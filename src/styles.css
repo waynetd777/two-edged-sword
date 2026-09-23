@@ -181,3 +181,8 @@ input[type="range"] { accent-color: var(--accent); }
 }
 
 mark { background: var(--hl-gold); color: inherit; border-radius: 3px; padding: 0 2px; font-weight: 600; }
+
+/* The sidebar sword: the light app icon's colours on the light sidebar, gold on dark. */
+:root { --sw-light: #557ea9; --sw-dark: #2b4f76; --sw-fuller: #1d3857; --sw-gold: #a8791f; --sw-grip: #5a3a20; --sw-wrap: #74502f; --sw-pin: #86601a; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --sw-light: #efd9a4; --sw-dark: #c6974a; --sw-fuller: #8a6630; --sw-gold: #d8b160; --sw-grip: #6e4526; --sw-wrap: #8e5d35; --sw-pin: #b48a3e; } }
+:root[data-theme="dark"] { --sw-light: #efd9a4; --sw-dark: #c6974a; --sw-fuller: #8a6630; --sw-gold: #d8b160; --sw-grip: #6e4526; --sw-wrap: #8e5d35; --sw-pin: #b48a3e; }

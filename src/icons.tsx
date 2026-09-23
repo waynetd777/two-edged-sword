@@ -61,18 +61,19 @@ export function Pause({ size = 14 }: { size?: number }) {
   return <svg viewBox="0 0 16 16" aria-hidden="true" style={{ width: size, height: size, fill: "currentColor" }}><rect x="3.5" y="2.5" width="3" height="11" rx="1" /><rect x="9.5" y="2.5" width="3" height="11" rx="1" /></svg>;
 }
 
-/** The sidebar mark: the app icon's gold sword, without its tile. */
-export function Sword({ size = 26 }: { size?: number }) {
+/** The sidebar mark: the app icon's sword, without its tile. Gold on dark; on the light
+ *  sidebar the pale gold edge would vanish, so it takes the light icon's ink-blue blade. */
+export function Sword({ size = 28 }: { size?: number }) {
   return (
-    <svg viewBox="300 160 424 736" aria-hidden="true" style={{ width: (size * 424) / 736, height: size }}>
-      <path d="M512 176L470 262V640H512Z" fill="#efd9a4" />
-      <path d="M512 176L554 262V640H512Z" fill="#c6974a" />
-      <path d="M512 292V604" stroke="#8a6630" strokeWidth="8" strokeLinecap="round" fill="none" />
-      <path d="M334 648Q512 612 690 648V684Q512 652 334 684Z" fill="#d8b160" />
-      <circle cx="334" cy="666" r="26" fill="#d8b160" /><circle cx="690" cy="666" r="26" fill="#d8b160" />
-      <rect x="486" y="674" width="52" height="136" rx="12" fill="#6e4526" />
-      <path d="M486 704L538 720M486 734L538 750M486 764L538 780" stroke="#8e5d35" strokeWidth="8" fill="none" />
-      <circle cx="512" cy="840" r="40" fill="#d8b160" /><circle cx="512" cy="840" r="14" fill="#b48a3e" />
+    <svg className="sword" viewBox="300 160 424 736" aria-hidden="true" style={{ width: (size * 424) / 736, height: size }}>
+      <path d="M512 176L470 262V640H512Z" fill="var(--sw-light)" />
+      <path d="M512 176L554 262V640H512Z" fill="var(--sw-dark)" />
+      <path d="M512 292V604" stroke="var(--sw-fuller)" strokeWidth="8" strokeLinecap="round" fill="none" />
+      <path d="M334 648Q512 612 690 648V684Q512 652 334 684Z" fill="var(--sw-gold)" />
+      <circle cx="334" cy="666" r="26" fill="var(--sw-gold)" /><circle cx="690" cy="666" r="26" fill="var(--sw-gold)" />
+      <rect x="486" y="674" width="52" height="136" rx="12" fill="var(--sw-grip)" />
+      <path d="M486 704L538 720M486 734L538 750M486 764L538 780" stroke="var(--sw-wrap)" strokeWidth="8" fill="none" />
+      <circle cx="512" cy="840" r="40" fill="var(--sw-gold)" /><circle cx="512" cy="840" r="14" fill="var(--sw-pin)" />
     </svg>
   );
 }

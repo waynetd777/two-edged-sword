@@ -7,8 +7,9 @@ APP      := src-tauri/target/release/bundle/macos/Two-edged Sword.app
 # self-signed certificate's name in it. Without one the build is signed ad hoc, and macOS asks
 # again for permission to read e-Sword's library after every rebuild.
 -include signing.local
-export APPLE_SIGNING_IDENTITY
 SIGN_ID  := $(APPLE_SIGNING_IDENTITY)
+# "-" is an ad-hoc signature: an empty identity makes the bundler fail instead.
+export APPLE_SIGNING_IDENTITY := $(if $(SIGN_ID),$(SIGN_ID),-)
 
 .PHONY: check test app install-app dev icons sign-check
 
