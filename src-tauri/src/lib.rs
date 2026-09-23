@@ -71,6 +71,16 @@ fn get_passages(st: State<AppState>, bible: String, ranges: Vec<content::Range>)
 }
 
 #[tauri::command]
+fn chapter_sizes(st: State<AppState>, bible: String) -> Result<Vec<(i64, i64, i64)>, String> {
+    content::chapter_sizes(&st.lib(), &bible)
+}
+
+#[tauri::command]
+fn commentary_ranges(st: State<AppState>, module: String) -> Result<Vec<(i64, i64, i64, i64, i64)>, String> {
+    content::commentary_ranges(&st.lib(), &module)
+}
+
+#[tauri::command]
 fn get_commentary(st: State<AppState>, module: String, book: i64, chapter: i64, verse: i64) -> Result<content::Commentary, String> {
     content::commentary(&st.lib(), &module, book, chapter, verse)
 }
@@ -213,6 +223,8 @@ pub fn run() {
             get_chapter,
             get_passages,
             get_commentary,
+            chapter_sizes,
+            commentary_ranges,
             get_coverage,
             get_article,
             find_topics,

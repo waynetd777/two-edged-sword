@@ -92,6 +92,24 @@ pub struct Coverage {
     pub range: Option<(i64, i64, i64, i64)>,
 }
 
+/// Verses per chapter, for splitting reading plans into days of similar length.
+pub fn chapter_sizes(lib: &Library, bible: &str) -> Result<Vec<(i64, i64, i64)>, String> {
+    lib.with(Kind::Bible, bible, |c| {
+        let mut st = c.prepare("SELECT Book, Chapter, count(*) FROM Bible WHERE Book BETWEEN 1 AND 66 GROUP BY Book, Chapter ORDER BY Book, Chapter")?;
+        let rows = st.query_map([], |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?)))?;
+        rows.collect()
+    })
+}
+
+/// Every verse range a commentary comments on, in order (F. B. Meyer's daily readings).
+pub fn commentary_ranges(lib: &Library, module: &str) -> Result<Vec<(i64, i64, i64, i64, i64)>, String> {
+    lib.with(Kind::Commentary, module, |c| {
+        let mut st = c.prepare("SELECT Book, ChapterBegin, VerseBegin, ChapterEnd, VerseEnd FROM VerseCommentary ORDER BY Book, ChapterBegin, VerseBegin")?;
+        let rows = st.query_map([], |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?, r.get(3)?, r.get(4)?)))?;
+        rows.collect()
+    })
+}
+
 /// Which commentaries have something on this verse, and over what range.
 pub fn coverage(lib: &Library, book: i64, chapter: i64, verse: i64) -> Vec<Coverage> {
     lib.of_kind(Kind::Commentary)

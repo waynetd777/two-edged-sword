@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Two-edged Sword</title>
+    <!--
+      Inline splash: paints as soon as the webview does and covers the wait for the library.
+      Keep the background colours in step with --bg in src/styles.css and lib.rs.
+    -->
+    <style>
+      :root { color-scheme: light dark; --splash-bg: #f4f1ea; --splash-fg: #1f1d19; --splash-dim: #645e52; --splash-line: rgba(0,0,0,.08); }
+      @media (prefers-color-scheme: dark) { :root { --splash-bg: #1e1e20; --splash-fg: #f2f2f4; --splash-dim: #9a9aa2; --splash-line: rgba(255,255,255,.1); } }
+      html, body { background: var(--splash-bg); margin: 0; }
+      #splash { position: fixed; inset: 0; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; background: var(--splash-bg); font: 13px/1.4 -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif; color: var(--splash-fg); transition: opacity .18s ease-out; }
+      #splash.gone { opacity: 0; pointer-events: none; }
+      #splash .mark { width: 72px; height: 72px; animation: rise .35s ease-out both; }
+      #splash .name { font-size: 15px; font-weight: 600; letter-spacing: .01em; font-family: Georgia, serif; }
+      #splash .what { font-size: 12px; color: var(--splash-dim); margin-top: -8px; font-style: italic; font-family: Georgia, serif; }
+      #splash .bar { width: 152px; height: 3px; border-radius: 99px; background: var(--splash-line); overflow: hidden; }
+      #splash .bar i { display: block; width: 40%; height: 100%; border-radius: 99px; background: #c6974a; animation: slide 1.1s ease-in-out infinite; }
+      @keyframes slide { 0% { transform: translateX(-110%); } 100% { transform: translateX(360%); } }
+      @keyframes rise { from { opacity: 0; transform: scale(.94); } to { opacity: 1; transform: none; } }
+      @media (prefers-reduced-motion: reduce) { #splash .mark, #splash .bar i { animation: none; } }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <div id="splash">
+      <!-- The app icon (tools/make_icons.py draws the same sword). -->
+      <svg class="mark" viewBox="100 100 824 824" aria-hidden="true">
+        <rect x="100" y="100" width="824" height="824" rx="185" fill="#1b2532" />
+        <circle cx="512" cy="440" r="290" fill="#26354a" />
+        <path d="M512 176L470 262V640H512Z" fill="#efd9a4" />
+        <path d="M512 176L554 262V640H512Z" fill="#c6974a" />
+        <path d="M512 292V604" stroke="#8a6630" stroke-width="8" stroke-linecap="round" fill="none" />
+        <path d="M334 648Q512 612 690 648V684Q512 652 334 684Z" fill="#d8b160" />
+        <circle cx="334" cy="666" r="26" fill="#d8b160" /><circle cx="690" cy="666" r="26" fill="#d8b160" />
+        <rect x="486" y="674" width="52" height="136" rx="12" fill="#6e4526" />
+        <circle cx="512" cy="840" r="40" fill="#d8b160" /><circle cx="512" cy="840" r="14" fill="#b48a3e" />
+      </svg>
+      <div class="name">Two-edged Sword</div>
+      <div class="what">sharper than any twoedged sword</div>
+      <div class="bar"><i></i></div>
+    </div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
