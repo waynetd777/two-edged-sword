@@ -242,10 +242,23 @@ mod library_tests {
     fn searches_the_real_modules() {
         let Some(lib) = lib() else { return };
         let q = search::Query { text: "born again".into(), mode: search::Mode::Phrase, whole_words: true, bible: "kjv".into(), book_from: 1, book_to: 66, strongs_bible: Some("kjv+".into()) };
-        let r = search::run(&lib, &q).unwrap();
+        let r = search::run(&lib, None, &q).unwrap();
         assert_eq!(r.bible.count, 3);
         assert!(r.commentaries.iter().any(|m| m.module == "gill" && m.count > 50));
+        // The same through a freshly built index.
+        let ix = crate::index::Index::new(std::env::temp_dir().join(format!("tes-index-{}.sqlite", std::process::id())));
+        ix.update(&lib).unwrap();
+        let r2 = search::run(&lib, Some(&ix), &q).unwrap();
+        assert_eq!(r2.bible.count, 3);
+        for m in &r.commentaries {
+            let m2 = r2.commentaries.iter().find(|x| x.module == m.module).unwrap();
+            assert_eq!(m.count, m2.count, "{}", m.module);
+        }
+        let t = std::time::Instant::now();
+        search::run(&lib, Some(&ix), &q).unwrap();
+        eprintln!("indexed search took {:?}", t.elapsed());
+        let _ = std::fs::remove_file(&ix.path);
         let q = search::Query { text: "G509".into(), ..q };
-        assert_eq!(search::run(&lib, &q).unwrap().bible.count, 13);
+        assert_eq!(search::run(&lib, None, &q).unwrap().bible.count, 13);
     }
 }

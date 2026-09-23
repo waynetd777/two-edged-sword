@@ -1,5 +1,6 @@
 mod claude;
 mod content;
+mod index;
 mod journal;
 mod library;
 mod search;
@@ -19,9 +20,17 @@ use tauri_plugin_window_state::{AppHandleExt, StateFlags};
 const STATE_FLAGS: StateFlags = StateFlags::all().difference(StateFlags::VISIBLE);
 
 struct AppState {
-    lib: Arc<Library>,
+    /// Replaced wholesale by `rescan_library` when modules are added.
+    lib_cell: std::sync::RwLock<Arc<Library>>,
     data: PathBuf,
     running: Arc<claude::Running>,
+    index: Arc<index::Index>,
+}
+
+impl AppState {
+    fn lib(&self) -> Arc<Library> {
+        self.lib_cell.read().map(|l| l.clone()).unwrap_or_else(|e| e.into_inner().clone())
+    }
 }
 
 #[derive(Serialize)]
@@ -34,63 +43,83 @@ struct LibraryInfo {
 
 #[tauri::command]
 fn library_info(st: State<AppState>) -> LibraryInfo {
-    LibraryInfo { dir: st.lib.dir.to_string_lossy().to_string(), found: st.lib.dir.is_dir(), modules: st.lib.modules.clone() }
+    let lib = st.lib();
+    LibraryInfo { dir: lib.dir.to_string_lossy().to_string(), found: lib.dir.is_dir(), modules: lib.modules.clone() }
+}
+
+/// Looks for modules again (after new ones are downloaded in e-Sword).
+#[tauri::command]
+async fn rescan_library(st: State<'_, AppState>) -> Result<LibraryInfo, String> {
+    let dir = st.lib().dir.clone();
+    let fresh = Arc::new(tauri::async_runtime::spawn_blocking(move || Library::scan(dir)).await.map_err(|e| e.to_string())?);
+    *st.lib_cell.write().map_err(|e| e.to_string())? = fresh.clone();
+    let (lib, index) = (fresh.clone(), st.index.clone());
+    std::thread::spawn(move || {
+        let _ = index.update(&lib);
+    });
+    Ok(LibraryInfo { dir: fresh.dir.to_string_lossy().to_string(), found: fresh.dir.is_dir(), modules: fresh.modules.clone() })
 }
 
 #[tauri::command]
 fn get_chapter(st: State<AppState>, bible: String, book: i64, chapter: i64) -> Result<Vec<content::Verse>, String> {
-    content::chapter(&st.lib, &bible, book, chapter)
+    content::chapter(&st.lib(), &bible, book, chapter)
 }
 
 #[tauri::command]
 fn get_passages(st: State<AppState>, bible: String, ranges: Vec<content::Range>) -> Result<Vec<content::Passage>, String> {
-    content::passages(&st.lib, &bible, &ranges)
+    content::passages(&st.lib(), &bible, &ranges)
 }
 
 #[tauri::command]
 fn get_commentary(st: State<AppState>, module: String, book: i64, chapter: i64, verse: i64) -> Result<content::Commentary, String> {
-    content::commentary(&st.lib, &module, book, chapter, verse)
+    content::commentary(&st.lib(), &module, book, chapter, verse)
 }
 
 #[tauri::command]
 fn get_coverage(st: State<AppState>, book: i64, chapter: i64, verse: i64) -> Vec<content::Coverage> {
-    content::coverage(&st.lib, book, chapter, verse)
+    content::coverage(&st.lib(), book, chapter, verse)
 }
 
 #[tauri::command]
 fn get_article(st: State<AppState>, kind: Kind, module: String, topic: String) -> Result<Option<content::Article>, String> {
-    content::article(&st.lib, kind, &module, &topic)
+    content::article(&st.lib(), kind, &module, &topic)
 }
 
 #[tauri::command]
 fn find_topics(st: State<AppState>, word: String) -> Vec<content::TopicHit> {
-    content::find_topics(&st.lib, &word, 8)
+    content::find_topics(&st.lib(), &word, 8)
 }
 
 #[tauri::command]
 fn list_topics(st: State<AppState>, kind: Kind, module: String, prefix: String, limit: usize) -> Result<Vec<String>, String> {
-    content::topics(&st.lib, kind, &module, &prefix, limit)
+    content::topics(&st.lib(), kind, &module, &prefix, limit)
 }
 
 #[tauri::command]
 fn reference_titles(st: State<AppState>, module: String) -> Result<Vec<String>, String> {
-    content::reference_titles(&st.lib, &module)
+    content::reference_titles(&st.lib(), &module)
 }
 
 #[tauri::command]
 fn strongs_by_book(st: State<AppState>, bible: String, number: String) -> Result<Vec<(i64, i64)>, String> {
-    content::strongs_by_book(&st.lib, &bible, &number)
+    content::strongs_by_book(&st.lib(), &bible, &number)
 }
 
 #[tauri::command]
 fn strongs_verses(st: State<AppState>, bible: String, number: String, book: Option<i64>, limit: usize) -> Result<Vec<content::VerseHit>, String> {
-    content::strongs_verses(&st.lib, &bible, &number, book, limit)
+    content::strongs_verses(&st.lib(), &bible, &number, book, limit)
 }
 
 #[tauri::command]
 async fn search(st: State<'_, AppState>, query: search::Query) -> Result<search::Results, String> {
-    let lib = st.lib.clone();
-    tauri::async_runtime::spawn_blocking(move || search::run(&lib, &query)).await.map_err(|e| e.to_string())?
+    let lib = st.lib().clone();
+    let ix = st.index.clone();
+    tauri::async_runtime::spawn_blocking(move || search::run(&lib, Some(&ix), &query)).await.map_err(|e| e.to_string())?
+}
+
+#[tauri::command]
+fn index_progress(st: State<AppState>) -> index::Progress {
+    st.index.progress()
 }
 
 #[tauri::command]
@@ -163,7 +192,15 @@ fn show_main(app: &AppHandle) {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let lib = Arc::new(Library::scan(library::default_dir()));
-    let state = AppState { lib, data: store::data_dir(), running: Arc::new(claude::Running::default()) };
+    let data = store::data_dir();
+    let index = Arc::new(index::Index::new(data.join("search-index.sqlite")));
+    {
+        let (lib, index) = (lib.clone(), index.clone());
+        std::thread::spawn(move || {
+            if let Err(e) = index.update(&lib) { eprintln!("search index: {e}"); }
+        });
+    }
+    let state = AppState { lib_cell: std::sync::RwLock::new(lib), data, running: Arc::new(claude::Running::default()), index };
 
     tauri::Builder::default()
         .plugin(tauri_plugin_window_state::Builder::default().with_state_flags(STATE_FLAGS).build())
@@ -172,6 +209,7 @@ pub fn run() {
         .manage(state)
         .invoke_handler(tauri::generate_handler![
             library_info,
+            rescan_library,
             get_chapter,
             get_passages,
             get_commentary,
@@ -183,6 +221,7 @@ pub fn run() {
             strongs_by_book,
             strongs_verses,
             search,
+            index_progress,
             store_read,
             store_write,
             journal_default_dir,

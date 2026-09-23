@@ -183,7 +183,7 @@ fn like_clause(col: &str, terms: &[String], phrase: &str, mode: Mode) -> (String
     (format!("({clause})"), pats)
 }
 
-pub fn run(lib: &Library, q: &Query) -> Result<Results, String> {
+pub fn run(lib: &Library, index: Option<&crate::index::Index>, q: &Query) -> Result<Results, String> {
     let raw = q.text.trim();
     let strongs_num = {
         let up = raw.to_ascii_uppercase();
@@ -234,21 +234,17 @@ pub fn run(lib: &Library, q: &Query) -> Result<Results, String> {
     // Commentaries (TSK is a list of references, not prose: leave it out)
     let mut commentaries = Vec::new();
     for m in lib.of_kind(Kind::Commentary).filter(|m| m.id != "tsk") {
-        let (clause, pats) = like_clause("Comments", &terms, &phrase, q.mode);
         let mut hits = Vec::new();
         let mut count = 0;
-        let _ = lib.with(Kind::Commentary, &m.id, |c| {
-            let sql = format!("SELECT Book, ChapterBegin, VerseBegin, ChapterEnd, VerseEnd, Comments FROM VerseCommentary WHERE Book BETWEEN {} AND {} AND {clause} ORDER BY Book, ChapterBegin, VerseBegin", q.book_from, q.book_to);
-            let mut st = c.prepare(&sql)?;
-            let mut rows = st.query(params_from_iter(pats.iter()))?;
-            while let Some(r) = rows.next()? {
-                let html: String = r.get::<_, Option<String>>(5)?.unwrap_or_default();
-                let p = plain(&html);
-                if let Some(at) = matches(&p, &terms, &phrase, q.mode, q.whole_words) {
-                    count += 1;
-                    if hits.len() < MAX_COMMENT_HITS {
-                        hits.push(CommentMatch { book: r.get(0)?, chapter_begin: r.get(1)?, verse_begin: r.get(2)?, chapter_end: r.get(3)?, verse_end: r.get(4)?, snippet: snippet(&p, at) });
-                    }
+        let cols = "Book, ChapterBegin, VerseBegin, ChapterEnd, VerseEnd, Comments";
+        let range = format!("Book BETWEEN {} AND {}", q.book_from, q.book_to);
+        let _ = candidate_rows(lib, index, Kind::Commentary, &m.id, "VerseCommentary", cols, "Comments", &range, "Book, ChapterBegin, VerseBegin", &terms, &phrase, q, |r| {
+            let html: String = r.get::<_, Option<String>>(5)?.unwrap_or_default();
+            let p = plain(&html);
+            if let Some(at) = matches(&p, &terms, &phrase, q.mode, q.whole_words) {
+                count += 1;
+                if hits.len() < MAX_COMMENT_HITS {
+                    hits.push(CommentMatch { book: r.get(0)?, chapter_begin: r.get(1)?, verse_begin: r.get(2)?, chapter_end: r.get(3)?, verse_end: r.get(4)?, snippet: snippet(&p, at) });
                 }
             }
             Ok(())
@@ -262,19 +258,13 @@ pub fn run(lib: &Library, q: &Query) -> Result<Results, String> {
     // Dictionaries (the whole library, not limited by book range)
     let mut dictionaries = Vec::new();
     for m in lib.of_kind(Kind::Dictionary) {
-        let (clause, pats) = like_clause("Definition", &terms, &phrase, q.mode);
         let mut topics = Vec::new();
         let mut count = 0;
-        let _ = lib.with(Kind::Dictionary, &m.id, |c| {
-            let sql = format!("SELECT Topic, Definition FROM Dictionary WHERE {clause} ORDER BY Topic COLLATE NOCASE");
-            let mut st = c.prepare(&sql)?;
-            let mut rows = st.query(params_from_iter(pats.iter()))?;
-            while let Some(r) = rows.next()? {
-                let def: String = r.get::<_, Option<String>>(1)?.unwrap_or_default();
-                if matches(&plain(&def), &terms, &phrase, q.mode, q.whole_words).is_some() {
-                    count += 1;
-                    if topics.len() < MAX_TOPICS { topics.push(r.get::<_, String>(0)?); }
-                }
+        let _ = candidate_rows(lib, index, Kind::Dictionary, &m.id, "Dictionary", "Topic, Definition", "Definition", "1", "Topic COLLATE NOCASE", &terms, &phrase, q, |r| {
+            let def: String = r.get::<_, Option<String>>(1)?.unwrap_or_default();
+            if matches(&plain(&def), &terms, &phrase, q.mode, q.whole_words).is_some() {
+                count += 1;
+                if topics.len() < MAX_TOPICS { topics.push(r.get::<_, String>(0)?); }
             }
             Ok(())
         });
@@ -285,6 +275,48 @@ pub fn run(lib: &Library, q: &Query) -> Result<Results, String> {
     dictionaries.sort_by(|a, b| b.count.cmp(&a.count));
 
     Ok(Results { bible, commentaries, dictionaries, strongs: false })
+}
+
+/// Feeds `f` every row of the module that could match: the index's candidates when the module
+/// is indexed (and the search is by whole words, which is how the index tokenises), otherwise
+/// the rows LIKE finds.
+#[allow(clippy::too_many_arguments)]
+fn candidate_rows(
+    lib: &Library,
+    index: Option<&crate::index::Index>,
+    kind: Kind,
+    id: &str,
+    table: &str,
+    cols: &str,
+    text_col: &str,
+    filter: &str,
+    order: &str,
+    terms: &[String],
+    phrase: &str,
+    q: &Query,
+    mut f: impl FnMut(&rusqlite::Row) -> rusqlite::Result<()>,
+) -> Result<(), String> {
+    if let Some(ix) = index.filter(|ix| q.whole_words && ix.is_ready(kind, id)) {
+        let ids = ix.candidates(kind, id, &crate::index::fts_query(terms, phrase, q.mode))?;
+        return lib.with(kind, id, |c| {
+            for chunk in ids.chunks(400) {
+                let list = chunk.iter().map(|i| i.to_string()).collect::<Vec<_>>().join(",");
+                let sql = format!("SELECT {cols} FROM {table} WHERE rowid IN ({list}) AND {filter} ORDER BY {order}");
+                let mut st = c.prepare(&sql)?;
+                let mut rows = st.query([])?;
+                while let Some(r) = rows.next()? { f(r)?; }
+            }
+            Ok(())
+        });
+    }
+    let (clause, pats) = like_clause(text_col, terms, phrase, q.mode);
+    lib.with(kind, id, |c| {
+        let sql = format!("SELECT {cols} FROM {table} WHERE {filter} AND {clause} ORDER BY {order}");
+        let mut st = c.prepare(&sql)?;
+        let mut rows = st.query(params_from_iter(pats.iter()))?;
+        while let Some(r) = rows.next()? { f(r)?; }
+        Ok(())
+    })
 }
 
 #[cfg(test)]
