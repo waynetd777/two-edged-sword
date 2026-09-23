@@ -295,7 +295,7 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
             commentary={commentary} setCommentary={setCommentary} />
         )}
       </div>
-      <PlayerBar />
+      <PlayerBar focus={focus} />
       {word && wordRef && (
         <WordLookup pick={word} vref={wordRef} bible={bible} onClose={() => setWord(null)}
           onDictionary={(module, topic) => { setDict({ module, topic }); setTab("dictionary"); setWord(null); if (!settings.studyPane) app.set({ studyPane: true }); }}
@@ -346,7 +346,8 @@ function TextSizeButton() {
 
 const SPEEDS = [0.75, 1, 1.25, 1.5, 2];
 
-export function PlayerBar() {
+/** The player floats over the reading column: clear of the sidebar and the study pane. */
+export function PlayerBar({ focus = false }: { focus?: boolean }) {
   const app = useApp();
   const p = usePlayer();
   const [menu, setMenu] = useState<DOMRect | null>(null);
@@ -355,7 +356,7 @@ export function PlayerBar() {
   const s = p.state;
   const pct = s.count ? Math.round(((s.verse - 1) / s.count) * 100) : 0;
   return (
-    <div role="region" aria-label="Listen" style={{ position: "fixed", left: app.screen === "read" ? 0 : 200, right: 0, bottom: 18, display: "flex", justifyContent: "center", pointerEvents: "none", zIndex: 40 }}>
+    <div role="region" aria-label="Listen" style={{ position: "fixed", left: focus ? 0 : 200, right: app.screen === "read" && !focus && app.settings.studyPane ? 520 : 0, bottom: 18, display: "flex", justifyContent: "center", pointerEvents: "none", zIndex: 40 }}>
       <div style={{ pointerEvents: "auto", width: "min(600px, calc(100% - 48px))", height: 56, display: "flex", alignItems: "center", gap: 14, padding: "0 10px 0 8px", borderRadius: 28, background: "var(--panel)", border: "1px solid var(--border)", boxShadow: "0 10px 30px var(--shadow)" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
           <button className="ibtn" type="button" aria-label="Previous verse" onClick={() => p.skip(-1)}><Icon name="prev" /></button>
@@ -373,7 +374,7 @@ export function PlayerBar() {
         </div>
       </div>
       {menu && (
-        <Popover anchor={menu} onClose={() => setMenu(null)} width={300} place="above">
+        <Popover anchor={menu} onClose={() => setMenu(null)} width={300} place="above" style={{ pointerEvents: "auto" }}>
           <div style={{ padding: "14px 16px 12px", display: "flex", flexDirection: "column", gap: 12 }}>
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               <div style={{ display: "flex", justifyContent: "space-between" }}><span className="label">Speed</span><b>{app.settings.rate}×</b></div>
@@ -394,7 +395,7 @@ export function PlayerBar() {
         </Popover>
       )}
       {sleepMenu && (
-        <Popover anchor={sleepMenu} onClose={() => setSleepMenu(null)} width={220} place="above">
+        <Popover anchor={sleepMenu} onClose={() => setSleepMenu(null)} width={220} place="above" style={{ pointerEvents: "auto" }}>
           <div style={{ padding: 6, display: "flex", flexDirection: "column" }}>
             {([[15, "In 15 minutes"], [30, "In 30 minutes"], [60, "In an hour"], ["chapter", "At the end of this chapter"], [null, "Off"]] as [number | "chapter" | null, string][]).map(([m, l]) => (
               <button key={String(m)} type="button" className="bm" onClick={() => { p.sleep(m); setSleepMenu(null); }}>{l}</button>
