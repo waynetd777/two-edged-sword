@@ -1,0 +1,22 @@
+node_modules
+dist
+dist-ssr
+*.local
+signing.local
+src-tauri/target
+src-tauri/gen/schemas
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+
+# Bible modules are licensed for personal use and never go in the repo.
+*.bbli
+*.cmti
+*.dcti
+*.lexi
+*.refi
+*.dzip
+
+# sift: derived state and private notes
+_sift/.cache/
+_sift/local/

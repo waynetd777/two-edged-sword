@@ -1,0 +1,55 @@
+[package]
+name = "two-edged-sword"
+version = "0.1.0"
+description = "A personal Bible study app that reads the e-Sword X library"
+authors = ["Wayne Davies"]
+edition = "2021"
+
+[lib]
+name = "two_edged_sword_lib"
+# rlib only: this app is macOS-only, and each extra crate type is another full LTO link.
+crate-type = ["rlib"]
+
+# The binary name is what the Dock and Activity Monitor show in `tauri dev`.
+[[bin]]
+name = "TwoEdgedSword"
+path = "src/main.rs"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = ["tray-icon", "image-png"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+rusqlite = { version = "0.40.2", features = ["bundled"] }
+chrono = { version = "0.4.45", default-features = false, features = ["clock", "std"] }
+tauri-plugin-window-state = "2"
+tauri-plugin-dialog = "2"
+tauri-plugin-opener = "2"
+
+[target.'cfg(target_os = "macos")'.dependencies]
+objc2 = "0.6"
+objc2-foundation = { version = "0.3", default-features = false, features = ["std", "NSProcessInfo", "NSString", "NSValue"] }
+objc2-app-kit = { version = "0.3", default-features = false, features = ["std", "NSColor"] }
+
+# Thin LTO with parallel codegen units: incremental release builds in ~20s instead of minutes.
+[profile.release]
+codegen-units = 16
+lto = "thin"
+opt-level = 3
+panic = "abort"
+strip = true
+
+# `make dev` and `make check` rebuild constantly; debug info for every dependency is most of
+# the link time and nobody steps through them in a debugger here.
+[profile.dev]
+debug = "line-tables-only"
+
+[profile.dev.package."*"]
+debug = false
+
+# SQLite does all the searching; unoptimised it is several times slower even in dev builds.
+# It is compiled once and cached, so this costs nothing per rebuild.
+[profile.dev.package.libsqlite3-sys]
+opt-level = 3

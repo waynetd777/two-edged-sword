@@ -1,0 +1,6 @@
+# Copy to signing.local (untracked) and set the name of the self-signed certificate in your
+# login keychain that `make app` should sign the bundle with. Creating one: Keychain Access →
+# Certificate Assistant → Create a Certificate, type "Code Signing", self-signed.
+#
+# A stable signature keeps macOS's permission to read the e-Sword X library across rebuilds.
+APPLE_SIGNING_IDENTITY = Two-edged Sword Dev
