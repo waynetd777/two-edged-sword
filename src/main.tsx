@@ -25,6 +25,14 @@ export function hideSplash() {
   }, wait);
 }
 
+// If anything fails before the first screen, say so on the splash rather than leaving it spinning.
+function showStartupError(msg: string) {
+  const el = document.querySelector("#splash .what");
+  if (el) { el.textContent = `Something went wrong: ${msg}`; (el as HTMLElement).style.whiteSpace = "pre-wrap"; (el as HTMLElement).style.maxWidth = "80vw"; (el as HTMLElement).style.fontStyle = "normal"; }
+}
+window.addEventListener("error", (e) => showStartupError(`${e.message}\n${e.error?.stack ?? ""}`.slice(0, 1200)));
+window.addEventListener("unhandledrejection", (e) => showStartupError(String(e.reason).slice(0, 1200)));
+
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <App />

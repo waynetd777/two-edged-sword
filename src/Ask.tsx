@@ -10,7 +10,9 @@ import { orderModules } from "./StudyPane";
 import { Popover } from "./ui";
 
 /** A module whose description carries a copyright notice is licensed, not public domain. */
-export const isLicensed = (m: ModuleInfo | undefined) => !!m && /copyright|&copy;|&#169;|©|all rights reserved|used by permission/i.test(m.info) && !/public domain/i.test(m.info);
+const PUBLIC_DOMAIN = /^(KJV\+?|KJVA|ASV|YLT|WEB|DRB|DRA|Darby|BBE|RV|ERV|Webster|Geneva|GNV|Bishops|Tyndale|Wycliffe|LXX|TR|WH|Byz)$/i;
+export const isLicensed = (m: ModuleInfo | undefined) =>
+  !!m && !PUBLIC_DOMAIN.test(m.abbrev) && !/public domain/i.test(m.info) && /copyright|&copy;|&#169;|©|all rights reserved|used by permission/i.test(m.info);
 
 // One listener for the whole app; panels subscribe by chat id.
 type Sub = { chunk: (t: string) => void; done: (d: { sessionId: string | null; text: string; error: string | null }) => void };
@@ -144,7 +146,7 @@ export function AskPanel(p: AskProps) {
   const modelName = MODELS.find((m) => m.id === model)?.name ?? model;
   const header = (
     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-      {!p.full && <><span style={{ color: "var(--accent)", display: "inline-flex" }}><Icon name="chat" /></span><b>Ask Claude</b><span className="n" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>about {about}</span></>}
+      {!p.full && <><span style={{ color: "var(--accent)", display: "inline-flex" }}><Icon name="chat" /></span><b style={{ whiteSpace: "nowrap" }}>Ask Claude</b><span className="n" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", minWidth: 0 }}>about {about}</span></>}
       <button className={`btn small ${recent ? "on" : ""}`} type="button" title="Recent chats" aria-label="Recent chats" style={{ marginLeft: "auto" }} onClick={(e) => setRecent(e.currentTarget.getBoundingClientRect())}><Icon name="clock" size={13} />{p.full && "Recent"}</button>
       <button className="btn small" type="button" onClick={() => { setChatId(null); setQ(""); }}><Icon name="plus" size={13} />New chat</button>
     </div>

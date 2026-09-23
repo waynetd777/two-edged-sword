@@ -1,5 +1,11 @@
 import { useEffect, useState } from "react";
-import { ComparePlaceholder } from "./placeholders";
+import { CompareScreen } from "./Compare";
+import { JournalScreen } from "./Journal";
+import { LibraryScreen } from "./Library";
+import { PlansScreen } from "./PlansScreen";
+import { SearchScreen } from "./Search";
+import { SettingsScreen } from "./Settings";
+import { WordStudyScreen } from "./WordStudy";
 import { Palette } from "./Palette";
 import { PlayerBar, ReadScreen } from "./Read";
 import { SCREEN_KEYS, Sidebar } from "./Shell";
@@ -50,9 +56,15 @@ function Screens() {
     <div className={`shell ${focus && screen === "read" ? "nosidebar" : ""}`}>
       {!(focus && screen === "read") && <Sidebar />}
       {screen === "read" && <ReadScreen focus={focus} setFocus={setFocus} openPalette={openPalette} />}
-      {screen !== "read" && <ComparePlaceholder screen={screen} openPalette={openPalette} />}
+      {screen === "compare" && <CompareScreen openPalette={openPalette} />}
+      {screen === "search" && <SearchScreen />}
+      {screen === "word" && <WordStudyScreen />}
+      {screen === "journal" && <JournalScreen />}
+      {screen === "plans" && <PlansScreen />}
+      {screen === "library" && <LibraryScreen />}
+      {screen === "settings" && <SettingsScreen />}
       {screen !== "read" && <PlayerBar />}
-      {palette && <Palette onClose={() => setPalette(false)} onAsk={() => app.set({ studyPane: true })} />}
+      {palette && <Palette onClose={() => setPalette(false)} onAsk={() => app.setPending({ ask: "" })} />}
       {app.toastMsg && <div className="toast" role="status">{app.toastMsg}</div>}
     </div>
   );

@@ -75,18 +75,25 @@ def icon():
 
 
 def tray():
-    # 22pt menu-bar icon at 2x = 44px. The sword fills the height; everything is black.
-    size = 44
-    k = SS * size / 780  # the sword spans y 150..900 of the 1024 space
-    img = Image.new("RGBA", (size * SS, size * SS), (0, 0, 0, 0))
+    """22pt menu-bar icon at 2x (44px): a bold sword silhouette, black plus alpha, drawn on its
+    own 44px grid rather than shrunk from the Dock icon, so the blade and guard stay legible."""
+    size, k = 44, SS
+    img = Image.new("RGBA", (size * k, size * k), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
-    shifted = Image.new("RGBA", img.size, (0, 0, 0, 0))
-    sd = ImageDraw.Draw(shifted)
-    sword(sd, k, fill=(0, 0, 0, 255))
-    # Centre: the sword's box is x 308..716, y 176..880 in 1024-space.
-    ox = (size * SS - (716 + 308) * k) / 2
-    oy = (size * SS - (880 + 176) * k) / 2
-    img.alpha_composite(shifted, (int(ox), int(oy)))
+    black = (0, 0, 0, 255)
+
+    def P(pts):
+        return [(x * k, y * k) for x, y in pts]
+
+    # Blade: point at the top, two edges down to the guard.
+    d.polygon(P([(22, 2), (26.5, 8), (26.5, 28), (17.5, 28), (17.5, 8)]), fill=black)
+    # Fuller: a transparent groove down the middle gives it a two-edged look.
+    d.line(P([(22, 9), (22, 26)]), fill=(0, 0, 0, 0), width=int(1.6 * k))
+    # Cross-guard with rounded ends.
+    d.rounded_rectangle(P([(10, 28), (34, 32.5)]), radius=2.25 * k, fill=black)
+    # Grip and pommel.
+    d.rectangle(P([(19.8, 32), (24.2, 38.5)]), fill=black)
+    d.ellipse(P([(18.5, 37.5), (25.5, 44)]), fill=black)
     out = ROOT / "src-tauri" / "icons" / "tray@2x.png"
     out.parent.mkdir(parents=True, exist_ok=True)
     img.resize((size, size), Image.LANCZOS).save(out)

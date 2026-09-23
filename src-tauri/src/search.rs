@@ -69,7 +69,8 @@ const MAX_VERSES: usize = 500;
 const MAX_COMMENT_HITS: usize = 50;
 const MAX_TOPICS: usize = 60;
 
-/// Plain, lower-cased text: tags removed, Strong's numbers dropped, common entities decoded.
+/// Plain text: tags removed, Strong's numbers dropped, common entities decoded. Case is kept;
+/// matching lower-cases with `to_ascii_lowercase`, which keeps byte offsets the same.
 pub fn plain(html: &str) -> String {
     let mut out = String::with_capacity(html.len());
     let mut chars = html.char_indices().peekable();
@@ -105,6 +106,12 @@ pub fn plain(html: &str) -> String {
                     "quot" | "#147" | "#148" => Some('"'),
                     "#146" | "#145" | "apos" => Some('\''),
                     "nbsp" => Some(' '),
+                    "mdash" => Some('—'),
+                    "ndash" => Some('–'),
+                    "hellip" => Some('…'),
+                    "lsquo" | "rsquo" => Some('’'),
+                    "ldquo" => Some('“'),
+                    "rdquo" => Some('”'),
                     "lt" => Some('<'),
                     "gt" => Some('>'),
                     _ => ent.strip_prefix('#').and_then(|n| n.parse::<u32>().ok()).and_then(char::from_u32),
@@ -121,7 +128,7 @@ pub fn plain(html: &str) -> String {
         }
         out.push(ch);
     }
-    out.to_lowercase()
+    out
 }
 
 fn is_word_char(c: char) -> bool {
@@ -148,6 +155,8 @@ fn find_term(hay: &str, term: &str, whole: bool) -> Option<usize> {
 
 /// Where the first match starts, if the text matches the query.
 pub fn matches(plain_text: &str, terms: &[String], phrase: &str, mode: Mode, whole: bool) -> Option<usize> {
+    let lower = plain_text.to_ascii_lowercase();
+    let plain_text = lower.as_str();
     match mode {
         Mode::Phrase => find_term(plain_text, phrase, whole),
         Mode::All => {
@@ -326,7 +335,7 @@ mod tests {
     #[test]
     fn plain_strips_markup_and_numbers() {
         let s = "<red>For</red><num>G1063</num> <red>God</red><num>G2316</num> so &#147;loved&#148;<p>x</p>";
-        assert_eq!(plain(s), "for god so \"loved\" x ");
+        assert_eq!(plain(s), "For God so \"loved\" x ");
     }
 
     #[test]

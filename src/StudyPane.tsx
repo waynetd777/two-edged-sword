@@ -113,28 +113,17 @@ function CommentaryTab(p: Props & { vref: Ref }) {
   const open = (r: Ref) => { hide(); app.open({ book: r.book, chapter: r.chapter, verse: r.verse, to: r.to }); };
   const html = intro === "chapter" ? data?.chapter : intro === "book" ? data?.book : data?.verse.map((e) => e.html).join("");
   const others = cov.filter((c) => c.id !== app.tsk && !c.range);
-  const [moreAt, setMoreAt] = useState<DOMRect | null>(null);
-  // The current one always shows, even when it comes from the "more" menu.
-  const shown = list.slice(0, 6).concat(current && list.indexOf(current) >= 6 ? [current] : []);
-  const more = list.filter((c) => !shown.includes(c));
+  const shown = list;
   return (
     <>
       <div style={{ display: "flex", gap: 6, padding: "10px 18px 0", flexWrap: "wrap" }}>
         {shown.map((c) => (
           <button key={c.id} type="button" className={`chip ${current?.id === c.id ? "on" : ""}`} title={c.title} onClick={() => { p.setCommentary(c.id); setIntro("verse"); }}>
-            {short(c)}{c.range && rangeLabel(c.range, p.chapter) && <span className="n">{rangeLabel(c.range, p.chapter)}</span>}
+            {c.abbrev.replace(/^(Albert|Adam|John|Matthew) /, "")}{c.range && rangeLabel(c.range, p.chapter) && <span className="n">{rangeLabel(c.range, p.chapter)}</span>}
           </button>
         ))}
-        {more.length > 0 && <button type="button" className="chip" onClick={(e) => setMoreAt(e.currentTarget.getBoundingClientRect())}>+{more.length} more<Icon name="down" className="sm" /></button>}
+        {others.length > 0 && <span className="n" style={{ alignSelf: "center" }} title={others.map((o) => o.title).join(", ")}>{others.length} with nothing here</span>}
       </div>
-      {moreAt && (
-        <Popover anchor={moreAt} onClose={() => setMoreAt(null)} width={320}>
-          <div style={{ padding: 6 }}>
-            {more.map((c) => <button key={c.id} type="button" className="bm" onClick={() => { p.setCommentary(c.id); setIntro("verse"); setMoreAt(null); }}><span className="t">{c.title}</span>{c.range && <span className="r">{rangeLabel(c.range, p.chapter)}</span>}</button>)}
-            {others.length > 0 && <div className="hint" style={{ padding: "8px 10px 4px" }}>Nothing on this verse in {others.map((o) => short(o)).join(", ")}.</div>}
-          </div>
-        </Popover>
-      )}
       <div className="scroll" style={{ flexGrow: 1, padding: "12px 22px 20px" }}>
         {current ? (
           <>

@@ -69,7 +69,7 @@ export function WordLookup({ pick, vref, bible, onClose, onDictionary, onComment
               <a style={{ marginLeft: "auto", fontSize: 12 }} onClick={() => { app.studyWord(l.num); onClose(); }}>{l.num}</a>
             </div>
             {l.pron && <div className="n">{l.pron}</div>}
-            <div className="es" style={{ font: "400 14.5px/1.5 var(--serif)" }}>{renderHtml(l.rest, { onStrongs: (n) => { app.studyWord(n); onClose(); } })}</div>
+            <div className="es" style={{ font: "400 14.5px/1.5 var(--serif)" }}>{renderHtml(l.rest, { onStrongs: (n) => { app.studyWord(n); onClose(); }, inlineNums: true })}</div>
             {l.renderings.length > 0 && <div className="n" style={{ fontWeight: 400 }}>KJV translates it {l.renderings.slice(0, 7).map(([w, n], i) => <span key={w}>{i > 0 && " · "}<b style={{ color: w.toLowerCase() === word.toLowerCase() ? "var(--text)" : undefined }}>{w}</b> {n}</span>)}</div>}
           </div>
         ))}

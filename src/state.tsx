@@ -69,6 +69,8 @@ export interface Chat {
 
 export interface JournalSeed { verses?: string[]; title?: string; body?: string; tags?: string[]; /** Open this entry instead of starting one. */ openId?: string; chatId?: string }
 
+export interface Pending { article?: { module: string; topic: string }; ask?: string; commentary?: string }
+
 export type Screen = "read" | "compare" | "search" | "word" | "journal" | "plans" | "library" | "settings";
 
 export interface Loc { book: number; chapter: number; verse?: number; to?: number }
@@ -117,6 +119,10 @@ interface Ctx {
   journalSeed: JournalSeed | null;
   startEntry: (seed: JournalSeed) => void;
   clearSeed: () => void;
+
+  /** Something another screen wants the Read screen's study pane to show. */
+  pending: Pending | null;
+  setPending: (p: Pending | null) => void;
 
   wordStudy: string | null;
   studyWord: (num: string) => void;
@@ -178,6 +184,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [defaultDir, setDefaultDir] = useState("");
   const [wordStudy, setWordStudy] = useState<string | null>(null);
   const [journalSeed, setJournalSeed] = useState<JournalSeed | null>(null);
+  const [pending, setPendingState] = useState<Pending | null>(null);
   const [searchFor, setSearchFor] = useState<string | null>(null);
   const [toastMsg, setToast] = useState<string | null>(null);
   const toastTimer = useRef<number | undefined>(undefined);
@@ -269,6 +276,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     deleteEntry: async (id) => { await api.journalDelete(journalDir, id); await reloadJournal(); },
     reloadJournal,
     plans, setPlans, chats, setChats,
+    pending, setPending: (x) => { setPendingState(x); if (x) setScreen("read"); },
     journalSeed, startEntry: (seed) => { setJournalSeed(seed); setScreen("journal"); }, clearSeed: () => setJournalSeed(null),
     wordStudy, studyWord: (n) => { setWordStudy(n); setScreen("word"); },
     searchFor, searchText: (q) => { setSearchFor(q); setScreen("search"); },

@@ -14,6 +14,8 @@ export interface RenderOpts {
   onStrongs?: (num: string) => void;
   /** Hover on a reference (for previews); receives the element for positioning. */
   onRefHover?: (r: Ref | null, el: HTMLElement | null) => void;
+  /** Strong's numbers as ordinary links (in lexicon text) rather than superscripts. */
+  inlineNums?: boolean;
 }
 
 /** "Joh 3:16", "Joh 3:16-18", "2Co 5:19-21", or a bare "3:16" after a book in the same list. */
@@ -68,6 +70,7 @@ export function renderHtml(html: string, opts: RenderOpts = {}): ReactNode {
       }
       case "num": {
         const n = (el.textContent || "").trim();
+        if (opts.inlineNums) return <a className="ref" onClick={(e) => { e.preventDefault(); e.stopPropagation(); opts.onStrongs?.(n); }}>{n}</a>;
         return <span className="strongs" role="link" tabIndex={-1} onClick={(e) => { e.stopPropagation(); opts.onStrongs?.(n); }}>{n}</span>;
       }
       case "ref": {

@@ -70,6 +70,17 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
   const scroller = useRef<HTMLDivElement>(null);
   const notes = useNotesByVerse();
 
+  // Another screen asked for a dictionary article, a commentary or a question here.
+  useEffect(() => {
+    const x = app.pending;
+    if (!x) return;
+    if (x.article) { setDict(x.article); setTab("dictionary"); }
+    if (x.commentary) { setCommentary(x.commentary); setTab("commentary"); }
+    if (x.ask !== undefined) { setAskSeed(x.ask || null); setTab("ask"); }
+    if (!settings.studyPane) app.set({ studyPane: true });
+    app.setPending(null);
+  }, [app.pending]); // eslint-disable-line react-hooks/exhaustive-deps
+
   useEffect(() => {
     let dead = false;
     setErr(null);
@@ -227,7 +238,7 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
       })}
     </div>
   ) : (
-    <div style={{ position: "relative", maxWidth: focus ? 680 : 720, margin: focus ? "0 auto" : undefined, paddingTop: sel && !focus ? 46 : 0 }}>
+    <div style={{ position: "relative", maxWidth: focus ? 680 : undefined, margin: focus ? "0 auto" : undefined, paddingTop: sel && !focus ? 46 : 0 }}>
       {!focus && sel && <div style={{ position: "sticky", top: 0, zIndex: 20, height: 0 }}><div style={{ position: "relative", top: -44 }}>{toolbar}</div></div>}
       <p className="para selectable" style={{ margin: 0, fontSize: focus ? 21 : undefined, lineHeight: focus ? 1.85 : undefined }}>
         {verses.map((v) => {
@@ -303,7 +314,7 @@ function ChapterNav({ onGo }: { onGo: (d: 1 | -1) => void }) {
   const { loc } = useApp();
   const p = prevChapter(loc.book, loc.chapter), n = nextChapter(loc.book, loc.chapter);
   return (
-    <div style={{ display: "flex", justifyContent: "space-between", maxWidth: 780, padding: "28px 10px 0" }} onClick={(e) => e.stopPropagation()}>
+    <div style={{ display: "flex", justifyContent: "space-between", padding: "28px 10px 0" }} onClick={(e) => e.stopPropagation()}>
       {p ? <button className="btn" type="button" onClick={() => onGo(-1)}><Icon name="back" />{book(p[0]).name} {p[1]}</button> : <span />}
       {n ? <button className="btn" type="button" onClick={() => onGo(1)}>{book(n[0]).name} {n[1]}<Icon name="fwd" /></button> : <span />}
     </div>
