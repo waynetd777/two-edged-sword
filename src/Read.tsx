@@ -131,6 +131,8 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
   const selRef: Ref | null = sel ? { book: loc.book, chapter: loc.chapter, verse: sel.from, to: sel.to !== sel.from ? sel.to : undefined } : null;
 
   const clickVerse = (v: number, e: React.MouseEvent) => {
+    // The reading area behind clears the selection on click; this click must not reach it.
+    e.stopPropagation();
     if (e.shiftKey && sel) setSel({ from: Math.min(sel.from, v), to: Math.max(sel.to, v) });
     else if (sel && sel.from === v && sel.to === v) { setSel(null); return; }
     else setSel({ from: v, to: v });
