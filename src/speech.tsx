@@ -21,6 +21,8 @@ export interface PlayerState {
   char: number;
   sleepAt: number | null;
   sleepEndOfChapter: boolean;
+  /** Which sleep option was chosen, so the menu can tick it. */
+  sleepChoice: number | "chapter" | null;
 }
 
 interface PlayerCtx {
@@ -40,7 +42,7 @@ export const usePlayer = () => {
   return c;
 };
 
-const IDLE: PlayerState = { on: false, paused: false, bible: "", book: 0, chapter: 0, verse: 0, count: 0, char: -1, sleepAt: null, sleepEndOfChapter: false };
+const IDLE: PlayerState = { on: false, paused: false, bible: "", book: 0, chapter: 0, verse: 0, count: 0, char: -1, sleepAt: null, sleepEndOfChapter: false, sleepChoice: null };
 
 export function PlayerProvider({ children }: { children: ReactNode }) {
   const app = useApp();
@@ -138,7 +140,9 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   }, [speakFrom]);
 
   const sleep = useCallback((m: number | "chapter" | null) => {
-    setState((p) => ({ ...p, sleepAt: typeof m === "number" ? Date.now() + m * 60000 : null, sleepEndOfChapter: m === "chapter" }));
+    const next = { sleepAt: typeof m === "number" ? Date.now() + m * 60000 : null, sleepEndOfChapter: m === "chapter", sleepChoice: m };
+    st.current = { ...st.current, ...next };
+    setState((p) => ({ ...p, ...next }));
   }, []);
 
   // A change of speed or voice takes effect from the current verse.

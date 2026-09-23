@@ -352,9 +352,19 @@ export function PlayerBar({ focus = false }: { focus?: boolean }) {
   const p = usePlayer();
   const [menu, setMenu] = useState<DOMRect | null>(null);
   const [sleepMenu, setSleepMenu] = useState<DOMRect | null>(null);
+  // Tick while a sleep timer runs, so the countdown stays current.
+  const [, tick] = useState(0);
+  useEffect(() => {
+    if (!p.state.sleepAt) return;
+    const t = window.setInterval(() => tick((x) => x + 1), 15000);
+    return () => window.clearInterval(t);
+  }, [p.state.sleepAt]);
   if (!p.state.on) return null;
   const s = p.state;
   const pct = s.count ? Math.round(((s.verse - 1) / s.count) * 100) : 0;
+  const minsLeft = s.sleepAt ? Math.max(1, Math.ceil((s.sleepAt - Date.now()) / 60000)) : 0;
+  const sleepLabel = s.sleepAt ? `${minsLeft} min` : s.sleepEndOfChapter ? "end of ch." : "";
+  const SLEEP: [number | "chapter" | null, string][] = [[15, "In 15 minutes"], [30, "In 30 minutes"], [60, "In an hour"], ["chapter", "At the end of this chapter"], [null, "Off"]];
   return (
     <div role="region" aria-label="Listen" style={{ position: "fixed", left: focus ? 0 : 200, right: app.screen === "read" && !focus && app.settings.studyPane ? 520 : 0, bottom: 18, display: "flex", justifyContent: "center", pointerEvents: "none", zIndex: 40 }}>
       <div style={{ pointerEvents: "auto", width: "min(600px, calc(100% - 48px))", height: 56, display: "flex", alignItems: "center", gap: 14, padding: "0 10px 0 8px", borderRadius: 28, background: "var(--panel)", border: "1px solid var(--border)", boxShadow: "0 10px 30px var(--shadow)" }}>
@@ -364,12 +374,12 @@ export function PlayerBar({ focus = false }: { focus?: boolean }) {
           <button className="ibtn" type="button" aria-label="Next verse" onClick={() => p.skip(1)}><Icon name="next" /></button>
         </div>
         <button type="button" onClick={() => app.open({ book: s.book, chapter: s.chapter, verse: s.verse }, "read")} style={{ flexGrow: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 7, border: 0, background: "transparent", cursor: "pointer", textAlign: "left", padding: 0 }}>
-          <span style={{ display: "flex", alignItems: "baseline", gap: 8, whiteSpace: "nowrap", width: "100%" }}><b style={{ fontSize: 13 }}>{book(s.book).name} {s.chapter}:{s.verse}</b><span className="n">{app.mod("bible", s.bible)?.abbrev}</span><span className="n" style={{ marginLeft: "auto", fontVariantNumeric: "tabular-nums" }}>{s.verse} of {s.count}{s.sleepAt ? ` · stops ${new Date(s.sleepAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}` : s.sleepEndOfChapter ? " · stops at end of chapter" : ""}</span></span>
+          <span style={{ display: "flex", alignItems: "baseline", gap: 8, whiteSpace: "nowrap", width: "100%" }}><b style={{ fontSize: 13 }}>{book(s.book).name} {s.chapter}:{s.verse}</b><span className="n">{app.mod("bible", s.bible)?.abbrev}</span><span className="n" style={{ marginLeft: "auto", fontVariantNumeric: "tabular-nums" }}>{s.verse} of {s.count}</span></span>
           <span style={{ position: "relative", height: 3, borderRadius: 999, background: "var(--border)", width: "100%" }}><span style={{ position: "absolute", left: 0, top: 0, width: `${pct}%`, height: 3, borderRadius: 999, background: "var(--accent)" }} /><span style={{ position: "absolute", left: `${pct}%`, top: -3, width: 9, height: 9, marginLeft: -4, borderRadius: "50%", background: "var(--accent)" }} /></span>
         </button>
         <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
           <button type="button" aria-label="Speed and voice" onClick={(e) => setMenu(e.currentTarget.getBoundingClientRect())} style={{ height: 28, padding: "0 10px", borderRadius: 999, border: 0, background: "var(--accentsoft)", color: "var(--accent)", fontWeight: 600, fontVariantNumeric: "tabular-nums", cursor: "pointer" }}>{app.settings.rate}×</button>
-          <button className={`ibtn ${s.sleepAt || s.sleepEndOfChapter ? "on" : ""}`} type="button" aria-label="Sleep timer" onClick={(e) => setSleepMenu(e.currentTarget.getBoundingClientRect())}><Icon name="moon" /></button>
+          <button className={`ibtn ${sleepLabel ? "on" : ""}`} type="button" aria-label={sleepLabel ? `Sleep timer: ${sleepLabel}` : "Sleep timer"} title={sleepLabel ? `Stops ${s.sleepAt ? "in " + sleepLabel : "at the end of the chapter"}` : "Sleep timer"} onClick={(e) => setSleepMenu(e.currentTarget.getBoundingClientRect())} style={sleepLabel ? { width: "auto", padding: "0 8px", gap: 5, fontSize: 11.5, fontWeight: 600, fontVariantNumeric: "tabular-nums" } : undefined}><Icon name="moon" />{sleepLabel}</button>
           <button className="ibtn" type="button" aria-label="Stop and close" onClick={p.stop}><Icon name="x" /></button>
         </div>
       </div>
@@ -395,11 +405,21 @@ export function PlayerBar({ focus = false }: { focus?: boolean }) {
         </Popover>
       )}
       {sleepMenu && (
-        <Popover anchor={sleepMenu} onClose={() => setSleepMenu(null)} width={220} place="above" style={{ pointerEvents: "auto" }}>
+        <Popover anchor={sleepMenu} onClose={() => setSleepMenu(null)} width={250} place="above" style={{ pointerEvents: "auto" }}>
           <div style={{ padding: 6, display: "flex", flexDirection: "column" }}>
-            {([[15, "In 15 minutes"], [30, "In 30 minutes"], [60, "In an hour"], ["chapter", "At the end of this chapter"], [null, "Off"]] as [number | "chapter" | null, string][]).map(([m, l]) => (
-              <button key={String(m)} type="button" className="bm" onClick={() => { p.sleep(m); setSleepMenu(null); }}>{l}</button>
-            ))}
+            <div style={{ padding: "6px 10px 6px", display: "flex", flexDirection: "column", gap: 2 }}>
+              <span className="label">Sleep timer</span>
+              <span className="hint">{s.sleepAt ? `Stops in ${minsLeft} minute${minsLeft === 1 ? "" : "s"}, at the end of the verse it is reading.` : s.sleepEndOfChapter ? `Stops at the end of ${book(s.book).name} ${s.chapter}.` : "Off. Reading carries on until you stop it."}</span>
+            </div>
+            {SLEEP.map(([m, l]) => {
+              const on = s.sleepChoice === m;
+              return (
+                <button key={String(m)} type="button" className="bm" aria-pressed={on} style={{ minHeight: 30, background: on ? "var(--accentsoft)" : undefined, color: on ? "var(--accent)" : undefined, fontWeight: on ? 600 : undefined }}
+                  onClick={() => { p.sleep(m); setSleepMenu(null); app.toast(m === null ? "Sleep timer off" : m === "chapter" ? `Stops at the end of ${book(s.book).name} ${s.chapter}` : `Stops in ${m} minutes`); }}>
+                  <span className="t">{l}</span>{on && <span className="r"><Icon name="check" /></span>}
+                </button>
+              );
+            })}
           </div>
         </Popover>
       )}
