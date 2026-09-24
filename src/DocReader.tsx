@@ -214,12 +214,14 @@ export function DocReader({ focus, setFocus }: { focus: boolean; setFocus: (f: b
   useEffect(() => {
     if (!doc.title) { setArt(null); return; }
     const module = doc.module, title = doc.title;
+    let dead = false;
     (devo
       ? api.devotion(module, title).then((html) => (html ? { module, title: mod?.title ?? module, topic: title, html } : null))
       : api.article("reference", module, title)
-    ).then(setArt).catch(() => setArt(null));
+    ).then((a) => { if (!dead) setArt(a); }).catch(() => { if (!dead) setArt(null); });
     scroller.current?.scrollTo({ top: 0 });
     list.current?.querySelector<HTMLElement>("[aria-current=true]")?.scrollIntoView({ block: "nearest" });
+    return () => { dead = true; };
   }, [doc.module, doc.title]);
 
   // The list arrives after the first chapter is open: bring the current one into view.

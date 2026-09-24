@@ -2,11 +2,11 @@
 //! The user's own Codex config (MCP servers, hooks, rules) is left out; sign-in still comes from
 //! ~/.codex. Runs in the read-only sandbox.
 
-use super::{emit_status, stem, Done, Folder, Model, Running, SYSTEM};
+use super::{emit_status, finish, spawn, stem, Done, Folder, Model, Running, SYSTEM};
 use std::io::{BufRead, BufReader};
 use std::path::PathBuf;
-use std::process::{Command, Stdio};
-use std::sync::{Arc, Mutex};
+use std::process::Command;
+use std::sync::Arc;
 use tauri::{AppHandle, Emitter};
 
 const TOOLS: &str = "Search with rg and print only the relevant lines, covering several files in one command where you can; do not read whole files unless the question needs it. Read nothing outside the folders named here.";
@@ -54,12 +54,8 @@ pub fn ask(app: AppHandle, running: Arc<Running>, cwd: PathBuf, chat_id: String,
     if let Some(s) = &session {
         cmd.arg(s);
     }
-    cmd.arg(&prompt).stdin(Stdio::null()).stdout(Stdio::piped()).stderr(Stdio::piped());
-    let mut child = cmd.spawn().map_err(|e| format!("couldn't start codex: {e}"))?;
-    let stdout = child.stdout.take().ok_or("no stdout")?;
-    let stderr = child.stderr.take();
-    let child = Arc::new(Mutex::new(child));
-    running.add(&chat_id, child.clone());
+    cmd.arg(&prompt);
+    let (child, stdout, stderr) = spawn(&mut cmd, &running, &chat_id, "codex")?;
 
     std::thread::spawn(move || {
         let mut text = String::new();
@@ -92,13 +88,11 @@ pub fn ask(app: AppHandle, running: Arc<Running>, cwd: PathBuf, chat_id: String,
         if !text.is_empty() {
             error = None;
         }
-        let status = child.lock().ok().and_then(|mut c| c.wait().ok());
-        if error.is_none() && !status.is_some_and(|s| s.success()) && text.is_empty() {
-            let mut msg = String::new();
-            if let Some(mut e) = stderr { let _ = std::io::Read::read_to_string(&mut e, &mut msg); }
+        let ok = finish(child, &running);
+        if error.is_none() && !ok && text.is_empty() {
+            let msg = stderr.join().unwrap_or_default();
             error = Some(if msg.trim().is_empty() { "Codex stopped without answering".into() } else { msg.trim().to_string() });
         }
-        running.remove(&chat_id);
         let _ = app.emit("ask-done", Done { chat_id, session_id, text, error });
     });
     Ok(())

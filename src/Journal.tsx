@@ -31,6 +31,8 @@ export function JournalScreen() {
   const [ask, setAsk] = useState(false);
   const canAsk = useAssistant().available;
   const saveTimer = useRef<number | undefined>(undefined);
+  const pendingSave = useRef<{ id: string; run: () => void } | null>(null);
+  useEffect(() => () => pendingSave.current?.run(), []); // flush an unsaved edit on leaving the screen
 
   // A seed from elsewhere: open an entry, or start one on the given verses.
   useEffect(() => {
@@ -52,21 +54,27 @@ export function JournalScreen() {
 
   const persist = (e: JournalEntry) => {
     setDraft(e);
+    // One timer for all entries: an edit to another entry flushes this one's save rather than cancelling it.
+    if (pendingSave.current && pendingSave.current.id !== e.id) pendingSave.current.run();
     window.clearTimeout(saveTimer.current);
-    saveTimer.current = window.setTimeout(async () => {
+    const run = async () => {
+      window.clearTimeout(saveTimer.current); pendingSave.current = null;
       if (!e.title.trim() && !e.body.trim()) return; // nothing to keep yet
       try {
         await app.saveEntry({ ...e, title: e.title.trim() || "Untitled" });
         setSaved(`Saved to ${e.created.slice(0, 7)}.md · ${new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}`);
         setErr(null);
       } catch (x) { setErr(String(x)); }
-    }, 600);
+    };
+    pendingSave.current = { id: e.id, run };
+    saveTimer.current = window.setTimeout(run, 600);
   };
   const edit = (patch: Partial<JournalEntry>) => { if (cur) persist({ ...cur, ...patch, updated: nowLocal() }); };
   const create = () => { const e: JournalEntry = { id: uid(), title: "", created: nowLocal(), updated: nowLocal(), verses: [], tags: [], body: "" }; setDraft(e); setSelId(e.id); };
   const remove = async () => {
     if (!cur) return;
     if (!(await confirmDelete(`“${cur.title || "Untitled"}”`))) return;
+    if (pendingSave.current?.id === cur.id) { window.clearTimeout(saveTimer.current); pendingSave.current = null; }
     if (app.journal.some((e) => e.id === cur.id)) await app.deleteEntry(cur.id);
     setDraft(null);
     setSelId(app.journal.find((e) => e.id !== cur.id)?.id ?? null);
@@ -292,7 +300,8 @@ function ExportDialog({ current, onClose }: { current: JournalEntry | null; onCl
     // PDF: lay the entries out in a print-only container and open the print dialog, which saves PDFs.
     const root = document.createElement("div");
     root.id = "print-root";
-    root.innerHTML = parts.map(({ e, verses }) => `<section class="${perPage ? "pp" : ""}"><div class="pd">${longDate(e.created)}${e.verses.length ? " · " + e.verses.join(", ") : ""}</div><h1>${e.title.replace(/</g, "&lt;")}</h1>${verses ? mdToHtml(verses, false) : ""}${mdToHtml(e.body, false)}</section>`).join("");
+    const esc = (t: string) => t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    root.innerHTML = parts.map(({ e, verses }) => `<section class="${perPage ? "pp" : ""}"><div class="pd">${esc(longDate(e.created))}${e.verses.length ? " · " + esc(e.verses.join(", ")) : ""}</div><h1>${esc(e.title)}</h1>${verses ? mdToHtml(verses, false) : ""}${mdToHtml(e.body, false)}</section>`).join("");
     document.body.appendChild(root);
     onClose();
     await new Promise((r) => setTimeout(r, 60));

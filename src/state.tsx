@@ -101,7 +101,8 @@ export interface Pending { article?: { module: string; topic: string }; ask?: st
 export type Screen = "read" | "compare" | "search" | "word" | "journal" | "plans" | "library" | "settings";
 
 /** A chapter read lately: of the Bible, or (with `doc`) of a reference book or devotional. */
-export interface Recent { book: number; chapter: number; at: string; doc?: Doc }
+/** A passage or book chapter opened. `verse`/`to` are the verses it was opened at, if any; one entry per chapter, the latest open. */
+export interface Recent { book: number; chapter: number; verse?: number; to?: number; at: string; doc?: Doc }
 
 /** One entry in the back/forward history. `word` is a Strong's number or an English word looked
  *  up in Word Study; `search` is the last search run. */
@@ -172,6 +173,8 @@ interface Ctx {
   reloadJournal: () => Promise<void>;
 
   plans: Plan[];
+  /** Settings and plans have been read from the store, so they are the user's and not the defaults. */
+  plansReady: boolean;
   setPlans: (f: (p: Plan[]) => Plan[]) => void;
   chats: Chat[];
   setChats: (f: (c: Chat[]) => Chat[]) => void;
@@ -205,26 +208,57 @@ export const useApp = () => {
   return c;
 };
 
-/** A JSON document in the store, loaded once and written back (debounced) on change. */
-function useStored<T>(name: string, initial: T): [T, (f: (v: T) => T) => void, boolean] {
+// Saves waiting on their debounce, written at once when the window hides, loses focus or unloads
+// (closing only hides it, and Quit exits without warning the page).
+const flushers = new Set<() => void>();
+const flushAll = () => flushers.forEach((f) => f());
+window.addEventListener("beforeunload", flushAll);
+window.addEventListener("blur", flushAll);
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") flushAll(); });
+
+/** A JSON document in the store, loaded once and written back (debounced) on change. Nothing is
+ *  written until the read has succeeded, so a failed read never overwrites the file with defaults;
+ *  changes made before it finishes are replayed onto what was read. */
+function useStored<T>(name: string, initial: T): [T, (f: (v: T) => T) => void, boolean, boolean] {
   const [v, setV] = useState<T>(initial);
   const [loaded, setLoaded] = useState(false);
+  const [failed, setFailed] = useState(false);
   const timer = useRef<number | undefined>(undefined);
+  const ok = useRef(false);
+  const early = useRef<((v: T) => T)[] | null>([]);
+  const due = useRef<{ v: T } | null>(null);
+  const flush = useCallback(() => {
+    window.clearTimeout(timer.current);
+    const d = due.current;
+    due.current = null;
+    if (d) api.storeWrite(name, d.v).catch((e) => console.error(name, e));
+  }, [name]);
+  const save = useCallback((next: T) => { due.current = { v: next }; window.clearTimeout(timer.current); timer.current = window.setTimeout(flush, 250); }, [flush]);
+  useEffect(() => { flushers.add(flush); return () => { flushers.delete(flush); flush(); }; }, [flush]);
   useEffect(() => {
     api.storeRead<T>(name).then((x) => {
-      if (x !== null && x !== undefined) setV((cur) => (typeof cur === "object" && !Array.isArray(cur) && cur ? { ...cur, ...x } : x));
+      if (ok.current) return;
+      const base = x !== null && x !== undefined ? (typeof initial === "object" && !Array.isArray(initial) && initial ? { ...initial, ...x } : x) : initial;
+      const q = early.current ?? [];
+      const next = q.reduce((a, f) => f(a), base);
+      ok.current = true;
+      early.current = null;
+      setV(next);
+      if (q.length) save(next);
       setLoaded(true);
-    }).catch(() => setLoaded(true));
-  }, [name]);
+    }).catch((e) => { console.error(`couldn't read ${name}; changes won't be saved`, e); early.current = null; setFailed(true); setLoaded(true); });
+  }, [name]); // eslint-disable-line react-hooks/exhaustive-deps
   const update = useCallback((f: (v: T) => T) => {
+    // Before the read, the change is only replayed onto what it returns (which then saves).
+    const pre = !ok.current;
+    if (early.current) early.current.push(f);
     setV((cur) => {
       const next = f(cur);
-      window.clearTimeout(timer.current);
-      timer.current = window.setTimeout(() => { api.storeWrite(name, next).catch((e) => console.error(name, e)); }, 250);
+      if (!pre) save(next);
       return next;
     });
-  }, [name]);
-  return [v, update, loaded];
+  }, [save]);
+  return [v, update, loaded, failed];
 }
 
 export const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
@@ -237,12 +271,13 @@ export const vkey = (b: number, c: number, v: number) => `${b}.${c}.${v}`;
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [lib, setLib] = useState<LibraryInfo | null>(null);
-  const [settings, setSettings, settingsLoaded] = useStored<Settings>("settings", DEFAULTS);
-  const [bookmarks, setBookmarks] = useStored<Bookmark[]>("bookmarks", []);
-  const [highlights, setHighlights] = useStored<Record<string, HlColor>>("highlights", {});
-  const [nav, setNav, navLoaded] = useStored<{ loc: Loc; recent: Recent[]; doc: Doc | null; docAt: Record<string, string> }>("place", { loc: { book: 43, chapter: 1 }, recent: [], doc: null, docAt: {} });
-  const [plans, setPlans] = useStored<Plan[]>("plans", []);
-  const [chats, setChats] = useStored<Chat[]>("chats", []);
+  const [settings, setSettings, settingsLoaded, f1] = useStored<Settings>("settings", DEFAULTS);
+  const [bookmarks, setBookmarks, , f2] = useStored<Bookmark[]>("bookmarks", []);
+  const [highlights, setHighlights, , f3] = useStored<Record<string, HlColor>>("highlights", {});
+  // The last word studied is kept with the place, so Word Study reopens on it.
+  const [nav, setNav, navLoaded, f4] = useStored<{ loc: Loc; recent: Recent[]; doc: Doc | null; docAt: Record<string, string>; word?: string | null }>("place", { loc: { book: 43, chapter: 1 }, recent: [], doc: null, docAt: {}, word: null });
+  const [plans, setPlans, plansLoaded, f5] = useStored<Plan[]>("plans", []);
+  const [chats, setChats, , f6] = useStored<Chat[]>("chats", []);
   const [screen, setScreen] = useState<Screen>("read");
   // Back and forward: every place the user goes (a screen, a passage, a book's chapter, a word
   // studied, a search) is pushed here, and back/forward restore one.
@@ -253,7 +288,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [, bump] = useState(0);
   const [journal, setJournal] = useState<JournalEntry[]>([]);
   const [defaultDir, setDefaultDir] = useState("");
-  const [wordStudy, setWordStudy] = useState<string | null>(null);
+  const wordStudy = nav.word ?? null;
   const [journalSeed, setJournalSeed] = useState<JournalSeed | null>(null);
   const [pending, setPendingState] = useState<Pending | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -275,9 +310,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [settings.theme, settings.readSize, settings.readFont]);
 
   const journalDir = settings.journalDir || defaultDir;
+  // Only the latest listing is kept: at startup the default folder's can arrive after the chosen one's.
+  const journalSeq = useRef(0);
   const reloadJournal = useCallback(async () => {
     if (!journalDir) return;
-    try { setJournal(await api.journalList(journalDir)); } catch (e) { console.error(e); }
+    const n = ++journalSeq.current;
+    try { const js = await api.journalList(journalDir); if (n === journalSeq.current) setJournal(js); } catch (e) { console.error(e); }
   }, [journalDir]);
   useEffect(() => { reloadJournal(); }, [reloadJournal]);
 
@@ -301,9 +339,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const show = (pl: Place) => {
     curPlace.current = pl;
     setScreen(pl.screen);
-    setWordStudy(pl.word);
     setSearchFor(pl.search);
-    setNav((n) => ({ ...n, loc: pl.loc, doc: pl.doc }));
+    setNav((n) => ({ ...n, loc: pl.loc, doc: pl.doc, word: pl.word }));
   };
   /** Goes somewhere new: the current place with `patch` applied, pushed onto the history (or
    *  replacing the current entry, for a step that only fills in where the user already is). */
@@ -327,7 +364,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const addRecent = (r: Recent) => setNav((n) => ({ ...n, recent: [r, ...n.recent.filter((x) => !sameRecent(x, r))].slice(0, 50) }));
 
   const open = (l: Loc, s?: Screen) => {
-    addRecent({ book: l.book, chapter: l.chapter, at: new Date().toISOString() });
+    addRecent({ book: l.book, chapter: l.chapter, ...(l.verse ? { verse: l.verse, to: l.to } : {}), at: new Date().toISOString() });
     navigate({ loc: l, doc: null, ...(s ? { screen: s } : {}) });
   };
 
@@ -351,6 +388,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     window.clearTimeout(toastTimer.current);
     toastTimer.current = window.setTimeout(() => { setToast(null); setToastUndo(null); }, undo ? 6000 : 2600);
   }, []);
+  const readFailed = [f1, f2, f3, f4, f5, f6].some(Boolean);
+  useEffect(() => { if (readFailed) toast("Couldn't read your saved data — changes this session won't be saved"); }, [readFailed, toast]);
 
   const value: Ctx = {
     lib, bibles, mod, strongsBible, lexicon, concordance, tsk,
@@ -392,7 +431,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     saveEntry: async (e) => { await api.journalSave(journalDir, e); await reloadJournal(); },
     deleteEntry: async (id) => { await api.journalDelete(journalDir, id); await reloadJournal(); },
     reloadJournal,
-    plans, setPlans, chats, setChats,
+    plans, setPlans, plansReady: settingsLoaded && plansLoaded, chats, setChats,
     // An article, a commentary or a question is shown beside the Bible, so a book open in Read is
     // closed for it (back returns to the book).
     pending, setPending: (x) => { setPendingState(x); if (x) navigate({ screen: "read", doc: null }); },
@@ -401,15 +440,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
     searchFor, searchText: (q) => navigate({ screen: "search", search: q }),
     toast, toastMsg, toastUndo,
     // Single rows go straight away with an Undo in the toast; clearing Recent asks first (Shell).
+    // Undo puts back just the removed row, where it was, keeping anything added since.
     removeBookmark: (id) => {
-      const before = bookmarks;
+      const i = bookmarks.findIndex((b) => b.id === id), gone = bookmarks[i];
       setBookmarks((bs) => bs.filter((b) => b.id !== id));
-      toast("Bookmark removed", () => setBookmarks(() => before));
+      if (gone) toast("Bookmark removed", () => setBookmarks((bs) => (bs.some((b) => b.id === id) ? bs : [...bs.slice(0, i), gone, ...bs.slice(i)])));
     },
     removeRecent: (r) => {
-      const before = nav.recent;
+      const i = nav.recent.findIndex((x) => sameRecent(x, r)), gone = nav.recent[i];
       setNav((n) => ({ ...n, recent: n.recent.filter((x) => !sameRecent(x, r)) }));
-      toast("Removed from Recent", () => setNav((n) => ({ ...n, recent: before })));
+      if (gone) toast("Removed from Recent", () => setNav((n) => ({ ...n, recent: n.recent.some((x) => sameRecent(x, gone)) ? n.recent : [...n.recent.slice(0, i), gone, ...n.recent.slice(i)] })));
     },
     clearRecent: () => setNav((n) => ({ ...n, recent: [] })),
   };

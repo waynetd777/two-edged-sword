@@ -22,6 +22,8 @@ export interface Scene {
   player?: Partial<PlayerState>;
   /** Scroll the study pane back to the top once the page settles (an Ask chat opens scrolled to its end). */
   scrollTop?: boolean;
+  /** Scroll this CSS selector into view once the page settles (a row low on a long screen). */
+  scrollTo?: string;
   /** Asked for after the rest has settled, as a click elsewhere would (a dictionary article, a question). */
   pending?: Pending;
   /** A reference book or devotional to open, at a chapter (and, with para, a paragraph). */
@@ -55,6 +57,7 @@ export function runScene(app: ReturnType<typeof useApp>, still: (s: Partial<Play
       if (sc.search) app.searchText(sc.search);
       if (sc.player) still(sc.player);
       if (sc.pending) { const x = sc.pending; window.setTimeout(() => app.setPending(x), 1500); }
+      if (sc.scrollTo) { const q = sc.scrollTo; window.setTimeout(() => document.querySelector(q)?.scrollIntoView({ block: "center" }), 1500); }
       if (sc.scrollTop) window.setTimeout(() => document.querySelectorAll(".study .scroll").forEach((el) => { el.scrollTop = 0; }), 1500);
     }, 400);
   }).catch(() => {});

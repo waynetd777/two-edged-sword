@@ -70,7 +70,7 @@ const MAX_COMMENT_HITS: usize = 50;
 const MAX_TOPICS: usize = 60;
 
 /// Plain text: tags removed, Strong's numbers dropped, common entities decoded. Case is kept;
-/// matching lower-cases with `to_ascii_lowercase`, which keeps byte offsets the same.
+/// matching lower-cases with `lower`.
 pub fn plain(html: &str) -> String {
     let mut out = String::with_capacity(html.len());
     let mut chars = html.char_indices().peekable();
@@ -153,10 +153,37 @@ fn find_term(hay: &str, term: &str, whole: bool) -> Option<usize> {
     None
 }
 
-/// Where the first match starts, if the text matches the query.
+/// Lower case by Unicode rules, a character at a time (the query is lowered the same way). For
+/// non-ASCII text, also where each byte of the result came from in `s`, as lowering can change
+/// lengths ("İ" is two characters lowered).
+pub fn lower(s: &str) -> (String, Option<Vec<usize>>) {
+    if s.is_ascii() { return (s.to_ascii_lowercase(), None); }
+    let (mut out, mut same) = (String::with_capacity(s.len()), true);
+    for c in s.chars() {
+        let n = out.len();
+        out.extend(c.to_lowercase());
+        same &= out.len() - n == c.len_utf8();
+    }
+    if same { return (out, None); }
+    let (mut out, mut map) = (String::with_capacity(s.len()), Vec::with_capacity(s.len()));
+    for (i, c) in s.char_indices() {
+        for l in c.to_lowercase() {
+            out.push(l);
+            map.resize(out.len(), i);
+        }
+    }
+    (out, Some(map))
+}
+
+/// Where the first match starts in `plain_text`, if it matches the query (terms already lowered).
 pub fn matches(plain_text: &str, terms: &[String], phrase: &str, mode: Mode, whole: bool) -> Option<usize> {
-    let lower = plain_text.to_ascii_lowercase();
-    let plain_text = lower.as_str();
+    // An ASCII query can only match ASCII letters, so the (much quicker) ASCII lowering does.
+    let (lowered, map) = if phrase.is_ascii() && terms.iter().all(|t| t.is_ascii()) { (plain_text.to_ascii_lowercase(), None) } else { lower(plain_text) };
+    let at = find_lowered(&lowered, terms, phrase, mode, whole)?;
+    Some(map.map_or(at, |m| m.get(at).copied().unwrap_or(plain_text.len())))
+}
+
+fn find_lowered(plain_text: &str, terms: &[String], phrase: &str, mode: Mode, whole: bool) -> Option<usize> {
     match mode {
         Mode::Phrase => find_term(plain_text, phrase, whole),
         Mode::All => {
@@ -182,11 +209,20 @@ fn snippet(text: &str, at: usize) -> String {
 }
 
 /// SQL LIKE conditions that narrow the candidates: every term for phrase/all, any for "any".
+/// LIKE ignores case only for ASCII, so a word with other letters can't narrow them: it is left
+/// to `matches`, and for "any" nothing narrows at all.
 fn like_clause(col: &str, terms: &[String], phrase: &str, mode: Mode) -> (String, Vec<String>) {
-    let pats: Vec<String> = match mode {
-        Mode::Phrase => phrase.split_whitespace().map(|w| format!("%{w}%")).collect(),
-        _ => terms.iter().map(|t| format!("%{t}%")).collect(),
+    let words: Vec<&str> = match mode {
+        Mode::Phrase => phrase.split_whitespace().collect(),
+        _ => terms.iter().map(String::as_str).collect(),
     };
+    if mode == Mode::Any && words.iter().any(|w| !w.is_ascii()) {
+        return ("1".into(), vec![]);
+    }
+    let pats: Vec<String> = words.iter().filter(|w| w.is_ascii()).map(|w| format!("%{w}%")).collect();
+    if pats.is_empty() {
+        return ("1".into(), vec![]);
+    }
     let joiner = if mode == Mode::Any { " OR " } else { " AND " };
     let clause = pats.iter().map(|_| format!("{col} LIKE ?")).collect::<Vec<_>>().join(joiner);
     (format!("({clause})"), pats)
@@ -216,7 +252,7 @@ pub fn run(lib: &Library, index: Option<&crate::index::Index>, q: &Query) -> Res
         });
     }
 
-    let phrase = raw.to_lowercase().split_whitespace().collect::<Vec<_>>().join(" ");
+    let phrase = lower(raw).0.split_whitespace().collect::<Vec<_>>().join(" ");
     let terms: Vec<String> = phrase.split_whitespace().map(|s| s.to_string()).collect();
     if terms.is_empty() {
         return Err("Type something to search for".into());
@@ -351,6 +387,17 @@ mod tests {
         assert_eq!(find_term(t, "born again", true), Some(7));
         assert_eq!(find_term("reborn again", "born again", true), None);
         assert_eq!(find_term("reborn again", "born again", false), Some(2));
+    }
+
+    #[test]
+    fn unicode_case_and_offsets() {
+        let terms = vec!["élie".to_string()];
+        let t = "İ saw ÉLIE";
+        let at = matches(t, &terms, "élie", Mode::Any, true).unwrap();
+        assert_eq!(&t[at..], "ÉLIE");
+        assert_eq!(like_clause("c", &terms, "élie", Mode::Any).0, "1");
+        let both = vec!["saw".to_string(), "élie".to_string()];
+        assert_eq!(like_clause("c", &both, "saw élie", Mode::All), ("(c LIKE ?)".to_string(), vec!["%saw%".to_string()]));
     }
 
     #[test]

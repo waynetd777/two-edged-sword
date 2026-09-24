@@ -22,7 +22,9 @@ export function Palette({ onClose, onAsk }: { onClose: () => void; onAsk: (ref: 
   useEffect(() => {
     setPreview("");
     if (!ref?.verse) return;
-    api.passages(app.settings.bible, [{ book: ref.book, chapter: ref.chapter, from: ref.verse, to: ref.to ?? ref.verse }]).then(([p]) => setPreview(p.verses.map((v) => plainText(v.text)).join(" "))).catch(() => {});
+    let dead = false;
+    api.passages(app.settings.bible, [{ book: ref.book, chapter: ref.chapter, from: ref.verse, to: ref.to ?? ref.verse }]).then(([p]) => { if (!dead) setPreview(p.verses.map((v) => plainText(v.text)).join(" ")); }).catch(() => {});
+    return () => { dead = true; };
   }, [q]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const items = useMemo<Item[]>(() => {

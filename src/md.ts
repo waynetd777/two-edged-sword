@@ -2,7 +2,7 @@
 // journal toolbar can make round-trips: headings (###), bold, italic, quotes, bullet and
 // numbered lists, and paragraphs. Verse references anywhere in the text become links.
 
-import { findBook, fmtRef, Ref } from "./bible";
+import { findBook, Ref } from "./bible";
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
@@ -12,9 +12,12 @@ const REF_RE = /\b((?:[123]\s?)?[A-Z][a-z]{1,15}(?:\s(?:of\s)?[A-Z][a-z]+)?)\.?\
 export function findRefs(text: string): { index: number; length: number; ref: Ref }[] {
   const out = [];
   for (const m of text.matchAll(REF_RE)) {
-    const b = findBook(m[1]);
+    let b = findBook(m[1]), skip = 0;
+    // "See John 3:16": the capitalised word before the book was taken as part of its name.
+    const w = !b && !/^[123]/.test(m[1]) ? m[1].match(/\s(\S+)$/) : null;
+    if (w) { b = findBook(w[1]); skip = m[1].length - w[1].length; }
     if (!b) continue;
-    out.push({ index: m.index!, length: m[0].length, ref: { book: b, chapter: +m[2], verse: +m[3], to: m[4] ? +m[4] : undefined } });
+    out.push({ index: m.index! + skip, length: m[0].length - skip, ref: { book: b, chapter: +m[2], verse: +m[3], to: m[4] ? +m[4] : undefined } });
   }
   return out;
 }
@@ -30,17 +33,23 @@ function linkRefs(text: string): string {
   return out + esc(text.slice(last));
 }
 
+// An escaped mark (\*), ***bold italic***, **bold**, *italic*, and _italic_ only at word edges, so
+// my_notes_file stays as it is.
+const INLINE_RE = /\\[\\*_]|\*\*\*(?=\S)(?:\\.|[^\\])+?\*\*\*|\*\*(?=\S)(?:\\.|[^\\])+?\*\*|\*(?=[^\s*])(?:\\.|[^*\\])+\*|(?<![\p{L}\p{N}_\\])_(?=[^\s_])(?:\\.|[^_\\])+_(?![\p{L}\p{N}_])/gu;
+
 function inline(s: string, links: boolean): string {
-  // Split on **bold** and *italic* first, then escape and link the plain parts.
+  // Split on the marks first, then escape and link the plain parts.
   const parts: string[] = [];
-  const re = /(\*\*[^*]+\*\*|\*[^*\s][^*]*\*|_[^_\s][^_]*_)/g;
   let last = 0;
-  for (const m of s.matchAll(re)) {
+  for (const m of s.matchAll(INLINE_RE)) {
     parts.push(links ? linkRefs(s.slice(last, m.index)) : esc(s.slice(last, m.index)));
     const t = m[0];
-    const inner = t.startsWith("**") ? t.slice(2, -2) : t.slice(1, -1);
-    const body = links ? linkRefs(inner) : esc(inner);
-    parts.push(t.startsWith("**") ? `<b>${body}</b>` : `<i>${body}</i>`);
+    const n = t.startsWith("***") ? 3 : t.startsWith("**") ? 2 : 1;
+    if (t[0] === "\\") parts.push(esc(t[1]));
+    else {
+      const body = inline(t.slice(n, -n), links);
+      parts.push(n === 3 ? `<b><i>${body}</i></b>` : n === 2 ? `<b>${body}</b>` : `<i>${body}</i>`);
+    }
     last = m.index! + t.length;
   }
   parts.push(links ? linkRefs(s.slice(last)) : esc(s.slice(last)));
@@ -86,7 +95,8 @@ export function mdToHtml(md: string, links = true): string {
 /** The editor's DOM back to Markdown. One paragraph is one line: no hard wrapping. */
 export function htmlToMd(root: HTMLElement): string {
   const inl = (n: Node): string => {
-    if (n.nodeType === Node.TEXT_NODE) return (n.textContent || "").replace(/ /g, " ");
+    // Marks typed as text are escaped, so they read back as text; a _ inside a word needs none.
+    if (n.nodeType === Node.TEXT_NODE) return (n.textContent || "").replace(/ /g, " ").replace(/\\(?=[\\*_])|\*|(?<![\p{L}\p{N}])_|_(?![\p{L}\p{N}])/gu, "\\$&");
     if (n.nodeType !== Node.ELEMENT_NODE) return "";
     const el = n as HTMLElement;
     const kids = Array.from(el.childNodes).map(inl).join("");
@@ -130,8 +140,5 @@ export function htmlToMd(root: HTMLElement): string {
   return blocks.join("\n\n");
 }
 
-/** A verse quoted into a note: the text, then the reference and Bible on the last line. */
-export const verseQuote = (text: string, r: Ref, bible: string) => `> ${text}\n> — ${fmtRef(r)} ${bible}`;
-
 /** Plain text with the Markdown marks taken out, for excerpts. */
-export const mdPlain = (md: string) => md.replace(/^#+\s+/gm, "").replace(/^>\s?/gm, "").replace(/^[-*]\s+/gm, "").replace(/\*\*|__|\*|_/g, "").replace(/\s+/g, " ").trim();
+export const mdPlain = (md: string) => md.replace(/^#+\s+/gm, "").replace(/^>\s?/gm, "").replace(/^[-*]\s+/gm, "").replace(/\\([\\*_])|\*+|(?<![\p{L}\p{N}])_+|_+(?![\p{L}\p{N}])/gu, (_m, e) => e ?? "").replace(/\s+/g, " ").trim();

@@ -1,10 +1,10 @@
 //! Claude Code in print mode, streaming JSON: text arrives as deltas while it is written.
 
-use super::{emit_status, stem, Chunk, Done, Folder, Running, SYSTEM};
+use super::{emit_status, finish, spawn, stem, Chunk, Done, Folder, Running, SYSTEM};
 use std::io::{BufRead, BufReader};
 use std::path::PathBuf;
-use std::process::{Command, Stdio};
-use std::sync::{Arc, Mutex};
+use std::process::Command;
+use std::sync::Arc;
 use tauri::{AppHandle, Emitter};
 
 const TOOLS: &str = "Use Grep to find the relevant passages and Read only those lines; do not read whole files unless the question needs it. Several Read or Grep calls can go in one turn.";
@@ -20,10 +20,7 @@ pub fn ask(app: AppHandle, running: Arc<Running>, cwd: PathBuf, chat_id: String,
     cmd.current_dir(&cwd)
         .arg("-p")
         .arg(&prompt)
-        .args(["--model", &model, "--output-format", "stream-json", "--verbose", "--include-partial-messages", "--strict-mcp-config"])
-        .stdin(Stdio::null())
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped());
+        .args(["--model", &model, "--output-format", "stream-json", "--verbose", "--include-partial-messages", "--strict-mcp-config"]);
     if let Some(extra) = folder.prompt() {
         // Reads inside the working directory (and an --add-dir) need no permission; anything else
         // would ask, and print mode refuses what it would have to ask for. Pin the mode in case the
@@ -38,11 +35,7 @@ pub fn ask(app: AppHandle, running: Arc<Running>, cwd: PathBuf, chat_id: String,
     if let Some(s) = &session {
         cmd.args(["--resume", s]);
     }
-    let mut child = cmd.spawn().map_err(|e| format!("couldn't start claude: {e}"))?;
-    let stdout = child.stdout.take().ok_or("no stdout")?;
-    let stderr = child.stderr.take();
-    let child = Arc::new(Mutex::new(child));
-    running.add(&chat_id, child.clone());
+    let (child, stdout, stderr) = spawn(&mut cmd, &running, &chat_id, "claude")?;
 
     std::thread::spawn(move || {
         let mut text = String::new();
@@ -97,13 +90,11 @@ pub fn ask(app: AppHandle, running: Arc<Running>, cwd: PathBuf, chat_id: String,
                 _ => {}
             }
         }
-        let status = child.lock().ok().and_then(|mut c| c.wait().ok());
-        if error.is_none() && !status.is_some_and(|s| s.success()) && text.is_empty() {
-            let mut msg = String::new();
-            if let Some(mut e) = stderr { let _ = std::io::Read::read_to_string(&mut e, &mut msg); }
+        let ok = finish(child, &running);
+        if error.is_none() && !ok && text.is_empty() {
+            let msg = stderr.join().unwrap_or_default();
             error = Some(if msg.trim().is_empty() { "Claude stopped without answering".into() } else { msg.trim().to_string() });
         }
-        running.remove(&chat_id);
         let _ = app.emit("ask-done", Done { chat_id, session_id, text, error });
     });
     Ok(())

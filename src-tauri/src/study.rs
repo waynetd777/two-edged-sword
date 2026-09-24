@@ -53,70 +53,74 @@ pub fn export(lib: &Library, root: &Path, chat_id: &str, req: &Request) -> Resul
     if id.is_empty() {
         return Err("bad chat id".into());
     }
-    let dir = studies_root(root).join(id);
-    let _ = std::fs::remove_dir_all(&dir);
-    for sub in ["passage", "commentaries", "lexicons"] {
-        std::fs::create_dir_all(dir.join(sub)).map_err(|e| e.to_string())?;
-    }
-    let (from, to) = (req.from.unwrap_or(1), req.to.or(req.from).unwrap_or(999));
-    let mut index = format!("Material from the user's library on {}.\n\ndigest.txt — start here: every commentary's notes on the passage, shortened, in one file.\n\n", req.label);
-
-    index.push_str("passage/ — the passage in each of their Bibles:\n");
-    for b in &req.bibles {
-        let Ok(m) = lib.module(Kind::Bible, b) else { continue };
-        let verses = verses(lib, b, req.book, req.chapter, from, to).unwrap_or_default();
-        if verses.is_empty() {
-            continue;
+    let dest = studies_root(root).join(id);
+    // Built aside and swapped in whole, one export of a chat at a time.
+    let lock = crate::store::dir_lock(&dest);
+    let _held = lock.lock().unwrap_or_else(|e| e.into_inner());
+    crate::store::replace_dir(&dest, |dir| {
+        for sub in ["passage", "commentaries", "lexicons"] {
+            std::fs::create_dir_all(dir.join(sub)).map_err(|e| e.to_string())?;
         }
-        let file = format!("{}.txt", file_name(&format!("{} {}", m.abbrev, m.title)));
-        let body: String = verses.iter().map(|(v, t)| format!("{v} {t}\n")).collect();
-        write(&dir.join("passage").join(&file), &format!("{} — {}\n\n{body}", m.title, req.label))?;
-        index.push_str(&format!("  {file}\n"));
-    }
+        let (from, to) = (req.from.unwrap_or(1), req.to.or(req.from).unwrap_or(999));
+        let mut index = format!("Material from the user's library on {}.\n\ndigest.txt — start here: every commentary's notes on the passage, shortened, in one file.\n\n", req.label);
 
-    index.push_str("\ncommentaries/ — every commentary's notes that touch the passage (with its chapter and book introductions), entries headed == reference ==:\n");
-    let mut digest = format!("What each commentary in the library says on {}, the opening of its notes (about {DIGEST_WORDS} words each). The full notes are in commentaries/.\n\n", req.label);
-    for m in lib.of_kind(Kind::Commentary) {
-        let text = commentary(lib, &m.id, req.book, req.chapter, from, to).unwrap_or_default();
-        if text.trim().is_empty() {
-            continue;
+        index.push_str("passage/ — the passage in each of their Bibles:\n");
+        for b in &req.bibles {
+            let Ok(m) = lib.module(Kind::Bible, b) else { continue };
+            let verses = verses(lib, b, req.book, req.chapter, from, to).unwrap_or_default();
+            if verses.is_empty() {
+                continue;
+            }
+            let file = format!("{}.txt", file_name(&format!("{} {}", m.abbrev, m.title)));
+            let body: String = verses.iter().map(|(v, t)| format!("{v} {t}\n")).collect();
+            write(&dir.join("passage").join(&file), &format!("{} — {}\n\n{body}", m.title, req.label))?;
+            index.push_str(&format!("  {file}\n"));
         }
-        let file = format!("{}.txt", file_name(&m.title));
-        write(&dir.join("commentaries").join(&file), &format!("{}\n\n{text}", m.title))?;
-        let words = text.split_whitespace().count();
-        index.push_str(&format!("  {file}  ({words} words)\n"));
-        let (short, cut) = shorten(&text, DIGEST_WORDS);
-        if !short.is_empty() {
-            let more = if cut { format!("\n[continues: commentaries/{file}, {words} words]") } else { String::new() };
-            digest.push_str(&format!("######## {}\n{short}{more}\n\n", m.title));
-        }
-    }
-    write(&dir.join("digest.txt"), &digest)?;
 
-    let numbers = req.strongs_bible.as_deref().map(|b| strongs(lib, b, req.book, req.chapter, from, to)).unwrap_or_default();
-    if !numbers.is_empty() {
-        index.push_str(&format!("\nlexicons/ — entries for the Strong's numbers in the passage ({}), headed == number ==:\n", numbers.iter().cloned().collect::<Vec<_>>().join(" ")));
-        for m in lib.of_kind(Kind::Lexicon) {
-            let text = lexicon(lib, &m.id, &numbers).unwrap_or_default();
-            if text.is_empty() {
+        index.push_str("\ncommentaries/ — every commentary's notes that touch the passage (with its chapter and book introductions), entries headed == reference ==:\n");
+        let mut digest = format!("What each commentary in the library says on {}, the opening of its notes (about {DIGEST_WORDS} words each). The full notes are in commentaries/.\n\n", req.label);
+        for m in lib.of_kind(Kind::Commentary) {
+            let text = commentary(lib, &m.id, req.book, req.chapter, from, to).unwrap_or_default();
+            if text.trim().is_empty() {
                 continue;
             }
             let file = format!("{}.txt", file_name(&m.title));
-            write(&dir.join("lexicons").join(&file), &format!("{}\n\n{text}", m.title))?;
-            index.push_str(&format!("  {file}\n"));
+            write(&dir.join("commentaries").join(&file), &format!("{}\n\n{text}", m.title))?;
+            let words = text.split_whitespace().count();
+            index.push_str(&format!("  {file}  ({words} words)\n"));
+            let (short, cut) = shorten(&text, DIGEST_WORDS);
+            if !short.is_empty() {
+                let more = if cut { format!("\n[continues: commentaries/{file}, {words} words]") } else { String::new() };
+                digest.push_str(&format!("######## {}\n{short}{more}\n\n", m.title));
+            }
         }
-    }
+        write(&dir.join("digest.txt"), &digest)?;
 
-    let dicts = dictionaries_dir(root);
-    let done: Vec<String> = lib.of_kind(Kind::Dictionary).filter(|m| dict_current(&dicts, m)).map(|m| format!("{}.txt", file_name(&m.title))).collect();
-    if !done.is_empty() {
-        index.push_str(&format!("\nDictionaries, whole, one file each in {}, articles headed == Topic ==:\n", dicts.to_string_lossy()));
-        for f in done {
-            index.push_str(&format!("  {f}\n"));
+        let numbers = req.strongs_bible.as_deref().map(|b| strongs(lib, b, req.book, req.chapter, from, to)).unwrap_or_default();
+        if !numbers.is_empty() {
+            index.push_str(&format!("\nlexicons/ — entries for the Strong's numbers in the passage ({}), headed == number ==:\n", numbers.iter().cloned().collect::<Vec<_>>().join(" ")));
+            for m in lib.of_kind(Kind::Lexicon) {
+                let text = lexicon(lib, &m.id, &numbers).unwrap_or_default();
+                if text.is_empty() {
+                    continue;
+                }
+                let file = format!("{}.txt", file_name(&m.title));
+                write(&dir.join("lexicons").join(&file), &format!("{}\n\n{text}", m.title))?;
+                index.push_str(&format!("  {file}\n"));
+            }
         }
-    }
-    write(&dir.join("index.txt"), &index)?;
-    Ok(dir)
+
+        let dicts = dictionaries_dir(root);
+        let done: Vec<String> = lib.of_kind(Kind::Dictionary).filter(|m| dict_current(&dicts, m)).map(|m| format!("{}.txt", file_name(&m.title))).collect();
+        if !done.is_empty() {
+            index.push_str(&format!("\nDictionaries, whole, one file each in {}, articles headed == Topic ==:\n", dicts.to_string_lossy()));
+            for f in done {
+                index.push_str(&format!("  {f}\n"));
+            }
+        }
+        write(&dir.join("index.txt"), &index)
+    })?;
+    Ok(dest)
 }
 
 /// Words of each commentary in digest.txt: enough for its reading of the verse, and the

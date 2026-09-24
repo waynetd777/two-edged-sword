@@ -3,7 +3,7 @@ import { api } from "./api";
 import { book, BOOKS, fmtRef, parseRef, SECTIONS, SHORT } from "./bible";
 import { Icon, Play } from "./icons";
 import {
-  addDays, balanced, behind, chaptersOf, dateOf, dayLabel, firstUndone, fmtDay, fmtLong, indexOn, markDayRead, markPpoRead, paired, readOn, streak, unmarkDayRead, parseYmd, partRef, perDay, Plan, PpoPlan, dayTitle, ONLINE_DEVOTIONALS, doneToday, progressKey, ppoPreview, ppoUpcoming, SequencePlan, Sizes, today, todayFor, ymd,
+  addDays, balanced, behind, chaptersOf, dateOf, dayLabel, dueBefore, firstUndone, fmtDay, fmtLong, indexOn, markDayRead, markPpoRead, paired, readOn, streak, unmarkDayRead, parseYmd, partRef, perDay, Plan, PpoPlan, dayTitle, ONLINE_DEVOTIONALS, doneToday, progressKey, ppoPreview, ppoUpcoming, SequencePlan, Sizes, today, todayFor, ymd,
 } from "./plans";
 import { Topbar } from "./Shell";
 import { uid, useApp } from "./state";
@@ -38,7 +38,7 @@ export function PlansScreen() {
     const w = app.settings.whenBehind;
     if (w === "ask") return;
     if (w === "move") update({ ...plan, shift: plan.shift + late });
-    if (w === "skip") update({ ...plan, skipped: [...plan.skipped, ...plan.days.map((_, i) => i).filter((i) => i < indexOn(plan, today()) && !plan.done.includes(i) && !plan.skipped.includes(i))] });
+    if (w === "skip") update({ ...plan, skipped: [...plan.skipped, ...plan.days.map((_, i) => i).filter((i) => i < dueBefore(plan, today()) && !plan.done.includes(i) && !plan.skipped.includes(i))] });
   }, [plan?.id, late]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const markRead = () => {
@@ -396,7 +396,7 @@ function BehindDialog({ plan, onClose, onApply }: { plan: SequencePlan; onClose:
   const late = behind(plan);
   const [choice, setChoice] = useState<"move" | "catchup" | "skip">("move");
   const [always, setAlways] = useState(false);
-  const due = indexOn(plan, today());
+  const due = dueBefore(plan, today());
   const missed = plan.days.map((_, i) => i).filter((i) => i < due && !plan.done.includes(i) && !plan.skipped.includes(i));
   const oldEnd = dateOf(plan, plan.days.length - 1);
   const newEnd = dateOf({ ...plan, shift: plan.shift + late }, plan.days.length - 1);

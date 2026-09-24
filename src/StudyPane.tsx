@@ -35,14 +35,18 @@ export function useRefPreview(bible: string, side: "below" | "right" = "below") 
   // `r` for a passage; `head`/`sub` for a book's chapter (the book's title, the chapter's).
   const [prev, setPrev] = useState<{ r?: Ref; head?: string; sub?: string; rect: DOMRect; text: string } | null>(null);
   const timer = useRef<number | undefined>(undefined);
+  // Bumped by every hover change and hide, so a fetch still in flight when the mouse left is dropped.
+  const gen = useRef(0);
   const onRefHover = (r: Ref | null, el: HTMLElement | null, from = bible) => {
     window.clearTimeout(timer.current);
+    const g = ++gen.current;
     if (!r || !el) { timer.current = window.setTimeout(() => setPrev(null), 150); return; }
     const rect = el.getBoundingClientRect();
     timer.current = window.setTimeout(async () => {
       const to = r.toChapter ? 200 : r.to ?? r.verse ?? 200;
       try {
         const [p] = await api.passages(from, [{ book: r.book, chapter: r.chapter, from: r.verse ?? 1, to: r.verse ? to : 6 }]);
+        if (g !== gen.current) return;
         setPrev({ r, rect, text: p.verses.map((v) => (p.verses.length > 1 ? `${v.v} ` : "") + plainText(v.text)).join(" ") });
       } catch { /* not in this Bible */ }
     }, 350);
@@ -50,11 +54,13 @@ export function useRefPreview(bible: string, side: "below" | "right" = "below") 
   /** The same preview for a reference book's or devotional's chapter: its opening sentences. */
   const onDocHover = (d: { module: string; title: string; kind?: string; book?: string; para?: number } | null, el: HTMLElement | null) => {
     window.clearTimeout(timer.current);
+    const g = ++gen.current;
     if (!d || !el) { timer.current = window.setTimeout(() => setPrev(null), 150); return; }
     const rect = el.getBoundingClientRect();
     timer.current = window.setTimeout(async () => {
       try {
         const html = d.kind === "devotional" ? await api.devotion(d.module, d.title) : (await api.article("reference", d.module, d.title))?.html;
+        if (g !== gen.current) return;
         // A bookmarked paragraph shows that paragraph; a chapter, its opening.
         const all = d.para ? plainText(docSegments(html ?? "")[d.para - 1] ?? "") : plainText(html ?? "");
         // The first few sentences, up to about 300 characters.
@@ -76,7 +82,7 @@ export function useRefPreview(bible: string, side: "below" | "right" = "below") 
       <div style={{ font: "400 15px/1.55 var(--serif)", maxHeight: 220, overflow: "hidden" }}>{prev.text}</div>
     </div>
   );
-  return { onRefHover, onDocHover, preview: node, hide: () => { window.clearTimeout(timer.current); setPrev(null); } };
+  return { onRefHover, onDocHover, preview: node, hide: () => { window.clearTimeout(timer.current); gen.current++; setPrev(null); } };
 }
 
 // A dictionary's entry names, lower-cased to the real name; loaded once per module for "See X" links.
@@ -193,12 +199,18 @@ function CommentaryTab(p: Props & { vref: Ref }) {
   useEffect(() => { trail.reset([reading]); }, [p.book, p.chapter, p.verse]); // eslint-disable-line react-hooks/exhaustive-deps
   const at = trail.cur ?? reading;
   const away = at.book !== p.book || at.chapter !== p.chapter || at.verse !== p.verse;
-  useEffect(() => { api.coverage(at.book, at.chapter, at.verse).then(setCov); }, [at.book, at.chapter, at.verse]);
+  useEffect(() => {
+    let dead = false;
+    api.coverage(at.book, at.chapter, at.verse).then((c) => { if (!dead) setCov(c); }).catch(() => { if (!dead) setCov([]); });
+    return () => { dead = true; };
+  }, [at.book, at.chapter, at.verse]);
   const list = useMemo(() => orderModules(cov.filter((c) => c.id !== app.tsk && c.range), app.settings.commentaryOrder), [cov, app.tsk, app.settings.commentaryOrder]);
   const current = (p.commentary && list.find((c) => c.id === p.commentary)) || list[0];
   useEffect(() => {
     if (!current) { setData(null); return; }
-    api.commentary(current.id, at.book, at.chapter, at.verse).then(setData);
+    let dead = false;
+    api.commentary(current.id, at.book, at.chapter, at.verse).then((d) => { if (!dead) setData(d); }).catch(() => { if (!dead) setData(null); });
+    return () => { dead = true; };
   }, [current?.id, at.book, at.chapter, at.verse]);
   const note = (r: Ref) => { hide(); setIntro("verse"); trail.visit({ book: r.book, chapter: r.chapter, verse: r.verse ?? 1 }); };
   const goTrail = (d: number) => { hide(); setIntro("verse"); trail.go(d); };
@@ -249,7 +261,9 @@ function CrossRefs({ vref, onOpen, onRefHover }: { vref: Ref; onOpen: (r: Ref) =
   const [open, setOpen] = useState(true);
   useEffect(() => {
     if (!app.tsk) return;
-    api.commentary(app.tsk, vref.book, vref.chapter, vref.verse!).then((c) => setHtml(c.verse.map((e) => e.html).join("") || null));
+    let dead = false;
+    api.commentary(app.tsk, vref.book, vref.chapter, vref.verse!).then((c) => { if (!dead) setHtml(c.verse.map((e) => e.html).join("") || null); }).catch(() => { if (!dead) setHtml(null); });
+    return () => { dead = true; };
   }, [app.tsk, vref.book, vref.chapter, vref.verse]);
   if (!app.tsk || !html) return null;
   const count = (html.match(/<ref>/g) || []).length;

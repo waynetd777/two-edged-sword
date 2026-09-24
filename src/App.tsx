@@ -16,10 +16,12 @@ import { PlayerProvider, usePlayer } from "./speech";
 import { runScene } from "./scene";
 import { AppProvider, useApp } from "./state";
 import { hideSplash } from "./splash";
+import { useTray } from "./tray";
 import { Tooltips, WordHoverBox } from "./ui";
 
 function Screens() {
   const app = useApp();
+  useTray();
   const [focus, setFocus] = useState(false);
   const [palette, setPalette] = useState(false);
 

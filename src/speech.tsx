@@ -148,7 +148,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
         setState((p) => ({ ...p, doc, verse: 1, count: segs.length, char: -1 }));
         // Turn the page too, if the book is open.
         if (appRef.current.doc?.module === module && appRef.current.doc.title === title) appRef.current.openDoc(module, next, kind);
-        window.setTimeout(() => speakFrom(0), 600);
+        window.setTimeout(() => { if (g === gen.current) speakFrom(0); }, 600);
       }).catch(() => { if (g === gen.current) stop(); });
       return;
     }
@@ -161,8 +161,8 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
           announce.current = spokenChapter(nx[0], nx[1]);
           setState((p) => ({ ...p, book: nx[0], chapter: nx[1], verse: v[0]?.v ?? 1, count: v.length, char: -1 }));
           st.current = { ...st.current, book: nx[0], chapter: nx[1] };
-          window.setTimeout(() => speakFrom(0), 600);
-        });
+          window.setTimeout(() => { if (g === gen.current) speakFrom(0); }, 600);
+        }).catch((e) => { console.error(e); if (g === gen.current) stop(); });
       } else stop();
       return;
     }
@@ -178,7 +178,10 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   }, [stop, voiceFor]);
 
   const play = useCallback((bible: string, b: number, c: number, fromVerse?: number, o: PlayOpts = {}) => {
+    // A Stop, or another Play, while the chapter loads wins over this one.
+    const g = ++gen.current;
     api.chapter(bible, b, c).then((v) => {
+      if (g !== gen.current) return;
       opts.current = o;
       verses.current = v;
       announce.current = spokenChapter(b, c, fromVerse);
@@ -187,8 +190,8 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       st.current = next;
       setState(next);
       speakFrom(i);
-    });
-  }, [speakFrom]);
+    }).catch((e) => { console.error(e); if (g === gen.current) stop(); });
+  }, [speakFrom, stop]);
 
   const playDoc = useCallback((module: string, title: string, paragraphs: string[], from = 0, kind: "reference" | "devotional" = "reference", o: PlayOpts = {}) => {
     opts.current = o;
@@ -256,8 +259,6 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
   return <Ctx.Provider value={{ state, voices, play, playDoc, toggle, stop, skip, sleep, say, still }}>{children}</Ctx.Provider>;
 }
-
-export const chapterName = (b: number, c: number) => `${book(b).name} ${c}`;
 
 /** A speaker button that pronounces an original-language word. A span, not a button, so it can sit
  *  inside a row that is itself a button; it stops the click reaching the row. */

@@ -286,8 +286,6 @@ export function tokenize(html: string): Token[] {
   return out;
 }
 
-export const tokensText = (tokens: Token[]) => tokens.map((t) => t.text).join("");
-
 /**
  * Strong's numbers for a verse in a Bible that has none, borrowed from its Strong's edition
  * (KJV from KJV+): the words line up one for one when the text is the same.

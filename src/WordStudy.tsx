@@ -84,7 +84,8 @@ export function WordStudyScreen() {
     let dead = false;
     if (!app.lexicon) return;
     api.article("lexicon", app.lexicon, num).then(async (a) => {
-      if (dead || !a) { setE(null); return; }
+      if (dead) return;
+      if (!a) { setE(null); return; }
       const parts = lexiconParts(a.html);
       setE({ num, html: a.html, ...parts });
       // Related: the numbers the entry itself points to, plus words derived from this one are not indexed, so only those.
@@ -98,7 +99,9 @@ export function WordStudyScreen() {
   }, [num, app.lexicon, app.concordance, sb]);
   useEffect(() => {
     if (!sb) return;
-    api.strongsVerses(sb, num, onlyBook, 300).then(setVerses);
+    let dead = false;
+    api.strongsVerses(sb, num, onlyBook, 300).then((v) => { if (!dead) setVerses(v); });
+    return () => { dead = true; };
   }, [num, onlyBook, sb]);
   // Dictionary articles for the English words the KJV uses for it.
   useEffect(() => {

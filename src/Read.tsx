@@ -90,13 +90,13 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
 
   useEffect(() => {
     let dead = false;
-    setErr(null);
+    setErr(null); setStrongVerses(new Map()); // the old chapter's numbers must not align against the new text
     api.chapter(bible, loc.book, loc.chapter).then((v) => { if (!dead) setVerses(v); }).catch((e) => !dead && setErr(String(e)));
     // A Bible without Strong's numbers borrows them from its Strong's edition when the text is the same (KJV from KJV+).
     const sb = app.strongsBible;
     if (sb && bmod && !bmod.strongs && /^kjv/i.test(bmod.abbrev)) {
       api.chapter(sb, loc.book, loc.chapter).then((v) => !dead && setStrongVerses(new Map(v.map((x) => [x.v, x.text])))).catch(() => {});
-    } else setStrongVerses(new Map());
+    }
     return () => { dead = true; };
   }, [bible, loc.book, loc.chapter, app.strongsBible, bmod]);
 

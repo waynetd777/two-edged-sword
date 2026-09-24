@@ -8,8 +8,8 @@ mod codex;
 
 use serde::Serialize;
 use std::path::PathBuf;
-use std::process::{Child, Command};
-use std::sync::{Arc, Mutex};
+use std::process::{Child, ChildStdout, Command, Stdio};
+use std::sync::Mutex;
 
 const SYSTEM: &str = "You are a careful Bible study assistant inside a personal study app. \
 The user's message includes the passage they are reading and, sometimes, excerpts from classic commentaries in their library. \
@@ -96,18 +96,53 @@ struct Done {
     error: Option<String>,
 }
 
+/// The CLIs answering now, by chat id and process id. Each leads its own process group, so a
+/// signal to the group also ends whatever it started (node, rg, a shell).
 #[derive(Default)]
 pub struct Running {
-    pub children: Mutex<Vec<(String, Arc<Mutex<Child>>)>>,
+    children: Mutex<Vec<(String, u32)>>,
 }
 
 impl Running {
-    fn add(&self, chat_id: &str, child: Arc<Mutex<Child>>) {
-        if let Ok(mut ch) = self.children.lock() { ch.push((chat_id.to_string(), child)); }
+    fn remove(&self, pid: u32) {
+        if let Ok(mut ch) = self.children.lock() { ch.retain(|(_, p)| *p != pid); }
     }
-    fn remove(&self, chat_id: &str) {
-        if let Ok(mut ch) = self.children.lock() { ch.retain(|(id, _)| id != chat_id); }
+    /// On quit: nothing is left running once the app has gone.
+    pub fn kill_all(&self) {
+        if let Ok(ch) = self.children.lock() {
+            for (_, pid) in ch.iter() { kill_group(*pid); }
+        }
     }
+}
+
+fn kill_group(pid: u32) {
+    // SAFETY: kill(2) takes no pointers; a negative pid addresses the process group.
+    unsafe { libc::kill(-(pid as libc::pid_t), libc::SIGTERM); }
+}
+
+/// Starts the CLI in its own process group and registers it. Its stderr is read on a thread
+/// from the start (a full pipe would stall it); join that for the text when it fails.
+fn spawn(cmd: &mut Command, running: &Running, chat_id: &str, name: &str) -> Result<(Child, ChildStdout, std::thread::JoinHandle<String>), String> {
+    use std::os::unix::process::CommandExt;
+    cmd.stdin(Stdio::null()).stdout(Stdio::piped()).stderr(Stdio::piped()).process_group(0);
+    let mut child = cmd.spawn().map_err(|e| format!("couldn't start {name}: {e}"))?;
+    let stdout = child.stdout.take().ok_or("no stdout")?;
+    let stderr = child.stderr.take();
+    let err = std::thread::spawn(move || {
+        let mut s = String::new();
+        if let Some(mut e) = stderr { let _ = std::io::Read::read_to_string(&mut e, &mut s); }
+        s
+    });
+    if let Ok(mut ch) = running.children.lock() { ch.push((chat_id.to_string(), child.id())); }
+    Ok((child, stdout, err))
+}
+
+/// Waits for the CLI to exit (no lock held, so Stop is never kept waiting) and unregisters it;
+/// true if it succeeded.
+fn finish(mut child: Child, running: &Running) -> bool {
+    let ok = child.wait().is_ok_and(|s| s.success());
+    running.remove(child.id());
+    ok
 }
 
 #[derive(Serialize)]
@@ -169,7 +204,7 @@ fn is_codex(model: &str) -> bool {
 /// Outside a folder chat each CLI gets its own working folder under `data` (Claude Code files
 /// its sessions by working directory, so Claude's stays "claude").
 #[allow(clippy::too_many_arguments)]
-pub fn ask(app: tauri::AppHandle, running: Arc<Running>, data: &std::path::Path, folder: Folder, chat_id: String, prompt: String, model: String, session: Option<String>) -> Result<(), String> {
+pub fn ask(app: tauri::AppHandle, running: std::sync::Arc<Running>, data: &std::path::Path, folder: Folder, chat_id: String, prompt: String, model: String, session: Option<String>) -> Result<(), String> {
     let codex = is_codex(&model);
     let cwd = folder.dir().cloned().unwrap_or_else(|| data.join(if codex { "codex" } else { "claude" }));
     std::fs::create_dir_all(&cwd).map_err(|e| e.to_string())?;
@@ -182,10 +217,6 @@ pub fn ask(app: tauri::AppHandle, running: Arc<Running>, data: &std::path::Path,
 
 pub fn cancel(running: &Running, chat_id: &str) {
     if let Ok(ch) = running.children.lock() {
-        for (id, c) in ch.iter() {
-            if id == chat_id {
-                if let Ok(mut c) = c.lock() { let _ = c.kill(); }
-            }
-        }
+        for (_, pid) in ch.iter().filter(|(id, _)| id == chat_id) { kill_group(*pid); }
     }
 }

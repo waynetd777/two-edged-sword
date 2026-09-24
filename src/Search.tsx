@@ -68,15 +68,18 @@ export function SearchScreen() {
     return () => window.clearInterval(t);
   }, []);
 
+  const runId = useRef(0);
   const run = async (text = q) => {
     if (!text.trim()) return;
+    const id = ++runId.current; // only the latest search may show its results
     setBusy(true); setErr(null); setSearching(text.trim());
     try {
       const r = await api.search({ text, mode, wholeWords: whole, bible, bookFrom: range.from, bookTo: range.to, strongsBible: app.strongsBible });
+      if (id !== runId.current) return;
       setRes(r); setRan(text); setCmod(r.commentaries[0]?.module ?? null);
       const first = r.bible.hits[0];
       setPick(first ? { kind: "verse", ref: { book: first.book, chapter: first.chapter, verse: first.verse } } : null);
-    } catch (e) { setErr(String(e)); setRes(null); }
+    } catch (e) { if (id !== runId.current) return; setErr(String(e)); setRes(null); }
     setBusy(false);
   };
   const first = useRef(true);
@@ -231,9 +234,11 @@ function Preview({ pick, bible, terms }: { pick: Pick | null; bible: string; ter
   useEffect(() => {
     setVerses([]); setComm(null); setArt(null);
     if (!pick) return;
-    if (pick.kind === "verse") api.passages(bible, [{ book: pick.ref.book, chapter: pick.ref.chapter, from: Math.max(1, pick.ref.verse! - 3), to: pick.ref.verse! + 3 }]).then(([p]) => setVerses(p.verses));
-    if (pick.kind === "comment") api.commentary(pick.module, pick.ref.book, pick.ref.chapter, pick.ref.verse!).then(setComm);
-    if (pick.kind === "dict") api.article("dictionary", pick.module, pick.topic).then(setArt);
+    let dead = false;
+    if (pick.kind === "verse") api.passages(bible, [{ book: pick.ref.book, chapter: pick.ref.chapter, from: Math.max(1, pick.ref.verse! - 3), to: pick.ref.verse! + 3 }]).then(([p]) => { if (!dead) setVerses(p.verses); }).catch(() => {});
+    if (pick.kind === "comment") api.commentary(pick.module, pick.ref.book, pick.ref.chapter, pick.ref.verse!).then((c) => { if (!dead) setComm(c); }).catch(() => {});
+    if (pick.kind === "dict") api.article("dictionary", pick.module, pick.topic).then((a) => { if (!dead) setArt(a); }).catch(() => {});
+    return () => { dead = true; };
   }, [pick, bible]);
   if (!pick) return <div className="empty" style={{ flexGrow: 1 }}>Choose a result to see it here.</div>;
   const openRef = (r: Ref) => { hide(); app.open({ book: r.book, chapter: r.chapter, verse: r.verse, to: r.to }, "read"); };

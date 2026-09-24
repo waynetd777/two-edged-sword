@@ -113,18 +113,6 @@ export function fmtRef(r: Ref, style: "long" | "short" | "esword" = "long"): str
   return s;
 }
 
-/** Canonical key for storage: "43.3.16" or "43.3.16-18". */
-export const refKey = (r: Ref) => `${r.book}.${r.chapter}${r.verse ? "." + r.verse : ""}${r.to && r.to !== r.verse ? "-" + r.to : ""}`;
-
-export function fromKey(k: string): Ref | undefined {
-  const m = k.match(/^(\d+)\.(\d+)(?:\.(\d+)(?:-(\d+))?)?$/);
-  if (!m) return undefined;
-  const r: Ref = { book: +m[1], chapter: +m[2] };
-  if (m[3]) r.verse = +m[3];
-  if (m[4]) r.to = +m[4];
-  return r;
-}
-
 export const nextChapter = (b: number, c: number): [number, number] | undefined =>
   c < book(b).chapters ? [b, c + 1] : b < 66 ? [b + 1, 1] : undefined;
 export const prevChapter = (b: number, c: number): [number, number] | undefined =>
@@ -143,6 +131,3 @@ export const SECTIONS: { name: string; from: number; to: number }[] = [
   { name: "Revelation", from: 66, to: 66 },
 ];
 export const sectionOf = (b: number) => SECTIONS.find((s) => b >= s.from && b <= s.to)?.name ?? "";
-
-/** Verse counts per chapter are not known here; the chapter reply carries them. */
-export const totalChapters = BOOKS.reduce((n, b) => n + b.chapters, 0);

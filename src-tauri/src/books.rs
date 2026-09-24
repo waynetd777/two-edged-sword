@@ -25,12 +25,11 @@ pub fn export(lib: &Library, root: &Path, module: &str, kind: Kind) -> Result<Ex
     let titles = if devotional { content::devotion_titles(lib, module)? } else { content::reference_titles(lib, module)? };
     let files: Vec<String> = titles.iter().enumerate().map(|(i, t)| format!("{:02} {}.txt", i + 1, sanitize(t, 60))).collect();
     let chapter = if devotional { "Days" } else { "Chapters" };
-    let marker = dir.join(".complete");
-    if std::fs::read_to_string(&marker).ok().as_deref() == Some(VERSION) {
+    let lock = crate::store::dir_lock(&dir);
+    let _held = lock.lock().unwrap_or_else(|e| e.into_inner());
+    if std::fs::read_to_string(dir.join(".complete")).ok().as_deref() == Some(VERSION) {
         return Ok(Export { dir: dir.to_string_lossy().into(), files });
     }
-    let _ = std::fs::remove_dir_all(&dir);
-    std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
     let book: Vec<(String, String)> = if devotional {
         titles.iter().map(|t| Ok((t.clone(), content::devotion(lib, module, t)?.unwrap_or_default()))).collect::<Result<_, String>>()?
     } else {
@@ -40,18 +39,21 @@ pub fn export(lib: &Library, root: &Path, module: &str, kind: Kind) -> Result<Ex
             rows.collect::<rusqlite::Result<Vec<_>>>()
         })?
     };
-    let mut index = format!("{chapter} of this book, one file each. Charts are PNG files named in the text as [Chart: …].\n\n");
-    for (i, (title, html)) in book.iter().enumerate() {
-        let (text, images) = to_text(html, i + 1);
-        for (name, bytes) in images {
-            std::fs::write(dir.join(name), bytes).map_err(|e| e.to_string())?;
+    // Written aside and swapped in whole, .complete last, so it only ever marks a whole export.
+    crate::store::replace_dir(&dir, |tmp| {
+        let mut index = format!("{chapter} of this book, one file each. Charts are PNG files named in the text as [Chart: …].\n\n");
+        for (i, (title, html)) in book.iter().enumerate() {
+            let (text, images) = to_text(html, i + 1);
+            for (name, bytes) in images {
+                std::fs::write(tmp.join(name), bytes).map_err(|e| e.to_string())?;
+            }
+            let file = &files[i];
+            std::fs::write(tmp.join(file), format!("{title}\n\n{text}\n")).map_err(|e| e.to_string())?;
+            index.push_str(&format!("{file}  ({} words)\n", text.split_whitespace().count()));
         }
-        let file = &files[i];
-        std::fs::write(dir.join(file), format!("{title}\n\n{text}\n")).map_err(|e| e.to_string())?;
-        index.push_str(&format!("{file}  ({} words)\n", text.split_whitespace().count()));
-    }
-    std::fs::write(dir.join("index.txt"), index).map_err(|e| e.to_string())?;
-    std::fs::write(&marker, VERSION).map_err(|e| e.to_string())?;
+        std::fs::write(tmp.join("index.txt"), index).map_err(|e| e.to_string())?;
+        std::fs::write(tmp.join(".complete"), VERSION).map_err(|e| e.to_string())
+    })?;
     Ok(Export { dir: dir.to_string_lossy().into(), files })
 }
 

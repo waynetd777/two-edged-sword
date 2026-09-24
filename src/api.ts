@@ -49,6 +49,9 @@ export interface SearchResults { bible: ModuleMatches<VerseHit>; commentaries: M
 
 export interface JournalEntry { id: string; title: string; created: string; updated: string; verses: string[]; tags: string[]; body: string }
 
+/** today: today's reading ("Psalm 23 · John 3"), null without an active plan. */
+export interface TrayState { today: string | null; done: boolean; reading: string; reminder: boolean; reminderTime: string }
+
 export const api = {
   library: () => invoke<LibraryInfo>("library_info"),
   rescan: () => invoke<LibraryInfo>("rescan_library"),
@@ -96,4 +99,6 @@ export const api = {
   ttsVoices: () => invoke<Voice[]>("tts_voices"),
   ttsSpeak: (id: number, text: string, voice: string | undefined, rate: number) => invoke<void>("tts_speak", { id, text, voice: voice ?? null, rate }),
   ttsStop: () => invoke<void>("tts_stop"),
+  /** What the menu-bar menu shows and when the daily reminder fires; the menu's clicks come back as "tray" events. */
+  setTray: (state: TrayState) => invoke<void>("set_tray", { state }),
 };

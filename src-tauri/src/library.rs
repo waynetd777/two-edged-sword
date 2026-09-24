@@ -51,7 +51,9 @@ pub struct ModuleInfo {
 pub struct Library {
     pub dir: PathBuf,
     pub modules: Vec<ModuleInfo>,
-    conns: Mutex<HashMap<String, Connection>>,
+    /// Idle connections per module. A query takes one out (or opens another) and puts it back,
+    /// so a long export or index build on one module never holds up reading another, or the same one.
+    conns: Mutex<HashMap<String, Vec<Connection>>>,
 }
 
 /// Where e-Sword X keeps its modules.
@@ -108,16 +110,18 @@ impl Library {
         self.modules.iter().filter(move |m| m.kind == kind)
     }
 
-    /// Runs `f` on the module's (cached) connection.
+    /// Runs `f` on one of the module's cached connections, without holding any lock meanwhile.
     pub fn with<T>(&self, kind: Kind, id: &str, f: impl FnOnce(&Connection) -> rusqlite::Result<T>) -> Result<T, String> {
         let m = self.module(kind, id)?;
         let key = format!("{kind:?}/{id}");
-        let mut conns = self.conns.lock().map_err(|e| e.to_string())?;
-        if !conns.contains_key(&key) {
-            let c = open_readonly(&m.path).map_err(|e| e.to_string())?;
-            conns.insert(key.clone(), c);
+        let idle = self.conns.lock().map_err(|e| e.to_string())?.get_mut(&key).and_then(Vec::pop);
+        let c = match idle { Some(c) => c, None => open_readonly(&m.path).map_err(|e| e.to_string())? };
+        let r = f(&c).map_err(|e| e.to_string());
+        if let Ok(mut conns) = self.conns.lock() {
+            let pool = conns.entry(key).or_default();
+            if pool.len() < 4 { pool.push(c); }
         }
-        f(conns.get(&key).expect("inserted above")).map_err(|e| e.to_string())
+        r
     }
 }
 

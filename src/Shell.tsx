@@ -1,5 +1,5 @@
 import { ReactNode, useState } from "react";
-import { BOOKS, book, fmtRef } from "./bible";
+import { fmtRef } from "./bible";
 import { Icon, Wordmark } from "./icons";
 import { Screen, useApp } from "./state";
 import { todayReading } from "./plans";
@@ -82,8 +82,8 @@ export function Sidebar() {
               <Icon name="library" size={13} style={{ color: "var(--muted)", flexShrink: 0 }} /><span className="t">{r.doc.title}</span><span className="r">{ago(r.at)}</span>{remove("Remove from Recent", () => app.removeRecent(r))}
             </button>
           ) : (
-            <button key={`${r.book}.${r.chapter}`} type="button" className="bm" onMouseEnter={(e) => onRefHover({ book: r.book, chapter: r.chapter }, e.currentTarget)} onMouseLeave={leave} onClick={() => { hide(); app.open({ book: r.book, chapter: r.chapter }, "read"); }}>
-              <Icon name="bible" size={13} style={{ color: "var(--muted)", flexShrink: 0 }} /><span className="t">{book(r.book).name} {r.chapter}</span><span className="r">{ago(r.at)}</span>{remove("Remove from Recent", () => app.removeRecent(r))}
+            <button key={`${r.book}.${r.chapter}`} type="button" className="bm" onMouseEnter={(e) => onRefHover({ book: r.book, chapter: r.chapter, verse: r.verse, to: r.to }, e.currentTarget)} onMouseLeave={leave} onClick={() => { hide(); app.open({ book: r.book, chapter: r.chapter, verse: r.verse, to: r.to }, "read"); }}>
+              <Icon name="bible" size={13} style={{ color: "var(--muted)", flexShrink: 0 }} /><span className="t">{fmtRef(r)}</span><span className="r">{ago(r.at)}</span>{remove("Remove from Recent", () => app.removeRecent(r))}
             </button>
           ))}
           {more(app.recent.length, allRecent, () => setAllRecent(!allRecent))}
@@ -152,5 +152,3 @@ export function SearchField({ onOpen }: { onOpen: () => void }) {
     </button>
   );
 }
-
-export const allBooks = BOOKS;

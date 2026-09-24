@@ -133,7 +133,9 @@ export function StrongsHover() {
   const [show, setShow] = useState<{ num: string; rect: DOMRect; lex: Lex | null } | null>(null);
   const timer = useRef<number | undefined>(undefined);
   const cache = useRef(new Map<string, Promise<Lex | null>>());
+  const gen = useRef(0); // bumped on every hover change, so a lookup that lands after the mouse left is dropped
   useEffect(() => {
+    cache.current.clear(); // entries from the previous lexicon or concordance
     const load = (num: string) => {
       let p = cache.current.get(num);
       if (!p) {
@@ -145,6 +147,7 @@ export function StrongsHover() {
           return { num, ...lexiconParts(a.html), renderings: c ? concordanceRenderings(c.html) : [] };
         })().catch(() => null);
         cache.current.set(num, p);
+        p.then((l) => { if (!l && cache.current.get(num) === p) cache.current.delete(num); }); // a miss may be a failure: retry next time
       }
       return p;
     };
@@ -156,9 +159,11 @@ export function StrongsHover() {
       if (!/^[GH]\d+[a-z]?$/i.test(num)) return;
       window.clearTimeout(timer.current);
       const rect = el.getBoundingClientRect();
+      const g = ++gen.current;
       timer.current = window.setTimeout(async () => {
         const n = num[0].toUpperCase() + num.slice(1);
         const lex = await load(n);
+        if (g !== gen.current) return;
         setShow({ num: n, rect, lex });
       }, 300);
     };
@@ -166,9 +171,10 @@ export function StrongsHover() {
       const el = (e.target as HTMLElement).closest?.(".strongs");
       if (!el || el.contains(e.relatedTarget as Node)) return;
       window.clearTimeout(timer.current);
+      gen.current++;
       timer.current = window.setTimeout(() => setShow(null), 120);
     };
-    const hide = () => { window.clearTimeout(timer.current); setShow(null); };
+    const hide = () => { window.clearTimeout(timer.current); gen.current++; setShow(null); };
     document.addEventListener("mouseover", over);
     document.addEventListener("mouseout", out);
     document.addEventListener("scroll", hide, true);

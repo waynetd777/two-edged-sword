@@ -7,13 +7,13 @@ mod library;
 mod search;
 mod store;
 mod study;
+mod tray;
 mod tts;
 
 use library::{Kind, Library, ModuleInfo};
 use serde::Serialize;
 use std::path::PathBuf;
 use std::sync::Arc;
-use tauri::menu::{Menu, MenuItem, PredefinedMenuItem};
 use tauri::tray::TrayIconBuilder;
 use tauri::{AppHandle, Manager, State};
 use tauri_plugin_window_state::{AppHandleExt, StateFlags};
@@ -114,12 +114,12 @@ fn reference_titles(st: State<AppState>, module: String) -> Result<Vec<String>, 
     content::reference_titles(&st.lib(), &module)
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 fn strongs_by_book(st: State<AppState>, bible: String, number: String) -> Result<Vec<(i64, i64)>, String> {
     content::strongs_by_book(&st.lib(), &bible, &number)
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 fn strongs_for_word(st: State<AppState>, bible: String, word: String) -> Result<Vec<content::WordNumber>, String> {
     content::strongs_for_word(&st.lib(), &bible, &word)
 }
@@ -129,7 +129,7 @@ fn translit_search(st: State<AppState>, lexicon: String, query: String, limit: u
     content::translit_search(&st.lib(), &lexicon, &query, limit)
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 fn strongs_verses(st: State<AppState>, bible: String, number: String, book: Option<i64>, limit: usize) -> Result<Vec<content::VerseHit>, String> {
     content::strongs_verses(&st.lib(), &bible, &number, book, limit)
 }
@@ -165,24 +165,38 @@ fn journal_default_dir() -> String {
     dir.to_string_lossy().to_string()
 }
 
-#[tauri::command]
+/// A folder the user chose: an absolute path with no `..` in it.
+fn chosen_dir(dir: &str) -> Result<PathBuf, String> {
+    let p = PathBuf::from(dir);
+    if !p.is_absolute() || p.components().any(|c| c == std::path::Component::ParentDir) { return Err(format!("not a usable folder: {dir}")); }
+    Ok(p)
+}
+
+// The journal and file commands run off the main thread: the vault is on OneDrive, where
+// reading a file that is only in the cloud first downloads it.
+#[tauri::command(async)]
 fn journal_list(dir: String) -> Result<Vec<journal::Entry>, String> {
-    journal::list(&PathBuf::from(dir))
+    journal::list(&chosen_dir(&dir)?)
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 fn journal_save(dir: String, entry: journal::Entry) -> Result<(), String> {
-    journal::save(&PathBuf::from(dir), &entry)
+    journal::save(&chosen_dir(&dir)?, &entry)
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 fn journal_delete(dir: String, id: String) -> Result<(), String> {
-    journal::delete(&PathBuf::from(dir), &id)
+    journal::delete(&chosen_dir(&dir)?, &id)
 }
 
-#[tauri::command]
+#[tauri::command(async)]
+/// An export the user saved from a dialog: only a document of a known kind, never a dotfile.
 fn write_text_file(path: String, text: String) -> Result<(), String> {
-    store::write_text_atomic(&PathBuf::from(path), &text)
+    let p = chosen_dir(&path)?;
+    let name = p.file_name().and_then(|n| n.to_str()).unwrap_or("");
+    let ext = p.extension().and_then(|e| e.to_str()).unwrap_or("").to_ascii_lowercase();
+    if name.starts_with('.') || !["md", "txt", "html", "json"].contains(&ext.as_str()) { return Err(format!("won't write {name}: only .md, .txt, .html or .json files")); }
+    store::write_text_atomic(&p, &text)
 }
 
 #[tauri::command]
@@ -190,12 +204,18 @@ async fn assistant_status() -> Result<assistant::CliStatus, String> {
     tauri::async_runtime::spawn_blocking(assistant::status).await.map_err(|e| e.to_string())
 }
 
-#[tauri::command]
+/// Async so finding the CLI (which can ask a login shell) doesn't hold up the window.
+#[tauri::command(async)]
 #[allow(clippy::too_many_arguments)]
 fn ask(app: AppHandle, st: State<AppState>, chat_id: String, prompt: String, model: String, session: Option<String>, book_dir: Option<String>, study_dir: Option<String>) -> Result<(), String> {
     // A folder chat runs in that folder with read-only search tools; only the app's own folders count.
     let root = study::root(&st.data);
-    let folder = match (book_dir.map(PathBuf::from).filter(|d| d.starts_with(books::root(&st.data))), study_dir.map(PathBuf::from).filter(|d| d.starts_with(study::studies_root(&root)))) {
+    // Canonical first, so `..` can't lead out of them.
+    let inside = |d: Option<String>, top: PathBuf| {
+        let (d, top) = (std::fs::canonicalize(d?).ok()?, std::fs::canonicalize(top).ok()?);
+        d.starts_with(&top).then_some(d)
+    };
+    let folder = match (inside(book_dir, books::root(&st.data)), inside(study_dir, study::studies_root(&root))) {
         (Some(b), _) => assistant::Folder::Book(b),
         (None, Some(dir)) => assistant::Folder::Study { dir, dictionaries: study::dictionaries_dir(&root) },
         _ => assistant::Folder::None,
@@ -306,7 +326,9 @@ pub fn run() {
         .plugin(tauri_plugin_window_state::Builder::default().with_state_flags(STATE_FLAGS).with_filter(|label| !label.starts_with("web-")).build())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_notification::init())
         .manage(state)
+        .manage(tray::Tray::default())
         .invoke_handler(tauri::generate_handler![
             library_info,
             rescan_library,
@@ -345,12 +367,12 @@ pub fn run() {
             scene,
             tts::tts_voices,
             tts::tts_speak,
-            tts::tts_stop
+            tts::tts_stop,
+            tray::set_tray
         ])
         .setup(|app| {
-            let open = MenuItem::with_id(app, "open", "Open Two-edged Sword", true, None::<&str>)?;
-            let quit = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
-            let menu = Menu::with_items(app, &[&open, &PredefinedMenuItem::separator(app)?, &quit])?;
+            // Until the frontend sends today's reading, the menu has its choices without the details.
+            let menu = tray::menu(app.handle(), None)?;
             let tray_icon = tauri::image::Image::from_bytes(include_bytes!("../icons/tray@2x.png")).expect("tray icon is a valid png");
             TrayIconBuilder::with_id("main")
                 .icon(tray_icon)
@@ -364,9 +386,10 @@ pub fn run() {
                         let _ = app.save_window_state(STATE_FLAGS);
                         app.exit(0)
                     }
-                    _ => {}
+                    id => tray::on_action(app, id),
                 })
                 .build(app)?;
+            tray::start_reminders(app.handle().clone());
 
             if let Some(w) = app.get_webview_window("main") {
                 // Screenshots are taken at one size, whatever size the window was left at.
@@ -422,11 +445,12 @@ pub fn run() {
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
         .run(|app, ev| {
+            if let tauri::RunEvent::Exit = ev {
+                app.state::<AppState>().running.kill_all();
+            }
             #[cfg(target_os = "macos")]
             if let tauri::RunEvent::Reopen { .. } = ev {
                 show_main(app);
             }
-            #[cfg(not(target_os = "macos"))]
-            let _ = (app, ev);
         });
 }

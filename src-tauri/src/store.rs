@@ -50,6 +50,33 @@ pub fn write_text_atomic(p: &std::path::Path, text: &str) -> Result<(), String> 
     std::fs::rename(&tmp, p).map_err(|e| e.to_string())
 }
 
+/// One lock per exported folder, so overlapping exports of the same thing take turns.
+pub fn dir_lock(dir: &std::path::Path) -> std::sync::Arc<std::sync::Mutex<()>> {
+    use std::collections::HashMap;
+    use std::sync::{Arc, Mutex, OnceLock};
+    static LOCKS: OnceLock<Mutex<HashMap<PathBuf, Arc<Mutex<()>>>>> = OnceLock::new();
+    LOCKS.get_or_init(Default::default).lock().unwrap_or_else(|e| e.into_inner()).entry(dir.to_path_buf()).or_default().clone()
+}
+
+/// Has `build` write the folder's contents beside it, then swaps that in, so `dir` is never seen
+/// half-written. Call with `dir_lock(dir)` held.
+pub fn replace_dir<T>(dir: &std::path::Path, build: impl FnOnce(&std::path::Path) -> Result<T, String>) -> Result<T, String> {
+    use std::fs;
+    let name = dir.file_name().and_then(|n| n.to_str()).ok_or("bad folder name")?;
+    let (new, old) = (dir.with_file_name(format!(".{name}.new")), dir.with_file_name(format!(".{name}.old")));
+    let _ = fs::remove_dir_all(&new);
+    let _ = fs::remove_dir_all(&old);
+    fs::create_dir_all(&new).map_err(|e| e.to_string())?;
+    let r = build(&new).inspect_err(|_| { let _ = fs::remove_dir_all(&new); })?;
+    if dir.exists() { fs::rename(dir, &old).map_err(|e| e.to_string())?; }
+    if let Err(e) = fs::rename(&new, dir) {
+        let _ = fs::rename(&old, dir);
+        return Err(e.to_string());
+    }
+    let _ = fs::remove_dir_all(&old);
+    Ok(r)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -63,5 +90,18 @@ mod tests {
         assert_eq!(read(&dir, "missing").unwrap(), Value::Null);
         assert!(write(&dir, "../x", &v).is_err());
         let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn replaces_folders_whole() {
+        let dir = std::env::temp_dir().join(format!("tes-replace-{}", std::process::id())).join("book");
+        replace_dir(&dir, |d| std::fs::write(d.join("a.txt"), "1").map_err(|e| e.to_string())).unwrap();
+        let r: Result<(), String> = replace_dir(&dir, |d| { std::fs::write(d.join("b.txt"), "2").unwrap(); Err("failed".into()) });
+        assert!(r.is_err());
+        assert!(dir.join("a.txt").exists() && !dir.join("b.txt").exists(), "a failed build leaves the old folder");
+        replace_dir(&dir, |d| std::fs::write(d.join("b.txt"), "2").map_err(|e| e.to_string())).unwrap();
+        assert!(!dir.join("a.txt").exists() && dir.join("b.txt").exists());
+        assert_eq!(std::fs::read_dir(dir.parent().unwrap()).unwrap().count(), 1, "nothing left beside it");
+        let _ = std::fs::remove_dir_all(dir.parent().unwrap());
     }
 }

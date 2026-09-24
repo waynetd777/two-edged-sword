@@ -2,7 +2,7 @@
 // from a start date. The "ppo" plan (a Psalm, a Proverb and one more) has no end: Proverbs
 // follows the date, while the Psalm and the other chapter move on each time a day is read.
 
-import { book, BOOKS, fmtRef, Ref } from "./bible";
+import { book, BOOKS, Ref } from "./bible";
 
 /** One passage: whole chapters (c..c2), or a verse range when v is set. */
 export interface Part { b: number; c: number; c2?: number; v?: number; v2?: number }
@@ -74,19 +74,22 @@ export function dateOf(p: SequencePlan, i: number): Date {
 }
 
 /** Which plan day falls on the date (clamped to the plan), or -1 before it starts. */
-export function indexOn(p: SequencePlan, date: Date): number {
+export const indexOn = (p: SequencePlan, date: Date) => Math.min(dayOn(p, date), p.days.length - 1);
+/** How many plan days come before the date: every day once the plan's end has passed. */
+export const dueBefore = (p: SequencePlan, date: Date) => Math.max(0, Math.min(dayOn(p, date), p.days.length));
+function dayOn(p: SequencePlan, date: Date): number {
   const start = parseYmd(p.start);
   if (date < start) return -1;
   let n: number;
   if (!p.weekdaysOnly) n = Math.round((date.getTime() - start.getTime()) / 86400000);
   else { n = 0; for (let d = new Date(start); d < date; d = addDays(d, 1)) if (!isWeekend(d)) n++; if (isWeekend(date)) n--; }
-  return Math.min(n - p.shift, p.days.length - 1);
+  return n - p.shift;
 }
 
 export const firstUndone = (p: SequencePlan) => p.days.findIndex((_, i) => !p.done.includes(i) && !p.skipped.includes(i));
 /** How many readings due by today are not read. */
 export function behind(p: SequencePlan): number {
-  const due = indexOn(p, today());
+  const due = dueBefore(p, today());
   let n = 0;
   for (let i = 0; i < due; i++) if (!p.done.includes(i) && !p.skipped.includes(i)) n++;
   return n;
@@ -242,7 +245,10 @@ export function markDayRead(p: Plan, d: Date): Plan {
  *  parts ticked today are unticked (they would otherwise mark the day read again). */
 export function unmarkDayRead(p: Plan, d: Date): Plan {
   const k = ymd(d);
-  const progress = p.progress?.key === progressKey(p, d) ? undefined : p.progress;
+  // The key the day's ticks were saved under: for a sequence, the day being unmarked (the last
+  // marked), not the next unread one it would be while that day still counts as read.
+  const key = p.kind === "sequence" ? `day:${p.done[p.done.length - 1]}` : progressKey(p, d);
+  const progress = p.progress?.key === key ? undefined : p.progress;
   if (p.kind === "ppo") {
     if (!p.doneDates.includes(k)) return p;
     return { ...p, nextPsalm: ((p.nextPsalm + 148) % 150) + 1, nextOther: prevOtherBefore(p.nextOther, p.otherFrom), doneDates: p.doneDates.filter((x) => x !== k), progress };
@@ -340,5 +346,3 @@ export function todayReading(app: { plans: Plan[] }): Today | null {
   const p = current(app.plans);
   return p ? todayFor(p) : null;
 }
-
-export const refOfParts = (parts: Part[]) => parts.map((x) => fmtRef(partRef(x)));

@@ -88,6 +88,7 @@ export function SettingsScreen() {
             </Row>
           </Section>
           <Section title="Quiet time">
+            <Row label="Daily reminder" hint="A notification at this time if today's reading isn't done. The app keeps running in the menu bar after its window is closed; it can't remind you once you quit it."><div style={{ display: "flex", gap: 10, alignItems: "center" }}><Switch on={s.reminder} onChange={(v) => app.set({ reminder: v })}>Remind me</Switch><input className="btn" type="time" value={s.reminderTime} disabled={!s.reminder} onChange={(e) => e.target.value && app.set({ reminderTime: e.target.value })} /></div></Row>
             <Row label="When I fall behind"><select className="btn" value={s.whenBehind} onChange={(e) => app.set({ whenBehind: e.target.value as typeof s.whenBehind })}><option value="ask">Ask me each time</option><option value="move">Move the rest later</option><option value="skip">Skip the missed readings</option></select></Row>
           </Section>
         </div>
