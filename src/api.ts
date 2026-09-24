@@ -50,6 +50,10 @@ export const api = {
   topics: (kind: Kind, module: string, prefix: string, limit = 200) => invoke<string[]>("list_topics", { kind, module, prefix, limit }),
   referenceTitles: (module: string) => invoke<string[]>("reference_titles", { module }),
   strongsByBook: (bible: string, number: string) => invoke<[number, number][]>("strongs_by_book", { bible, number }),
+  /** The Strong's numbers an English word translates in a Strong's Bible, with the forms used. */
+  strongsForWord: (bible: string, word: string) => invoke<{ num: string; count: number; forms: [string, number][] }[]>("strongs_for_word", { bible, word }),
+  /** Lexicon entries whose transliteration matches, accents ignored ("agape" → agapē). */
+  translitSearch: (lexicon: string, query: string, limit = 12) => invoke<{ num: string; word: string; translit: string }[]>("translit_search", { lexicon, query, limit }),
   strongsVerses: (bible: string, number: string, book: number | null, limit = 400) => invoke<VerseHit[]>("strongs_verses", { bible, number, book, limit }),
   search: (query: SearchQuery) => invoke<SearchResults>("search", { query }),
   indexProgress: () => invoke<{ building: boolean; done: number; total: number }>("index_progress"),
@@ -61,7 +65,9 @@ export const api = {
   journalDelete: (dir: string, id: string) => invoke<void>("journal_delete", { dir, id }),
   writeTextFile: (path: string, text: string) => invoke<void>("write_text_file", { path, text }),
   claudeStatus: () => invoke<{ path: string | null; version: string | null }>("claude_status"),
-  ask: (chatId: string, prompt: string, model: string, session: string | null) => invoke<void>("ask", { chatId, prompt, model, session }),
+  ask: (chatId: string, prompt: string, model: string, session: string | null, bookDir: string | null = null) => invoke<void>("ask", { chatId, prompt, model, session, bookDir }),
+  /** Writes a reference book out as text files and charts for Ask to search; returns its folder and chapter files. */
+  docExport: (module: string) => invoke<{ dir: string; files: string[] }>("doc_export", { module }),
   askCancel: (chatId: string) => invoke<void>("ask_cancel", { chatId }),
   print: () => invoke<void>("print_page"),
 };

@@ -40,7 +40,7 @@ input, textarea, [contenteditable="true"] { user-select: text; }
 .main { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
 .sidebar { background: var(--sidebar); border-right: 1px solid var(--sbborder); padding: 44px 10px 14px; display: flex; flex-direction: column; gap: 20px; overflow-y: auto; }
 .brand { display: flex; align-items: center; gap: 8px; padding: 0 8px; }
-.brand b { font: 600 17px/1.1 var(--display); letter-spacing: 0.01em; }
+.brand b { font: 600 15px/1.1 var(--ui); letter-spacing: -0.01em; }
 .nav { display: flex; align-items: center; gap: 9px; height: 30px; padding: 0 10px; border: 0; border-radius: 7px; background: transparent; width: 100%; text-align: left; cursor: pointer; }
 .nav:hover { background: var(--hover); }
 .nav.on { background: var(--accent); color: var(--onaccent); }
@@ -50,6 +50,10 @@ input, textarea, [contenteditable="true"] { user-select: text; }
 .bm { display: flex; align-items: center; gap: 8px; min-height: 26px; padding: 3px 10px; border-radius: 6px; color: var(--text); font-size: 12.5px; border: 0; background: transparent; width: 100%; text-align: left; cursor: pointer; }
 .bm:hover { background: var(--hover); text-decoration: none; }
 .bm .r { color: var(--muted); margin-left: auto; font-size: 11px; white-space: nowrap; }
+.doclist { display: flex; flex-direction: column; gap: 1px; }
+.doclist button { display: block; min-height: 28px; padding: 5px 10px; border: 0; border-radius: 6px; background: transparent; color: var(--text); font-size: 12.5px; text-align: left; cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 0; }
+.doclist button:hover { background: var(--hover); }
+.doclist button.on { background: var(--accentsoft); color: var(--accent); font-weight: 600; }
 .bm .t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .today { display: flex; flex-direction: column; gap: 6px; padding: 10px; border-radius: 8px; background: var(--hover); border: 0; text-align: left; cursor: pointer; width: 100%; }
 
@@ -122,6 +126,21 @@ input[type="range"] { accent-color: var(--accent); }
 .es .strongs { font: 500 0.52em var(--ui); color: var(--accent); vertical-align: super; margin-left: 1px; cursor: pointer; letter-spacing: 0.01em; }
 .es img { max-width: 100%; height: auto; border-radius: 6px; }
 .es table { border-collapse: collapse; }
+.docbody img { display: block; width: 100%; height: auto; margin: 0.6em 0; }
+.docbody table { width: 100%; }
+.es img.zoomable { cursor: zoom-in; }
+.dseg { position: relative; border-radius: 6px; transition: background 0.2s; }
+.docbody p { margin: 0; }
+.dseg + .dseg { margin-top: 1.15em; }
+.dseg.speaking { background: var(--accentsoft); box-shadow: 0 0 0 6px var(--accentsoft); }
+.dseg.asking { box-shadow: -4px 0 0 var(--accent); }
+.dseg .dsegtools { position: absolute; left: -30px; top: 0.3em; display: flex; flex-direction: column; gap: 2px; opacity: 0; }
+.dseg:hover .dsegtools, .dseg .dsegtools:focus-within { opacity: 1; }
+.dseg .dsegtools button { width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 50%; background: transparent; color: var(--muted); cursor: pointer; }
+.dseg .dsegtools button:hover { background: var(--hover); color: var(--accent); }
+.viewer { position: fixed; inset: 0; z-index: 80; background: rgba(12, 12, 14, 0.94); }
+.viewer .ibtn { color: #eee; }
+.viewer .ibtn:hover { background: rgba(255, 255, 255, 0.12); }
 .es td { border: 1px solid var(--border); padding: 4px 6px; vertical-align: top; }
 .es .blu { color: var(--accent); }
 .w { cursor: pointer; border-radius: 3px; }

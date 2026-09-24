@@ -39,7 +39,7 @@ function Marked({ tokens, diff, red, showNums, onWord, activeWi }: { tokens: Tok
         return (
           <span key={i}>
             <span className={`w ${t.red && red ? "red" : ""} ${activeWi === t.wi ? "on" : ""}`} style={d ? { background: "var(--hl-gold)", borderRadius: 3, padding: "0 2px" } : undefined} onClick={(e) => { e.stopPropagation(); onWord(t, e.currentTarget); }}>{t.italic ? <i>{t.text}</i> : t.text}</span>
-            {showNums && t.showNums?.map((n) => <span key={n} className="strongs" style={{ font: "500 9.5px var(--ui)", color: "var(--accent)", verticalAlign: "super", marginLeft: 1 }}>{n.slice(1)}</span>)}
+            {showNums && t.showNums?.map((n) => <span key={n} className="strongs" data-num={n} style={{ font: "500 9.5px var(--ui)", color: "var(--accent)", verticalAlign: "super", marginLeft: 1 }}>{n.slice(1)}</span>)}
           </span>
         );
       })}
@@ -168,7 +168,7 @@ export function CompareScreen({ openPalette }: { openPalette: () => void }) {
           onCommentary={(m) => { app.open({ book: loc.book, chapter: loc.chapter, verse: word.verse }); app.setPending({ commentary: m }); }}
           onAsk={() => { setSel(word.verse); setAsk(true); setWord(null); }} />
       )}
-      {picker && <RefPicker anchor={picker} initialBook={loc.book} onClose={() => setPicker(null)} onPick={(b, c) => { setPicker(null); app.open({ book: b, chapter: c }); }} />}
+      {picker && <RefPicker anchor={picker} initialBook={loc.book} onClose={() => setPicker(null)} onPick={(b, c, v) => { setPicker(null); app.open({ book: b, chapter: c, verse: v }); }} />}
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { Fragment, ReactNode, useEffect, useMemo, useState } from "react";
+import { Fragment, ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { api, Article, Commentary, SearchMode, SearchResults, Verse } from "./api";
 import { AskPanel } from "./Ask";
 import { book, fmtRef, Ref, SECTIONS } from "./bible";
@@ -7,9 +7,16 @@ import { Icon } from "./icons";
 import { mdPlain } from "./md";
 import { BibleSelect, Topbar } from "./Shell";
 import { useApp } from "./state";
-import { short, useRefPreview } from "./StudyPane";
+import { short, useRefPreview, useTopics } from "./StudyPane";
+import { TrailButtons, useTrail } from "./ui";
 
 type Scope = "all" | "bible" | "commentary" | "dictionary" | "journal";
+
+/** The search as last left, for the rest of the session. */
+let saved: {
+  q: string; ran: string; mode: SearchMode; whole: boolean; range: (typeof RANGES)[number]; bible: string;
+  res: SearchResults | null; scope: Scope; cmod: string | null; pick: Pick | null; scroll: number; searchFor: string | null;
+} | null = null;
 type Pick =
   | { kind: "verse"; ref: Ref }
   | { kind: "comment"; module: string; ref: Ref }
@@ -28,21 +35,30 @@ export function mark(text: string, terms: string[]): ReactNode {
 
 export function SearchScreen() {
   const app = useApp();
-  const [q, setQ] = useState(app.searchFor ?? "");
-  const [ran, setRan] = useState<string>("");
-  const [mode, setMode] = useState<SearchMode>("phrase");
-  const [whole, setWhole] = useState(true);
-  const [range, setRange] = useState(RANGES[0]);
-  const [bible, setBible] = useState(app.settings.bible);
-  const [res, setRes] = useState<SearchResults | null>(null);
+  // Coming back to Search (say after opening a result) finds it as it was left.
+  const was = saved;
+  const [q, setQ] = useState(was?.q ?? app.searchFor ?? "");
+  const [ran, setRan] = useState<string>(was?.ran ?? "");
+  const [mode, setMode] = useState<SearchMode>(was?.mode ?? "phrase");
+  const [whole, setWhole] = useState(was?.whole ?? true);
+  const [range, setRange] = useState(was?.range ?? RANGES[0]);
+  const [bible, setBible] = useState(was?.bible ?? app.settings.bible);
+  const [res, setRes] = useState<SearchResults | null>(was?.res ?? null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
-  const [scope, setScope] = useState<Scope>("all");
-  const [cmod, setCmod] = useState<string | null>(null);
-  const [pick, setPick] = useState<Pick | null>(null);
+  const [scope, setScope] = useState<Scope>(was?.scope ?? "all");
+  const [cmod, setCmod] = useState<string | null>(was?.cmod ?? null);
+  const [pick, setPick] = useState<Pick | null>(was?.pick ?? null);
   const [ix, setIx] = useState<{ building: boolean; done: number; total: number } | null>(null);
+  const list = useRef<HTMLDivElement>(null);
+  const scrollTop = useRef(was?.scroll ?? 0);
+  useEffect(() => { saved = { q, ran, mode, whole, range, bible, res, scope, cmod, pick, scroll: scrollTop.current, searchFor: app.searchFor }; });
+  useEffect(() => { if (list.current) list.current.scrollTop = scrollTop.current; }, []);
 
-  useEffect(() => { if (app.searchFor) { setQ(app.searchFor); run(app.searchFor); } }, [app.searchFor]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (app.searchFor && app.searchFor !== was?.searchFor) { setQ(app.searchFor); run(app.searchFor); }
+  }, [app.searchFor]); // eslint-disable-line react-hooks/exhaustive-deps
+  const clear = () => { setQ(""); setRan(""); setRes(null); setErr(null); setPick(null); scrollTop.current = 0; };
   useEffect(() => {
     const t = window.setInterval(() => api.indexProgress().then(setIx), 1500);
     api.indexProgress().then(setIx);
@@ -60,7 +76,11 @@ export function SearchScreen() {
     } catch (e) { setErr(String(e)); setRes(null); }
     setBusy(false);
   };
-  useEffect(() => { if (ran) run(ran); }, [mode, whole, range, bible]); // eslint-disable-line react-hooks/exhaustive-deps
+  const first = useRef(true);
+  useEffect(() => {
+    if (first.current) { first.current = false; return; } // restored results are already for these options
+    if (ran) run(ran);
+  }, [mode, whole, range, bible]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const terms = useMemo(() => (mode === "phrase" ? [ran.trim()] : ran.trim().split(/\s+/)), [ran, mode]);
   const journalHits = useMemo(() => {
@@ -81,7 +101,8 @@ export function SearchScreen() {
     <div className="main">
       <Topbar>
         <form onSubmit={(e) => { e.preventDefault(); run(); }} style={{ marginLeft: 16, flexGrow: 1, maxWidth: 520 }}>
-          <label className="field"><Icon name="search" /><input autoFocus value={q} onChange={(e) => setQ(e.target.value)} placeholder="Words, a phrase, or a Strong's number like G509" aria-label="Search" />{busy && <span className="n">Searching…</span>}</label>
+          <label className="field"><Icon name="search" /><input autoFocus value={q} onChange={(e) => setQ(e.target.value)} onKeyDown={(e) => { if (e.key === "Escape" && (q || res)) { e.preventDefault(); e.stopPropagation(); clear(); } }} placeholder="Words, a phrase, or a Strong's number like G509" aria-label="Search" />{busy && <span className="n">Searching…</span>}
+            {(q || res) && !busy && <button type="button" className="ibtn" aria-label="Clear search" title="Clear (esc)" onClick={clear} style={{ width: 20, height: 20, flexShrink: 0 }}><Icon name="x" size={12} /></button>}</label>
         </form>
       </Topbar>
       <div style={{ flexGrow: 1, minHeight: 0, display: "grid", gridTemplateColumns: "236px minmax(0,1fr) 440px" }}>
@@ -112,7 +133,7 @@ export function SearchScreen() {
           {ix?.building && <div className="hint" style={{ padding: "0 10px" }}>Indexing your library for faster search: {ix.done} of {ix.total} books. Searches still work meanwhile.</div>}
         </div>
 
-        <div className="scroll" style={{ padding: "8px 16px 40px" }}>
+        <div ref={list} className="scroll" style={{ padding: "8px 16px 40px" }} onScroll={(e) => { scrollTop.current = e.currentTarget.scrollTop; }}>
           {err && <div className="err" style={{ padding: 12 }}>{err}</div>}
           {!res && !err && <div className="empty">Search the Bible, every commentary and dictionary in your library, and your journal.</div>}
           {res && (
@@ -189,6 +210,17 @@ function Preview({ pick, bible, terms }: { pick: Pick | null; bible: string; ter
   const [comm, setComm] = useState<Commentary | null>(null);
   const [art, setArt] = useState<Article | null>(null);
   const { onRefHover, preview, hide } = useRefPreview(bible);
+  const topic = useTopics(pick?.kind === "dict" ? pick.module : undefined, art?.topic);
+  const trail = useTrail<string>((a, b) => a === b);
+  useEffect(() => { trail.reset(pick?.kind === "dict" ? [pick.topic] : []); }, [pick]); // eslint-disable-line react-hooks/exhaustive-deps
+  const openTopic = (t: string, d?: number) => {
+    if (pick?.kind !== "dict") return;
+    hide();
+    const to = d ? trail.go(d) : t;
+    if (!to) return;
+    if (!d) trail.visit(to);
+    api.article("dictionary", pick.module, to).then(setArt);
+  };
   useEffect(() => {
     setVerses([]); setComm(null); setArt(null);
     if (!pick) return;
@@ -209,12 +241,13 @@ function Preview({ pick, bible, terms }: { pick: Pick | null; bible: string; ter
       </div>
     );
   }
-  const title = pick.kind === "dict" ? pick.topic : pick.kind === "verse" ? `${book(pick.ref.book).name} ${pick.ref.chapter}:${Math.max(1, pick.ref.verse! - 3)}–${pick.ref.verse! + 3}` : fmtRef(pick.ref);
+  const title = pick.kind === "dict" ? art?.topic ?? pick.topic : pick.kind === "verse" ? `${book(pick.ref.book).name} ${pick.ref.chapter}:${Math.max(1, pick.ref.verse! - 3)}–${pick.ref.verse! + 3}` : fmtRef(pick.ref);
   const where = pick.kind === "verse" ? "In context" : pick.kind === "comment" ? app.mod("commentary", pick.module)?.title : app.mod("dictionary", pick.module)?.title;
   const target = pick.kind === "dict" ? null : pick.ref;
   return (
     <>
       <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "14px 20px", borderBottom: "1px solid var(--border)" }}>
+        {(trail.canBack || trail.canForward) && <TrailButtons trail={trail} onGo={(d) => openTopic("", d)} />}
         <div style={{ minWidth: 0 }}><div className="label" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{where}</div><div style={{ font: "500 22px/1.3 var(--display)" }}>{title}</div></div>
         {target && <div style={{ marginLeft: "auto", display: "flex", gap: 6 }}><button className="btn" type="button" onClick={() => app.open(target, "compare")}>Compare</button><button className="btn primary" type="button" onClick={() => app.open(target, "read")}>Open<span style={{ opacity: 0.75 }}>⏎</span></button></div>}
       </div>
@@ -225,7 +258,7 @@ function Preview({ pick, bible, terms }: { pick: Pick | null; bible: string; ter
           </p>
         ))}
         {comm && <div className="es prose selectable">{renderHtml(comm.verse.map((e) => e.html).join(""), { onRef: openRef, onRefHover, onStrongs: app.studyWord })}</div>}
-        {art && <div className="es prose selectable">{renderHtml(art.html, { onRef: openRef, onRefHover, onStrongs: app.studyWord })}</div>}
+        {art && pick.kind === "dict" && <div className="es prose selectable">{renderHtml(art.html, { onRef: openRef, onRefHover, onStrongs: app.studyWord, topic, onTopic: (t) => openTopic(t) })}</div>}
       </div>
       {preview}
     </>

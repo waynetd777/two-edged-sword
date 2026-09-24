@@ -4,7 +4,7 @@ import { api } from "./api";
 import { Icon } from "./icons";
 import { VoiceSelect } from "./Read";
 import { Topbar } from "./Shell";
-import { MODELS, useApp } from "./state";
+import { MODELS, READ_FONTS, ReadFont, useApp } from "./state";
 import { Seg, Switch } from "./ui";
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
@@ -41,6 +41,7 @@ export function SettingsScreen() {
           <h1 style={{ margin: 0, font: "500 30px/1 var(--display)" }}>Settings</h1>
           <Section title="Appearance">
             <Row label="Theme"><Seg value={s.theme} options={[["auto", "Match macOS"], ["light", "Light"], ["dark", "Dark"]]} onChange={(v) => app.set({ theme: v })} /></Row>
+            <Row label="Reading font"><Seg value={s.readFont} options={Object.entries(READ_FONTS).map(([k, f]) => [k as ReadFont, f.label])} onChange={(v) => app.set({ readFont: v })} /></Row>
             <Row label="Reading text size">
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}><span style={{ fontSize: 12 }}>A</span><input type="range" min={14} max={28} value={s.readSize} onChange={(e) => app.set({ readSize: +e.target.value })} aria-label="Reading text size" style={{ width: 200 }} /><span style={{ fontSize: 18 }}>A</span><span className="n">{s.readSize} px</span></div>
               <div style={{ font: `400 ${s.readSize}px/1.6 var(--serif)`, marginTop: 6 }}><span className={s.redLetters ? "red" : undefined}>For God so loved the world…</span></div>

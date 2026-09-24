@@ -16,6 +16,31 @@ export interface RenderOpts {
   onRefHover?: (r: Ref | null, el: HTMLElement | null) => void;
   /** Strong's numbers as ordinary links (in lexicon text) rather than superscripts. */
   inlineNums?: boolean;
+  /** Click on an image (to show it full screen). */
+  onImage?: (src: string) => void;
+  /** The entry a name refers to in this module ("ASTRONOMY" → "Astronomy"), if it has one; with onTopic, "See X" becomes a link. */
+  topic?: (name: string) => string | undefined;
+  onTopic?: (topic: string) => void;
+  /** A reference that points at this commentary's own note ("see on Jdg 9:7", "Gen 12:8 note") opens that note instead of the Bible. */
+  onNote?: (r: Ref) => void;
+}
+
+const NOTE_BEFORE = /\b[Ss]ee\b[^.()]{0,40}?\b(?:on|notes?)\s*$/;
+const NOTE_AFTER = /^\s*[,;]?\s*\(?\s*(?:see the )?notes?\b/i;
+const LIST_GAP = /^\s*(?:[;,]|and)\s*$/;
+
+const SEE = /\b(?:[Ss]ee(?: also| under)?|[Cc]ompare|[Cc]f\.)\s+/g;
+const SEE_AT_END = /\b(?:[Ss]ee(?: also| under)?|[Cc]ompare|[Cc]f\.)\s*$/;
+
+/** The entry named at the start of `s`, trying up to six words and then fewer: "Aaron's Rod, the" → "Aaron's Rod". */
+function leadingTopic(s: string, topic: (n: string) => string | undefined): { text: string; topic: string } | undefined {
+  const words = s.trim().split(/\s+/);
+  for (let n = Math.min(words.length, 6); n > 0; n--) {
+    const text = words.slice(0, n).join(" ").replace(/[,;:'’]+$/, "");
+    const t = text && topic(text);
+    if (t) return { text, topic: t };
+  }
+  return undefined;
 }
 
 /** "Joh 3:16", "Joh 3:16-18", "2Co 5:19-21", or a bare "3:16" after a book in the same list. */
@@ -37,9 +62,10 @@ function cls(el: Element): string | undefined {
 
 export function renderHtml(html: string, opts: RenderOpts = {}): ReactNode {
   let lastBook: number | undefined;
+  let noteChain = false; // "see notes on A; B": B is a note too
   let key = 0;
   const walk = (node: Node): ReactNode => {
-    if (node.nodeType === Node.TEXT_NODE) return node.textContent;
+    if (node.nodeType === Node.TEXT_NODE) return opts.topic && opts.onTopic ? linkSees(node.textContent || "") : node.textContent;
     if (node.nodeType !== Node.ELEMENT_NODE) return null;
     const el = node as Element;
     const kids = () => Array.from(el.childNodes).map((c) => <Fragment key={key++}>{walk(c)}</Fragment>);
@@ -49,8 +75,8 @@ export function renderHtml(html: string, opts: RenderOpts = {}): ReactNode {
         const center = (el.getAttribute("align") || "").toLowerCase() === "center";
         return <p className={cls(el)} style={center ? { textAlign: "center", fontWeight: 600 } : undefined}>{kids()}</p>;
       }
-      case "b": case "strong": return <b>{kids()}</b>;
-      case "i": case "em": return <i>{kids()}</i>;
+      case "b": case "strong": return seeTarget(el) ?? <b>{kids()}</b>;
+      case "i": case "em": return seeTarget(el) ?? <i>{kids()}</i>;
       case "u": return <u>{kids()}</u>;
       case "sup": return <sup>{kids()}</sup>;
       case "sub": return <sub>{kids()}</sub>;
@@ -66,7 +92,9 @@ export function renderHtml(html: string, opts: RenderOpts = {}): ReactNode {
       case "td": case "th": return <td colSpan={+(el.getAttribute("colspan") || 1)}>{kids()}</td>;
       case "img": {
         const src = el.getAttribute("src") || "";
-        return src.startsWith("data:image/") ? <img src={src} alt="" draggable={false} /> : null;
+        if (!src.startsWith("data:image/")) return null;
+        const onImage = opts.onImage;
+        return onImage ? <img src={src} alt="" draggable={false} className="zoomable" onClick={(e) => { e.stopPropagation(); onImage(src); }} /> : <img src={src} alt="" draggable={false} />;
       }
       case "num": {
         const n = (el.textContent || "").trim();
@@ -78,6 +106,17 @@ export function renderHtml(html: string, opts: RenderOpts = {}): ReactNode {
         const r = parseEswordRef(text, lastBook);
         if (r) lastBook = r.book;
         if (!r || !opts.onRef) return <span>{text}</span>;
+        if (opts.onNote) {
+          const before = el.previousSibling?.nodeType === Node.TEXT_NODE ? el.previousSibling.textContent || "" : "";
+          const after = el.nextSibling?.nodeType === Node.TEXT_NODE ? el.nextSibling.textContent || "" : "";
+          noteChain = NOTE_BEFORE.test(before) || NOTE_AFTER.test(after) || (noteChain && LIST_GAP.test(before));
+          if (noteChain) {
+            return (
+              <a className="ref" title="Open this commentary's note" onClick={(e) => { e.preventDefault(); e.stopPropagation(); opts.onNote!(r); }}
+                onMouseEnter={(e) => opts.onRefHover?.(r, e.currentTarget)} onMouseLeave={() => opts.onRefHover?.(null, null)}>{text}</a>
+            );
+          }
+        }
         return (
           <a className="ref" onClick={(e) => { e.preventDefault(); e.stopPropagation(); opts.onRef!(r, text); }}
             onMouseEnter={(e) => opts.onRefHover?.(r, e.currentTarget)} onMouseLeave={() => opts.onRefHover?.(null, null)}>{text}</a>
@@ -86,7 +125,92 @@ export function renderHtml(html: string, opts: RenderOpts = {}): ReactNode {
       default: return <>{kids()}</>;
     }
   };
+  const link = (text: string, topic: string) => <a key={key++} className="ref" title={`Open ${topic}`} onClick={(e) => { e.preventDefault(); e.stopPropagation(); opts.onTopic!(topic); }}>{text}</a>;
+  // "See ASTRONOMY. III, 3" or "see also Meal; Banquet": each name after the cue that is an entry here becomes a link.
+  const linkSees = (text: string): ReactNode => {
+    const out: ReactNode[] = [];
+    let last = 0;
+    for (const m of text.matchAll(SEE)) {
+      const start = m.index! + m[0].length;
+      const tail = text.slice(start);
+      const end = start + (tail.search(/[.()[\]:]/) + 1 || tail.length + 1) - 1;
+      // Longest entry name first ("Mining and Metals"), else move on past the next ; , or "and".
+      let at = start;
+      while (at < end) {
+        const rest = text.slice(at, end);
+        const hit = leadingTopic(rest, opts.topic!);
+        const lead = hit ? rest.indexOf(hit.text) : -1;
+        if (hit && lead >= 0) {
+          if (at + lead > last) out.push(text.slice(last, at + lead));
+          out.push(link(hit.text, hit.topic));
+          at = last = at + lead + hit.text.length;
+        } else {
+          const d = rest.search(/;|,|\band\b/);
+          if (d < 0) break;
+          at += d + (rest[d] === "a" ? 3 : 1);
+        }
+      }
+    }
+    if (!out.length) return text;
+    if (last < text.length) out.push(text.slice(last));
+    return out;
+  };
+  // "See <b>Hagar</b>." — the name is its own element straight after the cue.
+  const seeTarget = (el: Element): ReactNode | undefined => {
+    if (!opts.topic || !opts.onTopic) return undefined;
+    const prev = el.previousSibling;
+    if (prev?.nodeType !== Node.TEXT_NODE || !SEE_AT_END.test(prev.textContent || "")) return undefined;
+    const name = (el.textContent || "").trim().replace(/[.,;:]+$/, "");
+    const t = opts.topic(name);
+    return t ? link(el.textContent || name, t) : undefined;
+  };
   return Array.from(parse(html).childNodes).map((c) => <Fragment key={key++}>{walk(c)}</Fragment>);
+}
+
+const BLOCK = new Set(["p", "table", "div", "h1", "h2", "h3", "h4", "h5", "h6", "ul", "ol", "blockquote", "center", "hr"]);
+
+/**
+ * A reference book's chapter as paragraphs of HTML, the units it is read aloud in. Block elements
+ * stand alone; loose text between them is split at blank lines (two <br>s). A single wrapping
+ * element is looked through.
+ */
+export function docSegments(html: string): string[] {
+  let root: Element = parse(html);
+  const meaningful = (n: Node) => n.nodeType === Node.ELEMENT_NODE || (n.textContent || "").trim() !== "";
+  for (;;) {
+    const kids = Array.from(root.childNodes).filter(meaningful);
+    if (kids.length === 1 && kids[0].nodeType === Node.ELEMENT_NODE && !["p", "table"].includes((kids[0] as Element).tagName.toLowerCase()) && (kids[0] as Element).querySelector("p, br, table, div")) root = kids[0] as Element;
+    else break;
+  }
+  const out: string[] = [];
+  let run: string[] = [];
+  let brs = 0;
+  const flush = () => {
+    const h = run.join("").replace(/^(\s|<br\s*\/?>)+|(\s|<br\s*\/?>)+$/gi, "");
+    if (h && (plainText(h) || /<img/i.test(h))) out.push(h);
+    run = []; brs = 0;
+  };
+  for (const n of Array.from(root.childNodes)) {
+    if (n.nodeType === Node.ELEMENT_NODE) {
+      const el = n as Element;
+      const tag = el.tagName.toLowerCase();
+      if (BLOCK.has(tag)) {
+        flush();
+        if (tag === "div" && el.querySelector("p, table, div")) out.push(...docSegments(el.innerHTML));
+        else if (plainText(el.outerHTML) || el.querySelector("img")) out.push(el.outerHTML);
+        continue;
+      }
+      if (tag === "br") { if (++brs >= 2) flush(); else run.push("<br>"); continue; }
+      brs = 0;
+      run.push(el.outerHTML);
+    } else if (n.nodeType === Node.TEXT_NODE) {
+      const t = n.textContent || "";
+      if (t.trim()) brs = 0;
+      run.push(t.replace(/&/g, "&amp;").replace(/</g, "&lt;"));
+    }
+  }
+  flush();
+  return out;
 }
 
 /** Plain text of e-Sword HTML (Strong's numbers dropped). */

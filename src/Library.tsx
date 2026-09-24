@@ -24,7 +24,7 @@ function Ordered({ kind, title, orderKey }: { kind: ModuleInfo["kind"]; title: s
       <div style={{ display: "flex", justifyContent: "space-between", paddingBottom: 4 }}><span className="label">{title}</span><span className="n">{ms.length}</span></div>
       {ms.map((m, i) => (
         <div key={m.id} style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 12.5, minHeight: 26 }}>
-          <span className="n" style={{ width: 18, textAlign: "right" }}>{i + 1}</span>
+          <span className="n" style={{ width: 22, flexShrink: 0 }}>{i + 1}</span>
           <span style={{ flexGrow: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={m.title}>{m.title}</span>
           <button className="ibtn" type="button" aria-label={`Move ${m.title} up`} style={{ width: 22, height: 22 }} disabled={i === 0} onClick={() => move(i, -1)}><Icon name="up" size={13} /></button>
           <button className="ibtn" type="button" aria-label={`Move ${m.title} down`} style={{ width: 22, height: 22 }} disabled={i === ms.length - 1} onClick={() => move(i, 1)}><Icon name="down" size={13} /></button>
@@ -93,7 +93,10 @@ export function LibraryScreen() {
       {info && (
         <Popover anchor={info.rect} onClose={() => setInfo(null)} width={420}>
           <div style={{ padding: "14px 16px", display: "flex", flexDirection: "column", gap: 8 }}>
-            <b style={{ font: "500 20px var(--display)" }}>{info.m.title}</b>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <b style={{ font: "500 20px var(--display)", flexGrow: 1 }}>{info.m.title}</b>
+              {info.m.kind === "reference" && <button className="btn small" type="button" onClick={() => { setInfo(null); app.openDoc(info.m.id); }}><Icon name="read" size={13} />Read</button>}
+            </div>
             <div className="es" style={{ fontSize: 12.5, lineHeight: 1.5, maxHeight: 300, overflowY: "auto" }}>{renderHtml(info.m.info)}</div>
           </div>
         </Popover>

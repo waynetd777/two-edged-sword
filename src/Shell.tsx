@@ -3,6 +3,7 @@ import { BOOKS, book, fmtRef } from "./bible";
 import { Icon, Sword } from "./icons";
 import { Screen, useApp } from "./state";
 import { todayReading } from "./plans";
+import { useRefPreview } from "./StudyPane";
 
 const NAV: { s: Screen; label: string; icon: string; key: string }[] = [
   { s: "read", label: "Read", icon: "read", key: "1" },
@@ -27,6 +28,8 @@ function ago(iso: string) {
 export function Sidebar() {
   const app = useApp();
   const today = todayReading(app);
+  const { onRefHover, preview, hide } = useRefPreview(app.settings.bible, "right");
+  const leave = () => onRefHover(null, null);
   return (
     <aside className="sidebar drag">
       <div className="brand"><Sword /><b>Two-edged Sword</b></div>
@@ -41,7 +44,7 @@ export function Sidebar() {
         <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
           <div className="lab" style={{ paddingBottom: 2 }}>Bookmarks</div>
           {app.bookmarks.slice(0, 8).map((b) => (
-            <button key={b.id} type="button" className="bm" onClick={() => app.open({ book: b.ref.book, chapter: b.ref.chapter, verse: b.ref.verse, to: b.ref.to }, "read")}>
+            <button key={b.id} type="button" className="bm" onMouseEnter={(e) => onRefHover(b.ref, e.currentTarget, b.bible)} onMouseLeave={leave} onClick={() => { hide(); app.open({ book: b.ref.book, chapter: b.ref.chapter, verse: b.ref.verse, to: b.ref.to }, "read"); }}>
               <Icon name="bookmark" style={{ color: "var(--accent)" }} /><span className="t">{fmtRef(b.ref)}</span><span className="r">{app.mod("bible", b.bible)?.abbrev ?? ""}</span>
             </button>
           ))}
@@ -51,7 +54,7 @@ export function Sidebar() {
         <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
           <div className="lab" style={{ paddingBottom: 2 }}>Recent</div>
           {app.recent.slice(0, 5).map((r) => (
-            <button key={`${r.book}.${r.chapter}`} type="button" className="bm" onClick={() => app.open({ book: r.book, chapter: r.chapter }, "read")}>
+            <button key={`${r.book}.${r.chapter}`} type="button" className="bm" onMouseEnter={(e) => onRefHover({ book: r.book, chapter: r.chapter }, e.currentTarget)} onMouseLeave={leave} onClick={() => { hide(); app.open({ book: r.book, chapter: r.chapter }, "read"); }}>
               <span className="t">{book(r.book).name} {r.chapter}</span><span className="r">{ago(r.at)}</span>
             </button>
           ))}
@@ -74,6 +77,7 @@ export function Sidebar() {
           <Icon name="settings" />Settings<span className="k">⌘,</span>
         </button>
       </div>
+      {preview}
     </aside>
   );
 }
@@ -103,7 +107,7 @@ export function BibleSelect({ value, onChange, style }: { value: string; onChang
   const list = app.bibles.filter((b) => !app.settings.hiddenBibles.includes(b.id) || b.id === value);
   return (
     <label className="btn" style={{ position: "relative", ...style }} title={app.mod("bible", value)?.title}>
-      {app.mod("bible", value)?.abbrev ?? value}
+      <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}><Icon name="bible" />{app.mod("bible", value)?.abbrev ?? value}</span>
       <Icon name="down" className="sm" style={{ color: "var(--muted)" }} />
       <select aria-label="Bible" value={value} onChange={(e) => onChange(e.target.value)} style={{ position: "absolute", inset: 0, opacity: 0, cursor: "pointer" }}>
         {list.map((b) => <option key={b.id} value={b.id}>{b.abbrev} · {b.title}</option>)}

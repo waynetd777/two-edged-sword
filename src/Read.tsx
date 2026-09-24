@@ -9,6 +9,7 @@ import { HlColor, hlName, useApp, vkey } from "./state";
 import { StudyPane, StudyTab } from "./StudyPane";
 import { Popover, RefPicker, Seg } from "./ui";
 import { WordLookup } from "./WordLookup";
+import { BooksButton } from "./DocReader";
 
 export interface WordPick { token: Token; verse: number; rect: DOMRect }
 
@@ -41,7 +42,7 @@ export function VerseText({ tokens, red, speakingChar, onWord, activeWi, showNum
         return (
           <Fragment key={i}>
             <span className={`w ${cls} ${activeWi === t.wi ? "on" : ""} ${speaking ? "speaking" : ""}`} onClick={(e) => { e.stopPropagation(); onWord?.(t, e.currentTarget); }}>{inner}</span>
-            {showNums && t.showNums?.map((n) => <span key={n} className="strongs" style={{ font: "500 10px var(--ui)", color: "var(--accent)", verticalAlign: "super", marginLeft: 1 }}>{n}</span>)}
+            {showNums && t.showNums?.map((n) => <span key={n} className="strongs" data-num={n} style={{ font: "500 10px var(--ui)", color: "var(--accent)", verticalAlign: "super", marginLeft: 1 }}>{n}</span>)}
           </Fragment>
         );
       })}
@@ -61,11 +62,13 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
   const [sel, setSel] = useState<{ from: number; to: number } | null>(null);
   const [word, setWord] = useState<WordPick | null>(null);
   const [picker, setPicker] = useState<DOMRect | null>(null);
-  const [tab, setTab] = useState<StudyTab>("commentary");
-  const [dict, setDict] = useState<{ module: string; topic: string } | null>(null);
+  // The study pane's choices are remembered between sessions.
+  const tab = settings.studyTab, dict = settings.studyDict, commentary = settings.studyCommentary, follow = settings.studyFollow;
+  const setTab = (t: StudyTab) => app.set({ studyTab: t });
+  const setDict = (d: { module: string; topic: string } | null) => app.set({ studyDict: d });
+  const setCommentary = (m: string | null) => app.set({ studyCommentary: m });
+  const setFollow = (f: boolean) => app.set({ studyFollow: f });
   const [askSeed, setAskSeed] = useState<string | null>(null);
-  const [commentary, setCommentary] = useState<string | null>(null);
-  const [follow, setFollow] = useState(true);
   const [studyVerse, setStudyVerse] = useState<number>(loc.verse ?? 1);
   const scroller = useRef<HTMLDivElement>(null);
   const notes = useNotesByVerse();
@@ -268,7 +271,7 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
       })}
     </div>
   ) : (
-    <div style={{ position: "relative", maxWidth: focus ? 680 : undefined, margin: focus ? "0 auto" : undefined, paddingTop: sel && !focus ? 46 : 0 }}>
+    <div style={{ position: "relative", maxWidth: focus ? 1040 : undefined, margin: focus ? "0 auto" : undefined, paddingTop: sel && !focus ? 46 : 0 }}>
       {!focus && sel && <div style={{ position: "sticky", top: 0, zIndex: 20, height: 0 }}><div style={{ position: "relative", top: -44 }}>{toolbar}</div></div>}
       <p className="para selectable" style={{ margin: 0, fontSize: focus ? 21 : undefined, lineHeight: focus ? 1.85 : undefined }}>
         {verses.map((v) => {
@@ -310,6 +313,7 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
         }>
           <RefButton onClick={() => setPicker(document.activeElement?.getBoundingClientRect() ?? new DOMRect(300, 40, 100, 20))} />
           <BibleSelect value={bible} onChange={(id) => app.set({ bible: id })} />
+          <BooksButton />
           <SearchField onOpen={openPalette} />
         </Topbar>
       )}
@@ -332,7 +336,7 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
           onCommentary={(m) => { setCommentary(m); setTab("commentary"); setStudyVerse(word.verse); setWord(null); if (!settings.studyPane) app.set({ studyPane: true }); }}
           onAsk={(q) => { setAskSeed(q); setTab("ask"); setWord(null); if (focus) setFocus(false); if (!settings.studyPane) app.set({ studyPane: true }); }} />
       )}
-      {picker && <RefPicker anchor={picker} initialBook={loc.book} onClose={() => setPicker(null)} onPick={(b, c) => { setPicker(null); app.open({ book: b, chapter: c }); }} />}
+      {picker && <RefPicker anchor={picker} initialBook={loc.book} onClose={() => setPicker(null)} onPick={(b, c, v) => { setPicker(null); app.open({ book: b, chapter: c, verse: v }); }} />}
       {focus && <div style={{ position: "fixed", bottom: 18, left: 0, right: 0, display: "flex", justifyContent: "center", gap: 18, color: "var(--muted)", fontSize: 12, pointerEvents: "none" }}>
         <span>Click any word to look it up</span><span>·</span><span><span className="kbd">space</span> listen</span><span>·</span><span><span className="kbd">←</span> <span className="kbd">→</span> chapters</span>
       </div>}
@@ -351,7 +355,7 @@ function ChapterNav({ onGo }: { onGo: (d: 1 | -1) => void }) {
   );
 }
 
-function TextSizeButton() {
+export function TextSizeButton() {
   const app = useApp();
   const [a, setA] = useState<DOMRect | null>(null);
   return (
@@ -384,6 +388,17 @@ export function PlayerBar({ focus = false }: { focus?: boolean }) {
   const [sleepMenu, setSleepMenu] = useState<DOMRect | null>(null);
   // Tick while a sleep timer runs, so the countdown stays current.
   const [, tick] = useState(0);
+  // Esc closes the player, once nothing nearer has used it: a menu, the palette, a search box, focus mode.
+  useEffect(() => {
+    if (!p.state.on) return;
+    const k = (e: KeyboardEvent) => {
+      if (e.key !== "Escape" || e.defaultPrevented || focus || menu || sleepMenu) return;
+      if ((e.target as HTMLElement)?.closest?.("input, textarea, select, [contenteditable='true']")) return;
+      p.stop();
+    };
+    window.addEventListener("keydown", k);
+    return () => window.removeEventListener("keydown", k);
+  }, [p, focus, menu, sleepMenu]);
   useEffect(() => {
     if (!p.state.sleepAt) return;
     const t = window.setInterval(() => tick((x) => x + 1), 15000);
@@ -399,12 +414,14 @@ export function PlayerBar({ focus = false }: { focus?: boolean }) {
     <div role="region" aria-label="Listen" style={{ position: "fixed", left: focus ? 0 : 200, right: app.screen === "read" && !focus && app.settings.studyPane ? 520 : 0, bottom: 18, display: "flex", justifyContent: "center", pointerEvents: "none", zIndex: 40 }}>
       <div style={{ pointerEvents: "auto", width: "min(600px, calc(100% - 48px))", height: 56, display: "flex", alignItems: "center", gap: 14, padding: "0 10px 0 8px", borderRadius: 28, background: "var(--panel)", border: "1px solid var(--border)", boxShadow: "0 10px 30px var(--shadow)" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
-          <button className="ibtn" type="button" aria-label="Previous verse" onClick={() => p.skip(-1)}><Icon name="prev" /></button>
+          <button className="ibtn" type="button" aria-label={s.doc ? "Previous paragraph" : "Previous verse"} onClick={() => p.skip(-1)}><Icon name="prev" /></button>
           <button type="button" aria-label={s.paused ? "Play" : "Pause"} onClick={p.toggle} style={{ width: 40, height: 40, borderRadius: "50%", border: 0, background: "var(--accent)", color: "var(--onaccent)", display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>{s.paused ? <Play /> : <Pause />}</button>
-          <button className="ibtn" type="button" aria-label="Next verse" onClick={() => p.skip(1)}><Icon name="next" /></button>
+          <button className="ibtn" type="button" aria-label={s.doc ? "Next paragraph" : "Next verse"} onClick={() => p.skip(1)}><Icon name="next" /></button>
         </div>
-        <button type="button" onClick={() => app.open({ book: s.book, chapter: s.chapter, verse: s.verse }, "read")} style={{ flexGrow: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 7, border: 0, background: "transparent", cursor: "pointer", textAlign: "left", padding: 0 }}>
-          <span style={{ display: "flex", alignItems: "baseline", gap: 8, whiteSpace: "nowrap", width: "100%" }}><b style={{ fontSize: 13 }}>{book(s.book).name} {s.chapter}:{s.verse}</b><span className="n">{app.mod("bible", s.bible)?.abbrev}</span><span className="n" style={{ marginLeft: "auto", fontVariantNumeric: "tabular-nums" }}>{s.verse} of {s.count}</span></span>
+        <button type="button" onClick={() => (s.doc ? app.openDoc(s.doc.module, s.doc.title) : app.open({ book: s.book, chapter: s.chapter, verse: s.verse }, "read"))} style={{ flexGrow: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 7, border: 0, background: "transparent", cursor: "pointer", textAlign: "left", padding: 0 }}>
+          <span style={{ display: "flex", alignItems: "baseline", gap: 8, whiteSpace: "nowrap", width: "100%" }}>{s.doc
+            ? <><b style={{ fontSize: 13, overflow: "hidden", textOverflow: "ellipsis" }}>{s.doc.title}</b><span className="n" style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{app.mod("reference", s.doc.module)?.abbrev}</span></>
+            : <><b style={{ fontSize: 13 }}>{book(s.book).name} {s.chapter}:{s.verse}</b><span className="n">{app.mod("bible", s.bible)?.abbrev}</span></>}<span className="n" style={{ marginLeft: "auto", fontVariantNumeric: "tabular-nums" }}>{s.verse} of {s.count}</span></span>
           <span style={{ position: "relative", height: 3, borderRadius: 999, background: "var(--border)", width: "100%" }}><span style={{ position: "absolute", left: 0, top: 0, width: `${pct}%`, height: 3, borderRadius: 999, background: "var(--accent)" }} /><span style={{ position: "absolute", left: `${pct}%`, top: -3, width: 9, height: 9, marginLeft: -4, borderRadius: "50%", background: "var(--accent)" }} /></span>
         </button>
         <div style={{ display: "flex", alignItems: "center", gap: 2 }}>

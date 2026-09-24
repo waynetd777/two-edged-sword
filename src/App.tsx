@@ -8,10 +8,12 @@ import { SettingsScreen } from "./Settings";
 import { WordStudyScreen } from "./WordStudy";
 import { Palette } from "./Palette";
 import { PlayerBar, ReadScreen } from "./Read";
+import { DocReader } from "./DocReader";
+import { StrongsHover } from "./WordLookup";
 import { SCREEN_KEYS, Sidebar } from "./Shell";
 import { PlayerProvider } from "./speech";
 import { AppProvider, useApp } from "./state";
-import { hideSplash } from "./main";
+import { hideSplash } from "./splash";
 
 function Screens() {
   const app = useApp();
@@ -55,7 +57,8 @@ function Screens() {
   return (
     <div className={`shell ${focus && screen === "read" ? "nosidebar" : ""}`}>
       {!(focus && screen === "read") && <Sidebar />}
-      {screen === "read" && <ReadScreen focus={focus} setFocus={setFocus} openPalette={openPalette} />}
+      {screen === "read" && app.doc && <DocReader focus={focus} setFocus={setFocus} />}
+      {screen === "read" && !app.doc && <ReadScreen focus={focus} setFocus={setFocus} openPalette={openPalette} />}
       {screen === "compare" && <CompareScreen openPalette={openPalette} />}
       {screen === "search" && <SearchScreen />}
       {screen === "word" && <WordStudyScreen />}
@@ -63,9 +66,10 @@ function Screens() {
       {screen === "plans" && <PlansScreen />}
       {screen === "library" && <LibraryScreen />}
       {screen === "settings" && <SettingsScreen />}
-      {screen !== "read" && <PlayerBar />}
+      {(screen !== "read" || app.doc) && <PlayerBar focus={focus && screen === "read"} />}
       {palette && <Palette onClose={() => setPalette(false)} onAsk={() => app.setPending({ ask: "" })} />}
       {app.toastMsg && <div className="toast" role="status">{app.toastMsg}</div>}
+      <StrongsHover />
     </div>
   );
 }

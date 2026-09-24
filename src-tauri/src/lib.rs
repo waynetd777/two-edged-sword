@@ -1,3 +1,4 @@
+mod books;
 mod claude;
 mod content;
 mod index;
@@ -116,6 +117,16 @@ fn strongs_by_book(st: State<AppState>, bible: String, number: String) -> Result
 }
 
 #[tauri::command]
+fn strongs_for_word(st: State<AppState>, bible: String, word: String) -> Result<Vec<content::WordNumber>, String> {
+    content::strongs_for_word(&st.lib(), &bible, &word)
+}
+
+#[tauri::command]
+fn translit_search(st: State<AppState>, lexicon: String, query: String, limit: usize) -> Result<Vec<content::TranslitHit>, String> {
+    content::translit_search(&st.lib(), &lexicon, &query, limit)
+}
+
+#[tauri::command]
 fn strongs_verses(st: State<AppState>, bible: String, number: String, book: Option<i64>, limit: usize) -> Result<Vec<content::VerseHit>, String> {
     content::strongs_verses(&st.lib(), &bible, &number, book, limit)
 }
@@ -177,8 +188,17 @@ async fn claude_status() -> claude::Status {
 }
 
 #[tauri::command]
-fn ask(app: AppHandle, st: State<AppState>, chat_id: String, prompt: String, model: String, session: Option<String>) -> Result<(), String> {
-    claude::ask(app, st.running.clone(), st.data.join("claude"), chat_id, prompt, model, session)
+fn ask(app: AppHandle, st: State<AppState>, chat_id: String, prompt: String, model: String, session: Option<String>, book_dir: Option<String>) -> Result<(), String> {
+    // A book chat runs in the book's exported folder, with read-only tools confined to it.
+    let book = book_dir.map(PathBuf::from).filter(|d| d.starts_with(books::root(&st.data)));
+    let cwd = book.clone().unwrap_or_else(|| st.data.join("claude"));
+    claude::ask(app, st.running.clone(), cwd, chat_id, prompt, model, session, book.is_some())
+}
+
+#[tauri::command]
+async fn doc_export(st: State<'_, AppState>, module: String) -> Result<books::Export, String> {
+    let (lib, root) = (st.lib(), books::root(&st.data));
+    tauri::async_runtime::spawn_blocking(move || books::export(&lib, &root, &module)).await.map_err(|e| e.to_string())?
 }
 
 #[tauri::command]
@@ -230,6 +250,9 @@ pub fn run() {
             find_topics,
             list_topics,
             reference_titles,
+            strongs_for_word,
+            translit_search,
+            doc_export,
             strongs_by_book,
             strongs_verses,
             search,

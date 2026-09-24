@@ -225,6 +225,129 @@ pub fn strongs_verses(lib: &Library, bible: &str, number: &str, book: Option<i64
     })
 }
 
+/// A Strong's number an English word stands for in a Strong's Bible, how often, and in which forms.
+#[derive(Serialize, Debug)]
+pub struct WordNumber {
+    pub num: String,
+    pub count: i64,
+    /// The English forms carrying it, most frequent first: [("love", 74), ("loved", 38)].
+    pub forms: Vec<(String, i64)>,
+}
+
+/// Does a word in the text count as the searched word? The word itself, or it with a short ending
+/// ("love" finds loved, loveth, lovest, lover), but not a longer word that merely starts the same.
+fn is_form(w: &str, q: &str) -> bool {
+    w == q || (w.starts_with(q) && w.len() <= q.len() + 4 && q.len() >= 3)
+}
+
+/// The Strong's numbers a word translates. In a Strong's Bible each group of words is followed by
+/// the number(s) it renders ("loved<num>G25</num>"), so count the numbers after groups holding the word.
+pub fn strongs_for_word(lib: &Library, bible: &str, word: &str) -> Result<Vec<WordNumber>, String> {
+    let q = word.trim().to_lowercase();
+    if q.is_empty() { return Ok(vec![]); }
+    let rows = lib.with(Kind::Bible, bible, |c| {
+        let mut st = c.prepare("SELECT Scripture FROM Bible WHERE Scripture LIKE ?1")?;
+        let rows = st.query_map(params![format!("%{q}%")], |r| r.get::<_, Option<String>>(0))?;
+        rows.map(|r| r.map(|s| s.unwrap_or_default())).collect::<rusqlite::Result<Vec<_>>>()
+    })?;
+    let mut counts: std::collections::HashMap<String, (i64, std::collections::HashMap<String, i64>)> = Default::default();
+    for s in rows {
+        let mut words: Vec<String> = vec![];
+        let mut nums: Vec<String> = vec![];
+        let mut flush = |words: &mut Vec<String>, nums: &mut Vec<String>| {
+            for w in words.iter().filter(|w| is_form(w, &q)) {
+                for n in nums.iter() {
+                    let e = counts.entry(n.clone()).or_default();
+                    e.0 += 1;
+                    *e.1.entry(w.clone()).or_default() += 1;
+                }
+            }
+            words.clear();
+            nums.clear();
+        };
+        let mut rest = s.as_str();
+        while !rest.is_empty() {
+            if let Some(r) = rest.strip_prefix("<num>") {
+                let end = r.find("</num>").unwrap_or(r.len());
+                nums.push(r[..end].trim().to_string());
+                rest = r.get(end + 6..).unwrap_or("");
+            } else if rest.starts_with('<') {
+                rest = rest.find('>').map(|e| &rest[e + 1..]).unwrap_or("");
+            } else {
+                let end = rest.find('<').unwrap_or(rest.len());
+                for w in rest[..end].split(|c: char| !(c.is_alphabetic() || c == '\'')).filter(|w| !w.is_empty()) {
+                    if !nums.is_empty() { flush(&mut words, &mut nums); }
+                    words.push(w.trim_end_matches('\'').to_lowercase());
+                }
+                rest = &rest[end..];
+            }
+        }
+        flush(&mut words, &mut nums);
+    }
+    let mut out: Vec<WordNumber> = counts.into_iter().map(|(num, (count, forms))| {
+        let mut forms: Vec<(String, i64)> = forms.into_iter().collect();
+        forms.sort_by(|a, b| b.1.cmp(&a.1).then(a.0.cmp(&b.0)));
+        WordNumber { num, count, forms }
+    }).collect();
+    out.sort_by(|a, b| b.count.cmp(&a.count).then(a.num.cmp(&b.num)));
+    out.truncate(40);
+    Ok(out)
+}
+
+/// A lexicon entry whose transliteration matches: "agape" finds agapaō (G25) and agapē (G26).
+#[derive(Serialize, Debug)]
+pub struct TranslitHit {
+    pub num: String,
+    pub word: String,
+    pub translit: String,
+}
+
+/// Lower-case ASCII letters only, accents taken off: "agapáō" → "agapao", "ʼĕlôhîym" → "elohiym".
+fn fold(s: &str) -> String {
+    s.chars().flat_map(|c| c.to_lowercase()).filter_map(|c| {
+        let b = match c {
+            'a'..='z' => c,
+            'à'..='å' | 'ā' | 'ă' | 'ą' | 'ǎ' => 'a',
+            'è'..='ë' | 'ē' | 'ĕ' | 'ė' | 'ę' | 'ě' => 'e',
+            'ì'..='ï' | 'ī' | 'ĭ' | 'į' | 'ǐ' => 'i',
+            'ò'..='ö' | 'ø' | 'ō' | 'ŏ' | 'ő' | 'ǒ' => 'o',
+            'ù'..='ü' | 'ū' | 'ŭ' | 'ů' | 'ű' | 'ǔ' => 'u',
+            'ý' | 'ÿ' | 'ŷ' => 'y',
+            'ç' | 'ć' | 'č' => 'c',
+            'ñ' | 'ń' | 'ň' => 'n',
+            'š' | 'ś' | 'ş' => 's',
+            'ž' | 'ź' | 'ż' => 'z',
+            'ḥ' => 'h', 'ṭ' => 't', 'ṣ' => 's', 'ḳ' | 'ḵ' => 'k',
+            _ => return None,
+        };
+        Some(b)
+    }).collect()
+}
+
+pub fn translit_search(lib: &Library, lexicon: &str, query: &str, limit: usize) -> Result<Vec<TranslitHit>, String> {
+    let q = fold(query);
+    if q.len() < 2 { return Ok(vec![]); }
+    let rows = lib.with(Kind::Lexicon, lexicon, |c| {
+        let mut st = c.prepare("SELECT Topic, Definition FROM Lexicon")?;
+        let rows = st.query_map([], |r| Ok((r.get::<_, String>(0)?, r.get::<_, Option<String>>(1)?.unwrap_or_default())))?;
+        rows.collect::<rusqlite::Result<Vec<_>>>()
+    })?;
+    let para = |html: &str, i: usize| html.split("</p>").nth(i).map(crate::search::plain).map(|s| s.trim().to_string()).unwrap_or_default();
+    let mut exact = vec![];
+    let mut starts = vec![];
+    for (num, html) in rows {
+        let translit = para(&html, 1);
+        let f = fold(&translit);
+        if f.is_empty() { continue; }
+        let hit = TranslitHit { num, word: para(&html, 0), translit };
+        if f == q { exact.push(hit) } else if f.starts_with(&q) { starts.push(hit) }
+    }
+    starts.sort_by_key(|h| h.translit.chars().count());
+    exact.extend(starts);
+    exact.truncate(limit);
+    Ok(exact)
+}
+
 /// These run against the e-Sword X library on this Mac and skip themselves where it is absent.
 #[cfg(test)]
 mod library_tests {
@@ -254,6 +377,13 @@ mod library_tests {
         assert!(find_topics(&lib, "love", 8).iter().any(|t| t.module == "isbe" && t.topic == "Love, Brotherly"));
         let total: i64 = strongs_by_book(&lib, "kjv+", "G25").unwrap().iter().map(|(_, n)| n).sum();
         assert_eq!(total, 109);
+
+        let love = strongs_for_word(&lib, "kjv+", "love").unwrap();
+        let nums: Vec<&str> = love.iter().take(6).map(|w| w.num.as_str()).collect();
+        assert!(nums.contains(&"G25") && nums.contains(&"G26") && nums.contains(&"H157"), "{nums:?}");
+        assert!(love.iter().find(|w| w.num == "G25").unwrap().forms.iter().any(|(f, _)| f == "loved"));
+        let agape = translit_search(&lib, "strong", "agape", 10).unwrap();
+        assert!(agape.iter().any(|h| h.num == "G26"), "{agape:?}");
     }
 
     #[test]

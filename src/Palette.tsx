@@ -53,7 +53,7 @@ export function Palette({ onClose, onAsk }: { onClose: () => void; onAsk: (ref: 
     if (e.key === "ArrowDown") { setI((x) => Math.min(items.length - 1, x + 1)); e.preventDefault(); }
     else if (e.key === "ArrowUp") { setI((x) => Math.max(0, x - 1)); e.preventDefault(); }
     else if (e.key === "Enter") { (e.altKey ? items.find((x) => x.id === "cmp") : e.shiftKey ? items.find((x) => x.id === "note") : items[i])?.run(); e.preventDefault(); }
-    else if (e.key === "Escape") onClose();
+    else if (e.key === "Escape") { e.preventDefault(); onClose(); }
   };
   let lastGroup = "";
   return (

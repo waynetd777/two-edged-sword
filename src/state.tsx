@@ -6,6 +6,7 @@ import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, 
 import { api, JournalEntry, LibraryInfo, ModuleInfo } from "./api";
 import { Ref } from "./bible";
 import { Plan } from "./plans";
+import type { StudyTab } from "./StudyPane";
 
 export type Theme = "auto" | "light" | "dark";
 export type Model = "claude-opus-5-5" | "claude-sonnet-5" | "claude-haiku-4-5-20251001";
@@ -18,6 +19,7 @@ export const MODELS: { id: Model; name: string }[] = [
 export interface Settings {
   theme: Theme;
   readSize: number;
+  readFont: ReadFont;
   redLetters: boolean;
   layout: "verse" | "paragraph";
   bible: string;
@@ -41,14 +43,29 @@ export interface Settings {
   studyPane: boolean;
   /** Copying verses puts the verse numbers in front of each verse. */
   copyNumbers: boolean;
+  /** The study pane as it was left: its tab, the commentary and dictionary entry chosen, and whether it follows the reading. */
+  studyTab: StudyTab;
+  studyCommentary: string | null;
+  studyDict: { module: string; topic: string } | null;
+  dictModule: string | null;
+  studyFollow: boolean;
 }
 
 const DEFAULTS: Settings = {
-  theme: "auto", readSize: 19, redLetters: true, layout: "verse", bible: "kjv", compare: ["kjv", "asv", "kjv+"], hiddenBibles: [],
+  theme: "auto", readSize: 19, readFont: "literata", studyTab: "commentary", studyCommentary: null, studyDict: null, dictModule: null, studyFollow: true, redLetters: true, layout: "verse", bible: "kjv", compare: ["kjv", "asv", "kjv+"], hiddenBibles: [],
   commentaryOrder: ["barnes", "henry", "clarke", "gill", "jfb", "wesley", "darby", "meyer"], dictionaryOrder: ["isbe", "smith", "nave", "cyclopedia"],
   voice: "", rate: 1, continueChapter: true, readNumbers: false, highlightWords: true, journalDir: "", showNotes: true,
   model: "claude-sonnet-5", includeCommentaries: true, allowLicensed: true, reminder: false, reminderTime: "06:30", whenBehind: "ask", studyPane: true, copyNumbers: true,
 };
+
+/** Faces for Scripture, commentary and notes. Greek and Hebrew stay in --display. */
+export const READ_FONTS = {
+  literata: { label: "Literata", stack: '"Literata Variable", Georgia, serif' },
+  source: { label: "Source Serif", stack: '"Source Serif 4 Variable", "Source Serif 4", Georgia, serif' },
+  inter: { label: "Inter", stack: '"Inter Variable", -apple-system, sans-serif' },
+  atkinson: { label: "Atkinson", stack: '"Atkinson Hyperlegible Next Variable", -apple-system, sans-serif' },
+};
+export type ReadFont = keyof typeof READ_FONTS;
 
 export interface Bookmark { id: string; ref: Ref; bible: string; created: string }
 export type HlColor = "red" | "orange" | "yellow" | "green" | "blue" | "purple";
@@ -67,6 +84,8 @@ export interface Chat {
   updated: string;
   model: Model;
   session?: string;
+  /** A chat about a reference book runs in the book's exported folder (api.docExport). */
+  bookDir?: string;
   messages: ChatMsg[];
   journaled?: boolean;
 }
@@ -78,6 +97,8 @@ export interface Pending { article?: { module: string; topic: string }; ask?: st
 export type Screen = "read" | "compare" | "search" | "word" | "journal" | "plans" | "library" | "settings";
 
 export interface Loc { book: number; chapter: number; verse?: number; to?: number }
+/** A reference book open in the reading column, and the chapter being read. */
+export interface Doc { module: string; title: string }
 
 interface Ctx {
   lib: LibraryInfo | null;
@@ -107,6 +128,14 @@ interface Ctx {
   highlights: Record<string, HlColor>;
   setHighlight: (key: string, c: HlColor | null) => void;
   recent: { book: number; chapter: number; at: string }[];
+
+  /** The reference book in the reading column; null while reading the Bible. */
+  doc: Doc | null;
+  /** Opens a reference book, at the given chapter or wherever it was last left. */
+  openDoc: (module: string, title?: string) => void;
+  closeDoc: () => void;
+  /** The chapter last read in each reference book. */
+  docAt: Record<string, string>;
 
   journal: JournalEntry[];
   journalDir: string;
@@ -178,7 +207,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [settings, setSettings, settingsLoaded] = useStored<Settings>("settings", DEFAULTS);
   const [bookmarks, setBookmarks] = useStored<Bookmark[]>("bookmarks", []);
   const [highlights, setHighlights] = useStored<Record<string, HlColor>>("highlights", {});
-  const [nav, setNav] = useStored<{ loc: Loc; recent: { book: number; chapter: number; at: string }[] }>("place", { loc: { book: 43, chapter: 1 }, recent: [] });
+  const [nav, setNav] = useStored<{ loc: Loc; recent: { book: number; chapter: number; at: string }[]; doc: Doc | null; docAt: Record<string, string> }>("place", { loc: { book: 43, chapter: 1 }, recent: [], doc: null, docAt: {} });
   const [plans, setPlans] = useStored<Plan[]>("plans", []);
   const [chats, setChats] = useStored<Chat[]>("chats", []);
   const [screen, setScreen] = useState<Screen>("read");
@@ -200,7 +229,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (t === "auto") document.documentElement.removeAttribute("data-theme");
     else document.documentElement.setAttribute("data-theme", t);
     document.documentElement.style.setProperty("--read-size", `${settings.readSize}px`);
-  }, [settings.theme, settings.readSize]);
+    document.documentElement.style.setProperty("--serif", READ_FONTS[settings.readFont]?.stack ?? READ_FONTS.literata.stack);
+  }, [settings.theme, settings.readSize, settings.readFont]);
 
   const journalDir = settings.journalDir || defaultDir;
   const reloadJournal = useCallback(async () => {
@@ -233,7 +263,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     h.i = h.stack.length - 1;
     setNav((n) => {
       const recent = [{ book: l.book, chapter: l.chapter, at: new Date().toISOString() }, ...n.recent.filter((r) => !(r.book === l.book && r.chapter === l.chapter))].slice(0, 12);
-      return { loc: l, recent };
+      return { ...n, loc: l, recent, doc: null };
     });
     if (s) setScreen(s);
     bump((x) => x + 1);
@@ -249,7 +279,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const j = h.i + d;
     if (j < 0 || j >= h.stack.length) return;
     h.i = j;
-    setNav((n) => ({ ...n, loc: h.stack[j] }));
+    setNav((n) => ({ ...n, loc: h.stack[j], doc: null }));
     bump((x) => x + 1);
   };
 
@@ -275,6 +305,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
     highlights,
     setHighlight: (k, c) => setHighlights((h) => { const n = { ...h }; if (c) n[k] = c; else delete n[k]; return n; }),
     recent: nav.recent,
+    doc: nav.doc, docAt: nav.docAt ?? {},
+    openDoc: (module, title) => {
+      setNav((n) => {
+        const t = title ?? n.docAt?.[module];
+        return { ...n, doc: { module, title: t ?? "" }, docAt: t ? { ...n.docAt, [module]: t } : n.docAt };
+      });
+      setScreen("read");
+    },
+    closeDoc: () => setNav((n) => ({ ...n, doc: null })),
     journal, journalDir,
     saveEntry: async (e) => { await api.journalSave(journalDir, e); await reloadJournal(); },
     deleteEntry: async (id) => { await api.journalDelete(journalDir, id); await reloadJournal(); },

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { api, TopicHit, VerseHit } from "./api";
 import { AskPanel } from "./Ask";
 import { BOOKS, fmtRef, SHORT } from "./bible";
@@ -10,10 +10,25 @@ import { orderModules } from "./StudyPane";
 
 interface Entry { num: string; word: string; translit: string; pron: string; rest: string; total?: number; html: string }
 
+/** An English word (or a transliteration) mapped to the Strong's numbers behind it. */
+interface Lookup {
+  q: string;
+  words: { num: string; count: number; forms: [string, number][]; word?: string; translit?: string }[];
+  translit: { num: string; word: string; translit: string }[];
+}
+/** The box and the last lookup, kept for the session so leaving the screen loses nothing. */
+let saved: { q: string; lookup: Lookup | null; showing: boolean; num: string } | null = null;
+
 export function WordStudyScreen() {
   const app = useApp();
   const num = app.wordStudy ?? "G25";
-  const [q, setQ] = useState(num);
+  const was = saved;
+  const [q, setQ] = useState(was?.q ?? num);
+  const [lookup, setLookup] = useState<Lookup | null>(was?.lookup ?? null);
+  const [showing, setShowing] = useState(was?.showing ?? false);
+  const [finding, setFinding] = useState(false);
+  const lastNum = useRef(was?.num ?? num);
+  useEffect(() => { saved = { q, lookup, showing, num }; });
   const [e, setE] = useState<Entry | null>(null);
   const [renderings, setRenderings] = useState<[string, number][]>([]);
   const [dist, setDist] = useState<[number, number][]>([]);
@@ -24,7 +39,35 @@ export function WordStudyScreen() {
   const greek = num.startsWith("G");
   const sb = app.strongsBible;
 
-  useEffect(() => { setQ(num); setOnlyBook(null); }, [num]);
+  // A new number from elsewhere (a word clicked in the text) shows that number, not the old lookup.
+  useEffect(() => {
+    if (num === lastNum.current) return;
+    lastNum.current = num;
+    setQ(num); setOnlyBook(null); setShowing(false);
+  }, [num]);
+  const find = async (text: string) => {
+    const t = text.trim();
+    if (!t) return;
+    const n = t.toUpperCase();
+    if (/^[GH]\d+$/.test(n)) { setShowing(false); app.studyWord(n); return; }
+    setFinding(true);
+    try {
+      const [words, translit] = await Promise.all([
+        sb ? api.strongsForWord(sb, t) : Promise.resolve([]),
+        app.lexicon ? api.translitSearch(app.lexicon, t) : Promise.resolve([]),
+      ]);
+      // Name each number by its Greek or Hebrew word.
+      const named = await Promise.all(words.slice(0, 24).map(async (w) => {
+        const a = app.lexicon ? await api.article("lexicon", app.lexicon, w.num).catch(() => null) : null;
+        const p = a ? lexiconParts(a.html) : null;
+        return { ...w, word: p?.word, translit: p?.translit };
+      }));
+      setLookup({ q: t, words: named, translit: translit.filter((x) => !named.some((w) => w.num === x.num)) });
+      setShowing(true);
+    } finally { setFinding(false); }
+  };
+  const clear = () => { setQ(""); setLookup(null); setShowing(false); };
+  const choose = (n: string) => { setShowing(false); lastNum.current = n; app.studyWord(n); };
   useEffect(() => {
     let dead = false;
     if (!app.lexicon) return;
@@ -71,11 +114,13 @@ export function WordStudyScreen() {
   return (
     <div className="main">
       <Topbar>
-        <form onSubmit={(ev) => { ev.preventDefault(); const n = q.trim().toUpperCase(); if (/^[GH]\d+$/.test(n)) app.studyWord(n); }} style={{ marginLeft: 16, width: 280 }}>
-          <label className="field"><Icon name="word" /><input value={q} onChange={(ev) => setQ(ev.target.value)} placeholder="Strong's number, e.g. G25 or H430" aria-label="Strong's number" /></label>
+        <form onSubmit={(ev) => { ev.preventDefault(); find(q); }} style={{ marginLeft: 16, width: 340 }}>
+          <label className="field"><Icon name="word" /><input value={q} onChange={(ev) => setQ(ev.target.value)} onKeyDown={(ev) => { if (ev.key === "Escape" && q) { ev.preventDefault(); clear(); } }} placeholder="A word like love, agape, or a number like G25" aria-label="Word or Strong's number" />
+            {finding ? <span className="n">Finding…</span> : q && <button type="button" className="ibtn" aria-label="Clear" title="Clear (esc)" onClick={clear} style={{ width: 20, height: 20, flexShrink: 0 }}><Icon name="x" size={12} /></button>}</label>
         </form>
+        {lookup && !showing && <button className="btn small" type="button" onClick={() => setShowing(true)}><Icon name="back" size={13} />Words for “{lookup.q}”</button>}
       </Topbar>
-      {!app.lexicon ? <div className="empty">Word study needs a Strong's lexicon in your library.</div> : !e ? <div className="empty">No entry for {num}.</div> : (
+      {showing && lookup ? <LookupList lookup={lookup} onChoose={choose} /> : !app.lexicon ? <div className="empty">Word study needs a Strong's lexicon in your library.</div> : !e ? <div className="empty">No entry for {num}.</div> : (
         <div style={{ flexGrow: 1, minHeight: 0, display: "grid", gridTemplateColumns: "minmax(0,1fr) 380px", gap: 20, padding: "22px 28px" }}>
           <div className="scroll" style={{ display: "flex", flexDirection: "column", gap: 18, minWidth: 0, paddingRight: 4 }}>
             <div style={{ display: "flex", alignItems: "flex-end", gap: 22, flexWrap: "wrap" }}>
@@ -162,6 +207,49 @@ export function WordStudyScreen() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function LookupList({ lookup, onChoose }: { lookup: Lookup; onChoose: (num: string) => void }) {
+  const total = lookup.words.reduce((n, w) => n + w.count, 0);
+  const row = (num: string, word: string | undefined, translit: string | undefined, right: React.ReactNode) => (
+    <button key={num} type="button" className="bm" onClick={() => onChoose(num)} style={{ display: "grid", gridTemplateColumns: "64px 150px minmax(0,1fr)", alignItems: "baseline", gap: 14, padding: "10px 12px" }}>
+      <b style={{ fontSize: 12.5, color: "var(--accent)" }}>{num}</b>
+      <span style={{ display: "flex", alignItems: "baseline", gap: 8, minWidth: 0 }}>
+        <span style={{ font: "500 19px var(--display)" }} lang={num.startsWith("H") ? "he" : "grc"}>{word}</span>
+        <i style={{ fontFamily: "var(--serif)", fontSize: 14, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{translit}</i>
+      </span>
+      <span style={{ minWidth: 0 }}>{right}</span>
+    </button>
+  );
+  return (
+    <div className="scroll" style={{ flexGrow: 1, padding: "22px 28px 40px" }}>
+      <div style={{ maxWidth: 860, display: "flex", flexDirection: "column", gap: 22 }}>
+        <div>
+          <h1 style={{ margin: 0, font: "500 30px/1.15 var(--display)" }}>“{lookup.q}” in the original languages</h1>
+          <div className="hint" style={{ marginTop: 6 }}>Choose a word to study it.</div>
+        </div>
+        {lookup.words.length > 0 && (
+          <section className="card" style={{ padding: "10px 8px" }}>
+            <div className="label" style={{ padding: "4px 12px 8px" }}>Translated “{lookup.q}” in the KJV · {total.toLocaleString()} times</div>
+            {lookup.words.map((w) => row(w.num, w.word, w.translit, (
+              <span style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <span style={{ flexGrow: 1, height: 4, borderRadius: 999, background: "var(--border)", maxWidth: 160 }}><span style={{ display: "block", height: 4, borderRadius: 999, background: "var(--accent)", width: `${Math.max(3, (w.count / lookup.words[0].count) * 100)}%` }} /></span>
+                <b style={{ fontVariantNumeric: "tabular-nums", minWidth: 32, textAlign: "right" }}>{w.count}</b>
+                <span className="n" style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{w.forms.slice(0, 4).map(([f, n]) => `${f} ${n}`).join(" · ")}</span>
+              </span>
+            )))}
+          </section>
+        )}
+        {lookup.translit.length > 0 && (
+          <section className="card" style={{ padding: "10px 8px" }}>
+            <div className="label" style={{ padding: "4px 12px 8px" }}>Sounds like “{lookup.q}”</div>
+            {lookup.translit.map((t) => row(t.num, t.word, t.translit, null))}
+          </section>
+        )}
+        {!lookup.words.length && !lookup.translit.length && <div className="empty">Nothing in the KJV or the lexicon matches “{lookup.q}”.</div>}
+      </div>
     </div>
   );
 }

@@ -6,7 +6,7 @@ import { plainText } from "./esword";
 import { Icon } from "./icons";
 import { mdToHtml } from "./md";
 import { Chat, MODELS, Model, nowLocal, uid, useApp } from "./state";
-import { orderModules } from "./StudyPane";
+import { orderModules, useRefPreview } from "./StudyPane";
 import { Popover } from "./ui";
 
 /** A module whose description carries a copyright notice is licensed, not public domain. */
@@ -26,12 +26,19 @@ function ensureListening() {
 }
 
 /** Answer text with verse references as links. */
-export function Answer({ text, onRef }: { text: string; onRef: (r: Ref) => void }) {
+export function Answer({ text, onRef, onRefHover }: { text: string; onRef: (r: Ref) => void; onRefHover?: (r: Ref | null, el: HTMLElement | null) => void }) {
   const html = useMemo(() => mdToHtml(text), [text]);
+  const refAt = (t: EventTarget) => (t as HTMLElement).closest("a.ref") as HTMLElement | null;
   return (
     <div className="prose md selectable" onClick={(e) => {
-      const a = (e.target as HTMLElement).closest("a.ref") as HTMLElement | null;
-      if (a?.dataset.ref) { e.preventDefault(); onRef(JSON.parse(a.dataset.ref)); }
+      const a = refAt(e.target);
+      if (a?.dataset.ref) { e.preventDefault(); onRefHover?.(null, null); onRef(JSON.parse(a.dataset.ref)); }
+    }} onMouseOver={(e) => {
+      const a = refAt(e.target);
+      if (a?.dataset.ref && !a.contains(e.relatedTarget as Node)) onRefHover?.(JSON.parse(a.dataset.ref), a);
+    }} onMouseOut={(e) => {
+      const a = refAt(e.target);
+      if (a && !a.contains(e.relatedTarget as Node)) onRefHover?.(null, null);
     }} dangerouslySetInnerHTML={{ __html: html }} />
   );
 }
@@ -46,6 +53,10 @@ export interface AskProps {
   about?: string;
   /** More context for Claude: other translations, a lexicon entry, search results, a journal entry. */
   context?: () => Promise<string> | string;
+  /** A reference book's exported folder, which Claude may search and read (see books.rs). */
+  bookDir?: () => Promise<string>;
+  /** What goes with the question, for the empty state; defaults to the passage. */
+  hint?: string;
   suggestions?: string[];
   seed?: string | null;
   clearSeed?: () => void;
@@ -107,9 +118,11 @@ export function AskPanel(p: AskProps) {
     setBusy(true);
     let id = chat?.id;
     let prompt = question;
+    let bookDir = chat?.bookDir;
     if (!chat) {
+      if (p.bookDir) { try { bookDir = await p.bookDir(); } catch (e) { console.error(e); } }
       id = uid();
-      const c: Chat = { id, title: question.length > 80 ? question.slice(0, 77) + "…" : question, about, source: p.source, created: new Date().toISOString(), updated: new Date().toISOString(), model, messages: [] };
+      const c: Chat = { id, title: question.length > 80 ? question.slice(0, 77) + "…" : question, about, source: p.source, created: new Date().toISOString(), updated: new Date().toISOString(), model, bookDir, messages: [] };
       app.setChats((cs) => [c, ...cs]);
       setChatId(id);
       try { const ctx = await buildContext(); if (ctx) prompt = `${ctx}\n\nQuestion: ${question}`; } catch (e) { console.error(e); }
@@ -129,7 +142,7 @@ export function AskPanel(p: AskProps) {
         setBusy(false);
       },
     });
-    try { await api.ask(cid, prompt, model, chat?.session ?? null); }
+    try { await api.ask(cid, prompt, model, chat?.session ?? null, bookDir ?? null); }
     catch (e) { subs.get(cid)?.done({ sessionId: null, text: "", error: String(e) }); }
   };
 
@@ -142,7 +155,9 @@ export function AskPanel(p: AskProps) {
     app.toast("Added to your journal");
   };
 
-  const openRef = (r: Ref) => app.open({ book: r.book, chapter: r.chapter, verse: r.verse, to: r.to }, "read");
+  const { onRefHover, preview, hide } = useRefPreview(app.settings.bible);
+  const openRef = (r: Ref) => { hide(); openRefNow(r); };
+  const openRefNow = (r: Ref) => app.open({ book: r.book, chapter: r.chapter, verse: r.verse, to: r.to }, "read");
   const modelName = MODELS.find((m) => m.id === model)?.name ?? model;
   const header = (
     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -161,7 +176,7 @@ export function AskPanel(p: AskProps) {
       ) : (
         <div key={i} style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}><span className="label">Claude</span><span className="n">{MODELS.find((x) => x.id === chat!.model)?.name}</span></div>
-          {m.error ? <div className="err" style={{ fontSize: 13 }}>{m.text}</div> : m.text ? <Answer text={m.text} onRef={openRef} /> : <span className="n">Thinking…</span>}
+          {m.error ? <div className="err" style={{ fontSize: 13 }}>{m.text}</div> : m.text ? <Answer text={m.text} onRef={openRef} onRefHover={onRefHover} /> : <span className="n">Thinking…</span>}
           {!m.error && m.text && !(busy && i === messages.length - 1) && (
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
               <button className="btn primary small" type="button" onClick={() => addToJournal(chat!, i)}><Icon name="journal" size={13} />Add to journal</button>
@@ -191,6 +206,7 @@ export function AskPanel(p: AskProps) {
 
   const popovers = (
     <>
+      {preview}
       {recent && <RecentChats anchor={recent} about={about} onClose={() => setRecent(null)} onPick={(id) => { setChatId(id); setRecent(null); }} current={chatId} />}
       {modelMenu && (
         <Popover anchor={modelMenu} onClose={() => setModelMenu(null)} width={200}>
@@ -216,7 +232,7 @@ export function AskPanel(p: AskProps) {
         <div className="scroll" style={{ flexGrow: 1, padding: "16px 18px", display: "flex", flexDirection: "column", gap: 14 }}>
           {messages.length === 0 && (
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              <div className="hint">Ask anything about {about}. The passage{withCommentary ? " and what your commentaries say about it" : ""} goes with the question.</div>
+              <div className="hint">{p.hint ?? `Ask anything about ${about}. The passage${withCommentary ? " and what your commentaries say about it" : ""} goes with the question.`}</div>
               <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                 {(suggestions.length ? suggestions : ["What is the main point here?", "What background helps me understand this?", "Where else does the Bible say something like this?"]).map((s) => <button key={s} type="button" className="chip wrap" onClick={() => send(s)}>{s}</button>)}
               </div>

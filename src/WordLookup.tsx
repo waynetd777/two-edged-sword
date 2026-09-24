@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { api, Coverage, TopicHit } from "./api";
 import { fmtRef, Ref } from "./bible";
-import { concordanceRenderings, headwords, lexiconParts, renderHtml } from "./esword";
+import { concordanceRenderings, headwords, lexiconParts, plainText, renderHtml } from "./esword";
 import { Icon } from "./icons";
 import { WordPick } from "./Read";
 import { useApp } from "./state";
@@ -93,5 +93,82 @@ export function WordLookup({ pick, vref, bible, onClose, onDictionary, onComment
         </div>
       </div>
     </Popover>
+  );
+}
+
+/**
+ * Hovering a Strong's number anywhere (the superscripts in the KJV+ and in commentaries) shows its
+ * lexicon entry. One listener for the whole window, so every screen gets it without wiring.
+ */
+export function StrongsHover() {
+  const app = useApp();
+  const [show, setShow] = useState<{ num: string; rect: DOMRect; lex: Lex | null } | null>(null);
+  const timer = useRef<number | undefined>(undefined);
+  const cache = useRef(new Map<string, Promise<Lex | null>>());
+  useEffect(() => {
+    const load = (num: string) => {
+      let p = cache.current.get(num);
+      if (!p) {
+        p = (async () => {
+          if (!app.lexicon) return null;
+          const a = await api.article("lexicon", app.lexicon, num);
+          if (!a) return null;
+          const c = app.concordance ? await api.article("lexicon", app.concordance, num).catch(() => null) : null;
+          return { num, ...lexiconParts(a.html), renderings: c ? concordanceRenderings(c.html) : [] };
+        })().catch(() => null);
+        cache.current.set(num, p);
+      }
+      return p;
+    };
+    const over = (e: MouseEvent) => {
+      const el = (e.target as HTMLElement).closest?.(".strongs") as HTMLElement | null;
+      if (!el || el.contains(e.relatedTarget as Node)) return;
+      // The full number is in data-num where the text shows it shortened ("25" for G25 on Compare).
+      const num = (el.dataset.num || el.textContent || "").trim();
+      if (!/^[GH]\d+[a-z]?$/i.test(num)) return;
+      window.clearTimeout(timer.current);
+      const rect = el.getBoundingClientRect();
+      timer.current = window.setTimeout(async () => {
+        const n = num[0].toUpperCase() + num.slice(1);
+        const lex = await load(n);
+        setShow({ num: n, rect, lex });
+      }, 300);
+    };
+    const out = (e: MouseEvent) => {
+      const el = (e.target as HTMLElement).closest?.(".strongs");
+      if (!el || el.contains(e.relatedTarget as Node)) return;
+      window.clearTimeout(timer.current);
+      timer.current = window.setTimeout(() => setShow(null), 120);
+    };
+    const hide = () => { window.clearTimeout(timer.current); setShow(null); };
+    document.addEventListener("mouseover", over);
+    document.addEventListener("mouseout", out);
+    document.addEventListener("scroll", hide, true);
+    document.addEventListener("mousedown", hide);
+    return () => {
+      document.removeEventListener("mouseover", over);
+      document.removeEventListener("mouseout", out);
+      document.removeEventListener("scroll", hide, true);
+      document.removeEventListener("mousedown", hide);
+    };
+  }, [app.lexicon, app.concordance]);
+  if (!show) return null;
+  const { rect, lex } = show;
+  const above = rect.top > 280;
+  const def = lex ? plainText(lex.rest) : "";
+  return (
+    <div className="popover" style={{ left: Math.max(12, Math.min(rect.left - 40, window.innerWidth - 340)), top: above ? rect.top - 8 : rect.bottom + 8, transform: above ? "translateY(-100%)" : undefined, width: 320, padding: "12px 14px", pointerEvents: "none", zIndex: 90 }}>
+      {lex ? (
+        <>
+          <div style={{ display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap" }}>
+            <span style={{ font: "500 20px var(--display)" }} lang={show.num.startsWith("H") ? "he" : "grc"}>{lex.word}</span>
+            <i style={{ fontFamily: "var(--serif)", fontSize: 15 }}>{lex.translit}</i>
+            <span className="n" style={{ marginLeft: "auto" }}>{show.num}</span>
+          </div>
+          <div style={{ font: "400 14px/1.5 var(--serif)", marginTop: 6, maxHeight: 150, overflow: "hidden" }}>{def.length > 320 ? def.slice(0, 317) + "…" : def}</div>
+          {lex.renderings.length > 0 && <div className="n" style={{ marginTop: 8 }}>KJV: {lex.renderings.slice(0, 5).map(([w, n]) => `${w} (${n})`).join(", ")}</div>}
+        </>
+      ) : <div className="n">{show.num}: not in your lexicon.</div>}
+    </div>
   );
 }

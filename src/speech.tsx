@@ -5,7 +5,7 @@
 import { createContext, ReactNode, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { api, Verse } from "./api";
 import { book, nextChapter } from "./bible";
-import { plainText } from "./esword";
+import { docSegments, plainText } from "./esword";
 import { useApp } from "./state";
 
 export interface PlayerState {
@@ -23,12 +23,16 @@ export interface PlayerState {
   sleepEndOfChapter: boolean;
   /** Which sleep option was chosen, so the menu can tick it. */
   sleepChoice: number | "chapter" | null;
+  /** Reading a reference book instead of the Bible: "verse" is then the paragraph number. */
+  doc: { module: string; title: string } | null;
 }
 
 interface PlayerCtx {
   state: PlayerState;
   voices: SpeechSynthesisVoice[];
   play: (bible: string, book: number, chapter: number, fromVerse?: number) => void;
+  /** Reads a reference book's chapter, paragraph by paragraph (from docSegments). */
+  playDoc: (module: string, title: string, paragraphs: string[], from?: number) => void;
   toggle: () => void;
   stop: () => void;
   skip: (d: number) => void;
@@ -42,7 +46,7 @@ export const usePlayer = () => {
   return c;
 };
 
-const IDLE: PlayerState = { on: false, paused: false, bible: "", book: 0, chapter: 0, verse: 0, count: 0, char: -1, sleepAt: null, sleepEndOfChapter: false, sleepChoice: null };
+const IDLE: PlayerState = { on: false, paused: false, bible: "", book: 0, chapter: 0, verse: 0, count: 0, char: -1, sleepAt: null, sleepEndOfChapter: false, sleepChoice: null, doc: null };
 
 export function PlayerProvider({ children }: { children: ReactNode }) {
   const app = useApp();
@@ -53,6 +57,8 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   st.current = state;
   const settings = useRef(app.settings);
   settings.current = app.settings;
+  const appRef = useRef(app);
+  appRef.current = app;
   const gen = useRef(0); // bumps on every restart, so stale utterance callbacks do nothing
 
   useEffect(() => {
@@ -79,6 +85,25 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     const vs = verses.current;
     const s = st.current;
     if (s.sleepAt && Date.now() > s.sleepAt) { stop(); return; }
+    if (i >= vs.length && s.doc) {
+      const { module, title } = s.doc;
+      if (!settings.current.continueChapter || s.sleepEndOfChapter) { stop(); return; }
+      api.referenceTitles(module).then(async (ts) => {
+        const next = ts[ts.indexOf(title) + 1];
+        if (!next) { if (g === gen.current) stop(); return; }
+        const art = await api.article("reference", module, next);
+        if (g !== gen.current) return;
+        const segs = docSegments(art?.html ?? "");
+        verses.current = segs.map((text, k) => ({ v: k + 1, text }));
+        const doc = { module, title: next };
+        st.current = { ...st.current, doc };
+        setState((p) => ({ ...p, doc, verse: 1, count: segs.length, char: -1 }));
+        // Turn the page too, if the book is open.
+        if (appRef.current.doc?.module === module && appRef.current.doc.title === title) appRef.current.openDoc(module, next);
+        window.setTimeout(() => speakFrom(0), 600);
+      }).catch(() => { if (g === gen.current) stop(); });
+      return;
+    }
     if (i >= vs.length) {
       const nx = nextChapter(s.book, s.chapter);
       if (settings.current.continueChapter && nx && !s.sleepEndOfChapter) {
@@ -94,7 +119,8 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     }
     const verse = vs[i];
     const text = plainText(verse.text);
-    const prefix = settings.current.readNumbers ? `Verse ${verse.v}. ` : "";
+    if (!text) { setState((p) => ({ ...p, verse: verse.v, char: -1 })); speakFrom(i + 1); return; }
+    const prefix = settings.current.readNumbers && !s.doc ? `Verse ${verse.v}. ` : "";
     const u = new SpeechSynthesisUtterance(prefix + text);
     const voice = voiceFor();
     if (voice) u.voice = voice;
@@ -110,11 +136,20 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     api.chapter(bible, b, c).then((v) => {
       verses.current = v;
       const i = Math.max(0, fromVerse ? v.findIndex((x) => x.v === fromVerse) : 0);
-      const next = { ...st.current, on: true, paused: false, bible, book: b, chapter: c, verse: v[i]?.v ?? 1, count: v.length, char: -1 };
+      const next = { ...st.current, on: true, paused: false, bible, book: b, chapter: c, verse: v[i]?.v ?? 1, count: v.length, char: -1, doc: null };
       st.current = next;
       setState(next);
       speakFrom(i);
     });
+  }, [speakFrom]);
+
+  const playDoc = useCallback((module: string, title: string, paragraphs: string[], from = 0) => {
+    verses.current = paragraphs.map((text, k) => ({ v: k + 1, text }));
+    const i = Math.max(0, Math.min(from, paragraphs.length - 1));
+    const next = { ...st.current, on: true, paused: false, doc: { module, title }, verse: i + 1, count: paragraphs.length, char: -1 };
+    st.current = next;
+    setState(next);
+    speakFrom(i);
   }, [speakFrom]);
 
   const toggle = useCallback(() => {
@@ -155,7 +190,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => () => window.speechSynthesis.cancel(), []);
 
-  return <Ctx.Provider value={{ state, voices, play, toggle, stop, skip, sleep }}>{children}</Ctx.Provider>;
+  return <Ctx.Provider value={{ state, voices, play, playDoc, toggle, stop, skip, sleep }}>{children}</Ctx.Provider>;
 }
 
 export const chapterName = (b: number, c: number) => `${book(b).name} ${c}`;

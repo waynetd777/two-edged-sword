@@ -5,7 +5,7 @@ import { AskPanel } from "./Ask";
 import { plainText, renderHtml } from "./esword";
 import { Icon } from "./icons";
 import { useApp } from "./state";
-import { Popover } from "./ui";
+import { Popover, TrailButtons, useTrail } from "./ui";
 
 export type StudyTab = "commentary" | "dictionary" | "notes" | "maps" | "ask";
 
@@ -28,28 +28,79 @@ interface Props {
 }
 
 /** Hovering a reference shows the verse; clicking opens it. */
-export function useRefPreview(bible: string) {
+export function useRefPreview(bible: string, side: "below" | "right" = "below") {
   const [prev, setPrev] = useState<{ r: Ref; rect: DOMRect; text: string } | null>(null);
   const timer = useRef<number | undefined>(undefined);
-  const onRefHover = (r: Ref | null, el: HTMLElement | null) => {
+  const onRefHover = (r: Ref | null, el: HTMLElement | null, from = bible) => {
     window.clearTimeout(timer.current);
     if (!r || !el) { timer.current = window.setTimeout(() => setPrev(null), 150); return; }
     const rect = el.getBoundingClientRect();
     timer.current = window.setTimeout(async () => {
       const to = r.toChapter ? 200 : r.to ?? r.verse ?? 200;
       try {
-        const [p] = await api.passages(bible, [{ book: r.book, chapter: r.chapter, from: r.verse ?? 1, to: r.verse ? to : 6 }]);
+        const [p] = await api.passages(from, [{ book: r.book, chapter: r.chapter, from: r.verse ?? 1, to: r.verse ? to : 6 }]);
         setPrev({ r, rect, text: p.verses.map((v) => (p.verses.length > 1 ? `${v.v} ` : "") + plainText(v.text)).join(" ") });
       } catch { /* not in this Bible */ }
     }, 350);
   };
+  const pos = !prev ? {} : side === "right"
+    ? { left: prev.rect.right + 8, top: Math.max(12, Math.min(prev.rect.top - 12, window.innerHeight - 280)) }
+    : { left: Math.max(12, Math.min(prev.rect.left - 40, window.innerWidth - 340)), top: prev.rect.top > 260 ? prev.rect.top - 8 : prev.rect.bottom + 8, transform: prev.rect.top > 260 ? "translateY(-100%)" : undefined };
   const node = prev && (
-    <div className="popover" style={{ left: Math.max(12, Math.min(prev.rect.left - 40, window.innerWidth - 340)), top: prev.rect.top > 260 ? prev.rect.top - 8 : prev.rect.bottom + 8, transform: prev.rect.top > 260 ? "translateY(-100%)" : undefined, width: 320, padding: "12px 14px", pointerEvents: "none" }}>
+    <div className="popover" style={{ ...pos, width: 320, padding: "12px 14px", pointerEvents: "none" }}>
       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}><b style={{ fontSize: 12 }}>{fmtRef(prev.r)}</b><span className="n">click to open</span></div>
       <div style={{ font: "400 15px/1.55 var(--serif)", maxHeight: 220, overflow: "hidden" }}>{prev.text}</div>
     </div>
   );
-  return { onRefHover, preview: node, hide: () => setPrev(null) };
+  return { onRefHover, preview: node, hide: () => { window.clearTimeout(timer.current); setPrev(null); } };
+}
+
+// A dictionary's entry names, lower-cased to the real name; loaded once per module for "See X" links.
+const topicCache = new Map<string, Promise<Map<string, string>>>();
+/** Resolves a name to an entry of the dictionary (not `self`), once its names have loaded. */
+export function useTopics(module: string | undefined, self?: string) {
+  const [names, setNames] = useState<Map<string, string> | null>(null);
+  useEffect(() => {
+    setNames(null);
+    if (!module) return;
+    let p = topicCache.get(module);
+    if (!p) {
+      p = api.topics("dictionary", module, "", 200000).then((ts) => new Map(ts.map((t) => [t.toLowerCase(), t])));
+      p.catch(() => topicCache.delete(module));
+      topicCache.set(module, p);
+    }
+    let live = true;
+    p.then((m) => live && setNames(m)).catch(() => {});
+    return () => { live = false; };
+  }, [module]);
+  if (!names) return undefined;
+  return (name: string) => {
+    const t = names.get(name.toLowerCase());
+    return t && t !== self ? t : undefined;
+  };
+}
+
+/** Questions that suit the passage: its kind of writing, who is speaking, whether a verse or a chapter is in view. */
+export function bibleSuggestions(r: Ref, verses: Verse[]): string[] {
+  const b = r.book, name = book(b).name;
+  const inView = r.verse ? verses.filter((v) => v.v >= r.verse! && v.v <= (r.to ?? r.verse!)) : verses;
+  const jesus = inView.some((v) => /<red>/i.test(v.text));
+  const out = [r.verse ? `What is the main point of ${fmtRef(r, "short")}?` : `Summarise ${name} ${r.chapter}`];
+  if (b <= 5) out.push("What does this show about God's covenant with Israel?");
+  else if (b <= 17) out.push("What was happening historically at this point?");
+  else if (b === 19) out.push("What kind of psalm is this, and how is it built?");
+  else if (b === 20) out.push("How would I live this out today?");
+  else if (b <= 22) out.push(`How does this fit the argument of ${name}?`);
+  else if (b <= 39) out.push("Who was this spoken to, and has it been fulfilled?");
+  else if (b <= 43) out.push(jesus ? "What did Jesus mean here?" : "How do the other Gospels tell this?");
+  else if (b === 44) out.push("Where does this fit in the spread of the church?");
+  else if (b <= 65) out.push("What problem was the writer addressing?");
+  else out.push("How do the main schools of interpretation read this?");
+  if (b <= 43 && b >= 40 && jesus) out.push("How do the other Gospels tell this?");
+  out.push(b <= 39 ? "Where is this quoted or echoed in the New Testament?" : "What Old Testament background lies behind this?");
+  if (!r.verse) out.push("How is this chapter structured?");
+  else out.push("Are there any key words in the original language here?");
+  return Array.from(new Set(out)).slice(0, 4);
 }
 
 /** A commentary's name, short enough for a chip: "Barnes", "JFB", "Pulpit". */
@@ -92,7 +143,7 @@ export function StudyPane(p: Props) {
       {p.tab === "dictionary" && <DictionaryTab dict={p.dict} setDict={p.setDict} />}
       {p.tab === "notes" && <NotesTab vref={vref} selRef={p.selRef} />}
       {p.tab === "maps" && <MapsTab bookN={p.book} />}
-      {p.tab === "ask" && <AskPanel source="Read" seed={p.askSeed} clearSeed={p.clearAskSeed} passage={p.selRef ?? { book: p.book, chapter: p.chapter }} verses={p.verses} full />}
+      {p.tab === "ask" && <AskPanel source="Read" seed={p.askSeed} clearSeed={p.clearAskSeed} passage={p.selRef ?? { book: p.book, chapter: p.chapter }} verses={p.verses} suggestions={bibleSuggestions(p.selRef ?? { book: p.book, chapter: p.chapter }, p.verses)} full />}
     </aside>
   );
 }
@@ -103,13 +154,22 @@ function CommentaryTab(p: Props & { vref: Ref }) {
   const [data, setData] = useState<Commentary | null>(null);
   const [intro, setIntro] = useState<"verse" | "chapter" | "book">("verse");
   const { onRefHover, preview, hide } = useRefPreview(app.settings.bible);
-  useEffect(() => { api.coverage(p.book, p.chapter, p.verse).then(setCov); }, [p.book, p.chapter, p.verse]);
+  // Following a note moves the pane, not the reader; the trail leads back to the verse being read.
+  type At = { book: number; chapter: number; verse: number };
+  const trail = useTrail<At>((a, b) => a.book === b.book && a.chapter === b.chapter && a.verse === b.verse);
+  const reading: At = { book: p.book, chapter: p.chapter, verse: p.verse };
+  useEffect(() => { trail.reset([reading]); }, [p.book, p.chapter, p.verse]); // eslint-disable-line react-hooks/exhaustive-deps
+  const at = trail.cur ?? reading;
+  const away = at.book !== p.book || at.chapter !== p.chapter || at.verse !== p.verse;
+  useEffect(() => { api.coverage(at.book, at.chapter, at.verse).then(setCov); }, [at.book, at.chapter, at.verse]);
   const list = useMemo(() => orderModules(cov.filter((c) => c.id !== app.tsk && c.range), app.settings.commentaryOrder), [cov, app.tsk, app.settings.commentaryOrder]);
   const current = (p.commentary && list.find((c) => c.id === p.commentary)) || list[0];
   useEffect(() => {
     if (!current) { setData(null); return; }
-    api.commentary(current.id, p.book, p.chapter, p.verse).then(setData);
-  }, [current?.id, p.book, p.chapter, p.verse]);
+    api.commentary(current.id, at.book, at.chapter, at.verse).then(setData);
+  }, [current?.id, at.book, at.chapter, at.verse]);
+  const note = (r: Ref) => { hide(); setIntro("verse"); trail.visit({ book: r.book, chapter: r.chapter, verse: r.verse ?? 1 }); };
+  const goTrail = (d: number) => { hide(); setIntro("verse"); trail.go(d); };
   const open = (r: Ref) => { hide(); app.open({ book: r.book, chapter: r.chapter, verse: r.verse, to: r.to }); };
   const html = intro === "chapter" ? data?.chapter : intro === "book" ? data?.book : data?.verse.map((e) => e.html).join("");
   const others = cov.filter((c) => c.id !== app.tsk && !c.range);
@@ -119,7 +179,7 @@ function CommentaryTab(p: Props & { vref: Ref }) {
       <div style={{ display: "flex", gap: 6, padding: "10px 18px 0", flexWrap: "wrap" }}>
         {shown.map((c) => (
           <button key={c.id} type="button" className={`chip ${current?.id === c.id ? "on" : ""}`} title={c.title} onClick={() => { p.setCommentary(c.id); setIntro("verse"); }}>
-            {c.abbrev.replace(/^(Albert|Adam|John|Matthew) /, "")}{c.range && rangeLabel(c.range, p.chapter) && <span className="n">{rangeLabel(c.range, p.chapter)}</span>}
+            {c.abbrev.replace(/^(Albert|Adam|John|Matthew) /, "")}{c.range && rangeLabel(c.range, at.chapter) && <span className="n">{rangeLabel(c.range, at.chapter)}</span>}
           </button>
         ))}
         {others.length > 0 && <span className="n" style={{ alignSelf: "center" }} title={others.map((o) => o.title).join(", ")}>{others.length} with nothing here</span>}
@@ -128,15 +188,22 @@ function CommentaryTab(p: Props & { vref: Ref }) {
         {current ? (
           <>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-              <span className="label">{current.title} · {intro === "verse" ? fmtRef({ book: p.book, chapter: p.chapter, verse: current.range?.[1], to: current.range?.[3] }) : intro === "chapter" ? `${book(p.book).name} ${p.chapter}` : book(p.book).name}</span>
+              {(trail.canBack || trail.canForward) && <TrailButtons trail={trail} onGo={goTrail} />}
+              <span className="label">{current.title} · {intro === "verse" ? fmtRef({ book: at.book, chapter: at.chapter, verse: current.range?.[1], to: current.range?.[3] }) : intro === "chapter" ? `${book(at.book).name} ${at.chapter}` : book(at.book).name}</span>
               <span style={{ marginLeft: "auto", display: "flex", gap: 4 }}>
                 {data?.chapter && <button type="button" className={`chip ${intro === "chapter" ? "on" : ""}`} onClick={() => setIntro(intro === "chapter" ? "verse" : "chapter")}>Chapter intro</button>}
                 {data?.book && <button type="button" className={`chip ${intro === "book" ? "on" : ""}`} onClick={() => setIntro(intro === "book" ? "verse" : "book")}>Book intro</button>}
               </span>
             </div>
-            <div className="es prose selectable">{html ? renderHtml(html, { onRef: open, onRefHover, onStrongs: app.studyWord }) : <span className="n">Nothing here.</span>}</div>
+            {away && (
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10, padding: "6px 10px", borderRadius: 8, background: "var(--accentsoft)", fontSize: 12.5 }}>
+                <span>Following a note, away from {fmtRef(p.vref)}</span>
+                <button className="btn small" type="button" style={{ marginLeft: "auto" }} onClick={() => { setIntro("verse"); trail.visit(reading); }}>Back to {p.chapter}:{p.verse}</button>
+              </div>
+            )}
+            <div className="es prose selectable">{html ? renderHtml(html, { onRef: open, onRefHover, onStrongs: app.studyWord, onNote: note }) : <span className="n">Nothing here.</span>}</div>
           </>
-        ) : <div className="empty">No commentary in your library covers {fmtRef(p.vref)}.</div>}
+        ) : <div className="empty">No commentary in your library covers {fmtRef({ book: at.book, chapter: at.chapter, verse: at.verse })}.</div>}
       </div>
       <CrossRefs vref={p.vref} onOpen={open} onRefHover={onRefHover} />
       {preview}
@@ -168,12 +235,18 @@ function CrossRefs({ vref, onOpen, onRefHover }: { vref: Ref; onOpen: (r: Ref) =
 function DictionaryTab({ dict, setDict }: { dict: { module: string; topic: string } | null; setDict: (d: { module: string; topic: string } | null) => void }) {
   const app = useApp();
   const dicts = orderModules((app.lib?.modules ?? []).filter((m) => m.kind === "dictionary"), app.settings.dictionaryOrder);
-  const [module, setModule] = useState<string>(dict?.module ?? dicts[0]?.id ?? "");
+  const remembered = dicts.find((d) => d.id === (dict?.module ?? app.settings.dictModule))?.id;
+  const [module, setModuleState] = useState<string>(remembered ?? dicts[0]?.id ?? "");
+  const setModule = (m: string) => { setModuleState(m); if (m !== app.settings.dictModule) app.set({ dictModule: m }); };
   const [q, setQ] = useState(dict?.topic ?? "");
   const [topics, setTopics] = useState<string[]>([]);
   const [art, setArt] = useState<Article | null>(null);
   const { onRefHover, preview, hide } = useRefPreview(app.settings.bible);
-  useEffect(() => { if (dict) { setModule(dict.module); setQ(dict.topic); } }, [dict]);
+  const topic = useTopics(art ? module : undefined, art?.topic);
+  // Every entry opened joins the trail, so links followed can be walked back.
+  const trail = useTrail<{ module: string; topic: string }>((a, b) => a.module === b.module && a.topic === b.topic);
+  useEffect(() => { if (dict) { setModule(dict.module); setQ(dict.topic); trail.visit(dict); } }, [dict]); // eslint-disable-line react-hooks/exhaustive-deps
+  const goTrail = (d: number) => { hide(); const it = trail.go(d); if (it) setDict(it); };
   useEffect(() => {
     if (!module) return;
     if (dict && dict.module === module) api.article("dictionary", module, dict.topic).then(setArt);
@@ -205,9 +278,12 @@ function DictionaryTab({ dict, setDict }: { dict: { module: string; topic: strin
       <div className="scroll" style={{ flexGrow: 1, padding: "14px 22px 20px" }}>
         {art ? (
           <>
-            <div className="label" style={{ marginBottom: 4 }}>{art.title}</div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+              {(trail.canBack || trail.canForward) && <TrailButtons trail={trail} onGo={goTrail} />}
+              <div className="label">{art.title}</div>
+            </div>
             <h2 style={{ margin: "0 0 10px", font: "500 26px/1.2 var(--display)" }}>{art.topic}</h2>
-            <div className="es prose selectable">{renderHtml(art.html, { onRef: (r) => { hide(); app.open({ book: r.book, chapter: r.chapter, verse: r.verse, to: r.to }); }, onRefHover, onStrongs: app.studyWord })}</div>
+            <div className="es prose selectable">{renderHtml(art.html, { onRef: (r) => { hide(); app.open({ book: r.book, chapter: r.chapter, verse: r.verse, to: r.to }); }, onRefHover, onStrongs: app.studyWord, topic, onTopic: (t) => { hide(); pick(t); setQ(t); } })}</div>
           </>
         ) : <div className="empty">Click a word in the text, or type one above.</div>}
       </div>
