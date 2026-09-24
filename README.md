@@ -24,7 +24,8 @@ read-only and keeps what you make (journal, bookmarks, highlights, plans, chats)
 | | |
 |---|---|
 | ![Ask comparing the commentators on 1 John 1:1](docs/images/ask.png) | ![KJV+, ASV and YLT compared, differences highlighted](docs/images/compare.png) |
-| ![Word Study for G26, agapē](docs/images/word-study.png) | ![Quiet time with today's readings](docs/images/quiet-time.png) |
+| ![Word Study for G26, agapē](docs/images/word-study.png) | ![Listening to 1 John 1, the word being spoken highlighted](docs/images/listen.png) |
+| ![Quiet time with today's readings](docs/images/quiet-time.png) | ![Searching the KJV for “tithe”, with the verse in context](docs/images/search.png) |
 
 ## Documentation
 
