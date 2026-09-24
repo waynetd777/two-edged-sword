@@ -1,5 +1,9 @@
 # Features
 
+[Read](#read) · [Books and devotionals](#books-and-devotionals) · [Listen](#listen) ·
+[Compare](#compare) · [Search](#search) · [Word Study](#word-study) · [Journal](#journal) ·
+[Quiet time](#quiet-time) · [Menu bar](#menu-bar) · [Library](#library) · [Settings](#settings)
+
 ⌘1 to ⌘7 switch between the screens, ⌘K goes to any reference or command, and ⌘, opens
 Settings. Everything you delete (a journal entry, a plan, a chat) asks first.
 
