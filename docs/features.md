@@ -62,9 +62,14 @@ first column highlighted, and Strong's numbers shown for a Strong's Bible.
 
 ## Search
 
-The Bible, every commentary and dictionary, and your journal at once. A Strong's number such as
-`G509` finds every verse that uses the word, however it is translated. The search is kept while
-you open results and come back.
+![Searching the KJV for “tithe”, with the verse in context](images/search.png)
+
+The Bible, every commentary and dictionary, and your journal at once, with a count for each.
+Narrow it to one Bible, a range (Old or New Testament, Wisdom, Prophets, Gospels, Letters), and
+match the exact phrase, all or any of the words, and whole words only. Selecting a verse shows it
+in context beside the results, ready to open or compare, and Ask can summarise what the results
+say. A Strong's number such as `G509` finds every verse that uses the word, however it is
+translated. The search is kept while you open results and come back.
 
 ## Word Study
 
