@@ -98,7 +98,16 @@ export type Screen = "read" | "compare" | "search" | "word" | "journal" | "plans
 
 export interface Loc { book: number; chapter: number; verse?: number; to?: number }
 /** A reference book open in the reading column, and the chapter being read. */
-export interface Doc { module: string; title: string }
+export interface Doc { module: string; title: string; kind?: DocKind }
+export type DocKind = "reference" | "devotional";
+
+/** One part of a Quiet time: a chapter (or part of one), a devotional's reading, or an online devotional. */
+export type QuietStep = { key: string; label: string } & (
+  | { kind: "bible"; bible: string; b: number; c: number; v?: number; v2?: number }
+  | { kind: "devotional"; module: string; title: string }
+  | { kind: "online"; id: string; url: string }
+);
+export interface Session { planId: string; dayKey: string; steps: QuietStep[]; i: number; audio: boolean; started: number }
 
 interface Ctx {
   lib: LibraryInfo | null;
@@ -129,10 +138,14 @@ interface Ctx {
   setHighlight: (key: string, c: HlColor | null) => void;
   recent: { book: number; chapter: number; at: string }[];
 
+  /** A Quiet time session being stepped through (QuietTime.tsx). */
+  session: Session | null;
+  setSession: (s: Session | null | ((s: Session | null) => Session | null)) => void;
+
   /** The reference book in the reading column; null while reading the Bible. */
   doc: Doc | null;
   /** Opens a reference book, at the given chapter or wherever it was last left. */
-  openDoc: (module: string, title?: string) => void;
+  openDoc: (module: string, title?: string, kind?: DocKind) => void;
   closeDoc: () => void;
   /** The chapter last read in each reference book. */
   docAt: Record<string, string>;
@@ -218,6 +231,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [wordStudy, setWordStudy] = useState<string | null>(null);
   const [journalSeed, setJournalSeed] = useState<JournalSeed | null>(null);
   const [pending, setPendingState] = useState<Pending | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [searchFor, setSearchFor] = useState<string | null>(null);
   const [toastMsg, setToast] = useState<string | null>(null);
   const toastTimer = useRef<number | undefined>(undefined);
@@ -305,11 +319,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
     highlights,
     setHighlight: (k, c) => setHighlights((h) => { const n = { ...h }; if (c) n[k] = c; else delete n[k]; return n; }),
     recent: nav.recent,
+    session, setSession,
     doc: nav.doc, docAt: nav.docAt ?? {},
-    openDoc: (module, title) => {
+    openDoc: (module, title, kind = "reference") => {
       setNav((n) => {
+        // A devotional opens on today's reading (DocReader picks it); a book where it was left.
+        if (kind === "devotional") return { ...n, doc: { module, title: title ?? "", kind } };
         const t = title ?? n.docAt?.[module];
-        return { ...n, doc: { module, title: t ?? "" }, docAt: t ? { ...n.docAt, [module]: t } : n.docAt };
+        return { ...n, doc: { module, title: t ?? "", kind }, docAt: t ? { ...n.docAt, [module]: t } : n.docAt };
       });
       setScreen("read");
     },

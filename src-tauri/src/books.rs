@@ -19,22 +19,28 @@ pub struct Export {
     pub files: Vec<String>,
 }
 
-pub fn export(lib: &Library, root: &Path, module: &str) -> Result<Export, String> {
-    let dir = root.join(sanitize(module, 80));
-    let titles = content::reference_titles(lib, module)?;
+pub fn export(lib: &Library, root: &Path, module: &str, kind: Kind) -> Result<Export, String> {
+    let devotional = kind == Kind::Devotional;
+    let dir = root.join(if devotional { format!("devotional-{}", sanitize(module, 80)) } else { sanitize(module, 80) });
+    let titles = if devotional { content::devotion_titles(lib, module)? } else { content::reference_titles(lib, module)? };
     let files: Vec<String> = titles.iter().enumerate().map(|(i, t)| format!("{:02} {}.txt", i + 1, sanitize(t, 60))).collect();
+    let chapter = if devotional { "Days" } else { "Chapters" };
     let marker = dir.join(".complete");
     if std::fs::read_to_string(&marker).ok().as_deref() == Some(VERSION) {
         return Ok(Export { dir: dir.to_string_lossy().into(), files });
     }
     let _ = std::fs::remove_dir_all(&dir);
     std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
-    let book = lib.with(Kind::Reference, module, |c| {
-        let mut st = c.prepare("SELECT Chapter, Content FROM Reference ORDER BY rowid")?;
-        let rows = st.query_map([], |r| Ok((r.get::<_, String>(0)?, r.get::<_, String>(1)?)))?;
-        rows.collect::<rusqlite::Result<Vec<_>>>()
-    })?;
-    let mut index = String::from("Chapters of this book, one file each. Charts are PNG files named in the text as [Chart: …].\n\n");
+    let book: Vec<(String, String)> = if devotional {
+        titles.iter().map(|t| Ok((t.clone(), content::devotion(lib, module, t)?.unwrap_or_default()))).collect::<Result<_, String>>()?
+    } else {
+        lib.with(Kind::Reference, module, |c| {
+            let mut st = c.prepare("SELECT Chapter, Content FROM Reference ORDER BY rowid")?;
+            let rows = st.query_map([], |r| Ok((r.get::<_, String>(0)?, r.get::<_, String>(1)?)))?;
+            rows.collect::<rusqlite::Result<Vec<_>>>()
+        })?
+    };
+    let mut index = format!("{chapter} of this book, one file each. Charts are PNG files named in the text as [Chart: …].\n\n");
     for (i, (title, html)) in book.iter().enumerate() {
         let (text, images) = to_text(html, i + 1);
         for (name, bytes) in images {

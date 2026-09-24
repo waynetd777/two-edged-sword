@@ -48,7 +48,7 @@ export function LibraryScreen() {
       <div className="scroll" style={{ flexGrow: 1, padding: "20px 28px 60px", display: "flex", flexDirection: "column", gap: 16 }}>
         <div style={{ display: "flex", alignItems: "baseline", gap: 14, flexWrap: "wrap" }}>
           <h1 style={{ margin: 0, font: "500 30px/1 var(--display)" }}>Library</h1>
-          <span style={{ color: "var(--muted)" }}>{ms.length} modules · {n("bible")} Bibles, {n("commentary")} commentaries, {n("dictionary")} dictionaries, {n("lexicon")} lexicons, {n("reference")} reference books</span>
+          <span style={{ color: "var(--muted)" }}>{ms.length} modules · {n("bible")} Bibles, {n("commentary")} commentaries, {n("dictionary")} dictionaries, {n("lexicon")} lexicons, {n("reference")} reference books, {n("devotional")} devotionals</span>
         </div>
         <div className="card" style={{ padding: "14px 16px", display: "flex", alignItems: "center", gap: 14 }}>
           <Icon name="check" size={22} style={{ color: "var(--good)" }} />
@@ -81,9 +81,9 @@ export function LibraryScreen() {
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 12 }}>
           <Ordered kind="commentary" title="Commentaries" orderKey="commentaryOrder" />
           <Ordered kind="dictionary" title="Dictionaries" orderKey="dictionaryOrder" />
-          {(["lexicon", "reference"] as const).map((k) => (
+          {(["lexicon", "reference", "devotional"] as const).map((k) => (
             <div key={k} className="card" style={{ padding: "14px 16px", display: "flex", flexDirection: "column", gap: 4 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", paddingBottom: 4 }}><span className="label">{k === "lexicon" ? "Lexicons" : "Reference and maps"}</span><span className="n">{n(k)}</span></div>
+              <div style={{ display: "flex", justifyContent: "space-between", paddingBottom: 4 }}><span className="label">{k === "lexicon" ? "Lexicons" : k === "devotional" ? "Devotionals" : "Reference and maps"}</span><span className="n">{n(k)}</span></div>
               {ms.filter((m) => m.kind === k).map((m) => <a key={m.id} style={{ fontSize: 12.5, color: "var(--text)", minHeight: 24, display: "flex", alignItems: "center" }} onClick={(e) => setInfo({ m, rect: e.currentTarget.getBoundingClientRect() })}>{m.title}</a>)}
             </div>
           ))}
@@ -95,7 +95,7 @@ export function LibraryScreen() {
           <div style={{ padding: "14px 16px", display: "flex", flexDirection: "column", gap: 8 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <b style={{ font: "500 20px var(--display)", flexGrow: 1 }}>{info.m.title}</b>
-              {info.m.kind === "reference" && <button className="btn small" type="button" onClick={() => { setInfo(null); app.openDoc(info.m.id); }}><Icon name="read" size={13} />Read</button>}
+              {(info.m.kind === "reference" || info.m.kind === "devotional") && <button className="btn small" type="button" onClick={() => { setInfo(null); app.openDoc(info.m.id, undefined, info.m.kind as "reference" | "devotional"); }}><Icon name="read" size={13} />Read</button>}
             </div>
             <div className="es" style={{ fontSize: 12.5, lineHeight: 1.5, maxHeight: 300, overflowY: "auto" }}>{renderHtml(info.m.info)}</div>
           </div>

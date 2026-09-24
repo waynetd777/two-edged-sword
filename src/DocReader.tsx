@@ -10,12 +10,19 @@ import { Topbar } from "./Shell";
 import { useApp } from "./state";
 import { useRefPreview } from "./StudyPane";
 import { Popover } from "./ui";
+import { dayTitle } from "./plans";
 
-/** A reference book in the reading column: its chapters down the side, the chapter's text in the reading font. */
+/**
+ * A reference book or a devotional in the reading column: its chapters (a devotional's days) down
+ * the side, the text in the reading font.
+ */
 export function DocReader({ focus, setFocus }: { focus: boolean; setFocus: (f: boolean) => void }) {
   const app = useApp();
   const doc = app.doc!;
-  const books = (app.lib?.modules ?? []).filter((m) => m.kind === "reference");
+  const kind = doc.kind ?? "reference";
+  const devo = kind === "devotional";
+  const unit = devo ? "reading" : "chapter";
+  const books = (app.lib?.modules ?? []).filter((m) => m.kind === kind);
   const mod = books.find((m) => m.id === doc.module);
   const [loaded, setLoaded] = useState<{ module: string; titles: string[] }>({ module: "", titles: [] });
   const titles = loaded.module === doc.module ? loaded.titles : [];
@@ -31,7 +38,7 @@ export function DocReader({ focus, setFocus }: { focus: boolean; setFocus: (f: b
   const images = useMemo(() => segs.flatMap((h) => Array.from(h.matchAll(/<img[^>]+src="(data:image\/[^"]+)"/gi), (m) => m[1])), [segs]);
   const ps = player.state;
   const reading = ps.on && ps.doc?.module === doc.module && ps.doc.title === doc.title;
-  const listen = (from = 0) => player.playDoc(doc.module, doc.title, segs, from);
+  const listen = (from = 0) => player.playDoc(doc.module, doc.title, segs, from, kind);
 
   // Ask: the chapter (or the part around the paragraph asked about) goes with the question; the
   // rest of the book is exported once so Claude can search it rather than carry it.
@@ -40,7 +47,7 @@ export function DocReader({ focus, setFocus }: { focus: boolean; setFocus: (f: b
   const exported = useRef<{ module: string; p: Promise<{ dir: string; files: string[] }> } | null>(null);
   const exportBook = () => {
     if (exported.current?.module !== doc.module) {
-      const p = api.docExport(doc.module);
+      const p = api.docExport(doc.module, kind);
       p.catch(() => { exported.current = null; });
       exported.current = { module: doc.module, p };
     }
@@ -65,8 +72,9 @@ export function DocReader({ focus, setFocus }: { focus: boolean; setFocus: (f: b
         if (from > 0 && n < 6000) n += words(--from);
       }
     }
-    const part = from === 0 && to === paras.length - 1 ? "the whole chapter" : `paragraphs ${from + 1} to ${to + 1} of ${paras.length}; the rest is in the file`;
-    const lines = [`The reader has open "${mod?.title ?? doc.module}", chapter "${doc.title}"${file ? ` (file "${file}")` : ""}. Here is ${part}, numbered by paragraph:`];
+    const part = from === 0 && to === paras.length - 1 ? `the whole ${unit}` : `paragraphs ${from + 1} to ${to + 1} of ${paras.length}; the rest is in the file`;
+    const where = devo ? `the devotional "${mod?.title ?? doc.module}", the reading for ${doc.title}` : `"${mod?.title ?? doc.module}", chapter "${doc.title}"`;
+    const lines = [`The reader has open ${where}${file ? ` (file "${file}")` : ""}. Here is ${part}, numbered by paragraph:`];
     for (let k = from; k <= to; k++) lines.push(`[${k + 1}] ${paras[k]}`);
     if (asking !== null) lines.push(`\nThe question is about paragraph ${asking + 1}:\n${paras[asking]}`);
     return lines.join("\n");
@@ -75,7 +83,15 @@ export function DocReader({ focus, setFocus }: { focus: boolean; setFocus: (f: b
   const para = asking !== null ? segs[asking] ?? "" : "";
   const multi = titles.length > 1;
   const chapterRefs = segs.reduce((n, h) => n + (h.match(/<ref>/gi)?.length ?? 0), 0);
-  const suggestions = (asking === null
+  const suggestions = (asking === null && devo
+    ? [
+        "Summarise today's reading",
+        "What is the key verse here, and why?",
+        "How can I put this into practice today?",
+        "Give me a short prayer drawn from this",
+        chapterRefs >= 2 ? "Read me the verses it quotes" : "",
+      ]
+    : asking === null
     ? [
         "Summarise this chapter",
         images.length === 1 ? "Explain the chart in this chapter" : images.length > 1 ? "Explain the main chart in this chapter" : "",
@@ -88,7 +104,7 @@ export function DocReader({ focus, setFocus }: { focus: boolean; setFocus: (f: b
         /<img/i.test(para) ? "Explain this chart" : "Explain this paragraph",
         plainText(para).split(/\s+/).length > 80 ? "Put this in simpler words" : "",
         /<ref>/i.test(para) ? "How do the verses cited here support this?" : "What Scriptures support this?",
-        multi ? "Where else does the book discuss this?" : "",
+        multi ? (devo ? "Where else does this devotional touch on this?" : "Where else does the book discuss this?") : "",
         "What would someone who disagrees say?",
       ]
   ).filter(Boolean).slice(0, 5);
@@ -102,17 +118,23 @@ export function DocReader({ focus, setFocus }: { focus: boolean; setFocus: (f: b
   useEffect(() => {
     setFilter("");
     const module = doc.module;
-    api.referenceTitles(module).then((titles) => setLoaded({ module, titles })).catch(() => setLoaded({ module, titles: [] }));
-  }, [doc.module]);
+    (devo ? api.devotionTitles(module) : api.referenceTitles(module)).then((titles) => setLoaded({ module, titles })).catch(() => setLoaded({ module, titles: [] }));
+  }, [doc.module, devo]);
 
-  // No chapter yet (first time in this book): start at the first.
+  // No chapter yet: a book starts at its first, a devotional at today's reading.
   useEffect(() => {
-    if (!doc.title && titles.length) app.openDoc(doc.module, titles[0]);
-  }, [doc.title, doc.module, titles, app]);
+    if (doc.title || !titles.length) return;
+    const today = dayTitle(new Date());
+    app.openDoc(doc.module, devo ? (titles.includes(today) ? today : titles[0]) : titles[0], kind);
+  }, [doc.title, doc.module, titles, app, devo, kind]);
 
   useEffect(() => {
     if (!doc.title) { setArt(null); return; }
-    api.article("reference", doc.module, doc.title).then(setArt).catch(() => setArt(null));
+    const module = doc.module, title = doc.title;
+    (devo
+      ? api.devotion(module, title).then((html) => (html ? { module, title: mod?.title ?? module, topic: title, html } : null))
+      : api.article("reference", module, title)
+    ).then(setArt).catch(() => setArt(null));
     scroller.current?.scrollTo({ top: 0 });
     list.current?.querySelector<HTMLElement>("[aria-current=true]")?.scrollIntoView({ block: "nearest" });
   }, [doc.module, doc.title]);
@@ -124,7 +146,7 @@ export function DocReader({ focus, setFocus }: { focus: boolean; setFocus: (f: b
     const q = filter.trim().toLowerCase();
     return q ? titles.filter((t) => t.toLowerCase().includes(q)) : titles;
   }, [titles, filter]);
-  const go = (t: string | undefined) => { if (t) { hide(); app.openDoc(doc.module, t); } };
+  const go = (t: string | undefined) => { if (t) { hide(); app.openDoc(doc.module, t, kind); } };
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -164,7 +186,7 @@ export function DocReader({ focus, setFocus }: { focus: boolean; setFocus: (f: b
         <label className="btn" style={{ position: "relative", maxWidth: 320 }} title={mod?.title}>
           <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{mod?.title ?? doc.module}</span>
           <Icon name="down" className="sm" style={{ color: "var(--muted)" }} />
-          <select aria-label="Reference book" value={doc.module} onChange={(e) => app.openDoc(e.target.value)} style={{ position: "absolute", inset: 0, opacity: 0, cursor: "pointer" }}>
+          <select aria-label="Reference book" value={doc.module} onChange={(e) => app.openDoc(e.target.value, undefined, kind)} style={{ position: "absolute", inset: 0, opacity: 0, cursor: "pointer" }}>
             {books.map((b) => <option key={b.id} value={b.id}>{b.title}</option>)}
           </select>
         </label>
@@ -172,7 +194,7 @@ export function DocReader({ focus, setFocus }: { focus: boolean; setFocus: (f: b
       <div style={{ flexGrow: 1, minHeight: 0, display: "grid", gridTemplateColumns: focus ? "minmax(0,1fr)" : app.settings.studyPane ? "260px minmax(0,1fr) 520px" : "260px minmax(0,1fr)" }}>
         {!focus && <aside style={{ display: "flex", flexDirection: "column", minHeight: 0, borderRight: "1px solid var(--border)" }}>
           {titles.length > 12 && (
-            <label className="field" style={{ margin: "10px 12px 4px" }}><Icon name="search" /><input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder={`Filter ${titles.length} chapters`} aria-label="Filter chapters" /></label>
+            <label className="field" style={{ margin: "10px 12px 4px" }}><Icon name="search" /><input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder={`Filter ${titles.length} ${devo ? "days" : "chapters"}`} aria-label="Filter chapters" /></label>
           )}
           <div ref={list} className="scroll doclist" style={{ padding: "6px 8px 20px" }}>
             {shown.map((t) => <button key={t} type="button" aria-current={t === doc.title} className={t === doc.title ? "on" : ""} title={t} onClick={() => go(t)}>{t}</button>)}
@@ -184,12 +206,12 @@ export function DocReader({ focus, setFocus }: { focus: boolean; setFocus: (f: b
             {focus ? (
               <div style={{ padding: "24px 0 22px", display: "flex", flexDirection: "column", alignItems: "center", gap: 6, textAlign: "center" }}>
                 <div className="label">{mod?.title}{titles.length ? ` · ${i + 1} of ${titles.length}` : ""}</div>
-                <h1 style={{ margin: 0, font: "400 40px/1.1 var(--display)", letterSpacing: "0.02em" }}>{doc.title}</h1>
+                <h1 data-quiet-anchor style={{ margin: 0, font: "400 40px/1.1 var(--display)", letterSpacing: "0.02em" }}>{doc.title}</h1>
               </div>
             ) : (
               <div style={{ padding: "18px 0 14px" }}>
                 <div className="label">{mod?.title}{titles.length ? ` · ${i + 1} of ${titles.length}` : ""}</div>
-                <h1 style={{ margin: "6px 0 0", font: "500 30px/1.15 var(--display)" }}>{doc.title}</h1>
+                <h1 data-quiet-anchor style={{ margin: "6px 0 0", font: "500 30px/1.15 var(--display)" }}>{doc.title}</h1>
               </div>
             )}
             {art
@@ -221,7 +243,7 @@ export function DocReader({ focus, setFocus }: { focus: boolean; setFocus: (f: b
             )}
             <AskPanel key={`${doc.module}|${doc.title}|${asking}`} full source="Reader" about={asking === null ? doc.title : `${doc.title} ¶${asking + 1}`}
               context={askContext} bookDir={() => exportBook().then((x) => x.dir)}
-              hint={`Ask anything about ${asking === null ? "this chapter" : "this paragraph"}. The chapter goes with the question, and Claude can search the rest of ${mod?.title ?? "the book"} and look at its charts when it needs to.`}
+              hint={`Ask anything about ${asking === null ? `this ${unit}` : "this paragraph"}. The ${unit} goes with the question, and Claude can search the rest of ${mod?.title ?? "the book"}${devo ? "" : " and look at its charts"} when it needs to.`}
               suggestions={suggestions} />
           </aside>
         )}
@@ -264,12 +286,13 @@ export function ImageViewer({ images, start, onClose }: { images: string[]; star
   );
 }
 
-/** Opens a reference book from the Bible reader; the last one read comes first. */
+/** Opens a reference book or a devotional from the Bible reader; books read before come first. */
 export function BooksButton() {
   const app = useApp();
   const [a, setA] = useState<DOMRect | null>(null);
   const books = (app.lib?.modules ?? []).filter((m) => m.kind === "reference");
-  if (!books.length) return null;
+  const devotionals = (app.lib?.modules ?? []).filter((m) => m.kind === "devotional");
+  if (!books.length && !devotionals.length) return null;
   const last = Object.keys(app.docAt);
   const sorted = [...books].sort((x, y) => (last.includes(y.id) ? 1 : 0) - (last.includes(x.id) ? 1 : 0) || x.title.localeCompare(y.title));
   return (
@@ -277,7 +300,10 @@ export function BooksButton() {
       <button className="btn" type="button" title="Read a reference book" onClick={(e) => setA(e.currentTarget.getBoundingClientRect())}><Icon name="library" />Books<Icon name="down" className="sm" style={{ color: "var(--muted)" }} /></button>
       {a && (
         <Popover anchor={a} onClose={() => setA(null)} width={340}>
-          <div className="doclist" style={{ padding: 6, maxHeight: 420, overflowY: "auto" }}>
+          <div className="doclist" style={{ padding: 6, maxHeight: 460, overflowY: "auto" }}>
+            {devotionals.length > 0 && <div className="label" style={{ padding: "6px 10px 4px" }}>Devotionals · today</div>}
+            {devotionals.map((m) => <button key={m.id} type="button" title={m.title} onClick={() => { setA(null); app.openDoc(m.id, dayTitle(new Date()), "devotional"); }}>{m.title}</button>)}
+            {devotionals.length > 0 && books.length > 0 && <div className="label" style={{ padding: "10px 10px 4px" }}>Books</div>}
             {sorted.map((m) => <button key={m.id} type="button" title={m.title} onClick={() => { setA(null); app.openDoc(m.id); }}>{m.title}{app.docAt[m.id] && <span className="n" style={{ marginLeft: 8 }}>{app.docAt[m.id]}</span>}</button>)}
           </div>
         </Popover>

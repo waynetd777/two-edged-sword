@@ -81,7 +81,7 @@ export function SettingsScreen() {
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}><span style={{ fontSize: 12.5 }}>{app.chats.length} chat{app.chats.length === 1 ? "" : "s"}</span><button className="btn small" type="button" disabled={!app.chats.length} onClick={() => { if (window.confirm("Delete all chats? This can't be undone.")) app.setChats(() => []); }}><Icon name="trash" size={13} />Delete all chats</button></div>
             </Row>
           </Section>
-          <Section title="Reading plan">
+          <Section title="Quiet time">
             <Row label="When I fall behind"><select className="btn" value={s.whenBehind} onChange={(e) => app.set({ whenBehind: e.target.value as typeof s.whenBehind })}><option value="ask">Ask me each time</option><option value="move">Move the rest later</option><option value="skip">Skip the missed readings</option></select></Row>
           </Section>
         </div>

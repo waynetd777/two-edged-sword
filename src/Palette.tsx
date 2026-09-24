@@ -42,7 +42,7 @@ export function Palette({ onClose, onAsk }: { onClose: () => void; onAsk: (ref: 
       app.journal.filter((e) => (e.title + " " + e.tags.join(" ") + " " + e.verses.join(" ")).toLowerCase().includes(ql)).slice(0, 4).forEach((e) =>
         out.push({ id: "j" + e.id, group: "Journal", icon: "journal", label: e.title || "Untitled", sub: `${new Date(e.created).toLocaleDateString("en-GB", { day: "numeric", month: "short" })} · ${e.verses.join(", ") || mdPlain(e.body).slice(0, 60)}`, run: () => { app.startEntry({ openId: e.id }); onClose(); } }));
     } else {
-      ([["read", "Read", "⌘1"], ["compare", "Compare", "⌘2"], ["search", "Search", "⌘3"], ["word", "Word Study", "⌘4"], ["journal", "Journal", "⌘5"], ["plans", "Reading plan", "⌘6"], ["library", "Library", "⌘7"], ["settings", "Settings", "⌘,"]] as [Screen, string, string][]).forEach(([s, l, k]) =>
+      ([["read", "Read", "⌘1"], ["compare", "Compare", "⌘2"], ["search", "Search", "⌘3"], ["word", "Word Study", "⌘4"], ["journal", "Journal", "⌘5"], ["plans", "Quiet time", "⌘6"], ["library", "Library", "⌘7"], ["settings", "Settings", "⌘,"]] as [Screen, string, string][]).forEach(([s, l, k]) =>
         out.push({ id: s, group: "Screens", icon: s === "plans" ? "plans" : s, label: l, kbd: k, run: () => go(s) }));
     }
     return out;

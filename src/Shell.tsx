@@ -11,7 +11,7 @@ const NAV: { s: Screen; label: string; icon: string; key: string }[] = [
   { s: "search", label: "Search", icon: "search", key: "3" },
   { s: "word", label: "Word Study", icon: "word", key: "4" },
   { s: "journal", label: "Journal", icon: "journal", key: "5" },
-  { s: "plans", label: "Plans", icon: "plans", key: "6" },
+  { s: "plans", label: "Quiet time", icon: "plans", key: "6" },
   { s: "library", label: "Library", icon: "library", key: "7" },
 ];
 export const SCREEN_KEYS = NAV.map((n) => n.s);
@@ -69,7 +69,7 @@ export function Sidebar() {
           </button>
         ) : (
           <button type="button" className="today" onClick={() => app.go("plans")}>
-            <span className="lab" style={{ padding: 0 }}>Reading plan</span>
+            <span className="lab" style={{ padding: 0 }}>Quiet time</span>
             <span style={{ fontSize: 12 }}>Choose a plan…</span>
           </button>
         )}

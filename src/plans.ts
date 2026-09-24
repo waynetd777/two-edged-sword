@@ -21,8 +21,15 @@ export interface SequencePlan {
   shift: number;
   /** Commentary whose note goes with each day (F. B. Meyer). */
   noteModule?: string;
+  /** Devotionals read each day alongside the plan: e-Sword module ids, or ONLINE_DEVOTIONALS ids. */
+  devotionals?: string[];
+  /** Parts of the current day ticked off so far (see progressKey). */
+  progress?: Progress;
   active: boolean;
 }
+
+/** Which day `done` belongs to, and the parts of it read: "43.3" for a chapter, a devotional's id. */
+export interface Progress { key: string; done: string[] }
 
 export interface PpoPlan {
   id: string;
@@ -37,6 +44,8 @@ export interface PpoPlan {
   shortMonths: "last" | "skip";
   /** Dates read, YYYY-MM-DD. */
   doneDates: string[];
+  devotionals?: string[];
+  progress?: Progress;
   active: boolean;
 }
 
@@ -187,6 +196,48 @@ export function ppoPreview(p: PpoPlan, from: Date, n: number): { date: Date; par
     other = nextOtherAfter(other, p.otherFrom);
   }
   return out;
+}
+
+/** The days after `today`. Until today is marked read the plan has not moved on, so skip today's chapters. */
+const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+/** A day as a devotional's title: "September 24". */
+export const dayTitle = (d: Date) => `${MONTH_NAMES[d.getMonth()]} ${d.getDate()}`;
+
+/** Devotionals read online, opened in a window of their own. */
+export const ONLINE_DEVOTIONALS: { id: string; title: string; url: (d: Date) => string }[] = [
+  { id: "online:odb", title: "Our Daily Bread", url: () => "https://www.odbm.org/en/devotionals" },
+  { id: "online:heartlight", title: "Heartlight", url: (d) => `https://www.heartlight.org/cgi-shl/todaysverse.cgi?day=${ymd(d).replace(/-/g, "")}&ver=niv` },
+];
+
+/** The day being read: a sequence plan's next unread day, a Psalm-and-Proverb plan's date. */
+export function progressKey(p: Plan, d: Date): string {
+  return p.kind === "sequence" ? `day:${firstUndone(p)}` : ymd(d);
+}
+
+/** Parts of the day already ticked off. */
+export const doneToday = (p: Plan, key: string): string[] => (p.progress?.key === key ? p.progress.done : []);
+
+/** Marks the day read: the next unread day of a sequence, or the date of a Psalm-and-Proverb plan. */
+export function markDayRead(p: Plan, d: Date): Plan {
+  if (p.kind === "ppo") return markPpoRead(p, d);
+  const i = firstUndone(p);
+  return i >= 0 && !p.done.includes(i) ? { ...p, done: [...p.done, i] } : p;
+}
+
+/**
+ * Ticks off one part of the day. When every Bible part in `bibleParts` is read, the day is marked
+ * read too, once. `key` is the day the session started on, so marking cannot run into the next day.
+ */
+export function tickPart(p: Plan, key: string, part: string, bibleParts: string[], d: Date): Plan {
+  const done = Array.from(new Set([...doneToday(p, key), part]));
+  let next: Plan = { ...p, progress: { key, done } };
+  const dayRead = p.kind === "ppo" ? p.doneDates.includes(key) : p.done.includes(+key.slice(4));
+  if (!dayRead && bibleParts.length && bibleParts.every((x) => done.includes(x))) next = markDayRead(next, d);
+  return next;
+}
+
+export function ppoUpcoming(p: PpoPlan, today: Date, n: number): { date: Date; parts: Part[] }[] {
+  return p.doneDates.includes(ymd(today)) ? ppoPreview(p, addDays(today, 1), n) : ppoPreview(p, today, n + 1).slice(1);
 }
 
 export function markPpoRead(p: PpoPlan, d: Date): PpoPlan {

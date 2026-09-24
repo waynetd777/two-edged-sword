@@ -15,6 +15,7 @@ pub enum Kind {
     Dictionary,
     Lexicon,
     Reference,
+    Devotional,
 }
 
 impl Kind {
@@ -25,6 +26,7 @@ impl Kind {
             "dcti" => Some(Kind::Dictionary),
             "lexi" => Some(Kind::Lexicon),
             "refi" => Some(Kind::Reference),
+            "devi" => Some(Kind::Devotional),
             _ => None,
         }
     }
@@ -143,6 +145,7 @@ mod tests {
     fn kinds_from_extensions() {
         assert_eq!(Kind::from_ext("bbli"), Some(Kind::Bible));
         assert_eq!(Kind::from_ext("refi"), Some(Kind::Reference));
+        assert_eq!(Kind::from_ext("devi"), Some(Kind::Devotional));
         assert_eq!(Kind::from_ext("dzip"), None);
     }
 }

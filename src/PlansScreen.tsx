@@ -3,12 +3,12 @@ import { api } from "./api";
 import { book, BOOKS, fmtRef, parseRef, SECTIONS, SHORT } from "./bible";
 import { Icon, Play } from "./icons";
 import {
-  addDays, balanced, behind, chaptersOf, dateOf, dayLabel, firstUndone, fmtDay, fmtLong, indexOn, markPpoRead, paired, parseYmd, partRef, perDay, Plan, PpoPlan, ppoPreview, SequencePlan, Sizes, today, todayFor, ymd,
+  addDays, balanced, behind, chaptersOf, dateOf, dayLabel, firstUndone, fmtDay, fmtLong, indexOn, markPpoRead, paired, parseYmd, partRef, perDay, Plan, PpoPlan, dayTitle, ONLINE_DEVOTIONALS, doneToday, progressKey, ppoPreview, ppoUpcoming, SequencePlan, Sizes, today, todayFor, ymd,
 } from "./plans";
 import { Topbar } from "./Shell";
-import { usePlayer } from "./speech";
 import { uid, useApp } from "./state";
-import { Dialog, Seg } from "./ui";
+import { Dialog, Popover, Seg } from "./ui";
+import { useStartQuietTime } from "./QuietTime";
 
 let sizesCache: Record<string, Sizes> = {};
 async function sizes(bible: string): Promise<Sizes> {
@@ -18,7 +18,6 @@ async function sizes(bible: string): Promise<Sizes> {
 
 export function PlansScreen() {
   const app = useApp();
-  const player = usePlayer();
   const plan = app.plans.find((p) => p.active) ?? app.plans[0];
   const [picker, setPicker] = useState(false);
   const [builder, setBuilder] = useState(false);
@@ -26,6 +25,8 @@ export function PlansScreen() {
   const [month, setMonth] = useState(() => { const d = today(); d.setDate(1); return d; });
 
   const update = (p: Plan) => app.setPlans((ps) => ps.map((x) => (x.id === p.id ? p : x)));
+  const startQuiet = useStartQuietTime();
+  const partsDone = plan ? doneToday(plan, progressKey(plan, today())) : [];
   const t = plan ? todayFor(plan) : null;
   const late = plan?.kind === "sequence" ? behind(plan) : 0;
 
@@ -44,7 +45,9 @@ export function PlansScreen() {
     else { const i = firstUndone(plan); if (i >= 0) update({ ...plan, done: [...plan.done, i] }); }
     app.toast("Marked as read");
   };
-  const openPart = (i = 0) => { const x = t?.parts[i]; if (x) app.open({ book: x.b, chapter: x.c, verse: x.v, to: x.v2 }, "read"); };
+  // A plan is read in the Bible it was set up with, when that Bible is still in the library.
+  const toPlanBible = () => { if (app.mod("bible", plan.bible) && app.settings.bible !== plan.bible) app.set({ bible: plan.bible }); };
+  const openPart = (i = 0) => { const x = t?.parts[i]; if (x) { toPlanBible(); app.open({ book: x.b, chapter: x.c, verse: x.v, to: x.v2 }, "read"); } };
 
   // Days to mark on the calendar.
   const doneDays = useMemo(() => {
@@ -56,7 +59,7 @@ export function PlansScreen() {
   }, [plan]);
   const upcoming = useMemo(() => {
     if (!plan) return [];
-    if (plan.kind === "ppo") return ppoPreview(plan, addDays(today(), 1), 6).map((x) => ({ date: x.date, label: x.parts.map((p) => fmtRef(partRef(p)).replace("Psalms", "Psalm")).join(" · ") }));
+    if (plan.kind === "ppo") return ppoUpcoming(plan, today(), 6).map((x) => ({ date: x.date, label: x.parts.map((p) => fmtRef(partRef(p)).replace("Psalms", "Psalm")).join(" · ") }));
     const i = firstUndone(plan);
     if (i < 0) return [];
     return plan.days.slice(i + 1, i + 7).map((d, k) => ({ date: dateOf(plan, i + 1 + k), label: dayLabel(d) }));
@@ -68,7 +71,7 @@ export function PlansScreen() {
         <Topbar />
         <div style={{ flexGrow: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
           <div className="card" style={{ padding: 28, maxWidth: 480, display: "flex", flexDirection: "column", gap: 10 }}>
-            <h1 style={{ margin: 0, font: "500 28px var(--display)" }}>Reading plan</h1>
+            <h1 style={{ margin: 0, font: "500 28px var(--display)" }}>Quiet time</h1>
             <p style={{ margin: 0, color: "var(--muted)" }}>Read through the Bible, a part of it, or a Psalm, a Proverb and one more chapter every day.</p>
             <div style={{ display: "flex", gap: 8 }}><button className="btn primary" type="button" onClick={() => setPicker(true)}>Choose a plan…</button><button className="btn" type="button" onClick={() => setBuilder(true)}>Make a plan…</button></div>
           </div>
@@ -97,7 +100,7 @@ export function PlansScreen() {
       <Topbar />
       <div className="scroll" style={{ flexGrow: 1, padding: "20px 28px 100px", display: "flex", flexDirection: "column", gap: 16 }}>
         <div style={{ display: "flex", alignItems: "baseline", gap: 14 }}>
-          <h1 style={{ margin: 0, font: "500 30px/1 var(--display)" }}>Reading plan</h1>
+          <h1 style={{ margin: 0, font: "500 30px/1 var(--display)" }}>Quiet time</h1>
           {app.plans.length > 1 && <select className="btn small" value={plan.id} onChange={(e) => app.setPlans((ps) => ps.map((p) => ({ ...p, active: p.id === e.target.value })))} aria-label="Plan">{app.plans.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</select>}
           <button className="btn" type="button" style={{ marginLeft: "auto" }} onClick={() => setPicker(true)}><Icon name="plus" />Choose a plan…</button>
           <button className="btn" type="button" onClick={() => setBuilder(true)}>Make a plan…</button>
@@ -133,24 +136,28 @@ export function PlansScreen() {
           <div className="card" style={{ padding: "22px 24px", display: "flex", flexDirection: "column", gap: 12, background: "var(--accentsoft)", borderColor: "var(--ring)" }}>
             <div className="label" style={{ color: "var(--accent)" }}>{plan.kind === "ppo" ? `Today · ${fmtLong(today())}` : t?.label === "Finished" ? "Finished" : `Next · day ${firstUndone(seq!) + 1}`}</div>
             <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-              {t?.parts.map((x, i) => <button key={i} type="button" onClick={() => openPart(i)} style={{ border: 0, background: "transparent", padding: 0, textAlign: "left", cursor: "pointer", font: `500 ${t.parts.length > 1 ? 30 : 44}px/1.1 var(--display)`, color: "var(--text)" }}>{fmtRef(partRef(x)).replace("Psalms", "Psalm")}</button>)}
+              {t?.parts.map((x, i) => {
+                const read = Array.from({ length: (x.c2 ?? x.c) - x.c + 1 }, (_, k) => `${x.b}.${x.c + k}`).every((k) => partsDone.includes(k));
+                return <button key={i} type="button" onClick={() => openPart(i)} style={{ border: 0, background: "transparent", padding: 0, textAlign: "left", cursor: "pointer", font: `500 ${t.parts.length > 1 ? 30 : 44}px/1.1 var(--display)`, color: read ? "var(--muted)" : "var(--text)", display: "flex", alignItems: "center", gap: 10 }}>{fmtRef(partRef(x)).replace("Psalms", "Psalm")}{read && <Icon name="check" size={20} style={{ color: "var(--good)" }} />}</button>;
+              })}
             </div>
             {plan.kind === "ppo" && plan.doneDates.includes(tk) && <div style={{ color: "var(--good)", display: "flex", gap: 6, alignItems: "center" }}><Icon name="check" />Read today</div>}
             <div style={{ display: "flex", gap: 8, marginTop: "auto", flexWrap: "wrap" }}>
-              <button className="btn primary" type="button" style={{ height: 34, padding: "0 16px" }} onClick={() => openPart(0)}><Icon name="read" />Read</button>
-              <button className="btn" type="button" style={{ height: 34 }} onClick={() => { const x = t?.parts[0]; if (x) player.play(plan.bible, x.b, x.c, x.v); }}><Play size={12} />Listen</button>
+              <button className="btn primary" type="button" style={{ height: 34, padding: "0 16px" }} title="Step through today's readings and devotionals" onClick={() => t && startQuiet(plan, t.parts, false)}><Icon name="read" />Read</button>
+              <button className="btn" type="button" style={{ height: 34 }} title="Read today's readings and devotionals aloud, one after another" onClick={() => t && startQuiet(plan, t.parts, true)}><Play size={12} />Read with audio</button>
               <button className="btn" type="button" style={{ height: 34, marginLeft: "auto" }} onClick={markRead} disabled={plan.kind === "ppo" && plan.doneDates.includes(tk)}><Icon name="check" />Mark as read</button>
             </div>
             {t?.parts[0] && (
               <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center" }}>
                 <span style={{ color: "var(--accent)", display: "inline-flex" }}><Icon name="chat" /></span>
                 {[`Background before I read ${fmtRef(partRef(t.parts[t.parts.length - 1]))}`, `What to look for in ${fmtRef(partRef(t.parts[t.parts.length - 1]))}`].map((s) => (
-                  <button key={s} type="button" className="chip" onClick={() => { const x = t.parts[t.parts.length - 1]; app.open({ book: x.b, chapter: x.c }); app.setPending({ ask: s }); }}>{s.replace(/ (Psalms?|Proverbs) .*$/, "")}</button>
+                  <button key={s} type="button" className="chip" onClick={() => { const x = t.parts[t.parts.length - 1]; toPlanBible(); app.open({ book: x.b, chapter: x.c }); app.setPending({ ask: s }); }}>{s.replace(/ (Psalms?|Proverbs) .*$/, "")}</button>
                 ))}
               </div>
             )}
           </div>
         </div>
+        <DevotionalsCard plan={plan} update={update} />
         <div style={{ display: "grid", gridTemplateColumns: "420px minmax(0,1fr)", gap: 16 }}>
           <div className="card" style={{ padding: "16px 18px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
@@ -165,7 +172,7 @@ export function PlansScreen() {
                 const key = ymd(d), done = doneDays.has(key), isToday = key === tk;
                 const r = readingFor(d);
                 return (
-                  <button key={k} type="button" title={r ? dayLabel(r) : undefined} disabled={!r && plan.kind !== "ppo"} onClick={() => { if (r) app.open({ book: r[0].b, chapter: r[0].c }, "read"); }}
+                  <button key={k} type="button" title={r ? dayLabel(r) : undefined} disabled={!r && plan.kind !== "ppo"} onClick={() => { if (r) { toPlanBible(); app.open({ book: r[0].b, chapter: r[0].c }, "read"); } }}
                     style={{ height: 38, borderRadius: 8, border: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2, fontSize: 12, fontVariantNumeric: "tabular-nums", cursor: r ? "pointer" : "default", color: isToday ? "var(--accent)" : done ? "var(--text)" : "var(--muted)", fontWeight: isToday ? 700 : 400, background: isToday ? "var(--accentsoft)" : "transparent", boxShadow: isToday ? "inset 0 0 0 1.5px var(--accent)" : undefined }}>
                     {d.getDate()}<span style={{ width: 5, height: 5, borderRadius: "50%", background: done ? "var(--accent)" : "transparent" }} />
                   </button>
@@ -413,3 +420,71 @@ function BehindDialog({ plan, onClose, onApply }: { plan: SequencePlan; onClose:
   );
 }
 
+
+/** The day's reading in each devotional chosen for the plan, with a way to choose them. */
+function DevotionalsCard({ plan, update }: { plan: Plan; update: (p: Plan) => void }) {
+  const app = useApp();
+  const [choose, setChoose] = useState<DOMRect | null>(null);
+  const [heads, setHeads] = useState<Record<string, string>>({});
+  const local = (app.lib?.modules ?? []).filter((m) => m.kind === "devotional");
+  const chosen = (plan.devotionals ?? []).filter((id) => local.some((m) => m.id === id) || ONLINE_DEVOTIONALS.some((o) => o.id === id));
+  const read = doneToday(plan, progressKey(plan, new Date()));
+  const day = new Date();
+  const title = dayTitle(day);
+  const key = chosen.join(",");
+  // What each local devotional is about today: its first heading, and the verse it opens with.
+  useEffect(() => {
+    let live = true;
+    Promise.all(chosen.filter((id) => !id.startsWith("online:")).map(async (id) => {
+      const html = await api.devotion(id, title).catch(() => null);
+      if (!html) return [id, ""] as const;
+      const doc = new DOMParser().parseFromString(html, "text/html");
+      const h = doc.querySelector("h1, h2, h3")?.textContent?.trim() ?? "";
+      const ref = doc.querySelector("ref, h4")?.textContent?.trim() ?? "";
+      const first = (doc.body.textContent ?? "").replace(/\s+/g, " ").trim().slice(0, 90);
+      return [id, [h && h[0] + h.slice(1).toLowerCase(), ref].filter(Boolean).join(" · ") || first + "…"] as const;
+    })).then((xs) => live && setHeads(Object.fromEntries(xs)));
+    return () => { live = false; };
+  }, [key, title]); // eslint-disable-line react-hooks/exhaustive-deps
+  const toggle = (id: string) => {
+    const cur = plan.devotionals ?? [];
+    update({ ...plan, devotionals: cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id] });
+  };
+  const open = (id: string) => {
+    const o = ONLINE_DEVOTIONALS.find((x) => x.id === id);
+    if (o) api.openWeb(o.id, o.url(day), o.title).catch((e) => app.toast(String(e)));
+    else app.openDoc(id, title, "devotional");
+  };
+  return (
+    <div className="card" style={{ padding: "16px 20px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: chosen.length ? 8 : 0 }}>
+        <span className="label">Devotionals · {title}</span>
+        <button className="btn small" type="button" style={{ marginLeft: "auto" }} onClick={(e) => setChoose(e.currentTarget.getBoundingClientRect())}><Icon name="plus" size={13} />{chosen.length ? "Change…" : "Add devotionals…"}</button>
+      </div>
+      {chosen.length === 0 && <div className="hint" style={{ marginTop: 6 }}>Read a devotional or two each day alongside the plan: the day's reading shows here.</div>}
+      {chosen.map((id) => {
+        const o = ONLINE_DEVOTIONALS.find((x) => x.id === id);
+        const m = local.find((x) => x.id === id);
+        return (
+          <div key={id} style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) auto", alignItems: "center", gap: 12, minHeight: 46, borderTop: "1px solid var(--border)" }}>
+            <div style={{ minWidth: 0 }}>
+              <b style={{ font: "600 15px var(--display)", display: "inline-flex", alignItems: "center", gap: 6 }}>{o?.title ?? m?.abbrev ?? m?.title}{read.includes(id) && <Icon name="check" size={13} style={{ color: "var(--good)" }} />}</b>
+              <div className="n" style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{o ? "Online · opens in its own window" : heads[id] ?? "…"}</div>
+            </div>
+            <button className="btn" type="button" onClick={() => open(id)}>{o ? <><Icon name="link" size={13} />Open</> : <><Icon name="read" size={13} />Read</>}</button>
+          </div>
+        );
+      })}
+      {choose && (
+        <Popover anchor={choose} onClose={() => setChoose(null)} width={320}>
+          <div style={{ padding: "10px 12px", display: "flex", flexDirection: "column", gap: 2 }}>
+            {local.length > 0 && <div className="label" style={{ padding: "2px 0 4px" }}>In your library</div>}
+            {local.map((m) => <label key={m.id} className="opt" title={m.title}><input type="checkbox" checked={chosen.includes(m.id)} onChange={() => toggle(m.id)} />{m.title}</label>)}
+            <div className="label" style={{ padding: "10px 0 4px" }}>Online</div>
+            {ONLINE_DEVOTIONALS.map((o) => <label key={o.id} className="opt"><input type="checkbox" checked={chosen.includes(o.id)} onChange={() => toggle(o.id)} />{o.title}</label>)}
+          </div>
+        </Popover>
+      )}
+    </div>
+  );
+}

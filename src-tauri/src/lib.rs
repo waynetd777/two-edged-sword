@@ -196,9 +196,54 @@ fn ask(app: AppHandle, st: State<AppState>, chat_id: String, prompt: String, mod
 }
 
 #[tauri::command]
-async fn doc_export(st: State<'_, AppState>, module: String) -> Result<books::Export, String> {
+async fn doc_export(st: State<'_, AppState>, module: String, kind: Option<library::Kind>) -> Result<books::Export, String> {
     let (lib, root) = (st.lib(), books::root(&st.data));
-    tauri::async_runtime::spawn_blocking(move || books::export(&lib, &root, &module)).await.map_err(|e| e.to_string())?
+    let kind = kind.unwrap_or(library::Kind::Reference);
+    tauri::async_runtime::spawn_blocking(move || books::export(&lib, &root, &module, kind)).await.map_err(|e| e.to_string())?
+}
+
+#[tauri::command]
+fn devotion_titles(st: State<AppState>, module: String) -> Result<Vec<String>, String> {
+    content::devotion_titles(&st.lib(), &module)
+}
+
+#[tauri::command]
+fn devotion(st: State<AppState>, module: String, title: String) -> Result<Option<String>, String> {
+    content::devotion(&st.lib(), &module, &title)
+}
+
+/// An online page (a devotional) in its own window inside the app, reused if already open.
+#[tauri::command]
+fn open_web(app: AppHandle, key: String, url: String, title: String) -> Result<(), String> {
+    let label = format!("web-{}", key.chars().filter(|c| c.is_ascii_alphanumeric()).collect::<String>());
+    let parsed: tauri::Url = url.parse().map_err(|e| format!("bad address: {e}"))?;
+    if parsed.scheme() != "https" { return Err("only https pages can be opened".into()); }
+    // Same size and place as the main window, so it reads like a page of the app.
+    let main = app.get_webview_window("main");
+    let frame = main.as_ref().and_then(|m| {
+        let scale = m.scale_factor().ok()?;
+        let size = m.inner_size().ok()?.to_logical::<f64>(scale);
+        let pos = m.outer_position().ok()?.to_logical::<f64>(scale);
+        Some((size, pos))
+    });
+    if let Some(w) = app.get_webview_window(&label) {
+        let _ = w.navigate(parsed);
+        let _ = w.set_title(&title);
+        if let Some((size, pos)) = frame {
+            let _ = w.set_size(size);
+            let _ = w.set_position(pos);
+        }
+        let _ = w.show();
+        let _ = w.set_focus();
+        return Ok(());
+    }
+    let mut b = tauri::WebviewWindowBuilder::new(&app, &label, tauri::WebviewUrl::External(parsed)).title(&title);
+    b = match frame {
+        Some((size, pos)) => b.inner_size(size.width, size.height).position(pos.x, pos.y),
+        None => b.inner_size(1000.0, 820.0),
+    };
+    b.build().map_err(|e| e.to_string())?;
+    Ok(())
 }
 
 #[tauri::command]
@@ -233,7 +278,7 @@ pub fn run() {
     let state = AppState { lib_cell: std::sync::RwLock::new(lib), data, running: Arc::new(claude::Running::default()), index };
 
     tauri::Builder::default()
-        .plugin(tauri_plugin_window_state::Builder::default().with_state_flags(STATE_FLAGS).build())
+        .plugin(tauri_plugin_window_state::Builder::default().with_state_flags(STATE_FLAGS).with_filter(|label| !label.starts_with("web-")).build())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
         .manage(state)
@@ -253,6 +298,9 @@ pub fn run() {
             strongs_for_word,
             translit_search,
             doc_export,
+            devotion_titles,
+            devotion,
+            open_web,
             strongs_by_book,
             strongs_verses,
             search,

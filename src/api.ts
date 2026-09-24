@@ -1,6 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
 
-export type Kind = "bible" | "commentary" | "dictionary" | "lexicon" | "reference";
+export type Kind = "bible" | "commentary" | "dictionary" | "lexicon" | "reference" | "devotional";
 
 export interface ModuleInfo {
   id: string;
@@ -67,7 +67,13 @@ export const api = {
   claudeStatus: () => invoke<{ path: string | null; version: string | null }>("claude_status"),
   ask: (chatId: string, prompt: string, model: string, session: string | null, bookDir: string | null = null) => invoke<void>("ask", { chatId, prompt, model, session, bookDir }),
   /** Writes a reference book out as text files and charts for Ask to search; returns its folder and chapter files. */
-  docExport: (module: string) => invoke<{ dir: string; files: string[] }>("doc_export", { module }),
+  docExport: (module: string, kind: "reference" | "devotional" = "reference") => invoke<{ dir: string; files: string[] }>("doc_export", { module, kind }),
+  /** A devotional's days as titles ("January 1" …), in calendar order. */
+  devotionTitles: (module: string) => invoke<string[]>("devotion_titles", { module }),
+  /** The reading for a day, by its title ("September 24"). */
+  devotion: (module: string, title: string) => invoke<string | null>("devotion", { module, title }),
+  /** Opens an https page in its own window inside the app; `key` reuses the window. */
+  openWeb: (key: string, url: string, title: string) => invoke<void>("open_web", { key, url, title }),
   askCancel: (chatId: string) => invoke<void>("ask_cancel", { chatId }),
   print: () => invoke<void>("print_page"),
 };

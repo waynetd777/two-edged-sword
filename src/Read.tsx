@@ -233,12 +233,12 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
       {focus ? (
         <div style={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
           <div className="label">{sectionOf(loc.book)} · {testament(loc.book)}</div>
-          <h1 style={{ margin: 0, font: "400 46px/1 var(--display)", letterSpacing: "0.02em" }}>{book(loc.book).name} <span style={{ color: "var(--muted)" }}>{loc.chapter}</span></h1>
+          <h1 data-quiet-anchor style={{ margin: 0, font: "400 46px/1 var(--display)", letterSpacing: "0.02em" }}>{book(loc.book).name} <span style={{ color: "var(--muted)" }}>{loc.chapter}</span></h1>
         </div>
       ) : (
         <>
           <div style={{ display: "flex", alignItems: "baseline", gap: 12 }}>
-            <h1 style={{ margin: 0, font: "500 30px/1 var(--display)" }}>{book(loc.book).name} {loc.chapter}</h1>
+            <h1 data-quiet-anchor style={{ margin: 0, font: "500 30px/1 var(--display)" }}>{book(loc.book).name} {loc.chapter}</h1>
             <span style={{ color: "var(--muted)" }}>{bmod?.title ?? bible} · {verses.length} verses</span>
           </div>
           <Seg value={settings.layout} options={[["paragraph", "Paragraph"], ["verse", "Verse"]]} onChange={(v) => app.set({ layout: v })} />
@@ -418,9 +418,9 @@ export function PlayerBar({ focus = false }: { focus?: boolean }) {
           <button type="button" aria-label={s.paused ? "Play" : "Pause"} onClick={p.toggle} style={{ width: 40, height: 40, borderRadius: "50%", border: 0, background: "var(--accent)", color: "var(--onaccent)", display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>{s.paused ? <Play /> : <Pause />}</button>
           <button className="ibtn" type="button" aria-label={s.doc ? "Next paragraph" : "Next verse"} onClick={() => p.skip(1)}><Icon name="next" /></button>
         </div>
-        <button type="button" onClick={() => (s.doc ? app.openDoc(s.doc.module, s.doc.title) : app.open({ book: s.book, chapter: s.chapter, verse: s.verse }, "read"))} style={{ flexGrow: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 7, border: 0, background: "transparent", cursor: "pointer", textAlign: "left", padding: 0 }}>
+        <button type="button" onClick={() => (s.doc ? app.openDoc(s.doc.module, s.doc.title, s.doc.kind) : app.open({ book: s.book, chapter: s.chapter, verse: s.verse }, "read"))} style={{ flexGrow: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 7, border: 0, background: "transparent", cursor: "pointer", textAlign: "left", padding: 0 }}>
           <span style={{ display: "flex", alignItems: "baseline", gap: 8, whiteSpace: "nowrap", width: "100%" }}>{s.doc
-            ? <><b style={{ fontSize: 13, overflow: "hidden", textOverflow: "ellipsis" }}>{s.doc.title}</b><span className="n" style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{app.mod("reference", s.doc.module)?.abbrev}</span></>
+            ? <><b style={{ fontSize: 13, overflow: "hidden", textOverflow: "ellipsis" }}>{s.doc.title}</b><span className="n" style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{app.mod(s.doc.kind ?? "reference", s.doc.module)?.abbrev}</span></>
             : <><b style={{ fontSize: 13 }}>{book(s.book).name} {s.chapter}:{s.verse}</b><span className="n">{app.mod("bible", s.bible)?.abbrev}</span></>}<span className="n" style={{ marginLeft: "auto", fontVariantNumeric: "tabular-nums" }}>{s.verse} of {s.count}</span></span>
           <span style={{ position: "relative", height: 3, borderRadius: 999, background: "var(--border)", width: "100%" }}><span style={{ position: "absolute", left: 0, top: 0, width: `${pct}%`, height: 3, borderRadius: 999, background: "var(--accent)" }} /><span style={{ position: "absolute", left: `${pct}%`, top: -3, width: 9, height: 9, marginLeft: -4, borderRadius: "50%", background: "var(--accent)" }} /></span>
         </button>

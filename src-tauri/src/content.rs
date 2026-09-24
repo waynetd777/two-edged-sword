@@ -225,6 +225,47 @@ pub fn strongs_verses(lib: &Library, bible: &str, number: &str, book: Option<i64
     })
 }
 
+const MONTHS: [&str; 12] = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+/// A devotional's day as a title: "September 24". Month 13 is how one module files a December day.
+fn day_title(month: i64, day: i64) -> String {
+    format!("{} {day}", MONTHS[(month.clamp(1, 13) as usize - 1).min(11)])
+}
+
+fn title_day(title: &str) -> Option<(i64, i64)> {
+    let (m, d) = title.trim().rsplit_once(' ')?;
+    let month = MONTHS.iter().position(|x| x.eq_ignore_ascii_case(m))? as i64 + 1;
+    Some((month, d.parse().ok()?))
+}
+
+/// A devotional's days, in calendar order, as titles.
+pub fn devotion_titles(lib: &Library, module: &str) -> Result<Vec<String>, String> {
+    let mut days = lib.with(Kind::Devotional, module, |c| {
+        let mut st = c.prepare("SELECT DISTINCT Month, Day FROM Devotional")?;
+        let rows = st.query_map([], |r| Ok((r.get::<_, i64>(0)?, r.get::<_, i64>(1)?)))?;
+        rows.collect::<rusqlite::Result<Vec<_>>>()
+    })?;
+    for d in days.iter_mut() { if d.0 == 13 { d.0 = 12; } }
+    days.sort();
+    days.dedup();
+    Ok(days.into_iter().map(|(m, d)| day_title(m, d)).collect())
+}
+
+/// The reading for a day ("September 24"). A missing 29 February falls back to the 28th.
+pub fn devotion(lib: &Library, module: &str, title: &str) -> Result<Option<String>, String> {
+    let Some((m, d)) = title_day(title) else { return Ok(None) };
+    let mut tries = vec![(m, d)];
+    if m == 12 { tries.push((13, d)); }
+    if m == 2 && d == 29 { tries.push((2, 28)); }
+    lib.with(Kind::Devotional, module, |c| {
+        for (m, d) in tries {
+            let html: Option<String> = c.query_row("SELECT Devotion FROM Devotional WHERE Month = ?1 AND Day = ?2", params![m, d], |r| r.get(0)).optional()?;
+            if html.is_some() { return Ok(html); }
+        }
+        Ok(None)
+    })
+}
+
 /// A Strong's number an English word stands for in a Strong's Bible, how often, and in which forms.
 #[derive(Serialize, Debug)]
 pub struct WordNumber {
@@ -382,6 +423,12 @@ mod library_tests {
         let nums: Vec<&str> = love.iter().take(6).map(|w| w.num.as_str()).collect();
         assert!(nums.contains(&"G25") && nums.contains(&"G26") && nums.contains(&"H157"), "{nums:?}");
         assert!(love.iter().find(|w| w.num == "G25").unwrap().forms.iter().any(|(f, _)| f == "loved"));
+        let days = devotion_titles(&lib, "gordon").unwrap();
+        assert_eq!(days.first().map(String::as_str), Some("January 1"));
+        assert!(days.contains(&"December 3".to_string()) && days.len() == 365, "{}", days.len());
+        assert!(devotion(&lib, "gordon", "December 3").unwrap().unwrap().contains("NEVER FAILS"));
+        assert!(devotion(&lib, "gordon", "February 29").unwrap().is_some());
+        assert!(devotion(&lib, "spurgeon", "September 24").unwrap().unwrap().contains("Ezr 8:22"));
         let agape = translit_search(&lib, "strong", "agape", 10).unwrap();
         assert!(agape.iter().any(|h| h.num == "G26"), "{agape:?}");
     }

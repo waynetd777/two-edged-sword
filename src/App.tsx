@@ -10,6 +10,7 @@ import { Palette } from "./Palette";
 import { PlayerBar, ReadScreen } from "./Read";
 import { DocReader } from "./DocReader";
 import { StrongsHover } from "./WordLookup";
+import { QuietTime } from "./QuietTime";
 import { SCREEN_KEYS, Sidebar } from "./Shell";
 import { PlayerProvider } from "./speech";
 import { AppProvider, useApp } from "./state";
@@ -70,6 +71,7 @@ function Screens() {
       {palette && <Palette onClose={() => setPalette(false)} onAsk={() => app.setPending({ ask: "" })} />}
       {app.toastMsg && <div className="toast" role="status">{app.toastMsg}</div>}
       <StrongsHover />
+      <QuietTime focus={focus && screen === "read"} />
     </div>
   );
 }
