@@ -66,7 +66,10 @@ export const ymd = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).p
 export const parseYmd = (s: string) => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); };
 export const addDays = (d: Date, n: number) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
 const isWeekend = (d: Date) => d.getDay() === 0 || d.getDay() === 6;
-export const today = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; };
+/** A reading day starts at 4am, not midnight: a late-night Quiet time counts for the day before. */
+export const DAY_STARTS_AT = 4;
+/** Midnight of the reading day it is now. */
+export const today = () => { const d = new Date(Date.now() - DAY_STARTS_AT * 3_600_000); d.setHours(0, 0, 0, 0); return d; };
 export const fmtDay = (d: Date, opts: Intl.DateTimeFormatOptions = { weekday: "short", day: "numeric", month: "short" }) => d.toLocaleDateString("en-GB", opts);
 export const fmtLong = (d: Date) => d.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
 
@@ -336,8 +339,10 @@ export function current(plans: Plan[]): Plan | undefined {
 
 export function todayFor(p: Plan): Today {
   if (p.kind === "ppo") {
-    const parts = ppoReading(p, today());
     const done = p.doneDates.includes(ymd(today()));
+    // Marking the day moved the psalm and other chapter on; a day that's read shows what was read.
+    const read = done ? { ...p, nextPsalm: ((p.nextPsalm + 148) % 150) + 1, nextOther: prevOtherBefore(p.nextOther, p.otherFrom) } : p;
+    const parts = ppoReading(read, today());
     const bs = otherBooks(p.otherFrom);
     const total = bs.reduce((n, b) => n + book(b).chapters, 0);
     let pos = 0;

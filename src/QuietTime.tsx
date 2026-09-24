@@ -67,7 +67,7 @@ export function useWorshipAhead() {
   useEffect(() => {
     if (!ready || !key || !plan || !t || !w || isReadOnly()) return;
     const timer = window.setTimeout(() => {
-      const steps = sessionSteps(app, plan, t.parts, new Date());
+      const steps = sessionSteps(app, plan, t.parts, startOfToday());
       if (steps.some((x) => x.kind === "worship")) pickSongs(w.songs, worshipAbout(steps), w.when, app.settings.model).catch(() => {});
     }, 8000);
     return () => window.clearTimeout(timer);
@@ -77,7 +77,7 @@ export function useWorshipAhead() {
 export function useStartQuietTime() {
   const app = useApp();
   return (plan: Plan, parts: Part[], audio: boolean, preview = false) => {
-    const day = new Date();
+    const day = startOfToday();
     const steps = sessionSteps(app, plan, parts, day);
     if (!steps.length) return;
     // A preview runs from the start and records nothing.
@@ -104,7 +104,7 @@ export function QuietTime({ focus }: { focus: boolean }) {
 
   const tick = (key: string) => {
     if (!s || s.preview) return;
-    app.setPlans((ps) => ps.map((p) => (p.id === s.planId ? tickPart(p, s.dayKey, key, bibleKeys, new Date()) : p)));
+    app.setPlans((ps) => ps.map((p) => (p.id === s.planId ? tickPart(p, s.dayKey, key, bibleKeys, startOfToday()) : p)));
   };
   // Forward ticks off the part being left; going past the last part ends the session.
   const go = (d: number) => {

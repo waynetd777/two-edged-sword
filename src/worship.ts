@@ -5,6 +5,7 @@
 import { api, MusicTrack } from "./api";
 import { askOnce } from "./Ask";
 import { assistantModels, pickModel } from "./assistant";
+import { today } from "./plans";
 
 /** Genres that hold worship music, as the Music app and the stores name them. */
 const WORSHIP = /christian|gospel|worship|praise|religious|inspirational|ccm/i;
@@ -33,7 +34,7 @@ const chosen = new Map<string, Promise<Picked>>();
 
 /** `n` songs for a Quiet time reading `about` (its parts, "John 3", "My Utmost for His Highest"). */
 export function pickSongs(n: number, about: string[], when: "before" | "after", model: string): Promise<Picked> {
-  const key = JSON.stringify([n, about, when, new Date().toDateString()]);
+  const key = JSON.stringify([n, about, when, today().toDateString()]);
   let p = chosen.get(key);
   if (!p) {
     p = choose(n, about, when, model);

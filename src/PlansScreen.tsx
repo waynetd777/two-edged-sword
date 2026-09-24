@@ -443,8 +443,8 @@ function DevotionalsCard({ plan, update }: { plan: Plan; update: (p: Plan) => vo
   const [heads, setHeads] = useState<Record<string, string>>({});
   const local = (app.lib?.modules ?? []).filter((m) => m.kind === "devotional");
   const chosen = (plan.devotionals ?? []).filter((id) => local.some((m) => m.id === id) || ONLINE_DEVOTIONALS.some((o) => o.id === id));
-  const read = doneToday(plan, progressKey(plan, new Date()));
-  const day = new Date();
+  const read = doneToday(plan, progressKey(plan, today()));
+  const day = today();
   const title = dayTitle(day);
   const key = chosen.join(",");
   // What each local devotional is about today: its first heading, and the verse it opens with.
