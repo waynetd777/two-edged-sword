@@ -8,17 +8,18 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Working } from "./Ask";
-import { api, MusicState } from "./api";
+import { api, isReadOnly, MusicState } from "./api";
 import { book } from "./bible";
 import { docSegments } from "./esword";
 import { Icon, Pause, Play } from "./icons";
-import { dayTitle, doneToday, ONLINE_DEVOTIONALS, Part, Plan, progressKey, tickPart } from "./plans";
+import { current, dayTitle, doneToday, firstUndone, ONLINE_DEVOTIONALS, Part, Plan, progressKey, tickPart, today as startOfToday, todayFor, ymd } from "./plans";
 import { usePlayer } from "./speech";
 import { QuietStep, useApp } from "./state";
-import { pickSongs } from "./worship";
+import { Picked, pickSongs } from "./worship";
 
 const FIRST_DELAY = 900; // let the first part's screen open before reading starts
 const NEXT_DELAY = 2000;
+const AUTO_PLAY = 12; // seconds the worship card shows, with audio, before its songs start
 
 /** Today's parts, one chapter at a time, then the chosen devotionals; worship songs first or last. */
 export function quietSteps(plan: Plan, parts: Part[], devotionalIds: string[], day: Date): QuietStep[] {
@@ -44,12 +45,40 @@ export function quietSteps(plan: Plan, parts: Part[], devotionalIds: string[], d
   return steps;
 }
 
+/** The session's parts as the app shows them: devotionals it has, named by their abbreviations. */
+function sessionSteps(app: ReturnType<typeof useApp>, plan: Plan, parts: Part[], day: Date): QuietStep[] {
+  const ids = (plan.devotionals ?? []).filter((id) => id.startsWith("online:") || app.mod("devotional", id));
+  return quietSteps(plan, parts, ids, day).map((s) => (s.kind === "devotional" ? { ...s, label: app.mod("devotional", s.module)?.abbrev || s.label } : s));
+}
+
+/** What worship songs are chosen for: the session's other parts. */
+const worshipAbout = (steps: QuietStep[]) => steps.filter((x) => x.kind !== "worship").map((x) => x.label);
+
+/** Chooses today's worship songs a little after the app opens, when the plan has them and today
+ *  isn't read yet, so they're ready when Quiet time starts (the assistant can take most of a minute). */
+export function useWorshipAhead() {
+  const app = useApp();
+  const plan = current(app.plans);
+  const t = plan && !(plan.kind === "sequence" && firstUndone(plan) < 0) ? todayFor(plan) : null;
+  const done = !!plan && (plan.kind === "ppo" ? plan.doneDates : plan.readDates ?? []).includes(ymd(startOfToday()));
+  const w = plan?.worship;
+  const ready = app.plansReady && !!app.lib;
+  const key = plan && t && w && !done ? JSON.stringify([plan.id, t.label, w, (plan.devotionals ?? []).join(), app.settings.model]) : null;
+  useEffect(() => {
+    if (!ready || !key || !plan || !t || !w || isReadOnly()) return;
+    const timer = window.setTimeout(() => {
+      const steps = sessionSteps(app, plan, t.parts, new Date());
+      if (steps.some((x) => x.kind === "worship")) pickSongs(w.songs, worshipAbout(steps), w.when, app.settings.model).catch(() => {});
+    }, 8000);
+    return () => window.clearTimeout(timer);
+  }, [ready, key]); // eslint-disable-line react-hooks/exhaustive-deps
+}
+
 export function useStartQuietTime() {
   const app = useApp();
   return (plan: Plan, parts: Part[], audio: boolean) => {
     const day = new Date();
-    const ids = (plan.devotionals ?? []).filter((id) => id.startsWith("online:") || app.mod("devotional", id));
-    const steps = quietSteps(plan, parts, ids, day).map((s) => (s.kind === "devotional" ? { ...s, label: app.mod("devotional", s.module)?.abbrev || s.label } : s));
+    const steps = sessionSteps(app, plan, parts, day);
     if (!steps.length) return;
     // Start at the first part not yet read today.
     const dayKey = progressKey(plan, day);
@@ -100,35 +129,53 @@ export function QuietTime({ focus }: { focus: boolean }) {
     const w = s?.steps.find((x) => x.kind === "worship");
     if (!s || !w || w.kind !== "worship" || w.picked) return;
     const started = s.started;
-    const about = s.steps.filter((x) => x.kind !== "worship").map((x) => x.label);
-    const put = (picked: { id: string; name: string; artist: string }[], note?: string) =>
-      app.setSession((x) => (x && x.started === started ? { ...x, steps: x.steps.map((y) => (y.kind === "worship" ? { ...y, picked, note } : y)) } : x));
-    pickSongs(w.songs, about, w.when, app.settings.model).then((p) => put(p.songs, p.note)).catch((e) => put([], e instanceof Error ? e.message : String(e)));
+    const about = worshipAbout(s.steps);
+    const put = (p: Picked) =>
+      app.setSession((x) => (x && x.started === started ? { ...x, steps: x.steps.map((y) => (y.kind === "worship" ? { ...y, picked: p.songs, intro: p.intro, note: p.note } : y)) } : x));
+    pickSongs(w.songs, about, w.when, app.settings.model).then(put).catch((e) => put({ songs: [], note: e instanceof Error ? e.message : String(e) }));
   }, [s?.started]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // The Worship part: its songs play in Music (once chosen), the bar shows what's playing, and the
-  // part moves on when they finish. Leaving it pauses them.
+  // The Worship part: once its songs are chosen, a card says why each suits the reading, and they
+  // play in Music when asked (Play, or by themselves after a few seconds with audio). The bar and
+  // card show what's playing; the part moves on when they finish, and leaving it pauses them.
   const cur = s?.steps[s.i];
   const songs = cur?.kind === "worship" ? cur.picked : undefined;
   const [now, setNow] = useState<MusicState | null>(null);
+  /** Asks Music what's playing now (after pause or skip, so the bar keeps up). */
+  const checkNow = useRef<() => void>(() => {});
+  const control = (cmd: "pause" | "play" | "next" | "show") => api.musicControl(cmd).then(() => checkNow.current()).catch((e) => app.toast(String(e)));
+  const [playing, setPlaying] = useState(false);
+  const [countdown, setCountdown] = useState<number | null>(null);
+  useEffect(() => { setPlaying(false); setCountdown(null); }, [s?.started, s?.i]);
+  useEffect(() => {
+    if (!songs?.length || playing || !s?.audio) { setCountdown(null); return; }
+    let n = AUTO_PLAY;
+    setCountdown(n);
+    const t = window.setInterval(() => { n -= 1; if (n <= 0) { window.clearInterval(t); setCountdown(null); setPlaying(true); } else setCountdown(n); }, 1000);
+    return () => window.clearInterval(t);
+  }, [s?.started, s?.i, !!songs?.length, playing]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     setNow(null);
-    // None chosen (the bar says why): it waits for Next.
-    if (!songs?.length) return;
+    // None chosen (the card says why): it waits for Next.
+    if (!songs?.length || !playing) return;
     let dead = false, heard = false, poll: number | undefined;
+    const check = async () => {
+      const st = await api.musicState().catch(() => null);
+      if (dead || !st) return;
+      setNow(st);
+      if (st.ours && st.state === "playing") heard = true;
+      else if (heard && (!st.ours || st.state === "stopped")) { window.clearInterval(poll); goRef.current(1); }
+    };
+    checkNow.current = check;
     api.musicPlay(songs.map((x) => x.id)).then((n) => {
       if (dead) return;
       if (!n) { app.toast("Couldn't find the songs in Music"); return; }
-      poll = window.setInterval(async () => {
-        const st = await api.musicState().catch(() => null);
-        if (dead || !st) return;
-        setNow(st);
-        if (st.ours && st.state === "playing") heard = true;
-        else if (heard && (!st.ours || st.state === "stopped")) { window.clearInterval(poll); goRef.current(1); }
-      }, 2000);
+      // At once, so pause and skip work as soon as it's playing, then every second.
+      check();
+      poll = window.setInterval(check, 1000);
     }).catch((e) => { if (!dead) app.toast(String(e)); });
-    return () => { dead = true; window.clearInterval(poll); api.musicControl("pause").catch(() => {}); };
-  }, [s?.started, s?.i, !!songs]); // eslint-disable-line react-hooks/exhaustive-deps
+    return () => { dead = true; checkNow.current = () => {}; window.clearInterval(poll); api.musicControl("pause").catch(() => {}); };
+  }, [s?.started, s?.i, !!songs, playing]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     window.clearTimeout(timer.current);
@@ -186,6 +233,7 @@ export function QuietTime({ focus }: { focus: boolean }) {
   const next = s.steps[s.i + 1];
   const end = () => { window.clearTimeout(timer.current); if (s.audio) player.stop(); app.setSession(null); };
   return (
+    <>
     <div role="region" aria-label="Quiet time" style={at?.x !== undefined
       ? { position: "fixed", top: at.y, left: at.x, right: 16, transform: "translateY(-50%)", display: "flex", pointerEvents: "none", zIndex: 45 }
       : { position: "fixed", top: at?.y ?? 84, transform: "translateY(-50%)", left: focus ? 0 : 200, right: 0, display: "flex", justifyContent: "center", pointerEvents: "none", zIndex: 45 }}>
@@ -199,29 +247,71 @@ export function QuietTime({ focus }: { focus: boolean }) {
         </span>
         <b style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", minWidth: 0 }}>{step.label}</b>
         {step.kind === "online" && <span className="n" style={{ whiteSpace: "nowrap" }}>in its own window · Next when done</span>}
-        {step.kind === "worship" && <WorshipNow step={step} now={now} />}
+        {step.kind === "worship" && <WorshipNow step={step} now={now} started={playing} onPlay={() => setPlaying(true)} control={control} />}
         <button className="ibtn" type="button" aria-label="Previous part" title="Previous" disabled={s.i === 0} onClick={() => go(-1)}><Icon name="back" /></button>
         <button className="btn primary small" type="button" onClick={() => go(1)} style={{ whiteSpace: "nowrap" }}>{next ? <>Next: {next.label}<Icon name="fwd" size={13} /></> : <><Icon name="check" size={13} />Finish</>}</button>
         <button className="ibtn" type="button" aria-label="End quiet time" title="End" onClick={end}><Icon name="x" /></button>
       </div>
     </div>
+      {/* Outside the bar's box: its transform would otherwise be what "fixed" is fixed to. */}
+      {step.kind === "worship" && (
+        <div style={{ position: "fixed", top: (at?.y ?? 84) + 30, left: at?.x ?? (focus ? 0 : 200), right: at?.x !== undefined ? 16 : 0, display: "flex", justifyContent: at?.x !== undefined ? "flex-start" : "center", pointerEvents: "none", zIndex: 45 }}>
+          <WorshipCard key={s.started} step={step} now={now} started={playing} countdown={countdown} onPlay={() => setPlaying(true)} />
+        </div>
+      )}
+    </>
   );
 }
 
-/** In the bar during the Worship part: the song playing, with pause and skip. */
-function WorshipNow({ step, now }: { step: Extract<QuietStep, { kind: "worship" }>; now: MusicState | null }) {
+/** In the bar during the Worship part: Play until the songs start, then the song playing, with pause and skip. */
+function WorshipNow({ step, now, started, onPlay, control }: { step: Extract<QuietStep, { kind: "worship" }>; now: MusicState | null; started: boolean; onPlay: () => void; control: (cmd: "pause" | "play" | "next" | "show") => void }) {
   if (!step.picked) return <Working text="Choosing songs" />;
-  if (!step.picked.length) return <span className="n err" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", minWidth: 0 }} title={step.note}>{step.note ?? "No songs"}</span>;
+  if (!step.picked.length) return null; // the card says why
+  if (!started) return <button className="btn small" type="button" onClick={onPlay}><Play size={11} />Play songs</button>;
   const playing = now?.ours && now.state === "playing";
   const k = now?.ours ? step.picked.findIndex((x) => x.name === now.name) : -1;
-  const list = step.picked.map((x, i) => `${i + 1}. ${x.name} — ${x.artist}`).join("\n") + (step.note ? `\n\n${step.note}` : "");
   return (
     <>
-      <span className="n" title={list} style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", minWidth: 0, maxWidth: 320 }}>
-        {now?.ours ? <>{k >= 0 ? `${k + 1} of ${step.picked.length} · ` : ""}{now.name} — {now.artist}</> : `${step.picked.length} song${step.picked.length === 1 ? "" : "s"}`}
+      <span className="n" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", minWidth: 0, maxWidth: 320 }}>
+        {now?.ours ? <>{k >= 0 ? `${k + 1} of ${step.picked.length} · ` : ""}{now.name} — {now.artist}</> : "Starting…"}
       </span>
-      <button className="ibtn" type="button" aria-label={playing ? "Pause" : "Play"} title={playing ? "Pause" : "Play"} onClick={() => api.musicControl(playing ? "pause" : "play").catch(() => {})}>{playing ? <Pause size={12} /> : <Play size={12} />}</button>
-      <button className="ibtn" type="button" aria-label="Next song" title="Next song" onClick={() => api.musicControl("next").catch(() => {})}><Icon name="fwd" /></button>
+      {/* Until Music says the playlist is on, there's nothing of ours to pause or skip. */}
+      <button className="ibtn" type="button" disabled={!now?.ours} aria-label={playing ? "Pause" : "Play"} title={playing ? "Pause" : "Play"} onClick={() => control(playing ? "pause" : "play")}>{playing ? <Pause size={12} /> : <Play size={12} />}</button>
+      <button className="ibtn" type="button" disabled={!now?.ours} aria-label="Next song" title="Next song" onClick={() => control("next")}><Icon name="fwd" /></button>
+      <button className="btn small" type="button" disabled={!now?.ours} title="Open Music, where its lyrics button shows the words as the song plays" onClick={() => control("show")}><Icon name="quote" size={12} />Lyrics</button>
     </>
+  );
+}
+
+/** Under the bar during the Worship part: what today's reading is about, and why each song was chosen. */
+function WorshipCard({ step, now, started, countdown, onPlay }: { step: Extract<QuietStep, { kind: "worship" }>; now: MusicState | null; started: boolean; countdown: number | null; onPlay: () => void }) {
+  const [hidden, setHidden] = useState(false);
+  if (!step.picked || hidden) return null;
+  const k = started && now?.ours ? step.picked.findIndex((x) => x.name === now.name) : -1;
+  return (
+    <div className="card" style={{ pointerEvents: "auto", width: 560, maxWidth: "calc(100% - 48px)", padding: "14px 18px 16px", boxShadow: "0 14px 40px var(--shadow)", display: "flex", flexDirection: "column", gap: 10, maxHeight: "60vh", overflow: "auto" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <span className="label">Worship · {step.when === "before" ? "before your reading" : "after your reading"}</span>
+        <button className="ibtn" type="button" aria-label="Hide" title="Hide" style={{ marginLeft: "auto" }} onClick={() => setHidden(true)}><Icon name="x" /></button>
+      </div>
+      {step.intro && <p style={{ margin: 0, font: "400 15px/1.55 var(--serif)" }}>{step.intro}</p>}
+      {step.note && <div className={step.picked.length ? "hint" : "err"} style={{ fontSize: 12.5 }}>{step.note}</div>}
+      {step.picked.length > 0 && (
+        <ol style={{ margin: 0, paddingLeft: 22, display: "flex", flexDirection: "column", gap: 8 }}>
+          {step.picked.map((x, i) => (
+            <li key={x.id} style={{ color: i === k ? "var(--accent)" : undefined }}>
+              <b style={{ fontWeight: 600 }}>{x.name}</b> <span className="n">— {x.artist}{i === k ? " · playing" : ""}</span>
+              {x.why && <div style={{ fontSize: 13.5, lineHeight: 1.5, color: "var(--muted)", marginTop: 2 }}>{x.why}</div>}
+            </li>
+          ))}
+        </ol>
+      )}
+      {!started && step.picked.length > 0 && (
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <button className="btn primary" type="button" onClick={onPlay}><Play size={12} />Play songs</button>
+          {countdown !== null && <span className="n">Starting in {countdown}s</span>}
+        </div>
+      )}
+    </div>
   );
 }

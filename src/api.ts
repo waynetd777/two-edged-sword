@@ -85,8 +85,8 @@ export const api = {
   /** Queues these songs as the Quiet time playlist and plays it; returns how many were found. */
   musicPlay: (ids: string[]) => (readOnly ? Promise.resolve(0) : invoke<number>("music_play", { ids })),
   musicState: () => invoke<MusicState>("music_state"),
-  /** Pauses, resumes or skips, but only while the Quiet time playlist is what's playing. */
-  musicControl: (cmd: "pause" | "play" | "next") => (readOnly ? Promise.resolve() : invoke<void>("music_control", { cmd })),
+  /** Pauses, resumes or skips, but only while the Quiet time playlist is what's playing; "show" brings Music to the front. */
+  musicControl: (cmd: "pause" | "play" | "next" | "show") => (readOnly ? Promise.resolve() : invoke<void>("music_control", { cmd })),
   journalSave: (dir: string, entry: JournalEntry) => (readOnly ? Promise.resolve() : invoke<void>("journal_save", { dir, entry })),
   journalDelete: (dir: string, id: string) => (readOnly ? Promise.resolve() : invoke<void>("journal_delete", { dir, id })),
   writeTextFile: (path: string, text: string) => invoke<void>("write_text_file", { path, text }),

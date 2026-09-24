@@ -3,6 +3,7 @@
 // or, for the journal, as Markdown in the journal folder.
 
 import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import type { Song } from "./worship";
 import { api, JournalEntry, LibraryInfo, ModuleInfo } from "./api";
 import { Ref } from "./bible";
 import { Plan } from "./plans";
@@ -123,7 +124,7 @@ export type QuietStep = { key: string; label: string } & (
   | { kind: "devotional"; module: string; title: string }
   | { kind: "online"; id: string; url: string }
   /** Songs for the day's reading; `picked` once they are chosen (worship.ts), with why when it had to guess. */
-  | { kind: "worship"; songs: number; when: "before" | "after"; picked?: { id: string; name: string; artist: string }[]; note?: string }
+  | { kind: "worship"; songs: number; when: "before" | "after"; picked?: Song[]; intro?: string; note?: string }
 );
 export interface Session { planId: string; dayKey: string; steps: QuietStep[]; i: number; audio: boolean; started: number }
 

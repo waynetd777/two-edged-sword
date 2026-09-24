@@ -85,8 +85,12 @@ pub fn state() -> Result<State, String> {
 }
 
 /// "pause", "play" or "next", for the Quiet time playlist only: nothing else the user is
-/// listening to is paused or skipped.
+/// listening to is paused or skipped. "show" brings Music to the front, where its lyrics are:
+/// they aren't in the library's files, and Apple Music's own can't be read by another app.
 pub fn control(cmd: &str) -> Result<(), String> {
+    if cmd == "show" {
+        return jxa(r#"function run(argv) { Application("Music").activate(); return ""; }"#, "").map(|_| ());
+    }
     if !["pause", "play", "next"].contains(&cmd) {
         return Err(format!("unknown command {cmd}"));
     }

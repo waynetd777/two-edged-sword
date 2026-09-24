@@ -137,9 +137,14 @@ that chapter.
 **Worship music** (on the plan's page): a few songs from your Music library, before the reading
 or after it, as many as you choose. The AI assistant picks them from the library's Christian,
 gospel and worship songs to suit the day's passages and devotionals (at random if there's no
-assistant), and the app plays them in Music as a playlist of its own, "Two-edged Sword · Quiet
-time", with pause and skip in the bar. The part moves on when the songs finish, and leaving it
-pauses them. macOS asks whether the app may control Music the first time.
+assistant), a little after the app opens so they're ready when you start. A card under the bar
+says what the day's reading is about and why each song was chosen; **Play songs** starts them
+(with audio, they start by themselves after a few seconds). They play in Music as a playlist of
+its own, "Two-edged Sword · Quiet time", with pause and skip in the bar, and **Lyrics**, which
+brings Music to the front for its lyrics view (the app can't show them itself: they aren't in
+the library's files, and Apple Music's aren't open to other apps). The part moves on when
+the songs finish, and leaving it pauses them. macOS asks whether the app may control Music the
+first time.
 
 Under the progress bar: how many days in a row you've read, your best run, and how many of the
 last seven days (weekdays, for a weekdays-only plan, so weekends don't break the streak).

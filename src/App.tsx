@@ -10,7 +10,7 @@ import { Palette } from "./Palette";
 import { PlayerBar, ReadScreen } from "./Read";
 import { DocReader } from "./DocReader";
 import { StrongsHover } from "./WordLookup";
-import { QuietTime } from "./QuietTime";
+import { QuietTime, useWorshipAhead } from "./QuietTime";
 import { SCREEN_KEYS, Sidebar } from "./Shell";
 import { PlayerProvider, usePlayer } from "./speech";
 import { runScene } from "./scene";
@@ -22,6 +22,7 @@ import { Tooltips, WordHoverBox } from "./ui";
 function Screens() {
   const app = useApp();
   useTray();
+  useWorshipAhead();
   const [focus, setFocus] = useState(false);
   const [palette, setPalette] = useState(false);
 

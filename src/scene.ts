@@ -4,7 +4,7 @@
 
 import { api, setReadOnly } from "./api";
 import { setSceneChat } from "./Ask";
-import { Chat, Loc, Pending, Screen, Settings, useApp } from "./state";
+import { Chat, Loc, Pending, Screen, Session, Settings, useApp } from "./state";
 import type { PlayerState } from "./speech";
 
 export interface Scene {
@@ -30,6 +30,8 @@ export interface Scene {
   doc?: { module: string; title: string; kind?: "reference" | "devotional"; para?: number };
   /** Click this paragraph of the open book once it has loaded, selecting it. */
   selectPara?: number;
+  /** A Quiet time session to show (its worship songs already chosen, say). */
+  session?: Omit<Session, "started">;
   /** A journal entry to open, by id. */
   journal?: string;
   /** A CSS selector clicked after that (a toolbar button, say), to show what it does. */
@@ -55,6 +57,7 @@ export function runScene(app: ReturnType<typeof useApp>, still: (s: Partial<Play
       if (sc.doc) app.openDoc(sc.doc.module, sc.doc.title, sc.doc.kind ?? "reference", sc.doc.para);
       if (sc.click) { const q = sc.click; window.setTimeout(() => (document.querySelector(q) as HTMLElement | null)?.click(), 2800); }
       if (sc.selectPara) { const n = sc.selectPara; window.setTimeout(() => (document.querySelector(`[data-seg="${n}"]`) as HTMLElement | null)?.click(), 2000); }
+      if (sc.session) { const x = sc.session; window.setTimeout(() => app.setSession({ ...x, started: Date.now() }), 1200); }
       if (sc.journal) { const id = sc.journal; window.setTimeout(() => app.startEntry({ openId: id }), 1200); }
       if (sc.word) app.studyWord(sc.word);
       if (sc.search) app.searchText(sc.search);
