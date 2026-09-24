@@ -3,7 +3,7 @@ import { save as saveDialog } from "@tauri-apps/plugin-dialog";
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
 import { api, JournalEntry } from "./api";
 import { AskPanel } from "./Ask";
-import { fmtRef, parseRef } from "./bible";
+import { fmtRef, parseRef, Ref } from "./bible";
 import { plainText } from "./esword";
 import { Icon } from "./icons";
 import { htmlToMd, mdPlain, mdToHtml } from "./md";
@@ -12,6 +12,7 @@ import { nowLocal, onFlush, uid, useApp } from "./state";
 import { confirmDelete, Dialog, Popover, Seg } from "./ui";
 import { useAssistant } from "./assistant";
 import { docModule, parseDocLabel } from "./docref";
+import { useRefPreview } from "./StudyPane";
 
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const longDate = (s: string) => {
@@ -136,9 +137,14 @@ function Editor({ entry, onChange, saved, err, onDelete, onExport, ask }: { entr
   useEffect(() => {
     // Every line is a <p>, so Enter, lists and quotes act on one line at a time.
     document.execCommand("defaultParagraphSeparator", false, "p");
-    if (ed.current) ed.current.innerHTML = mdToHtml(entry.body, false) || "<p><br></p>";
+    // References are links (htmlToMd reads them back as their text); ones typed now link next time.
+    if (ed.current) ed.current.innerHTML = mdToHtml(entry.body) || "<p><br></p>";
   }, [entry.id]); // eslint-disable-line react-hooks/exhaustive-deps
-  const sync = () => { if (ed.current) onChange({ body: htmlToMd(ed.current) }); };
+  // Only a real change is saved: clicking in and out must not write back a copy made before the
+  // file changed elsewhere (in Obsidian, say).
+  const sync = () => { if (!ed.current) return; const body = htmlToMd(ed.current); if (body !== entry.body) onChange({ body }); };
+  const { onRefHover, preview, hide } = useRefPreview(app.settings.bible);
+  const refAt = (t: EventTarget) => (t as HTMLElement).closest("a.ref") as HTMLElement | null;
   const cmd = (c: string, v?: string) => { ed.current?.focus(); document.execCommand(c, false, v); sync(); };
   const remember = () => { const s = window.getSelection(); if (s && s.rangeCount && ed.current?.contains(s.anchorNode)) saved_range.current = s.getRangeAt(0).cloneRange(); };
   const insertVerse = async (text: string) => {
@@ -202,7 +208,7 @@ function Editor({ entry, onChange, saved, err, onDelete, onExport, ask }: { entr
         </div>
       </div>
       <div className="scroll" style={{ flexGrow: 1, padding: "28px 0 40px" }}>
-        <article style={{ maxWidth: 700, margin: "0 auto", padding: "0 24px", display: "flex", flexDirection: "column", gap: 14, minHeight: "100%" }} onClick={(e) => { if (e.target === e.currentTarget) ed.current?.focus(); }}>
+        <article style={{ padding: "0 40px", display: "flex", flexDirection: "column", gap: 14, minHeight: "100%" }} onClick={(e) => { if (e.target === e.currentTarget) ed.current?.focus(); }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
             <span className="label">{longDate(entry.created)}</span>
             <span style={{ marginLeft: "auto", display: "flex", gap: 5, flexWrap: "wrap" }}>
@@ -226,9 +232,13 @@ function Editor({ entry, onChange, saved, err, onDelete, onExport, ask }: { entr
             })}
           </div>
           <div ref={ed} className={`md editor selectable ${entry.body.trim() ? "" : "blank"}`} contentEditable suppressContentEditableWarning onInput={sync} onBlur={() => { remember(); sync(); }} onKeyUp={remember} onMouseUp={remember} onKeyDown={keys}
+            onClick={(e) => { const a = refAt(e.target); if (a?.dataset.ref) { e.preventDefault(); hide(); const r: Ref = JSON.parse(a.dataset.ref); app.open({ book: r.book, chapter: r.chapter, verse: r.verse, to: r.to }, "read"); } }}
+            onMouseOver={(e) => { const a = refAt(e.target); if (a?.dataset.ref && !a.contains(e.relatedTarget as Node)) onRefHover(JSON.parse(a.dataset.ref), a); }}
+            onMouseOut={(e) => { const a = refAt(e.target); if (a && !a.contains(e.relatedTarget as Node)) onRefHover(null, null); }}
             onPaste={(e) => { e.preventDefault(); document.execCommand("insertText", false, e.clipboardData.getData("text/plain")); }}
             data-placeholder="Write here…" style={{ font: "400 17px/1.7 var(--serif)", outline: "none", minHeight: 300, textWrap: "pretty" }} />
         </article>
+        {preview}
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 20px", borderTop: "1px solid var(--border)", color: "var(--muted)", fontSize: 12 }}>
         <span>{words} word{words === 1 ? "" : "s"}</span>

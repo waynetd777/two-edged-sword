@@ -2,12 +2,13 @@
 // journal toolbar can make round-trips: headings (###), bold, italic, quotes, bullet and
 // numbered lists, and paragraphs. Verse references anywhere in the text become links.
 
-import { findBook, Ref } from "./bible";
+import { book, findBook, Ref } from "./bible";
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
-// "John 3:16", "1 John 4:9-10", "Joh 3:16", "Num 21:8–9", "Ps 23:1".
-const REF_RE = /\b((?:[123]\s?)?[A-Z][a-z]{1,15}(?:\s(?:of\s)?[A-Z][a-z]+)?)\.?\s(\d{1,3}):(\d{1,3})(?:\s?[-–]\s?(\d{1,3}))?/g;
+// "John 3:16", "1 John 4:9-10", "Joh 3:16", "Num 21:8–9", "Ps 23:1"; as spoken, "1 John 5, verse 4"
+// and "Job 19, verses 25 to 27"; and a whole chapter, "Hebrews 11".
+const REF_RE = /\b((?:[123]\s?)?[A-Z][a-z]{1,15}(?:\s(?:of\s)?[A-Z][a-z]+)?)\.?\s(\d{1,3})(?::(\d{1,3})(?:\s?[-–]\s?(\d{1,3}))?|,?\s(?:verses?|vv?\.?)\s(\d{1,3})(?:\s?(?:[-–]|to)\s?(\d{1,3}))?)?(?!\d|:\d)/g;
 
 export function findRefs(text: string): { index: number; length: number; ref: Ref }[] {
   const out = [];
@@ -17,7 +18,18 @@ export function findRefs(text: string): { index: number; length: number; ref: Re
     const w = !b && !/^[123]/.test(m[1]) ? m[1].match(/\s(\S+)$/) : null;
     if (w) { b = findBook(w[1]); skip = m[1].length - w[1].length; }
     if (!b) continue;
-    out.push({ index: m.index! + skip, length: m[0].length - skip, ref: { book: b, chapter: +m[2], verse: +m[3], to: m[4] ? +m[4] : undefined } });
+    let chapter = +m[2], verse = m[3] ?? m[5] ? +(m[3] ?? m[5]) : undefined;
+    const to = m[4] ?? m[6] ? +(m[4] ?? m[6]) : undefined;
+    if (verse === undefined) {
+      // A chapter on its own only by the book's name or a long form of it ("Job 3", "Psalm 23"),
+      // not "Dan 4" or "Song 3"; "Jude 5" is a verse.
+      const name = m[1].slice(skip).replace(/^[123]\s?/, "");
+      const full = book(b).name.replace(/^[123]\s?/, "");
+      if (name !== full && (name.length < 4 || name === "Song")) continue;
+      if (book(b).chapters === 1 && chapter > 1) { verse = chapter; chapter = 1; }
+    }
+    if (chapter < 1 || chapter > book(b).chapters) continue;
+    out.push({ index: m.index! + skip, length: m[0].length - skip, ref: { book: b, chapter, verse, to } });
   }
   return out;
 }

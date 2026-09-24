@@ -204,6 +204,11 @@ fn write_month(dir: &Path, key: &str, text: Option<String>) -> Result<(), String
 
 pub fn save(dir: &Path, entry: &Entry) -> Result<(), String> {
     if entry.id.is_empty() { return Err("entry has no id".into()); }
+    // The folder itself is made on first use, but not the one it sits in: if that is gone (the
+    // vault moved), a fresh empty journal would quietly start there instead.
+    if dir.parent().is_some_and(|p| !p.is_dir()) {
+        return Err(format!("{} isn't there any more. Choose the journal's folder in Settings.", dir.parent().unwrap().display()));
+    }
     let key = month_key(&entry.created).ok_or("entry has no valid date")?.to_string();
     // Saves overlap (one entry's debounce, the next entry's), and each rewrites whole months.
     let lock = crate::store::dir_lock(dir);

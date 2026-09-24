@@ -41,6 +41,8 @@ function alias(n: number, ...names: string[]) {
 BOOKS.forEach((b) => alias(b.n, b.name, b.abbr, SHORT[b.n - 1]));
 alias(8, "Rth");
 alias(19, "Psalm", "Psa", "Pss", "Psm");
+// Common misspellings, so a reference written with one still links.
+alias(23, "Isiah"); alias(48, "Galations"); alias(49, "Ephesian"); alias(50, "Phillipians", "Philipians", "Pillipians"); alias(51, "Colosians");
 alias(22, "Song", "Songs", "Song of Songs", "SOS", "Canticles");
 alias(29, "Jl");
 alias(40, "Matt", "Mt");
