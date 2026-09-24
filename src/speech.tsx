@@ -257,6 +257,10 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
   const still = useCallback((s: Partial<PlayerState>) => { const next = { ...IDLE, on: true, ...s }; st.current = next; setState(next); }, []);
 
+  // Reading aloud anywhere keeps the screen from sleeping and locking; pausing or stopping lets it.
+  const awake = state.on && !state.paused;
+  useEffect(() => { api.keepAwake(awake).catch(() => {}); }, [awake]);
+
   return <Ctx.Provider value={{ state, voices, play, playDoc, toggle, stop, skip, sleep, say, still }}>{children}</Ctx.Provider>;
 }
 

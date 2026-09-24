@@ -173,6 +173,8 @@ input[type="range"] { accent-color: var(--accent); }
 .whover { position: fixed; z-index: 5; pointer-events: none; background: var(--hover); border-radius: 3px; }
 .w.on { background: var(--accentsoft); box-shadow: 0 2px 0 var(--accent); }
 .w.speaking { background: var(--hl-blue); box-shadow: 0 2px 0 var(--accent); }
+/* The same in a book, where the word is a CSS highlight (DocReader): no box-shadow there. */
+::highlight(speaking) { background-color: var(--hl-blue); text-decoration: underline 2px var(--accent); text-underline-offset: 3px; }
 
 /* ---------- reading ---------- */
 .verses { display: flex; flex-direction: column; gap: 2px; }

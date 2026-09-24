@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { api, Article } from "./api";
 import { fmtRef } from "./bible";
-import { docSegments, plainText, renderHtml } from "./esword";
+import { docSegments, plainText, renderHtml, wordRangeAt } from "./esword";
 import { Icon } from "./icons";
 import { usePlayer } from "./speech";
 import { AskPanel } from "./Ask";
@@ -192,6 +192,18 @@ export function DocReader({ focus, setFocus }: { focus: boolean; setFocus: (f: b
     const id = window.setTimeout(() => setFlash(null), 1600);
     return () => window.clearTimeout(id);
   }, [app.docPara, segs, doc.module, doc.title]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // The word being read, highlighted as in the Bible reader. A CSS highlight, so the page's own
+  // markup is left alone; where WebKit has none (before macOS 14) there's just the paragraph's.
+  useEffect(() => {
+    const hs = (CSS as unknown as { highlights?: Map<string, unknown> }).highlights;
+    const H = (window as unknown as { Highlight?: new (...r: Range[]) => unknown }).Highlight;
+    if (!hs || !H) return;
+    const seg = reading && app.settings.highlightWords && ps.char >= 0 ? scroller.current?.querySelector(`[data-seg="${ps.verse}"] .dsegtext`) : null;
+    const r = seg ? wordRangeAt(seg, ps.char) : null;
+    if (r) hs.set("speaking", new H(r)); else hs.delete("speaking");
+    return () => { hs.delete("speaking"); };
+  }, [reading, ps.verse, ps.char, app.settings.highlightWords, segs]);
 
   // Keep the paragraph being read in view.
   useEffect(() => {

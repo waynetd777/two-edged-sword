@@ -200,6 +200,27 @@ fn music_state() -> Result<music::State, String> { music::state() }
 #[tauri::command(async)]
 fn music_control(cmd: String) -> Result<(), String> { music::control(&cmd) }
 
+/// While reading aloud, the display is kept from sleeping (so the screen doesn't lock) by a
+/// `caffeinate`, which ends with the reading, or with the app (-w) if it quits first.
+#[tauri::command]
+fn keep_awake(on: bool) -> Result<(), String> {
+    use std::sync::Mutex;
+    static CHILD: Mutex<Option<std::process::Child>> = Mutex::new(None);
+    let mut c = CHILD.lock().unwrap_or_else(|e| e.into_inner());
+    if on {
+        // One at a time; a finished one (killed from outside) is replaced.
+        if let Some(ch) = c.as_mut() {
+            if ch.try_wait().ok().flatten().is_none() { return Ok(()); }
+        }
+        let child = std::process::Command::new("/usr/bin/caffeinate").args(["-d", "-i", "-w", &std::process::id().to_string()]).spawn().map_err(|e| e.to_string())?;
+        *c = Some(child);
+    } else if let Some(mut ch) = c.take() {
+        let _ = ch.kill();
+        let _ = ch.wait();
+    }
+    Ok(())
+}
+
 #[tauri::command(async)]
 fn journal_stamp(dir: String) -> Result<String, String> {
     Ok(journal::stamp(&chosen_dir(&dir)?))
@@ -412,6 +433,7 @@ pub fn run() {
             journal_save,
             journal_delete,
             journal_stamp,
+            keep_awake,
             music_tracks,
             music_play,
             music_state,

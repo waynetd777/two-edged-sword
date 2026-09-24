@@ -214,6 +214,43 @@ export function docSegments(html: string): string[] {
 }
 
 /** Plain text of e-Sword HTML (Strong's numbers dropped). */
+/**
+ * The word at `char` in `el`'s text as plainText would give it (what the voice is reading),
+ * as a Range over the rendered page: Strong's numbers and bracket superscripts are skipped, and
+ * spaces collapsed, just as there.
+ */
+export function wordRangeAt(el: Element, char: number): Range | null {
+  const at: [Text, number][] = []; // for each character of the plain text, where it is on the page
+  let space = true; // as if after a space, so leading spaces are dropped
+  const walk = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, {
+    acceptNode: (n) => {
+      const p = n.parentElement;
+      if (p?.closest(".strongs")) return NodeFilter.FILTER_REJECT;
+      if (p?.closest("sup") && /^[()]$/.test((p.closest("sup")!.textContent || "").trim())) return NodeFilter.FILTER_REJECT;
+      return NodeFilter.FILTER_ACCEPT;
+    },
+  });
+  for (let n = walk.nextNode() as Text | null; n; n = walk.nextNode() as Text | null) {
+    const t = n.data;
+    for (let i = 0; i < t.length; i++) {
+      const ws = /\s/.test(t[i]);
+      if (ws && space) continue;
+      at.push([n, i]);
+      space = ws;
+    }
+  }
+  if (char < 0 || char >= at.length) return null;
+  const isWord = (k: number) => k >= 0 && k < at.length && !/\s/.test(at[k][0].data[at[k][1]]);
+  let a = char, b = char;
+  while (isWord(a - 1)) a--;
+  while (isWord(b + 1)) b++;
+  if (!isWord(a)) return null;
+  const r = document.createRange();
+  r.setStart(at[a][0], at[a][1]);
+  r.setEnd(at[b][0], at[b][1] + 1);
+  return r;
+}
+
 export function plainText(html: string): string {
   const body = parse(html);
   body.querySelectorAll("num").forEach((n) => n.remove());
