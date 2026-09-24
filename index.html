@@ -14,8 +14,12 @@
       html, body { background: var(--splash-bg); margin: 0; }
       #splash { position: fixed; inset: 0; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; background: var(--splash-bg); font: 13px/1.4 -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif; color: var(--splash-fg); transition: opacity .18s ease-out; }
       #splash.gone { opacity: 0; pointer-events: none; }
-      #splash .mark { width: 72px; height: 72px; animation: rise .35s ease-out both; }
-      #splash .name { font-size: 15px; font-weight: 600; letter-spacing: -.01em; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
+      @font-face { font-family: "Cinzel Decorative"; font-weight: 700; font-display: block; src: url(/node_modules/@fontsource/cinzel-decorative/files/cinzel-decorative-latin-700-normal.woff2) format("woff2"); }
+      @font-face { font-family: "Cinzel Decorative"; font-weight: 900; font-display: block; src: url(/node_modules/@fontsource/cinzel-decorative/files/cinzel-decorative-latin-900-normal.woff2) format("woff2"); }
+      :root { --wm-1: #f4d27a; --wm-2: #b3821f; --wm-3: #5a3c05; --wm-4: #d6a543; --wm-5: #7e540d; --wm-edge: #4d3305; --wm-shadow: rgba(60, 40, 5, 0.35); }
+      @media (prefers-color-scheme: dark) { :root { --wm-1: #fff6d8; --wm-2: #efcb76; --wm-3: #8f631c; --wm-4: #f7dc95; --wm-5: #b5832b; --wm-edge: #6b4a17; --wm-shadow: rgba(0, 0, 0, 0.7); } }
+      #splash .mark { width: 300px; height: auto; overflow: visible; margin-bottom: 8px; animation: rise .35s ease-out both; }
+      #splash .medal { --sw-light: #efd9a4; --sw-dark: #c6974a; --sw-fuller: #8a6630; --sw-gold: #d8b160; --sw-grip: #6e4526; --sw-wrap: #8e5d35; --sw-pin: #b48a3e; }
       #splash .what { font-size: 13px; line-height: 1.55; color: var(--splash-dim); margin-top: -6px; font-style: italic; font-family: Georgia, serif; max-width: 440px; text-align: center; text-wrap: pretty; padding: 0 24px; }
       #splash .cite { display: block; margin-top: 6px; font-style: normal; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; font-family: -apple-system, sans-serif; }
       #splash .bar { width: 152px; height: 3px; border-radius: 99px; background: var(--splash-line); overflow: hidden; }
@@ -28,19 +32,39 @@
   <body>
     <div id="root"></div>
     <div id="splash">
-      <!-- The app icon (tools/make_icons.py draws the same sword). -->
-      <svg class="mark" viewBox="100 100 824 824" aria-hidden="true">
-        <rect x="100" y="100" width="824" height="824" rx="185" fill="#1b2532" />
-        <circle cx="512" cy="440" r="290" fill="#26354a" />
-        <path d="M512 176L470 262V640H512Z" fill="#efd9a4" />
-        <path d="M512 176L554 262V640H512Z" fill="#c6974a" />
-        <path d="M512 292V604" stroke="#8a6630" stroke-width="8" stroke-linecap="round" fill="none" />
-        <path d="M334 648Q512 612 690 648V684Q512 652 334 684Z" fill="#d8b160" />
-        <circle cx="334" cy="666" r="26" fill="#d8b160" /><circle cx="690" cy="666" r="26" fill="#d8b160" />
-        <rect x="486" y="674" width="52" height="136" rx="12" fill="#6e4526" />
-        <circle cx="512" cy="840" r="40" fill="#d8b160" /><circle cx="512" cy="840" r="14" fill="#b48a3e" />
+      <!-- The sidebar logo (Wordmark in src/icons.tsx; keep the two in step). -->
+      <svg class="mark" viewBox="0 0 172 58" role="img" aria-label="Two-edged Sword">
+        <defs>
+          <linearGradient id="gsplash" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" style="stop-color:var(--wm-1)" />
+            <stop offset="0.46" style="stop-color:var(--wm-2)" />
+            <stop offset="0.5" style="stop-color:var(--wm-3)" />
+            <stop offset="0.64" style="stop-color:var(--wm-4)" />
+            <stop offset="1" style="stop-color:var(--wm-5)" />
+          </linearGradient>
+          <filter id="ssplash" x="-10%" y="-20%" width="120%" height="150%">
+            <feDropShadow dx="0" dy="0.8" stdDeviation="0.6" style="flood-color:var(--wm-shadow)" />
+          </filter>
+        </defs>
+        <rect x="0.7" y="0.7" width="170.6" height="56.6" rx="10" fill="none" stroke="url(#gsplash)" stroke-width="1.4" />
+        <svg class="medal" x="6" y="5" width="38.4" height="48" viewBox="212 140 600 750">
+          <circle cx="512" cy="440" r="290" fill="#26354a" />
+          
+        <path d="M512 176L470 262V640H512Z" fill="var(--sw-light)" />
+        <path d="M512 176L554 262V640H512Z" fill="var(--sw-dark)" />
+        <path d="M512 292V604" stroke="var(--sw-fuller)" stroke-width="8" stroke-linecap="round" fill="none" />
+        <path d="M334 648Q512 612 690 648V684Q512 652 334 684Z" fill="var(--sw-gold)" />
+        <circle cx="334" cy="666" r="26" fill="var(--sw-gold)" /><circle cx="690" cy="666" r="26" fill="var(--sw-gold)" />
+        <rect x="486" y="674" width="52" height="136" rx="12" fill="var(--sw-grip)" />
+        <path d="M486 704L538 720M486 734L538 750M486 764L538 780" stroke="var(--sw-wrap)" stroke-width="8" fill="none" />
+        <circle cx="512" cy="840" r="40" fill="var(--sw-gold)" /><circle cx="512" cy="840" r="14" fill="var(--sw-pin)" />
+        
+        </svg>
+        <g fill="url(#gsplash)" stroke="var(--wm-edge)" stroke-width="0.35" filter="url(#ssplash)" font-family="'Cinzel Decorative', serif">
+          <text x="50" y="21" font-size="12" font-weight="700" letter-spacing="2.3">Two-edged</text>
+          <text x="49" y="46.5" font-size="27" font-weight="900" letter-spacing="0.6">Sword</text>
+        </g>
       </svg>
-      <div class="name">Two-edged Sword</div>
       <div class="what">For the word of God is quick, and powerful, and sharper than any twoedged sword, piercing even to the dividing asunder of soul and spirit, and of the joints and marrow, and is a discerner of the thoughts and intents of the heart.<span class="cite">Hebrews 4:12</span></div>
       <div class="bar"><i></i></div>
     </div>

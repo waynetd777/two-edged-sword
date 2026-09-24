@@ -1,11 +1,11 @@
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useEffect } from "react";
 import { open as openDialog } from "@tauri-apps/plugin-dialog";
-import { api } from "./api";
 import { Icon } from "./icons";
 import { VoiceSelect } from "./Read";
 import { Topbar } from "./Shell";
-import { MODELS, READ_FONTS, ReadFont, useApp } from "./state";
-import { Seg, Switch } from "./ui";
+import { PROVIDER_NAME, pickModel, refreshAssistant, useAssistant } from "./assistant";
+import { READ_FONTS, ReadFont, useApp } from "./state";
+import { confirmDelete, Seg, Switch } from "./ui";
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -27,8 +27,8 @@ function Row({ label, hint, children }: { label: string; hint?: string; children
 export function SettingsScreen() {
   const app = useApp();
   const s = app.settings;
-  const [claude, setClaude] = useState<{ path: string | null; version: string | null } | null>(null);
-  useEffect(() => { api.claudeStatus().then(setClaude); }, []);
+  const asst = useAssistant();
+  useEffect(() => { refreshAssistant(); }, []);
   const chooseDir = async () => {
     const d = await openDialog({ directory: true, defaultPath: app.journalDir });
     if (typeof d === "string") app.set({ journalDir: d });
@@ -70,15 +70,21 @@ export function SettingsScreen() {
             </Row>
             <Row label="Show notes beside verses"><Switch on={s.showNotes} onChange={(v) => app.set({ showNotes: v })} /></Row>
           </Section>
-          <Section title="Ask Claude">
-            <Row label="Claude Code">
-              {claude === null ? <span className="n">Checking…</span> : claude.path ? <span style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12.5 }}><Icon name="check" style={{ color: "var(--good)" }} />Found · {claude.version ?? "version unknown"}</span> : <span className="err" style={{ fontSize: 12.5 }}>Not found. Install Claude Code and sign in to use Ask.</span>}
-            </Row>
-            <Row label="Default model"><Seg value={s.model} options={MODELS.map((m) => [m.id, m.name] as [typeof m.id, string])} onChange={(v) => app.set({ model: v })} /></Row>
-            <Row label="Include commentaries" hint="Adds what your commentaries say about the verses to each question."><Switch on={s.includeCommentaries} onChange={(v) => app.set({ includeCommentaries: v })} /></Row>
+          <Section title="AI assistant">
+            {(["claude", "codex"] as const).map((k) => {
+              const c = asst.status?.[k];
+              return (
+                <Row key={k} label={PROVIDER_NAME[k]}>
+                  {!c ? <span className="n">Checking…</span> : c.path ? <span style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12.5 }}><Icon name="check" style={{ color: "var(--good)" }} />Found · {c.version ?? "version unknown"}</span> : <span className="n">Not installed</span>}
+                </Row>
+              );
+            })}
+            {asst.status && !asst.available && <div className="hint">Install Claude Code or Codex and sign in, and Ask appears throughout the app. Until then it stays hidden.</div>}
+            {asst.models.length > 0 && <Row label="Default model"><select className="btn" value={pickModel(s.model, asst.models)} onChange={(e) => app.set({ model: e.target.value })}>{asst.models.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}</select></Row>}
+            <Row label="Search my library" hint="In a chat about a passage, the assistant can search every commentary on it, the lexicon entries for its words, your dictionaries and your other Bibles, and does when the question calls for them."><Switch on={s.includeCommentaries} onChange={(v) => app.set({ includeCommentaries: v })} /></Row>
             <Row label="Licensed translations" hint="When off, questions about the NIV, ESV and other licensed Bibles send public-domain text instead."><Switch on={s.allowLicensed} onChange={(v) => app.set({ allowLicensed: v })}>Allow their text to be sent</Switch></Row>
             <Row label="Chats" hint="Kept on this Mac. Delete one from the Recent menu on any Ask card.">
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}><span style={{ fontSize: 12.5 }}>{app.chats.length} chat{app.chats.length === 1 ? "" : "s"}</span><button className="btn small" type="button" disabled={!app.chats.length} onClick={() => { if (window.confirm("Delete all chats? This can't be undone.")) app.setChats(() => []); }}><Icon name="trash" size={13} />Delete all chats</button></div>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}><span style={{ fontSize: 12.5 }}>{app.chats.length} chat{app.chats.length === 1 ? "" : "s"}</span><button className="btn small" type="button" disabled={!app.chats.length} onClick={async () => { if (await confirmDelete(`all ${app.chats.length} chats`)) app.setChats(() => []); }}><Icon name="trash" size={13} />Delete all chats</button></div>
             </Row>
           </Section>
           <Section title="Quiet time">

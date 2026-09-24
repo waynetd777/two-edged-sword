@@ -18,6 +18,13 @@ export interface LibraryInfo {
 }
 
 export interface Verse { v: number; text: string }
+/** An AI CLI on this Mac; `path` is null when it isn't installed. `models` is filled for Codex only. */
+export interface Cli { path: string | null; version: string | null; models: { id: string; name: string }[] }
+export interface AssistantStatus { claude: Cli; codex: Cli }
+/** A macOS voice. quality: 1 default, 2 enhanced, 3 premium. */
+export interface Voice { id: string; name: string; lang: string; quality: number; default: boolean }
+/** From the native synthesiser: a word about to be spoken (UTF-16 range) or the end of utterance `id`. */
+export interface TtsEvent { id: number; kind: "word" | "end"; char: number; len: number }
 export interface Range { book: number; chapter: number; from: number; to: number }
 export interface Passage { range: Range; verses: Verse[] }
 
@@ -64,8 +71,10 @@ export const api = {
   journalSave: (dir: string, entry: JournalEntry) => invoke<void>("journal_save", { dir, entry }),
   journalDelete: (dir: string, id: string) => invoke<void>("journal_delete", { dir, id }),
   writeTextFile: (path: string, text: string) => invoke<void>("write_text_file", { path, text }),
-  claudeStatus: () => invoke<{ path: string | null; version: string | null }>("claude_status"),
-  ask: (chatId: string, prompt: string, model: string, session: string | null, bookDir: string | null = null) => invoke<void>("ask", { chatId, prompt, model, session, bookDir }),
+  assistantStatus: () => invoke<AssistantStatus>("assistant_status"),
+  ask: (chatId: string, prompt: string, model: string, session: string | null, bookDir: string | null = null, studyDir: string | null = null) => invoke<void>("ask", { chatId, prompt, model, session, bookDir, studyDir }),
+  /** Writes out the library's material on a passage (every Bible allowed, all commentaries, lexicon entries) for chat `chatId`; returns its folder. */
+  studyExport: (chatId: string, req: { book: number; chapter: number; from: number | null; to: number | null; bibles: string[]; strongsBible: string | null; label: string }) => invoke<string>("study_export", { chatId, req }),
   /** Writes a reference book out as text files and charts for Ask to search; returns its folder and chapter files. */
   docExport: (module: string, kind: "reference" | "devotional" = "reference") => invoke<{ dir: string; files: string[] }>("doc_export", { module, kind }),
   /** A devotional's days as titles ("January 1" …), in calendar order. */
@@ -76,4 +85,7 @@ export const api = {
   openWeb: (key: string, url: string, title: string) => invoke<void>("open_web", { key, url, title }),
   askCancel: (chatId: string) => invoke<void>("ask_cancel", { chatId }),
   print: () => invoke<void>("print_page"),
+  ttsVoices: () => invoke<Voice[]>("tts_voices"),
+  ttsSpeak: (id: number, text: string, voice: string | undefined, rate: number) => invoke<void>("tts_speak", { id, text, voice: voice ?? null, rate }),
+  ttsStop: () => invoke<void>("tts_stop"),
 };

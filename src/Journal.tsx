@@ -9,7 +9,8 @@ import { Icon } from "./icons";
 import { htmlToMd, mdPlain, mdToHtml } from "./md";
 import { Topbar } from "./Shell";
 import { nowLocal, uid, useApp } from "./state";
-import { Dialog, Popover, Seg } from "./ui";
+import { confirmDelete, Dialog, Popover, Seg } from "./ui";
+import { useAssistant } from "./assistant";
 
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const longDate = (s: string) => {
@@ -27,6 +28,7 @@ export function JournalScreen() {
   const [err, setErr] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
   const [ask, setAsk] = useState(false);
+  const canAsk = useAssistant().available;
   const saveTimer = useRef<number | undefined>(undefined);
 
   // A seed from elsewhere: open an entry, or start one on the given verses.
@@ -63,7 +65,7 @@ export function JournalScreen() {
   const create = () => { const e: JournalEntry = { id: uid(), title: "", created: nowLocal(), updated: nowLocal(), verses: [], tags: [], body: "" }; setDraft(e); setSelId(e.id); };
   const remove = async () => {
     if (!cur) return;
-    if (!window.confirm(`Delete “${cur.title || "Untitled"}”? This can't be undone.`)) return;
+    if (!(await confirmDelete(`“${cur.title || "Untitled"}”`))) return;
     if (app.journal.some((e) => e.id === cur.id)) await app.deleteEntry(cur.id);
     setDraft(null);
     setSelId(app.journal.find((e) => e.id !== cur.id)?.id ?? null);
@@ -78,7 +80,7 @@ export function JournalScreen() {
   let lastMonth = "";
   return (
     <div className="main">
-      <Topbar right={<button className={`btn ${ask ? "on" : ""}`} type="button" onClick={() => setAsk(!ask)}><Icon name="chat" />Ask Claude</button>} />
+      <Topbar right={canAsk && <button className={`btn ${ask ? "on" : ""}`} type="button" onClick={() => setAsk(!ask)}><Icon name="chat" />Ask</button>} />
       <div style={{ flexGrow: 1, minHeight: 0, display: "grid", gridTemplateColumns: "320px minmax(0,1fr)" }}>
         <div style={{ borderRight: "1px solid var(--border)", padding: "14px 12px 0", display: "flex", flexDirection: "column", gap: 10, minHeight: 0 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "0 4px" }}>

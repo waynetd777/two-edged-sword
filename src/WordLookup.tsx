@@ -7,6 +7,7 @@ import { WordPick } from "./Read";
 import { useApp } from "./state";
 import { orderModules, short } from "./StudyPane";
 import { Popover } from "./ui";
+import { useAssistant } from "./assistant";
 
 interface Lex { num: string; word: string; translit: string; pron: string; rest: string; renderings: [string, number][] }
 
@@ -34,6 +35,7 @@ export function WordLookup({ pick, vref, bible, onClose, onDictionary, onComment
   onDictionary: (module: string, topic: string) => void; onCommentary: (module: string) => void; onAsk: (q: string) => void;
 }) {
   const app = useApp();
+  const canAsk = useAssistant().available;
   const word = pick.token.text;
   const lex = useLexicon(pick.token.strongs);
   const [topics, setTopics] = useState<TopicHit[]>([]);
@@ -86,10 +88,10 @@ export function WordLookup({ pick, vref, bible, onClose, onDictionary, onComment
             <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>{cov.map((c) => <button key={c.id} type="button" className="rchip" onClick={() => onCommentary(c.id)}>{short(c)}{range(c)}</button>)}</div>
           </div>
         )}
-        <div style={{ display: "grid", gridTemplateColumns: `repeat(${lex.length ? 3 : 2}, minmax(0,1fr))` }}>
+        <div style={{ display: "grid", gridTemplateColumns: `repeat(${1 + (lex.length ? 1 : 0) + (canAsk ? 1 : 0)}, minmax(0,1fr))` }}>
           {lex.length > 0 && <button type="button" style={{ height: 40, border: 0, background: "transparent", cursor: "pointer", color: "var(--accent)", borderRight: "1px solid var(--border)" }} onClick={() => { app.studyWord(lex[0].num); onClose(); }}>Word study</button>}
-          <button type="button" style={{ height: 40, border: 0, background: "transparent", cursor: "pointer", color: "var(--accent)", borderRight: "1px solid var(--border)" }} onClick={() => { app.searchText(word); onClose(); }}>Search “{word}”</button>
-          <button type="button" style={{ height: 40, border: 0, background: "transparent", cursor: "pointer", color: "var(--accent)" }} onClick={() => onAsk(`What does “${word}” mean in ${fmtRef(vref)}?`)}>Ask Claude</button>
+          <button type="button" style={{ height: 40, border: 0, background: "transparent", cursor: "pointer", color: "var(--accent)", borderRight: canAsk ? "1px solid var(--border)" : 0 }} onClick={() => { app.searchText(word); onClose(); }}>Search “{word}”</button>
+          {canAsk && <button type="button" style={{ height: 40, border: 0, background: "transparent", cursor: "pointer", color: "var(--accent)" }} onClick={() => onAsk(`What does “${word}” mean in ${fmtRef(vref)}?`)}>Ask</button>}
         </div>
       </div>
     </Popover>

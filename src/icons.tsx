@@ -1,3 +1,5 @@
+import { useId } from "react";
+
 // Stroke icons on a 16px grid, drawn in currentColor.
 
 const P: Record<string, string> = {
@@ -62,11 +64,10 @@ export function Pause({ size = 14 }: { size?: number }) {
   return <svg viewBox="0 0 16 16" aria-hidden="true" style={{ width: size, height: size, fill: "currentColor" }}><rect x="3.5" y="2.5" width="3" height="11" rx="1" /><rect x="9.5" y="2.5" width="3" height="11" rx="1" /></svg>;
 }
 
-/** The sidebar mark: the app icon's sword, without its tile. Gold on dark; on the light
- *  sidebar the pale gold edge would vanish, so it takes the light icon's ink-blue blade. */
-export function Sword({ size = 28 }: { size?: number }) {
+/** The sword's shapes in 1024-space (tools/make_icons.py is the source of truth). */
+function SwordParts() {
   return (
-    <svg className="sword" viewBox="300 160 424 736" aria-hidden="true" style={{ width: (size * 424) / 736, height: size }}>
+    <>
       <path d="M512 176L470 262V640H512Z" fill="var(--sw-light)" />
       <path d="M512 176L554 262V640H512Z" fill="var(--sw-dark)" />
       <path d="M512 292V604" stroke="var(--sw-fuller)" strokeWidth="8" strokeLinecap="round" fill="none" />
@@ -75,6 +76,49 @@ export function Sword({ size = 28 }: { size?: number }) {
       <rect x="486" y="674" width="52" height="136" rx="12" fill="var(--sw-grip)" />
       <path d="M486 704L538 720M486 734L538 750M486 764L538 780" stroke="var(--sw-wrap)" strokeWidth="8" fill="none" />
       <circle cx="512" cy="840" r="40" fill="var(--sw-gold)" /><circle cx="512" cy="840" r="14" fill="var(--sw-pin)" />
+    </>
+  );
+}
+
+/** The sidebar title: the sword beside "Two-edged Sword" in Cinzel Decorative (Roman
+ *  triumphal capitals, for victory), filled with the blade's polished gold, framed in a gold rounded border. The sword sits on the
+ *  app icon's blue disc and so always takes the icon's gold colours (.medal). The gradient's
+ *  stops are theme tokens (--wm-*), deeper on the light sidebar so the pale shine still reads. */
+export function Wordmark() {
+  const id = useId().replace(/:/g, "");
+  return (
+    <svg className="wordmark" viewBox="0 0 172 58" role="img" aria-label="Two-edged Sword">
+      <defs>
+        <linearGradient id={`g${id}`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" style={{ stopColor: "var(--wm-1)" }} />
+          <stop offset="0.46" style={{ stopColor: "var(--wm-2)" }} />
+          <stop offset="0.5" style={{ stopColor: "var(--wm-3)" }} />
+          <stop offset="0.64" style={{ stopColor: "var(--wm-4)" }} />
+          <stop offset="1" style={{ stopColor: "var(--wm-5)" }} />
+        </linearGradient>
+        <filter id={`s${id}`} x="-10%" y="-20%" width="120%" height="150%">
+          <feDropShadow dx="0" dy="0.8" stdDeviation="0.6" style={{ floodColor: "var(--wm-shadow)" }} />
+        </filter>
+      </defs>
+      <rect x="0.7" y="0.7" width="170.6" height="56.6" rx="10" fill="none" stroke={`url(#g${id})`} strokeWidth="1.4" />
+      <svg className="medal" x="6" y="5" width="38.4" height="48" viewBox="212 140 600 750">
+        <circle cx="512" cy="440" r="290" fill="#26354a" />
+        <SwordParts />
+      </svg>
+      <g fill={`url(#g${id})`} stroke="var(--wm-edge)" strokeWidth="0.35" filter={`url(#s${id})`} style={{ fontFamily: "'Cinzel Decorative', serif" }}>
+        <text x="50" y="21" fontSize="12" fontWeight="700" letterSpacing="2.3">Two-edged</text>
+        <text x="49" y="46.5" fontSize="27" fontWeight="900" letterSpacing="0.6">Sword</text>
+      </g>
+    </svg>
+  );
+}
+
+/** The sidebar mark: the app icon's sword, without its tile. Gold on dark; on the light
+ *  sidebar the pale gold edge would vanish, so it takes the light icon's ink-blue blade. */
+export function Sword({ size = 28 }: { size?: number }) {
+  return (
+    <svg className="sword" viewBox="300 160 424 736" aria-hidden="true" style={{ width: (size * 424) / 736, height: size }}>
+      <SwordParts />
     </svg>
   );
 }

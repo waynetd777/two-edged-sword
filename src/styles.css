@@ -39,8 +39,9 @@ input, textarea, [contenteditable="true"] { user-select: text; }
 .shell.nosidebar { grid-template-columns: minmax(0, 1fr); }
 .main { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
 .sidebar { background: var(--sidebar); border-right: 1px solid var(--sbborder); padding: 44px 10px 14px; display: flex; flex-direction: column; gap: 20px; overflow-y: auto; }
-.brand { display: flex; align-items: center; gap: 8px; padding: 0 8px; }
-.brand b { font: 600 15px/1.1 var(--ui); letter-spacing: -0.01em; }
+.brand { display: flex; align-items: center; }
+.wordmark { width: 100%; height: auto; display: block; overflow: visible; }
+.wordmark .medal { --sw-light: #efd9a4; --sw-dark: #c6974a; --sw-fuller: #8a6630; --sw-gold: #d8b160; --sw-grip: #6e4526; --sw-wrap: #8e5d35; --sw-pin: #b48a3e; }
 .nav { display: flex; align-items: center; gap: 9px; height: 30px; padding: 0 10px; border: 0; border-radius: 7px; background: transparent; width: 100%; text-align: left; cursor: pointer; }
 .nav:hover { background: var(--hover); }
 .nav.on { background: var(--accent); color: var(--onaccent); }
@@ -204,6 +205,15 @@ input[type="range"] { accent-color: var(--accent); }
 mark { background: var(--hl-gold); color: inherit; border-radius: 3px; padding: 0 2px; font-weight: 600; }
 
 /* The sidebar sword: the light app icon's colours on the light sidebar, gold on dark. */
-:root { --sw-light: #557ea9; --sw-dark: #2b4f76; --sw-fuller: #1d3857; --sw-gold: #a8791f; --sw-grip: #5a3a20; --sw-wrap: #74502f; --sw-pin: #86601a; }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --sw-light: #efd9a4; --sw-dark: #c6974a; --sw-fuller: #8a6630; --sw-gold: #d8b160; --sw-grip: #6e4526; --sw-wrap: #8e5d35; --sw-pin: #b48a3e; } }
-:root[data-theme="dark"] { --sw-light: #efd9a4; --sw-dark: #c6974a; --sw-fuller: #8a6630; --sw-gold: #d8b160; --sw-grip: #6e4526; --sw-wrap: #8e5d35; --sw-pin: #b48a3e; }
+:root { --sw-light: #557ea9; --sw-dark: #2b4f76; --sw-fuller: #1d3857; --sw-gold: #a8791f; --sw-grip: #5a3a20; --sw-wrap: #74502f; --sw-pin: #86601a; --wm-1: #f4d27a; --wm-2: #b3821f; --wm-3: #5a3c05; --wm-4: #d6a543; --wm-5: #7e540d; --wm-edge: #4d3305; --wm-shadow: rgba(60, 40, 5, 0.35); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --sw-light: #efd9a4; --sw-dark: #c6974a; --sw-fuller: #8a6630; --sw-gold: #d8b160; --sw-grip: #6e4526; --sw-wrap: #8e5d35; --sw-pin: #b48a3e; --wm-1: #fff6d8; --wm-2: #efcb76; --wm-3: #8f631c; --wm-4: #f7dc95; --wm-5: #b5832b; --wm-edge: #6b4a17; --wm-shadow: rgba(0, 0, 0, 0.7); } }
+:root[data-theme="dark"] { --sw-light: #efd9a4; --sw-dark: #c6974a; --sw-fuller: #8a6630; --sw-gold: #d8b160; --sw-grip: #6e4526; --sw-wrap: #8e5d35; --sw-pin: #b48a3e; --wm-1: #fff6d8; --wm-2: #efcb76; --wm-3: #8f631c; --wm-4: #f7dc95; --wm-5: #b5832b; --wm-edge: #6b4a17; --wm-shadow: rgba(0, 0, 0, 0.7); }
+
+/* Ask's progress line: a highlight sweeping across the muted text, and dots that fill in turn. */
+.working { align-self: flex-start; background: linear-gradient(90deg, var(--muted) 0%, var(--muted) 40%, var(--text) 50%, var(--muted) 60%, var(--muted) 100%) 0 0 / 250% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: sweep 1.8s linear infinite; }
+.working .dots i { font-style: normal; animation: dot 1.2s infinite; opacity: 0.2; }
+.working .dots i:nth-child(2) { animation-delay: 0.2s; }
+.working .dots i:nth-child(3) { animation-delay: 0.4s; }
+@keyframes sweep { from { background-position: 100% 0; } to { background-position: 0 0; } }
+@keyframes dot { 0%, 20% { opacity: 0.2; } 40%, 60% { opacity: 1; } 100% { opacity: 0.2; } }
+@media (prefers-reduced-motion: reduce) { .working { animation: none; color: var(--muted); background: none; } .working .dots i { animation: none; opacity: 1; } }

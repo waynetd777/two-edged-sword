@@ -15,7 +15,15 @@ src-tauri/gen/schemas
 *.dcti
 *.lexi
 *.refi
+*.devi
 *.dzip
+# and the Windows formats
+*.bblx
+*.cmtx
+*.dctx
+*.lexx
+*.refx
+*.topx
 
 # sift: derived state and private notes
 _sift/.cache/

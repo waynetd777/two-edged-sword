@@ -189,7 +189,7 @@ export function WordStudyScreen() {
                 {related.map((r) => (
                   <button key={r.num} type="button" className="bm" onClick={() => app.studyWord(r.num)} style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) auto", gap: "2px 10px", padding: "10px 0", borderBottom: "1px solid var(--border)", borderRadius: 0 }}>
                     <span><span style={{ font: "500 20px var(--display)" }}>{r.word}</span> <i>{r.translit}</i></span><span className="n">{r.num}</span>
-                    <span style={{ gridColumn: "1 / -1", fontSize: 12.5, color: "var(--muted)" }}>{plainText(r.rest).slice(0, 110)}</span>
+                    <span style={{ gridColumn: "1 / -1", fontSize: 12.5, color: "var(--muted)" }}>{plainText(r.rest.replace(/<num>(.*?)<\/num>/g, "$1")).slice(0, 110)}</span>
                   </button>
                 ))}
               </div>

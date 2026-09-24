@@ -338,6 +338,7 @@ export function lexiconParts(html: string): { word: string; translit: string; pr
 /** KJV renderings from the KJ Concordance entry: [["love", 74], ["loved", 38], …]. */
 export function concordanceRenderings(html: string): [string, number][] {
   const out: [string, number][] = [];
-  for (const m of html.matchAll(/<b>([^<]+?),\s*(\d+)<\/b>/g)) out.push([m[1].trim(), +m[2]]);
+  // plainText decodes entities: the concordance writes "love's" as "love&#146;s".
+  for (const m of html.matchAll(/<b>([^<]+?),\s*(\d+)<\/b>/g)) out.push([plainText(m[1]), +m[2]]);
   return out;
 }

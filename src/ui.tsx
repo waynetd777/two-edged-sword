@@ -3,6 +3,13 @@ import { BOOKS, book, SECTIONS } from "./bible";
 import { api } from "./api";
 import { Icon } from "./icons";
 import { useApp } from "./state";
+import { confirm } from "@tauri-apps/plugin-dialog";
+
+/** Asks before anything is deleted, as a native macOS alert with Delete as its button.
+ *  Used for every delete in the app, rather than window.confirm. */
+export function confirmDelete(what: string, detail = "This can't be undone."): Promise<boolean> {
+  return confirm(detail, { title: `Delete ${what}?`, kind: "warning", okLabel: "Delete", cancelLabel: "Cancel" }).catch(() => false);
+}
 
 /** Closes on Escape or a click outside. */
 export function useDismiss(ref: React.RefObject<HTMLElement | null>, onClose: () => void, active = true) {

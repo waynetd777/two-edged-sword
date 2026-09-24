@@ -1,11 +1,13 @@
+mod assistant;
 mod books;
-mod claude;
 mod content;
 mod index;
 mod journal;
 mod library;
 mod search;
 mod store;
+mod study;
+mod tts;
 
 use library::{Kind, Library, ModuleInfo};
 use serde::Serialize;
@@ -24,7 +26,7 @@ struct AppState {
     /// Replaced wholesale by `rescan_library` when modules are added.
     lib_cell: std::sync::RwLock<Arc<Library>>,
     data: PathBuf,
-    running: Arc<claude::Running>,
+    running: Arc<assistant::Running>,
     index: Arc<index::Index>,
 }
 
@@ -54,9 +56,10 @@ async fn rescan_library(st: State<'_, AppState>) -> Result<LibraryInfo, String> 
     let dir = st.lib().dir.clone();
     let fresh = Arc::new(tauri::async_runtime::spawn_blocking(move || Library::scan(dir)).await.map_err(|e| e.to_string())?);
     *st.lib_cell.write().map_err(|e| e.to_string())? = fresh.clone();
-    let (lib, index) = (fresh.clone(), st.index.clone());
+    let (lib, index, ask_root) = (fresh.clone(), st.index.clone(), study::root(&st.data));
     std::thread::spawn(move || {
         let _ = index.update(&lib);
+        study::export_dictionaries(&lib, &ask_root);
     });
     Ok(LibraryInfo { dir: fresh.dir.to_string_lossy().to_string(), found: fresh.dir.is_dir(), modules: fresh.modules.clone() })
 }
@@ -183,16 +186,28 @@ fn write_text_file(path: String, text: String) -> Result<(), String> {
 }
 
 #[tauri::command]
-async fn claude_status() -> claude::Status {
-    tauri::async_runtime::spawn_blocking(claude::status).await.unwrap_or(claude::Status { path: None, version: None })
+async fn assistant_status() -> Result<assistant::CliStatus, String> {
+    tauri::async_runtime::spawn_blocking(assistant::status).await.map_err(|e| e.to_string())
 }
 
 #[tauri::command]
-fn ask(app: AppHandle, st: State<AppState>, chat_id: String, prompt: String, model: String, session: Option<String>, book_dir: Option<String>) -> Result<(), String> {
-    // A book chat runs in the book's exported folder, with read-only tools confined to it.
-    let book = book_dir.map(PathBuf::from).filter(|d| d.starts_with(books::root(&st.data)));
-    let cwd = book.clone().unwrap_or_else(|| st.data.join("claude"));
-    claude::ask(app, st.running.clone(), cwd, chat_id, prompt, model, session, book.is_some())
+#[allow(clippy::too_many_arguments)]
+fn ask(app: AppHandle, st: State<AppState>, chat_id: String, prompt: String, model: String, session: Option<String>, book_dir: Option<String>, study_dir: Option<String>) -> Result<(), String> {
+    // A folder chat runs in that folder with read-only search tools; only the app's own folders count.
+    let root = study::root(&st.data);
+    let folder = match (book_dir.map(PathBuf::from).filter(|d| d.starts_with(books::root(&st.data))), study_dir.map(PathBuf::from).filter(|d| d.starts_with(study::studies_root(&root)))) {
+        (Some(b), _) => assistant::Folder::Book(b),
+        (None, Some(dir)) => assistant::Folder::Study { dir, dictionaries: study::dictionaries_dir(&root) },
+        _ => assistant::Folder::None,
+    };
+    assistant::ask(app, st.running.clone(), &st.data, folder, chat_id, prompt, model, session)
+}
+
+/// Writes out the library's material on a passage for a chat; returns the folder.
+#[tauri::command]
+async fn study_export(st: State<'_, AppState>, chat_id: String, req: study::Request) -> Result<String, String> {
+    let (lib, root) = (st.lib(), study::root(&st.data));
+    tauri::async_runtime::spawn_blocking(move || study::export(&lib, &root, &chat_id, &req).map(|d| d.to_string_lossy().to_string())).await.map_err(|e| e.to_string())?
 }
 
 #[tauri::command]
@@ -248,7 +263,7 @@ fn open_web(app: AppHandle, key: String, url: String, title: String) -> Result<(
 
 #[tauri::command]
 fn ask_cancel(st: State<AppState>, chat_id: String) {
-    claude::cancel(&st.running, &chat_id)
+    assistant::cancel(&st.running, &chat_id)
 }
 
 #[tauri::command]
@@ -270,12 +285,15 @@ pub fn run() {
     let data = store::data_dir();
     let index = Arc::new(index::Index::new(data.join("search-index.sqlite")));
     {
-        let (lib, index) = (lib.clone(), index.clone());
+        let (lib, index, ask_root) = (lib.clone(), index.clone(), study::root(&data));
         std::thread::spawn(move || {
             if let Err(e) = index.update(&lib) { eprintln!("search index: {e}"); }
+            // Then the dictionaries Ask searches, written out once (slow only the first time).
+            study::prune(&ask_root);
+            study::export_dictionaries(&lib, &ask_root);
         });
     }
-    let state = AppState { lib_cell: std::sync::RwLock::new(lib), data, running: Arc::new(claude::Running::default()), index };
+    let state = AppState { lib_cell: std::sync::RwLock::new(lib), data, running: Arc::new(assistant::Running::default()), index };
 
     tauri::Builder::default()
         .plugin(tauri_plugin_window_state::Builder::default().with_state_flags(STATE_FLAGS).with_filter(|label| !label.starts_with("web-")).build())
@@ -298,6 +316,7 @@ pub fn run() {
             strongs_for_word,
             translit_search,
             doc_export,
+            study_export,
             devotion_titles,
             devotion,
             open_web,
@@ -312,10 +331,13 @@ pub fn run() {
             journal_save,
             journal_delete,
             write_text_file,
-            claude_status,
+            assistant_status,
             ask,
             ask_cancel,
-            print_page
+            print_page,
+            tts::tts_voices,
+            tts::tts_speak,
+            tts::tts_stop
         ])
         .setup(|app| {
             let open = MenuItem::with_id(app, "open", "Open Two-edged Sword", true, None::<&str>)?;

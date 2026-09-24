@@ -5,12 +5,14 @@ import { plainText } from "./esword";
 import { Icon } from "./icons";
 import { mdPlain } from "./md";
 import { Screen, useApp } from "./state";
+import { useAssistant } from "./assistant";
 
 interface Item { id: string; group: string; icon: string; label: string; sub?: string; kbd?: string; run: () => void }
 
 /** ⌘K: go to a reference, search, or run a command. */
 export function Palette({ onClose, onAsk }: { onClose: () => void; onAsk: (ref: string) => void }) {
   const app = useApp();
+  const canAsk = useAssistant().available;
   const [q, setQ] = useState("");
   const [i, setI] = useState(0);
   const [preview, setPreview] = useState("");
@@ -32,7 +34,7 @@ export function Palette({ onClose, onAsk }: { onClose: () => void; onAsk: (ref: 
       if (ref.verse) out.push({ id: "ch", group: "Go to", icon: "read", label: `${BOOKS[ref.book - 1].name} ${ref.chapter}`, sub: "whole chapter", run: () => { app.open({ book: ref.book, chapter: ref.chapter }, "read"); onClose(); } });
       out.push({ id: "cmp", group: "Do", icon: "compare", label: `Compare ${fmtRef(ref)} in ${app.settings.compare.map((c) => app.mod("bible", c)?.abbrev ?? c).join(", ")}`, run: () => { app.open(l, "compare"); onClose(); } });
       out.push({ id: "note", group: "Do", icon: "note", label: `New journal entry on ${fmtRef(ref)}`, run: () => { app.startEntry({ verses: [fmtRef(ref)] }); onClose(); } });
-      out.push({ id: "ask", group: "Do", icon: "chat", label: `Ask Claude about ${fmtRef(ref)}`, kbd: "⌘L", run: () => { app.open(l, "read"); onAsk(fmtRef(ref)); onClose(); } });
+      if (canAsk) out.push({ id: "ask", group: "Do", icon: "chat", label: `Ask about ${fmtRef(ref)}`, kbd: "⌘L", run: () => { app.open(l, "read"); onAsk(fmtRef(ref)); onClose(); } });
     }
     if (q.trim()) {
       const up = q.trim().toUpperCase();
@@ -46,7 +48,7 @@ export function Palette({ onClose, onAsk }: { onClose: () => void; onAsk: (ref: 
         out.push({ id: s, group: "Screens", icon: s === "plans" ? "plans" : s, label: l, kbd: k, run: () => go(s) }));
     }
     return out;
-  }, [q, ref?.book, ref?.chapter, ref?.verse, ref?.to, preview, app]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [q, ref?.book, ref?.chapter, ref?.verse, ref?.to, preview, app, canAsk]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => setI(0), [q]);
   const key = (e: React.KeyboardEvent) => {

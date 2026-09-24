@@ -6,6 +6,7 @@ import { plainText, renderHtml } from "./esword";
 import { Icon } from "./icons";
 import { useApp } from "./state";
 import { Popover, TrailButtons, useTrail } from "./ui";
+import { useAssistant } from "./assistant";
 
 export type StudyTab = "commentary" | "dictionary" | "notes" | "maps" | "ask";
 
@@ -124,7 +125,8 @@ export function orderModules<T extends { id: string }>(ms: T[], order: string[])
 
 export function StudyPane(p: Props) {
   const app = useApp();
-  const tabs: [StudyTab, string][] = [["commentary", "Commentary"], ["dictionary", "Dictionary"], ["notes", "Notes"], ["maps", "Maps"], ["ask", "Ask"]];
+  const canAsk = useAssistant().available;
+  const tabs: [StudyTab, string][] = [["commentary", "Commentary"], ["dictionary", "Dictionary"], ["notes", "Notes"], ["maps", "Maps"], ...(canAsk ? [["ask", "Ask"] as [StudyTab, string]] : [])];
   const vref: Ref = { book: p.book, chapter: p.chapter, verse: p.verse };
   const noteCount = app.journal.filter((e) => e.verses.some((v) => { const r = parseRef(v); return r && r.book === p.book && r.chapter === p.chapter && (!r.verse || (r.verse <= p.verse && p.verse <= (r.to ?? r.verse))); })).length;
   return (

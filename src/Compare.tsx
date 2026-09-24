@@ -9,6 +9,7 @@ import { BibleSelect, RefButton, SearchField, Topbar } from "./Shell";
 import { useApp } from "./state";
 import { RefPicker, Switch } from "./ui";
 import { WordLookup } from "./WordLookup";
+import { useAssistant } from "./assistant";
 
 const norm = (s: string) => s.toLowerCase().replace(/[’']/g, "'");
 
@@ -30,12 +31,14 @@ function diffWords(a: string[], b: string[]): Set<number> {
 }
 
 function Marked({ tokens, diff, red, showNums, onWord, activeWi }: { tokens: Token[]; diff: Set<number> | null; red: boolean; showNums: boolean; onWord: (t: Token, el: HTMLElement) => void; activeWi?: number }) {
-  if (!diff || !diff.size) return <VerseText tokens={tokens} red={red} showNums={showNums} onWord={onWord} activeWi={activeWi} />;
+  // Numbers are drawn here, without their G/H, whether or not the verse has differences, so every
+  // verse in a column looks the same (VerseText writes them in full).
+  if ((!diff || !diff.size) && !showNums) return <VerseText tokens={tokens} red={red} showNums={showNums} onWord={onWord} activeWi={activeWi} />;
   return (
     <>
       {tokens.map((t, i) => {
         if (!t.word) return <span key={i} className={t.red && red ? "red" : undefined}>{t.italic ? <i>{t.text}</i> : t.text}</span>;
-        const d = diff.has(t.wi);
+        const d = !!diff?.has(t.wi);
         return (
           <span key={i}>
             <span className={`w ${t.red && red ? "red" : ""} ${activeWi === t.wi ? "on" : ""}`} style={d ? { background: "var(--hl-gold)", borderRadius: 3, padding: "0 2px" } : undefined} onClick={(e) => { e.stopPropagation(); onWord(t, e.currentTarget); }}>{t.italic ? <i>{t.text}</i> : t.text}</span>
@@ -55,6 +58,7 @@ export function CompareScreen({ openPalette }: { openPalette: () => void }) {
   const [diff, setDiff] = useState(true);
   const [nums, setNums] = useState(true);
   const [ask, setAsk] = useState(false);
+  const canAsk = useAssistant().available;
   const [word, setWord] = useState<(WordPick & { bible: string }) | null>(null);
   const [picker, setPicker] = useState<DOMRect | null>(null);
   const [sel, setSel] = useState<number | null>(loc.verse ?? null);
@@ -96,7 +100,7 @@ export function CompareScreen({ openPalette }: { openPalette: () => void }) {
 
   return (
     <div className="main">
-      <Topbar right={<button className={`btn ${ask ? "on" : ""}`} type="button" onClick={() => setAsk(!ask)}><Icon name="chat" />Ask Claude</button>}>
+      <Topbar right={canAsk && <button className={`btn ${ask ? "on" : ""}`} type="button" onClick={() => setAsk(!ask)}><Icon name="chat" />Ask</button>}>
         <RefButton onClick={() => setPicker(new DOMRect(300, 40, 100, 20))} />
         <SearchField onOpen={openPalette} />
       </Topbar>

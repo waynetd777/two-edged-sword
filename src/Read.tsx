@@ -1,5 +1,5 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { api, Verse } from "./api";
+import { api, Verse, Voice } from "./api";
 import { book, fmtRef, nextChapter, parseRef, prevChapter, Ref, sectionOf, testament } from "./bible";
 import { alignStrongs, plainText, Token, tokenize } from "./esword";
 import { Icon, Pause, Play } from "./icons";
@@ -10,6 +10,7 @@ import { StudyPane, StudyTab } from "./StudyPane";
 import { Popover, RefPicker, Seg } from "./ui";
 import { WordLookup } from "./WordLookup";
 import { BooksButton } from "./DocReader";
+import { useAssistant } from "./assistant";
 
 export interface WordPick { token: Token; verse: number; rect: DOMRect }
 
@@ -52,6 +53,7 @@ export function VerseText({ tokens, red, speakingChar, onWord, activeWi, showNum
 
 export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; setFocus: (f: boolean) => void; openPalette: () => void }) {
   const app = useApp();
+  const canAsk = useAssistant().available;
   const { loc, settings } = app;
   const player = usePlayer();
   const bible = settings.bible;
@@ -222,7 +224,7 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
       <button type="button" className="tb" onClick={() => app.startEntry({ verses: [fmtRef(selRef!)] })}><Icon name="note" />Note<span style={{ opacity: 0.6 }}>N</span></button>
       <button type="button" className="tb" onClick={() => app.open({ ...loc, verse: sel.from, to: sel.to }, "compare")}><Icon name="compare" />Compare</button>
       <button type="button" className="tb" onClick={() => player.play(bible, loc.book, loc.chapter, sel.from)}><Icon name="speaker" />Listen from here</button>
-      <button type="button" className="tb" onClick={() => { setTab("ask"); setAskSeed(null); }}><Icon name="chat" />Ask</button>
+      {canAsk && <button type="button" className="tb" onClick={() => { setTab("ask"); setAskSeed(null); }}><Icon name="chat" />Ask</button>}
       <button type="button" className="tb" title={settings.copyNumbers ? "Copy with verse numbers (⌘C)" : "Copy without verse numbers (⌘C)"} onClick={copy}><Icon name="copy" />Copy<span style={{ opacity: 0.6 }}>⌘C</span></button>
       <button type="button" className="tb" aria-pressed={settings.copyNumbers} title="Include verse numbers when copying" onClick={() => app.set({ copyNumbers: !settings.copyNumbers })} style={{ padding: "0 7px", opacity: settings.copyNumbers ? 1 : 0.5, textDecoration: settings.copyNumbers ? undefined : "line-through" }}>#</button>
     </div>
@@ -477,14 +479,14 @@ export function PlayerBar({ focus = false }: { focus?: boolean }) {
 export function VoiceSelect() {
   const app = useApp();
   const { voices } = usePlayer();
-  const cur = voices.find((v) => v.voiceURI === app.settings.voice) ?? voices.find((v) => v.default) ?? voices[0];
-  const label = (v: SpeechSynthesisVoice) => `${v.name} · ${new Intl.DisplayNames(["en"], { type: "language" }).of(v.lang) ?? v.lang}`;
+  const cur = voices.find((v) => v.id === app.settings.voice) ?? voices.find((v) => v.name === app.settings.voice) ?? voices.find((v) => v.default) ?? voices[0];
+  const label = (v: Voice) => `${v.name} · ${new Intl.DisplayNames(["en"], { type: "language" }).of(v.lang) ?? v.lang}`;
   return (
     <label className="btn" style={{ position: "relative", justifyContent: "space-between", width: "100%" }}>
       <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{cur ? label(cur) : "System voice"}</span>
       <Icon name="down" className="sm" style={{ color: "var(--muted)" }} />
-      <select aria-label="Voice" value={cur?.voiceURI ?? ""} onChange={(e) => app.set({ voice: e.target.value })} style={{ position: "absolute", inset: 0, opacity: 0, cursor: "pointer" }}>
-        {voices.map((v) => <option key={v.voiceURI} value={v.voiceURI}>{label(v)}</option>)}
+      <select aria-label="Voice" value={cur?.id ?? ""} onChange={(e) => app.set({ voice: e.target.value })} style={{ position: "absolute", inset: 0, opacity: 0, cursor: "pointer" }}>
+        {voices.map((v) => <option key={v.id} value={v.id}>{label(v)}</option>)}
       </select>
     </label>
   );

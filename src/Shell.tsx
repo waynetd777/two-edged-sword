@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { BOOKS, book, fmtRef } from "./bible";
-import { Icon, Sword } from "./icons";
+import { Icon, Wordmark } from "./icons";
 import { Screen, useApp } from "./state";
 import { todayReading } from "./plans";
 import { useRefPreview } from "./StudyPane";
@@ -32,7 +32,7 @@ export function Sidebar() {
   const leave = () => onRefHover(null, null);
   return (
     <aside className="sidebar drag">
-      <div className="brand"><Sword /><b>Two-edged Sword</b></div>
+      <div className="brand"><Wordmark /></div>
       <nav style={{ display: "flex", flexDirection: "column", gap: 2 }} aria-label="Screens">
         {NAV.map((n) => (
           <button key={n.s} type="button" className={`nav ${app.screen === n.s ? "on" : ""}`} onClick={() => app.go(n.s)}>

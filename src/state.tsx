@@ -9,12 +9,8 @@ import { Plan } from "./plans";
 import type { StudyTab } from "./StudyPane";
 
 export type Theme = "auto" | "light" | "dark";
-export type Model = "claude-opus-5-5" | "claude-sonnet-5" | "claude-haiku-4-5-20251001";
-export const MODELS: { id: Model; name: string }[] = [
-  { id: "claude-opus-5-5", name: "Opus 5.5" },
-  { id: "claude-sonnet-5", name: "Sonnet 5" },
-  { id: "claude-haiku-4-5-20251001", name: "Haiku 4.5" },
-];
+/** A model id; which CLI answers follows from it (see assistant.ts). */
+export type Model = string;
 
 export interface Settings {
   theme: Theme;
@@ -86,6 +82,8 @@ export interface Chat {
   session?: string;
   /** A chat about a reference book runs in the book's exported folder (api.docExport). */
   bookDir?: string;
+  /** A chat about a Bible passage searches the library's material on it here (api.studyExport). */
+  studyDir?: string;
   messages: ChatMsg[];
   journaled?: boolean;
 }

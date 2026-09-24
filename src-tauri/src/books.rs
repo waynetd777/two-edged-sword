@@ -75,12 +75,20 @@ fn to_text(html: &str, chapter: usize) -> (String, Vec<(String, Vec<u8>)>) {
         rest = &rest[end..];
     }
     s.push_str(rest);
+    (paragraphs(&s), images)
+}
+
+/// Plain text with each paragraph (or line break, heading, list item, table row) on its own
+/// line, blank lines between, so it can be searched and read a paragraph at a time.
+pub fn paragraphs(html: &str) -> String {
+    const PARA: char = '\u{1}';
+    let mut s = html.to_string();
     for pat in ["</p>", "</P>", "<br>", "<br/>", "<br />", "<BR>", "</tr>", "</h1>", "</h2>", "</h3>", "</li>"] {
         s = s.replace(pat, &format!("{pat}{PARA}"));
     }
     let text = plain(&s);
     let paras: Vec<String> = text.split(PARA).map(|p| p.split_whitespace().collect::<Vec<_>>().join(" ")).filter(|p| !p.is_empty()).collect();
-    (paras.join("\n\n"), images)
+    paras.join("\n\n")
 }
 
 fn data_uri(tag: &str) -> Option<(&str, &str)> {

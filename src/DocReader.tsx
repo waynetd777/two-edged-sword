@@ -11,6 +11,7 @@ import { useApp } from "./state";
 import { useRefPreview } from "./StudyPane";
 import { Popover } from "./ui";
 import { dayTitle } from "./plans";
+import { useAssistant } from "./assistant";
 
 /**
  * A reference book or a devotional in the reading column: its chapters (a devotional's days) down
@@ -18,6 +19,8 @@ import { dayTitle } from "./plans";
  */
 export function DocReader({ focus, setFocus }: { focus: boolean; setFocus: (f: boolean) => void }) {
   const app = useApp();
+  const canAsk = useAssistant().available;
+  const pane = app.settings.studyPane && canAsk;
   const doc = app.doc!;
   const kind = doc.kind ?? "reference";
   const devo = kind === "devotional";
@@ -41,7 +44,7 @@ export function DocReader({ focus, setFocus }: { focus: boolean; setFocus: (f: b
   const listen = (from = 0) => player.playDoc(doc.module, doc.title, segs, from, kind);
 
   // Ask: the chapter (or the part around the paragraph asked about) goes with the question; the
-  // rest of the book is exported once so Claude can search it rather than carry it.
+  // rest of the book is exported once so the model can search it rather than carry it.
   const [asking, setAsking] = useState<number | null>(null);
   useEffect(() => setAsking(null), [doc.module, doc.title]);
   const exported = useRef<{ module: string; p: Promise<{ dir: string; files: string[] }> } | null>(null);
@@ -56,7 +59,7 @@ export function DocReader({ focus, setFocus }: { focus: boolean; setFocus: (f: b
   const askContext = async () => {
     const { files } = await exportBook().catch(() => ({ files: [] as string[] }));
     const file = files[i];
-    // Charts named as in the exported files, so Claude can open the one it is asked about.
+    // Charts named as in the exported files, so the model can open the one it is asked about.
     let img = 0;
     const nn = String(i + 1).padStart(2, "0");
     const paras = segs.map((h) => plainText(h.replace(/<img[^>]*>/gi, () => ` [Chart: ${nn}-img${++img}.png] `)));
@@ -179,7 +182,7 @@ export function DocReader({ focus, setFocus }: { focus: boolean; setFocus: (f: b
           <button className={`ibtn ${reading ? "on" : ""}`} type="button" aria-label="Listen" title="Listen (space)" disabled={!segs.length} onClick={() => (reading ? player.toggle() : listen())}><Icon name="speaker" /></button>
           <TextSizeButton />
           <button className="ibtn" type="button" aria-label="Focus mode" title="Focus mode (⌘.)" onClick={() => setFocus(true)}><Icon name="focus" /></button>
-          <button className={`ibtn ${app.settings.studyPane ? "on" : ""}`} type="button" aria-label="Ask Claude" title="Ask Claude (⌘\)" onClick={() => app.set({ studyPane: !app.settings.studyPane })}><Icon name="chat" /></button>
+          {canAsk && <button className={`ibtn ${app.settings.studyPane ? "on" : ""}`} type="button" aria-label="Ask" title="Ask (⌘\)" onClick={() => app.set({ studyPane: !app.settings.studyPane })}><Icon name="chat" /></button>}
         </div>
       }>
         <button className="btn" type="button" title="Back to the Bible" onClick={app.closeDoc}><Icon name="read" />{fmtRef(app.loc)}</button>
@@ -191,7 +194,7 @@ export function DocReader({ focus, setFocus }: { focus: boolean; setFocus: (f: b
           </select>
         </label>
       </Topbar>}
-      <div style={{ flexGrow: 1, minHeight: 0, display: "grid", gridTemplateColumns: focus ? "minmax(0,1fr)" : app.settings.studyPane ? "260px minmax(0,1fr) 520px" : "260px minmax(0,1fr)" }}>
+      <div style={{ flexGrow: 1, minHeight: 0, display: "grid", gridTemplateColumns: focus ? "minmax(0,1fr)" : pane ? "260px minmax(0,1fr) 520px" : "260px minmax(0,1fr)" }}>
         {!focus && <aside style={{ display: "flex", flexDirection: "column", minHeight: 0, borderRight: "1px solid var(--border)" }}>
           {titles.length > 12 && (
             <label className="field" style={{ margin: "10px 12px 4px" }}><Icon name="search" /><input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder={`Filter ${titles.length} ${devo ? "days" : "chapters"}`} aria-label="Filter chapters" /></label>
@@ -220,7 +223,7 @@ export function DocReader({ focus, setFocus }: { focus: boolean; setFocus: (f: b
                     <div key={k} data-seg={k + 1} className={`dseg ${reading && ps.verse === k + 1 ? "speaking" : ""} ${asking === k ? "asking" : ""}`}>
                       <span className="dsegtools">
                         <button type="button" aria-label="Listen from here" title="Listen from here" onClick={() => listen(k)}><Icon name="speaker" size={13} /></button>
-                        <button type="button" aria-label="Ask about this paragraph" title="Ask about this paragraph" onClick={() => askAbout(k)}><Icon name="chat" size={13} /></button>
+                        {canAsk && <button type="button" aria-label="Ask about this paragraph" title="Ask about this paragraph" onClick={() => askAbout(k)}><Icon name="chat" size={13} /></button>}
                       </span>
                       {renderHtml(h, { onRef: (r) => { hide(); app.open({ book: r.book, chapter: r.chapter, verse: r.verse, to: r.to }, "read"); }, onRefHover, onStrongs: app.studyWord, onImage: setImage })}
                     </div>
@@ -233,7 +236,7 @@ export function DocReader({ focus, setFocus }: { focus: boolean; setFocus: (f: b
             </div>
           </div>
         </main>
-        {!focus && app.settings.studyPane && (
+        {!focus && pane && (
           <aside style={{ display: "flex", flexDirection: "column", minHeight: 0, borderLeft: "1px solid var(--border)", background: "var(--panel)" }}>
             {asking !== null && (
               <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 18px", borderBottom: "1px solid var(--border)", fontSize: 12.5 }}>
@@ -243,7 +246,7 @@ export function DocReader({ focus, setFocus }: { focus: boolean; setFocus: (f: b
             )}
             <AskPanel key={`${doc.module}|${doc.title}|${asking}`} full source="Reader" about={asking === null ? doc.title : `${doc.title} ¶${asking + 1}`}
               context={askContext} bookDir={() => exportBook().then((x) => x.dir)}
-              hint={`Ask anything about ${asking === null ? `this ${unit}` : "this paragraph"}. The ${unit} goes with the question, and Claude can search the rest of ${mod?.title ?? "the book"}${devo ? "" : " and look at its charts"} when it needs to.`}
+              hint={`Ask anything about ${asking === null ? `this ${unit}` : "this paragraph"}. The ${unit} goes with the question, and the model can search the rest of ${mod?.title ?? "the book"}${devo ? "" : " and look at its charts"} when it needs to.`}
               suggestions={suggestions} />
           </aside>
         )}

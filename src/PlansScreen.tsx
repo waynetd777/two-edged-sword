@@ -7,8 +7,9 @@ import {
 } from "./plans";
 import { Topbar } from "./Shell";
 import { uid, useApp } from "./state";
-import { Dialog, Popover, Seg } from "./ui";
+import { confirmDelete, Dialog, Popover, Seg } from "./ui";
 import { useStartQuietTime } from "./QuietTime";
+import { useAssistant } from "./assistant";
 
 let sizesCache: Record<string, Sizes> = {};
 async function sizes(bible: string): Promise<Sizes> {
@@ -18,6 +19,7 @@ async function sizes(bible: string): Promise<Sizes> {
 
 export function PlansScreen() {
   const app = useApp();
+  const canAsk = useAssistant().available;
   const plan = app.plans.find((p) => p.active) ?? app.plans[0];
   const [picker, setPicker] = useState(false);
   const [builder, setBuilder] = useState(false);
@@ -123,14 +125,14 @@ export function PlansScreen() {
               </div>
             ) : plan.kind === "ppo" && (
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                <div style={{ display: "flex", justifyContent: "space-between" }}><span><b>{plan.doneDates.length}</b> days read</span><span style={{ color: "var(--muted)" }}>next other chapter {book(plan.nextOther[0]).name} {plan.nextOther[1]} · {t?.pct}% round</span></div>
+                <div style={{ display: "flex", justifyContent: "space-between" }}><span><b>{plan.doneDates.length}</b> {plan.doneDates.length === 1 ? "day" : "days"} read</span><span style={{ color: "var(--muted)" }}>next other chapter {book(plan.nextOther[0]).name} {plan.nextOther[1]} · {t?.pct}% round</span></div>
                 <div style={{ height: 8, borderRadius: 999, background: "var(--border)", overflow: "hidden" }}><div style={{ width: `${t?.pct}%`, height: 8, background: "var(--accent)" }} /></div>
               </div>
             )}
             <div style={{ display: "flex", gap: 8, marginTop: "auto", flexWrap: "wrap" }}>
               <button className="btn" type="button" onClick={() => update({ ...plan, active: !plan.active })}>{plan.active ? "Pause plan" : "Resume plan"}</button>
               {seq && <button className="btn" type="button" onClick={() => setBehindOpen(true)}>Move the rest later…</button>}
-              <button className="btn" type="button" style={{ marginLeft: "auto", color: "var(--bad)" }} onClick={() => { if (window.confirm(`Delete the plan “${plan.name}”?`)) app.setPlans((ps) => ps.filter((p) => p.id !== plan.id)); }}><Icon name="trash" />Delete</button>
+              <button className="btn" type="button" style={{ marginLeft: "auto", color: "var(--bad)" }} onClick={async () => { if (await confirmDelete(`the plan “${plan.name}”`, "Its progress is lost too. This can't be undone.")) app.setPlans((ps) => ps.filter((p) => p.id !== plan.id)); }}><Icon name="trash" />Delete</button>
             </div>
           </div>
           <div className="card" style={{ padding: "22px 24px", display: "flex", flexDirection: "column", gap: 12, background: "var(--accentsoft)", borderColor: "var(--ring)" }}>
@@ -147,7 +149,7 @@ export function PlansScreen() {
               <button className="btn" type="button" style={{ height: 34 }} title="Read today's readings and devotionals aloud, one after another" onClick={() => t && startQuiet(plan, t.parts, true)}><Play size={12} />Read with audio</button>
               <button className="btn" type="button" style={{ height: 34, marginLeft: "auto" }} onClick={markRead} disabled={plan.kind === "ppo" && plan.doneDates.includes(tk)}><Icon name="check" />Mark as read</button>
             </div>
-            {t?.parts[0] && (
+            {canAsk && t?.parts[0] && (
               <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center" }}>
                 <span style={{ color: "var(--accent)", display: "inline-flex" }}><Icon name="chat" /></span>
                 {[`Background before I read ${fmtRef(partRef(t.parts[t.parts.length - 1]))}`, `What to look for in ${fmtRef(partRef(t.parts[t.parts.length - 1]))}`].map((s) => (

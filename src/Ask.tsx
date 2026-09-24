@@ -5,24 +5,33 @@ import { fmtRef, Ref } from "./bible";
 import { plainText } from "./esword";
 import { Icon } from "./icons";
 import { mdToHtml } from "./md";
-import { Chat, MODELS, Model, nowLocal, uid, useApp } from "./state";
-import { orderModules, useRefPreview } from "./StudyPane";
-import { Popover } from "./ui";
+import { modelName, pickModel, providerOf, PROVIDER_NAME, useAssistant } from "./assistant";
+import { Chat, Model, nowLocal, uid, useApp } from "./state";
+import { useRefPreview } from "./StudyPane";
+import { confirmDelete, Popover } from "./ui";
 
 /** A module whose description carries a copyright notice is licensed, not public domain. */
 const PUBLIC_DOMAIN = /^(KJV\+?|KJVA|ASV|YLT|WEB|DRB|DRA|Darby|BBE|RV|ERV|Webster|Geneva|GNV|Bishops|Tyndale|Wycliffe|LXX|TR|WH|Byz)$/i;
 export const isLicensed = (m: ModuleInfo | undefined) =>
   !!m && !PUBLIC_DOMAIN.test(m.abbrev) && !/public domain/i.test(m.info) && /copyright|&copy;|&#169;|©|all rights reserved|used by permission/i.test(m.info);
 
-// One listener for the whole app; panels subscribe by chat id.
-type Sub = { chunk: (t: string) => void; done: (d: { sessionId: string | null; text: string; error: string | null }) => void };
-const subs = new Map<string, Sub>();
-let listening = false;
+// One listener for the whole app; panels subscribe by chat id. Kept on globalThis so a hot
+// reload of this file shares them instead of stranding answers in a fresh, empty map.
+type Sub = { chunk: (t: string) => void; status: (t: string) => void; done: (d: { sessionId: string | null; text: string; error: string | null }) => void };
+const g = globalThis as { __askSubs?: Map<string, Sub>; __askListening?: boolean };
+const subs = (g.__askSubs ??= new Map<string, Sub>());
 function ensureListening() {
-  if (listening) return;
-  listening = true;
+  if (g.__askListening) return;
+  g.__askListening = true;
   listen<{ chatId: string; text: string }>("ask-chunk", (e) => subs.get(e.payload.chatId)?.chunk(e.payload.text));
+  listen<{ chatId: string; text: string }>("ask-status", (e) => subs.get(e.payload.chatId)?.status(e.payload.text));
   listen<{ chatId: string; sessionId: string | null; text: string; error: string | null }>("ask-done", (e) => subs.get(e.payload.chatId)?.done(e.payload));
+}
+
+/** A progress line ("Thinking", "Reading Matthew Henry's Commentary"): a light sweeps across
+ *  it and the dots count up. Keyed by the text so each new step starts its sweep afresh. */
+function Working({ text }: { text: string }) {
+  return <span key={text} className="n working" role="status">{text}<span className="dots" aria-hidden="true"><i>.</i><i>.</i><i>.</i></span></span>;
 }
 
 /** Answer text with verse references as links. */
@@ -46,14 +55,14 @@ export function Answer({ text, onRef, onRefHover }: { text: string; onRef: (r: R
 export interface AskProps {
   /** Where it is asked from, shown in Recent: "Read", "Compare"… */
   source: string;
-  /** The passage it is about, when there is one; its text goes to Claude. */
+  /** The passage it is about, when there is one; its text goes to the model. */
   passage?: Ref | null;
   verses?: Verse[];
   /** Short label for Recent when there is no passage: "G25 agapaō". */
   about?: string;
-  /** More context for Claude: other translations, a lexicon entry, search results, a journal entry. */
+  /** More context for the model: other translations, a lexicon entry, search results, a journal entry. */
   context?: () => Promise<string> | string;
-  /** A reference book's exported folder, which Claude may search and read (see books.rs). */
+  /** A reference book's exported folder, which the model may search and read (see books.rs). */
   bookDir?: () => Promise<string>;
   /** What goes with the question, for the empty state; defaults to the passage. */
   hint?: string;
@@ -70,13 +79,17 @@ export function AskPanel(p: AskProps) {
   const [chatId, setChatId] = useState<string | null>(null);
   const [q, setQ] = useState("");
   const [busy, setBusy] = useState(false);
+  /** What it is doing while it searches the library: "Reading Matthew Henry's Commentary". */
+  const [status, setStatus] = useState<string | null>(null);
   const [scope, setScope] = useState<"passage" | "chapter">("passage");
   const [recent, setRecent] = useState<DOMRect | null>(null);
   const [modelMenu, setModelMenu] = useState<DOMRect | null>(null);
-  const [withCommentary, setWithCommentary] = useState(app.settings.includeCommentaries);
+  // Every passage chat gets the library to search; the model decides whether a question needs it.
+  const withLibrary = app.settings.includeCommentaries;
   const endRef = useRef<HTMLDivElement>(null);
   const chat = app.chats.find((c) => c.id === chatId) ?? null;
-  const model: Model = chat?.model ?? app.settings.model;
+  const asst = useAssistant();
+  const model: Model = chat?.model ?? pickModel(app.settings.model, asst.models);
   const passage = p.passage ? (scope === "chapter" ? { book: p.passage.book, chapter: p.passage.chapter } : p.passage) : null;
   const about = passage ? fmtRef(passage) : p.about ?? p.source;
 
@@ -98,14 +111,6 @@ export function AskPanel(p: AskProps) {
         vs = ps.verses;
       } else vs = await api.chapter(bible, passage.book, passage.chapter);
       parts.push(`The passage (${fmtRef(passage)}, ${bm?.title ?? bible}):\n${vs.map((v) => `${v.v} ${plainText(v.text)}`).join("\n")}`);
-      if (withCommentary && passage.verse) {
-        const cov = orderModules((await api.coverage(passage.book, passage.chapter, passage.verse)).filter((c) => c.range && c.id !== app.tsk), app.settings.commentaryOrder).slice(0, 2);
-        for (const c of cov) {
-          const cm = await api.commentary(c.id, passage.book, passage.chapter, passage.verse);
-          const t = plainText(cm.verse.map((e) => e.html).join(" "));
-          if (t) parts.push(`From ${c.title}:\n${t.length > 3500 ? t.slice(0, 3500) + " …" : t}`);
-        }
-      }
     }
     if (p.context) { const c = await p.context(); if (c) parts.push(c); }
     return parts.join("\n\n");
@@ -119,17 +124,26 @@ export function AskPanel(p: AskProps) {
     let id = chat?.id;
     let prompt = question;
     let bookDir = chat?.bookDir;
+    let studyDir = chat?.studyDir;
     if (!chat) {
-      if (p.bookDir) { try { bookDir = await p.bookDir(); } catch (e) { console.error(e); } }
       id = uid();
-      const c: Chat = { id, title: question.length > 80 ? question.slice(0, 77) + "…" : question, about, source: p.source, created: new Date().toISOString(), updated: new Date().toISOString(), model, bookDir, messages: [] };
+      if (p.bookDir) { try { bookDir = await p.bookDir(); } catch (e) { console.error(e); } }
+      // A passage chat gets the library's material on it to search: the commentaries, the other
+      // Bibles (public-domain ones only, unless licensed text may be sent) and the lexicons.
+      else if (passage && withLibrary) {
+        const bibles = app.bibles.filter((b) => app.settings.allowLicensed || !isLicensed(b)).map((b) => b.id);
+        try { studyDir = await api.studyExport(id, { book: passage.book, chapter: passage.chapter, from: passage.verse ?? null, to: passage.verse ? passage.to ?? passage.verse : null, bibles, strongsBible: app.strongsBible, label: fmtRef(passage) }); } catch (e) { console.error(e); }
+      }
+      const c: Chat = { id, title: question.length > 80 ? question.slice(0, 77) + "…" : question, about, source: p.source, created: new Date().toISOString(), updated: new Date().toISOString(), model, bookDir, studyDir, messages: [] };
       app.setChats((cs) => [c, ...cs]);
       setChatId(id);
       try { const ctx = await buildContext(); if (ctx) prompt = `${ctx}\n\nQuestion: ${question}`; } catch (e) { console.error(e); }
     }
     const cid = id!;
     update(cid, (c) => ({ ...c, updated: new Date().toISOString(), messages: [...c.messages, { role: "user", text: question }, { role: "assistant", text: "" }] }));
+    setStatus(null);
     subs.set(cid, {
+      status: (t) => setStatus(t),
       chunk: (t) => update(cid, (c) => { const m = [...c.messages]; m[m.length - 1] = { ...m[m.length - 1], text: m[m.length - 1].text + t }; return { ...c, messages: m }; }),
       done: (d) => {
         update(cid, (c) => {
@@ -140,9 +154,10 @@ export function AskPanel(p: AskProps) {
         });
         subs.delete(cid);
         setBusy(false);
+        setStatus(null);
       },
     });
-    try { await api.ask(cid, prompt, model, chat?.session ?? null, bookDir ?? null); }
+    try { await api.ask(cid, prompt, model, chat?.session ?? null, bookDir ?? null, studyDir ?? null); }
     catch (e) { subs.get(cid)?.done({ sessionId: null, text: "", error: String(e) }); }
   };
 
@@ -150,7 +165,7 @@ export function AskPanel(p: AskProps) {
     const qm = c.messages[i - 1]?.text ?? c.title;
     const a = c.messages[i].text;
     const refs = passage ? [fmtRef(passage)] : [];
-    await app.saveEntry({ id: uid(), title: qm.length > 70 ? qm.slice(0, 67) + "…" : qm, created: nowLocal(), updated: nowLocal(), verses: refs, tags: ["ask"], body: `**Asked:** ${qm}\n\n${a}\n\n*Answer from Claude (${MODELS.find((m) => m.id === c.model)?.name ?? c.model}).*` });
+    await app.saveEntry({ id: uid(), title: qm.length > 70 ? qm.slice(0, 67) + "…" : qm, created: nowLocal(), updated: nowLocal(), verses: refs, tags: ["ask"], body: `**Asked:** ${qm}\n\n${a}\n\n*Answer from ${modelName(c.model)}.*` });
     update(c.id, (x) => ({ ...x, journaled: true }));
     app.toast("Added to your journal");
   };
@@ -158,10 +173,9 @@ export function AskPanel(p: AskProps) {
   const { onRefHover, preview, hide } = useRefPreview(app.settings.bible);
   const openRef = (r: Ref) => { hide(); openRefNow(r); };
   const openRefNow = (r: Ref) => app.open({ book: r.book, chapter: r.chapter, verse: r.verse, to: r.to }, "read");
-  const modelName = MODELS.find((m) => m.id === model)?.name ?? model;
   const header = (
     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-      {!p.full && <><span style={{ color: "var(--accent)", display: "inline-flex" }}><Icon name="chat" /></span><b style={{ whiteSpace: "nowrap" }}>Ask Claude</b><span className="n" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", minWidth: 0 }}>about {about}</span></>}
+      {!p.full && <><span style={{ color: "var(--accent)", display: "inline-flex" }}><Icon name="chat" /></span><b style={{ whiteSpace: "nowrap" }}>Ask</b><span className="n" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", minWidth: 0 }}>about {about}</span></>}
       <button className={`btn small ${recent ? "on" : ""}`} type="button" title="Recent chats" aria-label="Recent chats" style={{ marginLeft: "auto" }} onClick={(e) => setRecent(e.currentTarget.getBoundingClientRect())}><Icon name="clock" size={13} />{p.full && "Recent"}</button>
       <button className="btn small" type="button" onClick={() => { setChatId(null); setQ(""); }}><Icon name="plus" size={13} />New chat</button>
     </div>
@@ -175,8 +189,9 @@ export function AskPanel(p: AskProps) {
         <div key={i} style={{ alignSelf: "flex-end", maxWidth: "88%", padding: "8px 12px", borderRadius: "12px 12px 4px 12px", background: "var(--accentsoft)", fontSize: 13.5, lineHeight: 1.5 }} className="selectable">{m.text}</div>
       ) : (
         <div key={i} style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}><span className="label">Claude</span><span className="n">{MODELS.find((x) => x.id === chat!.model)?.name}</span></div>
-          {m.error ? <div className="err" style={{ fontSize: 13 }}>{m.text}</div> : m.text ? <Answer text={m.text} onRef={openRef} onRefHover={onRefHover} /> : <span className="n">Thinking…</span>}
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}><span className="label">{modelName(chat!.model)}</span></div>
+          {m.error ? <div className="err" style={{ fontSize: 13 }}>{m.text}</div> : m.text ? <Answer text={m.text} onRef={openRef} onRefHover={onRefHover} /> : <Working text={busy && status && i === messages.length - 1 ? status : "Thinking"} />}
+          {busy && status && m.text && i === messages.length - 1 && <Working text={status} />}
           {!m.error && m.text && !(busy && i === messages.length - 1) && (
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
               <button className="btn primary small" type="button" onClick={() => addToJournal(chat!, i)}><Icon name="journal" size={13} />Add to journal</button>
@@ -197,8 +212,7 @@ export function AskPanel(p: AskProps) {
         onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || !e.shiftKey)) { e.preventDefault(); send(q); } }}
         style={{ border: 0, outline: 0, resize: "none", background: "transparent", font: "400 13.5px/1.5 var(--ui)", color: "var(--text)", flexGrow: 1 }} />
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-        <button className="btn small" type="button" onClick={(e) => setModelMenu(e.currentTarget.getBoundingClientRect())} disabled={!!chat}>{modelName}<Icon name="down" className="sm" /></button>
-        {p.full && passage?.verse && <button type="button" className={`chip ${withCommentary ? "on" : ""}`} aria-pressed={withCommentary} disabled={!!chat} onClick={() => setWithCommentary(!withCommentary)}>+ commentaries</button>}
+        <button className="btn small" type="button" onClick={(e) => setModelMenu(e.currentTarget.getBoundingClientRect())} disabled={!!chat}>{modelName(model)}<Icon name="down" className="sm" /></button>
         <button type="button" aria-label="Send" disabled={busy || !q.trim()} onClick={() => send(q)} style={{ marginLeft: "auto", width: 30, height: 30, borderRadius: 8, border: 0, background: "var(--accent)", color: "var(--onaccent)", display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer", opacity: busy || !q.trim() ? 0.5 : 1 }}><Icon name="send" /></button>
       </div>
     </label>
@@ -209,13 +223,14 @@ export function AskPanel(p: AskProps) {
       {preview}
       {recent && <RecentChats anchor={recent} about={about} onClose={() => setRecent(null)} onPick={(id) => { setChatId(id); setRecent(null); }} current={chatId} />}
       {modelMenu && (
-        <Popover anchor={modelMenu} onClose={() => setModelMenu(null)} width={200}>
-          <div style={{ padding: 6 }}>{MODELS.map((m) => <button key={m.id} type="button" className="bm" onClick={() => { app.set({ model: m.id }); setModelMenu(null); }}>{m.name}{m.id === model && <span className="r"><Icon name="check" /></span>}</button>)}</div>
+        <Popover anchor={modelMenu} onClose={() => setModelMenu(null)} width={230}>
+          <div style={{ padding: 6 }}>{asst.models.map((m) => <button key={m.id} type="button" className="bm" onClick={() => { app.set({ model: m.id }); setModelMenu(null); }}>{m.name}{m.id === model && <span className="r"><Icon name="check" /></span>}</button>)}</div>
         </Popover>
       )}
     </>
   );
 
+  if (!asst.available) return null;
   if (p.full) {
     return (
       <div style={{ display: "flex", flexDirection: "column", flexGrow: 1, minHeight: 0 }}>
@@ -232,7 +247,7 @@ export function AskPanel(p: AskProps) {
         <div className="scroll" style={{ flexGrow: 1, padding: "16px 18px", display: "flex", flexDirection: "column", gap: 14 }}>
           {messages.length === 0 && (
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              <div className="hint">{p.hint ?? `Ask anything about ${about}. The passage${withCommentary ? " and what your commentaries say about it" : ""} goes with the question.`}</div>
+              <div className="hint">{p.hint ?? `Ask anything about ${about}. The passage goes with the question${withLibrary ? ", and it can search your commentaries, lexicons and dictionaries when the question needs them" : ""}.`}</div>
               <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                 {(suggestions.length ? suggestions : ["What is the main point here?", "What background helps me understand this?", "Where else does the Bible say something like this?"]).map((s) => <button key={s} type="button" className="chip wrap" onClick={() => send(s)}>{s}</button>)}
               </div>
@@ -242,14 +257,14 @@ export function AskPanel(p: AskProps) {
         </div>
         <div style={{ flexShrink: 0, padding: "12px 16px 14px", borderTop: "1px solid var(--border)", background: "var(--panel)", display: "flex", flexDirection: "column", gap: 8 }}>
           {input}
-          <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11.5, color: "var(--muted)" }}><Icon name="check" size={13} style={{ color: "var(--good)" }} />Runs Claude Code on this Mac<span style={{ marginLeft: "auto" }}><span className="kbd">⏎</span> send · <span className="kbd">⇧⏎</span> new line</span></div>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11.5, color: "var(--muted)" }}><Icon name="check" size={13} style={{ color: "var(--good)" }} />Runs {PROVIDER_NAME[providerOf(model)]} on this Mac<span style={{ marginLeft: "auto" }}><span className="kbd">⏎</span> send · <span className="kbd">⇧⏎</span> new line</span></div>
         </div>
         {popovers}
       </div>
     );
   }
   return (
-    <section aria-label="Ask Claude" className="card" style={{ padding: "14px 16px", display: "flex", flexDirection: "column", gap: 10, ...p.style }}>
+    <section aria-label="Ask" className="card" style={{ padding: "14px 16px", display: "flex", flexDirection: "column", gap: 10, ...p.style }}>
       {header}
       {messages.length > 0 ? <div className="scroll" style={{ display: "flex", flexDirection: "column", gap: 10, maxHeight: 360 }}>{convo}</div> : suggestions.length > 0 && (
         <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>{suggestions.map((s) => <button key={s} type="button" className="chip wrap" onClick={() => send(s)}>{s}</button>)}</div>
@@ -273,11 +288,12 @@ function RecentChats({ anchor, about, onClose, onPick, current }: { anchor: DOMR
   };
   const item = (c: Chat) => (
     <div key={c.id} style={{ display: "flex", alignItems: "center", gap: 4 }}>
-      <button type="button" className="bm" style={{ flexDirection: "column", alignItems: "flex-start", gap: 1, padding: "7px 10px", background: c.id === current ? "var(--accentsoft)" : undefined }} onClick={() => onPick(c.id)}>
-        <b style={{ fontSize: 12.5 }} className="t">{c.title}</b>
-        <span className="n">{c.source} · {c.about} · {when(c.updated)}{c.journaled ? " · added to journal" : ""}</span>
+      {/* flex: 1 with minWidth 0, not the .bm default width: 100%, so long titles ellipsize and leave room for the delete button. */}
+      <button type="button" className="bm" style={{ flex: 1, minWidth: 0, width: "auto", flexDirection: "column", alignItems: "flex-start", gap: 1, padding: "7px 10px", background: c.id === current ? "var(--accentsoft)" : undefined }} onClick={() => onPick(c.id)}>
+        <b style={{ fontSize: 12.5, maxWidth: "100%" }} className="t">{c.title}</b>
+        <span className="n t" style={{ maxWidth: "100%" }}>{c.source} · {c.about} · {when(c.updated)}{c.journaled ? " · added to journal" : ""}</span>
       </button>
-      <button className="ibtn" type="button" aria-label="Delete chat" title="Delete chat" onClick={() => app.setChats((cs) => cs.filter((x) => x.id !== c.id))}><Icon name="trash" size={13} /></button>
+      <button className="ibtn" type="button" style={{ flexShrink: 0 }} aria-label="Delete chat" title="Delete chat" onClick={async () => { if (await confirmDelete(`the chat “${c.title}”`)) app.setChats((cs) => cs.filter((x) => x.id !== c.id)); }}><Icon name="trash" size={13} /></button>
     </div>
   );
   return (

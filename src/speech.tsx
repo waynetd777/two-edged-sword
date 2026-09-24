@@ -1,9 +1,11 @@
-// Reading aloud with the voices macOS provides, through the web speech API. One verse is one
-// utterance; word boundaries drive the highlight in the text; at the end of a chapter it
-// carries on into the next one when Settings says so.
+// Reading aloud with the voices macOS provides, through the native synthesiser (src-tauri/src/tts.rs;
+// WebKit's speech API hides downloaded Premium voices). One verse is one utterance; word events
+// drive the highlight in the text; at the end of a chapter it carries on into the next one when
+// Settings says so.
 
 import { createContext, ReactNode, useCallback, useContext, useEffect, useRef, useState } from "react";
-import { api, Verse } from "./api";
+import { listen } from "@tauri-apps/api/event";
+import { api, TtsEvent, Verse, Voice } from "./api";
 import { book, nextChapter } from "./bible";
 import { docSegments, plainText } from "./esword";
 import { useApp } from "./state";
@@ -32,7 +34,7 @@ export interface PlayOpts { toVerse?: number; onEnd?: () => void }
 
 interface PlayerCtx {
   state: PlayerState;
-  voices: SpeechSynthesisVoice[];
+  voices: Voice[];
   play: (bible: string, book: number, chapter: number, fromVerse?: number, opts?: PlayOpts) => void;
   /** Reads a reference book's chapter, paragraph by paragraph (from docSegments). */
   playDoc: (module: string, title: string, paragraphs: string[], from?: number, kind?: "reference" | "devotional", opts?: PlayOpts) => void;
@@ -61,7 +63,9 @@ const IDLE: PlayerState = { on: false, paused: false, bible: "", book: 0, chapte
 export function PlayerProvider({ children }: { children: ReactNode }) {
   const app = useApp();
   const [state, setState] = useState<PlayerState>(IDLE);
-  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
+  const [voices, setVoices] = useState<Voice[]>([]);
+  const voicesRef = useRef<Voice[]>([]);
+  voicesRef.current = voices;
   const verses = useRef<Verse[]>([]);
   const st = useRef(state);
   st.current = state;
@@ -73,28 +77,43 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const opts = useRef<PlayOpts>({}); // this reading's stopping point and what to do after it
   const announce = useRef<string | null>(null); // said before the next verse: the chapter just begun // bumps on every restart, so stale utterance callbacks do nothing
 
+  // Reloaded when the window regains focus, so voices downloaded in System Settings appear.
   useEffect(() => {
-    const load = () => setVoices(window.speechSynthesis.getVoices().filter((v) => v.lang.startsWith("en")));
+    const load = () => api.ttsVoices().then((vs) => setVoices(vs.filter((v) => v.lang.startsWith("en")))).catch(() => {});
     load();
-    window.speechSynthesis.addEventListener("voiceschanged", load);
-    return () => window.speechSynthesis.removeEventListener("voiceschanged", load);
+    window.addEventListener("focus", load);
+    return () => window.removeEventListener("focus", load);
   }, []);
 
+  // The utterance being spoken: its id (the generation), how much of it is the spoken heading,
+  // and what to do when it ends. Events for any other id are stale and ignored.
+  const utt = useRef<{ id: number; prefix: number; onEnd: () => void } | null>(null);
+  useEffect(() => {
+    const un = listen<TtsEvent>("tts", ({ payload: e }) => {
+      const u = utt.current;
+      if (!u || e.id !== u.id || e.id !== gen.current) return;
+      if (e.kind === "word") setState((p) => ({ ...p, char: e.char - u.prefix }));
+      else { utt.current = null; u.onEnd(); }
+    });
+    return () => { un.then((f) => f()); };
+  }, []);
+
+  // Settings keep the voice's identifier; a name (or an old WebKit voiceURI) still matches.
   const voiceFor = useCallback(() => {
-    const all = window.speechSynthesis.getVoices();
-    return all.find((v) => v.voiceURI === settings.current.voice) ?? all.find((v) => v.name === settings.current.voice) ?? all.find((v) => v.default && v.lang.startsWith("en")) ?? all.find((v) => v.lang.startsWith("en"));
+    const all = voicesRef.current, want = settings.current.voice;
+    return (all.find((v) => v.id === want) ?? all.find((v) => v.name === want) ?? all.find((v) => v.default) ?? all[0])?.id;
   }, []);
 
   const stop = useCallback(() => {
     opts.current = {};
     gen.current++;
-    window.speechSynthesis.cancel();
+    api.ttsStop();
     setState(IDLE);
   }, []);
 
   const speakFrom = useCallback((i: number) => {
     const g = ++gen.current;
-    window.speechSynthesis.cancel();
+    api.ttsStop();
     const vs = verses.current;
     const s = st.current;
     if (s.sleepAt && Date.now() > s.sleepAt) { stop(); return; }
@@ -148,15 +167,9 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     const heading = announce.current ? `${announce.current}. ` : "";
     announce.current = null;
     const prefix = heading + (settings.current.readNumbers && !s.doc ? `Verse ${verse.v}. ` : "");
-    const u = new SpeechSynthesisUtterance(prefix + text);
-    const voice = voiceFor();
-    if (voice) u.voice = voice;
-    u.rate = settings.current.rate;
-    u.onboundary = (e) => { if (g === gen.current && e.name === "word") setState((p) => ({ ...p, char: e.charIndex - prefix.length })); };
-    u.onend = () => { if (g === gen.current) speakFrom(i + 1); };
-    u.onerror = (e) => { if (g === gen.current && e.error !== "interrupted" && e.error !== "canceled") stop(); };
+    utt.current = { id: g, prefix: prefix.length, onEnd: () => speakFrom(i + 1) };
     setState((p) => ({ ...p, verse: verse.v, char: -1 }));
-    window.speechSynthesis.speak(u);
+    api.ttsSpeak(g, prefix + text, voiceFor(), settings.current.rate).catch(() => { if (g === gen.current) stop(); });
   }, [stop, voiceFor]);
 
   const play = useCallback((bible: string, b: number, c: number, fromVerse?: number, o: PlayOpts = {}) => {
@@ -188,12 +201,12 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     const s = st.current;
     if (!s.on) return;
     if (s.paused) {
-      // Resume by restarting the verse: pause/resume in WebKit's synthesiser is unreliable.
+      // Resume by restarting the verse.
       setState((p) => ({ ...p, paused: false }));
       speakFrom(Math.max(0, verses.current.findIndex((v) => v.v === s.verse)));
     } else {
       gen.current++;
-      window.speechSynthesis.cancel();
+      api.ttsStop();
       setState((p) => ({ ...p, paused: true }));
     }
   }, [speakFrom]);
@@ -220,7 +233,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rate, voice]);
 
-  useEffect(() => () => window.speechSynthesis.cancel(), []);
+  useEffect(() => () => { api.ttsStop(); }, []);
 
   return <Ctx.Provider value={{ state, voices, play, playDoc, toggle, stop, skip, sleep }}>{children}</Ctx.Provider>;
 }
