@@ -321,6 +321,25 @@ export function AppProvider({ children }: { children: ReactNode }) {
     try { const js = await api.journalList(journalDir); if (n === journalSeq.current) setJournal(js); } catch (e) { console.error(e); }
   }, [journalDir]);
   useEffect(() => { reloadJournal(); }, [reloadJournal]);
+  // Edits made elsewhere (Obsidian) are picked up: the files are checked every few seconds while
+  // the window is showing, and at once when it comes back to the front.
+  useEffect(() => {
+    if (!journalDir) return;
+    let last: string | null = null, dead = false;
+    const check = async () => {
+      if (document.visibilityState === "hidden") return;
+      try {
+        const s = await api.journalStamp(journalDir);
+        if (dead) return;
+        if (last !== null && s !== last) reloadJournal();
+        last = s;
+      } catch { /* the folder isn't there; saving says so */ }
+    };
+    check();
+    const t = window.setInterval(check, 3000);
+    window.addEventListener("focus", check);
+    return () => { dead = true; window.clearInterval(t); window.removeEventListener("focus", check); };
+  }, [journalDir, reloadJournal]);
 
   const bibles = useMemo(() => (lib?.modules ?? []).filter((m) => m.kind === "bible"), [lib]);
   const mod = useCallback((kind: ModuleInfo["kind"], id: string) => lib?.modules.find((m) => m.kind === kind && m.id === id), [lib]);

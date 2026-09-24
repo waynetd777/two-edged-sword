@@ -177,6 +177,17 @@ fn month_files(dir: &Path) -> Vec<(String, std::path::PathBuf)> {
     v
 }
 
+/// A fingerprint of the month files (names, sizes, modified times), cheap enough to poll: it
+/// changes whenever one is written, here or in Obsidian. It reads no file, so nothing only in
+/// the cloud is downloaded.
+pub fn stamp(dir: &Path) -> String {
+    month_files(dir).iter().map(|(k, p)| {
+        let m = std::fs::metadata(p).ok();
+        let t = m.as_ref().and_then(|m| m.modified().ok()).and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok()).map(|d| d.as_nanos()).unwrap_or(0);
+        format!("{k}:{}:{t}", m.map(|m| m.len()).unwrap_or(0))
+    }).collect::<Vec<_>>().join(" ")
+}
+
 pub fn list(dir: &Path) -> Result<Vec<Entry>, String> {
     let mut all = Vec::new();
     for (_, p) in month_files(dir) {

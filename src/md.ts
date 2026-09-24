@@ -7,17 +7,21 @@ import { book, findBook, Ref } from "./bible";
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
 // "John 3:16", "1 John 4:9-10", "Joh 3:16", "Num 21:8–9", "Ps 23:1"; as spoken, "1 John 5, verse 4"
-// and "Job 19, verses 25 to 27"; and a whole chapter, "Hebrews 11".
-const REF_RE = /\b((?:[123]\s?)?[A-Z][a-z]{1,15}(?:\s(?:of\s)?[A-Z][a-z]+)?)\.?\s(\d{1,3})(?::(\d{1,3})(?:\s?[-–]\s?(\d{1,3}))?|,?\s(?:verses?|vv?\.?)\s(\d{1,3})(?:\s?(?:[-–]|to)\s?(\d{1,3}))?)?(?!\d|:\d)/g;
+// and "Job 19, verses 25 to 27", "Genesis chapter 3:1 - 5"; and a whole chapter, "Hebrews 11".
+const REF_RE = /\b((?:[123]\s?)?[A-Z][a-z]{1,15}(?:\s(?:of\s)?(?!Chapter\b)[A-Z][a-z]+)?)\.?\s(?:(?:[Cc]hapter|[Cc]hap\.|[Cc]h\.)\s)?(\d{1,3})(?::(\d{1,3})(?:\s?[-–]\s?(\d{1,3}))?|,?\s(?:verses?|vv?\.?)\s(\d{1,3})(?:\s?(?:[-–]|to)\s?(\d{1,3}))?)?(?!\d|:\d)/g;
 
 export function findRefs(text: string): { index: number; length: number; ref: Ref }[] {
   const out = [];
-  for (const m of text.matchAll(REF_RE)) {
+  REF_RE.lastIndex = 0;
+  for (let m: RegExpExecArray | null; (m = REF_RE.exec(text)); ) {
+    // Not a reference ("In 1 Peter 1:22" first tries "In 1"): look again from the next word, so
+    // the text it took can still be one.
+    const reject = () => { REF_RE.lastIndex = m!.index + (m![0].search(/\s/) + 1 || 1); };
     let b = findBook(m[1]), skip = 0;
     // "See John 3:16": the capitalised word before the book was taken as part of its name.
     const w = !b && !/^[123]/.test(m[1]) ? m[1].match(/\s(\S+)$/) : null;
     if (w) { b = findBook(w[1]); skip = m[1].length - w[1].length; }
-    if (!b) continue;
+    if (!b) { reject(); continue; }
     let chapter = +m[2], verse = m[3] ?? m[5] ? +(m[3] ?? m[5]) : undefined;
     const to = m[4] ?? m[6] ? +(m[4] ?? m[6]) : undefined;
     if (verse === undefined) {
@@ -25,10 +29,10 @@ export function findRefs(text: string): { index: number; length: number; ref: Re
       // not "Dan 4" or "Song 3"; "Jude 5" is a verse.
       const name = m[1].slice(skip).replace(/^[123]\s?/, "");
       const full = book(b).name.replace(/^[123]\s?/, "");
-      if (name !== full && (name.length < 4 || name === "Song")) continue;
+      if (name !== full && (name.length < 4 || name === "Song")) { reject(); continue; }
       if (book(b).chapters === 1 && chapter > 1) { verse = chapter; chapter = 1; }
     }
-    if (chapter < 1 || chapter > book(b).chapters) continue;
+    if (chapter < 1 || chapter > book(b).chapters) { reject(); continue; }
     out.push({ index: m.index! + skip, length: m[0].length - skip, ref: { book: b, chapter, verse, to } });
   }
   return out;

@@ -46,6 +46,12 @@ export function JournalScreen() {
     setDraft(e); setSelId(e.id);
   }, [app.journalSeed]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Once the journal (reloaded after a save, or after a change in the vault) has this entry and no
+  // save is waiting, show the file's copy, so a change made elsewhere appears.
+  useEffect(() => {
+    if (draft && !pendingSave.current && app.journal.some((e) => e.id === draft.id)) setDraft(null);
+  }, [app.journal]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const entries = useMemo(() => {
     const all = draft && !app.journal.some((e) => e.id === draft.id) ? [draft, ...app.journal] : app.journal;
     const f = filter.toLowerCase();
@@ -130,6 +136,9 @@ export function JournalScreen() {
 function Editor({ entry, onChange, saved, err, onDelete, onExport, ask }: { entry: JournalEntry; onChange: (p: Partial<JournalEntry>) => void; saved: string; err: string | null; onDelete: () => void; onExport: () => void; ask: boolean }) {
   const app = useApp();
   const ed = useRef<HTMLDivElement>(null);
+  // What the editor holds. A body arriving that isn't it was changed elsewhere (in the vault):
+  // show it. While typing, the entry shown is the unsaved copy, so this never replaces an edit.
+  const shown = useRef(entry.body);
   const [verseAt, setVerseAt] = useState<DOMRect | null>(null);
   const [linkAt, setLinkAt] = useState<DOMRect | null>(null);
   const [tagAt, setTagAt] = useState<DOMRect | null>(null);
@@ -139,10 +148,16 @@ function Editor({ entry, onChange, saved, err, onDelete, onExport, ask }: { entr
     document.execCommand("defaultParagraphSeparator", false, "p");
     // References are links (htmlToMd reads them back as their text); ones typed now link next time.
     if (ed.current) ed.current.innerHTML = mdToHtml(entry.body) || "<p><br></p>";
+    shown.current = entry.body;
   }, [entry.id]); // eslint-disable-line react-hooks/exhaustive-deps
   // Only a real change is saved: clicking in and out must not write back a copy made before the
   // file changed elsewhere (in Obsidian, say).
-  const sync = () => { if (!ed.current) return; const body = htmlToMd(ed.current); if (body !== entry.body) onChange({ body }); };
+  const sync = () => { if (!ed.current) return; const body = htmlToMd(ed.current); if (body !== entry.body) { shown.current = body; onChange({ body }); } };
+  useEffect(() => {
+    if (entry.body === shown.current || !ed.current) return;
+    shown.current = entry.body;
+    ed.current.innerHTML = mdToHtml(entry.body) || "<p><br></p>";
+  }, [entry.body]);
   const { onRefHover, preview, hide } = useRefPreview(app.settings.bible);
   const refAt = (t: EventTarget) => (t as HTMLElement).closest("a.ref") as HTMLElement | null;
   const cmd = (c: string, v?: string) => { ed.current?.focus(); document.execCommand(c, false, v); sync(); };

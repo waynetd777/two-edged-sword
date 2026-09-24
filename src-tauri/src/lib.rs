@@ -189,6 +189,11 @@ fn journal_save(dir: String, entry: journal::Entry) -> Result<(), String> {
 }
 
 #[tauri::command(async)]
+fn journal_stamp(dir: String) -> Result<String, String> {
+    Ok(journal::stamp(&chosen_dir(&dir)?))
+}
+
+#[tauri::command(async)]
 fn journal_delete(dir: String, id: String) -> Result<(), String> {
     journal::delete(&chosen_dir(&dir)?, &id)
 }
@@ -394,6 +399,7 @@ pub fn run() {
             journal_list,
             journal_save,
             journal_delete,
+            journal_stamp,
             write_text_file,
             assistant_status,
             ask,

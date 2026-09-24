@@ -77,6 +77,7 @@ export const api = {
   storeWrite: (name: string, value: unknown) => (readOnly ? Promise.resolve() : invoke<void>("store_write", { name, value })),
   journalDefaultDir: () => invoke<string>("journal_default_dir"),
   journalList: (dir: string) => invoke<JournalEntry[]>("journal_list", { dir }),
+  journalStamp: (dir: string) => invoke<string>("journal_stamp", { dir }),
   journalSave: (dir: string, entry: JournalEntry) => (readOnly ? Promise.resolve() : invoke<void>("journal_save", { dir, entry })),
   journalDelete: (dir: string, id: string) => (readOnly ? Promise.resolve() : invoke<void>("journal_delete", { dir, id })),
   writeTextFile: (path: string, text: string) => invoke<void>("write_text_file", { path, text }),
