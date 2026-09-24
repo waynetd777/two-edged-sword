@@ -12,7 +12,9 @@ import { WordLookup } from "./WordLookup";
 import { BooksButton } from "./DocReader";
 import { useAssistant } from "./assistant";
 
-export interface WordPick { token: Token; verse: number; rect: DOMRect }
+export interface WordPick { token: Token; verse: number; rect: DOMRect; /** Set for a word in a commentary: which one, and on what. */ where?: string }
+/** A clicked word outside a verse (commentary, a book) as a token: no Strong's numbers of its own. */
+export const textToken = (text: string): Token => ({ text, word: true, red: false, italic: false, strongs: [], at: 0, wi: -1 });
 
 const HL: HlColor[] = ["red", "orange", "yellow", "green", "blue", "purple"];
 const HL_DOT: Record<HlColor, string> = { red: "#e59a92", orange: "#efb97e", yellow: "#e9d271", green: "#a9cf9f", blue: "#9fc0e6", purple: "#c1a9e3" };
@@ -297,12 +299,12 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
     <div className="main" style={{ minHeight: 0 }}>
       {focus ? (
         <header className="topbar drag" style={{ borderBottom: 0, paddingLeft: 84 }}>
-          <button className="ibtn" type="button" aria-label="Previous chapter" onClick={() => go(-1)}><Icon name="back" /></button>
+          <button className="ibtn" type="button" aria-label="Previous chapter" title="Previous chapter (←)" onClick={() => go(-1)}><Icon name="back" /></button>
           <div className="spacer" style={{ display: "flex", alignItems: "center", justifyContent: "center", color: "var(--muted)" }}>{book(loc.book).name} {loc.chapter} · {bmod?.title}</div>
           <button className={`ibtn ${player.state.on ? "on" : ""}`} type="button" aria-label="Listen" onClick={() => (player.state.on ? player.toggle() : player.play(bible, loc.book, loc.chapter))}><Icon name="speaker" /></button>
           <TextSizeButton />
           <button className="btn" type="button" onClick={() => setFocus(false)}>Exit focus<span className="kbd">esc</span></button>
-          <button className="ibtn" type="button" aria-label="Next chapter" onClick={() => go(1)}><Icon name="fwd" /></button>
+          <button className="ibtn" type="button" aria-label="Next chapter" title="Next chapter (→)" onClick={() => go(1)}><Icon name="fwd" /></button>
         </header>
       ) : (
         <Topbar right={
@@ -328,12 +330,13 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
         {!focus && settings.studyPane && (
           <StudyPane tab={tab} setTab={setTab} book={loc.book} chapter={loc.chapter} verse={studyVerse} selRef={selRef} verses={verses}
             follow={follow} setFollow={setFollow} dict={dict} setDict={setDict} askSeed={askSeed} clearAskSeed={() => setAskSeed(null)}
-            commentary={commentary} setCommentary={setCommentary} />
+            commentary={commentary} setCommentary={setCommentary}
+            onWord={(w, rect, v, where) => { setWord({ token: textToken(w), verse: v.verse ?? studyVerse, rect, where }); }} />
         )}
       </div>
       <PlayerBar focus={focus} />
       {word && wordRef && (
-        <WordLookup pick={word} vref={wordRef} bible={bible} onClose={() => setWord(null)}
+        <WordLookup pick={word} vref={wordRef} context={word.where} bible={bible} onClose={() => setWord(null)}
           onDictionary={(module, topic) => { setDict({ module, topic }); setTab("dictionary"); setWord(null); if (!settings.studyPane) app.set({ studyPane: true }); }}
           onCommentary={(m) => { setCommentary(m); setTab("commentary"); setStudyVerse(word.verse); setWord(null); if (!settings.studyPane) app.set({ studyPane: true }); }}
           onAsk={(q) => { setAskSeed(q); setTab("ask"); setWord(null); if (focus) setFocus(false); if (!settings.studyPane) app.set({ studyPane: true }); }} />
@@ -351,8 +354,8 @@ function ChapterNav({ onGo }: { onGo: (d: 1 | -1) => void }) {
   const p = prevChapter(loc.book, loc.chapter), n = nextChapter(loc.book, loc.chapter);
   return (
     <div style={{ display: "flex", justifyContent: "space-between", padding: "28px 10px 0" }} onClick={(e) => e.stopPropagation()}>
-      {p ? <button className="btn" type="button" onClick={() => onGo(-1)}><Icon name="back" />{book(p[0]).name} {p[1]}</button> : <span />}
-      {n ? <button className="btn" type="button" onClick={() => onGo(1)}>{book(n[0]).name} {n[1]}<Icon name="fwd" /></button> : <span />}
+      {p ? <button className="btn" type="button" title={`Previous chapter: ${book(p[0]).name} ${p[1]} (←)`} onClick={() => onGo(-1)}><Icon name="back" />{book(p[0]).name} {p[1]}</button> : <span />}
+      {n ? <button className="btn" type="button" title={`Next chapter: ${book(n[0]).name} ${n[1]} (→)`} onClick={() => onGo(1)}>{book(n[0]).name} {n[1]}<Icon name="fwd" /></button> : <span />}
     </div>
   );
 }
@@ -362,7 +365,7 @@ export function TextSizeButton() {
   const [a, setA] = useState<DOMRect | null>(null);
   return (
     <>
-      <button className="ibtn" type="button" aria-label="Text size" onClick={(e) => setA(e.currentTarget.getBoundingClientRect())}><Icon name="textsize" /></button>
+      <button className="ibtn" type="button" aria-label="Text size" title="Reading font and text size" onClick={(e) => setA(e.currentTarget.getBoundingClientRect())}><Icon name="textsize" /></button>
       {a && (
         <Popover anchor={a} onClose={() => setA(null)} width={260}>
           <div style={{ padding: 14, display: "flex", flexDirection: "column", gap: 10 }}>

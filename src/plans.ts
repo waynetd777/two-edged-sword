@@ -16,6 +16,8 @@ export interface SequencePlan {
   weekdaysOnly: boolean;
   days: Part[][];
   done: number[];
+  /** Dates a day was finished, YYYY-MM-DD, for streaks. Recorded from September 2026 on. */
+  readDates?: string[];
   skipped: number[];
   /** Days the rest of the plan has been moved later by. */
   shift: number;
@@ -180,6 +182,16 @@ export function nextOtherAfter(cur: [number, number], from: PpoPlan["otherFrom"]
   return [bs[(i + 1) % bs.length] ?? bs[0], 1];
 }
 
+/** The chapter before `cur` in the "other" reading order: the inverse of nextOtherAfter. */
+export function prevOtherBefore(cur: [number, number], from: PpoPlan["otherFrom"]): [number, number] {
+  const bs = otherBooks(from);
+  const [b, c] = cur;
+  if (c > 1) return [b, c - 1];
+  const i = bs.indexOf(b);
+  const pb = bs[(i - 1 + bs.length) % bs.length] ?? bs[0];
+  return [pb, book(pb).chapters];
+}
+
 export function ppoReading(p: PpoPlan, d: Date): Part[] {
   const [p1, p2] = proverbsFor(d, p.shortMonths);
   return [{ b: 19, c: p.nextPsalm }, p1 === p2 ? { b: 20, c: p1 } : { b: 20, c: p1, c2: p2 }, { b: p.nextOther[0], c: p.nextOther[1] }];
@@ -221,7 +233,61 @@ export const doneToday = (p: Plan, key: string): string[] => (p.progress?.key ==
 export function markDayRead(p: Plan, d: Date): Plan {
   if (p.kind === "ppo") return markPpoRead(p, d);
   const i = firstUndone(p);
-  return i >= 0 && !p.done.includes(i) ? { ...p, done: [...p.done, i] } : p;
+  if (i < 0 || p.done.includes(i)) return p;
+  const k = ymd(d);
+  return { ...p, done: [...p.done, i], readDates: p.readDates?.includes(k) ? p.readDates : [...(p.readDates ?? []), k] };
+}
+
+/** Undoes today's "mark as read": the date comes off, the plan steps back to where it was, and the
+ *  parts ticked today are unticked (they would otherwise mark the day read again). */
+export function unmarkDayRead(p: Plan, d: Date): Plan {
+  const k = ymd(d);
+  const progress = p.progress?.key === progressKey(p, d) ? undefined : p.progress;
+  if (p.kind === "ppo") {
+    if (!p.doneDates.includes(k)) return p;
+    return { ...p, nextPsalm: ((p.nextPsalm + 148) % 150) + 1, nextOther: prevOtherBefore(p.nextOther, p.otherFrom), doneDates: p.doneDates.filter((x) => x !== k), progress };
+  }
+  if (!p.readDates?.includes(k) || !p.done.length) return p;
+  return { ...p, done: p.done.slice(0, -1), readDates: p.readDates.filter((x) => x !== k), progress };
+}
+
+/** Whether today was marked read (a sequence plan only knows this for days marked since dates were recorded). */
+export const readOn = (p: Plan, d: Date) => (p.kind === "ppo" ? p.doneDates : p.readDates ?? []).includes(ymd(d));
+
+export interface Streak {
+  /** Days in a row up to today, or up to yesterday while today isn't read yet. */
+  current: number;
+  best: number;
+  /** Of the last seven reading days (weekdays only, for a weekdays plan), how many were read. */
+  week: number;
+  /** Whether today is read. */
+  today: boolean;
+}
+
+/** Streaks from the dates a plan was read on. A weekdays-only plan doesn't break on weekends. */
+export function streak(p: Plan, now = today()): Streak {
+  const dates = new Set(p.kind === "ppo" ? p.doneDates : p.readDates ?? []);
+  const counts = (d: Date) => !(p.kind === "sequence" && p.weekdaysOnly && isWeekend(d));
+  const prev = (d: Date) => { let x = addDays(d, -1); while (!counts(x)) x = addDays(x, -1); return x; };
+  const read = (d: Date) => dates.has(ymd(d));
+  let day = counts(now) ? now : prev(now);
+  const isToday = read(now);
+  if (!read(day)) day = prev(day);
+  let current = 0;
+  while (read(day)) { current++; day = prev(day); }
+  let best = 0;
+  const sorted = [...dates].sort();
+  let run = 0, last: Date | null = null;
+  for (const s of sorted) {
+    const d = parseYmd(s);
+    if (!counts(d)) continue;
+    run = last && ymd(prev(d)) === ymd(last) ? run + 1 : 1;
+    best = Math.max(best, run);
+    last = d;
+  }
+  let week = 0;
+  for (let i = 0, d = counts(now) ? now : prev(now); i < 7; i++, d = prev(d)) if (read(d)) week++;
+  return { current, best: Math.max(best, current), week, today: isToday };
 }
 
 /**

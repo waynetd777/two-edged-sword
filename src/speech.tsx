@@ -9,6 +9,7 @@ import { api, TtsEvent, Verse, Voice } from "./api";
 import { book, nextChapter } from "./bible";
 import { docSegments, plainText } from "./esword";
 import { useApp } from "./state";
+import { Icon } from "./icons";
 
 export interface PlayerState {
   on: boolean;
@@ -42,6 +43,8 @@ interface PlayerCtx {
   stop: () => void;
   skip: (d: number) => void;
   sleep: (minutes: number | "chapter" | null) => void;
+  /** Pronounces a Greek or Hebrew word (Strong's `num` says which), pausing any reading. */
+  say: (word: string, num: string, pron?: string) => void;
   /** Screenshot mode: show the player at a given place without speaking. */
   still: (s: Partial<PlayerState>) => void;
 }
@@ -237,9 +240,34 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => () => { api.ttsStop(); }, []);
 
+  // In a Greek or Hebrew voice when one is installed (macOS has Melina and Carmit; both speak the
+  // modern language), otherwise Strong's pronunciation guide ("ag-ah'-pay") in the reading voice.
+  // Utterance id 0 is never a reading's, so its events are ignored.
+  const say = useCallback(async (word: string, num: string, pron?: string) => {
+    const s = st.current;
+    if (s.on && !s.paused) { gen.current++; st.current = { ...s, paused: true }; setState((p) => ({ ...p, paused: true })); }
+    const lang = num.startsWith("H") ? "he" : "el";
+    const v = (await api.ttsVoices().catch(() => [])).filter((x) => x.lang.startsWith(lang)).sort((a, b) => b.quality - a.quality)[0];
+    if (v) api.ttsSpeak(0, word, v.id, 0.8);
+    else if (pron) api.ttsSpeak(0, pron.replace(/[-'ʼ]/g, " "), voiceFor(), 0.9);
+  }, [voiceFor]);
+
   const still = useCallback((s: Partial<PlayerState>) => { const next = { ...IDLE, on: true, ...s }; st.current = next; setState(next); }, []);
 
-  return <Ctx.Provider value={{ state, voices, play, playDoc, toggle, stop, skip, sleep, still }}>{children}</Ctx.Provider>;
+  return <Ctx.Provider value={{ state, voices, play, playDoc, toggle, stop, skip, sleep, say, still }}>{children}</Ctx.Provider>;
 }
 
 export const chapterName = (b: number, c: number) => `${book(b).name} ${c}`;
+
+/** A speaker button that pronounces an original-language word. A span, not a button, so it can sit
+ *  inside a row that is itself a button; it stops the click reaching the row. */
+export function SayButton({ word, num, pron, size = 14 }: { word: string; num: string; pron?: string; size?: number }) {
+  const { say } = usePlayer();
+  const go = (e: React.SyntheticEvent) => { e.stopPropagation(); e.preventDefault(); say(word, num, pron); };
+  return (
+    <span role="button" tabIndex={0} className="ibtn say" aria-label={`Pronounce ${word}`} title="Pronounce" onClick={go}
+      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") go(e); }} style={{ width: size + 12, height: size + 12, alignSelf: "center" }}>
+      <Icon name="speaker" size={size} />
+    </span>
+  );
+}

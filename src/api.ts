@@ -3,6 +3,8 @@ import { invoke } from "@tauri-apps/api/core";
 /** Screenshot mode (scene.ts) sets this: nothing the page changes is saved. */
 let readOnly = false;
 export const setReadOnly = (on: boolean) => { readOnly = on; };
+/** True in screenshot mode. */
+export const isReadOnly = () => readOnly;
 
 export type Kind = "bible" | "commentary" | "dictionary" | "lexicon" | "reference" | "devotional";
 

@@ -94,6 +94,13 @@ export interface Pending { article?: { module: string; topic: string }; ask?: st
 
 export type Screen = "read" | "compare" | "search" | "word" | "journal" | "plans" | "library" | "settings";
 
+/** A chapter read lately: of the Bible, or (with `doc`) of a reference book or devotional. */
+export interface Recent { book: number; chapter: number; at: string; doc?: Doc }
+
+/** One entry in the back/forward history. `word` is a Strong's number or an English word looked
+ *  up in Word Study; `search` is the last search run. */
+interface Place { screen: Screen; loc: Loc; doc: Doc | null; word: string | null; search: string | null }
+
 export interface Loc { book: number; chapter: number; verse?: number; to?: number }
 /** A reference book open in the reading column, and the chapter being read. */
 export interface Doc { module: string; title: string; kind?: DocKind }
@@ -134,7 +141,7 @@ interface Ctx {
   toggleBookmark: (ref: Ref, bible: string) => void;
   highlights: Record<string, HlColor>;
   setHighlight: (key: string, c: HlColor | null) => void;
-  recent: { book: number; chapter: number; at: string }[];
+  recent: Recent[];
 
   /** A Quiet time session being stepped through (QuietTime.tsx). */
   session: Session | null;
@@ -218,11 +225,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [settings, setSettings, settingsLoaded] = useStored<Settings>("settings", DEFAULTS);
   const [bookmarks, setBookmarks] = useStored<Bookmark[]>("bookmarks", []);
   const [highlights, setHighlights] = useStored<Record<string, HlColor>>("highlights", {});
-  const [nav, setNav] = useStored<{ loc: Loc; recent: { book: number; chapter: number; at: string }[]; doc: Doc | null; docAt: Record<string, string> }>("place", { loc: { book: 43, chapter: 1 }, recent: [], doc: null, docAt: {} });
+  const [nav, setNav, navLoaded] = useStored<{ loc: Loc; recent: Recent[]; doc: Doc | null; docAt: Record<string, string> }>("place", { loc: { book: 43, chapter: 1 }, recent: [], doc: null, docAt: {} });
   const [plans, setPlans] = useStored<Plan[]>("plans", []);
   const [chats, setChats] = useStored<Chat[]>("chats", []);
   const [screen, setScreen] = useState<Screen>("read");
-  const hist = useRef<{ stack: Loc[]; i: number }>({ stack: [], i: -1 });
+  // Back and forward: every place the user goes (a screen, a passage, a book's chapter, a word
+  // studied, a search) is pushed here, and back/forward restore one.
+  const hist = useRef<{ stack: Place[]; i: number }>({ stack: [], i: -1 });
+  // Where the user is as of the last move, ahead of React's state, so two moves in one handler
+  // (close the book, then open a dictionary entry) build on each other.
+  const curPlace = useRef<Place | null>(null);
   const [, bump] = useState(0);
   const [journal, setJournal] = useState<JournalEntry[]>([]);
   const [defaultDir, setDefaultDir] = useState("");
@@ -268,31 +280,51 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (settingsLoaded && bibles.length && !bibles.some((b) => b.id === settings.bible)) setSettings((s) => ({ ...s, bible: bibles[0].id }));
   }, [settingsLoaded, bibles, settings.bible, setSettings]);
 
-  const open = useCallback((l: Loc, s?: Screen) => {
+  const here = (): Place => ({ screen, loc: nav.loc, doc: nav.doc, word: wordStudy, search: searchFor });
+  const show = (pl: Place) => {
+    curPlace.current = pl;
+    setScreen(pl.screen);
+    setWordStudy(pl.word);
+    setSearchFor(pl.search);
+    setNav((n) => ({ ...n, loc: pl.loc, doc: pl.doc }));
+  };
+  /** Goes somewhere new: the current place with `patch` applied, pushed onto the history (or
+   *  replacing the current entry, for a step that only fills in where the user already is). */
+  const navigate = (patch: Partial<Place>, replace = false) => {
     const h = hist.current;
-    h.stack = h.stack.slice(0, h.i + 1);
-    h.stack.push(l);
-    if (h.stack.length > 200) h.stack.shift();
-    h.i = h.stack.length - 1;
-    setNav((n) => {
-      const recent = [{ book: l.book, chapter: l.chapter, at: new Date().toISOString() }, ...n.recent.filter((r) => !(r.book === l.book && r.chapter === l.chapter))].slice(0, 12);
-      return { ...n, loc: l, recent, doc: null };
-    });
-    if (s) setScreen(s);
+    const cur = curPlace.current ?? here();
+    const next = { ...cur, ...patch };
+    if (JSON.stringify(next) === JSON.stringify(h.stack[h.i] ?? cur) && JSON.stringify(next) === JSON.stringify(cur)) return;
+    if (replace && h.i >= 0) h.stack[h.i] = next;
+    else {
+      h.stack = h.stack.slice(0, h.i + 1);
+      h.stack.push(next);
+      if (h.stack.length > 200) h.stack.shift();
+      h.i = h.stack.length - 1;
+    }
+    show(next);
     bump((x) => x + 1);
-  }, [setNav]);
+  };
 
-  // Seed the history with where the reader was last time.
+  const sameRecent = (a: Recent, b: Recent) => (a.doc || b.doc ? a.doc?.module === b.doc?.module && a.doc?.title === b.doc?.title : a.book === b.book && a.chapter === b.chapter);
+  const addRecent = (r: Recent) => setNav((n) => ({ ...n, recent: [r, ...n.recent.filter((x) => !sameRecent(x, r))].slice(0, 12) }));
+
+  const open = (l: Loc, s?: Screen) => {
+    addRecent({ book: l.book, chapter: l.chapter, at: new Date().toISOString() });
+    navigate({ loc: l, doc: null, ...(s ? { screen: s } : {}) });
+  };
+
+  // Seed the history with where the reader was last time, once the saved place has loaded.
   useEffect(() => {
-    if (hist.current.i < 0 && nav.loc) { hist.current = { stack: [nav.loc], i: 0 }; bump((x) => x + 1); }
-  }, [nav.loc]);
+    if (navLoaded && hist.current.i < 0) { const pl = here(); hist.current = { stack: [pl], i: 0 }; curPlace.current = pl; bump((x) => x + 1); }
+  }, [navLoaded]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const moveHist = (d: number) => {
     const h = hist.current;
     const j = h.i + d;
     if (j < 0 || j >= h.stack.length) return;
     h.i = j;
-    setNav((n) => ({ ...n, loc: h.stack[j], doc: null }));
+    show(h.stack[j]);
     bump((x) => x + 1);
   };
 
@@ -306,7 +338,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     lib, bibles, mod, strongsBible, lexicon, concordance, tsk,
     rescan: async () => { setLib(await api.rescan()); },
     settings, set: (p) => setSettings((s) => ({ ...s, ...p })),
-    screen, go: setScreen,
+    screen, go: (s) => navigate({ screen: s }),
     loc: nav.loc, open,
     back: () => moveHist(-1), forward: () => moveHist(1),
     canBack: hist.current.i > 0, canForward: hist.current.i < hist.current.stack.length - 1,
@@ -321,24 +353,28 @@ export function AppProvider({ children }: { children: ReactNode }) {
     session, setSession,
     doc: nav.doc, docAt: nav.docAt ?? {},
     openDoc: (module, title, kind = "reference") => {
-      setNav((n) => {
-        // A devotional opens on today's reading (DocReader picks it); a book where it was left.
-        if (kind === "devotional") return { ...n, doc: { module, title: title ?? "", kind } };
-        const t = title ?? n.docAt?.[module];
-        return { ...n, doc: { module, title: t ?? "", kind }, docAt: t ? { ...n.docAt, [module]: t } : n.docAt };
-      });
-      setScreen("read");
+      // A devotional opens on today's reading (DocReader picks it); a book where it was left.
+      const t = kind === "devotional" ? title ?? "" : title ?? nav.docAt?.[module] ?? "";
+      if (kind !== "devotional" && t) setNav((n) => ({ ...n, docAt: { ...n.docAt, [module]: t } }));
+      // DocReader fills in the chapter of a book opened without one: that replaces the entry, so
+      // back doesn't land on the empty book and open it again.
+      const d = (curPlace.current ?? here()).doc;
+      const filling = d?.module === module && !d.title;
+      navigate({ doc: { module, title: t, kind }, screen: "read" }, filling);
+      if (t) addRecent({ book: 0, chapter: 0, at: new Date().toISOString(), doc: { module, title: t, kind } });
     },
-    closeDoc: () => setNav((n) => ({ ...n, doc: null })),
+    closeDoc: () => navigate({ doc: null }),
     journal, journalDir,
     saveEntry: async (e) => { await api.journalSave(journalDir, e); await reloadJournal(); },
     deleteEntry: async (id) => { await api.journalDelete(journalDir, id); await reloadJournal(); },
     reloadJournal,
     plans, setPlans, chats, setChats,
-    pending, setPending: (x) => { setPendingState(x); if (x) setScreen("read"); },
-    journalSeed, startEntry: (seed) => { setJournalSeed(seed); setScreen("journal"); }, clearSeed: () => setJournalSeed(null),
-    wordStudy, studyWord: (n) => { setWordStudy(n); setScreen("word"); },
-    searchFor, searchText: (q) => { setSearchFor(q); setScreen("search"); },
+    // An article, a commentary or a question is shown beside the Bible, so a book open in Read is
+    // closed for it (back returns to the book).
+    pending, setPending: (x) => { setPendingState(x); if (x) navigate({ screen: "read", doc: null }); },
+    journalSeed, startEntry: (seed) => { setJournalSeed(seed); navigate({ screen: "journal" }); }, clearSeed: () => setJournalSeed(null),
+    wordStudy, studyWord: (n) => navigate({ screen: "word", word: n }),
+    searchFor, searchText: (q) => navigate({ screen: "search", search: q }),
     toast, toastMsg,
   };
   return <C.Provider value={value}>{children}</C.Provider>;

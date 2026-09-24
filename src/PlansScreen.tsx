@@ -3,7 +3,7 @@ import { api } from "./api";
 import { book, BOOKS, fmtRef, parseRef, SECTIONS, SHORT } from "./bible";
 import { Icon, Play } from "./icons";
 import {
-  addDays, balanced, behind, chaptersOf, dateOf, dayLabel, firstUndone, fmtDay, fmtLong, indexOn, markPpoRead, paired, parseYmd, partRef, perDay, Plan, PpoPlan, dayTitle, ONLINE_DEVOTIONALS, doneToday, progressKey, ppoPreview, ppoUpcoming, SequencePlan, Sizes, today, todayFor, ymd,
+  addDays, balanced, behind, chaptersOf, dateOf, dayLabel, firstUndone, fmtDay, fmtLong, indexOn, markDayRead, markPpoRead, paired, readOn, streak, unmarkDayRead, parseYmd, partRef, perDay, Plan, PpoPlan, dayTitle, ONLINE_DEVOTIONALS, doneToday, progressKey, ppoPreview, ppoUpcoming, SequencePlan, Sizes, today, todayFor, ymd,
 } from "./plans";
 import { Topbar } from "./Shell";
 import { uid, useApp } from "./state";
@@ -44,8 +44,13 @@ export function PlansScreen() {
   const markRead = () => {
     if (!plan) return;
     if (plan.kind === "ppo") update(markPpoRead(plan, today()));
-    else { const i = firstUndone(plan); if (i >= 0) update({ ...plan, done: [...plan.done, i] }); }
+    else update(markDayRead(plan, today()));
     app.toast("Marked as read");
+  };
+  const unmarkRead = () => {
+    if (!plan) return;
+    update(unmarkDayRead(plan, today()));
+    app.toast("Marked as unread");
   };
   // A plan is read in the Bible it was set up with, when that Bible is still in the library.
   const toPlanBible = () => { if (app.mod("bible", plan.bible) && app.settings.bible !== plan.bible) app.set({ bible: plan.bible }); };
@@ -122,11 +127,13 @@ export function PlansScreen() {
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", fontVariantNumeric: "tabular-nums" }}><span><b>{seq.done.length}</b> of {seq.days.length} days</span><span style={{ color: "var(--muted)" }}>{t?.pct}% · {seq.days.length - seq.done.length - seq.skipped.length} to go</span></div>
                 <div style={{ height: 8, borderRadius: 999, background: "var(--border)", overflow: "hidden" }}><div style={{ width: `${t?.pct}%`, height: 8, background: "var(--accent)" }} /></div>
+                <StreakLine plan={plan} />
               </div>
             ) : plan.kind === "ppo" && (
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 <div style={{ display: "flex", justifyContent: "space-between" }}><span><b>{plan.doneDates.length}</b> {plan.doneDates.length === 1 ? "day" : "days"} read</span><span style={{ color: "var(--muted)" }}>next other chapter {book(plan.nextOther[0]).name} {plan.nextOther[1]} · {t?.pct}% round</span></div>
                 <div style={{ height: 8, borderRadius: 999, background: "var(--border)", overflow: "hidden" }}><div style={{ width: `${t?.pct}%`, height: 8, background: "var(--accent)" }} /></div>
+                <StreakLine plan={plan} />
               </div>
             )}
             <div style={{ display: "flex", gap: 8, marginTop: "auto", flexWrap: "wrap" }}>
@@ -140,14 +147,17 @@ export function PlansScreen() {
             <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
               {t?.parts.map((x, i) => {
                 const read = Array.from({ length: (x.c2 ?? x.c) - x.c + 1 }, (_, k) => `${x.b}.${x.c + k}`).every((k) => partsDone.includes(k));
-                return <button key={i} type="button" onClick={() => openPart(i)} style={{ border: 0, background: "transparent", padding: 0, textAlign: "left", cursor: "pointer", font: `500 ${t.parts.length > 1 ? 30 : 44}px/1.1 var(--display)`, color: read ? "var(--muted)" : "var(--text)", display: "flex", alignItems: "center", gap: 10 }}>{fmtRef(partRef(x)).replace("Psalms", "Psalm")}{read && <Icon name="check" size={20} style={{ color: "var(--good)" }} />}</button>;
+                return <button key={i} type="button" className="partlink" title={`Open ${fmtRef(partRef(x)).replace("Psalms", "Psalm")} in the ${app.mod("bible", plan.bible)?.abbrev ?? "plan's Bible"}`} onClick={() => openPart(i)} style={{ alignSelf: "flex-start", border: 0, padding: "2px 8px", margin: "0 -8px", borderRadius: 8, textAlign: "left", cursor: "pointer", font: `500 ${t.parts.length > 1 ? 30 : 44}px/1.1 var(--display)`, color: read ? "var(--muted)" : "var(--text)", display: "flex", alignItems: "center", gap: 10 }}>{fmtRef(partRef(x)).replace("Psalms", "Psalm")}{read && <Icon name="check" size={20} style={{ color: "var(--good)" }} />}</button>;
               })}
             </div>
             {plan.kind === "ppo" && plan.doneDates.includes(tk) && <div style={{ color: "var(--good)", display: "flex", gap: 6, alignItems: "center" }}><Icon name="check" />Read today</div>}
             <div style={{ display: "flex", gap: 8, marginTop: "auto", flexWrap: "wrap" }}>
               <button className="btn primary" type="button" style={{ height: 34, padding: "0 16px" }} title="Step through today's readings and devotionals" onClick={() => t && startQuiet(plan, t.parts, false)}><Icon name="read" />Read</button>
               <button className="btn" type="button" style={{ height: 34 }} title="Read today's readings and devotionals aloud, one after another" onClick={() => t && startQuiet(plan, t.parts, true)}><Play size={12} />Read with audio</button>
-              <button className="btn" type="button" style={{ height: 34, marginLeft: "auto" }} onClick={markRead} disabled={plan.kind === "ppo" && plan.doneDates.includes(tk)}><Icon name="check" />Mark as read</button>
+              {/* Once today is marked, the button undoes it. A sequence plan can still mark another
+                  day read (catching up), so it keeps both. */}
+              {readOn(plan, today()) && <button className="btn" type="button" style={{ height: 34, marginLeft: "auto" }} title="Undo today's mark: the plan goes back to where it was" onClick={unmarkRead}><Icon name="x" />Mark as unread</button>}
+              {!(plan.kind === "ppo" && plan.doneDates.includes(tk)) && <button className="btn" type="button" style={{ height: 34, marginLeft: readOn(plan, today()) ? undefined : "auto" }} onClick={markRead}><Icon name="check" />Mark as read</button>}
             </div>
             {canAsk && t?.parts[0] && (
               <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center" }}>
@@ -487,6 +497,20 @@ function DevotionalsCard({ plan, update }: { plan: Plan; update: (p: Plan) => vo
           </div>
         </Popover>
       )}
+    </div>
+  );
+}
+
+/** Under the progress bar: the streak, the best one, and the last week. */
+function StreakLine({ plan }: { plan: Plan }) {
+  const st = streak(plan);
+  const unit = plan.kind === "sequence" && plan.weekdaysOnly ? "weekday" : "day";
+  const days = (n: number) => `${n} ${n === 1 ? unit : unit + "s"}`;
+  return (
+    <div style={{ display: "flex", gap: 18, flexWrap: "wrap", fontSize: 12.5, color: "var(--muted)", fontVariantNumeric: "tabular-nums" }}>
+      <span title={st.today || !st.current ? undefined : "Read today to keep it going"}><b style={{ color: st.current ? "var(--text)" : undefined }}>{days(st.current)}</b> in a row{st.current && !st.today ? " · read today to keep it going" : ""}</span>
+      <span>Best <b style={{ color: "var(--text)" }}>{days(st.best)}</b></span>
+      <span><b style={{ color: "var(--text)" }}>{st.week}</b> of the last 7 {unit}s</span>
     </div>
   );
 }

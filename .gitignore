@@ -28,3 +28,6 @@ src-tauri/gen/schemas
 # sift: derived state and private notes
 _sift/.cache/
 _sift/local/
+
+# Python bytecode (tools/)
+__pycache__/

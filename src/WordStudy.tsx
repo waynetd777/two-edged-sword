@@ -7,6 +7,7 @@ import { Icon } from "./icons";
 import { Topbar } from "./Shell";
 import { useApp } from "./state";
 import { orderModules } from "./StudyPane";
+import { SayButton } from "./speech";
 
 interface Entry { num: string; word: string; translit: string; pron: string; rest: string; total?: number; html: string }
 
@@ -21,8 +22,12 @@ let saved: { q: string; lookup: Lookup | null; showing: boolean; num: string } |
 
 export function WordStudyScreen() {
   const app = useApp();
-  const num = app.wordStudy ?? "G25";
+  // app.wordStudy is a Strong's number to show, or an English word or transliteration looked up
+  // ("love"); either way it is a place in the back/forward history.
+  const target = app.wordStudy ?? "G25";
+  const isNum = /^[GH]\d+$/i.test(target);
   const was = saved;
+  const num = isNum ? target.toUpperCase() : was?.num ?? "G25";
   const [q, setQ] = useState(was?.q ?? num);
   const [lookup, setLookup] = useState<Lookup | null>(was?.lookup ?? null);
   const [showing, setShowing] = useState(was?.showing ?? false);
@@ -39,17 +44,24 @@ export function WordStudyScreen() {
   const greek = num.startsWith("G");
   const sb = app.strongsBible;
 
-  // A new number from elsewhere (a word clicked in the text) shows that number, not the old lookup.
+  // A number (from the box, a related word, a word clicked in the text, or back/forward) shows its
+  // entry; a word shows the Greek and Hebrew words for it, looked up again unless it just was.
   useEffect(() => {
-    if (num === lastNum.current) return;
-    lastNum.current = num;
-    setQ(num); setOnlyBook(null); setShowing(false);
-  }, [num]);
-  const find = async (text: string) => {
+    if (isNum) {
+      if (num !== lastNum.current || showing) { lastNum.current = num; setQ(num); setOnlyBook(null); setShowing(false); }
+    } else if (lookup?.q === target) { setQ(target); setShowing(true); }
+    else lookUp(target);
+  }, [target]); // eslint-disable-line react-hooks/exhaustive-deps
+  // The box: going to a number or a word is a new place, so back returns here.
+  const find = (text: string) => {
     const t = text.trim();
     if (!t) return;
-    const n = t.toUpperCase();
-    if (/^[GH]\d+$/.test(n)) { setShowing(false); app.studyWord(n); return; }
+    const next = /^[GH]\d+$/i.test(t) ? t.toUpperCase() : t;
+    if (next === target) { if (!isNum) lookUp(t); return; }
+    app.studyWord(next);
+  };
+  const lookUp = async (t: string) => {
+    setQ(t);
     setFinding(true);
     try {
       const [words, translit] = await Promise.all([
@@ -67,7 +79,7 @@ export function WordStudyScreen() {
     } finally { setFinding(false); }
   };
   const clear = () => { setQ(""); setLookup(null); setShowing(false); };
-  const choose = (n: string) => { setShowing(false); lastNum.current = n; app.studyWord(n); };
+  const choose = (n: string) => app.studyWord(n);
   useEffect(() => {
     let dead = false;
     if (!app.lexicon) return;
@@ -118,13 +130,14 @@ export function WordStudyScreen() {
           <label className="field"><Icon name="word" /><input value={q} onChange={(ev) => setQ(ev.target.value)} onKeyDown={(ev) => { if (ev.key === "Escape" && q) { ev.preventDefault(); clear(); } }} placeholder="A word like love, agape, or a number like G25" aria-label="Word or Strong's number" />
             {finding ? <span className="n">Finding…</span> : q && <button type="button" className="ibtn" aria-label="Clear" title="Clear (esc)" onClick={clear} style={{ width: 20, height: 20, flexShrink: 0 }}><Icon name="x" size={12} /></button>}</label>
         </form>
-        {lookup && !showing && <button className="btn small" type="button" onClick={() => setShowing(true)}><Icon name="back" size={13} />Words for “{lookup.q}”</button>}
+        {lookup && !showing && <button className="btn small" type="button" onClick={() => app.studyWord(lookup.q)}><Icon name="back" size={13} />Words for “{lookup.q}”</button>}
       </Topbar>
       {showing && lookup ? <LookupList lookup={lookup} onChoose={choose} /> : !app.lexicon ? <div className="empty">Word study needs a Strong's lexicon in your library.</div> : !e ? <div className="empty">No entry for {num}.</div> : (
         <div style={{ flexGrow: 1, minHeight: 0, display: "grid", gridTemplateColumns: "minmax(0,1fr) 380px", gap: 20, padding: "22px 28px" }}>
           <div className="scroll" style={{ display: "flex", flexDirection: "column", gap: 18, minWidth: 0, paddingRight: 4 }}>
             <div style={{ display: "flex", alignItems: "flex-end", gap: 22, flexWrap: "wrap" }}>
               <div style={{ font: "400 72px/0.95 var(--display)", letterSpacing: "-0.01em" }} lang={greek ? "grc" : "he"}>{e.word}</div>
+              {e.word && <span style={{ paddingBottom: 8 }}><SayButton word={e.word} num={num} pron={e.pron} size={18} /></span>}
               <div style={{ display: "flex", flexDirection: "column", gap: 4, paddingBottom: 6 }}>
                 <div style={{ font: "italic 400 22px/1.2 var(--serif)" }}>{e.translit}</div>
                 <div style={{ color: "var(--muted)" }}>{e.pron}</div>
@@ -218,6 +231,7 @@ function LookupList({ lookup, onChoose }: { lookup: Lookup; onChoose: (num: stri
       <b style={{ fontSize: 12.5, color: "var(--accent)" }}>{num}</b>
       <span style={{ display: "flex", alignItems: "baseline", gap: 8, minWidth: 0 }}>
         <span style={{ font: "500 19px var(--display)" }} lang={num.startsWith("H") ? "he" : "grc"}>{word}</span>
+        {word && <SayButton word={word} num={num} size={13} />}
         <i style={{ fontFamily: "var(--serif)", fontSize: 14, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{translit}</i>
       </span>
       <span style={{ minWidth: 0 }}>{right}</span>

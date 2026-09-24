@@ -8,6 +8,7 @@ import { useApp } from "./state";
 import { orderModules, short } from "./StudyPane";
 import { Popover } from "./ui";
 import { useAssistant } from "./assistant";
+import { SayButton } from "./speech";
 
 interface Lex { num: string; word: string; translit: string; pron: string; rest: string; renderings: [string, number][] }
 
@@ -30,14 +31,34 @@ export function useLexicon(nums: string[]) {
   return lex;
 }
 
-export function WordLookup({ pick, vref, bible, onClose, onDictionary, onCommentary, onAsk }: {
-  pick: WordPick; vref: Ref; bible: string; onClose: () => void;
-  onDictionary: (module: string, topic: string) => void; onCommentary: (module: string) => void; onAsk: (q: string) => void;
+export function WordLookup({ pick, vref, context, bible, onClose, onDictionary, onCommentary, onAsk }: {
+  pick: WordPick; bible: string; onClose: () => void;
+  /** The verse the word is in, or near (a commentary's verse); none in a book. */
+  vref?: Ref;
+  /** Where the word is, when not in a verse: "Easton's Bible Dictionary", a book's chapter. */
+  context?: string;
+  onDictionary: (module: string, topic: string) => void; onCommentary?: (module: string) => void; onAsk: (q: string) => void;
 }) {
   const app = useApp();
   const canAsk = useAssistant().available;
   const word = pick.token.text;
-  const lex = useLexicon(pick.token.strongs);
+  // A word with no Strong's numbers of its own (a Bible without them, a commentary, a book): the
+  // Greek and Hebrew words the KJV+ most often translates with it.
+  const [guess, setGuess] = useState<string[]>([]);
+  useEffect(() => {
+    let dead = false;
+    setGuess([]);
+    if (pick.token.strongs.length || !app.strongsBible || word.length < 3) return;
+    (async () => {
+      for (const h of headwords(word)) {
+        const ns = await api.strongsForWord(app.strongsBible!, h).catch(() => []);
+        if (ns.length) { if (!dead) setGuess(ns.slice().sort((a, b) => b.count - a.count).slice(0, 2).map((n) => n.num)); return; }
+      }
+    })();
+    return () => { dead = true; };
+  }, [word, pick.token.strongs.length, app.strongsBible]);
+  const guessed = !pick.token.strongs.length && guess.length > 0;
+  const lex = useLexicon(pick.token.strongs.length ? pick.token.strongs : guess);
   const [topics, setTopics] = useState<TopicHit[]>([]);
   const [cov, setCov] = useState<Coverage[]>([]);
   useEffect(() => {
@@ -49,9 +70,10 @@ export function WordLookup({ pick, vref, bible, onClose, onDictionary, onComment
       }
       if (!dead) setTopics([]);
     })();
-    api.coverage(vref.book, vref.chapter, vref.verse!).then((c) => !dead && setCov(orderModules(c.filter((x) => x.range && x.id !== app.tsk), app.settings.commentaryOrder)));
+    if (vref?.verse && onCommentary) api.coverage(vref.book, vref.chapter, vref.verse).then((c) => !dead && setCov(orderModules(c.filter((x) => x.range && x.id !== app.tsk), app.settings.commentaryOrder)));
+    else setCov([]);
     return () => { dead = true; };
-  }, [word, vref.book, vref.chapter, vref.verse, app.tsk, app.settings.dictionaryOrder, app.settings.commentaryOrder]);
+  }, [word, vref?.book, vref?.chapter, vref?.verse, app.tsk, app.settings.dictionaryOrder, app.settings.commentaryOrder]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const range = (c: Coverage) => (c.range && (c.range[1] !== c.range[3] || c.range[0] !== c.range[2]) ? ` ${c.range[0]}:${c.range[1]}–${c.range[2] !== c.range[0] ? c.range[2] + ":" : ""}${c.range[3]}` : "");
   const lang = (n: string) => (n.startsWith("H") ? "Hebrew" : "Greek");
@@ -59,14 +81,16 @@ export function WordLookup({ pick, vref, bible, onClose, onDictionary, onComment
     <Popover anchor={pick.rect} onClose={onClose} width={420}>
       <div role="dialog" aria-label={`Look up: ${word}`}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 12px 10px 16px", borderBottom: "1px solid var(--border)" }}>
-          <span style={{ font: "600 19px/1 var(--serif)" }}>{word}</span><span className="n">{fmtRef(vref)} · {app.mod("bible", bible)?.abbrev}</span>
+          <span style={{ font: "600 19px/1 var(--serif)" }}>{word}</span><span className="n">{vref ? `${fmtRef(vref)} · ${app.mod("bible", bible)?.abbrev ?? ""}` : context}</span>
           <button className="ibtn" type="button" aria-label="Close" style={{ marginLeft: "auto" }} onClick={onClose}><Icon name="x" /></button>
         </div>
+        {guessed && lex.length > 0 && <div className="hint" style={{ padding: "10px 16px 0" }}>The Greek and Hebrew words the KJV most often translates “{word.toLowerCase()}”:</div>}
         {lex.map((l) => (
           <div key={l.num} style={{ padding: "12px 16px", display: "flex", flexDirection: "column", gap: 6, borderBottom: "1px solid var(--border)" }}>
             <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
               <span className="label">{lang(l.num)}</span>
               <span style={{ font: "400 26px/1 var(--display)" }} lang={l.num.startsWith("H") ? "he" : "grc"}>{l.word}</span>
+              {l.word && <SayButton word={l.word} num={l.num} pron={l.pron} />}
               <i style={{ fontFamily: "var(--serif)", fontSize: 15 }}>{l.translit}</i>
               <a style={{ marginLeft: "auto", fontSize: 12 }} onClick={() => { app.studyWord(l.num); onClose(); }}>{l.num}</a>
             </div>
@@ -75,7 +99,7 @@ export function WordLookup({ pick, vref, bible, onClose, onDictionary, onComment
             {l.renderings.length > 0 && <div className="n" style={{ fontWeight: 400 }}>KJV translates it {l.renderings.slice(0, 7).map(([w, n], i) => <span key={w}>{i > 0 && " · "}<b style={{ color: w.toLowerCase() === word.toLowerCase() ? "var(--text)" : undefined }}>{w}</b> {n}</span>)}</div>}
           </div>
         ))}
-        {!lex.length && pick.token.strongs.length === 0 && <div className="hint" style={{ padding: "10px 16px", borderBottom: "1px solid var(--border)" }}>This Bible has no Strong's numbers, so the Greek or Hebrew isn't shown. The KJV+ shows it.</div>}
+        {!lex.length && pick.token.strongs.length === 0 && !guess.length && app.strongsBible && vref && !context && <div className="hint" style={{ padding: "10px 16px", borderBottom: "1px solid var(--border)" }}>No Greek or Hebrew word found for “{word}”.</div>}
         {topics.length > 0 && (
           <div style={{ padding: "10px 8px 6px", borderBottom: "1px solid var(--border)" }}>
             <div className="label" style={{ padding: "0 8px 4px" }}>Dictionaries</div>
@@ -85,13 +109,15 @@ export function WordLookup({ pick, vref, bible, onClose, onDictionary, onComment
         {cov.length > 0 && (
           <div style={{ padding: "10px 16px 12px", display: "flex", flexDirection: "column", gap: 8, borderBottom: "1px solid var(--border)" }}>
             <div className="label">Commentary on this verse</div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>{cov.map((c) => <button key={c.id} type="button" className="rchip" onClick={() => onCommentary(c.id)}>{short(c)}{range(c)}</button>)}</div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>{cov.map((c) => <button key={c.id} type="button" className="rchip" onClick={() => onCommentary?.(c.id)}>{short(c)}{range(c)}</button>)}</div>
           </div>
         )}
-        <div style={{ display: "grid", gridTemplateColumns: `repeat(${1 + (lex.length ? 1 : 0) + (canAsk ? 1 : 0)}, minmax(0,1fr))` }}>
-          {lex.length > 0 && <button type="button" style={{ height: 40, border: 0, background: "transparent", cursor: "pointer", color: "var(--accent)", borderRight: "1px solid var(--border)" }} onClick={() => { app.studyWord(lex[0].num); onClose(); }}>Word study</button>}
+        <div style={{ display: "grid", gridTemplateColumns: `repeat(${2 + (canAsk ? 1 : 0)}, minmax(0,1fr))` }}>
+          {/* A word with its own Strong's number studies that number; any other word (a commentary's,
+              a book's) looks up the Greek and Hebrew words the KJV translates it with. */}
+          <button type="button" style={{ height: 40, border: 0, background: "transparent", cursor: "pointer", color: "var(--accent)", borderRight: "1px solid var(--border)" }} onClick={() => { app.studyWord(pick.token.strongs.length && lex.length ? lex[0].num : word.toLowerCase()); onClose(); }}>Word study</button>
           <button type="button" style={{ height: 40, border: 0, background: "transparent", cursor: "pointer", color: "var(--accent)", borderRight: canAsk ? "1px solid var(--border)" : 0 }} onClick={() => { app.searchText(word); onClose(); }}>Search “{word}”</button>
-          {canAsk && <button type="button" style={{ height: 40, border: 0, background: "transparent", cursor: "pointer", color: "var(--accent)" }} onClick={() => onAsk(`What does “${word}” mean in ${fmtRef(vref)}?`)}>Ask</button>}
+          {canAsk && <button type="button" style={{ height: 40, border: 0, background: "transparent", cursor: "pointer", color: "var(--accent)" }} onClick={() => onAsk(`What does “${word}” mean in ${context ?? (vref ? fmtRef(vref) : "this passage")}?`)}>Ask</button>}
         </div>
       </div>
     </Popover>

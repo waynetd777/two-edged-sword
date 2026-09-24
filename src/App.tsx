@@ -16,6 +16,7 @@ import { PlayerProvider, usePlayer } from "./speech";
 import { runScene } from "./scene";
 import { AppProvider, useApp } from "./state";
 import { hideSplash } from "./splash";
+import { Tooltips, WordHoverBox } from "./ui";
 
 function Screens() {
   const app = useApp();
@@ -75,6 +76,8 @@ function Screens() {
       {palette && <Palette onClose={() => setPalette(false)} onAsk={() => app.setPending({ ask: "" })} />}
       {app.toastMsg && <div className="toast" role="status">{app.toastMsg}</div>}
       <StrongsHover />
+      <Tooltips />
+      <WordHoverBox />
       <QuietTime focus={focus && screen === "read"} />
     </div>
   );

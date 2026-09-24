@@ -35,7 +35,7 @@ const takeSceneChat = () => { const id = sceneChat; sceneChat = null; return id;
 
 /** A progress line ("Thinking", "Reading Matthew Henry's Commentary"): a light sweeps across
  *  it and the dots count up. Keyed by the text so each new step starts its sweep afresh. */
-function Working({ text }: { text: string }) {
+export function Working({ text }: { text: string }) {
   return <span key={text} className="n working" role="status">{text}<span className="dots" aria-hidden="true"><i>.</i><i>.</i><i>.</i></span></span>;
 }
 
@@ -187,7 +187,13 @@ export function AskPanel(p: AskProps) {
   );
 
   const suggestions = p.suggestions ?? [];
+  // The full panel always offers something to ask; the compact card only what it was given.
+  const offered = suggestions.length || !p.full ? suggestions : ["What is the main point here?", "What background helps me understand this?", "Where else does the Bible say something like this?"];
   const messages = chat?.messages ?? [];
+  // With the box empty, the go button asks the first suggestion, which the box shows as its hint,
+  // so what you see is what gets asked. Not in a chat already under way.
+  const defaultQ = messages.length === 0 ? offered[0] : undefined;
+  const toSend = q.trim() ? q : defaultQ ?? "";
   const convo = (
     <>
       {messages.map((m, i) => m.role === "user" ? (
@@ -212,13 +218,13 @@ export function AskPanel(p: AskProps) {
   );
 
   const input = (
-    <label style={{ display: "flex", flexDirection: p.full ? "column" : "row", alignItems: p.full ? "stretch" : "center", gap: 8, padding: p.full ? "10px 12px" : "4px 4px 4px 12px", borderRadius: 10, border: "1px solid var(--ring)", background: "var(--panel2)" }}>
-      <textarea rows={p.full ? 2 : 1} value={q} placeholder={`Ask about ${about}…`} aria-label="Question" onChange={(e) => setQ(e.target.value)}
-        onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || !e.shiftKey)) { e.preventDefault(); send(q); } }}
+    <label style={{ display: "flex", flexDirection: "column", alignItems: "stretch", gap: p.full ? 8 : 4, padding: p.full ? "10px 12px" : "8px 6px 6px 12px", borderRadius: 10, border: "1px solid var(--ring)", background: "var(--panel2)" }}>
+      <textarea rows={2} value={q} placeholder={defaultQ ?? (messages.length ? "Ask a follow-up…" : `Ask about ${about}…`)} aria-label="Question" onChange={(e) => setQ(e.target.value)}
+        onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || !e.shiftKey)) { e.preventDefault(); send(toSend); } }}
         style={{ border: 0, outline: 0, resize: "none", background: "transparent", font: "400 13.5px/1.5 var(--ui)", color: "var(--text)", flexGrow: 1 }} />
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
         <button className="btn small" type="button" onClick={(e) => setModelMenu(e.currentTarget.getBoundingClientRect())} disabled={!!chat}>{modelName(model)}<Icon name="down" className="sm" /></button>
-        <button type="button" aria-label="Send" disabled={busy || !q.trim()} onClick={() => send(q)} style={{ marginLeft: "auto", width: 30, height: 30, borderRadius: 8, border: 0, background: "var(--accent)", color: "var(--onaccent)", display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer", opacity: busy || !q.trim() ? 0.5 : 1 }}><Icon name="send" /></button>
+        <button type="button" aria-label="Send" title={q.trim() || !defaultQ ? "Send" : `Ask “${defaultQ}”`} disabled={busy || !toSend.trim()} onClick={() => send(toSend)} style={{ marginLeft: "auto", width: 30, height: 30, borderRadius: 8, border: 0, background: busy || !toSend.trim() ? "var(--border)" : "var(--accent)", color: busy || !toSend.trim() ? "var(--muted)" : "var(--onaccent)", display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}><Icon name="send" /></button>
       </div>
     </label>
   );
@@ -254,7 +260,7 @@ export function AskPanel(p: AskProps) {
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               <div className="hint">{p.hint ?? `Ask anything about ${about}. The passage goes with the question${withLibrary ? ", and it can search your commentaries, lexicons and dictionaries when the question needs them" : ""}.`}</div>
               <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                {(suggestions.length ? suggestions : ["What is the main point here?", "What background helps me understand this?", "Where else does the Bible say something like this?"]).map((s) => <button key={s} type="button" className="chip wrap" onClick={() => send(s)}>{s}</button>)}
+                {offered.map((s) => <button key={s} type="button" className="chip wrap" onClick={() => send(s)}>{s}</button>)}
               </div>
             </div>
           )}

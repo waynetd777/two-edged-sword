@@ -5,11 +5,12 @@ import { docSegments, plainText, renderHtml } from "./esword";
 import { Icon } from "./icons";
 import { usePlayer } from "./speech";
 import { AskPanel } from "./Ask";
-import { TextSizeButton } from "./Read";
+import { TextSizeButton, textToken, WordPick } from "./Read";
+import { WordLookup } from "./WordLookup";
 import { Topbar } from "./Shell";
 import { useApp } from "./state";
 import { useRefPreview } from "./StudyPane";
-import { Popover } from "./ui";
+import { Popover, wordAt, wordHover } from "./ui";
 import { dayTitle } from "./plans";
 import { useAssistant } from "./assistant";
 
@@ -46,6 +47,9 @@ export function DocReader({ focus, setFocus }: { focus: boolean; setFocus: (f: b
   // Ask: the chapter (or the part around the paragraph asked about) goes with the question; the
   // rest of the book is exported once so the model can search it rather than carry it.
   const [asking, setAsking] = useState<number | null>(null);
+  // A word clicked in the text, looked up as a Bible word is; and a question it seeds for Ask.
+  const [word, setWord] = useState<WordPick | null>(null);
+  const [askSeed, setAskSeed] = useState<string | null>(null);
   useEffect(() => setAsking(null), [doc.module, doc.title]);
   const exported = useRef<{ module: string; p: Promise<{ dir: string; files: string[] }> } | null>(null);
   const exportBook = () => {
@@ -170,12 +174,12 @@ export function DocReader({ focus, setFocus }: { focus: boolean; setFocus: (f: b
     <div className="main" style={{ minHeight: 0 }}>
       {focus ? (
         <header className="topbar drag" style={{ borderBottom: 0, paddingLeft: 84 }}>
-          <button className="ibtn" type="button" aria-label="Previous chapter" disabled={i <= 0} onClick={() => go(titles[i - 1])}><Icon name="back" /></button>
+          <button className="ibtn" type="button" aria-label="Previous chapter" title={`Previous ${unit} (←)`} disabled={i <= 0} onClick={() => go(titles[i - 1])}><Icon name="back" /></button>
           <div className="spacer" style={{ display: "flex", alignItems: "center", justifyContent: "center", color: "var(--muted)", minWidth: 0 }}><span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{doc.title} · {mod?.title}</span></div>
           <button className={`ibtn ${reading ? "on" : ""}`} type="button" aria-label="Listen" title="Listen (space)" disabled={!segs.length} onClick={() => (reading ? player.toggle() : listen())}><Icon name="speaker" /></button>
           <TextSizeButton />
           <button className="btn" type="button" onClick={() => setFocus(false)}>Exit focus<span className="kbd">esc</span></button>
-          <button className="ibtn" type="button" aria-label="Next chapter" disabled={i < 0 || i >= titles.length - 1} onClick={() => go(titles[i + 1])}><Icon name="fwd" /></button>
+          <button className="ibtn" type="button" aria-label="Next chapter" title={`Next ${unit} (→)`} disabled={i < 0 || i >= titles.length - 1} onClick={() => go(titles[i + 1])}><Icon name="fwd" /></button>
         </header>
       ) : <Topbar right={
         <div style={{ display: "flex", gap: 2 }}>
@@ -218,7 +222,7 @@ export function DocReader({ focus, setFocus }: { focus: boolean; setFocus: (f: b
               </div>
             )}
             {art
-              ? <div className="es prose selectable docbody" style={{ fontSize: focus ? "calc(var(--read-size) + 2px)" : "var(--read-size)", lineHeight: focus ? 1.85 : 1.7 }}>
+              ? <div className="es prose selectable docbody clickwords" {...wordHover} onClick={(e) => { const w = wordAt(e); if (w) setWord({ token: textToken(w.word), verse: 0, rect: w.rect }); }} style={{ fontSize: focus ? "calc(var(--read-size) + 2px)" : "var(--read-size)", lineHeight: focus ? 1.85 : 1.7 }}>
                   {segs.map((h, k) => (
                     <div key={k} data-seg={k + 1} className={`dseg ${reading && ps.verse === k + 1 ? "speaking" : ""} ${asking === k ? "asking" : ""}`}>
                       <span className="dsegtools">
@@ -231,8 +235,8 @@ export function DocReader({ focus, setFocus }: { focus: boolean; setFocus: (f: b
                 </div>
               : doc.title && <div className="n">Loading…</div>}
             <div style={{ display: "flex", justifyContent: "space-between", gap: 12, padding: "28px 0 0" }}>
-              {i > 0 ? <button className="btn" type="button" onClick={() => go(titles[i - 1])} style={{ maxWidth: "48%" }}><Icon name="back" /><span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{titles[i - 1]}</span></button> : <span />}
-              {i >= 0 && i < titles.length - 1 ? <button className="btn" type="button" onClick={() => go(titles[i + 1])} style={{ maxWidth: "48%" }}><span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{titles[i + 1]}</span><Icon name="fwd" /></button> : <span />}
+              {i > 0 ? <button className="btn" type="button" title={`Previous ${unit}: ${titles[i - 1]} (←)`} onClick={() => go(titles[i - 1])} style={{ maxWidth: "48%" }}><Icon name="back" /><span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{titles[i - 1]}</span></button> : <span />}
+              {i >= 0 && i < titles.length - 1 ? <button className="btn" type="button" title={`Next ${unit}: ${titles[i + 1]} (→)`} onClick={() => go(titles[i + 1])} style={{ maxWidth: "48%" }}><span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{titles[i + 1]}</span><Icon name="fwd" /></button> : <span />}
             </div>
           </div>
         </main>
@@ -247,11 +251,16 @@ export function DocReader({ focus, setFocus }: { focus: boolean; setFocus: (f: b
             <AskPanel key={`${doc.module}|${doc.title}|${asking}`} full source="Reader" about={asking === null ? doc.title : `${doc.title} ¶${asking + 1}`}
               context={askContext} bookDir={() => exportBook().then((x) => x.dir)}
               hint={`Ask anything about ${asking === null ? `this ${unit}` : "this paragraph"}. The ${unit} goes with the question, and the model can search the rest of ${mod?.title ?? "the book"}${devo ? "" : " and look at its charts"} when it needs to.`}
-              suggestions={suggestions} />
+              suggestions={suggestions} seed={askSeed} clearSeed={() => setAskSeed(null)} />
           </aside>
         )}
       </div>
       {preview}
+      {word && (
+        <WordLookup pick={word} context={`${mod?.title ?? "This book"}, ${doc.title}`} bible={app.settings.bible} onClose={() => setWord(null)}
+          onDictionary={(module, topic) => { setWord(null); app.setPending({ article: { module, topic } }); }}
+          onAsk={(q) => { setWord(null); setAskSeed(q); if (focus) setFocus(false); if (!app.settings.studyPane) app.set({ studyPane: true }); }} />
+      )}
       {focus && <div style={{ position: "fixed", bottom: 18, left: 0, right: 0, display: "flex", justifyContent: "center", gap: 18, color: "var(--muted)", fontSize: 12, pointerEvents: "none" }}>
         <span>Click an image to see it full screen</span><span>·</span><span><span className="kbd">space</span> listen</span><span>·</span><span><span className="kbd">←</span> <span className="kbd">→</span> chapters</span>
       </div>}

@@ -4,7 +4,7 @@
 
 import { api, setReadOnly } from "./api";
 import { setSceneChat } from "./Ask";
-import { Chat, Loc, Screen, Settings, useApp } from "./state";
+import { Chat, Loc, Pending, Screen, Settings, useApp } from "./state";
 import type { PlayerState } from "./speech";
 
 export interface Scene {
@@ -22,6 +22,8 @@ export interface Scene {
   player?: Partial<PlayerState>;
   /** Scroll the study pane back to the top once the page settles (an Ask chat opens scrolled to its end). */
   scrollTop?: boolean;
+  /** Asked for after the rest has settled, as a click elsewhere would (a dictionary article, a question). */
+  pending?: Pending;
 }
 
 let started = false;
@@ -43,6 +45,7 @@ export function runScene(app: ReturnType<typeof useApp>, still: (s: Partial<Play
       if (sc.word) app.studyWord(sc.word);
       if (sc.search) app.searchText(sc.search);
       if (sc.player) still(sc.player);
+      if (sc.pending) { const x = sc.pending; window.setTimeout(() => app.setPending(x), 1500); }
       if (sc.scrollTop) window.setTimeout(() => document.querySelectorAll(".study .scroll").forEach((el) => { el.scrollTop = 0; }), 1500);
     }, 400);
   }).catch(() => {});

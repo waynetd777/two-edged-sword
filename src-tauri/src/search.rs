@@ -247,7 +247,7 @@ pub fn run(lib: &Library, index: Option<&crate::index::Index>, q: &Query) -> Res
         let mut count = 0;
         let cols = "Book, ChapterBegin, VerseBegin, ChapterEnd, VerseEnd, Comments";
         let range = format!("Book BETWEEN {} AND {}", q.book_from, q.book_to);
-        let _ = candidate_rows(lib, index, Kind::Commentary, &m.id, "VerseCommentary", cols, "Comments", &range, "Book, ChapterBegin, VerseBegin", &terms, &phrase, q, |r| {
+        let exact = candidate_rows(lib, index, Kind::Commentary, &m.id, "VerseCommentary", cols, "Comments", &range, "Book, ChapterBegin, VerseBegin", &terms, &phrase, q, MAX_COMMENT_HITS, |r| {
             let html: String = r.get::<_, Option<String>>(5)?.unwrap_or_default();
             let p = plain(&html);
             if let Some(at) = matches(&p, &terms, &phrase, q.mode, q.whole_words) {
@@ -258,6 +258,7 @@ pub fn run(lib: &Library, index: Option<&crate::index::Index>, q: &Query) -> Res
             }
             Ok(())
         });
+        if let Ok(Some(n)) = exact { count = n; }
         if count > 0 {
             commentaries.push(ModuleMatches { module: m.id.clone(), title: m.title.clone(), abbrev: m.abbrev.clone(), count, hits });
         }
@@ -269,7 +270,7 @@ pub fn run(lib: &Library, index: Option<&crate::index::Index>, q: &Query) -> Res
     for m in lib.of_kind(Kind::Dictionary) {
         let mut topics = Vec::new();
         let mut count = 0;
-        let _ = candidate_rows(lib, index, Kind::Dictionary, &m.id, "Dictionary", "Topic, Definition", "Definition", "1", "Topic COLLATE NOCASE", &terms, &phrase, q, |r| {
+        let exact = candidate_rows(lib, index, Kind::Dictionary, &m.id, "Dictionary", "Topic, Definition", "Definition", "1", "Topic COLLATE NOCASE", &terms, &phrase, q, MAX_TOPICS, |r| {
             let def: String = r.get::<_, Option<String>>(1)?.unwrap_or_default();
             if matches(&plain(&def), &terms, &phrase, q.mode, q.whole_words).is_some() {
                 count += 1;
@@ -277,6 +278,7 @@ pub fn run(lib: &Library, index: Option<&crate::index::Index>, q: &Query) -> Res
             }
             Ok(())
         });
+        if let Ok(Some(n)) = exact { count = n; }
         if count > 0 {
             dictionaries.push(ModuleMatches { module: m.id.clone(), title: m.title.clone(), abbrev: m.abbrev.clone(), count, hits: topics });
         }
@@ -286,9 +288,10 @@ pub fn run(lib: &Library, index: Option<&crate::index::Index>, q: &Query) -> Res
     Ok(Results { bible, commentaries, dictionaries, strongs: false })
 }
 
-/// Feeds `f` every row of the module that could match: the index's candidates when the module
-/// is indexed (and the search is by whole words, which is how the index tokenises), otherwise
-/// the rows LIKE finds.
+/// Feeds `f` the rows of the module that could match. With the index (a whole-word search on an
+/// indexed module) its matches are already exact, so they are counted in SQL and only the first
+/// `limit` rows, the ones shown, are loaded and passed on; the count is returned. Without it, `f`
+/// gets every row LIKE finds and does its own counting, and None is returned.
 #[allow(clippy::too_many_arguments)]
 fn candidate_rows(
     lib: &Library,
@@ -303,19 +306,23 @@ fn candidate_rows(
     terms: &[String],
     phrase: &str,
     q: &Query,
+    limit: usize,
     mut f: impl FnMut(&rusqlite::Row) -> rusqlite::Result<()>,
-) -> Result<(), String> {
+) -> Result<Option<usize>, String> {
     if let Some(ix) = index.filter(|ix| q.whole_words && ix.is_ready(kind, id)) {
         let ids = ix.candidates(kind, id, &crate::index::fts_query(terms, phrase, q.mode))?;
+        if ids.is_empty() {
+            return Ok(Some(0));
+        }
+        let list = ids.iter().map(|i| i.to_string()).collect::<Vec<_>>().join(",");
         return lib.with(kind, id, |c| {
-            for chunk in ids.chunks(400) {
-                let list = chunk.iter().map(|i| i.to_string()).collect::<Vec<_>>().join(",");
-                let sql = format!("SELECT {cols} FROM {table} WHERE rowid IN ({list}) AND {filter} ORDER BY {order}");
-                let mut st = c.prepare(&sql)?;
-                let mut rows = st.query([])?;
-                while let Some(r) = rows.next()? { f(r)?; }
-            }
-            Ok(())
+            let n: i64 = c.query_row(&format!("SELECT count(*) FROM {table} WHERE rowid IN ({list}) AND {filter}"), [], |r| r.get(0))?;
+            // A few more than shown, in case the text check below turns one down.
+            let sql = format!("SELECT {cols} FROM {table} WHERE rowid IN ({list}) AND {filter} ORDER BY {order} LIMIT {}", limit + 10);
+            let mut st = c.prepare(&sql)?;
+            let mut rows = st.query([])?;
+            while let Some(r) = rows.next()? { f(r)?; }
+            Ok(Some(n as usize))
         });
     }
     let (clause, pats) = like_clause(text_col, terms, phrase, q.mode);
@@ -324,7 +331,7 @@ fn candidate_rows(
         let mut st = c.prepare(&sql)?;
         let mut rows = st.query(params_from_iter(pats.iter()))?;
         while let Some(r) = rows.next()? { f(r)?; }
-        Ok(())
+        Ok(None)
     })
 }
 
@@ -356,3 +363,4 @@ mod tests {
         assert!(matches("born", &terms, "born spirit", Mode::All, true).is_none());
     }
 }
+

@@ -58,6 +58,10 @@ asking a model each time; the Listen shot places the player without speaking.
 It needs Screen Recording permission for the terminal, and starts the Vite dev server if it isn't
 already running. Scenes use public-domain Bibles only.
 
+Screenshot mode is also the way to see the app while debugging: a one-off scene can put it in
+the state a bug needs (including `pending`, which replays a click that opens an article,
+commentary or question) and capture what it shows. `CLAUDE.md` and `AGENTS.md` show how.
+
 ## The code
 
 | Where | What |

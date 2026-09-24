@@ -5,7 +5,7 @@ import { AskPanel } from "./Ask";
 import { plainText, renderHtml } from "./esword";
 import { Icon } from "./icons";
 import { useApp } from "./state";
-import { Popover, TrailButtons, useTrail } from "./ui";
+import { Popover, TrailButtons, useTrail, wordAt, wordHover } from "./ui";
 import { useAssistant } from "./assistant";
 
 export type StudyTab = "commentary" | "dictionary" | "notes" | "maps" | "ask";
@@ -26,6 +26,8 @@ interface Props {
   clearAskSeed: () => void;
   commentary: string | null;
   setCommentary: (m: string | null) => void;
+  /** A word clicked in a commentary: look it up as a Bible word is. `where` names the commentary. */
+  onWord?: (word: string, rect: DOMRect, verse: Ref, where: string) => void;
 }
 
 /** Hovering a reference shows the verse; clicking opens it. */
@@ -127,13 +129,20 @@ export function StudyPane(p: Props) {
   const app = useApp();
   const canAsk = useAssistant().available;
   const tabs: [StudyTab, string][] = [["commentary", "Commentary"], ["dictionary", "Dictionary"], ["notes", "Notes"], ["maps", "Maps"], ...(canAsk ? [["ask", "Ask"] as [StudyTab, string]] : [])];
+  const tips: Record<StudyTab, string> = {
+    commentary: "Every commentary on the verse, with cross-references",
+    dictionary: "Dictionary and encyclopedia articles",
+    notes: "Your journal entries on this passage",
+    maps: "Maps for this book",
+    ask: "Ask about the verse or chapter, answered from your library",
+  };
   const vref: Ref = { book: p.book, chapter: p.chapter, verse: p.verse };
   const noteCount = app.journal.filter((e) => e.verses.some((v) => { const r = parseRef(v); return r && r.book === p.book && r.chapter === p.chapter && (!r.verse || (r.verse <= p.verse && p.verse <= (r.to ?? r.verse))); })).length;
   return (
     <aside className="study" aria-label="Study pane">
       <div className="tabs">
         {tabs.map(([t, l]) => (
-          <button key={t} type="button" className={`tab ${p.tab === t ? "on" : ""}`} onClick={() => p.setTab(t)}>
+          <button key={t} type="button" className={`tab ${p.tab === t ? "on" : ""}`} title={tips[t]} onClick={() => p.setTab(t)}>
             {t === "ask" && <Icon name="chat" />}{l}{t === "notes" && noteCount > 0 && <span className="n">{noteCount}</span>}
           </button>
         ))}
@@ -142,7 +151,7 @@ export function StudyPane(p: Props) {
         </button>
       </div>
       {p.tab === "commentary" && <CommentaryTab {...p} vref={vref} />}
-      {p.tab === "dictionary" && <DictionaryTab dict={p.dict} setDict={p.setDict} />}
+      {p.tab === "dictionary" && <DictionaryTab dict={p.dict} setDict={p.setDict} onWord={p.onWord && ((w, rect, where) => p.onWord!(w, rect, vref, where))} />}
       {p.tab === "notes" && <NotesTab vref={vref} selRef={p.selRef} />}
       {p.tab === "maps" && <MapsTab bookN={p.book} />}
       {p.tab === "ask" && <AskPanel source="Read" seed={p.askSeed} clearSeed={p.clearAskSeed} passage={p.selRef ?? { book: p.book, chapter: p.chapter }} verses={p.verses} suggestions={bibleSuggestions(p.selRef ?? { book: p.book, chapter: p.chapter }, p.verses)} full />}
@@ -203,7 +212,7 @@ function CommentaryTab(p: Props & { vref: Ref }) {
                 <button className="btn small" type="button" style={{ marginLeft: "auto" }} onClick={() => { setIntro("verse"); trail.visit(reading); }}>Back to {p.chapter}:{p.verse}</button>
               </div>
             )}
-            <div className="es prose selectable">{html ? renderHtml(html, { onRef: open, onRefHover, onStrongs: app.studyWord, onNote: note }) : <span className="n">Nothing here.</span>}</div>
+            <div className="es prose selectable clickwords" {...wordHover} onClick={(e) => { const w = p.onWord && wordAt(e); if (w && current) p.onWord!(w.word, w.rect, { book: at.book, chapter: at.chapter, verse: at.verse }, `${current.title} on ${fmtRef({ book: at.book, chapter: at.chapter, verse: at.verse })}`); }}>{html ? renderHtml(html, { onRef: open, onRefHover, onStrongs: app.studyWord, onNote: note }) : <span className="n">Nothing here.</span>}</div>
           </>
         ) : <div className="empty">No commentary in your library covers {fmtRef({ book: at.book, chapter: at.chapter, verse: at.verse })}.</div>}
       </div>
@@ -234,7 +243,7 @@ function CrossRefs({ vref, onOpen, onRefHover }: { vref: Ref; onOpen: (r: Ref) =
   );
 }
 
-function DictionaryTab({ dict, setDict }: { dict: { module: string; topic: string } | null; setDict: (d: { module: string; topic: string } | null) => void }) {
+function DictionaryTab({ dict, setDict, onWord }: { dict: { module: string; topic: string } | null; setDict: (d: { module: string; topic: string } | null) => void; onWord?: (word: string, rect: DOMRect, where: string) => void }) {
   const app = useApp();
   const dicts = orderModules((app.lib?.modules ?? []).filter((m) => m.kind === "dictionary"), app.settings.dictionaryOrder);
   const remembered = dicts.find((d) => d.id === (dict?.module ?? app.settings.dictModule))?.id;
@@ -285,7 +294,7 @@ function DictionaryTab({ dict, setDict }: { dict: { module: string; topic: strin
               <div className="label">{art.title}</div>
             </div>
             <h2 style={{ margin: "0 0 10px", font: "500 26px/1.2 var(--display)" }}>{art.topic}</h2>
-            <div className="es prose selectable">{renderHtml(art.html, { onRef: (r) => { hide(); app.open({ book: r.book, chapter: r.chapter, verse: r.verse, to: r.to }); }, onRefHover, onStrongs: app.studyWord, topic, onTopic: (t) => { hide(); pick(t); setQ(t); } })}</div>
+            <div className="es prose selectable clickwords" {...wordHover} onClick={(e) => { const w = onWord && wordAt(e); if (w) onWord!(w.word, w.rect, `${art.title}, ${art.topic}`); }}>{renderHtml(art.html, { onRef: (r) => { hide(); app.open({ book: r.book, chapter: r.chapter, verse: r.verse, to: r.to }); }, onRefHover, onStrongs: app.studyWord, topic, onTopic: (t) => { hide(); pick(t); setQ(t); } })}</div>
           </>
         ) : <div className="empty">Click a word in the text, or type one above.</div>}
       </div>

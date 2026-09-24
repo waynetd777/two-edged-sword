@@ -1,9 +1,114 @@
 import { ReactNode, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { BOOKS, book, SECTIONS } from "./bible";
-import { api } from "./api";
+import { api, isReadOnly } from "./api";
 import { Icon } from "./icons";
 import { useApp } from "./state";
 import { confirm } from "@tauri-apps/plugin-dialog";
+
+/** Tooltips everywhere in the app, styled like its popovers in place of macOS's plain ones. Any element there with a title (or data-tip, or an icon-only button's aria-label) gets one: the title moves to data-tip
+ *  so the native tooltip doesn't show as well. Shown after a short pause, below the element (above
+ *  it near the bottom of the window), or beside it in the sidebar; gone on leaving, clicking or scrolling. */
+export function Tooltips() {
+  const [tip, setTip] = useState<{ text: string; x: number; y: number; side: "below" | "above" | "right" } | null>(null);
+  useEffect(() => {
+    let timer: number | undefined;
+    let el: HTMLElement | null = null;
+    const hide = () => { window.clearTimeout(timer); el = null; setTip(null); };
+    const over = (e: MouseEvent) => {
+      // The nearest element with a title; failing that, an icon-only button's aria-label.
+      const target = e.target as HTMLElement;
+      const t = (target.closest?.("[title], [data-tip]") ?? target.closest?.("button[aria-label], [role=button][aria-label]")) as HTMLElement | null;
+      if (t === el) return;
+      hide();
+      if (!t) return;
+      if (t.title) { t.dataset.tip = t.title; t.removeAttribute("title"); }
+      const text = t.dataset.tip || (!t.textContent?.trim() ? t.getAttribute("aria-label") : null);
+      if (!text) return;
+      el = t;
+      timer = window.setTimeout(() => {
+        if (el !== t || !t.isConnected || isReadOnly()) return; // none in screenshots
+        const r = t.getBoundingClientRect();
+        const x = Math.max(150, Math.min(r.left + r.width / 2, window.innerWidth - 150));
+        if (t.closest(".sidebar")) setTip({ text, side: "right", x: r.right + 8, y: r.top + r.height / 2 });
+        else if (r.bottom + 44 > window.innerHeight) setTip({ text, side: "above", x, y: r.top - 6 });
+        else setTip({ text, side: "below", x, y: r.bottom + 6 });
+      }, 450);
+    };
+    document.addEventListener("mouseover", over);
+    document.addEventListener("mousedown", hide, true);
+    document.addEventListener("scroll", hide, true);
+    window.addEventListener("blur", hide);
+    return () => { hide(); document.removeEventListener("mouseover", over); document.removeEventListener("mousedown", hide, true); document.removeEventListener("scroll", hide, true); window.removeEventListener("blur", hide); };
+  }, []);
+  if (!tip) return null;
+  const style: React.CSSProperties = tip.side === "right"
+    ? { left: tip.x, top: tip.y, transform: "translateY(-50%)" }
+    : { left: tip.x, top: tip.y, transform: tip.side === "above" ? "translate(-50%, -100%)" : "translateX(-50%)" };
+  return <div className="tip" role="tooltip" style={style}>{tip.text}</div>;
+}
+
+/** The word under a click in rendered text (commentary, a book), and where it is, for the same
+ *  look-up popup as a Bible word. Found from the click point rather than by wrapping every word in
+ *  an element, so long HTML stays as it is. Null for links, numbers, images, a selection being
+ *  made, or a click between words. */
+export function wordAt(e: React.MouseEvent): { word: string; rect: DOMRect } | null {
+  if (window.getSelection()?.toString()) return null;
+  return wordAtPoint(e.clientX, e.clientY, e.target as HTMLElement);
+}
+
+function wordAtPoint(x: number, y: number, target: HTMLElement): { word: string; rect: DOMRect } | null {
+  if (target.closest("a, button, input, textarea, img, .strongs, [data-num], [role=button]")) return null;
+  const r = document.caretRangeFromPoint?.(x, y);
+  const node = r?.startContainer;
+  if (!r || !node || node.nodeType !== Node.TEXT_NODE) return null;
+  const text = node.textContent ?? "";
+  const isW = (c: string | undefined) => !!c && /[\p{L}\p{M}'’]/u.test(c);
+  let a = r.startOffset, b = r.startOffset;
+  while (a > 0 && isW(text[a - 1])) a--;
+  while (b < text.length && isW(text[b])) b++;
+  while (a < b && /['’]/.test(text[a])) a++;
+  while (b > a && /['’]/.test(text[b - 1])) b--;
+  if (b - a < 2) return null;
+  const range = document.createRange();
+  range.setStart(node, a);
+  range.setEnd(node, b);
+  const rect = range.getBoundingClientRect();
+  if (x < rect.left - 2 || x > rect.right + 2 || y < rect.top - 2 || y > rect.bottom + 2) return null;
+  return { word: text.slice(a, b), rect };
+}
+
+// Pointing at a word in rendered text highlights it and shows a hand, as a Bible word does. The
+// highlight is one box drawn over the word (WordHoverBox, mounted once), moved without
+// re-rendering the text under it, so long commentary stays cheap to hover over.
+let setWordBox: ((r: DOMRect | null) => void) | null = null;
+let hoverFrame = 0;
+export function WordHoverBox() {
+  const [box, setBox] = useState<DOMRect | null>(null);
+  useEffect(() => {
+    setWordBox = setBox;
+    const clear = () => setBox(null);
+    document.addEventListener("scroll", clear, true);
+    return () => { setWordBox = null; document.removeEventListener("scroll", clear, true); };
+  }, []);
+  return box && <div className="whover" style={{ left: box.left - 2, top: box.top, width: box.width + 4, height: box.height }} />;
+}
+/** Spread on text that wordAt makes clickable. */
+export const wordHover = {
+  onMouseMove: (e: React.MouseEvent<HTMLElement>) => {
+    const el = e.currentTarget, x = e.clientX, y = e.clientY, t = e.target as HTMLElement, dragging = e.buttons !== 0;
+    cancelAnimationFrame(hoverFrame);
+    hoverFrame = requestAnimationFrame(() => {
+      const w = dragging ? null : wordAtPoint(x, y, t);
+      el.style.cursor = w ? "pointer" : "";
+      setWordBox?.(w?.rect ?? null);
+    });
+  },
+  onMouseLeave: (e: React.MouseEvent<HTMLElement>) => {
+    cancelAnimationFrame(hoverFrame);
+    e.currentTarget.style.cursor = "";
+    setWordBox?.(null);
+  },
+};
 
 /** Asks before anything is deleted, as a native macOS alert with Delete as its button.
  *  Used for every delete in the app, rather than window.confirm. */

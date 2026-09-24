@@ -16,6 +16,9 @@ signed in on this Mac, so it uses your existing account:
 - **Codex** (`codex exec`), offering whichever models Codex's own model picker shows for your
   account, so the list stays current without an app update.
 
+Each Ask panel offers a few suggested questions; with the box empty, its hint is the first of
+them and the go button asks it.
+
 The model menu on each Ask panel lists the models from whichever tools are installed, and
 Settings › AI assistant shows what was found and sets the default. A chat keeps the model it
 started with.

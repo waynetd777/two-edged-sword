@@ -3,6 +3,13 @@
 ⌘1 to ⌘7 switch between the screens, ⌘K goes to any reference or command, and ⌘, opens
 Settings. Everything you delete (a journal entry, a plan, a chat) asks first.
 
+**Back and forward** (the arrows at the top left, or ⌘[ and ⌘]) work across the whole app: every
+screen you go to, passage, book chapter, word studied and search is a step you can go back to.
+From Word Study's list of words for "love", choosing ἀγάπη and pressing back returns to the list.
+
+The sidebar lists your bookmarks and the last ten chapters you read, of the Bible and of books
+and devotionals alike. Hover any control for a short description.
+
 ## Read
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="images/read-dark.png"><img alt="Reading 1 John 1 with the study pane on the commentaries" src="images/read-light.png"></picture>
@@ -17,8 +24,14 @@ selected verse:
 - **Ask**: questions about the verse or chapter (see [Ask](ask.md)).
 
 Click any word to look it up: its Greek or Hebrew (from the KJV+ when the Bible has no Strong's
-numbers of its own), how the KJV translates it, dictionary articles, and the commentaries on
-that verse. Select verses to highlight (six colours), bookmark, note, compare, listen or copy
+numbers of its own), how the KJV translates it, dictionary articles, the commentaries on that
+verse, and buttons for Word Study, Search and Ask. The speaker beside a Greek or Hebrew word
+pronounces it (macOS's Greek and Hebrew voices speak the modern languages; without them it reads
+Strong's pronunciation guide).
+
+Words in commentary, dictionary articles and books can be clicked the same way. They have no
+Strong's numbers of their own, so the popup shows the Greek and Hebrew words the KJV most often
+translates that word with. Select verses to highlight (six colours), bookmark, note, compare, listen or copy
 (⌘C, with or without verse numbers).
 
 Hover a reference, a bookmark, a recent chapter or a Strong's number for a preview. The passage
@@ -69,7 +82,9 @@ Narrow it to one Bible, a range (Old or New Testament, Wisdom, Prophets, Gospels
 match the exact phrase, all or any of the words, and whole words only. Selecting a verse shows it
 in context beside the results, ready to open or compare, and Ask can summarise what the results
 say. A Strong's number such as `G509` finds every verse that uses the word, however it is
-translated. The search is kept while you open results and come back.
+translated. The search is kept while you open results and come back, and each new search is a
+step back and forward can return to. Even a common word (over 20,000 matches for "light") takes
+well under a second.
 
 ## Word Study
 
@@ -77,7 +92,8 @@ translated. The search is kept while you open results and come back.
 
 A Strong's entry, how often and where it is used (by book), every verse in context, related words
 and the articles about it in your library. Type an English word ("love") to see the Greek and
-Hebrew words the KJV+ translates with it, or a transliteration ("agape").
+Hebrew words the KJV+ translates with it, or a transliteration ("agape"). The speaker beside the
+word pronounces it.
 
 ## Journal
 
@@ -97,7 +113,12 @@ chosen for the plan. Add devotionals from your library, or Our Daily Bread and H
 
 **Read** steps through the day's chapters and devotionals under a floating bar; **Read with
 audio** reads them aloud one after another, two seconds apart. Parts are ticked off as they are
-finished, and the day is marked read once its Bible readings are.
+finished, and the day is marked read once its Bible readings are. **Mark as unread** undoes
+today's mark and puts the plan back where it was. Click a reading in the day's card to open just
+that chapter.
+
+Under the progress bar: how many days in a row you've read, your best run, and how many of the
+last seven days (weekdays, for a weekdays-only plan, so weekends don't break the streak).
 
 ## Library
 

@@ -1,6 +1,6 @@
 import { Fragment, ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { api, Article, Commentary, SearchMode, SearchResults, Verse } from "./api";
-import { AskPanel } from "./Ask";
+import { AskPanel, Working } from "./Ask";
 import { book, fmtRef, Ref, SECTIONS } from "./bible";
 import { plainText, renderHtml } from "./esword";
 import { Icon } from "./icons";
@@ -45,6 +45,7 @@ export function SearchScreen() {
   const [bible, setBible] = useState(was?.bible ?? app.settings.bible);
   const [res, setRes] = useState<SearchResults | null>(was?.res ?? null);
   const [busy, setBusy] = useState(false);
+  const [searching, setSearching] = useState(""); // the text being searched for, while busy
   const [err, setErr] = useState<string | null>(null);
   const [scope, setScope] = useState<Scope>(was?.scope ?? "all");
   const [cmod, setCmod] = useState<string | null>(was?.cmod ?? null);
@@ -58,6 +59,8 @@ export function SearchScreen() {
   useEffect(() => {
     if (app.searchFor && app.searchFor !== was?.searchFor) { setQ(app.searchFor); run(app.searchFor); }
   }, [app.searchFor]); // eslint-disable-line react-hooks/exhaustive-deps
+  // A new search is a new place, so back returns to the one before; the effect above runs it.
+  const submit = () => { const t = q.trim(); if (!t) return; if (t === app.searchFor) run(t); else app.searchText(t); };
   const clear = () => { setQ(""); setRan(""); setRes(null); setErr(null); setPick(null); scrollTop.current = 0; };
   useEffect(() => {
     const t = window.setInterval(() => api.indexProgress().then(setIx), 1500);
@@ -67,7 +70,7 @@ export function SearchScreen() {
 
   const run = async (text = q) => {
     if (!text.trim()) return;
-    setBusy(true); setErr(null);
+    setBusy(true); setErr(null); setSearching(text.trim());
     try {
       const r = await api.search({ text, mode, wholeWords: whole, bible, bookFrom: range.from, bookTo: range.to, strongsBible: app.strongsBible });
       setRes(r); setRan(text); setCmod(r.commentaries[0]?.module ?? null);
@@ -100,8 +103,8 @@ export function SearchScreen() {
   return (
     <div className="main">
       <Topbar>
-        <form onSubmit={(e) => { e.preventDefault(); run(); }} style={{ marginLeft: 16, flexGrow: 1, maxWidth: 520 }}>
-          <label className="field"><Icon name="search" /><input autoFocus value={q} onChange={(e) => setQ(e.target.value)} onKeyDown={(e) => { if (e.key === "Escape" && (q || res)) { e.preventDefault(); e.stopPropagation(); clear(); } }} placeholder="Words, a phrase, or a Strong's number like G509" aria-label="Search" />{busy && <span className="n">Searching…</span>}
+        <form onSubmit={(e) => { e.preventDefault(); submit(); }} style={{ marginLeft: 16, flexGrow: 1, maxWidth: 520 }}>
+          <label className="field"><Icon name="search" /><input autoFocus value={q} onChange={(e) => setQ(e.target.value)} onKeyDown={(e) => { if (e.key === "Escape" && (q || res)) { e.preventDefault(); e.stopPropagation(); clear(); } }} placeholder="Words, a phrase, or a Strong's number like G509" aria-label="Search" />{busy && <span className="spinner" role="status" aria-label="Searching" />}
             {(q || res) && !busy && <button type="button" className="ibtn" aria-label="Clear search" title="Clear (esc)" onClick={clear} style={{ width: 20, height: 20, flexShrink: 0 }}><Icon name="x" size={12} /></button>}</label>
         </form>
       </Topbar>
@@ -133,11 +136,15 @@ export function SearchScreen() {
           {ix?.building && <div className="hint" style={{ padding: "0 10px" }}>Indexing your library for faster search: {ix.done} of {ix.total} books. Searches still work meanwhile.</div>}
         </div>
 
-        <div ref={list} className="scroll" style={{ padding: "8px 16px 40px" }} onScroll={(e) => { scrollTop.current = e.currentTarget.scrollTop; }}>
+        <div ref={list} className="scroll" style={{ padding: "8px 16px 40px", position: "relative" }} onScroll={(e) => { scrollTop.current = e.currentTarget.scrollTop; }}>
+          {/* While searching: a bar sweeping along the top, the old results dimmed, and on a first
+              search a line saying what is being looked for. */}
+          {busy && <div className="searchbar-progress" aria-hidden="true"><i /></div>}
+          {busy && !res && <div className="empty"><Working text={`Searching your library for “${searching}”`} /></div>}
           {err && <div className="err" style={{ padding: 12 }}>{err}</div>}
-          {!res && !err && <div className="empty">Search the Bible, every commentary and dictionary in your library, and your journal.</div>}
+          {!res && !err && !busy && <div className="empty">Search the Bible, every commentary and dictionary in your library, and your journal.</div>}
           {res && (
-            <>
+            <div style={{ opacity: busy ? 0.45 : 1, transition: "opacity .15s", pointerEvents: busy ? "none" : undefined }}>
               <h1 style={{ margin: 0, padding: "8px 12px 0", font: "500 26px/1.2 var(--display)" }}>{total.toLocaleString()} result{total === 1 ? "" : "s"} for “{ran}”</h1>
               {show("bible") && <>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "18px 12px 6px" }}><span className="label">Bible · {res.bible.abbrev}</span><span className="n">{res.bible.count} verse{res.bible.count === 1 ? "" : "s"}{res.bible.count > res.bible.hits.length ? `, first ${res.bible.hits.length} shown` : ""}</span></div>
@@ -185,7 +192,7 @@ export function SearchScreen() {
                   </button>
                 ))}
               </>}
-            </>
+            </div>
           )}
         </div>
 
