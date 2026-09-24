@@ -63,9 +63,12 @@ with each question.
 They are never copied into this repo (`.gitignore` excludes module files) and the app only
 reads them where e-Sword keeps them.
 
-**Signing.** macOS asks once for permission to read e-Sword's data. That permission is tied to
-the app's signature, so sign builds with a stable self-signed certificate: copy
-`signing.local.example` to `signing.local` (untracked) and name the certificate there.
+**Signing and Full Disk Access.** The modules live inside e-Sword's own container, so macOS asks
+"would like to access data from other apps". That answer is remembered only for the exact build,
+so it comes back after every rebuild. Give the app Full Disk Access once (System Settings ›
+Privacy & Security › Full Disk Access) and it stops: that grant is tied to the signing
+certificate, so sign builds with a stable self-signed one. Copy `signing.local.example` to
+`signing.local` (untracked) and name the certificate there.
 
 **Build times.** `src-tauri/Cargo.toml` keeps the lib `rlib`-only, uses thin LTO with parallel
 codegen units for release builds, drops debug info for dependencies in dev builds, and

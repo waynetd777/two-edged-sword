@@ -39,17 +39,21 @@ export interface Settings {
   reminderTime: string;
   whenBehind: "ask" | "move" | "catchup" | "skip";
   studyPane: boolean;
+  /** Copying verses puts the verse numbers in front of each verse. */
+  copyNumbers: boolean;
 }
 
 const DEFAULTS: Settings = {
   theme: "auto", readSize: 19, redLetters: true, layout: "verse", bible: "kjv", compare: ["kjv", "asv", "kjv+"], hiddenBibles: [],
   commentaryOrder: ["barnes", "henry", "clarke", "gill", "jfb", "wesley", "darby", "meyer"], dictionaryOrder: ["isbe", "smith", "nave", "cyclopedia"],
   voice: "", rate: 1, continueChapter: true, readNumbers: false, highlightWords: true, journalDir: "", showNotes: true,
-  model: "claude-sonnet-5", includeCommentaries: true, allowLicensed: true, reminder: false, reminderTime: "06:30", whenBehind: "ask", studyPane: true,
+  model: "claude-sonnet-5", includeCommentaries: true, allowLicensed: true, reminder: false, reminderTime: "06:30", whenBehind: "ask", studyPane: true, copyNumbers: true,
 };
 
 export interface Bookmark { id: string; ref: Ref; bible: string; created: string }
-export type HlColor = "gold" | "blue" | "green" | "rose";
+export type HlColor = "red" | "orange" | "yellow" | "green" | "blue" | "purple";
+/** Highlights saved before there were six colours. */
+export const hlName = (c: string): HlColor => (c === "gold" ? "yellow" : c === "rose" ? "red" : (c as HlColor));
 
 export interface ChatMsg { role: "user" | "assistant"; text: string; error?: boolean }
 export interface Chat {

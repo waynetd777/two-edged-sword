@@ -46,6 +46,7 @@ export function SettingsScreen() {
               <div style={{ font: `400 ${s.readSize}px/1.6 var(--serif)`, marginTop: 6 }}><span className={s.redLetters ? "red" : undefined}>For God so loved the world…</span></div>
             </Row>
             <Row label="Words of Jesus in red"><Switch on={s.redLetters} onChange={(v) => app.set({ redLetters: v })} /></Row>
+            <Row label="Copying verses" hint="⌘C or Copy on the verse toolbar. The reference and translation always go on the last line."><Switch on={s.copyNumbers} onChange={(v) => app.set({ copyNumbers: v })}>Include verse numbers</Switch></Row>
             <Row label="Show verses as"><Seg value={s.layout} options={[["verse", "One per line"], ["paragraph", "Paragraphs"]]} onChange={(v) => app.set({ layout: v })} /></Row>
           </Section>
           <Section title="Bibles">

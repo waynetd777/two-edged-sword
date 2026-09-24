@@ -5,15 +5,15 @@ import { alignStrongs, plainText, Token, tokenize } from "./esword";
 import { Icon, Pause, Play } from "./icons";
 import { BibleSelect, RefButton, SearchField, Topbar } from "./Shell";
 import { usePlayer } from "./speech";
-import { HlColor, useApp, vkey } from "./state";
+import { HlColor, hlName, useApp, vkey } from "./state";
 import { StudyPane, StudyTab } from "./StudyPane";
 import { Popover, RefPicker, Seg } from "./ui";
 import { WordLookup } from "./WordLookup";
 
 export interface WordPick { token: Token; verse: number; rect: DOMRect }
 
-const HL: HlColor[] = ["gold", "blue", "green", "rose"];
-const HL_DOT: Record<HlColor, string> = { gold: "#e9cf86", blue: "#a9c6e6", green: "#aed0a6", rose: "#e3b1ac" };
+const HL: HlColor[] = ["red", "orange", "yellow", "green", "blue", "purple"];
+const HL_DOT: Record<HlColor, string> = { red: "#e59a92", orange: "#efb97e", yellow: "#e9d271", green: "#a9cf9f", blue: "#9fc0e6", purple: "#c1a9e3" };
 
 /** Journal entries that mention a verse, by "b.c.v". */
 export function useNotesByVerse() {
@@ -163,11 +163,37 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
   }, [go, focus, setFocus, selRef, app, player, bible, loc.book, loc.chapter, sel]);
 
   const copy = () => {
-    if (!sel) return;
-    const lines = verses.filter((v) => v.v >= sel.from && v.v <= sel.to).map((v) => plainText(v.text));
-    navigator.clipboard.writeText(`${lines.join(" ")}\n${fmtRef(selRef!)} ${bmod?.abbrev ?? ""}`.trim());
-    app.toast("Copied");
+    const c = copyText();
+    if (!c) return;
+    navigator.clipboard.writeText(c.text);
+    app.toast(c.label);
   };
+
+  const copyText = useCallback(() => {
+    if (!sel) return null;
+    const vs = verses.filter((v) => v.v >= sel.from && v.v <= sel.to);
+    const nums = settings.copyNumbers;
+    const r = { book: loc.book, chapter: loc.chapter, verse: sel.from, to: sel.to !== sel.from ? sel.to : undefined };
+    return { text: `${vs.map((v) => (nums ? `${v.v} ` : "") + plainText(v.text)).join(" ")}\n${fmtRef(r)} ${bmod?.abbrev ?? ""}`.trim(), label: `Copied ${fmtRef(r)}${nums ? " with verse numbers" : ""}` };
+  }, [sel, verses, settings.copyNumbers, loc.book, loc.chapter, bmod]);
+
+  // ⌘C (which the Edit menu turns into a copy event) copies the selected verses, unless some
+  // text has been selected with the mouse or the focus is in a text field.
+  useEffect(() => {
+    const onCopy = (e: ClipboardEvent) => {
+      const t = document.activeElement as HTMLElement | null;
+      if (t?.closest("input, textarea, [contenteditable='true']")) return;
+      const s = window.getSelection();
+      if (s && !s.isCollapsed && s.toString().trim()) return;
+      const c = copyText();
+      if (!c || !e.clipboardData) return;
+      e.preventDefault();
+      e.clipboardData.setData("text/plain", c.text);
+      app.toast(c.label);
+    };
+    document.addEventListener("copy", onCopy);
+    return () => document.removeEventListener("copy", onCopy);
+  }, [copyText, app]);
 
   const isBookmarked = (v: number) => app.bookmarks.some((b) => b.ref.book === loc.book && b.ref.chapter === loc.chapter && (b.ref.verse ?? 0) <= v && v <= (b.ref.to ?? b.ref.verse ?? 0));
   const selBookmarked = !!sel && app.bookmarks.some((b) => b.ref.book === loc.book && b.ref.chapter === loc.chapter && b.ref.verse === sel.from && (b.ref.to ?? b.ref.verse) === sel.to);
@@ -175,7 +201,8 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
     if (!sel) return;
     for (let v = sel.from; v <= sel.to; v++) app.setHighlight(vkey(loc.book, loc.chapter, v), c);
   };
-  const curHl = sel ? app.highlights[vkey(loc.book, loc.chapter, sel.from)] : undefined;
+  const saved = sel ? app.highlights[vkey(loc.book, loc.chapter, sel.from)] : undefined;
+  const curHl = saved ? hlName(saved) : undefined;
 
   const pickWord = (t: Token, v: number, el: HTMLElement) => {
     setWord({ token: t, verse: v, rect: el.getBoundingClientRect() });
@@ -193,7 +220,8 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
       <button type="button" className="tb" onClick={() => app.open({ ...loc, verse: sel.from, to: sel.to }, "compare")}><Icon name="compare" />Compare</button>
       <button type="button" className="tb" onClick={() => player.play(bible, loc.book, loc.chapter, sel.from)}><Icon name="speaker" />Listen from here</button>
       <button type="button" className="tb" onClick={() => { setTab("ask"); setAskSeed(null); }}><Icon name="chat" />Ask</button>
-      <button type="button" className="tb" onClick={copy}><Icon name="copy" />Copy</button>
+      <button type="button" className="tb" title={settings.copyNumbers ? "Copy with verse numbers (⌘C)" : "Copy without verse numbers (⌘C)"} onClick={copy}><Icon name="copy" />Copy<span style={{ opacity: 0.6 }}>⌘C</span></button>
+      <button type="button" className="tb" aria-pressed={settings.copyNumbers} title="Include verse numbers when copying" onClick={() => app.set({ copyNumbers: !settings.copyNumbers })} style={{ padding: "0 7px", opacity: settings.copyNumbers ? 1 : 0.5, textDecoration: settings.copyNumbers ? undefined : "line-through" }}>#</button>
     </div>
   );
 
@@ -227,7 +255,7 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
           <div key={v.v} data-v={v.v} className={`v ${isSel ? "sel" : ""}`} style={isSel && sel!.from === v.v && toolbar ? { marginTop: 46 } : undefined} onClick={(e) => clickVerse(v.v, e)}>
             {isSel && sel!.from === v.v && toolbar}
             <div className="vn">{v.v}</div>
-            <div className="vt selectable"><span className={hl ? `hl-${hl}` : undefined}>
+            <div className="vt selectable"><span className={hl ? `hl-${hlName(hl)}` : undefined}>
               <VerseText tokens={tokens.get(v.v) ?? []} red={settings.redLetters} speakingChar={reading && player.state.verse === v.v && settings.highlightWords ? player.state.char : undefined} onWord={(t, el) => pickWord(t, v.v, el)} activeWi={word?.verse === v.v ? word.token.wi : undefined} showNums={!!bmod?.strongs} />
             </span></div>
             <div className="gut">
@@ -250,7 +278,7 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
           return (
             <span key={v.v} data-v={v.v} className={`pv ${isSel ? "sel" : ""}`} onClick={(e) => clickVerse(v.v, e)}>
               <span className="vnum">{v.v}</span>
-              <span className={hl ? `hl-${hl}` : undefined}><VerseText tokens={tokens.get(v.v) ?? []} red={settings.redLetters} speakingChar={reading && player.state.verse === v.v && settings.highlightWords ? player.state.char : undefined} onWord={(t, el) => pickWord(t, v.v, el)} activeWi={word?.verse === v.v ? word.token.wi : undefined} showNums={!!bmod?.strongs && !focus} /></span>{" "}
+              <span className={hl ? `hl-${hlName(hl)}` : undefined}><VerseText tokens={tokens.get(v.v) ?? []} red={settings.redLetters} speakingChar={reading && player.state.verse === v.v && settings.highlightWords ? player.state.char : undefined} onWord={(t, el) => pickWord(t, v.v, el)} activeWi={word?.verse === v.v ? word.token.wi : undefined} showNums={!!bmod?.strongs && !focus} /></span>{" "}
             </span>
           );
         })}
