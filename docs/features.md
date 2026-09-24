@@ -145,6 +145,8 @@ notifications the first time.
 
 Closing the window leaves the app in the menu bar. Its menu has:
 
+<img alt="The menu-bar menu" src="images/menu-bar.png" width="340">
+
 - **Start Quiet Time**, with today's readings: the same as **Read** on the day's card. Once the
   day is read it says so, and opens Quiet time instead.
 - **Continue Reading**, with the passage or book chapter you were last on.

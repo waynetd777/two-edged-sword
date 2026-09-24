@@ -56,7 +56,8 @@ browsers). The Ask shot shows a saved answer, `tools/screenshots/ask-chat.json`,
 asking a model each time; the Listen shot places the player without speaking. A scene can
 `scrollTo` a CSS selector, and `crop` the image to `[x, y, width, height]` of the 1400px-wide
 shot for one part of a screen (the reminder shot is just the Quiet time section of Settings).
-The menu-bar menu is a native menu that screenshot mode can't open, so it has no image.
+The menu-bar menu is a native menu that screenshot mode can't open, so `docs/images/menu-bar.png` is
+taken by hand (⌘⇧4 with the menu open, cropped to the menu).
 
 It needs Screen Recording permission for the terminal, and starts the Vite dev server if it isn't
 already running. Scenes use public-domain Bibles only.
