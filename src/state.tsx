@@ -32,6 +32,8 @@ export interface Settings {
   showNotes: boolean;
   model: Model;
   includeCommentaries: boolean;
+  /** Passage chats also get the user's journal entries on the passage. */
+  askJournal: boolean;
   allowLicensed: boolean;
   reminder: boolean;
   reminderTime: string;
@@ -53,7 +55,7 @@ const DEFAULTS: Settings = {
   theme: "auto", readSize: 19, readFont: "literata", studyTab: "commentary", docTab: "ask", studyCommentary: null, studyDict: null, dictModule: null, studyFollow: true, redLetters: true, layout: "verse", bible: "kjv", compare: ["kjv", "asv", "kjv+"], hiddenBibles: [],
   commentaryOrder: ["barnes", "henry", "clarke", "gill", "jfb", "wesley", "darby", "meyer"], dictionaryOrder: ["isbe", "smith", "nave", "cyclopedia"],
   voice: "", rate: 1, continueChapter: true, readNumbers: false, highlightWords: true, journalDir: "", showNotes: true,
-  model: "claude-sonnet-5", includeCommentaries: true, allowLicensed: true, reminder: false, reminderTime: "06:30", whenBehind: "ask", studyPane: true, copyNumbers: true,
+  model: "claude-sonnet-5", includeCommentaries: true, askJournal: false, allowLicensed: true, reminder: false, reminderTime: "06:30", whenBehind: "ask", studyPane: true, copyNumbers: true,
 };
 
 /** Faces for Scripture, commentary and notes. Greek and Hebrew stay in --display. */

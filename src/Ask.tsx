@@ -1,7 +1,7 @@
 import { listen } from "@tauri-apps/api/event";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { api, ModuleInfo, Verse } from "./api";
-import { fmtRef, Ref } from "./bible";
+import { api, JournalEntry, ModuleInfo, Verse } from "./api";
+import { fmtRef, parseRef, Ref } from "./bible";
 import { plainText } from "./esword";
 import { Icon } from "./icons";
 import { mdToHtml } from "./md";
@@ -79,6 +79,21 @@ export interface AskProps {
   style?: React.CSSProperties;
 }
 
+/** Journal entries linked to any verse of the passage (or, for a chapter, to anything in it). */
+function journalOn(journal: JournalEntry[], r: Ref): JournalEntry[] {
+  const from = r.verse ?? 1, to = r.verse ? r.to ?? r.verse : 999;
+  return journal.filter((e) => e.verses.some((v) => {
+    const x = parseRef(v);
+    if (!x || x.book !== r.book) return false;
+    const last = x.toChapter ?? x.chapter;
+    if (r.chapter < x.chapter || r.chapter > last) return false;
+    // Only the part of the entry's range that falls in this chapter.
+    const a = r.chapter === x.chapter ? x.verse ?? 1 : 1;
+    const b = r.chapter === last ? (x.toChapter ? x.to ?? 999 : x.to ?? x.verse ?? 999) : 999;
+    return a <= to && b >= from;
+  }));
+}
+
 export function AskPanel(p: AskProps) {
   const app = useApp();
   const [chatId, setChatId] = useState<string | null>(() => takeSceneChat());
@@ -139,7 +154,8 @@ export function AskPanel(p: AskProps) {
       // Bibles (public-domain ones only, unless licensed text may be sent) and the lexicons.
       else if (passage && withLibrary) {
         const bibles = app.bibles.filter((b) => app.settings.allowLicensed || !isLicensed(b)).map((b) => b.id);
-        try { studyDir = await api.studyExport(id, { book: passage.book, chapter: passage.chapter, from: passage.verse ?? null, to: passage.verse ? passage.to ?? passage.verse : null, bibles, strongsBible: app.strongsBible, label: fmtRef(passage) }); } catch (e) { console.error(e); }
+        const journal = app.settings.askJournal ? journalOn(app.journal, passage) : [];
+        try { studyDir = await api.studyExport(id, { book: passage.book, chapter: passage.chapter, from: passage.verse ?? null, to: passage.verse ? passage.to ?? passage.verse : null, bibles, strongsBible: app.strongsBible, label: fmtRef(passage), journal }); } catch (e) { console.error(e); }
       }
       const c: Chat = { id, title: question.length > 80 ? question.slice(0, 77) + "…" : question, about, source: p.source, created: new Date().toISOString(), updated: new Date().toISOString(), model, bookDir, studyDir, verses: passage ? [fmtRef(passage)] : [], messages: [] };
       app.setChats((cs) => [c, ...cs]);

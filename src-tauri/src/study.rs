@@ -33,6 +33,19 @@ pub struct Request {
     pub strongs_bible: Option<String>,
     /// A human label for the passage, "John 1:1".
     pub label: String,
+    /// The user's journal entries on the passage, when they have chosen to include them.
+    #[serde(default)]
+    pub journal: Vec<JournalNote>,
+}
+
+#[derive(Deserialize)]
+pub struct JournalNote {
+    pub title: String,
+    /// "2026-09-23T07:02"
+    pub created: String,
+    pub verses: Vec<String>,
+    /// Markdown.
+    pub body: String,
 }
 
 /// Everything here lives under `<data>/ask`, apart from books.rs's exports.
@@ -58,7 +71,7 @@ pub fn export(lib: &Library, root: &Path, chat_id: &str, req: &Request) -> Resul
     let lock = crate::store::dir_lock(&dest);
     let _held = lock.lock().unwrap_or_else(|e| e.into_inner());
     crate::store::replace_dir(&dest, |dir| {
-        for sub in ["passage", "commentaries", "lexicons"] {
+        for sub in ["passage", "commentaries", "lexicons", "journal"] {
             std::fs::create_dir_all(dir.join(sub)).map_err(|e| e.to_string())?;
         }
         let (from, to) = (req.from.unwrap_or(1), req.to.or(req.from).unwrap_or(999));
@@ -107,6 +120,18 @@ pub fn export(lib: &Library, root: &Path, chat_id: &str, req: &Request) -> Resul
                 let file = format!("{}.txt", file_name(&m.title));
                 write(&dir.join("lexicons").join(&file), &format!("{}\n\n{text}", m.title))?;
                 index.push_str(&format!("  {file}\n"));
+            }
+        }
+
+        if !req.journal.is_empty() {
+            index.push_str("\njournal/ — the user's own journal entries on the passage (their prayers, study notes and sermons), one file each, dated:\n");
+            let mut used = std::collections::HashSet::new();
+            for (i, e) in req.journal.iter().enumerate() {
+                let date = e.created.get(..10).unwrap_or("");
+                let mut file = format!("{}.md", file_name(&format!("{date} {}", e.title)));
+                if !used.insert(file.clone()) { file = format!("{}.md", file_name(&format!("{date} {} {}", e.title, i + 1))); used.insert(file.clone()); }
+                write(&dir.join("journal").join(&file), &format!("{}\n{date} · on {}\n\n{}\n", e.title, e.verses.join(", "), e.body))?;
+                index.push_str(&format!("  {file}  ({} words)\n", e.body.split_whitespace().count()));
             }
         }
 

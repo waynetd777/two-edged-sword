@@ -42,6 +42,10 @@ files, and the assistant searches them instead of answering from memory:
   introductions.
 - `passage/`: the passage in each of your Bibles.
 - `lexicons/`: every lexicon's entry for each Strong's number in the passage.
+- `journal/`: with Settings › AI assistant › **Include my journal** on (it is off to begin
+  with), your journal entries linked to any verse of the passage, one file each: prayers, notes
+  and sermons. The assistant reads them when a question is personal or asks what you have
+  written or preached, and speaks of them as yours.
 - Your dictionaries, each written out whole once (a few seconds, in the background, the first
   time the app starts after they change).
 
@@ -61,6 +65,9 @@ written out once, one file per chapter with its charts, for the assistant to sea
 
 Each question goes to the AI tool with the passage text. Whatever the assistant reads from the
 library folder is sent too, as it reads it: only the parts it opens, not the whole folder.
+
+**Your journal.** Only with Include my journal on, and only the entries linked to the passage;
+like the rest of the folder, only what the assistant opens is sent.
 
 **Licensed Bibles.** With Settings › Licensed translations off, questions about the NIV, ESV
 and other licensed Bibles send public-domain text instead, and licensed Bibles are left out of

@@ -84,7 +84,7 @@ export const api = {
   assistantStatus: () => invoke<AssistantStatus>("assistant_status"),
   ask: (chatId: string, prompt: string, model: string, session: string | null, bookDir: string | null = null, studyDir: string | null = null) => invoke<void>("ask", { chatId, prompt, model, session, bookDir, studyDir }),
   /** Writes out the library's material on a passage (every Bible allowed, all commentaries, lexicon entries) for chat `chatId`; returns its folder. */
-  studyExport: (chatId: string, req: { book: number; chapter: number; from: number | null; to: number | null; bibles: string[]; strongsBible: string | null; label: string }) => invoke<string>("study_export", { chatId, req }),
+  studyExport: (chatId: string, req: { book: number; chapter: number; from: number | null; to: number | null; bibles: string[]; strongsBible: string | null; label: string; journal?: { title: string; created: string; verses: string[]; body: string }[] }) => invoke<string>("study_export", { chatId, req }),
   /** Writes a reference book out as text files and charts for Ask to search; returns its folder and chapter files. */
   docExport: (module: string, kind: "reference" | "devotional" = "reference") => invoke<{ dir: string; files: string[] }>("doc_export", { module, kind }),
   /** A devotional's days as titles ("January 1" …), in calendar order. */
