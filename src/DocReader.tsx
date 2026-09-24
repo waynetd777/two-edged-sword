@@ -193,16 +193,20 @@ export function DocReader({ focus, setFocus }: { focus: boolean; setFocus: (f: b
     return () => window.clearTimeout(id);
   }, [app.docPara, segs, doc.module, doc.title]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // The word being read, highlighted as in the Bible reader. A CSS highlight, so the page's own
-  // markup is left alone; where WebKit has none (before macOS 14) there's just the paragraph's.
+  // The word being read, highlighted as in the Bible reader: boxes in its style drawn behind the
+  // word (where it wraps, one per line), so the book's own markup is left alone.
+  const [wordBoxes, setWordBoxes] = useState<{ left: number; top: number; width: number; height: number }[]>([]);
   useEffect(() => {
-    const hs = (CSS as unknown as { highlights?: Map<string, unknown> }).highlights;
-    const H = (window as unknown as { Highlight?: new (...r: Range[]) => unknown }).Highlight;
-    if (!hs || !H) return;
-    const seg = reading && app.settings.highlightWords && ps.char >= 0 ? scroller.current?.querySelector(`[data-seg="${ps.verse}"] .dsegtext`) : null;
-    const r = seg ? wordRangeAt(seg, ps.char) : null;
-    if (r) hs.set("speaking", new H(r)); else hs.delete("speaking");
-    return () => { hs.delete("speaking"); };
+    const place = () => {
+      const seg = reading && app.settings.highlightWords && ps.char >= 0 ? scroller.current?.querySelector<HTMLElement>(`[data-seg="${ps.verse}"] .dsegtext`) : null;
+      const r = seg ? wordRangeAt(seg, ps.char) : null;
+      if (!seg || !r) { setWordBoxes((b) => (b.length ? [] : b)); return; }
+      const o = seg.getBoundingClientRect();
+      setWordBoxes([...r.getClientRects()].filter((x) => x.width > 0).map((x) => ({ left: x.left - o.left, top: x.top - o.top, width: x.width, height: x.height })));
+    };
+    place();
+    window.addEventListener("resize", place);
+    return () => window.removeEventListener("resize", place);
   }, [reading, ps.verse, ps.char, app.settings.highlightWords, segs]);
 
   // Keep the paragraph being read in view.
@@ -339,10 +343,12 @@ export function DocReader({ focus, setFocus }: { focus: boolean; setFocus: (f: b
                     const onePara = /^\s*<p[\s>]/i.test(h) && (h.match(/<p[\s>]/gi)?.length ?? 0) === 1 && !/<(img|table|div|ul|ol)/i.test(h);
                     const noted = notes.some((e) => e.verses.some((v) => { const l = parseDocLabel(v); return !!l && l.book === bookTitle && l.chapter === doc.title && !!l.from && l.from <= n && n <= (l.to ?? l.from); }));
                     return (
-                      <div key={k} data-seg={n} className={`v dseg ${isSel ? "sel" : ""} ${reading && ps.verse === n ? "speaking" : ""} ${asking === k ? "asking" : ""} ${flash === n ? "flash" : ""}`} style={isSel && sel!.from === n ? { marginTop: 46 } : undefined}>
+                      <div key={k} data-seg={n} className={`v dseg ${isSel ? "sel" : ""} ${reading && ps.verse === n ? `speaking${app.settings.highlightWords ? "" : " tint"}` : ""} ${asking === k ? "asking" : ""} ${flash === n ? "flash" : ""}`} style={isSel && sel!.from === n ? { marginTop: 46 } : undefined}>
                         {isSel && sel!.from === n && toolbar}
                         <div className="vn dsegn"><span title="Click the paragraph (not a word) to select it · ⇧-click for a range">{n}</span></div>
-                        <div className={`dsegtext ${onePara ? "inl" : ""}`}><span className={hl ? `hl-${hlName(hl)}` : undefined}>
+                        <div className={`dsegtext ${onePara ? "inl" : ""}`}>
+                          {reading && ps.verse === n && wordBoxes.map((b, j) => <span key={j} className="speakbox" style={b} />)}
+                          <span className={hl ? `hl-${hlName(hl)}` : undefined}>
                           {renderHtml(h, { onRef: (r) => { hide(); app.open({ book: r.book, chapter: r.chapter, verse: r.verse, to: r.to }, "read"); }, onRefHover, onStrongs: app.studyWord, onImage: setImage })}
                         </span></div>
                         <div className="gut">

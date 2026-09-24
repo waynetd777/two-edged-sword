@@ -155,7 +155,8 @@ input[type="range"] { accent-color: var(--accent); }
 .dsegtext [class^="hl-"] { -webkit-box-decoration-break: clone; box-decoration-break: clone; }
 .docbody p { margin: 0; }
 .dseg + .dseg { margin-top: 0.5em; }
-.dseg.speaking { background: var(--accentsoft); }
+/* Only when words aren't highlighted: then it's the one sign of where the reading is. */
+.dseg.speaking.tint { background: var(--accentsoft); }
 .dseg.asking { box-shadow: -4px 0 0 var(--accent); }
 .dseg.flash { animation: flashpara 1.6s ease-out; }
 @keyframes flashpara { 0%, 40% { background: var(--accentsoft); box-shadow: 0 0 0 6px var(--accentsoft); } 100% { background: transparent; box-shadow: 0 0 0 6px transparent; } }
@@ -172,9 +173,12 @@ input[type="range"] { accent-color: var(--accent); }
 /* The same highlight over a word in commentary or a book (WordHoverBox in ui.tsx). */
 .whover { position: fixed; z-index: 5; pointer-events: none; background: var(--hover); border-radius: 3px; }
 .w.on { background: var(--accentsoft); box-shadow: 0 2px 0 var(--accent); }
-.w.speaking { background: var(--hl-blue); box-shadow: 0 2px 0 var(--accent); }
-/* The same in a book, where the word is a CSS highlight (DocReader): no box-shadow there. */
-::highlight(speaking) { background-color: var(--hl-blue); text-decoration: underline 2px var(--accent); text-underline-offset: 3px; }
+/* The word being read: in the Bible (.w) and, as a box behind it, in a book (.speakbox). One rule. */
+.w.speaking, .speakbox { background: var(--hl-blue); box-shadow: 0 2px 0 var(--accent); border-radius: 3px; }
+/* The same in a book, as a box behind the word (DocReader): its paragraph's text is a layer of its
+   own, so the box sits under the words but over the paragraph's own background. */
+.dsegtext { position: relative; z-index: 0; }
+.speakbox { position: absolute; z-index: -1; pointer-events: none; }
 
 /* ---------- reading ---------- */
 .verses { display: flex; flex-direction: column; gap: 2px; }

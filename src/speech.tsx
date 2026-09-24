@@ -6,8 +6,9 @@
 import { createContext, ReactNode, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { listen } from "@tauri-apps/api/event";
 import { api, TtsEvent, Verse, Voice } from "./api";
-import { book, nextChapter } from "./bible";
+import { book, nextChapter, Ref } from "./bible";
 import { docSegments, plainText } from "./esword";
+import { findRefs } from "./md";
 import { useApp } from "./state";
 import { Icon } from "./icons";
 
@@ -63,6 +64,37 @@ export function spokenChapter(b: number, c: number, fromVerse?: number): string 
   return fromVerse && fromVerse > 1 ? `${ch}, from verse ${fromVerse}` : ch;
 }
 
+/** A reference as it should be heard: "Exo 31:18" is "Exodus 31 18", "1 Cor 13" "First Corinthians 13". */
+function sayRef(r: Ref): string {
+  const name = book(r.book).name.replace(/^Psalms$/, "Psalm").replace(/^1 /, "First ").replace(/^2 /, "Second ").replace(/^3 /, "Third ");
+  if (!r.verse) return `${name} ${r.chapter}`;
+  if (book(r.book).chapters === 1) return `${name} ${r.verse}${r.to && r.to !== r.verse ? ` to ${r.to}` : ""}`;
+  if (r.toChapter && r.toChapter !== r.chapter) return `${name} ${r.chapter} ${r.verse} to ${r.toChapter} ${r.to}`;
+  return `${name} ${r.chapter} ${r.verse}${r.to && r.to !== r.verse ? ` to ${r.to}` : ""}`;
+}
+
+/**
+ * The text to speak, with its references said in full, and for each character of it the
+ * character of `text` it stands for, so the word highlight still lands on the page's words.
+ */
+export function speakable(text: string): { spoken: string; at: number[] } {
+  // e-Sword writes references "Psa_82:1"; the same length with a space, so positions hold.
+  const t = text.replace(/([A-Za-z])_(\d)/g, "$1 $2");
+  let spoken = "", last = 0;
+  const at: number[] = [];
+  const copy = (to: number) => { for (let k = last; k < to; k++) at.push(k); spoken += t.slice(last, to); };
+  for (const h of findRefs(t, true)) {
+    copy(h.index);
+    const say = sayRef(h.ref);
+    // Each spoken character of the reference points into the written one, in proportion.
+    for (let k = 0; k < say.length; k++) at.push(h.index + Math.min(h.length - 1, Math.floor((k * h.length) / say.length)));
+    spoken += say;
+    last = h.index + h.length;
+  }
+  copy(t.length);
+  return { spoken, at };
+}
+
 const IDLE: PlayerState = { on: false, paused: false, bible: "", book: 0, chapter: 0, verse: 0, count: 0, char: -1, sleepAt: null, sleepEndOfChapter: false, sleepChoice: null, doc: null };
 
 export function PlayerProvider({ children }: { children: ReactNode }) {
@@ -92,12 +124,12 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
   // The utterance being spoken: its id (the generation), how much of it is the spoken heading,
   // and what to do when it ends. Events for any other id are stale and ignored.
-  const utt = useRef<{ id: number; prefix: number; onEnd: () => void } | null>(null);
+  const utt = useRef<{ id: number; prefix: number; at: number[]; onEnd: () => void } | null>(null);
   useEffect(() => {
     const un = listen<TtsEvent>("tts", ({ payload: e }) => {
       const u = utt.current;
       if (!u || e.id !== u.id || e.id !== gen.current) return;
-      if (e.kind === "word") setState((p) => ({ ...p, char: e.char - u.prefix }));
+      if (e.kind === "word") { const k = e.char - u.prefix; setState((p) => ({ ...p, char: k < 0 ? k : u.at[k] ?? k })); }
       else { utt.current = null; u.onEnd(); }
     });
     return () => { un.then((f) => f()); };
@@ -172,9 +204,10 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     const heading = announce.current ? `${announce.current}. ` : "";
     announce.current = null;
     const prefix = heading + (settings.current.readNumbers && !s.doc ? `Verse ${verse.v}. ` : "");
-    utt.current = { id: g, prefix: prefix.length, onEnd: () => speakFrom(i + 1) };
+    const { spoken, at } = speakable(text);
+    utt.current = { id: g, prefix: prefix.length, at, onEnd: () => speakFrom(i + 1) };
     setState((p) => ({ ...p, verse: verse.v, char: -1 }));
-    api.ttsSpeak(g, prefix + text, voiceFor(), settings.current.rate).catch(() => { if (g === gen.current) stop(); });
+    api.ttsSpeak(g, prefix + spoken, voiceFor(), settings.current.rate).catch(() => { if (g === gen.current) stop(); });
   }, [stop, voiceFor]);
 
   const play = useCallback((bible: string, b: number, c: number, fromVerse?: number, o: PlayOpts = {}) => {
