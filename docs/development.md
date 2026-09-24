@@ -25,7 +25,7 @@ Reload the window (⌘R) or restart `make dev` before treating it as a bug.
 |---|---|
 | e-Sword X modules (read-only) | `~/Library/Containers/net.e-sword.e-Sword-X/Data/Library/Application Support/` |
 | Journal, one Markdown file per month | the Obsidian vault's `Two-edged Sword/` folder, or `~/Documents/Two-edged Sword/`; set in Settings |
-| Settings, bookmarks, highlights, plans, chats | `~/Library/Application Support/Two-edged Sword/*.json` |
+| Settings, bookmarks, highlights, plans, chats, the day the reminder last came (`reminder.json`) | `~/Library/Application Support/Two-edged Sword/*.json` |
 | Search index (rebuilt on its own when modules change) | `~/Library/Application Support/Two-edged Sword/search-index.sqlite` |
 | Library material written out for Ask | `~/Library/Application Support/Two-edged Sword/ask/` and `books/` (see [Ask](ask.md)) |
 
@@ -53,7 +53,10 @@ launches the dev build with the scene in `TES_SCENE`; `src/scene.ts` sets it up 
 saves nothing, so your own settings, chats and window position are left alone. It captures the
 window, and writes it 1400px wide without the display's colour profile (which would tint it in
 browsers). The Ask shot shows a saved answer, `tools/screenshots/ask-chat.json`, rather than
-asking a model each time; the Listen shot places the player without speaking.
+asking a model each time; the Listen shot places the player without speaking. A scene can
+`scrollTo` a CSS selector, and `crop` the image to `[x, y, width, height]` of the 1400px-wide
+shot for one part of a screen (the reminder shot is just the Quiet time section of Settings).
+The menu-bar menu is a native menu that screenshot mode can't open, so it has no image.
 
 It needs Screen Recording permission for the terminal, and starts the Vite dev server if it isn't
 already running. Scenes use public-domain Bibles only.
@@ -71,6 +74,7 @@ commentary or question) and capture what it shows. `CLAUDE.md` and `AGENTS.md` s
 | `src/Ask.tsx`, `src/assistant.ts` | The Ask panels, and which AI tools and models are available |
 | `src-tauri/src/library.rs`, `content.rs` | Finding modules and reading text out of them |
 | `src-tauri/src/search.rs`, `index.rs` | Search and its index |
+| `src/tray.tsx`, `src-tauri/src/tray.rs` | The menu-bar menu and the daily reminder, which is timed on the Rust side so it fires with the window hidden |
 | `src-tauri/src/tts.rs` | Speech through AVSpeechSynthesizer (WebKit's speech API hides downloaded voices) |
 | `src-tauri/src/assistant/` | Running Claude Code or Codex for Ask |
 | `src-tauri/src/study.rs`, `books.rs` | Writing library material out as files for Ask to search |

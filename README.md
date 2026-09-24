@@ -20,8 +20,9 @@ read-only and keeps what you make (journal, bookmarks, highlights, plans, chats)
   about it in your library.
 - **Listen** to a chapter read aloud in any macOS voice, including the Premium ones, with each
   word highlighted as it is spoken.
-- **Quiet time** plans with daily readings and devotionals, a **Journal** linked to the verses
-  it's about, and **Search** across the whole library.
+- **Quiet time** plans with daily readings and devotionals and a daily reminder, a **Journal**
+  linked to the verses it's about, and **Search** across the whole library. The menu-bar menu
+  starts today's Quiet time or picks up where you left off.
 
 <table>
   <tr>

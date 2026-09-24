@@ -133,6 +133,25 @@ that chapter.
 Under the progress bar: how many days in a row you've read, your best run, and how many of the
 last seven days (weekdays, for a weekdays-only plan, so weekends don't break the streak).
 
+**Daily reminder** (Settings → Quiet time): a notification at the time you choose, with the day's
+readings, if today isn't marked read yet. It comes once a day, and up to two hours late if the
+Mac was asleep at the time. The app keeps running in the menu bar when its window is closed, so
+the reminder still comes then; it can't once you quit the app. macOS asks whether to allow
+notifications the first time.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="images/reminder-dark.png"><img alt="The daily reminder in Settings" src="images/reminder-light.png"></picture>
+
+## Menu bar
+
+Closing the window leaves the app in the menu bar. Its menu has:
+
+- **Start Quiet Time**, with today's readings: the same as **Read** on the day's card. Once the
+  day is read it says so, and opens Quiet time instead.
+- **Continue Reading**, with the passage or book chapter you were last on.
+- **New Journal Entry** and **Search…**
+- **Daily Reminder at** the time set, ticked when it's on; choosing it turns the reminder on or off.
+- **Open Two-edged Sword** and **Quit**.
+
 ## Library
 
 Every module, which Bibles appear in the picker, and the order of commentaries and dictionaries.
@@ -142,6 +161,7 @@ app started. See [Library](library.md).
 ## Settings
 
 Theme (match macOS, light or dark), reading font and size, verse numbers, the voice and speed,
-the journal folder, and the AI assistant: which of Claude Code and Codex are installed, the
+the journal folder, the daily Quiet time reminder, what to do when you fall behind a plan, and
+the AI assistant: which of Claude Code and Codex are installed, the
 default model, whether Ask may search your library, whether licensed Bible text may be sent,
 and your saved chats.

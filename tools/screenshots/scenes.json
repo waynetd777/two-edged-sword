@@ -83,6 +83,21 @@
     "screen": "plans"
   },
   {
+    "name": "reminder",
+    "screen": "settings",
+    "scrollTo": "input[type=time]",
+    "settings": {
+      "reminder": true,
+      "reminderTime": "06:30"
+    },
+    "crop": [
+      400,
+      650,
+      790,
+      185
+    ]
+  },
+  {
     "name": "search",
     "search": "tithe",
     "settings": {

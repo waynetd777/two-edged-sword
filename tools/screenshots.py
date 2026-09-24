@@ -73,7 +73,7 @@ def window_of(window_id, pid, timeout=30):
 
 
 def shoot(scene, theme, window_id):
-    sc = {k: v for k, v in scene.items() if k != "chatFile"}
+    sc = {k: v for k, v in scene.items() if k not in ("chatFile", "crop")}
     if "chatFile" in scene:
         sc["chat"] = json.loads((HERE / scene["chatFile"]).read_text())
     sc["settings"] = {**sc.get("settings", {}), "theme": theme}
@@ -92,6 +92,10 @@ def shoot(scene, theme, window_id):
             im = Image.open(raw.name)
             im.load()
         im = im.resize((WIDTH, round(im.height * WIDTH / im.width)), Image.LANCZOS)
+        # "crop": [x, y, width, height] of the 1400px-wide image, for a shot of one part of a screen.
+        if "crop" in scene:
+            x, y, w, h = scene["crop"]
+            im = im.crop((x, y, x + w, y + h))
         im.info.pop("icc_profile", None)
         out = OUT / f"{scene['name']}-{theme}.png"
         im.save(out, optimize=True)
