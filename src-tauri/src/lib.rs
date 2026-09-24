@@ -4,6 +4,10 @@ mod content;
 mod index;
 mod journal;
 mod library;
+#[cfg(target_os = "macos")]
+mod login_item;
+#[cfg(target_os = "macos")]
+mod login_launch;
 mod search;
 mod store;
 mod study;
@@ -298,10 +302,41 @@ fn print_page(window: tauri::WebviewWindow) -> Result<(), String> {
     window.print().map_err(|e| e.to_string())
 }
 
+/// In the Dock while the window is open, only in the menu bar while it is closed. Runs on the main
+/// thread, as every caller does: the tray's menu handler, the window's events and Reopen.
+#[cfg(target_os = "macos")]
+fn set_in_dock(app: &AppHandle, shown: bool) {
+    let _ = app.set_activation_policy(if shown { tauri::ActivationPolicy::Regular } else { tauri::ActivationPolicy::Accessory });
+}
+
+#[cfg(not(target_os = "macos"))]
+fn set_in_dock(_app: &AppHandle, _shown: bool) {}
+
+/// Brings the app to the front: after coming back from Accessory, `set_focus()` alone can leave
+/// the window behind whatever the user was working in.
+#[cfg(target_os = "macos")]
+fn activate() {
+    use objc2::runtime::{AnyClass, AnyObject};
+    let Some(cls) = AnyClass::get(c"NSApplication") else { return };
+    unsafe {
+        let nsapp: *mut AnyObject = objc2::msg_send![cls, sharedApplication];
+        if !nsapp.is_null() {
+            let _: () = objc2::msg_send![nsapp, activateIgnoringOtherApps: true];
+        }
+    }
+}
+
+#[cfg(not(target_os = "macos"))]
+fn activate() {}
+
 fn show_main(app: &AppHandle) {
+    // Back in the Dock before the window is shown: done afterwards, the window can come up
+    // behind whatever had focus.
+    set_in_dock(app, true);
     if let Some(w) = app.get_webview_window("main") {
         let _ = w.show();
         let _ = w.unminimize();
+        activate();
         let _ = w.set_focus();
     }
 }
@@ -371,6 +406,16 @@ pub fn run() {
             tray::set_tray
         ])
         .setup(|app| {
+            // Did Login Items start this, rather than someone opening the app? Asked first: the
+            // answer is in the launch AppleEvent AppKit is dispatching now, and it has to be known
+            // before anything shows the window. A login launch stays in the menu bar.
+            #[cfg(target_os = "macos")]
+            let quiet = login_launch::probe() && scene().is_none();
+            #[cfg(not(target_os = "macos"))]
+            let quiet = false;
+            if quiet {
+                set_in_dock(app.handle(), false);
+            }
             // Until the frontend sends today's reading, the menu has its choices without the details.
             let menu = tray::menu(app.handle(), None)?;
             let tray_icon = tauri::image::Image::from_bytes(include_bytes!("../icons/tray@2x.png")).expect("tray icon is a valid png");
@@ -415,19 +460,23 @@ pub fn run() {
                             let key = objc2_foundation::NSString::from_str("drawsBackground");
                             let _: () = objc2::msg_send![webview, setValue: &*no, forKey: &*key];
                         }
-                        let _ = w_show.show();
-                        let _ = w_show.set_focus();
-                    });
-                    let w_fallback = w.clone();
-                    std::thread::spawn(move || {
-                        std::thread::sleep(std::time::Duration::from_millis(1200));
-                        if matches!(w_fallback.is_visible(), Ok(false)) {
-                            let _ = w_fallback.show();
+                        if !quiet {
+                            let _ = w_show.show();
+                            let _ = w_show.set_focus();
                         }
                     });
+                    if !quiet {
+                        let w_fallback = w.clone();
+                        std::thread::spawn(move || {
+                            std::thread::sleep(std::time::Duration::from_millis(1200));
+                            if matches!(w_fallback.is_visible(), Ok(false)) {
+                                let _ = w_fallback.show();
+                            }
+                        });
+                    }
                 }
                 #[cfg(not(target_os = "macos"))]
-                {
+                if !quiet {
                     let _ = w.show();
                 }
                 // Closing the window hides it; the app stays in the menu bar.
@@ -437,6 +486,8 @@ pub fn run() {
                         api.prevent_close();
                         let _ = w2.app_handle().save_window_state(STATE_FLAGS);
                         let _ = w2.hide();
+                        // Out of the Dock once the window has gone: the app is only in the menu bar now.
+                        set_in_dock(w2.app_handle(), false);
                     }
                 });
             }

@@ -12,7 +12,7 @@ screen you go to, passage, book chapter, word studied and search is a step you c
 From Word Study's list of words for "love", choosing ἀγάπη and pressing back returns to the list.
 
 The sidebar lists your bookmarks (verses and book paragraphs) and the chapters you read lately,
-of the Bible and of books and devotionals alike, eight of each with **Show all** for the rest.
+of the Bible (with the verse you opened it at, if any) and of books and devotionals alike, eight of each with **Show all** for the rest.
 Hover an entry for a preview; its × removes it, with **Undo** in the message that follows, and
 **Clear** beside the Recent heading empties that list (after asking). Hover any control for a
 short description.
@@ -110,7 +110,7 @@ well under a second.
 A Strong's entry, how often and where it is used (by book), every verse in context, related words
 and the articles about it in your library. Type an English word ("love") to see the Greek and
 Hebrew words the KJV+ translates with it, or a transliteration ("agape"). The speaker beside the
-word pronounces it.
+word pronounces it. Word Study opens on the last word you studied, including after a restart.
 
 ## Journal
 
@@ -147,7 +147,8 @@ notifications the first time.
 
 ## Menu bar
 
-Closing the window leaves the app in the menu bar. Its menu has:
+Closing the window leaves the app in the menu bar and takes it out of the Dock until the window
+is opened again. Its menu has:
 
 <img alt="The menu-bar menu" src="images/menu-bar.png" width="340">
 
@@ -156,6 +157,9 @@ Closing the window leaves the app in the menu bar. Its menu has:
 - **Continue Reading**, with the passage or book chapter you were last on.
 - **New Journal Entry** and **Search…**
 - **Daily Reminder at** the time set, ticked when it's on; choosing it turns the reminder on or off.
+- **Open at Login**: starts the app when you log in, in the menu bar with its window closed, so
+  the reminder comes without your opening it. It's the same setting as the app's switch in System
+  Settings → General → Login Items.
 - **Open Two-edged Sword** and **Quit**.
 
 ## Library

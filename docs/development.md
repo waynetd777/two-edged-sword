@@ -38,6 +38,12 @@ Access) and it stops: that grant is tied to the signing certificate, so sign bui
 self-signed one. Copy `signing.local.example` to `signing.local` (untracked) and name the
 certificate there.
 
+**Open at Login** registers the installed bundle with SMAppService (the same list as System
+Settings › General › Login Items), so it only works in the app from `make install-app`: under
+`make dev` the menu item is disabled. The registration is per user and survives rebuilds as long
+as the bundle identifier stays `com.wayned.two-edged-sword`. A login launch is recognised from the
+launch Apple event, so the app starts in the menu bar with no window or Dock icon.
+
 ## Build times
 
 `src-tauri/Cargo.toml` keeps the lib `rlib`-only, uses thin LTO with parallel codegen units for
@@ -76,6 +82,7 @@ commentary or question) and capture what it shows. `CLAUDE.md` and `AGENTS.md` s
 | `src-tauri/src/library.rs`, `content.rs` | Finding modules and reading text out of them |
 | `src-tauri/src/search.rs`, `index.rs` | Search and its index |
 | `src/tray.tsx`, `src-tauri/src/tray.rs` | The menu-bar menu and the daily reminder, which is timed on the Rust side so it fires with the window hidden |
+| `src-tauri/src/login_item.rs`, `login_launch.rs` | Open at Login, and telling a login launch from the user opening the app |
 | `src-tauri/src/tts.rs` | Speech through AVSpeechSynthesizer (WebKit's speech API hides downloaded voices) |
 | `src-tauri/src/assistant/` | Running Claude Code or Codex for Ask |
 | `src-tauri/src/study.rs`, `books.rs` | Writing library material out as files for Ask to search |
