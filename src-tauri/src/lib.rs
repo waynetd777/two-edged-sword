@@ -8,6 +8,7 @@ mod library;
 mod login_item;
 #[cfg(target_os = "macos")]
 mod login_launch;
+mod music;
 mod search;
 mod store;
 mod study;
@@ -187,6 +188,17 @@ fn journal_list(dir: String) -> Result<Vec<journal::Entry>, String> {
 fn journal_save(dir: String, entry: journal::Entry) -> Result<(), String> {
     journal::save(&chosen_dir(&dir)?, &entry)
 }
+
+// Music: each runs osascript, which can take a moment (and, the first time, waits on the
+// permission prompt), so off the main thread.
+#[tauri::command(async)]
+fn music_tracks() -> Result<Vec<music::Track>, String> { music::tracks() }
+#[tauri::command(async)]
+fn music_play(ids: Vec<String>) -> Result<usize, String> { music::play(&ids) }
+#[tauri::command(async)]
+fn music_state() -> Result<music::State, String> { music::state() }
+#[tauri::command(async)]
+fn music_control(cmd: String) -> Result<(), String> { music::control(&cmd) }
 
 #[tauri::command(async)]
 fn journal_stamp(dir: String) -> Result<String, String> {
@@ -400,6 +412,10 @@ pub fn run() {
             journal_save,
             journal_delete,
             journal_stamp,
+            music_tracks,
+            music_play,
+            music_state,
+            music_control,
             write_text_file,
             assistant_status,
             ask,

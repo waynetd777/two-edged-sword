@@ -37,6 +37,9 @@ export function refreshAssistant() {
 }
 refreshAssistant();
 
+/** The models on offer now, for code outside a component. */
+export const assistantModels = () => state.models;
+
 export function useAssistant(): Assistant {
   return useSyncExternalStore((l) => { listeners.add(l); return () => listeners.delete(l); }, () => state);
 }

@@ -28,6 +28,20 @@ function ensureListening() {
   listen<{ chatId: string; sessionId: string | null; text: string; error: string | null }>("ask-done", (e) => subs.get(e.payload.chatId)?.done(e.payload));
 }
 
+/** One question with no chat around it (worship.ts's song choosing): the answer's text. */
+export function askOnce(prompt: string, model: string): Promise<string> {
+  ensureListening();
+  const id = "once-" + uid();
+  let text = "";
+  return new Promise((resolve, reject) => {
+    subs.set(id, {
+      chunk: (t) => { text += t; }, status: () => {},
+      done: (d) => { subs.delete(id); if (d.error) reject(new Error(d.error)); else resolve(d.text || text); },
+    });
+    api.ask(id, prompt, model, null).catch((e) => { subs.delete(id); reject(e); });
+  });
+}
+
 /** Screenshot mode: the chat the next Ask panel opens on (scene.ts). */
 let sceneChat: string | null = null;
 export const setSceneChat = (id: string) => { sceneChat = id; };

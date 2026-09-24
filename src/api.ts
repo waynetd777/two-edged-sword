@@ -47,6 +47,8 @@ export interface CommentMatch { book: number; chapterBegin: number; verseBegin: 
 export interface ModuleMatches<T> { module: string; title: string; abbrev: string; count: number; hits: T[] }
 export interface SearchResults { bible: ModuleMatches<VerseHit>; commentaries: ModuleMatches<CommentMatch>[]; dictionaries: ModuleMatches<string>[]; strongs: boolean }
 
+export interface MusicTrack { id: string; name: string; artist: string; genre: string }
+export interface MusicState { state: string; name: string; artist: string; ours: boolean }
 export interface JournalEntry { id: string; title: string; created: string; updated: string; verses: string[]; tags: string[]; body: string }
 
 /** today: today's reading ("Psalm 23 · John 3"), null without an active plan. */
@@ -78,6 +80,13 @@ export const api = {
   journalDefaultDir: () => invoke<string>("journal_default_dir"),
   journalList: (dir: string) => invoke<JournalEntry[]>("journal_list", { dir }),
   journalStamp: (dir: string) => invoke<string>("journal_stamp", { dir }),
+  /** The songs in the Music app's library (music.rs). */
+  musicTracks: () => invoke<MusicTrack[]>("music_tracks"),
+  /** Queues these songs as the Quiet time playlist and plays it; returns how many were found. */
+  musicPlay: (ids: string[]) => (readOnly ? Promise.resolve(0) : invoke<number>("music_play", { ids })),
+  musicState: () => invoke<MusicState>("music_state"),
+  /** Pauses, resumes or skips, but only while the Quiet time playlist is what's playing. */
+  musicControl: (cmd: "pause" | "play" | "next") => (readOnly ? Promise.resolve() : invoke<void>("music_control", { cmd })),
   journalSave: (dir: string, entry: JournalEntry) => (readOnly ? Promise.resolve() : invoke<void>("journal_save", { dir, entry })),
   journalDelete: (dir: string, id: string) => (readOnly ? Promise.resolve() : invoke<void>("journal_delete", { dir, id })),
   writeTextFile: (path: string, text: string) => invoke<void>("write_text_file", { path, text }),

@@ -25,6 +25,8 @@ export interface SequencePlan {
   noteModule?: string;
   /** Devotionals read each day alongside the plan: e-Sword module ids, or ONLINE_DEVOTIONALS ids. */
   devotionals?: string[];
+  /** Songs from the Music library, chosen for the day's reading; absent for none. */
+  worship?: Worship;
   /** Parts of the current day ticked off so far (see progressKey). */
   progress?: Progress;
   active: boolean;
@@ -32,6 +34,9 @@ export interface SequencePlan {
 
 /** Which day `done` belongs to, and the parts of it read: "43.3" for a chapter, a devotional's id. */
 export interface Progress { key: string; done: string[] }
+
+/** Worship songs in Quiet time: how many, and whether they come before the reading or after it. */
+export interface Worship { songs: number; when: "before" | "after" }
 
 export interface PpoPlan {
   id: string;
@@ -47,6 +52,8 @@ export interface PpoPlan {
   /** Dates read, YYYY-MM-DD. */
   doneDates: string[];
   devotionals?: string[];
+  /** Songs from the Music library, chosen for the day's reading; absent for none. */
+  worship?: Worship;
   progress?: Progress;
   active: boolean;
 }

@@ -122,6 +122,8 @@ export type QuietStep = { key: string; label: string } & (
   | { kind: "bible"; bible: string; b: number; c: number; v?: number; v2?: number }
   | { kind: "devotional"; module: string; title: string }
   | { kind: "online"; id: string; url: string }
+  /** Songs for the day's reading; `picked` once they are chosen (worship.ts), with why when it had to guess. */
+  | { kind: "worship"; songs: number; when: "before" | "after"; picked?: { id: string; name: string; artist: string }[]; note?: string }
 );
 export interface Session { planId: string; dayKey: string; steps: QuietStep[]; i: number; audio: boolean; started: number }
 

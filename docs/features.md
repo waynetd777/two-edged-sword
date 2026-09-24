@@ -134,6 +134,13 @@ finished, and the day is marked read once its Bible readings are. **Mark as unre
 today's mark and puts the plan back where it was. Click a reading in the day's card to open just
 that chapter.
 
+**Worship music** (on the plan's page): a few songs from your Music library, before the reading
+or after it, as many as you choose. The AI assistant picks them from the library's Christian,
+gospel and worship songs to suit the day's passages and devotionals (at random if there's no
+assistant), and the app plays them in Music as a playlist of its own, "Two-edged Sword · Quiet
+time", with pause and skip in the bar. The part moves on when the songs finish, and leaving it
+pauses them. macOS asks whether the app may control Music the first time.
+
 Under the progress bar: how many days in a row you've read, your best run, and how many of the
 last seven days (weekdays, for a weekdays-only plan, so weekends don't break the streak).
 

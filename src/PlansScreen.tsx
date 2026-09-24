@@ -7,7 +7,7 @@ import {
 } from "./plans";
 import { Topbar } from "./Shell";
 import { uid, useApp } from "./state";
-import { confirmDelete, Dialog, Popover, Seg } from "./ui";
+import { confirmDelete, Dialog, Popover, Seg, Switch } from "./ui";
 import { useStartQuietTime } from "./QuietTime";
 import { useAssistant } from "./assistant";
 
@@ -170,6 +170,7 @@ export function PlansScreen() {
           </div>
         </div>
         <DevotionalsCard plan={plan} update={update} />
+        <WorshipCard plan={plan} update={update} />
         <div style={{ display: "grid", gridTemplateColumns: "420px minmax(0,1fr)", gap: 16 }}>
           <div className="card" style={{ padding: "16px 18px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
@@ -498,6 +499,31 @@ function DevotionalsCard({ plan, update }: { plan: Plan; update: (p: Plan) => vo
             {ONLINE_DEVOTIONALS.map((o) => <label key={o.id} className="opt"><input type="checkbox" checked={chosen.includes(o.id)} onChange={() => toggle(o.id)} />{o.title}</label>)}
           </div>
         </Popover>
+      )}
+    </div>
+  );
+}
+
+/** Worship songs in Quiet time: whether to have them, how many, and before or after the reading. */
+function WorshipCard({ plan, update }: { plan: Plan; update: (p: Plan) => void }) {
+  const w = plan.worship;
+  const set = (x: Plan["worship"]) => update({ ...plan, worship: x });
+  return (
+    <div className="card" style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <span className="label">Worship music</span>
+        <span style={{ marginLeft: "auto" }}><Switch on={!!w} onChange={(on) => set(on ? { songs: 3, when: "before" } : undefined)} /></span>
+      </div>
+      <div className="hint">{w ? "Songs from your Music library, chosen by the AI assistant to suit each day's reading, play in Quiet time." : "Play a few worship songs from your Music library in Quiet time, chosen to suit each day's reading."}</div>
+      {w && (
+        <div style={{ display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap" }}>
+          <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13 }}>Songs
+            <select className="btn small" value={w.songs} onChange={(e) => set({ ...w, songs: +e.target.value })} aria-label="Number of songs">
+              {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => <option key={n} value={n}>{n}</option>)}
+            </select>
+          </label>
+          <Seg value={w.when} options={[["before", "Before the reading"], ["after", "After the reading"]]} onChange={(when) => set({ ...w, when })} />
+        </div>
       )}
     </div>
   );
