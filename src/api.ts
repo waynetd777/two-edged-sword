@@ -5,6 +5,9 @@ let readOnly = false;
 export const setReadOnly = (on: boolean) => { readOnly = on; };
 /** True in screenshot mode. */
 export const isReadOnly = () => readOnly;
+/** Screenshot mode: journal entries shown instead of the user's (their own stay private). */
+let sceneJournal: JournalEntry[] | null = null;
+export const setSceneJournal = (es: JournalEntry[]) => { sceneJournal = es; };
 
 export type Kind = "bible" | "commentary" | "dictionary" | "lexicon" | "reference" | "devotional";
 
@@ -78,8 +81,9 @@ export const api = {
   storeRead: <T>(name: string) => invoke<T | null>("store_read", { name }),
   storeWrite: (name: string, value: unknown) => (readOnly ? Promise.resolve() : invoke<void>("store_write", { name, value })),
   journalDefaultDir: () => invoke<string>("journal_default_dir"),
-  journalList: (dir: string) => invoke<JournalEntry[]>("journal_list", { dir }),
-  journalStamp: (dir: string) => invoke<string>("journal_stamp", { dir }),
+  journalList: (dir: string) => (sceneJournal ? Promise.resolve(sceneJournal) : invoke<JournalEntry[]>("journal_list", { dir })),
+  // With a scene's entries the stamp changes every time, so the journal is sure to reload onto them.
+  journalStamp: (dir: string) => (sceneJournal ? Promise.resolve(`scene:${Date.now()}`) : invoke<string>("journal_stamp", { dir })),
   /** The songs in the Music app's library (music.rs). */
   musicTracks: () => invoke<MusicTrack[]>("music_tracks"),
   /** Queues these songs as the Quiet time playlist and plays it; returns how many were found. */

@@ -129,7 +129,8 @@ export function QuietTime({ focus }: { focus: boolean }) {
   // Worship songs are chosen as the session starts, so they're ready by the time they're wanted.
   useEffect(() => {
     const w = s?.steps.find((x) => x.kind === "worship");
-    if (!s || !w || w.kind !== "worship" || w.picked) return;
+    // Not in screenshot mode, where a scene gives its songs (or shows them still being chosen).
+    if (!s || !w || w.kind !== "worship" || w.picked || isReadOnly()) return;
     const started = s.started;
     const about = worshipAbout(s.steps);
     const put = (p: Picked) =>
@@ -146,6 +147,7 @@ export function QuietTime({ focus }: { focus: boolean }) {
   /** Asks Music what's playing now (after pause or skip, so the bar keeps up). */
   const checkNow = useRef<() => void>(() => {});
   const control = (cmd: "pause" | "play" | "next" | "show") => api.musicControl(cmd).then(() => checkNow.current()).catch((e) => app.toast(String(e)));
+  const nowRef = useRef<MusicState | null>(null);
   const [playing, setPlaying] = useState(false);
   const [countdown, setCountdown] = useState<number | null>(null);
   useEffect(() => { setPlaying(false); setCountdown(null); }, [s?.started, s?.i]);
@@ -156,6 +158,22 @@ export function QuietTime({ focus }: { focus: boolean }) {
     const t = window.setInterval(() => { n -= 1; if (n <= 0) { window.clearInterval(t); setCountdown(null); setPlaying(true); } else setCountdown(n); }, 1000);
     return () => window.clearInterval(t);
   }, [s?.started, s?.i, !!songs?.length, playing]); // eslint-disable-line react-hooks/exhaustive-deps
+  nowRef.current = now;
+  // While the songs are on, Space pauses and resumes them instead of reading aloud: caught on the
+  // way down, before the readers' own Space (which listen on the way up) can see it.
+  useEffect(() => {
+    if (!songs?.length || !playing) return;
+    const k = (e: KeyboardEvent) => {
+      if (e.key !== " " || e.metaKey || e.ctrlKey || e.altKey || (e.target as HTMLElement).closest("input, textarea, select, [contenteditable]")) return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      const st = nowRef.current;
+      if (st?.ours) control(st.state === "playing" ? "pause" : "play");
+    };
+    window.addEventListener("keydown", k, true);
+    return () => window.removeEventListener("keydown", k, true);
+  }, [s?.started, s?.i, !!songs?.length, playing]); // eslint-disable-line react-hooks/exhaustive-deps
+
   useEffect(() => {
     setNow(null);
     // None chosen (the card says why): it waits for Next.
@@ -267,7 +285,8 @@ export function QuietTime({ focus }: { focus: boolean }) {
 
 /** In the bar during the Worship part: Play until the songs start, then the song playing, with pause and skip. */
 function WorshipNow({ step, now, started, onPlay, control }: { step: Extract<QuietStep, { kind: "worship" }>; now: MusicState | null; started: boolean; onPlay: () => void; control: (cmd: "pause" | "play" | "next" | "show") => void }) {
-  if (!step.picked) return <Working text="Choosing songs" />;
+  // Wrapped: .working keeps to the top of a column (Ask's), and the bar centres its items.
+  if (!step.picked) return <span style={{ display: "inline-flex", alignItems: "center" }}><Working text="Choosing songs" /></span>;
   if (!step.picked.length) return null; // the card says why
   if (!started) return <button className="btn small" type="button" onClick={onPlay}><Play size={11} />Play songs</button>;
   const playing = now?.ours && now.state === "playing";

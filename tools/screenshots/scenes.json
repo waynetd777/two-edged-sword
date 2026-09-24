@@ -83,6 +83,18 @@
     "screen": "plans"
   },
   {
+    "name": "worship",
+    "loc": {
+      "book": 19,
+      "chapter": 59
+    },
+    "settings": {
+      "bible": "kjv",
+      "studyPane": false
+    },
+    "sessionFile": "worship-session.json"
+  },
+  {
     "name": "reminder",
     "screen": "settings",
     "scrollTo": "input[type=time]",
@@ -96,6 +108,15 @@
       790,
       185
     ]
+  },
+  {
+    "name": "journal",
+    "screen": "journal",
+    "entriesFile": "journal-entries.json",
+    "journal": "scene-rest",
+    "settings": {
+      "bible": "kjv"
+    }
   },
   {
     "name": "search",

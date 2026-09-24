@@ -2,7 +2,7 @@
 // tools/screenshots/scenes.json); the app sets it up and saves nothing, so the user's settings,
 // chats and place are untouched. Outside screenshot mode none of this runs.
 
-import { api, setReadOnly } from "./api";
+import { api, JournalEntry, setReadOnly, setSceneJournal } from "./api";
 import { setSceneChat } from "./Ask";
 import { Chat, Loc, Pending, Screen, Session, Settings, useApp } from "./state";
 import type { PlayerState } from "./speech";
@@ -32,6 +32,8 @@ export interface Scene {
   selectPara?: number;
   /** A Quiet time session to show (its worship songs already chosen, say). */
   session?: Omit<Session, "started">;
+  /** Journal entries shown instead of the user's (from entriesFile). */
+  entries?: JournalEntry[];
   /** A journal entry to open, by id. */
   journal?: string;
   /** A CSS selector clicked after that (a toolbar button, say), to show what it does. */
@@ -48,6 +50,7 @@ export function runScene(app: ReturnType<typeof useApp>, still: (s: Partial<Play
     if (!json) return;
     const sc: Scene = JSON.parse(json);
     setReadOnly(true);
+    if (sc.entries) setSceneJournal(sc.entries);
     // Give the stored settings and place a moment to load, so the scene is applied on top of them.
     window.setTimeout(() => {
       if (sc.chat) { const chat = sc.chat; app.setChats(() => [chat]); setSceneChat(chat.id); }
@@ -58,7 +61,8 @@ export function runScene(app: ReturnType<typeof useApp>, still: (s: Partial<Play
       if (sc.click) { const q = sc.click; window.setTimeout(() => (document.querySelector(q) as HTMLElement | null)?.click(), 2800); }
       if (sc.selectPara) { const n = sc.selectPara; window.setTimeout(() => (document.querySelector(`[data-seg="${n}"]`) as HTMLElement | null)?.click(), 2000); }
       if (sc.session) { const x = sc.session; window.setTimeout(() => app.setSession({ ...x, started: Date.now() }), 1200); }
-      if (sc.journal) { const id = sc.journal; window.setTimeout(() => app.startEntry({ openId: id }), 1200); }
+      // Scene entries arrive with the journal's next check for changes (every 3 seconds).
+      if (sc.journal) { const id = sc.journal; window.setTimeout(() => app.startEntry({ openId: id }), sc.entries ? 3800 : 1200); }
       if (sc.word) app.studyWord(sc.word);
       if (sc.search) app.searchText(sc.search);
       if (sc.player) still(sc.player);

@@ -73,9 +73,12 @@ def window_of(window_id, pid, timeout=30):
 
 
 def shoot(scene, theme, window_id):
-    sc = {k: v for k, v in scene.items() if k not in ("chatFile", "crop")}
-    if "chatFile" in scene:
-        sc["chat"] = json.loads((HERE / scene["chatFile"]).read_text())
+    # A fixture from a file beside scenes.json: "chatFile" becomes "chat", and so on.
+    files = {"chatFile": "chat", "sessionFile": "session", "entriesFile": "entries"}
+    sc = {k: v for k, v in scene.items() if k not in files and k != "crop"}
+    for f, k in files.items():
+        if f in scene:
+            sc[k] = json.loads((HERE / scene[f]).read_text())
     sc["settings"] = {**sc.get("settings", {}), "theme": theme}
     env = {**os.environ, "TES_SCENE": json.dumps(sc)}
     app = subprocess.Popen([str(BIN)], cwd=ROOT / "src-tauri", env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)

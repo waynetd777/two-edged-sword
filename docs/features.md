@@ -114,10 +114,24 @@ word pronounces it. Word Study opens on the last word you studied, including aft
 
 ## Journal
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="images/journal-dark.png"><img alt="A journal entry with its verse references as links" src="images/journal-light.png"></picture>
+
 Dated entries with headings, bold and italic, lists, quotes and verses inserted from the Bible,
 linked to the verses they are about and shown beside them in Read. Entries are Markdown files,
 one per month, in your Obsidian vault's `Two-edged Sword/` folder or `~/Documents/Two-edged
 Sword/` (change it in Settings). An Ask answer can be added to the journal in one click.
+
+References in an entry are links, as you wrote them: hover for the verse, click to open it.
+"John 3:16", "Rom 8:28-30", "1 John 5, verse 4", "Job 19, verses 25 to 27", "Genesis chapter
+3:1 - 5" and a whole chapter by its book's name ("Hebrews 11", "John Chapter 6") all link, and so
+do common misspellings ("Isiah", "Pillipians"). References typed now link the next time the
+entry opens.
+
+The journal follows the files: an entry changed in Obsidian shows the change within a few
+seconds, the open one too, unless you have an edit of your own waiting to be saved. Clicking in
+and out of an entry doesn't save it; only a real change is written. If the folder the journal
+sits in has gone (the vault moved), saving says so rather than starting an empty journal
+somewhere else.
 
 ## Quiet time
 
@@ -134,6 +148,8 @@ finished, and the day is marked read once its Bible readings are. **Mark as unre
 today's mark and puts the plan back where it was. Click a reading in the day's card to open just
 that chapter.
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="images/worship-dark.png"><img alt="The Worship part of Quiet time: why each song suits the day's reading" src="images/worship-light.png"></picture>
+
 **Worship music** (on the plan's page): a few songs from your Music library, before the reading
 or after it, as many as you choose. The AI assistant picks them from the library's Christian,
 gospel and worship songs to suit the day's passages and devotionals (at random if there's no
@@ -142,7 +158,9 @@ says what the day's reading is about and why each song was chosen; **Play songs*
 (with audio, they start by themselves after a few seconds). They play in Music as a playlist of
 its own, "Two-edged Sword · Quiet time", with pause and skip in the bar, and **Lyrics**, which
 brings Music to the front for its lyrics view (the app can't show them itself: they aren't in
-the library's files, and Apple Music's aren't open to other apps). The part moves on when
+the library's files, and Apple Music's aren't open to other apps). While the songs play, Space
+pauses and resumes them rather than reading aloud. **Try it now** runs today's Quiet time, songs
+and all, as a preview: nothing is ticked off and the day isn't marked read. The part moves on when
 the songs finish, and leaving it pauses them. macOS asks whether the app may control Music the
 first time.
 
@@ -185,5 +203,5 @@ app started. See [Library](library.md).
 Theme (match macOS, light or dark), reading font and size, verse numbers, the voice and speed,
 the journal folder, the daily Quiet time reminder, what to do when you fall behind a plan, and
 the AI assistant: which of Claude Code and Codex are installed, the
-default model, whether Ask may search your library, whether licensed Bible text may be sent,
-and your saved chats.
+default model, whether Ask may search your library and your journal (entries linked to the
+passage, off to begin with), whether licensed Bible text may be sent, and your saved chats.

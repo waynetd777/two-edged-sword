@@ -59,7 +59,10 @@ launches the dev build with the scene in `TES_SCENE`; `src/scene.ts` sets it up 
 saves nothing, so your own settings, chats and window position are left alone. It captures the
 window, and writes it 1400px wide without the display's colour profile (which would tint it in
 browsers). The Ask shot shows a saved answer, `tools/screenshots/ask-chat.json`, rather than
-asking a model each time; the Listen shot places the player without speaking. A scene can
+asking a model each time; the Listen shot places the player without speaking. The Worship shot
+opens a Quiet time session with its songs already chosen (`worship-session.json`), and the
+Journal shot shows sample entries (`journal-entries.json`) in place of yours, which stay private.
+In a scene, `chatFile`, `sessionFile` and `entriesFile` name these fixtures. A scene can
 `scrollTo` a CSS selector, and `crop` the image to `[x, y, width, height]` of the 1400px-wide
 shot for one part of a screen (the reminder shot is just the Quiet time section of Settings).
 The menu-bar menu is a native menu that screenshot mode can't open, so `docs/images/menu-bar.png` is

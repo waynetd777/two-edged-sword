@@ -1,0 +1,21 @@
+{
+  "planId": "scene",
+  "dayKey": "scene",
+  "i": 0,
+  "audio": false,
+  "preview": true,
+  "steps": [
+    {
+      "key": "worship", "label": "Worship", "kind": "worship", "songs": 3, "when": "before",
+      "intro": "You're reading today about God as your refuge in danger and the wonder of His infinite wisdom, in Psalm 59, Proverbs 26 and Job 11. These songs help you settle into His presence, trust His care, and stand in awe of His character.",
+      "picked": [
+        { "id": "scene-1", "name": "Be Still", "artist": "Bethel Music", "why": "It centres your heart in God's presence, inviting you to pause and trust before reading Psalm 59's cry for protection." },
+        { "id": "scene-2", "name": "Refuge in You", "artist": "Brenton Brown", "why": "It speaks directly to Psalm 59's themes, affirming that God is your refuge and safe place amid every struggle." },
+        { "id": "scene-3", "name": "How Great Is Our God", "artist": "Chris Tomlin", "why": "It celebrates God's greatness and wisdom, preparing you for the awe of Job 11 and the call to seek wisdom in Proverbs 26." }
+      ]
+    },
+    { "key": "19.59", "label": "Psalm 59", "kind": "bible", "bible": "kjv", "b": 19, "c": 59 },
+    { "key": "20.26", "label": "Proverbs 26", "kind": "bible", "bible": "kjv", "b": 20, "c": 26 },
+    { "key": "18.11", "label": "Job 11", "kind": "bible", "bible": "kjv", "b": 18, "c": 11 }
+  ]
+}

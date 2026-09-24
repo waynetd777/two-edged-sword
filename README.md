@@ -20,9 +20,11 @@ read-only and keeps what you make (journal, bookmarks, highlights, plans, chats)
   about it in your library.
 - **Listen** to a chapter read aloud in any macOS voice, including the Premium ones, with each
   word highlighted as it is spoken.
-- **Quiet time** plans with daily readings and devotionals and a daily reminder, a **Journal**
-  linked to the verses it's about, and **Search** across the whole library. The menu-bar menu
-  starts today's Quiet time or picks up where you left off.
+- **Quiet time** plans with daily readings and devotionals, worship songs from your Music
+  library chosen to suit the day's reading, and a daily reminder; a **Journal** linked to the
+  verses it's about, its references as links, kept in step with your Obsidian vault; and
+  **Search** across the whole library. The menu-bar menu starts today's Quiet time or picks up
+  where you left off.
 
 <table>
   <tr>
