@@ -126,7 +126,11 @@ export type QuietStep = { key: string; label: string } & (
   /** Songs for the day's reading; `picked` once they are chosen (worship.ts), with why when it had to guess. */
   | { kind: "worship"; songs: number; when: "before" | "after"; picked?: Song[]; intro?: string; note?: string }
 );
-export interface Session { planId: string; dayKey: string; steps: QuietStep[]; i: number; audio: boolean; started: number }
+export interface Session {
+  planId: string; dayKey: string; steps: QuietStep[]; i: number; audio: boolean; started: number;
+  /** A try-out: everything works, but nothing is ticked off or marked read. */
+  preview?: boolean;
+}
 
 interface Ctx {
   lib: LibraryInfo | null;

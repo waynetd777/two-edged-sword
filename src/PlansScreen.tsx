@@ -507,6 +507,8 @@ function DevotionalsCard({ plan, update }: { plan: Plan; update: (p: Plan) => vo
 /** Worship songs in Quiet time: whether to have them, how many, and before or after the reading. */
 function WorshipCard({ plan, update }: { plan: Plan; update: (p: Plan) => void }) {
   const w = plan.worship;
+  const startQuiet = useStartQuietTime();
+  const t = !(plan.kind === "sequence" && firstUndone(plan) < 0) ? todayFor(plan) : null;
   const set = (x: Plan["worship"]) => update({ ...plan, worship: x });
   return (
     <div className="card" style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
@@ -523,6 +525,7 @@ function WorshipCard({ plan, update }: { plan: Plan; update: (p: Plan) => void }
             </select>
           </label>
           <Seg value={w.when} options={[["before", "Before the reading"], ["after", "After the reading"]]} onChange={(when) => set({ ...w, when })} />
+          <button className="btn small" type="button" style={{ marginLeft: "auto" }} disabled={!t?.parts.length} title="Go through today's Quiet time with its songs, without ticking anything off or marking the day read" onClick={() => t && startQuiet(plan, t.parts, false, true)}><Play size={11} />Try it now</button>
         </div>
       )}
     </div>

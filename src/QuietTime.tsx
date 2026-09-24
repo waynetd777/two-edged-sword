@@ -76,10 +76,12 @@ export function useWorshipAhead() {
 
 export function useStartQuietTime() {
   const app = useApp();
-  return (plan: Plan, parts: Part[], audio: boolean) => {
+  return (plan: Plan, parts: Part[], audio: boolean, preview = false) => {
     const day = new Date();
     const steps = sessionSteps(app, plan, parts, day);
     if (!steps.length) return;
+    // A preview runs from the start and records nothing.
+    if (preview) { app.setSession({ planId: plan.id, dayKey: progressKey(plan, day), steps, i: 0, audio, started: Date.now(), preview }); return; }
     // Start at the first part not yet read today.
     const dayKey = progressKey(plan, day);
     const done = doneToday(plan, dayKey);
@@ -101,7 +103,7 @@ export function QuietTime({ focus }: { focus: boolean }) {
   const done = plan && s ? doneToday(plan, s.dayKey) : [];
 
   const tick = (key: string) => {
-    if (!s) return;
+    if (!s || s.preview) return;
     app.setPlans((ps) => ps.map((p) => (p.id === s.planId ? tickPart(p, s.dayKey, key, bibleKeys, new Date()) : p)));
   };
   // Forward ticks off the part being left; going past the last part ends the session.
@@ -113,7 +115,7 @@ export function QuietTime({ focus }: { focus: boolean }) {
     if (j >= s.steps.length) {
       window.clearTimeout(timer.current);
       app.setSession(null);
-      app.toast("Quiet time done");
+      app.toast(s.preview ? "Preview done · nothing was marked" : "Quiet time done");
       return;
     }
     app.setSession((x) => (x ? { ...x, i: j } : x));
@@ -238,7 +240,7 @@ export function QuietTime({ focus }: { focus: boolean }) {
       ? { position: "fixed", top: at.y, left: at.x, right: 16, transform: "translateY(-50%)", display: "flex", pointerEvents: "none", zIndex: 45 }
       : { position: "fixed", top: at?.y ?? 84, transform: "translateY(-50%)", left: focus ? 0 : 200, right: 0, display: "flex", justifyContent: "center", pointerEvents: "none", zIndex: 45 }}>
       <div style={{ pointerEvents: "auto", display: "flex", alignItems: "center", gap: 10, padding: "6px 8px 6px 14px", borderRadius: 24, background: "var(--panel)", border: "1px solid var(--border)", boxShadow: "0 10px 30px var(--shadow)", maxWidth: "calc(100% - 48px)" }}>
-        <span className="label" style={{ color: "var(--accent)", whiteSpace: "nowrap" }}>Quiet time{s.audio && <Icon name="speaker" size={12} style={{ marginLeft: 6, verticalAlign: -2 }} />}</span>
+        <span className="label" style={{ color: "var(--accent)", whiteSpace: "nowrap" }}>{s.preview ? "Preview" : "Quiet time"}{s.audio && <Icon name="speaker" size={12} style={{ marginLeft: 6, verticalAlign: -2 }} />}</span>
         <span style={{ display: "flex", gap: 4 }} aria-label={`Part ${s.i + 1} of ${s.steps.length}`}>
           {s.steps.map((x, k) => (
             <button key={x.key + k} type="button" title={x.label + (done.includes(x.key) ? " · read" : "")} onClick={() => app.setSession((y) => (y ? { ...y, i: k } : y))}
