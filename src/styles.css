@@ -1,15 +1,17 @@
-/* Two-edged Sword. Light is warm paper and ink; dark is the neutral grey of the other apps.
+/* Two-edged Sword. Both themes use GitHub's palettes: light is cool greys on white, dark is blue-black; both
+   with its blue accent.
    Theme follows macOS unless Settings forces one (data-theme on <html>).
    Keep --bg in step with index.html's splash and the window colour in lib.rs. */
 
 
 :root {
-  --bg: #f4f1ea; --panel: #fffdf9; --panel2: #f8f5ee; --border: #e2dccf; --text: #1f1d19; --muted: #645e52;
-  --accent: #2b5a8c; --onaccent: #ffffff; --accentsoft: #e5ecf4; --ring: #b7c9de; --red: #982a22;
+  --bg: #f6f8fa; --panel: #ffffff; --panel2: #f3f5f7; --border: #d0d7de; --text: #1f2328; --muted: #59636e;
+  --accent: #0969da; --onaccent: #ffffff; --accentsoft: #ddf4ff; --ring: #80ccff; --red: #cf222e;
   --hl-gold: #f3e2b3; --hl-red: #f6d6d2; --hl-orange: #f8e2c8; --hl-yellow: #f4ebb8; --hl-green: #dcead9; --hl-blue: #d8e6f5; --hl-purple: #e6dcf4;
-  --sidebar: #ebe6db; --sbborder: #dcd5c7; --hover: rgba(0, 0, 0, 0.045); --shadow: rgba(31, 29, 25, 0.18);
-  --scrim: rgba(31, 29, 25, 0.34); --tbbg: #2a2723; --track: #cfc8b9; --dash: #c9c1b1; --good: #3d7a4e; --bad: #b3261e;
-  --pdbg: #e3eedf; --pdfg: #2f6a3c; --pubg: #f3e8d2; --pufg: #7a5410; --barsoft: #8fa9c7;
+  --sidebar: #eef1f4; --sbborder: #d8dee4; --hover: rgba(0, 0, 0, 0.045); --shadow: rgba(31, 35, 40, 0.18);
+  --scrim: rgba(31, 35, 40, 0.34); --tbbg: #24292f; --track: #d0d7de; --dash: #c6ccd2; --good: #1a7f37; --bad: #cf222e;
+  --pdbg: #dafbe1; --pdfg: #1a7f37; --pubg: #fff8c5; --pufg: #7d4e00; --barsoft: #8fb8e8;
+  --navon-bg: #ddf4ff; --navon-fg: #0969da;
   --serif: "Source Serif 4 Variable", "Source Serif 4", Georgia, serif; --display: "EB Garamond", Garamond, Georgia, serif;
   --ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
   --mono: ui-monospace, "SF Mono", Menlo, monospace;
@@ -17,9 +19,9 @@
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) { --bg: #1e1e20; --panel: #2a2a2d; --panel2: #242427; --border: #3a3a3f; --text: #f2f2f4; --muted: #9a9aa2; --accent: #86aedb; --onaccent: #0f1722; --accentsoft: #243140; --ring: #3f5875; --red: #e58a7c; --hl-gold: #4a3d1c; --hl-red: #4f2724; --hl-orange: #4e3520; --hl-yellow: #47401b; --hl-green: #253a2a; --hl-blue: #23364a; --hl-purple: #382a4c; --sidebar: #232326; --sbborder: #303034; --hover: rgba(255, 255, 255, 0.06); --shadow: rgba(0, 0, 0, 0.55); --scrim: rgba(0, 0, 0, 0.55); --tbbg: #3a3a3f; --track: #4a4a50; --dash: #4a4a50; --good: #7cc28e; --bad: #f28b82; --pdbg: #1f3324; --pdfg: #9fd3aa; --pubg: #3a2f17; --pufg: #e3c07a; --barsoft: #3f5670; color-scheme: dark; }
+  :root:not([data-theme="light"]) { --bg: #0d1117; --panel: #161b22; --panel2: #11161d; --border: #30363d; --text: #e6edf3; --muted: #8b949e; --accent: #58a6ff; --onaccent: #0d1117; --accentsoft: #132339; --ring: #1f6feb; --red: #ff7b72; --hl-gold: #3d3012; --hl-red: #49211f; --hl-orange: #47301a; --hl-yellow: #3f3914; --hl-green: #1b3524; --hl-blue: #172f4a; --hl-purple: #2f2548; --sidebar: #010409; --sbborder: #21262d; --hover: rgba(177, 186, 196, 0.12); --shadow: rgba(1, 4, 9, 0.8); --scrim: rgba(1, 4, 9, 0.6); --tbbg: #21262d; --track: #30363d; --dash: #30363d; --good: #3fb950; --bad: #f85149; --pdbg: #12261e; --pdfg: #7ee787; --pubg: #2b2111; --pufg: #e3b341; --barsoft: #2f4f7f; --navon-bg: #1a2d45; --navon-fg: #79b8ff; color-scheme: dark; }
 }
-:root[data-theme="dark"] { --bg: #1e1e20; --panel: #2a2a2d; --panel2: #242427; --border: #3a3a3f; --text: #f2f2f4; --muted: #9a9aa2; --accent: #86aedb; --onaccent: #0f1722; --accentsoft: #243140; --ring: #3f5875; --red: #e58a7c; --hl-gold: #4a3d1c; --hl-red: #4f2724; --hl-orange: #4e3520; --hl-yellow: #47401b; --hl-green: #253a2a; --hl-blue: #23364a; --hl-purple: #382a4c; --sidebar: #232326; --sbborder: #303034; --hover: rgba(255, 255, 255, 0.06); --shadow: rgba(0, 0, 0, 0.55); --scrim: rgba(0, 0, 0, 0.55); --tbbg: #3a3a3f; --track: #4a4a50; --dash: #4a4a50; --good: #7cc28e; --bad: #f28b82; --pdbg: #1f3324; --pdfg: #9fd3aa; --pubg: #3a2f17; --pufg: #e3c07a; --barsoft: #3f5670; color-scheme: dark; }
+:root[data-theme="dark"] { --bg: #0d1117; --panel: #161b22; --panel2: #11161d; --border: #30363d; --text: #e6edf3; --muted: #8b949e; --accent: #58a6ff; --onaccent: #0d1117; --accentsoft: #132339; --ring: #1f6feb; --red: #ff7b72; --hl-gold: #3d3012; --hl-red: #49211f; --hl-orange: #47301a; --hl-yellow: #3f3914; --hl-green: #1b3524; --hl-blue: #172f4a; --hl-purple: #2f2548; --sidebar: #010409; --sbborder: #21262d; --hover: rgba(177, 186, 196, 0.12); --shadow: rgba(1, 4, 9, 0.8); --scrim: rgba(1, 4, 9, 0.6); --tbbg: #21262d; --track: #30363d; --dash: #30363d; --good: #3fb950; --bad: #f85149; --pdbg: #12261e; --pdfg: #7ee787; --pubg: #2b2111; --pufg: #e3b341; --barsoft: #2f4f7f; --navon-bg: #1a2d45; --navon-fg: #79b8ff; color-scheme: dark; }
 
 * { box-sizing: border-box; }
 html, body, #root { height: 100%; margin: 0; }
@@ -40,13 +42,14 @@ input, textarea, [contenteditable="true"] { user-select: text; }
 .main { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
 .sidebar { background: var(--sidebar); border-right: 1px solid var(--sbborder); padding: 44px 10px 14px; display: flex; flex-direction: column; gap: 20px; overflow-y: auto; }
 .brand { display: flex; align-items: center; }
-.wordmark { width: 100%; height: auto; display: block; overflow: visible; }
+.wordmark { width: 100%; height: auto; display: block; overflow: visible; --wm-bg: #0b1f3a; --wm-1: #fff6d8; --wm-2: #efcb76; --wm-3: #8f631c; --wm-4: #f7dc95; --wm-5: #b5832b; --wm-edge: #6b4a17; --wm-shadow: rgba(0, 0, 0, 0.7); }
 .wordmark .medal { --sw-light: #efd9a4; --sw-dark: #c6974a; --sw-fuller: #8a6630; --sw-gold: #d8b160; --sw-grip: #6e4526; --sw-wrap: #8e5d35; --sw-pin: #b48a3e; }
 .nav { display: flex; align-items: center; gap: 9px; height: 30px; padding: 0 10px; border: 0; border-radius: 7px; background: transparent; width: 100%; text-align: left; cursor: pointer; }
 .nav:hover { background: var(--hover); }
-.nav.on { background: var(--accent); color: var(--onaccent); }
+/* The selected screen: a tint of the accent with accent text (a solid bar fought the logo). */
+.nav.on { background: var(--navon-bg); color: var(--navon-fg); font-weight: 600; }
 .nav .k { margin-left: auto; font-size: 11px; color: var(--muted); }
-.nav.on .k { color: var(--onaccent); opacity: 0.75; }
+.nav.on .k { color: var(--navon-fg); opacity: 0.75; }
 .lab { font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); padding: 0 10px; }
 .bm { display: flex; align-items: center; gap: 8px; min-height: 26px; padding: 3px 10px; border-radius: 6px; color: var(--text); font-size: 12.5px; border: 0; background: transparent; width: 100%; text-align: left; cursor: pointer; }
 .bm:hover { background: var(--hover); text-decoration: none; }
@@ -205,9 +208,9 @@ input[type="range"] { accent-color: var(--accent); }
 mark { background: var(--hl-gold); color: inherit; border-radius: 3px; padding: 0 2px; font-weight: 600; }
 
 /* The sidebar sword: the light app icon's colours on the light sidebar, gold on dark. */
-:root { --sw-light: #557ea9; --sw-dark: #2b4f76; --sw-fuller: #1d3857; --sw-gold: #a8791f; --sw-grip: #5a3a20; --sw-wrap: #74502f; --sw-pin: #86601a; --wm-1: #f4d27a; --wm-2: #b3821f; --wm-3: #5a3c05; --wm-4: #d6a543; --wm-5: #7e540d; --wm-edge: #4d3305; --wm-shadow: rgba(60, 40, 5, 0.35); }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --sw-light: #efd9a4; --sw-dark: #c6974a; --sw-fuller: #8a6630; --sw-gold: #d8b160; --sw-grip: #6e4526; --sw-wrap: #8e5d35; --sw-pin: #b48a3e; --wm-1: #fff6d8; --wm-2: #efcb76; --wm-3: #8f631c; --wm-4: #f7dc95; --wm-5: #b5832b; --wm-edge: #6b4a17; --wm-shadow: rgba(0, 0, 0, 0.7); } }
-:root[data-theme="dark"] { --sw-light: #efd9a4; --sw-dark: #c6974a; --sw-fuller: #8a6630; --sw-gold: #d8b160; --sw-grip: #6e4526; --sw-wrap: #8e5d35; --sw-pin: #b48a3e; --wm-1: #fff6d8; --wm-2: #efcb76; --wm-3: #8f631c; --wm-4: #f7dc95; --wm-5: #b5832b; --wm-edge: #6b4a17; --wm-shadow: rgba(0, 0, 0, 0.7); }
+:root { --sw-light: #557ea9; --sw-dark: #2b4f76; --sw-fuller: #1d3857; --sw-gold: #a8791f; --sw-grip: #5a3a20; --sw-wrap: #74502f; --sw-pin: #86601a; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --sw-light: #efd9a4; --sw-dark: #c6974a; --sw-fuller: #8a6630; --sw-gold: #d8b160; --sw-grip: #6e4526; --sw-wrap: #8e5d35; --sw-pin: #b48a3e; } }
+:root[data-theme="dark"] { --sw-light: #efd9a4; --sw-dark: #c6974a; --sw-fuller: #8a6630; --sw-gold: #d8b160; --sw-grip: #6e4526; --sw-wrap: #8e5d35; --sw-pin: #b48a3e; }
 
 /* Ask's progress line: a highlight sweeping across the muted text, and dots that fill in turn. */
 .working { align-self: flex-start; background: linear-gradient(90deg, var(--muted) 0%, var(--muted) 40%, var(--text) 50%, var(--muted) 60%, var(--muted) 100%) 0 0 / 250% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: sweep 1.8s linear infinite; }

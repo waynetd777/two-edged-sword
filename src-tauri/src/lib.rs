@@ -266,6 +266,13 @@ fn ask_cancel(st: State<AppState>, chat_id: String) {
     assistant::cancel(&st.running, &chat_id)
 }
 
+/// Screenshot mode (tools/screenshots.py): the scene to set up, as JSON, from TES_SCENE. The
+/// page then saves nothing, so the user's settings, chats and place are left as they were.
+#[tauri::command]
+fn scene() -> Option<String> {
+    std::env::var("TES_SCENE").ok().filter(|s| !s.is_empty())
+}
+
 #[tauri::command]
 fn print_page(window: tauri::WebviewWindow) -> Result<(), String> {
     window.print().map_err(|e| e.to_string())
@@ -335,6 +342,7 @@ pub fn run() {
             ask,
             ask_cancel,
             print_page,
+            scene,
             tts::tts_voices,
             tts::tts_speak,
             tts::tts_stop
@@ -361,10 +369,15 @@ pub fn run() {
                 .build(app)?;
 
             if let Some(w) = app.get_webview_window("main") {
+                // Screenshots are taken at one size, whatever size the window was left at.
+                if scene().is_some() {
+                    let _ = w.set_size(tauri::LogicalSize::new(1440.0, 900.0));
+                    let _ = w.center();
+                }
                 // Paint the window and the webview in the theme's background before showing it,
                 // so no white frame appears. Keep in step with --bg in src/styles.css and index.html.
                 let dark = matches!(w.theme(), Ok(tauri::Theme::Dark));
-                let (r, g, b) = if dark { (30u8, 30u8, 32u8) } else { (244u8, 241u8, 234u8) };
+                let (r, g, b) = if dark { (13u8, 17u8, 23u8) } else { (246u8, 248u8, 250u8) };
                 let _ = w.set_background_color(Some(tauri::window::Color(r, g, b, 255)));
                 #[cfg(target_os = "macos")]
                 {

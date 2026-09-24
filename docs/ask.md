@@ -1,6 +1,6 @@
 # Ask
 
-![Ask comparing the commentators on 1 John 1:1](images/ask.png)
+<picture><source media="(prefers-color-scheme: dark)" srcset="images/ask-dark.png"><img alt="Ask comparing the commentators on 1 John 1:1" src="images/ask-light.png"></picture>
 
 Ask answers questions about what you are reading: a verse or chapter in Read or Compare, a
 word in Word Study, search results, a journal entry, or a chapter or paragraph of a reference

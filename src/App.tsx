@@ -12,7 +12,8 @@ import { DocReader } from "./DocReader";
 import { StrongsHover } from "./WordLookup";
 import { QuietTime } from "./QuietTime";
 import { SCREEN_KEYS, Sidebar } from "./Shell";
-import { PlayerProvider } from "./speech";
+import { PlayerProvider, usePlayer } from "./speech";
+import { runScene } from "./scene";
 import { AppProvider, useApp } from "./state";
 import { hideSplash } from "./splash";
 
@@ -21,7 +22,10 @@ function Screens() {
   const [focus, setFocus] = useState(false);
   const [palette, setPalette] = useState(false);
 
+  const player = usePlayer();
   useEffect(() => { if (app.lib) hideSplash(); }, [app.lib]);
+  // Screenshot mode only (TES_SCENE); otherwise it finds no scene and does nothing.
+  useEffect(() => { if (app.lib) runScene(app, player.still); }, [app.lib]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ⌘1–⌘7 switch screens, ⌘K opens the palette, ⌘, Settings, ⌘. focus mode, ⌘[ ⌘] history.
   useEffect(() => {

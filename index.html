@@ -9,16 +9,15 @@
       Keep the background colours in step with --bg in src/styles.css and lib.rs.
     -->
     <style>
-      :root { color-scheme: light dark; --splash-bg: #f4f1ea; --splash-fg: #1f1d19; --splash-dim: #645e52; --splash-line: rgba(0,0,0,.08); }
-      @media (prefers-color-scheme: dark) { :root { --splash-bg: #1e1e20; --splash-fg: #f2f2f4; --splash-dim: #9a9aa2; --splash-line: rgba(255,255,255,.1); } }
+      :root { color-scheme: light dark; --splash-bg: #f6f8fa; --splash-fg: #1f2328; --splash-dim: #59636e; --splash-line: rgba(0,0,0,.08); }
+      @media (prefers-color-scheme: dark) { :root { --splash-bg: #0d1117; --splash-fg: #e6edf3; --splash-dim: #8b949e; --splash-line: rgba(255,255,255,.1); } }
       html, body { background: var(--splash-bg); margin: 0; }
       #splash { position: fixed; inset: 0; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; background: var(--splash-bg); font: 13px/1.4 -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif; color: var(--splash-fg); transition: opacity .18s ease-out; }
       #splash.gone { opacity: 0; pointer-events: none; }
       @font-face { font-family: "Cinzel Decorative"; font-weight: 700; font-display: block; src: url(/node_modules/@fontsource/cinzel-decorative/files/cinzel-decorative-latin-700-normal.woff2) format("woff2"); }
       @font-face { font-family: "Cinzel Decorative"; font-weight: 900; font-display: block; src: url(/node_modules/@fontsource/cinzel-decorative/files/cinzel-decorative-latin-900-normal.woff2) format("woff2"); }
-      :root { --wm-1: #f4d27a; --wm-2: #b3821f; --wm-3: #5a3c05; --wm-4: #d6a543; --wm-5: #7e540d; --wm-edge: #4d3305; --wm-shadow: rgba(60, 40, 5, 0.35); }
-      @media (prefers-color-scheme: dark) { :root { --wm-1: #fff6d8; --wm-2: #efcb76; --wm-3: #8f631c; --wm-4: #f7dc95; --wm-5: #b5832b; --wm-edge: #6b4a17; --wm-shadow: rgba(0, 0, 0, 0.7); } }
       #splash .mark { width: 300px; height: auto; overflow: visible; margin-bottom: 8px; animation: rise .35s ease-out both; }
+      #splash .mark { --wm-1: #fff6d8; --wm-2: #efcb76; --wm-3: #8f631c; --wm-4: #f7dc95; --wm-5: #b5832b; --wm-edge: #6b4a17; --wm-shadow: rgba(0, 0, 0, 0.7); }
       #splash .medal { --sw-light: #efd9a4; --sw-dark: #c6974a; --sw-fuller: #8a6630; --sw-gold: #d8b160; --sw-grip: #6e4526; --sw-wrap: #8e5d35; --sw-pin: #b48a3e; }
       #splash .what { font-size: 13px; line-height: 1.55; color: var(--splash-dim); margin-top: -6px; font-style: italic; font-family: Georgia, serif; max-width: 440px; text-align: center; text-wrap: pretty; padding: 0 24px; }
       #splash .cite { display: block; margin-top: 6px; font-style: normal; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; font-family: -apple-system, sans-serif; }
@@ -46,7 +45,7 @@
             <feDropShadow dx="0" dy="0.8" stdDeviation="0.6" style="flood-color:var(--wm-shadow)" />
           </filter>
         </defs>
-        <rect x="0.7" y="0.7" width="170.6" height="56.6" rx="10" fill="none" stroke="url(#gsplash)" stroke-width="1.4" />
+        <rect x="0.7" y="0.7" width="170.6" height="56.6" rx="10" fill="#0b1f3a" stroke="url(#gsplash)" stroke-width="1.4" />
         <svg class="medal" x="6" y="5" width="38.4" height="48" viewBox="212 140 600 750">
           <circle cx="512" cy="440" r="290" fill="#26354a" />
           

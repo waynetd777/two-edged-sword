@@ -237,7 +237,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => { api.library().then(setLib); api.journalDefaultDir().then(setDefaultDir); }, []);
 
   useEffect(() => {
-    const t = settings.theme;
+    // "midnight" was a trial of the GitHub palette that became Dark; a setting saved then still means dark.
+    const t = (settings.theme as string) === "midnight" ? "dark" : settings.theme;
     if (t === "auto") document.documentElement.removeAttribute("data-theme");
     else document.documentElement.setAttribute("data-theme", t);
     document.documentElement.style.setProperty("--read-size", `${settings.readSize}px`);

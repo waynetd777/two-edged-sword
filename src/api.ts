@@ -1,5 +1,9 @@
 import { invoke } from "@tauri-apps/api/core";
 
+/** Screenshot mode (scene.ts) sets this: nothing the page changes is saved. */
+let readOnly = false;
+export const setReadOnly = (on: boolean) => { readOnly = on; };
+
 export type Kind = "bible" | "commentary" | "dictionary" | "lexicon" | "reference" | "devotional";
 
 export interface ModuleInfo {
@@ -65,11 +69,11 @@ export const api = {
   search: (query: SearchQuery) => invoke<SearchResults>("search", { query }),
   indexProgress: () => invoke<{ building: boolean; done: number; total: number }>("index_progress"),
   storeRead: <T>(name: string) => invoke<T | null>("store_read", { name }),
-  storeWrite: (name: string, value: unknown) => invoke<void>("store_write", { name, value }),
+  storeWrite: (name: string, value: unknown) => (readOnly ? Promise.resolve() : invoke<void>("store_write", { name, value })),
   journalDefaultDir: () => invoke<string>("journal_default_dir"),
   journalList: (dir: string) => invoke<JournalEntry[]>("journal_list", { dir }),
-  journalSave: (dir: string, entry: JournalEntry) => invoke<void>("journal_save", { dir, entry }),
-  journalDelete: (dir: string, id: string) => invoke<void>("journal_delete", { dir, id }),
+  journalSave: (dir: string, entry: JournalEntry) => (readOnly ? Promise.resolve() : invoke<void>("journal_save", { dir, entry })),
+  journalDelete: (dir: string, id: string) => (readOnly ? Promise.resolve() : invoke<void>("journal_delete", { dir, id })),
   writeTextFile: (path: string, text: string) => invoke<void>("write_text_file", { path, text }),
   assistantStatus: () => invoke<AssistantStatus>("assistant_status"),
   ask: (chatId: string, prompt: string, model: string, session: string | null, bookDir: string | null = null, studyDir: string | null = null) => invoke<void>("ask", { chatId, prompt, model, session, bookDir, studyDir }),
@@ -85,6 +89,8 @@ export const api = {
   openWeb: (key: string, url: string, title: string) => invoke<void>("open_web", { key, url, title }),
   askCancel: (chatId: string) => invoke<void>("ask_cancel", { chatId }),
   print: () => invoke<void>("print_page"),
+  /** The screenshot scene the app was launched with (TES_SCENE), as JSON, or null. */
+  scene: () => invoke<string | null>("scene"),
   ttsVoices: () => invoke<Voice[]>("tts_voices"),
   ttsSpeak: (id: number, text: string, voice: string | undefined, rate: number) => invoke<void>("tts_speak", { id, text, voice: voice ?? null, rate }),
   ttsStop: () => invoke<void>("tts_stop"),

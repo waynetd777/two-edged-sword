@@ -42,6 +42,8 @@ interface PlayerCtx {
   stop: () => void;
   skip: (d: number) => void;
   sleep: (minutes: number | "chapter" | null) => void;
+  /** Screenshot mode: show the player at a given place without speaking. */
+  still: (s: Partial<PlayerState>) => void;
 }
 
 const Ctx = createContext<PlayerCtx | null>(null);
@@ -235,7 +237,9 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => () => { api.ttsStop(); }, []);
 
-  return <Ctx.Provider value={{ state, voices, play, playDoc, toggle, stop, skip, sleep }}>{children}</Ctx.Provider>;
+  const still = useCallback((s: Partial<PlayerState>) => { const next = { ...IDLE, on: true, ...s }; st.current = next; setState(next); }, []);
+
+  return <Ctx.Provider value={{ state, voices, play, playDoc, toggle, stop, skip, sleep, still }}>{children}</Ctx.Provider>;
 }
 
 export const chapterName = (b: number, c: number) => `${book(b).name} ${c}`;

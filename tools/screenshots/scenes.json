@@ -1,0 +1,14 @@
+[
+  { "name": "read", "loc": { "book": 62, "chapter": 1 },
+    "settings": { "bible": "kjv", "studyPane": true, "studyTab": "commentary" } },
+  { "name": "ask", "loc": { "book": 62, "chapter": 1 }, "chatFile": "ask-chat.json",
+    "settings": { "bible": "kjv", "studyPane": true, "studyTab": "ask" }, "scrollTop": true },
+  { "name": "compare", "screen": "compare", "loc": { "book": 62, "chapter": 1 },
+    "settings": { "compare": ["kjv+", "asv", "ylt"] } },
+  { "name": "word-study", "word": "G26", "settings": { "bible": "kjv" } },
+  { "name": "listen", "loc": { "book": 62, "chapter": 1 },
+    "settings": { "bible": "kjv", "studyPane": false },
+    "player": { "bible": "kjv", "book": 62, "chapter": 1, "verse": 1, "count": 10, "char": 24 } },
+  { "name": "quiet-time", "screen": "plans" },
+  { "name": "search", "search": "tithe", "settings": { "bible": "kjv" } }
+]

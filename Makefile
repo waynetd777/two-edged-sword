@@ -47,6 +47,10 @@ icons:
 	@rm -rf src-tauri/icons/android src-tauri/icons/ios
 	@echo "regenerated src-tauri/icons"
 
+## Retake docs/images/*-light.png and *-dark.png from tools/screenshots/scenes.json.
+screenshots:
+	@python3 tools/screenshots.py
+
 sign-check:
 	@codesign -dv --verbose=2 "/Applications/Two-edged Sword.app" 2>&1 | grep -E "^(Identifier|Authority|Signature|TeamIdentifier)"
 

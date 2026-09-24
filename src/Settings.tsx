@@ -40,7 +40,7 @@ export function SettingsScreen() {
         <div style={{ maxWidth: 820, margin: "0 auto", padding: "20px 28px 60px", display: "flex", flexDirection: "column", gap: 18 }}>
           <h1 style={{ margin: 0, font: "500 30px/1 var(--display)" }}>Settings</h1>
           <Section title="Appearance">
-            <Row label="Theme"><Seg value={s.theme} options={[["auto", "Match macOS"], ["light", "Light"], ["dark", "Dark"]]} onChange={(v) => app.set({ theme: v })} /></Row>
+            <Row label="Theme"><Seg value={(s.theme as string) === "midnight" ? "dark" : s.theme} options={[["auto", "Match macOS"], ["light", "Light"], ["dark", "Dark"]]} onChange={(v) => app.set({ theme: v })} /></Row>
             <Row label="Reading font"><Seg value={s.readFont} options={Object.entries(READ_FONTS).map(([k, f]) => [k as ReadFont, f.label])} onChange={(v) => app.set({ readFont: v })} /></Row>
             <Row label="Reading text size">
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}><span style={{ fontSize: 12 }}>A</span><input type="range" min={14} max={28} value={s.readSize} onChange={(e) => app.set({ readSize: +e.target.value })} aria-label="Reading text size" style={{ width: 200 }} /><span style={{ fontSize: 18 }}>A</span><span className="n">{s.readSize} px</span></div>

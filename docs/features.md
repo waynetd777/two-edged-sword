@@ -5,7 +5,7 @@ Settings. Everything you delete (a journal entry, a plan, a chat) asks first.
 
 ## Read
 
-![Reading 1 John 1 with the study pane on the commentaries](images/read.png)
+<picture><source media="(prefers-color-scheme: dark)" srcset="images/read-dark.png"><img alt="Reading 1 John 1 with the study pane on the commentaries" src="images/read-light.png"></picture>
 
 The chapter, one verse per line or as paragraphs, beside a study pane that follows the
 selected verse:
@@ -37,7 +37,7 @@ A devotional opens on today's reading.
 
 ## Listen
 
-![Listening to 1 John 1, the word being spoken highlighted](images/listen.png)
+<picture><source media="(prefers-color-scheme: dark)" srcset="images/listen-dark.png"><img alt="Listening to 1 John 1, the word being spoken highlighted" src="images/listen-light.png"></picture>
 
 Reads the chapter aloud, highlighting each word as it is spoken, at 0.5× to 2×, with a sleep
 timer (minutes, or the end of the chapter). It carries on into the next chapter and announces
@@ -55,14 +55,14 @@ including the far more natural **Premium** and **Enhanced** ones. They are a sep
 
 ## Compare
 
-![KJV+, ASV and YLT side by side](images/compare.png)
+<picture><source media="(prefers-color-scheme: dark)" srcset="images/compare-dark.png"><img alt="KJV+, ASV and YLT side by side" src="images/compare-light.png"></picture>
 
 Any number of translations side by side, verse by verse, with the wording that differs from the
 first column highlighted, and Strong's numbers shown for a Strong's Bible.
 
 ## Search
 
-![Searching the KJV for “tithe”, with the verse in context](images/search.png)
+<picture><source media="(prefers-color-scheme: dark)" srcset="images/search-dark.png"><img alt="Searching the KJV for “tithe”, with the verse in context" src="images/search-light.png"></picture>
 
 The Bible, every commentary and dictionary, and your journal at once, with a count for each.
 Narrow it to one Bible, a range (Old or New Testament, Wisdom, Prophets, Gospels, Letters), and
@@ -73,7 +73,7 @@ translated. The search is kept while you open results and come back.
 
 ## Word Study
 
-![Word Study for G26, agapē](images/word-study.png)
+<picture><source media="(prefers-color-scheme: dark)" srcset="images/word-study-dark.png"><img alt="Word Study for G26, agapē" src="images/word-study-light.png"></picture>
 
 A Strong's entry, how often and where it is used (by book), every verse in context, related words
 and the articles about it in your library. Type an English word ("love") to see the Greek and
@@ -88,7 +88,7 @@ Sword/` (change it in Settings). An Ask answer can be added to the journal in on
 
 ## Quiet time
 
-![Quiet time with today's readings](images/quiet-time.png)
+<picture><source media="(prefers-color-scheme: dark)" srcset="images/quiet-time-dark.png"><img alt="Quiet time with today's readings" src="images/quiet-time-light.png"></picture>
 
 Reading plans: the Bible in a year, the New Testament in 90 days, the Gospels, F. B. Meyer's
 daily readings, your own, or a Psalm, a Proverb and one more chapter a day, read in the Bible

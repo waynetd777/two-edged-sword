@@ -4,7 +4,7 @@ A personal Bible study app for macOS, built on the Bibles, commentaries, diction
 reference books, devotionals and maps you already have in e-Sword X. It opens every module
 read-only and keeps what you make (journal, bookmarks, highlights, plans, chats) separately.
 
-![Reading 1 John 1 with the study pane open on the commentaries](docs/images/read.png)
+<picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/read-dark.png"><img alt="Reading 1 John 1 with the study pane open on the commentaries" src="docs/images/read-light.png"></picture>
 
 ## What it does
 
@@ -21,11 +21,20 @@ read-only and keeps what you make (journal, bookmarks, highlights, plans, chats)
 - **Quiet time** plans with daily readings and devotionals, a **Journal** linked to the verses
   it's about, and **Search** across the whole library.
 
-| | |
-|---|---|
-| ![Ask comparing the commentators on 1 John 1:1](docs/images/ask.png) | ![KJV+, ASV and YLT compared, differences highlighted](docs/images/compare.png) |
-| ![Word Study for G26, agapē](docs/images/word-study.png) | ![Listening to 1 John 1, the word being spoken highlighted](docs/images/listen.png) |
-| ![Quiet time with today's readings](docs/images/quiet-time.png) | ![Searching the KJV for “tithe”, with the verse in context](docs/images/search.png) |
+<table>
+  <tr>
+    <td><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/ask-dark.png"><img alt="Ask comparing the commentators on 1 John 1:1" src="docs/images/ask-light.png"></picture></td>
+    <td><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/compare-dark.png"><img alt="KJV+, ASV and YLT compared, differences highlighted" src="docs/images/compare-light.png"></picture></td>
+  </tr>
+  <tr>
+    <td><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/word-study-dark.png"><img alt="Word Study for G26, agapē" src="docs/images/word-study-light.png"></picture></td>
+    <td><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/listen-dark.png"><img alt="Listening to 1 John 1, the word being spoken highlighted" src="docs/images/listen-light.png"></picture></td>
+  </tr>
+  <tr>
+    <td><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/quiet-time-dark.png"><img alt="Quiet time with today's readings" src="docs/images/quiet-time-light.png"></picture></td>
+    <td><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/search-dark.png"><img alt="Searching the KJV for “tithe”, with the verse in context" src="docs/images/search-light.png"></picture></td>
+  </tr>
+</table>
 
 ## Documentation
 

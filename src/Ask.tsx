@@ -28,6 +28,11 @@ function ensureListening() {
   listen<{ chatId: string; sessionId: string | null; text: string; error: string | null }>("ask-done", (e) => subs.get(e.payload.chatId)?.done(e.payload));
 }
 
+/** Screenshot mode: the chat the next Ask panel opens on (scene.ts). */
+let sceneChat: string | null = null;
+export const setSceneChat = (id: string) => { sceneChat = id; };
+const takeSceneChat = () => { const id = sceneChat; sceneChat = null; return id; };
+
 /** A progress line ("Thinking", "Reading Matthew Henry's Commentary"): a light sweeps across
  *  it and the dots count up. Keyed by the text so each new step starts its sweep afresh. */
 function Working({ text }: { text: string }) {
@@ -76,7 +81,7 @@ export interface AskProps {
 
 export function AskPanel(p: AskProps) {
   const app = useApp();
-  const [chatId, setChatId] = useState<string | null>(null);
+  const [chatId, setChatId] = useState<string | null>(() => takeSceneChat());
   const [q, setQ] = useState("");
   const [busy, setBusy] = useState(false);
   /** What it is doing while it searches the library: "Reading Matthew Henry's Commentary". */

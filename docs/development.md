@@ -14,6 +14,7 @@ runs the AI tools for Ask; the frontend is everything you see.
 | `make install-app` | Build it and replace the copy in /Applications |
 | `make icons` | Redraw the icon artwork (`tools/make_icons.py`) and regenerate the icon set |
 | `make sign-check` | Show how the installed app is signed |
+| `make screenshots` | Retake the screenshots in `docs/images/`, light and dark (see below) |
 
 Hot reload can leave a screen in a broken state after edits that change a component's hooks.
 Reload the window (⌘R) or restart `make dev` before treating it as a bug.
@@ -43,6 +44,20 @@ certificate there.
 release builds, drops debug info for dependencies in dev builds, and optimises SQLite even in dev
 builds because it does all the searching.
 
+## Screenshots
+
+`make screenshots` retakes every image in `docs/images/`, in both themes, and
+`python3 tools/screenshots.py read ask --theme dark` retakes just some. Each scene (the screen,
+passage, Bible, study-pane tab and so on) is in `tools/screenshots/scenes.json`. The script
+launches the dev build with the scene in `TES_SCENE`; `src/scene.ts` sets it up at 1440×900 and
+saves nothing, so your own settings, chats and window position are left alone. It captures the
+window, and writes it 1400px wide without the display's colour profile (which would tint it in
+browsers). The Ask shot shows a saved answer, `tools/screenshots/ask-chat.json`, rather than
+asking a model each time; the Listen shot places the player without speaking.
+
+It needs Screen Recording permission for the terminal, and starts the Vite dev server if it isn't
+already running. Scenes use public-domain Bibles only.
+
 ## The code
 
 | Where | What |
@@ -56,6 +71,7 @@ builds because it does all the searching.
 | `src-tauri/src/assistant/` | Running Claude Code or Codex for Ask |
 | `src-tauri/src/study.rs`, `books.rs` | Writing library material out as files for Ask to search |
 | `index.html` | The splash screen, painted before React starts |
+| `src/scene.ts`, `tools/screenshots.py` | Screenshot mode and the script that drives it |
 | `tools/make_icons.py` | The icon artwork (the sidebar logo and splash reuse the same sword) |
 
 Decisions and known bugs are recorded with sift in `_sift/` (see `AGENTS.md`):
