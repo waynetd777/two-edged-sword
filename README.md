@@ -28,16 +28,16 @@ read-only and keeps what you make (journal, bookmarks, highlights, plans, chats)
 
 <table>
   <tr>
-    <td><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/ask-dark.png"><img alt="Ask comparing the commentators on 1 John 1:1" src="docs/images/ask-light.png"></picture></td>
-    <td><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/compare-dark.png"><img alt="KJV+, ASV and YLT compared, differences highlighted" src="docs/images/compare-light.png"></picture></td>
+    <td align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/ask-dark.png"><img alt="Ask comparing the commentators on 1 John 1:1" src="docs/images/ask-light.png"></picture><br><sub>Ask compares the commentators</sub></td>
+    <td align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/compare-dark.png"><img alt="KJV+, ASV and YLT compared, differences highlighted" src="docs/images/compare-light.png"></picture><br><sub>Compare translations</sub></td>
   </tr>
   <tr>
-    <td><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/word-study-dark.png"><img alt="Word Study for G26, agapē" src="docs/images/word-study-light.png"></picture></td>
-    <td><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/listen-dark.png"><img alt="Listening to 1 John 1, the word being spoken highlighted" src="docs/images/listen-light.png"></picture></td>
+    <td align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/word-study-dark.png"><img alt="Word Study for G26, agapē" src="docs/images/word-study-light.png"></picture><br><sub>Word Study</sub></td>
+    <td align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/listen-dark.png"><img alt="Listening to 1 John 1, the word being spoken highlighted" src="docs/images/listen-light.png"></picture><br><sub>Listen, word by word</sub></td>
   </tr>
   <tr>
-    <td><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/quiet-time-dark.png"><img alt="Quiet time with today's readings" src="docs/images/quiet-time-light.png"></picture></td>
-    <td><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/search-dark.png"><img alt="Searching the KJV for “tithe”, with the verse in context" src="docs/images/search-light.png"></picture></td>
+    <td align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/quiet-time-dark.png"><img alt="Quiet time with today's readings" src="docs/images/quiet-time-light.png"></picture><br><sub>Quiet time plans</sub></td>
+    <td align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/search-dark.png"><img alt="Searching the KJV for “tithe”, with the verse in context" src="docs/images/search-light.png"></picture><br><sub>Search the library</sub></td>
   </tr>
 </table>
 

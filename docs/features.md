@@ -150,19 +150,11 @@ that chapter.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="images/worship-dark.png"><img alt="The Worship part of Quiet time: why each song suits the day's reading" src="images/worship-light.png"></picture>
 
-**Worship music** (on the plan's page): a few songs from your Music library, before the reading
-or after it, as many as you choose. The AI assistant picks them from the library's Christian,
-gospel and worship songs to suit the day's passages and devotionals (at random if there's no
-assistant), a little after the app opens so they're ready when you start. A card under the bar
-says what the day's reading is about and why each song was chosen; **Play songs** starts them
-(with audio, they start by themselves after a few seconds). They play in Music as a playlist of
-its own, "Two-edged Sword · Quiet time", with pause and skip in the bar, and **Lyrics**, which
-brings Music to the front for its lyrics view (the app can't show them itself: they aren't in
-the library's files, and Apple Music's aren't open to other apps). While the songs play, Space
-pauses and resumes them rather than reading aloud. **Try it now** runs today's Quiet time, songs
-and all, as a preview: nothing is ticked off and the day isn't marked read. The part moves on when
-the songs finish, and leaving it pauses them. macOS asks whether the app may control Music the
-first time.
+**Worship music** (on the plan's page): songs from your Music library, before or after the
+reading, chosen by the AI assistant to suit the day's passages. A card explains each choice;
+**Play songs** starts them in Music, with pause, skip and **Lyrics** in the bar, and Space
+pauses too. **Try it now** previews the day without marking anything read. macOS asks once
+whether the app may control Music.
 
 Under the progress bar: how many days in a row you've read, your best run, and how many of the
 last seven days (weekdays, for a weekdays-only plan, so weekends don't break the streak).
