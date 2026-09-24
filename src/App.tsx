@@ -74,7 +74,7 @@ function Screens() {
       {screen === "settings" && <SettingsScreen />}
       {(screen !== "read" || app.doc) && <PlayerBar focus={focus && screen === "read"} />}
       {palette && <Palette onClose={() => setPalette(false)} onAsk={() => app.setPending({ ask: "" })} />}
-      {app.toastMsg && <div className="toast" role="status">{app.toastMsg}</div>}
+      {app.toastMsg && <div className="toast" role="status">{app.toastMsg}{app.toastUndo && <button type="button" className="toastundo" onClick={app.toastUndo}>Undo</button>}</div>}
       <StrongsHover />
       <Tooltips />
       <WordHoverBox />

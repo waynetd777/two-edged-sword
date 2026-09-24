@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { api, Article, Commentary, Coverage, ModuleInfo, Verse } from "./api";
 import { book, fmtRef, parseRef, Ref } from "./bible";
 import { AskPanel } from "./Ask";
-import { plainText, renderHtml } from "./esword";
+import { plainText, renderHtml, docSegments } from "./esword";
 import { Icon } from "./icons";
 import { useApp } from "./state";
 import { Popover, TrailButtons, useTrail, wordAt, wordHover } from "./ui";
@@ -32,7 +32,8 @@ interface Props {
 
 /** Hovering a reference shows the verse; clicking opens it. */
 export function useRefPreview(bible: string, side: "below" | "right" = "below") {
-  const [prev, setPrev] = useState<{ r: Ref; rect: DOMRect; text: string } | null>(null);
+  // `r` for a passage; `head`/`sub` for a book's chapter (the book's title, the chapter's).
+  const [prev, setPrev] = useState<{ r?: Ref; head?: string; sub?: string; rect: DOMRect; text: string } | null>(null);
   const timer = useRef<number | undefined>(undefined);
   const onRefHover = (r: Ref | null, el: HTMLElement | null, from = bible) => {
     window.clearTimeout(timer.current);
@@ -46,16 +47,36 @@ export function useRefPreview(bible: string, side: "below" | "right" = "below") 
       } catch { /* not in this Bible */ }
     }, 350);
   };
+  /** The same preview for a reference book's or devotional's chapter: its opening sentences. */
+  const onDocHover = (d: { module: string; title: string; kind?: string; book?: string; para?: number } | null, el: HTMLElement | null) => {
+    window.clearTimeout(timer.current);
+    if (!d || !el) { timer.current = window.setTimeout(() => setPrev(null), 150); return; }
+    const rect = el.getBoundingClientRect();
+    timer.current = window.setTimeout(async () => {
+      try {
+        const html = d.kind === "devotional" ? await api.devotion(d.module, d.title) : (await api.article("reference", d.module, d.title))?.html;
+        // A bookmarked paragraph shows that paragraph; a chapter, its opening.
+        const all = d.para ? plainText(docSegments(html ?? "")[d.para - 1] ?? "") : plainText(html ?? "");
+        // The first few sentences, up to about 300 characters.
+        const sentences = all.match(/[^.!?]+[.!?]+["”’)]*\s*/g) ?? [all];
+        let text = "";
+        for (const s of sentences) { if (text && text.length + s.length > 300) break; text += s; }
+        if (text.length > 340) text = text.slice(0, 337).trimEnd() + "…";
+        setPrev({ head: d.book ?? d.module, sub: d.para ? `${d.title} · ¶${d.para}` : d.title, rect, text: text.trim() });
+      } catch { /* chapter gone */ }
+    }, 350);
+  };
   const pos = !prev ? {} : side === "right"
     ? { left: prev.rect.right + 8, top: Math.max(12, Math.min(prev.rect.top - 12, window.innerHeight - 280)) }
     : { left: Math.max(12, Math.min(prev.rect.left - 40, window.innerWidth - 340)), top: prev.rect.top > 260 ? prev.rect.top - 8 : prev.rect.bottom + 8, transform: prev.rect.top > 260 ? "translateY(-100%)" : undefined };
   const node = prev && (
     <div className="popover" style={{ ...pos, width: 320, padding: "12px 14px", pointerEvents: "none" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}><b style={{ fontSize: 12 }}>{fmtRef(prev.r)}</b><span className="n">click to open</span></div>
+      <div style={{ display: "flex", justifyContent: "space-between", gap: 10, marginBottom: 6 }}><b style={{ fontSize: 12, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{prev.r ? fmtRef(prev.r) : prev.head}</b><span className="n" style={{ flexShrink: 0 }}>click to open</span></div>
+      {prev.sub && <div style={{ font: "500 17px/1.25 var(--display)", marginBottom: 4 }}>{prev.sub}</div>}
       <div style={{ font: "400 15px/1.55 var(--serif)", maxHeight: 220, overflow: "hidden" }}>{prev.text}</div>
     </div>
   );
-  return { onRefHover, preview: node, hide: () => { window.clearTimeout(timer.current); setPrev(null); } };
+  return { onRefHover, onDocHover, preview: node, hide: () => { window.clearTimeout(timer.current); setPrev(null); } };
 }
 
 // A dictionary's entry names, lower-cased to the real name; loaded once per module for "See X" links.
@@ -243,7 +264,7 @@ function CrossRefs({ vref, onOpen, onRefHover }: { vref: Ref; onOpen: (r: Ref) =
   );
 }
 
-function DictionaryTab({ dict, setDict, onWord }: { dict: { module: string; topic: string } | null; setDict: (d: { module: string; topic: string } | null) => void; onWord?: (word: string, rect: DOMRect, where: string) => void }) {
+export function DictionaryTab({ dict, setDict, onWord }: { dict: { module: string; topic: string } | null; setDict: (d: { module: string; topic: string } | null) => void; onWord?: (word: string, rect: DOMRect, where: string) => void }) {
   const app = useApp();
   const dicts = orderModules((app.lib?.modules ?? []).filter((m) => m.kind === "dictionary"), app.settings.dictionaryOrder);
   const remembered = dicts.find((d) => d.id === (dict?.module ?? app.settings.dictModule))?.id;

@@ -1,9 +1,10 @@
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import { BOOKS, book, fmtRef } from "./bible";
 import { Icon, Wordmark } from "./icons";
 import { Screen, useApp } from "./state";
 import { todayReading } from "./plans";
 import { useRefPreview } from "./StudyPane";
+import { confirmDelete } from "./ui";
 
 const NAV: { s: Screen; label: string; icon: string; key: string; tip: string }[] = [
   { s: "read", label: "Read", icon: "read", key: "1" , tip: "Read the Bible beside the study pane" },
@@ -28,8 +29,22 @@ function ago(iso: string) {
 export function Sidebar() {
   const app = useApp();
   const today = todayReading(app);
-  const { onRefHover, preview, hide } = useRefPreview(app.settings.bible, "right");
+  const { onRefHover, onDocHover, preview, hide } = useRefPreview(app.settings.bible, "right");
   const leave = () => onRefHover(null, null);
+  // Each list shows its newest SHOWN; "Show all" opens the rest in place.
+  const SHOWN = 8;
+  const [allBookmarks, setAllBookmarks] = useState(false);
+  const [allRecent, setAllRecent] = useState(false);
+  // The × a row shows on hover, in place of its date or Bible. A span, since the row is a button.
+  const remove = (label: string, go: () => void) => (
+    <span role="button" tabIndex={0} className="x" aria-label={label} title={label}
+      onClick={(e) => { e.stopPropagation(); hide(); go(); }} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.stopPropagation(); e.preventDefault(); go(); } }}>
+      <Icon name="x" size={12} />
+    </span>
+  );
+  const more = (n: number, open: boolean, toggle: () => void) => n > SHOWN && (
+    <button type="button" className="bm more" onClick={toggle}>{open ? "Show fewer" : `Show all (${n})`}</button>
+  );
   return (
     <aside className="sidebar drag">
       <div className="brand"><Wordmark /></div>
@@ -43,26 +58,35 @@ export function Sidebar() {
       {app.bookmarks.length > 0 && (
         <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
           <div className="lab" style={{ paddingBottom: 2 }}>Bookmarks</div>
-          {app.bookmarks.slice(0, 8).map((b) => (
+          {app.bookmarks.slice(0, allBookmarks ? undefined : SHOWN).map((b) => b.doc ? (
+            // A paragraph of a book: the books icon, the chapter and paragraph; the paragraph previewed on hover.
+            <button key={b.id} type="button" className="bm" onMouseEnter={(e) => onDocHover({ ...b.doc!, book: app.mod(b.doc!.kind ?? "reference", b.doc!.module)?.title }, e.currentTarget)} onMouseLeave={() => onDocHover(null, null)} onClick={() => { hide(); app.openDoc(b.doc!.module, b.doc!.title, b.doc!.kind, b.doc!.para); }}>
+              <Icon name="bookmark" style={{ color: "var(--accent)", flexShrink: 0 }} /><span className="t">{b.doc.title}</span><span className="r">¶{b.doc.para}</span>{remove("Remove bookmark", () => app.removeBookmark(b.id))}
+            </button>
+          ) : (
             <button key={b.id} type="button" className="bm" onMouseEnter={(e) => onRefHover(b.ref, e.currentTarget, b.bible)} onMouseLeave={leave} onClick={() => { hide(); app.open({ book: b.ref.book, chapter: b.ref.chapter, verse: b.ref.verse, to: b.ref.to }, "read"); }}>
-              <Icon name="bookmark" style={{ color: "var(--accent)" }} /><span className="t">{fmtRef(b.ref)}</span><span className="r">{app.mod("bible", b.bible)?.abbrev ?? ""}</span>
+              <Icon name="bookmark" style={{ color: "var(--accent)" }} /><span className="t">{fmtRef(b.ref)}</span><span className="r">{app.mod("bible", b.bible)?.abbrev ?? ""}</span>{remove("Remove bookmark", () => app.removeBookmark(b.id))}
             </button>
           ))}
+          {more(app.bookmarks.length, allBookmarks, () => setAllBookmarks(!allBookmarks))}
         </div>
       )}
       {app.recent.length > 0 && (
         <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          <div className="lab" style={{ paddingBottom: 2 }}>Recent</div>
-          {app.recent.slice(0, 10).map((r) => r.doc ? (
-            // A book's or devotional's chapter: a book icon and its title; the book is in the tooltip.
-            <button key={`${r.doc.module}|${r.doc.title}`} type="button" className="bm" title={`${app.mod(r.doc.kind ?? "reference", r.doc.module)?.title ?? r.doc.module}: ${r.doc.title}`} onClick={() => app.openDoc(r.doc!.module, r.doc!.title, r.doc!.kind)}>
-              <Icon name="library" size={13} style={{ color: "var(--muted)", flexShrink: 0 }} /><span className="t">{r.doc.title}</span><span className="r">{ago(r.at)}</span>
+          <div className="lab" style={{ paddingBottom: 2, display: "flex", alignItems: "center" }}>Recent
+            <button type="button" className="labbtn" title="Clear the Recent list" onClick={async () => { if (await confirmDelete("the Recent list", "Your bookmarks and reading aren't affected.")) app.clearRecent(); }}>Clear</button>
+          </div>
+          {app.recent.slice(0, allRecent ? undefined : SHOWN).map((r) => r.doc ? (
+            // A book's or devotional's chapter: a book icon and its title, previewed on hover like a passage.
+            <button key={`${r.doc.module}|${r.doc.title}`} type="button" className="bm" onMouseEnter={(e) => onDocHover({ ...r.doc!, book: app.mod(r.doc!.kind ?? "reference", r.doc!.module)?.title }, e.currentTarget)} onMouseLeave={() => onDocHover(null, null)} onClick={() => { hide(); app.openDoc(r.doc!.module, r.doc!.title, r.doc!.kind); }}>
+              <Icon name="library" size={13} style={{ color: "var(--muted)", flexShrink: 0 }} /><span className="t">{r.doc.title}</span><span className="r">{ago(r.at)}</span>{remove("Remove from Recent", () => app.removeRecent(r))}
             </button>
           ) : (
             <button key={`${r.book}.${r.chapter}`} type="button" className="bm" onMouseEnter={(e) => onRefHover({ book: r.book, chapter: r.chapter }, e.currentTarget)} onMouseLeave={leave} onClick={() => { hide(); app.open({ book: r.book, chapter: r.chapter }, "read"); }}>
-              <Icon name="bible" size={13} style={{ color: "var(--muted)", flexShrink: 0 }} /><span className="t">{book(r.book).name} {r.chapter}</span><span className="r">{ago(r.at)}</span>
+              <Icon name="bible" size={13} style={{ color: "var(--muted)", flexShrink: 0 }} /><span className="t">{book(r.book).name} {r.chapter}</span><span className="r">{ago(r.at)}</span>{remove("Remove from Recent", () => app.removeRecent(r))}
             </button>
           ))}
+          {more(app.recent.length, allRecent, () => setAllRecent(!allRecent))}
         </div>
       )}
       <div style={{ marginTop: "auto" }}>

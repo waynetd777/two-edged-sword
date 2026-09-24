@@ -13,6 +13,8 @@ read-only and keeps what you make (journal, bookmarks, highlights, plans, chats)
 - **Ask** questions about what you're reading. The assistant searches your own commentaries,
   lexicons and dictionaries and names its sources. It runs on Claude Code or Codex, if either
   is installed.
+- **Books and devotionals** from your library, with the same tools as Scripture: highlight,
+  bookmark and note a paragraph, listen, and ask about it.
 - **Compare** any number of translations verse by verse, with the differences highlighted.
 - **Word Study** a Strong's number: where it is used, every verse in context, and the articles
   about it in your library.

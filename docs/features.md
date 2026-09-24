@@ -7,8 +7,11 @@ Settings. Everything you delete (a journal entry, a plan, a chat) asks first.
 screen you go to, passage, book chapter, word studied and search is a step you can go back to.
 From Word Study's list of words for "love", choosing ἀγάπη and pressing back returns to the list.
 
-The sidebar lists your bookmarks and the last ten chapters you read, of the Bible and of books
-and devotionals alike. Hover any control for a short description.
+The sidebar lists your bookmarks (verses and book paragraphs) and the chapters you read lately,
+of the Bible and of books and devotionals alike, eight of each with **Show all** for the rest.
+Hover an entry for a preview; its × removes it, with **Undo** in the message that follows, and
+**Clear** beside the Recent heading empties that list (after asking). Hover any control for a
+short description.
 
 ## Read
 
@@ -31,8 +34,12 @@ Strong's pronunciation guide).
 
 Words in commentary, dictionary articles and books can be clicked the same way. They have no
 Strong's numbers of their own, so the popup shows the Greek and Hebrew words the KJV most often
-translates that word with. Select verses to highlight (six colours), bookmark, note, compare, listen or copy
-(⌘C, with or without verse numbers).
+translates that word with.
+
+Pointing at a verse outlines it and turns its number into a button: click the verse (anywhere but
+a word) to select it, ⇧-click for a range, and the toolbar above offers highlight (six colours),
+bookmark, note, compare, listen from here, ask and copy (⌘C, with or without verse numbers). Its
+labels fold to icons when the column is narrow.
 
 Hover a reference, a bookmark, a recent chapter or a Strong's number for a preview. The passage
 picker goes book, chapter, then verse. "See ASTRONOMY" in a dictionary and "see on Gen 12:8" in
@@ -43,10 +50,16 @@ and forward.
 
 ## Books and devotionals
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="images/books-dark.png"><img alt="Foxe's Book of Martyrs with a paragraph selected and highlighted" src="images/books-light.png"></picture>
+
 The Books menu beside the Bible picker opens a reference book or a devotional in the reading
 column: chapters (a devotional's days) down the side, text and charts full width, images full
-screen, read aloud paragraph by paragraph, focus mode, and Ask about the chapter or a paragraph.
-A devotional opens on today's reading.
+screen, read aloud paragraph by paragraph, and focus mode. A devotional opens on today's reading.
+
+Paragraphs work like verses: numbered, outlined on hover, selected with a click (⇧-click for a
+run), with the same toolbar to highlight, bookmark, note (a journal entry quoting it, linked to
+it), listen from here, ask and copy. Bookmarks and notes show beside the paragraph. The study
+pane beside the book has **Notes** (journal entries on the chapter), **Dictionary** and **Ask**.
 
 ## Listen
 

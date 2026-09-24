@@ -85,6 +85,8 @@ def shoot(scene, theme, window_id):
             print(f"  {scene['name']} {theme}: no window")
             return False
         time.sleep(SETTLE)
+        # Found again just before capturing: the window can be replaced while the page settles.
+        win = window_of(window_id, app.pid, timeout=5) or win
         with tempfile.NamedTemporaryFile(suffix=".png") as raw:
             subprocess.run(["screencapture", "-x", "-o", f"-l{win}", raw.name], check=True)
             im = Image.open(raw.name)

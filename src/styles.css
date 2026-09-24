@@ -53,6 +53,17 @@ input, textarea, [contenteditable="true"] { user-select: text; }
 .lab { font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); padding: 0 10px; }
 .bm { display: flex; align-items: center; gap: 8px; min-height: 26px; padding: 3px 10px; border-radius: 6px; color: var(--text); font-size: 12.5px; border: 0; background: transparent; width: 100%; text-align: left; cursor: pointer; }
 .bm:hover { background: var(--hover); text-decoration: none; }
+/* A row's remove ×: shown on hover in place of its date or Bible. */
+.bm .x { display: none; margin-left: auto; width: 18px; height: 18px; border-radius: 5px; align-items: center; justify-content: center; color: var(--muted); flex-shrink: 0; }
+.bm:hover .x, .bm:focus-within .x { display: inline-flex; }
+.bm:hover .r, .bm:focus-within .r { display: none; }
+.bm .x:hover { background: var(--hover); color: var(--text); }
+/* A small action beside a sidebar heading ("Clear"), shown on hover of the heading. */
+.lab .labbtn { margin-left: auto; border: 0; background: transparent; color: var(--muted); font: 500 11px var(--ui); text-transform: none; letter-spacing: 0; cursor: pointer; opacity: 0; padding: 0 2px; border-radius: 4px; }
+.lab:hover .labbtn, .labbtn:focus-visible { opacity: 1; }
+.lab .labbtn:hover { color: var(--text); }
+.toast .toastundo { border: 0; background: transparent; color: #86aedb; font: 600 12.5px var(--ui); cursor: pointer; padding: 0; }
+.bm.more { color: var(--muted); font-size: 12px; min-height: 22px; }
 .bm .r { color: var(--muted); margin-left: auto; font-size: 11px; white-space: nowrap; }
 .doclist { display: flex; flex-direction: column; gap: 1px; }
 .doclist button { display: block; min-height: 28px; padding: 5px 10px; border: 0; border-radius: 6px; background: transparent; color: var(--text); font-size: 12.5px; text-align: left; cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 0; }
@@ -121,7 +132,7 @@ input[type="range"] { accent-color: var(--accent); }
 .scrim { position: fixed; inset: 0; z-index: 60; background: var(--scrim); display: flex; align-items: center; justify-content: center; }
 .dialog { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; box-shadow: 0 24px 70px var(--shadow); display: flex; flex-direction: column; overflow: hidden; max-height: calc(100vh - 60px); }
 .dialog .foot { display: flex; align-items: center; gap: 10px; padding: 12px 18px; border-top: 1px solid var(--border); background: var(--panel2); }
-.toast { position: fixed; right: 18px; bottom: 18px; z-index: 80; padding: 10px 14px; border-radius: 10px; background: var(--tbbg); color: #f2f2f4; box-shadow: 0 10px 30px var(--shadow); font-size: 12.5px; }
+.toast { position: fixed; right: 18px; bottom: 18px; z-index: 80; display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 10px; background: var(--tbbg); color: #f2f2f4; box-shadow: 0 10px 30px var(--shadow); font-size: 12.5px; }
 
 /* ---------- e-Sword text ---------- */
 .es p { margin: 0 0 0.6em; }
@@ -137,15 +148,17 @@ input[type="range"] { accent-color: var(--accent); }
 .docbody img { display: block; width: 100%; height: auto; margin: 0.6em 0; }
 .docbody table { width: 100%; }
 .es img.zoomable { cursor: zoom-in; }
-.dseg { position: relative; border-radius: 6px; transition: background 0.2s; }
+/* A book's paragraph is a verse row (.v): number, text and markers; these are the differences. */
+.dseg { transition: background 0.2s; }
+.dsegtext { min-width: 0; }
+.dsegtext.inl > span > p { display: inline; margin: 0; }
+.dsegtext [class^="hl-"] { -webkit-box-decoration-break: clone; box-decoration-break: clone; }
 .docbody p { margin: 0; }
-.dseg + .dseg { margin-top: 1.15em; }
-.dseg.speaking { background: var(--accentsoft); box-shadow: 0 0 0 6px var(--accentsoft); }
+.dseg + .dseg { margin-top: 0.5em; }
+.dseg.speaking { background: var(--accentsoft); }
 .dseg.asking { box-shadow: -4px 0 0 var(--accent); }
-.dseg .dsegtools { position: absolute; left: -30px; top: 0.3em; display: flex; flex-direction: column; gap: 2px; opacity: 0; }
-.dseg:hover .dsegtools, .dseg .dsegtools:focus-within { opacity: 1; }
-.dseg .dsegtools button { width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 50%; background: transparent; color: var(--muted); cursor: pointer; }
-.dseg .dsegtools button:hover { background: var(--hover); color: var(--accent); }
+.dseg.flash { animation: flashpara 1.6s ease-out; }
+@keyframes flashpara { 0%, 40% { background: var(--accentsoft); box-shadow: 0 0 0 6px var(--accentsoft); } 100% { background: transparent; box-shadow: 0 0 0 6px transparent; } }
 .viewer { position: fixed; inset: 0; z-index: 80; background: rgba(12, 12, 14, 0.94); }
 .viewer .ibtn { color: #eee; }
 .viewer .ibtn:hover { background: rgba(255, 255, 255, 0.12); }
@@ -164,7 +177,16 @@ input[type="range"] { accent-color: var(--accent); }
 /* ---------- reading ---------- */
 .verses { display: flex; flex-direction: column; gap: 2px; }
 .v { display: grid; grid-template-columns: 34px minmax(0, 1fr) 30px; gap: 10px; padding: 6px 10px; border-radius: 8px; position: relative; }
-.v:hover { background: var(--hover); }
+/* Pointing at a verse or paragraph shows it can be selected: a faint outline (the selection's,
+   lighter), a hand, and its number as a button. Words inside keep their own highlight. */
+.v { cursor: pointer; }
+.v:hover { background: var(--hover); box-shadow: inset 0 0 0 1px var(--ring); }
+.v:hover .vn { color: var(--accent); }
+/* On hover the number looks like the app's buttons (.btn): panel, border, small radius. */
+.vn span { display: inline-block; min-width: 22px; padding: 0 5px; border: 1px solid transparent; border-radius: 6px; text-align: center; line-height: 1.6; transition: background 0.12s, border-color 0.12s; }
+.v:hover .vn span { background: var(--panel); border-color: var(--border); box-shadow: 0 1px 2px var(--shadow); }
+.v:hover .vn span:hover { border-color: var(--ring); }
+.v.sel:hover { box-shadow: inset 0 0 0 1.5px var(--accent); }
 .v.sel { background: var(--hover); box-shadow: inset 0 0 0 1.5px var(--accent); }
 .v.sel + .v.sel { border-top-left-radius: 0; border-top-right-radius: 0; }
 .vn { font: 600 12px/calc(var(--read-size) * 1.7) var(--ui); color: var(--accent); text-align: right; cursor: pointer; }
@@ -183,6 +205,12 @@ input[type="range"] { accent-color: var(--accent); }
 .vtool { position: absolute; z-index: 20; display: flex; align-items: center; gap: 2px; padding: 3px 5px; border-radius: 9px; background: var(--tbbg); box-shadow: 0 6px 20px var(--shadow); }
 .vtool .tb { display: inline-flex; align-items: center; gap: 5px; height: 30px; padding: 0 9px; border: 0; border-radius: 6px; background: transparent; cursor: pointer; color: #ece6da; font-size: 12px; }
 .vtool .tb:hover { background: rgba(255, 255, 255, 0.1); }
+/* The verse and paragraph toolbars show labels when their column has room, and only icons (each
+   with its tooltip) when it doesn't: the text columns are size containers for this. */
+.readcol, .docbody { container-type: inline-size; }
+.vtool .tb { white-space: nowrap; }
+@container (max-width: 820px) { .vtool.fold-bible .lbl { display: none; } .vtool.fold-bible .tb { padding: 0 8px; } }
+@container (max-width: 640px) { .vtool.fold-doc .lbl { display: none; } .vtool.fold-doc .tb { padding: 0 8px; } }
 .vtool .dot { width: 16px; height: 16px; border-radius: 50%; border: 0; cursor: pointer; }
 .vtool .sep { width: 1px; height: 18px; background: rgba(255, 255, 255, 0.18); margin: 0 4px; }
 .fade-b { position: sticky; bottom: 0; height: 40px; background: linear-gradient(transparent, var(--bg)); pointer-events: none; }

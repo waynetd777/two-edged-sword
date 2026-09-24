@@ -24,6 +24,12 @@ export interface Scene {
   scrollTop?: boolean;
   /** Asked for after the rest has settled, as a click elsewhere would (a dictionary article, a question). */
   pending?: Pending;
+  /** A reference book or devotional to open, at a chapter (and, with para, a paragraph). */
+  doc?: { module: string; title: string; kind?: "reference" | "devotional"; para?: number };
+  /** Click this paragraph of the open book once it has loaded, selecting it. */
+  selectPara?: number;
+  /** A CSS selector clicked after that (a toolbar button, say), to show what it does. */
+  click?: string;
 }
 
 let started = false;
@@ -42,6 +48,9 @@ export function runScene(app: ReturnType<typeof useApp>, still: (s: Partial<Play
       if (sc.settings) app.set(sc.settings);
       if (sc.loc) app.open(sc.loc, sc.screen ?? "read");
       else if (sc.screen) app.go(sc.screen);
+      if (sc.doc) app.openDoc(sc.doc.module, sc.doc.title, sc.doc.kind ?? "reference", sc.doc.para);
+      if (sc.click) { const q = sc.click; window.setTimeout(() => (document.querySelector(q) as HTMLElement | null)?.click(), 2800); }
+      if (sc.selectPara) { const n = sc.selectPara; window.setTimeout(() => (document.querySelector(`[data-seg="${n}"]`) as HTMLElement | null)?.click(), 2000); }
       if (sc.word) app.studyWord(sc.word);
       if (sc.search) app.searchText(sc.search);
       if (sc.player) still(sc.player);

@@ -16,8 +16,8 @@ export interface WordPick { token: Token; verse: number; rect: DOMRect; /** Set 
 /** A clicked word outside a verse (commentary, a book) as a token: no Strong's numbers of its own. */
 export const textToken = (text: string): Token => ({ text, word: true, red: false, italic: false, strongs: [], at: 0, wi: -1 });
 
-const HL: HlColor[] = ["red", "orange", "yellow", "green", "blue", "purple"];
-const HL_DOT: Record<HlColor, string> = { red: "#e59a92", orange: "#efb97e", yellow: "#e9d271", green: "#a9cf9f", blue: "#9fc0e6", purple: "#c1a9e3" };
+export const HL: HlColor[] = ["red", "orange", "yellow", "green", "blue", "purple"];
+export const HL_DOT: Record<HlColor, string> = { red: "#e59a92", orange: "#efb97e", yellow: "#e9d271", green: "#a9cf9f", blue: "#9fc0e6", purple: "#c1a9e3" };
 
 /** Journal entries that mention a verse, by "b.c.v". */
 export function useNotesByVerse() {
@@ -217,17 +217,17 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
   };
 
   const toolbar = sel && (
-    <div className="vtool" role="toolbar" aria-label="Verse actions" style={{ top: -44, left: 44 }} onClick={(e) => e.stopPropagation()}>
+    <div className="vtool fold-bible" role="toolbar" aria-label="Verse actions" style={{ top: -44, left: 44 }} onClick={(e) => e.stopPropagation()}>
       <div style={{ display: "flex", gap: 6, padding: "0 6px 0 4px" }}>
         {HL.map((c) => <button key={c} type="button" className="dot" aria-label={`Highlight ${c}`} aria-pressed={curHl === c} style={{ background: HL_DOT[c], outline: curHl === c ? "2px solid #fff" : undefined }} onClick={() => setHl(curHl === c ? null : c)} />)}
       </div>
       <span className="sep" />
-      <button type="button" className="tb" onClick={() => app.toggleBookmark(selRef!, bible)}><Icon name="bookmark" style={{ fill: selBookmarked ? "currentColor" : "none" }} />{selBookmarked ? "Bookmarked" : "Bookmark"}</button>
-      <button type="button" className="tb" onClick={() => app.startEntry({ verses: [fmtRef(selRef!)] })}><Icon name="note" />Note<span style={{ opacity: 0.6 }}>N</span></button>
-      <button type="button" className="tb" onClick={() => app.open({ ...loc, verse: sel.from, to: sel.to }, "compare")}><Icon name="compare" />Compare</button>
-      <button type="button" className="tb" onClick={() => player.play(bible, loc.book, loc.chapter, sel.from)}><Icon name="speaker" />Listen from here</button>
-      {canAsk && <button type="button" className="tb" onClick={() => { setTab("ask"); setAskSeed(null); }}><Icon name="chat" />Ask</button>}
-      <button type="button" className="tb" title={settings.copyNumbers ? "Copy with verse numbers (⌘C)" : "Copy without verse numbers (⌘C)"} onClick={copy}><Icon name="copy" />Copy<span style={{ opacity: 0.6 }}>⌘C</span></button>
+      <button type="button" className="tb" title={selBookmarked ? "Remove the bookmark" : "Bookmark these verses"} onClick={() => app.toggleBookmark(selRef!, bible)}><Icon name="bookmark" style={{ fill: selBookmarked ? "currentColor" : "none" }} /><span className="lbl">{selBookmarked ? "Bookmarked" : "Bookmark"}</span></button>
+      <button type="button" className="tb" title="Note: a journal entry on these verses (N)" onClick={() => app.startEntry({ verses: [fmtRef(selRef!)] })}><Icon name="note" /><span className="lbl">Note<span style={{ opacity: 0.6 }}> N</span></span></button>
+      <button type="button" className="tb" title="Compare these verses in other translations" onClick={() => app.open({ ...loc, verse: sel.from, to: sel.to }, "compare")}><Icon name="compare" /><span className="lbl">Compare</span></button>
+      <button type="button" className="tb" title="Listen from here" onClick={() => player.play(bible, loc.book, loc.chapter, sel.from)}><Icon name="speaker" /><span className="lbl">Listen from here</span></button>
+      {canAsk && <button type="button" className="tb" title="Ask about these verses" onClick={() => { setTab("ask"); setAskSeed(null); }}><Icon name="chat" /><span className="lbl">Ask</span></button>}
+      <button type="button" className="tb" title={settings.copyNumbers ? "Copy with verse numbers (⌘C)" : "Copy without verse numbers (⌘C)"} onClick={copy}><Icon name="copy" /><span className="lbl">Copy<span style={{ opacity: 0.6 }}> ⌘C</span></span></button>
       <button type="button" className="tb" aria-pressed={settings.copyNumbers} title="Include verse numbers when copying" onClick={() => app.set({ copyNumbers: !settings.copyNumbers })} style={{ padding: "0 7px", opacity: settings.copyNumbers ? 1 : 0.5, textDecoration: settings.copyNumbers ? undefined : "line-through" }}>#</button>
     </div>
   );
@@ -261,7 +261,7 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
         return (
           <div key={v.v} data-v={v.v} className={`v ${isSel ? "sel" : ""}`} style={isSel && sel!.from === v.v && toolbar ? { marginTop: 46 } : undefined} onClick={(e) => clickVerse(v.v, e)}>
             {isSel && sel!.from === v.v && toolbar}
-            <div className="vn">{v.v}</div>
+            <div className="vn"><span title="Click the verse (not a word) to select it · ⇧-click for a range">{v.v}</span></div>
             <div className="vt selectable"><span className={hl ? `hl-${hlName(hl)}` : undefined}>
               <VerseText tokens={tokens.get(v.v) ?? []} red={settings.redLetters} speakingChar={reading && player.state.verse === v.v && settings.highlightWords ? player.state.char : undefined} onWord={(t, el) => pickWord(t, v.v, el)} activeWi={word?.verse === v.v ? word.token.wi : undefined} showNums={!!bmod?.strongs} />
             </span></div>
@@ -322,7 +322,7 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
         </Topbar>
       )}
       <div style={{ flexGrow: 1, minHeight: 0, display: "grid", gridTemplateColumns: !focus && settings.studyPane ? "minmax(0,1fr) 520px" : "minmax(0,1fr)" }}>
-        <main ref={scroller} className="scroll" style={{ position: "relative", padding: focus ? "0 40px 120px" : "0 40px 120px 36px" }} onClick={() => setSel(null)}>
+        <main ref={scroller} className="scroll readcol" style={{ position: "relative", padding: focus ? "0 40px 120px" : "0 40px 120px 36px" }} onClick={() => setSel(null)}>
           {header}
           {err ? <div className="err" style={{ padding: 20 }}>{err}</div> : body}
           <ChapterNav onGo={go} />

@@ -41,6 +41,8 @@ export interface Settings {
   copyNumbers: boolean;
   /** The study pane as it was left: its tab, the commentary and dictionary entry chosen, and whether it follows the reading. */
   studyTab: StudyTab;
+  /** The study pane beside a book: its tab. */
+  docTab: "notes" | "dictionary" | "ask";
   studyCommentary: string | null;
   studyDict: { module: string; topic: string } | null;
   dictModule: string | null;
@@ -48,7 +50,7 @@ export interface Settings {
 }
 
 const DEFAULTS: Settings = {
-  theme: "auto", readSize: 19, readFont: "literata", studyTab: "commentary", studyCommentary: null, studyDict: null, dictModule: null, studyFollow: true, redLetters: true, layout: "verse", bible: "kjv", compare: ["kjv", "asv", "kjv+"], hiddenBibles: [],
+  theme: "auto", readSize: 19, readFont: "literata", studyTab: "commentary", docTab: "ask", studyCommentary: null, studyDict: null, dictModule: null, studyFollow: true, redLetters: true, layout: "verse", bible: "kjv", compare: ["kjv", "asv", "kjv+"], hiddenBibles: [],
   commentaryOrder: ["barnes", "henry", "clarke", "gill", "jfb", "wesley", "darby", "meyer"], dictionaryOrder: ["isbe", "smith", "nave", "cyclopedia"],
   voice: "", rate: 1, continueChapter: true, readNumbers: false, highlightWords: true, journalDir: "", showNotes: true,
   model: "claude-sonnet-5", includeCommentaries: true, allowLicensed: true, reminder: false, reminderTime: "06:30", whenBehind: "ask", studyPane: true, copyNumbers: true,
@@ -63,7 +65,11 @@ export const READ_FONTS = {
 };
 export type ReadFont = keyof typeof READ_FONTS;
 
-export interface Bookmark { id: string; ref: Ref; bible: string; created: string }
+/** A bookmarked passage, or (with `doc`) a paragraph of a reference book or devotional; `ref` is
+ *  then unused ({ book: 0, chapter: 0 }). */
+export interface Bookmark { id: string; ref: Ref; bible: string; created: string; doc?: DocSpot }
+/** A paragraph in a book: its chapter, and the paragraph's number there (from 1). */
+export interface DocSpot { module: string; title: string; kind?: DocKind; para: number }
 export type HlColor = "red" | "orange" | "yellow" | "green" | "blue" | "purple";
 /** Highlights saved before there were six colours. */
 export const hlName = (c: string): HlColor => (c === "gold" ? "yellow" : c === "rose" ? "red" : (c as HlColor));
@@ -139,6 +145,10 @@ interface Ctx {
 
   bookmarks: Bookmark[];
   toggleBookmark: (ref: Ref, bible: string) => void;
+  toggleDocBookmark: (spot: DocSpot) => void;
+  /** A paragraph to scroll to once DocReader has the chapter (set by openDoc's `para`). */
+  docPara: DocSpot | null;
+  clearDocPara: () => void;
   highlights: Record<string, HlColor>;
   setHighlight: (key: string, c: HlColor | null) => void;
   recent: Recent[];
@@ -150,7 +160,7 @@ interface Ctx {
   /** The reference book in the reading column; null while reading the Bible. */
   doc: Doc | null;
   /** Opens a reference book, at the given chapter or wherever it was last left. */
-  openDoc: (module: string, title?: string, kind?: DocKind) => void;
+  openDoc: (module: string, title?: string, kind?: DocKind, para?: number) => void;
   closeDoc: () => void;
   /** The chapter last read in each reference book. */
   docAt: Record<string, string>;
@@ -179,8 +189,13 @@ interface Ctx {
   studyWord: (num: string) => void;
   searchFor: string | null;
   searchText: (q: string) => void;
-  toast: (msg: string) => void;
+  /** A brief message; with `undo`, it offers an Undo button that runs it. */
+  toast: (msg: string, undo?: () => void) => void;
   toastMsg: string | null;
+  toastUndo: (() => void) | null;
+  removeBookmark: (id: string) => void;
+  removeRecent: (r: Recent) => void;
+  clearRecent: () => void;
 }
 
 const C = createContext<Ctx | null>(null);
@@ -243,7 +258,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [pending, setPendingState] = useState<Pending | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [searchFor, setSearchFor] = useState<string | null>(null);
+  const [docPara, setDocPara] = useState<DocSpot | null>(null);
   const [toastMsg, setToast] = useState<string | null>(null);
+  const [toastUndo, setToastUndo] = useState<(() => void) | null>(null);
   const toastTimer = useRef<number | undefined>(undefined);
 
   useEffect(() => { api.library().then(setLib); api.journalDefaultDir().then(setDefaultDir); }, []);
@@ -307,7 +324,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   };
 
   const sameRecent = (a: Recent, b: Recent) => (a.doc || b.doc ? a.doc?.module === b.doc?.module && a.doc?.title === b.doc?.title : a.book === b.book && a.chapter === b.chapter);
-  const addRecent = (r: Recent) => setNav((n) => ({ ...n, recent: [r, ...n.recent.filter((x) => !sameRecent(x, r))].slice(0, 12) }));
+  const addRecent = (r: Recent) => setNav((n) => ({ ...n, recent: [r, ...n.recent.filter((x) => !sameRecent(x, r))].slice(0, 50) }));
 
   const open = (l: Loc, s?: Screen) => {
     addRecent({ book: l.book, chapter: l.chapter, at: new Date().toISOString() });
@@ -328,10 +345,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     bump((x) => x + 1);
   };
 
-  const toast = useCallback((m: string) => {
+  const toast = useCallback((m: string, undo?: () => void) => {
     setToast(m);
+    setToastUndo(() => (undo ? () => { undo(); setToast(null); setToastUndo(null); } : null));
     window.clearTimeout(toastTimer.current);
-    toastTimer.current = window.setTimeout(() => setToast(null), 2600);
+    toastTimer.current = window.setTimeout(() => { setToast(null); setToastUndo(null); }, undo ? 6000 : 2600);
   }, []);
 
   const value: Ctx = {
@@ -347,12 +365,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const same = (b: Bookmark) => b.ref.book === ref.book && b.ref.chapter === ref.chapter && b.ref.verse === ref.verse && (b.ref.to ?? b.ref.verse) === (ref.to ?? ref.verse);
       return bs.some(same) ? bs.filter((b) => !same(b)) : [{ id: uid(), ref, bible, created: new Date().toISOString() }, ...bs];
     }),
+    toggleDocBookmark: (spot) => setBookmarks((bs) => {
+      const same = (b: Bookmark) => b.doc?.module === spot.module && b.doc.title === spot.title && b.doc.para === spot.para;
+      return bs.some(same) ? bs.filter((b) => !same(b)) : [{ id: uid(), ref: { book: 0, chapter: 0 }, bible: "", created: new Date().toISOString(), doc: spot }, ...bs];
+    }),
+    docPara, clearDocPara: () => setDocPara(null),
     highlights,
     setHighlight: (k, c) => setHighlights((h) => { const n = { ...h }; if (c) n[k] = c; else delete n[k]; return n; }),
     recent: nav.recent,
     session, setSession,
     doc: nav.doc, docAt: nav.docAt ?? {},
-    openDoc: (module, title, kind = "reference") => {
+    openDoc: (module, title, kind = "reference", para) => {
+      setDocPara(para && title ? { module, title, kind, para } : null);
       // A devotional opens on today's reading (DocReader picks it); a book where it was left.
       const t = kind === "devotional" ? title ?? "" : title ?? nav.docAt?.[module] ?? "";
       if (kind !== "devotional" && t) setNav((n) => ({ ...n, docAt: { ...n.docAt, [module]: t } }));
@@ -375,7 +399,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
     journalSeed, startEntry: (seed) => { setJournalSeed(seed); navigate({ screen: "journal" }); }, clearSeed: () => setJournalSeed(null),
     wordStudy, studyWord: (n) => navigate({ screen: "word", word: n }),
     searchFor, searchText: (q) => navigate({ screen: "search", search: q }),
-    toast, toastMsg,
+    toast, toastMsg, toastUndo,
+    // Single rows go straight away with an Undo in the toast; clearing Recent asks first (Shell).
+    removeBookmark: (id) => {
+      const before = bookmarks;
+      setBookmarks((bs) => bs.filter((b) => b.id !== id));
+      toast("Bookmark removed", () => setBookmarks(() => before));
+    },
+    removeRecent: (r) => {
+      const before = nav.recent;
+      setNav((n) => ({ ...n, recent: n.recent.filter((x) => !sameRecent(x, r)) }));
+      toast("Removed from Recent", () => setNav((n) => ({ ...n, recent: before })));
+    },
+    clearRecent: () => setNav((n) => ({ ...n, recent: [] })),
   };
   return <C.Provider value={value}>{children}</C.Provider>;
 }

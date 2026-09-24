@@ -11,6 +11,7 @@ import { Topbar } from "./Shell";
 import { nowLocal, uid, useApp } from "./state";
 import { confirmDelete, Dialog, Popover, Seg } from "./ui";
 import { useAssistant } from "./assistant";
+import { docModule, parseDocLabel } from "./docref";
 
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const longDate = (s: string) => {
@@ -205,9 +206,11 @@ function Editor({ entry, onChange, saved, err, onDelete, onExport, ask }: { entr
             <span className="n">{entry.verses.length ? "Linked to" : "No verses linked"}</span>
             {entry.verses.map((v) => {
               const r = parseRef(v);
+              const d = r ? null : parseDocLabel(v);
+              const dm = d && docModule(d, app.lib?.modules ?? []);
               return (
                 <span key={v} className="rchip" style={{ gap: 6 }}>
-                  <a onClick={() => r && app.open({ book: r.book, chapter: r.chapter, verse: r.verse, to: r.to }, "read")}>{v}</a>
+                  <a onClick={() => { if (r) app.open({ book: r.book, chapter: r.chapter, verse: r.verse, to: r.to }, "read"); else if (d && dm) app.openDoc(dm.id, d.chapter, dm.kind === "devotional" ? "devotional" : "reference", d.from); }}>{v}</a>
                   <button className="ibtn" type="button" aria-label={`Unlink ${v}`} style={{ width: 16, height: 16 }} onClick={() => onChange({ verses: entry.verses.filter((x) => x !== v) })}><Icon name="x" size={11} /></button>
                 </span>
               );
