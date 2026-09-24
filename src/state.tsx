@@ -90,11 +90,13 @@ export interface Chat {
   bookDir?: string;
   /** A chat about a Bible passage searches the library's material on it here (api.studyExport). */
   studyDir?: string;
+  /** The passage it was asked about, which Add to journal links. */
+  verses?: string[];
   messages: ChatMsg[];
   journaled?: boolean;
 }
 
-export interface JournalSeed { verses?: string[]; title?: string; body?: string; tags?: string[]; /** Open this entry instead of starting one. */ openId?: string; chatId?: string }
+export interface JournalSeed { verses?: string[]; title?: string; body?: string; tags?: string[]; /** Open this entry instead of starting one. */ openId?: string }
 
 export interface Pending { article?: { module: string; topic: string }; ask?: string; commentary?: string }
 
@@ -170,7 +172,6 @@ interface Ctx {
   journalDir: string;
   saveEntry: (e: JournalEntry) => Promise<void>;
   deleteEntry: (id: string) => Promise<void>;
-  reloadJournal: () => Promise<void>;
 
   plans: Plan[];
   /** Settings and plans have been read from the store, so they are the user's and not the defaults. */
@@ -212,6 +213,8 @@ export const useApp = () => {
 // (closing only hides it, and Quit exits without warning the page).
 const flushers = new Set<() => void>();
 const flushAll = () => flushers.forEach((f) => f());
+/** Adds a pending save to those written at once; returns its removal. */
+export const onFlush = (f: () => void) => { flushers.add(f); return () => { flushers.delete(f); }; };
 window.addEventListener("beforeunload", flushAll);
 window.addEventListener("blur", flushAll);
 document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") flushAll(); });
@@ -430,7 +433,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     journal, journalDir,
     saveEntry: async (e) => { await api.journalSave(journalDir, e); await reloadJournal(); },
     deleteEntry: async (id) => { await api.journalDelete(journalDir, id); await reloadJournal(); },
-    reloadJournal,
     plans, setPlans, plansReady: settingsLoaded && plansLoaded, chats, setChats,
     // An article, a commentary or a question is shown beside the Bible, so a book open in Read is
     // closed for it (back returns to the book).

@@ -209,17 +209,19 @@ fn snippet(text: &str, at: usize) -> String {
 }
 
 /// SQL LIKE conditions that narrow the candidates: every term for phrase/all, any for "any".
-/// LIKE ignores case only for ASCII, so a word with other letters can't narrow them: it is left
-/// to `matches`, and for "any" nothing narrows at all.
+/// LIKE runs on the stored markup, where only plain ASCII letters and digits are sure to appear as
+/// typed (LIKE ignores case only for ASCII, and `'` or `"` may be stored as entities). Any other
+/// word can't narrow them: it is left to `matches`, and for "any" nothing narrows at all.
 fn like_clause(col: &str, terms: &[String], phrase: &str, mode: Mode) -> (String, Vec<String>) {
     let words: Vec<&str> = match mode {
         Mode::Phrase => phrase.split_whitespace().collect(),
         _ => terms.iter().map(String::as_str).collect(),
     };
-    if mode == Mode::Any && words.iter().any(|w| !w.is_ascii()) {
+    let narrows = |w: &str| w.chars().all(|c| c.is_ascii_alphanumeric());
+    if mode == Mode::Any && !words.iter().all(|w| narrows(w)) {
         return ("1".into(), vec![]);
     }
-    let pats: Vec<String> = words.iter().filter(|w| w.is_ascii()).map(|w| format!("%{w}%")).collect();
+    let pats: Vec<String> = words.iter().filter(|w| narrows(w)).map(|w| format!("%{w}%")).collect();
     if pats.is_empty() {
         return ("1".into(), vec![]);
     }

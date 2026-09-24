@@ -92,6 +92,8 @@ export function AskPanel(p: AskProps) {
   // Every passage chat gets the library to search; the model decides whether a question needs it.
   const withLibrary = app.settings.includeCommentaries;
   const endRef = useRef<HTMLDivElement>(null);
+  /** The chat being answered, which Stop cancels even once another chat is on screen. */
+  const running = useRef<string | null>(null);
   const chat = app.chats.find((c) => c.id === chatId) ?? null;
   const asst = useAssistant();
   const model: Model = chat?.model ?? pickModel(app.settings.model, asst.models);
@@ -139,12 +141,13 @@ export function AskPanel(p: AskProps) {
         const bibles = app.bibles.filter((b) => app.settings.allowLicensed || !isLicensed(b)).map((b) => b.id);
         try { studyDir = await api.studyExport(id, { book: passage.book, chapter: passage.chapter, from: passage.verse ?? null, to: passage.verse ? passage.to ?? passage.verse : null, bibles, strongsBible: app.strongsBible, label: fmtRef(passage) }); } catch (e) { console.error(e); }
       }
-      const c: Chat = { id, title: question.length > 80 ? question.slice(0, 77) + "…" : question, about, source: p.source, created: new Date().toISOString(), updated: new Date().toISOString(), model, bookDir, studyDir, messages: [] };
+      const c: Chat = { id, title: question.length > 80 ? question.slice(0, 77) + "…" : question, about, source: p.source, created: new Date().toISOString(), updated: new Date().toISOString(), model, bookDir, studyDir, verses: passage ? [fmtRef(passage)] : [], messages: [] };
       app.setChats((cs) => [c, ...cs]);
       setChatId(id);
       try { const ctx = await buildContext(); if (ctx) prompt = `${ctx}\n\nQuestion: ${question}`; } catch (e) { console.error(e); }
     }
     const cid = id!;
+    running.current = cid;
     update(cid, (c) => ({ ...c, updated: new Date().toISOString(), messages: [...c.messages, { role: "user", text: question }, { role: "assistant", text: "" }] }));
     setStatus(null);
     subs.set(cid, {
@@ -158,6 +161,7 @@ export function AskPanel(p: AskProps) {
           return { ...c, session: d.sessionId ?? c.session, messages: m, updated: new Date().toISOString() };
         });
         subs.delete(cid);
+        running.current = null;
         setBusy(false);
         setStatus(null);
       },
@@ -169,7 +173,8 @@ export function AskPanel(p: AskProps) {
   const addToJournal = async (c: Chat, i: number) => {
     const qm = c.messages[i - 1]?.text ?? c.title;
     const a = c.messages[i].text;
-    const refs = passage ? [fmtRef(passage)] : [];
+    // Chats from before they kept their passage: the one on screen, only if it's what they were about.
+    const refs = c.verses ?? (passage && fmtRef(passage) === c.about ? [fmtRef(passage)] : []);
     await app.saveEntry({ id: uid(), title: qm.length > 70 ? qm.slice(0, 67) + "…" : qm, created: nowLocal(), updated: nowLocal(), verses: refs, tags: ["ask"], body: `**Asked:** ${qm}\n\n${a}\n\n*Answer from ${modelName(c.model)}.*` });
     update(c.id, (x) => ({ ...x, journaled: true }));
     app.toast("Added to your journal");
@@ -212,7 +217,7 @@ export function AskPanel(p: AskProps) {
           )}
         </div>
       ))}
-      {busy && <button className="btn small" type="button" style={{ alignSelf: "flex-start" }} onClick={() => chat && api.askCancel(chat.id)}><Icon name="stop" size={12} />Stop</button>}
+      {busy && <button className="btn small" type="button" style={{ alignSelf: "flex-start" }} onClick={() => { if (running.current) api.askCancel(running.current); }}><Icon name="stop" size={12} />Stop</button>}
       <div ref={endRef} />
     </>
   );

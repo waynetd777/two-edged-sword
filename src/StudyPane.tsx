@@ -217,11 +217,10 @@ function CommentaryTab(p: Props & { vref: Ref }) {
   const open = (r: Ref) => { hide(); app.open({ book: r.book, chapter: r.chapter, verse: r.verse, to: r.to }); };
   const html = intro === "chapter" ? data?.chapter : intro === "book" ? data?.book : data?.verse.map((e) => e.html).join("");
   const others = cov.filter((c) => c.id !== app.tsk && !c.range);
-  const shown = list;
   return (
     <>
       <div style={{ display: "flex", gap: 6, padding: "10px 18px 0", flexWrap: "wrap" }}>
-        {shown.map((c) => (
+        {list.map((c) => (
           <button key={c.id} type="button" className={`chip ${current?.id === c.id ? "on" : ""}`} title={c.title} onClick={() => { p.setCommentary(c.id); setIntro("verse"); }}>
             {c.abbrev.replace(/^(Albert|Adam|John|Matthew) /, "")}{c.range && rangeLabel(c.range, at.chapter) && <span className="n">{rangeLabel(c.range, at.chapter)}</span>}
           </button>
@@ -293,20 +292,27 @@ export function DictionaryTab({ dict, setDict, onWord }: { dict: { module: strin
   const trail = useTrail<{ module: string; topic: string }>((a, b) => a.module === b.module && a.topic === b.topic);
   useEffect(() => { if (dict) { setModule(dict.module); setQ(dict.topic); trail.visit(dict); } }, [dict]); // eslint-disable-line react-hooks/exhaustive-deps
   const goTrail = (d: number) => { hide(); const it = trail.go(d); if (it) setDict(it); };
+  // Only the article asked for last is shown: an earlier one can arrive after it.
+  const artSeq = useRef(0);
+  const loadArt = (m: string, topic: string, then?: (a: Article | null) => void) => {
+    const n = ++artSeq.current;
+    api.article("dictionary", m, topic).then((a) => { if (n === artSeq.current) { setArt(a); then?.(a); } }).catch(console.error);
+  };
   useEffect(() => {
-    if (!module) return;
-    if (dict && dict.module === module) api.article("dictionary", module, dict.topic).then(setArt);
-  }, [dict, module]);
+    if (module && dict && dict.module === module) loadArt(module, dict.topic);
+  }, [dict, module]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (!module || !q.trim()) { setTopics([]); return; }
-    const t = window.setTimeout(() => api.topics("dictionary", module, q.trim(), 40).then(setTopics), 120);
-    return () => window.clearTimeout(t);
+    let dead = false;
+    const t = window.setTimeout(() => api.topics("dictionary", module, q.trim(), 40).then((ts) => { if (!dead) setTopics(ts); }).catch(console.error), 120);
+    return () => { dead = true; window.clearTimeout(t); };
   }, [q, module]);
-  const pick = (topic: string) => { setDict({ module, topic }); api.article("dictionary", module, topic).then(setArt); setTopics([]); };
+  // Setting dict loads the article (the effect above).
+  const pick = (topic: string) => { setDict({ module, topic }); setTopics([]); };
   // Switching dictionary keeps the same topic when it has one.
   const switchTo = (m: ModuleInfo) => {
     setModule(m.id);
-    if (art) api.article("dictionary", m.id, art.topic).then((a) => { setArt(a); if (a) setDict({ module: m.id, topic: a.topic }); });
+    if (art) loadArt(m.id, art.topic, (a) => { if (a) setDict({ module: m.id, topic: a.topic }); });
   };
   return (
     <div style={{ display: "flex", flexDirection: "column", minHeight: 0, flexGrow: 1 }}>
@@ -394,7 +400,9 @@ function MapsTab({ bookN }: { bookN: number }) {
   useEffect(() => {
     if (!chosen) { setArt(null); return; }
     setZoom(1);
-    api.article("reference", chosen.module, chosen.title).then(setArt);
+    let dead = false;
+    api.article("reference", chosen.module, chosen.title).then((a) => { if (!dead) setArt(a); }).catch(console.error);
+    return () => { dead = true; };
   }, [chosen?.module, chosen?.title]);
   if (!refs.length) return <div className="empty">No maps in your library.</div>;
   return (

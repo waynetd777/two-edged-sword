@@ -60,7 +60,9 @@ export function WordStudyScreen() {
     if (next === target) { if (!isNum) lookUp(t); return; }
     app.studyWord(next);
   };
+  const lookSeq = useRef(0);
   const lookUp = async (t: string) => {
+    const n = ++lookSeq.current;
     setQ(t);
     setFinding(true);
     try {
@@ -74,9 +76,11 @@ export function WordStudyScreen() {
         const p = a ? lexiconParts(a.html) : null;
         return { ...w, word: p?.word, translit: p?.translit };
       }));
+      if (n !== lookSeq.current) return;
       setLookup({ q: t, words: named, translit: translit.filter((x) => !named.some((w) => w.num === x.num)) });
       setShowing(true);
-    } finally { setFinding(false); }
+    } catch (e) { if (n === lookSeq.current) app.toast(`Couldn't look that up: ${e}`); }
+    finally { if (n === lookSeq.current) setFinding(false); }
   };
   const clear = () => { setQ(""); setLookup(null); setShowing(false); };
   const choose = (n: string) => app.studyWord(n);

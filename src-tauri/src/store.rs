@@ -35,17 +35,26 @@ pub fn read(dir: &std::path::Path, name: &str) -> Result<Value, String> {
 pub fn write(dir: &std::path::Path, name: &str, value: &Value) -> Result<(), String> {
     let p = path_for(dir, name)?;
     std::fs::create_dir_all(dir).map_err(|e| e.to_string())?;
-    let tmp = p.with_extension("json.tmp");
+    let tmp = tmp_beside(&p);
     let text = serde_json::to_string_pretty(value).map_err(|e| e.to_string())?;
     std::fs::write(&tmp, text).map_err(|e| e.to_string())?;
     std::fs::rename(&tmp, &p).map_err(|e| e.to_string())
+}
+
+/// A hidden temporary name beside `p`, unique to this write, so it can't clobber a file of the
+/// user's (`Notes.tmp`) or another write in flight.
+fn tmp_beside(p: &std::path::Path) -> PathBuf {
+    use std::sync::atomic::{AtomicU64, Ordering};
+    static N: AtomicU64 = AtomicU64::new(0);
+    let name = p.file_name().and_then(|n| n.to_str()).unwrap_or("file");
+    p.with_file_name(format!(".{name}.{}.{}.tmp", std::process::id(), N.fetch_add(1, Ordering::Relaxed)))
 }
 
 pub fn write_text_atomic(p: &std::path::Path, text: &str) -> Result<(), String> {
     if let Some(parent) = p.parent() {
         std::fs::create_dir_all(parent).map_err(|e| e.to_string())?;
     }
-    let tmp = p.with_extension("tmp");
+    let tmp = tmp_beside(p);
     std::fs::write(&tmp, text).map_err(|e| e.to_string())?;
     std::fs::rename(&tmp, p).map_err(|e| e.to_string())
 }

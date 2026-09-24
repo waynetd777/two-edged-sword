@@ -78,7 +78,7 @@ fn get_passages(st: State<AppState>, bible: String, ranges: Vec<content::Range>)
     content::passages(&st.lib(), &bible, &ranges)
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 fn chapter_sizes(st: State<AppState>, bible: String) -> Result<Vec<(i64, i64, i64)>, String> {
     content::chapter_sizes(&st.lib(), &bible)
 }
@@ -93,7 +93,7 @@ fn get_commentary(st: State<AppState>, module: String, book: i64, chapter: i64, 
     content::commentary(&st.lib(), &module, book, chapter, verse)
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 fn get_coverage(st: State<AppState>, book: i64, chapter: i64, verse: i64) -> Vec<content::Coverage> {
     content::coverage(&st.lib(), book, chapter, verse)
 }
@@ -103,7 +103,7 @@ fn get_article(st: State<AppState>, kind: Kind, module: String, topic: String) -
     content::article(&st.lib(), kind, &module, &topic)
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 fn find_topics(st: State<AppState>, word: String) -> Vec<content::TopicHit> {
     content::find_topics(&st.lib(), &word, 8)
 }
@@ -128,7 +128,7 @@ fn strongs_for_word(st: State<AppState>, bible: String, word: String) -> Result<
     content::strongs_for_word(&st.lib(), &bible, &word)
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 fn translit_search(st: State<AppState>, lexicon: String, query: String, limit: usize) -> Result<Vec<content::TranslitHit>, String> {
     content::translit_search(&st.lib(), &lexicon, &query, limit)
 }

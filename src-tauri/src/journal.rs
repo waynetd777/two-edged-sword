@@ -205,6 +205,9 @@ fn write_month(dir: &Path, key: &str, text: Option<String>) -> Result<(), String
 pub fn save(dir: &Path, entry: &Entry) -> Result<(), String> {
     if entry.id.is_empty() { return Err("entry has no id".into()); }
     let key = month_key(&entry.created).ok_or("entry has no valid date")?.to_string();
+    // Saves overlap (one entry's debounce, the next entry's), and each rewrites whole months.
+    let lock = crate::store::dir_lock(dir);
+    let _held = lock.lock().unwrap_or_else(|e| e.into_inner());
     write_month(dir, &key, splice(&read_month(dir, &key)?, &key, &entry.id, Some(entry)))?;
     // Only once it is safely written, out of whichever month held it before (its date may have changed).
     for (k, _) in month_files(dir).into_iter().filter(|(k, _)| *k != key) {
@@ -216,6 +219,8 @@ pub fn save(dir: &Path, entry: &Entry) -> Result<(), String> {
 
 pub fn delete(dir: &Path, id: &str) -> Result<(), String> {
     if id.is_empty() { return Ok(()); }
+    let lock = crate::store::dir_lock(dir);
+    let _held = lock.lock().unwrap_or_else(|e| e.into_inner());
     for (k, _) in month_files(dir) {
         let text = read_month(dir, &k)?;
         if parse(&text).iter().any(|e| e.id == id) { write_month(dir, &k, splice(&text, &k, id, None))?; }

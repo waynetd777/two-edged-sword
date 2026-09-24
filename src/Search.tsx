@@ -116,7 +116,7 @@ export function SearchScreen() {
           <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
             <div className="label" style={{ padding: "0 10px 6px" }}>Look in</div>
             {([["all", "Everything", total], ["bible", "Bible", res?.bible.count ?? 0], ["commentary", "Commentaries", cTotal], ["dictionary", "Dictionaries", dTotal], ["journal", "Journal", journalHits.length]] as [Scope, string, number][]).map(([s, l, n]) => (
-              <button key={s} type="button" className={`bm ${scope === s ? "" : ""}`} style={{ height: 30, background: scope === s ? "var(--accentsoft)" : undefined, color: scope === s ? "var(--accent)" : undefined, fontWeight: scope === s ? 600 : undefined }} onClick={() => setScope(s)}>{l}<span className="r">{res ? n : ""}</span></button>
+              <button key={s} type="button" className="bm" style={{ height: 30, background: scope === s ? "var(--accentsoft)" : undefined, color: scope === s ? "var(--accent)" : undefined, fontWeight: scope === s ? 600 : undefined }} onClick={() => setScope(s)}>{l}<span className="r">{res ? n : ""}</span></button>
             ))}
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 8, padding: "0 10px" }}>
@@ -223,16 +223,19 @@ function Preview({ pick, bible, terms }: { pick: Pick | null; bible: string; ter
   const topic = useTopics(pick?.kind === "dict" ? pick.module : undefined, art?.topic);
   const trail = useTrail<string>((a, b) => a === b);
   useEffect(() => { trail.reset(pick?.kind === "dict" ? [pick.topic] : []); }, [pick]); // eslint-disable-line react-hooks/exhaustive-deps
+  const topicSeq = useRef(0);
   const openTopic = (t: string, d?: number) => {
     if (pick?.kind !== "dict") return;
     hide();
     const to = d ? trail.go(d) : t;
     if (!to) return;
     if (!d) trail.visit(to);
-    api.article("dictionary", pick.module, to).then(setArt);
+    const n = ++topicSeq.current;
+    api.article("dictionary", pick.module, to).then((a) => { if (n === topicSeq.current) setArt(a); }).catch(console.error);
   };
   useEffect(() => {
     setVerses([]); setComm(null); setArt(null);
+    topicSeq.current++;
     if (!pick) return;
     let dead = false;
     if (pick.kind === "verse") api.passages(bible, [{ book: pick.ref.book, chapter: pick.ref.chapter, from: Math.max(1, pick.ref.verse! - 3), to: pick.ref.verse! + 3 }]).then(([p]) => { if (!dead) setVerses(p.verses); }).catch(() => {});

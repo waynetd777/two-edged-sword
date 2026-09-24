@@ -8,7 +8,7 @@ import { plainText } from "./esword";
 import { Icon } from "./icons";
 import { htmlToMd, mdPlain, mdToHtml } from "./md";
 import { Topbar } from "./Shell";
-import { nowLocal, uid, useApp } from "./state";
+import { nowLocal, onFlush, uid, useApp } from "./state";
 import { confirmDelete, Dialog, Popover, Seg } from "./ui";
 import { useAssistant } from "./assistant";
 import { docModule, parseDocLabel } from "./docref";
@@ -32,7 +32,8 @@ export function JournalScreen() {
   const canAsk = useAssistant().available;
   const saveTimer = useRef<number | undefined>(undefined);
   const pendingSave = useRef<{ id: string; run: () => void } | null>(null);
-  useEffect(() => () => pendingSave.current?.run(), []); // flush an unsaved edit on leaving the screen
+  // An unsaved edit is written on leaving the screen, and on hiding or quitting like the store's saves.
+  useEffect(() => { const off = onFlush(() => pendingSave.current?.run()); return () => { off(); pendingSave.current?.run(); }; }, []);
 
   // A seed from elsewhere: open an entry, or start one on the given verses.
   useEffect(() => {

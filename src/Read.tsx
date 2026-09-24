@@ -117,9 +117,12 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
   useEffect(() => {
     if (reading) scroller.current?.querySelector(`[data-v="${player.state.verse}"]`)?.scrollIntoView({ block: "center", behavior: "smooth" });
   }, [reading, player.state.verse]);
-  // When reading carries on into the next chapter, turn the page.
+  // When reading carries on into the next chapter, turn the page, if it was showing the one just finished.
+  const lastPlayed = useRef<[number, number] | null>(null);
   useEffect(() => {
-    if (player.state.on && player.state.bible === bible && (player.state.book !== loc.book || player.state.chapter !== loc.chapter) && player.state.verse === 1)
+    const prev = lastPlayed.current;
+    lastPlayed.current = [player.state.book, player.state.chapter];
+    if (player.state.on && player.state.bible === bible && (player.state.book !== loc.book || player.state.chapter !== loc.chapter) && player.state.verse === 1 && prev?.[0] === loc.book && prev[1] === loc.chapter)
       app.open({ book: player.state.book, chapter: player.state.chapter });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [player.state.book, player.state.chapter]);

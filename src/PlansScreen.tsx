@@ -256,16 +256,18 @@ function PlanPicker({ onClose, onBuild }: { onClose: () => void; onBuild: () => 
       if (dead) return;
       if (p.kind === "ppo") setPreview(ppoPreview(p, parseYmd(start), 8).map((x) => ({ date: fmtDay(x.date), label: x.parts.map((q) => fmtRef(partRef(q)).replace("Psalms", "Psalm")).join(" · ") })));
       else setPreview(p.days.slice(0, 7).map((d, i) => ({ date: fmtDay(dateOf(p, i)), label: dayLabel(d) })));
-    });
+    }).catch((e) => { if (!dead) { console.error(e); setPreview([]); } });
     return () => { dead = true; };
   }, [choice, start, bible, weekdays, psalm, other, otherFrom, shortMonths]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const startPlan = async () => {
     setBusy(true);
-    const p = await build();
+    let p: Plan;
+    try { p = await build(); }
+    catch (e) { app.toast(`Couldn't make the plan: ${e}`); return; }
+    finally { setBusy(false); }
     // The new plan becomes the current one; the old one is kept (paused) or removed.
     app.setPlans((ps) => [...ps.filter((x) => keep || !x.active).map((x) => ({ ...x, active: false })), p]);
-    setBusy(false);
     onClose();
   };
   const opt = OPTIONS.find((o) => o.id === choice)!;

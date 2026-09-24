@@ -201,7 +201,9 @@ export function DocReader({ focus, setFocus }: { focus: boolean; setFocus: (f: b
   useEffect(() => {
     setFilter("");
     const module = doc.module;
-    (devo ? api.devotionTitles(module) : api.referenceTitles(module)).then((titles) => setLoaded({ module, titles })).catch(() => setLoaded({ module, titles: [] }));
+    let dead = false;
+    (devo ? api.devotionTitles(module) : api.referenceTitles(module)).then((titles) => { if (!dead) setLoaded({ module, titles }); }).catch(() => { if (!dead) setLoaded({ module, titles: [] }); });
+    return () => { dead = true; };
   }, [doc.module, devo]);
 
   // No chapter yet: a book starts at its first, a devotional at today's reading.

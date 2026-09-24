@@ -298,13 +298,14 @@ export function streak(p: Plan, now = today()): Streak {
 
 /**
  * Ticks off one part of the day. When every Bible part in `bibleParts` is read, the day is marked
- * read too, once. `key` is the day the session started on, so marking cannot run into the next day.
+ * read too, once. `key` is the day the session started on, so marking cannot run into the next day:
+ * a Psalm-and-Proverb session finished after midnight marks the day it began.
  */
 export function tickPart(p: Plan, key: string, part: string, bibleParts: string[], d: Date): Plan {
   const done = Array.from(new Set([...doneToday(p, key), part]));
   let next: Plan = { ...p, progress: { key, done } };
   const dayRead = p.kind === "ppo" ? p.doneDates.includes(key) : p.done.includes(+key.slice(4));
-  if (!dayRead && bibleParts.length && bibleParts.every((x) => done.includes(x))) next = markDayRead(next, d);
+  if (!dayRead && bibleParts.length && bibleParts.every((x) => done.includes(x))) next = markDayRead(next, p.kind === "ppo" ? parseYmd(key) : d);
   return next;
 }
 

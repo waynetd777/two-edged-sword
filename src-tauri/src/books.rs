@@ -27,7 +27,11 @@ pub fn export(lib: &Library, root: &Path, module: &str, kind: Kind) -> Result<Ex
     let chapter = if devotional { "Days" } else { "Chapters" };
     let lock = crate::store::dir_lock(&dir);
     let _held = lock.lock().unwrap_or_else(|e| e.into_inner());
-    if std::fs::read_to_string(dir.join(".complete")).ok().as_deref() == Some(VERSION) {
+    // The module file's size and date too, so a book e-Sword has updated is exported again.
+    let meta = std::fs::metadata(&lib.module(kind, module)?.path).ok();
+    let mtime = meta.as_ref().and_then(|m| m.modified().ok()).and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok()).map(|d| d.as_secs()).unwrap_or(0);
+    let stamp = format!("{VERSION} {} {mtime}", meta.map(|m| m.len()).unwrap_or(0));
+    if std::fs::read_to_string(dir.join(".complete")).ok() == Some(stamp.clone()) {
         return Ok(Export { dir: dir.to_string_lossy().into(), files });
     }
     let book: Vec<(String, String)> = if devotional {
@@ -35,7 +39,7 @@ pub fn export(lib: &Library, root: &Path, module: &str, kind: Kind) -> Result<Ex
     } else {
         lib.with(Kind::Reference, module, |c| {
             let mut st = c.prepare("SELECT Chapter, Content FROM Reference ORDER BY rowid")?;
-            let rows = st.query_map([], |r| Ok((r.get::<_, String>(0)?, r.get::<_, String>(1)?)))?;
+            let rows = st.query_map([], |r| Ok((r.get::<_, String>(0)?, r.get::<_, Option<String>>(1)?.unwrap_or_default())))?;
             rows.collect::<rusqlite::Result<Vec<_>>>()
         })?
     };
@@ -52,7 +56,7 @@ pub fn export(lib: &Library, root: &Path, module: &str, kind: Kind) -> Result<Ex
             index.push_str(&format!("{file}  ({} words)\n", text.split_whitespace().count()));
         }
         std::fs::write(tmp.join("index.txt"), index).map_err(|e| e.to_string())?;
-        std::fs::write(tmp.join(".complete"), VERSION).map_err(|e| e.to_string())
+        std::fs::write(tmp.join(".complete"), &stamp).map_err(|e| e.to_string())
     })?;
     Ok(Export { dir: dir.to_string_lossy().into(), files })
 }
