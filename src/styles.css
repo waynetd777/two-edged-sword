@@ -219,7 +219,7 @@ input[type="range"] { accent-color: var(--accent); }
 .vtool .tb { white-space: nowrap; }
 @container (max-width: 820px) { .vtool.fold-bible .lbl { display: none; } .vtool.fold-bible .tb { padding: 0 8px; } }
 @container (max-width: 640px) { .vtool.fold-doc .lbl { display: none; } .vtool.fold-doc .tb { padding: 0 8px; } }
-.vtool .dot { width: 16px; height: 16px; border-radius: 50%; border: 0; cursor: pointer; }
+.vtool .dot, .hlpick .dot { width: 16px; height: 16px; border-radius: 50%; border: 0; cursor: pointer; }
 .vtool .sep { width: 1px; height: 18px; background: rgba(255, 255, 255, 0.18); margin: 0 4px; }
 .study { border-left: 1px solid var(--border); background: var(--panel2); display: flex; flex-direction: column; min-height: 0; position: relative; }
 .study .tabs { display: flex; align-items: center; gap: 4px; padding: 10px 14px; border-bottom: 1px solid var(--border); }
@@ -275,6 +275,17 @@ mark { background: var(--hl-gold); color: inherit; border-radius: 3px; padding: 
 @media (prefers-reduced-motion: reduce) { .spinner, .searchbar-progress i { animation: none; } }
 
 /* A misspelled word in the journal (spelling.ts). */
+/* The journal highlighter's paint (HL_PAINT in md.ts), shown in the theme's colours; saved as marks. */
+.editor span[style*="rgb(250, 1, 1)"] { background-color: var(--hl-red) !important; border-radius: 3px; }
+.editor span[style*="rgb(250, 1, 2)"] { background-color: var(--hl-orange) !important; border-radius: 3px; }
+.editor span[style*="rgb(250, 1, 3)"] { background-color: var(--hl-yellow) !important; border-radius: 3px; }
+.editor span[style*="rgb(250, 1, 4)"] { background-color: var(--hl-green) !important; border-radius: 3px; }
+.editor span[style*="rgb(250, 1, 5)"] { background-color: var(--hl-blue) !important; border-radius: 3px; }
+.editor span[style*="rgb(250, 1, 6)"] { background-color: var(--hl-purple) !important; border-radius: 3px; }
+/* "No highlight" inside a highlight: painted in the background it sits on. */
+.editor span[style*="rgb(250, 1, 7)"] { background-color: var(--panel) !important; }
+.editor blockquote span[style*="rgb(250, 1, 7)"] { background-color: var(--panel2) !important; }
+.md mark[class^="hl-"] { font-weight: inherit; padding: 0; color: inherit; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
 ::highlight(find) { background-color: var(--hl-yellow); }
 ::highlight(find-current) { background-color: var(--accent); color: var(--onaccent); }
 ::highlight(spelling) { text-decoration: underline wavy var(--bad); text-decoration-thickness: 1.5px; text-underline-offset: 3px; text-decoration-skip-ink: none; }

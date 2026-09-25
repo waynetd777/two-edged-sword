@@ -55,8 +55,10 @@ function linkRefs(text: string): string {
 }
 
 // An escaped mark (\*), ***bold italic***, **bold**, *italic*, and _italic_ only at word edges, so
-// my_notes_file stays as it is.
-const INLINE_RE = /\\[\\*_]|\*\*\*(?=\S)(?:\\.|[^\\])+?\*\*\*|\*\*(?=\S)(?:\\.|[^\\])+?\*\*|\*(?=[^\s*])(?:\\.|[^*\\])+\*|(?<![\p{L}\p{N}_\\])_(?=[^\s_])(?:\\.|[^_\\])+_(?![\p{L}\p{N}_])/gu;
+// my_notes_file stays as it is; and highlights: ==yellow== (Obsidian's own) and
+// <mark class="hl-green">the other colours</mark>.
+const HL_COLOURS = ["red", "orange", "yellow", "green", "blue", "purple"];
+const INLINE_RE = /\\[\\*_=]|<mark class="hl-(?:red|orange|yellow|green|blue|purple)">.+?<\/mark>|==(?=\S)(?:\\.|[^\\])+?==|\*\*\*(?=\S)(?:\\.|[^\\])+?\*\*\*|\*\*(?=\S)(?:\\.|[^\\])+?\*\*|\*(?=[^\s*])(?:\\.|[^*\\])+\*|(?<![\p{L}\p{N}_\\])_(?=[^\s_])(?:\\.|[^_\\])+_(?![\p{L}\p{N}_])/gu;
 
 function inline(s: string, links: boolean): string {
   // Split on the marks first, then escape and link the plain parts.
@@ -66,7 +68,10 @@ function inline(s: string, links: boolean): string {
     parts.push(links ? linkRefs(s.slice(last, m.index)) : esc(s.slice(last, m.index)));
     const t = m[0];
     const n = t.startsWith("***") ? 3 : t.startsWith("**") ? 2 : 1;
+    const mark = t.match(/^<mark class="hl-(\w+)">(.+)<\/mark>$/);
     if (t[0] === "\\") parts.push(esc(t[1]));
+    else if (mark) parts.push(`<mark class="hl-${mark[1]}">${inline(mark[2], links)}</mark>`);
+    else if (t.startsWith("==")) parts.push(`<mark class="hl-yellow">${inline(t.slice(2, -2), links)}</mark>`);
     else {
       const body = inline(t.slice(n, -n), links);
       parts.push(n === 3 ? `<b><i>${body}</i></b>` : n === 2 ? `<b>${body}</b>` : `<i>${body}</i>`);
@@ -117,7 +122,7 @@ export function mdToHtml(md: string, links = true): string {
 export function htmlToMd(root: HTMLElement): string {
   const inl = (n: Node): string => {
     // Marks typed as text are escaped, so they read back as text; a _ inside a word needs none.
-    if (n.nodeType === Node.TEXT_NODE) return (n.textContent || "").replace(/ /g, " ").replace(/\\(?=[\\*_])|\*|(?<![\p{L}\p{N}])_|_(?![\p{L}\p{N}])/gu, "\\$&");
+    if (n.nodeType === Node.TEXT_NODE) return highlighted((n.textContent || "").replace(/ /g, " ").replace(/\\(?=[\\*_=])|\*|(?<![\p{L}\p{N}])_|_(?![\p{L}\p{N}])|=(?==)/gu, "\\$&"), hlOf(n, root));
     if (n.nodeType !== Node.ELEMENT_NODE) return "";
     const el = n as HTMLElement;
     const kids = Array.from(el.childNodes).map(inl).join("");
@@ -158,8 +163,38 @@ export function htmlToMd(root: HTMLElement): string {
     }
   };
   root.childNodes.forEach(block);
-  return blocks.join("\n\n");
+  // A highlight split across text nodes is joined up again.
+  return blocks.map(joinMarks).join("\n\n");
+}
+
+/** Sentinel colours the editor's highlighter paints with (execCommand hiliteColor, so ⌘Z undoes
+ *  it); the stylesheet shows each as its theme's colour, and "none" as no highlight. */
+export const HL_PAINT: Record<string, string> = { red: "rgb(250, 1, 1)", orange: "rgb(250, 1, 2)", yellow: "rgb(250, 1, 3)", green: "rgb(250, 1, 4)", blue: "rgb(250, 1, 5)", purple: "rgb(250, 1, 6)", none: "rgb(250, 1, 7)" };
+const PAINTED = new Map(Object.entries(HL_PAINT).map(([c, v]) => [v, c]));
+
+/** The highlight a text node shows: the nearest mark, or span painted by the highlighter. */
+function hlOf(n: Node, root: HTMLElement): string | null {
+  for (let e = n.parentElement; e && e !== root; e = e.parentElement) {
+    const painted = e.style?.backgroundColor ? PAINTED.get(e.style.backgroundColor) : undefined;
+    if (painted) return painted === "none" ? null : painted;
+    const m = e.tagName === "MARK" && e.className.match(/\bhl-(\w+)/);
+    if (m && HL_COLOURS.includes(m[1])) return m[1];
+  }
+  return null;
+}
+
+/** Text in its highlight's marks, with any spaces at its ends left outside them. */
+function highlighted(t: string, c: string | null): string {
+  const m = c ? t.match(/^(\s*)([^]*?)(\s*)$/) : null;
+  if (!m || !m[2]) return t;
+  return m[1] + (c === "yellow" ? `==${m[2]}==` : `<mark class="hl-${c}">${m[2]}</mark>`) + m[3];
+}
+
+function joinMarks(s: string): string {
+  let t = s.replace(/(?<!\\)====/g, "");
+  for (let was = ""; was !== t; ) { was = t; t = t.replace(/(<mark class="hl-(\w+)">(?:(?!<\/?mark).)*)<\/mark><mark class="hl-\2">/g, "$1"); }
+  return t;
 }
 
 /** Plain text with the Markdown marks taken out, for excerpts. */
-export const mdPlain = (md: string) => md.replace(/^#+\s+/gm, "").replace(/^>\s?/gm, "").replace(/^[-*]\s+/gm, "").replace(/\\([\\*_])|\*+|(?<![\p{L}\p{N}])_+|_+(?![\p{L}\p{N}])/gu, (_m, e) => e ?? "").replace(/\s+/g, " ").trim();
+export const mdPlain = (md: string) => md.replace(/<\/?mark[^>]*>/g, "").replace(/(?<!\\)==(?=\S)(.+?)==/g, "$1").replace(/^#+\s+/gm, "").replace(/^>\s?/gm, "").replace(/^[-*]\s+/gm, "").replace(/\\([\\*_=])|\*+|(?<![\p{L}\p{N}])_+|_+(?![\p{L}\p{N}])/gu, (_m, e) => e ?? "").replace(/\s+/g, " ").trim();

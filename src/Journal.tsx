@@ -6,9 +6,10 @@ import { AskPanel } from "./Ask";
 import { fmtRef, parseRef, Ref } from "./bible";
 import { plainText } from "./esword";
 import { Icon } from "./icons";
-import { htmlToMd, mdPlain, mdToHtml } from "./md";
+import { HL_PAINT, htmlToMd, mdPlain, mdToHtml } from "./md";
+import { HL, HL_DOT } from "./Read";
 import { Topbar } from "./Shell";
-import { nowLocal, onFlush, uid, useApp } from "./state";
+import { HlColor, nowLocal, onFlush, uid, useApp } from "./state";
 import { confirmDelete, Dialog, Popover, Seg } from "./ui";
 import { useAssistant } from "./assistant";
 import { docModule, parseDocLabel } from "./docref";
@@ -153,6 +154,7 @@ function Editor({ entry, onChange, saved, err, onDelete, onExport, listed, liste
   const [verseAt, setVerseAt] = useState<DOMRect | null>(null);
   const [linkAt, setLinkAt] = useState<DOMRect | null>(null);
   const [tagAt, setTagAt] = useState<DOMRect | null>(null);
+  const [hlAt, setHlAt] = useState<DOMRect | null>(null);
   const saved_range = useRef<Range | null>(null);
   useEffect(() => {
     // Every line is a <p>, so Enter, lists and quotes act on one line at a time.
@@ -180,6 +182,16 @@ function Editor({ entry, onChange, saved, err, onDelete, onExport, listed, liste
   const { onRefHover, preview, hide } = useRefPreview(app.settings.bible);
   const refAt = (t: EventTarget) => (t as HTMLElement).closest("a.ref") as HTMLElement | null;
   const cmd = (c: string, v?: string) => { ed.current?.focus(); document.execCommand(c, false, v); sync(); };
+  /** Highlights the selection in a reader colour (null takes highlighting off); ⌘Z undoes it. */
+  const hlLast = app.settings.journalHighlight ?? "yellow";
+  const highlight = (c: HlColor | null, picking = false) => {
+    const s = window.getSelection();
+    ed.current?.focus();
+    if (s && !(s.rangeCount && ed.current?.contains(s.anchorNode)) && saved_range.current) { s.removeAllRanges(); s.addRange(saved_range.current); }
+    if (!s || s.isCollapsed || !ed.current?.contains(s.anchorNode)) { if (!picking) app.toast("Select the text to highlight"); return; }
+    document.execCommand("hiliteColor", false, HL_PAINT[c ?? "none"]);
+    sync();
+  };
   const remember = () => { const s = window.getSelection(); if (s && s.rangeCount && ed.current?.contains(s.anchorNode)) saved_range.current = s.getRangeAt(0).cloneRange(); };
   const insertVerse = async (text: string) => {
     const r = parseRef(text);
@@ -244,6 +256,10 @@ function Editor({ entry, onChange, saved, err, onDelete, onExport, listed, liste
         <button className="ibtn" type="button" aria-label="Heading" title="Heading" style={{ font: "600 14px var(--display)", color: "var(--text)" }} onClick={() => cmd("formatBlock", "h3")}>H</button>
         <button className="ibtn" type="button" aria-label="Bold" title="Bold ⌘B" style={{ fontWeight: 700, color: "var(--text)" }} onClick={() => cmd("bold")}>B</button>
         <button className="ibtn" type="button" aria-label="Italic" title="Italic ⌘I" style={{ fontStyle: "italic", fontFamily: "var(--serif)", color: "var(--text)" }} onClick={() => cmd("italic")}>I</button>
+        <button className="ibtn" type="button" aria-label={`Highlight ${hlLast}`} title={`Highlight (${hlLast})`} style={{ flexDirection: "column", gap: 1, color: "var(--text)" }} onClick={() => highlight(hlLast)}>
+          <Icon name="highlight" /><span style={{ width: 14, height: 3, borderRadius: 2, background: HL_DOT[hlLast] }} />
+        </button>
+        <button className="ibtn" type="button" aria-label="Highlight colour" title="Highlight colour" style={{ width: 16, marginLeft: -2 }} onClick={(e) => { remember(); setHlAt(e.currentTarget.getBoundingClientRect()); }}><Icon name="down" size={11} /></button>
         <span style={{ width: 1, height: 18, background: "var(--border)", margin: "0 4px" }} />
         <button className="ibtn" type="button" aria-label="Bulleted list" onClick={() => cmd("insertUnorderedList")}><Icon name="list" /></button>
         <button className="ibtn" type="button" aria-label="Numbered list" onClick={() => cmd("insertOrderedList")}><Icon name="olist" /></button>
@@ -347,6 +363,14 @@ function Editor({ entry, onChange, saved, err, onDelete, onExport, listed, liste
       )}
       {verseAt && <RefPrompt anchor={verseAt} label="Insert a verse" onClose={() => setVerseAt(null)} onSubmit={async (t) => { const ok = await insertVerse(t); if (ok) setVerseAt(null); return ok; }} />}
       {linkAt && <RefPrompt anchor={linkAt} label="Link a verse to this entry" onClose={() => setLinkAt(null)} onSubmit={async (t) => { const r = parseRef(t); if (!r) return false; const s = fmtRef(r); if (!entry.verses.includes(s)) onChange({ verses: [...entry.verses, s] }); setLinkAt(null); return true; }} />}
+      {hlAt && (
+        <Popover anchor={hlAt} onClose={() => setHlAt(null)} width={220}>
+          <div className="hlpick" style={{ padding: 8, display: "flex", alignItems: "center", gap: 8 }} onMouseDown={(e) => e.preventDefault()}>
+            {HL.map((c) => <button key={c} type="button" className="dot" aria-label={`Highlight ${c}`} title={c[0].toUpperCase() + c.slice(1)} style={{ background: HL_DOT[c], outline: c === hlLast ? "2px solid var(--text)" : undefined }} onClick={() => { setHlAt(null); app.set({ journalHighlight: c }); highlight(c, true); }} />)}
+            <button className="btn small" type="button" style={{ marginLeft: "auto" }} title="Take highlighting off the selection" onClick={() => { setHlAt(null); highlight(null); }}>None</button>
+          </div>
+        </Popover>
+      )}
       {tagAt && <RefPrompt anchor={tagAt} label="Add a tag" placeholder="e.g. new-birth" onClose={() => setTagAt(null)} onSubmit={async (t) => { const x = t.trim().replace(/^#/, "").replace(/\s+/g, "-").toLowerCase(); if (!x) return false; if (!entry.tags.includes(x)) onChange({ tags: [...entry.tags, x] }); setTagAt(null); return true; }} />}
     </div>
   );

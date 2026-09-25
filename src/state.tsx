@@ -31,6 +31,8 @@ export interface Settings {
   highlightWords: boolean;
   journalDir: string;
   showNotes: boolean;
+  /** The journal highlighter's colour, kept until another is picked. */
+  journalHighlight: HlColor;
   model: Model;
   includeCommentaries: boolean;
   /** Passage chats also get the user's journal entries on the passage. */
@@ -55,7 +57,7 @@ export interface Settings {
 const DEFAULTS: Settings = {
   theme: "auto", readSize: 19, readFont: "literata", studyTab: "commentary", docTab: "ask", studyCommentary: null, studyDict: null, dictModule: null, studyFollow: true, redLetters: true, layout: "verse", bible: "kjv", compare: ["kjv", "asv", "kjv+"], hiddenBibles: [],
   commentaryOrder: ["barnes", "henry", "clarke", "gill", "jfb", "wesley", "darby", "meyer"], dictionaryOrder: ["isbe", "smith", "nave", "cyclopedia"],
-  voice: "", rate: 1, continueChapter: true, readNumbers: false, highlightWords: true, journalDir: "", showNotes: true,
+  voice: "", rate: 1, continueChapter: true, readNumbers: false, highlightWords: true, journalDir: "", showNotes: true, journalHighlight: "yellow",
   model: "claude-sonnet-5", includeCommentaries: true, askJournal: false, allowLicensed: true, reminder: false, reminderTime: "06:30", whenBehind: "ask", studyPane: true, copyNumbers: true,
 };
 
