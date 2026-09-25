@@ -10,6 +10,7 @@ mod login_item;
 mod login_launch;
 mod music;
 mod search;
+mod spell;
 mod store;
 mod study;
 mod tray;
@@ -220,6 +221,18 @@ fn keep_awake(on: bool) -> Result<(), String> {
     }
     Ok(())
 }
+
+// Spelling (spell.rs): not async, so they run on the main thread, as AppKit wants.
+#[tauri::command]
+fn spell_check(text: String) -> Vec<(usize, usize)> { spell::check(&text) }
+#[tauri::command]
+fn spell_guesses(word: String) -> Vec<String> { spell::guesses(&word) }
+#[tauri::command]
+fn spell_correction(word: String) -> Option<String> { spell::correction(&word) }
+#[tauri::command]
+fn spell_learn(word: String) { spell::learn(&word) }
+#[tauri::command]
+fn spell_ignore(word: String) { spell::ignore(&word) }
 
 #[tauri::command(async)]
 fn journal_stamp(dir: String) -> Result<String, String> {
@@ -433,6 +446,11 @@ pub fn run() {
             journal_save,
             journal_delete,
             journal_stamp,
+            spell_check,
+            spell_guesses,
+            spell_correction,
+            spell_learn,
+            spell_ignore,
             keep_awake,
             music_tracks,
             music_play,

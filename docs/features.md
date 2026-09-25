@@ -127,6 +127,12 @@ References in an entry are links, as you wrote them: hover for the verse, click 
 do common misspellings ("Isiah", "Pillipians"). References typed now link the next time the
 entry opens.
 
+Spelling is checked by macOS's own spell checker: misspelled words get a red wavy underline,
+and clicking one offers its suggestions, Add to dictionary and Ignore. With "Correct spelling
+automatically" on in macOS (Keyboard › Text Input), a word is corrected as you finish it; ⌘Z
+undoes that, and clicking the word offers to change it back. Verses inserted from the Bible
+aren't checked.
+
 The journal follows the files: an entry changed in Obsidian shows the change within a few
 seconds, the open one too, unless you have an edit of your own waiting to be saved. Clicking in
 and out of an entry doesn't save it; only a real change is written. If the folder the journal

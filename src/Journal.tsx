@@ -13,6 +13,7 @@ import { confirmDelete, Dialog, Popover, Seg } from "./ui";
 import { useAssistant } from "./assistant";
 import { docModule, parseDocLabel } from "./docref";
 import { useRefPreview } from "./StudyPane";
+import { useSpelling } from "./spelling";
 
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const longDate = (s: string) => {
@@ -157,7 +158,9 @@ function Editor({ entry, onChange, saved, err, onDelete, onExport, ask }: { entr
     if (entry.body === shown.current || !ed.current) return;
     shown.current = entry.body;
     ed.current.innerHTML = mdToHtml(entry.body) || "<p><br></p>";
-  }, [entry.body]);
+    spell.recheck(50);
+  }, [entry.body]); // eslint-disable-line react-hooks/exhaustive-deps
+  const spell = useSpelling(ed, entry.id, () => sync());
   const { onRefHover, preview, hide } = useRefPreview(app.settings.bible);
   const refAt = (t: EventTarget) => (t as HTMLElement).closest("a.ref") as HTMLElement | null;
   const cmd = (c: string, v?: string) => { ed.current?.focus(); document.execCommand(c, false, v); sync(); };
@@ -246,14 +249,28 @@ function Editor({ entry, onChange, saved, err, onDelete, onExport, ask }: { entr
               );
             })}
           </div>
-          <div ref={ed} className={`md editor selectable ${entry.body.trim() ? "" : "blank"}`} contentEditable suppressContentEditableWarning onInput={sync} onBlur={() => { remember(); sync(); }} onKeyUp={remember} onMouseUp={remember} onKeyDown={keys}
-            onClick={(e) => { const a = refAt(e.target); if (a?.dataset.ref) { e.preventDefault(); hide(); const r: Ref = JSON.parse(a.dataset.ref); app.open({ book: r.book, chapter: r.chapter, verse: r.verse, to: r.to }, "read"); } }}
+          <div ref={ed} className={`md editor selectable ${entry.body.trim() ? "" : "blank"}`} contentEditable suppressContentEditableWarning spellCheck={false} onInput={() => { sync(); spell.recheck(); }} onBlur={() => { remember(); sync(); }} onKeyUp={remember} onMouseUp={remember} onKeyDown={(e) => { spell.onKey(e); keys(e); }}
+            onClick={(e) => { const a = refAt(e.target); if (a?.dataset.ref) { e.preventDefault(); hide(); const r: Ref = JSON.parse(a.dataset.ref); app.open({ book: r.book, chapter: r.chapter, verse: r.verse, to: r.to }, "read"); } else spell.onClick(e); }}
             onMouseOver={(e) => { const a = refAt(e.target); if (a?.dataset.ref && !a.contains(e.relatedTarget as Node)) onRefHover(JSON.parse(a.dataset.ref), a); }}
             onMouseOut={(e) => { const a = refAt(e.target); if (a && !a.contains(e.relatedTarget as Node)) onRefHover(null, null); }}
             onPaste={(e) => { e.preventDefault(); document.execCommand("insertText", false, e.clipboardData.getData("text/plain")); }}
             data-placeholder="Write here…" style={{ font: "400 17px/1.7 var(--serif)", outline: "none", minHeight: 300, textWrap: "pretty" }} />
         </article>
         {preview}
+        {spell.menu && (
+          <Popover anchor={spell.menu.rect} onClose={spell.closeMenu} width={220}>
+            <div style={{ padding: 6, display: "flex", flexDirection: "column" }}>
+              {spell.menu.was && <button className="opt" type="button" onClick={() => spell.choose(spell.menu!.was!)}>Change back to “{spell.menu.was}”</button>}
+              {spell.menu.guesses.map((g) => <button key={g} className="opt" type="button" style={{ fontWeight: 600 }} onClick={() => spell.choose(g)}>{g}</button>)}
+              {!spell.menu.was && !spell.menu.guesses.length && <span className="n" style={{ padding: "6px 10px" }}>No suggestions</span>}
+              {!spell.menu.was && <>
+                <div style={{ height: 1, background: "var(--border)", margin: "4px 0" }} />
+                <button className="opt" type="button" onClick={spell.learn}>Add “{spell.menu.word}” to dictionary</button>
+                <button className="opt" type="button" onClick={spell.ignore}>Ignore</button>
+              </>}
+            </div>
+          </Popover>
+        )}
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 20px", borderTop: "1px solid var(--border)", color: "var(--muted)", fontSize: 12 }}>
         <span>{words} word{words === 1 ? "" : "s"}</span>

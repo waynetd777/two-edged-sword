@@ -89,6 +89,13 @@ export const api = {
   /** Queues these songs as the Quiet time playlist and plays it; returns how many were found. */
   musicPlay: (ids: string[]) => (readOnly ? Promise.resolve(0) : invoke<number>("music_play", { ids })),
   musicState: () => invoke<MusicState>("music_state"),
+  /** macOS's spell checker (spell.rs): misspelled words as [start, length] in UTF-16, as JS strings count. */
+  spellCheck: (text: string) => invoke<[number, number][]>("spell_check", { text }),
+  spellGuesses: (word: string) => invoke<string[]>("spell_guesses", { word }),
+  /** The automatic correction for a word just typed, only with "Correct spelling automatically" on. */
+  spellCorrection: (word: string) => invoke<string | null>("spell_correction", { word }),
+  spellLearn: (word: string) => invoke<void>("spell_learn", { word }),
+  spellIgnore: (word: string) => invoke<void>("spell_ignore", { word }),
   /** Keeps the display awake (and so the screen unlocked) while reading aloud. */
   keepAwake: (on: boolean) => invoke<void>("keep_awake", { on }),
   /** Pauses, resumes or skips, but only while the Quiet time playlist is what's playing; "show" brings Music to the front. */
