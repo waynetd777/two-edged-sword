@@ -73,7 +73,7 @@ export function useSpelling(ed: RefObject<HTMLDivElement | null>, key: string, o
       const n = nodes[i], off = a - starts[i];
       // Typed over since the check was asked for: left to the next one.
       if (!n?.isConnected || n.data.slice(off, off + len) !== text.slice(a, a + len)) continue;
-      if (accepted.has(text.slice(a, a + len))) continue;
+      if (accepted.has(text.slice(a, a + len).toLowerCase())) continue;
       // Not the word being typed.
       if (caret && caret.startContainer === n && caret.startOffset === off + len) continue;
       const r = document.createRange();
@@ -155,12 +155,14 @@ export function useSpelling(ed: RefObject<HTMLDivElement | null>, key: string, o
     setMenu(null);
     recheck(100);
   };
-  /** Takes the word's underlines off at once, everywhere in the entry, and tells macOS. */
+  /** Takes the word's underlines off at once, everywhere in the entry and in any capitals, then
+   *  tells macOS and checks again. */
   const accept = (word: string, tell: (w: string) => Promise<unknown>) => {
-    accepted.add(word);
-    bad.current = bad.current.filter((r) => r.toString() !== word);
+    const w = word.toLowerCase();
+    accepted.add(w);
+    bad.current = bad.current.filter((r) => r.toString().toLowerCase() !== w);
     paint();
-    tell(word).catch(() => {});
+    tell(word).then(() => recheck(0)).catch(() => {});
   };
   const learn = () => { if (menu) accept(menu.word, api.spellLearn); setMenu(null); };
   const ignore = () => { if (menu) accept(menu.word, api.spellIgnore); setMenu(null); };
