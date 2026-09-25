@@ -18,6 +18,8 @@ export interface ModuleInfo {
   abbrev: string;
   info: string;
   strongs: boolean;
+  /** The file's size in bytes. */
+  size: number;
 }
 
 export interface LibraryInfo {

@@ -44,6 +44,8 @@ pub struct ModuleInfo {
     pub info: String,
     /// Bibles only: the text carries Strong's numbers (`<num>G25</num>`).
     pub strongs: bool,
+    /// The file's size in bytes.
+    pub size: u64,
     #[serde(skip)]
     pub path: PathBuf,
 }
@@ -93,7 +95,10 @@ impl Library {
                 let (Some(stem), Some(ext)) = (path.file_stem().and_then(|s| s.to_str()), path.extension().and_then(|s| s.to_str())) else { continue };
                 let Some(kind) = Kind::from_ext(&ext.to_ascii_lowercase()) else { continue };
                 match read_details(&path, kind) {
-                    Ok((title, abbrev, info, strongs)) => modules.push(ModuleInfo { id: stem.to_string(), kind, title, abbrev, info, strongs, path }),
+                    Ok((title, abbrev, info, strongs)) => {
+                        let size = e.metadata().map(|m| m.len()).unwrap_or(0);
+                        modules.push(ModuleInfo { id: stem.to_string(), kind, title, abbrev, info, strongs, size, path })
+                    }
                     Err(err) => eprintln!("skipping {}: {err}", path.display()),
                 }
             }

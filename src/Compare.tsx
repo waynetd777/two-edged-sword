@@ -170,7 +170,7 @@ export function CompareScreen({ openPalette }: { openPalette: () => void }) {
       )}
       {word && (
         <WordLookup pick={word} vref={{ book: loc.book, chapter: loc.chapter, verse: word.verse }} bible={word.bible} onClose={() => setWord(null)}
-          onDictionary={(module, topic) => { app.open({ book: loc.book, chapter: loc.chapter, verse: word.verse }); app.setPending({ article: { module, topic } }); }}
+          onDictionary={(module, topic, search) => { app.open({ book: loc.book, chapter: loc.chapter, verse: word.verse }); app.setPending({ article: { module, topic, search } }); }}
           onCommentary={(m) => { app.open({ book: loc.book, chapter: loc.chapter, verse: word.verse }); app.setPending({ commentary: m }); }}
           onAsk={() => { setSel(word.verse); setAsk(true); setWord(null); }} />
       )}

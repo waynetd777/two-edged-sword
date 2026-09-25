@@ -6,6 +6,7 @@ import { Icon } from "./icons";
 import { mdPlain } from "./md";
 import { Screen, useApp } from "./state";
 import { useAssistant } from "./assistant";
+import { ClearButton } from "./ui";
 
 interface Item { id: string; group: string; icon: string; label: string; sub?: string; kbd?: string; run: () => void }
 
@@ -66,6 +67,7 @@ export function Palette({ onClose, onAsk }: { onClose: () => void; onAsk: (ref: 
         <label style={{ display: "flex", alignItems: "center", gap: 12, height: 58, padding: "0 18px", borderBottom: "1px solid var(--border)" }}>
           <Icon name="search" size={20} style={{ color: "var(--muted)" }} />
           <input ref={input} value={q} onChange={(e) => setQ(e.target.value)} onKeyDown={key} placeholder="Reference, word, Strong's number or command" aria-label="Reference, word or command" style={{ border: 0, outline: 0, background: "transparent", flexGrow: 1, font: "400 20px var(--ui)", color: "var(--text)" }} />
+          <ClearButton show={!!q} onClear={() => setQ("")} />
           <span className="kbd">esc</span>
         </label>
         <div style={{ padding: 6, maxHeight: 460, overflowY: "auto" }}>

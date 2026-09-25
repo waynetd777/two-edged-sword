@@ -27,12 +27,15 @@ selected verse:
 - **Commentary**: every commentary that covers the verse, in your order, with each one's
   chapter and book introductions, and Treasury of Scripture Knowledge cross-references with
   previews.
-- **Dictionary**, **Notes** (your journal entries on the verse) and **Maps** for the book.
+- **Dictionary**: type in the box at the top; once you do, only the dictionaries with a matching
+  entry keep a pill, and the rest are counted as "with nothing here".
+- **Notes** (your journal entries on the verse) and **Maps** for the book.
 - **Ask**: questions about the verse or chapter (see [Ask](ask.md)).
 
 Click any word to look it up: its Greek or Hebrew (for a Bible without Strong's numbers, the
 words the KJV+ most often translates it with), how the KJV translates it, dictionary articles,
-the commentaries on that verse, and buttons for Word Study, Search and Ask. The speaker beside a
+the commentaries on that verse, and buttons for Search, Word study, Dictionary (looks the word up
+in the Dictionary tab and opens the first match) and Ask. The speaker beside a
 Greek or Hebrew word pronounces it, with macOS's Greek or Hebrew voice (modern pronunciation) if
 installed, otherwise from Strong's pronunciation guide. Words in commentary, dictionary articles
 and books can be clicked the same way.
@@ -208,8 +211,10 @@ is opened again. Its menu has:
 
 ## Library
 
-Every module, which Bibles appear in the picker, and the order of commentaries and dictionaries.
-Reference books and devotionals open from here too. **Rescan** picks up modules added since the
+Every module, which Bibles appear in the picker, and the order of commentaries and dictionaries,
+with the space the modules take on disk, in all and for each kind. The search box at the top
+finds modules by title, abbreviation or file name. Reference books and devotionals open from
+here too. **Rescan** picks up modules added since the
 app started. See [Library](library.md).
 
 ## Settings

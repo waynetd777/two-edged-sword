@@ -11,7 +11,7 @@ import { WordLookup } from "./WordLookup";
 import { SearchField, Topbar } from "./Shell";
 import { HlColor, hlName, useApp } from "./state";
 import { DictionaryTab, useRefPreview } from "./StudyPane";
-import { Popover, wordAt, wordHover } from "./ui";
+import { ClearButton, Popover, wordAt, wordHover } from "./ui";
 import { dayTitle } from "./plans";
 import { useAssistant } from "./assistant";
 
@@ -298,7 +298,7 @@ export function DocReader({ focus, setFocus, openPalette }: { focus: boolean; se
       <div style={{ flexGrow: 1, minHeight: 0, display: "grid", gridTemplateColumns: focus ? "minmax(0,1fr)" : pane ? "260px minmax(0,1fr) 440px" : "260px minmax(0,1fr)" }}>
         {!focus && <aside style={{ display: "flex", flexDirection: "column", minHeight: 0, borderRight: "1px solid var(--border)" }}>
           {titles.length > 12 && (
-            <label className="field" style={{ margin: "10px 12px 4px" }}><Icon name="search" /><input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder={`Filter ${titles.length} ${devo ? "days" : "chapters"}`} aria-label="Filter chapters" /></label>
+            <label className="field" style={{ margin: "10px 12px 4px" }}><Icon name="search" /><input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder={`Filter ${titles.length} ${devo ? "days" : "chapters"}`} aria-label="Filter chapters" /><ClearButton show={!!filter} onClear={() => setFilter("")} /></label>
           )}
           <div ref={list} className="scroll doclist" style={{ padding: "6px 8px 20px" }}>
             {shown.map((t) => <button key={t} type="button" aria-current={t === doc.title} className={t === doc.title ? "on" : ""} title={t} onClick={() => go(t)}>{t}</button>)}
@@ -415,7 +415,7 @@ export function DocReader({ focus, setFocus, openPalette }: { focus: boolean; se
       {preview}
       {word && (
         <WordLookup pick={word} context={word.where ?? `${mod?.title ?? "This book"}, ${doc.title}`} bible={app.settings.bible} onClose={() => setWord(null)}
-          onDictionary={(module, topic) => { setWord(null); app.set({ studyDict: { module, topic } }); setTab("dictionary"); }}
+          onDictionary={(module, topic, search) => { setWord(null); app.set({ studyDict: { module, topic, search } }); setTab("dictionary"); }}
           onAsk={(q) => { setWord(null); setAskSeed(q); if (focus) setFocus(false); setTab("ask"); }} />
       )}
       {focus && <div style={{ position: "fixed", bottom: 18, left: 0, right: 0, display: "flex", justifyContent: "center", gap: 18, color: "var(--muted)", fontSize: 12, pointerEvents: "none" }}>

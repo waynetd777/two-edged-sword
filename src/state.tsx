@@ -51,7 +51,7 @@ export interface Settings {
   /** The study pane beside a book: its tab. */
   docTab: "notes" | "dictionary" | "ask";
   studyCommentary: string | null;
-  studyDict: { module: string; topic: string } | null;
+  studyDict: DictAt | null;
   dictModule: string | null;
   studyFollow: boolean;
 }
@@ -105,7 +105,9 @@ export interface Chat {
 
 export interface JournalSeed { verses?: string[]; title?: string; body?: string; tags?: string[]; /** Open this entry instead of starting one. */ openId?: string }
 
-export interface Pending { article?: { module: string; topic: string }; ask?: string; commentary?: string }
+/** A dictionary entry to show, or (with search) a word to look up in the dictionary search, in the current dictionary when module is "". */
+export interface DictAt { module: string; topic: string; search?: boolean }
+export interface Pending { article?: DictAt; ask?: string; commentary?: string }
 
 export type Screen = "read" | "compare" | "search" | "word" | "journal" | "plans" | "library" | "settings";
 

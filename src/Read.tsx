@@ -5,7 +5,7 @@ import { alignStrongs, plainText, Token, tokenize } from "./esword";
 import { Icon, Pause, Play } from "./icons";
 import { BibleSelect, RefButton, SearchField, Topbar } from "./Shell";
 import { usePlayer } from "./speech";
-import { HlColor, hlName, useApp, vkey } from "./state";
+import { DictAt, HlColor, hlName, useApp, vkey } from "./state";
 import { StudyPane, StudyTab } from "./StudyPane";
 import { Popover, RefPicker, Seg } from "./ui";
 import { WordLookup } from "./WordLookup";
@@ -69,7 +69,7 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
   // The study pane's choices are remembered between sessions.
   const tab = settings.studyTab, dict = settings.studyDict, commentary = settings.studyCommentary, follow = settings.studyFollow;
   const setTab = (t: StudyTab) => app.set({ studyTab: t });
-  const setDict = (d: { module: string; topic: string } | null) => app.set({ studyDict: d });
+  const setDict = (d: DictAt | null) => app.set({ studyDict: d });
   const setCommentary = (m: string | null) => app.set({ studyCommentary: m });
   const setFollow = (f: boolean) => app.set({ studyFollow: f });
   const [askSeed, setAskSeed] = useState<string | null>(null);
@@ -340,7 +340,7 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
       <PlayerBar focus={focus} />
       {word && wordRef && (
         <WordLookup pick={word} vref={wordRef} context={word.where} bible={bible} onClose={() => setWord(null)}
-          onDictionary={(module, topic) => { setDict({ module, topic }); setTab("dictionary"); setWord(null); if (!settings.studyPane) app.set({ studyPane: true }); }}
+          onDictionary={(module, topic, search) => { setDict({ module, topic, search }); setTab("dictionary"); setWord(null); if (!settings.studyPane) app.set({ studyPane: true }); }}
           onCommentary={(m) => { setCommentary(m); setTab("commentary"); setStudyVerse(word.verse); setWord(null); if (!settings.studyPane) app.set({ studyPane: true }); }}
           onAsk={(q) => { setAskSeed(q); setTab("ask"); setWord(null); if (focus) setFocus(false); if (!settings.studyPane) app.set({ studyPane: true }); }} />
       )}

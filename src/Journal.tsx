@@ -10,7 +10,7 @@ import { HL_PAINT, htmlToMd, mdPlain, mdToHtml } from "./md";
 import { HL, HL_DOT } from "./Read";
 import { SearchField, Topbar } from "./Shell";
 import { HlColor, nowLocal, onFlush, uid, useApp } from "./state";
-import { confirmDelete, Dialog, Popover, Seg } from "./ui";
+import { ClearButton, confirmDelete, Dialog, Popover, Seg } from "./ui";
 import { useAssistant } from "./assistant";
 import { docModule, parseDocLabel } from "./docref";
 import { useRefPreview } from "./StudyPane";
@@ -124,7 +124,7 @@ export function JournalScreen({ openPalette }: { openPalette: () => void }) {
             <h1 style={{ margin: 0, font: "500 26px/1.2 var(--display)" }}>Journal</h1>
             <button className="btn primary" type="button" style={{ marginLeft: "auto" }} onClick={create}><Icon name="plus" />New entry<span style={{ opacity: 0.75 }}>⌘N</span></button>
           </div>
-          <label className="field" style={{ margin: "0 4px" }}><Icon name="search" /><input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Filter entries, tags or verses" aria-label="Filter entries" /></label>
+          <label className="field" style={{ margin: "0 4px" }}><Icon name="search" /><input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Filter entries, tags or verses" aria-label="Filter entries" /><ClearButton show={!!filter} onClear={() => setFilter("")} /></label>
           {tags.length > 0 && <div style={{ display: "flex", gap: 5, padding: "0 4px", flexWrap: "wrap" }}><button type="button" className={`chip ${!tag ? "on" : ""}`} onClick={() => setTag(null)}>All</button>{tags.slice(0, 8).map((t) => <button key={t} type="button" className={`chip ${tag === t ? "on" : ""}`} onClick={() => setTag(tag === t ? null : t)}>#{t}</button>)}</div>}
           <div className="scroll" style={{ flexGrow: 1, paddingBottom: 20 }}>
             {!entries.length && <div className="empty">{app.journal.length ? "Nothing matches." : "No entries yet. Start one with New entry, or press N on a verse."}</div>}

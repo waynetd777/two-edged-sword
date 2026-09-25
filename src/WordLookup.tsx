@@ -37,7 +37,8 @@ export function WordLookup({ pick, vref, context, bible, onClose, onDictionary, 
   vref?: Ref;
   /** Where the word is, when not in a verse: "Easton's Bible Dictionary", a book's chapter. */
   context?: string;
-  onDictionary: (module: string, topic: string) => void; onCommentary?: (module: string) => void; onAsk: (q: string) => void;
+  /** With search, the word goes into the dictionary search box rather than opening an entry. */
+  onDictionary: (module: string, topic: string, search?: boolean) => void; onCommentary?: (module: string) => void; onAsk: (q: string) => void;
 }) {
   const app = useApp();
   const canAsk = useAssistant().available;
@@ -60,15 +61,16 @@ export function WordLookup({ pick, vref, context, bible, onClose, onDictionary, 
   const guessed = !pick.token.strongs.length && guess.length > 0;
   const lex = useLexicon(pick.token.strongs.length ? pick.token.strongs : guess);
   const [topics, setTopics] = useState<TopicHit[]>([]);
+  const [head, setHead] = useState(word.toLowerCase()); // the form of the word the dictionaries have
   const [cov, setCov] = useState<Coverage[]>([]);
   useEffect(() => {
     let dead = false;
     (async () => {
       for (const h of headwords(word)) {
         const t = await api.findTopics(h);
-        if (t.length) { if (!dead) setTopics(orderModules(t.map((x) => ({ ...x, id: x.module })), app.settings.dictionaryOrder).slice(0, 6)); return; }
+        if (t.length) { if (!dead) setHead(h); if (!dead) setTopics(orderModules(t.map((x) => ({ ...x, id: x.module })), app.settings.dictionaryOrder).slice(0, 6)); return; }
       }
-      if (!dead) setTopics([]);
+      if (!dead) { setTopics([]); setHead(word.toLowerCase()); }
     })();
     if (vref?.verse && onCommentary) api.coverage(vref.book, vref.chapter, vref.verse).then((c) => !dead && setCov(orderModules(c.filter((x) => x.range && x.id !== app.tsk), app.settings.commentaryOrder)));
     else setCov([]);
@@ -112,11 +114,12 @@ export function WordLookup({ pick, vref, context, bible, onClose, onDictionary, 
             <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>{cov.map((c) => <button key={c.id} type="button" className="rchip" onClick={() => onCommentary?.(c.id)}>{short(c)}{range(c)}</button>)}</div>
           </div>
         )}
-        <div style={{ display: "grid", gridTemplateColumns: `repeat(${2 + (canAsk ? 1 : 0)}, minmax(0,1fr))` }}>
+        <div style={{ display: "grid", gridTemplateColumns: `repeat(${3 + (canAsk ? 1 : 0)}, minmax(0,1fr))` }}>
+          <button type="button" style={{ height: 40, border: 0, background: "transparent", cursor: "pointer", color: "var(--accent)", borderRight: "1px solid var(--border)" }} onClick={() => { app.searchText(word); onClose(); }}>Search</button>
           {/* A word with its own Strong's number studies that number; any other word (a commentary's,
               a book's) looks up the Greek and Hebrew words the KJV translates it with. */}
           <button type="button" style={{ height: 40, border: 0, background: "transparent", cursor: "pointer", color: "var(--accent)", borderRight: "1px solid var(--border)" }} onClick={() => { app.studyWord(pick.token.strongs.length && lex.length ? lex[0].num : word.toLowerCase()); onClose(); }}>Word study</button>
-          <button type="button" style={{ height: 40, border: 0, background: "transparent", cursor: "pointer", color: "var(--accent)", borderRight: canAsk ? "1px solid var(--border)" : 0 }} onClick={() => { app.searchText(word); onClose(); }}>Search “{word}”</button>
+          <button type="button" style={{ height: 40, border: 0, background: "transparent", cursor: "pointer", color: "var(--accent)", borderRight: canAsk ? "1px solid var(--border)" : 0 }} onClick={() => onDictionary("", head, true)}>Dictionary</button>
           {canAsk && <button type="button" style={{ height: 40, border: 0, background: "transparent", cursor: "pointer", color: "var(--accent)" }} onClick={() => onAsk(`What does “${word}” mean in ${context ?? (vref ? fmtRef(vref) : "this passage")}?`)}>Ask</button>}
         </div>
       </div>

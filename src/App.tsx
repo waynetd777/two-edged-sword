@@ -73,7 +73,7 @@ function Screens() {
       {screen === "word" && <WordStudyScreen />}
       {screen === "journal" && <JournalScreen openPalette={openPalette} />}
       {screen === "plans" && <PlansScreen openPalette={openPalette} />}
-      {screen === "library" && <LibraryScreen openPalette={openPalette} />}
+      {screen === "library" && <LibraryScreen />}
       {screen === "settings" && <SettingsScreen />}
       {(screen !== "read" || app.doc) && <PlayerBar focus={focus && screen === "read"} />}
       {palette && <Palette onClose={() => setPalette(false)} onAsk={() => app.setPending({ ask: "" })} />}

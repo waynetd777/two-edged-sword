@@ -8,7 +8,7 @@ import { mdToHtml } from "./md";
 import { modelGroups, modelName, pickModel, providerOf, PROVIDER_NAME, useAssistant } from "./assistant";
 import { Chat, Model, nowLocal, uid, useApp } from "./state";
 import { useRefPreview } from "./StudyPane";
-import { confirmDelete, Popover } from "./ui";
+import { ClearButton, confirmDelete, Popover } from "./ui";
 
 /** A module whose description carries a copyright notice is licensed, not public domain. */
 const PUBLIC_DOMAIN = /^(KJV\+?|KJVA|ASV|YLT|WEB|DRB|DRA|Darby|BBE|RV|ERV|Webster|Geneva|GNV|Bishops|Tyndale|Wycliffe|LXX|TR|WH|Byz)$/i;
@@ -364,7 +364,7 @@ function RecentChats({ anchor, about, onClose, onPick, current }: { anchor: DOMR
   return (
     <Popover anchor={anchor} onClose={onClose} width={380}>
       <div style={{ padding: 6, display: "flex", flexDirection: "column" }}>
-        <label className="field" style={{ margin: "2px 4px 6px" }}><Icon name="search" /><input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search chats" aria-label="Search chats" autoFocus /></label>
+        <label className="field" style={{ margin: "2px 4px 6px" }}><Icon name="search" /><input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search chats" aria-label="Search chats" autoFocus /><ClearButton show={!!q} onClear={() => setQ("")} /></label>
         {here.length > 0 && <><div className="label" style={{ padding: "4px 10px" }}>About {about}</div>{here.map(item)}</>}
         {rest.length > 0 && <><div className="label" style={{ padding: "8px 10px 4px" }}>Earlier</div>{rest.map(item)}</>}
         {!list.length && <div className="n" style={{ padding: 10 }}>No chats yet.</div>}

@@ -4,8 +4,8 @@ import { book, fmtRef, parseRef, Ref } from "./bible";
 import { AskPanel } from "./Ask";
 import { plainText, renderHtml, docSegments } from "./esword";
 import { Icon } from "./icons";
-import { useApp } from "./state";
-import { Popover, TrailButtons, useTrail, wordAt, wordHover } from "./ui";
+import { DictAt, useApp } from "./state";
+import { ClearButton, Popover, TrailButtons, useTrail, wordAt, wordHover } from "./ui";
 import { useAssistant } from "./assistant";
 
 export type StudyTab = "commentary" | "dictionary" | "notes" | "maps" | "ask";
@@ -20,8 +20,8 @@ interface Props {
   verses: Verse[];
   follow: boolean;
   setFollow: (f: boolean) => void;
-  dict: { module: string; topic: string } | null;
-  setDict: (d: { module: string; topic: string } | null) => void;
+  dict: DictAt | null;
+  setDict: (d: DictAt | null) => void;
   askSeed: string | null;
   clearAskSeed: () => void;
   commentary: string | null;
@@ -277,7 +277,7 @@ function CrossRefs({ vref, onOpen, onRefHover }: { vref: Ref; onOpen: (r: Ref) =
   );
 }
 
-export function DictionaryTab({ dict, setDict, onWord }: { dict: { module: string; topic: string } | null; setDict: (d: { module: string; topic: string } | null) => void; onWord?: (word: string, rect: DOMRect, where: string) => void }) {
+export function DictionaryTab({ dict, setDict, onWord }: { dict: DictAt | null; setDict: (d: DictAt | null) => void; onWord?: (word: string, rect: DOMRect, where: string) => void }) {
   const app = useApp();
   const dicts = orderModules((app.lib?.modules ?? []).filter((m) => m.kind === "dictionary"), app.settings.dictionaryOrder);
   const remembered = dicts.find((d) => d.id === (dict?.module ?? app.settings.dictModule))?.id;
@@ -290,7 +290,9 @@ export function DictionaryTab({ dict, setDict, onWord }: { dict: { module: strin
   const topic = useTopics(art ? module : undefined, art?.topic);
   // Every entry opened joins the trail, so links followed can be walked back.
   const trail = useTrail<{ module: string; topic: string }>((a, b) => a.module === b.module && a.topic === b.topic);
-  useEffect(() => { if (dict) { setModule(dict.module); setQ(dict.topic); trail.visit(dict); } }, [dict]); // eslint-disable-line react-hooks/exhaustive-deps
+  // A word sent to be searched for fills the box and opens its first match, as Enter would; an entry is opened.
+  const enter = useRef(false);
+  useEffect(() => { if (dict) { if (dict.module) setModule(dict.module); setQ(dict.topic); enter.current = !!dict.search; if (!dict.search) trail.visit(dict); } }, [dict]); // eslint-disable-line react-hooks/exhaustive-deps
   const goTrail = (d: number) => { hide(); const it = trail.go(d); if (it) setDict(it); };
   // Only the article asked for last is shown: an earlier one can arrive after it.
   const artSeq = useRef(0);
@@ -299,14 +301,29 @@ export function DictionaryTab({ dict, setDict, onWord }: { dict: { module: strin
     api.article("dictionary", m, topic).then((a) => { if (n === artSeq.current) { setArt(a); then?.(a); } }).catch(console.error);
   };
   useEffect(() => {
-    if (module && dict && dict.module === module) loadArt(module, dict.topic);
+    if (module && dict && !dict.search && dict.module === module) loadArt(module, dict.topic);
   }, [dict, module]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (!module || !q.trim()) { setTopics([]); return; }
     let dead = false;
-    const t = window.setTimeout(() => api.topics("dictionary", module, q.trim(), 40).then((ts) => { if (!dead) setTopics(ts); }).catch(console.error), 120);
+    const t = window.setTimeout(() => api.topics("dictionary", module, q.trim(), 40).then((ts) => { if (dead) return; if (enter.current && ts[0]) { enter.current = false; setDict({ module, topic: ts[0] }); } else setTopics(ts); }).catch(console.error), 120);
     return () => { dead = true; window.clearTimeout(t); };
   }, [q, module]);
+  // With a search typed, only the dictionaries that have a matching entry get a pill, as in the commentary tab.
+  const [hits, setHits] = useState<Set<string> | null>(null);
+  const ids = dicts.map((d) => d.id).join("|");
+  useEffect(() => {
+    const w = q.trim();
+    if (!w) { setHits(null); return; }
+    let dead = false;
+    const t = window.setTimeout(() => Promise.all(dicts.map((d) => api.topics("dictionary", d.id, w, 1).then((ts) => ts.length > 0, () => false)))
+      .then((has) => { if (!dead) setHits(new Set(dicts.filter((_, i) => has[i]).map((d) => d.id))); }), 120);
+    return () => { dead = true; window.clearTimeout(t); };
+  }, [q, ids]); // eslint-disable-line react-hooks/exhaustive-deps
+  const shown = hits ? dicts.filter((d) => hits.has(d.id)) : dicts;
+  const others = hits ? dicts.filter((d) => !hits.has(d.id)) : [];
+  // The dictionary being searched moves to one with a match when it has none itself.
+  useEffect(() => { if (hits && shown.length > 0 && !hits.has(module)) setModule(shown[0].id); }, [hits]); // eslint-disable-line react-hooks/exhaustive-deps
   // Setting dict loads the article (the effect above).
   const pick = (topic: string) => { setDict({ module, topic }); setTopics([]); };
   // Switching dictionary keeps the same topic when it has one.
@@ -316,16 +333,17 @@ export function DictionaryTab({ dict, setDict, onWord }: { dict: { module: strin
   };
   return (
     <div style={{ display: "flex", flexDirection: "column", minHeight: 0, flexGrow: 1 }}>
-      <div style={{ display: "flex", gap: 6, padding: "10px 18px 0", flexWrap: "wrap" }}>
-        {dicts.map((d) => <button key={d.id} type="button" className={`chip ${module === d.id ? "on" : ""}`} title={d.title} onClick={() => switchTo(d)}>{d.abbrev}</button>)}
-      </div>
       <div style={{ padding: "10px 18px 0", position: "relative" }}>
-        <label className="field"><Icon name="search" /><input value={q} placeholder="Look up a word or name" aria-label="Look up" onChange={(e) => setQ(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && topics[0]) pick(topics[0]); }} /></label>
+        <label className="field"><Icon name="search" /><input value={q} placeholder="Look up a word or name" aria-label="Look up" onChange={(e) => { enter.current = false; setQ(e.target.value); }} onKeyDown={(e) => { if (e.key === "Enter" && topics[0]) pick(topics[0]); }} /><ClearButton show={!!q} onClear={() => setQ("")} /></label>
         {topics.length > 0 && q !== art?.topic && (
           <div className="card" style={{ position: "absolute", left: 18, right: 18, top: 44, zIndex: 10, maxHeight: 260, overflowY: "auto", padding: 4, boxShadow: "0 10px 30px var(--shadow)" }}>
             {topics.map((t) => <button key={t} type="button" className="bm" onClick={() => pick(t)}>{t}</button>)}
           </div>
         )}
+      </div>
+      <div style={{ display: "flex", gap: 6, padding: "10px 18px 0", flexWrap: "wrap" }}>
+        {shown.map((d) => <button key={d.id} type="button" className={`chip ${module === d.id ? "on" : ""}`} title={d.title} onClick={() => switchTo(d)}>{d.abbrev}</button>)}
+        {others.length > 0 && <span className="n" style={{ alignSelf: "center" }} title={others.map((o) => o.title).join(", ")}>{others.length} with nothing here</span>}
       </div>
       <div className="scroll" style={{ flexGrow: 1, padding: "14px 22px 20px" }}>
         {art ? (

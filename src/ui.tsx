@@ -257,3 +257,9 @@ export function TrailButtons({ trail, onGo }: { trail: { canBack: boolean; canFo
 export function Spinner() {
   return <span className="n" style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>Loading…</span>;
 }
+
+/** The x at the end of a search box, shown while it has text; clicking it keeps the box focused. */
+export function ClearButton({ show, onClear, label = "Clear" }: { show: boolean; onClear: () => void; label?: string }) {
+  if (!show) return null;
+  return <button type="button" className="ibtn" aria-label={label} title={label} onMouseDown={(e) => e.preventDefault()} onClick={onClear} style={{ width: 20, height: 20, flexShrink: 0 }}><Icon name="x" size={12} /></button>;
+}

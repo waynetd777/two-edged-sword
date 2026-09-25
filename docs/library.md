@@ -76,4 +76,8 @@ personal use. Ask treats any module whose description carries a copyright notice
 see [Ask](ask.md#what-is-sent).
 
 Classics that only exist as EPUB or text (Augustine's Confessions, Pilgrim's Progress, the later
-church fathers) would need converting into a `.refi` module first.
+church fathers) would need converting into a `.refi` module first. A `.refi` is a SQLite file with
+two tables: `Details (Title, Abbreviation, Information, Version)`, one row, with Version 4; and
+`Reference (Chapter, Content)`, one row per chapter in reading order, with an index on `Chapter`.
+Chapter names must be unique. Content is HTML: paragraphs, bold and italics, tables, `<ref>Rom
+8:28</ref>` for a Bible reference, and images inline as `data:` URLs.

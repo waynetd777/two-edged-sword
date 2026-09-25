@@ -4,6 +4,7 @@
 
 import { RefObject, useEffect, useRef, useState } from "react";
 import { Icon } from "./icons";
+import { ClearButton } from "./ui";
 
 type Highlights = { set: (k: string, v: unknown) => void; delete: (k: string) => void };
 const highlights = () => (CSS as unknown as { highlights?: Highlights }).highlights;
@@ -135,6 +136,7 @@ export function useFind(ed: RefObject<HTMLDivElement | null>, onEdit: () => void
         <label className="field" style={{ flex: 1, maxWidth: 360 }}><Icon name="search" />
           <input ref={input} value={q} onChange={(e) => setQ(e.target.value)} placeholder="Find" aria-label="Find"
             onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); step(e.shiftKey ? -1 : 1); } }} />
+          <ClearButton show={!!q} onClear={() => setQ("")} />
         </label>
         <span className="n" style={{ minWidth: 64 }}>{q ? (found.length ? `${cur + 1} of ${found.length}` : "No matches") : ""}</span>
         <button className="ibtn" type="button" aria-label="Previous match" title="Previous ⇧⌘G" disabled={!found.length} onClick={() => step(-1)}><Icon name="up" /></button>
