@@ -146,7 +146,8 @@ back. Verses inserted from the Bible aren't checked.
 
 Changes made to the files elsewhere (in Obsidian, say) show within a few seconds, even in the
 open entry, unless you have unsaved edits. If the folder the journal sits in has gone (the vault
-moved), saving says so rather than starting an empty journal somewhere else.
+moved), saving says so rather than starting an empty journal somewhere else. Saving an entry
+keeps its month file's modified time, so an edit doesn't make an old month look new.
 
 ## Quiet time
 

@@ -245,10 +245,19 @@ fn read_month(dir: &Path, key: &str) -> Result<String, String> {
     std::fs::read_to_string(&p).map_err(|e| format!("{}: {e}", p.display()))
 }
 
+/// A month file keeps the modified time it had: an edit here doesn't make an old month look new
+/// (to Finder, Obsidian's sort, a backup). A new month file gets the time it's made.
 fn write_month(dir: &Path, key: &str, text: Option<String>) -> Result<(), String> {
     let p = month_path(dir, key);
     match text {
-        Some(t) => write_text_atomic(&p, &t),
+        Some(t) => {
+            let was = std::fs::metadata(&p).and_then(|m| m.modified()).ok();
+            write_text_atomic(&p, &t)?;
+            if let Some(was) = was {
+                std::fs::File::options().write(true).open(&p).and_then(|f| f.set_modified(was)).map_err(|e| e.to_string())?;
+            }
+            Ok(())
+        }
         None if p.exists() => std::fs::remove_file(&p).map_err(|e| e.to_string()),
         None => Ok(()),
     }
@@ -336,6 +345,22 @@ mod tests {
         let text = render_month("2026-09", &[e.clone()]);
         assert!(!text.lines().nth(3).unwrap().contains("a--b\""), "comment must not contain --");
         assert_eq!(parse(&text)[0].tags, vec!["a--b".to_string()]);
+    }
+
+    #[test]
+    fn save_keeps_the_month_file_modified_time() {
+        let dir = std::env::temp_dir().join(format!("tes-journal-mtime-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).unwrap();
+        let e = sample();
+        save(&dir, &e).unwrap();
+        let p = dir.join("Me. Journal - 2026-09.md");
+        let old = std::time::SystemTime::UNIX_EPOCH + std::time::Duration::from_secs(1_700_000_000);
+        std::fs::File::options().write(true).open(&p).unwrap().set_modified(old).unwrap();
+        save(&dir, &Entry { body: "Changed.".into(), ..e.clone() }).unwrap();
+        assert!(std::fs::read_to_string(&p).unwrap().contains("Changed."));
+        assert_eq!(std::fs::metadata(&p).unwrap().modified().unwrap(), old);
+        let _ = std::fs::remove_dir_all(&dir);
     }
 
     #[test]
