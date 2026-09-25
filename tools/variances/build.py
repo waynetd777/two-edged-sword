@@ -3,8 +3,9 @@
     python3 tools/variances/build.py niv
 
 Reads variances-work/<module>/reviewed/*.json (see review.md) and writes variances-<module>.json
-to the app's data folder, where the reading pane picks it up. Records for books outside the
-reviewed batches are kept from the existing file, so the Old Testament can be added later.
+to the app's data folder, where the reading pane picks it up. It merges: a verse in the batches
+takes its reviewed record (or loses its old one if the review dropped it); every other record in
+the existing file is kept, so the Old Testament, or a list of disputed verses, can be added later.
 """
 import argparse, datetime, json, re, sys
 from pathlib import Path
@@ -45,12 +46,12 @@ def main():
     missing = [b.name for b in batches if b.name not in reviewed]
     if missing:
         sys.exit(f"not reviewed yet: {', '.join(missing)}")
-    base, books, records, errs = "kjv", set(), {}, []
+    base, picked_all, records, errs = "kjv", set(), {}, []
     for b in batches:
         batch = json.loads(b.read_text())
         base = batch["base"]
-        books |= {c["book"] for c in batch["candidates"]}
         picked = {(c["book"], c["chapter"], c["verse"]) for c in batch["candidates"]}
+        picked_all |= picked
         out = json.loads(reviewed[b.name].read_text())
         for r in out["records"]:
             errs += check(r, b.name)
@@ -62,7 +63,7 @@ def main():
     target = DATA / f"{store_name(a.module)}.json"
     if target.exists():
         for r in json.loads(target.read_text()).get("records", []):
-            if r["book"] not in books:
+            if (r["book"], r["chapter"], r["verse"]) not in picked_all:
                 records.setdefault((r["book"], r["chapter"], r["verse"]), r)
     doc = {"module": a.module, "base": base, "updated": datetime.date.today().isoformat(), "records": [records[k] for k in sorted(records)]}
     target.write_text(json.dumps(doc, indent=1, ensure_ascii=False))

@@ -1,6 +1,7 @@
 """Verses where a translation may differ in meaning from a base Bible (the KJV by default), for review.
 
     python3 tools/variances/candidates.py niv --books 40-66
+    python3 tools/variances/candidates.py niv --refs tools/variances/disputed-ot.txt
 
 Reads both modules from the e-Sword library and writes batches of candidates, with both texts,
 to a work folder outside the repo (the translation's text is copyrighted; it is never committed).
@@ -68,13 +69,21 @@ def main():
     ap.add_argument("--base", default="kjv")
     ap.add_argument("--books", default="1-66", help="e-Sword book numbers, e.g. 40-66")
     ap.add_argument("--batch", type=int, default=80)
+    ap.add_argument("--refs", type=Path, help="review exactly these verses: a file of 'book chapter verse' lines (e-Sword book numbers), # comments")
     ap.add_argument("--no-shorter", action="store_true", help="don't pick verses only for being much shorter (for the Old Testament, where both follow the Masoretic text and a shorter verse is idiom, not omission)")
     ap.add_argument("--out", type=Path, help="work folder (default: variances-work/<module> in the app's data folder)")
     a = ap.parse_args()
     lo, hi = (int(x) for x in (a.books.split("-") + [a.books])[:2])
     base, mod = load(a.base), load(a.module)
+    only = None
+    if a.refs:
+        only = {tuple(int(x) for x in line.split("#")[0].split()) for line in a.refs.read_text().splitlines() if line.split("#")[0].strip()}
     found = []
     for ref in sorted(base):
+        if only is not None:
+            if ref in only:
+                found.append({"book": ref[0], "chapter": ref[1], "verse": ref[2], "why": reasons(base[ref], mod.get(ref, ""), False) or ["often disputed"], "base": base[ref], "text": mod.get(ref, "")})
+            continue
         if not lo <= ref[0] <= hi:
             continue
         why = reasons(base[ref], mod.get(ref, ""), not a.no_shorter)
