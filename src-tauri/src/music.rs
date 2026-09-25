@@ -63,7 +63,8 @@ pub fn play(ids: &[String]) -> Result<usize, String> {
         const lib = m.libraryPlaylists[0].tracks;
         for (const id of ids) { const t = lib.whose({ persistentID: id })(); if (t.length) m.duplicate(t[0], { to: pl }); }
         const n = pl.tracks.length;
-        if (n) { m.shuffleEnabled = false; pl.play(); }
+        // In order, once through: repeat would never let the part end.
+        if (n) { m.shuffleEnabled = false; m.songRepeat = "off"; pl.play(); }
         return String(n);
     }"#;
     let arg = serde_json::to_string(&(PLAYLIST, ids)).map_err(|e| e.to_string())?;
@@ -85,11 +86,15 @@ pub fn state() -> Result<State, String> {
 }
 
 /// "pause", "play" or "next", for the Quiet time playlist only: nothing else the user is
-/// listening to is paused or skipped. "show" brings Music to the front, where its lyrics are:
+/// listening to is paused or skipped. "stop" is sent as the playlist ends, and stops whatever
+/// Music has gone on to play after it (AutoPlay's similar songs) as well. "show" brings Music to the front, where its lyrics are:
 /// they aren't in the library's files, and Apple Music's own can't be read by another app.
 pub fn control(cmd: &str) -> Result<(), String> {
     if cmd == "show" {
         return jxa(r#"function run(argv) { Application("Music").activate(); return ""; }"#, "").map(|_| ());
+    }
+    if cmd == "stop" {
+        return jxa(r#"function run(argv) { const m = Application("Music"); if (m.running() && m.playerState() !== "stopped") m.stop(); return ""; }"#, "").map(|_| ());
     }
     if !["pause", "play", "next"].contains(&cmd) {
         return Err(format!("unknown command {cmd}"));

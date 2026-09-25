@@ -178,13 +178,20 @@ export function QuietTime({ focus }: { focus: boolean }) {
     setNow(null);
     // None chosen (the card says why): it waits for Next.
     if (!songs?.length || !playing) return;
-    let dead = false, heard = false, poll: number | undefined;
+    let dead = false, heard = false, onLast = false, poll: number | undefined;
+    const last = songs[songs.length - 1].name;
     const check = async () => {
       const st = await api.musicState().catch(() => null);
       if (dead || !st) return;
       setNow(st);
-      if (st.ours && st.state === "playing") heard = true;
-      else if (heard && (!st.ours || st.state === "stopped")) { window.clearInterval(poll); goRef.current(1); }
+      if (st.ours && st.state === "playing") { heard = true; onLast = st.name === last; }
+      else if (heard && (!st.ours || st.state === "stopped")) {
+        window.clearInterval(poll);
+        // Straight on from the last song: Music's AutoPlay carrying on after the playlist, which
+        // is stopped. Anything else (music the user put on instead) is left playing.
+        if (onLast && st.state !== "stopped") api.musicControl("stop").catch(() => {});
+        goRef.current(1);
+      }
     };
     checkNow.current = check;
     api.musicPlay(songs.map((x) => x.id)).then((n) => {
