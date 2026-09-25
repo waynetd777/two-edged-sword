@@ -78,7 +78,7 @@ pub fn export(lib: &Library, root: &Path, chat_id: &str, req: &Request) -> Resul
     let lock = crate::store::dir_lock(&dest);
     let _held = lock.lock().unwrap_or_else(|e| e.into_inner());
     crate::store::replace_dir(&dest, |dir| {
-        for sub in ["passage", "differences", "commentaries", "lexicons", "journal", "dictionaries"] {
+        for sub in ["passage", "differences", "commentaries", "references", "lexicons", "journal", "dictionaries"] {
             std::fs::create_dir_all(dir.join(sub)).map_err(|e| e.to_string())?;
         }
         let (from, to) = (req.from.unwrap_or(1), req.to.or(req.from).unwrap_or(999));
@@ -118,6 +118,8 @@ pub fn export(lib: &Library, root: &Path, chat_id: &str, req: &Request) -> Resul
         }
         write(&dir.join("digest.txt"), &digest)?;
 
+        cited_in_books(lib, req, from, to, &dir.join("references"), &mut index)?;
+
         let numbers = req.strongs_bible.as_deref().map(|b| strongs(lib, b, req.book, req.chapter, from, to)).unwrap_or_default();
         if !numbers.is_empty() {
             index.push_str(&format!("\nlexicons/ — entries for the Strong's numbers in the passage ({}), headed == number ==:\n", numbers.iter().cloned().collect::<Vec<_>>().join(" ")));
@@ -150,6 +152,32 @@ pub fn export(lib: &Library, root: &Path, chat_id: &str, req: &Request) -> Resul
         write(&dir.join("index.txt"), &index)
     })?;
     Ok(dest)
+}
+
+/// Passages in reference books that cite the passage's verses, from a book's VerseLinks table
+/// (tools/sefaria gives each Talmud tractate one; e-Sword's own books have none): one file per book.
+fn cited_in_books(lib: &Library, req: &Request, from: i64, to: i64, dir: &Path, index: &mut String) -> Result<(), String> {
+    let mut listed = false;
+    for m in lib.of_kind(Kind::Reference).filter(|m| !req.exclude.contains(&m.id)) {
+        let rows = lib.with(Kind::Reference, &m.id, |c| {
+            let mut st = c.prepare("SELECT Verse, Segment, Excerpt FROM VerseLinks WHERE Book = ?1 AND Chapter = ?2 AND Verse BETWEEN ?3 AND ?4 ORDER BY Verse, rowid")?;
+            let rows = st.query_map(params![req.book, req.chapter, from, to], |r| Ok((r.get::<_, i64>(0)?, r.get::<_, String>(1)?, r.get::<_, String>(2)?)))?;
+            rows.collect::<rusqlite::Result<Vec<_>>>()
+        });
+        let Ok(rows) = rows else { continue };
+        if rows.is_empty() {
+            continue;
+        }
+        if !listed {
+            index.push_str("\nreferences/ — passages in their reference books (such as the Talmud) that cite these verses, each headed == verse · place ==, with a passage either side for context:\n");
+            listed = true;
+        }
+        let body: String = rows.iter().map(|(v, seg, text)| format!("== {}:{v} · {} {seg} ==\n{text}\n\n", req.chapter, m.abbrev)).collect();
+        let file = format!("{}.txt", file_name(&m.title));
+        write(&dir.join(&file), &format!("{} — passages citing {}\n\n{body}", m.title, req.label))?;
+        index.push_str(&format!("  {file}  ({} passages)\n", rows.len()));
+    }
+    Ok(())
 }
 
 /// e-Sword's book numbers, from 1.
@@ -428,6 +456,23 @@ mod tests {
         assert!(dir.join("2026-09-01 Love 2.md").exists());
         assert!(export_journal(&root, "../", "x", &[]).is_err());
         let _ = std::fs::remove_dir_all(&root);
+    }
+
+    /// Against the e-Sword X library on this Mac, with tools/sefaria's Talmud; skips itself without them.
+    #[test]
+    fn talmud_passages_citing_a_verse() {
+        let dir = crate::library::default_dir();
+        if !dir.join("talmud_sanhedrin.refi").is_file() { return; }
+        let lib = Library::scan(dir);
+        let out = std::env::temp_dir().join(format!("tes-ask-cited-{}", std::process::id()));
+        std::fs::create_dir_all(&out).unwrap();
+        let req = Request { book: 1, chapter: 49, from: Some(10), to: Some(10), bibles: vec![], strongs_bible: None, label: "Genesis 49:10".into(), journal: vec![], exclude: vec![] };
+        let mut index = String::new();
+        cited_in_books(&lib, &req, 10, 10, &out, &mut index).unwrap();
+        let text = std::fs::read_to_string(out.join("Talmud_ Sanhedrin.txt")).or_else(|_| std::fs::read_to_string(std::fs::read_dir(&out).unwrap().flatten().find(|e| e.file_name().to_string_lossy().contains("Sanhedrin")).unwrap().path())).unwrap();
+        assert!(text.contains("== 49:10 · Sanhedrin 98b"), "{text}");
+        assert!(index.contains("references/"));
+        let _ = std::fs::remove_dir_all(&out);
     }
 
     /// Against the e-Sword X library on this Mac; skips itself where it is absent.

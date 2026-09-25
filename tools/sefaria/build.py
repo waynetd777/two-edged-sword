@@ -7,14 +7,17 @@ Targums become Bibles (verse by verse, so they read and compare beside any other
   targum_aramaic / targum_english          Onkelos (Torah), Jonathan (Prophets), the Writings' Targums
   pseudojonathan_aramaic / _english        Targum Pseudo-Jonathan (Torah)
 The Talmud becomes one reference book per tractate (talmud_<tractate>.refi), a chapter per daf,
-each passage in English (the William Davidson translation) with its Aramaic beneath.
+each passage in English (the William Davidson translation) with its Aramaic beneath. Each also
+gets a VerseLinks table (e-Sword ignores it): Sefaria's links from its passages to the verses
+they cite, in the KJV's numbering, with the passage's English, so Ask can be given the Talmud's
+discussion of the verses a question is about.
 
 Downloads are cached in ~/Library/Caches/Two-edged Sword/sefaria. Modules are written to the
 e-Sword library, where the app (after Library → Rescan) and e-Sword both find them. English is
 Sefaria's merged text: its best version for each verse, whose sources and licences are listed
 in each module's information. Several are CC-BY-NC: fine for personal study, not for resale.
 """
-import html, json, os, re, sqlite3, sys, urllib.parse, urllib.request
+import csv, html, io, json, os, re, sqlite3, sys, urllib.parse, urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
@@ -201,12 +204,72 @@ def targums(tocmap):
     targum_bible(tocmap, "pseudojonathan_english", "Targum Pseudo-Jonathan (English)", "Ps-Jon-E", pj, "English", blurb)
 
 
+def kjv_verse(b, c, v, heb, kjv):
+    """One Hebrew-numbered verse in the KJV's numbering (see to_kjv); heb and kjv are chapter lengths."""
+    if b == 19:
+        extra = heb.get((b, c), 0) - kjv.get((b, c), 0)
+        return (b, c, max(1, v - extra)) if extra in (1, 2) else (b, c, v)
+    for bk, hc, lo, hi, kc, kv in HEB_TO_KJV:
+        if bk == b and hc == c and lo <= v <= hi:
+            return b, kc, kv + (v - lo)
+    return b, c, v
+
+
+def talmud_links():
+    """(Talmud segment, verse) pairs from Sefaria's links export (about 680 MB, read as it
+    streams; only these pairs are kept), cached."""
+    p = CACHE / "talmud_links.json"
+    if not p.exists():
+        out = []
+        for n in range(17):
+            with urllib.request.urlopen(f"https://storage.googleapis.com/sefaria-export/links/links{n}.csv", timeout=300) as r:
+                for row in csv.reader(io.TextIOWrapper(r, encoding="utf-8")):
+                    if len(row) < 7:
+                        continue
+                    a, b, _, ta, tb, ca, cb = row[:7]
+                    if ca == "Talmud" and cb == "Tanakh" and not ta.startswith(("Jerusalem", "Mishnah")):
+                        out.append((a, b))
+                    elif cb == "Talmud" and ca == "Tanakh" and not tb.startswith(("Jerusalem", "Mishnah")):
+                        out.append((b, a))
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text(json.dumps(out))
+    return json.loads(p.read_text())
+
+
+SEG = re.compile(r"^(.+?) (\d+)([ab])(?::(\d+)(?:-(\d+))?)?$")
+VERSE = re.compile(r"^(.+?) (\d+):(\d+)(?:-(\d+))?")
+
+
+def links_by_tractate(titles):
+    """Tractate → [(amud index, first segment, last segment, (book, chapter, verse) Hebrew-numbered)]."""
+    out = {t: [] for t in titles}
+    for seg, verse in talmud_links():
+        m, n = SEG.match(seg), VERSE.match(verse)
+        if not m or not n or m[1] not in out or n[1] not in BOOKS:
+            continue
+        i = (int(m[2]) - 1) * 2 + (m[3] == "b")
+        lo = int(m[4] or 1)
+        hi = int(m[5] or m[4] or 1)
+        b, c = BOOKS.index(n[1]) + 1, int(n[2])
+        for v in range(int(n[3]), int(n[4] or n[3]) + 1):
+            out[m[1]].append((i, lo, hi, (b, c, v)))
+    return out
+
+
+def chapter_lengths(module):
+    p = LIBRARY / f"{module}.bbli"
+    if not p.exists():
+        return {}
+    c = sqlite3.connect(f"file:{p}?immutable=1", uri=True)
+    return {(b, ch): n for b, ch, n in c.execute("SELECT Book, Chapter, MAX(Verse) FROM Bible GROUP BY Book, Chapter")}
+
+
 def amud(i):
     """The text's index as a daf and side: 0 → 1a, 1 → 1b, 2 → 2a."""
     return i // 2 + 1, "ab"[i % 2]
 
 
-def tractate(tocmap, title):
+def tractate(tocmap, title, links, heb, kjv):
     en, he = text(tocmap, title, "English"), text(tocmap, title, "Hebrew")
     if not en and not he:
         return None
@@ -239,16 +302,28 @@ def tractate(tocmap, title):
         CREATE INDEX ChapterIndex ON Reference (Chapter);""")
     c.execute("INSERT INTO Details VALUES (?,?,?,1,0)", (f"Talmud: {title}", title, info))
     c.executemany("INSERT INTO Reference VALUES (?,?)", [(f"{title} {d}", "\n".join(b)) for d, b in sorted(chapters.items())])
+    # The cited segments with one on either side, for context.
+    c.executescript("""CREATE TABLE VerseLinks (Book INT, Chapter INT, Verse INT, Ref TEXT, Segment TEXT, Excerpt TEXT);
+        CREATE INDEX VerseLinksIndex ON VerseLinks (Book, Chapter, Verse);""")
+    rows = set()
+    for i, lo, hi, (b, ch, v) in links:
+        segs = ent[i] if i < len(ent) else []
+        excerpt = " ".join(clean(x) for x in segs[max(0, lo - 2):hi + 1] if isinstance(x, str))
+        if excerpt:
+            daf, side = amud(i)
+            rows.add((*kjv_verse(b, ch, v, heb, kjv), f"{title} {daf}", f"{daf}{side}:{lo}" + (f"-{hi}" if hi > lo else ""), excerpt))
+    c.executemany("INSERT INTO VerseLinks VALUES (?,?,?,?,?,?)", sorted(rows))
     c.commit()
     c.close()
     tmp.replace(p)
-    return f"{p.name}: {len(chapters)} dafs"
+    return f"{p.name}: {len(chapters)} dafs, {len(rows)} verse links"
 
 
 def talmud(tocmap):
     titles = [t for t, path in tocmap.items() if path[:2] == ["Talmud", "Bavli"] and len(path) > 2 and path[2].startswith("Seder")]
+    links, heb, kjv = links_by_tractate(titles), chapter_lengths("wlc"), chapter_lengths("kjv")
     with ThreadPoolExecutor(8) as pool:
-        for line in pool.map(lambda t: tractate(tocmap, t), titles):
+        for line in pool.map(lambda t: tractate(tocmap, t, links[t], heb, kjv), titles):
             if line:
                 print(line)
 

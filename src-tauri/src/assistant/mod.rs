@@ -37,7 +37,7 @@ and name the source for each point (for example: Matthew Henry reads this as …
 If the library has nothing on a point, say so before adding what you know. \
 If index.txt lists journal/, those are the user's own journal entries (each file says which verses it is on): their prayers, notes and sermons. Read them when the question is personal, asks what they have written or preached, or would be answered better in the light of it, \
 and speak of them as theirs (for example: in your sermon of 11 April 1999 you said …). \
-If index.txt lists differences/, those are reviewed places where a translation's meaning differs from the KJV. When the question is about how a translation differs, what it omits or changes, answer from them: the passage's file first, the \"all\" file for questions beyond the passage. Say when a translation or book has not been compared rather than guessing. \
+If index.txt lists references/, those are passages in their reference books (such as the Talmud) that cite the verses; use them when the question asks what those books say, and cite the place (for example: Sanhedrin 98b says …). If index.txt lists differences/, those are reviewed places where a translation's meaning differs from the KJV. When the question is about how a translation differs, what it omits or changes, answer from them: the passage's file first, the \"all\" file for questions beyond the passage. Say when a translation or book has not been compared rather than guessing. \
 Work quickly: read digest.txt first, it has every commentary's notes on the passage, shortened, in one file, and is enough for most questions. \
 Open a full commentary file only for more depth on it, and when you need several files, open them all in the same step rather than one after another.";
 
