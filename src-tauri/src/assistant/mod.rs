@@ -1,10 +1,12 @@
-//! Ask: runs an AI coding CLI already installed and signed in on this Mac — Claude Code or
-//! Codex — non-interactively, and streams its answer back to the window as events. It has no
+//! Ask: runs an AI coding CLI already installed and signed in on this Mac — Claude Code, Codex,
+//! Antigravity or GitHub Copilot — non-interactively, and streams its answer back to the window as events. It has no
 //! tools, except read-only search in a folder: a reference book's exported files (books.rs) or
 //! the library's material on a Bible passage, or the user's journal (study.rs). The model id says which CLI answers.
 
+mod antigravity;
 mod claude;
 mod codex;
+mod copilot;
 
 use serde::Serialize;
 use std::path::PathBuf;
@@ -167,7 +169,7 @@ pub struct Model {
 pub struct Cli {
     path: Option<String>,
     version: Option<String>,
-    /// Codex only: the models the signed-in account offers. Claude's are fixed in the app.
+    /// Codex and Antigravity: the models the signed-in account offers. Claude's are fixed in the app.
     models: Vec<Model>,
 }
 
@@ -175,6 +177,8 @@ pub struct Cli {
 pub struct CliStatus {
     claude: Cli,
     codex: Cli,
+    antigravity: Cli,
+    copilot: Cli,
 }
 
 /// A GUI app does not get the login shell's PATH, so look where installers put `name`, then
@@ -197,7 +201,8 @@ fn find(name: &str, extra: &[&str]) -> Option<PathBuf> {
 
 fn version(bin: &PathBuf) -> Option<String> {
     let out = Command::new(bin).arg("--version").output().ok()?;
-    Some(String::from_utf8_lossy(&out.stdout).trim().to_string()).filter(|s| !s.is_empty())
+    // The first line only: Copilot adds "Run 'copilot update' to check for updates."
+    String::from_utf8_lossy(&out.stdout).lines().map(str::trim).find(|l| !l.is_empty()).map(|l| l.trim_end_matches('.').to_string())
 }
 
 pub fn status() -> CliStatus {
@@ -206,24 +211,22 @@ pub fn status() -> CliStatus {
         models: if bin.is_some() { models } else { Vec::new() },
         path: bin.map(|p| p.to_string_lossy().to_string()),
     };
-    CliStatus { claude: cli(claude::find(), Vec::new()), codex: cli(codex::find(), codex::models()) }
-}
-
-fn is_codex(model: &str) -> bool {
-    !model.starts_with("claude")
+    CliStatus { claude: cli(claude::find(), Vec::new()), codex: cli(codex::find(), codex::models()), antigravity: cli(antigravity::find(), antigravity::models()), copilot: cli(copilot::find(), copilot::models()) }
 }
 
 /// Outside a folder chat each CLI gets its own working folder under `data` (Claude Code files
 /// its sessions by working directory, so Claude's stays "claude").
 #[allow(clippy::too_many_arguments)]
 pub fn ask(app: tauri::AppHandle, running: std::sync::Arc<Running>, data: &std::path::Path, folder: Folder, chat_id: String, prompt: String, model: String, session: Option<String>) -> Result<(), String> {
-    let codex = is_codex(&model);
-    let cwd = folder.dir().cloned().unwrap_or_else(|| data.join(if codex { "codex" } else { "claude" }));
+    // "agy:…" is Antigravity (which offers Claude models too), "copilot:…" Copilot, "claude…" Claude Code, the rest Codex.
+    let cli = if model.starts_with(antigravity::PREFIX) { "agy" } else if model.starts_with(copilot::PREFIX) { "copilot" } else if model.starts_with("claude") { "claude" } else { "codex" };
+    let cwd = folder.dir().cloned().unwrap_or_else(|| data.join(cli));
     std::fs::create_dir_all(&cwd).map_err(|e| e.to_string())?;
-    if codex {
-        codex::ask(app, running, cwd, chat_id, prompt, model, session, folder)
-    } else {
-        claude::ask(app, running, cwd, chat_id, prompt, model, session, folder)
+    match cli {
+        "agy" => antigravity::ask(app, running, cwd, chat_id, prompt, model, session, folder),
+        "copilot" => copilot::ask(app, running, cwd, chat_id, prompt, model, session, folder),
+        "claude" => claude::ask(app, running, cwd, chat_id, prompt, model, session, folder),
+        _ => codex::ask(app, running, cwd, chat_id, prompt, model, session, folder),
     }
 }
 

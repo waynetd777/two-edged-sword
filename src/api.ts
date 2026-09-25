@@ -27,9 +27,9 @@ export interface LibraryInfo {
 }
 
 export interface Verse { v: number; text: string }
-/** An AI CLI on this Mac; `path` is null when it isn't installed. `models` is filled for Codex only. */
+/** An AI CLI on this Mac; `path` is null when it isn't installed. `models` is filled for Codex, Antigravity (ids "agy:…") and Copilot ("copilot:auto"). */
 export interface Cli { path: string | null; version: string | null; models: { id: string; name: string }[] }
-export interface AssistantStatus { claude: Cli; codex: Cli }
+export interface AssistantStatus { claude: Cli; codex: Cli; antigravity: Cli; copilot: Cli }
 /** A macOS voice. quality: 1 default, 2 enhanced, 3 premium. */
 export interface Voice { id: string; name: string; lang: string; quality: number; default: boolean }
 /** From the native synthesiser: a word about to be spoken (UTF-16 range) or the end of utterance `id`. */

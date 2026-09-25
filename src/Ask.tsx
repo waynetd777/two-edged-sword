@@ -5,7 +5,7 @@ import { fmtRef, parseRef, Ref } from "./bible";
 import { plainText } from "./esword";
 import { Icon } from "./icons";
 import { mdToHtml } from "./md";
-import { modelName, pickModel, providerOf, PROVIDER_NAME, useAssistant } from "./assistant";
+import { modelGroups, modelName, pickModel, providerOf, PROVIDER_NAME, useAssistant } from "./assistant";
 import { Chat, Model, nowLocal, uid, useApp } from "./state";
 import { useRefPreview } from "./StudyPane";
 import { confirmDelete, Popover } from "./ui";
@@ -283,8 +283,13 @@ export function AskPanel(p: AskProps) {
       {preview}
       {recent && <RecentChats anchor={recent} about={about} onClose={() => setRecent(null)} onPick={(id) => { setChatId(id); setRecent(null); }} current={chatId} />}
       {modelMenu && (
-        <Popover anchor={modelMenu} onClose={() => setModelMenu(null)} width={230}>
-          <div style={{ padding: 6 }}>{asst.models.map((m) => <button key={m.id} type="button" className="bm" onClick={() => { app.set({ model: m.id }); setModelMenu(null); }}>{m.name}{m.id === model && <span className="r"><Icon name="check" /></span>}</button>)}</div>
+        <Popover anchor={modelMenu} onClose={() => setModelMenu(null)} width={250}>
+          <div style={{ padding: 6 }}>{modelGroups(asst.models).map((g, i) => (
+            <div key={g.provider}>
+              <div className="label" style={{ padding: `${i ? 10 : 4}px 10px 4px` }}>{g.name}</div>
+              {g.models.map((m) => <button key={m.id} type="button" className="bm" onClick={() => { app.set({ model: m.id }); setModelMenu(null); }}>{m.name}{m.id === model && <span className="r"><Icon name="check" /></span>}</button>)}
+            </div>
+          ))}</div>
         </Popover>
       )}
     </>
