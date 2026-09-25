@@ -33,6 +33,14 @@ take the Mac one.
 Then press **Rescan** on the Library screen (or reopen the app, which rescans on its own). The
 search index and the dictionaries Ask searches update in the background.
 
+- **The Targums and the Talmud, from Sefaria**: `python3 tools/sefaria/build.py` writes them
+  into the folder above. The Targums become Bibles in the KJV's verse numbering, so they read
+  and compare beside it: Targum (Aramaic) and Targum (English) (Onkelos on the Torah, Jonathan on
+  the Prophets, the Writings' Targums; English only where Sefaria has a translation) and Targum
+  Pseudo-Jonathan in both. The Babylonian Talmud becomes one book per tractate ("Talmud:
+  Sanhedrin"), a chapter per daf, English with the Aramaic beneath. Some sources are CC-BY-NC:
+  for personal study.
+
 ## Free modules worth having
 
 Public domain unless noted. Those marked e-Sword come through e-Sword X's Download window;
