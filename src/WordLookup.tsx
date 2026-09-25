@@ -91,7 +91,7 @@ export function WordLookup({ pick, vref, context, bible, onClose, onDictionary, 
           <div key={l.num} style={{ padding: "12px 16px", display: "flex", flexDirection: "column", gap: 6, borderBottom: "1px solid var(--border)" }}>
             <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
               <span className="label">{lang(l.num)}</span>
-              <span style={{ font: "400 26px/1 var(--display)" }} lang={l.num.startsWith("H") ? "he" : "grc"}>{l.word}</span>
+              <span style={{ font: "400 26px/1 var(--orig)" }} lang={l.num.startsWith("H") ? "he" : "grc"}>{l.word}</span>
               {l.word && <SayButton word={l.word} num={l.num} pron={l.pron} />}
               <i style={{ fontFamily: "var(--serif)", fontSize: 15 }}>{l.translit}</i>
               <a style={{ marginLeft: "auto", fontSize: 12 }} onClick={() => { app.studyWord(l.num); onClose(); }}>{l.num}</a>
@@ -198,7 +198,7 @@ export function StrongsHover() {
       {lex ? (
         <>
           <div style={{ display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap" }}>
-            <span style={{ font: "500 20px var(--display)" }} lang={show.num.startsWith("H") ? "he" : "grc"}>{lex.word}</span>
+            <span style={{ font: "500 20px var(--orig)" }} lang={show.num.startsWith("H") ? "he" : "grc"}>{lex.word}</span>
             <i style={{ fontFamily: "var(--serif)", fontSize: 15 }}>{lex.translit}</i>
             <span className="n" style={{ marginLeft: "auto" }}>{show.num}</span>
           </div>

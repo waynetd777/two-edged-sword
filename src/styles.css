@@ -13,6 +13,8 @@
   --pdbg: #dafbe1; --pdfg: #1a7f37; --pubg: #fff8c5; --pufg: #7d4e00; --barsoft: #8fb8e8;
   --navon-bg: #ddf4ff; --navon-fg: #0969da;
   --serif: "Source Serif 4 Variable", "Source Serif 4", Georgia, serif; --display: "EB Garamond", Garamond, Georgia, serif;
+  /* Greek and Hebrew words keep Garamond, whatever the reading font. */
+  --orig: "EB Garamond", Garamond, Georgia, serif;
   --ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
   --mono: ui-monospace, "SF Mono", Menlo, monospace;
   --read-size: 19px;
@@ -142,7 +144,7 @@ input[type="range"] { accent-color: var(--accent); }
 .es .indent1 { padding-left: 1.2em; }
 .es .indent2 { padding-left: 2.4em; }
 .es .indent3 { padding-left: 3.6em; }
-.es .grk, .es .heb { font-family: var(--display); }
+.es .grk, .es .heb { font-family: var(--orig); }
 .es .heb { direction: rtl; unicode-bidi: isolate; }
 .es .strongs { font: 500 0.52em var(--ui); color: var(--accent); vertical-align: super; margin-left: 1px; cursor: pointer; letter-spacing: 0.01em; }
 .es img { max-width: 100%; height: auto; border-radius: 6px; }

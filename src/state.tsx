@@ -324,7 +324,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (t === "auto") document.documentElement.removeAttribute("data-theme");
     else document.documentElement.setAttribute("data-theme", t);
     document.documentElement.style.setProperty("--read-size", `${settings.readSize}px`);
-    document.documentElement.style.setProperty("--serif", READ_FONTS[settings.readFont]?.stack ?? READ_FONTS.literata.stack);
+    // Headings (--display) follow the reading font too, so the whole app changes with it.
+    const stack = READ_FONTS[settings.readFont]?.stack ?? READ_FONTS.literata.stack;
+    document.documentElement.style.setProperty("--serif", stack);
+    document.documentElement.style.setProperty("--display", stack);
   }, [settings.theme, settings.readSize, settings.readFont]);
 
   const journalDir = settings.journalDir || defaultDir;

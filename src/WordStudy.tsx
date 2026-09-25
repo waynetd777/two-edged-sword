@@ -143,7 +143,7 @@ export function WordStudyScreen() {
         <div style={{ flexGrow: 1, minHeight: 0, display: "grid", gridTemplateColumns: "minmax(0,1fr) 380px", gap: 20, padding: "22px 28px" }}>
           <div className="scroll" style={{ display: "flex", flexDirection: "column", gap: 18, minWidth: 0, paddingRight: 4 }}>
             <div style={{ display: "flex", alignItems: "flex-end", gap: 22, flexWrap: "wrap" }}>
-              <div style={{ font: "400 72px/0.95 var(--display)", letterSpacing: "-0.01em" }} lang={greek ? "grc" : "he"}>{e.word}</div>
+              <div style={{ font: "400 72px/0.95 var(--orig)", letterSpacing: "-0.01em" }} lang={greek ? "grc" : "he"}>{e.word}</div>
               {e.word && <span style={{ paddingBottom: 8 }}><SayButton word={e.word} num={num} pron={e.pron} size={18} /></span>}
               <div style={{ display: "flex", flexDirection: "column", gap: 4, paddingBottom: 6 }}>
                 <div style={{ font: "italic 400 22px/1.2 var(--serif)" }}>{e.translit}</div>
@@ -237,7 +237,7 @@ function LookupList({ lookup, onChoose }: { lookup: Lookup; onChoose: (num: stri
     <button key={num} type="button" className="bm" onClick={() => onChoose(num)} style={{ display: "grid", gridTemplateColumns: "64px 150px minmax(0,1fr)", alignItems: "baseline", gap: 14, padding: "10px 12px" }}>
       <b style={{ fontSize: 12.5, color: "var(--accent)" }}>{num}</b>
       <span style={{ display: "flex", alignItems: "baseline", gap: 8, minWidth: 0 }}>
-        <span style={{ font: "500 19px var(--display)" }} lang={num.startsWith("H") ? "he" : "grc"}>{word}</span>
+        <span style={{ font: "500 19px var(--orig)" }} lang={num.startsWith("H") ? "he" : "grc"}>{word}</span>
         {word && <SayButton word={word} num={num} size={13} />}
         <i style={{ fontFamily: "var(--serif)", fontSize: 14, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{translit}</i>
       </span>
