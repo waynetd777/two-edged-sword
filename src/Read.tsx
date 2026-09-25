@@ -7,7 +7,7 @@ import { BibleSelect, RefButton, SearchField, Topbar } from "./Shell";
 import { usePlayer } from "./speech";
 import { DictAt, HlColor, hlName, useApp, vkey } from "./state";
 import { StudyPane, StudyTab } from "./StudyPane";
-import { Popover, RefPicker, Seg, SideNav, useBibleBooks } from "./ui";
+import { Popover, RefPicker, Seg, SideNav, useBibleBooks, useDrag } from "./ui";
 import { WordLookup } from "./WordLookup";
 import { BooksButton } from "./DocReader";
 import { useAssistant } from "./assistant";
@@ -458,6 +458,7 @@ export function PlayerBar({ focus = false }: { focus?: boolean }) {
   const p = usePlayer();
   const [menu, setMenu] = useState<DOMRect | null>(null);
   const [sleepMenu, setSleepMenu] = useState<DOMRect | null>(null);
+  const drag = useDrag(p.state.on);
   // Tick while a sleep timer runs, so the countdown stays current.
   const [, tick] = useState(0);
   // Esc closes the player, once nothing nearer has used it: a menu, the palette, a search box, focus mode.
@@ -484,7 +485,7 @@ export function PlayerBar({ focus = false }: { focus?: boolean }) {
   const SLEEP: [number | "chapter" | null, string][] = [[15, "In 15 minutes"], [30, "In 30 minutes"], [60, "In an hour"], ["chapter", "At the end of this chapter"], [null, "Off"]];
   return (
     <div role="region" aria-label="Listen" style={{ position: "fixed", left: focus ? 0 : 200, right: app.screen === "read" && !focus && app.settings.studyPane ? 520 : 0, bottom: 18, display: "flex", justifyContent: "center", pointerEvents: "none", zIndex: 40 }}>
-      <div style={{ pointerEvents: "auto", width: "min(600px, calc(100% - 48px))", height: 56, display: "flex", alignItems: "center", gap: 14, padding: "0 10px 0 8px", borderRadius: 28, background: "var(--panel)", border: "1px solid var(--border)", boxShadow: "0 10px 30px var(--shadow)" }}>
+      <div {...drag.bind} style={{ ...drag.style, pointerEvents: "auto", width: "min(600px, calc(100% - 48px))", height: 56, display: "flex", alignItems: "center", gap: 14, padding: "0 10px 0 8px", borderRadius: 28, background: "var(--panel)", border: "1px solid var(--border)", boxShadow: "0 10px 30px var(--shadow)" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
           <button className="ibtn" type="button" aria-label={s.doc ? "Previous paragraph" : "Previous verse"} onClick={() => p.skip(-1)}><Icon name="prev" /></button>
           <button type="button" aria-label={s.paused ? "Play" : "Pause"} onClick={p.toggle} style={{ width: 40, height: 40, borderRadius: "50%", border: 0, background: "var(--accent)", color: "var(--onaccent)", display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>{s.paused ? <Play /> : <Pause />}</button>

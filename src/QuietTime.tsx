@@ -15,6 +15,7 @@ import { Icon, Pause, Play } from "./icons";
 import { current, dayTitle, doneToday, firstUndone, ONLINE_DEVOTIONALS, Part, Plan, progressKey, tickPart, today as startOfToday, todayFor, ymd } from "./plans";
 import { usePlayer } from "./speech";
 import { QuietStep, useApp } from "./state";
+import { useDrag } from "./ui";
 import { Picked, pickSongs } from "./worship";
 
 const FIRST_DELAY = 900; // let the first part's screen open before reading starts
@@ -239,6 +240,7 @@ export function QuietTime({ focus }: { focus: boolean }) {
   // or in focus mode just right of the heading's text. Measured as if scrolled to the top, so the
   // bar stays put while the page scrolls under it.
   const [at, setAt] = useState<{ x?: number; y: number } | null>(null);
+  const drag = useDrag(!!s);
   useEffect(() => {
     if (!s) return;
     const measure = () => {
@@ -264,7 +266,7 @@ export function QuietTime({ focus }: { focus: boolean }) {
     <div role="region" aria-label="Quiet time" style={at?.x !== undefined
       ? { position: "fixed", top: at.y, left: at.x, right: 16, transform: "translateY(-50%)", display: "flex", pointerEvents: "none", zIndex: 45 }
       : { position: "fixed", top: at?.y ?? 84, transform: "translateY(-50%)", left: focus ? 0 : 200, right: 0, display: "flex", justifyContent: "center", pointerEvents: "none", zIndex: 45 }}>
-      <div style={{ pointerEvents: "auto", display: "flex", alignItems: "center", gap: 10, padding: "6px 8px 6px 14px", borderRadius: 24, background: "var(--panel)", border: "1px solid var(--border)", boxShadow: "0 10px 30px var(--shadow)", maxWidth: "calc(100% - 48px)" }}>
+      <div {...drag.bind} style={{ ...drag.style, pointerEvents: "auto", display: "flex", alignItems: "center", gap: 10, padding: "6px 8px 6px 14px", borderRadius: 24, background: "var(--panel)", border: "1px solid var(--border)", boxShadow: "0 10px 30px var(--shadow)", maxWidth: "calc(100% - 48px)" }}>
         <span className="label" style={{ color: "var(--accent)", whiteSpace: "nowrap" }}>{s.preview ? "Preview" : "Quiet time"}{s.audio && <Icon name="speaker" size={12} style={{ marginLeft: 6, verticalAlign: -2 }} />}</span>
         <span style={{ display: "flex", gap: 4 }} aria-label={`Part ${s.i + 1} of ${s.steps.length}`}>
           {s.steps.map((x, k) => (
@@ -314,11 +316,13 @@ function WorshipNow({ step, now, started, onPlay, control }: { step: Extract<Qui
 /** Under the bar during the Worship part: what today's reading is about, and why each song was chosen. */
 function WorshipCard({ step, now, started, countdown, onPlay }: { step: Extract<QuietStep, { kind: "worship" }>; now: MusicState | null; started: boolean; countdown: number | null; onPlay: () => void }) {
   const [hidden, setHidden] = useState(false);
+  const drag = useDrag(true); // remounted for each Worship part, so it opens in place
   if (!step.picked || hidden) return null;
   const k = started && now?.ours ? step.picked.findIndex((x) => x.name === now.name) : -1;
   return (
-    <div className="card" style={{ pointerEvents: "auto", width: 560, maxWidth: "calc(100% - 48px)", padding: "14px 18px 16px", boxShadow: "0 14px 40px var(--shadow)", display: "flex", flexDirection: "column", gap: 10, maxHeight: "60vh", overflow: "auto" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+    <div className="card" data-drag style={{ ...drag.style, cursor: undefined, pointerEvents: "auto", width: 560, maxWidth: "calc(100% - 48px)", padding: "14px 18px 16px", boxShadow: "0 14px 40px var(--shadow)", display: "flex", flexDirection: "column", gap: 10, maxHeight: "60vh", overflow: "auto" }}>
+      {/* Picked up by its heading, so the songs' reasons can still be selected and scrolled. */}
+      <div {...drag.bind} style={{ display: "flex", alignItems: "center", gap: 8, cursor: "grab", touchAction: "none" }}>
         <span className="label">Worship · {step.when === "before" ? "before your reading" : "after your reading"}</span>
         <button className="ibtn" type="button" aria-label="Hide" title="Hide" style={{ marginLeft: "auto" }} onClick={() => setHidden(true)}><Icon name="x" /></button>
       </div>

@@ -128,6 +128,44 @@ export function useDismiss(ref: React.RefObject<HTMLElement | null>, onClose: ()
   }, [ref, onClose, active]);
 }
 
+/** Lets a floating bar be dragged out of the way: spread `bind` on it (or on a handle inside it) and add `style` to it. It can be
+ *  picked up anywhere, buttons included (a drag doesn't click them), and is kept on screen. The offset
+ *  isn't saved, and goes back to nothing while `open` is false, so the bar always opens where it was made to. */
+export function useDrag(open: boolean) {
+  const [off, setOff] = useState({ x: 0, y: 0 });
+  useEffect(() => { if (!open) setOff({ x: 0, y: 0 }); }, [open]);
+  const onPointerDown = (e: React.PointerEvent<HTMLElement>) => {
+    if (e.button !== 0 || (e.target as HTMLElement).closest("input, select, textarea")) return;
+    // A handle inside the card (marked data-drag) moves the card, so that's what's kept on screen.
+    const el = e.currentTarget.closest<HTMLElement>("[data-drag]") ?? e.currentTarget, sx = e.clientX, sy = e.clientY, start = off;
+    const r = el.getBoundingClientRect();
+    let moved = false;
+    const move = (m: PointerEvent) => {
+      const dx = m.clientX - sx, dy = m.clientY - sy;
+      if (!moved && Math.hypot(dx, dy) < 4) return;
+      moved = true;
+      setOff({
+        x: start.x + Math.max(8 - r.left, Math.min(dx, window.innerWidth - 8 - r.right)),
+        y: start.y + Math.max(8 - r.top, Math.min(dy, window.innerHeight - 8 - r.bottom)),
+      });
+    };
+    const up = () => {
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", up);
+      window.removeEventListener("pointercancel", up);
+      if (!moved) return;
+      // The click that ends a drag isn't one; if none comes, the next real one must still get through.
+      const eat = (c: MouseEvent) => { c.stopPropagation(); c.preventDefault(); };
+      window.addEventListener("click", eat, { capture: true, once: true });
+      window.setTimeout(() => window.removeEventListener("click", eat, true), 0);
+    };
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", up);
+    window.addEventListener("pointercancel", up);
+  };
+  return { off, bind: { onPointerDown }, style: { transform: `translate(${off.x}px, ${off.y}px)`, cursor: "grab", touchAction: "none" } as React.CSSProperties };
+}
+
 /** A floating card placed below (or above) an anchor rectangle and kept on screen. */
 export function Popover({ anchor, onClose, children, width = 380, style, place = "below" }: { anchor: DOMRect; onClose: () => void; children: ReactNode; width?: number; style?: React.CSSProperties; place?: "below" | "above" | "right" }) {
   const ref = useRef<HTMLDivElement>(null);
