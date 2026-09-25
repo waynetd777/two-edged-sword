@@ -48,8 +48,8 @@ Hover a reference or a Strong's number for a preview. The passage picker goes bo
 then verse. "See ASTRONOMY" in a dictionary and "see on Gen 12:8" in a commentary open that entry
 or note in the pane, with back and forward.
 
-⌘. is focus mode (Esc leaves it), ← and → turn the page, and ⌘\\ shows or hides the study
-pane.
+⌘. is focus mode (Esc leaves it), ← and → turn the page (as do the chevrons at the middle of the
+column's sides, in books and Compare too), and ⌘\\ shows or hides the study pane.
 
 ## Books and devotionals
 

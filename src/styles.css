@@ -91,6 +91,14 @@ svg.i.sm { width: 12px; height: 12px; }
 .ibtn { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border: 0; border-radius: 7px; background: transparent; color: var(--muted); cursor: pointer; flex-shrink: 0; }
 .ibtn:hover { background: var(--hover); color: var(--text); }
 .ibtn.on { color: var(--accent); background: var(--accentsoft); }
+/* Previous/next chevrons at the middle of a reading column's sides (SideNav). */
+.sidenav-wrap { position: relative; min-height: 0; min-width: 0; display: flex; flex-direction: column; }
+.sidenav-wrap > .scroll { flex: 1 1 auto; min-height: 0; }
+/* Just the chevron until hovered, then a button. */
+.sidenav { position: absolute; top: 50%; transform: translateY(-50%); z-index: 5; display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 52px; border: 1px solid transparent; border-radius: 8px; background: transparent; color: var(--muted); cursor: pointer; }
+.sidenav:hover { color: var(--text); background: var(--panel); border-color: var(--border); box-shadow: 0 2px 8px var(--shadow); }
+.sidenav.left { left: 4px; }
+.sidenav.right { right: 4px; }
 .ibtn:disabled { opacity: 0.4; cursor: default; }
 .chip { display: inline-flex; align-items: center; gap: 6px; min-height: 24px; padding: 2px 10px; border: 1px solid var(--border); border-radius: 999px; background: var(--panel); font-size: 12px; cursor: pointer; white-space: nowrap; }
 .chip.wrap { white-space: normal; text-align: left; }

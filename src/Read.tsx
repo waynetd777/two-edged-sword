@@ -7,7 +7,7 @@ import { BibleSelect, RefButton, SearchField, Topbar } from "./Shell";
 import { usePlayer } from "./speech";
 import { DictAt, HlColor, hlName, useApp, vkey } from "./state";
 import { StudyPane, StudyTab } from "./StudyPane";
-import { Popover, RefPicker, Seg } from "./ui";
+import { Popover, RefPicker, Seg, SideNav } from "./ui";
 import { WordLookup } from "./WordLookup";
 import { BooksButton } from "./DocReader";
 import { useAssistant } from "./assistant";
@@ -325,11 +325,13 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
         </Topbar>
       )}
       <div style={{ flexGrow: 1, minHeight: 0, display: "grid", gridTemplateColumns: !focus && settings.studyPane ? "minmax(0,1fr) 520px" : "minmax(0,1fr)" }}>
-        <main ref={scroller} className="scroll readcol" style={{ position: "relative", padding: focus ? "0 40px 120px" : "0 40px 120px 36px" }} onClick={() => setSel(null)}>
-          {header}
-          {err ? <div className="err" style={{ padding: 20 }}>{err}</div> : body}
+        <div className="sidenav-wrap">
+          <main ref={scroller} className="scroll readcol" style={{ position: "relative", padding: focus ? "0 40px 120px" : "0 40px 120px 36px" }} onClick={() => setSel(null)}>
+            {header}
+            {err ? <div className="err" style={{ padding: 20 }}>{err}</div> : body}
+          </main>
           <ChapterNav onGo={go} />
-        </main>
+        </div>
         {!focus && settings.studyPane && (
           <StudyPane tab={tab} setTab={setTab} book={loc.book} chapter={loc.chapter} verse={studyVerse} selRef={selRef} verses={verses}
             follow={follow} setFollow={setFollow} dict={dict} setDict={setDict} askSeed={askSeed} clearAskSeed={() => setAskSeed(null)}
@@ -352,15 +354,11 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
   );
 }
 
+/** Previous and next chapter, at the sides of the reading column. */
 function ChapterNav({ onGo }: { onGo: (d: 1 | -1) => void }) {
   const { loc } = useApp();
   const p = prevChapter(loc.book, loc.chapter), n = nextChapter(loc.book, loc.chapter);
-  return (
-    <div style={{ display: "flex", justifyContent: "space-between", padding: "28px 10px 0" }} onClick={(e) => e.stopPropagation()}>
-      {p ? <button className="btn" type="button" title={`Previous chapter: ${book(p[0]).name} ${p[1]} (←)`} onClick={() => onGo(-1)}><Icon name="back" />{book(p[0]).name} {p[1]}</button> : <span />}
-      {n ? <button className="btn" type="button" title={`Next chapter: ${book(n[0]).name} ${n[1]} (→)`} onClick={() => onGo(1)}>{book(n[0]).name} {n[1]}<Icon name="fwd" /></button> : <span />}
-    </div>
-  );
+  return <SideNav prev={p && { label: `Previous chapter: ${book(p[0]).name} ${p[1]} (←)`, go: () => onGo(-1) }} next={n && { label: `Next chapter: ${book(n[0]).name} ${n[1]} (→)`, go: () => onGo(1) }} />;
 }
 
 export function TextSizeButton() {

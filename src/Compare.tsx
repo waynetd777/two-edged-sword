@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { api, Verse } from "./api";
-import { AskPanel, withheld } from "./Ask";
+import { AskPanel, useAskOpener, withheld } from "./Ask";
 import { book, fmtRef, nextChapter, prevChapter, Ref } from "./bible";
 import { plainText, Token, tokenize } from "./esword";
 import { Icon } from "./icons";
 import { VerseText, WordPick } from "./Read";
 import { BibleSelect, RefButton, SearchField, Topbar } from "./Shell";
 import { useApp } from "./state";
-import { RefPicker, Switch } from "./ui";
+import { RefPicker, SideNav, Switch } from "./ui";
 import { WordLookup } from "./WordLookup";
 import { useAssistant } from "./assistant";
 
@@ -58,6 +58,7 @@ export function CompareScreen({ openPalette }: { openPalette: () => void }) {
   const [diff, setDiff] = useState(true);
   const [nums, setNums] = useState(true);
   const [ask, setAsk] = useState(false);
+  useAskOpener(() => setAsk(true));
   const canAsk = useAssistant().available;
   const [word, setWord] = useState<(WordPick & { bible: string }) | null>(null);
   const [picker, setPicker] = useState<DOMRect | null>(null);
@@ -86,6 +87,7 @@ export function CompareScreen({ openPalette }: { openPalette: () => void }) {
 
   const setCols = (next: string[]) => app.set({ compare: next });
   const addable = app.bibles.filter((b) => !cols.includes(b.id));
+  const pc = prevChapter(loc.book, loc.chapter), nc = nextChapter(loc.book, loc.chapter);
   const go = (d: 1 | -1) => { const n = d > 0 ? nextChapter(loc.book, loc.chapter) : prevChapter(loc.book, loc.chapter); if (n) app.open({ book: n[0], chapter: n[1] }); };
   const selRef: Ref | null = sel ? { book: loc.book, chapter: loc.chapter, verse: sel } : null;
   const grid = `40px repeat(${cols.length}, minmax(0, 1fr)) 120px`;
@@ -102,15 +104,16 @@ export function CompareScreen({ openPalette }: { openPalette: () => void }) {
 
   return (
     <div className="main">
-      <Topbar right={canAsk && <button className={`btn ${ask ? "on" : ""}`} type="button" onClick={() => setAsk(!ask)}><Icon name="chat" />Ask</button>}>
+      <Topbar>
         <RefButton onClick={() => setPicker(new DOMRect(300, 40, 100, 20))} />
         <SearchField onOpen={openPalette} />
       </Topbar>
       <div style={{ display: "flex", alignItems: "center", gap: 18, padding: "14px 28px 12px" }}>
         <h1 style={{ margin: 0, font: "500 30px/1 var(--display)" }}>{book(loc.book).name} {loc.chapter}</h1>
-        <div style={{ display: "flex", gap: 14, marginLeft: "auto" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 14, marginLeft: "auto" }}>
           <Switch on={diff} onChange={setDiff}>Highlight differences</Switch>
           <Switch on={nums} onChange={setNums}>Strong's numbers</Switch>
+          {canAsk && <button className={`btn ${ask ? "on" : ""}`} type="button" onClick={() => setAsk(!ask)}><Icon name="chat" />Ask</button>}
         </div>
       </div>
       <div style={{ display: "grid", gridTemplateColumns: grid, gap: "0 24px", padding: "0 28px 10px" }}>
@@ -134,38 +137,39 @@ export function CompareScreen({ openPalette }: { openPalette: () => void }) {
           </select>
         </label>
       </div>
-      <div ref={scroller} className="scroll" style={{ flexGrow: 1, background: "var(--panel)", borderTop: "1px solid var(--border)" }}>
-        {verseNums.map((v) => {
-          const base = (toks[cols[0]]?.get(v) ?? []).filter((t) => t.word).map((t) => norm(t.text));
-          return (
-            <div key={v} data-v={v} onClick={() => setSel(v)} style={{ display: "grid", gridTemplateColumns: grid, gap: "0 24px", padding: "14px 28px", borderBottom: "1px solid var(--border)", background: sel === v ? "var(--accentsoft)" : undefined, cursor: "default" }}>
-              <div className="vn" style={{ textAlign: "left", lineHeight: "26px" }}>{v}</div>
-              {cols.map((c, i) => {
-                const t = toks[c]?.get(v);
-                if (!t) return <div key={c} className="n">—</div>;
-                const words = t.filter((x) => x.word).map((x) => norm(x.text));
-                const d = diff && i > 0 ? diffWords(base, words) : diff && cols.length > 1 ? diffWords((toks[cols[1]]?.get(v) ?? []).filter((x) => x.word).map((x) => norm(x.text)), words) : null;
-                const same = i > 0 && diff && d && d.size === 0 && words.length === base.length;
-                return (
-                  <div key={c} className="selectable" style={{ font: "400 16px/1.65 var(--serif)", textWrap: "pretty" }}>
-                    <Marked tokens={t} diff={d} red={settings.redLetters} showNums={nums && !!app.mod("bible", c)?.strongs} activeWi={word?.bible === c && word.verse === v ? word.token.wi : undefined} onWord={(tok, el) => setWord({ token: tok, verse: v, rect: el.getBoundingClientRect(), bible: c })} />
-                    {same && <div style={{ marginTop: 4 }}><span className="chip" style={{ minHeight: 20, fontSize: 11, color: "var(--muted)", cursor: "default" }}>Same as {app.mod("bible", cols[0])?.abbrev}</span></div>}
-                  </div>
-                );
-              })}
-              <div />
-            </div>
-          );
-        })}
-        <div style={{ display: "flex", justifyContent: "space-between", padding: "18px 28px 120px" }}>
-          <button className="btn" type="button" onClick={() => go(-1)}><Icon name="back" />Previous chapter</button>
-          <button className="btn" type="button" onClick={() => go(1)}>Next chapter<Icon name="fwd" /></button>
+      <div className="sidenav-wrap" style={{ flexGrow: 1 }}>
+        <div ref={scroller} className="scroll" style={{ flexGrow: 1, background: "var(--panel)", borderTop: "1px solid var(--border)" }}>
+          {verseNums.map((v) => {
+            const base = (toks[cols[0]]?.get(v) ?? []).filter((t) => t.word).map((t) => norm(t.text));
+            return (
+              <div key={v} data-v={v} onClick={() => setSel(v)} style={{ display: "grid", gridTemplateColumns: grid, gap: "0 24px", padding: "14px 28px", borderBottom: "1px solid var(--border)", background: sel === v ? "var(--accentsoft)" : undefined, cursor: "default" }}>
+                <div className="vn" style={{ textAlign: "left", lineHeight: "26px" }}>{v}</div>
+                {cols.map((c, i) => {
+                  const t = toks[c]?.get(v);
+                  if (!t) return <div key={c} className="n">—</div>;
+                  const words = t.filter((x) => x.word).map((x) => norm(x.text));
+                  const d = diff && i > 0 ? diffWords(base, words) : diff && cols.length > 1 ? diffWords((toks[cols[1]]?.get(v) ?? []).filter((x) => x.word).map((x) => norm(x.text)), words) : null;
+                  const same = i > 0 && diff && d && d.size === 0 && words.length === base.length;
+                  return (
+                    <div key={c} className="selectable" style={{ font: "400 16px/1.65 var(--serif)", textWrap: "pretty" }}>
+                      <Marked tokens={t} diff={d} red={settings.redLetters} showNums={nums && !!app.mod("bible", c)?.strongs} activeWi={word?.bible === c && word.verse === v ? word.token.wi : undefined} onWord={(tok, el) => setWord({ token: tok, verse: v, rect: el.getBoundingClientRect(), bible: c })} />
+                      {same && <div style={{ marginTop: 4 }}><span className="chip" style={{ minHeight: 20, fontSize: 11, color: "var(--muted)", cursor: "default" }}>Same as {app.mod("bible", cols[0])?.abbrev}</span></div>}
+                    </div>
+                  );
+                })}
+                <div />
+              </div>
+            );
+          })}
+          <div style={{ height: 120 }} />
         </div>
+        <SideNav prev={pc && { label: `Previous chapter: ${book(pc[0]).name} ${pc[1]} (←)`, go: () => go(-1) }} next={nc && { label: `Next chapter: ${book(nc[0]).name} ${nc[1]} (→)`, go: () => go(1) }} />
       </div>
       {ask && (
         <div style={{ position: "fixed", right: 28, bottom: 20, width: 460, zIndex: 30, boxShadow: "0 14px 40px var(--shadow)", borderRadius: 12 }}>
           <AskPanel source="Compare" passage={selRef ?? { book: loc.book, chapter: loc.chapter }} about={selRef ? `${fmtRef(selRef)} in ${cols.map((c) => app.mod("bible", c)?.abbrev).join(", ")}` : undefined} context={askContext}
-            suggestions={selRef ? [`What are the main differences between these translations of ${fmtRef(selRef, "short")}?`, "Which difference matters most here?"] : ["Click a verse, then ask about it."]} />
+            suggestions={selRef ? [`What are the main differences between these translations of ${fmtRef(selRef, "short")}?`, "Which difference matters most here?"] : []}
+            hint={selRef ? undefined : "Click a verse to ask about it in these translations, or ask about the whole chapter."} />
         </div>
       )}
       {word && (

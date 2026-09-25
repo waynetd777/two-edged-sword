@@ -99,6 +99,8 @@ export interface Chat {
   studyDir?: string;
   /** The passage it was asked about, which Add to journal links. */
   verses?: string[];
+  /** What was open when it started, so the chat can reopen it. */
+  opened?: Opened;
   messages: ChatMsg[];
   journaled?: boolean;
 }
@@ -117,7 +119,9 @@ export interface Recent { book: number; chapter: number; verse?: number; to?: nu
 
 /** One entry in the back/forward history. `word` is a Strong's number or an English word looked
  *  up in Word Study; `search` is the last search run. */
-interface Place { screen: Screen; loc: Loc; doc: Doc | null; word: string | null; search: string | null }
+export interface Place { screen: Screen; loc: Loc; doc: Doc | null; word: string | null; search: string | null }
+/** A place with what was open in it: a book's paragraph (from 1), a journal entry. */
+export interface Opened extends Place { para?: number; entry?: string }
 
 export interface Loc { book: number; chapter: number; verse?: number; to?: number }
 /** A reference book open in the reading column, and the chapter being read. */
@@ -198,6 +202,9 @@ interface Ctx {
   /** A new journal entry waiting to be opened in the Journal screen. */
   journalSeed: JournalSeed | null;
   startEntry: (seed: JournalSeed) => void;
+  /** Where the user is now, and going back there (a chat's `opened`). */
+  here: () => Place;
+  reopen: (o: Opened) => void;
   clearSeed: () => void;
 
   /** Something another screen wants the Read screen's study pane to show. */
@@ -490,6 +497,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     // closed for it (back returns to the book).
     pending, setPending: (x) => { setPendingState(x); if (x) navigate({ screen: "read", doc: null }); },
     journalSeed, startEntry: (seed) => { setJournalSeed(seed); navigate({ screen: "journal" }); }, clearSeed: () => setJournalSeed(null),
+    here: () => curPlace.current ?? here(),
+    reopen: ({ para, entry, ...pl }) => {
+      if (entry) { setJournalSeed({ openId: entry }); navigate({ screen: "journal" }); return; }
+      navigate(pl);
+      if (pl.doc && para) setDocPara({ ...pl.doc, para });
+    },
     wordStudy, studyWord: (n) => navigate({ screen: "word", word: n }),
     searchFor, searchText: (q) => navigate({ screen: "search", search: q }),
     toast, toastMsg, toastUndo,

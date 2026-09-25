@@ -4,7 +4,10 @@
 
 Ask answers questions about what you are reading: a passage in Read or Compare, a word in Word
 Study, search results, a journal entry, or a reference book or devotional. Chats stay on this
-Mac; find them again under **Recent** on any Ask panel. An answer can be added to your journal.
+Mac; find them again under **Recent** on any Ask panel. A chat keeps what was open when it
+started (the passage, book chapter, word, search or journal entry): opening it from Recent, or
+clicking "Started in…" at its top, goes back there with the chat beside it. An answer can be
+added to your journal.
 
 ## Claude Code, Codex, Antigravity or Copilot
 

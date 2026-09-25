@@ -2,7 +2,7 @@ import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { save as saveDialog } from "@tauri-apps/plugin-dialog";
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
 import { api, JournalEntry } from "./api";
-import { AskPanel } from "./Ask";
+import { AskPanel, useAskOpener } from "./Ask";
 import { fmtRef, parseRef, Ref } from "./bible";
 import { plainText } from "./esword";
 import { Icon } from "./icons";
@@ -155,6 +155,7 @@ function Editor({ entry, onChange, saved, err, onDelete, onExport, listed, liste
   const canAsk = useAssistant().available;
   const [ask, setAsk] = useState(false);
   const [scope, setScope] = useState<"entry" | "journal">("entry");
+  useAskOpener(() => { setScope("entry"); setAsk(true); });
   // Text selected in the entry, which an Ask about the entry is then about. Kept while the
   // selection moves to the Ask panel's box; cleared by a caret in the entry or its ×.
   const [picked, setPicked] = useState("");
@@ -361,7 +362,7 @@ function Editor({ entry, onChange, saved, err, onDelete, onExport, listed, liste
             {scope === "journal" && <span className="n" style={{ flexBasis: "100%" }}>Searches {listedLabel} ({listed.length} {listed.length === 1 ? "entry" : "entries"}).</span>}
           </div>
           {scope === "entry" ? (
-            <AskPanel key={`entry|${entry.id}`} source="Journal" label={entry.title || "this entry"} style={{ border: 0, background: "transparent", boxShadow: "none" }}
+            <AskPanel key={`entry|${entry.id}`} source="Journal" opened={{ entry: entry.id }} label={entry.title || "this entry"} style={{ border: 0, background: "transparent", boxShadow: "none" }}
               passage={passage} journal={others} journalDir={(id) => api.journalExport(id, "the whole journal", app.journal.map((e) => (e.id === entry.id ? entry : e)))}
               context={() => [`The user's journal entry, “${entry.title}”${entry.verses.length ? ` (on ${entry.verses.join(", ")})` : ""}${entry.tags.length ? ` #${entry.tags.join(" #")}` : ""}:\n${entry.body || "(nothing written yet)"}`, picked && `They have selected this part of it and are asking about it:\n“${picked}”`].filter(Boolean).join("\n\n")}
               suggestions={picked ? ["Explain this", "Suggest verses that speak to this", "Help me say this more clearly"]

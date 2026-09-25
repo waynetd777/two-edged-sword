@@ -6,7 +6,7 @@ import { plainText } from "./esword";
 import { Icon } from "./icons";
 import { mdToHtml } from "./md";
 import { modelGroups, modelName, pickModel, providerOf, PROVIDER_NAME, useAssistant } from "./assistant";
-import { Chat, Model, nowLocal, uid, useApp } from "./state";
+import { Chat, Model, nowLocal, Opened, Place, uid, useApp } from "./state";
 import { useRefPreview } from "./StudyPane";
 import { ClearButton, confirmDelete, Popover } from "./ui";
 
@@ -46,8 +46,36 @@ export function askOnce(prompt: string, model: string): Promise<string> {
 
 /** Screenshot mode: the chat the next Ask panel opens on (scene.ts). */
 let sceneChat: string | null = null;
-export const setSceneChat = (id: string) => { sceneChat = id; };
+// A panel already on screen takes it too, from the event.
+export const setSceneChat = (id: string) => { sceneChat = id; window.setTimeout(() => window.dispatchEvent(new Event("tes-show-chat")), 0); };
 const takeSceneChat = () => { const id = sceneChat; sceneChat = null; return id; };
+
+// Set while going back to a chat's origin: the screen there opens its Ask panel (useAskOpener).
+let askWanted = false;
+/** For a screen whose Ask panel is opened by a button (Compare, a journal entry): opens it when a
+ *  chat is being reopened there, whether the screen is already showing or mounts for it. */
+export function useAskOpener(open: () => void) {
+  useEffect(() => {
+    const go = () => { if (askWanted) { askWanted = false; open(); } };
+    go();
+    window.addEventListener("tes-open-ask", go);
+    return () => window.removeEventListener("tes-open-ask", go);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+}
+
+/** Goes back to what a chat was started from and shows the chat there, in the Ask panel of that
+ *  screen (the one that mounts, or one already on screen). */
+function reopenChat(app: ReturnType<typeof useApp>, c: Chat) {
+  if (!c.opened) return;
+  sceneChat = c.id;
+  askWanted = true;
+  app.reopen(c.opened);
+  if (c.opened.screen === "read" && !c.opened.doc) app.setPending({ ask: "" });
+  if (c.opened.doc) app.set({ docTab: "ask", studyPane: true });
+  window.setTimeout(() => { window.dispatchEvent(new Event("tes-open-ask")); window.dispatchEvent(new Event("tes-show-chat")); }, 0);
+  // Not left waiting for some later panel if none took them.
+  window.setTimeout(() => { if (sceneChat === c.id) sceneChat = null; askWanted = false; }, 1500);
+}
 
 /** A progress line ("Thinking", "Reading Matthew Henry's Commentary"): a light sweeps across
  *  it and the dots count up. Keyed by the text so each new step starts its sweep afresh. */
@@ -98,6 +126,8 @@ export interface AskProps {
   suggestions?: string[];
   seed?: string | null;
   clearSeed?: () => void;
+  /** What is open besides the screen and place, kept with the chat so it can reopen it: a book's paragraph, a journal entry. */
+  opened?: { para?: number; entry?: string };
   /** The study pane's full-height version; otherwise a compact card. */
   full?: boolean;
   style?: React.CSSProperties;
@@ -121,6 +151,11 @@ function journalOn(journal: JournalEntry[], r: Ref): JournalEntry[] {
 export function AskPanel(p: AskProps) {
   const app = useApp();
   const [chatId, setChatId] = useState<string | null>(() => takeSceneChat());
+  useEffect(() => {
+    const show = () => { const id = takeSceneChat(); if (id) setChatId(id); };
+    window.addEventListener("tes-show-chat", show);
+    return () => window.removeEventListener("tes-show-chat", show);
+  }, []);
   const [q, setQ] = useState("");
   const [busy, setBusy] = useState(false);
   /** What it is doing while it searches the library: "Reading Matthew Henry's Commentary". */
@@ -184,7 +219,7 @@ export function AskPanel(p: AskProps) {
         try { studyDir = await api.studyExport(id, { book: passage.book, chapter: passage.chapter, from: passage.verse ?? null, to: passage.verse ? passage.to ?? passage.verse : null, bibles, strongsBible: app.strongsBible, label: fmtRef(passage), journal, exclude }); } catch (e) { console.error(e); }
       }
       else if (p.journalDir) { try { studyDir = await p.journalDir(id); } catch (e) { console.error(e); } }
-      const c: Chat = { id, title: question.length > 80 ? question.slice(0, 77) + "…" : question, about, source: p.source, created: new Date().toISOString(), updated: new Date().toISOString(), model, bookDir, studyDir, verses: passage ? [fmtRef(passage)] : [], messages: [] };
+      const c: Chat = { id, title: question.length > 80 ? question.slice(0, 77) + "…" : question, about, source: p.source, created: new Date().toISOString(), updated: new Date().toISOString(), model, bookDir, studyDir, verses: passage ? [fmtRef(passage)] : [], opened: { ...app.here(), ...p.opened }, messages: [] };
       app.setChats((cs) => [c, ...cs]);
       setChatId(id);
       try { const ctx = await buildContext(); if (ctx) prompt = `${ctx}\n\nQuestion: ${question}`; } catch (e) { console.error(e); }
@@ -244,6 +279,11 @@ export function AskPanel(p: AskProps) {
   const toSend = q.trim() ? q : defaultQ ?? "";
   const convo = (
     <>
+      {chat?.opened && !samePlace(chat.opened, app.here()) && (
+        <button type="button" className="rchip" style={{ alignSelf: "flex-start", display: "inline-flex", alignItems: "center", gap: 5 }} title="Reopen what this chat was started from" onClick={() => reopenChat(app, chat)}>
+          <Icon name="link" size={12} />Started in {chat.source}: {chat.about}
+        </button>
+      )}
       {messages.map((m, i) => m.role === "user" ? (
         <div key={i} style={{ alignSelf: "flex-end", maxWidth: "88%", padding: "8px 12px", borderRadius: "12px 12px 4px 12px", background: "var(--accentsoft)", fontSize: 13.5, lineHeight: 1.5 }} className="selectable">{m.text}</div>
       ) : (
@@ -331,6 +371,7 @@ export function AskPanel(p: AskProps) {
   return (
     <section aria-label="Ask" className="card" style={{ padding: "14px 16px", display: "flex", flexDirection: "column", gap: 10, ...p.style }}>
       {header}
+      {messages.length === 0 && p.hint && <div className="hint">{p.hint}</div>}
       {messages.length > 0 ? <div className="scroll" style={{ display: "flex", flexDirection: "column", gap: 10, maxHeight: 360 }}>{convo}</div> : suggestions.length > 0 && (
         <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>{suggestions.map((s) => <button key={s} type="button" className="chip wrap" onClick={() => send(s)}>{s}</button>)}</div>
       )}
@@ -338,6 +379,12 @@ export function AskPanel(p: AskProps) {
       {popovers}
     </section>
   );
+}
+
+/** Whether a chat's place is where the user is now (then there is nothing to reopen). */
+function samePlace(a: Opened, b: Place) {
+  const k = (p: Place) => JSON.stringify([p.screen, p.screen === "read" ? (p.doc ? [p.doc.module, p.doc.title] : [p.loc.book, p.loc.chapter]) : p.screen === "word" ? p.word : p.screen === "search" ? p.search : null]);
+  return !a.entry && !a.para && k(a) === k(b);
 }
 
 function RecentChats({ anchor, about, onClose, onPick, current }: { anchor: DOMRect; about: string; onClose: () => void; onPick: (id: string) => void; current: string | null }) {
@@ -354,7 +401,10 @@ function RecentChats({ anchor, about, onClose, onPick, current }: { anchor: DOMR
   const item = (c: Chat) => (
     <div key={c.id} style={{ display: "flex", alignItems: "center", gap: 4 }}>
       {/* flex: 1 with minWidth 0, not the .bm default width: 100%, so long titles ellipsize and leave room for the delete button. */}
-      <button type="button" className="bm" style={{ flex: 1, minWidth: 0, width: "auto", flexDirection: "column", alignItems: "flex-start", gap: 1, padding: "7px 10px", background: c.id === current ? "var(--accentsoft)" : undefined }} onClick={() => onPick(c.id)}>
+      <button type="button" className="bm" style={{ flex: 1, minWidth: 0, width: "auto", flexDirection: "column", alignItems: "flex-start", gap: 1, padding: "7px 10px", background: c.id === current ? "var(--accentsoft)" : undefined }} onClick={() => {
+        // A chat goes back to where it was started, and shows there; one started here just opens.
+        if (c.opened && !samePlace(c.opened, app.here())) { onClose(); reopenChat(app, c); } else onPick(c.id);
+      }}>
         <b style={{ fontSize: 12.5, maxWidth: "100%" }} className="t">{c.title}</b>
         <span className="n t" style={{ maxWidth: "100%" }}>{c.source} · {c.about} · {when(c.updated)}{c.journaled ? " · added to journal" : ""}</span>
       </button>

@@ -263,3 +263,14 @@ export function ClearButton({ show, onClear, label = "Clear" }: { show: boolean;
   if (!show) return null;
   return <button type="button" className="ibtn" aria-label={label} title={label} onMouseDown={(e) => e.preventDefault()} onClick={onClear} style={{ width: 20, height: 20, flexShrink: 0 }}><Icon name="x" size={12} /></button>;
 }
+
+/** Previous and next, as chevrons floating at the middle of the reading column's sides; each one's
+ *  tooltip says where it goes. Put inside a `.sidenav-wrap` around the scrolling column. */
+export function SideNav({ prev, next }: { prev?: { label: string; go: () => void } | null; next?: { label: string; go: () => void } | null }) {
+  return (
+    <>
+      {prev && <button type="button" className="sidenav left" aria-label={prev.label} title={prev.label} onClick={(e) => { e.stopPropagation(); prev.go(); }}><Icon name="back" /></button>}
+      {next && <button type="button" className="sidenav right" aria-label={next.label} title={next.label} onClick={(e) => { e.stopPropagation(); next.go(); }}><Icon name="fwd" /></button>}
+    </>
+  );
+}

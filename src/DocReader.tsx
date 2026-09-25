@@ -11,7 +11,7 @@ import { WordLookup } from "./WordLookup";
 import { SearchField, Topbar } from "./Shell";
 import { HlColor, hlName, useApp } from "./state";
 import { DictionaryTab, useRefPreview } from "./StudyPane";
-import { ClearButton, Popover, wordAt, wordHover } from "./ui";
+import { ClearButton, Popover, SideNav, wordAt, wordHover } from "./ui";
 import { dayTitle } from "./plans";
 import { useAssistant } from "./assistant";
 
@@ -305,68 +305,68 @@ export function DocReader({ focus, setFocus, openPalette }: { focus: boolean; se
             {!titles.length && <div className="n" style={{ padding: 10 }}>Loading…</div>}
           </div>
         </aside>}
-        <main ref={scroller} className="scroll" style={{ padding: focus ? "0 40px 120px" : "0 40px 120px 36px" }} onClick={(e) => {
-          // A click in the margin beside a paragraph selects it, as beside a verse; elsewhere clears.
-          if (e.target === e.currentTarget || (e.target as HTMLElement).dataset.margin !== undefined) {
-            const seg = [...(scroller.current?.querySelectorAll<HTMLElement>("[data-seg]") ?? [])].find((el) => { const r = el.getBoundingClientRect(); return e.clientY >= r.top - 8 && e.clientY <= r.bottom + 8; });
-            if (seg) { clickPara(+seg.dataset.seg!, e.shiftKey); return; }
-          }
-          setSel(null);
-        }}>
-          <div data-margin style={focus ? { maxWidth: 1040, margin: "0 auto" } : undefined}>
-            {focus ? (
-              <div style={{ padding: "24px 0 22px", display: "flex", flexDirection: "column", alignItems: "center", gap: 6, textAlign: "center" }}>
-                <div className="label">{mod?.title}{titles.length ? ` · ${i + 1} of ${titles.length}` : ""}</div>
-                <h1 data-quiet-anchor style={{ margin: 0, font: "400 40px/1.1 var(--display)", letterSpacing: "0.02em" }}>{doc.title}</h1>
-              </div>
-            ) : (
-              <div style={{ padding: "18px 0 14px" }}>
-                <div className="label">{mod?.title}{titles.length ? ` · ${i + 1} of ${titles.length}` : ""}</div>
-                <h1 data-quiet-anchor style={{ margin: "6px 0 0", font: "500 30px/1.15 var(--display)" }}>{doc.title}</h1>
-              </div>
-            )}
-            {art
-              ? <div className="es prose selectable docbody clickwords" {...wordHover} onClick={(e) => {
-                  e.stopPropagation();
-                  const w = wordAt(e);
-                  if (w) { setWord({ token: textToken(w.word), verse: 0, rect: w.rect }); return; }
-                  const t = e.target as HTMLElement;
-                  if (t.closest("a, button, img, .vtool") || window.getSelection()?.toString()) return;
-                  const seg = t.closest<HTMLElement>("[data-seg]");
-                  if (seg) clickPara(+seg.dataset.seg!, e.shiftKey);
-                }} style={{ fontSize: focus ? "calc(var(--read-size) + 2px)" : "var(--read-size)", lineHeight: focus ? 1.85 : 1.7 }}>
-                  {segs.map((h, k) => {
-                    // Laid out as a verse row: number, text (highlighted line by line), and markers.
-                    const n = k + 1;
-                    const isSel = !!sel && n >= sel.from && n <= sel.to;
-                    const hl = hlOf(n);
-                    // A paragraph that is one <p> is shown inline, so its highlight follows the lines.
-                    const onePara = /^\s*<p[\s>]/i.test(h) && (h.match(/<p[\s>]/gi)?.length ?? 0) === 1 && !/<(img|table|div|ul|ol)/i.test(h);
-                    const noted = notes.some((e) => e.verses.some((v) => { const l = parseDocLabel(v); return !!l && l.book === bookTitle && l.chapter === doc.title && !!l.from && l.from <= n && n <= (l.to ?? l.from); }));
-                    return (
-                      <div key={k} data-seg={n} className={`v dseg ${isSel ? "sel" : ""} ${reading && ps.verse === n ? `speaking${app.settings.highlightWords ? "" : " tint"}` : ""} ${asking === k ? "asking" : ""} ${flash === n ? "flash" : ""}`} style={isSel && sel!.from === n ? { marginTop: 46 } : undefined}>
-                        {isSel && sel!.from === n && toolbar}
-                        <div className="vn dsegn"><span title="Click the paragraph (not a word) to select it · ⇧-click for a range">{n}</span></div>
-                        <div className={`dsegtext ${onePara ? "inl" : ""}`}>
-                          {reading && ps.verse === n && wordBoxes.map((b, j) => <span key={j} className="speakbox" style={b} />)}
-                          <span className={hl ? `hl-${hlName(hl)}` : undefined}>
-                          {renderHtml(h, { onRef: (r) => { hide(); app.open({ book: r.book, chapter: r.chapter, verse: r.verse, to: r.to }, "read"); }, onRefHover, onStrongs: app.studyWord, onImage: setImage })}
-                        </span></div>
-                        <div className="gut">
-                          {marked(k) && <Icon name="bookmark" style={{ fill: "var(--accent)" }} />}
-                          {noted && <button className="ibtn" style={{ width: 16, height: 16 }} aria-label="Journal notes on this paragraph" title="Journal notes on this paragraph" onClick={(e) => { e.stopPropagation(); setTab("notes"); }}><Icon name="note" /></button>}
-                        </div>
-                      </div>
-                    );
-                  })}
+        <div className="sidenav-wrap">
+          <main ref={scroller} className="scroll" style={{ padding: focus ? "0 40px 120px" : "0 40px 120px 36px" }} onClick={(e) => {
+            // A click in the margin beside a paragraph selects it, as beside a verse; elsewhere clears.
+            if (e.target === e.currentTarget || (e.target as HTMLElement).dataset.margin !== undefined) {
+              const seg = [...(scroller.current?.querySelectorAll<HTMLElement>("[data-seg]") ?? [])].find((el) => { const r = el.getBoundingClientRect(); return e.clientY >= r.top - 8 && e.clientY <= r.bottom + 8; });
+              if (seg) { clickPara(+seg.dataset.seg!, e.shiftKey); return; }
+            }
+            setSel(null);
+          }}>
+            <div data-margin style={focus ? { maxWidth: 1040, margin: "0 auto" } : undefined}>
+              {focus ? (
+                <div style={{ padding: "24px 0 22px", display: "flex", flexDirection: "column", alignItems: "center", gap: 6, textAlign: "center" }}>
+                  <div className="label">{mod?.title}{titles.length ? ` · ${i + 1} of ${titles.length}` : ""}</div>
+                  <h1 data-quiet-anchor style={{ margin: 0, font: "400 40px/1.1 var(--display)", letterSpacing: "0.02em" }}>{doc.title}</h1>
                 </div>
-              : doc.title && <div className="n">Loading…</div>}
-            <div style={{ display: "flex", justifyContent: "space-between", gap: 12, padding: "28px 0 0" }}>
-              {i > 0 ? <button className="btn" type="button" title={`Previous ${unit}: ${titles[i - 1]} (←)`} onClick={() => go(titles[i - 1])} style={{ maxWidth: "48%" }}><Icon name="back" /><span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{titles[i - 1]}</span></button> : <span />}
-              {i >= 0 && i < titles.length - 1 ? <button className="btn" type="button" title={`Next ${unit}: ${titles[i + 1]} (→)`} onClick={() => go(titles[i + 1])} style={{ maxWidth: "48%" }}><span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{titles[i + 1]}</span><Icon name="fwd" /></button> : <span />}
+              ) : (
+                <div style={{ padding: "18px 0 14px" }}>
+                  <div className="label">{mod?.title}{titles.length ? ` · ${i + 1} of ${titles.length}` : ""}</div>
+                  <h1 data-quiet-anchor style={{ margin: "6px 0 0", font: "500 30px/1.15 var(--display)" }}>{doc.title}</h1>
+                </div>
+              )}
+              {art
+                ? <div className="es prose selectable docbody clickwords" {...wordHover} onClick={(e) => {
+                    e.stopPropagation();
+                    const w = wordAt(e);
+                    if (w) { setWord({ token: textToken(w.word), verse: 0, rect: w.rect }); return; }
+                    const t = e.target as HTMLElement;
+                    if (t.closest("a, button, img, .vtool") || window.getSelection()?.toString()) return;
+                    const seg = t.closest<HTMLElement>("[data-seg]");
+                    if (seg) clickPara(+seg.dataset.seg!, e.shiftKey);
+                  }} style={{ fontSize: focus ? "calc(var(--read-size) + 2px)" : "var(--read-size)", lineHeight: focus ? 1.85 : 1.7 }}>
+                    {segs.map((h, k) => {
+                      // Laid out as a verse row: number, text (highlighted line by line), and markers.
+                      const n = k + 1;
+                      const isSel = !!sel && n >= sel.from && n <= sel.to;
+                      const hl = hlOf(n);
+                      // A paragraph that is one <p> is shown inline, so its highlight follows the lines.
+                      const onePara = /^\s*<p[\s>]/i.test(h) && (h.match(/<p[\s>]/gi)?.length ?? 0) === 1 && !/<(img|table|div|ul|ol)/i.test(h);
+                      const noted = notes.some((e) => e.verses.some((v) => { const l = parseDocLabel(v); return !!l && l.book === bookTitle && l.chapter === doc.title && !!l.from && l.from <= n && n <= (l.to ?? l.from); }));
+                      return (
+                        <div key={k} data-seg={n} className={`v dseg ${isSel ? "sel" : ""} ${reading && ps.verse === n ? `speaking${app.settings.highlightWords ? "" : " tint"}` : ""} ${asking === k ? "asking" : ""} ${flash === n ? "flash" : ""}`} style={isSel && sel!.from === n ? { marginTop: 46 } : undefined}>
+                          {isSel && sel!.from === n && toolbar}
+                          <div className="vn dsegn"><span title="Click the paragraph (not a word) to select it · ⇧-click for a range">{n}</span></div>
+                          <div className={`dsegtext ${onePara ? "inl" : ""}`}>
+                            {reading && ps.verse === n && wordBoxes.map((b, j) => <span key={j} className="speakbox" style={b} />)}
+                            <span className={hl ? `hl-${hlName(hl)}` : undefined}>
+                            {renderHtml(h, { onRef: (r) => { hide(); app.open({ book: r.book, chapter: r.chapter, verse: r.verse, to: r.to }, "read"); }, onRefHover, onStrongs: app.studyWord, onImage: setImage })}
+                          </span></div>
+                          <div className="gut">
+                            {marked(k) && <Icon name="bookmark" style={{ fill: "var(--accent)" }} />}
+                            {noted && <button className="ibtn" style={{ width: 16, height: 16 }} aria-label="Journal notes on this paragraph" title="Journal notes on this paragraph" onClick={(e) => { e.stopPropagation(); setTab("notes"); }}><Icon name="note" /></button>}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                : doc.title && <div className="n">Loading…</div>}
             </div>
-          </div>
-        </main>
+          </main>
+          <SideNav prev={i > 0 ? { label: `Previous ${unit}: ${titles[i - 1]} (←)`, go: () => go(titles[i - 1]) } : null}
+            next={i >= 0 && i < titles.length - 1 ? { label: `Next ${unit}: ${titles[i + 1]} (→)`, go: () => go(titles[i + 1]) } : null} />
+        </div>
         {!focus && pane && (
           <aside className="study" aria-label="Study pane" style={{ display: "flex", flexDirection: "column", minHeight: 0, borderLeft: "1px solid var(--border)", background: "var(--panel)" }}>
             <div className="tabs">
@@ -403,7 +403,7 @@ export function DocReader({ focus, setFocus, openPalette }: { focus: boolean; se
                 <button className="btn small" type="button" style={{ marginLeft: "auto" }} onClick={() => setAsking(null)}>Whole chapter</button>
               </div>
             )}
-            <AskPanel key={`${doc.module}|${doc.title}|${asking}`} full source="Reader" about={asking === null ? doc.title : `${doc.title} ¶${asking + 1}`}
+            <AskPanel key={`${doc.module}|${doc.title}|${asking}`} full source="Reader" opened={asking === null ? undefined : { para: asking + 1 }} about={asking === null ? doc.title : `${doc.title} ¶${asking + 1}`}
               {...(withheld(app.settings.allowLicensed, mod)
                 ? { context: () => `The user is reading ${mod?.title ?? doc.title}, a licensed book; they have chosen not to send its text.`, hint: `${mod?.title ?? "This book"} is licensed, so its text isn't sent (Settings › AI assistant › Licensed text). Ask general questions, or turn that on.` }
                 : { context: askContext, bookDir: () => exportBook().then((x) => x.dir), hint: `Ask anything about ${asking === null ? `this ${unit}` : "this paragraph"}. The ${unit} goes with the question, and the model can search the rest of ${mod?.title ?? "the book"}${devo ? "" : " and look at its charts"} when it needs to.` })}
