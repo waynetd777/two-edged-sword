@@ -37,7 +37,7 @@ export interface Scene {
   /** A journal entry to open, by id. */
   journal?: string;
   /** A CSS selector clicked after that (a toolbar button, say), to show what it does. */
-  click?: string;
+  click?: string | string[];
   /** Before `click`: a click on the first place this text is shown (a misspelled word, say). */
   clickText?: string;
   /** Then text typed into a box, as [CSS selector, text] (find's box, say). */
@@ -85,7 +85,8 @@ export function runScene(app: ReturnType<typeof useApp>, still: (s: Partial<Play
         }
       };
       // After a journal entry opens (which replaces its editor), and retried until it's there.
-      const click = () => { if (!sc.click) { type(); return; } const q = sc.click; const at = Date.now(); const go = () => { const el = document.querySelector(q) as HTMLElement | null; if (el) { el.click(); window.setTimeout(type, 300); } else if (Date.now() - at < 3000) window.setTimeout(go, 200); }; go(); };
+      // Several selectors are clicked in turn, each once it's there.
+      const click = (qs = sc.click ? ([] as string[]).concat(sc.click) : []) => { if (!qs.length) { type(); return; } const [q, ...rest] = qs; const at = Date.now(); const go = () => { const el = document.querySelector(q) as HTMLElement | null; if (el) { el.click(); window.setTimeout(() => click(rest), 400); } else if (Date.now() - at < 3000) window.setTimeout(go, 200); }; go(); };
       if (sc.click || sc.type || sc.clickText) window.setTimeout(() => { if (sc.clickText) { clickText(sc.clickText); window.setTimeout(click, 700); } else click(); }, sc.journal && sc.entries ? 4300 : 2800);
       if (sc.selectPara) { const n = sc.selectPara; window.setTimeout(() => (document.querySelector(`[data-seg="${n}"]`) as HTMLElement | null)?.click(), 2000); }
       if (sc.session) { const x = sc.session; window.setTimeout(() => app.setSession({ ...x, started: Date.now() }), 1200); }

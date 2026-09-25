@@ -11,8 +11,8 @@ read-only and keeps what you make (journal, bookmarks, highlights, plans, chats)
 - **Read** a chapter beside a study pane with every commentary on the verse, cross-references,
   dictionaries, your notes and maps. Click any word for its Greek or Hebrew.
 - **Ask** questions about what you're reading. The assistant searches your own commentaries,
-  lexicons and dictionaries and names its sources. It runs on Claude Code or Codex, if either
-  is installed.
+  lexicons and dictionaries and names its sources. It runs on Claude Code, Codex,
+  Antigravity or GitHub Copilot, whichever is installed.
 - **Books and devotionals** from your library, with the same tools as Scripture: highlight,
   bookmark and note a paragraph, listen, and ask about it.
 - **Compare** any number of translations verse by verse, with the differences highlighted.
@@ -44,7 +44,7 @@ read-only and keeps what you make (journal, bookmarks, highlights, plans, chats)
 ## Quick start
 
 Needs macOS 13+, the Xcode Command Line Tools, e-Sword X with some modules, Rust and Node. Ask
-also needs Claude Code or Codex.
+also needs Claude Code, Codex, Antigravity or GitHub Copilot.
 
 ```sh
 npm install

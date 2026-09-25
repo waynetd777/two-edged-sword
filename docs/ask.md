@@ -6,7 +6,7 @@ Ask answers questions about what you are reading: a passage in Read or Compare, 
 Study, search results, a journal entry, or a reference book or devotional. Chats stay on this
 Mac; find them again under **Recent** on any Ask panel. An answer can be added to your journal.
 
-## Claude Code or Codex
+## Claude Code, Codex, Antigravity or Copilot
 
 Ask doesn't talk to an AI service itself. It runs an AI command-line tool already installed and
 signed in on this Mac, so it uses your existing account:
@@ -14,17 +14,23 @@ signed in on this Mac, so it uses your existing account:
 - **Claude Code** (`claude -p`), offering Claude Opus, Sonnet and Haiku.
 - **Codex** (`codex exec`), offering whichever models Codex's own model picker shows for your
   account, so the list stays current without an app update.
+- **Antigravity** (`agy -p`, Google's successor to Gemini CLI), offering whichever models your
+  Google account has: Gemini, and some Claude and GPT models.
+- **GitHub Copilot** (`copilot -p`), as "Copilot (Auto)": it lists no models, so Copilot picks
+  whichever your plan allows. An organisation's Copilot policy can switch the CLI off.
 
-The model menu on each Ask panel lists the models from whichever tools are installed; choosing
-one there also makes it the default. Settings › AI assistant shows what was found. A chat keeps
-the model it started with.
+<picture><source media="(prefers-color-scheme: dark)" srcset="images/ask-models-dark.png"><img alt="The model menu, grouped by the tool that runs each model" src="images/ask-models-light.png" width="330"></picture>
 
-**If neither is installed, Ask is hidden** everywhere: panels, buttons, the study pane's Ask
-tab, the command palette entry. Install one, sign in (for Codex, run it once so it lists its
-models), and open Settings; Ask appears without a restart.
+The model menu on each Ask panel lists the models from whichever tools are installed, grouped by
+tool; choosing one there also makes it the default. Settings › AI assistant shows what was
+found. A chat keeps the model it started with.
 
-Claude streams its answer as it writes. Codex's answer appears all at once when it is done.
-While either is searching your library, the panel shows what it is doing ("Reading Matthew
+**If none is installed, Ask is hidden** everywhere: panels, buttons, the study pane's Ask
+tab, the command palette entry. Install one, sign in (for Codex or Antigravity, run it once in
+Terminal so it lists its models), and open Settings; Ask appears without a restart.
+
+Claude, Antigravity and Copilot stream their answers as they write. Codex's answer appears all at once
+when it is done. While any of them is searching your library, the panel shows what it is doing ("Reading Matthew
 Henry's Commentary…"). In a new chat, the box's hint is the first suggested question, and the go
 button asks it.
 
@@ -87,7 +93,14 @@ and no licensed module's text is sent (one whose description carries a copyright
 chat's folder. Your own Claude Code settings still apply, so an allow rule there could widen
 that; your hooks and `~/.claude/CLAUDE.md` load too. Codex runs in its read-only sandbox,
 without your Codex config (MCP servers, hooks, rules). It is told to stay in the chat's folder,
-but nothing enforces that. Neither can change files.
+but nothing enforces that. Antigravity is given a custom agent (`.agents/agents/tes-ask.md`,
+written into the chat's folder) that has only its read and search tools, so it can't search the
+web, open pages or run commands; reading outside the folder is refused. Your own Antigravity
+rules files still load. Copilot is given only its read and search tools (`--available-tools`),
+without its GitHub connection or your instruction files; reading outside the folder is refused
+and it answers without it. None of them can change files. Each tool keeps its own history of
+your questions, as it would for any chat: `~/.claude/`, `~/.codex/`,
+`~/.gemini/antigravity-cli/`, `~/.copilot/`.
 
 ## Where it keeps things
 
@@ -100,4 +113,4 @@ Under `~/Library/Application Support/Two-edged Sword/`:
 | A journal chat's entries | `ask/journal/<chat>/` (removed after 60 days unused) |
 | Dictionaries, written out whole | `ask/dictionaries/` |
 | Reference books and devotionals, written out | `books/` |
-| Working folders for chats without one | `claude/`, `codex/` |
+| Working folders for chats without one | `claude/`, `codex/`, `agy/`, `copilot/` |

@@ -83,7 +83,7 @@ taken by hand (⌘⇧4 with the menu open, cropped to the menu).
 | `src/tray.tsx`, `src-tauri/src/tray.rs` | The menu-bar menu and the daily reminder, which is timed on the Rust side so it fires with the window hidden |
 | `src-tauri/src/login_item.rs`, `login_launch.rs` | Open at Login, and telling a login launch from the user opening the app |
 | `src-tauri/src/tts.rs` | Speech through AVSpeechSynthesizer (WebKit's speech API hides downloaded voices) |
-| `src-tauri/src/assistant/` | Running Claude Code or Codex for Ask |
+| `src-tauri/src/assistant/` | Running Claude Code, Codex, Antigravity or Copilot for Ask |
 | `src-tauri/src/study.rs`, `books.rs` | Writing library material out as files for Ask to search: a folder per passage chat with the dictionaries hard-linked in, and `ask/journal/<chat>/` for journal chats |
 | `index.html` | The splash screen, painted before React starts |
 | `src/scene.ts`, `tools/screenshots.py` | Screenshot mode and the script that drives it |

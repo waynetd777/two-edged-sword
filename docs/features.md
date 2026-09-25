@@ -212,7 +212,7 @@ app started. See [Library](library.md).
 Theme (match macOS, light or dark), reading font and size, words of Jesus in red, verse or
 paragraph layout, the default and Compare translations, verse numbers when copying, the voice and
 speed, the journal folder and notes beside verses, the daily Quiet time reminder, what to do when
-you fall behind a plan, and the AI assistant: which of Claude Code and Codex are installed, the
+you fall behind a plan, and the AI assistant: which of Claude Code, Codex, Antigravity and Copilot are installed, the
 default model, whether Ask may search your library (on at first) and your journal entries linked
 to the passage (off at first), **Licensed text** (when off, no licensed module's text goes to
 Ask: Bibles fall back to public-domain text, and licensed commentaries, lexicons, dictionaries

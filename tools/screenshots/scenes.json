@@ -135,6 +135,25 @@
     ]
   },
   {
+    "name": "ask-models",
+    "screen": "journal",
+    "entriesFile": "journal-entries.json",
+    "journal": "scene-rest",
+    "click": [
+      "[role=toolbar] > button:last-child",
+      "label:has(textarea[aria-label=\"Question\"]) button.btn.small"
+    ],
+    "settings": {
+      "bible": "kjv"
+    },
+    "crop": [
+      960,
+      40,
+      440,
+      760
+    ]
+  },
+  {
     "name": "search",
     "search": "tithe",
     "settings": {
