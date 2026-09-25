@@ -1,4 +1,4 @@
-//! The journal: Markdown, one file per month (`2026-09.md`), so it reads naturally in Obsidian
+//! The journal: Markdown, one file per month (`Me. Journal - 2026-09.md`), so it reads naturally in Obsidian
 //! or any editor. Each entry is a `## Title` heading, a hidden `<!-- tes … -->` comment holding
 //! its id, dates, verses and tags, a visible line generated from those, and the body.
 
@@ -161,14 +161,19 @@ fn splice(text: &str, key: &str, id: &str, put: Option<&Entry>) -> Option<String
     Some(s)
 }
 
+fn month_path(dir: &Path, key: &str) -> std::path::PathBuf {
+    dir.join(format!("Me. Journal - {key}.md"))
+}
+
 fn month_files(dir: &Path) -> Vec<(String, std::path::PathBuf)> {
     let mut v = Vec::new();
     if let Ok(rd) = std::fs::read_dir(dir) {
         for f in rd.flatten() {
             let p = f.path();
             if let Some(stem) = p.file_stem().and_then(|s| s.to_str()) {
-                if p.extension().is_some_and(|e| e == "md") && stem.len() == 7 && month_key(stem).is_some() {
-                    v.push((stem.to_string(), p.clone()));
+                let key = stem.strip_prefix("Me. Journal - ").unwrap_or("");
+                if p.extension().is_some_and(|e| e == "md") && key.len() == 7 && month_key(key).is_some() {
+                    v.push((key.to_string(), p.clone()));
                 }
             }
         }
@@ -199,13 +204,13 @@ pub fn list(dir: &Path) -> Result<Vec<Entry>, String> {
 }
 
 fn read_month(dir: &Path, key: &str) -> Result<String, String> {
-    let p = dir.join(format!("{key}.md"));
+    let p = month_path(dir, key);
     if !p.exists() { return Ok(String::new()); }
     std::fs::read_to_string(&p).map_err(|e| format!("{}: {e}", p.display()))
 }
 
 fn write_month(dir: &Path, key: &str, text: Option<String>) -> Result<(), String> {
-    let p = dir.join(format!("{key}.md"));
+    let p = month_path(dir, key);
     match text {
         Some(t) => write_text_atomic(&p, &t),
         None if p.exists() => std::fs::remove_file(&p).map_err(|e| e.to_string()),
@@ -287,7 +292,7 @@ mod tests {
         save(&dir, &e).unwrap();
         e.created = "2026-10-01T06:00".into();
         save(&dir, &e).unwrap();
-        assert!(!dir.join("2026-09.md").exists());
+        assert!(!dir.join("Me. Journal - 2026-09.md").exists());
         assert_eq!(list(&dir).unwrap().len(), 1);
         delete(&dir, &e.id).unwrap();
         assert!(list(&dir).unwrap().is_empty());
@@ -305,12 +310,12 @@ mod tests {
         let damaged = "## Lost its id\n<!-- tes created=\"2026-09-05T08:00\" -->\nStill mine.";
         let text = format!("# September 2026\n\nA note of my own.\n\n{}{damaged}\n\n{}", render_entry(&other), render_entry(&e).replace("*Wednesday 23 September 2026 · 07:02* · John 3:1-8, John 3:16 · #new-birth", "*emphasis* line"));
         std::fs::create_dir_all(&dir).unwrap();
-        std::fs::write(dir.join("2026-09.md"), &text).unwrap();
+        std::fs::write(dir.join("Me. Journal - 2026-09.md"), &text).unwrap();
         // Its meta line was deleted in Obsidian: the body's own "*…*" line is not taken for it.
         assert!(parse(&text)[1].body.starts_with("*emphasis* line"));
         e.body = "Rewritten.".into();
         save(&dir, &e).unwrap();
-        let after = std::fs::read_to_string(dir.join("2026-09.md")).unwrap();
+        let after = std::fs::read_to_string(dir.join("Me. Journal - 2026-09.md")).unwrap();
         assert!(after.starts_with("# September 2026\n\nA note of my own.\n\n"));
         assert!(after.contains(damaged));
         assert!(after.contains("Rewritten.") && !after.contains("*emphasis* line"));
@@ -319,7 +324,7 @@ mod tests {
         e.created = "2026-10-01T06:00".into();
         save(&dir, &e).unwrap();
         delete(&dir, &other.id).unwrap();
-        let after = std::fs::read_to_string(dir.join("2026-09.md")).unwrap();
+        let after = std::fs::read_to_string(dir.join("Me. Journal - 2026-09.md")).unwrap();
         assert!(after.contains("A note of my own.") && after.contains(damaged));
         assert_eq!(list(&dir).unwrap(), vec![e]);
         let _ = std::fs::remove_dir_all(&dir);

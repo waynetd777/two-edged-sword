@@ -71,7 +71,7 @@ export function JournalScreen() {
       if (!e.title.trim() && !e.body.trim()) return; // nothing to keep yet
       try {
         await app.saveEntry({ ...e, title: e.title.trim() || "Untitled" });
-        setSaved(`Saved to ${e.created.slice(0, 7)}.md · ${new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}`);
+        setSaved(`Saved to Me. Journal - ${e.created.slice(0, 7)}.md · ${new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}`);
         setErr(null);
       } catch (x) { setErr(String(x)); }
     };
@@ -275,7 +275,7 @@ function Editor({ entry, onChange, saved, err, onDelete, onExport, ask }: { entr
       <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 20px", borderTop: "1px solid var(--border)", color: "var(--muted)", fontSize: 12 }}>
         <span>{words} word{words === 1 ? "" : "s"}</span>
         {entry.verses.length > 0 && <><span>·</span><span>Shows beside {entry.verses.join(", ")} in Read</span></>}
-        <button className="btn" type="button" style={{ marginLeft: "auto" }} onClick={() => revealItemInDir(`${app.journalDir}/${entry.created.slice(0, 7)}.md`).catch(() => app.toast("Save the entry first"))}><Icon name="finder" />Show in Finder</button>
+        <button className="btn" type="button" style={{ marginLeft: "auto" }} onClick={() => revealItemInDir(`${app.journalDir}/Me. Journal - ${entry.created.slice(0, 7)}.md`).catch(() => app.toast("Save the entry first"))}><Icon name="finder" />Show in Finder</button>
         <button className="btn" type="button" onClick={onExport}><Icon name="export" />Export…</button>
         <button className="ibtn" type="button" aria-label="Delete entry" title="Delete entry" onClick={onDelete}><Icon name="trash" /></button>
       </div>
