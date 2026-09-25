@@ -59,7 +59,8 @@ alias(66, "Rv", "Revelations", "Apocalypse");
   // "I Kings", "II Kings" and "First Kings".
   const roman = d === "1" ? "i" : d === "2" ? "ii" : "iii";
   const word = d === "1" ? "first" : d === "2" ? "second" : "third";
-  for (const [k, v] of Array.from(ALIASES)) if (k.startsWith(d)) { ALIASES.set(roman + k.slice(1), v); ALIASES.set(word + k.slice(1), v); }
+  // Never over a name already taken: "1Sa" as "isa" would turn Isaiah into 1 Samuel.
+  for (const [k, v] of Array.from(ALIASES)) if (k.startsWith(d)) for (const a of [roman + k.slice(1), word + k.slice(1)]) if (!ALIASES.has(a)) ALIASES.set(a, v);
 });
 
 export function findBook(text: string): number | undefined {
