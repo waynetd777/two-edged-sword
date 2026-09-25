@@ -79,6 +79,14 @@ export interface AskProps {
   verses?: Verse[];
   /** Short label for Recent when there is no passage: "G25 agapaō". */
   about?: string;
+  /** Shown and kept in Recent instead of the passage's reference: a journal entry's title. */
+  label?: string;
+  /** Journal entries for a passage chat's folder, instead of the ones linked to the passage. */
+  journal?: JournalEntry[];
+  /** For a chat with no passage folder: journal entries written out to search (api.journalExport). */
+  journalDir?: (chatId: string) => Promise<string>;
+  /** Offers to put an answer into what is being written (the journal entry open). */
+  onInsert?: (markdown: string) => void;
   /** More context for the model: other translations, a lexicon entry, search results, a journal entry. */
   context?: () => Promise<string> | string;
   /** A reference book's exported folder, which the model may search and read (see books.rs). */
@@ -127,7 +135,7 @@ export function AskPanel(p: AskProps) {
   const asst = useAssistant();
   const model: Model = chat?.model ?? pickModel(app.settings.model, asst.models);
   const passage = p.passage ? (scope === "chapter" ? { book: p.passage.book, chapter: p.passage.chapter } : p.passage) : null;
-  const about = passage ? fmtRef(passage) : p.about ?? p.source;
+  const about = p.label ?? (passage ? fmtRef(passage) : p.about ?? p.source);
 
   useEffect(() => { ensureListening(); }, []);
   useEffect(() => { if (p.seed) { setChatId(null); setQ(p.seed); p.clearSeed?.(); } }, [p.seed]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -168,9 +176,10 @@ export function AskPanel(p: AskProps) {
       // Bibles (public-domain ones only, unless licensed text may be sent) and the lexicons.
       else if (passage && withLibrary) {
         const bibles = app.bibles.filter((b) => app.settings.allowLicensed || !isLicensed(b)).map((b) => b.id);
-        const journal = app.settings.askJournal ? journalOn(app.journal, passage) : [];
+        const journal = p.journal ?? (app.settings.askJournal ? journalOn(app.journal, passage) : []);
         try { studyDir = await api.studyExport(id, { book: passage.book, chapter: passage.chapter, from: passage.verse ?? null, to: passage.verse ? passage.to ?? passage.verse : null, bibles, strongsBible: app.strongsBible, label: fmtRef(passage), journal }); } catch (e) { console.error(e); }
       }
+      else if (p.journalDir) { try { studyDir = await p.journalDir(id); } catch (e) { console.error(e); } }
       const c: Chat = { id, title: question.length > 80 ? question.slice(0, 77) + "…" : question, about, source: p.source, created: new Date().toISOString(), updated: new Date().toISOString(), model, bookDir, studyDir, verses: passage ? [fmtRef(passage)] : [], messages: [] };
       app.setChats((cs) => [c, ...cs]);
       setChatId(id);
@@ -240,7 +249,8 @@ export function AskPanel(p: AskProps) {
           {busy && status && m.text && i === messages.length - 1 && <Working text={status} />}
           {!m.error && m.text && !(busy && i === messages.length - 1) && (
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-              <button className="btn primary small" type="button" onClick={() => addToJournal(chat!, i)}><Icon name="journal" size={13} />Add to journal</button>
+              {p.onInsert && <button className="btn primary small" type="button" onClick={() => p.onInsert!(m.text)}><Icon name="plus" size={13} />Insert into entry</button>}
+              <button className={`btn small ${p.onInsert ? "" : "primary"}`} type="button" onClick={() => addToJournal(chat!, i)}><Icon name="journal" size={13} />{p.onInsert ? "New entry" : "Add to journal"}</button>
               <button className="ibtn" type="button" aria-label="Copy" onClick={() => { navigator.clipboard.writeText(m.text); app.toast("Copied"); }}><Icon name="copy" /></button>
               {i === messages.length - 1 && <button className="ibtn" type="button" aria-label="Ask again" title="Ask again" onClick={() => { const qm = messages[i - 1]?.text; update(chat!.id, (c) => ({ ...c, messages: c.messages.slice(0, -2) })); if (qm) send(qm); }}><Icon name="refresh" /></button>}
             </div>

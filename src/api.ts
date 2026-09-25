@@ -53,6 +53,8 @@ export interface SearchResults { bible: ModuleMatches<VerseHit>; commentaries: M
 export interface MusicTrack { id: string; name: string; artist: string; genre: string }
 export interface MusicState { state: string; name: string; artist: string; ours: boolean }
 export interface JournalEntry { id: string; title: string; created: string; updated: string; verses: string[]; tags: string[]; body: string }
+/** What of an entry goes to Ask (study.rs's JournalNote). */
+export type JournalNote = Pick<JournalEntry, "title" | "created" | "verses" | "tags" | "body">;
 
 /** today: today's reading ("Psalm 23 · John 3"), null without an active plan. */
 export interface TrayState { today: string | null; done: boolean; reading: string; reminder: boolean; reminderTime: string }
@@ -99,14 +101,16 @@ export const api = {
   /** Keeps the display awake (and so the screen unlocked) while reading aloud. */
   keepAwake: (on: boolean) => invoke<void>("keep_awake", { on }),
   /** Pauses, resumes or skips, but only while the Quiet time playlist is what's playing; "show" brings Music to the front. */
-  musicControl: (cmd: "pause" | "play" | "next" | "show") => (readOnly ? Promise.resolve() : invoke<void>("music_control", { cmd })),
+  musicControl: (cmd: "pause" | "play" | "next" | "stop" | "show") => (readOnly ? Promise.resolve() : invoke<void>("music_control", { cmd })),
   journalSave: (dir: string, entry: JournalEntry) => (readOnly ? Promise.resolve() : invoke<void>("journal_save", { dir, entry })),
   journalDelete: (dir: string, id: string) => (readOnly ? Promise.resolve() : invoke<void>("journal_delete", { dir, id })),
   writeTextFile: (path: string, text: string) => invoke<void>("write_text_file", { path, text }),
   assistantStatus: () => invoke<AssistantStatus>("assistant_status"),
   ask: (chatId: string, prompt: string, model: string, session: string | null, bookDir: string | null = null, studyDir: string | null = null) => invoke<void>("ask", { chatId, prompt, model, session, bookDir, studyDir }),
   /** Writes out the library's material on a passage (every Bible allowed, all commentaries, lexicon entries) for chat `chatId`; returns its folder. */
-  studyExport: (chatId: string, req: { book: number; chapter: number; from: number | null; to: number | null; bibles: string[]; strongsBible: string | null; label: string; journal?: { title: string; created: string; verses: string[]; body: string }[] }) => invoke<string>("study_export", { chatId, req }),
+  studyExport: (chatId: string, req: { book: number; chapter: number; from: number | null; to: number | null; bibles: string[]; strongsBible: string | null; label: string; journal?: JournalNote[] }) => invoke<string>("study_export", { chatId, req }),
+  /** Journal entries written out for a chat about them; the folder goes to `ask` as its studyDir. */
+  journalExport: (chatId: string, label: string, entries: JournalNote[]) => invoke<string>("journal_export", { chatId, label, entries }),
   /** Writes a reference book out as text files and charts for Ask to search; returns its folder and chapter files. */
   docExport: (module: string, kind: "reference" | "devotional" = "reference") => invoke<{ dir: string; files: string[] }>("doc_export", { module, kind }),
   /** A devotional's days as titles ("January 1" …), in calendar order. */

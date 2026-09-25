@@ -270,9 +270,10 @@ fn ask(app: AppHandle, st: State<AppState>, chat_id: String, prompt: String, mod
         let (d, top) = (std::fs::canonicalize(d?).ok()?, std::fs::canonicalize(top).ok()?);
         d.starts_with(&top).then_some(d)
     };
-    let folder = match (inside(book_dir, books::root(&st.data)), inside(study_dir, study::studies_root(&root))) {
-        (Some(b), _) => assistant::Folder::Book(b),
-        (None, Some(dir)) => assistant::Folder::Study { dir, dictionaries: study::dictionaries_dir(&root) },
+    let folder = match (inside(book_dir, books::root(&st.data)), inside(study_dir.clone(), study::studies_root(&root)), inside(study_dir, study::journal_root(&root))) {
+        (Some(b), _, _) => assistant::Folder::Book(b),
+        (None, Some(dir), _) => assistant::Folder::Study { dir, dictionaries: study::dictionaries_dir(&root) },
+        (None, None, Some(dir)) => assistant::Folder::Journal(dir),
         _ => assistant::Folder::None,
     };
     assistant::ask(app, st.running.clone(), &st.data, folder, chat_id, prompt, model, session)
@@ -283,6 +284,13 @@ fn ask(app: AppHandle, st: State<AppState>, chat_id: String, prompt: String, mod
 async fn study_export(st: State<'_, AppState>, chat_id: String, req: study::Request) -> Result<String, String> {
     let (lib, root) = (st.lib(), study::root(&st.data));
     tauri::async_runtime::spawn_blocking(move || study::export(&lib, &root, &chat_id, &req).map(|d| d.to_string_lossy().to_string())).await.map_err(|e| e.to_string())?
+}
+
+/// Writes out journal entries for a chat about them; returns the folder (passed to `ask` as its study_dir).
+#[tauri::command]
+async fn journal_export(st: State<'_, AppState>, chat_id: String, label: String, entries: Vec<study::JournalNote>) -> Result<String, String> {
+    let root = study::root(&st.data);
+    tauri::async_runtime::spawn_blocking(move || study::export_journal(&root, &chat_id, &label, &entries).map(|d| d.to_string_lossy().to_string())).await.map_err(|e| e.to_string())?
 }
 
 #[tauri::command]
@@ -446,6 +454,7 @@ pub fn run() {
             journal_save,
             journal_delete,
             journal_stamp,
+            journal_export,
             spell_check,
             spell_guesses,
             spell_correction,

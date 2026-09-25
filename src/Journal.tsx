@@ -30,8 +30,6 @@ export function JournalScreen() {
   const [saved, setSaved] = useState<string>("");
   const [err, setErr] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
-  const [ask, setAsk] = useState(false);
-  const canAsk = useAssistant().available;
   const saveTimer = useRef<number | undefined>(undefined);
   const pendingSave = useRef<{ id: string; run: () => void } | null>(null);
   // An unsaved edit is written on leaving the screen, and on hiding or quitting like the store's saves.
@@ -98,7 +96,7 @@ export function JournalScreen() {
   let lastMonth = "";
   return (
     <div className="main">
-      <Topbar right={canAsk && <button className={`btn ${ask ? "on" : ""}`} type="button" onClick={() => setAsk(!ask)}><Icon name="chat" />Ask</button>} />
+      <Topbar />
       <div style={{ flexGrow: 1, minHeight: 0, display: "grid", gridTemplateColumns: "320px minmax(0,1fr)" }}>
         <div style={{ borderRight: "1px solid var(--border)", padding: "14px 12px 0", display: "flex", flexDirection: "column", gap: 10, minHeight: 0 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "0 4px" }}>
@@ -127,15 +125,26 @@ export function JournalScreen() {
             })}
           </div>
         </div>
-        {cur ? <Editor key={cur.id} entry={cur} onChange={edit} saved={saved} err={err} onDelete={remove} onExport={() => setExporting(true)} ask={ask} /> : <div className="empty">Choose an entry, or start a new one.</div>}
+        {cur ? <Editor key={cur.id} entry={cur} onChange={edit} saved={saved} err={err} onDelete={remove} onExport={() => setExporting(true)} listed={entries} listedLabel={tag ? `entries tagged #${tag}` : filter.trim() ? `entries matching “${filter.trim()}”` : "your whole journal"} /> : <div className="empty">Choose an entry, or start a new one.</div>}
       </div>
       {exporting && <ExportDialog current={cur} onClose={() => setExporting(false)} />}
     </div>
   );
 }
 
-function Editor({ entry, onChange, saved, err, onDelete, onExport, ask }: { entry: JournalEntry; onChange: (p: Partial<JournalEntry>) => void; saved: string; err: string | null; onDelete: () => void; onExport: () => void; ask: boolean }) {
+/** `listed` are the entries the list shows (filtered), which a whole-journal Ask is about; `listedLabel` says which. */
+function Editor({ entry, onChange, saved, err, onDelete, onExport, listed, listedLabel }: { entry: JournalEntry; onChange: (p: Partial<JournalEntry>) => void; saved: string; err: string | null; onDelete: () => void; onExport: () => void; listed: JournalEntry[]; listedLabel: string }) {
   const app = useApp();
+  const canAsk = useAssistant().available;
+  const [ask, setAsk] = useState(false);
+  const [scope, setScope] = useState<"entry" | "journal">("entry");
+  // Text selected in the entry, which an Ask about the entry is then about. Kept while the
+  // selection moves to the Ask panel's box; cleared by a caret in the entry or its ×.
+  const [picked, setPicked] = useState("");
+  // An Ask about the entry gets its first Bible reference as its passage (with the library's
+  // material on it) and the rest of the journal to search.
+  const passage = useMemo(() => entry.verses.map((v) => parseRef(v)).find((r): r is Ref => !!r) ?? null, [entry.verses]);
+  const others = useMemo(() => app.journal.filter((e) => e.id !== entry.id), [app.journal, entry.id]);
   const ed = useRef<HTMLDivElement>(null);
   // What the editor holds. A body arriving that isn't it was changed elsewhere (in the vault):
   // show it. While typing, the entry shown is the unsaved copy, so this never replaces an edit.
@@ -161,6 +170,11 @@ function Editor({ entry, onChange, saved, err, onDelete, onExport, ask }: { entr
     spell.recheck(50);
   }, [entry.body]); // eslint-disable-line react-hooks/exhaustive-deps
   const spell = useSpelling(ed, entry.id, () => sync());
+  useEffect(() => {
+    const f = () => { const s = window.getSelection(); if (s?.rangeCount && ed.current?.contains(s.anchorNode)) setPicked(s.isCollapsed ? "" : s.toString().trim()); };
+    document.addEventListener("selectionchange", f);
+    return () => document.removeEventListener("selectionchange", f);
+  }, []);
   const { onRefHover, preview, hide } = useRefPreview(app.settings.bible);
   const refAt = (t: EventTarget) => (t as HTMLElement).closest("a.ref") as HTMLElement | null;
   const cmd = (c: string, v?: string) => { ed.current?.focus(); document.execCommand(c, false, v); sync(); };
@@ -179,6 +193,21 @@ function Editor({ entry, onChange, saved, err, onDelete, onExport, ask }: { entr
     document.execCommand("insertHTML", false, html);
     if (!entry.verses.includes(fmtRef(r))) onChange({ verses: [...entry.verses, fmtRef(r)], body: htmlToMd(ed.current!) }); else sync();
     return true;
+  };
+  /** An answer from Ask, put in after the paragraph the caret (or selection) was last in, or at the end. */
+  const insertAnswer = (md: string) => {
+    const root = ed.current;
+    if (!root) return;
+    root.focus();
+    const at = saved_range.current && root.contains(saved_range.current.endContainer) ? saved_range.current.endContainer : null;
+    const block = ((at?.nodeType === Node.TEXT_NODE ? at.parentElement : (at as HTMLElement | null))?.closest("p, li, h3, blockquote") as HTMLElement | null) ?? root;
+    const r = document.createRange();
+    r.selectNodeContents(block.closest("ul, ol") ?? block);
+    r.collapse(false);
+    const s = window.getSelection();
+    s?.removeAllRanges(); s?.addRange(r);
+    document.execCommand("insertHTML", false, mdToHtml(md));
+    sync(); spell.recheck();
   };
   // The webview has no Format menu, so ⌘B and ⌘I are handled here; and Markdown habits work:
   // "- ", "1. ", "> " and "### " at the start of a line become a list, quote or heading.
@@ -221,9 +250,11 @@ function Editor({ entry, onChange, saved, err, onDelete, onExport, ask }: { entr
         <span style={{ width: 1, height: 18, background: "var(--border)", margin: "0 4px" }} />
         <button className="btn small" type="button" style={{ border: 0 }} onClick={(e) => { remember(); setVerseAt(e.currentTarget.getBoundingClientRect()); }}><Icon name="read" />Insert verse</button>
         <button className="btn small" type="button" style={{ border: 0 }} onClick={(e) => setLinkAt(e.currentTarget.getBoundingClientRect())}><Icon name="link" />Link verse</button>
-        <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 6, color: err ? "var(--bad)" : "var(--muted)", fontSize: 12 }}>
+        <button className="btn small" type="button" style={{ border: 0 }} onClick={(e) => setTagAt(e.currentTarget.getBoundingClientRect())}><Icon name="plus" />Tag</button>
+        <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 6, color: err ? "var(--bad)" : "var(--muted)", fontSize: 12, minWidth: 0 }}>
           {err ? err : saved && <><Icon name="check" style={{ color: "var(--good)" }} />{saved}</>}
         </div>
+        {canAsk && <><span style={{ width: 1, height: 18, background: "var(--border)", margin: "0 4px 0 10px" }} /><button className={`btn small ${ask ? "on" : ""}`} type="button" onClick={() => setAsk(!ask)}><Icon name="chat" />Ask</button></>}
       </div>
       <div className="scroll" style={{ flexGrow: 1, padding: "28px 0 40px" }}>
         <article style={{ padding: "0 40px", display: "flex", flexDirection: "column", gap: 14, minHeight: "100%" }} onClick={(e) => { if (e.target === e.currentTarget) ed.current?.focus(); }}>
@@ -231,7 +262,6 @@ function Editor({ entry, onChange, saved, err, onDelete, onExport, ask }: { entr
             <span className="label">{longDate(entry.created)}</span>
             <span style={{ marginLeft: "auto", display: "flex", gap: 5, flexWrap: "wrap" }}>
               {entry.tags.map((t) => <button key={t} type="button" className="chip" title="Remove tag" onClick={() => onChange({ tags: entry.tags.filter((x) => x !== t) })}>#{t}<Icon name="x" size={11} /></button>)}
-              <button type="button" className="chip" aria-label="Add tag" onClick={(e) => setTagAt(e.currentTarget.getBoundingClientRect())}>+ tag</button>
             </span>
           </div>
           <input value={entry.title} autoFocus={!entry.title} onChange={(e) => onChange({ title: e.target.value })} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); ed.current?.focus(); } }} placeholder="Title" aria-label="Title" style={{ border: 0, outline: 0, background: "transparent", font: "500 36px/1.15 var(--display)", color: "var(--text)", padding: 0 }} />
@@ -254,7 +284,8 @@ function Editor({ entry, onChange, saved, err, onDelete, onExport, ask }: { entr
             onMouseOver={(e) => { const a = refAt(e.target); if (a?.dataset.ref && !a.contains(e.relatedTarget as Node)) onRefHover(JSON.parse(a.dataset.ref), a); }}
             onMouseOut={(e) => { const a = refAt(e.target); if (a && !a.contains(e.relatedTarget as Node)) onRefHover(null, null); }}
             onPaste={(e) => { e.preventDefault(); document.execCommand("insertText", false, e.clipboardData.getData("text/plain")); }}
-            data-placeholder="Write here…" style={{ font: "400 17px/1.7 var(--serif)", outline: "none", minHeight: 300, textWrap: "pretty" }} />
+            data-placeholder="Write here…" style={{ font: "400 17px/1.7 var(--serif)", outline: "none", minHeight: 300 }} />
+          {canAsk && !entry.body.trim() && !ask && <button className="btn small" type="button" style={{ alignSelf: "flex-start", border: 0, color: "var(--muted)" }} onClick={() => { setScope("entry"); setAsk(true); }}><Icon name="chat" />Stuck? Ask for a prompt to start</button>}
         </article>
         {preview}
         {spell.menu && (
@@ -280,9 +311,33 @@ function Editor({ entry, onChange, saved, err, onDelete, onExport, ask }: { entr
         <button className="ibtn" type="button" aria-label="Delete entry" title="Delete entry" onClick={onDelete}><Icon name="trash" /></button>
       </div>
       {ask && (
-        <div style={{ position: "absolute", right: 20, bottom: 60, width: 360, zIndex: 20, boxShadow: "0 14px 40px var(--shadow)", borderRadius: 12 }}>
-          <AskPanel source="Journal" about={entry.title || "this entry"} context={() => `The user's journal entry, “${entry.title}”${entry.verses.length ? ` (on ${entry.verses.join(", ")})` : ""}:\n${entry.body}`}
-            suggestions={["Suggest cross-references I haven't linked", "Give me questions to reflect on", ...(app.journal.length > 1 ? ["What else in my journal connects with this?"] : [])]} />
+        <div className="card" style={{ position: "absolute", right: 20, bottom: 60, width: 380, zIndex: 20, boxShadow: "0 14px 40px var(--shadow)", borderRadius: 12, padding: 0, display: "flex", flexDirection: "column" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "12px 16px 0", flexWrap: "wrap" }}>
+            <Seg value={scope} options={[["entry", "This entry"], ["journal", "Whole journal"]]} onChange={setScope} />
+            <button className="ibtn" type="button" aria-label="Close" title="Close" style={{ marginLeft: "auto" }} onClick={() => setAsk(false)}><Icon name="x" /></button>
+            {scope === "entry" && picked && (
+              <span className="chip" style={{ maxWidth: "100%", cursor: "default" }} title={picked}>
+                <span className="t" style={{ minWidth: 0 }}>On “{picked}”</span>
+                <button className="ibtn" type="button" aria-label="Ask about the whole entry" title="Ask about the whole entry" style={{ width: 16, height: 16 }} onClick={() => setPicked("")}><Icon name="x" size={11} /></button>
+              </span>
+            )}
+            {scope === "journal" && <span className="n" style={{ flexBasis: "100%" }}>Searches {listedLabel} ({listed.length} {listed.length === 1 ? "entry" : "entries"}).</span>}
+          </div>
+          {scope === "entry" ? (
+            <AskPanel key={`entry|${entry.id}`} source="Journal" label={entry.title || "this entry"} style={{ border: 0, background: "transparent", boxShadow: "none" }}
+              passage={passage} journal={others} journalDir={(id) => api.journalExport(id, "the whole journal", app.journal.map((e) => (e.id === entry.id ? entry : e)))}
+              context={() => [`The user's journal entry, “${entry.title}”${entry.verses.length ? ` (on ${entry.verses.join(", ")})` : ""}${entry.tags.length ? ` #${entry.tags.join(" #")}` : ""}:\n${entry.body || "(nothing written yet)"}`, picked && `They have selected this part of it and are asking about it:\n“${picked}”`].filter(Boolean).join("\n\n")}
+              suggestions={picked ? ["Explain this", "Suggest verses that speak to this", "Help me say this more clearly"]
+                : !entry.body.trim() ? [`Give me a few prompts to start writing${entry.verses.length ? ` on ${entry.verses.join(", ")}` : ""}`, ...(entry.verses.length ? [] : ["Suggest a verse to reflect on today"]), "Give me questions to reflect on"]
+                : ["Suggest cross-references I haven't linked", "Give me questions to reflect on", ...(others.length ? ["What else in my journal connects with this?"] : [])]}
+              onInsert={insertAnswer} />
+          ) : (
+            <AskPanel key={`journal|${listedLabel}`} source="Journal" label={listedLabel} style={{ border: 0, background: "transparent", boxShadow: "none" }}
+              journalDir={(id) => api.journalExport(id, listedLabel, listed.map((e) => (e.id === entry.id ? entry : e)))}
+              context={() => `The entry they have open is “${entry.title || "Untitled"}” (${entry.created.slice(0, 10)}).`}
+              suggestions={["What themes keep coming back in my journal?", "Which verses do I return to most, and what have I said about them?", "How has my thinking changed over time?", "What have I been praying about lately?"]}
+              onInsert={insertAnswer} />
+          )}
         </div>
       )}
       {verseAt && <RefPrompt anchor={verseAt} label="Insert a verse" onClose={() => setVerseAt(null)} onSubmit={async (t) => { const ok = await insertVerse(t); if (ok) setVerseAt(null); return ok; }} />}

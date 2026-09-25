@@ -44,6 +44,8 @@ pub struct JournalNote {
     /// "2026-09-23T07:02"
     pub created: String,
     pub verses: Vec<String>,
+    #[serde(default)]
+    pub tags: Vec<String>,
     /// Markdown.
     pub body: String,
 }
@@ -124,15 +126,8 @@ pub fn export(lib: &Library, root: &Path, chat_id: &str, req: &Request) -> Resul
         }
 
         if !req.journal.is_empty() {
-            index.push_str("\njournal/ — the user's own journal entries on the passage (their prayers, study notes and sermons), one file each, dated:\n");
-            let mut used = std::collections::HashSet::new();
-            for (i, e) in req.journal.iter().enumerate() {
-                let date = e.created.get(..10).unwrap_or("");
-                let mut file = format!("{}.md", file_name(&format!("{date} {}", e.title)));
-                if !used.insert(file.clone()) { file = format!("{}.md", file_name(&format!("{date} {} {}", e.title, i + 1))); used.insert(file.clone()); }
-                write(&dir.join("journal").join(&file), &format!("{}\n{date} · on {}\n\n{}\n", e.title, e.verses.join(", "), e.body))?;
-                index.push_str(&format!("  {file}  ({} words)\n", e.body.split_whitespace().count()));
-            }
+            index.push_str("\njournal/ — the user's own journal entries (their prayers, study notes and sermons), one file each, dated:\n");
+            write_journal(&dir.join("journal"), &req.journal, &mut index)?;
         }
 
         let dicts = dictionaries_dir(root);
@@ -180,6 +175,44 @@ fn trim_headings(mut v: Vec<String>) -> Vec<String> {
         v.pop();
     }
     v
+}
+
+/// One file per entry in `dir`, each listed in `index` with its date, verses and length.
+fn write_journal(dir: &Path, notes: &[JournalNote], index: &mut String) -> Result<(), String> {
+    let mut used = std::collections::HashSet::new();
+    for (i, e) in notes.iter().enumerate() {
+        let date = e.created.get(..10).unwrap_or("");
+        let mut file = format!("{}.md", file_name(&format!("{date} {}", e.title)));
+        if !used.insert(file.clone()) { file = format!("{}.md", file_name(&format!("{date} {} {}", e.title, i + 1))); used.insert(file.clone()); }
+        let on = if e.verses.is_empty() { String::new() } else { format!(" · on {}", e.verses.join(", ")) };
+        let tags = if e.tags.is_empty() { String::new() } else { format!(" · #{}", e.tags.join(" #")) };
+        write(&dir.join(&file), &format!("{}\n{date}{on}{tags}\n\n{}\n", e.title, e.body))?;
+        index.push_str(&format!("  {file}  ({} words{on}{tags})\n", e.body.split_whitespace().count()));
+    }
+    Ok(())
+}
+
+/// Journal chats' folders: `<data>/ask/journal/<chat id>`.
+pub fn journal_root(root: &Path) -> PathBuf {
+    root.join("journal")
+}
+
+/// The user's journal entries written out for a chat that asks about them; returns the folder.
+/// `label` says what they are: "the whole journal", "entries tagged #prayer".
+pub fn export_journal(root: &Path, chat_id: &str, label: &str, notes: &[JournalNote]) -> Result<PathBuf, String> {
+    let id: String = chat_id.chars().filter(|c| c.is_ascii_alphanumeric() || *c == '-').take(64).collect();
+    if id.is_empty() {
+        return Err("bad chat id".into());
+    }
+    let dest = journal_root(root).join(id);
+    let lock = crate::store::dir_lock(&dest);
+    let _held = lock.lock().unwrap_or_else(|e| e.into_inner());
+    crate::store::replace_dir(&dest, |dir| {
+        let mut index = format!("The user's journal: {label}, {} entries, newest first, one file each (date, the verses it is on, tags, word count):\n", notes.len());
+        write_journal(dir, notes, &mut index)?;
+        write(&dir.join("index.txt"), &index)?;
+        Ok(dest.clone())
+    })
 }
 
 fn write(path: &Path, s: &str) -> Result<(), String> {
@@ -313,11 +346,10 @@ pub fn export_dictionaries(lib: &Library, root: &Path) {
     }
 }
 
-/// Study folders of chats not touched for 60 days; the chat itself may be long gone.
+/// Study and journal folders of chats not touched for 60 days; the chat itself may be long gone.
 pub fn prune(root: &Path) {
-    let Ok(rd) = std::fs::read_dir(studies_root(root)) else { return };
     let old = std::time::SystemTime::now() - std::time::Duration::from_secs(60 * 86400);
-    for e in rd.flatten() {
+    for e in [studies_root(root), journal_root(root)].iter().filter_map(|d| std::fs::read_dir(d).ok()).flat_map(|rd| rd.flatten()) {
         if e.metadata().and_then(|m| m.modified()).is_ok_and(|t| t < old) {
             let _ = std::fs::remove_dir_all(e.path());
         }
@@ -332,3 +364,22 @@ fn file_name(s: &str) -> String {
     if t.is_empty() { "untitled".into() } else { t }
 }
 
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn journal_export_lists_each_entry() {
+        let root = std::env::temp_dir().join(format!("tes-ask-journal-{}", std::process::id()));
+        let note = |t: &str, tags: &[&str]| JournalNote { title: t.into(), created: "2026-09-01T07:00".into(), verses: vec!["John 3:16".into()], tags: tags.iter().map(|s| s.to_string()).collect(), body: "So loved.".into() };
+        let dir = export_journal(&root, "chat-1", "the whole journal", &[note("Love", &["prayer"]), note("Love", &[])]).unwrap();
+        let index = std::fs::read_to_string(dir.join("index.txt")).unwrap();
+        assert!(index.contains("2 entries"));
+        assert!(index.contains("2026-09-01 Love.md  (2 words · on John 3:16 · #prayer)"));
+        // Same date and title: the second gets its own file.
+        assert!(dir.join("2026-09-01 Love 2.md").exists());
+        assert!(export_journal(&root, "../", "x", &[]).is_err());
+        let _ = std::fs::remove_dir_all(&root);
+    }
+}

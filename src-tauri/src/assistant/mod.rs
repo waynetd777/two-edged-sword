@@ -1,7 +1,7 @@
 //! Ask: runs an AI coding CLI already installed and signed in on this Mac — Claude Code or
 //! Codex — non-interactively, and streams its answer back to the window as events. It has no
 //! tools, except read-only search in a folder: a reference book's exported files (books.rs) or
-//! the library's material on a Bible passage (study.rs). The model id says which CLI answers.
+//! the library's material on a Bible passage, or the user's journal (study.rs). The model id says which CLI answers.
 
 mod claude;
 mod codex;
@@ -33,23 +33,32 @@ every commentary's notes that touch it, and lexicon entries for its Strong's num
 When the question turns on what commentators, lexicons or dictionaries say, answer from these files rather than from memory, \
 and name the source for each point (for example: Matthew Henry reads this as …). Compare commentators when they differ. \
 If the library has nothing on a point, say so before adding what you know. \
-If index.txt lists journal/, those are the user's own entries on the passage: their prayers, notes and sermons. Read them when the question is personal, asks what they have written or preached, or would be answered better in the light of it, \
+If index.txt lists journal/, those are the user's own journal entries (each file says which verses it is on): their prayers, notes and sermons. Read them when the question is personal, asks what they have written or preached, or would be answered better in the light of it, \
 and speak of them as theirs (for example: in your sermon of 11 April 1999 you said …). \
 Work quickly: read digest.txt first, it has every commentary's notes on the passage, shortened, in one file, and is enough for most questions. \
 Open a full commentary file only for more depth on it, and when you need several files, open them all in the same step rather than one after another.";
 
-/// Where an answer may search: nowhere, a book, or the library's material on a passage.
+/// Added in a journal chat.
+const JOURNAL: &str = "The user is asking about their own journal: their prayers, study notes and sermons. \
+Your working directory holds the entries the question is about, one file each; index.txt lists them with their dates, the verses each is on and their tags. \
+The message may include the entry they have open. \
+Search the entries (by word, verse, tag or date) and read the ones that bear on the question before answering, opening several in the same step rather than one after another. \
+Speak of them as theirs and say which entry each point comes from, by title and date (for example: in “Grace at work”, 3 March 2026, you wrote …). \
+Where their thinking has changed over time, say how. If the journal has nothing on a point, say so.";
+
+/// Where an answer may search: nowhere, a book, the library's material on a passage, or the journal.
 pub enum Folder {
     None,
     Book(PathBuf),
     Study { dir: PathBuf, dictionaries: PathBuf },
+    Journal(PathBuf),
 }
 
 impl Folder {
     fn dir(&self) -> Option<&PathBuf> {
         match self {
             Folder::None => None,
-            Folder::Book(d) | Folder::Study { dir: d, .. } => Some(d),
+            Folder::Book(d) | Folder::Study { dir: d, .. } | Folder::Journal(d) => Some(d),
         }
     }
     /// What to add to the system prompt; each CLI appends how to search with its own tools.
@@ -58,6 +67,7 @@ impl Folder {
             Folder::None => None,
             Folder::Book(_) => Some(BOOK.to_string()),
             Folder::Study { dictionaries, .. } => Some(STUDY.replace("{dicts}", &dictionaries.to_string_lossy())),
+            Folder::Journal(_) => Some(JOURNAL.to_string()),
         }
     }
 }
