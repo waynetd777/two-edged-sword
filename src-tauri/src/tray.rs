@@ -64,9 +64,9 @@ pub fn menu(app: &AppHandle, s: Option<&TrayState>) -> tauri::Result<Menu<Wry>> 
     let reminder = CheckMenuItem::with_id(app, "reminder", reminder_label, s.is_some(), s.is_some_and(|s| s.reminder), None::<&str>)?;
     let login = login_menu_item(app)?;
     let open = MenuItem::with_id(app, "open", "Open Two-edged Sword", true, None::<&str>)?;
-    let quit = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
+    let quit = MenuItem::with_id(app, "quit", "Quit", true, Some("CmdOrCtrl+Q"))?;
     let sep = || PredefinedMenuItem::separator(app);
-    Menu::with_items(app, &[&quiet, &cont, &journal, &search, &sep()?, &reminder, &login, &sep()?, &open, &quit])
+    Menu::with_items(app, &[&open, &sep()?, &quiet, &cont, &journal, &search, &sep()?, &reminder, &login, &sep()?, &quit])
 }
 
 /// "Open at Login", ticked from what macOS reports. Disabled where there is nothing to register
