@@ -3,7 +3,7 @@
 
 Launches the dev build once per scene and theme with the scene in TES_SCENE (src/scene.ts sets it
 up and the app saves nothing), captures its window, and writes it 1400px wide in sRGB with no
-colour profile (macOS embeds the display's, which tints the image in browsers).
+colour profile: converted from the display's, which macOS embeds and which would otherwise tint it.
 
     python3 tools/screenshots.py                 # every scene, light and dark
     python3 tools/screenshots.py read ask        # just these
@@ -15,6 +15,7 @@ the terminal, Pillow, and e-Sword X's modules. Scenes are in tools/screenshots/s
 """
 
 import argparse
+import io
 import json
 import os
 import pathlib
@@ -25,7 +26,7 @@ import tempfile
 import time
 import urllib.request
 
-from PIL import Image
+from PIL import Image, ImageCms
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 HERE = ROOT / "tools" / "screenshots"
@@ -34,6 +35,20 @@ BIN = ROOT / "src-tauri" / "target" / "debug" / "TwoEdgedSword"
 DEV_URL = "http://localhost:1420"
 WIDTH = 1400
 SETTLE = 6.0  # seconds after the window appears: splash, library load, scene, fonts
+
+
+def to_srgb(im):
+    """The pixels converted from the display's colour profile (which macOS embeds) to sRGB, and the
+    profile dropped. Only dropping it would leave the display's tint in the pixels (the Dell's)."""
+    icc = im.info.get("icc_profile")
+    if icc:
+        alpha = im.getchannel("A") if im.mode == "RGBA" else None
+        src = ImageCms.ImageCmsProfile(io.BytesIO(icc))
+        im = ImageCms.profileToProfile(im.convert("RGB"), src, ImageCms.createProfile("sRGB"), renderingIntent=ImageCms.Intent.PERCEPTUAL)
+        if alpha:
+            im.putalpha(alpha)
+    im.info.pop("icc_profile", None)
+    return im
 
 
 def dev_server():
@@ -94,12 +109,12 @@ def shoot(scene, theme, window_id):
             subprocess.run(["screencapture", "-x", "-o", f"-l{win}", raw.name], check=True)
             im = Image.open(raw.name)
             im.load()
+            im = to_srgb(im)
         im = im.resize((WIDTH, round(im.height * WIDTH / im.width)), Image.LANCZOS)
         # "crop": [x, y, width, height] of the 1400px-wide image, for a shot of one part of a screen.
         if "crop" in scene:
             x, y, w, h = scene["crop"]
             im = im.crop((x, y, x + w, y + h))
-        im.info.pop("icc_profile", None)
         out = OUT / f"{scene['name']}-{theme}.png"
         im.save(out, optimize=True)
         print(f"  {out.relative_to(ROOT)}  {im.width}x{im.height}")

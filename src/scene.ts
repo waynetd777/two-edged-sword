@@ -58,7 +58,8 @@ export function runScene(app: ReturnType<typeof useApp>, still: (s: Partial<Play
       if (sc.loc) app.open(sc.loc, sc.screen ?? "read");
       else if (sc.screen) app.go(sc.screen);
       if (sc.doc) app.openDoc(sc.doc.module, sc.doc.title, sc.doc.kind ?? "reference", sc.doc.para);
-      if (sc.click) { const q = sc.click; window.setTimeout(() => (document.querySelector(q) as HTMLElement | null)?.click(), 2800); }
+      // After a journal entry opens (which replaces its editor), and retried until it's there.
+      if (sc.click) { const q = sc.click; const at = Date.now(); const go = () => { const el = document.querySelector(q) as HTMLElement | null; if (el) el.click(); else if (Date.now() - at < 3000) window.setTimeout(go, 200); }; window.setTimeout(go, sc.journal && sc.entries ? 4300 : 2800); }
       if (sc.selectPara) { const n = sc.selectPara; window.setTimeout(() => (document.querySelector(`[data-seg="${n}"]`) as HTMLElement | null)?.click(), 2000); }
       if (sc.session) { const x = sc.session; window.setTimeout(() => app.setSession({ ...x, started: Date.now() }), 1200); }
       // Scene entries arrive with the journal's next check for changes (every 3 seconds).

@@ -119,7 +119,18 @@ word pronounces it. Word Study opens on the last word you studied, including aft
 Dated entries with headings, bold and italic, lists, quotes and verses inserted from the Bible,
 linked to the verses they are about and shown beside them in Read. Entries are Markdown files,
 one per month, in your Obsidian vault's `Two-edged Sword/` folder or `~/Documents/Two-edged
-Sword/` (change it in Settings). An Ask answer can be added to the journal in one click.
+Sword/` (change it in Settings). The toolbar inserts a verse, links one, and adds a tag. An Ask
+answer can be added to the journal in one click.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="images/journal-ask-dark.png"><img alt="Ask in the journal, about the open entry or the whole journal" src="images/journal-ask-light.png"></picture>
+
+**Ask** (right of the toolbar) asks about **This entry** or the **Whole journal**. An entry's
+chat gets its first linked verse with your library's material on it, and can search the rest of
+your journal ("What else in my journal connects with this?"). Select some text first and it asks
+about that: explain it, suggest verses, say it more clearly. **Insert into entry** puts an answer
+after the paragraph you were in. On a blank entry it offers prompts to start writing. The whole
+journal means the entries the list shows, so a tag or filter narrows it: "What themes keep coming
+back?", "How has my thinking changed over time?"
 
 References in an entry are links, as you wrote them: hover for the verse, click to open it.
 "John 3:16", "Rom 8:28-30", "1 John 5, verse 4", "Job 19, verses 25 to 27", "Genesis chapter
@@ -159,7 +170,8 @@ that chapter.
 **Worship music** (on the plan's page): songs from your Music library, before or after the
 reading, chosen by the AI assistant to suit the day's passages. A card explains each choice;
 **Play songs** starts them in Music, with pause, skip and **Lyrics** in the bar, and Space
-pauses too. **Try it now** previews the day without marking anything read. macOS asks once
+pauses too. When the last song ends, Music is stopped rather than left on AutoPlay, and Quiet
+time moves on. **Try it now** previews the day without marking anything read. macOS asks once
 whether the app may control Music.
 
 Under the progress bar: how many days in a row you've read, your best run, and how many of the
@@ -180,6 +192,7 @@ is opened again. Its menu has:
 
 <img alt="The menu-bar menu" src="images/menu-bar.png" width="340">
 
+- **Open Two-edged Sword**.
 - **Start Quiet Time**, with today's readings: the same as **Read** on the day's card. Once the
   day is read it says so, and opens Quiet time instead.
 - **Continue Reading**, with the passage or book chapter you were last on.
@@ -188,7 +201,7 @@ is opened again. Its menu has:
 - **Open at Login**: starts the app when you log in, in the menu bar with its window closed, so
   the reminder comes without your opening it. It's the same setting as the app's switch in System
   Settings → General → Login Items.
-- **Open Two-edged Sword** and **Quit**.
+- **Quit** (⌘Q).
 
 ## Library
 

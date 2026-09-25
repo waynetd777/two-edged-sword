@@ -119,6 +119,22 @@
     }
   },
   {
+    "name": "journal-ask",
+    "screen": "journal",
+    "entriesFile": "journal-entries.json",
+    "journal": "scene-rest",
+    "click": "[role=toolbar] > button:last-child",
+    "settings": {
+      "bible": "kjv"
+    },
+    "crop": [
+      506,
+      50,
+      894,
+      790
+    ]
+  },
+  {
     "name": "search",
     "search": "tithe",
     "settings": {

@@ -61,13 +61,21 @@ A chat about a reference book or devotional works the same way with that book: t
 with the question (or about 6,000 words around the paragraph asked about), and the whole book is
 written out once, one file per chapter with its charts, for the assistant to search.
 
+In the journal, Ask can be about the open entry or the whole journal. A chat about an entry with
+a linked verse gets that passage's library folder as above, with all your other journal entries
+in `journal/`; without a linked verse (or with Search my library off) it gets the journal alone.
+A whole-journal chat gets the entries the journal list shows (all, or those with the chosen tag
+or filter), one file each, with an index of their dates, verses and tags. Include my journal
+doesn't apply here: asking from the journal is asking about it.
+
 ## What is sent
 
 Each question goes to the AI tool with the passage text. Whatever the assistant reads from the
 library folder is sent too, as it reads it: only the parts it opens, not the whole folder.
 
-**Your journal.** Only with Include my journal on, and only the entries linked to the passage;
-like the rest of the folder, only what the assistant opens is sent.
+**Your journal.** From Read and the other screens, only with Include my journal on, and only the
+entries linked to the passage. From the journal's own Ask, the entries it is about (see above).
+Either way, like the rest of the folder, only what the assistant opens is sent.
 
 **Licensed Bibles.** With Settings › Licensed translations off, questions about the NIV, ESV
 and other licensed Bibles send public-domain text instead, and licensed Bibles are left out of
@@ -87,6 +95,7 @@ Under `~/Library/Application Support/Two-edged Sword/`:
 |---|---|
 | Chats | `chats.json` |
 | A passage chat's library folder | `ask/studies/<chat>/` (removed after 60 days unused) |
+| A journal chat's entries | `ask/journal/<chat>/` (removed after 60 days unused) |
 | Dictionaries, written out whole | `ask/dictionaries/` |
 | Reference books and devotionals, written out | `books/` |
 | Working folders for chats without one | `claude/`, `codex/` |
