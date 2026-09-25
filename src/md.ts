@@ -56,9 +56,10 @@ function linkRefs(text: string): string {
 
 // An escaped mark (\*), ***bold italic***, **bold**, *italic*, and _italic_ only at word edges, so
 // my_notes_file stays as it is; and highlights: ==yellow== (Obsidian's own) and
-// <mark class="hl-green">the other colours</mark>.
+// <mark class="hl-green">the other colours</mark>; and <sup>superscript</sup> and <sub>subscript</sub>
+// ("17<sup>th</sup>"), as Obsidian shows them.
 const HL_COLOURS = ["red", "orange", "yellow", "green", "blue", "purple"];
-const INLINE_RE = /\\[\\*_=]|<mark class="hl-(?:red|orange|yellow|green|blue|purple)">.+?<\/mark>|==(?=\S)(?:\\.|[^\\])+?==|\*\*\*(?=\S)(?:\\.|[^\\])+?\*\*\*|\*\*(?=\S)(?:\\.|[^\\])+?\*\*|\*(?=[^\s*])(?:\\.|[^*\\])+\*|(?<![\p{L}\p{N}_\\])_(?=[^\s_])(?:\\.|[^_\\])+_(?![\p{L}\p{N}_])/gu;
+const INLINE_RE = /\\[\\*_=]|<(sup|sub)>.+?<\/\1>|<mark class="hl-(?:red|orange|yellow|green|blue|purple)">.+?<\/mark>|==(?=\S)(?:\\.|[^\\])+?==|\*\*\*(?=\S)(?:\\.|[^\\])+?\*\*\*|\*\*(?=\S)(?:\\.|[^\\])+?\*\*|\*(?=[^\s*])(?:\\.|[^*\\])+\*|(?<![\p{L}\p{N}_\\])_(?=[^\s_])(?:\\.|[^_\\])+_(?![\p{L}\p{N}_])/gu;
 
 function inline(s: string, links: boolean): string {
   // Split on the marks first, then escape and link the plain parts.
@@ -69,7 +70,9 @@ function inline(s: string, links: boolean): string {
     const t = m[0];
     const n = t.startsWith("***") ? 3 : t.startsWith("**") ? 2 : 1;
     const mark = t.match(/^<mark class="hl-(\w+)">(.+)<\/mark>$/);
+    const script = t.match(/^<(sup|sub)>(.+)<\/\1>$/);
     if (t[0] === "\\") parts.push(esc(t[1]));
+    else if (script) parts.push(`<${script[1]}>${inline(script[2], links)}</${script[1]}>`);
     else if (mark) parts.push(`<mark class="hl-${mark[1]}">${inline(mark[2], links)}</mark>`);
     else if (t.startsWith("==")) parts.push(`<mark class="hl-yellow">${inline(t.slice(2, -2), links)}</mark>`);
     else {
@@ -130,6 +133,7 @@ export function htmlToMd(root: HTMLElement): string {
     const bold = tag === "b" || tag === "strong" || (tag === "span" && (el.style.fontWeight === "bold" || +el.style.fontWeight >= 600));
     const ital = tag === "i" || tag === "em" || (tag === "span" && el.style.fontStyle === "italic");
     if (tag === "br") return "\n";
+    if ((tag === "sup" || tag === "sub") && kids) return `<${tag}>${kids}</${tag}>`;
     if (bold && kids.trim()) return `**${kids.trim()}**${kids.endsWith(" ") ? " " : ""}`;
     if (ital && kids.trim()) return `*${kids.trim()}*${kids.endsWith(" ") ? " " : ""}`;
     return kids;
@@ -197,4 +201,4 @@ function joinMarks(s: string): string {
 }
 
 /** Plain text with the Markdown marks taken out, for excerpts. */
-export const mdPlain = (md: string) => md.replace(/<\/?mark[^>]*>/g, "").replace(/(?<!\\)==(?=\S)(.+?)==/g, "$1").replace(/^#+\s+/gm, "").replace(/^>\s?/gm, "").replace(/^[-*]\s+/gm, "").replace(/\\([\\*_=])|\*+|(?<![\p{L}\p{N}])_+|_+(?![\p{L}\p{N}])/gu, (_m, e) => e ?? "").replace(/\s+/g, " ").trim();
+export const mdPlain = (md: string) => md.replace(/<\/?(mark|sup|sub)\b[^>]*>/g, "").replace(/(?<!\\)==(?=\S)(.+?)==/g, "$1").replace(/^#+\s+/gm, "").replace(/^>\s?/gm, "").replace(/^[-*]\s+/gm, "").replace(/\\([\\*_=])|\*+|(?<![\p{L}\p{N}])_+|_+(?![\p{L}\p{N}])/gu, (_m, e) => e ?? "").replace(/\s+/g, " ").trim();

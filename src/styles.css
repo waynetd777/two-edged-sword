@@ -286,6 +286,8 @@ mark { background: var(--hl-gold); color: inherit; border-radius: 3px; padding: 
 .editor span[style*="rgb(250, 1, 7)"] { background-color: var(--panel) !important; }
 .editor blockquote span[style*="rgb(250, 1, 7)"] { background-color: var(--panel2) !important; }
 .md mark[class^="hl-"] { font-weight: inherit; padding: 0; color: inherit; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+/* Superscripts (17<sup>th</sup>) and subscripts don't push their line apart. */
+.md sup, .md sub { line-height: 0; }
 ::highlight(find) { background-color: var(--hl-yellow); }
 ::highlight(find-current) { background-color: var(--accent); color: var(--onaccent); }
 ::highlight(grammar) { text-decoration: underline wavy var(--accent); text-decoration-thickness: 1.5px; text-underline-offset: 3px; text-decoration-skip-ink: none; }
