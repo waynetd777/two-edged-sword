@@ -121,26 +121,33 @@ fn from_meta_line(line: &str) -> Option<(String, Vec<String>, Vec<String>)> {
     Some((created, verses, tags))
 }
 
+/// The first line after the heading at `i` that isn't blank: editors may add a blank line there.
+fn after_heading(lines: &[&str], i: usize) -> usize {
+    (i + 1..lines.len()).find(|&j| !lines[j].trim().is_empty()).unwrap_or(lines.len())
+}
+
 fn has_comment(lines: &[&str], i: usize) -> bool {
-    lines.get(i + 1).is_some_and(|l| l.trim_start().starts_with("<!-- tes "))
+    lines.get(after_heading(lines, i)).is_some_and(|l| l.trim_start().starts_with("<!-- tes "))
 }
 
 /// Where entries start: a "## " heading whose next line is our comment, or our meta line if the
 /// comment has been lost.
 fn starts(lines: &[&str]) -> Vec<usize> {
-    (0..lines.len()).filter(|&i| lines[i].starts_with("## ") && (has_comment(lines, i) || lines.get(i + 1).is_some_and(|l| from_meta_line(l).is_some()))).collect()
+    (0..lines.len()).filter(|&i| lines[i].starts_with("## ") && (has_comment(lines, i) || lines.get(after_heading(lines, i)).is_some_and(|l| from_meta_line(l).is_some()))).collect()
 }
 
 /// The entry in lines[i..end]; its id is empty if the comment has lost it.
 fn parse_at(lines: &[&str], i: usize, end: usize) -> Entry {
     let title = lines[i][3..].trim().to_string();
     if !has_comment(lines, i) {
-        let (created, verses, tags) = from_meta_line(lines[i + 1]).unwrap_or_default();
+        let meta = after_heading(lines, i);
+        let (created, verses, tags) = lines.get(meta).and_then(|l| from_meta_line(l)).unwrap_or_default();
         let id = created.replace(['-', ':'], "").replace('T', "-");
-        let body = lines[(i + 2).min(end)..end].join("\n").trim().to_string();
+        let body = lines[(meta + 1).min(end)..end].join("\n").trim().to_string();
         return Entry { id, title, updated: created.clone(), created, verses, tags, body };
     }
-    let comment = lines[i + 1].trim().trim_start_matches("<!-- tes ").trim_end_matches("-->");
+    let c = after_heading(lines, i);
+    let comment = lines[c].trim().trim_start_matches("<!-- tes ").trim_end_matches("-->");
     let mut e = Entry { id: String::new(), title, created: String::new(), updated: String::new(), verses: vec![], tags: vec![], body: String::new() };
     for (k, v) in attrs(comment) {
         match k.as_str() {
@@ -152,9 +159,10 @@ fn parse_at(lines: &[&str], i: usize, end: usize) -> Entry {
             _ => {}
         }
     }
-    let mut body_start = i + 2;
+    let mut body_start = c + 1;
     // Skip the generated meta line, but only ours: a body's own "*…" line is text.
-    if lines.get(body_start).is_some_and(|l| l.starts_with(&format!("*{}*", weekday_line(&e.created)))) { body_start += 1; }
+    let m = after_heading(lines, c);
+    if lines.get(m).is_some_and(|l| l.starts_with(&format!("*{}*", weekday_line(&e.created)))) { body_start = m + 1; }
     e.body = lines[body_start.min(end)..end].join("\n").trim().to_string();
     e
 }
@@ -312,6 +320,11 @@ mod tests {
         // Saving it again writes the comment back.
         let again = splice(&stripped, "2026-09", &e.id, Some(&e)).unwrap();
         assert_eq!(parse(&again), vec![e]);
+        let spaced = stripped.replace("## Born of the Spirit\n", "## Born of the Spirit\n\n");
+        assert_eq!(parse(&spaced), got);
+        let edited = "# September 2026\n\n## Oh the Greatness of God\n\n*Friday 25 September 2026 · 02:09* · #prayer\n\nAbba Father.\n";
+        let got = parse(edited);
+        assert_eq!((got[0].id.as_str(), got[0].tags.clone(), got[0].body.as_str()), ("20260925-0209", vec!["prayer".to_string()], "Abba Father."));
         assert_eq!(from_meta_line("*Saturday 5 September 2026 · 06:00* · #prayer").unwrap().0, "2026-09-05T06:00");
     }
 
