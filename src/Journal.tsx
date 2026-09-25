@@ -14,6 +14,7 @@ import { useAssistant } from "./assistant";
 import { docModule, parseDocLabel } from "./docref";
 import { useRefPreview } from "./StudyPane";
 import { useSpelling } from "./spelling";
+import { useFind } from "./find";
 
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const longDate = (s: string) => {
@@ -170,6 +171,7 @@ function Editor({ entry, onChange, saved, err, onDelete, onExport, listed, liste
     spell.recheck(50);
   }, [entry.body]); // eslint-disable-line react-hooks/exhaustive-deps
   const spell = useSpelling(ed, entry.id, () => sync());
+  const find = useFind(ed, () => { sync(); spell.recheck(); });
   useEffect(() => {
     const f = () => { const s = window.getSelection(); if (s?.rangeCount && ed.current?.contains(s.anchorNode)) setPicked(s.isCollapsed ? "" : s.toString().trim()); };
     document.addEventListener("selectionchange", f);
@@ -251,11 +253,14 @@ function Editor({ entry, onChange, saved, err, onDelete, onExport, listed, liste
         <button className="btn small" type="button" style={{ border: 0 }} onClick={(e) => { remember(); setVerseAt(e.currentTarget.getBoundingClientRect()); }}><Icon name="read" />Insert verse</button>
         <button className="btn small" type="button" style={{ border: 0 }} onClick={(e) => setLinkAt(e.currentTarget.getBoundingClientRect())}><Icon name="link" />Link verse</button>
         <button className="btn small" type="button" style={{ border: 0 }} onClick={(e) => setTagAt(e.currentTarget.getBoundingClientRect())}><Icon name="plus" />Tag</button>
+        <span style={{ width: 1, height: 18, background: "var(--border)", margin: "0 4px" }} />
+        <button className="ibtn" type="button" aria-label="Find and replace" title="Find ⌘F · Replace ⌥⌘F" onClick={() => find.start("find")}><Icon name="search" /></button>
         <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 6, color: err ? "var(--bad)" : "var(--muted)", fontSize: 12, minWidth: 0 }}>
           {err ? err : saved && <><Icon name="check" style={{ color: "var(--good)" }} />{saved}</>}
         </div>
         {canAsk && <><span style={{ width: 1, height: 18, background: "var(--border)", margin: "0 4px 0 10px" }} /><button className={`btn small ${ask ? "on" : ""}`} type="button" onClick={() => setAsk(!ask)}><Icon name="chat" />Ask</button></>}
       </div>
+      {find.bar}
       <div className="scroll" style={{ flexGrow: 1, padding: "28px 0 40px" }}>
         <article style={{ padding: "0 40px", display: "flex", flexDirection: "column", gap: 14, minHeight: "100%" }} onClick={(e) => { if (e.target === e.currentTarget) ed.current?.focus(); }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
@@ -279,7 +284,7 @@ function Editor({ entry, onChange, saved, err, onDelete, onExport, listed, liste
               );
             })}
           </div>
-          <div ref={ed} className={`md editor selectable ${entry.body.trim() ? "" : "blank"}`} contentEditable suppressContentEditableWarning spellCheck={false} onInput={() => { sync(); spell.recheck(); }} onBlur={() => { remember(); sync(); }} onKeyUp={remember} onMouseUp={remember} onKeyDown={(e) => { spell.onKey(e); keys(e); }}
+          <div ref={ed} className={`md editor selectable ${entry.body.trim() ? "" : "blank"}`} contentEditable suppressContentEditableWarning spellCheck={false} onInput={() => { sync(); spell.recheck(); find.refresh(); }} onBlur={() => { remember(); sync(); }} onKeyUp={remember} onMouseUp={remember} onKeyDown={(e) => { spell.onKey(e); keys(e); }}
             onClick={(e) => { const a = refAt(e.target); if (a?.dataset.ref) { e.preventDefault(); hide(); const r: Ref = JSON.parse(a.dataset.ref); app.open({ book: r.book, chapter: r.chapter, verse: r.verse, to: r.to }, "read"); } else spell.onClick(e); }}
             onMouseOver={(e) => { const a = refAt(e.target); if (a?.dataset.ref && !a.contains(e.relatedTarget as Node)) onRefHover(JSON.parse(a.dataset.ref), a); }}
             onMouseOut={(e) => { const a = refAt(e.target); if (a && !a.contains(e.relatedTarget as Node)) onRefHover(null, null); }}

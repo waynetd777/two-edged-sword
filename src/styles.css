@@ -233,7 +233,8 @@ input[type="range"] { accent-color: var(--accent); }
 .md li { margin: 0.15em 0; }
 .md blockquote { margin: 0 0 0.9em; padding: 12px 16px; border-radius: 10px; background: var(--panel2); border: 1px solid var(--border); font-style: italic; }
 .md blockquote.verse { font-style: italic; }
-.md blockquote cite { display: block; margin-top: 6px; font: 600 12px var(--ui); font-style: normal; color: var(--muted); }
+/* inline-block, not block: WebKit paints no highlights (find, spelling) on text beside a block child. */
+.md blockquote cite { display: inline-block; width: 100%; margin-top: 6px; font: 600 12px var(--ui); font-style: normal; color: var(--muted); }
 .editor { position: relative; }
 .editor.blank::before { content: attr(data-placeholder); color: var(--muted); position: absolute; pointer-events: none; }
 #print-root { display: none; }
@@ -274,4 +275,6 @@ mark { background: var(--hl-gold); color: inherit; border-radius: 3px; padding: 
 @media (prefers-reduced-motion: reduce) { .spinner, .searchbar-progress i { animation: none; } }
 
 /* A misspelled word in the journal (spelling.ts). */
+::highlight(find) { background-color: var(--hl-yellow); }
+::highlight(find-current) { background-color: var(--accent); color: var(--onaccent); }
 ::highlight(spelling) { text-decoration: underline wavy var(--bad); text-decoration-thickness: 1.5px; text-underline-offset: 3px; text-decoration-skip-ink: none; }

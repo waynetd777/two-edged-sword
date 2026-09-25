@@ -14,6 +14,10 @@ const HighlightOf = () => (window as unknown as { Highlight?: new (...r: Range[]
 
 const SKIP = "blockquote.verse, cite, a.ref, code";
 
+/** Words added to the dictionary or ignored this session. macOS can take a moment to take them
+ *  in, and a check straight after would underline them again. */
+const accepted = new Set<string>();
+
 function textNodes(root: HTMLElement): Text[] {
   const out: Text[] = [];
   const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
@@ -69,6 +73,7 @@ export function useSpelling(ed: RefObject<HTMLDivElement | null>, key: string, o
       const n = nodes[i], off = a - starts[i];
       // Typed over since the check was asked for: left to the next one.
       if (!n?.isConnected || n.data.slice(off, off + len) !== text.slice(a, a + len)) continue;
+      if (accepted.has(text.slice(a, a + len))) continue;
       // Not the word being typed.
       if (caret && caret.startContainer === n && caret.startOffset === off + len) continue;
       const r = document.createRange();
@@ -150,8 +155,15 @@ export function useSpelling(ed: RefObject<HTMLDivElement | null>, key: string, o
     setMenu(null);
     recheck(100);
   };
-  const learn = () => { if (menu) api.spellLearn(menu.word).then(() => recheck(0)).catch(() => {}); setMenu(null); };
-  const ignore = () => { if (menu) api.spellIgnore(menu.word).then(() => recheck(0)).catch(() => {}); setMenu(null); };
+  /** Takes the word's underlines off at once, everywhere in the entry, and tells macOS. */
+  const accept = (word: string, tell: (w: string) => Promise<unknown>) => {
+    accepted.add(word);
+    bad.current = bad.current.filter((r) => r.toString() !== word);
+    paint();
+    tell(word).catch(() => {});
+  };
+  const learn = () => { if (menu) accept(menu.word, api.spellLearn); setMenu(null); };
+  const ignore = () => { if (menu) accept(menu.word, api.spellIgnore); setMenu(null); };
 
   return { recheck, onKey, onClick, menu, closeMenu: () => setMenu(null), choose, learn, ignore };
 }
