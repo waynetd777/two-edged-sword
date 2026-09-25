@@ -47,6 +47,7 @@ const P: Record<string, string> = {
   stop: "M4 4h8v8H4z",
   info: "M8 2.5a5.5 5.5 0 1 1 0 11 5.5 5.5 0 0 1 0-11zM8 7.5v3.5M8 5v.5",
   dots: "M3.5 8h.01M8 8h.01M12.5 8h.01",
+  variance: "M3 6h10M3 10h10M11 2.5l-6 11",
 };
 
 export function Icon({ name, size, className, style }: { name: keyof typeof P | string; size?: number; className?: string; style?: React.CSSProperties }) {

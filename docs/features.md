@@ -44,6 +44,11 @@ Click a verse (anywhere but a word) to select it; ⇧-click for a range. The too
 offers highlight (six colours), bookmark, note (a journal entry on the verse, N), compare, listen
 from here, ask and copy (⌘C). Its labels fold to icons when the column is narrow.
 
+In Verse layout, a ≠ beside a verse marks where the translation's meaning differs from the KJV
+(faint for minor differences); click it for both readings and why they differ. A verse the
+translation leaves out shows as "Not in this translation." The differences come from a
+reviewed list per translation, built with `tools/variances/`.
+
 Hover a reference or a Strong's number for a preview. The passage picker goes book, chapter,
 then verse. "See ASTRONOMY" in a dictionary and "see on Gen 12:8" in a commentary open that entry
 or note in the pane, with back and forward.

@@ -11,6 +11,7 @@ import { Popover, RefPicker, Seg, SideNav } from "./ui";
 import { WordLookup } from "./WordLookup";
 import { BooksButton } from "./DocReader";
 import { useAssistant } from "./assistant";
+import { useVariances, Variance, VariancePopover } from "./variances";
 
 export interface WordPick { token: Token; verse: number; rect: DOMRect; /** Set for a word in a commentary: which one, and on what. */ where?: string }
 /** A clicked word outside a verse (commentary, a book) as a token: no Strong's numbers of its own. */
@@ -53,6 +54,24 @@ export function VerseText({ tokens, red, speakingChar, onWord, activeWi, showNum
   );
 }
 
+/** The chapter's verses, with a placeholder for each verse the translation leaves out that has a variance record. */
+function withMissing(verses: Verse[], byVerse: Map<number, Variance>): (Verse & { missing?: true })[] {
+  if (!byVerse.size) return verses;
+  const have = new Set(verses.map((v) => v.v));
+  const gaps = [...byVerse.keys()].filter((n) => !have.has(n)).map((n) => ({ v: n, text: "" }));
+  return [...verses, ...gaps].sort((a, b) => a.v - b.v).map((v) => (byVerse.has(v.v) && !plainText(v.text).trim() ? { ...v, missing: true as const } : v));
+}
+
+function VarianceButton({ v, base, onPick }: { v: Variance; base: string; onPick: (rect: DOMRect) => void }) {
+  const title = `Differs from the ${base.toUpperCase()}: ${v.change}`;
+  return (
+    <button className="ibtn" style={{ width: 16, height: 16, opacity: v.weight === "major" ? 1 : 0.55 }} aria-label={title} title={title}
+      onClick={(e) => { e.stopPropagation(); onPick(e.currentTarget.getBoundingClientRect()); }}>
+      <Icon name="variance" style={{ color: "var(--accent)" }} />
+    </button>
+  );
+}
+
 export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; setFocus: (f: boolean) => void; openPalette: () => void }) {
   const app = useApp();
   const canAsk = useAssistant().available;
@@ -76,6 +95,8 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
   const [studyVerse, setStudyVerse] = useState<number>(loc.verse ?? 1);
   const scroller = useRef<HTMLDivElement>(null);
   const notes = useNotesByVerse();
+  const variances = useVariances(bible, loc.book, loc.chapter);
+  const [varPick, setVarPick] = useState<{ v: Variance; rect: DOMRect } | null>(null);
 
   // Another screen asked for a dictionary article, a commentary or a question here.
   useEffect(() => {
@@ -256,7 +277,15 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
 
   const body = settings.layout === "verse" && !focus ? (
     <div className="verses">
-      {verses.map((v) => {
+      {withMissing(verses, variances.byVerse).map((v) => {
+        const variance = variances.byVerse.get(v.v);
+        if (v.missing) return (
+          <div key={v.v} className="v" style={{ cursor: "default" }}>
+            <div className="vn" style={{ color: "var(--muted)" }}><span>{v.v}</span></div>
+            <div className="vt" style={{ color: "var(--muted)", fontStyle: "italic" }}>Not in this translation.</div>
+            <div className="gut">{variance && <VarianceButton v={variance} base={variances.base ?? "kjv"} onPick={(rect) => setVarPick({ v: variance, rect })} />}</div>
+          </div>
+        );
         const k = vkey(loc.book, loc.chapter, v.v);
         const isSel = !!sel && v.v >= sel.from && v.v <= sel.to;
         const hl = app.highlights[k];
@@ -270,6 +299,7 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
             </span></div>
             <div className="gut">
               {isBookmarked(v.v) && <Icon name="bookmark" style={{ fill: "var(--accent)" }} />}
+              {variance && <VarianceButton v={variance} base={variances.base ?? "kjv"} onPick={(rect) => setVarPick({ v: variance, rect })} />}
               {hasNote && <button className="ibtn" style={{ width: 16, height: 16 }} aria-label="Journal notes on this verse" title="Journal notes on this verse" onClick={(e) => { e.stopPropagation(); setStudyVerse(v.v); setTab("notes"); }}><Icon name="note" style={{ color: "var(--accent)" }} /></button>}
               {reading && player.state.verse === v.v && <Icon name="speaker" />}
             </div>
@@ -345,6 +375,10 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
           onDictionary={(module, topic, search) => { setDict({ module, topic, search }); setTab("dictionary"); setWord(null); if (!settings.studyPane) app.set({ studyPane: true }); }}
           onCommentary={(m) => { setCommentary(m); setTab("commentary"); setStudyVerse(word.verse); setWord(null); if (!settings.studyPane) app.set({ studyPane: true }); }}
           onAsk={(q) => { setAskSeed(q); setTab("ask"); setWord(null); if (focus) setFocus(false); if (!settings.studyPane) app.set({ studyPane: true }); }} />
+      )}
+      {varPick && variances.base && (
+        <VariancePopover v={varPick.v} anchor={varPick.rect} base={variances.base} module={bible} moduleTitle={bmod?.title ?? bible}
+          text={verses.find((x) => x.v === varPick.v.verse)?.text ?? null} onClose={() => setVarPick(null)} />
       )}
       {picker && <RefPicker anchor={picker} initialBook={loc.book} onClose={() => setPicker(null)} onPick={(b, c, v) => { setPicker(null); app.open({ book: b, chapter: c, verse: v }); }} />}
       {focus && <div style={{ position: "fixed", bottom: 18, left: 0, right: 0, display: "flex", justifyContent: "center", gap: 18, color: "var(--muted)", fontSize: 12, pointerEvents: "none" }}>

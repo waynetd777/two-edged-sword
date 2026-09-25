@@ -78,7 +78,7 @@ pub fn export(lib: &Library, root: &Path, chat_id: &str, req: &Request) -> Resul
     let lock = crate::store::dir_lock(&dest);
     let _held = lock.lock().unwrap_or_else(|e| e.into_inner());
     crate::store::replace_dir(&dest, |dir| {
-        for sub in ["passage", "commentaries", "lexicons", "journal", "dictionaries"] {
+        for sub in ["passage", "differences", "commentaries", "lexicons", "journal", "dictionaries"] {
             std::fs::create_dir_all(dir.join(sub)).map_err(|e| e.to_string())?;
         }
         let (from, to) = (req.from.unwrap_or(1), req.to.or(req.from).unwrap_or(999));
@@ -96,6 +96,8 @@ pub fn export(lib: &Library, root: &Path, chat_id: &str, req: &Request) -> Resul
             write(&dir.join("passage").join(&file), &format!("{} — {}\n\n{body}", m.title, req.label))?;
             index.push_str(&format!("  {file}\n"));
         }
+
+        differences(lib, root, req, from, to, &dir.join("differences"), &mut index)?;
 
         index.push_str("\ncommentaries/ — every commentary's notes that touch the passage (with its chapter and book introductions), entries headed == reference ==:\n");
         let mut digest = format!("What each commentary in the library says on {}, the opening of its notes (about {DIGEST_WORDS} words each). The full notes are in commentaries/.\n\n", req.label);
@@ -148,6 +150,43 @@ pub fn export(lib: &Library, root: &Path, chat_id: &str, req: &Request) -> Resul
         write(&dir.join("index.txt"), &index)
     })?;
     Ok(dest)
+}
+
+/// e-Sword's book numbers, from 1.
+const BOOKS: [&str; 66] = ["Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy", "Joshua", "Judges", "Ruth", "1 Samuel", "2 Samuel", "1 Kings", "2 Kings", "1 Chronicles", "2 Chronicles", "Ezra", "Nehemiah", "Esther", "Job", "Psalms", "Proverbs", "Ecclesiastes", "Song of Solomon", "Isaiah", "Jeremiah", "Lamentations", "Ezekiel", "Daniel", "Hosea", "Joel", "Amos", "Obadiah", "Jonah", "Micah", "Nahum", "Habakkuk", "Zephaniah", "Haggai", "Zechariah", "Malachi", "Matthew", "Mark", "Luke", "John", "Acts", "Romans", "1 Corinthians", "2 Corinthians", "Galatians", "Ephesians", "Philippians", "Colossians", "1 Thessalonians", "2 Thessalonians", "1 Timothy", "2 Timothy", "Titus", "Philemon", "Hebrews", "James", "1 Peter", "2 Peter", "1 John", "2 John", "3 John", "Jude", "Revelation"];
+
+/// Where each translation's meaning differs from the KJV, from the reviewed `variances-<module>.json`
+/// files beside the app's other data (tools/variances/ builds them): the passage's, and the whole list.
+fn differences(lib: &Library, root: &Path, req: &Request, from: i64, to: i64, dir: &Path, index: &mut String) -> Result<(), String> {
+    let data = root.parent().unwrap_or(root);
+    let mut listed = false;
+    for m in lib.of_kind(Kind::Bible) {
+        let name: String = m.id.chars().map(|c| if c.is_ascii_alphanumeric() || c == '-' || c == '_' { c } else { '_' }).collect();
+        let Ok(text) = std::fs::read_to_string(data.join(format!("variances-{name}.json"))) else { continue };
+        let Ok(doc) = serde_json::from_str::<serde_json::Value>(&text) else { continue };
+        let base = doc["base"].as_str().unwrap_or("kjv").to_uppercase();
+        let records = doc["records"].as_array().cloned().unwrap_or_default();
+        let line = |r: &serde_json::Value| {
+            let n = |k: &str| r[k].as_i64().unwrap_or(0);
+            let s = |k: &str| r[k].as_str().unwrap_or("");
+            let book = BOOKS.get((n("book") - 1).max(0) as usize).copied().unwrap_or("?");
+            format!("{book} {}:{} [{}, {}] {}\n  {}\n", n("chapter"), n("verse"), s("kind"), s("weight"), s("change"), s("note"))
+        };
+        let here: String = records.iter().filter(|r| r["book"].as_i64() == Some(req.book) && r["chapter"].as_i64() == Some(req.chapter) && (from..=to).contains(&r["verse"].as_i64().unwrap_or(0))).map(line).collect();
+        let all: String = records.iter().map(line).collect();
+        if !listed {
+            index.push_str("\ndifferences/ — reviewed places where a translation's meaning differs from the KJV (omitted verses and phrases, changed names of God and Christ, doctrinal words), with the manuscript reason. Only reviewed books are covered; a translation with no file has not been compared:\n");
+            listed = true;
+        }
+        let file = format!("{}.txt", file_name(&format!("{} vs {base}", m.abbrev)));
+        let head = format!("{} compared with the {base} ({} differences in all, reviewed {}).\n\n", m.title, records.len(), doc["updated"].as_str().unwrap_or("?"));
+        let body = if here.is_empty() { format!("None recorded in {}.\n", req.label) } else { here };
+        write(&dir.join(&file), &format!("{head}In {}:\n\n{body}", req.label))?;
+        let whole = format!("{}.txt", file_name(&format!("{} vs {base} - all", m.abbrev)));
+        write(&dir.join(&whole), &format!("{head}{all}"))?;
+        index.push_str(&format!("  {file}  (in this passage)\n  {whole}  (every book reviewed so far)\n"));
+    }
+    Ok(())
 }
 
 /// Words of each commentary in digest.txt: enough for its reading of the verse, and the
@@ -389,6 +428,29 @@ mod tests {
         assert!(dir.join("2026-09-01 Love 2.md").exists());
         assert!(export_journal(&root, "../", "x", &[]).is_err());
         let _ = std::fs::remove_dir_all(&root);
+    }
+
+    /// Against the e-Sword X library on this Mac; skips itself where it is absent.
+    #[test]
+    fn differences_list_the_passage_and_the_whole_file() {
+        let dir = crate::library::default_dir();
+        if !dir.join("kjv.bbli").is_file() { return; }
+        let lib = Library::scan(dir);
+        let data = std::env::temp_dir().join(format!("tes-ask-diff-{}", std::process::id()));
+        let (root, out) = (data.join("ask"), data.join("out"));
+        std::fs::create_dir_all(&out).unwrap();
+        let rec = |b: i64, c: i64, v: i64, change: &str| serde_json::json!({"book": b, "chapter": c, "verse": v, "kind": "deity", "weight": "major", "change": change, "note": "Why."});
+        let doc = serde_json::json!({"module": "kjv", "base": "kjv", "updated": "2026-09-25", "records": [rec(43, 3, 16, "In John"), rec(51, 1, 14, "In Colossians")]});
+        std::fs::write(data.join("variances-kjv.json"), doc.to_string()).unwrap();
+        let req = Request { book: 43, chapter: 3, from: None, to: None, bibles: vec![], strongs_bible: None, label: "John 3".into(), journal: vec![], exclude: vec![] };
+        let mut index = String::new();
+        differences(&lib, &root, &req, 1, 999, &out, &mut index).unwrap();
+        let file = |name: &str| std::fs::read_to_string(std::fs::read_dir(&out).unwrap().flatten().find(|e| e.file_name().to_string_lossy().ends_with(name)).unwrap().path()).unwrap();
+        let here = file("KJV.txt");
+        assert!(here.contains("John 3:16 [deity, major] In John") && !here.contains("Colossians"));
+        assert!(file("all.txt").contains("Colossians 1:14"));
+        assert!(index.contains("differences/"));
+        let _ = std::fs::remove_dir_all(&data);
     }
 
     /// Against the e-Sword X library on this Mac; skips itself where it is absent.
