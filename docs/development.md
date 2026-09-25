@@ -19,82 +19,78 @@ runs the AI tools for Ask; the frontend is everything you see.
 Hot reload can leave a screen in a broken state after edits that change a component's hooks.
 Reload the window (⌘R) or restart `make dev` before treating it as a bug.
 
+Release and dev build profiles in `src-tauri/Cargo.toml` are tuned for build speed; its comments
+say why.
+
 ## Where things live
 
 | What | Where |
 |---|---|
 | e-Sword X modules (read-only) | `~/Library/Containers/net.e-sword.e-Sword-X/Data/Library/Application Support/` |
-| Journal, one Markdown file per month | the Obsidian vault's `Two-edged Sword/` folder, or `~/Documents/Two-edged Sword/`; set in Settings |
-| Settings, bookmarks, highlights, plans, chats, the day the reminder last came (`reminder.json`) | `~/Library/Application Support/Two-edged Sword/*.json` |
+| Journal, one Markdown file per month | `~/Library/CloudStorage/OneDrive-Personal/Notes/Two-edged Sword/` if that exists, else `~/Documents/Two-edged Sword/`; change it in Settings |
+| Settings, bookmarks, highlights, plans, chats, `reminder.json` (when the reminder last fired) | `~/Library/Application Support/Two-edged Sword/*.json` |
 | Search index (rebuilt on its own when modules change) | `~/Library/Application Support/Two-edged Sword/search-index.sqlite` |
 | Library material written out for Ask | `~/Library/Application Support/Two-edged Sword/ask/` and `books/` (see [Ask](ask.md)) |
 
+In `ask/`, each passage chat gets `studies/<chat>/`, with the dictionaries hard-linked in from
+`ask/dictionaries/` rather than copied; each journal chat gets `journal/<chat>/`.
+
 ## Signing and Full Disk Access
 
-The modules live inside e-Sword's own container, so macOS asks "would like to access data from
-other apps". That answer is remembered only for the exact build, so it comes back after every
-rebuild. Give the app Full Disk Access once (System Settings › Privacy & Security › Full Disk
-Access) and it stops: that grant is tied to the signing certificate, so sign builds with a stable
-self-signed one. Copy `signing.local.example` to `signing.local` (untracked) and name the
-certificate there.
+To stop macOS asking for e-Sword's data after every rebuild, sign builds with a stable
+self-signed certificate: create one (`signing.local.example` says how), copy that file to
+`signing.local` (untracked) and put the certificate's name in it. Then give the installed app
+Full Disk Access once (System Settings › Privacy & Security › Full Disk Access). Unsigned builds
+are asked again every time because the answer is tied to the exact build.
 
-**Open at Login** registers the installed bundle with SMAppService (the same list as System
-Settings › General › Login Items), so it only works in the app from `make install-app`: under
-`make dev` the menu item is disabled. The registration is per user and survives rebuilds as long
-as the bundle identifier stays `com.wayned.two-edged-sword`. A login launch is recognised from the
-launch Apple event, so the app starts in the menu bar with no window or Dock icon.
+## Open at Login
 
-## Build times
-
-`src-tauri/Cargo.toml` keeps the lib `rlib`-only, uses thin LTO with parallel codegen units for
-release builds, drops debug info for dependencies in dev builds, and optimises SQLite even in dev
-builds because it does all the searching.
+Works only in the app from `make install-app` (disabled under `make dev`): it registers the
+installed bundle as a login item, which survives rebuilds while the bundle identifier stays
+`com.wayned.two-edged-sword`. When macOS opens the app at login, it starts in the menu bar with
+no window or Dock icon.
 
 ## Screenshots
 
-`make screenshots` retakes every image in `docs/images/`, in both themes, and
-`python3 tools/screenshots.py read ask --theme dark` retakes just some. Each scene (the screen,
-passage, Bible, study-pane tab and so on) is in `tools/screenshots/scenes.json`. The script
-launches the dev build with the scene in `TES_SCENE`; `src/scene.ts` sets it up at 1440×900 and
-saves nothing, so your own settings, chats and window position are left alone. It captures the
-window, and writes it 1400px wide without the display's colour profile (which would tint it in
-browsers). The Ask shot shows a saved answer, `tools/screenshots/ask-chat.json`, rather than
-asking a model each time; the Listen shot places the player without speaking. The Worship shot
-opens a Quiet time session with its songs already chosen (`worship-session.json`), and the
-Journal shot shows sample entries (`journal-entries.json`) in place of yours, which stay private.
-In a scene, `chatFile`, `sessionFile` and `entriesFile` name these fixtures. A scene can
-`scrollTo` a CSS selector, and `crop` the image to `[x, y, width, height]` of the 1400px-wide
-shot for one part of a screen (the reminder shot is just the Quiet time section of Settings).
-The menu-bar menu is a native menu that screenshot mode can't open, so `docs/images/menu-bar.png` is
+`make screenshots` retakes every image in `docs/images/`, in both themes;
+`python3 tools/screenshots.py read ask --theme dark` retakes just some. It needs Pillow, the
+Xcode Command Line Tools and Screen Recording permission for the terminal, and starts the Vite
+dev server if it isn't running.
+
+Each scene is in `tools/screenshots/scenes.json`. The script launches the dev build with the
+scene in `TES_SCENE`; the app sizes the window to 1440×900, `src/scene.ts` sets up the scene and
+nothing is saved. The window is written 1400px wide, converted from the display's colour profile
+to sRGB. Ask, Worship and Journal shots use fixtures in `tools/screenshots/` (a saved answer, a
+session with songs chosen, sample entries) so nothing is asked of a model and your journal stays
+private. Scenes use public-domain Bibles only. `AGENTS.md` lists the scene fields and shows how
+to use a one-off scene to see the app while debugging.
+
+The menu-bar menu is native and screenshot mode can't open it, so `docs/images/menu-bar.png` is
 taken by hand (⌘⇧4 with the menu open, cropped to the menu).
-
-It needs Screen Recording permission for the terminal, and starts the Vite dev server if it isn't
-already running. Scenes use public-domain Bibles only.
-
-Screenshot mode is also the way to see the app while debugging: a one-off scene can put it in
-the state a bug needs (including `pending`, which replays a click that opens an article,
-commentary or question) and capture what it shows. `CLAUDE.md` and `AGENTS.md` show how.
 
 ## The code
 
 | Where | What |
 |---|---|
-| `src/` | The screens (`Read.tsx`, `Compare.tsx`, `WordStudy.tsx`…), shared state (`state.tsx`), the Rust calls (`api.ts`), e-Sword markup rendering (`esword.tsx`) |
+| `src/` | The screens (`Read.tsx`, `Compare.tsx`, `WordStudy.tsx`, `QuietTime.tsx`, `Journal.tsx`…), shared state (`state.tsx`), the Rust calls (`api.ts`), e-Sword markup rendering (`esword.tsx`) |
 | `src/speech.tsx` | Reading aloud: verse by verse through the native synthesiser, word highlighting, sleep timer |
 | `src/Ask.tsx`, `src/assistant.ts` | The Ask panels, and which AI tools and models are available |
 | `src-tauri/src/library.rs`, `content.rs` | Finding modules and reading text out of them |
 | `src-tauri/src/search.rs`, `index.rs` | Search and its index |
+| `src-tauri/src/journal.rs` | The journal's monthly Markdown files |
+| `src-tauri/src/store.rs` | The JSON files in Application Support |
+| `src-tauri/src/music.rs` | Quiet time's worship songs, played through Music |
 | `src/tray.tsx`, `src-tauri/src/tray.rs` | The menu-bar menu and the daily reminder, which is timed on the Rust side so it fires with the window hidden |
 | `src-tauri/src/login_item.rs`, `login_launch.rs` | Open at Login, and telling a login launch from the user opening the app |
 | `src-tauri/src/tts.rs` | Speech through AVSpeechSynthesizer (WebKit's speech API hides downloaded voices) |
 | `src-tauri/src/assistant/` | Running Claude Code or Codex for Ask |
-| `src-tauri/src/study.rs`, `books.rs` | Writing library material out as files for Ask to search |
+| `src-tauri/src/study.rs`, `books.rs` | Writing library material out as files for Ask to search: a folder per passage chat with the dictionaries hard-linked in, and `ask/journal/<chat>/` for journal chats |
 | `index.html` | The splash screen, painted before React starts |
 | `src/scene.ts`, `tools/screenshots.py` | Screenshot mode and the script that drives it |
 | `tools/make_icons.py` | The icon artwork (the sidebar logo and splash reuse the same sword) |
 
-Decisions and known bugs are recorded with sift in `_sift/` (see `AGENTS.md`):
-`python3 _sift/bin/sift.py decisions` lists why things are the way they are.
+Design decisions and known bugs are logged in `_sift/`; `python3 _sift/bin/sift.py decisions`
+lists them.
 
 ## Licensed Bibles
 

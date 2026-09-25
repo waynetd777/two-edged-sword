@@ -2,10 +2,9 @@
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="images/ask-dark.png"><img alt="Ask comparing the commentators on 1 John 1:1" src="images/ask-light.png"></picture>
 
-Ask answers questions about what you are reading: a verse or chapter in Read or Compare, a
-word in Word Study, search results, a journal entry, or a chapter or paragraph of a reference
-book or devotional. Chats are kept on this Mac, can be found again from **Recent** on any Ask
-panel, and an answer can be added to your journal.
+Ask answers questions about what you are reading: a passage in Read or Compare, a word in Word
+Study, search results, a journal entry, or a reference book or devotional. Chats stay on this
+Mac; find them again under **Recent** on any Ask panel. An answer can be added to your journal.
 
 ## Claude Code or Codex
 
@@ -16,25 +15,23 @@ signed in on this Mac, so it uses your existing account:
 - **Codex** (`codex exec`), offering whichever models Codex's own model picker shows for your
   account, so the list stays current without an app update.
 
-Each Ask panel offers a few suggested questions; with the box empty, its hint is the first of
-them and the go button asks it.
-
-The model menu on each Ask panel lists the models from whichever tools are installed, and
-Settings › AI assistant shows what was found and sets the default. A chat keeps the model it
-started with.
+The model menu on each Ask panel lists the models from whichever tools are installed; choosing
+one there also makes it the default. Settings › AI assistant shows what was found. A chat keeps
+the model it started with.
 
 **If neither is installed, Ask is hidden** everywhere: panels, buttons, the study pane's Ask
-tab, the command palette entry. Install one, sign in, and open Settings; Ask appears without a
-restart.
+tab, the command palette entry. Install one, sign in (for Codex, run it once so it lists its
+models), and open Settings; Ask appears without a restart.
 
-Claude streams its answer as it writes. Codex's answer appears all at once when it is done. While
-either is searching your library, the panel shows what it is doing ("Reading Matthew Henry's
-Commentary…").
+Claude streams its answer as it writes. Codex's answer appears all at once when it is done.
+While either is searching your library, the panel shows what it is doing ("Reading Matthew
+Henry's Commentary…"). In a new chat, the box's hint is the first suggested question, and the go
+button asks it.
 
 ## Answers from your library
 
 In a chat about a Bible passage, the app writes out your library's material on it as plain text
-files, and the assistant searches them instead of answering from memory:
+files in the chat's folder, and the assistant searches them instead of answering from memory:
 
 - `digest.txt`: every commentary's notes on the passage, the first ~400 words of each, in one
   file. Most questions are answered from this alone, which keeps answers quick.
@@ -42,50 +39,55 @@ files, and the assistant searches them instead of answering from memory:
   introductions.
 - `passage/`: the passage in each of your Bibles.
 - `lexicons/`: every lexicon's entry for each Strong's number in the passage.
-- `journal/`: with Settings › AI assistant › **Include my journal** on (it is off to begin
-  with), your journal entries linked to any verse of the passage, one file each: prayers, notes
-  and sermons. The assistant reads them when a question is personal or asks what you have
-  written or preached, and speaks of them as yours.
-- Your dictionaries, each written out whole once (a few seconds, in the background, the first
-  time the app starts after they change).
+- `dictionaries/`: your dictionaries, whole. They are written out once in the background after
+  they change (at startup or after a rescan); that takes a while the first time.
+- `journal/`: your journal entries linked to the passage, one file each, if Settings › AI
+  assistant › **Include my journal** is on (it is off to begin with). The assistant reads them
+  for personal questions, or ones about what you have written or preached.
 
 The assistant decides whether a question needs them. "How do the commentators differ on this
 verse?" makes it read the digest and compare named commentators; a quick factual question, or a
 follow-up on its own answer, is answered straight away. It is told to name the source for each
 point and to say when your library has nothing on something.
 
-Settings › AI assistant › **Search my library** turns this off, and the assistant then has the
-passage text only.
+Turn off **Search my library** and the assistant gets only the passage text, and no journal
+entries.
 
-A chat about a reference book or devotional works the same way with that book: the chapter goes
-with the question (or about 6,000 words around the paragraph asked about), and the whole book is
-written out once, one file per chapter with its charts, for the assistant to search.
+A reference book or devotional works the same way. The chapter goes with the question (about
+6,000 words around the paragraph, for long chapters), and the whole book is written out, a file
+per chapter with its charts, for the assistant to search.
 
-In the journal, Ask can be about the open entry or the whole journal. A chat about an entry with
-a linked verse gets that passage's library folder as above, with all your other journal entries
-in `journal/`; without a linked verse (or with Search my library off) it gets the journal alone.
-A whole-journal chat gets the entries the journal list shows (all, or those with the chosen tag
-or filter), one file each, with an index of their dates, verses and tags. Include my journal
-doesn't apply here: asking from the journal is asking about it.
+In the journal, Ask offers two choices:
+
+- **This entry**: the entry goes with the question. If it has a linked verse, the chat gets the
+  first one's passage folder as above, with all your other journal entries in `journal/`;
+  otherwise (or with Search my library off) it gets the journal alone.
+- **Whole journal**: the entries the journal list shows (all, or those with the chosen tag or
+  filter), one file each, with an index of their dates, verses and tags.
+
+Include my journal doesn't apply to either.
 
 ## What is sent
 
-Each question goes to the AI tool with the passage text. Whatever the assistant reads from the
-library folder is sent too, as it reads it: only the parts it opens, not the whole folder.
+The first question goes with what you are looking at: the passage, the verse in each compared
+translation, the word's lexicon entry, the search results, the open journal entry (and any text
+you selected in it), or the book's chapter. After that, only what the assistant opens from the
+chat's folder is sent, not the whole folder.
 
-**Your journal.** From Read and the other screens, only with Include my journal on, and only the
-entries linked to the passage. From the journal's own Ask, the entries it is about (see above).
-Either way, like the rest of the folder, only what the assistant opens is sent.
+**Licensed text.** Settings › AI assistant › **Licensed text** is on to begin with. Turn it off
+and no licensed module's text is sent (one whose description carries a copyright notice):
 
-**Licensed Bibles.** With Settings › Licensed translations off, questions about the NIV, ESV
-and other licensed Bibles send public-domain text instead, and licensed Bibles are left out of
-the library folder.
+- A licensed Bible is swapped for a public-domain one, or, with none installed, only the
+  reference is sent.
+- Compare leaves out licensed columns, and Search sends only references for a licensed Bible.
+- Licensed Bibles, commentaries, lexicons and dictionaries are left out of the chat's folder.
+- A licensed book or devotional sends neither its text nor its folder; the panel says so.
 
-**What the assistant can reach.** Claude Code can only read the chat's folder and the exported
-dictionaries (read and search tools, confined there). Codex runs in its read-only sandbox,
-ignores your own Codex configuration (MCP servers, hooks, rules), and is told to stay in those
-folders; its sandbox does not enforce that, so it could technically read other files on the Mac.
-Neither can change anything.
+**What the assistant can reach.** Claude Code gets only read and search tools, confined to the
+chat's folder. Your own Claude Code settings still apply, so an allow rule there could widen
+that; your hooks and `~/.claude/CLAUDE.md` load too. Codex runs in its read-only sandbox,
+without your Codex config (MCP servers, hooks, rules). It is told to stay in the chat's folder,
+but nothing enforces that. Neither can change files.
 
 ## Where it keeps things
 
@@ -94,7 +96,7 @@ Under `~/Library/Application Support/Two-edged Sword/`:
 | What | Where |
 |---|---|
 | Chats | `chats.json` |
-| A passage chat's library folder | `ask/studies/<chat>/` (removed after 60 days unused) |
+| A passage chat's folder | `ask/studies/<chat>/` (removed after 60 days unused) |
 | A journal chat's entries | `ask/journal/<chat>/` (removed after 60 days unused) |
 | Dictionaries, written out whole | `ask/dictionaries/` |
 | Reference books and devotionals, written out | `books/` |

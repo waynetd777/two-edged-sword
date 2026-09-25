@@ -22,8 +22,7 @@ It reads e-Sword X's Mac formats, which are SQLite files:
 
 It does not read the older Windows e-Sword formats (`.bblx`, `.cmtx`, `.dctx`, `.lexx`, `.refx`,
 `.topx`), EPUB, plain text or SWORD modules. Bible Support offers many modules in both formats;
-take the Mac one. (The Windows Westminster Leningrad Codex `.bblx`, for example, has the same
-Hebrew text as the `.bbli`, stored less compactly and padded with empty New Testament rows.)
+take the Mac one.
 
 ## Adding modules
 
@@ -31,8 +30,8 @@ Hebrew text as the `.bbli`, stored less compactly and padded with empty New Test
   above.
 - **From elsewhere**: copy the file into that folder itself (not a subfolder).
 
-Then **Library › Rescan**, and the new modules appear. The search index and the dictionaries Ask
-searches update on their own in the background.
+Then press **Rescan** on the Library screen (or reopen the app, which rescans on its own). The
+search index and the dictionaries Ask searches update in the background.
 
 ## Free modules worth having
 
@@ -71,10 +70,10 @@ Bible Support ([biblesupport.com](https://www.biblesupport.com), free sign-in) h
   (e-Sword).
 - Spurgeon's Faith's Checkbook and his sermons (Bible Support).
 
-Leave out copyrighted modules offered without the publisher's permission. Some modern texts are
-free but still copyrighted (the Lexham English Bible, Mounce's Greek dictionary); they are fine
-for personal use, and Ask treats any module whose description carries a copyright notice as
-licensed.
+Leave out copyrighted modules shared without the publisher's permission. Some modern texts (the
+Lexham English Bible, Mounce's Greek dictionary) are free but copyrighted, so they are fine for
+personal use. Ask treats any module whose description carries a copyright notice as licensed;
+see [Ask](ask.md#what-is-sent).
 
 Classics that only exist as EPUB or text (Augustine's Confessions, Pilgrim's Progress, the later
 church fathers) would need converting into a `.refi` module first.

@@ -20,11 +20,11 @@ read-only and keeps what you make (journal, bookmarks, highlights, plans, chats)
   about it in your library.
 - **Listen** to a chapter read aloud in any macOS voice, including the Premium ones, with each
   word highlighted as it is spoken.
-- **Quiet time** plans with daily readings and devotionals, worship songs from your Music
-  library chosen to suit the day's reading, and a daily reminder; a **Journal** linked to the
-  verses it's about, its references as links, kept in step with your Obsidian vault; and
-  **Search** across the whole library. The menu-bar menu starts today's Quiet time or picks up
-  where you left off.
+- **Quiet time** plans: daily readings and devotionals, worship songs from your Music library
+  chosen for the day's reading, and a daily reminder.
+- **Journal** entries linked to the verses they're about, kept in step with your Obsidian vault.
+- **Search** across the whole library.
+- The **menu-bar** menu starts today's Quiet time or picks up where you left off.
 
 <table>
   <tr>
@@ -41,26 +41,26 @@ read-only and keeps what you make (journal, bookmarks, highlights, plans, chats)
   </tr>
 </table>
 
+## Quick start
+
+Needs macOS 13+, the Xcode Command Line Tools, e-Sword X with some modules, Rust and Node. Ask
+also needs Claude Code or Codex.
+
+```sh
+npm install
+make dev            # the app with hot reload
+cp signing.local.example signing.local   # then name your signing certificate in it
+make install-app    # build it and put it in /Applications
+```
+
+Without a signing certificate, macOS asks for access to e-Sword's data after every build: see
+[Signing and Full Disk Access](docs/development.md#signing-and-full-disk-access).
+
+Licensed Bibles are read where e-Sword keeps them and never copied into this repo.
+
 ## Documentation
 
 - [Features](docs/features.md): each screen, and keyboard shortcuts
 - [Ask](docs/ask.md): the AI assistant, which models it offers, and what it sends
 - [Library](docs/library.md): e-Sword modules, adding more, and free ones worth having
 - [Development](docs/development.md): building, signing, where data lives, and the code
-
-## Quick start
-
-Needs macOS, e-Sword X with some modules, Rust and Node.
-
-```sh
-npm install
-make dev            # the app with hot reload
-make install-app    # build it and put it in /Applications
-```
-
-The first time it reads e-Sword's modules, macOS asks for access to another app's data. See
-[Signing and Full Disk Access](docs/development.md#signing-and-full-disk-access) to stop it
-asking after every build.
-
-Licensed Bibles (NIV, ESV and others) are for personal use: they are never copied into this repo,
-and the app only reads them where e-Sword keeps them.

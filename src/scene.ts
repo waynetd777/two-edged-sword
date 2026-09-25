@@ -38,6 +38,10 @@ export interface Scene {
   journal?: string;
   /** A CSS selector clicked after that (a toolbar button, say), to show what it does. */
   click?: string;
+  /** Before `click`: a click on the first place this text is shown (a misspelled word, say). */
+  clickText?: string;
+  /** Then text typed into a box, as [CSS selector, text] (find's box, say). */
+  type?: [string, string];
 }
 
 let started = false;
@@ -58,8 +62,31 @@ export function runScene(app: ReturnType<typeof useApp>, still: (s: Partial<Play
       if (sc.loc) app.open(sc.loc, sc.screen ?? "read");
       else if (sc.screen) app.go(sc.screen);
       if (sc.doc) app.openDoc(sc.doc.module, sc.doc.title, sc.doc.kind ?? "reference", sc.doc.para);
+      // Then text typed into a box. React tracks an input's value itself, so it's set through the
+      // native setter and announced.
+      const type = () => {
+        if (!sc.type) return;
+        const [q, text] = sc.type;
+        const el = document.querySelector(q) as HTMLInputElement | null;
+        if (!el) return;
+        Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set?.call(el, text);
+        el.dispatchEvent(new Event("input", { bubbles: true }));
+      };
+      // A real click, with coordinates, at the middle of the text: what caretRangeFromPoint needs.
+      const clickText = (t: string) => {
+        const w = document.createTreeWalker(document.querySelector(".main") ?? document.body, NodeFilter.SHOW_TEXT);
+        for (let n = w.nextNode() as Text | null; n; n = w.nextNode() as Text | null) {
+          const i = n.data.indexOf(t);
+          if (i < 0) continue;
+          const r = document.createRange(); r.setStart(n, i); r.setEnd(n, i + t.length);
+          const b = r.getBoundingClientRect(), x = b.left + b.width / 2, y = b.top + b.height / 2;
+          document.elementFromPoint(x, y)?.dispatchEvent(new MouseEvent("click", { bubbles: true, clientX: x, clientY: y }));
+          return;
+        }
+      };
       // After a journal entry opens (which replaces its editor), and retried until it's there.
-      if (sc.click) { const q = sc.click; const at = Date.now(); const go = () => { const el = document.querySelector(q) as HTMLElement | null; if (el) el.click(); else if (Date.now() - at < 3000) window.setTimeout(go, 200); }; window.setTimeout(go, sc.journal && sc.entries ? 4300 : 2800); }
+      const click = () => { if (!sc.click) { type(); return; } const q = sc.click; const at = Date.now(); const go = () => { const el = document.querySelector(q) as HTMLElement | null; if (el) { el.click(); window.setTimeout(type, 300); } else if (Date.now() - at < 3000) window.setTimeout(go, 200); }; go(); };
+      if (sc.click || sc.type || sc.clickText) window.setTimeout(() => { if (sc.clickText) { clickText(sc.clickText); window.setTimeout(click, 700); } else click(); }, sc.journal && sc.entries ? 4300 : 2800);
       if (sc.selectPara) { const n = sc.selectPara; window.setTimeout(() => (document.querySelector(`[data-seg="${n}"]`) as HTMLElement | null)?.click(), 2000); }
       if (sc.session) { const x = sc.session; window.setTimeout(() => app.setSession({ ...x, started: Date.now() }), 1200); }
       // Scene entries arrive with the journal's next check for changes (every 3 seconds).
