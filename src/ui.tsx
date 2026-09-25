@@ -167,8 +167,23 @@ export function Seg<T extends string | number>({ value, options, onChange }: { v
 
 /** Book then chapter, as two grids. */
 /** Book, then chapter, then verse (or the whole chapter). */
+const booksCache = new Map<string, Promise<Set<number>>>();
+/** The books a Bible has (an Old or New Testament alone has only its own), or null until known. */
+export function useBibleBooks(bible: string): Set<number> | null {
+  const [got, setGot] = useState<{ bible: string; books: Set<number> } | null>(null);
+  useEffect(() => {
+    let live = true;
+    if (!booksCache.has(bible)) booksCache.set(bible, api.chapterSizes(bible).then((s) => new Set(s.map((x) => x[0]))).catch(() => new Set<number>()));
+    booksCache.get(bible)!.then((books) => { if (live) setGot({ bible, books }); });
+    return () => { live = false; };
+  }, [bible]);
+  return got && got.bible === bible && got.books.size ? got.books : null;
+}
+
 export function RefPicker({ anchor, onClose, onPick, initialBook }: { anchor: DOMRect; onClose: () => void; onPick: (b: number, c: number, v?: number) => void; initialBook?: number }) {
   const bible = useApp().settings.bible;
+  const books = useBibleBooks(bible);
+  const has = (n: number) => !books || books.has(n);
   const [b, setB] = useState<number | null>(null);
   const [c, setC] = useState<number | null>(null);
   const [count, setCount] = useState(0);
@@ -198,11 +213,11 @@ export function RefPicker({ anchor, onClose, onPick, initialBook }: { anchor: DO
         </div>
       ) : b === null ? (
         <div style={{ padding: 14, display: "flex", flexDirection: "column", gap: 10 }}>
-          {SECTIONS.map((s) => (
+          {SECTIONS.filter((s) => BOOKS.some((x) => x.n >= s.from && x.n <= s.to && has(x.n))).map((s) => (
             <div key={s.name} style={{ display: "grid", gridTemplateColumns: "84px minmax(0,1fr)", gap: 8, alignItems: "start" }}>
               <span className="label" style={{ paddingTop: 5 }}>{s.name}</span>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
-                {BOOKS.filter((x) => x.n >= s.from && x.n <= s.to).map((x) => (
+                {BOOKS.filter((x) => x.n >= s.from && x.n <= s.to && has(x.n)).map((x) => (
                   <button key={x.n} type="button" className={`chip ${x.n === initialBook ? "on" : ""}`} onClick={() => (x.chapters === 1 ? pickChapter(x.n, 1) : setB(x.n))}>{x.name}</button>
                 ))}
               </div>
@@ -259,6 +274,47 @@ export function Spinner() {
 }
 
 /** The x at the end of a search box, shown while it has text; clicking it keeps the box focused. */
+export interface ListItem { key: string; label: string; /** Muted, after the label. */ sub?: string; title?: string; /** A heading shown above the first item of each group. */ group?: string; /** Also searched. */ terms?: string }
+
+/** A long list in a popover with a search box on top: typing filters it, ↑↓ move, Enter picks,
+ *  Esc clears the search (or closes, when it's empty). */
+export function SearchList({ items, current, onPick, onClose, placeholder }: { items: ListItem[]; current?: string; onPick: (key: string) => void; onClose: () => void; placeholder: string }) {
+  const [q, setQ] = useState("");
+  const [at, setAt] = useState(0);
+  const list = useRef<HTMLDivElement>(null);
+  const words = q.toLowerCase().split(/\s+/).filter(Boolean);
+  const shown = items.filter((it) => { const hay = `${it.label} ${it.sub ?? ""} ${it.terms ?? ""}`.toLowerCase(); return words.every((w) => hay.includes(w)); });
+  useEffect(() => { setAt(Math.max(0, q ? 0 : shown.findIndex((it) => it.key === current))); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [q]);
+  useEffect(() => { list.current?.querySelector<HTMLElement>(`[data-i="${at}"]`)?.scrollIntoView({ block: "nearest" }); }, [at]);
+  const key = (e: React.KeyboardEvent) => {
+    if (e.key === "ArrowDown") { setAt((i) => Math.min(shown.length - 1, i + 1)); e.preventDefault(); }
+    else if (e.key === "ArrowUp") { setAt((i) => Math.max(0, i - 1)); e.preventDefault(); }
+    else if (e.key === "Enter" && shown[at]) { onPick(shown[at].key); e.preventDefault(); }
+    else if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); if (q) setQ(""); else onClose(); }
+  };
+  return (
+    <div style={{ display: "flex", flexDirection: "column", minHeight: 0 }}>
+      <div style={{ padding: 8, borderBottom: "1px solid var(--border)" }}>
+        <label className="field"><Icon name="search" />
+          <input autoFocus value={q} onChange={(e) => setQ(e.target.value)} onKeyDown={key} placeholder={placeholder} aria-label={placeholder} />
+          <ClearButton show={!!q} onClear={() => setQ("")} />
+        </label>
+      </div>
+      <div ref={list} className="doclist" style={{ padding: 6, maxHeight: 440, overflowY: "auto" }}>
+        {shown.map((it, i) => (
+          <div key={it.key} style={{ display: "contents" }}>
+            {it.group && it.group !== shown[i - 1]?.group && <div className="label" style={{ padding: `${i ? 10 : 6}px 10px 4px` }}>{it.group}</div>}
+            <button type="button" data-i={i} title={it.title ?? it.label} className={`${it.key === current ? "on" : ""} ${i === at ? "at" : ""}`} onMouseMove={() => setAt(i)} onClick={() => onPick(it.key)}>
+              {it.label}{it.sub && <span className="n" style={{ marginLeft: 8 }}>{it.sub}</span>}
+            </button>
+          </div>
+        ))}
+        {!shown.length && <div className="hint" style={{ padding: "8px 10px" }}>Nothing matches “{q}”.</div>}
+      </div>
+    </div>
+  );
+}
+
 export function ClearButton({ show, onClear, label = "Clear" }: { show: boolean; onClear: () => void; label?: string }) {
   if (!show) return null;
   return <button type="button" className="ibtn" aria-label={label} title={label} onMouseDown={(e) => e.preventDefault()} onClick={onClear} style={{ width: 20, height: 20, flexShrink: 0 }}><Icon name="x" size={12} /></button>;

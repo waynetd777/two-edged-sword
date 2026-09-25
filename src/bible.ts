@@ -121,6 +121,13 @@ export const nextChapter = (b: number, c: number): [number, number] | undefined 
 export const prevChapter = (b: number, c: number): [number, number] | undefined =>
   c > 1 ? [b, c - 1] : b > 1 ? [b - 1, book(b - 1).chapters] : undefined;
 
+/** The next (d = 1) or previous chapter in a Bible that has only `books` (null: all of them), skipping the books it lacks. */
+export function stepChapter(b: number, c: number, d: 1 | -1, books: Set<number> | null): [number, number] | undefined {
+  let n = d > 0 ? nextChapter(b, c) : prevChapter(b, c);
+  while (n && books && !books.has(n[0])) n = d > 0 ? (n[0] < 66 ? [n[0] + 1, 1] : undefined) : (n[0] > 1 ? [n[0] - 1, book(n[0] - 1).chapters] : undefined);
+  return n;
+}
+
 export const testament = (b: number) => (b <= 39 ? "Old Testament" : "New Testament");
 
 export const SECTIONS: { name: string; from: number; to: number }[] = [

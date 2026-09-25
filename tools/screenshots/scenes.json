@@ -159,5 +159,39 @@
     "settings": {
       "bible": "kjv"
     }
+  },
+  {
+    "name": "differences",
+    "loc": {
+      "book": 51,
+      "chapter": 1,
+      "verse": 14
+    },
+    "variancesFile": "asv-variances.json",
+    "settings": {
+      "bible": "asv",
+      "layout": "verse",
+      "studyPane": false
+    },
+    "scrollTo": "[data-v=\"12\"]",
+    "click": "[data-v=\"14\"] .gut button"
+  },
+  {
+    "name": "interlinear",
+    "loc": {
+      "book": 42,
+      "chapter": 17,
+      "verse": 33
+    },
+    "settings": {
+      "bible": "greeknttr+",
+      "layout": "verse",
+      "studyPane": false
+    },
+    "scrollTo": "[data-v=\"33\"]"
+  },
+  {
+    "name": "kjv-history",
+    "screen": "history"
   }
 ]

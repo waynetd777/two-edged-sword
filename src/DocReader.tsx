@@ -11,7 +11,7 @@ import { WordLookup } from "./WordLookup";
 import { SearchField, Topbar } from "./Shell";
 import { HlColor, hlName, useApp } from "./state";
 import { DictionaryTab, useRefPreview } from "./StudyPane";
-import { ClearButton, Popover, SideNav, wordAt, wordHover } from "./ui";
+import { ClearButton, Popover, SearchList, SideNav, wordAt, wordHover } from "./ui";
 import { dayTitle } from "./plans";
 import { useAssistant } from "./assistant";
 
@@ -21,6 +21,7 @@ import { useAssistant } from "./assistant";
  */
 export function DocReader({ focus, setFocus, openPalette }: { focus: boolean; setFocus: (f: boolean) => void; openPalette: () => void }) {
   const app = useApp();
+  const [bookMenu, setBookMenu] = useState<DOMRect | null>(null);
   const canAsk = useAssistant().available;
   // The study pane: notes on the chapter, the dictionaries, and Ask (when an assistant is installed).
   const pane = app.settings.studyPane;
@@ -286,13 +287,16 @@ export function DocReader({ focus, setFocus, openPalette }: { focus: boolean; se
         </div>
       }>
         <button className="btn" type="button" title="Back to the Bible" onClick={app.closeDoc}><Icon name="read" />{fmtRef(app.loc)}</button>
-        <label className="btn" style={{ position: "relative", maxWidth: 320 }} title={mod?.title}>
+        <button className="btn" type="button" aria-label="Reference book" style={{ maxWidth: 320 }} title={mod?.title} onClick={(e) => setBookMenu(e.currentTarget.getBoundingClientRect())}>
           <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{mod?.title ?? doc.module}</span>
           <Icon name="down" className="sm" style={{ color: "var(--muted)" }} />
-          <select aria-label="Reference book" value={doc.module} onChange={(e) => app.openDoc(e.target.value, undefined, kind)} style={{ position: "absolute", inset: 0, opacity: 0, cursor: "pointer" }}>
-            {books.map((b) => <option key={b.id} value={b.id}>{b.title}</option>)}
-          </select>
-        </label>
+        </button>
+        {bookMenu && (
+          <Popover anchor={bookMenu} onClose={() => setBookMenu(null)} width={380} style={{ padding: 0, overflow: "hidden" }}>
+            <SearchList placeholder={kind === "devotional" ? "Find a devotional" : "Find a book"} current={doc.module} onClose={() => setBookMenu(null)}
+              onPick={(id) => { setBookMenu(null); app.openDoc(id, undefined, kind); }} items={books.map((b) => ({ key: b.id, label: b.title, terms: b.abbrev }))} />
+          </Popover>
+        )}
         <SearchField onOpen={openPalette} />
       </Topbar>}
       <div style={{ flexGrow: 1, minHeight: 0, display: "grid", gridTemplateColumns: focus ? "minmax(0,1fr)" : pane ? "260px minmax(0,1fr) 440px" : "260px minmax(0,1fr)" }}>
@@ -468,13 +472,13 @@ export function BooksButton() {
     <>
       <button className="btn" type="button" title="Read a reference book" onClick={(e) => setA(e.currentTarget.getBoundingClientRect())}><Icon name="library" />Books<Icon name="down" className="sm" style={{ color: "var(--muted)" }} /></button>
       {a && (
-        <Popover anchor={a} onClose={() => setA(null)} width={340}>
-          <div className="doclist" style={{ padding: 6, maxHeight: 460, overflowY: "auto" }}>
-            {devotionals.length > 0 && <div className="label" style={{ padding: "6px 10px 4px" }}>Devotionals · today</div>}
-            {devotionals.map((m) => <button key={m.id} type="button" title={m.title} onClick={() => { setA(null); app.openDoc(m.id, dayTitle(new Date()), "devotional"); }}>{m.title}</button>)}
-            {devotionals.length > 0 && books.length > 0 && <div className="label" style={{ padding: "10px 10px 4px" }}>Books</div>}
-            {sorted.map((m) => <button key={m.id} type="button" title={m.title} onClick={() => { setA(null); app.openDoc(m.id); }}>{m.title}{app.docAt[m.id] && <span className="n" style={{ marginLeft: 8 }}>{app.docAt[m.id]}</span>}</button>)}
-          </div>
+        <Popover anchor={a} onClose={() => setA(null)} width={380} style={{ padding: 0, overflow: "hidden" }}>
+          <SearchList placeholder="Find a book or devotional" onClose={() => setA(null)}
+            onPick={(k) => { setA(null); const [kind, id] = [k.slice(0, 1), k.slice(2)]; if (kind === "d") app.openDoc(id, dayTitle(new Date()), "devotional"); else app.openDoc(id); }}
+            items={[
+              ...devotionals.map((m) => ({ key: `d:${m.id}`, label: m.title, group: "Devotionals · today", terms: m.abbrev })),
+              ...sorted.map((m) => ({ key: `b:${m.id}`, label: m.title, sub: app.docAt[m.id], group: devotionals.length ? "Books" : undefined, terms: m.abbrev })),
+            ]} />
         </Popover>
       )}
     </>

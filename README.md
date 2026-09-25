@@ -16,6 +16,12 @@ read-only and keeps what you make (journal, bookmarks, highlights, plans, chats)
 - **Books and devotionals** from your library, with the same tools as Scripture: highlight,
   bookmark and note a paragraph, listen, and ask about it.
 - **Compare** any number of translations verse by verse, with the differences highlighted.
+- **Differences from the KJV**: a mark beside each verse where a translation differs in meaning,
+  with both readings and the manuscript reason.
+- **Greek and Hebrew** Bibles word by word, each word over its English and Strong's number, with
+  other editions' readings marked.
+- **KJV History**: the manuscripts and editions behind the King James Version, and which of them
+  you have.
 - **Word Study** a Strong's number: where it is used, every verse in context, and the articles
   about it in your library.
 - **Listen** to a chapter read aloud in any macOS voice, including the Premium ones, with each
@@ -24,6 +30,8 @@ read-only and keeps what you make (journal, bookmarks, highlights, plans, chats)
   chosen for the day's reading, and a daily reminder.
 - **Journal** entries linked to the verses they're about, kept in step with your Obsidian vault.
 - **Search** across the whole library.
+- **Build more modules** from free sources: the Targums, the Talmud, the Clementine Vulgate, the
+  Syriac Peshitta, Tyndale and the Geneva Bible.
 - The **menu-bar** menu starts today's Quiet time or picks up where you left off.
 
 <table>
@@ -32,12 +40,16 @@ read-only and keeps what you make (journal, bookmarks, highlights, plans, chats)
     <td align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/compare-dark.png"><img alt="KJV+, ASV and YLT compared, differences highlighted" src="docs/images/compare-light.png"></picture><br><sub>Compare translations</sub></td>
   </tr>
   <tr>
+    <td align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/differences-dark.png"><img alt="Colossians 1:14 in the ASV, marked as omitting “through his blood”, with the reason" src="docs/images/differences-light.png"></picture><br><sub>Differences from the KJV</sub></td>
+    <td align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/interlinear-dark.png"><img alt="Luke 17 in the Greek Textus Receptus, word by word, with Scrivener's readings" src="docs/images/interlinear-light.png"></picture><br><sub>Greek word by word</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/kjv-history-dark.png"><img alt="The KJV's family tree, and which sources are in the library" src="docs/images/kjv-history-light.png"></picture><br><sub>KJV History</sub></td>
     <td align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/word-study-dark.png"><img alt="Word Study for G26, agapē" src="docs/images/word-study-light.png"></picture><br><sub>Word Study</sub></td>
-    <td align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/listen-dark.png"><img alt="Listening to 1 John 1, the word being spoken highlighted" src="docs/images/listen-light.png"></picture><br><sub>Listen, word by word</sub></td>
   </tr>
   <tr>
     <td align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/quiet-time-dark.png"><img alt="Quiet time with today's readings" src="docs/images/quiet-time-light.png"></picture><br><sub>Quiet time plans</sub></td>
-    <td align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/search-dark.png"><img alt="Searching the KJV for “tithe”, with the verse in context" src="docs/images/search-light.png"></picture><br><sub>Search the library</sub></td>
+    <td align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/listen-dark.png"><img alt="Listening to 1 John 1, the word being spoken highlighted" src="docs/images/listen-light.png"></picture><br><sub>Listen, word by word</sub></td>
   </tr>
 </table>
 
@@ -60,7 +72,10 @@ Licensed Bibles are read where e-Sword keeps them and never copied into this rep
 
 ## Documentation
 
-- [Features](docs/features.md): each screen, and keyboard shortcuts
+- [Features](docs/features.md): getting around, and Settings, with a page for each part:
+  [Reading](docs/reading.md), [Study](docs/study.md),
+  [Translations and manuscripts](docs/manuscripts.md), [Journal](docs/journal.md) and
+  [Quiet time](docs/quiet-time.md)
 - [Ask](docs/ask.md): the AI assistant, which models it offers, and what it sends
-- [Library](docs/library.md): e-Sword modules, adding more, and free ones worth having
+- [Library](docs/library.md): e-Sword modules, adding and building more, and free ones worth having
 - [Development](docs/development.md): building, signing, where data lives, and the code

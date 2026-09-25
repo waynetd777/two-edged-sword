@@ -4,6 +4,7 @@
 
 import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import type { Song } from "./worship";
+import { listen } from "@tauri-apps/api/event";
 import { api, JournalEntry, LibraryInfo, ModuleInfo } from "./api";
 import { Ref } from "./bible";
 import { Plan } from "./plans";
@@ -111,7 +112,7 @@ export interface JournalSeed { verses?: string[]; title?: string; body?: string;
 export interface DictAt { module: string; topic: string; search?: boolean }
 export interface Pending { article?: DictAt; ask?: string; commentary?: string }
 
-export type Screen = "read" | "compare" | "search" | "word" | "journal" | "plans" | "library" | "settings";
+export type Screen = "read" | "compare" | "search" | "word" | "journal" | "plans" | "library" | "history" | "settings";
 
 /** A chapter read lately: of the Bible, or (with `doc`) of a reference book or devotional. */
 /** A passage or book chapter opened. `verse`/`to` are the verses it was opened at, if any; one entry per chapter, the latest open. */
@@ -153,8 +154,14 @@ interface Ctx {
   tsk: string | null;
   rescan: () => Promise<void>;
 
+  /** The settings, with `bible` the Bible being read this session (see set). */
   settings: Settings;
+  /** Saves settings. `bible` alone changes only this session's Bible: the saved default, set in
+   *  Settings or the Library, comes back when the window is reopened or the app restarted. */
   set: (patch: Partial<Settings>) => void;
+  defaultBible: string;
+  /** Saves the default Bible, and reads it now. */
+  setDefaultBible: (id: string) => void;
 
   screen: Screen;
   go: (s: Screen) => void;
@@ -385,6 +392,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (settingsLoaded && bibles.length && !bibles.some((b) => b.id === settings.bible)) setSettings((s) => ({ ...s, bible: bibles[0].id }));
   }, [settingsLoaded, bibles, settings.bible, setSettings]);
 
+  // The Bible being read this session, when it isn't the saved default (settings.bible). Closing
+  // the window (the app stays in the menu bar) goes back to the default for next time.
+  const [sessionBible, setSessionBible] = useState<string | null>(null);
+  useEffect(() => { if (sessionBible && bibles.length && !bibles.some((b) => b.id === sessionBible)) setSessionBible(null); }, [sessionBible, bibles]);
+  useEffect(() => {
+    const off = listen("main-window-closed", () => setSessionBible(null));
+    return () => { off.then((f) => f()).catch(() => {}); };
+  }, []);
+  const view = useMemo(() => (sessionBible && sessionBible !== settings.bible ? { ...settings, bible: sessionBible } : settings), [settings, sessionBible]);
+
   const here = (): Place => ({ screen, loc: nav.loc, doc: nav.doc, word: wordStudy, search: searchFor });
   const show = (pl: Place) => {
     curPlace.current = pl;
@@ -444,7 +461,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const value: Ctx = {
     lib, bibles, mod, strongsBible, lexicon, concordance, tsk,
     rescan: async () => { setLib(await api.rescan()); },
-    settings, set: (p) => setSettings((s) => ({ ...s, ...p })),
+    settings: view,
+    set: ({ bible, ...rest }) => {
+      if (bible !== undefined) setSessionBible(bible);
+      if (Object.keys(rest).length) setSettings((s) => ({ ...s, ...rest }));
+    },
+    defaultBible: settings.bible,
+    setDefaultBible: (id) => { setSessionBible(null); setSettings((s) => ({ ...s, bible: id })); },
     screen, go: (s) => navigate({ screen: s }),
     loc: nav.loc, open,
     back: () => moveHist(-1), forward: () => moveHist(1),

@@ -69,7 +69,7 @@ input, textarea, [contenteditable="true"] { user-select: text; }
 .bm .r { color: var(--muted); margin-left: auto; font-size: 11px; white-space: nowrap; }
 .doclist { display: flex; flex-direction: column; gap: 1px; }
 .doclist button { display: block; min-height: 28px; padding: 5px 10px; border: 0; border-radius: 6px; background: transparent; color: var(--text); font-size: 12.5px; text-align: left; cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 0; }
-.doclist button:hover { background: var(--hover); }
+.doclist button:hover, .doclist button.at { background: var(--hover); }
 .doclist button.on { background: var(--accentsoft); color: var(--accent); font-weight: 600; }
 .bm .t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .today { display: flex; flex-direction: column; gap: 6px; padding: 10px; border-radius: 8px; background: var(--hover); border: 0; text-align: left; cursor: pointer; width: 100%; }
@@ -213,6 +213,26 @@ input[type="range"] { accent-color: var(--accent); }
 .para { font: 400 var(--read-size)/1.8 var(--serif); text-wrap: pretty; }
 .para .pv { cursor: pointer; border-radius: 4px; }
 .para .pv.sel { box-shadow: 0 0 0 1.5px var(--accent); border-radius: 4px; }
+/* Where the KJV came from (KjvSources.tsx). */
+.ks-card { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 4px; padding: 10px 12px; border-radius: 10px; background: var(--panel); border: 1px solid var(--border); box-shadow: 0 1px 2px var(--shadow); transition: opacity 0.15s; }
+.ks-card.ks-have { border-color: var(--good); }
+.ks-card.ks-near { border-color: var(--pufg); border-style: dashed; }
+.ks-chip { align-self: flex-start; display: inline-flex; align-items: center; gap: 4px; height: 20px; white-space: nowrap; padding: 0 8px; margin-top: 2px; border-radius: 999px; border: 0; font: 500 11px var(--ui); background: var(--hover); color: var(--muted); }
+button.ks-chip { cursor: pointer; }
+.ks-chip-have { background: var(--pdbg); color: var(--pdfg); }
+.ks-chip-near { background: var(--pubg); color: var(--pufg); }
+.ks-chip-rel { background: var(--accentsoft); color: var(--accent); }
+
+/* Interlinear Bibles: each original word over its English and Strong's number (esword.tsx tokenize). */
+.il { display: inline-flex; flex-direction: column; align-items: center; vertical-align: top; margin: 0 5px 8px 0; line-height: 1.35; }
+.il-g { font: 500 11.5px/1.3 var(--ui); color: var(--muted); text-transform: lowercase; font-variant: small-caps; letter-spacing: 0.02em; white-space: nowrap; }
+.il-n { font: 500 10px/1.2 var(--ui); color: var(--accent); }
+.il-p { vertical-align: top; }
+/* Another edition's reading in a Greek NT (| base | other | in the module): muted, in ⟨ ⟩. */
+.var { color: var(--muted); }
+.il.var .w { font-style: italic; }
+.il-p.var { font: 500 12px var(--ui); padding-top: 4px; }
+.il-e { font: 600 10px/1.2 var(--ui); color: var(--red); letter-spacing: 0.08em; }
 .para .vnum { font: 600 11px var(--ui); color: var(--accent); vertical-align: super; margin: 0 3px 0 2px; }
 .hl-red { background: var(--hl-red); border-radius: 3px; }
 .hl-orange { background: var(--hl-orange); border-radius: 3px; }

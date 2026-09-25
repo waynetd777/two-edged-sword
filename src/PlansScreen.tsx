@@ -5,7 +5,7 @@ import { Icon, Play } from "./icons";
 import {
   addDays, balanced, behind, chaptersOf, dateOf, dayLabel, dueBefore, firstUndone, fmtDay, fmtLong, indexOn, markDayRead, markPpoRead, paired, readOn, streak, unmarkDayRead, parseYmd, partRef, perDay, Plan, PpoPlan, dayTitle, ONLINE_DEVOTIONALS, doneToday, progressKey, ppoPreview, ppoUpcoming, SequencePlan, Sizes, today, todayFor, ymd,
 } from "./plans";
-import { SearchField, Topbar } from "./Shell";
+import { BibleSelect, SearchField, Topbar } from "./Shell";
 import { uid, useApp } from "./state";
 import { confirmDelete, Dialog, Popover, Seg, Switch } from "./ui";
 import { useStartQuietTime } from "./QuietTime";
@@ -309,7 +309,7 @@ function PlanPicker({ onClose, onBuild }: { onClose: () => void; onBuild: () => 
               <Seg value={shortMonths} options={[["last", "Read leftover Proverbs on the last day"], ["skip", "Skip them"]]} onChange={setShortMonths} />
             </>}
             <span className="n">Translation</span>
-            <select className="btn" value={bible} onChange={(e) => setBible(e.target.value)} style={{ width: 260 }}>{app.bibles.map((b) => <option key={b.id} value={b.id}>{b.title}</option>)}</select>
+            <BibleSelect titled all value={bible} onChange={setBible} style={{ width: 260 }} />
             {choice !== "ppo" && <><span className="n">Days</span><label className="opt"><input type="checkbox" checked={weekdays} onChange={(e) => setWeekdays(e.target.checked)} />Weekdays only</label></>}
           </div>
           <div style={{ padding: "10px 14px", borderRadius: 10, background: "var(--panel2)", border: "1px solid var(--border)" }}>

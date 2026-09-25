@@ -4,7 +4,7 @@ import { ModuleInfo } from "./api";
 import { isLicensed } from "./Ask";
 import { renderHtml } from "./esword";
 import { Icon } from "./icons";
-import { Topbar } from "./Shell";
+import { BibleSelect, Topbar } from "./Shell";
 import { useApp } from "./state";
 import { orderModules } from "./StudyPane";
 import { ClearButton, Popover, Switch } from "./ui";
@@ -74,12 +74,17 @@ export function LibraryScreen() {
           <button className="btn" type="button" onClick={() => app.lib && revealItemInDir(app.lib.dir)}><Icon name="finder" />Show in Finder</button>
           <button className="btn" type="button" disabled={busy} onClick={async () => { setBusy(true); await app.rescan(); setBusy(false); app.toast("Library rescanned"); }}><Icon name="refresh" />{busy ? "Rescanning…" : "Rescan"}</button>
         </div>
+        {!q && <div className="card" style={{ padding: "14px 16px", display: "flex", alignItems: "center", gap: 14 }}>
+          <Icon name="map" size={22} style={{ color: "var(--accent)" }} />
+          <div style={{ flexGrow: 1, display: "flex", flexDirection: "column", gap: 2 }}><b>Where the King James Version came from</b><span className="hint" style={{ fontSize: 12.5 }}>The manuscript traditions and printed editions the translators worked from, and which of them are in your library.</span></div>
+          <button className="btn" type="button" aria-label="Show where the KJV came from" onClick={() => app.go("history")}>Show</button>
+        </div>}
         {none && <div className="empty">Nothing in the library matches “{q}”.</div>}
         {bibles.length > 0 && <>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <div className="label">Bibles</div><span className="n">{q ? `${bibles.length} of ${n("bible")}` : n("bible")} · {total(app.bibles)}</span>
           <span className="n" style={{ marginLeft: "auto" }}>Default</span>
-          <select className="btn small" value={app.settings.bible} onChange={(e) => app.set({ bible: e.target.value })} aria-label="Default Bible">{app.bibles.map((b) => <option key={b.id} value={b.id}>{b.abbrev}</option>)}</select>
+          <BibleSelect all value={app.defaultBible} onChange={app.setDefaultBible} />
         </div>
         <table style={{ borderCollapse: "separate", borderSpacing: 0, width: "100%", background: "var(--panel)", border: "1px solid var(--border)", borderRadius: 10, overflow: "hidden" }}>
           <thead><tr>{["Translation", "Abbrev.", "Features", "Licence", "In picker"].map((h, i) => <th key={h} style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.04em", textTransform: "uppercase", color: "var(--muted)", textAlign: i === 4 ? "right" : "left", background: "var(--panel2)", padding: "8px 14px", borderBottom: "1px solid var(--border)" }}>{h}</th>)}</tr></thead>

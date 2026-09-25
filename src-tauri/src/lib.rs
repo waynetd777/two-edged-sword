@@ -21,7 +21,7 @@ use serde::Serialize;
 use std::path::PathBuf;
 use std::sync::Arc;
 use tauri::tray::TrayIconBuilder;
-use tauri::{AppHandle, Manager, State};
+use tauri::{AppHandle, Emitter, Manager, State};
 use tauri_plugin_window_state::{AppHandleExt, StateFlags};
 
 /// Everything except VISIBLE: the window is created hidden and shown once its background is
@@ -568,6 +568,8 @@ pub fn run() {
                         api.prevent_close();
                         let _ = w2.app_handle().save_window_state(STATE_FLAGS);
                         let _ = w2.hide();
+                        // The page goes back to the default Bible for when the window is reopened.
+                        let _ = w2.emit("main-window-closed", ());
                         // Out of the Dock once the window has gone: the app is only in the menu bar now.
                         set_in_dock(w2.app_handle(), false);
                     }

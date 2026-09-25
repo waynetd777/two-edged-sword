@@ -7,7 +7,7 @@ import { Icon } from "./icons";
 import { VerseText, WordPick } from "./Read";
 import { BibleSelect, RefButton, SearchField, Topbar } from "./Shell";
 import { useApp } from "./state";
-import { RefPicker, SideNav, Switch } from "./ui";
+import { Popover, RefPicker, SearchList, SideNav, Switch } from "./ui";
 import { WordLookup } from "./WordLookup";
 import { useAssistant } from "./assistant";
 
@@ -52,6 +52,7 @@ function Marked({ tokens, diff, red, showNums, onWord, activeWi }: { tokens: Tok
 
 export function CompareScreen({ openPalette }: { openPalette: () => void }) {
   const app = useApp();
+  const [addMenu, setAddMenu] = useState<DOMRect | null>(null);
   const { loc, settings } = app;
   const cols = settings.compare.filter((c) => app.mod("bible", c));
   const [data, setData] = useState<Record<string, Verse[]>>({});
@@ -129,13 +130,15 @@ export function CompareScreen({ openPalette }: { openPalette: () => void }) {
             </div>
           );
         })}
-        <label className="btn" style={{ height: 40, border: "1px dashed var(--dash)", background: "transparent", color: "var(--muted)", justifyContent: "center", position: "relative" }}>
+        <button className="btn" type="button" aria-label="Add a translation" style={{ height: 40, border: "1px dashed var(--dash)", background: "transparent", color: "var(--muted)", justifyContent: "center" }} onClick={(e) => setAddMenu(e.currentTarget.getBoundingClientRect())}>
           <Icon name="plus" />Add
-          <select aria-label="Add a translation" value="" onChange={(e) => e.target.value && setCols([...cols, e.target.value])} style={{ position: "absolute", inset: 0, opacity: 0, cursor: "pointer" }}>
-            <option value="" />
-            {addable.map((b) => <option key={b.id} value={b.id}>{b.abbrev} · {b.title}</option>)}
-          </select>
-        </label>
+        </button>
+        {addMenu && (
+          <Popover anchor={addMenu} onClose={() => setAddMenu(null)} width={380} style={{ padding: 0, overflow: "hidden" }}>
+            <SearchList placeholder="Find a translation to add" onClose={() => setAddMenu(null)} onPick={(id) => { setAddMenu(null); setCols([...cols, id]); }}
+              items={addable.map((b) => ({ key: b.id, label: b.abbrev, sub: b.title, title: b.title, terms: b.id }))} />
+          </Popover>
+        )}
       </div>
       <div className="sidenav-wrap" style={{ flexGrow: 1 }}>
         <div ref={scroller} className="scroll" style={{ flexGrow: 1, background: "var(--panel)", borderTop: "1px solid var(--border)" }}>

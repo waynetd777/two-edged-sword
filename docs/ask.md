@@ -48,6 +48,9 @@ files in the chat's folder, and the assistant searches them instead of answering
   introductions.
 - `passage/`: the passage in each of your Bibles.
 - `lexicons/`: every lexicon's entry for each Strong's number in the passage.
+- `differences/`: where a translation differs in meaning from the KJV, in the passage and in all,
+  for each translation that has a reviewed list (see [Translations and manuscripts](manuscripts.md)).
+- `references/`: passages in your reference books that cite the verses, such as the Talmud's.
 - `dictionaries/`: your dictionaries, whole. They are written out once in the background after
   they change (at startup or after a rescan); that takes a while the first time.
 - `journal/`: your journal entries linked to the passage, one file each, if Settings › AI

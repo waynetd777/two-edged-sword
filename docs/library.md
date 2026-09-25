@@ -1,11 +1,18 @@
 # Library
 
 The app has no library of its own: it reads the modules e-Sword X keeps, where e-Sword keeps
-them, and never changes them.
+them, and never changes them. (The build scripts below add new ones there.)
 
 ```
 ~/Library/Containers/net.e-sword.e-Sword-X/Data/Library/Application Support/
 ```
+
+## The Library screen
+
+Every module and the space it takes, which Bibles appear in the Bible menu (**In picker**), the
+default Bible, and the order of commentaries and dictionaries. The search box finds modules by
+title, abbreviation or file name; reference books and devotionals open from here. **Rescan**
+picks up modules added since the app started.
 
 ## Formats
 
@@ -33,13 +40,20 @@ take the Mac one.
 Then press **Rescan** on the Library screen (or reopen the app, which rescans on its own). The
 search index and the dictionaries Ask searches update in the background.
 
-- **The Targums and the Talmud, from Sefaria**: `python3 tools/sefaria/build.py` writes them
-  into the folder above. The Targums become Bibles in the KJV's verse numbering, so they read
-  and compare beside it: Targum (Aramaic) and Targum (English) (Onkelos on the Torah, Jonathan on
-  the Prophets, the Writings' Targums; English only where Sefaria has a translation) and Targum
-  Pseudo-Jonathan in both. The Babylonian Talmud becomes one book per tractate ("Talmud:
-  Sanhedrin"), a chapter per daf, English with the Aramaic beneath. Some sources are CC-BY-NC:
-  for personal study.
+## Building modules
+
+Some texts aren't e-Sword downloads, so scripts in `tools/` build them from free sources into
+the folder above. Each caches its downloads in `~/Library/Caches/Two-edged Sword/` and puts
+everything in the KJV's verse numbering, so it reads and compares beside the KJV. Rescan after.
+
+| Script | Builds | From |
+|---|---|---|
+| `python3 tools/sefaria/build.py` | Targum (Aramaic and English), Targum Pseudo-Jonathan, and the Babylonian Talmud (a book per tractate, English with the Aramaic, linked to the verses it cites) | Sefaria |
+| `python3 tools/vulgate/build.py` | The Clementine Vulgate (1592), with the deuterocanon | The Clementine Vulgate Project |
+| `python3 tools/crosswire/build.py` | The Syriac Peshitta NT, Murdock's and Etheridge's English of it, Tyndale (1525/1530), the Geneva Bible (1599), and the Douay-Rheims (Challoner) | CrossWire |
+
+All are public domain except some Sefaria translations, which are CC-BY-NC: fine for personal
+study.
 
 ## Free modules worth having
 
@@ -50,12 +64,16 @@ Bible Support ([biblesupport.com](https://www.biblesupport.com), free sign-in) h
 
 - Young's Literal Translation (e-Sword): very literal, a good second column beside the KJV.
 - Brenton's English Septuagint (e-Sword): the Greek Old Testament the apostles quoted.
-- Geneva Bible 1587 (Bible Support, Mac module): the Reformers' Bible.
-- Westminster Leningrad Codex (Bible Support): the Hebrew Old Testament.
-- Westcott-Hort Greek New Testament with Strong's and parsing (Bible Support, `iwh+p.bbli`).
-- Darby, Webster, Weymouth, the Revised Version, Douay-Rheims, the World English Bible and the
-  Berean Standard Bible (e-Sword); Tyndale, Coverdale and other early English Bibles (Bible
-  Support; check each has a Mac file).
+- Greek NT INT+ (e-Sword): an interlinear with each word's meaning, grammar, and which printed
+  editions have it. The best single tool for comparing the Greek behind the KJV and modern
+  versions.
+- Greek NT TR+, BYZ+ and WH+ (e-Sword): the Textus Receptus, the Byzantine Majority Text and
+  Westcott-Hort, with Strong's numbers and grammar.
+- Greek OT+ (e-Sword): Rahlfs' Septuagint with Strong's numbers. Hebrew OT+ (e-Sword): the
+  Hebrew Old Testament with Strong's numbers; Westminster Leningrad Codex (Bible Support) has
+  the vowel points.
+- Darby, Webster, Weymouth, the Revised Version, the World English Bible and the Berean Standard
+  Bible (e-Sword).
 
 **Commentaries**
 

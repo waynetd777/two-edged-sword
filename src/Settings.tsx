@@ -2,7 +2,7 @@ import { ReactNode, useEffect } from "react";
 import { open as openDialog } from "@tauri-apps/plugin-dialog";
 import { Icon } from "./icons";
 import { VoiceSelect } from "./Read";
-import { Topbar } from "./Shell";
+import { BibleSelect, Topbar } from "./Shell";
 import { modelGroups, PROVIDER_NAME, pickModel, refreshAssistant, useAssistant } from "./assistant";
 import { READ_FONTS, ReadFont, useApp } from "./state";
 import { confirmDelete, Seg, Switch } from "./ui";
@@ -51,7 +51,7 @@ export function SettingsScreen() {
             <Row label="Show verses as"><Seg value={s.layout} options={[["verse", "One per line"], ["paragraph", "Paragraphs"]]} onChange={(v) => app.set({ layout: v })} /></Row>
           </Section>
           <Section title="Bibles">
-            <Row label="Default translation"><select className="btn" style={{ maxWidth: "min(360px, 100%)" }} value={s.bible} onChange={(e) => app.set({ bible: e.target.value })}>{app.bibles.map((b) => <option key={b.id} value={b.id}>{b.title}</option>)}</select></Row>
+            <Row label="Default translation"><BibleSelect titled all value={app.defaultBible} onChange={app.setDefaultBible} style={{ maxWidth: "min(360px, 100%)" }} /></Row>
             <Row label="Compare starts with" hint="Change them on the Compare screen."><div style={{ display: "flex", gap: 5 }}>{s.compare.map((c) => <span key={c} className="chip" style={{ cursor: "default" }}>{app.mod("bible", c)?.abbrev ?? c}</span>)}</div></Row>
             <Row label="Library" hint="Checked for new modules each time the app opens, or press Rescan on the Library screen."><span style={{ fontSize: 12.5 }}>e-Sword X · {app.lib?.modules.length} modules · read-only</span></Row>
           </Section>

@@ -89,7 +89,7 @@ def window_of(window_id, pid, timeout=30):
 
 def shoot(scene, theme, window_id):
     # A fixture from a file beside scenes.json: "chatFile" becomes "chat", and so on.
-    files = {"chatFile": "chat", "sessionFile": "session", "entriesFile": "entries"}
+    files = {"chatFile": "chat", "sessionFile": "session", "entriesFile": "entries", "variancesFile": "variances"}
     sc = {k: v for k, v in scene.items() if k not in files and k != "crop"}
     for f, k in files.items():
         if f in scene:

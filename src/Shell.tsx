@@ -4,7 +4,7 @@ import { Icon, Wordmark } from "./icons";
 import { Screen, useApp } from "./state";
 import { todayReading } from "./plans";
 import { useRefPreview } from "./StudyPane";
-import { confirmDelete } from "./ui";
+import { confirmDelete, Popover, SearchList } from "./ui";
 
 const NAV: { s: Screen; label: string; icon: string; key: string; tip: string }[] = [
   { s: "read", label: "Read", icon: "read", key: "1" , tip: "Read the Bible beside the study pane" },
@@ -14,6 +14,7 @@ const NAV: { s: Screen; label: string; icon: string; key: string; tip: string }[
   { s: "journal", label: "Journal", icon: "journal", key: "5" , tip: "Your journal, linked to the verses" },
   { s: "plans", label: "Quiet time", icon: "plans", key: "6" , tip: "Reading plans and devotionals for today" },
   { s: "library", label: "Library", icon: "library", key: "7" , tip: "Your modules and their order" },
+  { s: "history", label: "KJV History", icon: "lineage", key: "8" , tip: "Where the King James Version came from, and which of its sources you have" },
 ];
 export const SCREEN_KEYS = NAV.map((n) => n.s);
 
@@ -131,17 +132,26 @@ export function RefButton({ onClick }: { onClick: () => void }) {
   return <button className="btn" type="button" style={{ fontWeight: 600 }} title="Go to a book, chapter or verse" onClick={onClick}>{fmtRef(r)}<Icon name="down" className="sm" style={{ color: "var(--muted)" }} /></button>;
 }
 
-export function BibleSelect({ value, onChange, style }: { value: string; onChange: (id: string) => void; style?: React.CSSProperties }) {
+/** The Bible picker: a button that opens a searchable list. `titled` shows the Bible's title rather
+ *  than its abbreviation; `all` lists the Bibles hidden from the picker too (for settings). */
+export function BibleSelect({ value, onChange, style, titled, all }: { value: string; onChange: (id: string) => void; style?: React.CSSProperties; titled?: boolean; all?: boolean }) {
   const app = useApp();
-  const list = app.bibles.filter((b) => !app.settings.hiddenBibles.includes(b.id) || b.id === value);
+  const [a, setA] = useState<DOMRect | null>(null);
+  const list = app.bibles.filter((b) => all || !app.settings.hiddenBibles.includes(b.id) || b.id === value);
+  const m = app.mod("bible", value);
   return (
-    <label className="btn" style={{ position: "relative", ...style }} title={app.mod("bible", value)?.title}>
-      <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}><Icon name="bible" />{app.mod("bible", value)?.abbrev ?? value}</span>
-      <Icon name="down" className="sm" style={{ color: "var(--muted)" }} />
-      <select aria-label="Bible" value={value} onChange={(e) => onChange(e.target.value)} style={{ position: "absolute", inset: 0, opacity: 0, cursor: "pointer" }}>
-        {list.map((b) => <option key={b.id} value={b.id}>{b.abbrev} · {b.title}</option>)}
-      </select>
-    </label>
+    <>
+      <button className="btn" type="button" aria-label="Bible" style={style} title={app.mod("bible", value)?.title} onClick={(e) => setA(e.currentTarget.getBoundingClientRect())}>
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 6, minWidth: 0 }}><Icon name="bible" /><span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{(titled ? m?.title : m?.abbrev) ?? value}</span></span>
+        <Icon name="down" className="sm" style={{ color: "var(--muted)" }} />
+      </button>
+      {a && (
+        <Popover anchor={a} onClose={() => setA(null)} width={380} style={{ padding: 0, overflow: "hidden" }}>
+          <SearchList placeholder="Find a Bible" current={value} onClose={() => setA(null)} onPick={(id) => { setA(null); onChange(id); }}
+            items={list.map((b) => ({ key: b.id, label: b.abbrev, sub: b.title, title: b.title, terms: b.id }))} />
+        </Popover>
+      )}
+    </>
   );
 }
 

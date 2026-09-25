@@ -1,13 +1,13 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api, Verse, Voice } from "./api";
-import { book, fmtRef, nextChapter, parseRef, prevChapter, Ref, sectionOf, testament } from "./bible";
-import { alignStrongs, plainText, Token, tokenize } from "./esword";
+import { book, fmtRef, parseRef, Ref, sectionOf, stepChapter, testament } from "./bible";
+import { alignStrongs, EDITIONS, plainText, Token, tokenize, variantSource } from "./esword";
 import { Icon, Pause, Play } from "./icons";
 import { BibleSelect, RefButton, SearchField, Topbar } from "./Shell";
 import { usePlayer } from "./speech";
 import { DictAt, HlColor, hlName, useApp, vkey } from "./state";
 import { StudyPane, StudyTab } from "./StudyPane";
-import { Popover, RefPicker, Seg, SideNav } from "./ui";
+import { Popover, RefPicker, Seg, SideNav, useBibleBooks } from "./ui";
 import { WordLookup } from "./WordLookup";
 import { BooksButton } from "./DocReader";
 import { useAssistant } from "./assistant";
@@ -35,11 +35,33 @@ export function useNotesByVerse() {
   }, [journal]);
 }
 
-export function VerseText({ tokens, red, speakingChar, onWord, activeWi, showNums }: { tokens: Token[]; red: boolean; speakingChar?: number; onWord?: (t: Token, el: HTMLElement) => void; activeWi?: number; showNums: boolean }) {
+export function VerseText({ tokens, red, speakingChar, onWord, activeWi, showNums, variantFrom = "another edition" }: { tokens: Token[]; red: boolean; speakingChar?: number; onWord?: (t: Token, el: HTMLElement) => void; activeWi?: number; showNums: boolean; /** Whose readings a Greek NT's ⟨variants⟩ are. */ variantFrom?: string }) {
+  const vtitle = `${variantFrom} reads`;
+  // An interlinear Bible: each original word stacked over its English, Strong's number and grammar.
+  if (tokens.some((t) => t.gloss !== undefined || t.parse !== undefined)) {
+    const glossed = tokens.some((t) => t.gloss !== undefined);
+    const marked = tokens.some((t) => t.editions);
+    return (
+    <>
+      {tokens.map((t, i) => {
+        if (!t.word || !(t.gloss !== undefined || t.parse !== undefined || t.strongs.length)) return t.text.trim() ? <span key={i} className={`il-p ${t.variant ? "var" : ""}`} title={t.variant ? vtitle : undefined}>{t.text}</span> : <Fragment key={i}>{" "}</Fragment>;
+        const speaking = speakingChar !== undefined && speakingChar >= t.at && speakingChar < t.at + t.text.length;
+        return (
+          <span key={i} className={`il ${t.variant ? "var" : ""}`} title={[t.variant && vtitle, t.lemma, t.parse, t.editions && `Only in: ${[...t.editions].map((c) => EDITIONS[c] ?? c).join(", ")}`].filter(Boolean).join(" · ") || undefined}>
+            <span className={`w ${activeWi === t.wi ? "on" : ""} ${speaking ? "speaking" : ""}`} onClick={(e) => { e.stopPropagation(); onWord?.(t, e.currentTarget); }}>{t.text}</span>
+            {glossed && <span className="il-g">{t.gloss ?? "\u00a0"}</span>}
+            {showNums && <span className="il-n">{t.strongs.join(" ") || "\u00a0"}</span>}
+            {marked && <span className="il-e">{t.editions || "\u00a0"}</span>}
+          </span>
+        );
+      })}
+    </>
+    );
+  }
   return (
     <>
       {tokens.map((t, i) => {
-        const cls = [t.red && red ? "red" : ""].join(" ");
+        const cls = [t.red && red ? "red" : "", t.variant ? "var" : ""].join(" ").trim();
         const inner = t.italic ? <i>{t.text}</i> : t.text;
         if (!t.word) return <span key={i} className={cls || undefined}>{inner}</span>;
         const speaking = speakingChar !== undefined && speakingChar >= t.at && speakingChar < t.at + t.text.length;
@@ -170,10 +192,20 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
     if (follow) setStudyVerse(v);
   };
 
+  const books = useBibleBooks(bible);
   const go = useCallback((d: 1 | -1) => {
-    const n = d > 0 ? nextChapter(loc.book, loc.chapter) : prevChapter(loc.book, loc.chapter);
+    const n = stepChapter(loc.book, loc.chapter, d, books);
     if (n) app.open({ book: n[0], chapter: n[1] });
-  }, [app, loc.book, loc.chapter]);
+  }, [app, loc.book, loc.chapter, books]);
+  // A Bible chosen (or opened with) where it has no such book, an Old or New Testament alone:
+  // open it where it starts.
+  const shownIn = useRef<string | null>(null);
+  useEffect(() => {
+    if (!books || shownIn.current === bible) return;
+    shownIn.current = bible;
+    if (!books.has(loc.book)) app.open({ book: Math.min(...books), chapter: 1 });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [books, bible]);
 
   // Arrow keys turn the page; N adds a note; Space plays or pauses.
   useEffect(() => {
@@ -295,7 +327,7 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
             {isSel && sel!.from === v.v && toolbar}
             <div className="vn"><span title="Click the verse (not a word) to select it · ⇧-click for a range">{v.v}</span></div>
             <div className="vt selectable"><span className={hl ? `hl-${hlName(hl)}` : undefined}>
-              <VerseText tokens={tokens.get(v.v) ?? []} red={settings.redLetters} speakingChar={reading && player.state.verse === v.v && settings.highlightWords ? player.state.char : undefined} onWord={(t, el) => pickWord(t, v.v, el)} activeWi={word?.verse === v.v ? word.token.wi : undefined} showNums={!!bmod?.strongs} />
+              <VerseText tokens={tokens.get(v.v) ?? []} red={settings.redLetters} speakingChar={reading && player.state.verse === v.v && settings.highlightWords ? player.state.char : undefined} onWord={(t, el) => pickWord(t, v.v, el)} activeWi={word?.verse === v.v ? word.token.wi : undefined} showNums={!!bmod?.strongs} variantFrom={variantSource(bmod?.info ?? "")} />
             </span></div>
             <div className="gut">
               {isBookmarked(v.v) && <Icon name="bookmark" style={{ fill: "var(--accent)" }} />}
@@ -318,7 +350,7 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
           return (
             <span key={v.v} data-v={v.v} className={`pv ${isSel ? "sel" : ""}`} onClick={(e) => clickVerse(v.v, e)}>
               <span className="vnum">{v.v}</span>
-              <span className={hl ? `hl-${hlName(hl)}` : undefined}><VerseText tokens={tokens.get(v.v) ?? []} red={settings.redLetters} speakingChar={reading && player.state.verse === v.v && settings.highlightWords ? player.state.char : undefined} onWord={(t, el) => pickWord(t, v.v, el)} activeWi={word?.verse === v.v ? word.token.wi : undefined} showNums={!!bmod?.strongs && !focus} /></span>{" "}
+              <span className={hl ? `hl-${hlName(hl)}` : undefined}><VerseText tokens={tokens.get(v.v) ?? []} red={settings.redLetters} speakingChar={reading && player.state.verse === v.v && settings.highlightWords ? player.state.char : undefined} onWord={(t, el) => pickWord(t, v.v, el)} activeWi={word?.verse === v.v ? word.token.wi : undefined} showNums={!!bmod?.strongs && !focus} variantFrom={variantSource(bmod?.info ?? "")} /></span>{" "}
             </span>
           );
         })}
@@ -360,7 +392,7 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
             {header}
             {err ? <div className="err" style={{ padding: 20 }}>{err}</div> : body}
           </main>
-          <ChapterNav onGo={go} />
+          <ChapterNav onGo={go} books={books} />
         </div>
         {!focus && settings.studyPane && (
           <StudyPane tab={tab} setTab={setTab} book={loc.book} chapter={loc.chapter} verse={studyVerse} selRef={selRef} verses={verses}
@@ -389,9 +421,9 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
 }
 
 /** Previous and next chapter, at the sides of the reading column. */
-function ChapterNav({ onGo }: { onGo: (d: 1 | -1) => void }) {
+function ChapterNav({ onGo, books }: { onGo: (d: 1 | -1) => void; books: Set<number> | null }) {
   const { loc } = useApp();
-  const p = prevChapter(loc.book, loc.chapter), n = nextChapter(loc.book, loc.chapter);
+  const p = stepChapter(loc.book, loc.chapter, -1, books), n = stepChapter(loc.book, loc.chapter, 1, books);
   return <SideNav prev={p && { label: `Previous chapter: ${book(p[0]).name} ${p[1]} (←)`, go: () => onGo(-1) }} next={n && { label: `Next chapter: ${book(n[0]).name} ${n[1]} (→)`, go: () => onGo(1) }} />;
 }
 

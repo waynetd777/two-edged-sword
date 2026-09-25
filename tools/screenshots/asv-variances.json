@@ -1,0 +1,4 @@
+{"module": "asv", "base": "kjv", "updated": "2026-09-26", "records": [
+ {"book": 51, "chapter": 1, "verse": 14, "kind": "atonement", "weight": "major", "change": "Omits \"through his blood\"", "note": "The phrase is in the Byzantine majority and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; the ASV follows the latter. Redemption through Christ's blood is still stated in Ephesians 1:7."},
+ {"book": 51, "chapter": 1, "verse": 2, "kind": "deity", "weight": "minor", "change": "Omits \"and the Lord Jesus Christ\"", "note": "The earliest manuscripts end the greeting at \"God our Father\"; the Textus Receptus adds \"and the Lord Jesus Christ\", as in Paul's other greetings."}
+]}

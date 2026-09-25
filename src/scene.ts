@@ -6,6 +6,7 @@ import { api, JournalEntry, setReadOnly, setSceneJournal } from "./api";
 import { setSceneChat } from "./Ask";
 import { Chat, Loc, Pending, Screen, Session, Settings, useApp } from "./state";
 import type { PlayerState } from "./speech";
+import { setSceneVariances, VarianceFile } from "./variances";
 
 export interface Scene {
   name: string;
@@ -42,6 +43,8 @@ export interface Scene {
   clickText?: string;
   /** Then text typed into a box, as [CSS selector, text] (find's box, say). */
   type?: [string, string];
+  /** A translation's differences from the KJV, shown instead of the user's (from variancesFile). */
+  variances?: VarianceFile;
 }
 
 let started = false;
@@ -55,10 +58,12 @@ export function runScene(app: ReturnType<typeof useApp>, still: (s: Partial<Play
     const sc: Scene = JSON.parse(json);
     setReadOnly(true);
     if (sc.entries) setSceneJournal(sc.entries);
+    if (sc.variances) setSceneVariances(sc.variances);
     // Give the stored settings and place a moment to load, so the scene is applied on top of them.
     window.setTimeout(() => {
       if (sc.chat) { const chat = sc.chat; app.setChats(() => [chat]); setSceneChat(chat.id); }
-      if (sc.settings) app.set(sc.settings);
+      // The KJV unless the scene says otherwise: never the user's own choice, which may be licensed.
+      app.set({ bible: "kjv", ...sc.settings });
       if (sc.loc) app.open(sc.loc, sc.screen ?? "read");
       else if (sc.screen) app.go(sc.screen);
       if (sc.doc) app.openDoc(sc.doc.module, sc.doc.title, sc.doc.kind ?? "reference", sc.doc.para);

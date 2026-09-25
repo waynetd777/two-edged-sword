@@ -255,7 +255,10 @@ export function plainText(html: string): string {
   const body = parse(html);
   body.querySelectorAll("num").forEach((n) => n.remove());
   body.querySelectorAll("sup").forEach((n) => { if (/^[()]$/.test(n.textContent || "")) n.remove(); });
-  return (body.textContent || "").replace(/\s+/g, " ").trim();
+  let text = body.textContent || "";
+  // Greek NT TR+/WH+ "| base | other |": the base reading only.
+  if ((text.match(/\|/g) ?? []).length % 3 === 0) text = text.replace(/\|([^|]*)\|[^|]*\|/g, "$1");
+  return text.replace(/\s+/g, " ").trim();
 }
 
 // ---------- verse tokens ----------
@@ -273,25 +276,80 @@ export interface Token {
   wi: number;
   /** Strong's numbers are shown after the last word of their group. */
   showNums?: string[];
+  /** Interlinear Bibles: the English under this original-language word, and its grammar code. */
+  gloss?: string;
+  parse?: string;
+  /** Its dictionary form, and (Greek NT INT+) which printed editions have the word, when not all do. */
+  lemma?: string;
+  editions?: string;
+  /** Part of another edition's reading (Greek NT TR+ and WH+ mark them | base | other |), or its brackets. */
+  variant?: boolean;
 }
+
+/** Which edition a Greek NT module's | base | other | readings come from, from its description. */
+export function variantSource(info: string): string {
+  if (/Scrivener/i.test(info)) return "Scrivener 1894";
+  if (/Nestle|UBS/i.test(info)) return "NA27/UBS4";
+  return "another edition";
+}
+
+/** INT+'s edition markers. */
+export const EDITIONS: Record<string, string> = { ν: "NA28/UBS5", α: "Alexandrian (UBS3–4, NA26–27)", τ: "Stephanus 1550 (TR)", σ: "Scrivener 1894 (TR)", β: "Byzantine Majority" };
+
+const CODES = new Set(["PREP", "CONJ", "ADV", "PRT", "INJ", "COND", "HEB", "ARAM"]);
+/** A grammar code (N-NSF, V-2AAI-3S, PREP), as opposed to an English gloss (THE, WORD,). */
+const isCode = (t: string) => (t.includes("-") ? /^[A-Z0-9]+(-[A-Z0-9]+)+$/.test(t) : CODES.has(t));
 
 const WORD = /[\p{L}\p{M}'’]+(?:-[\p{L}\p{M}'’]+)*/gu;
 
-/** A verse as a list of words and gaps, with each word's Strong's numbers where the Bible has them. */
+const ORIGINAL = /[\p{Script=Greek}\p{Script=Hebrew}]/u;
+
+/**
+ * A verse as a list of words and gaps, with each word's Strong's numbers where the Bible has them.
+ * An interlinear Bible (one with <tvm>) gets its English glosses and grammar codes attached to the
+ * Greek or Hebrew word they belong to instead of as words of their own. Two layouts are known:
+ * IGNT+ has <grk>word</grk><num>G3056 [G5748]</num><tvm>GLOSS</tvm> (the bracketed number is a
+ * tense code); IWH+P has word<num>G3056</num><tvm>N-NSM</tvm><sup>gloss</sup>; LXX+ has
+ * <grk>word</grk> <tvm>3056[N-NSM]</tvm> (the Strong's number and the grammar, no gloss); the Greek NT
+ * TR+, BYZ+, WH+ and Greek OT+ have word<num>G3056</num> <tvm>N-NSM</tvm> in one <grk>; and INT+
+ * boxes each word in a <div>: word, number, grammar, dictionary form, meaning (<gra>), editions.
+ */
 export function tokenize(html: string): Token[] {
   const out: Token[] = [];
+  const interlinear = /<tvm>/i.test(html);
+  /** The last original-language word so far: glosses and codes after it belong to it. */
+  const lastOriginal = () => { for (let k = out.length - 1; k >= 0; k--) if (out[k].word && ORIGINAL.test(out[k].text)) return out[k]; };
   let at = 0;
   let wi = 0;
   let groupStart = 0; // first token since the previous <num>
+  // "| base | other |": the base reading stays as it is; the other edition's is marked, in
+  // brackets, or "omit" when it leaves the base reading out. Only when the pipes come in threes.
+  const pipes = (html.match(/\|/g) ?? []).length;
+  const variants = pipes > 0 && pipes % 3 === 0;
+  let vstate = 0, vstart = 0;
+  const mark = (text: string) => { out.push({ text, word: false, red: false, italic: false, strongs: [], at, wi: -1, variant: true }); at += text.length; };
+  const pipe = () => {
+    vstate = (vstate + 1) % 3;
+    if (vstate === 2) { mark("⟨"); vstart = out.length; }
+    else if (vstate === 0) { if (!out.slice(vstart).some((t) => t.word)) mark("omit"); mark("⟩"); }
+  };
   const push = (text: string, red: boolean, italic: boolean) => {
+    if (variants && text.includes("|")) {
+      text.split("|").forEach((part, i) => { if (i) pipe(); pushText(part, red, italic); });
+      return;
+    }
+    pushText(text, red, italic);
+  };
+  const pushText = (text: string, red: boolean, italic: boolean) => {
+    const variant = vstate === 2 || undefined;
     let last = 0;
     for (const m of text.matchAll(WORD)) {
-      if (m.index! > last) { const t = text.slice(last, m.index); out.push({ text: t, word: false, red, italic, strongs: [], at, wi: -1 }); at += t.length; }
-      out.push({ text: m[0], word: true, red, italic, strongs: [], at, wi: wi++ });
+      if (m.index! > last) { const t = text.slice(last, m.index); out.push({ text: t, word: false, red, italic, strongs: [], at, wi: -1, variant }); at += t.length; }
+      out.push({ text: m[0], word: true, red, italic, strongs: [], at, wi: wi++, variant });
       at += m[0].length;
       last = m.index! + m[0].length;
     }
-    if (last < text.length) { const t = text.slice(last); out.push({ text: t, word: false, red, italic, strongs: [], at, wi: -1 }); at += t.length; }
+    if (last < text.length) { const t = text.slice(last); out.push({ text: t, word: false, red, italic, strongs: [], at, wi: -1, variant }); at += t.length; }
   };
   const walk = (node: Node, red: boolean, italic: boolean) => {
     if (node.nodeType === Node.TEXT_NODE) { push(node.textContent || "", red, italic); return; }
@@ -299,7 +357,11 @@ export function tokenize(html: string): Token[] {
     const el = node as Element;
     const tag = el.tagName.toLowerCase();
     if (tag === "num") {
-      const n = (el.textContent || "").trim();
+      const raw = (el.textContent || "").trim();
+      // "G1526 [G5748]": the Strong's number, then a tense code, which is grammar, not a word.
+      const code = raw.match(/\[(\w+)\]/)?.[1];
+      const n = raw.replace(/\s*\[\w+\]/g, "").trim();
+      if (code && interlinear) { const t = lastOriginal(); if (t) t.parse = t.parse ? `${t.parse} ${code}` : code; }
       const words = out.slice(groupStart).filter((t) => t.word);
       words.forEach((t) => t.strongs.push(n));
       const lastWord = words[words.length - 1];
@@ -308,6 +370,35 @@ export function tokenize(html: string): Token[] {
       return;
     }
     if (tag === "sup" && /^[()]$/.test((el.textContent || "").trim())) return;
+    if (interlinear && tag === "div" && el.querySelector("gra")) {
+      let t: Token | undefined;
+      for (const k of Array.from(el.children)) {
+        const kt = k.tagName.toLowerCase(), text = (k.textContent || "").trim();
+        if (!text) continue;
+        if (kt === "grk" && !t) { push(text, red, italic); t = lastOriginal(); groupStart = out.length; }
+        else if (!t) continue;
+        else if (kt === "num") { t.strongs.push(text); (t.showNums ??= []).push(text); }
+        else if (kt === "tvm") t.parse = text;
+        else if (kt === "grk") t.lemma = text;
+        else if (kt === "gra") t.gloss = text;
+        else if (kt === "red") t.editions = text;
+      }
+      push(" ", red, italic);
+      return;
+    }
+    if (interlinear && (tag === "tvm" || tag === "sup")) {
+      const text = (el.textContent || "").replace(/\s+/g, " ").trim();
+      const t = lastOriginal();
+      const numbered = tag === "tvm" ? text.match(/^(\d*)\[([^\]]+)\]$/) : null;
+      if (t && numbered) {
+        if (numbered[1]) { const n = `G${numbered[1]}`; t.strongs.push(n); (t.showNums ??= []).push(n); groupStart = out.length; }
+        t.parse = numbered[2];
+      } else if (t && text) {
+        if (tag === "sup" || !isCode(text)) t.gloss = t.gloss ? `${t.gloss} ${text}` : text;
+        else t.parse = t.parse ? `${t.parse} ${text}` : text;
+      }
+      return;
+    }
     const r = red || tag === "red";
     const i = italic || tag === "i";
     el.childNodes.forEach((c) => walk(c, r, i));

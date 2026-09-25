@@ -42,7 +42,7 @@ pub struct ModuleInfo {
     pub abbrev: String,
     /// e-Sword's own description, HTML.
     pub info: String,
-    /// Bibles only: the text carries Strong's numbers (`<num>G25</num>`).
+    /// Bibles only: the text carries Strong's numbers (`<num>G25</num>`, or LXX+'s `<tvm>25[N-NSM]</tvm>`).
     pub strongs: bool,
     /// The file's size in bytes.
     pub size: u64,
@@ -135,8 +135,10 @@ fn read_details(path: &Path, kind: Kind) -> rusqlite::Result<(String, String, St
     let (title, abbrev, info): (String, String, String) = c.query_row("SELECT Title, Abbreviation, Information FROM Details LIMIT 1", [], |r| {
         Ok((r.get::<_, Option<String>>(0)?.unwrap_or_default(), r.get::<_, Option<String>>(1)?.unwrap_or_default(), r.get::<_, Option<String>>(2)?.unwrap_or_default()))
     })?;
+    // e-Sword's graphical books are titled "* Classic Bible Maps" so they sort first there.
+    let title = title.trim_start_matches(|c: char| c == '*' || c.is_whitespace()).to_string();
     let strongs = kind == Kind::Bible
-        && c.query_row("SELECT 1 FROM Bible WHERE Book = 43 AND Chapter = 3 AND Scripture LIKE '%<num>%' LIMIT 1", [], |_| Ok(())).optional()?.is_some();
+        && c.query_row("SELECT 1 FROM Bible WHERE ((Book = 43 AND Chapter = 3) OR (Book = 1 AND Chapter = 1)) AND (Scripture LIKE '%<num>%' OR Scripture GLOB '*<tvm>[0-9]*') LIMIT 1", [], |_| Ok(())).optional()?.is_some();
     Ok((title, abbrev, info, strongs))
 }
 

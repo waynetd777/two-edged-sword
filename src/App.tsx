@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { CompareScreen } from "./Compare";
 import { JournalScreen } from "./Journal";
+import { KjvHistoryScreen } from "./KjvHistory";
 import { LibraryScreen } from "./Library";
 import { PlansScreen } from "./PlansScreen";
 import { SearchScreen } from "./Search";
@@ -74,6 +75,7 @@ function Screens() {
       {screen === "journal" && <JournalScreen openPalette={openPalette} />}
       {screen === "plans" && <PlansScreen openPalette={openPalette} />}
       {screen === "library" && <LibraryScreen />}
+      {screen === "history" && <KjvHistoryScreen />}
       {screen === "settings" && <SettingsScreen />}
       {(screen !== "read" || app.doc) && <PlayerBar focus={focus && screen === "read"} />}
       {palette && <Palette onClose={() => setPalette(false)} onAsk={() => app.setPending({ ask: "" })} />}

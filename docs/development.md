@@ -31,6 +31,8 @@ say why.
 | Settings, bookmarks, highlights, plans, chats, `reminder.json` (when the reminder last fired) | `~/Library/Application Support/Two-edged Sword/*.json` |
 | Search index (rebuilt on its own when modules change) | `~/Library/Application Support/Two-edged Sword/search-index.sqlite` |
 | Library material written out for Ask | `~/Library/Application Support/Two-edged Sword/ask/` and `books/` (see [Ask](ask.md)) |
+| Differences from the KJV, one reviewed list per translation, and their work folders | `~/Library/Application Support/Two-edged Sword/variances-<module>.json`, `variances-work/` |
+| Downloads cached by the build scripts in `tools/` | `~/Library/Caches/Two-edged Sword/` |
 
 In `ask/`, each passage chat gets `studies/<chat>/`, with the dictionaries hard-linked in from
 `ask/dictionaries/` rather than copied; each journal chat gets `journal/<chat>/`.
@@ -87,6 +89,9 @@ taken by hand (⌘⇧4 with the menu open, cropped to the menu).
 | `src-tauri/src/study.rs`, `books.rs` | Writing library material out as files for Ask to search: a folder per passage chat with the dictionaries hard-linked in, and `ask/journal/<chat>/` for journal chats |
 | `index.html` | The splash screen, painted before React starts |
 | `src/scene.ts`, `tools/screenshots.py` | Screenshot mode and the script that drives it |
+| `src/variances.tsx`, `src/KjvHistory.tsx` | The ≠ marks and their popup, and the KJV History page |
+| `tools/variances/` | Finding, reviewing and building each translation's differences from the KJV (see [Translations and manuscripts](manuscripts.md)) |
+| `tools/sefaria/`, `tools/vulgate/`, `tools/crosswire/` | Building modules from free sources (see [Library](library.md#building-modules)) |
 | `tools/make_icons.py` | The icon artwork (the sidebar logo and splash reuse the same sword) |
 
 Design decisions and known bugs are logged in `_sift/`; `python3 _sift/bin/sift.py decisions`
