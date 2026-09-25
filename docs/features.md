@@ -144,7 +144,9 @@ underline at once). With "Correct spelling automatically" on in macOS (Keyboard 
 word is corrected as you finish it; ⌘Z undoes that, and clicking the word offers to change it
 back. Grammar is checked too (Settings › Journal › Check grammar): problems get a blue wavy
 underline, and clicking one shows macOS's explanation, its fix if it has one, and Ignore. Whole
-sentences it takes for fragments aren't marked. Verses inserted from the Bible aren't checked.
+sentences it takes for fragments aren't marked. Every word in your KJV counts as spelled right
+("maketh", "shouldest", every name), and sentences in KJV English ("he maketh me", "thou art")
+aren't grammar-checked. Verses inserted from the Bible aren't checked.
 
 Changes made to the files elsewhere (in Obsidian, say) show within a few seconds, even in the
 open entry, unless you have unsaved edits. If the folder the journal sits in has gone (the vault

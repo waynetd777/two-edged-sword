@@ -224,9 +224,11 @@ fn keep_awake(on: bool) -> Result<(), String> {
 
 // Spelling (spell.rs): not async, so they run on the main thread, as AppKit wants.
 #[tauri::command]
-fn spell_check(text: String) -> Vec<(usize, usize)> { spell::check(&text) }
+fn spell_check(st: State<AppState>, text: String) -> Vec<(usize, usize)> { kjv_words(&st); spell::check(&text) }
 #[tauri::command]
-fn spell_grammar(text: String) -> Vec<spell::GrammarIssue> { spell::grammar(&text) }
+fn spell_grammar(st: State<AppState>, text: String) -> Vec<spell::GrammarIssue> { kjv_words(&st); spell::grammar(&text) }
+/// The KJV's words, read here if a check comes before the start-up read has finished.
+fn kjv_words(st: &AppState) { if !spell::kjv_ready() { spell::load_kjv(&st.lib()); } }
 #[tauri::command]
 fn spell_guesses(word: String) -> Vec<String> { spell::guesses(&word) }
 #[tauri::command]
@@ -411,6 +413,8 @@ pub fn run() {
     let lib = Arc::new(Library::scan(library::default_dir()));
     let data = store::data_dir();
     let index = Arc::new(index::Index::new(data.join("search-index.sqlite")));
+    // The KJV's words, so the journal's spell checker takes its spellings as right.
+    { let lib = lib.clone(); std::thread::spawn(move || spell::load_kjv(&lib)); }
     {
         let (lib, index, ask_root) = (lib.clone(), index.clone(), study::root(&data));
         std::thread::spawn(move || {
