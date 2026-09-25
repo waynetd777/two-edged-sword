@@ -226,6 +226,8 @@ fn keep_awake(on: bool) -> Result<(), String> {
 #[tauri::command]
 fn spell_check(text: String) -> Vec<(usize, usize)> { spell::check(&text) }
 #[tauri::command]
+fn spell_grammar(text: String) -> Vec<spell::GrammarIssue> { spell::grammar(&text) }
+#[tauri::command]
 fn spell_guesses(word: String) -> Vec<String> { spell::guesses(&word) }
 #[tauri::command]
 fn spell_correction(word: String) -> Option<String> { spell::correction(&word) }
@@ -460,6 +462,7 @@ pub fn run() {
             journal_stamp,
             journal_export,
             spell_check,
+            spell_grammar,
             spell_guesses,
             spell_correction,
             spell_learn,

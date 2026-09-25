@@ -33,7 +33,7 @@ libc = "0.2"
 
 [target.'cfg(target_os = "macos")'.dependencies]
 objc2 = "0.6"
-objc2-foundation = { version = "0.3", default-features = false, features = ["std", "NSProcessInfo", "NSString", "NSValue", "NSArray", "NSRange"] }
+objc2-foundation = { version = "0.3", default-features = false, features = ["std", "NSProcessInfo", "NSString", "NSValue", "NSArray", "NSRange", "NSDictionary"] }
 objc2-app-kit = { version = "0.3", default-features = false, features = ["std", "NSColor", "NSSpellChecker"] }
 objc2-avf-audio = { version = "0.3", default-features = false, features = ["std", "AVSpeechSynthesis"] }
 

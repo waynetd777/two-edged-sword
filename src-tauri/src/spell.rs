@@ -4,8 +4,10 @@
 //! are UTF-16, as in NSString and in JavaScript strings. Called on the main thread (the
 //! commands aren't async), where AppKit wants it.
 
+use objc2::runtime::AnyObject;
 use objc2_app_kit::NSSpellChecker;
-use objc2_foundation::{NSRange, NSString};
+use objc2_foundation::{NSArray, NSDictionary, NSRange, NSString, NSValue};
+use serde::Serialize;
 use std::sync::OnceLock;
 
 /// One document tag for the app, so words ignored stay ignored until it quits.
@@ -25,6 +27,54 @@ pub fn check(text: &str) -> Vec<(usize, usize)> {
             break;
         }
         out.push((r.location, r.length));
+        at = r.location + r.length;
+    }
+    out
+}
+
+/// A grammar problem: where it is (UTF-16, as for spelling), macOS's explanation, and its fixes.
+#[derive(Serialize)]
+pub struct GrammarIssue {
+    pub start: usize,
+    pub len: usize,
+    pub description: String,
+    pub corrections: Vec<String>,
+}
+
+/// The grammar problems, a sentence at a time. macOS needs the language named to check grammar
+/// at all; a problem inside another one ("the" within "the the") is left to the outer one, and
+/// one that is the whole sentence (a "fragment", which a journal is full of) is left out.
+pub fn grammar(text: &str) -> Vec<GrammarIssue> {
+    let sc = NSSpellChecker::sharedSpellChecker();
+    let s = NSString::from_str(text);
+    let lang = sc.language();
+    let key = |k: &str, d: &NSDictionary<NSString, AnyObject>| d.objectForKey(&NSString::from_str(k));
+    let (len, mut at, mut out) = (s.length(), 0usize, Vec::<GrammarIssue>::new());
+    while at < len && out.len() < 500 {
+        let mut details: Option<objc2::rc::Retained<NSArray<NSDictionary<NSString, AnyObject>>>> = None;
+        let r = unsafe { sc.checkGrammarOfString_startingAt_language_wrap_inSpellDocumentWithTag_details(&s, at as isize, Some(&lang), false, tag(), Some(&mut details)) };
+        if r.length == 0 || r.location >= len {
+            break;
+        }
+        let first = out.len();
+        for d in details.iter().flat_map(|ds| (0..ds.count()).map(move |i| ds.objectAtIndex(i))) {
+            // The range is from the start of the sentence.
+            let Some(g) = key("NSGrammarRange", &d).and_then(|v| v.downcast::<NSValue>().ok()).and_then(|v| v.get_range()) else { continue };
+            let (start, glen) = (r.location + g.location, g.length);
+            let whole = s.substringWithRange(r).to_string();
+            let body = whole.trim_end_matches(|c: char| c.is_whitespace() || ".!?".contains(c)).encode_utf16().count();
+            if g.location == 0 && glen >= body {
+                continue;
+            }
+            if glen == 0 || out[first..].iter().any(|o| o.start <= start && start + glen <= o.start + o.len) {
+                continue;
+            }
+            let description = key("NSGrammarUserDescription", &d).and_then(|v| v.downcast::<NSString>().ok()).map(|v| v.to_string()).unwrap_or_default();
+            let corrections = key("NSGrammarCorrections", &d).and_then(|v| v.downcast::<NSArray>().ok())
+                .map(|a| (0..a.count()).filter_map(|i| a.objectAtIndex(i).downcast::<NSString>().ok().map(|x| x.to_string())).collect())
+                .unwrap_or_default();
+            out.push(GrammarIssue { start, len: glen, description, corrections });
+        }
         at = r.location + r.length;
     }
     out
@@ -57,4 +107,25 @@ pub fn learn(word: &str) {
 /// Leaves the word alone until the app quits.
 pub fn ignore(word: &str) {
     NSSpellChecker::sharedSpellChecker().ignoreWord_inSpellDocumentWithTag(&NSString::from_str(word), tag());
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn grammar_finds_a_doubled_word_with_its_fix() {
+        let text = "This is fine. He went to the the store.";
+        let found = super::grammar(text);
+        let u: Vec<u16> = text.encode_utf16().collect();
+        let doubled = found.iter().find(|g| String::from_utf16_lossy(&u[g.start..g.start + g.len]) == "the the");
+        let Some(g) = doubled else { panic!("no doubled word in {:?}", found.iter().map(|g| &g.description).collect::<Vec<_>>()) };
+        assert_eq!(g.corrections, vec!["the".to_string()]);
+        assert!(!g.description.is_empty());
+        // The lone "the" inside it isn't reported separately.
+        assert_eq!(found.iter().filter(|x| x.start >= g.start && x.start < g.start + g.len).count(), 1);
+    }
+
+    #[test]
+    fn grammar_leaves_out_whole_sentence_fragments() {
+        assert!(super::grammar("Amen. A full week behind me and a fuller one ahead.").is_empty());
+    }
 }

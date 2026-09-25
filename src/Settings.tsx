@@ -51,7 +51,7 @@ export function SettingsScreen() {
             <Row label="Show verses as"><Seg value={s.layout} options={[["verse", "One per line"], ["paragraph", "Paragraphs"]]} onChange={(v) => app.set({ layout: v })} /></Row>
           </Section>
           <Section title="Bibles">
-            <Row label="Default translation"><select className="btn" value={s.bible} onChange={(e) => app.set({ bible: e.target.value })}>{app.bibles.map((b) => <option key={b.id} value={b.id}>{b.title}</option>)}</select></Row>
+            <Row label="Default translation"><select className="btn" style={{ maxWidth: "min(360px, 100%)" }} value={s.bible} onChange={(e) => app.set({ bible: e.target.value })}>{app.bibles.map((b) => <option key={b.id} value={b.id}>{b.title}</option>)}</select></Row>
             <Row label="Compare starts with" hint="Change them on the Compare screen."><div style={{ display: "flex", gap: 5 }}>{s.compare.map((c) => <span key={c} className="chip" style={{ cursor: "default" }}>{app.mod("bible", c)?.abbrev ?? c}</span>)}</div></Row>
             <Row label="Library" hint="Checked for new modules each time the app opens, or press Rescan on the Library screen."><span style={{ fontSize: 12.5 }}>e-Sword X · {app.lib?.modules.length} modules · read-only</span></Row>
           </Section>
@@ -69,6 +69,7 @@ export function SettingsScreen() {
               <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}><code style={{ fontSize: 12 }}>{app.journalDir.replace(/^\/Users\/[^/]+/, "~")}</code><button className="btn small" type="button" onClick={chooseDir}>Change…</button>{s.journalDir && <button className="btn small" type="button" onClick={() => app.set({ journalDir: "" })}>Use default</button>}</div>
             </Row>
             <Row label="Show notes beside verses"><Switch on={s.showNotes} onChange={(v) => app.set({ showNotes: v })} /></Row>
+            <Row label="Check grammar" hint="With spelling, by macOS: a blue underline, and a click explains it."><Switch on={s.journalGrammar ?? true} onChange={(v) => app.set({ journalGrammar: v })} /></Row>
           </Section>
           <Section title="AI assistant">
             {(["claude", "codex", "antigravity", "copilot"] as const).map((k) => {
@@ -80,7 +81,7 @@ export function SettingsScreen() {
               );
             })}
             {asst.status && !asst.available && <div className="hint">Install Claude Code, Codex, Antigravity or GitHub Copilot and sign in, and Ask appears throughout the app. Until then it stays hidden.</div>}
-            {asst.models.length > 0 && <Row label="Default model"><select className="btn" value={pickModel(s.model, asst.models)} onChange={(e) => app.set({ model: e.target.value })}>{modelGroups(asst.models).map((g) => <optgroup key={g.provider} label={g.name}>{g.models.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}</optgroup>)}</select></Row>}
+            {asst.models.length > 0 && <Row label="Default model"><select className="btn" style={{ maxWidth: "min(360px, 100%)" }} value={pickModel(s.model, asst.models)} onChange={(e) => app.set({ model: e.target.value })}>{modelGroups(asst.models).map((g) => <optgroup key={g.provider} label={g.name}>{g.models.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}</optgroup>)}</select></Row>}
             <Row label="Search my library" hint="In a chat about a passage, the assistant can search every commentary on it, the lexicon entries for its words, your dictionaries and your other Bibles, and does when the question calls for them."><Switch on={s.includeCommentaries} onChange={(v) => app.set({ includeCommentaries: v })} /></Row>
             <Row label="Include my journal" hint="With Search my library on, a chat about a passage can also draw on your journal entries linked to it: your prayers, notes and sermons. They go to the AI (Anthropic, OpenAI or Google) with your questions."><Switch on={s.askJournal} onChange={(v) => app.set({ askJournal: v })} /></Row>
             <Row label="Licensed text" hint="When off, no copyrighted module's text is sent: questions about the NIV, ESV and other licensed Bibles send public-domain text instead, and licensed commentaries, lexicons, dictionaries and books are left out."><Switch on={s.allowLicensed} onChange={(v) => app.set({ allowLicensed: v })}>Allow their text to be sent</Switch></Row>
@@ -90,7 +91,7 @@ export function SettingsScreen() {
           </Section>
           <Section title="Quiet time">
             <Row label="Daily reminder" hint="A notification at this time if today's reading isn't done. The app keeps running in the menu bar after its window is closed; it can't remind you once you quit it."><div style={{ display: "flex", gap: 10, alignItems: "center" }}><Switch on={s.reminder} onChange={(v) => app.set({ reminder: v })}>Remind me</Switch><input className="btn" type="time" value={s.reminderTime} disabled={!s.reminder} onChange={(e) => e.target.value && app.set({ reminderTime: e.target.value })} /></div></Row>
-            <Row label="When I fall behind"><select className="btn" value={s.whenBehind} onChange={(e) => app.set({ whenBehind: e.target.value as typeof s.whenBehind })}><option value="ask">Ask me each time</option><option value="move">Move the rest later</option><option value="skip">Skip the missed readings</option></select></Row>
+            <Row label="When I fall behind"><select className="btn" style={{ maxWidth: "min(360px, 100%)" }} value={s.whenBehind} onChange={(e) => app.set({ whenBehind: e.target.value as typeof s.whenBehind })}><option value="ask">Ask me each time</option><option value="move">Move the rest later</option><option value="skip">Skip the missed readings</option></select></Row>
           </Section>
         </div>
       </div>

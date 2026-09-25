@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { save as saveDialog } from "@tauri-apps/plugin-dialog";
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
 import { api, JournalEntry } from "./api";
@@ -22,6 +22,25 @@ const longDate = (s: string) => {
   const d = new Date(s);
   return `${d.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" })} · ${d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}`;
 };
+
+// Worked out once per entry (the objects are kept until an entry changes): with thousands of
+// entries, doing it on every keystroke made typing slow.
+const plainOf = new WeakMap<JournalEntry, string>();
+const plain = (e: JournalEntry) => { let t = plainOf.get(e); if (t === undefined) { t = mdPlain(e.body); plainOf.set(e, t); } return t; };
+const hayOf = new WeakMap<JournalEntry, string>();
+const hay = (e: JournalEntry) => { let t = hayOf.get(e); if (t === undefined) { t = (e.title + " " + e.tags.join(" ") + " " + e.verses.join(" ") + " " + plain(e)).toLowerCase(); hayOf.set(e, t); } return t; };
+
+/** One entry in the list; drawn again only when it or its selection changes. */
+const EntryRow = memo(function EntryRow({ e, selected, onSelect }: { e: JournalEntry; selected: boolean; onSelect: (id: string) => void }) {
+  const d = new Date(e.created);
+  return (
+    <button type="button" className="bm" onClick={() => onSelect(e.id)} style={{ flexDirection: "column", alignItems: "flex-start", gap: 3, padding: "10px 12px", background: selected ? "var(--accentsoft)" : undefined, boxShadow: selected ? "inset 0 0 0 1px var(--ring)" : undefined }}>
+      <b style={{ fontSize: 13.5 }}>{e.title || "Untitled"}</b>
+      <span className="n">{d.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })}{e.verses.length ? ` · ${e.verses.join(", ")}` : ""}</span>
+      <span style={{ font: "400 13.5px/1.45 var(--serif)", color: "var(--muted)", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{plain(e).slice(0, 180)}</span>
+    </button>
+  );
+});
 
 export function JournalScreen({ openPalette }: { openPalette: () => void }) {
   const app = useApp();
@@ -56,7 +75,7 @@ export function JournalScreen({ openPalette }: { openPalette: () => void }) {
   const entries = useMemo(() => {
     const all = draft && !app.journal.some((e) => e.id === draft.id) ? [draft, ...app.journal] : app.journal;
     const f = filter.toLowerCase();
-    return all.filter((e) => (!tag || e.tags.includes(tag)) && (!f || (e.title + " " + e.tags.join(" ") + " " + e.verses.join(" ") + " " + mdPlain(e.body)).toLowerCase().includes(f)));
+    return all.filter((e) => (!tag || e.tags.includes(tag)) && (!f || hay(e).includes(f)));
   }, [app.journal, draft, filter, tag]);
   const tags = useMemo(() => Array.from(new Set(app.journal.flatMap((e) => e.tags))).sort(), [app.journal]);
   const cur = (draft && draft.id === selId ? draft : app.journal.find((e) => e.id === selId)) ?? null;
@@ -117,11 +136,7 @@ export function JournalScreen({ openPalette }: { openPalette: () => void }) {
               return (
                 <div key={e.id}>
                   {head}
-                  <button type="button" className="bm" onClick={() => setSelId(e.id)} style={{ flexDirection: "column", alignItems: "flex-start", gap: 3, padding: "10px 12px", background: e.id === selId ? "var(--accentsoft)" : undefined, boxShadow: e.id === selId ? "inset 0 0 0 1px var(--ring)" : undefined }}>
-                    <b style={{ fontSize: 13.5 }}>{e.title || "Untitled"}</b>
-                    <span className="n">{d.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })}{e.verses.length ? ` · ${e.verses.join(", ")}` : ""}</span>
-                    <span style={{ font: "400 13.5px/1.45 var(--serif)", color: "var(--muted)", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{mdPlain(e.body).slice(0, 180)}</span>
-                  </button>
+                  <EntryRow e={e} selected={e.id === selId} onSelect={setSelId} />
                 </div>
               );
             })}
@@ -172,7 +187,7 @@ function Editor({ entry, onChange, saved, err, onDelete, onExport, listed, liste
     ed.current.innerHTML = mdToHtml(entry.body) || "<p><br></p>";
     spell.recheck(50);
   }, [entry.body]); // eslint-disable-line react-hooks/exhaustive-deps
-  const spell = useSpelling(ed, entry.id, () => sync());
+  const spell = useSpelling(ed, entry.id, () => sync(), app.settings.journalGrammar ?? true);
   const find = useFind(ed, () => { sync(); spell.recheck(); });
   useEffect(() => {
     const f = () => { const s = window.getSelection(); if (s?.rangeCount && ed.current?.contains(s.anchorNode)) setPicked(s.isCollapsed ? "" : s.toString().trim()); };
@@ -310,14 +325,15 @@ function Editor({ entry, onChange, saved, err, onDelete, onExport, listed, liste
         </article>
         {preview}
         {spell.menu && (
-          <Popover anchor={spell.menu.rect} onClose={spell.closeMenu} width={220}>
+          <Popover anchor={spell.menu.rect} onClose={spell.closeMenu} width={spell.menu.grammar !== undefined ? 280 : 220}>
             <div style={{ padding: 6, display: "flex", flexDirection: "column" }}>
+              {spell.menu.grammar !== undefined && <span className="n" style={{ padding: "6px 10px", lineHeight: 1.4 }}>{spell.menu.grammar || "Possible grammar problem"}</span>}
               {spell.menu.was && <button className="opt" type="button" onClick={() => spell.choose(spell.menu!.was!)}>Change back to “{spell.menu.was}”</button>}
               {spell.menu.guesses.map((g) => <button key={g} className="opt" type="button" style={{ fontWeight: 600 }} onClick={() => spell.choose(g)}>{g}</button>)}
-              {!spell.menu.was && !spell.menu.guesses.length && <span className="n" style={{ padding: "6px 10px" }}>No suggestions</span>}
+              {!spell.menu.was && !spell.menu.guesses.length && spell.menu.grammar === undefined && <span className="n" style={{ padding: "6px 10px" }}>No suggestions</span>}
               {!spell.menu.was && <>
                 <div style={{ height: 1, background: "var(--border)", margin: "4px 0" }} />
-                <button className="opt" type="button" onClick={spell.learn}>Add “{spell.menu.word}” to dictionary</button>
+                {spell.menu.grammar === undefined && <button className="opt" type="button" onClick={spell.learn}>Add “{spell.menu.word}” to dictionary</button>}
                 <button className="opt" type="button" onClick={spell.ignore}>Ignore</button>
               </>}
             </div>

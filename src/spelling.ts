@@ -2,8 +2,9 @@
 // wavy underline (a CSS highlight, so the editor's contents are never touched); clicking one
 // offers macOS's guesses, Add to dictionary and Ignore. With "Correct spelling automatically" on
 // in macOS, a word is corrected as it's finished (space or punctuation); ⌘Z undoes it, and
-// clicking the corrected word offers to change it back. Verses inserted from the Bible, their
-// citations and links aren't checked.
+// clicking the corrected word offers to change it back. Grammar too, by the same checker: a
+// blue underline, and a click shows macOS's explanation and fixes. Verses inserted from the
+// Bible, their citations and links aren't checked.
 
 import { RefObject, useEffect, useRef, useState } from "react";
 import { api } from "./api";
@@ -17,7 +18,49 @@ const SKIP = "blockquote.verse, cite, a.ref, code";
 /** Words added to the dictionary or ignored this session. macOS can take a moment to take them
  *  in, and a check straight after would underline them again. */
 const accepted = new Set<string>();
+/** Grammar problems ignored this session, by their text and explanation. */
+const acceptedGrammar = new Set<string>();
+const grammarKey = (text: string, description: string) => `${text.toLowerCase()}|${description}`;
 
+/** The editor's text a paragraph at a time: text in one block runs on (a word or sentence can
+ *  cross bold or a link), with a range for any stretch of it. */
+function blocks(nodes: Text[]) {
+  const out: { text: string; range: (a: number, len: number) => Range | null }[] = [];
+  let cur: Text[] = [], starts: number[] = [], text = "", block: Element | null | undefined;
+  const close = () => {
+    if (!cur.length) return;
+    const [ns, ss, t] = [cur, starts, text];
+    const at = (i: number): [Text, number] => {
+      let k = ss.length - 1;
+      while (k > 0 && ss[k] > i) k--;
+      return [ns[k], Math.min(i - ss[k], ns[k].data.length)];
+    };
+    out.push({ text: t, range: (a, len) => {
+      if (len <= 0) return null;
+      const r = document.createRange();
+      r.setStart(...at(a));
+      // The end from its last character, so it isn't placed at the start of the next node.
+      const [n, off] = at(a + len - 1);
+      r.setEnd(n, off + 1);
+      return r;
+    } });
+  };
+  for (const n of nodes) {
+    const b = n.parentElement?.closest("p, li, h1, h2, h3, h4, blockquote, div") ?? null;
+    if (b !== block) { close(); cur = []; starts = []; text = ""; block = b; }
+    cur.push(n); starts.push(text.length); text += n.data;
+  }
+  close();
+  return out;
+}
+
+/** What macOS found in a paragraph's text, kept so that only paragraphs that changed are sent
+ *  (the checks run on the app's main thread, where a whole long entry takes a noticeable time). */
+type Found = { spelling: [number, number][]; grammar: { start: number; len: number; description: string; corrections: string[] }[] | null };
+const cache = new Map<string, Found>();
+const remember = (text: string, f: Found) => { cache.delete(text); cache.set(text, f); if (cache.size > 3000) cache.delete(cache.keys().next().value!); };
+
+interface GrammarHit { range: Range; description: string; corrections: string[] }
 function textNodes(root: HTMLElement): Text[] {
   const out: Text[] = [];
   const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
@@ -39,12 +82,15 @@ export interface SpellMenu {
   guesses: string[];
   /** For a word corrected automatically: what was typed. */
   was?: string;
+  /** For a grammar problem: macOS's explanation. */
+  grammar?: string;
 }
 
 /** Spelling for the editor `ed`; `key` is the entry shown (a new one starts afresh); `onEdit`
- *  saves after a change made here. */
-export function useSpelling(ed: RefObject<HTMLDivElement | null>, key: string, onEdit: () => void) {
+ *  saves after a change made here; `grammarOn` checks grammar as well. */
+export function useSpelling(ed: RefObject<HTMLDivElement | null>, key: string, onEdit: () => void, grammarOn = true) {
   const bad = useRef<Range[]>([]);
+  const gram = useRef<GrammarHit[]>([]);
   const fixed = useRef<{ range: Range; was: string }[]>([]);
   const timer = useRef<number | undefined>(undefined);
   const [menu, setMenu] = useState<SpellMenu | null>(null);
@@ -53,35 +99,49 @@ export function useSpelling(ed: RefObject<HTMLDivElement | null>, key: string, o
     const hs = highlights(), H = HighlightOf();
     if (!hs || !H) return;
     if (bad.current.length) hs.set("spelling", new H(...bad.current)); else hs.delete("spelling");
+    if (gram.current.length) hs.set("grammar", new H(...gram.current.map((g) => g.range))); else hs.delete("grammar");
   };
 
   const check = async () => {
     const root = ed.current;
     if (!root) return;
-    const nodes = textNodes(root);
-    let text = "";
-    const starts: number[] = [];
-    for (const n of nodes) { starts.push(text.length); text += n.data + "\n"; }
-    let found: [number, number][];
-    try { found = await api.spellCheck(text); } catch { return; }
+    const paras = blocks(textNodes(root));
+    // Only paragraphs not seen before (or not yet checked for grammar) go to macOS, in one call
+    // each, a line apiece; the results are split back by where each line starts.
+    const need = [...new Set(paras.map((p) => p.text).filter((t) => t.trim() && (!cache.has(t) || (grammarOn && !cache.get(t)!.grammar))))];
+    if (need.length) {
+      const joined = need.join("\n"), starts: number[] = [];
+      need.reduce((n, t) => { starts.push(n); return n + t.length + 1; }, 0);
+      const line = (a: number) => { let k = starts.length - 1; while (k > 0 && starts[k] > a) k--; return k; };
+      let sp: [number, number][], gr: Awaited<ReturnType<typeof api.spellGrammar>> | null;
+      try { [sp, gr] = await Promise.all([api.spellCheck(joined), grammarOn ? api.spellGrammar(joined) : Promise.resolve(null)]); } catch { return; }
+      const got = need.map((t): Found => ({ spelling: [], grammar: gr ? [] : cache.get(t)?.grammar ?? null }));
+      for (const [a, len] of sp) { const k = line(a); got[k].spelling.push([a - starts[k], len]); }
+      for (const g of gr ?? []) { const k = line(g.start); got[k].grammar!.push({ ...g, start: g.start - starts[k] }); }
+      need.forEach((t, k) => remember(t, got[k]));
+    }
     const sel = window.getSelection();
     const caret = sel?.rangeCount && sel.isCollapsed && document.activeElement === root ? sel.getRangeAt(0) : null;
-    const ranges: Range[] = [];
-    for (const [a, len] of found) {
-      let i = starts.length - 1;
-      while (i > 0 && starts[i] > a) i--;
-      const n = nodes[i], off = a - starts[i];
-      // Typed over since the check was asked for: left to the next one.
-      if (!n?.isConnected || n.data.slice(off, off + len) !== text.slice(a, a + len)) continue;
-      if (accepted.has(text.slice(a, a + len).toLowerCase())) continue;
-      // Not the word being typed.
-      if (caret && caret.startContainer === n && caret.startOffset === off + len) continue;
-      const r = document.createRange();
-      r.setStart(n, off);
-      r.setEnd(n, off + len);
-      ranges.push(r);
+    // Not what is being typed at the caret.
+    const typing = (r: Range) => !!caret && caret.startContainer === r.endContainer && caret.startOffset === r.endOffset;
+    const ranges: Range[] = [], hits: GrammarHit[] = [];
+    for (const p of paras) {
+      const f = cache.get(p.text);
+      if (!f) continue;
+      for (const [a, len] of f.spelling) {
+        const want = p.text.slice(a, a + len), r = p.range(a, len);
+        // Typed over since the check was asked for: left to the next one.
+        if (!r || r.toString() !== want || accepted.has(want.toLowerCase()) || typing(r)) continue;
+        ranges.push(r);
+      }
+      for (const g of grammarOn ? f.grammar ?? [] : []) {
+        const want = p.text.slice(g.start, g.start + g.len), r = p.range(g.start, g.len);
+        if (!r || r.toString() !== want || acceptedGrammar.has(grammarKey(want, g.description)) || typing(r)) continue;
+        hits.push({ range: r, description: g.description, corrections: g.corrections });
+      }
     }
     bad.current = ranges;
+    gram.current = hits;
     paint();
   };
 
@@ -91,8 +151,10 @@ export function useSpelling(ed: RefObject<HTMLDivElement | null>, key: string, o
     fixed.current = [];
     setMenu(null);
     recheck(50);
-    return () => { window.clearTimeout(timer.current); highlights()?.delete("spelling"); };
+    return () => { window.clearTimeout(timer.current); highlights()?.delete("spelling"); highlights()?.delete("grammar"); };
   }, [key]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Turning grammar off in Settings takes its underlines away; on, checks again.
+  useEffect(() => { if (!grammarOn) { gram.current = []; paint(); } else recheck(50); }, [grammarOn]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /** Puts `text` in place of `r`, as typing would (so ⌘Z undoes it), keeping the caret where it was. */
   const replace = (r: Range, text: string, keepCaret = true): Range | null => {
@@ -136,12 +198,14 @@ export function useSpelling(ed: RefObject<HTMLDivElement | null>, key: string, o
     }).catch(() => {});
   };
 
-  /** A click in the editor: on a misspelled or corrected word, opens its menu. */
+  /** A click in the editor: on a misspelled or corrected word, or a grammar problem, opens its menu. */
   const onClick = async (e: React.MouseEvent) => {
     const at = document.caretRangeFromPoint?.(e.clientX, e.clientY);
     if (!at) return;
     const f = fixed.current.find((x) => holds(x.range, at.startContainer, at.startOffset));
     const r = f?.range ?? bad.current.find((x) => holds(x, at.startContainer, at.startOffset));
+    const g = r ? undefined : gram.current.find((x) => holds(x.range, at.startContainer, at.startOffset));
+    if (g) { setMenu({ rect: g.range.getBoundingClientRect(), word: g.range.toString(), range: g.range, guesses: g.corrections.slice(0, 6), grammar: g.description }); return; }
     if (!r) { setMenu(null); return; }
     const word = r.toString();
     const guesses = await api.spellGuesses(word).catch(() => [] as string[]);
@@ -165,7 +229,14 @@ export function useSpelling(ed: RefObject<HTMLDivElement | null>, key: string, o
     tell(word).then(() => recheck(0)).catch(() => {});
   };
   const learn = () => { if (menu) accept(menu.word, api.spellLearn); setMenu(null); };
-  const ignore = () => { if (menu) accept(menu.word, api.spellIgnore); setMenu(null); };
+  const ignore = () => {
+    if (menu?.grammar !== undefined) {
+      acceptedGrammar.add(grammarKey(menu.word, menu.grammar));
+      gram.current = gram.current.filter((g) => g.range !== menu.range);
+      paint();
+    } else if (menu) accept(menu.word, api.spellIgnore);
+    setMenu(null);
+  };
 
   return { recheck, onKey, onClick, menu, closeMenu: () => setMenu(null), choose, learn, ignore };
 }

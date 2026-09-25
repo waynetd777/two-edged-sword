@@ -93,6 +93,8 @@ export const api = {
   musicState: () => invoke<MusicState>("music_state"),
   /** macOS's spell checker (spell.rs): misspelled words as [start, length] in UTF-16, as JS strings count. */
   spellCheck: (text: string) => invoke<[number, number][]>("spell_check", { text }),
+  /** Grammar problems, with macOS's explanation and fixes; offsets as for spellCheck. */
+  spellGrammar: (text: string) => invoke<{ start: number; len: number; description: string; corrections: string[] }[]>("spell_grammar", { text }),
   spellGuesses: (word: string) => invoke<string[]>("spell_guesses", { word }),
   /** The automatic correction for a word just typed, only with "Correct spelling automatically" on. */
   spellCorrection: (word: string) => invoke<string | null>("spell_correction", { word }),

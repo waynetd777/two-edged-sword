@@ -33,6 +33,8 @@ export interface Settings {
   showNotes: boolean;
   /** The journal highlighter's colour, kept until another is picked. */
   journalHighlight: HlColor;
+  /** Grammar checking in the journal, with spelling. */
+  journalGrammar: boolean;
   model: Model;
   includeCommentaries: boolean;
   /** Passage chats also get the user's journal entries on the passage. */
@@ -57,7 +59,7 @@ export interface Settings {
 const DEFAULTS: Settings = {
   theme: "auto", readSize: 19, readFont: "literata", studyTab: "commentary", docTab: "ask", studyCommentary: null, studyDict: null, dictModule: null, studyFollow: true, redLetters: true, layout: "verse", bible: "kjv", compare: ["kjv", "asv", "kjv+"], hiddenBibles: [],
   commentaryOrder: ["barnes", "henry", "clarke", "gill", "jfb", "wesley", "darby", "meyer"], dictionaryOrder: ["isbe", "smith", "nave", "cyclopedia"],
-  voice: "", rate: 1, continueChapter: true, readNumbers: false, highlightWords: true, journalDir: "", showNotes: true, journalHighlight: "yellow",
+  voice: "", rate: 1, continueChapter: true, readNumbers: false, highlightWords: true, journalDir: "", showNotes: true, journalHighlight: "yellow", journalGrammar: true,
   model: "claude-sonnet-5", includeCommentaries: true, askJournal: false, allowLicensed: true, reminder: false, reminderTime: "06:30", whenBehind: "ask", studyPane: true, copyNumbers: true,
 };
 
@@ -326,6 +328,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const journalDir = settings.journalDir || defaultDir;
   // Only the latest listing is kept: at startup the default folder's can arrive after the chosen one's.
   const journalSeq = useRef(0);
+  /** The journal files' fingerprint as last seen, so a save made here isn't mistaken for an edit elsewhere. */
+  const journalStamp = useRef<string | null>(null);
   const reloadJournal = useCallback(async () => {
     if (!journalDir) return;
     const n = ++journalSeq.current;
@@ -336,14 +340,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // the window is showing, and at once when it comes back to the front.
   useEffect(() => {
     if (!journalDir) return;
-    let last: string | null = null, dead = false;
+    let dead = false;
+    journalStamp.current = null;
     const check = async () => {
       if (document.visibilityState === "hidden") return;
       try {
         const s = await api.journalStamp(journalDir);
         if (dead) return;
-        if (last !== null && s !== last) reloadJournal();
-        last = s;
+        if (journalStamp.current !== null && s !== journalStamp.current) reloadJournal();
+        journalStamp.current = s;
       } catch { /* the folder isn't there; saving says so */ }
     };
     check();
@@ -461,8 +466,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
     },
     closeDoc: () => navigate({ doc: null }),
     journal, journalDir,
-    saveEntry: async (e) => { await api.journalSave(journalDir, e); await reloadJournal(); },
-    deleteEntry: async (id) => { await api.journalDelete(journalDir, id); await reloadJournal(); },
+    // A save or delete updates the one entry here rather than reading the whole journal again
+    // (thousands of entries, on every pause in typing), and notes the files' new fingerprint.
+    saveEntry: async (e) => {
+      await api.journalSave(journalDir, e);
+      ++journalSeq.current; // a reload already under way would bring back the old copy
+      setJournal((js) => [e, ...js.filter((x) => x.id !== e.id)].sort((a, b) => b.created.localeCompare(a.created)));
+      journalStamp.current = await api.journalStamp(journalDir).catch(() => journalStamp.current);
+    },
+    deleteEntry: async (id) => {
+      await api.journalDelete(journalDir, id);
+      ++journalSeq.current;
+      setJournal((js) => js.filter((x) => x.id !== id));
+      journalStamp.current = await api.journalStamp(journalDir).catch(() => journalStamp.current);
+    },
     plans, setPlans, plansReady: settingsLoaded && plansLoaded, chats, setChats,
     // An article, a commentary or a question is shown beside the Bible, so a book open in Read is
     // closed for it (back returns to the book).
