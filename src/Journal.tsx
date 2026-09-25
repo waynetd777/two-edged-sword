@@ -8,7 +8,7 @@ import { plainText } from "./esword";
 import { Icon } from "./icons";
 import { HL_PAINT, htmlToMd, mdPlain, mdToHtml } from "./md";
 import { HL, HL_DOT } from "./Read";
-import { Topbar } from "./Shell";
+import { SearchField, Topbar } from "./Shell";
 import { HlColor, nowLocal, onFlush, uid, useApp } from "./state";
 import { confirmDelete, Dialog, Popover, Seg } from "./ui";
 import { useAssistant } from "./assistant";
@@ -23,7 +23,7 @@ const longDate = (s: string) => {
   return `${d.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" })} · ${d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}`;
 };
 
-export function JournalScreen() {
+export function JournalScreen({ openPalette }: { openPalette: () => void }) {
   const app = useApp();
   const [selId, setSelId] = useState<string | null>(app.journal[0]?.id ?? null);
   const [draft, setDraft] = useState<JournalEntry | null>(null);
@@ -98,7 +98,7 @@ export function JournalScreen() {
   let lastMonth = "";
   return (
     <div className="main">
-      <Topbar />
+      <Topbar><SearchField onOpen={openPalette} /></Topbar>
       <div style={{ flexGrow: 1, minHeight: 0, display: "grid", gridTemplateColumns: "320px minmax(0,1fr)" }}>
         <div style={{ borderRight: "1px solid var(--border)", padding: "14px 12px 0", display: "flex", flexDirection: "column", gap: 10, minHeight: 0 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "0 4px" }}>

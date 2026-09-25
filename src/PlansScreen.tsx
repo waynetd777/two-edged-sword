@@ -5,7 +5,7 @@ import { Icon, Play } from "./icons";
 import {
   addDays, balanced, behind, chaptersOf, dateOf, dayLabel, dueBefore, firstUndone, fmtDay, fmtLong, indexOn, markDayRead, markPpoRead, paired, readOn, streak, unmarkDayRead, parseYmd, partRef, perDay, Plan, PpoPlan, dayTitle, ONLINE_DEVOTIONALS, doneToday, progressKey, ppoPreview, ppoUpcoming, SequencePlan, Sizes, today, todayFor, ymd,
 } from "./plans";
-import { Topbar } from "./Shell";
+import { SearchField, Topbar } from "./Shell";
 import { uid, useApp } from "./state";
 import { confirmDelete, Dialog, Popover, Seg, Switch } from "./ui";
 import { useStartQuietTime } from "./QuietTime";
@@ -17,7 +17,7 @@ async function sizes(bible: string): Promise<Sizes> {
   return sizesCache[bible];
 }
 
-export function PlansScreen() {
+export function PlansScreen({ openPalette }: { openPalette: () => void }) {
   const app = useApp();
   const canAsk = useAssistant().available;
   const plan = app.plans.find((p) => p.active) ?? app.plans[0];
@@ -75,7 +75,7 @@ export function PlansScreen() {
   if (!plan) {
     return (
       <div className="main">
-        <Topbar />
+        <Topbar><SearchField onOpen={openPalette} /></Topbar>
         <div style={{ flexGrow: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
           <div className="card" style={{ padding: 28, maxWidth: 480, display: "flex", flexDirection: "column", gap: 10 }}>
             <h1 style={{ margin: 0, font: "500 28px var(--display)" }}>Quiet time</h1>
@@ -104,7 +104,7 @@ export function PlansScreen() {
 
   return (
     <div className="main">
-      <Topbar />
+      <Topbar><SearchField onOpen={openPalette} /></Topbar>
       <div className="scroll" style={{ flexGrow: 1, padding: "20px 28px 100px", display: "flex", flexDirection: "column", gap: 16 }}>
         <div style={{ display: "flex", alignItems: "baseline", gap: 14 }}>
           <h1 style={{ margin: 0, font: "500 30px/1 var(--display)" }}>Quiet time</h1>

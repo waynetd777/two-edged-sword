@@ -4,7 +4,7 @@ import { ModuleInfo } from "./api";
 import { isLicensed } from "./Ask";
 import { renderHtml } from "./esword";
 import { Icon } from "./icons";
-import { Topbar } from "./Shell";
+import { SearchField, Topbar } from "./Shell";
 import { useApp } from "./state";
 import { orderModules } from "./StudyPane";
 import { Popover, Switch } from "./ui";
@@ -35,7 +35,7 @@ function Ordered({ kind, title, orderKey }: { kind: ModuleInfo["kind"]; title: s
   );
 }
 
-export function LibraryScreen() {
+export function LibraryScreen({ openPalette }: { openPalette: () => void }) {
   const app = useApp();
   const [busy, setBusy] = useState(false);
   const [info, setInfo] = useState<{ m: ModuleInfo; rect: DOMRect } | null>(null);
@@ -44,7 +44,7 @@ export function LibraryScreen() {
   const hidden = app.settings.hiddenBibles;
   return (
     <div className="main">
-      <Topbar />
+      <Topbar><SearchField onOpen={openPalette} /></Topbar>
       <div className="scroll" style={{ flexGrow: 1, padding: "20px 28px 60px", display: "flex", flexDirection: "column", gap: 16 }}>
         <div style={{ display: "flex", alignItems: "baseline", gap: 14, flexWrap: "wrap" }}>
           <h1 style={{ margin: 0, font: "500 30px/1 var(--display)" }}>Library</h1>

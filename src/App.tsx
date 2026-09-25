@@ -71,9 +71,9 @@ function Screens() {
       {screen === "compare" && <CompareScreen openPalette={openPalette} />}
       {screen === "search" && <SearchScreen />}
       {screen === "word" && <WordStudyScreen />}
-      {screen === "journal" && <JournalScreen />}
-      {screen === "plans" && <PlansScreen />}
-      {screen === "library" && <LibraryScreen />}
+      {screen === "journal" && <JournalScreen openPalette={openPalette} />}
+      {screen === "plans" && <PlansScreen openPalette={openPalette} />}
+      {screen === "library" && <LibraryScreen openPalette={openPalette} />}
       {screen === "settings" && <SettingsScreen />}
       {(screen !== "read" || app.doc) && <PlayerBar focus={focus && screen === "read"} />}
       {palette && <Palette onClose={() => setPalette(false)} onAsk={() => app.setPending({ ask: "" })} />}
