@@ -116,9 +116,11 @@ Dated entries with headings, bold, italic, lists, quotes and verses inserted fro
 (⌘N starts one). Each entry is linked to the verses it's about and shows beside them in Read
 (Settings › Journal › Show notes beside verses). Entries are Markdown files, one per month, in
 `~/Documents/Two-edged Sword/` (change it in Settings, e.g. to a folder in your Obsidian vault).
-The toolbar inserts a verse, links one, and adds a tag. ⌘F finds in the entry and ⌥⌘F
-replaces (⌘G for the next match; ⌘Z undoes a replacement). An Ask answer can be added to
-the journal in one click.
+The toolbar highlights in the reader's six colours (the button keeps the colour last picked;
+saved as `==text==` for yellow, which Obsidian shows too, and `<mark class="hl-green">` for the
+others), inserts a verse, links one, and adds a tag. ⌘F finds in the entry and ⌥⌘F replaces (⌘G
+for the next match; ⌘Z undoes a replacement). An Ask answer can be added to the journal in one
+click.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="images/journal-ask-dark.png"><img alt="Ask in the journal, about the open entry or the whole journal" src="images/journal-ask-light.png"></picture>
 
