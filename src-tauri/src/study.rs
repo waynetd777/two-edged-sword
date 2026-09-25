@@ -6,9 +6,11 @@
 //!   passage/<Bible>.txt       the passage in each Bible the page allows
 //!   commentaries/<Title>.txt  every commentary's notes that touch the passage
 //!   lexicons/<Title>.txt      entries for the Strong's numbers in the passage
+//!   dictionaries/<Title>.txt  each dictionary, whole
 //!
 //! Dictionaries are too big to copy per chat, so each is written out once, whole, under
-//! `dictionaries/` (redone when the module file changes) and the index points there.
+//! `<data>/ask/dictionaries/` (redone when the module file changes) and hard-linked into the
+//! chat's folder, so the assistant needs no other folder and sees only the ones allowed.
 
 use crate::library::{Kind, Library};
 use rusqlite::params;
@@ -36,6 +38,9 @@ pub struct Request {
     /// The user's journal entries on the passage, when they have chosen to include them.
     #[serde(default)]
     pub journal: Vec<JournalNote>,
+    /// Module ids to leave out: licensed ones, when the user hasn't allowed sending them.
+    #[serde(default)]
+    pub exclude: Vec<String>,
 }
 
 #[derive(Deserialize)]
@@ -73,7 +78,7 @@ pub fn export(lib: &Library, root: &Path, chat_id: &str, req: &Request) -> Resul
     let lock = crate::store::dir_lock(&dest);
     let _held = lock.lock().unwrap_or_else(|e| e.into_inner());
     crate::store::replace_dir(&dest, |dir| {
-        for sub in ["passage", "commentaries", "lexicons", "journal"] {
+        for sub in ["passage", "commentaries", "lexicons", "journal", "dictionaries"] {
             std::fs::create_dir_all(dir.join(sub)).map_err(|e| e.to_string())?;
         }
         let (from, to) = (req.from.unwrap_or(1), req.to.or(req.from).unwrap_or(999));
@@ -94,7 +99,7 @@ pub fn export(lib: &Library, root: &Path, chat_id: &str, req: &Request) -> Resul
 
         index.push_str("\ncommentaries/ — every commentary's notes that touch the passage (with its chapter and book introductions), entries headed == reference ==:\n");
         let mut digest = format!("What each commentary in the library says on {}, the opening of its notes (about {DIGEST_WORDS} words each). The full notes are in commentaries/.\n\n", req.label);
-        for m in lib.of_kind(Kind::Commentary) {
+        for m in lib.of_kind(Kind::Commentary).filter(|m| !req.exclude.contains(&m.id)) {
             let text = commentary(lib, &m.id, req.book, req.chapter, from, to).unwrap_or_default();
             if text.trim().is_empty() {
                 continue;
@@ -114,7 +119,7 @@ pub fn export(lib: &Library, root: &Path, chat_id: &str, req: &Request) -> Resul
         let numbers = req.strongs_bible.as_deref().map(|b| strongs(lib, b, req.book, req.chapter, from, to)).unwrap_or_default();
         if !numbers.is_empty() {
             index.push_str(&format!("\nlexicons/ — entries for the Strong's numbers in the passage ({}), headed == number ==:\n", numbers.iter().cloned().collect::<Vec<_>>().join(" ")));
-            for m in lib.of_kind(Kind::Lexicon) {
+            for m in lib.of_kind(Kind::Lexicon).filter(|m| !req.exclude.contains(&m.id)) {
                 let text = lexicon(lib, &m.id, &numbers).unwrap_or_default();
                 if text.is_empty() {
                     continue;
@@ -131,9 +136,11 @@ pub fn export(lib: &Library, root: &Path, chat_id: &str, req: &Request) -> Resul
         }
 
         let dicts = dictionaries_dir(root);
-        let done: Vec<String> = lib.of_kind(Kind::Dictionary).filter(|m| dict_current(&dicts, m)).map(|m| format!("{}.txt", file_name(&m.title))).collect();
+        let done: Vec<String> = lib.of_kind(Kind::Dictionary).filter(|m| !req.exclude.contains(&m.id) && dict_current(&dicts, m)).map(|m| format!("{}.txt", file_name(&m.title)))
+            .filter(|f| std::fs::hard_link(dicts.join(f), dir.join("dictionaries").join(f)).inspect_err(|e| eprintln!("dictionary link {f}: {e}")).is_ok())
+            .collect();
         if !done.is_empty() {
-            index.push_str(&format!("\nDictionaries, whole, one file each in {}, articles headed == Topic ==:\n", dicts.to_string_lossy()));
+            index.push_str("\ndictionaries/ — their dictionaries, whole, one file each, articles headed == Topic ==:\n");
             for f in done {
                 index.push_str(&format!("  {f}\n"));
             }
@@ -346,7 +353,8 @@ pub fn export_dictionaries(lib: &Library, root: &Path) {
     }
 }
 
-/// Study and journal folders of chats not touched for 60 days; the chat itself may be long gone.
+/// Study and journal folders of chats not asked in for 60 days (`ask` touches them); the chat
+/// itself may be long gone.
 pub fn prune(root: &Path) {
     let old = std::time::SystemTime::now() - std::time::Duration::from_secs(60 * 86400);
     for e in [studies_root(root), journal_root(root)].iter().filter_map(|d| std::fs::read_dir(d).ok()).flat_map(|rd| rd.flatten()) {
@@ -380,6 +388,29 @@ mod tests {
         // Same date and title: the second gets its own file.
         assert!(dir.join("2026-09-01 Love 2.md").exists());
         assert!(export_journal(&root, "../", "x", &[]).is_err());
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    /// Against the e-Sword X library on this Mac; skips itself where it is absent.
+    #[test]
+    fn export_links_dictionaries_and_leaves_out_excluded() {
+        let dir = crate::library::default_dir();
+        if !dir.join("kjv.bbli").is_file() { return; }
+        let lib = Library::scan(dir);
+        let root = std::env::temp_dir().join(format!("tes-ask-study-{}", std::process::id()));
+        export_dictionaries(&lib, &root);
+        let comm: Vec<_> = lib.of_kind(Kind::Commentary).collect();
+        let dicts: Vec<_> = lib.of_kind(Kind::Dictionary).collect();
+        let (Some(c), Some(d)) = (comm.first(), dicts.first()) else { return };
+        let req = |exclude: Vec<String>| Request { book: 43, chapter: 3, from: Some(16), to: Some(16), bibles: vec!["kjv".into()], strongs_bible: None, label: "John 3:16".into(), journal: vec![], exclude };
+        let all = export(&lib, &root, "all", &req(vec![])).unwrap();
+        let fewer = export(&lib, &root, "fewer", &req(vec![c.id.clone(), d.id.clone()])).unwrap();
+        let count = |p: PathBuf| std::fs::read_dir(p).map(|r| r.count()).unwrap_or(0);
+        assert!(count(all.join("dictionaries")) > 0, "dictionaries linked into the chat's folder");
+        assert_eq!(count(fewer.join("dictionaries")), count(all.join("dictionaries")) - 1);
+        let index = std::fs::read_to_string(fewer.join("index.txt")).unwrap();
+        assert!(!index.contains(&format!("{}.txt", file_name(&d.title))));
+        assert!(!std::fs::read_to_string(fewer.join("digest.txt")).unwrap().contains(&format!("######## {}\n", c.title)));
         let _ = std::fs::remove_dir_all(&root);
     }
 }

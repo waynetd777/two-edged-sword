@@ -25,11 +25,11 @@ The message includes the chapter being read, or the part of it being asked about
 Read a chart's PNG only when the question is about it or turns on it. \
 When you draw on the book, say which chapter it comes from.";
 
-/// Added in a passage chat. `{dicts}` is the folder of whole dictionaries.
+/// Added in a passage chat.
 const STUDY: &str = "The user's library has been written out for this question, to use only if the question needs it: \
 if it asks what commentators, lexicons or dictionaries say, or would be answered better from them, search it; if not (a quick factual question, a follow-up on your own answer), answer directly without opening any files. \
 Your working directory holds its material on the passage; index.txt lists the files: the passage in each of their Bibles, \
-every commentary's notes that touch it, and lexicon entries for its Strong's numbers. Their dictionaries are in {dicts}, whole, one file each, articles headed == Topic ==. \
+every commentary's notes that touch it, lexicon entries for its Strong's numbers, and their dictionaries, whole, one file each, articles headed == Topic ==. \
 When the question turns on what commentators, lexicons or dictionaries say, answer from these files rather than from memory, \
 and name the source for each point (for example: Matthew Henry reads this as …). Compare commentators when they differ. \
 If the library has nothing on a point, say so before adding what you know. \
@@ -50,7 +50,7 @@ Where their thinking has changed over time, say how. If the journal has nothing 
 pub enum Folder {
     None,
     Book(PathBuf),
-    Study { dir: PathBuf, dictionaries: PathBuf },
+    Study(PathBuf),
     Journal(PathBuf),
 }
 
@@ -58,7 +58,7 @@ impl Folder {
     fn dir(&self) -> Option<&PathBuf> {
         match self {
             Folder::None => None,
-            Folder::Book(d) | Folder::Study { dir: d, .. } | Folder::Journal(d) => Some(d),
+            Folder::Book(d) | Folder::Study(d) | Folder::Journal(d) => Some(d),
         }
     }
     /// What to add to the system prompt; each CLI appends how to search with its own tools.
@@ -66,7 +66,7 @@ impl Folder {
         match self {
             Folder::None => None,
             Folder::Book(_) => Some(BOOK.to_string()),
-            Folder::Study { dictionaries, .. } => Some(STUDY.replace("{dicts}", &dictionaries.to_string_lossy())),
+            Folder::Study(_) => Some(STUDY.to_string()),
             Folder::Journal(_) => Some(JOURNAL.to_string()),
         }
     }

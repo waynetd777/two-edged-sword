@@ -22,13 +22,10 @@ pub fn ask(app: AppHandle, running: Arc<Running>, cwd: PathBuf, chat_id: String,
         .arg(&prompt)
         .args(["--model", &model, "--output-format", "stream-json", "--verbose", "--include-partial-messages", "--strict-mcp-config"]);
     if let Some(extra) = folder.prompt() {
-        // Reads inside the working directory (and an --add-dir) need no permission; anything else
+        // Reads inside the working directory need no permission; anything else
         // would ask, and print mode refuses what it would have to ask for. Pin the mode in case the
         // user's settings bypass it.
         cmd.args(["--tools", "Read,Grep,Glob", "--permission-mode", "default", "--append-system-prompt", &format!("{SYSTEM}\n\n{extra} {TOOLS}")]);
-        if let Folder::Study { dictionaries, .. } = &folder {
-            cmd.arg("--add-dir").arg(dictionaries);
-        }
     } else {
         cmd.args(["--tools", "", "--append-system-prompt", SYSTEM]);
     }

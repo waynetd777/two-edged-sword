@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { api, Verse } from "./api";
-import { AskPanel } from "./Ask";
+import { AskPanel, withheld } from "./Ask";
 import { book, fmtRef, nextChapter, prevChapter, Ref } from "./bible";
 import { plainText, Token, tokenize } from "./esword";
 import { Icon } from "./icons";
@@ -93,8 +93,10 @@ export function CompareScreen({ openPalette }: { openPalette: () => void }) {
   const askContext = () => {
     if (!sel) return "";
     return "The same verse in the translations being compared:\n" + cols.map((c) => {
+      const m = app.mod("bible", c);
+      if (withheld(app.settings.allowLicensed, m)) return `${m?.abbrev}: (licensed; the user has chosen not to send its text)`;
       const v = (data[c] ?? []).find((x) => x.v === sel);
-      return `${app.mod("bible", c)?.abbrev}: ${v ? plainText(v.text) : "(not in this translation)"}`;
+      return `${m?.abbrev}: ${v ? plainText(v.text) : "(not in this translation)"}`;
     }).join("\n");
   };
 

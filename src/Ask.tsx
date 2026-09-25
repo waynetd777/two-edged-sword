@@ -14,6 +14,8 @@ import { confirmDelete, Popover } from "./ui";
 const PUBLIC_DOMAIN = /^(KJV\+?|KJVA|ASV|YLT|WEB|DRB|DRA|Darby|BBE|RV|ERV|Webster|Geneva|GNV|Bishops|Tyndale|Wycliffe|LXX|TR|WH|Byz)$/i;
 export const isLicensed = (m: ModuleInfo | undefined) =>
   !!m && !PUBLIC_DOMAIN.test(m.abbrev) && !/public domain/i.test(m.info) && /copyright|&copy;|&#169;|©|all rights reserved|used by permission/i.test(m.info);
+/** A module whose text Ask mustn't send: licensed, with Settings › Licensed text off. */
+export const withheld = (allowLicensed: boolean, m: ModuleInfo | undefined) => !allowLicensed && isLicensed(m);
 
 // One listener for the whole app; panels subscribe by chat id. Kept on globalThis so a hot
 // reload of this file shares them instead of stranding answers in a fresh, empty map.
@@ -145,9 +147,10 @@ export function AskPanel(p: AskProps) {
 
   const buildContext = async (): Promise<string> => {
     const parts: string[] = [];
-    if (passage) {
-      let bible = app.settings.bible;
-      if (!app.settings.allowLicensed && isLicensed(app.mod("bible", bible))) bible = app.bibles.find((b) => !isLicensed(b))?.id ?? bible;
+    let bible: string | undefined = app.settings.bible;
+    if (withheld(app.settings.allowLicensed, app.mod("bible", bible))) bible = app.bibles.find((b) => !isLicensed(b))?.id;
+    if (passage && !bible) parts.push(`The passage is ${fmtRef(passage)}. Its text isn't included: the user's Bibles are licensed and they have chosen not to send licensed text.`);
+    if (passage && bible) {
       const bm = app.mod("bible", bible);
       let vs: Verse[];
       if (passage.verse) {
@@ -175,9 +178,10 @@ export function AskPanel(p: AskProps) {
       // A passage chat gets the library's material on it to search: the commentaries, the other
       // Bibles (public-domain ones only, unless licensed text may be sent) and the lexicons.
       else if (passage && withLibrary) {
-        const bibles = app.bibles.filter((b) => app.settings.allowLicensed || !isLicensed(b)).map((b) => b.id);
+        const bibles = app.bibles.filter((b) => !withheld(app.settings.allowLicensed, b)).map((b) => b.id);
+        const exclude = (app.lib?.modules ?? []).filter((m) => withheld(app.settings.allowLicensed, m)).map((m) => m.id);
         const journal = p.journal ?? (app.settings.askJournal ? journalOn(app.journal, passage) : []);
-        try { studyDir = await api.studyExport(id, { book: passage.book, chapter: passage.chapter, from: passage.verse ?? null, to: passage.verse ? passage.to ?? passage.verse : null, bibles, strongsBible: app.strongsBible, label: fmtRef(passage), journal }); } catch (e) { console.error(e); }
+        try { studyDir = await api.studyExport(id, { book: passage.book, chapter: passage.chapter, from: passage.verse ?? null, to: passage.verse ? passage.to ?? passage.verse : null, bibles, strongsBible: app.strongsBible, label: fmtRef(passage), journal, exclude }); } catch (e) { console.error(e); }
       }
       else if (p.journalDir) { try { studyDir = await p.journalDir(id); } catch (e) { console.error(e); } }
       const c: Chat = { id, title: question.length > 80 ? question.slice(0, 77) + "…" : question, about, source: p.source, created: new Date().toISOString(), updated: new Date().toISOString(), model, bookDir, studyDir, verses: passage ? [fmtRef(passage)] : [], messages: [] };

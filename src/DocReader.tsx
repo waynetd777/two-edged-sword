@@ -4,7 +4,7 @@ import { fmtRef } from "./bible";
 import { docSegments, plainText, renderHtml, wordRangeAt } from "./esword";
 import { Icon } from "./icons";
 import { usePlayer } from "./speech";
-import { AskPanel } from "./Ask";
+import { AskPanel, withheld } from "./Ask";
 import { HL, HL_DOT, TextSizeButton, textToken, WordPick } from "./Read";
 import { docHlKey, docLabel, parseDocLabel } from "./docref";
 import { WordLookup } from "./WordLookup";
@@ -403,8 +403,9 @@ export function DocReader({ focus, setFocus }: { focus: boolean; setFocus: (f: b
               </div>
             )}
             <AskPanel key={`${doc.module}|${doc.title}|${asking}`} full source="Reader" about={asking === null ? doc.title : `${doc.title} ¶${asking + 1}`}
-              context={askContext} bookDir={() => exportBook().then((x) => x.dir)}
-              hint={`Ask anything about ${asking === null ? `this ${unit}` : "this paragraph"}. The ${unit} goes with the question, and the model can search the rest of ${mod?.title ?? "the book"}${devo ? "" : " and look at its charts"} when it needs to.`}
+              {...(withheld(app.settings.allowLicensed, mod)
+                ? { context: () => `The user is reading ${mod?.title ?? doc.title}, a licensed book; they have chosen not to send its text.`, hint: `${mod?.title ?? "This book"} is licensed, so its text isn't sent (Settings › AI assistant › Licensed text). Ask general questions, or turn that on.` }
+                : { context: askContext, bookDir: () => exportBook().then((x) => x.dir), hint: `Ask anything about ${asking === null ? `this ${unit}` : "this paragraph"}. The ${unit} goes with the question, and the model can search the rest of ${mod?.title ?? "the book"}${devo ? "" : " and look at its charts"} when it needs to.` })}
               suggestions={suggestions} seed={askSeed} clearSeed={() => setAskSeed(null)} />
             </>}
           </aside>

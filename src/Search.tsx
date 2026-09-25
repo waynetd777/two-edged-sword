@@ -1,6 +1,6 @@
 import { Fragment, ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { api, Article, Commentary, SearchMode, SearchResults, Verse } from "./api";
-import { AskPanel, Working } from "./Ask";
+import { AskPanel, withheld, Working } from "./Ask";
 import { book, fmtRef, Ref, SECTIONS } from "./bible";
 import { plainText, renderHtml } from "./esword";
 import { Icon } from "./icons";
@@ -204,7 +204,7 @@ export function SearchScreen() {
           {res && (
             <div style={{ padding: "12px 14px 14px", borderTop: "1px solid var(--border)" }}>
               <AskPanel source="Search" about={`“${ran}” (${total} results)`} style={{ border: 0, padding: 0, background: "transparent" }}
-                context={() => `The user searched their library for “${ran}”. Bible verses found (${res.bible.abbrev}, ${res.bible.count} in all):\n` + res.bible.hits.slice(0, 40).map((h) => `${fmtRef({ book: h.book, chapter: h.chapter, verse: h.verse }, "short")} ${plainText(h.text)}`).join("\n") + (res.commentaries.length ? `\n\nCommentaries with matches: ${res.commentaries.map((m) => `${m.title} (${m.count})`).join(", ")}` : "")}
+                context={() => `The user searched their library for “${ran}”. Bible verses found (${res.bible.abbrev}, ${res.bible.count} in all):\n` + res.bible.hits.slice(0, 40).map((h) => `${fmtRef({ book: h.book, chapter: h.chapter, verse: h.verse }, "short")}${withheld(app.settings.allowLicensed, app.mod("bible", res.bible.module)) ? "" : ` ${plainText(h.text)}`}`).join("\n") + (withheld(app.settings.allowLicensed, app.mod("bible", res.bible.module)) ? "\n(References only: this Bible is licensed and the user has chosen not to send its text.)" : "") + (res.commentaries.length ? `\n\nCommentaries with matches: ${res.commentaries.map((m) => `${m.title} (${m.count})`).join(", ")}` : "")}
                 suggestions={res.strongs ? [`How is ${ran} used across these verses?`] : [`Summarise what these verses say about “${ran}”`, "Which of these passages is most important, and why?"]} />
             </div>
           )}

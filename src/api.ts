@@ -108,7 +108,7 @@ export const api = {
   assistantStatus: () => invoke<AssistantStatus>("assistant_status"),
   ask: (chatId: string, prompt: string, model: string, session: string | null, bookDir: string | null = null, studyDir: string | null = null) => invoke<void>("ask", { chatId, prompt, model, session, bookDir, studyDir }),
   /** Writes out the library's material on a passage (every Bible allowed, all commentaries, lexicon entries) for chat `chatId`; returns its folder. */
-  studyExport: (chatId: string, req: { book: number; chapter: number; from: number | null; to: number | null; bibles: string[]; strongsBible: string | null; label: string; journal?: JournalNote[] }) => invoke<string>("study_export", { chatId, req }),
+  studyExport: (chatId: string, req: { book: number; chapter: number; from: number | null; to: number | null; bibles: string[]; strongsBible: string | null; label: string; journal?: JournalNote[]; exclude?: string[] }) => invoke<string>("study_export", { chatId, req }),
   /** Journal entries written out for a chat about them; the folder goes to `ask` as its studyDir. */
   journalExport: (chatId: string, label: string, entries: JournalNote[]) => invoke<string>("journal_export", { chatId, label, entries }),
   /** Writes a reference book out as text files and charts for Ask to search; returns its folder and chapter files. */

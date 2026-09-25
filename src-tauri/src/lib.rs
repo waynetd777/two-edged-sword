@@ -272,10 +272,14 @@ fn ask(app: AppHandle, st: State<AppState>, chat_id: String, prompt: String, mod
     };
     let folder = match (inside(book_dir, books::root(&st.data)), inside(study_dir.clone(), study::studies_root(&root)), inside(study_dir, study::journal_root(&root))) {
         (Some(b), _, _) => assistant::Folder::Book(b),
-        (None, Some(dir), _) => assistant::Folder::Study { dir, dictionaries: study::dictionaries_dir(&root) },
+        (None, Some(dir), _) => assistant::Folder::Study(dir),
         (None, None, Some(dir)) => assistant::Folder::Journal(dir),
         _ => assistant::Folder::None,
     };
+    // A chat in use keeps its folder: study::prune goes by when it was last touched.
+    if let assistant::Folder::Study(d) | assistant::Folder::Journal(d) = &folder {
+        let _ = std::fs::File::open(d).and_then(|f| f.set_modified(std::time::SystemTime::now()));
+    }
     assistant::ask(app, st.running.clone(), &st.data, folder, chat_id, prompt, model, session)
 }
 
