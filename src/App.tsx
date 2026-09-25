@@ -66,7 +66,7 @@ function Screens() {
   return (
     <div className={`shell ${focus && screen === "read" ? "nosidebar" : ""}`}>
       {!(focus && screen === "read") && <Sidebar />}
-      {screen === "read" && app.doc && <DocReader focus={focus} setFocus={setFocus} />}
+      {screen === "read" && app.doc && <DocReader focus={focus} setFocus={setFocus} openPalette={openPalette} />}
       {screen === "read" && !app.doc && <ReadScreen focus={focus} setFocus={setFocus} openPalette={openPalette} />}
       {screen === "compare" && <CompareScreen openPalette={openPalette} />}
       {screen === "search" && <SearchScreen />}

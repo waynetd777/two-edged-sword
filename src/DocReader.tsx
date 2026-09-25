@@ -8,7 +8,7 @@ import { AskPanel, withheld } from "./Ask";
 import { HL, HL_DOT, TextSizeButton, textToken, WordPick } from "./Read";
 import { docHlKey, docLabel, parseDocLabel } from "./docref";
 import { WordLookup } from "./WordLookup";
-import { Topbar } from "./Shell";
+import { SearchField, Topbar } from "./Shell";
 import { HlColor, hlName, useApp } from "./state";
 import { DictionaryTab, useRefPreview } from "./StudyPane";
 import { Popover, wordAt, wordHover } from "./ui";
@@ -19,7 +19,7 @@ import { useAssistant } from "./assistant";
  * A reference book or a devotional in the reading column: its chapters (a devotional's days) down
  * the side, the text in the reading font.
  */
-export function DocReader({ focus, setFocus }: { focus: boolean; setFocus: (f: boolean) => void }) {
+export function DocReader({ focus, setFocus, openPalette }: { focus: boolean; setFocus: (f: boolean) => void; openPalette: () => void }) {
   const app = useApp();
   const canAsk = useAssistant().available;
   // The study pane: notes on the chapter, the dictionaries, and Ask (when an assistant is installed).
@@ -293,6 +293,7 @@ export function DocReader({ focus, setFocus }: { focus: boolean; setFocus: (f: b
             {books.map((b) => <option key={b.id} value={b.id}>{b.title}</option>)}
           </select>
         </label>
+        <SearchField onOpen={openPalette} />
       </Topbar>}
       <div style={{ flexGrow: 1, minHeight: 0, display: "grid", gridTemplateColumns: focus ? "minmax(0,1fr)" : pane ? "260px minmax(0,1fr) 440px" : "260px minmax(0,1fr)" }}>
         {!focus && <aside style={{ display: "flex", flexDirection: "column", minHeight: 0, borderRight: "1px solid var(--border)" }}>
