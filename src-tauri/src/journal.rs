@@ -1,6 +1,6 @@
 //! The journal: Markdown, one file per month (`Me. Journal - 2026-09.md`), so it reads naturally in Obsidian
 //! or any editor. Each entry is a `## Title` heading, a hidden `<!-- tes … -->` comment holding
-//! its id, dates, verses and tags, a visible line generated from those, and the body.
+//! its id, dates, verses and tags (recovered from the visible line if an editor drops it), a visible line generated from those, and the body.
 
 use crate::store::write_text_atomic;
 use serde::{Deserialize, Serialize};
@@ -104,14 +104,42 @@ pub fn render_month(key: &str, entries: &[Entry]) -> String {
     s
 }
 
-/// Where entries start: a "## " heading whose next line is our comment.
+/// The created time, verses and tags from our visible meta line, for an entry whose comment an
+/// editor has dropped (waynes-world's rich-text editor does). None for any other line.
+fn from_meta_line(line: &str) -> Option<(String, Vec<String>, Vec<String>)> {
+    let rest = line.strip_prefix('*')?;
+    let (when, after) = rest.split_once('*')?;
+    let (date, time) = when.split_once(" · ")?;
+    let date = date.split_once(' ')?.1;
+    let created = chrono::NaiveDateTime::parse_from_str(&format!("{date} {time}"), "%d %B %Y %H:%M").ok()?.format("%Y-%m-%dT%H:%M").to_string();
+    if weekday_line(&created) != when { return None; }
+    let (mut verses, mut tags) = (vec![], vec![]);
+    for part in after.split(" · ").map(str::trim).filter(|p| !p.is_empty()) {
+        if part.starts_with('#') { tags = part.split_whitespace().map(|t| t.trim_start_matches('#').to_string()).collect(); }
+        else { verses = part.split(", ").map(String::from).collect(); }
+    }
+    Some((created, verses, tags))
+}
+
+fn has_comment(lines: &[&str], i: usize) -> bool {
+    lines.get(i + 1).is_some_and(|l| l.trim_start().starts_with("<!-- tes "))
+}
+
+/// Where entries start: a "## " heading whose next line is our comment, or our meta line if the
+/// comment has been lost.
 fn starts(lines: &[&str]) -> Vec<usize> {
-    (0..lines.len()).filter(|&i| lines[i].starts_with("## ") && lines.get(i + 1).is_some_and(|l| l.trim_start().starts_with("<!-- tes "))).collect()
+    (0..lines.len()).filter(|&i| lines[i].starts_with("## ") && (has_comment(lines, i) || lines.get(i + 1).is_some_and(|l| from_meta_line(l).is_some()))).collect()
 }
 
 /// The entry in lines[i..end]; its id is empty if the comment has lost it.
 fn parse_at(lines: &[&str], i: usize, end: usize) -> Entry {
     let title = lines[i][3..].trim().to_string();
+    if !has_comment(lines, i) {
+        let (created, verses, tags) = from_meta_line(lines[i + 1]).unwrap_or_default();
+        let id = created.replace(['-', ':'], "").replace('T', "-");
+        let body = lines[(i + 2).min(end)..end].join("\n").trim().to_string();
+        return Entry { id, title, updated: created.clone(), created, verses, tags, body };
+    }
     let comment = lines[i + 1].trim().trim_start_matches("<!-- tes ").trim_end_matches("-->");
     let mut e = Entry { id: String::new(), title, created: String::new(), updated: String::new(), verses: vec![], tags: vec![], body: String::new() };
     for (k, v) in attrs(comment) {
@@ -272,6 +300,19 @@ mod tests {
         assert!(text.starts_with("# September 2026\n"));
         assert!(text.contains("*Wednesday 23 September 2026 · 07:02* · John 3:1-8, John 3:16 · #new-birth"));
         assert_eq!(parse(&text), vec![e]);
+    }
+
+    #[test]
+    fn survives_losing_its_comment() {
+        let e = sample();
+        let text = render_month("2026-09", &[e.clone()]);
+        let stripped: String = text.lines().filter(|l| !l.starts_with("<!-- tes ")).map(|l| format!("{l}\n")).collect();
+        let got = parse(&stripped);
+        assert_eq!(got, vec![Entry { updated: e.created.clone(), ..e.clone() }]);
+        // Saving it again writes the comment back.
+        let again = splice(&stripped, "2026-09", &e.id, Some(&e)).unwrap();
+        assert_eq!(parse(&again), vec![e]);
+        assert_eq!(from_meta_line("*Saturday 5 September 2026 · 06:00* · #prayer").unwrap().0, "2026-09-05T06:00");
     }
 
     #[test]
