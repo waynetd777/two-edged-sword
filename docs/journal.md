@@ -17,7 +17,8 @@ click.
 **Listen** (top right) reads the open entry aloud, its title and then each paragraph, with the
 word being spoken highlighted as in the readers. While it reads, even paused, the entry can't be
 edited, so Space plays and pauses as well as ⌘P; F7 and F9 go to the previous or next entry in
-the list. **Focus mode** (⌘., Esc to leave) hides the sidebar and the list and gives the entry 80%
+the list. With Settings › Listening › Continue into the next journal entry on (or the same switch
+in the player's menu), it reads on through the list. **Focus mode** (⌘., Esc to leave) hides the sidebar and the list and gives the entry 80%
 of the window.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="images/journal-ask-dark.png"><img alt="Ask in the journal, about the open entry or the whole journal" src="images/journal-ask-light.png"></picture>

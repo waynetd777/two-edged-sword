@@ -231,6 +231,17 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     setState(IDLE);
   }, []);
 
+  // The journal entry after (1) or before (-1) this one in the list, skipping empty ones.
+  const nextEntry = (id: string | undefined, d: 1 | -1) => {
+    const all = appRef.current.journal;
+    for (let k = all.findIndex((e) => e.id === id) + d; k >= 0 && k < all.length; k += d) {
+      const paras = journalParas(all[k].body);
+      if (paras.length) return { entry: all[k], paras };
+    }
+    return null;
+  };
+  const jumpRef = useRef<(d: 1 | -1) => void>(() => {});
+
   // A book's next or previous chapter, from its start, after `wait` ms; `g` is the reading's generation.
   const turnDoc = (d: 1 | -1, g: number, wait: number) => {
     const { module, title, kind } = st.current.doc!;
@@ -270,8 +281,14 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       return;
     }
     if (i >= vs.length && s.doc) {
-      // A devotional is one day's reading and a journal entry one entry; only a book carries on into its next chapter.
-      if (s.doc.kind === "devotional" || s.doc.module === "journal" || !settings.current.continueChapter || s.sleepEndOfChapter) { stop(); return; }
+      // A journal entry goes on to the next one in the list, when Settings says so.
+      if (s.doc.module === "journal") {
+        if (!settings.current.continueEntry || s.sleepEndOfChapter || !nextEntry(s.doc.id, 1)) { stop(); return; }
+        window.setTimeout(() => { if (g === gen.current) jumpRef.current(1); }, 600);
+        return;
+      }
+      // A devotional is one day's reading; only a book carries on into its next chapter.
+      if (s.doc.kind === "devotional" || !settings.current.continueChapter || s.sleepEndOfChapter) { stop(); return; }
       turnDoc(1, g, 600);
       return;
     }
@@ -365,11 +382,8 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     const s = st.current;
     if (!s.on || opts.current.onEnd) return;
     if (s.doc?.module === "journal") {
-      const all = appRef.current.journal;
-      for (let k = all.findIndex((e) => e.id === s.doc!.id) + d; k >= 0 && k < all.length; k += d) {
-        const paras = journalParas(all[k].body);
-        if (paras.length) { playDoc("journal", all[k].title || "Untitled entry", paras, 0, "reference", { id: all[k].id }); return; }
-      }
+      const n = nextEntry(s.doc.id, d);
+      if (n) playDoc("journal", n.entry.title || "Untitled entry", n.paras, 0, "reference", { id: n.entry.id });
       return;
     }
     if (s.doc) {
@@ -385,6 +399,8 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [play, playDoc]);
+
+  jumpRef.current = jump;
 
   // ⌘P and F8 play or pause, anywhere (Space does in the readers, but types a space in the
   // journal); F7 and F9 go back or on. With fn held, or with standard function keys set, the

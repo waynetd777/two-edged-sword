@@ -30,7 +30,7 @@
   reading lasts until you close the window, or the button beside the Bible picker), the Compare
   columns, and the library.
 - **Listening**: the voice, the voices for Hebrew, Greek and Latin Bibles, speed, and whether to
-  highlight each word, continue into the next chapter and read verse numbers.
+  highlight each word, continue into the next chapter or journal entry, and read verse numbers.
 - **Journal**: its folder, notes beside verses, and grammar checking.
 - **Quiet time**: the daily reminder, and what to do when you fall behind a plan.
 - **AI assistant**: which of Claude Code, Codex, Antigravity and Copilot are installed, the

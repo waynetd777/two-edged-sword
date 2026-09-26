@@ -65,6 +65,7 @@ export function SettingsScreen() {
             <Row label="While reading aloud">
               <Switch on={s.highlightWords} onChange={(v) => app.set({ highlightWords: v })}>Highlight each word</Switch>
               <Switch on={s.continueChapter} onChange={(v) => app.set({ continueChapter: v })}>Continue into the next chapter</Switch>
+              <Switch on={s.continueEntry} onChange={(v) => app.set({ continueEntry: v })}>Continue into the next journal entry</Switch>
               <Switch on={s.readNumbers} onChange={(v) => app.set({ readNumbers: v })}>Read verse numbers</Switch>
             </Row>
           </Section>

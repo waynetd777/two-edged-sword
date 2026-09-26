@@ -578,7 +578,9 @@ export function PlayerBar({ focus = false }: { focus?: boolean }) {
               <VoiceSelect />
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 2, borderTop: "1px solid var(--border)", paddingTop: 10 }}>
-              <label className="opt"><input type="checkbox" checked={app.settings.continueChapter} onChange={(e) => app.set({ continueChapter: e.target.checked })} />Continue into the next chapter</label>
+              {s.doc?.module === "journal"
+                ? <label className="opt"><input type="checkbox" checked={app.settings.continueEntry} onChange={(e) => app.set({ continueEntry: e.target.checked })} />Continue into the next entry</label>
+                : <label className="opt"><input type="checkbox" checked={app.settings.continueChapter} onChange={(e) => app.set({ continueChapter: e.target.checked })} />Continue into the next chapter</label>}
               <label className="opt"><input type="checkbox" checked={app.settings.readNumbers} onChange={(e) => app.set({ readNumbers: e.target.checked })} />Read verse numbers aloud</label>
             </div>
           </div>

@@ -35,6 +35,8 @@ export interface Settings {
   voiceLatin: string;
   rate: number;
   continueChapter: boolean;
+  /** At the end of a journal entry read aloud, go on to the next one in the list. */
+  continueEntry: boolean;
   readNumbers: boolean;
   highlightWords: boolean;
   journalDir: string;
@@ -67,7 +69,7 @@ export interface Settings {
 const DEFAULTS: Settings = {
   theme: "auto", readSize: 19, readFont: "literata", studyTab: "commentary", docTab: "ask", studyCommentary: null, studyDict: null, dictModule: null, studyFollow: true, redLetters: true, kjvGlosses: true, layout: "verse", bible: "kjv", compare: ["kjv", "asv", "kjv+"], hiddenBibles: [],
   commentaryOrder: ["barnes", "henry", "clarke", "gill", "jfb", "wesley", "darby", "meyer"], dictionaryOrder: ["isbe", "smith", "nave", "cyclopedia"],
-  voice: "", voiceHebrew: "", voiceGreek: "", voiceLatin: "", rate: 1, continueChapter: true, readNumbers: false, highlightWords: true, journalDir: "", showNotes: true, journalHighlight: "yellow", journalGrammar: true,
+  voice: "", voiceHebrew: "", voiceGreek: "", voiceLatin: "", rate: 1, continueChapter: true, continueEntry: false, readNumbers: false, highlightWords: true, journalDir: "", showNotes: true, journalHighlight: "yellow", journalGrammar: true,
   model: "claude-sonnet-5", includeCommentaries: true, askJournal: false, allowLicensed: true, reminder: false, reminderTime: "06:30", whenBehind: "ask", studyPane: true, copyNumbers: true,
 };
 
