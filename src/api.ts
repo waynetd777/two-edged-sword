@@ -18,6 +18,8 @@ export interface ModuleInfo {
   abbrev: string;
   info: string;
   strongs: boolean;
+  /** Bibles only: the text reads right to left (Hebrew, Arabic, …). */
+  rtl: boolean;
   /** The file's size in bytes. */
   size: number;
 }

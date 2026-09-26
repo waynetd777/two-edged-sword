@@ -35,9 +35,13 @@ added a batch at a time.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="images/interlinear-dark.png"><img alt="Luke 17 in the Greek Textus Receptus: each word over its Strong's number, with Scrivener's readings in angle brackets" src="images/interlinear-light.png"></picture>
 
-Bibles with Strong's numbers or glosses show each original word stacked over its English (when
-the module has it) and its Strong's number. Hover a word for its grammar and dictionary form;
-click it to look it up.
+Bibles with glosses show each original word stacked over its English and its Strong's number;
+hover a number for its dictionary entry, a word for its grammar and dictionary form, and click it
+to look it up. A Greek or Hebrew Bible with Strong's numbers but no English of its own (Hebrew
+OT+, Greek NT BYZ+) gets each number's commonest rendering in the KJV, from your concordance;
+Settings → Appearance → English under each word turns that off, and the numbers then sit after
+their words, with the grammar in the word's tooltip. Right-to-left Bibles read right to left,
+verse numbers on the right.
 
 - **Variant readings**: Greek NT TR+ (Stephanus 1550) and WH+ (Westcott-Hort) show another
   edition's reading muted in ⟨ ⟩, or ⟨omit⟩. Hover for whose: Scrivener 1894 in TR+,

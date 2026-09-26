@@ -5,6 +5,7 @@
 
 import { Fragment, ReactNode } from "react";
 import { findBook, parseRef, Ref } from "./bible";
+import { api } from "./api";
 
 const parser = new DOMParser();
 const parse = (html: string) => parser.parseFromString(`<body>${html}</body>`, "text/html").body;
@@ -302,7 +303,9 @@ const isCode = (t: string) => (t.includes("-") ? /^[A-Z0-9]+(-[A-Z0-9]+)+$/.test
 
 const WORD = /[\p{L}\p{M}'’]+(?:-[\p{L}\p{M}'’]+)*/gu;
 
-const ORIGINAL = /[\p{Script=Greek}\p{Script=Hebrew}]/u;
+const ORIGINAL = /[\p{Script=Greek}\p{Script=Hebrew}\p{Script=Syriac}]/u;
+/** A word in Greek, Hebrew or Syriac, as opposed to a translation's. */
+export const isOriginal = (text: string) => ORIGINAL.test(text);
 
 /**
  * A verse as a list of words and gaps, with each word's Strong's numbers where the Bible has them.
@@ -312,7 +315,8 @@ const ORIGINAL = /[\p{Script=Greek}\p{Script=Hebrew}]/u;
  * tense code); IWH+P has word<num>G3056</num><tvm>N-NSM</tvm><sup>gloss</sup>; LXX+ has
  * <grk>word</grk> <tvm>3056[N-NSM]</tvm> (the Strong's number and the grammar, no gloss); the Greek NT
  * TR+, BYZ+, WH+ and Greek OT+ have word<num>G3056</num> <tvm>N-NSM</tvm> in one <grk>; and INT+
- * boxes each word in a <div>: word, number, grammar, dictionary form, meaning (<gra>), editions.
+ * boxes each word in a <div>: word, number, grammar, dictionary form, meaning (<gra>), editions;
+ * Peshitta+ (tools/syriac) and the Latin+ Bibles (tools/latin) do the same, without numbers.
  */
 export function tokenize(html: string): Token[] {
   const out: Token[] = [];
@@ -375,7 +379,7 @@ export function tokenize(html: string): Token[] {
       for (const k of Array.from(el.children)) {
         const kt = k.tagName.toLowerCase(), text = (k.textContent || "").trim();
         if (!text) continue;
-        if (kt === "grk" && !t) { push(text, red, italic); t = lastOriginal(); groupStart = out.length; }
+        if (kt === "grk" && !t) { push(text, red, italic); t = [...out].reverse().find((x) => x.word); groupStart = out.length; } // the box's word, in any script (Latin+ too)
         else if (!t) continue;
         else if (kt === "num") { t.strongs.push(text); (t.showNums ??= []).push(text); }
         else if (kt === "tvm") t.parse = text;
@@ -462,6 +466,21 @@ export function lexiconParts(html: string): { word: string; translit: string; pr
 }
 
 /** KJV renderings from the KJ Concordance entry: [["love", 74], ["loved", 38], …]. */
+const kjvGlossCache = new Map<string, Promise<string | null>>();
+/** A Strong's number's commonest rendering in the KJV, from the concordance ("beginning" for H7225); cached. */
+export function kjvGloss(concordance: string, num: string): Promise<string | null> {
+  const key = `${concordance}/${num}`;
+  let p = kjvGlossCache.get(key);
+  if (!p) {
+    p = api.article("lexicon", concordance, num).then((a) => {
+      const r = a ? concordanceRenderings(a.html) : [];
+      return r.length ? r.reduce((x, y) => (y[1] > x[1] ? y : x))[0] : null;
+    }).catch(() => null);
+    kjvGlossCache.set(key, p);
+  }
+  return p;
+}
+
 export function concordanceRenderings(html: string): [string, number][] {
   const out: [string, number][] = [];
   // plainText decodes entities: the concordance writes "love's" as "love&#146;s".

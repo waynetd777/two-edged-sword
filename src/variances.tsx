@@ -69,7 +69,7 @@ export function VariancePopover({ v, anchor, base, module, moduleTitle, text, on
         </div>
         <p style={{ font: "500 14px/1.4 var(--ui)", margin: "0 0 12px" }}>{linked(v.change)}</p>
         <div style={label}>{base.toUpperCase()}</div>
-        <p style={reading}>{baseVerse === undefined ? "…" : baseVerse ? plainText(baseVerse.text) : "Not in this Bible."}</p>
+        <p dir="auto" style={reading}>{baseVerse === undefined ? "…" : baseVerse ? plainText(baseVerse.text) : "Not in this Bible."}</p>
         <div style={label}>{moduleTitle || module.toUpperCase()}</div>
         <p style={{ ...reading, color: text ? undefined : "var(--muted)", fontStyle: text ? undefined : "italic" }}>{text ? plainText(text) : "Not in this translation."}</p>
         <p style={{ font: "400 13px/1.5 var(--ui)", color: "var(--muted)", margin: 0 }}>{linked(v.note)}</p>

@@ -19,6 +19,8 @@ export interface Settings {
   readSize: number;
   readFont: ReadFont;
   redLetters: boolean;
+  /** Strong's Bibles in Greek or Hebrew without English of their own: each word's commonest KJV rendering under it. */
+  kjvGlosses: boolean;
   layout: "verse" | "paragraph";
   bible: string;
   compare: string[];
@@ -58,7 +60,7 @@ export interface Settings {
 }
 
 const DEFAULTS: Settings = {
-  theme: "auto", readSize: 19, readFont: "literata", studyTab: "commentary", docTab: "ask", studyCommentary: null, studyDict: null, dictModule: null, studyFollow: true, redLetters: true, layout: "verse", bible: "kjv", compare: ["kjv", "asv", "kjv+"], hiddenBibles: [],
+  theme: "auto", readSize: 19, readFont: "literata", studyTab: "commentary", docTab: "ask", studyCommentary: null, studyDict: null, dictModule: null, studyFollow: true, redLetters: true, kjvGlosses: true, layout: "verse", bible: "kjv", compare: ["kjv", "asv", "kjv+"], hiddenBibles: [],
   commentaryOrder: ["barnes", "henry", "clarke", "gill", "jfb", "wesley", "darby", "meyer"], dictionaryOrder: ["isbe", "smith", "nave", "cyclopedia"],
   voice: "", rate: 1, continueChapter: true, readNumbers: false, highlightWords: true, journalDir: "", showNotes: true, journalHighlight: "yellow", journalGrammar: true,
   model: "claude-sonnet-5", includeCommentaries: true, askJournal: false, allowLicensed: true, reminder: false, reminderTime: "06:30", whenBehind: "ask", studyPane: true, copyNumbers: true,
@@ -166,7 +168,8 @@ interface Ctx {
   screen: Screen;
   go: (s: Screen) => void;
   loc: Loc;
-  open: (l: Loc, screen?: Screen) => void;
+  /** `replace`: in place of the current history entry, for a step that corrects where the user already is. */
+  open: (l: Loc, screen?: Screen, replace?: boolean) => void;
   back: () => void;
   forward: () => void;
   canBack: boolean;
@@ -430,9 +433,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const sameRecent = (a: Recent, b: Recent) => (a.doc || b.doc ? a.doc?.module === b.doc?.module && a.doc?.title === b.doc?.title : a.book === b.book && a.chapter === b.chapter);
   const addRecent = (r: Recent) => setNav((n) => ({ ...n, recent: [r, ...n.recent.filter((x) => !sameRecent(x, r))].slice(0, 50) }));
 
-  const open = (l: Loc, s?: Screen) => {
+  const open = (l: Loc, s?: Screen, replace = false) => {
     addRecent({ book: l.book, chapter: l.chapter, ...(l.verse ? { verse: l.verse, to: l.to } : {}), at: new Date().toISOString() });
-    navigate({ loc: l, doc: null, ...(s ? { screen: s } : {}) });
+    navigate({ loc: l, doc: null, ...(s ? { screen: s } : {}) }, replace);
   };
 
   // Seed the history with where the reader was last time, once the saved place has loaded.

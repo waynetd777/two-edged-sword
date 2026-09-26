@@ -1,7 +1,7 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api, Verse, Voice } from "./api";
 import { book, fmtRef, parseRef, Ref, sectionOf, stepChapter, testament } from "./bible";
-import { alignStrongs, EDITIONS, plainText, Token, tokenize, variantSource } from "./esword";
+import { alignStrongs, EDITIONS, isOriginal, kjvGloss, plainText, Token, tokenize, variantSource } from "./esword";
 import { Icon, Pause, Play } from "./icons";
 import { BibleSelect, RefButton, SearchField, Topbar } from "./Shell";
 import { usePlayer } from "./speech";
@@ -37,9 +37,10 @@ export function useNotesByVerse() {
 
 export function VerseText({ tokens, red, speakingChar, onWord, activeWi, showNums, variantFrom = "another edition" }: { tokens: Token[]; red: boolean; speakingChar?: number; onWord?: (t: Token, el: HTMLElement) => void; activeWi?: number; showNums: boolean; /** Whose readings a Greek NT's ⟨variants⟩ are. */ variantFrom?: string }) {
   const vtitle = `${variantFrom} reads`;
+  const tip = (t: Token) => [t.variant && vtitle, t.lemma, t.parse, t.editions && `Only in: ${[...t.editions].map((c) => EDITIONS[c] ?? c).join(", ")}`].filter(Boolean).join(" · ") || undefined;
   // An interlinear Bible: each original word stacked over its English, Strong's number and grammar.
-  if (tokens.some((t) => t.gloss !== undefined || t.parse !== undefined)) {
-    const glossed = tokens.some((t) => t.gloss !== undefined);
+  // One with grammar but no English reads inline, like any Strong's Bible, the grammar in the word's tooltip.
+  if (tokens.some((t) => t.gloss !== undefined)) {
     const marked = tokens.some((t) => t.editions);
     return (
     <>
@@ -47,10 +48,10 @@ export function VerseText({ tokens, red, speakingChar, onWord, activeWi, showNum
         if (!t.word || !(t.gloss !== undefined || t.parse !== undefined || t.strongs.length)) return t.text.trim() ? <span key={i} className={`il-p ${t.variant ? "var" : ""}`} title={t.variant ? vtitle : undefined}>{t.text}</span> : <Fragment key={i}>{" "}</Fragment>;
         const speaking = speakingChar !== undefined && speakingChar >= t.at && speakingChar < t.at + t.text.length;
         return (
-          <span key={i} className={`il ${t.variant ? "var" : ""}`} title={[t.variant && vtitle, t.lemma, t.parse, t.editions && `Only in: ${[...t.editions].map((c) => EDITIONS[c] ?? c).join(", ")}`].filter(Boolean).join(" · ") || undefined}>
+          <span key={i} className={`il ${t.variant ? "var" : ""}`} title={tip(t)}>
             <span className={`w ${activeWi === t.wi ? "on" : ""} ${speaking ? "speaking" : ""}`} onClick={(e) => { e.stopPropagation(); onWord?.(t, e.currentTarget); }}>{t.text}</span>
-            {glossed && <span className="il-g">{t.gloss ?? "\u00a0"}</span>}
-            {showNums && <span className="il-n">{t.strongs.join(" ") || "\u00a0"}</span>}
+            <span className="il-g">{t.gloss ?? "\u00a0"}</span>
+            {showNums && <span className="il-n">{t.strongs.length ? t.strongs.map((n, k) => <Fragment key={n}>{k ? " " : ""}<span className="strongs" data-num={n}>{n}</span></Fragment>) : "\u00a0"}</span>}
             {marked && <span className="il-e">{t.editions || "\u00a0"}</span>}
           </span>
         );
@@ -62,13 +63,13 @@ export function VerseText({ tokens, red, speakingChar, onWord, activeWi, showNum
     <>
       {tokens.map((t, i) => {
         const cls = [t.red && red ? "red" : "", t.variant ? "var" : ""].join(" ").trim();
-        const inner = t.italic ? <i>{t.text}</i> : t.text;
+        const inner = t.italic ? <i className="added">{t.text}</i> : t.text;
         if (!t.word) return <span key={i} className={cls || undefined}>{inner}</span>;
         const speaking = speakingChar !== undefined && speakingChar >= t.at && speakingChar < t.at + t.text.length;
         return (
           <Fragment key={i}>
-            <span className={`w ${cls} ${activeWi === t.wi ? "on" : ""} ${speaking ? "speaking" : ""}`} onClick={(e) => { e.stopPropagation(); onWord?.(t, e.currentTarget); }}>{inner}</span>
-            {showNums && t.showNums?.map((n) => <span key={n} className="strongs" data-num={n} style={{ font: "500 10px var(--ui)", color: "var(--accent)", verticalAlign: "super", marginLeft: 1 }}>{n}</span>)}
+            <span className={`w ${cls} ${activeWi === t.wi ? "on" : ""} ${speaking ? "speaking" : ""}`} title={tip(t)} onClick={(e) => { e.stopPropagation(); onWord?.(t, e.currentTarget); }}>{inner}</span>
+            {showNums && t.showNums?.map((n) => <span key={n} className="strongs" data-num={n} style={{ font: "500 10px var(--ui)", color: "var(--accent)", verticalAlign: "super", marginInlineStart: 1 }}>{n}</span>)}
           </Fragment>
         );
       })}
@@ -102,6 +103,8 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
   const bible = settings.bible;
   const bmod = app.mod("bible", bible);
   const [verses, setVerses] = useState<Verse[]>([]);
+  /** The chapter `verses` holds ("bible/book/chapter"), so an empty one can be told from one still loading. */
+  const [loadedAt, setLoadedAt] = useState("");
   const [strongVerses, setStrongVerses] = useState<Map<number, string>>(new Map());
   const [err, setErr] = useState<string | null>(null);
   const [sel, setSel] = useState<{ from: number; to: number } | null>(null);
@@ -134,7 +137,7 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
   useEffect(() => {
     let dead = false;
     setErr(null); setStrongVerses(new Map()); // the old chapter's numbers must not align against the new text
-    api.chapter(bible, loc.book, loc.chapter).then((v) => { if (!dead) setVerses(v); }).catch((e) => !dead && setErr(String(e)));
+    api.chapter(bible, loc.book, loc.chapter).then((v) => { if (!dead) { setVerses(v); setLoadedAt(`${bible}/${loc.book}/${loc.chapter}`); } }).catch((e) => !dead && setErr(String(e)));
     // A Bible without Strong's numbers borrows them from its Strong's edition when the text is the same (KJV from KJV+).
     const sb = app.strongsBible;
     if (sb && bmod && !bmod.strongs && /^kjv/i.test(bmod.abbrev)) {
@@ -170,7 +173,7 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [player.state.book, player.state.chapter]);
 
-  const tokens = useMemo(() => {
+  const parsed = useMemo(() => {
     const m = new Map<number, Token[]>();
     for (const v of verses) {
       let t = tokenize(v.text);
@@ -180,6 +183,35 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
     }
     return m;
   }, [verses, strongVerses]);
+
+  // A Greek or Hebrew Strong's Bible with no English of its own gets each number's commonest KJV
+  // rendering under its word (settings.kjvGlosses).
+  const glossable = useMemo(() => {
+    if (!settings.kjvGlosses || !app.concordance) return null;
+    const all = [...parsed.values()].flat();
+    if (all.some((t) => t.gloss !== undefined) || !all.some((t) => t.word && t.strongs.length && isOriginal(t.text))) return null;
+    return [...new Set(all.flatMap((t) => (t.word && isOriginal(t.text) ? t.strongs : [])))];
+  }, [parsed, settings.kjvGlosses, app.concordance]);
+  const [kjv, setKjv] = useState<Map<string, string>>(new Map());
+  useEffect(() => {
+    if (!glossable?.length || !app.concordance) return;
+    let dead = false;
+    const conc = app.concordance;
+    Promise.all(glossable.map((n) => kjvGloss(conc, n).then((g) => [n, g] as const))).then((r) => {
+      if (!dead) setKjv((old) => new Map([...old, ...r.filter((x): x is readonly [string, string] => !!x[1])]));
+    });
+    return () => { dead = true; };
+  }, [glossable, app.concordance]);
+  const tokens = useMemo(() => {
+    if (!glossable || !kjv.size) return parsed;
+    const m = new Map<number, Token[]>();
+    for (const [v, ts] of parsed) m.set(v, ts.map((t) => {
+      if (!t.word || !isOriginal(t.text) || !t.strongs.length) return t;
+      const g = t.strongs.map((n) => kjv.get(n)).filter(Boolean).join(" ");
+      return { ...t, gloss: g || "\u00a0" };
+    }));
+    return m;
+  }, [parsed, glossable, kjv]);
 
   const selRef: Ref | null = sel ? { book: loc.book, chapter: loc.chapter, verse: sel.from, to: sel.to !== sel.from ? sel.to : undefined } : null;
 
@@ -198,12 +230,12 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
     if (n) app.open({ book: n[0], chapter: n[1] });
   }, [app, loc.book, loc.chapter, books]);
   // A Bible chosen (or opened with) where it has no such book, an Old or New Testament alone:
-  // open it where it starts.
+  // open it where it starts, in place of the empty chapter, so back doesn't stop there.
   const shownIn = useRef<string | null>(null);
   useEffect(() => {
     if (!books || shownIn.current === bible) return;
     shownIn.current = bible;
-    if (!books.has(loc.book)) app.open({ book: Math.min(...books), chapter: 1 });
+    if (!books.has(loc.book)) app.open({ book: Math.min(...books), chapter: 1 }, undefined, true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [books, bible]);
 
@@ -273,7 +305,7 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
   };
 
   const toolbar = sel && (
-    <div className="vtool fold-bible" role="toolbar" aria-label="Verse actions" style={{ top: -44, left: 44 }} onClick={(e) => e.stopPropagation()}>
+    <div className="vtool fold-bible" dir="ltr" role="toolbar" aria-label="Verse actions" style={{ top: -44, left: 44 }} onClick={(e) => e.stopPropagation()}>
       <div style={{ display: "flex", gap: 6, padding: "0 6px 0 4px" }}>
         {HL.map((c) => <button key={c} type="button" className="dot" aria-label={`Highlight ${c}`} aria-pressed={curHl === c} style={{ background: HL_DOT[c], outline: curHl === c ? "2px solid #fff" : undefined }} onClick={() => setHl(curHl === c ? null : c)} />)}
       </div>
@@ -307,8 +339,25 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
     </div>
   );
 
-  const body = settings.layout === "verse" && !focus ? (
-    <div className="verses">
+  const dir = bmod?.rtl ? "rtl" : undefined;
+  // A chapter, or the verse asked for, that this Bible doesn't have: say so, and why if it can be told.
+  const loaded = loadedAt === `${bible}/${loc.book}/${loc.chapter}`;
+  const place = `${book(loc.book).name} ${loc.chapter}`;
+  const name = bmod?.title ?? bible;
+  const other = app.defaultBible !== bible ? app.mod("bible", app.defaultBible) : undefined;
+  const why = !books || books.has(loc.book) ? "" : [...books].every((b) => b <= 39) ? " It has only the Old Testament." : [...books].every((b) => b >= 40 && b <= 66) ? " It has only the New Testament." : ` It doesn't include ${book(loc.book).name}.`;
+  const noChapter = loaded && !verses.length && !err;
+  const noVerse = loaded && !!verses.length && !!loc.verse && !verses.some((v) => v.v === loc.verse) && !variances.byVerse.has(loc.verse);
+  const hint = (text: string) => (
+    <div className="hint" role="status">
+      <Icon name="info" />
+      <span>{text}</span>
+      {other && noChapter && <button className="btn" type="button" onClick={() => app.set({ bible: other.id })}>Read it in {other.abbrev}</button>}
+    </div>
+  );
+
+  const body = noChapter ? hint(`The ${name} has no ${place}.${why}`) : settings.layout === "verse" && !focus ? (
+    <div className="verses" dir={dir}>
       {withMissing(verses, variances.byVerse).map((v) => {
         const variance = variances.byVerse.get(v.v);
         if (v.missing) return (
@@ -342,7 +391,7 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
   ) : (
     <div style={{ position: "relative", maxWidth: focus ? 1040 : undefined, margin: focus ? "0 auto" : undefined, paddingTop: sel && !focus ? 46 : 0 }}>
       {!focus && sel && <div style={{ position: "sticky", top: 0, zIndex: 20, height: 0 }}><div style={{ position: "relative", top: -44 }}>{toolbar}</div></div>}
-      <p className="para selectable" style={{ margin: 0, fontSize: focus ? 21 : undefined, lineHeight: focus ? 1.85 : undefined }}>
+      <p className="para selectable" dir={dir} style={{ margin: 0, fontSize: focus ? 21 : undefined, lineHeight: focus ? 1.85 : undefined }}>
         {verses.map((v) => {
           const k = vkey(loc.book, loc.chapter, v.v);
           const isSel = !!sel && v.v >= sel.from && v.v <= sel.to;
@@ -390,7 +439,7 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
         <div className="sidenav-wrap">
           <main ref={scroller} className="scroll readcol" style={{ position: "relative", padding: focus ? "0 40px 120px" : "0 40px 120px 36px" }} onClick={() => setSel(null)}>
             {header}
-            {err ? <div className="err" style={{ padding: 20 }}>{err}</div> : body}
+            {err ? <div className="err" style={{ padding: 20 }}>{err}</div> : <>{noVerse && hint(`The ${name} has no verse ${loc.verse} in ${place}.`)}{body}</>}
           </main>
           <ChapterNav onGo={go} books={books} />
         </div>

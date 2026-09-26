@@ -37,12 +37,12 @@ function Marked({ tokens, diff, red, showNums, onWord, activeWi }: { tokens: Tok
   return (
     <>
       {tokens.map((t, i) => {
-        if (!t.word) return <span key={i} className={t.red && red ? "red" : undefined}>{t.italic ? <i>{t.text}</i> : t.text}</span>;
+        if (!t.word) return <span key={i} className={t.red && red ? "red" : undefined}>{t.italic ? <i className="added">{t.text}</i> : t.text}</span>;
         const d = !!diff?.has(t.wi);
         return (
           <span key={i}>
-            <span className={`w ${t.red && red ? "red" : ""} ${activeWi === t.wi ? "on" : ""}`} style={d ? { background: "var(--hl-gold)", borderRadius: 3, padding: "0 2px" } : undefined} onClick={(e) => { e.stopPropagation(); onWord(t, e.currentTarget); }}>{t.italic ? <i>{t.text}</i> : t.text}</span>
-            {showNums && t.showNums?.map((n) => <span key={n} className="strongs" data-num={n} style={{ font: "500 9.5px var(--ui)", color: "var(--accent)", verticalAlign: "super", marginLeft: 1 }}>{n.slice(1)}</span>)}
+            <span className={`w ${t.red && red ? "red" : ""} ${activeWi === t.wi ? "on" : ""}`} style={d ? { background: "var(--hl-gold)", borderRadius: 3, padding: "0 2px" } : undefined} onClick={(e) => { e.stopPropagation(); onWord(t, e.currentTarget); }}>{t.italic ? <i className="added">{t.text}</i> : t.text}</span>
+            {showNums && t.showNums?.map((n) => <span key={n} className="strongs" data-num={n} style={{ font: "500 9.5px var(--ui)", color: "var(--accent)", verticalAlign: "super", marginInlineStart: 1 }}>{n.slice(1)}</span>)}
           </span>
         );
       })}
@@ -154,7 +154,7 @@ export function CompareScreen({ openPalette }: { openPalette: () => void }) {
                   const d = diff && i > 0 ? diffWords(base, words) : diff && cols.length > 1 ? diffWords((toks[cols[1]]?.get(v) ?? []).filter((x) => x.word).map((x) => norm(x.text)), words) : null;
                   const same = i > 0 && diff && d && d.size === 0 && words.length === base.length;
                   return (
-                    <div key={c} className="selectable" style={{ font: "400 16px/1.65 var(--serif)", textWrap: "pretty" }}>
+                    <div key={c} className="selectable" dir={app.mod("bible", c)?.rtl ? "rtl" : undefined} style={{ font: "400 16px/1.65 var(--serif)", textWrap: "pretty" }}>
                       <Marked tokens={t} diff={d} red={settings.redLetters} showNums={nums && !!app.mod("bible", c)?.strongs} activeWi={word?.bible === c && word.verse === v ? word.token.wi : undefined} onWord={(tok, el) => setWord({ token: tok, verse: v, rect: el.getBoundingClientRect(), bible: c })} />
                       {same && <div style={{ marginTop: 4 }}><span className="chip" style={{ minHeight: 20, fontSize: 11, color: "var(--muted)", cursor: "default" }}>Same as {app.mod("bible", cols[0])?.abbrev}</span></div>}
                     </div>

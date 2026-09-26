@@ -51,9 +51,13 @@ everything in the KJV's verse numbering, so it reads and compares beside the KJV
 | `python3 tools/sefaria/build.py` | Targum (Aramaic and English), Targum Pseudo-Jonathan, and the Babylonian Talmud (a book per tractate, English with the Aramaic, linked to the verses it cites) | Sefaria |
 | `python3 tools/vulgate/build.py` | The Clementine Vulgate (1592), with the deuterocanon | The Clementine Vulgate Project |
 | `python3 tools/crosswire/build.py` | The Syriac Peshitta NT, Murdock's and Etheridge's English of it, Tyndale (1525/1530), the Geneva Bible (1599), and the Douay-Rheims (Challoner) | CrossWire |
+| `python3 tools/wlc/build.py` | WLC+: the Westminster Leningrad Codex word by word, each word with its English, Strong's number and grammar, in the KJV's numbering | Open Scriptures Hebrew Bible (CC BY 4.0), with English from STEPBible's TBESH (CC BY 4.0) |
+| `python3 tools/latin/build.py` | Latin+ and Vulg-C+: the two Latin Vulgates word by word, each word with its English meaning, dictionary form and grammar (the first run installs Stanza, about 1 GB, in the cache) | Stanza's PROIEL Latin model and Whitaker's WORDS |
+| `python3 tools/targum/build.py` | Targum+ and Ps-Jon+: the Aramaic Targums word by word, each word with English and, where it renders a Hebrew word, that word's Strong's number (run tools/sefaria and tools/wlc first) | WLC+, a commonest-words table and Jastrow's dictionary (Sefaria's digitisation, CC BY-NC) |
+| `python3 tools/syriac/build.py` | Peshitta+: the Peshitta NT word by word, each word with its English meaning, dictionary form, root and grammar (run tools/crosswire first) | ETCBC's syrnt and SEDRA |
 
-All are public domain except some Sefaria translations, which are CC-BY-NC: fine for personal
-study.
+All are public domain except some Sefaria translations, which are CC-BY-NC, and SEDRA's glosses,
+which are for non-commercial use: fine for personal study.
 
 ## Free modules worth having
 

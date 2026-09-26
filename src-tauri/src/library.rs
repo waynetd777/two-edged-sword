@@ -44,6 +44,8 @@ pub struct ModuleInfo {
     pub info: String,
     /// Bibles only: the text carries Strong's numbers (`<num>G25</num>`, or LXX+'s `<tvm>25[N-NSM]</tvm>`).
     pub strongs: bool,
+    /// Bibles only: the text reads right to left (Hebrew, Arabic, …).
+    pub rtl: bool,
     /// The file's size in bytes.
     pub size: u64,
     #[serde(skip)]
@@ -95,9 +97,9 @@ impl Library {
                 let (Some(stem), Some(ext)) = (path.file_stem().and_then(|s| s.to_str()), path.extension().and_then(|s| s.to_str())) else { continue };
                 let Some(kind) = Kind::from_ext(&ext.to_ascii_lowercase()) else { continue };
                 match read_details(&path, kind) {
-                    Ok((title, abbrev, info, strongs)) => {
+                    Ok((title, abbrev, info, strongs, rtl)) => {
                         let size = e.metadata().map(|m| m.len()).unwrap_or(0);
-                        modules.push(ModuleInfo { id: stem.to_string(), kind, title, abbrev, info, strongs, size, path })
+                        modules.push(ModuleInfo { id: stem.to_string(), kind, title, abbrev, info, strongs, rtl, size, path })
                     }
                     Err(err) => eprintln!("skipping {}: {err}", path.display()),
                 }
@@ -130,7 +132,7 @@ impl Library {
     }
 }
 
-fn read_details(path: &Path, kind: Kind) -> rusqlite::Result<(String, String, String, bool)> {
+fn read_details(path: &Path, kind: Kind) -> rusqlite::Result<(String, String, String, bool, bool)> {
     let c = open_readonly(path)?;
     let (title, abbrev, info): (String, String, String) = c.query_row("SELECT Title, Abbreviation, Information FROM Details LIMIT 1", [], |r| {
         Ok((r.get::<_, Option<String>>(0)?.unwrap_or_default(), r.get::<_, Option<String>>(1)?.unwrap_or_default(), r.get::<_, Option<String>>(2)?.unwrap_or_default()))
@@ -139,7 +141,26 @@ fn read_details(path: &Path, kind: Kind) -> rusqlite::Result<(String, String, St
     let title = title.trim_start_matches(|c: char| c == '*' || c.is_whitespace()).to_string();
     let strongs = kind == Kind::Bible
         && c.query_row("SELECT 1 FROM Bible WHERE ((Book = 43 AND Chapter = 3) OR (Book = 1 AND Chapter = 1)) AND (Scripture LIKE '%<num>%' OR Scripture GLOB '*<tvm>[0-9]*') LIMIT 1", [], |_| Ok(())).optional()?.is_some();
-    Ok((title, abbrev, info, strongs))
+    // e-Sword's RightToLeft flag where the module sets it; otherwise the script of its first verse.
+    let rtl = kind == Kind::Bible
+        && (c.query_row("SELECT RightToLeft FROM Details LIMIT 1", [], |r| r.get::<_, Option<bool>>(0)).ok().flatten().unwrap_or(false)
+            || c.query_row("SELECT Scripture FROM Bible ORDER BY Book, Chapter, Verse LIMIT 1", [], |r| r.get::<_, Option<String>>(0)).optional()?.flatten().is_some_and(|t| is_rtl_text(&t)));
+    Ok((title, abbrev, info, strongs, rtl))
+}
+
+/// Whether most of the letters outside markup are in a right-to-left script (Hebrew, Syriac, Arabic, …).
+fn is_rtl_text(html: &str) -> bool {
+    let (mut rtl, mut ltr, mut tag) = (0, 0, false);
+    for ch in html.chars() {
+        match ch {
+            '<' => tag = true,
+            '>' => tag = false,
+            _ if tag || !ch.is_alphabetic() => {}
+            '\u{0590}'..='\u{08FF}' | '\u{FB1D}'..='\u{FDFF}' | '\u{FE70}'..='\u{FEFF}' => rtl += 1,
+            _ => ltr += 1,
+        }
+    }
+    rtl > ltr
 }
 
 #[cfg(test)]
@@ -150,6 +171,13 @@ mod tests {
     fn escapes_uri_characters() {
         assert_eq!(url_escape("/a b/kjv+.bbli"), "/a%20b/kjv%2b.bbli");
         assert_eq!(url_escape("/x?y#z%"), "/x%3fy%23z%25");
+    }
+
+    #[test]
+    fn right_to_left_text() {
+        assert!(is_rtl_text("בְּרֵאשִׁית<num>H7225</num> בָּרָא"));
+        assert!(!is_rtl_text("In the beginning<num>H7225</num>"));
+        assert!(!is_rtl_text("Βίβλος γενέσεως"));
     }
 
     #[test]

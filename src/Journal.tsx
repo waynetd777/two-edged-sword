@@ -217,7 +217,7 @@ function Editor({ entry, onChange, saved, err, onDelete, onExport, listed, liste
     if (!p.verses.length) return false;
     const txt = p.verses.map((v) => plainText(v.text)).join(" ");
     const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
-    const html = `<blockquote class="verse">${esc(txt)}<cite>${esc(fmtRef(r))} ${esc(app.mod("bible", bible)?.abbrev ?? "")}</cite></blockquote><p><br></p>`;
+    const html = `<blockquote class="verse" dir="auto">${esc(txt)}<cite>${esc(fmtRef(r))} ${esc(app.mod("bible", bible)?.abbrev ?? "")}</cite></blockquote><p><br></p>`;
     ed.current?.focus();
     if (saved_range.current) { const s = window.getSelection(); s?.removeAllRanges(); s?.addRange(saved_range.current); }
     document.execCommand("insertHTML", false, html);

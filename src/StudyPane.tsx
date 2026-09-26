@@ -79,7 +79,7 @@ export function useRefPreview(bible: string, side: "below" | "right" = "below") 
     <div className="popover" style={{ ...pos, width: 320, padding: "12px 14px", pointerEvents: "none" }}>
       <div style={{ display: "flex", justifyContent: "space-between", gap: 10, marginBottom: 6 }}><b style={{ fontSize: 12, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{prev.r ? fmtRef(prev.r) : prev.head}</b><span className="n" style={{ flexShrink: 0 }}>click to open</span></div>
       {prev.sub && <div style={{ font: "500 17px/1.25 var(--display)", marginBottom: 4 }}>{prev.sub}</div>}
-      <div style={{ font: "400 15px/1.55 var(--serif)", maxHeight: 220, overflow: "hidden" }}>{prev.text}</div>
+      <div dir="auto" style={{ font: "400 15px/1.55 var(--serif)", maxHeight: 220, overflow: "hidden" }}>{prev.text}</div>
     </div>
   );
   return { onRefHover, onDocHover, preview: node, hide: () => { window.clearTimeout(timer.current); gen.current++; setPrev(null); } };

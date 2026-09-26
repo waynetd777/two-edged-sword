@@ -134,6 +134,10 @@ input[type="range"] { accent-color: var(--accent); }
 .ref { color: var(--accent); border-bottom: 1px dotted var(--ring); cursor: pointer; }
 .ref:hover { text-decoration: none; border-bottom-style: solid; }
 .empty { color: var(--muted); padding: 24px; text-align: center; }
+/* A chapter or verse the Bible being read doesn't have (Read). */
+.hint { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 12px 10px; padding: 12px 14px; border-radius: 10px; background: var(--panel); border: 1px solid var(--border); color: var(--muted); font: 400 14px/1.45 var(--ui); }
+.hint > svg { color: var(--accent); flex: none; }
+.hint .btn { margin-left: auto; }
 .err { color: var(--bad); }
 .scroll { overflow-y: auto; min-height: 0; }
 .popover { position: fixed; z-index: 50; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 16px 44px var(--shadow); }
@@ -207,9 +211,11 @@ input[type="range"] { accent-color: var(--accent); }
 .v.sel:hover { box-shadow: inset 0 0 0 1.5px var(--accent); }
 .v.sel { background: var(--hover); box-shadow: inset 0 0 0 1.5px var(--accent); }
 .v.sel + .v.sel { border-top-left-radius: 0; border-top-right-radius: 0; }
-.vn { font: 600 12px/calc(var(--read-size) * 1.7) var(--ui); color: var(--accent); text-align: right; cursor: pointer; }
+.vn { font: 600 12px/calc(var(--read-size) * 1.7) var(--ui); color: var(--accent); text-align: end; cursor: pointer; }
 .vt { font: 400 var(--read-size)/1.7 var(--serif); text-wrap: pretty; }
 .gut { display: flex; flex-direction: column; gap: 4px; padding-top: 6px; color: var(--accent); }
+/* Words the translators supplied (the KJV's italics), in grey as well, to tell them from the text. */
+i.added { color: var(--muted); }
 .para { font: 400 var(--read-size)/1.8 var(--serif); text-wrap: pretty; }
 .para .pv { cursor: pointer; border-radius: 4px; }
 .para .pv.sel { box-shadow: 0 0 0 1.5px var(--accent); border-radius: 4px; }
@@ -224,16 +230,17 @@ button.ks-chip { cursor: pointer; }
 .ks-chip-rel { background: var(--accentsoft); color: var(--accent); }
 
 /* Interlinear Bibles: each original word over its English and Strong's number (esword.tsx tokenize). */
-.il { display: inline-flex; flex-direction: column; align-items: center; vertical-align: top; margin: 0 5px 8px 0; line-height: 1.35; }
+.il { display: inline-flex; flex-direction: column; align-items: center; vertical-align: top; margin: 0 0 8px 0; margin-inline-end: 5px; line-height: 1.35; }
 .il-g { font: 500 11.5px/1.3 var(--ui); color: var(--muted); text-transform: lowercase; font-variant: small-caps; letter-spacing: 0.02em; white-space: nowrap; }
 .il-n { font: 500 10px/1.2 var(--ui); color: var(--accent); }
+.il-n .strongs { cursor: pointer; }
 .il-p { vertical-align: top; }
 /* Another edition's reading in a Greek NT (| base | other | in the module): muted, in ⟨ ⟩. */
 .var { color: var(--muted); }
 .il.var .w { font-style: italic; }
 .il-p.var { font: 500 12px var(--ui); padding-top: 4px; }
 .il-e { font: 600 10px/1.2 var(--ui); color: var(--red); letter-spacing: 0.08em; }
-.para .vnum { font: 600 11px var(--ui); color: var(--accent); vertical-align: super; margin: 0 3px 0 2px; }
+.para .vnum { font: 600 11px var(--ui); color: var(--accent); vertical-align: super; margin-inline: 2px 3px; }
 .hl-red { background: var(--hl-red); border-radius: 3px; }
 .hl-orange { background: var(--hl-orange); border-radius: 3px; }
 .hl-yellow { background: var(--hl-yellow); border-radius: 3px; }

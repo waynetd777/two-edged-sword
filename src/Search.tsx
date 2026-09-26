@@ -157,7 +157,7 @@ export function SearchScreen() {
                   return (
                     <button key={`${h.book}.${h.chapter}.${h.verse}`} type="button" className="bm" onClick={() => setPick({ kind: "verse", ref: r })} onDoubleClick={() => app.open(r, "read")} style={{ display: "grid", gridTemplateColumns: "96px minmax(0,1fr)", gap: 12, padding: "10px 12px", background: on ? "var(--accentsoft)" : undefined }}>
                       <b style={{ fontSize: 12.5 }}>{fmtRef(r, "short")}</b>
-                      <span style={{ font: "400 15.5px/1.55 var(--serif)" }}>{res.strongs ? plainText(h.text) : mark(plainText(h.text), terms)}</span>
+                      <span dir="auto" style={{ font: "400 15.5px/1.55 var(--serif)" }}>{res.strongs ? plainText(h.text) : mark(plainText(h.text), terms)}</span>
                     </button>
                   );
                 })}
@@ -268,8 +268,8 @@ function Preview({ pick, bible, terms }: { pick: Pick | null; bible: string; ter
       </div>
       <div className="scroll" style={{ flexGrow: 1, padding: "16px 22px" }}>
         {pick.kind === "verse" && verses.map((v) => (
-          <p key={v.v} style={{ margin: "0 0 10px", font: "400 16px/1.65 var(--serif)", color: v.v === pick.ref.verse ? "var(--text)" : "var(--muted)" }}>
-            <span className="vn" style={{ marginRight: 6, lineHeight: 1 }}>{v.v}</span>{v.v === pick.ref.verse ? mark(plainText(v.text), terms) : plainText(v.text)}
+          <p key={v.v} dir="auto" style={{ margin: "0 0 10px", font: "400 16px/1.65 var(--serif)", color: v.v === pick.ref.verse ? "var(--text)" : "var(--muted)" }}>
+            <span className="vn" style={{ marginInlineEnd: 6, lineHeight: 1 }}>{v.v}</span>{v.v === pick.ref.verse ? mark(plainText(v.text), terms) : plainText(v.text)}
           </p>
         ))}
         {comm && <div className="es prose selectable">{renderHtml(comm.verse.map((e) => e.html).join(""), { onRef: openRef, onRefHover, onStrongs: app.studyWord })}</div>}

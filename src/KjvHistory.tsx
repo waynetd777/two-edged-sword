@@ -75,6 +75,16 @@ function matches(s: Source, bibles: ModuleInfo[]) {
   return { have, near: bibles.filter((b) => test(s.near)(b) && !have.includes(b)) };
 }
 
+/** Chips grouped into lines: a Bible with its + edition ("wlc" and "wlc+"), each other alone, in order. */
+function pairs<T extends { m: ModuleInfo }>(xs: T[]): T[][] {
+  const rows = new Map<string, T[]>();
+  for (const x of xs) {
+    const base = x.m.id.replace(/\+$/, "");
+    rows.set(base, [...(rows.get(base) ?? []), x]);
+  }
+  return [...rows.values()].map((r) => r.sort((a, b) => Number(a.m.id.endsWith("+")) - Number(b.m.id.endsWith("+"))));
+}
+
 const names = (ms: ModuleInfo[]) => ms.map((m) => `${m.title} (${m.abbrev})`).join(", ");
 const status = (s: Source, bibles: ModuleInfo[]) => {
   const { have, near } = matches(s, bibles);
@@ -150,13 +160,20 @@ export function KjvHistoryScreen() {
         title={[s.note, near.length ? s.nearNote : ""].filter(Boolean).join("\n\n")}>
         <b style={{ font: "600 13px/1.25 var(--ui)" }}>{s.name}</b>
         <span className="n" style={{ fontSize: 11.5 }}>{s.date}</span>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
-          {have.map((m) => <button key={m.id} type="button" className="ks-chip ks-chip-have" title={`Read ${m.title}`} onClick={() => open(m)}><Icon name="check" size={11} />{m.abbrev}</button>)}
-          {near.map((m, i) => {
-            // The first stands in for a text the library lacks; the rest are related.
-            const closest = !have.length && i === 0;
-            return <button key={m.id} type="button" className={`ks-chip ${closest ? "ks-chip-near" : "ks-chip-rel"}`} title={`${closest ? "Closest" : "Related"}: ${m.title}`} onClick={() => open(m)}>{closest ? "Closest: " : ""}{m.abbrev}</button>;
-          })}
+        {/* One resource to a line, but a Bible and its + edition (WLC, WLC+) side by side. */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          {pairs([...have.map((m) => ({ m, kind: "have" as const })), ...near.map((m, i) => ({ m, kind: !have.length && i === 0 ? "closest" as const : "rel" as const }))]).map((row) => (
+            <div key={row[0].m.id} style={{ display: "flex", gap: 3 }}>
+              {row.map(({ m, kind }, i) => {
+                // Beside its plain edition, a + edition is just "+" (its name is in the tooltip).
+                const label = i > 0 ? "+" : m.abbrev;
+                return kind === "have"
+                  ? <button key={m.id} type="button" className="ks-chip ks-chip-have" title={`Read ${m.title}`} onClick={() => open(m)}>{i === 0 && <Icon name="check" size={11} />}{label}</button>
+                  // The closest stands in for a text the library lacks; the rest are related.
+                  : <button key={m.id} type="button" className={`ks-chip ${kind === "closest" ? "ks-chip-near" : "ks-chip-rel"}`} title={`${kind === "closest" ? "Closest" : "Related"}: ${m.title}`} onClick={() => open(m)}>{i === 0 ? (kind === "closest" ? "Closest: " : "Related: ") : ""}{label}</button>;
+              })}
+            </div>
+          ))}
           {!have.length && !near.length && <span className="ks-chip">Not in library</span>}
         </div>
       </div>

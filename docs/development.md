@@ -91,7 +91,7 @@ taken by hand (⌘⇧4 with the menu open, cropped to the menu).
 | `src/scene.ts`, `tools/screenshots.py` | Screenshot mode and the script that drives it |
 | `src/variances.tsx`, `src/KjvHistory.tsx` | The ≠ marks and their popup, and the KJV History page |
 | `tools/variances/` | Finding, reviewing and building each translation's differences from the KJV (see [Translations and manuscripts](manuscripts.md)) |
-| `tools/sefaria/`, `tools/vulgate/`, `tools/crosswire/` | Building modules from free sources (see [Library](library.md#building-modules)) |
+| `tools/sefaria/`, `tools/vulgate/`, `tools/crosswire/`, `tools/syriac/`, `tools/wlc/`, `tools/latin/`, `tools/targum/` | Building modules from free sources (see [Library](library.md#building-modules)) |
 | `tools/make_icons.py` | The icon artwork (the sidebar logo and splash reuse the same sword) |
 
 Design decisions and known bugs are logged in `_sift/`; `python3 _sift/bin/sift.py decisions`
