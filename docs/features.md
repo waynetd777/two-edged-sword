@@ -29,6 +29,8 @@
 - **Bibles**: the default translation (what the reader opens with; choosing another Bible while
   reading lasts until you close the window, or the button beside the Bible picker), up to three
   favourite translations, the Compare columns, and the library.
+- **Highlights**: a name for each of the eight highlight colours, such as a theme. The highlight
+  pickers show the names, the journal's tag list offers each theme as a tag, and Ask knows them.
 - **Listening**: the voice, the voices for Hebrew, Greek and Latin Bibles, speed, and whether to
   highlight each word, continue into the next chapter or journal entry, and read verse numbers.
 - **Journal**: its folder, notes beside verses, and grammar checking.

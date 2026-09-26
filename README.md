@@ -10,6 +10,8 @@ read-only and keeps what you make (journal, bookmarks, highlights, plans, chats)
 
 - **Read** a chapter beside a study pane with every commentary on the verse, cross-references,
   dictionaries, your notes and maps. Click any word for its Greek or Hebrew.
+- **Highlight** in eight colours, each of which can stand for a theme you name, in Scripture,
+  books and the journal; one button hides and shows them all.
 - **Books and devotionals** from your library, with the same tools as Scripture: highlight,
   bookmark and note a paragraph, listen, and ask about it.
 - **Listen** to a chapter, book or journal entry read aloud in any macOS voice, including the
@@ -26,7 +28,8 @@ read-only and keeps what you make (journal, bookmarks, highlights, plans, chats)
 - **Search** across the whole library.
 - **Word Study** a Strong's number: where it is used, every verse in context, and the articles
   about it in your library.
-- **Journal** entries linked to the verses they're about, kept in step with your Obsidian vault.
+- **Journal** entries linked to the verses they're about, kept in step with your Obsidian vault,
+  tagged from a list that opens when you type #.
 - **Quiet time** plans: daily readings and devotionals, worship songs from your Music library
   chosen for the day's reading, and a daily reminder.
 - The **menu-bar** menu starts today's Quiet time or picks up where you left off.
