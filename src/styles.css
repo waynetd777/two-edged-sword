@@ -341,3 +341,5 @@ mark { background: var(--hl-gold); color: inherit; border-radius: 3px; padding: 
 /* The chapter's name stays put at the top of the reading column as it scrolls (Read.tsx). */
 .readcol .readhead { position: sticky; top: 0; z-index: 15; background: var(--bg); }
 .readcol [data-v] { scroll-margin-top: 80px; }
+/* KJV History: a Bible that has the Apocrypha (tooltip: which books). */
+.ks-apo { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 4px; background: var(--pubg); color: var(--pufg); font: 700 10px/1 var(--ui); cursor: help; flex: none; }

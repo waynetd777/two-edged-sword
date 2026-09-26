@@ -66,7 +66,8 @@ verse numbers on the right.
 printed editions the translators worked from (1604–1611), and the English Bibles before it.
 Each card's chips show what you have: green is the text itself, amber the closest stand-in, blue
 a related module. Click one to read it; its tooltip says whether it has the Old Testament, the New
-or both. Hover a card to light up what it came from and what came
+or both. A yellow **A** beside a chip means that Bible has the Apocrypha; hover it for which books
+and chapters. Hover a card to light up what it came from and what came
 from it.
 
 **Ask** opens a panel beside the tree. The history, and which sources are in your library, goes

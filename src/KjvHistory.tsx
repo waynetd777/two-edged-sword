@@ -4,7 +4,8 @@ import { AskPanel } from "./Ask";
 import { Icon } from "./icons";
 import { Topbar } from "./Shell";
 import { useApp } from "./state";
-import { bibleBooks } from "./ui";
+import { APOCRYPHA, BookSizes } from "./bible";
+import { bibleSizes } from "./ui";
 
 /** Where the King James Version came from: the manuscript traditions, the printed editions the
  * translators worked from (1604–1611), the English Bibles before it, and which of them, or what
@@ -90,6 +91,17 @@ function pairs<T extends { m: ModuleInfo }>(xs: T[]): T[][] {
 interface Coverage { ot: boolean; nt: boolean }
 const coverageOf = (books: Set<number>): Coverage => ({ ot: [...books].some((b) => b <= 39), nt: [...books].some((b) => b >= 40 && b <= 66) });
 
+/** The apocryphal books and chapters a Bible has: "Tobit", …, "Additions to Esther (11–16)", "Susanna". */
+function apocryphaIn(sz: BookSizes): string[] {
+  const out = APOCRYPHA.filter((b) => sz.has(b.n)).map((b) => b.name);
+  const est = sz.get(17) ?? 0, dan = sz.get(27) ?? 0;
+  if (est > 10) out.push(`Additions to Esther (${est > 11 ? `11–${est}` : "11"})`);
+  if (dan >= 13) out.push("Susanna (Daniel 13)");
+  if (dan >= 14) out.push("Bel and the Dragon (Daniel 14)");
+  if ((sz.get(19) ?? 0) > 150) out.push("Psalm 151");
+  return out;
+}
+
 /** "OT", "NT" or "OT & NT", for a chip's tooltip. */
 function coverageText(c: Coverage): string {
   return c.ot && c.nt ? "OT & NT" : c.ot ? "OT" : c.nt ? "NT" : "";
@@ -160,9 +172,15 @@ export function KjvHistoryScreen() {
   const open = (m: ModuleInfo) => { app.set({ bible: m.id }); app.go("read"); };
   // Which parts of the Bible each module covers, for the bars on the chips.
   const [cov, setCov] = useState<Record<string, Coverage>>({});
+  // And what of the Apocrypha each has, for the yellow A beside it.
+  const [apo, setApo] = useState<Record<string, string[]>>({});
   useEffect(() => {
     let live = true;
-    Promise.all(bibles.map((b) => bibleBooks(b.id).then((books) => [b.id, coverageOf(books)] as const))).then((r) => { if (live) setCov(Object.fromEntries(r)); });
+    Promise.all(bibles.map((b) => bibleSizes(b.id).then((sz) => [b.id, sz] as const))).then((r) => {
+      if (!live) return;
+      setCov(Object.fromEntries(r.map(([id, sz]) => [id, coverageOf(new Set(sz.keys()))])));
+      setApo(Object.fromEntries(r.map(([id, sz]) => [id, apocryphaIn(sz)]).filter(([, l]) => l.length)));
+    });
     return () => { live = false; };
   }, [bibles]);
   // Not when the name already says: "Westminster Leningrad Codex (Hebrew OT)", "Rheims New Testament (1582)".
@@ -182,7 +200,7 @@ export function KjvHistoryScreen() {
         {/* One resource to a line, but a Bible and its + edition (WLC, WLC+) side by side. */}
         <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
           {pairs([...have.map((m) => ({ m, kind: "have" as const })), ...near.map((m, i) => ({ m, kind: !have.length && i === 0 ? "closest" as const : "rel" as const }))]).map((row) => (
-            <div key={row[0].m.id} style={{ display: "flex", gap: 3 }}>
+            <div key={row[0].m.id} style={{ display: "flex", gap: 3, alignItems: "center" }}>
               {row.map(({ m, kind }, i) => {
                 // Beside its plain edition, a + edition is just "+" (its name is in the tooltip).
                 const label = i > 0 ? "+" : m.abbrev;
@@ -191,6 +209,7 @@ export function KjvHistoryScreen() {
                   // The closest stands in for a text the library lacks; the rest are related.
                   : <button key={m.id} type="button" className={`ks-chip ${kind === "closest" ? "ks-chip-near" : "ks-chip-rel"}`} title={`${kind === "closest" ? "Closest" : "Related"}: ${m.title}${covTip(m)}`} onClick={() => open(m)}>{i === 0 ? (kind === "closest" ? "Closest: " : "Related: ") : ""}{label}</button>;
               })}
+              {apo[row[0].m.id] && <span className="ks-apo" title={`Apocrypha in ${row[0].m.abbrev}: ${apo[row[0].m.id].join(", ")}`}>A</span>}
             </div>
           ))}
           {!have.length && !near.length && <span className="ks-chip">Not in library</span>}
@@ -215,6 +234,7 @@ export function KjvHistoryScreen() {
             <span className="ks-chip ks-chip-near" style={{ cursor: "default" }}>Closest</span>
             <span className="ks-chip ks-chip-rel" style={{ cursor: "default" }}>Related</span>
             <span className="ks-chip" style={{ cursor: "default" }}>Not in library</span>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}><span className="ks-apo" style={{ cursor: "default" }}>A</span><span className="n">Has the Apocrypha (hover for which)</span></span>
           </div>
           <div ref={box} style={{ position: "relative", padding: "22px 24px 40px", display: "flex", flexDirection: "column", gap: 44 }}>
             <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", overflow: "visible" }}>
