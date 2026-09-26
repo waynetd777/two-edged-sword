@@ -131,11 +131,61 @@ export interface Recent { book: number; chapter: number; verse?: number; to?: nu
 
 /** One entry in the back/forward history. `word` is a Strong's number or an English word looked
  *  up in Word Study; `search` is the last search run. */
-export interface Place { screen: Screen; loc: Loc; doc: Doc | null; word: string | null; search: string | null }
+export interface Place { screen: Screen; loc: Loc; doc: Doc | null; word: string | null; search: string | null; /** The Bible being read there. */ bible?: string; /** Where each scrolling area was when the user moved on (scrollsNow). */ scroll?: number[] }
 /** A place with what was open in it: a book's paragraph (from 1), a journal entry. */
 export interface Opened extends Place { para?: number; entry?: string }
 
 export interface Loc { book: number; chapter: number; verse?: number; to?: number }
+
+const samePlace = (a: Place, b: Place) => JSON.stringify({ ...a, scroll: undefined }) === JSON.stringify({ ...b, scroll: undefined });
+
+/** How far each scrolling area on screen (.scroll: the reading column, the study pane, lists) is scrolled. */
+const scrollsNow = () => Array.from(document.querySelectorAll<HTMLElement>(".scroll")).map((e) => Math.round(e.scrollTop));
+
+/** The verse at the top of the reading column, and how far below the column's top it starts. */
+function topVerse(): { v: string; off: number } | null {
+  const col = document.querySelector<HTMLElement>(".readcol");
+  if (!col) return null;
+  const top = col.getBoundingClientRect().top + 72; // under the chapter's name, which stays put
+  const el = Array.from(col.querySelectorAll<HTMLElement>("[data-v]")).find((e) => e.getBoundingClientRect().bottom > top);
+  return el ? { v: el.dataset.v!, off: el.getBoundingClientRect().top - col.getBoundingClientRect().top } : null;
+}
+/** Scrolls the reading column so verse `at.v` is where it was, once the new translation has loaded. */
+function keepVerse(at: { v: string; off: number }) {
+  let tries = 0, stopped = false;
+  const stop = () => { stopped = true; ["wheel", "keydown", "mousedown", "touchstart"].forEach((e) => window.removeEventListener(e, stop, true)); };
+  ["wheel", "keydown", "mousedown", "touchstart"].forEach((e) => window.addEventListener(e, stop, true));
+  const apply = () => {
+    if (stopped) return;
+    const col = document.querySelector<HTMLElement>(".readcol");
+    const el = col?.querySelector<HTMLElement>(`[data-v="${at.v}"]`);
+    if (col && el) {
+      const d = el.getBoundingClientRect().top - col.getBoundingClientRect().top - at.off;
+      if (Math.abs(d) > 2) col.scrollTop += d;
+    }
+    if (++tries < 30) window.setTimeout(apply, 60); else stop();
+  };
+  window.setTimeout(apply, 30);
+}
+
+/**
+ * Puts the scrolling areas back where a history step left them. The page fills in as its text
+ * loads, so it tries again for a moment, and gives up once the user scrolls, types or clicks.
+ */
+function restoreScrolls(want: number[]) {
+  let tries = 0, stopped = false;
+  const stop = () => { stopped = true; ["wheel", "keydown", "mousedown", "touchstart"].forEach((e) => window.removeEventListener(e, stop, true)); };
+  ["wheel", "keydown", "mousedown", "touchstart"].forEach((e) => window.addEventListener(e, stop, true));
+  const apply = () => {
+    if (stopped) return;
+    const els = Array.from(document.querySelectorAll<HTMLElement>(".scroll"));
+    let done = els.length === want.length;
+    if (done) els.forEach((el, k) => { if (Math.abs(el.scrollTop - want[k]) > 2) { el.scrollTop = want[k]; if (Math.abs(el.scrollTop - want[k]) > 2) done = false; } });
+    if (done && tries > 6) { stop(); return; } // settled, and past the page's own first scroll
+    if (++tries < 30) window.setTimeout(apply, 60); else stop();
+  };
+  window.setTimeout(apply, 30);
+}
 /** A reference book open in the reading column, and the chapter being read. */
 export interface Doc { module: string; title: string; kind?: DocKind }
 export type DocKind = "reference" | "devotional";
@@ -181,6 +231,8 @@ interface Ctx {
   open: (l: Loc, screen?: Screen, replace?: boolean) => void;
   back: () => void;
   forward: () => void;
+  /** Reads on in another Bible, as a step back can undo (the favourite translations). */
+  openBible: (id: string) => void;
   canBack: boolean;
   canForward: boolean;
 
@@ -414,9 +466,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
   const view = useMemo(() => (sessionBible && sessionBible !== settings.bible ? { ...settings, bible: sessionBible } : settings), [settings, sessionBible]);
 
-  const here = (): Place => ({ screen, loc: nav.loc, doc: nav.doc, word: wordStudy, search: searchFor });
+  // Each place remembers its Bible, so back after switching to a favourite translation returns to
+  // the one before (the Bible picker changes the current place's instead of adding one).
+  const bibleNow = useRef(view.bible);
+  bibleNow.current = view.bible;
+  const here = (): Place => ({ screen, loc: nav.loc, doc: nav.doc, word: wordStudy, search: searchFor, bible: bibleNow.current });
   const show = (pl: Place) => {
     curPlace.current = pl;
+    if (pl.bible && pl.bible !== bibleNow.current && bibles.some((b) => b.id === pl.bible)) {
+      bibleNow.current = pl.bible;
+      setSessionBible(pl.bible === settings.bible ? null : pl.bible);
+    }
     setScreen(pl.screen);
     setSearchFor(pl.search);
     setNav((n) => ({ ...n, loc: pl.loc, doc: pl.doc, word: pl.word }));
@@ -426,10 +486,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const navigate = (patch: Partial<Place>, replace = false) => {
     const h = hist.current;
     const cur = curPlace.current ?? here();
-    const next = { ...cur, ...patch };
-    if (JSON.stringify(next) === JSON.stringify(h.stack[h.i] ?? cur) && JSON.stringify(next) === JSON.stringify(cur)) return;
+    const next: Place = { ...cur, bible: bibleNow.current, scroll: undefined, ...patch };
+    if (samePlace(next, h.stack[h.i] ?? cur) && samePlace(next, cur)) return;
     if (replace && h.i >= 0) h.stack[h.i] = next;
     else {
+      // Leaving: remember how far down everything was, for back to restore.
+      if (h.i >= 0) h.stack[h.i] = { ...h.stack[h.i], scroll: scrollsNow() };
       h.stack = h.stack.slice(0, h.i + 1);
       h.stack.push(next);
       if (h.stack.length > 200) h.stack.shift();
@@ -456,9 +518,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const h = hist.current;
     const j = h.i + d;
     if (j < 0 || j >= h.stack.length) return;
+    h.stack[h.i] = { ...h.stack[h.i], scroll: scrollsNow() };
     h.i = j;
     show(h.stack[j]);
     bump((x) => x + 1);
+    if (h.stack[j].scroll) restoreScrolls(h.stack[j].scroll!);
   };
 
   const toast = useCallback((m: string, undo?: () => void) => {
@@ -475,12 +539,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
     rescan: async () => { setLib(await api.rescan()); },
     settings: view,
     set: ({ bible, ...rest }) => {
-      if (bible !== undefined) setSessionBible(bible);
+      if (bible !== undefined) {
+        setSessionBible(bible);
+        bibleNow.current = bible;
+        const h = hist.current;
+        if (h.i >= 0) h.stack[h.i] = { ...h.stack[h.i], bible };
+        if (curPlace.current) curPlace.current = { ...curPlace.current, bible };
+      }
       if (Object.keys(rest).length) setSettings((s) => ({ ...s, ...rest }));
     },
     defaultBible: settings.bible,
     setDefaultBible: (id) => { setSessionBible(null); setSettings((s) => ({ ...s, bible: id })); },
     screen, go: (s) => navigate({ screen: s }),
+    // Same passage in another translation: the verse at the top of the column stays at the top.
+    openBible: (id) => { const at = topVerse(); navigate({ bible: id }); if (at) keepVerse(at); },
     loc: nav.loc, open,
     back: () => moveHist(-1), forward: () => moveHist(1),
     canBack: hist.current.i > 0, canForward: hist.current.i < hist.current.stack.length - 1,

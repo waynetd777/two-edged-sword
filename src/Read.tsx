@@ -346,7 +346,7 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
             {/* The favourite translations from Settings, one click away (for this session, like the Bible picker). */}
             {favs.length > 0 && (
               <div className="seg" role="group" aria-label="Favourite translations">
-                {favs.map((m) => <button key={m.id} type="button" className={m.id === bible ? "on" : ""} title={m.id === bible ? m.title : `Read in ${m.title}`} onClick={() => app.set({ bible: m.id })}>{m.abbrev}</button>)}
+                {favs.map((m) => <button key={m.id} type="button" className={m.id === bible ? "on" : ""} title={m.id === bible ? m.title : `Read in ${m.title}`} onClick={() => app.openBible(m.id)}>{m.abbrev}</button>)}
               </div>
             )}
             <Seg value={settings.layout} options={[["paragraph", "Paragraph"], ["verse", "Verse"]]} onChange={(v) => app.set({ layout: v })} />

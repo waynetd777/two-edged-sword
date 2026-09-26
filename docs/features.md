@@ -16,7 +16,7 @@
   opens Settings. ⌘P plays and pauses reading aloud, and F7 and F9 go back or on
   ([Listen](reading.md#listen)).
 - **Back and forward** (top left, or ⌘[ and ⌘]) step through every screen, passage, book
-  chapter, word and search you've been to.
+  chapter, word, search and favourite translation you've been to, scrolled back to where you were.
 - The sidebar lists your bookmarks and recent chapters, eight of each, with **Show all** for the
   rest. Hover one for a preview; × removes it, with **Undo**.
 - Hover any control for what it does. Deleting a journal entry, a plan or a chat asks first.
