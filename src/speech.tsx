@@ -80,6 +80,15 @@ function sayRef(r: Ref): string {
  * The text to speak, with its references said in full, and for each character of it the
  * character of `text` it stands for, so the word highlight still lands on the page's words.
  */
+// Apple's character voices, in every language: last when Automatic picks one.
+const NOVELTY = /^(Eddy|Flo|Grandma|Grandpa|Reed|Rocko|Sandy|Shelley|Bahh|Bells|Boing|Bubbles|Cellos|Jester|Organ|Trinoids|Whisper|Zarvox|Wobble|Bad News|Good News|Superstar|Albert|Fred|Junior|Kathy|Ralph)\b/;
+
+/** Voices best first: Premium, then Enhanced, then the rest, character voices last. */
+export const rankVoices = (vs: Voice[]) => [...vs].sort((a, b) => Number(NOVELTY.test(a.name)) - Number(NOVELTY.test(b.name)) || b.quality - a.quality);
+
+/** A Latin Bible: the Vulgates (Latin, Latin+, Vulg-C, Vulg-C+). */
+export const isLatin = (m?: { title: string; abbrev: string }) => !!m && /\b(latin|vulg)/i.test(`${m.title} ${m.abbrev}`);
+
 /** "he" for a text mostly in Hebrew letters, "el" for Greek, else null. */
 export function scriptOf(text: string): "he" | "el" | null {
   const he = (text.match(/[\u0590-\u05FF]/g) ?? []).length, el = (text.match(/[\u0370-\u03FF\u1F00-\u1FFF]/g) ?? []).length;
@@ -161,12 +170,15 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   // Settings keep the voice's identifier; a name (or an old WebKit voiceURI) still matches.
   // A verse in Hebrew letters (the Hebrew Bibles, the Targums) or in Greek is read in the Hebrew or
   // Greek voice from Settings, or the best installed; with none installed, in the reading voice.
-  const voiceFor = useCallback((text = "") => {
-    const lang = scriptOf(text);
+  // A Latin Bible (told by its name: Latin looks like any text) is read in the Latin voice, an
+  // Italian one unless Settings says otherwise.
+  const voiceFor = useCallback((text = "", latin = false) => {
+    const lang = latin ? "la" : scriptOf(text);
     if (lang) {
-      const want = lang === "he" ? settings.current.voiceHebrew : settings.current.voiceGreek;
-      const mine = voicesRef.current.filter((v) => v.lang.startsWith(lang));
-      const v = mine.find((x) => x.id === want) ?? [...mine].sort((a, b) => b.quality - a.quality)[0];
+      const s = settings.current;
+      const want = lang === "he" ? s.voiceHebrew : lang === "el" ? s.voiceGreek : s.voiceLatin;
+      const mine = voicesRef.current.filter((v) => v.lang.startsWith(lang === "la" ? "it" : lang) || (lang === "la" && v.lang.startsWith("la")));
+      const v = mine.find((x) => x.id === want) ?? rankVoices(mine)[0];
       if (v) return v.id;
     }
     const all = voicesRef.current.filter((v) => v.lang.startsWith("en")), want = settings.current.voice;
@@ -235,12 +247,13 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     if (!text) { setState((p) => ({ ...p, verse: verse.v, char: -1 })); speakFrom(i + 1); return; }
     const heading = announce.current ? `${announce.current}. ` : "";
     announce.current = null;
-    // The heading and verse number are English: not said in a Hebrew or Greek voice.
-    const prefix = scriptOf(text) ? "" : heading + (settings.current.readNumbers && !s.doc ? `Verse ${verse.v}. ` : "");
+    // The heading and verse number are English: not said in a Hebrew, Greek or Latin voice.
+    const latin = !s.doc && isLatin(appRef.current.mod("bible", s.bible));
+    const prefix = scriptOf(text) || latin ? "" : heading + (settings.current.readNumbers && !s.doc ? `Verse ${verse.v}. ` : "");
     const { spoken, at } = speakable(text);
     utt.current = { id: g, prefix: prefix.length, at, onEnd: () => speakFrom(i + 1) };
     setState((p) => ({ ...p, verse: verse.v, char: -1 }));
-    api.ttsSpeak(g, prefix + spoken, voiceFor(text), settings.current.rate).catch(() => { if (g === gen.current) stop(); });
+    api.ttsSpeak(g, prefix + spoken, voiceFor(text, latin), settings.current.rate).catch(() => { if (g === gen.current) stop(); });
   }, [stop, voiceFor]);
 
   const play = useCallback((bible: string, b: number, c: number, fromVerse?: number, o: PlayOpts = {}) => {
@@ -300,12 +313,12 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // A change of speed or voice takes effect from the current verse.
-  const rate = app.settings.rate, voice = app.settings.voice, voiceHe = app.settings.voiceHebrew, voiceEl = app.settings.voiceGreek;
+  const rate = app.settings.rate, voice = app.settings.voice, voiceHe = app.settings.voiceHebrew, voiceEl = app.settings.voiceGreek, voiceLa = app.settings.voiceLatin;
   useEffect(() => {
     const s = st.current;
     if (s.on && !s.paused) speakFrom(Math.max(0, verses.current.findIndex((v) => v.v === s.verse)));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rate, voice, voiceHe, voiceEl]);
+  }, [rate, voice, voiceHe, voiceEl, voiceLa]);
 
   useEffect(() => () => { api.ttsStop(); }, []);
 

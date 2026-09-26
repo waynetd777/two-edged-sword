@@ -4,7 +4,7 @@ import { book, fmtRef, parseRef, Ref, sectionOf, stepChapter, testament } from "
 import { alignStrongs, EDITIONS, isOriginal, kjvGloss, plainText, Token, tokenize, variantSource } from "./esword";
 import { Icon, Pause, Play } from "./icons";
 import { BibleSelect, RefButton, SearchField, Topbar } from "./Shell";
-import { usePlayer } from "./speech";
+import { rankVoices, usePlayer } from "./speech";
 import { DictAt, HlColor, hlName, useApp, vkey } from "./state";
 import { StudyPane, StudyTab } from "./StudyPane";
 import { Popover, RefPicker, Seg, SideNav, useBibleBooks, useDrag } from "./ui";
@@ -598,11 +598,12 @@ export function PlayerBar({ focus = false }: { focus?: boolean }) {
 
 /** The reading voice, or with `lang` the voice for Bibles in Hebrew ("he") or Greek ("el"), whose
  *  first choice, Automatic, is the best one installed. */
-export function VoiceSelect({ lang }: { lang?: "he" | "el" } = {}) {
+export function VoiceSelect({ lang }: { lang?: "he" | "el" | "la" } = {}) {
   const app = useApp();
   const { voices: english, allVoices } = usePlayer();
-  const key = lang === "he" ? "voiceHebrew" : lang === "el" ? "voiceGreek" : "voice";
-  const voices = lang ? allVoices.filter((v) => v.lang.startsWith(lang)).sort((a, b) => b.quality - a.quality) : english;
+  const key = lang === "he" ? "voiceHebrew" : lang === "el" ? "voiceGreek" : lang === "la" ? "voiceLatin" : "voice";
+  // Latin has no voices of its own: an Italian one says Church Latin as it's said.
+  const voices = lang ? rankVoices(allVoices.filter((v) => v.lang.startsWith(lang === "la" ? "it" : lang) || (lang === "la" && v.lang.startsWith("la")))) : english;
   const want = app.settings[key];
   const label = (v: Voice) => `${v.name} · ${new Intl.DisplayNames(["en"], { type: "language" }).of(v.lang) ?? v.lang}${v.quality > 1 && !v.name.includes("(") ? (v.quality > 2 ? " (Premium)" : " (Enhanced)") : ""}`;
   const cur = lang ? voices.find((v) => v.id === want) : voices.find((v) => v.id === want) ?? voices.find((v) => v.name === want) ?? voices.find((v) => v.default) ?? voices[0];
@@ -611,7 +612,7 @@ export function VoiceSelect({ lang }: { lang?: "he" | "el" } = {}) {
     <label className="btn" style={{ position: "relative", justifyContent: "space-between", width: "100%" }}>
       <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{shown}</span>
       <Icon name="down" className="sm" style={{ color: "var(--muted)" }} />
-      <select aria-label={lang === "he" ? "Hebrew voice" : lang === "el" ? "Greek voice" : "Voice"} value={cur?.id ?? ""} onChange={(e) => app.set({ [key]: e.target.value })} style={{ position: "absolute", inset: 0, opacity: 0, cursor: "pointer" }}>
+      <select aria-label={lang === "he" ? "Hebrew voice" : lang === "el" ? "Greek voice" : lang === "la" ? "Latin voice" : "Voice"} value={cur?.id ?? ""} onChange={(e) => app.set({ [key]: e.target.value })} style={{ position: "absolute", inset: 0, opacity: 0, cursor: "pointer" }}>
         {lang && <option value="">{voices[0] ? `Automatic (${voices[0].name})` : "None installed: the reading voice"}</option>}
         {voices.map((v) => <option key={v.id} value={v.id}>{label(v)}</option>)}
       </select>
