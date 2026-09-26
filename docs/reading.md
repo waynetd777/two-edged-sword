@@ -28,7 +28,8 @@ installed, otherwise from Strong's pronunciation guide. Words in commentary, dic
 and books can be clicked the same way.
 
 Click a verse (anywhere but a word) to select it; ⇧-click for a range. The toolbar above it
-offers highlight (six colours), bookmark, note (a journal entry on the verse, N), compare, listen
+offers highlight (eight colours, each of which can be given a name such as a theme in
+Settings › Highlights; the toolbar shows the name of the verse's colour), bookmark, note (a journal entry on the verse, N), compare, listen
 from here, ask and copy (⌘C). Its labels fold to icons when the column is narrow.
 
 Hover a reference or a Strong's number for a preview. The passage picker goes book, chapter,

@@ -58,8 +58,8 @@ function linkRefs(text: string): string {
 // my_notes_file stays as it is; and highlights: ==yellow== (Obsidian's own) and
 // <mark class="hl-green">the other colours</mark>; and <sup>superscript</sup> and <sub>subscript</sub>
 // ("17<sup>th</sup>"), as Obsidian shows them.
-const HL_COLOURS = ["red", "orange", "yellow", "green", "blue", "purple"];
-const INLINE_RE = /\\[\\*_=]|<(sup|sub)>.+?<\/\1>|<mark class="hl-(?:red|orange|yellow|green|blue|purple)">.+?<\/mark>|==(?=\S)(?:\\.|[^\\])+?==|\*\*\*(?=\S)(?:\\.|[^\\])+?\*\*\*|\*\*(?=\S)(?:\\.|[^\\])+?\*\*|\*(?=[^\s*])(?:\\.|[^*\\])+\*|(?<![\p{L}\p{N}_\\])_(?=[^\s_])(?:\\.|[^_\\])+_(?![\p{L}\p{N}_])/gu;
+const HL_COLOURS = ["red", "orange", "yellow", "green", "teal", "blue", "purple", "grey"];
+const INLINE_RE = /\\[\\*_=]|<(sup|sub)>.+?<\/\1>|<mark class="hl-(?:red|orange|yellow|green|teal|blue|purple|grey)">.+?<\/mark>|==(?=\S)(?:\\.|[^\\])+?==|\*\*\*(?=\S)(?:\\.|[^\\])+?\*\*\*|\*\*(?=\S)(?:\\.|[^\\])+?\*\*|\*(?=[^\s*])(?:\\.|[^*\\])+\*|(?<![\p{L}\p{N}_\\])_(?=[^\s_])(?:\\.|[^_\\])+_(?![\p{L}\p{N}_])/gu;
 
 function inline(s: string, links: boolean): string {
   // Split on the marks first, then escape and link the plain parts.
@@ -173,7 +173,7 @@ export function htmlToMd(root: HTMLElement): string {
 
 /** Sentinel colours the editor's highlighter paints with (execCommand hiliteColor, so ⌘Z undoes
  *  it); the stylesheet shows each as its theme's colour, and "none" as no highlight. */
-export const HL_PAINT: Record<string, string> = { red: "rgb(250, 1, 1)", orange: "rgb(250, 1, 2)", yellow: "rgb(250, 1, 3)", green: "rgb(250, 1, 4)", blue: "rgb(250, 1, 5)", purple: "rgb(250, 1, 6)", none: "rgb(250, 1, 7)" };
+export const HL_PAINT: Record<string, string> = { red: "rgb(250, 1, 1)", orange: "rgb(250, 1, 2)", yellow: "rgb(250, 1, 3)", green: "rgb(250, 1, 4)", blue: "rgb(250, 1, 5)", purple: "rgb(250, 1, 6)", none: "rgb(250, 1, 7)", teal: "rgb(250, 1, 8)", grey: "rgb(250, 1, 9)" };
 const PAINTED = new Map(Object.entries(HL_PAINT).map(([c, v]) => [v, c]));
 
 /** The highlight a text node shows: the nearest mark, or span painted by the highlighter. */

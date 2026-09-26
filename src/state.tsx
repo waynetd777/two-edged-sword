@@ -45,6 +45,8 @@ export interface Settings {
   showNotes: boolean;
   /** The journal highlighter's colour, kept until another is picked. */
   journalHighlight: HlColor;
+  /** What each highlight colour stands for, e.g. a theme; shown in the pickers. Blank is the colour's own name. */
+  hlNames: Partial<Record<HlColor, string>>;
   /** Grammar checking in the journal, with spelling. */
   journalGrammar: boolean;
   model: Model;
@@ -71,7 +73,7 @@ export interface Settings {
 const DEFAULTS: Settings = {
   theme: "auto", readSize: 19, readFont: "literata", studyTab: "commentary", docTab: "ask", studyCommentary: null, studyDict: null, dictModule: null, studyFollow: true, redLetters: true, kjvGlosses: true, layout: "verse", bible: "kjv", compare: ["kjv", "asv", "kjv+"], favBibles: [], hiddenBibles: [],
   commentaryOrder: ["barnes", "henry", "clarke", "gill", "jfb", "wesley", "darby", "meyer"], dictionaryOrder: ["isbe", "smith", "nave", "cyclopedia"],
-  voice: "", voiceHebrew: "", voiceGreek: "", voiceLatin: "", rate: 1, continueChapter: true, continueEntry: false, readNumbers: false, highlightWords: true, journalDir: "", showNotes: true, journalHighlight: "yellow", journalGrammar: true,
+  voice: "", voiceHebrew: "", voiceGreek: "", voiceLatin: "", rate: 1, continueChapter: true, continueEntry: false, readNumbers: false, highlightWords: true, journalDir: "", showNotes: true, journalHighlight: "yellow", hlNames: {}, journalGrammar: true,
   model: "claude-sonnet-5", includeCommentaries: true, askJournal: false, allowLicensed: true, reminder: false, reminderTime: "06:30", whenBehind: "ask", studyPane: true, copyNumbers: true,
 };
 
@@ -89,7 +91,7 @@ export type ReadFont = keyof typeof READ_FONTS;
 export interface Bookmark { id: string; ref: Ref; bible: string; created: string; doc?: DocSpot }
 /** A paragraph in a book: its chapter, and the paragraph's number there (from 1). */
 export interface DocSpot { module: string; title: string; kind?: DocKind; para: number }
-export type HlColor = "red" | "orange" | "yellow" | "green" | "blue" | "purple";
+export type HlColor = "red" | "orange" | "yellow" | "green" | "teal" | "blue" | "purple" | "grey";
 /** Highlights saved before there were six colours. */
 export const hlName = (c: string): HlColor => (c === "gold" ? "yellow" : c === "rose" ? "red" : (c as HlColor));
 

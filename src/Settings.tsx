@@ -1,7 +1,7 @@
 import { ReactNode, useEffect, useState } from "react";
 import { open as openDialog } from "@tauri-apps/plugin-dialog";
 import { Icon } from "./icons";
-import { VoiceSelect } from "./Read";
+import { HL, HL_DOT, hlLabel, VoiceSelect } from "./Read";
 import { BibleSelect, Topbar } from "./Shell";
 import { modelGroups, PROVIDER_NAME, pickModel, refreshAssistant, useAssistant } from "./assistant";
 import { READ_FONTS, ReadFont, useApp } from "./state";
@@ -57,6 +57,9 @@ export function SettingsScreen() {
             <Row label="Compare starts with" hint="Change them on the Compare screen."><div style={{ display: "flex", gap: 5 }}>{s.compare.map((c) => <span key={c} className="chip" style={{ cursor: "default" }}>{app.mod("bible", c)?.abbrev ?? c}</span>)}</div></Row>
             <Row label="Library" hint="Checked for new modules each time the app opens, or press Rescan on the Library screen."><span style={{ fontSize: 12.5 }}>e-Sword X · {app.lib?.modules.length} modules · read-only</span></Row>
           </Section>
+          <Section title="Highlights">
+            <Row label="Colour names" hint="What each colour stands for, such as a theme. The highlight pickers show the names; leave one blank to keep the colour's own name."><HlNames /></Row>
+          </Section>
           <Section title="Listening">
             <Row label="Voice" hint="More voices: System Settings › Accessibility › Spoken Content › System Voice › Manage Voices."><div style={{ width: 320 }}><VoiceSelect /></div></Row>
             <Row label="Hebrew voice" hint="For the Hebrew Bibles and the Targums. macOS's Hebrew voices (Carmit) speak the modern pronunciation."><div style={{ width: 320 }}><VoiceSelect lang="he" /></div></Row>
@@ -106,6 +109,22 @@ export function SettingsScreen() {
 }
 
 /** The favourite Bibles: chips to take one off, and Add while there are fewer than three. */
+/** A name for each highlight colour, saved as it's typed. */
+function HlNames() {
+  const app = useApp();
+  const names = app.settings.hlNames ?? {};
+  return (
+    <div className="hlnames" style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: "6px 14px", width: "100%" }}>
+      {HL.map((c) => (
+        <label key={c} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span className="dot" title={hlLabel(c, names)} style={{ background: HL_DOT[c], flexShrink: 0 }} />
+          <input className="btn" style={{ flexGrow: 1, minWidth: 0 }} value={names[c] ?? ""} placeholder={c[0].toUpperCase() + c.slice(1)} aria-label={`Name for ${c}`} onChange={(e) => app.set({ hlNames: { ...names, [c]: e.target.value } })} />
+        </label>
+      ))}
+    </div>
+  );
+}
+
 function FavBibles() {
   const app = useApp();
   const favs = app.settings.favBibles ?? [];

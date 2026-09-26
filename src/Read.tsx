@@ -17,8 +17,10 @@ export interface WordPick { token: Token; verse: number; rect: DOMRect; /** Set 
 /** A clicked word outside a verse (commentary, a book) as a token: no Strong's numbers of its own. */
 export const textToken = (text: string): Token => ({ text, word: true, red: false, italic: false, strongs: [], at: 0, wi: -1 });
 
-export const HL: HlColor[] = ["red", "orange", "yellow", "green", "blue", "purple"];
-export const HL_DOT: Record<HlColor, string> = { red: "#e59a92", orange: "#efb97e", yellow: "#e9d271", green: "#a9cf9f", blue: "#9fc0e6", purple: "#c1a9e3" };
+export const HL: HlColor[] = ["red", "orange", "yellow", "green", "teal", "blue", "purple", "grey"];
+export const HL_DOT: Record<HlColor, string> = { red: "#e59a92", orange: "#efb97e", yellow: "#e9d271", green: "#a9cf9f", teal: "#8fcfc6", blue: "#9fc0e6", purple: "#c1a9e3", grey: "#aab3bf" };
+/** A highlight colour's name in the pickers: the user's name for it (Settings › Highlights), or the colour. */
+export const hlLabel = (c: HlColor, names: Partial<Record<HlColor, string>> | undefined) => names?.[c]?.trim() || c[0].toUpperCase() + c.slice(1);
 
 /** Journal entries that mention a verse, by "b.c.v". */
 export function useNotesByVerse() {
@@ -309,7 +311,8 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
   const toolbar = sel && (
     <div className="vtool fold-bible" dir="ltr" role="toolbar" aria-label="Verse actions" style={{ top: -44, left: 44 }} onClick={(e) => e.stopPropagation()}>
       <div style={{ display: "flex", gap: 6, padding: "0 6px 0 4px" }}>
-        {HL.map((c) => <button key={c} type="button" className="dot" aria-label={`Highlight ${c}`} aria-pressed={curHl === c} style={{ background: HL_DOT[c], outline: curHl === c ? "2px solid #fff" : undefined }} onClick={() => setHl(curHl === c ? null : c)} />)}
+        {HL.map((c) => <button key={c} type="button" className="dot" aria-label={`Highlight: ${hlLabel(c, settings.hlNames)}`} title={hlLabel(c, settings.hlNames)} aria-pressed={curHl === c} style={{ background: HL_DOT[c], outline: curHl === c ? "2px solid #fff" : undefined }} onClick={() => setHl(curHl === c ? null : c)} />)}
+        {curHl && settings.hlNames?.[curHl]?.trim() && <span style={{ fontSize: 12, alignSelf: "center", whiteSpace: "nowrap", maxWidth: 160, overflow: "hidden", textOverflow: "ellipsis" }}>{hlLabel(curHl, settings.hlNames)}</span>}
       </div>
       <span className="sep" />
       <button type="button" className="tb" title={selBookmarked ? "Remove the bookmark" : "Bookmark these verses"} onClick={() => app.toggleBookmark(selRef!, bible)}><Icon name="bookmark" style={{ fill: selBookmarked ? "currentColor" : "none" }} /><span className="lbl">{selBookmarked ? "Bookmarked" : "Bookmark"}</span></button>

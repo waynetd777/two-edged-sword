@@ -7,7 +7,7 @@ import { fmtRef, parseRef, Ref } from "./bible";
 import { plainText, wordRangeAt } from "./esword";
 import { Icon } from "./icons";
 import { HL_PAINT, htmlToMd, mdPlain, mdToHtml } from "./md";
-import { HL, HL_DOT } from "./Read";
+import { HL, HL_DOT, hlLabel } from "./Read";
 import { SearchField, Topbar } from "./Shell";
 import { HlColor, nowLocal, onFlush, uid, useApp } from "./state";
 import { ClearButton, confirmDelete, Dialog, Popover, Seg } from "./ui";
@@ -233,6 +233,8 @@ function Editor({ entry, onChange, saved, err, onDelete, onExport, listed, liste
   const cmd = (c: string, v?: string) => { ed.current?.focus(); document.execCommand(c, false, v); sync(); };
   /** Highlights the selection in a reader colour (null takes highlighting off); ⌘Z undoes it. */
   const hlLast = app.settings.journalHighlight ?? "yellow";
+  const names = app.settings.hlNames;
+  const named = HL.some((c) => names?.[c]?.trim());
   const highlight = (c: HlColor | null, picking = false) => {
     const s = window.getSelection();
     ed.current?.focus();
@@ -346,7 +348,7 @@ function Editor({ entry, onChange, saved, err, onDelete, onExport, listed, liste
         <button className="ibtn" type="button" aria-label="Heading" title="Heading" style={{ font: "600 14px var(--display)", color: "var(--text)" }} onClick={() => cmd("formatBlock", "h3")}>H</button>
         <button className="ibtn" type="button" aria-label="Bold" title="Bold ⌘B" style={{ fontWeight: 700, color: "var(--text)" }} onClick={() => cmd("bold")}>B</button>
         <button className="ibtn" type="button" aria-label="Italic" title="Italic ⌘I" style={{ fontStyle: "italic", fontFamily: "var(--serif)", color: "var(--text)" }} onClick={() => cmd("italic")}>I</button>
-        <button className="ibtn" type="button" aria-label={`Highlight ${hlLast}`} title={`Highlight (${hlLast})`} style={{ flexDirection: "column", gap: 1, color: "var(--text)" }} onClick={() => highlight(hlLast)}>
+        <button className="ibtn" type="button" aria-label={`Highlight: ${hlLabel(hlLast, names)}`} title={`Highlight (${hlLabel(hlLast, names)})`} style={{ flexDirection: "column", gap: 1, color: "var(--text)" }} onClick={() => highlight(hlLast)}>
           <Icon name="highlight" /><span style={{ width: 14, height: 3, borderRadius: 2, background: HL_DOT[hlLast] }} />
         </button>
         <button className="ibtn" type="button" aria-label="Highlight colour" title="Highlight colour" style={{ width: 16, marginLeft: -2 }} onClick={(e) => { remember(); setHlAt(e.currentTarget.getBoundingClientRect()); }}><Icon name="down" size={11} /></button>
@@ -458,10 +460,17 @@ function Editor({ entry, onChange, saved, err, onDelete, onExport, listed, liste
       {verseAt && <RefPrompt anchor={verseAt} label="Insert a verse" onClose={() => setVerseAt(null)} onSubmit={async (t) => { const ok = await insertVerse(t); if (ok) setVerseAt(null); return ok; }} />}
       {linkAt && <RefPrompt anchor={linkAt} label="Link a verse to this entry" onClose={() => setLinkAt(null)} onSubmit={async (t) => { const r = parseRef(t); if (!r) return false; const s = fmtRef(r); if (!entry.verses.includes(s)) onChange({ verses: [...entry.verses, s] }); setLinkAt(null); return true; }} />}
       {hlAt && (
-        <Popover anchor={hlAt} onClose={() => setHlAt(null)} width={220}>
-          <div className="hlpick" style={{ padding: 8, display: "flex", alignItems: "center", gap: 8 }} onMouseDown={(e) => e.preventDefault()}>
-            {HL.map((c) => <button key={c} type="button" className="dot" aria-label={`Highlight ${c}`} title={c[0].toUpperCase() + c.slice(1)} style={{ background: HL_DOT[c], outline: c === hlLast ? "2px solid var(--text)" : undefined }} onClick={() => { setHlAt(null); app.set({ journalHighlight: c }); highlight(c, true); }} />)}
-            <button className="btn small" type="button" style={{ marginLeft: "auto" }} title="Take highlighting off the selection" onClick={() => { setHlAt(null); highlight(null); }}>None</button>
+        <Popover anchor={hlAt} onClose={() => setHlAt(null)} width={named ? 260 : 290}>
+          {/* With names for the colours (Settings › Highlights), a list; without, a row of dots. */}
+          <div className="hlpick" style={{ padding: 8, display: "flex", flexDirection: named ? "column" : "row", alignItems: named ? "stretch" : "center", gap: named ? 2 : 8 }} onMouseDown={(e) => e.preventDefault()}>
+            {HL.map((c) => {
+              const pick = () => { setHlAt(null); app.set({ journalHighlight: c }); highlight(c, true); };
+              const dot = <span className="dot" style={{ background: HL_DOT[c], outline: c === hlLast ? "2px solid var(--text)" : undefined, flexShrink: 0 }} />;
+              return named
+                ? <button key={c} type="button" className="opt" aria-label={`Highlight: ${hlLabel(c, names)}`} title={hlLabel(c, names)} style={{ background: "none", border: 0, color: "var(--text)", padding: "2px 4px", textAlign: "left" }} onClick={pick}>{dot}{hlLabel(c, names)}</button>
+                : <button key={c} type="button" className="dot" aria-label={`Highlight ${c}`} title={hlLabel(c, names)} style={{ background: HL_DOT[c], outline: c === hlLast ? "2px solid var(--text)" : undefined }} onClick={pick} />;
+            })}
+            <button className="btn small" type="button" style={named ? { marginTop: 4, alignSelf: "flex-start" } : { marginLeft: "auto" }} title="Take highlighting off the selection" onClick={() => { setHlAt(null); highlight(null); }}>None</button>
           </div>
         </Popover>
       )}
