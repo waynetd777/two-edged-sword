@@ -22,11 +22,22 @@ test: check
 
 # Release builds strip the builder's home directory out of the binary (Rust bakes absolute
 # paths into panic metadata). Debug builds skip this so `make dev` keeps its incremental cache.
-RELEASE_RUSTFLAGS := --remap-path-prefix=$(HOME)=/build
+# The remapping is limited to what goes into the binary (--remap-path-scope=object).
+RELEASE_RUSTFLAGS := --remap-path-prefix=$(HOME)=/build --remap-path-scope=object
+# macOS 27's linker (ld-27037) sometimes writes a library whose string table dyld refuses
+# ("mis-aligned LINKEDIT string pool"), so rustc can't load a proc macro it has just built and
+# stops with "can't find crate" (E0463). Release builds link with Rust's own lld instead; lld
+# can't read the macOS 27 SDK's .tbd files, so it links against the 26.5 SDK when that's there.
+LLD_DIR := $(shell rustc --print sysroot)/lib/rustlib/aarch64-apple-darwin/bin/gcc-ld
+OLD_SDK := $(wildcard /Library/Developer/CommandLineTools/SDKs/MacOSX26*.sdk)
+ifneq ($(OLD_SDK),)
+RELEASE_RUSTFLAGS += -Clink-arg=-fuse-ld=lld -Clink-arg=-B$(LLD_DIR)
+RELEASE_ENV := SDKROOT=$(lastword $(OLD_SDK))
+endif
 
 ## Build the .app, signed with the identity in signing.local when there is one.
 app:
-	RUSTFLAGS="$(RELEASE_RUSTFLAGS)" npm run tauri build
+	$(RELEASE_ENV) RUSTFLAGS="$(RELEASE_RUSTFLAGS)" npm run tauri build
 	@if [ -n "$(SIGN_ID)" ]; then \
 	  codesign -dv --verbose=2 "$(APP)" 2>&1 | grep -E "^Authority=$(SIGN_ID)" >/dev/null \
 	    && echo "signed with $(SIGN_ID)" \
