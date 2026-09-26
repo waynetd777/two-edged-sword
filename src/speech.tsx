@@ -320,6 +320,15 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rate, voice, voiceHe, voiceEl, voiceLa]);
 
+  // Another translation chosen while a chapter is being read: stop, rather than read on in the one
+  // no longer showing. (Not a Quiet time's reading, which has its own Bible, nor a book.)
+  const shownBible = app.settings.bible;
+  useEffect(() => {
+    const s = st.current;
+    if (s.on && !s.doc && !opts.current.onEnd && s.bible && s.bible !== shownBible) stop();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shownBible]);
+
   useEffect(() => () => { api.ttsStop(); }, []);
 
   // In a Greek or Hebrew voice when one is installed (macOS has Melina and Carmit; both speak the
