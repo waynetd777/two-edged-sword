@@ -23,12 +23,15 @@
 
 ## Settings
 
-- **Reading**: theme (match macOS, light or dark), font and size, words of Jesus in red, verse
-  or paragraph layout, verse numbers when copying.
-- **Translations**: the default Bible (what the reader opens with; choosing another Bible while
-  reading lasts until you close the window) and the Compare columns.
-- **Voice** and speed for Listen, and the voices for Hebrew, Greek and Latin Bibles.
-- **Journal**: its folder, and notes beside verses.
+- **Appearance**: theme (match macOS, light or dark), font and size, words of Jesus in red,
+  English under each word of Greek and Hebrew Bibles that have none of their own, verse numbers
+  when copying, and verse or paragraph layout.
+- **Bibles**: the default translation (what the reader opens with; choosing another Bible while
+  reading lasts until you close the window, or the button beside the Bible picker), the Compare
+  columns, and the library.
+- **Listening**: the voice, the voices for Hebrew, Greek and Latin Bibles, speed, and whether to
+  highlight each word, continue into the next chapter and read verse numbers.
+- **Journal**: its folder, notes beside verses, and grammar checking.
 - **Quiet time**: the daily reminder, and what to do when you fall behind a plan.
 - **AI assistant**: which of Claude Code, Codex, Antigravity and Copilot are installed, the
   default model, whether Ask may search your library and your journal, **Licensed text** (off:

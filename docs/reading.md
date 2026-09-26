@@ -92,5 +92,7 @@ including the far more natural **Premium** and **Enhanced** ones. They are a sep
 Bibles in Hebrew (and the Aramaic Targums) and in Greek are read in a Hebrew or Greek voice
 (Settings › Listening; Automatic picks the best one installed, Carmit and Melina come with
 macOS), in the modern pronunciation. The Latin Vulgates are read in an Italian voice (Alice
-comes with macOS), which says Church Latin the way it is said; any voice can be chosen instead. A word-by-word Bible is read in its own language only, not
-the English and grammar under its words; the chapter heading and verse numbers are left out.
+comes with macOS), which says Church Latin the way it is said; any voice can be chosen instead.
+Better ones download the same way as the English voices, under Hebrew, Greek and Italian in
+Manage Voices. A word-by-word Bible is read in its own language only, not the English and
+grammar under its words; the chapter heading and verse numbers are left out.

@@ -191,6 +191,33 @@
     "scrollTo": "[data-v=\"33\"]"
   },
   {
+    "name": "interlinear-hebrew",
+    "loc": {
+      "book": 19,
+      "chapter": 23,
+      "verse": 1
+    },
+    "settings": {
+      "bible": "wlc+",
+      "layout": "verse",
+      "studyPane": false
+    }
+  },
+  {
+    "name": "interlinear-syriac",
+    "loc": {
+      "book": 40,
+      "chapter": 6,
+      "verse": 9
+    },
+    "settings": {
+      "bible": "peshitta+",
+      "layout": "verse",
+      "studyPane": false
+    },
+    "scrollTo": "[data-v=\"9\"]"
+  },
+  {
     "name": "kjv-history",
     "screen": "history"
   }

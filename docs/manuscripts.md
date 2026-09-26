@@ -39,9 +39,16 @@ Bibles with glosses show each original word stacked over its English and its Str
 hover a number for its dictionary entry, a word for its grammar and dictionary form, and click it
 to look it up. A Greek or Hebrew Bible with Strong's numbers but no English of its own (Hebrew
 OT+, Greek NT BYZ+) gets each number's commonest rendering in the KJV, from your concordance;
-Settings → Appearance → English under each word turns that off, and the numbers then sit after
+Settings › Appearance › English under each word turns that off, and the numbers then sit after
 their words, with the grammar in the word's tooltip. Right-to-left Bibles read right to left,
 verse numbers on the right.
+
+<table>
+  <tr>
+    <td align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="images/interlinear-hebrew-dark.png"><img alt="Psalm 23 in WLC+, the Hebrew read right to left, each word over its English and Strong's number" src="images/interlinear-hebrew-light.png"></picture><br><sub>Hebrew (WLC+), Psalm 23</sub></td>
+    <td align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="images/interlinear-syriac-dark.png"><img alt="Matthew 6 in Peshitta+, the Syriac read right to left, each word over its English" src="images/interlinear-syriac-light.png"></picture><br><sub>Syriac (Peshitta+), the Lord's Prayer</sub></td>
+  </tr>
+</table>
 
 - **Variant readings**: Greek NT TR+ (Stephanus 1550) and WH+ (Westcott-Hort) show another
   edition's reading muted in ⟨ ⟩, or ⟨omit⟩. Hover for whose: Scrivener 1894 in TR+,
