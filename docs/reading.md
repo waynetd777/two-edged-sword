@@ -50,7 +50,8 @@ The chapter's name stays at the top of the column as you scroll.
 
 The Bible you choose here is for this session. The default in Settings (or the Library) comes
 back when you reopen the window or restart the app, or with the button beside the Bible picker
-(greyed out when the default is the one showing).
+(greyed out when the default is the one showing). Up to three favourite translations (Settings ›
+Bibles) get buttons to the left of Paragraph and Verse, to switch between them in one click.
 
 In Verse layout, a ≠ beside a verse marks where the translation differs in meaning from the KJV,
 and Greek and Hebrew Bibles show each word over its English and Strong's number: see

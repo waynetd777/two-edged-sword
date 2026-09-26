@@ -8,7 +8,8 @@
     "settings": {
       "bible": "kjv",
       "studyPane": true,
-      "studyTab": "commentary"
+      "studyTab": "commentary",
+      "favBibles": ["kjv", "asv", "ylt"]
     }
   },
   {

@@ -94,7 +94,8 @@ def shoot(scene, theme, window_id):
     for f, k in files.items():
         if f in scene:
             sc[k] = json.loads((HERE / scene[f]).read_text())
-    sc["settings"] = {**sc.get("settings", {}), "theme": theme}
+    # No favourite translations unless the scene names them: the user's own could be licensed Bibles.
+    sc["settings"] = {"favBibles": [], **sc.get("settings", {}), "theme": theme}
     env = {**os.environ, "TES_SCENE": json.dumps(sc)}
     app = subprocess.Popen([str(BIN)], cwd=ROOT / "src-tauri", env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     try:

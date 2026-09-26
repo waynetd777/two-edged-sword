@@ -27,8 +27,8 @@
   English under each word of Greek and Hebrew Bibles that have none of their own, verse numbers
   when copying, and verse or paragraph layout.
 - **Bibles**: the default translation (what the reader opens with; choosing another Bible while
-  reading lasts until you close the window, or the button beside the Bible picker), the Compare
-  columns, and the library.
+  reading lasts until you close the window, or the button beside the Bible picker), up to three
+  favourite translations, the Compare columns, and the library.
 - **Listening**: the voice, the voices for Hebrew, Greek and Latin Bibles, speed, and whether to
   highlight each word, continue into the next chapter or journal entry, and read verse numbers.
 - **Journal**: its folder, notes beside verses, and grammar checking.

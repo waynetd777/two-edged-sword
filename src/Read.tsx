@@ -322,6 +322,7 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
     </div>
   );
 
+  const favs = (settings.favBibles ?? []).map((id) => app.mod("bible", id)).filter((m): m is NonNullable<typeof m> => !!m);
   // Apocrypha: a book of it, or a chapter a canonical book has only in some Bibles (Daniel 13, Susanna).
   const apo = isApocrypha(loc.book, loc.chapter);
   const apoName = apocryphaName(loc.book, loc.chapter);
@@ -341,7 +342,15 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
             {pill && <span style={{ alignSelf: "center" }}>{pill}</span>}
             <span style={{ color: "var(--muted)" }}>{bmod?.title ?? bible} · {verses.length} verses</span>
           </div>
-          <Seg value={settings.layout} options={[["paragraph", "Paragraph"], ["verse", "Verse"]]} onChange={(v) => app.set({ layout: v })} />
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            {/* The favourite translations from Settings, one click away (for this session, like the Bible picker). */}
+            {favs.length > 0 && (
+              <div className="seg" role="group" aria-label="Favourite translations">
+                {favs.map((m) => <button key={m.id} type="button" className={m.id === bible ? "on" : ""} title={m.id === bible ? m.title : `Read in ${m.title}`} onClick={() => app.set({ bible: m.id })}>{m.abbrev}</button>)}
+              </div>
+            )}
+            <Seg value={settings.layout} options={[["paragraph", "Paragraph"], ["verse", "Verse"]]} onChange={(v) => app.set({ layout: v })} />
+          </div>
         </>
       )}
     </div>

@@ -1,11 +1,11 @@
-import { ReactNode, useEffect } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { open as openDialog } from "@tauri-apps/plugin-dialog";
 import { Icon } from "./icons";
 import { VoiceSelect } from "./Read";
 import { BibleSelect, Topbar } from "./Shell";
 import { modelGroups, PROVIDER_NAME, pickModel, refreshAssistant, useAssistant } from "./assistant";
 import { READ_FONTS, ReadFont, useApp } from "./state";
-import { confirmDelete, Seg, Switch } from "./ui";
+import { confirmDelete, Popover, SearchList, Seg, Switch } from "./ui";
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -53,6 +53,7 @@ export function SettingsScreen() {
           </Section>
           <Section title="Bibles">
             <Row label="Default translation"><BibleSelect titled all value={app.defaultBible} onChange={app.setDefaultBible} style={{ maxWidth: "min(360px, 100%)" }} /></Row>
+            <Row label="Favourite translations" hint="Up to three. Buttons to the left of Paragraph and Verse in the reader switch to them."><FavBibles /></Row>
             <Row label="Compare starts with" hint="Change them on the Compare screen."><div style={{ display: "flex", gap: 5 }}>{s.compare.map((c) => <span key={c} className="chip" style={{ cursor: "default" }}>{app.mod("bible", c)?.abbrev ?? c}</span>)}</div></Row>
             <Row label="Library" hint="Checked for new modules each time the app opens, or press Rescan on the Library screen."><span style={{ fontSize: 12.5 }}>e-Sword X · {app.lib?.modules.length} modules · read-only</span></Row>
           </Section>
@@ -100,6 +101,32 @@ export function SettingsScreen() {
           </Section>
         </div>
       </div>
+    </div>
+  );
+}
+
+/** The favourite Bibles: chips to take one off, and Add while there are fewer than three. */
+function FavBibles() {
+  const app = useApp();
+  const favs = app.settings.favBibles ?? [];
+  const [a, setA] = useState<DOMRect | null>(null);
+  const set = (next: string[]) => app.set({ favBibles: next });
+  return (
+    <div style={{ display: "flex", gap: 5, flexWrap: "wrap", alignItems: "center" }}>
+      {favs.map((id) => (
+        <span key={id} className="chip" style={{ cursor: "default" }} title={app.mod("bible", id)?.title}>
+          {app.mod("bible", id)?.abbrev ?? id}
+          <button className="ibtn" type="button" aria-label={`Remove ${app.mod("bible", id)?.abbrev ?? id}`} title="Remove" style={{ width: 16, height: 16 }} onClick={() => set(favs.filter((x) => x !== id))}><Icon name="x" size={11} /></button>
+        </span>
+      ))}
+      {favs.length < 3 && <button className="btn small" type="button" onClick={(e) => setA(e.currentTarget.getBoundingClientRect())}><Icon name="plus" />Add</button>}
+      {!favs.length && <span className="n">None yet</span>}
+      {a && (
+        <Popover anchor={a} onClose={() => setA(null)} width={380} style={{ padding: 0, overflow: "hidden" }}>
+          <SearchList placeholder="Find a Bible" onClose={() => setA(null)} onPick={(id) => { setA(null); if (!favs.includes(id)) set([...favs, id].slice(0, 3)); }}
+            items={app.bibles.filter((b) => !favs.includes(b.id)).map((b) => ({ key: b.id, label: b.abbrev, sub: b.title, title: b.title, terms: b.id }))} />
+        </Popover>
+      )}
     </div>
   );
 }
