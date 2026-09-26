@@ -21,7 +21,9 @@ quotation marks (the 1582 text has none) are dropped; a misread word that is no 
 put right from Challoner's word in its place (hearen: heaven), or by the letters the reading
 confuses (tliat: that, yas: was), but never into a word the KJV or Challoner has (Saul, Heli) nor
 from a real word (passible, the 1582 wording at Acts 26:23); a first word cut down to its last
-letters becomes Challoner's first word ("d wisdom": And wisdom).
+letters becomes Challoner's first word ("d wisdom": And wisdom); and up to three words the
+reading lost, where it left a speck or a scrap in their place, are Challoner's words there
+("David the Ę And David": the King; "Blessed are the Fo in spirit": poor).
 
 What can't be mended is left: real words misread, and words lost at the edge of a column (a verse
 starting with a small letter has usually lost its first word). A verse neither reading has, like the first verses of Matthew, is left out. The Details
@@ -89,11 +91,13 @@ def challoner():
         words = re.findall(r"[A-Za-z][A-Za-z'’]*", html.unescape(re.sub(r"<[^>]+>", " ", t or "")))
         if words:
             FIRST[(b, c, v)] = words[0]
+        RAW[(b, c, v)] = [w for w in words if norm(w)]
         out.append(((b, c, v), [norm(w) for w in words if norm(w)]))
     return out
 
 
 FIRST = {}  # each of Challoner's verses' first word, as written
+RAW = {}  # each of Challoner's verses' words, as written
 
 
 def align(ref, ocr):
@@ -198,7 +202,7 @@ def verses(ref_verses, ocr, known, counts):
                         best = (got, on[lo + blocks[0].b][0], on[lo + blocks[-1].b + blocks[-1].size - 1][0])
             if best and best[0] >= 0.7 * len(ws):
                 got, a, z = best
-                out[key] = (clean(mend(ocr[a:z + 1], ws, known, counts)), got / len(ws))
+                out[key] = (clean(mend(ocr[a:z + 1], ws, known, counts, key)), got / len(ws))
     for n, vi in enumerate(order):
         key, ws = ref_verses[vi]
         nxt = start[order[n + 1]] if n + 1 < len(order) else len(ocr)
@@ -207,7 +211,7 @@ def verses(ref_verses, ocr, known, counts):
         end = last[vi] + 1
         while end < nxt and end < last[vi] + 26 and not re.fullmatch(r"\d+|[°*\"“”§#&|}{]+.*", ocr[end]):
             end += 1
-        toks = mend(ocr[start[vi]:end], ws, known, counts)
+        toks = mend(ocr[start[vi]:end], ws, known, counts, key)
         # A first word cut at the column's edge, leaving its last letters ("d wisdom is justified"),
         # is Challoner's first word when that ends with them ("And").
         words = [k for k, t in enumerate(toks) if norm(t)]
@@ -257,14 +261,51 @@ BIBLE = set()  # every word of the KJV and Challoner, any case
 CAPS = {}  # how often each is written with a capital in them (God, Lord)
 LATIN_WORDS = set()  # the Vulgate's words that no English Bible here has
 FIXED = {}  # (misread, corrected): how often, for the build's report
+FILLED = {}  # words put back from Challoner: how often
 
 # Pieces of words the reading leaves, which the dictionary happens to list ("th" for thy).
 FRAGMENTS = {"th", "tho", "wh", "ot"}
 
 
-def mend(toks, ref, known, counts=None):
+def lost(t):
+    """A speck the reading made of a word: no English letter, and not punctuation or a number."""
+    return not re.search(r"[A-Za-z0-9]", t) and not re.fullmatch(r"[.,;:!?()'\"“”’‘-]+", t)
+
+
+def fill(toks, ref, raw):
+    """Words the reading lost, put back from Challoner, only where it shows the loss: a speck in
+    their place ("David the Ę And David": the King), or the scrap of a word too short to be one
+    ("Blessed are the Fo in spirit": poor); up to three words, with Challoner's wording matching on
+    both sides. Where Challoner simply has words the 1582 hasn't, nothing is added: his revision
+    often added words."""
+    idx = [k for k, t in enumerate(toks) if norm(t)]
+    ws = [norm(toks[k]) for k in idx]
+    ops = SequenceMatcher(None, ws, ref, autojunk=False).get_opcodes()
+    edits = []
+    for n, (op, a1, a2, b1, b2) in enumerate(ops):
+        if not (0 < n < len(ops) - 1 and ops[n - 1][0] == "equal" and ops[n + 1][0] == "equal" and 1 <= b2 - b1 <= 3):
+            continue
+        words = " ".join(raw[b1:b2]) if raw and len(raw) >= b2 else " ".join(ref[b1:b2])
+        if op == "insert":
+            specks = [k for k in range(idx[a1 - 1] + 1, idx[a1]) if lost(toks[k])]
+            if specks:
+                edits.append((specks[0], words))
+        elif op == "replace" and a2 - a1 == 1 and len(ws[a1]) <= 3 and ws[a1] not in BIBLE:
+            edits.append((idx[a1], words))
+    out = list(toks)
+    # Spelt as the verse spells the word elsewhere ("King"), if it does.
+    seen = {norm(t): re.sub(r"[^A-Za-z'’]", "", t) for t in toks if norm(t)}
+    for k, w in edits:
+        w = " ".join(seen.get(norm(x), x) if norm(x) not in ("and", "the", "of", "a") else x for x in w.split())
+        FILLED[w] = FILLED.get(w, 0) + 1
+        out[k] = w
+    return out
+
+
+def mend(toks, ref, known, counts=None, key=None):
     """Words misread as non-words, put right from the word Challoner has in the same place:
     hearen -> heaven, Jorgive -> forgive. A real word (the 1582 wording) is never changed."""
+    toks = fill(toks, ref, RAW.get(key))
     idx = [k for k, t in enumerate(toks) if norm(t)]
     ws = [norm(toks[k]) for k in idx]
     out = list(toks)
@@ -445,7 +486,9 @@ def main():
     weak = sum(s < 0.5 for s in shares)
     print(f"kept: {len(best)} verses ({from_rtf} from the RTF), {sum(shares) / len(shares):.0%} matched on average, {weak} under half")
     rows = [(*k, t) for k, (t, _) in sorted(best.items()) if t]
+    print(f"  {sum(FILLED.values())} lost words put back from Challoner")
     if os.environ.get("RHEIMS_REPORT"):
+        Path(os.environ["RHEIMS_REPORT"] + ".filled").write_text("\n".join(f"{n}\t{w}" for w, n in sorted(FILLED.items(), key=lambda x: -x[1])))
         Path(os.environ["RHEIMS_REPORT"]).write_text("\n".join(f"{n}\t{a}\t{b}" for (a, b), n in sorted(FIXED.items(), key=lambda x: -x[1])))
     missing = [k for k, _ in ref if k not in best]
     if missing:
