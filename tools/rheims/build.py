@@ -224,7 +224,7 @@ def similar(a, b):
 
 # Letters the reading confuses: "tliat" for that, "yas" for was, "sor" for for, "rn" for m.
 CONFUSIONS = [("li", "h"), ("y", "w"), ("s", "f"), ("f", "s"), ("rn", "m"), ("cl", "d"), ("ii", "u"), ("c", "e"), ("e", "c"),
-              ("l", "i"), ("i", "l"), ("ri", "n"), ("vv", "w"), ("h", "b"), ("b", "h"), ("o", "e"), ("u", "n"), ("n", "u")]
+              ("l", "i"), ("i", "l"), ("ri", "n"), ("vv", "w"), ("h", "b"), ("b", "h"), ("o", "e"), ("u", "n"), ("n", "u"), ("q", "o"), ("i", "ll"), ("ii", "ll"), ("y", "v")]
 # Not a for o, nor m for n anywhere but a short word's first letter ("mot"): a word cut short at a
 # column's edge (brin[g], cam[e], hat[h]) would be made into another word (brim, can, hot).
 
@@ -254,6 +254,8 @@ def confused(w, counts, known):
 
 
 BIBLE = set()  # every word of the KJV and Challoner, any case
+CAPS = {}  # how often each is written with a capital in them (God, Lord)
+LATIN_WORDS = set()  # the Vulgate's words that no English Bible here has
 FIXED = {}  # (misread, corrected): how often, for the build's report
 
 # Pieces of words the reading leaves, which the dictionary happens to list ("th" for thy).
@@ -271,7 +273,8 @@ def mend(toks, ref, known, counts=None):
             continue
         for k in range(a2 - a1):
             w = ws[a1 + k]
-            if w in known and w not in FRAGMENTS:
+            # A short "word" is only trusted when a Bible has it: the dictionary lists "od", "rd".
+            if (w in BIBLE or (len(w) > 4 and w in known)) and w not in FRAGMENTS:
                 continue
             # Challoner's word in the same place, or where the stretches differ in length, the most
             # like it of theirs (a word cut at a column's edge: "esus", "hrist", "lieved").
@@ -283,8 +286,9 @@ def mend(toks, ref, known, counts=None):
                 continue
             t = toks[idx[a1 + k]]
             lead = re.match(r"[^A-Za-z]*", t).group()
-            fixed = r.capitalize() if t[len(lead):][:1].isupper() else r
+            fixed = r.capitalize() if t[len(lead):][:1].isupper() or CAPS.get(r, 0) > (counts or {}).get(r, 0) else r
             out[idx[a1 + k]] = lead + fixed + t[len(lead) + len(re.match(r"[A-Za-z'’]*", t[len(lead):]).group()):]
+    out = rejoin(out)
     for k, t in enumerate(out):
         m = re.fullmatch(r"([^A-Za-z]*)([A-Za-z]+)([^A-Za-z]*)", t)
         # A speck read as a capital before a word: "FAnd" for And.
@@ -296,6 +300,50 @@ def mend(toks, ref, known, counts=None):
             if c:
                 FIXED[(m.group(2), c)] = FIXED.get((m.group(2), c), 0) + 1
                 out[k] = m.group(1) + c + m.group(3)
+    # A line of the Latin column read into the English: two or more Vulgate words running, or one
+    # that is no English word ("sua").
+    latin = [bool(norm(t)) and norm(t) in LATIN_WORDS for t in out]
+    drop = set()
+    k = 0
+    while k < len(out):
+        if latin[k]:
+            j = k
+            while j < len(out) and (latin[j] or not norm(out[j])):
+                j += 1
+            if sum(latin[k:j]) >= 2 or norm(out[k]) not in known or len(norm(out[k])) <= 4:
+                drop.update(range(k, j))
+            k = j
+        else:
+            k += 1
+    out = [t for n, t in enumerate(out) if n not in drop]
+    # What is left of a word cut short, three letters or fewer and no word any Bible has ("jo",
+    # "il", "ls"), goes.
+    return [t for t in out if not (re.fullmatch(r"[A-Za-z]{1,3}", t) and norm(t) not in BIBLE and t not in ("I", "O", "a", "A"))]
+
+
+def rejoin(toks):
+    """Words the reading broke across a line: "seek: ing" and "judg ment" joined when together
+    they make a Bible word; the start of a word read twice ("pro proceedeth", "con: conceive")
+    dropped."""
+    out, k = [], 0
+    while k < len(toks):
+        t = toks[k]
+        nxt = next((j for j in range(k + 1, min(k + 3, len(toks))) if norm(toks[j])), None)
+        if norm(t) and nxt is not None:
+            a, b = norm(t), norm(toks[nxt])
+            if a not in BIBLE and len(a) <= 6 and b.startswith(a) and len(b) > len(a):
+                k += 1  # "pro proceedeth"
+                continue
+            joined = a + b
+            if joined in BIBLE and (a not in BIBLE or b not in BIBLE):  # "seek: ing", "judg ment"
+                lead = re.match(r"[^A-Za-z]*", t).group()
+                word = re.match(r"[A-Za-z'’]*", t[len(lead):]).group() + re.match(r"[^A-Za-z]*([A-Za-z'’]*)", toks[nxt]).group(1)
+                tail = toks[nxt][len(re.match(r"[^A-Za-z]*[A-Za-z'’]*", toks[nxt]).group()):]
+                out.append(lead + word + tail)
+                k = nxt + 1
+                continue
+        out.append(t)
+        k += 1
     return out
 
 
@@ -356,9 +404,19 @@ def vocabulary():
                     known.add(n)
                     if modern:
                         BIBLE.add(n)
+                        if w[:1].isupper():
+                            CAPS[n] = CAPS.get(n, 0) + 1
                     if modern and w.islower():  # the old spellings and names don't count
                         counts[n] = counts.get(n, 0) + 1
             db.close()
+    for f in ("latin.bbli", "clementine.bbli"):
+        p = LIBRARY / f
+        if p.exists():
+            db = sqlite3.connect(f"file:{p}?mode=ro", uri=True)
+            for (t,) in db.execute("SELECT Scripture FROM Bible WHERE Book BETWEEN 40 AND 66"):
+                LATIN_WORDS.update(norm(w) for w in re.findall(r"[A-Za-zæœ]+", re.sub(r"<[^>]+>", " ", t or "")))
+            db.close()
+    LATIN_WORDS.difference_update(BIBLE)
     return known, counts
 
 
