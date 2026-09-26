@@ -4,7 +4,7 @@ A personal Bible study app for macOS, built on the Bibles, commentaries, diction
 reference books, devotionals and maps you already have in e-Sword X. It opens every module
 read-only and keeps what you make (journal, bookmarks, highlights, plans, chats) separately.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/read-dark.png"><img alt="Reading 1 John 1 with the study pane open on the commentaries" src="docs/images/read-light.png"></picture>
+<a href="docs/images/read-light.png"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/read-dark.png"><img alt="Reading 1 John 1 with the study pane open on the commentaries" src="docs/images/read-light.png"></picture></a>
 
 ## What it does
 

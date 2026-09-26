@@ -6,14 +6,14 @@
 
 ## Compare
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="images/compare-dark.png"><img alt="KJV+, ASV and YLT side by side" src="images/compare-light.png"></picture>
+<a href="images/compare-light.png"><picture><source media="(prefers-color-scheme: dark)" srcset="images/compare-dark.png"><img alt="KJV+, ASV and YLT side by side" src="images/compare-light.png"></picture></a>
 
 Any number of translations side by side, verse by verse (**Add** has a search box), with **Highlight differences** marking
 wording that differs from the first column, and **Strong's numbers** for Bibles that have them.
 
 ## Search
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="images/search-dark.png"><img alt="Searching the KJV for “tithe”, with the verse in context" src="images/search-light.png"></picture>
+<a href="images/search-light.png"><picture><source media="(prefers-color-scheme: dark)" srcset="images/search-dark.png"><img alt="Searching the KJV for “tithe”, with the verse in context" src="images/search-light.png"></picture></a>
 
 The Bible, every commentary and dictionary, and your journal at once, with a count for each.
 Narrow it to one Bible and a range (Old or New Testament, the Apocrypha, Wisdom, Prophets,
@@ -27,7 +27,7 @@ step back and forward can return to.
 
 ## Word Study
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="images/word-study-dark.png"><img alt="Word Study for G26, agapē" src="images/word-study-light.png"></picture>
+<a href="images/word-study-light.png"><picture><source media="(prefers-color-scheme: dark)" srcset="images/word-study-dark.png"><img alt="Word Study for G26, agapē" src="images/word-study-light.png"></picture></a>
 
 A Strong's entry, how often and where it is used (by book), every verse in context, related words
 and the articles about it in your library. Type an English word ("love") to see the Greek and
