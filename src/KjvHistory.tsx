@@ -175,7 +175,7 @@ export function KjvHistoryScreen() {
     const status = have.length ? "have" : near.length ? "near" : "none";
     return (
       <div key={s.id} ref={(e) => { if (e) cards.current.set(s.id, e); else cards.current.delete(s.id); }} className={`ks-card ks-${status}`}
-        style={{ width: wide ? 300 : 168, opacity: on(s.id) ? 1 : 0.35 }} onMouseEnter={() => setHover(s.id)} onMouseLeave={() => setHover(null)}
+        style={{ minWidth: wide ? 300 : 168, width: "max-content", maxWidth: 340, opacity: on(s.id) ? 1 : 0.35 }} onMouseEnter={() => setHover(s.id)} onMouseLeave={() => setHover(null)}
         title={[s.note, near.length ? s.nearNote : ""].filter(Boolean).join("\n\n")}>
         <b style={{ font: "600 13px/1.25 var(--ui)" }}>{s.name}</b>
         <span className="n" style={{ fontSize: 11.5 }}>{s.date}</span>
