@@ -29,6 +29,14 @@ Greek NT TR+ (Stephanus 1550, whose base text Beza revised lightly), and prints 
 differ most, so a bad page shows.
 
 Downloads are cached in ~/Library/Caches/Two-edged Sword/beza.
+
+The wiki's transcription isn't Beza's throughout, and is corrected with TR+ (Stephanus 1550, with
+Scrivener 1894's readings marked) and the wiki's own Scrivener pages, since Scrivener follows Beza
+but for some 190 places: where Stephanus and Scrivener differ and the wiki has Stephanus' reading
+(Luke 2:22 αὐτῶν for Beza's αὐτῆς), Scrivener's, accented; modern spellings (-λημψ-, ἦλθαν) as Beza
+printed them (-ληψ-, ἦλθον); words typed without accents (βιβλου) with their accented form; and
+verses typed without punctuation get Scrivener's, with capitals on the names Beza capitalises.
+Enclitics (μου, τις) and elided words (δι᾽) are left unaccented.
 """
 import html, json, os, re, sqlite3, sys, time, unicodedata, urllib.parse, urllib.request
 from difflib import SequenceMatcher
@@ -239,6 +247,161 @@ def alike(a, b):
     return sum(m.size for m in SequenceMatcher(None, a, b, autojunk=False).get_matching_blocks()) / max(len(a), len(b), 1)
 
 
+def tr_tokens(t, other=False):
+    """TR+'s verse as accented words with their punctuation: its base (Stephanus 1550), or with
+    other=True the readings it marks | base | other | (Scrivener 1894)."""
+    t = re.sub(r"<num>.*?</num>|<tvm>.*?</tvm>", " ", t or "")
+    t = re.sub(r"<[^>]+>", " ", t)
+    if t.count("|") and t.count("|") % 3 == 0:
+        t = re.sub(r"\|([^|]*)\|([^|]*)\|", (lambda m: m.group(2)) if other else (lambda m: m.group(1)), t)
+    return [x for x in re.findall(r"\S+", t) if plain_greek(x)]
+
+
+def key(tok):
+    k = plain_greek(tok)
+    return k[0] if k else ""
+
+
+PUNCT = re.compile(r"[.,;:·\u0387\u037e]+$")
+
+
+def scrivener_pages(chapters):
+    """{(book, chapter, verse): accented text} from the wiki's own Scrivener 1894 pages."""
+    titles = {}
+    for b, c in chapters:
+        name = BOOKS[b - 40]
+        titles[(b, c)] = [f"{name} {c} Greek NT: Scrivener's Textus Receptus (1894)", f"{name} Greek NT: Scrivener's Textus Receptus (1894)"]
+    got = pages([t for ts in titles.values() for t in ts])
+    out = {}
+    for (b, c), ts in titles.items():
+        w = next((got[t] for t in ts if got.get(t)), None)
+        try:
+            vs = verses(w) if w else {}
+        except ValueError:
+            vs = {}
+        for v, t in vs.items():
+            out[(b, c, v)] = t
+    return out
+
+
+def correct(rows, trraw, scriv):
+    """What the wiki's transcription took from elsewhere, put back as Beza printed it, with TR+ as
+    the guide (its base is Stephanus 1550, its marked readings Scrivener 1894, who follows Beza
+    but for some 190 places):
+    - Where Stephanus and Scrivener differ, Beza is almost always Scrivener's source; where the
+      wiki has Stephanus' reading there instead (Luke 2:22 αὐτῶν for αὐτῆς), Scrivener's.
+    - Modern spellings (συλλημφθῆναι, ἦλθαν) where TR+ has the forms Beza printed (συλληφθῆναι, ἦλθον).
+    - A verse typed without punctuation or capitals gets Stephanus' where the words are the same.
+    Returns the rows and counts of each."""
+    counts = {"readings": 0, "spellings": 0, "punctuated": 0}
+    samples = []
+    out = []
+    # Each word's commonest accented form (TR+ has none), from the wiki's Beza and Scrivener.
+    forms = {}
+    accented = lambda w: any(unicodedata.combining(ch) for ch in unicodedata.normalize("NFD", w))
+    for t in [r[3] for r in rows] + list(scriv.values()):
+        for x in re.findall(r"\S+", t):
+            w = PUNCT.sub("", x)
+            if key(w) and accented(w):
+                forms.setdefault(key(w), {}).setdefault(w, 0)
+                forms[key(w)][w] += 1
+    best = {k: max(v, key=v.get) for k, v in forms.items()}
+    # Words rightly written without an accent (enclitics: μου, σου, τις; elided: δι᾽) as Scrivener
+    # writes them; and the words Beza's own text writes with a capital (names), as it writes them.
+    bare_ok = {PUNCT.sub("", x) for t in scriv.values() for x in re.findall(r"\S+", t) if not accented(PUNCT.sub("", x))}
+    caps = {}
+    for r in rows:
+        for n, x in enumerate(re.findall(r"\S+", r[3])):
+            if n and key(x):
+                caps.setdefault(key(x), [0, 0])[x[:1].isupper()] += 1
+    proper = {k for k, (lo, up) in caps.items() if up > lo}
+    for b, c, v, t in rows:
+        raw = trraw.get((b, c, v))
+        if not raw:
+            out.append((b, c, v, t))
+            continue
+        btok = re.findall(r"\S+", t)
+        stok, ctok = tr_tokens(raw), tr_tokens(raw, other=True)
+        bk, sk, ck = [key(x) for x in btok], [key(x) for x in stok], [key(x) for x in ctok]
+        # Scrivener's words accented: from the wiki's Scrivener page when its words are TR+'s,
+        # else each word's commonest accented form.
+        wiki = [x for x in re.findall(r"\S+", scriv.get((b, c, v), "")) if key(x)]
+        if [key(x) for x in wiki] == ck:
+            ctok = wiki
+        else:
+            ctok = [best.get(key(x), x) for x in ctok]
+        s2b = {}
+        for m in SequenceMatcher(None, bk, sk, autojunk=False).get_matching_blocks():
+            for k in range(m.size):
+                s2b[m.b + k] = m.a + k
+        edits = []  # (start, end, tokens) in btok
+        if sk != ck:
+            for op, i1, i2, j1, j2 in SequenceMatcher(None, sk, ck, autojunk=False).get_opcodes():
+                if op == "equal":
+                    continue
+                lb = s2b[i1 - 1] + 1 if i1 > 0 and i1 - 1 in s2b else (0 if i1 == 0 else None)
+                rb = s2b[i2] if i2 in s2b else (len(bk) if i2 == len(sk) else None)
+                if lb is None or rb is None or lb > rb:
+                    continue
+                if "".join(sk[i1:i2]) == "".join(ck[j1:j2]):
+                    continue  # only where the words are divided (διαπαντὸς, διὰ παντὸς)
+                if bk[lb:rb] == sk[i1:i2]:  # the wiki follows Stephanus here, not Beza
+                    new = [PUNCT.sub("", x) for x in ctok[j1:j2]]
+                    tail = PUNCT.search(btok[rb - 1]) if rb > lb else None
+                    if new and tail:
+                        new[-1] += tail.group()
+                    edits.append((lb, rb, new))
+                    counts["readings"] += 1
+                    if len(samples) < 12:
+                        samples.append(f"{BOOKS[b - 40]} {c}:{v} {' '.join(btok[lb:rb]) or '—'} → {' '.join(ctok[j1:j2]) or '—'}")
+        # Modern spellings, where Stephanus and Scrivener agree on the older form.
+        for op, i1, i2, j1, j2 in SequenceMatcher(None, bk, sk, autojunk=False).get_opcodes():
+            if op != "replace" or i2 - i1 != j2 - j1:
+                continue
+            for k in range(i2 - i1):
+                a, o = bk[i1 + k], sk[j1 + k]
+                if any(e[0] <= i1 + k < e[1] for e in edits):
+                    continue
+                if a.replace("λημψ", "ληψ").replace("λημφ", "ληφ") == o or (a.endswith("αν") and o.endswith("ον") and a[:-2] == o[:-2]):
+                    tail = PUNCT.search(btok[i1 + k])
+                    edits.append((i1 + k, i1 + k + 1, [best.get(o, PUNCT.sub("", stok[j1 + k])) + (tail.group() if tail else "")]))
+                    counts["spellings"] += 1
+        for lb, rb, new in sorted(edits, key=lambda e: -e[0]):
+            btok[lb:rb] = new
+        # A verse typed without punctuation (and in small letters) gets Scrivener's punctuation (the
+        # wiki's page) where the words are the same, and capitals on the names Beza writes with one.
+        bare = btok and not any(PUNCT.search(x) for x in btok)
+        bk = [key(x) for x in btok]
+        wk = [key(x) for x in wiki]
+        for m in SequenceMatcher(None, bk, wk, autojunk=False).get_matching_blocks():
+            for k in range(m.size):
+                x, y = btok[m.a + k], wiki[m.b + k]
+                word = PUNCT.sub("", x) if bare else x
+                if bare and m.a + k and key(x) in proper and word[:1].islower():
+                    word = word[:1].upper() + word[1:]
+                if bare:
+                    tail = PUNCT.search(y)
+                    word += tail.group() if tail else ""
+                btok[m.a + k] = word
+        counts["punctuated"] += bool(bare)
+        # A word typed without any accent or breathing (βιβλου): its accented form elsewhere.
+        for k, x in enumerate(btok):
+            w = PUNCT.sub("", x)
+            if re.search(r"[()]", w):
+                continue  # "σου)": left as it is
+            if (len(w) >= 3 and not accented(w) and not re.search(r"[᾽’'ʼ\u1fbd]", w) and w not in bare_ok and w.lower() not in bare_ok
+                    and best.get(key(w), w) != w):
+                btok[k] = best[key(w)] + x[len(w):]
+                counts["spellings"] += 1
+        text = " ".join(btok)
+        # Beza didn't write -λημψ-/-λημφ- (παραλημφθήσεται, at Luke 17:36 where Stephanus has no verse).
+        text, n = re.subn(r"(λ[ηή])μ([φψ])", r"\1\2", text)
+        counts["spellings"] += n
+        text = re.sub(r"([.,;:·\u0387])[.,;:·\u0387]+", r"\1", text)
+        out.append((b, c, v, text))
+    return out, counts, samples
+
+
 def main():
     kjv = {}
     for b, c, v, _ in library_chapters("kjv.bbli"):
@@ -294,6 +457,11 @@ def main():
         if have != want:
             problems.append(f"{name}: {len(have)} verses, KJV {len(want)}; none for {sorted(want - have)[:8]}, beyond {sorted(have - want)[:8]}")
         rows += [(b, c, v, t) for v, t in sorted(vs.items()) if t]
+    rows, fixed, samples = correct(rows, trraw, scrivener_pages(chapters))
+    print(f"put back as Beza printed it: {fixed['readings']} readings the wiki took from Stephanus, {fixed['spellings']} modern spellings; "
+          f"{fixed['punctuated']} verses typed without punctuation given Scrivener's")
+    for x in samples:
+        print("  " + x)
     print(f"{len(chapters)} chapters, {len(rows)} verses; divided again by TR+: {len(redivided)} ({', '.join(redivided)}); from Scrivener: {', '.join(from_scrivener) or 'none'}")
     for p in problems:
         print("  " + p)
