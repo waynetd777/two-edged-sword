@@ -37,20 +37,20 @@ read-only and keeps what you make (journal, bookmarks, highlights, plans, chats)
 
 <table>
   <tr>
-    <td align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/ask-dark.png"><img alt="Ask comparing the commentators on 1 John 1:1" src="docs/images/ask-light.png"></picture><br><sub>Ask compares the commentators</sub></td>
-    <td align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/compare-dark.png"><img alt="KJV+, ASV and YLT compared, differences highlighted" src="docs/images/compare-light.png"></picture><br><sub>Compare translations</sub></td>
+    <td align="center"><a href="docs/ask.md"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/ask-dark.png"><img alt="Ask comparing the commentators on 1 John 1:1" src="docs/images/ask-light.png"></picture></a><br><sub><a href="docs/ask.md">Ask compares the commentators</a></sub></td>
+    <td align="center"><a href="docs/study.md#compare"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/compare-dark.png"><img alt="KJV+, ASV and YLT compared, differences highlighted" src="docs/images/compare-light.png"></picture></a><br><sub><a href="docs/study.md#compare">Compare translations</a></sub></td>
   </tr>
   <tr>
-    <td align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/differences-dark.png"><img alt="Colossians 1:14 in the ASV, marked as omitting “through his blood”, with the reason" src="docs/images/differences-light.png"></picture><br><sub>Differences from the KJV</sub></td>
-    <td align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/interlinear-dark.png"><img alt="Luke 17 in the Greek Textus Receptus, word by word, with Scrivener's readings" src="docs/images/interlinear-light.png"></picture><br><sub>Greek word by word</sub></td>
+    <td align="center"><a href="docs/manuscripts.md#differences-from-the-kjv"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/differences-dark.png"><img alt="Colossians 1:14 in the ASV, marked as omitting “through his blood”, with the reason" src="docs/images/differences-light.png"></picture></a><br><sub><a href="docs/manuscripts.md#differences-from-the-kjv">Differences from the KJV</a></sub></td>
+    <td align="center"><a href="docs/manuscripts.md#greek-and-hebrew"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/interlinear-dark.png"><img alt="Luke 17 in the Greek Textus Receptus, word by word, with Scrivener's readings" src="docs/images/interlinear-light.png"></picture></a><br><sub><a href="docs/manuscripts.md#greek-and-hebrew">Greek word by word</a></sub></td>
   </tr>
   <tr>
-    <td align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/kjv-history-dark.png"><img alt="The KJV's family tree, and which sources are in the library" src="docs/images/kjv-history-light.png"></picture><br><sub>KJV History</sub></td>
-    <td align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/word-study-dark.png"><img alt="Word Study for G26, agapē" src="docs/images/word-study-light.png"></picture><br><sub>Word Study</sub></td>
+    <td align="center"><a href="docs/manuscripts.md#kjv-history"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/kjv-history-dark.png"><img alt="The KJV's family tree, and which sources are in the library" src="docs/images/kjv-history-light.png"></picture></a><br><sub><a href="docs/manuscripts.md#kjv-history">KJV History</a></sub></td>
+    <td align="center"><a href="docs/study.md#word-study"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/word-study-dark.png"><img alt="Word Study for G26, agapē" src="docs/images/word-study-light.png"></picture></a><br><sub><a href="docs/study.md#word-study">Word Study</a></sub></td>
   </tr>
   <tr>
-    <td align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/quiet-time-dark.png"><img alt="Quiet time with today's readings" src="docs/images/quiet-time-light.png"></picture><br><sub>Quiet time plans</sub></td>
-    <td align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/listen-dark.png"><img alt="Listening to 1 John 1, the word being spoken highlighted" src="docs/images/listen-light.png"></picture><br><sub>Listen, word by word</sub></td>
+    <td align="center"><a href="docs/quiet-time.md#plans"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/quiet-time-dark.png"><img alt="Quiet time with today's readings" src="docs/images/quiet-time-light.png"></picture></a><br><sub><a href="docs/quiet-time.md#plans">Quiet time plans</a></sub></td>
+    <td align="center"><a href="docs/reading.md#listen"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/listen-dark.png"><img alt="Listening to 1 John 1, the word being spoken highlighted" src="docs/images/listen-light.png"></picture></a><br><sub><a href="docs/reading.md#listen">Listen, word by word</a></sub></td>
   </tr>
 </table>
 
