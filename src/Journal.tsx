@@ -9,7 +9,7 @@ import { Icon } from "./icons";
 import { HL_PAINT, htmlToMd, mdPlain, mdToHtml } from "./md";
 import { HL, HL_DOT, hlLabel } from "./Read";
 import { SearchField, Topbar } from "./Shell";
-import { HlColor, nowLocal, onFlush, uid, useApp } from "./state";
+import { HlColor, HlTheme, nowLocal, onFlush, themesOf, uid, useApp } from "./state";
 import { ClearButton, confirmDelete, Dialog, Popover, Seg } from "./ui";
 import { useAssistant } from "./assistant";
 import { docModule, parseDocLabel } from "./docref";
@@ -204,6 +204,15 @@ function Editor({ entry, onChange, saved, err, onDelete, onExport, listed, liste
   const [linkAt, setLinkAt] = useState<DOMRect | null>(null);
   const [tagAt, setTagAt] = useState<DOMRect | null>(null);
   const [hlAt, setHlAt] = useState<DOMRect | null>(null);
+  const [tagQ, setTagQ] = useState("");
+  const [tagIdx, setTagIdx] = useState(0);
+  // Typing # in the entry offers tags; the one picked joins the entry's tags and the #text goes.
+  const [hash, setHash] = useState<{ rect: DOMRect; node: Text; start: number; q: string } | null>(null);
+  const dismissed = useRef<{ node: Node; start: number } | null>(null);
+  const themes = useMemo(() => themesOf(app.settings.hlNames), [app.settings.hlNames]);
+  const tagCounts = useMemo(() => { const m = new Map<string, number>(); for (const e of app.journal) for (const t of e.tags) m.set(t, (m.get(t) ?? 0) + 1); return m; }, [app.journal]);
+  const hashOptions = useMemo(() => (hash ? tagOptions(hash.q, themes, tagCounts, entry.tags) : []), [hash, themes, tagCounts, entry.tags]);
+  const addTag = (t: string) => { if (!entry.tags.includes(t)) onChange({ tags: [...entry.tags, t] }); };
   const saved_range = useRef<Range | null>(null);
   useEffect(() => {
     // Every line is a <p>, so Enter, lists and quotes act on one line at a time.
@@ -260,7 +269,7 @@ function Editor({ entry, onChange, saved, err, onDelete, onExport, listed, liste
     return true;
   };
   /** An answer from Ask, put in after the paragraph the caret (or selection) was last in, or at the end. */
-  const insertAnswer = (md: string) => {
+  const insertAnswer = (md: string, tags: string[] = []) => {
     const root = ed.current;
     if (!root) return;
     if (reading) { app.toast("Stop the reading to add this to the entry"); return; }
@@ -273,11 +282,16 @@ function Editor({ entry, onChange, saved, err, onDelete, onExport, listed, liste
     const s = window.getSelection();
     s?.removeAllRanges(); s?.addRange(r);
     document.execCommand("insertHTML", false, mdToHtml(md));
-    sync(); spell.recheck();
+    // The themes Ask named for the answer join the entry's tags.
+    const add = tags.filter((t) => !entry.tags.includes(t));
+    if (add.length) onChange({ tags: [...entry.tags, ...add], body: htmlToMd(root) }); else sync();
+    spell.recheck();
   };
   // The webview has no Format menu, so ⌘B and ⌘I are handled here; and Markdown habits work:
   // "- ", "1. ", "> " and "### " at the start of a line become a list, quote or heading.
   const keys = (e: React.KeyboardEvent) => {
+    if (hash && hashOptions.length && (e.key === "ArrowDown" || e.key === "ArrowUp")) { e.preventDefault(); setTagIdx((tagIdx + (e.key === "ArrowDown" ? 1 : -1) + hashOptions.length) % hashOptions.length); return; }
+    if (hash && (e.key === "Enter" || e.key === "Tab") && hashOptions[tagIdx]) { e.preventDefault(); pickHash(hashOptions[tagIdx].tag); return; }
     if (e.metaKey && (e.key === "b" || e.key === "i")) { e.preventDefault(); cmd(e.key === "b" ? "bold" : "italic"); return; }
     const sel = window.getSelection();
     const node = sel?.anchorNode ?? null;
@@ -300,6 +314,34 @@ function Editor({ entry, onChange, saved, err, onDelete, onExport, listed, liste
     cmd(m[0], m[1]);
     for (let i = 0; i < before.length; i++) document.execCommand("delete");
     sync();
+  };
+  /** After typing: a # at the start of a word, with the caret still in that word, opens the tag list. */
+  const checkHash = () => {
+    const s = window.getSelection();
+    const n = s?.anchorNode;
+    if (!s || !s.isCollapsed || !n || n.nodeType !== Node.TEXT_NODE || !ed.current?.contains(n)) { if (hash) setHash(null); return; }
+    const m = (n.textContent || "").slice(0, s.anchorOffset).match(/(?:^|\s)#([\p{L}\p{N}-]*)$/u);
+    if (!m) { if (hash) setHash(null); dismissed.current = null; return; }
+    const start = s.anchorOffset - m[1].length - 1;
+    if (dismissed.current?.node === n && dismissed.current.start === start) return;
+    const r = document.createRange();
+    r.setStart(n, start); r.setEnd(n, start + 1);
+    if (!hash || hash.node !== n || hash.start !== start) setTagIdx(0);
+    setHash({ rect: r.getBoundingClientRect(), node: n as Text, start, q: m[1] });
+  };
+  const pickHash = (t: string) => {
+    if (!hash) return;
+    const s = window.getSelection();
+    const end = s?.anchorNode === hash.node ? s.anchorOffset : hash.start + 1 + hash.q.length;
+    const r = document.createRange();
+    r.setStart(hash.node, hash.start); r.setEnd(hash.node, Math.min(end, hash.node.length));
+    ed.current?.focus();
+    s?.removeAllRanges(); s?.addRange(r);
+    document.execCommand("delete");
+    setHash(null);
+    const body = ed.current ? htmlToMd(ed.current) : entry.body;
+    shown.current = body;
+    onChange({ body, tags: entry.tags.includes(t) ? entry.tags : [...entry.tags, t] });
   };
   const words = mdPlain(entry.body).split(/\s+/).filter(Boolean).length;
 
@@ -360,7 +402,7 @@ function Editor({ entry, onChange, saved, err, onDelete, onExport, listed, liste
         <span style={{ width: 1, height: 18, background: "var(--border)", margin: "0 4px" }} />
         <button className="btn small" type="button" style={{ border: 0 }} onClick={(e) => { remember(); setVerseAt(e.currentTarget.getBoundingClientRect()); }}><Icon name="read" />Insert verse</button>
         <button className="btn small" type="button" style={{ border: 0 }} onClick={(e) => setLinkAt(e.currentTarget.getBoundingClientRect())}><Icon name="link" />Link verse</button>
-        <button className="btn small" type="button" style={{ border: 0 }} onClick={(e) => setTagAt(e.currentTarget.getBoundingClientRect())}><Icon name="plus" />Tag</button>
+        <button className="btn small" type="button" style={{ border: 0 }} onClick={(e) => { setTagIdx(0); setTagAt(e.currentTarget.getBoundingClientRect()); }}><Icon name="plus" />Tag</button>
         <span style={{ width: 1, height: 18, background: "var(--border)", margin: "0 4px" }} />
         <button className="ibtn" type="button" aria-label="Find and replace" title="Find ⌘F · Replace ⌥⌘F" onClick={() => find.start("find")}><Icon name="search" /></button>
         <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 6, color: err ? "var(--bad)" : "var(--muted)", fontSize: 12, minWidth: 0 }}>
@@ -394,7 +436,7 @@ function Editor({ entry, onChange, saved, err, onDelete, onExport, listed, liste
           </div>
           <div ref={wrap} style={{ position: "relative", zIndex: 0 }}>
           {boxes.map((b, j) => <span key={j} className={b.cls} style={{ left: b.left, top: b.top, width: b.width, height: b.height }} />)}
-          <div ref={ed} className={`md editor selectable ${entry.body.trim() ? "" : "blank"}`} contentEditable={!reading} suppressContentEditableWarning spellCheck={false} onInput={() => { sync(); spell.recheck(); find.refresh(); }} onBlur={() => { remember(); sync(); }} onKeyUp={remember} onMouseUp={remember} onKeyDown={(e) => { spell.onKey(e); keys(e); }}
+          <div ref={ed} className={`md editor selectable ${entry.body.trim() ? "" : "blank"}`} contentEditable={!reading} suppressContentEditableWarning spellCheck={false} onInput={() => { sync(); spell.recheck(); find.refresh(); checkHash(); }} onBlur={() => { remember(); sync(); }} onKeyUp={remember} onMouseUp={remember} onKeyDown={(e) => { spell.onKey(e); keys(e); }}
             onClick={(e) => { const a = refAt(e.target); if (a?.dataset.ref) { e.preventDefault(); hide(); const r: Ref = JSON.parse(a.dataset.ref); app.open({ book: r.book, chapter: r.chapter, verse: r.verse, to: r.to }, "read"); } else spell.onClick(e); }}
             onMouseOver={(e) => { const a = refAt(e.target); if (a?.dataset.ref && !a.contains(e.relatedTarget as Node)) onRefHover(JSON.parse(a.dataset.ref), a); }}
             onMouseOut={(e) => { const a = refAt(e.target); if (a && !a.contains(e.relatedTarget as Node)) onRefHover(null, null); }}
@@ -474,8 +516,46 @@ function Editor({ entry, onChange, saved, err, onDelete, onExport, listed, liste
           </div>
         </Popover>
       )}
-      {tagAt && <RefPrompt anchor={tagAt} label="Add a tag" placeholder="e.g. new-birth" onClose={() => setTagAt(null)} onSubmit={async (t) => { const x = t.trim().replace(/^#/, "").replace(/\s+/g, "-").toLowerCase(); if (!x) return false; if (!entry.tags.includes(x)) onChange({ tags: [...entry.tags, x] }); setTagAt(null); return true; }} />}
+      {tagAt && <TagPicker anchor={tagAt} options={tagOptions(tagQ, themes, tagCounts, entry.tags)} index={tagIdx} onIndex={setTagIdx} query={tagQ} onQuery={setTagQ} onClose={() => { setTagAt(null); setTagQ(""); }} onPick={(t) => { addTag(t); setTagAt(null); setTagQ(""); }} />}
+      {hash && <TagPicker anchor={hash.rect} options={hashOptions} index={tagIdx} onIndex={setTagIdx} onClose={() => { dismissed.current = { node: hash.node, start: hash.start }; setHash(null); }} onPick={pickHash} />}
     </div>
+  );
+}
+
+type TagOption = { tag: string; name?: string; colour?: HlColor; add?: boolean };
+/** Tags to offer for what has been typed: the highlight themes first, then the journal's own tags,
+ *  most used first, leaving out those the entry has; and a new tag when nothing matches exactly. */
+function tagOptions(q: string, themes: HlTheme[], counts: Map<string, number>, has: string[]): TagOption[] {
+  const x = q.trim().replace(/^#/, "").toLowerCase().replace(/\s+/g, "-");
+  const fits = (t: string, name = "") => !x || t.includes(x) || name.toLowerCase().includes(x.replace(/-/g, " "));
+  const themed = themes.filter((t) => !has.includes(t.tag) && fits(t.tag, t.name)).map((t) => ({ tag: t.tag, name: t.name, colour: t.colour }));
+  const own = [...counts.entries()].filter(([t]) => !has.includes(t) && !themes.some((h) => h.tag === t) && fits(t)).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).map(([tag]) => ({ tag }));
+  const all: TagOption[] = [...themed, ...own].slice(0, 12);
+  if (x && !all.some((o) => o.tag === x) && !has.includes(x)) all.push({ tag: x, add: true });
+  return all;
+}
+
+/** The list of tags to pick from: under the caret after # in the entry, or with its own box (the Tag button). */
+function TagPicker({ anchor, options, index, onIndex, onPick, onClose, query, onQuery }: { anchor: DOMRect; options: TagOption[]; index: number; onIndex: (i: number) => void; onPick: (tag: string) => void; onClose: () => void; query?: string; onQuery?: (q: string) => void }) {
+  const box = onQuery !== undefined;
+  const keys = (e: React.KeyboardEvent) => {
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); onIndex((index + (e.key === "ArrowDown" ? 1 : -1) + options.length) % Math.max(1, options.length)); }
+    else if (e.key === "Enter" && options[index]) { e.preventDefault(); onPick(options[index].tag); }
+  };
+  return (
+    <Popover anchor={anchor} onClose={onClose} width={260}>
+      <div style={{ padding: 6, display: "flex", flexDirection: "column", gap: 1 }} onMouseDown={(e) => { if (!box) e.preventDefault(); }}>
+        {box && <label className="field" style={{ margin: "2px 2px 6px" }}><input autoFocus value={query} onChange={(e) => { onQuery!(e.target.value); onIndex(0); }} onKeyDown={keys} placeholder="Tag, e.g. new-birth" aria-label="Add a tag" /></label>}
+        {options.length === 0 && <span className="hint" style={{ padding: "4px 6px" }}>Type a tag</span>}
+        {options.map((o, i) => (
+          <button key={o.tag} type="button" className="opt" title={o.name ? `#${o.tag}` : undefined} aria-selected={i === index} onMouseEnter={() => onIndex(i)} onClick={() => onPick(o.tag)}
+            style={{ background: i === index ? "var(--accentsoft)" : "none", border: 0, borderRadius: 6, color: "var(--text)", padding: "3px 6px", textAlign: "left" }}>
+            {o.colour ? <span style={{ width: 10, height: 10, borderRadius: "50%", background: HL_DOT[o.colour], flexShrink: 0 }} /> : <span style={{ width: 10, flexShrink: 0, color: "var(--muted)", textAlign: "center" }}>#</span>}
+            <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{o.add ? <>Add <b>#{o.tag}</b></> : o.name ?? o.tag}</span>
+          </button>
+        ))}
+      </div>
+    </Popover>
   );
 }
 

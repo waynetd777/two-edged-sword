@@ -7,7 +7,10 @@ Study, search results, a journal entry, or a reference book or devotional. Chats
 Mac; find them again under **Recent** on any Ask panel. A chat keeps what was open when it
 started (the passage, book chapter, word, search or journal entry): opening it from Recent, or
 clicking "Started in…" at its top, goes back there with the chat beside it. An answer can be
-added to your journal.
+added to your journal. When the highlight colours have names (Settings › Highlights), the
+assistant is told your themes, so it knows what your colours and theme tags mean, and it names
+the one or two themes each answer is about; an answer added to the journal, or inserted into an
+entry, gets those theme tags.
 
 ## Claude Code, Codex, Antigravity or Copilot
 

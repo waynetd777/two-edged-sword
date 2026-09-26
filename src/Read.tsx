@@ -5,7 +5,7 @@ import { alignStrongs, EDITIONS, isOriginal, kjvGloss, plainText, Token, tokeniz
 import { Icon, Pause, Play } from "./icons";
 import { BibleSelect, RefButton, SearchField, Topbar } from "./Shell";
 import { rankVoices, useListenKey, usePlayer } from "./speech";
-import { DictAt, HlColor, hlName, useApp, vkey } from "./state";
+import { DictAt, HL_COLOURS, HlColor, hlName, useApp, vkey } from "./state";
 import { StudyPane, StudyTab } from "./StudyPane";
 import { ApoPill, Popover, RefPicker, Seg, SideNav, useBibleBooks, useBibleSizes, useDrag } from "./ui";
 import { WordLookup } from "./WordLookup";
@@ -17,7 +17,7 @@ export interface WordPick { token: Token; verse: number; rect: DOMRect; /** Set 
 /** A clicked word outside a verse (commentary, a book) as a token: no Strong's numbers of its own. */
 export const textToken = (text: string): Token => ({ text, word: true, red: false, italic: false, strongs: [], at: 0, wi: -1 });
 
-export const HL: HlColor[] = ["red", "orange", "yellow", "green", "teal", "blue", "purple", "grey"];
+export const HL: HlColor[] = HL_COLOURS;
 export const HL_DOT: Record<HlColor, string> = { red: "#e59a92", orange: "#efb97e", yellow: "#e9d271", green: "#a9cf9f", teal: "#8fcfc6", blue: "#9fc0e6", purple: "#c1a9e3", grey: "#aab3bf" };
 /** A highlight colour's name in the pickers: the user's name for it (Settings › Highlights), or the colour. */
 export const hlLabel = (c: HlColor, names: Partial<Record<HlColor, string>> | undefined) => names?.[c]?.trim() || c[0].toUpperCase() + c.slice(1);

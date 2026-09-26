@@ -6,7 +6,7 @@ import { plainText } from "./esword";
 import { Icon } from "./icons";
 import { mdToHtml } from "./md";
 import { modelGroups, modelName, pickModel, providerOf, PROVIDER_NAME, useAssistant } from "./assistant";
-import { Chat, Model, nowLocal, Opened, Place, uid, useApp } from "./state";
+import { Chat, Model, nowLocal, Opened, Place, HlTheme, themesOf, uid, useApp } from "./state";
 import { useRefPreview } from "./StudyPane";
 import { ClearButton, confirmDelete, Popover } from "./ui";
 
@@ -116,7 +116,7 @@ export interface AskProps {
   /** For a chat with no passage folder: journal entries written out to search (api.journalExport). */
   journalDir?: (chatId: string) => Promise<string>;
   /** Offers to put an answer into what is being written (the journal entry open). */
-  onInsert?: (markdown: string) => void;
+  onInsert?: (markdown: string, tags: string[]) => void;
   /** More context for the model: other translations, a lexicon entry, search results, a journal entry. */
   context?: () => Promise<string> | string;
   /** A reference book's exported folder, which the model may search and read (see books.rs). */
@@ -134,6 +134,23 @@ export interface AskProps {
 }
 
 /** Journal entries linked to any verse of the passage (or, for a chapter, to anything in it). */
+/** Tells the model the user's highlight themes, and asks it to name the ones each answer is about. */
+function themeNote(themes: HlTheme[]): string {
+  if (!themes.length) return "";
+  return `The user highlights verses and tags journal entries by theme. Their themes, each with its highlight colour and journal tag: ${themes.map((t) => `${t.name} (${t.colour}, #${t.tag})`).join("; ")}. `
+    + "When their highlights, colours or tags come up, this is what they mean, and when you suggest tags for something they write, use these first. "
+    + "End every answer with one last line, exactly \"Themes: #tag\" or \"Themes: #tag #tag\", naming the one or two of these themes the answer is most about, from this list only. The app hides that line and uses it to tag the answer when it goes into their journal.";
+}
+
+/** An answer without its closing "Themes:" line, and the theme tags that line named. */
+export function splitThemes(text: string, themes: HlTheme[]): { body: string; tags: string[] } {
+  const m = text.match(/\n?[ \t]*\**Themes?:?\**[^\n]*$/i);
+  if (!m || !/^\s*\**Themes?/i.test(m[0].trimStart()) || m.index === undefined) return { body: text, tags: [] };
+  const known = new Set(themes.map((t) => t.tag));
+  const tags = [...m[0].matchAll(/#([\p{L}\p{N}-]+)/gu)].map((x) => x[1].toLowerCase()).filter((t) => known.has(t));
+  return { body: text.slice(0, m.index).trimEnd(), tags: [...new Set(tags)] };
+}
+
 function journalOn(journal: JournalEntry[], r: Ref): JournalEntry[] {
   const from = r.verse ?? 1, to = r.verse ? r.to ?? r.verse : 999;
   return journal.filter((e) => e.verses.some((v) => {
@@ -150,6 +167,7 @@ function journalOn(journal: JournalEntry[], r: Ref): JournalEntry[] {
 
 export function AskPanel(p: AskProps) {
   const app = useApp();
+  const themes = useMemo(() => themesOf(app.settings.hlNames), [app.settings.hlNames]);
   const [chatId, setChatId] = useState<string | null>(() => takeSceneChat());
   useEffect(() => {
     const show = () => { const id = takeSceneChat(); if (id) setChatId(id); };
@@ -223,6 +241,8 @@ export function AskPanel(p: AskProps) {
       app.setChats((cs) => [c, ...cs]);
       setChatId(id);
       try { const ctx = await buildContext(); if (ctx) prompt = `${ctx}\n\nQuestion: ${question}`; } catch (e) { console.error(e); }
+      const note = themeNote(themes);
+      if (note) prompt = `${note}\n\n${prompt}`;
     }
     const cid = id!;
     running.current = cid;
@@ -250,10 +270,10 @@ export function AskPanel(p: AskProps) {
 
   const addToJournal = async (c: Chat, i: number) => {
     const qm = c.messages[i - 1]?.text ?? c.title;
-    const a = c.messages[i].text;
+    const { body: a, tags } = splitThemes(c.messages[i].text, themes);
     // Chats from before they kept their passage: the one on screen, only if it's what they were about.
     const refs = c.verses ?? (passage && fmtRef(passage) === c.about ? [fmtRef(passage)] : []);
-    await app.saveEntry({ id: uid(), title: qm.length > 70 ? qm.slice(0, 67) + "…" : qm, created: nowLocal(), updated: nowLocal(), verses: refs, tags: ["ask"], body: `**Asked:** ${qm}\n\n${a}\n\n*Answer from ${modelName(c.model)}.*` });
+    await app.saveEntry({ id: uid(), title: qm.length > 70 ? qm.slice(0, 67) + "…" : qm, created: nowLocal(), updated: nowLocal(), verses: refs, tags: ["ask", ...tags], body: `**Asked:** ${qm}\n\n${a}\n\n*Answer from ${modelName(c.model)}.*` });
     update(c.id, (x) => ({ ...x, journaled: true }));
     app.toast("Added to your journal");
   };
@@ -289,13 +309,13 @@ export function AskPanel(p: AskProps) {
       ) : (
         <div key={i} style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}><span className="label">{modelName(chat!.model)}</span></div>
-          {m.error ? <div className="err" style={{ fontSize: 13 }}>{m.text}</div> : m.text ? <Answer text={m.text} onRef={openRef} onRefHover={onRefHover} /> : <Working text={busy && status && i === messages.length - 1 ? status : "Thinking"} />}
+          {m.error ? <div className="err" style={{ fontSize: 13 }}>{m.text}</div> : m.text ? <Answer text={splitThemes(m.text, themes).body} onRef={openRef} onRefHover={onRefHover} /> : <Working text={busy && status && i === messages.length - 1 ? status : "Thinking"} />}
           {busy && status && m.text && i === messages.length - 1 && <Working text={status} />}
           {!m.error && m.text && !(busy && i === messages.length - 1) && (
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-              {p.onInsert && <button className="btn primary small" type="button" onClick={() => p.onInsert!(m.text)}><Icon name="plus" size={13} />Insert into entry</button>}
+              {p.onInsert && <button className="btn primary small" type="button" onClick={() => { const a = splitThemes(m.text, themes); p.onInsert!(a.body, a.tags); }}><Icon name="plus" size={13} />Insert into entry</button>}
               <button className={`btn small ${p.onInsert ? "" : "primary"}`} type="button" onClick={() => addToJournal(chat!, i)}><Icon name="journal" size={13} />{p.onInsert ? "New entry" : "Add to journal"}</button>
-              <button className="ibtn" type="button" aria-label="Copy" onClick={() => { navigator.clipboard.writeText(m.text); app.toast("Copied"); }}><Icon name="copy" /></button>
+              <button className="ibtn" type="button" aria-label="Copy" onClick={() => { navigator.clipboard.writeText(splitThemes(m.text, themes).body); app.toast("Copied"); }}><Icon name="copy" /></button>
               {i === messages.length - 1 && <button className="ibtn" type="button" aria-label="Ask again" title="Ask again" onClick={() => { const qm = messages[i - 1]?.text; update(chat!.id, (c) => ({ ...c, messages: c.messages.slice(0, -2) })); if (qm) send(qm); }}><Icon name="refresh" /></button>}
             </div>
           )}

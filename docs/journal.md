@@ -11,7 +11,10 @@ Dated entries with headings, bold, italic, lists, quotes and verses inserted fro
 The toolbar highlights in the reader's eight colours, listed by name once they have names in
 Settings › Highlights (the button keeps the colour last picked;
 saved as `==text==` for yellow, which Obsidian shows too, and `<mark class="hl-green">` for the
-others), inserts a verse, links one, and adds a tag. ⌘F finds in the entry and ⌥⌘F replaces (⌘G
+others), inserts a verse, links one, and adds a tag. Typing # in an entry opens the same list
+of tags: the highlight themes first (Settings › Highlights names them; each theme's tag is its
+name, e.g. #trust-in-the-storm), then the journal's tags, most used first. The arrow keys and
+Enter or Tab pick one, which joins the entry's tags and replaces the #text; Esc leaves it. ⌘F finds in the entry and ⌥⌘F replaces (⌘G
 for the next match; ⌘Z undoes a replacement). An Ask answer can be added to the journal in one
 click.
 

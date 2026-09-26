@@ -92,6 +92,13 @@ export interface Bookmark { id: string; ref: Ref; bible: string; created: string
 /** A paragraph in a book: its chapter, and the paragraph's number there (from 1). */
 export interface DocSpot { module: string; title: string; kind?: DocKind; para: number }
 export type HlColor = "red" | "orange" | "yellow" | "green" | "teal" | "blue" | "purple" | "grey";
+export const HL_COLOURS: HlColor[] = ["red", "orange", "yellow", "green", "teal", "blue", "purple", "grey"];
+/** A theme's journal tag: its name as a tag, "Grace and the cross" → grace-and-the-cross. */
+export const themeTag = (name: string) => name.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, "-").replace(/^-+|-+$/g, "");
+export type HlTheme = { colour: HlColor; name: string; tag: string };
+/** The highlight colours that have names (Settings › Highlights), as themes with their tags. */
+export const themesOf = (names: Partial<Record<HlColor, string>> | undefined): HlTheme[] =>
+  HL_COLOURS.flatMap((colour) => { const name = names?.[colour]?.trim(); return name ? [{ colour, name, tag: themeTag(name) }] : []; });
 /** Highlights saved before there were six colours. */
 export const hlName = (c: string): HlColor => (c === "gold" ? "yellow" : c === "rose" ? "red" : (c as HlColor));
 
