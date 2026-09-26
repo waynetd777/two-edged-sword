@@ -431,6 +431,13 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
         }>
           <RefButton onClick={() => setPicker(document.activeElement?.getBoundingClientRect() ?? new DOMRect(300, 40, 100, 20))} />
           <BibleSelect value={bible} onChange={(id) => app.set({ bible: id })} />
+          {(() => {
+            // Back to the default translation from Settings; there all along, greyed out when it's the one showing.
+            const def = app.mod("bible", app.defaultBible);
+            const here = bible === app.defaultBible;
+            const tip = here ? `Reading your default translation${def ? `, ${def.abbrev}` : ""}` : `Back to your default translation${def ? `, ${def.abbrev}` : ""} (set in Settings)`;
+            return <button className="ibtn" type="button" aria-label={tip} title={tip} disabled={here || !def} style={{ opacity: here || !def ? 0.35 : 1 }} onClick={() => app.set({ bible: app.defaultBible })}><Icon name="refresh" /></button>;
+          })()}
           <BooksButton />
           <SearchField onOpen={openPalette} />
         </Topbar>
