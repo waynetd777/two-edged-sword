@@ -7,7 +7,7 @@ import { createContext, ReactNode, useCallback, useContext, useEffect, useRef, u
 import { listen } from "@tauri-apps/api/event";
 import { api, TtsEvent, Verse, Voice } from "./api";
 import { book, nextChapter, Ref } from "./bible";
-import { docSegments, plainText } from "./esword";
+import { docSegments, plainText, tokenize } from "./esword";
 import { findRefs } from "./md";
 import { useApp } from "./state";
 import { Icon } from "./icons";
@@ -36,7 +36,10 @@ export interface PlayOpts { toVerse?: number; onEnd?: () => void }
 
 interface PlayerCtx {
   state: PlayerState;
+  /** English voices, for the reading voice. */
   voices: Voice[];
+  /** Every voice installed, for the Hebrew and Greek ones. */
+  allVoices: Voice[];
   play: (bible: string, book: number, chapter: number, fromVerse?: number, opts?: PlayOpts) => void;
   /** Reads a reference book's chapter, paragraph by paragraph (from docSegments). */
   playDoc: (module: string, title: string, paragraphs: string[], from?: number, kind?: "reference" | "devotional", opts?: PlayOpts) => void;
@@ -77,6 +80,25 @@ function sayRef(r: Ref): string {
  * The text to speak, with its references said in full, and for each character of it the
  * character of `text` it stands for, so the word highlight still lands on the page's words.
  */
+/** "he" for a text mostly in Hebrew letters, "el" for Greek, else null. */
+export function scriptOf(text: string): "he" | "el" | null {
+  const he = (text.match(/[\u0590-\u05FF]/g) ?? []).length, el = (text.match(/[\u0370-\u03FF\u1F00-\u1FFF]/g) ?? []).length;
+  const en = (text.match(/[A-Za-z]/g) ?? []).length;
+  if (he > en && he >= el) return "he";
+  if (el > en) return "el";
+  return null;
+}
+
+/**
+ * A verse as it is read aloud: its words as the reader shows them (tokenize), so a word-by-word
+ * Bible is read in its own language without the English and grammar beneath each word, and the
+ * character positions match the tokens' for the highlight. Another edition's reading (⟨ ⟩) is
+ * blanked out, the same length.
+ */
+export function speechText(html: string): string {
+  return tokenize(html).map((t) => (t.variant ? " ".repeat(t.text.length) : t.text)).join("");
+}
+
 export function speakable(text: string): { spoken: string; at: number[] } {
   // e-Sword writes references "Psa_82:1"; the same length with a space, so positions hold.
   const t = text.replace(/([A-Za-z])_(\d)/g, "$1 $2");
@@ -100,9 +122,10 @@ const IDLE: PlayerState = { on: false, paused: false, bible: "", book: 0, chapte
 export function PlayerProvider({ children }: { children: ReactNode }) {
   const app = useApp();
   const [state, setState] = useState<PlayerState>(IDLE);
-  const [voices, setVoices] = useState<Voice[]>([]);
+  const [allVoices, setAllVoices] = useState<Voice[]>([]);
+  const voices = allVoices.filter((v) => v.lang.startsWith("en"));
   const voicesRef = useRef<Voice[]>([]);
-  voicesRef.current = voices;
+  voicesRef.current = allVoices;
   const verses = useRef<Verse[]>([]);
   const st = useRef(state);
   st.current = state;
@@ -116,7 +139,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
   // Reloaded when the window regains focus, so voices downloaded in System Settings appear.
   useEffect(() => {
-    const load = () => api.ttsVoices().then((vs) => setVoices(vs.filter((v) => v.lang.startsWith("en")))).catch(() => {});
+    const load = () => api.ttsVoices().then(setAllVoices).catch(() => {});
     load();
     window.addEventListener("focus", load);
     return () => window.removeEventListener("focus", load);
@@ -136,9 +159,18 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // Settings keep the voice's identifier; a name (or an old WebKit voiceURI) still matches.
-  const voiceFor = useCallback(() => {
-    const all = voicesRef.current, want = settings.current.voice;
-    return (all.find((v) => v.id === want) ?? all.find((v) => v.name === want) ?? all.find((v) => v.default) ?? all[0])?.id;
+  // A verse in Hebrew letters (the Hebrew Bibles, the Targums) or in Greek is read in the Hebrew or
+  // Greek voice from Settings, or the best installed; with none installed, in the reading voice.
+  const voiceFor = useCallback((text = "") => {
+    const lang = scriptOf(text);
+    if (lang) {
+      const want = lang === "he" ? settings.current.voiceHebrew : settings.current.voiceGreek;
+      const mine = voicesRef.current.filter((v) => v.lang.startsWith(lang));
+      const v = mine.find((x) => x.id === want) ?? [...mine].sort((a, b) => b.quality - a.quality)[0];
+      if (v) return v.id;
+    }
+    const all = voicesRef.current.filter((v) => v.lang.startsWith("en")), want = settings.current.voice;
+    return (all.find((v) => v.id === want) ?? voicesRef.current.find((v) => v.id === want) ?? all.find((v) => v.name === want) ?? all.find((v) => v.default) ?? all[0])?.id;
   }, []);
 
   const stop = useCallback(() => {
@@ -199,15 +231,16 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       return;
     }
     const verse = vs[i];
-    const text = plainText(verse.text);
+    const text = s.doc ? plainText(verse.text) : speechText(verse.text);
     if (!text) { setState((p) => ({ ...p, verse: verse.v, char: -1 })); speakFrom(i + 1); return; }
     const heading = announce.current ? `${announce.current}. ` : "";
     announce.current = null;
-    const prefix = heading + (settings.current.readNumbers && !s.doc ? `Verse ${verse.v}. ` : "");
+    // The heading and verse number are English: not said in a Hebrew or Greek voice.
+    const prefix = scriptOf(text) ? "" : heading + (settings.current.readNumbers && !s.doc ? `Verse ${verse.v}. ` : "");
     const { spoken, at } = speakable(text);
     utt.current = { id: g, prefix: prefix.length, at, onEnd: () => speakFrom(i + 1) };
     setState((p) => ({ ...p, verse: verse.v, char: -1 }));
-    api.ttsSpeak(g, prefix + spoken, voiceFor(), settings.current.rate).catch(() => { if (g === gen.current) stop(); });
+    api.ttsSpeak(g, prefix + spoken, voiceFor(text), settings.current.rate).catch(() => { if (g === gen.current) stop(); });
   }, [stop, voiceFor]);
 
   const play = useCallback((bible: string, b: number, c: number, fromVerse?: number, o: PlayOpts = {}) => {
@@ -267,12 +300,12 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // A change of speed or voice takes effect from the current verse.
-  const rate = app.settings.rate, voice = app.settings.voice;
+  const rate = app.settings.rate, voice = app.settings.voice, voiceHe = app.settings.voiceHebrew, voiceEl = app.settings.voiceGreek;
   useEffect(() => {
     const s = st.current;
     if (s.on && !s.paused) speakFrom(Math.max(0, verses.current.findIndex((v) => v.v === s.verse)));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rate, voice]);
+  }, [rate, voice, voiceHe, voiceEl]);
 
   useEffect(() => () => { api.ttsStop(); }, []);
 
@@ -294,7 +327,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const awake = state.on && !state.paused;
   useEffect(() => { api.keepAwake(awake).catch(() => {}); }, [awake]);
 
-  return <Ctx.Provider value={{ state, voices, play, playDoc, toggle, stop, skip, sleep, say, still }}>{children}</Ctx.Provider>;
+  return <Ctx.Provider value={{ state, voices, allVoices, play, playDoc, toggle, stop, skip, sleep, say, still }}>{children}</Ctx.Provider>;
 }
 
 /** A speaker button that pronounces an original-language word. A span, not a button, so it can sit

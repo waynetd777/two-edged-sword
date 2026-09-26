@@ -26,7 +26,7 @@
   or paragraph layout, verse numbers when copying.
 - **Translations**: the default Bible (what the reader opens with; choosing another Bible while
   reading lasts until you close the window) and the Compare columns.
-- **Voice** and speed for Listen.
+- **Voice** and speed for Listen, and the voices for Hebrew and Greek Bibles.
 - **Journal**: its folder, and notes beside verses.
 - **Quiet time**: the daily reminder, and what to do when you fall behind a plan.
 - **AI assistant**: which of Claude Code, Codex, Antigravity and Copilot are installed, the

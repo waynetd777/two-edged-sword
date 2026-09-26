@@ -58,6 +58,8 @@ export function SettingsScreen() {
           </Section>
           <Section title="Listening">
             <Row label="Voice" hint="More voices: System Settings › Accessibility › Spoken Content › System Voice › Manage Voices."><div style={{ width: 320 }}><VoiceSelect /></div></Row>
+            <Row label="Hebrew voice" hint="For the Hebrew Bibles and the Targums. macOS's Hebrew voices (Carmit) speak the modern pronunciation."><div style={{ width: 320 }}><VoiceSelect lang="he" /></div></Row>
+            <Row label="Greek voice" hint="For the Greek Bibles. macOS's Greek voices (Melina) speak the modern pronunciation."><div style={{ width: 320 }}><VoiceSelect lang="el" /></div></Row>
             <Row label="Speed"><div style={{ display: "flex", alignItems: "center", gap: 12 }}><input type="range" min={0.5} max={2} step={0.05} value={s.rate} onChange={(e) => app.set({ rate: Math.round(+e.target.value * 100) / 100 })} aria-label="Speed" style={{ width: 200 }} /><b>{s.rate}×</b></div></Row>
             <Row label="While reading aloud">
               <Switch on={s.highlightWords} onChange={(v) => app.set({ highlightWords: v })}>Highlight each word</Switch>

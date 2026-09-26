@@ -596,16 +596,23 @@ export function PlayerBar({ focus = false }: { focus?: boolean }) {
   );
 }
 
-export function VoiceSelect() {
+/** The reading voice, or with `lang` the voice for Bibles in Hebrew ("he") or Greek ("el"), whose
+ *  first choice, Automatic, is the best one installed. */
+export function VoiceSelect({ lang }: { lang?: "he" | "el" } = {}) {
   const app = useApp();
-  const { voices } = usePlayer();
-  const cur = voices.find((v) => v.id === app.settings.voice) ?? voices.find((v) => v.name === app.settings.voice) ?? voices.find((v) => v.default) ?? voices[0];
-  const label = (v: Voice) => `${v.name} · ${new Intl.DisplayNames(["en"], { type: "language" }).of(v.lang) ?? v.lang}`;
+  const { voices: english, allVoices } = usePlayer();
+  const key = lang === "he" ? "voiceHebrew" : lang === "el" ? "voiceGreek" : "voice";
+  const voices = lang ? allVoices.filter((v) => v.lang.startsWith(lang)).sort((a, b) => b.quality - a.quality) : english;
+  const want = app.settings[key];
+  const label = (v: Voice) => `${v.name} · ${new Intl.DisplayNames(["en"], { type: "language" }).of(v.lang) ?? v.lang}${v.quality > 1 && !v.name.includes("(") ? (v.quality > 2 ? " (Premium)" : " (Enhanced)") : ""}`;
+  const cur = lang ? voices.find((v) => v.id === want) : voices.find((v) => v.id === want) ?? voices.find((v) => v.name === want) ?? voices.find((v) => v.default) ?? voices[0];
+  const shown = cur ? label(cur) : lang ? (voices[0] ? `Automatic (${voices[0].name})` : "None installed: the reading voice") : "System voice";
   return (
     <label className="btn" style={{ position: "relative", justifyContent: "space-between", width: "100%" }}>
-      <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{cur ? label(cur) : "System voice"}</span>
+      <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{shown}</span>
       <Icon name="down" className="sm" style={{ color: "var(--muted)" }} />
-      <select aria-label="Voice" value={cur?.id ?? ""} onChange={(e) => app.set({ voice: e.target.value })} style={{ position: "absolute", inset: 0, opacity: 0, cursor: "pointer" }}>
+      <select aria-label={lang === "he" ? "Hebrew voice" : lang === "el" ? "Greek voice" : "Voice"} value={cur?.id ?? ""} onChange={(e) => app.set({ [key]: e.target.value })} style={{ position: "absolute", inset: 0, opacity: 0, cursor: "pointer" }}>
+        {lang && <option value="">{voices[0] ? `Automatic (${voices[0].name})` : "None installed: the reading voice"}</option>}
         {voices.map((v) => <option key={v.id} value={v.id}>{label(v)}</option>)}
       </select>
     </label>
