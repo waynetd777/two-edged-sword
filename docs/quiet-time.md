@@ -6,7 +6,7 @@
 
 ## Plans
 
-<a href="images/quiet-time-light.png"><picture><source media="(prefers-color-scheme: dark)" srcset="images/quiet-time-dark.png"><img alt="Quiet time with today's readings" src="images/quiet-time-light.png"></picture></a>
+<a href="images/index.md#quiet-time"><picture><source media="(prefers-color-scheme: dark)" srcset="images/quiet-time-dark.png"><img alt="Quiet time with today's readings" src="images/quiet-time-light.png"></picture></a>
 
 Reading plans: the Bible in a year, the New Testament in 90 days, the Gospels, F. B. Meyer's
 daily readings (if it's in your library), your own, or a Psalm, a Proverb and one more chapter a day, read in the Bible
@@ -25,7 +25,7 @@ resumes the reading, or reads the part showing when nothing is. During the worsh
 keys are left to Music. The audio player closes when Quiet time reaches the songs or an online
 devotional.
 
-<a href="images/worship-light.png"><picture><source media="(prefers-color-scheme: dark)" srcset="images/worship-dark.png"><img alt="The Worship part of Quiet time: why each song suits the day's reading" src="images/worship-light.png"></picture></a>
+<a href="images/index.md#quiet-time"><picture><source media="(prefers-color-scheme: dark)" srcset="images/worship-dark.png"><img alt="The Worship part of Quiet time: why each song suits the day's reading" src="images/worship-light.png"></picture></a>
 
 **Worship music** (on the plan's page): songs from your Music library, before or after the
 reading, chosen by the AI assistant to suit the day's passages. A card explains each choice;
@@ -44,14 +44,14 @@ Mac was asleep at the time. The app keeps running in the menu bar when its windo
 the reminder still comes then; it can't once you quit the app. macOS asks whether to allow
 notifications the first time.
 
-<a href="images/reminder-light.png"><picture><source media="(prefers-color-scheme: dark)" srcset="images/reminder-dark.png"><img alt="The daily reminder in Settings" src="images/reminder-light.png"></picture></a>
+<a href="images/index.md#quiet-time"><picture><source media="(prefers-color-scheme: dark)" srcset="images/reminder-dark.png"><img alt="The daily reminder in Settings" src="images/reminder-light.png"></picture></a>
 
 ## Menu bar
 
 Closing the window leaves the app in the menu bar and takes it out of the Dock until the window
 is opened again. Its menu has:
 
-<a href="images/menu-bar.png"><img alt="The menu-bar menu" src="images/menu-bar.png" width="340"></a>
+<a href="images/index.md#quiet-time"><img alt="The menu-bar menu" src="images/menu-bar.png" width="340"></a>
 
 - **Open Two-edged Sword**.
 - **Start Quiet Time**, with today's readings: the same as **Read** on the day's card. Once the

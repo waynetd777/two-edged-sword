@@ -7,7 +7,7 @@
 
 ## Differences from the KJV
 
-<a href="images/differences-light.png"><picture><source media="(prefers-color-scheme: dark)" srcset="images/differences-dark.png"><img alt="Colossians 1:14 in the ASV, with the popup saying it omits “through his blood” and why" src="images/differences-light.png"></picture></a>
+<a href="images/index.md#translations-and-manuscripts"><picture><source media="(prefers-color-scheme: dark)" srcset="images/differences-dark.png"><img alt="Colossians 1:14 in the ASV, with the popup saying it omits “through his blood” and why" src="images/differences-light.png"></picture></a>
 
 In Verse layout, a **≠** beside a verse marks where the translation differs in meaning from the
 KJV: an omitted verse or phrase, a changed name of God or Christ, a doctrinal word. It is faint
@@ -33,7 +33,7 @@ added a batch at a time.
 
 ## Greek and Hebrew
 
-<a href="images/interlinear-light.png"><picture><source media="(prefers-color-scheme: dark)" srcset="images/interlinear-dark.png"><img alt="Luke 17 in the Greek Textus Receptus: each word over its Strong's number, with Scrivener's readings in angle brackets" src="images/interlinear-light.png"></picture></a>
+<a href="images/index.md#translations-and-manuscripts"><picture><source media="(prefers-color-scheme: dark)" srcset="images/interlinear-dark.png"><img alt="Luke 17 in the Greek Textus Receptus: each word over its Strong's number, with Scrivener's readings in angle brackets" src="images/interlinear-light.png"></picture></a>
 
 Bibles with glosses show each original word stacked over its English and its Strong's number;
 hover a number for its dictionary entry, a word for its grammar and dictionary form, and click it
@@ -45,8 +45,8 @@ verse numbers on the right.
 
 <table>
   <tr>
-    <td align="center"><a href="images/interlinear-hebrew-light.png"><picture><source media="(prefers-color-scheme: dark)" srcset="images/interlinear-hebrew-dark.png"><img alt="Psalm 23 in WLC+, the Hebrew read right to left, each word over its English and Strong's number" src="images/interlinear-hebrew-light.png"></picture></a><br><sub>Hebrew (WLC+), Psalm 23</sub></td>
-    <td align="center"><a href="images/interlinear-syriac-light.png"><picture><source media="(prefers-color-scheme: dark)" srcset="images/interlinear-syriac-dark.png"><img alt="Matthew 6 in Peshitta+, the Syriac read right to left, each word over its English" src="images/interlinear-syriac-light.png"></picture></a><br><sub>Syriac (Peshitta+), the Lord's Prayer</sub></td>
+    <td align="center"><a href="images/index.md#translations-and-manuscripts"><picture><source media="(prefers-color-scheme: dark)" srcset="images/interlinear-hebrew-dark.png"><img alt="Psalm 23 in WLC+, the Hebrew read right to left, each word over its English and Strong's number" src="images/interlinear-hebrew-light.png"></picture></a><br><sub>Hebrew (WLC+), Psalm 23</sub></td>
+    <td align="center"><a href="images/index.md#translations-and-manuscripts"><picture><source media="(prefers-color-scheme: dark)" srcset="images/interlinear-syriac-dark.png"><img alt="Matthew 6 in Peshitta+, the Syriac read right to left, each word over its English" src="images/interlinear-syriac-light.png"></picture></a><br><sub>Syriac (Peshitta+), the Lord's Prayer</sub></td>
   </tr>
 </table>
 
@@ -60,7 +60,7 @@ verse numbers on the right.
 
 ## KJV History
 
-<a href="images/kjv-history-light.png"><picture><source media="(prefers-color-scheme: dark)" srcset="images/kjv-history-dark.png"><img alt="The KJV's family tree: manuscript traditions, printed editions, earlier English Bibles, and which are in the library" src="images/kjv-history-light.png"></picture></a>
+<a href="images/index.md#translations-and-manuscripts"><picture><source media="(prefers-color-scheme: dark)" srcset="images/kjv-history-dark.png"><img alt="The KJV's family tree: manuscript traditions, printed editions, earlier English Bibles, and which are in the library" src="images/kjv-history-light.png"></picture></a>
 
 **KJV History** in the sidebar (⌘8) is the KJV's family tree: the manuscript traditions, the
 printed editions the translators worked from (1604–1611), and the English Bibles before it.

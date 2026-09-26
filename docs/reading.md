@@ -6,7 +6,7 @@
 
 ## Read
 
-<a href="images/read-light.png"><picture><source media="(prefers-color-scheme: dark)" srcset="images/read-dark.png"><img alt="Reading 1 John 1 with the study pane on the commentaries" src="images/read-light.png"></picture></a>
+<a href="images/index.md#reading"><picture><source media="(prefers-color-scheme: dark)" srcset="images/read-dark.png"><img alt="Reading 1 John 1 with the study pane on the commentaries" src="images/read-light.png"></picture></a>
 
 The chapter, one verse per line or as paragraphs, beside a study pane that follows the
 selected verse:
@@ -64,7 +64,7 @@ column's sides, in books and Compare too), and ⌘\\ shows or hides the study pa
 
 ## Books and devotionals
 
-<a href="images/books-light.png"><picture><source media="(prefers-color-scheme: dark)" srcset="images/books-dark.png"><img alt="Foxe's Book of Martyrs with a paragraph selected and highlighted" src="images/books-light.png"></picture></a>
+<a href="images/index.md#reading"><picture><source media="(prefers-color-scheme: dark)" srcset="images/books-dark.png"><img alt="Foxe's Book of Martyrs with a paragraph selected and highlighted" src="images/books-light.png"></picture></a>
 
 The Books menu beside the Bible picker opens a reference book or a devotional in the reading
 column: chapters (a devotional's days) down the side, charts at full width, images full screen
@@ -78,7 +78,7 @@ pane beside the book has **Notes** (journal entries on the chapter), **Dictionar
 
 ## Listen
 
-<a href="images/listen-light.png"><picture><source media="(prefers-color-scheme: dark)" srcset="images/listen-dark.png"><img alt="Listening to 1 John 1, the word being spoken highlighted" src="images/listen-light.png"></picture></a>
+<a href="images/index.md#reading"><picture><source media="(prefers-color-scheme: dark)" srcset="images/listen-dark.png"><img alt="Listening to 1 John 1, the word being spoken highlighted" src="images/listen-light.png"></picture></a>
 
 Reads the chapter aloud, highlighting each word as it is spoken, at 0.5× to 2×, with a sleep
 timer (minutes, or the end of the chapter). It carries on into the next chapter and announces

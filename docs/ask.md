@@ -1,6 +1,6 @@
 # Ask
 
-<a href="images/ask-light.png"><picture><source media="(prefers-color-scheme: dark)" srcset="images/ask-dark.png"><img alt="Ask comparing the commentators on 1 John 1:1" src="images/ask-light.png"></picture></a>
+<a href="images/index.md#ask"><picture><source media="(prefers-color-scheme: dark)" srcset="images/ask-dark.png"><img alt="Ask comparing the commentators on 1 John 1:1" src="images/ask-light.png"></picture></a>
 
 Ask answers questions about what you are reading: a passage in Read or Compare, a word in Word
 Study, search results, a journal entry, or a reference book or devotional. Chats stay on this
@@ -22,7 +22,7 @@ signed in on this Mac, so it uses your existing account:
 - **GitHub Copilot** (`copilot -p`), as "Copilot (Auto)": it lists no models, so Copilot picks
   whichever your plan allows. An organisation's Copilot policy can switch the CLI off.
 
-<a href="images/ask-models-light.png"><picture><source media="(prefers-color-scheme: dark)" srcset="images/ask-models-dark.png"><img alt="The model menu, grouped by the tool that runs each model" src="images/ask-models-light.png" width="330"></picture></a>
+<a href="images/index.md#ask"><picture><source media="(prefers-color-scheme: dark)" srcset="images/ask-models-dark.png"><img alt="The model menu, grouped by the tool that runs each model" src="images/ask-models-light.png" width="330"></picture></a>
 
 The model menu on each Ask panel lists the models from whichever tools are installed, grouped by
 tool; choosing one there also makes it the default. Settings › AI assistant shows what was

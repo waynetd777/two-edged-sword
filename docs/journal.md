@@ -2,7 +2,7 @@
 
 <sub>[Features](features.md) › Journal</sub>
 
-<a href="images/journal-light.png"><picture><source media="(prefers-color-scheme: dark)" srcset="images/journal-dark.png"><img alt="A journal entry with its verse references as links" src="images/journal-light.png"></picture></a>
+<a href="images/index.md#journal"><picture><source media="(prefers-color-scheme: dark)" srcset="images/journal-dark.png"><img alt="A journal entry with its verse references as links" src="images/journal-light.png"></picture></a>
 
 Dated entries with headings, bold, italic, lists, quotes and verses inserted from the Bible
 (⌘N starts one). Each entry is linked to the verses it's about and shows beside them in Read
@@ -21,7 +21,7 @@ the list. With Settings › Listening › Continue into the next journal entry o
 in the player's menu), it reads on through the list. **Focus mode** (⌘., Esc to leave) hides the sidebar and the list and gives the entry 80%
 of the window.
 
-<a href="images/journal-ask-light.png"><picture><source media="(prefers-color-scheme: dark)" srcset="images/journal-ask-dark.png"><img alt="Ask in the journal, about the open entry or the whole journal" src="images/journal-ask-light.png"></picture></a>
+<a href="images/index.md#journal"><picture><source media="(prefers-color-scheme: dark)" srcset="images/journal-ask-dark.png"><img alt="Ask in the journal, about the open entry or the whole journal" src="images/journal-ask-light.png"></picture></a>
 
 **Ask** (right of the toolbar) asks about **This entry** or the **Whole journal**. **This entry**
 asks about the entry and its first linked verse, drawing on your library, and can search the
