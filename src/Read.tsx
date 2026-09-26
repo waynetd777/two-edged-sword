@@ -311,7 +311,7 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
   const toolbar = sel && (
     <div className="vtool fold-bible" dir="ltr" role="toolbar" aria-label="Verse actions" style={{ top: -44, left: 44 }} onClick={(e) => e.stopPropagation()}>
       <div style={{ display: "flex", gap: 6, padding: "0 6px 0 4px" }}>
-        {HL.map((c) => <button key={c} type="button" className="dot" aria-label={`Highlight: ${hlLabel(c, settings.hlNames)}`} title={hlLabel(c, settings.hlNames)} aria-pressed={curHl === c} style={{ background: HL_DOT[c], outline: curHl === c ? "2px solid #fff" : undefined }} onClick={() => setHl(curHl === c ? null : c)} />)}
+        {HL.map((c) => <button key={c} type="button" className="dot" aria-label={`Highlight: ${hlLabel(c, settings.hlNames)}`} title={hlLabel(c, settings.hlNames)} aria-pressed={curHl === c} style={{ background: HL_DOT[c], outline: curHl === c ? "2px solid var(--vt-ring)" : undefined }} onClick={() => setHl(curHl === c ? null : c)} />)}
         {curHl && settings.hlNames?.[curHl]?.trim() && <span style={{ fontSize: 12, alignSelf: "center", whiteSpace: "nowrap", maxWidth: 160, overflow: "hidden", textOverflow: "ellipsis" }}>{hlLabel(curHl, settings.hlNames)}</span>}
       </div>
       <span className="sep" />

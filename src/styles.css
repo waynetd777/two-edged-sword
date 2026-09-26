@@ -9,7 +9,7 @@
   --accent: #0969da; --onaccent: #ffffff; --accentsoft: #ddf4ff; --ring: #80ccff; --red: #cf222e;
   --hl-gold: #f3e2b3; --hl-red: #f6d6d2; --hl-orange: #f8e2c8; --hl-yellow: #f4ebb8; --hl-green: #dcead9; --hl-blue: #d8e6f5; --hl-purple: #e6dcf4; --hl-teal: #d4ece8; --hl-grey: #d9dee6;
   --sidebar: #eef1f4; --sbborder: #d8dee4; --hover: rgba(0, 0, 0, 0.045); --shadow: rgba(31, 35, 40, 0.18);
-  --scrim: rgba(31, 35, 40, 0.34); --tbbg: #24292f; --track: #d0d7de; --dash: #c6ccd2; --good: #1a7f37; --bad: #cf222e;
+  --scrim: rgba(31, 35, 40, 0.34); --tbbg: #24292f; --vt-bg: #ffffff; --vt-fg: #1f2328; --vt-hover: rgba(0, 0, 0, 0.06); --vt-sep: rgba(0, 0, 0, 0.14); --vt-ring: #1f2328; --vt-border: #d0d7de; --track: #d0d7de; --dash: #c6ccd2; --good: #1a7f37; --bad: #cf222e;
   --pdbg: #dafbe1; --pdfg: #1a7f37; --pubg: #fff8c5; --pufg: #7d4e00; --barsoft: #8fb8e8;
   --navon-bg: #ddf4ff; --navon-fg: #0969da;
   --serif: "Source Serif 4 Variable", "Source Serif 4", Georgia, serif; --display: "EB Garamond", Garamond, Georgia, serif;
@@ -21,9 +21,9 @@
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) { --bg: #0d1117; --panel: #161b22; --panel2: #11161d; --border: #30363d; --text: #e6edf3; --muted: #8b949e; --accent: #58a6ff; --onaccent: #0d1117; --accentsoft: #132339; --ring: #1f6feb; --red: #ff7b72; --hl-gold: #3d3012; --hl-red: #49211f; --hl-orange: #47301a; --hl-yellow: #3f3914; --hl-green: #1b3524; --hl-blue: #172f4a; --hl-purple: #2f2548; --hl-teal: #133834; --hl-grey: #323a45; --sidebar: #010409; --sbborder: #21262d; --hover: rgba(177, 186, 196, 0.12); --shadow: rgba(1, 4, 9, 0.8); --scrim: rgba(1, 4, 9, 0.6); --tbbg: #21262d; --track: #30363d; --dash: #30363d; --good: #3fb950; --bad: #f85149; --pdbg: #12261e; --pdfg: #7ee787; --pubg: #2b2111; --pufg: #e3b341; --barsoft: #2f4f7f; --navon-bg: #1a2d45; --navon-fg: #79b8ff; color-scheme: dark; }
+  :root:not([data-theme="light"]) { --bg: #0d1117; --panel: #161b22; --panel2: #11161d; --border: #30363d; --text: #e6edf3; --muted: #8b949e; --accent: #58a6ff; --onaccent: #0d1117; --accentsoft: #132339; --ring: #1f6feb; --red: #ff7b72; --hl-gold: #3d3012; --hl-red: #49211f; --hl-orange: #47301a; --hl-yellow: #3f3914; --hl-green: #1b3524; --hl-blue: #172f4a; --hl-purple: #2f2548; --hl-teal: #133834; --hl-grey: #323a45; --sidebar: #010409; --sbborder: #21262d; --hover: rgba(177, 186, 196, 0.12); --shadow: rgba(1, 4, 9, 0.8); --scrim: rgba(1, 4, 9, 0.6); --tbbg: #21262d; --vt-bg: #21262d; --vt-fg: #ece6da; --vt-hover: rgba(255, 255, 255, 0.1); --vt-sep: rgba(255, 255, 255, 0.18); --vt-ring: #ffffff; --vt-border: transparent; --track: #30363d; --dash: #30363d; --good: #3fb950; --bad: #f85149; --pdbg: #12261e; --pdfg: #7ee787; --pubg: #2b2111; --pufg: #e3b341; --barsoft: #2f4f7f; --navon-bg: #1a2d45; --navon-fg: #79b8ff; color-scheme: dark; }
 }
-:root[data-theme="dark"] { --bg: #0d1117; --panel: #161b22; --panel2: #11161d; --border: #30363d; --text: #e6edf3; --muted: #8b949e; --accent: #58a6ff; --onaccent: #0d1117; --accentsoft: #132339; --ring: #1f6feb; --red: #ff7b72; --hl-gold: #3d3012; --hl-red: #49211f; --hl-orange: #47301a; --hl-yellow: #3f3914; --hl-green: #1b3524; --hl-blue: #172f4a; --hl-purple: #2f2548; --hl-teal: #133834; --hl-grey: #323a45; --sidebar: #010409; --sbborder: #21262d; --hover: rgba(177, 186, 196, 0.12); --shadow: rgba(1, 4, 9, 0.8); --scrim: rgba(1, 4, 9, 0.6); --tbbg: #21262d; --track: #30363d; --dash: #30363d; --good: #3fb950; --bad: #f85149; --pdbg: #12261e; --pdfg: #7ee787; --pubg: #2b2111; --pufg: #e3b341; --barsoft: #2f4f7f; --navon-bg: #1a2d45; --navon-fg: #79b8ff; color-scheme: dark; }
+:root[data-theme="dark"] { --bg: #0d1117; --panel: #161b22; --panel2: #11161d; --border: #30363d; --text: #e6edf3; --muted: #8b949e; --accent: #58a6ff; --onaccent: #0d1117; --accentsoft: #132339; --ring: #1f6feb; --red: #ff7b72; --hl-gold: #3d3012; --hl-red: #49211f; --hl-orange: #47301a; --hl-yellow: #3f3914; --hl-green: #1b3524; --hl-blue: #172f4a; --hl-purple: #2f2548; --hl-teal: #133834; --hl-grey: #323a45; --sidebar: #010409; --sbborder: #21262d; --hover: rgba(177, 186, 196, 0.12); --shadow: rgba(1, 4, 9, 0.8); --scrim: rgba(1, 4, 9, 0.6); --tbbg: #21262d; --vt-bg: #21262d; --vt-fg: #ece6da; --vt-hover: rgba(255, 255, 255, 0.1); --vt-sep: rgba(255, 255, 255, 0.18); --vt-ring: #ffffff; --vt-border: transparent; --track: #30363d; --dash: #30363d; --good: #3fb950; --bad: #f85149; --pdbg: #12261e; --pdfg: #7ee787; --pubg: #2b2111; --pufg: #e3b341; --barsoft: #2f4f7f; --navon-bg: #1a2d45; --navon-fg: #79b8ff; color-scheme: dark; }
 
 * { box-sizing: border-box; }
 html, body, #root { height: 100%; margin: 0; }
@@ -256,9 +256,9 @@ button.ks-chip { cursor: pointer; }
 .hl-purple { background: var(--hl-purple); border-radius: 3px; }
 .hl-teal { background: var(--hl-teal); border-radius: 3px; }
 .hl-grey { background: var(--hl-grey); border-radius: 3px; }
-.vtool { position: absolute; z-index: 20; display: flex; align-items: center; gap: 2px; padding: 3px 5px; border-radius: 9px; background: var(--tbbg); box-shadow: 0 6px 20px var(--shadow); }
-.vtool .tb { display: inline-flex; align-items: center; gap: 5px; height: 30px; padding: 0 9px; border: 0; border-radius: 6px; background: transparent; cursor: pointer; color: #ece6da; font-size: 12px; }
-.vtool .tb:hover { background: rgba(255, 255, 255, 0.1); }
+.vtool { position: absolute; z-index: 20; display: flex; align-items: center; gap: 2px; padding: 3px 5px; border-radius: 9px; background: var(--vt-bg); color: var(--vt-fg); border: 1px solid var(--vt-border); box-shadow: 0 6px 20px var(--shadow); }
+.vtool .tb { display: inline-flex; align-items: center; gap: 5px; height: 30px; padding: 0 9px; border: 0; border-radius: 6px; background: transparent; cursor: pointer; color: var(--vt-fg); font-size: 12px; }
+.vtool .tb:hover { background: var(--vt-hover); }
 /* The verse and paragraph toolbars show labels when their column has room, and only icons (each
    with its tooltip) when it doesn't: the text columns are size containers for this. */
 .readcol, .docbody { container-type: inline-size; }
@@ -266,7 +266,7 @@ button.ks-chip { cursor: pointer; }
 @container (max-width: 820px) { .vtool.fold-bible .lbl { display: none; } .vtool.fold-bible .tb { padding: 0 8px; } }
 @container (max-width: 640px) { .vtool.fold-doc .lbl { display: none; } .vtool.fold-doc .tb { padding: 0 8px; } }
 .vtool .dot, .hlpick .dot, .hlnames .dot { width: 16px; height: 16px; border-radius: 50%; border: 0; cursor: pointer; }
-.vtool .sep { width: 1px; height: 18px; background: rgba(255, 255, 255, 0.18); margin: 0 4px; }
+.vtool .sep { width: 1px; height: 18px; background: var(--vt-sep); margin: 0 4px; }
 .study { border-left: 1px solid var(--border); background: var(--panel2); display: flex; flex-direction: column; min-height: 0; position: relative; }
 .study .tabs { display: flex; align-items: center; gap: 4px; padding: 10px 14px; border-bottom: 1px solid var(--border); }
 .prose { font: 400 15.5px/1.65 var(--serif); text-wrap: pretty; }
