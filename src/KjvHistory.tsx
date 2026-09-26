@@ -165,7 +165,8 @@ export function KjvHistoryScreen() {
     Promise.all(bibles.map((b) => bibleBooks(b.id).then((books) => [b.id, coverageOf(books)] as const))).then((r) => { if (live) setCov(Object.fromEntries(r)); });
     return () => { live = false; };
   }, [bibles]);
-  const covTip = (m: ModuleInfo) => (cov[m.id] && coverageText(cov[m.id]) ? ` (${coverageText(cov[m.id])})` : "");
+  // Not when the name already says: "Westminster Leningrad Codex (Hebrew OT)", "Rheims New Testament (1582)".
+  const covTip = (m: ModuleInfo) => (cov[m.id] && coverageText(cov[m.id]) && !/\b(OT|NT|Old Testament|New Testament|Tanach)\b/i.test(m.title) ? ` (${coverageText(cov[m.id])})` : "");
   const haveCount = ALL.filter((s) => matches(s, bibles).have.length).length;
   const nearCount = ALL.filter((s) => { const m = matches(s, bibles); return !m.have.length && m.near.length; }).length;
 
