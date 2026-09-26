@@ -46,8 +46,13 @@ input, textarea, [contenteditable="true"] { user-select: text; }
 .main { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
 .sidebar { background: var(--sidebar); border-right: 1px solid var(--sbborder); padding: 44px 10px 14px; display: flex; flex-direction: column; gap: 20px; overflow-y: auto; }
 .brand { display: flex; align-items: center; }
-.wordmark { width: 100%; height: auto; display: block; overflow: visible; --wm-bg: #0b1f3a; --wm-1: #fff6d8; --wm-2: #efcb76; --wm-3: #8f631c; --wm-4: #f7dc95; --wm-5: #b5832b; --wm-edge: #6b4a17; --wm-shadow: rgba(0, 0, 0, 0.7); }
-.wordmark .medal { --sw-light: #efd9a4; --sw-dark: #c6974a; --sw-fuller: #8a6630; --sw-gold: #d8b160; --sw-grip: #6e4526; --sw-wrap: #8e5d35; --sw-pin: #b48a3e; }
+.wordmark { width: 100%; height: auto; display: block; overflow: visible; --wm-bg: #0b1f3a; --wm-disc: #26354a; --wm-1: #ffffff; --wm-2: #d4dbe3; --wm-3: #6b7784; --wm-4: #eef1f5; --wm-5: #9aa5b1; --wm-edge: #3a434e; --wm-shadow: rgba(0, 0, 0, 0.7); }
+/* Light: the dark logo's navy plate and disc, in silver. */
+.wordmark .medal { --sw-light: #f3f6f9; --sw-dark: #a9b4c0; --sw-fuller: #66727f; --sw-gold: #c9d1da; --sw-grip: #4a5563; --sw-wrap: #6d7987; --sw-pin: #8b96a2; }
+/* Dark: the gold logo on its navy plate. */
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .wordmark { --wm-bg: #0b1f3a; --wm-disc: #26354a; --wm-1: #fff6d8; --wm-2: #efcb76; --wm-3: #8f631c; --wm-4: #f7dc95; --wm-5: #b5832b; --wm-edge: #6b4a17; --wm-shadow: rgba(0, 0, 0, 0.7); } :root:not([data-theme="light"]) .wordmark .medal { --sw-light: #efd9a4; --sw-dark: #c6974a; --sw-fuller: #8a6630; --sw-gold: #d8b160; --sw-grip: #6e4526; --sw-wrap: #8e5d35; --sw-pin: #b48a3e; } }
+:root[data-theme="dark"] .wordmark { --wm-bg: #0b1f3a; --wm-disc: #26354a; --wm-1: #fff6d8; --wm-2: #efcb76; --wm-3: #8f631c; --wm-4: #f7dc95; --wm-5: #b5832b; --wm-edge: #6b4a17; --wm-shadow: rgba(0, 0, 0, 0.7); }
+:root[data-theme="dark"] .wordmark .medal { --sw-light: #efd9a4; --sw-dark: #c6974a; --sw-fuller: #8a6630; --sw-gold: #d8b160; --sw-grip: #6e4526; --sw-wrap: #8e5d35; --sw-pin: #b48a3e; }
 .nav { display: flex; align-items: center; gap: 9px; height: 30px; padding: 0 10px; border: 0; border-radius: 7px; background: transparent; width: 100%; text-align: left; cursor: pointer; }
 .nav:hover { background: var(--hover); }
 /* The selected screen: a tint of the accent with accent text (a solid bar fought the logo). */

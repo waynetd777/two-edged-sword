@@ -85,8 +85,8 @@ function SwordParts() {
 /** The sidebar title: the sword beside "Two-edged Sword" in Cinzel Decorative (Roman
  *  triumphal capitals, for victory), filled with the blade's polished gold, framed in a gold rounded border. The sword sits on the
  *  app icon's blue disc and so always takes the icon's gold colours (.medal). The gradient's
- *  stops are tokens (--wm-*), set once on .wordmark: the logo sits on its own navy plate (--wm-bg) in
- *  every theme, so its gold is always the bright gold made for dark. */
+ *  stops are tokens (--wm-*), set on .wordmark: in dark it sits on its own navy plate (--wm-bg) in the
+ *  bright gold made for dark; in light, on the same navy plate and disc in silver, sword included. */
 export function Wordmark() {
   const id = useId().replace(/:/g, "");
   return (
@@ -105,7 +105,7 @@ export function Wordmark() {
       </defs>
       <rect x="0.7" y="0.7" width="170.6" height="56.6" rx="10" fill="var(--wm-bg)" stroke={`url(#g${id})`} strokeWidth="1.4" />
       <svg className="medal" x="6" y="5" width="38.4" height="48" viewBox="212 140 600 750">
-        <circle cx="512" cy="440" r="290" fill="#26354a" />
+        <circle cx="512" cy="440" r="290" style={{ fill: "var(--wm-disc)" }} />
         <SwordParts />
       </svg>
       <g fill={`url(#g${id})`} stroke="var(--wm-edge)" strokeWidth="0.35" filter={`url(#s${id})`} style={{ fontFamily: "'Cinzel Decorative', serif" }}>
