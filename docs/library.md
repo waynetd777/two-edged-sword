@@ -48,6 +48,7 @@ everything in the KJV's verse numbering, so it reads and compares beside the KJV
 
 | Script | Builds | From |
 |---|---|---|
+| `python3 tools/rheims/build.py` | The Rheims New Testament (1582), in Bagster's modernised spelling, from Google Books' OCR (Bible Support file 11077: the HTML zip and the RTF, in ~/Downloads), divided into verses by lining it up with Challoner's DRC (run tools/crosswire first) | Bible Support / Google Books |
 | `python3 tools/sefaria/build.py` | Targum (Aramaic and English), Targum Pseudo-Jonathan, and the Babylonian Talmud (a book per tractate, English with the Aramaic, linked to the verses it cites) | Sefaria |
 | `python3 tools/vulgate/build.py` | The Clementine Vulgate (1592), with the deuterocanon | The Clementine Vulgate Project |
 | `python3 tools/crosswire/build.py` | The Syriac Peshitta NT, Murdock's and Etheridge's English of it, Tyndale (1525/1530), the Geneva Bible (1599), and the Douay-Rheims (Challoner) | CrossWire |

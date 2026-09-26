@@ -135,9 +135,9 @@ input[type="range"] { accent-color: var(--accent); }
 .ref:hover { text-decoration: none; border-bottom-style: solid; }
 .empty { color: var(--muted); padding: 24px; text-align: center; }
 /* A chapter or verse the Bible being read doesn't have (Read). */
-.hint { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 12px 10px; padding: 12px 14px; border-radius: 10px; background: var(--panel); border: 1px solid var(--border); color: var(--muted); font: 400 14px/1.45 var(--ui); }
-.hint > svg { color: var(--accent); flex: none; }
-.hint .btn { margin-left: auto; }
+.missing { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 12px 10px; padding: 12px 14px; border-radius: 10px; background: var(--panel); border: 1px solid var(--border); color: var(--muted); font: 400 14px/1.45 var(--ui); }
+.missing > svg { color: var(--accent); flex: none; }
+.missing .btn { margin-left: auto; }
 .err { color: var(--bad); }
 .scroll { overflow-y: auto; min-height: 0; }
 .popover { position: fixed; z-index: 50; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 16px 44px var(--shadow); }

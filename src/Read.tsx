@@ -349,7 +349,7 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
   const noChapter = loaded && !verses.length && !err;
   const noVerse = loaded && !!verses.length && !!loc.verse && !verses.some((v) => v.v === loc.verse) && !variances.byVerse.has(loc.verse);
   const hint = (text: string) => (
-    <div className="hint" role="status">
+    <div className="missing" role="status">
       <Icon name="info" />
       <span>{text}</span>
       {other && noChapter && <button className="btn" type="button" onClick={() => app.set({ bible: other.id })}>Read it in {other.abbrev}</button>}

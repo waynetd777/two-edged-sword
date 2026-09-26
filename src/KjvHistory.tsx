@@ -60,7 +60,7 @@ const TIERS: { name: string; hint: string; items: Source[] }[] = [
       { id: "great", name: "Great Bible", date: "1539", note: "The first English Bible authorised for the churches.", from: ["matthew"], have: /Great Bible/i },
       { id: "geneva", name: "Geneva Bible", date: "1560", note: "The Reformers' Bible, with notes; from the Hebrew and Beza's Greek. Shakespeare's and the Pilgrims' Bible.", from: ["great", "beza", "bomberg"], have: /Geneva/i },
       { id: "bishops", name: "Bishops' Bible", date: "1568; 1602 edition", note: "The official English Bible; the 1602 printing was the base text the translators revised.", from: ["great", "geneva"], have: /Bishops/i },
-      { id: "rheims", name: "Rheims New Testament", date: "1582", note: "The Catholic English New Testament from the Vulgate; the translators borrowed some of its words.", from: ["vul"], near: /Douay|Rheims/i, nearNote: "Challoner's 1750 revision of the Douay-Rheims." },
+      { id: "rheims", name: "Rheims New Testament", date: "1582", note: "The Catholic English New Testament from the Vulgate; the translators borrowed some of its words.", from: ["vul"], have: /^Rheims New Testament \(1582\)$/i, near: /Douay|Rheims/i, nearNote: "Challoner's 1750 revision of the Douay-Rheims." },
     ],
   },
 ];
