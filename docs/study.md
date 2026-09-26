@@ -16,8 +16,9 @@ wording that differs from the first column, and **Strong's numbers** for Bibles 
 <picture><source media="(prefers-color-scheme: dark)" srcset="images/search-dark.png"><img alt="Searching the KJV for “tithe”, with the verse in context" src="images/search-light.png"></picture>
 
 The Bible, every commentary and dictionary, and your journal at once, with a count for each.
-Narrow it to one Bible, a range (Old or New Testament, Wisdom, Prophets, Gospels, Letters), and
-match the exact phrase, all or any of the words, and whole words only. Selecting a verse shows it
+Narrow it to one Bible and a range (Old or New Testament, Wisdom, Prophets, Gospels, Letters),
+which applies to the Bible and commentaries, and match the exact phrase, all or any of the words,
+and whole words only ("light" then doesn't find "delight"), in everything searched. Selecting a verse shows it
 in context beside the results, ready to open or compare, and Ask can summarise what the results
 say. A Strong's number such as `G509` finds every verse that uses the word, however it is
 translated. The search is kept while you open results and come back, and each new search is a

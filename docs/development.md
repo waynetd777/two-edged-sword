@@ -16,6 +16,10 @@ runs the AI tools for Ask; the frontend is everything you see.
 | `make sign-check` | Show how the installed app is signed |
 | `make screenshots` | Retake the screenshots in `docs/images/`, light and dark (see below) |
 
+On macOS 27, release builds link with Rust's own lld against the macOS 26 SDK when it's installed
+(see the Makefile): macOS 27's linker sometimes writes a proc-macro library dyld won't load, and
+the build stops with "can't find crate".
+
 Hot reload can leave a screen in a broken state after edits that change a component's hooks.
 Reload the window (⌘R) or restart `make dev` before treating it as a bug.
 

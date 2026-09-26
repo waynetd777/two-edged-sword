@@ -57,8 +57,9 @@ verse numbers on the right.
 
 **KJV History** in the sidebar (⌘8) is the KJV's family tree: the manuscript traditions, the
 printed editions the translators worked from (1604–1611), and the English Bibles before it.
-Each card shows what you have: green is the text itself, amber the closest stand-in, blue a
-related module. Click one to read it. Hover a card to light up what it came from and what came
+Each card's chips show what you have: green is the text itself, amber the closest stand-in, blue
+a related module. Click one to read it; its tooltip says whether it has the Old Testament, the New
+or both. Hover a card to light up what it came from and what came
 from it.
 
 **Ask** opens a panel beside the tree. The history, and which sources are in your library, goes

@@ -11,13 +11,19 @@
 Reading plans: the Bible in a year, the New Testament in 90 days, the Gospels, F. B. Meyer's
 daily readings (if it's in your library), your own, or a Psalm, a Proverb and one more chapter a day, read in the Bible
 chosen for the plan. Add devotionals from your library, or Our Daily Bread and Heartlight online
-(opened in a window of their own).
+(opened in a window of their own, dark when the app is: the page is inverted, with its pictures
+left as they are).
 
 **Read** opens each of the day's chapters and devotionals in turn, with a bar to move between
 them; **Read with audio** reads them aloud one after another, two seconds apart. Parts are ticked off as they are
 finished, and the day is marked read once its Bible readings are. **Mark as unread** undoes
 today's mark and puts the plan back where it was. Click a reading in the day's card to open just
 that chapter.
+
+F7 and F9 go to the previous or next part, as the bar's buttons do, and F8 (or ⌘P) pauses and
+resumes the reading, or reads the part showing when nothing is. During the worship songs the F
+keys are left to Music. The audio player closes when Quiet time reaches the songs or an online
+devotional.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="images/worship-dark.png"><img alt="The Worship part of Quiet time: why each song suits the day's reading" src="images/worship-light.png"></picture>
 
@@ -26,7 +32,8 @@ reading, chosen by the AI assistant to suit the day's passages. A card explains 
 **Play songs** starts them in Music, with pause, skip and **Lyrics** (opens Music, which shows
 them) in the bar, and Space pauses too. When the last song ends, Music is stopped rather than
 left on AutoPlay, and Quiet time moves on. **Try it now** runs the day's Quiet time with its
-songs, without marking anything read. macOS asks once whether the app may control Music.
+songs, without marking anything read; **Try it with audio** does the same with the readings read
+aloud. macOS asks once whether the app may control Music.
 
 Under the progress bar: how many days in a row you've read, your best run, and how many of the
 last seven days (weekdays, for a weekdays-only plan, so weekends don't break the streak).

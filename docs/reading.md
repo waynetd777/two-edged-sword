@@ -37,14 +37,15 @@ starts, and ← and → skip the books it lacks. The Bible and Books menus have 
 then ↑↓ and Enter).
 
 The Bible you choose here is for this session. The default in Settings (or the Library) comes
-back when you reopen the window or restart the app.
+back when you reopen the window or restart the app, or with the button beside the Bible picker
+(greyed out when the default is the one showing).
 
 In Verse layout, a ≠ beside a verse marks where the translation differs in meaning from the KJV,
 and Greek and Hebrew Bibles show each word over its English and Strong's number: see
 [Translations and manuscripts](manuscripts.md). "See ASTRONOMY" in a dictionary and "see on Gen 12:8" in a commentary open that entry
 or note in the pane, with back and forward.
 
-⌘. is focus mode (Esc leaves it), ← and → turn the page (as do the chevrons at the middle of the
+⌘. is focus mode (Esc leaves it), the text across 80% of the window; ← and → turn the page (as do the chevrons at the middle of the
 column's sides, in books and Compare too), and ⌘\\ shows or hides the study pane.
 
 ## Books and devotionals
@@ -67,8 +68,17 @@ pane beside the book has **Notes** (journal entries on the chapter), **Dictionar
 
 Reads the chapter aloud, highlighting each word as it is spoken, at 0.5× to 2×, with a sleep
 timer (minutes, or the end of the chapter). It carries on into the next chapter and announces
-each one ("First Samuel, chapter 3"). Space plays and pauses; Esc closes the player (after any
-open menu or focus mode).
+each one ("First Samuel, chapter 3"). The progress bar moves word by word.
+
+- **Space** (in the readers) or **⌘P** (anywhere) plays and pauses; with nothing playing they
+  start the chapter, book or entry showing. Pause stops mid-word and play carries on from there.
+- **F7** and **F9** go to the previous or next chapter (a book's, or the next journal entry). The
+  keyboard's media keys work without fn: while it reads, the app is what macOS's Now Playing and
+  headphone buttons control.
+- **Esc** closes the player (after any open menu or focus mode).
+
+Choosing another translation stops the reading, as does going to a screen that can't read aloud,
+or between the readers and the journal.
 
 It speaks through macOS's own synthesiser, so every voice installed on the Mac can be chosen,
 including the far more natural **Premium** and **Enhanced** ones. They are a separate download:

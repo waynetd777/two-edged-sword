@@ -14,6 +14,12 @@ others), inserts a verse, links one, and adds a tag. ⌘F finds in the entry and
 for the next match; ⌘Z undoes a replacement). An Ask answer can be added to the journal in one
 click.
 
+**Listen** (top right) reads the open entry aloud, its title and then each paragraph, with the
+word being spoken highlighted as in the readers. While it reads, even paused, the entry can't be
+edited, so Space plays and pauses as well as ⌘P; F7 and F9 go to the previous or next entry in
+the list. **Focus mode** (⌘., Esc to leave) hides the sidebar and the list and gives the entry 80%
+of the window.
+
 <picture><source media="(prefers-color-scheme: dark)" srcset="images/journal-ask-dark.png"><img alt="Ask in the journal, about the open entry or the whole journal" src="images/journal-ask-light.png"></picture>
 
 **Ask** (right of the toolbar) asks about **This entry** or the **Whole journal**. **This entry**

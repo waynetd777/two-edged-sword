@@ -24,8 +24,9 @@ read-only and keeps what you make (journal, bookmarks, highlights, plans, chats)
   you have.
 - **Word Study** a Strong's number: where it is used, every verse in context, and the articles
   about it in your library.
-- **Listen** to a chapter read aloud in any macOS voice, including the Premium ones, with each
-  word highlighted as it is spoken.
+- **Listen** to a chapter, book or journal entry read aloud in any macOS voice, including the
+  Premium ones, with each word highlighted as it is spoken; ⌘P and the keyboard's media keys
+  control it from anywhere.
 - **Quiet time** plans: daily readings and devotionals, worship songs from your Music library
   chosen for the day's reading, and a daily reminder.
 - **Journal** entries linked to the verses they're about, kept in step with your Obsidian vault.
