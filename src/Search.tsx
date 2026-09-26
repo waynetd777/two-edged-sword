@@ -26,10 +26,17 @@ type Pick =
 const RANGES: { name: string; from: number; to: number }[] = [{ name: "Whole Bible", from: 1, to: 66 }, { name: "OT", from: 1, to: 39 }, { name: "NT", from: 40, to: 66 }, ...SECTIONS.filter((s) => ["Gospels", "Letters", "Prophets", "Wisdom"].includes(s.name))];
 
 /** Text with every search term marked. */
-export function mark(text: string, terms: string[]): ReactNode {
+/** Finds any of `terms`, ignoring case; with `whole`, only as whole words ("light", not "delight";
+ *  an apostrophe is part of a word, as in search.rs, so "God" isn't "God's"). */
+export function termsRe(terms: string[], whole = false, flags = "giu"): RegExp | null {
   const ts = terms.filter(Boolean).map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
-  if (!ts.length) return text;
-  const re = new RegExp(`(${ts.join("|")})`, "gi");
+  if (!ts.length) return null;
+  return new RegExp(whole ? `(?<![\\p{L}\\p{N}'])(${ts.join("|")})(?![\\p{L}\\p{N}'])` : `(${ts.join("|")})`, flags);
+}
+
+export function mark(text: string, terms: string[], whole = false): ReactNode {
+  const re = termsRe(terms, whole);
+  if (!re) return text;
   return text.split(re).map((p, i) => (i % 2 ? <mark key={i}>{p}</mark> : <Fragment key={i}>{p}</Fragment>));
 }
 
@@ -88,15 +95,15 @@ export function SearchScreen() {
     if (ran) run(ran);
   }, [mode, whole, range, bible]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const terms = useMemo(() => (mode === "phrase" ? [ran.trim()] : ran.trim().split(/\s+/)), [ran, mode]);
+  const terms = useMemo(() => (mode === "phrase" ? [ran.trim().replace(/\s+/g, " ")] : ran.trim().split(/\s+/)), [ran, mode]);
   const journalHits = useMemo(() => {
     if (!ran.trim() || res?.strongs) return [];
-    const t = terms.map((x) => x.toLowerCase());
+    const res_ = terms.map((x) => termsRe([x], whole, "iu")!);
     return app.journal.filter((e) => {
-      const hay = (e.title + " " + mdPlain(e.body)).toLowerCase();
-      return mode === "any" ? t.some((x) => hay.includes(x)) : t.every((x) => hay.includes(x));
+      const hay = (e.title + " " + mdPlain(e.body)).replace(/\s+/g, " ");
+      return mode === "any" ? res_.some((r) => r.test(hay)) : res_.every((r) => r.test(hay));
     });
-  }, [app.journal, ran, terms, mode, res?.strongs]);
+  }, [app.journal, ran, terms, mode, whole, res?.strongs]);
   const cTotal = res?.commentaries.reduce((n, m) => n + m.count, 0) ?? 0;
   const dTotal = res?.dictionaries.reduce((n, m) => n + m.count, 0) ?? 0;
   const total = (res?.bible.count ?? 0) + cTotal + dTotal + journalHits.length;
@@ -157,7 +164,7 @@ export function SearchScreen() {
                   return (
                     <button key={`${h.book}.${h.chapter}.${h.verse}`} type="button" className="bm" onClick={() => setPick({ kind: "verse", ref: r })} onDoubleClick={() => app.open(r, "read")} style={{ display: "grid", gridTemplateColumns: "96px minmax(0,1fr)", gap: 12, padding: "10px 12px", background: on ? "var(--accentsoft)" : undefined }}>
                       <b style={{ fontSize: 12.5 }}>{fmtRef(r, "short")}</b>
-                      <span dir="auto" style={{ font: "400 15.5px/1.55 var(--serif)" }}>{res.strongs ? plainText(h.text) : mark(plainText(h.text), terms)}</span>
+                      <span dir="auto" style={{ font: "400 15.5px/1.55 var(--serif)" }}>{res.strongs ? plainText(h.text) : mark(plainText(h.text), terms, whole)}</span>
                     </button>
                   );
                 })}
@@ -171,7 +178,7 @@ export function SearchScreen() {
                   return (
                     <button key={k} type="button" className="bm" onClick={() => setPick({ kind: "comment", module: cur.module, ref: r })} style={{ display: "grid", gridTemplateColumns: "96px minmax(0,1fr)", gap: 12, padding: "10px 12px", background: on ? "var(--accentsoft)" : undefined }}>
                       <b style={{ fontSize: 12.5 }}>{fmtRef(r, "short")}</b>
-                      <span style={{ font: "400 14.5px/1.55 var(--serif)" }}>{mark(h.snippet, terms)}</span>
+                      <span style={{ font: "400 14.5px/1.55 var(--serif)" }}>{mark(h.snippet, terms, whole)}</span>
                     </button>
                   );
                 })}
@@ -191,7 +198,7 @@ export function SearchScreen() {
                 {journalHits.map((e) => (
                   <button key={e.id} type="button" className="bm" onClick={() => setPick({ kind: "journal", id: e.id })} onDoubleClick={() => app.startEntry({ openId: e.id })} style={{ display: "grid", gridTemplateColumns: "96px minmax(0,1fr)", gap: 12, padding: "10px 12px", background: pick?.kind === "journal" && pick.id === e.id ? "var(--accentsoft)" : undefined }}>
                     <b style={{ fontSize: 12.5 }}>{new Date(e.created).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</b>
-                    <span style={{ font: "400 14.5px/1.55 var(--serif)" }}><b>{e.title}.</b> {mark(mdPlain(e.body).slice(0, 200), terms)}…</span>
+                    <span style={{ font: "400 14.5px/1.55 var(--serif)" }}><b>{e.title}.</b> {mark(mdPlain(e.body).slice(0, 200), terms, whole)}…</span>
                   </button>
                 ))}
               </>}
@@ -200,7 +207,7 @@ export function SearchScreen() {
         </div>
 
         <aside aria-label="Preview" style={{ borderLeft: "1px solid var(--border)", background: "var(--panel)", display: "flex", flexDirection: "column", minHeight: 0 }}>
-          <Preview pick={pick} bible={bible} terms={terms} />
+          <Preview pick={pick} bible={bible} terms={terms} whole={whole} />
           {res && (
             <div style={{ padding: "12px 14px 14px", borderTop: "1px solid var(--border)" }}>
               <AskPanel source="Search" about={`“${ran}” (${total} results)`} style={{ border: 0, padding: 0, background: "transparent" }}
@@ -214,7 +221,7 @@ export function SearchScreen() {
   );
 }
 
-function Preview({ pick, bible, terms }: { pick: Pick | null; bible: string; terms: string[] }) {
+function Preview({ pick, bible, terms, whole }: { pick: Pick | null; bible: string; terms: string[]; whole: boolean }) {
   const app = useApp();
   const [verses, setVerses] = useState<Verse[]>([]);
   const [comm, setComm] = useState<Commentary | null>(null);
@@ -251,7 +258,7 @@ function Preview({ pick, bible, terms }: { pick: Pick | null; bible: string; ter
       <div className="scroll" style={{ flexGrow: 1, padding: "16px 22px" }}>
         <div className="label">Journal</div>
         <h2 style={{ margin: "4px 0 10px", font: "500 24px var(--display)" }}>{e?.title}</h2>
-        <div style={{ font: "400 15.5px/1.6 var(--serif)" }}>{mark(mdPlain(e?.body ?? ""), terms)}</div>
+        <div style={{ font: "400 15.5px/1.6 var(--serif)" }}>{mark(mdPlain(e?.body ?? ""), terms, whole)}</div>
         <button className="btn primary" type="button" style={{ marginTop: 14 }} onClick={() => app.startEntry({ openId: pick.id })}>Open entry</button>
       </div>
     );
@@ -269,7 +276,7 @@ function Preview({ pick, bible, terms }: { pick: Pick | null; bible: string; ter
       <div className="scroll" style={{ flexGrow: 1, padding: "16px 22px" }}>
         {pick.kind === "verse" && verses.map((v) => (
           <p key={v.v} dir="auto" style={{ margin: "0 0 10px", font: "400 16px/1.65 var(--serif)", color: v.v === pick.ref.verse ? "var(--text)" : "var(--muted)" }}>
-            <span className="vn" style={{ marginInlineEnd: 6, lineHeight: 1 }}>{v.v}</span>{v.v === pick.ref.verse ? mark(plainText(v.text), terms) : plainText(v.text)}
+            <span className="vn" style={{ marginInlineEnd: 6, lineHeight: 1 }}>{v.v}</span>{v.v === pick.ref.verse ? mark(plainText(v.text), terms, whole) : plainText(v.text)}
           </p>
         ))}
         {comm && <div className="es prose selectable">{renderHtml(comm.verse.map((e) => e.html).join(""), { onRef: openRef, onRefHover, onStrongs: app.studyWord })}</div>}

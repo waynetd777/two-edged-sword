@@ -179,7 +179,8 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   appRef.current = app;
   const gen = useRef(0);
   const opts = useRef<PlayOpts>({});
-  const held = useRef(false); // paused mid-utterance, so play carries on with it // this reading's stopping point and what to do after it
+  const held = useRef(false); // paused mid-utterance, so play carries on with it
+  const resumeAt = useRef<number | null>(null); // paused as a verse ended: play starts the next // this reading's stopping point and what to do after it
   const announce = useRef<string | null>(null); // said before the next verse: the chapter just begun // bumps on every restart, so stale utterance callbacks do nothing
 
   // Reloaded when the window regains focus, so voices downloaded in System Settings appear.
@@ -233,7 +234,8 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     const { module, title, kind } = st.current.doc!;
     api.referenceTitles(module).then(async (ts) => {
       const next = ts[ts.indexOf(title) + d];
-      if (!next) { if (g === gen.current && d > 0) stop(); return; }
+      // Past the last chapter the reading ends; before the first, this one starts again.
+      if (!next) { if (g === gen.current) { if (d > 0) stop(); else speakFrom(0); } return; }
       const art = await api.article("reference", module, next);
       if (g !== gen.current) return;
       const segs = docSegments(art?.html ?? "");
@@ -250,6 +252,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
   const speakFrom = useCallback((i: number) => {
     held.current = false;
+    resumeAt.current = null;
     const g = ++gen.current;
     api.ttsStop();
     const vs = verses.current;
@@ -293,7 +296,8 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     const latin = !s.doc && isLatin(appRef.current.mod("bible", s.bible));
     const prefix = scriptOf(text) || latin ? "" : heading + (settings.current.readNumbers && !s.doc ? `Verse ${verse.v}. ` : "");
     const { spoken, at } = speakable(text);
-    utt.current = { id: g, prefix: prefix.length, at, onEnd: () => speakFrom(i + 1) };
+    // Paused just as the verse ended: play goes on from the next one.
+    utt.current = { id: g, prefix: prefix.length, at, onEnd: () => { if (st.current.paused) { held.current = false; resumeAt.current = i + 1; } else speakFrom(i + 1); } };
     held.current = false;
     setState((p) => ({ ...p, verse: verse.v, char: -1, len: text.length }));
     api.ttsSpeak(g, prefix + spoken, voiceFor(text, latin), settings.current.rate).catch(() => { if (g === gen.current) stop(); });
@@ -336,7 +340,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       st.current = { ...s, paused: false };
       setState((p) => ({ ...p, paused: false }));
       if (held.current && utt.current?.id === gen.current) { held.current = false; api.ttsPause(false); }
-      else speakFrom(Math.max(0, verses.current.findIndex((v) => v.v === s.verse)));
+      else speakFrom(resumeAt.current ?? Math.max(0, verses.current.findIndex((v) => v.v === s.verse)));
     } else {
       st.current = { ...s, paused: true };
       if (utt.current?.id === gen.current) { held.current = true; api.ttsPause(true); }
