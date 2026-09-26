@@ -230,13 +230,6 @@ button.ks-chip { cursor: pointer; }
 .ks-chip-have { background: var(--pdbg); color: var(--pdfg); }
 .ks-chip-near { background: var(--pubg); color: var(--pufg); }
 .ks-chip-rel { background: var(--accentsoft); color: var(--accent); }
-/* Which Testaments a chip's module covers (KjvHistory's CoverageDot), and their key in the legend. */
-.ks-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-left: 5px; flex: none; }
-.ks-key .ks-dot { margin: 0 5px 0 0; }
-.ks-dot-ot { background: #f78166; }
-.ks-dot-nt { background: #a371f7; }
-.ks-dot-both { background: linear-gradient(90deg, #f78166 50%, #a371f7 50%); }
-.ks-key { display: inline-flex; align-items: center; font: 500 11px var(--ui); color: var(--muted); margin-left: 4px; }
 
 /* Interlinear Bibles: each original word over its English and Strong's number (esword.tsx tokenize). */
 .il { display: inline-flex; flex-direction: column; align-items: center; vertical-align: top; margin: 0 0 8px 0; margin-inline-end: 5px; line-height: 1.35; }

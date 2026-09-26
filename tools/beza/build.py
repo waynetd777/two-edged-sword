@@ -35,7 +35,10 @@ Scrivener 1894's readings marked) and the wiki's own Scrivener pages, since Scri
 but for some 190 places: where Stephanus and Scrivener differ and the wiki has Stephanus' reading
 (Luke 2:22 αὐτῶν for Beza's αὐτῆς), Scrivener's, accented; modern spellings (-λημψ-, ἦλθαν) as Beza
 printed them (-ληψ-, ἦλθον); words typed without accents (βιβλου) with their accented form; and
-verses typed without punctuation get Scrivener's, with capitals on the names Beza capitalises.
+verses typed without punctuation get Scrivener's, with capitals on the names Beza capitalises; a
+word misspelt in the typing (σονετέλεσεν) or in a later edition's form (Μαθθαῖος), found nowhere else
+in Beza, becomes the word Stephanus and Scrivener both have in its place, when it's a letter or two
+from it.
 Enclitics (μου, τις) and elided words (δι᾽) are left unaccented.
 """
 import html, json, os, re, sqlite3, sys, time, unicodedata, urllib.parse, urllib.request
@@ -262,6 +265,7 @@ def key(tok):
     return k[0] if k else ""
 
 
+SLIPS = []  # the typing slips put right, for the build's report
 PUNCT = re.compile(r"[.,;:·\u0387\u037e]+$")
 
 
@@ -293,7 +297,7 @@ def correct(rows, trraw, scriv):
     - Modern spellings (συλλημφθῆναι, ἦλθαν) where TR+ has the forms Beza printed (συλληφθῆναι, ἦλθον).
     - A verse typed without punctuation or capitals gets Stephanus' where the words are the same.
     Returns the rows and counts of each."""
-    counts = {"readings": 0, "spellings": 0, "punctuated": 0}
+    counts = {"readings": 0, "spellings": 0, "punctuated": 0, "slips": 0}
     samples = []
     out = []
     # Each word's commonest accented form (TR+ has none), from the wiki's Beza and Scrivener.
@@ -315,6 +319,10 @@ def correct(rows, trraw, scriv):
             if n and key(x):
                 caps.setdefault(key(x), [0, 0])[x[:1].isupper()] += 1
     proper = {k for k, (lo, up) in caps.items() if up > lo}
+    freq = {}
+    for r in rows:
+        for x in re.findall(r"\S+", r[3]):
+            freq[key(x)] = freq.get(key(x), 0) + 1
     for b, c, v, t in rows:
         raw = trraw.get((b, c, v))
         if not raw:
@@ -366,6 +374,19 @@ def correct(rows, trraw, scriv):
                     tail = PUNCT.search(btok[i1 + k])
                     edits.append((i1 + k, i1 + k + 1, [best.get(o, PUNCT.sub("", stok[j1 + k])) + (tail.group() if tail else "")]))
                     counts["spellings"] += 1
+                # A slip in the typing (σονετέλεσεν, ἀκωύειν, πάντεε) or a later edition's form (Μαθθαῖος,
+                # Ἰσκαριώτου): found nowhere else in Beza, and in its place both Stephanus and Scrivener
+                # (who follows Beza) have the same word, a letter or two from it.
+                elif (a.rstrip("ν") != o.rstrip("ν") and freq.get(a, 0) <= 2 and a not in {key(x) for x in wiki}
+                      and o in {key(x) for x in wiki} and o in best and not btok[i1 + k].isupper()
+                      and SequenceMatcher(None, a, o).ratio() >= 0.75 and abs(len(a) - len(o)) <= 2):
+                    tail = PUNCT.search(btok[i1 + k])
+                    fixed = best[o]
+                    if btok[i1 + k][:1].isupper():
+                        fixed = fixed[:1].upper() + fixed[1:]
+                    edits.append((i1 + k, i1 + k + 1, [fixed + (tail.group() if tail else "")]))
+                    counts["slips"] += 1
+                    SLIPS.append(f"{BOOKS[b - 40]} {c}:{v} {btok[i1 + k]} → {fixed}")
         for lb, rb, new in sorted(edits, key=lambda e: -e[0]):
             btok[lb:rb] = new
         # A verse typed without punctuation (and in small letters) gets Scrivener's punctuation (the
@@ -458,6 +479,7 @@ def main():
             problems.append(f"{name}: {len(have)} verses, KJV {len(want)}; none for {sorted(want - have)[:8]}, beyond {sorted(have - want)[:8]}")
         rows += [(b, c, v, t) for v, t in sorted(vs.items()) if t]
     rows, fixed, samples = correct(rows, trraw, scrivener_pages(chapters))
+    print(f"typing slips and later editions' forms put right: {fixed['slips']}; e.g. " + "; ".join(SLIPS[:14]))
     print(f"put back as Beza printed it: {fixed['readings']} readings the wiki took from Stephanus, {fixed['spellings']} modern spellings; "
           f"{fixed['punctuated']} verses typed without punctuation given Scrivener's")
     for x in samples:

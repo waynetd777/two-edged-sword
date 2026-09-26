@@ -86,24 +86,13 @@ function pairs<T extends { m: ModuleInfo }>(xs: T[]): T[][] {
   return [...rows.values()].map((r) => r.sort((a, b) => Number(a.m.id.endsWith("+")) - Number(b.m.id.endsWith("+"))));
 }
 
-/** How much of each part of the Bible a module has: 0 none, 1 some books, 2 all (or all but one or two). */
-interface Coverage { ot: number; nt: number; ap: number; books: Set<number> }
-const part = (have: number, all: number) => (have === 0 ? 0 : have >= all - 2 ? 2 : 1);
-function coverageOf(books: Set<number>): Coverage {
-  const n = (lo: number, hi: number) => [...books].filter((b) => b >= lo && b <= hi).length;
-  return { ot: part(n(1, 39), 39), nt: part(n(40, 66), 27), ap: n(67, 99) ? 2 : 0, books };
-}
-function coverageText(c: Coverage): string {
-  const say = (v: number, name: string, n: number) => (v === 2 ? name : v === 1 ? `${n} books of the ${name}` : "");
-  const ot = say(c.ot, "Old Testament", [...c.books].filter((b) => b <= 39).length), nt = say(c.nt, "New Testament", [...c.books].filter((b) => b >= 40 && b <= 66).length);
-  return [[ot, nt].filter(Boolean).join(" and "), c.ap ? "the Apocrypha" : ""].filter(Boolean).join(", with ") || "no books";
-}
+/** Whether a module has books of the Old Testament, of the New, or of both. */
+interface Coverage { ot: boolean; nt: boolean }
+const coverageOf = (books: Set<number>): Coverage => ({ ot: [...books].some((b) => b <= 39), nt: [...books].some((b) => b >= 40 && b <= 66) });
 
-/** A chip's coverage as a dot: one colour for the Old Testament alone, one for the New alone, half of
- *  each for both (the Apocrypha are in the tooltip). */
-function CoverageDot({ c }: { c?: Coverage }) {
-  if (!c || (!c.ot && !c.nt)) return null;
-  return <span className={`ks-dot ks-dot-${c.ot && c.nt ? "both" : c.ot ? "ot" : "nt"}`} aria-hidden="true" />;
+/** "OT", "NT" or "OT & NT", for a chip's tooltip. */
+function coverageText(c: Coverage): string {
+  return c.ot && c.nt ? "OT & NT" : c.ot ? "OT" : c.nt ? "NT" : "";
 }
 
 const names = (ms: ModuleInfo[]) => ms.map((m) => `${m.title} (${m.abbrev})`).join(", ");
@@ -176,7 +165,7 @@ export function KjvHistoryScreen() {
     Promise.all(bibles.map((b) => bibleBooks(b.id).then((books) => [b.id, coverageOf(books)] as const))).then((r) => { if (live) setCov(Object.fromEntries(r)); });
     return () => { live = false; };
   }, [bibles]);
-  const covTip = (m: ModuleInfo) => (cov[m.id] ? ` · ${coverageText(cov[m.id])}` : "");
+  const covTip = (m: ModuleInfo) => (cov[m.id] && coverageText(cov[m.id]) ? ` (${coverageText(cov[m.id])})` : "");
   const haveCount = ALL.filter((s) => matches(s, bibles).have.length).length;
   const nearCount = ALL.filter((s) => { const m = matches(s, bibles); return !m.have.length && m.near.length; }).length;
 
@@ -197,9 +186,9 @@ export function KjvHistoryScreen() {
                 // Beside its plain edition, a + edition is just "+" (its name is in the tooltip).
                 const label = i > 0 ? "+" : m.abbrev;
                 return kind === "have"
-                  ? <button key={m.id} type="button" className="ks-chip ks-chip-have" title={`Read ${m.title}${covTip(m)}`} onClick={() => open(m)}>{i === 0 && <Icon name="check" size={11} />}{label}{i === 0 && <CoverageDot c={cov[m.id]} />}</button>
+                  ? <button key={m.id} type="button" className="ks-chip ks-chip-have" title={`Read ${m.title}${covTip(m)}`} onClick={() => open(m)}>{i === 0 && <Icon name="check" size={11} />}{label}</button>
                   // The closest stands in for a text the library lacks; the rest are related.
-                  : <button key={m.id} type="button" className={`ks-chip ${kind === "closest" ? "ks-chip-near" : "ks-chip-rel"}`} title={`${kind === "closest" ? "Closest" : "Related"}: ${m.title}${covTip(m)}`} onClick={() => open(m)}>{i === 0 ? (kind === "closest" ? "Closest: " : "Related: ") : ""}{label}{i === 0 && <CoverageDot c={cov[m.id]} />}</button>;
+                  : <button key={m.id} type="button" className={`ks-chip ${kind === "closest" ? "ks-chip-near" : "ks-chip-rel"}`} title={`${kind === "closest" ? "Closest" : "Related"}: ${m.title}${covTip(m)}`} onClick={() => open(m)}>{i === 0 ? (kind === "closest" ? "Closest: " : "Related: ") : ""}{label}</button>;
               })}
             </div>
           ))}
@@ -225,9 +214,6 @@ export function KjvHistoryScreen() {
             <span className="ks-chip ks-chip-near" style={{ cursor: "default" }}>Closest</span>
             <span className="ks-chip ks-chip-rel" style={{ cursor: "default" }}>Related</span>
             <span className="ks-chip" style={{ cursor: "default" }}>Not in library</span>
-            <span className="ks-key"><span className="ks-dot ks-dot-ot" />Old Testament</span>
-            <span className="ks-key"><span className="ks-dot ks-dot-nt" />New Testament</span>
-            <span className="ks-key"><span className="ks-dot ks-dot-both" />Both</span>
           </div>
           <div ref={box} style={{ position: "relative", padding: "22px 24px 40px", display: "flex", flexDirection: "column", gap: 44 }}>
             <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", overflow: "visible" }}>
