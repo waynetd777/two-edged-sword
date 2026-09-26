@@ -1,13 +1,13 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api, Verse, Voice } from "./api";
-import { book, fmtRef, parseRef, Ref, sectionOf, stepChapter, testament } from "./bible";
+import { apocryphaName, book, BookSizes, fmtRef, isApocrypha, parseRef, Ref, sectionOf, stepChapter, testament } from "./bible";
 import { alignStrongs, EDITIONS, isOriginal, kjvGloss, plainText, Token, tokenize, variantSource } from "./esword";
 import { Icon, Pause, Play } from "./icons";
 import { BibleSelect, RefButton, SearchField, Topbar } from "./Shell";
 import { rankVoices, useListenKey, usePlayer } from "./speech";
 import { DictAt, HlColor, hlName, useApp, vkey } from "./state";
 import { StudyPane, StudyTab } from "./StudyPane";
-import { Popover, RefPicker, Seg, SideNav, useBibleBooks, useDrag } from "./ui";
+import { ApoPill, Popover, RefPicker, Seg, SideNav, useBibleBooks, useBibleSizes, useDrag } from "./ui";
 import { WordLookup } from "./WordLookup";
 import { BooksButton } from "./DocReader";
 import { useAssistant } from "./assistant";
@@ -225,10 +225,11 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
   };
 
   const books = useBibleBooks(bible);
+  const sizes = useBibleSizes(bible);
   const go = useCallback((d: 1 | -1) => {
-    const n = stepChapter(loc.book, loc.chapter, d, books);
+    const n = stepChapter(loc.book, loc.chapter, d, sizes);
     if (n) app.open({ book: n[0], chapter: n[1] });
-  }, [app, loc.book, loc.chapter, books]);
+  }, [app, loc.book, loc.chapter, sizes]);
   // A Bible chosen (or opened with) where it has no such book, an Old or New Testament alone:
   // open it where it starts, in place of the empty chapter, so back doesn't stop there.
   const shownIn = useRef<string | null>(null);
@@ -321,17 +322,23 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
     </div>
   );
 
+  // Apocrypha: a book of it, or a chapter a canonical book has only in some Bibles (Daniel 13, Susanna).
+  const apo = isApocrypha(loc.book, loc.chapter);
+  const apoName = apocryphaName(loc.book, loc.chapter);
+  const pill = apo && <ApoPill title={apoName ? `${apoName}: Apocrypha, not in the Protestant canon` : undefined} />;
+  // The chapter's name stays at the top of the column as it scrolls.
   const header = (
-    <div style={{ minHeight: 64, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, padding: focus ? "24px 0 8px" : "4px 0" }}>
+    <div className="readhead" style={{ minHeight: 64, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, padding: focus ? "24px 0 8px" : "4px 0" }}>
       {focus ? (
         <div style={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
-          <div className="label">{sectionOf(loc.book)} · {testament(loc.book)}</div>
-          <h1 data-quiet-anchor style={{ margin: 0, font: "400 46px/1 var(--display)", letterSpacing: "0.02em" }}>{book(loc.book).name} <span style={{ color: "var(--muted)" }}>{loc.chapter}</span></h1>
+          <div className="label">{apoName ?? sectionOf(loc.book)} · {apo ? "Apocrypha" : testament(loc.book)}</div>
+          <h1 data-quiet-anchor style={{ margin: 0, font: "400 46px/1 var(--display)", letterSpacing: "0.02em", display: "flex", alignItems: "center", gap: 14 }}><span>{book(loc.book).name} <span style={{ color: "var(--muted)" }}>{loc.chapter}</span></span>{pill}</h1>
         </div>
       ) : (
         <>
-          <div style={{ display: "flex", alignItems: "baseline", gap: 12 }}>
-            <h1 data-quiet-anchor style={{ margin: 0, font: "500 30px/1 var(--display)" }}>{book(loc.book).name} {loc.chapter}</h1>
+          <div style={{ display: "flex", alignItems: "baseline", gap: 12, minWidth: 0 }}>
+            <h1 data-quiet-anchor style={{ margin: 0, font: "500 30px/1 var(--display)", whiteSpace: "nowrap" }}>{book(loc.book).name} {loc.chapter}</h1>
+            {pill && <span style={{ alignSelf: "center" }}>{pill}</span>}
             <span style={{ color: "var(--muted)" }}>{bmod?.title ?? bible} · {verses.length} verses</span>
           </div>
           <Seg value={settings.layout} options={[["paragraph", "Paragraph"], ["verse", "Verse"]]} onChange={(v) => app.set({ layout: v })} />
@@ -346,7 +353,7 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
   const place = `${book(loc.book).name} ${loc.chapter}`;
   const name = bmod?.title ?? bible;
   const other = app.defaultBible !== bible ? app.mod("bible", app.defaultBible) : undefined;
-  const why = !books || books.has(loc.book) ? "" : [...books].every((b) => b <= 39) ? " It has only the Old Testament." : [...books].every((b) => b >= 40 && b <= 66) ? " It has only the New Testament." : ` It doesn't include ${book(loc.book).name}.`;
+  const why = !books || books.has(loc.book) ? (apo && loaded && !verses.length ? " It doesn't have the Apocrypha." : "") : loc.book > 66 ? " It doesn't have the Apocrypha." : [...books].every((b) => b <= 39) ? " It has only the Old Testament." : [...books].every((b) => b >= 40 && b <= 66) ? " It has only the New Testament." : ` It doesn't include ${book(loc.book).name}.`;
   const noChapter = loaded && !verses.length && !err;
   const noVerse = loaded && !!verses.length && !!loc.verse && !verses.some((v) => v.v === loc.verse) && !variances.byVerse.has(loc.verse);
   const hint = (text: string) => (
@@ -391,7 +398,7 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
     </div>
   ) : (
     <div style={{ position: "relative", paddingTop: sel && !focus ? 46 : 0 }}>
-      {!focus && sel && <div style={{ position: "sticky", top: 0, zIndex: 20, height: 0 }}><div style={{ position: "relative", top: -44 }}>{toolbar}</div></div>}
+      {!focus && sel && <div style={{ position: "sticky", top: 64, zIndex: 20, height: 0 }}><div style={{ position: "relative", top: -44 }}>{toolbar}</div></div>}
       <p className="para selectable" dir={dir} style={{ margin: 0, fontSize: focus ? 21 : undefined, lineHeight: focus ? 1.85 : undefined }}>
         {verses.map((v) => {
           const k = vkey(loc.book, loc.chapter, v.v);
@@ -449,7 +456,7 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
             {header}
             {err ? <div className="err" style={{ padding: 20 }}>{err}</div> : <>{noVerse && hint(`The ${name} has no verse ${loc.verse} in ${place}.`)}{body}</>}
           </main>
-          <ChapterNav onGo={go} books={books} />
+          <ChapterNav onGo={go} sizes={sizes} />
         </div>
         {!focus && settings.studyPane && (
           <StudyPane tab={tab} setTab={setTab} book={loc.book} chapter={loc.chapter} verse={studyVerse} selRef={selRef} verses={verses}
@@ -478,9 +485,9 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
 }
 
 /** Previous and next chapter, at the sides of the reading column. */
-function ChapterNav({ onGo, books }: { onGo: (d: 1 | -1) => void; books: Set<number> | null }) {
+function ChapterNav({ onGo, sizes }: { onGo: (d: 1 | -1) => void; sizes: BookSizes | null }) {
   const { loc } = useApp();
-  const p = stepChapter(loc.book, loc.chapter, -1, books), n = stepChapter(loc.book, loc.chapter, 1, books);
+  const p = stepChapter(loc.book, loc.chapter, -1, sizes), n = stepChapter(loc.book, loc.chapter, 1, sizes);
   return <SideNav prev={p && { label: `Previous chapter: ${book(p[0]).name} ${p[1]} (←)`, go: () => onGo(-1) }} next={n && { label: `Next chapter: ${book(n[0]).name} ${n[1]} (→)`, go: () => onGo(1) }} />;
 }
 
@@ -554,7 +561,7 @@ export function PlayerBar({ focus = false }: { focus?: boolean }) {
         <button type="button" title={s.doc?.module === "journal" ? "Show this entry" : s.doc ? `Open ${s.doc.title}` : `Go to ${book(s.book).name} ${s.chapter}:${s.verse}`} onClick={() => (s.doc?.module === "journal" ? app.startEntry({ openId: s.doc.id }) : s.doc ? app.openDoc(s.doc.module, s.doc.title, s.doc.kind) : app.open({ book: s.book, chapter: s.chapter, verse: s.verse }, "read"))} style={{ flexGrow: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 7, border: 0, background: "transparent", cursor: "pointer", textAlign: "left", padding: 0 }}>
           <span style={{ display: "flex", alignItems: "baseline", gap: 8, whiteSpace: "nowrap", width: "100%" }}>{s.doc
             ? <><b style={{ fontSize: 13, overflow: "hidden", textOverflow: "ellipsis" }}>{s.doc.title}</b><span className="n" style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{app.mod(s.doc.kind ?? "reference", s.doc.module)?.abbrev}</span></>
-            : <><b style={{ fontSize: 13 }}>{book(s.book).name} {s.chapter}:{s.verse}</b><span className="n">{app.mod("bible", s.bible)?.abbrev}</span></>}<span className="n" style={{ marginLeft: "auto", fontVariantNumeric: "tabular-nums" }}>{s.verse} of {s.count}</span></span>
+            : <><b style={{ fontSize: 13 }}>{book(s.book).name} {s.chapter}:{s.verse}</b>{isApocrypha(s.book, s.chapter) && <ApoPill small />}<span className="n">{app.mod("bible", s.bible)?.abbrev}</span></>}<span className="n" style={{ marginLeft: "auto", fontVariantNumeric: "tabular-nums" }}>{s.verse} of {s.count}</span></span>
           <span style={{ position: "relative", height: 3, borderRadius: 999, background: "var(--border)", width: "100%" }}><span style={{ position: "absolute", left: 0, top: 0, width: `${pct}%`, height: 3, borderRadius: 999, background: "var(--accent)" }} /><span style={{ position: "absolute", left: `${pct}%`, top: -3, width: 9, height: 9, marginLeft: -4, borderRadius: "50%", background: "var(--accent)" }} /></span>
         </button>
         <div style={{ display: "flex", alignItems: "center", gap: 2 }}>

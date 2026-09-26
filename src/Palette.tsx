@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { api } from "./api";
-import { BOOKS, fmtRef, parseRef } from "./bible";
+import { book, fmtRef, parseRef } from "./bible";
 import { plainText } from "./esword";
 import { Icon } from "./icons";
 import { mdPlain } from "./md";
@@ -34,7 +34,7 @@ export function Palette({ onClose, onAsk }: { onClose: () => void; onAsk: (ref: 
     if (ref) {
       const l = { book: ref.book, chapter: ref.chapter, verse: ref.verse, to: ref.to };
       out.push({ id: "go", group: "Go to", icon: "read", label: fmtRef(ref), sub: preview || undefined, kbd: "⏎", run: () => { app.open(l, "read"); onClose(); } });
-      if (ref.verse) out.push({ id: "ch", group: "Go to", icon: "read", label: `${BOOKS[ref.book - 1].name} ${ref.chapter}`, sub: "whole chapter", run: () => { app.open({ book: ref.book, chapter: ref.chapter }, "read"); onClose(); } });
+      if (ref.verse) out.push({ id: "ch", group: "Go to", icon: "read", label: `${book(ref.book).name} ${ref.chapter}`, sub: "whole chapter", run: () => { app.open({ book: ref.book, chapter: ref.chapter }, "read"); onClose(); } });
       out.push({ id: "cmp", group: "Do", icon: "compare", label: `Compare ${fmtRef(ref)} in ${app.settings.compare.map((c) => app.mod("bible", c)?.abbrev ?? c).join(", ")}`, run: () => { app.open(l, "compare"); onClose(); } });
       out.push({ id: "note", group: "Do", icon: "note", label: `New journal entry on ${fmtRef(ref)}`, run: () => { app.startEntry({ verses: [fmtRef(ref)] }); onClose(); } });
       if (canAsk) out.push({ id: "ask", group: "Do", icon: "chat", label: `Ask about ${fmtRef(ref)}`, kbd: "⌘L", run: () => { app.open(l, "read"); onAsk(fmtRef(ref)); onClose(); } });

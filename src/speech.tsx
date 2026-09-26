@@ -6,10 +6,10 @@
 import { createContext, ReactNode, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { listen } from "@tauri-apps/api/event";
 import { api, TtsEvent, Verse, Voice } from "./api";
-import { book, nextChapter, Ref, stepChapter } from "./bible";
+import { book, Ref, stepChapter } from "./bible";
 import { docSegments, plainText, tokenize } from "./esword";
 import { findRefs, mdToHtml } from "./md";
-import { bibleBooks } from "./ui";
+import { bibleSizes } from "./ui";
 import { useApp } from "./state";
 import { Icon } from "./icons";
 
@@ -293,9 +293,15 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       return;
     }
     if (i >= vs.length) {
-      const nx = nextChapter(s.book, s.chapter);
-      if (settings.current.continueChapter && nx && !s.sleepEndOfChapter) {
-        api.chapter(s.bible, nx[0], nx[1]).then((v) => {
+      if (settings.current.continueChapter && !s.sleepEndOfChapter) {
+        // On in reading order, the Bible's own: into its Apocrypha after Malachi, if it has them.
+        bibleSizes(s.bible).then((sizes) => {
+          const nx = stepChapter(s.book, s.chapter, 1, sizes.size ? sizes : null);
+          if (!nx) { if (g === gen.current) stop(); return null; }
+          return api.chapter(s.bible, nx[0], nx[1]).then((v) => [nx, v] as const);
+        }).then((got) => {
+          if (!got) return;
+          const [nx, v] = got;
           if (g !== gen.current) return;
           verses.current = v;
           announce.current = spokenChapter(nx[0], nx[1]);
@@ -393,8 +399,8 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       turnDoc(d, g, 0);
       return;
     }
-    bibleBooks(s.bible).then((books) => {
-      const n = stepChapter(s.book, s.chapter, d, books.size ? books : null);
+    bibleSizes(s.bible).then((sizes) => {
+      const n = stepChapter(s.book, s.chapter, d, sizes.size ? sizes : null);
       if (n && st.current.bible === s.bible && st.current.book === s.book && st.current.chapter === s.chapter) play(s.bible, n[0], n[1]);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps

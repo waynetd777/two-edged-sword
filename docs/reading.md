@@ -36,6 +36,18 @@ then verse, and lists only the books the Bible has: an Old or New Testament alon
 starts, and ← and → skip the books it lacks. The Bible and Books menus have a search box (type,
 then ↑↓ and Enter).
 
+**The Apocrypha.** A Bible that has them (the Douay-Rheims, the Vulgates, the Bishops' Bible,
+Brenton and the Septuagints) shows an Apocrypha section in the passage picker, between the
+Testaments where the KJV of 1611 printed them: Tobit, Judith, Wisdom, Sirach, Baruch, 1 and 2
+Maccabees, and in the Septuagints 1 Esdras, 3 and 4 Maccabees and the Prayer of Manasseh. The
+chapters some Bibles add to canonical books (Esther 11–16, Daniel 13 Susanna and 14 Bel and the
+Dragon, Psalm 151) are yellow in the chapter grid. Wherever one shows, it has a yellow
+**Apocrypha** pill: beside the chapter's name, in Compare, in search results and in the player,
+and the passage button turns yellow. Turning the page and reading aloud go from Malachi into
+them and on to Matthew; references such as "Tob 4:15", "Ecclus. 24:1" and "1 Macc 2:7" link.
+
+The chapter's name stays at the top of the column as you scroll.
+
 The Bible you choose here is for this session. The default in Settings (or the Library) comes
 back when you reopen the window or restart the app, or with the button beside the Bible picker
 (greyed out when the default is the one showing).

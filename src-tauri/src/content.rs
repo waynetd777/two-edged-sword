@@ -95,7 +95,7 @@ pub struct Coverage {
 /// Verses per chapter, for splitting reading plans into days of similar length.
 pub fn chapter_sizes(lib: &Library, bible: &str) -> Result<Vec<(i64, i64, i64)>, String> {
     lib.with(Kind::Bible, bible, |c| {
-        let mut st = c.prepare("SELECT Book, Chapter, count(*) FROM Bible WHERE Book BETWEEN 1 AND 66 GROUP BY Book, Chapter ORDER BY Book, Chapter")?;
+        let mut st = c.prepare("SELECT Book, Chapter, count(*) FROM Bible WHERE Book >= 1 GROUP BY Book, Chapter ORDER BY Book, Chapter")?;
         let rows = st.query_map([], |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?)))?;
         rows.collect()
     })

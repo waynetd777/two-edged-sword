@@ -1,5 +1,5 @@
 import { ReactNode, useState } from "react";
-import { fmtRef } from "./bible";
+import { fmtRef, isApocrypha } from "./bible";
 import { Icon, Wordmark } from "./icons";
 import { Screen, useApp } from "./state";
 import { todayReading } from "./plans";
@@ -129,7 +129,8 @@ export function Topbar({ children, right }: { children?: ReactNode; right?: Reac
 export function RefButton({ onClick }: { onClick: () => void }) {
   const { loc } = useApp();
   const r = { book: loc.book, chapter: loc.chapter, verse: loc.verse, to: loc.to };
-  return <button className="btn" type="button" style={{ fontWeight: 600 }} title="Go to a book, chapter or verse" onClick={onClick}>{fmtRef(r)}<Icon name="down" className="sm" style={{ color: "var(--muted)" }} /></button>;
+  const apo = isApocrypha(loc.book, loc.chapter);
+  return <button className={`btn ${apo ? "apo" : ""}`} type="button" style={{ fontWeight: 600 }} title={apo ? "Apocrypha · Go to a book, chapter or verse" : "Go to a book, chapter or verse"} onClick={onClick}>{fmtRef(r)}<Icon name="down" className="sm" style={{ color: "var(--muted)" }} /></button>;
 }
 
 /** The Bible picker: a button that opens a searchable list. `titled` shows the Bible's title rather

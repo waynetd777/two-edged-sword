@@ -333,3 +333,11 @@ mark { background: var(--hl-gold); color: inherit; border-radius: 3px; padding: 
 ::highlight(spelling) { text-decoration: underline wavy var(--bad); text-decoration-thickness: 1.5px; text-underline-offset: 3px; text-decoration-skip-ink: none; }
 /* The paragraph being read in the journal, when words aren't highlighted (Journal.tsx). */
 .speaktint { position: absolute; z-index: -1; pointer-events: none; background: var(--accentsoft); border-radius: 4px; }
+/* The Apocrypha, marked in yellow wherever a book or chapter of it shows (ApoPill in ui.tsx). */
+.apopill { display: inline-flex; align-items: center; height: 20px; padding: 0 8px; border-radius: 999px; background: var(--pubg); color: var(--pufg); font: 600 11px/1 var(--ui); letter-spacing: 0.02em; white-space: nowrap; vertical-align: middle; }
+.apopill.small { height: 16px; padding: 0 6px; font-size: 10px; }
+.chip.apo, .btn.apo { background: var(--pubg); color: var(--pufg); border-color: transparent; }
+.chip.apo.on { box-shadow: inset 0 0 0 1px var(--pufg); }
+/* The chapter's name stays put at the top of the reading column as it scrolls (Read.tsx). */
+.readcol .readhead { position: sticky; top: 0; z-index: 15; background: var(--bg); }
+.readcol [data-v] { scroll-margin-top: 80px; }

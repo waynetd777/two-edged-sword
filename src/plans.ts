@@ -2,7 +2,7 @@
 // from a start date. The "ppo" plan (a Psalm, a Proverb and one more) has no end: Proverbs
 // follows the date, while the Psalm and the other chapter move on each time a day is read.
 
-import { book, BOOKS, Ref } from "./bible";
+import { book, BOOKS, isApocrypha, Ref } from "./bible";
 
 /** One passage: whole chapters (c..c2), or a verse range when v is set. */
 export interface Part { b: number; c: number; c2?: number; v?: number; v2?: number }
@@ -169,7 +169,8 @@ export function paired(chs: Sizes): Part[][] {
   return out;
 }
 
-export const chaptersOf = (sizes: Sizes, books: number[]) => sizes.filter((s) => books.includes(s[0]));
+/** A plan's chapters: the Protestant canon's, not a Bible's apocryphal ones (Esther 11–16, Daniel 13–14). */
+export const chaptersOf = (sizes: Sizes, books: number[]) => sizes.filter((s) => books.includes(s[0]) && !isApocrypha(s[0], s[1]));
 
 // ---------- the Psalm, Proverb and one more plan ----------
 

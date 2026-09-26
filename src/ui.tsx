@@ -1,5 +1,5 @@
 import { ReactNode, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { BOOKS, book, SECTIONS } from "./bible";
+import { APOCRYPHA, apocryphaName, BookSizes, BOOKS, book, isApocrypha, SECTIONS } from "./bible";
 import { api, isReadOnly } from "./api";
 import { Icon } from "./icons";
 import { useApp } from "./state";
@@ -205,11 +205,32 @@ export function Seg<T extends string | number>({ value, options, onChange }: { v
 
 /** Book then chapter, as two grids. */
 /** Book, then chapter, then verse (or the whole chapter). */
-const booksCache = new Map<string, Promise<Set<number>>>();
+const sizesCache = new Map<string, Promise<BookSizes>>();
+/** The books a Bible has and how many chapters each, from its text (Esther has 16 in the Vulgate). */
+export function bibleSizes(bible: string): Promise<BookSizes> {
+  if (!sizesCache.has(bible)) sizesCache.set(bible, api.chapterSizes(bible).then((s) => {
+    const m: BookSizes = new Map();
+    for (const [b, c] of s) m.set(b, Math.max(m.get(b) ?? 0, c));
+    return m;
+  }).catch(() => new Map()));
+  return sizesCache.get(bible)!;
+}
 /** The books a Bible has, once looked up. */
-export function bibleBooks(bible: string): Promise<Set<number>> {
-  if (!booksCache.has(bible)) booksCache.set(bible, api.chapterSizes(bible).then((s) => new Set(s.map((x) => x[0]))).catch(() => new Set<number>()));
-  return booksCache.get(bible)!;
+export const bibleBooks = (bible: string): Promise<Set<number>> => bibleSizes(bible).then((m) => new Set(m.keys()));
+/** A Bible's books and chapters, or null until known. */
+export function useBibleSizes(bible: string): BookSizes | null {
+  const [got, setGot] = useState<{ bible: string; sizes: BookSizes } | null>(null);
+  useEffect(() => {
+    let live = true;
+    bibleSizes(bible).then((sizes) => { if (live) setGot({ bible, sizes }); });
+    return () => { live = false; };
+  }, [bible]);
+  return got && got.bible === bible && got.sizes.size ? got.sizes : null;
+}
+
+/** The yellow pill marking the Apocrypha, wherever a book or chapter of it shows. */
+export function ApoPill({ title, small }: { title?: string; small?: boolean }) {
+  return <span className={`apopill ${small ? "small" : ""}`} title={title ?? "Apocrypha: not in the Protestant canon (the KJV of 1611 printed it between the Testaments)"}>Apocrypha</span>;
 }
 /** The books a Bible has (an Old or New Testament alone has only its own), or null until known. */
 export function useBibleBooks(bible: string): Set<number> | null {
@@ -224,8 +245,9 @@ export function useBibleBooks(bible: string): Set<number> | null {
 
 export function RefPicker({ anchor, onClose, onPick, initialBook }: { anchor: DOMRect; onClose: () => void; onPick: (b: number, c: number, v?: number) => void; initialBook?: number }) {
   const bible = useApp().settings.bible;
-  const books = useBibleBooks(bible);
-  const has = (n: number) => !books || books.has(n);
+  const sizes = useBibleSizes(bible);
+  const has = (n: number) => (!sizes ? n <= 66 : sizes.has(n));
+  const chapters = (n: number) => sizes?.get(n) ?? book(n).chapters;
   const [b, setB] = useState<number | null>(null);
   const [c, setC] = useState<number | null>(null);
   const [count, setCount] = useState(0);
@@ -241,8 +263,9 @@ export function RefPicker({ anchor, onClose, onPick, initialBook }: { anchor: DO
       {b !== null && c !== null ? (
         <div style={{ padding: 14, display: "flex", flexDirection: "column", gap: 10 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <button type="button" className="ibtn" aria-label="Back to chapters" onClick={() => (book(b).chapters === 1 ? setB(null) : setC(null))}><Icon name="back" /></button>
+            <button type="button" className="ibtn" aria-label="Back to chapters" onClick={() => (chapters(b) === 1 ? setB(null) : setC(null))}><Icon name="back" /></button>
             <b style={{ font: "500 22px var(--display)" }}>{book(b).name} {c}</b>
+            {isApocrypha(b, c) && <ApoPill title={apocryphaName(b, c)} />}
             <button type="button" className="btn small" style={{ marginLeft: "auto" }} onClick={() => onPick(b, c)}>Whole chapter</button>
           </div>
           {count ? (
@@ -255,28 +278,37 @@ export function RefPicker({ anchor, onClose, onPick, initialBook }: { anchor: DO
         </div>
       ) : b === null ? (
         <div style={{ padding: 14, display: "flex", flexDirection: "column", gap: 10 }}>
-          {SECTIONS.filter((s) => BOOKS.some((x) => x.n >= s.from && x.n <= s.to && has(x.n))).map((s) => (
-            <div key={s.name} style={{ display: "grid", gridTemplateColumns: "84px minmax(0,1fr)", gap: 8, alignItems: "start" }}>
-              <span className="label" style={{ paddingTop: 5 }}>{s.name}</span>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
-                {BOOKS.filter((x) => x.n >= s.from && x.n <= s.to && has(x.n)).map((x) => (
-                  <button key={x.n} type="button" className={`chip ${x.n === initialBook ? "on" : ""}`} onClick={() => (x.chapters === 1 ? pickChapter(x.n, 1) : setB(x.n))}>{x.name}</button>
-                ))}
+          {/* The Apocrypha between the Testaments, as the KJV of 1611 printed them. */}
+          {[...SECTIONS.slice(0, 4), { name: "Apocrypha", from: 67, to: 78 }, ...SECTIONS.slice(4)].map((s) => {
+            const list = (s.from > 66 ? APOCRYPHA : BOOKS).filter((x) => x.n >= s.from && x.n <= s.to && has(x.n));
+            if (!list.length) return null;
+            const apo = s.from > 66;
+            return (
+              <div key={s.name} style={{ display: "grid", gridTemplateColumns: "84px minmax(0,1fr)", gap: 8, alignItems: "start" }}>
+                <span className="label" style={{ paddingTop: 5, color: apo ? "var(--pufg)" : undefined }}>{s.name}</span>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+                  {list.map((x) => (
+                    <button key={x.n} type="button" className={`chip ${apo ? "apo" : ""} ${x.n === initialBook ? "on" : ""}`} title={apo ? `${x.name} (Apocrypha)` : undefined} onClick={() => (chapters(x.n) === 1 ? pickChapter(x.n, 1) : setB(x.n))}>{x.name}</button>
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       ) : (
         <div style={{ padding: 14, display: "flex", flexDirection: "column", gap: 10 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <button type="button" className="ibtn" aria-label="Back to books" onClick={() => setB(null)}><Icon name="back" /></button>
             <b style={{ font: "500 22px var(--display)" }}>{book(b).name}</b>
+            {b > 66 && <ApoPill />}
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(10, minmax(0,1fr))", gap: 4 }}>
-            {Array.from({ length: book(b).chapters }, (_, i) => i + 1).map((c) => (
-              <button key={c} type="button" className="btn" style={{ justifyContent: "center", padding: 0 }} onClick={() => pickChapter(b, c)}>{c}</button>
-            ))}
+            {Array.from({ length: chapters(b) }, (_, i) => i + 1).map((c) => {
+              const extra = b <= 66 && isApocrypha(b, c);
+              return <button key={c} type="button" className={`btn ${extra ? "apo" : ""}`} title={extra ? `${apocryphaName(b, c)} (Apocrypha)` : undefined} style={{ justifyContent: "center", padding: 0 }} onClick={() => pickChapter(b, c)}>{c}</button>;
+            })}
           </div>
+          {b <= 66 && chapters(b) > book(b).chapters && <div className="hint">Yellow chapters are Apocrypha: {apocryphaName(b, book(b).chapters + 1)}{b === 27 ? " (13) and Bel and the Dragon (14)" : ""}.</div>}
         </div>
       )}
     </Popover>

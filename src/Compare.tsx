@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { api, Verse } from "./api";
 import { AskPanel, useAskOpener, withheld } from "./Ask";
-import { book, fmtRef, nextChapter, prevChapter, Ref } from "./bible";
+import { apocryphaName, book, BookSizes, fmtRef, isApocrypha, Ref, stepChapter } from "./bible";
 import { plainText, Token, tokenize } from "./esword";
 import { Icon } from "./icons";
 import { VerseText, WordPick } from "./Read";
 import { BibleSelect, RefButton, SearchField, Topbar } from "./Shell";
 import { useApp } from "./state";
-import { Popover, RefPicker, SearchList, SideNav, Switch } from "./ui";
+import { ApoPill, bibleSizes, Popover, RefPicker, SearchList, SideNav, Switch } from "./ui";
 import { WordLookup } from "./WordLookup";
 import { useAssistant } from "./assistant";
 
@@ -88,8 +88,19 @@ export function CompareScreen({ openPalette }: { openPalette: () => void }) {
 
   const setCols = (next: string[]) => app.set({ compare: next });
   const addable = app.bibles.filter((b) => !cols.includes(b.id));
-  const pc = prevChapter(loc.book, loc.chapter), nc = nextChapter(loc.book, loc.chapter);
-  const go = (d: 1 | -1) => { const n = d > 0 ? nextChapter(loc.book, loc.chapter) : prevChapter(loc.book, loc.chapter); if (n) app.open({ book: n[0], chapter: n[1] }); };
+  // Chapters any of the columns has, so the page turns into a Bible's Apocrypha when one has them.
+  const [sizes, setSizes] = useState<BookSizes | null>(null);
+  useEffect(() => {
+    let live = true;
+    Promise.all(cols.map(bibleSizes)).then((all) => {
+      const m: BookSizes = new Map();
+      for (const x of all) for (const [b, c] of x) m.set(b, Math.max(m.get(b) ?? 0, c));
+      if (live) setSizes(m.size ? m : null);
+    });
+    return () => { live = false; };
+  }, [cols.join("|")]); // eslint-disable-line react-hooks/exhaustive-deps
+  const pc = stepChapter(loc.book, loc.chapter, -1, sizes), nc = stepChapter(loc.book, loc.chapter, 1, sizes);
+  const go = (d: 1 | -1) => { const n = d > 0 ? nc : pc; if (n) app.open({ book: n[0], chapter: n[1] }); };
   const selRef: Ref | null = sel ? { book: loc.book, chapter: loc.chapter, verse: sel } : null;
   const grid = `40px repeat(${cols.length}, minmax(0, 1fr)) 120px`;
 
@@ -111,6 +122,7 @@ export function CompareScreen({ openPalette }: { openPalette: () => void }) {
       </Topbar>
       <div style={{ display: "flex", alignItems: "center", gap: 18, padding: "14px 28px 12px" }}>
         <h1 style={{ margin: 0, font: "500 30px/1 var(--display)" }}>{book(loc.book).name} {loc.chapter}</h1>
+        {isApocrypha(loc.book, loc.chapter) && <ApoPill title={apocryphaName(loc.book, loc.chapter)} />}
         <div style={{ display: "flex", alignItems: "center", gap: 14, marginLeft: "auto" }}>
           <Switch on={diff} onChange={setDiff}>Highlight differences</Switch>
           <Switch on={nums} onChange={setNums}>Strong's numbers</Switch>

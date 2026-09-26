@@ -1,14 +1,14 @@
 import { Fragment, ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { api, Article, Commentary, SearchMode, SearchResults, Verse } from "./api";
 import { AskPanel, withheld, Working } from "./Ask";
-import { book, fmtRef, Ref, SECTIONS } from "./bible";
+import { book, fmtRef, isApocrypha, Ref, SECTIONS } from "./bible";
 import { plainText, renderHtml } from "./esword";
 import { Icon } from "./icons";
 import { mdPlain } from "./md";
 import { BibleSelect, Topbar } from "./Shell";
 import { useApp } from "./state";
 import { short, useRefPreview, useTopics } from "./StudyPane";
-import { TrailButtons, useTrail } from "./ui";
+import { ApoPill, TrailButtons, useTrail } from "./ui";
 
 type Scope = "all" | "bible" | "commentary" | "dictionary" | "journal";
 
@@ -23,7 +23,8 @@ type Pick =
   | { kind: "dict"; module: string; topic: string }
   | { kind: "journal"; id: string };
 
-const RANGES: { name: string; from: number; to: number }[] = [{ name: "Whole Bible", from: 1, to: 66 }, { name: "OT", from: 1, to: 39 }, { name: "NT", from: 40, to: 66 }, ...SECTIONS.filter((s) => ["Gospels", "Letters", "Prophets", "Wisdom"].includes(s.name))];
+// The whole Bible takes in a Bible's Apocrypha (67–78) too; they are also a range of their own.
+const RANGES: { name: string; from: number; to: number }[] = [{ name: "Whole Bible", from: 1, to: 78 }, { name: "OT", from: 1, to: 39 }, { name: "NT", from: 40, to: 66 }, { name: "Apocrypha", from: 67, to: 78 }, ...SECTIONS.filter((s) => ["Gospels", "Letters", "Prophets", "Wisdom"].includes(s.name))];
 
 /** Text with every search term marked. */
 /** Finds any of `terms`, ignoring case; with `whole`, only as whole words ("light", not "delight";
@@ -163,7 +164,7 @@ export function SearchScreen() {
                   const on = pick?.kind === "verse" && pick.ref.book === h.book && pick.ref.chapter === h.chapter && pick.ref.verse === h.verse;
                   return (
                     <button key={`${h.book}.${h.chapter}.${h.verse}`} type="button" className="bm" onClick={() => setPick({ kind: "verse", ref: r })} onDoubleClick={() => app.open(r, "read")} style={{ display: "grid", gridTemplateColumns: "96px minmax(0,1fr)", gap: 12, padding: "10px 12px", background: on ? "var(--accentsoft)" : undefined }}>
-                      <b style={{ fontSize: 12.5 }}>{fmtRef(r, "short")}</b>
+                      <span style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 4 }}><b style={{ fontSize: 12.5 }}>{fmtRef(r, "short")}</b>{isApocrypha(h.book, h.chapter) && <ApoPill small />}</span>
                       <span dir="auto" style={{ font: "400 15.5px/1.55 var(--serif)" }}>{res.strongs ? plainText(h.text) : mark(plainText(h.text), terms, whole)}</span>
                     </button>
                   );
@@ -270,7 +271,7 @@ function Preview({ pick, bible, terms, whole }: { pick: Pick | null; bible: stri
     <>
       <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "14px 20px", borderBottom: "1px solid var(--border)" }}>
         {(trail.canBack || trail.canForward) && <TrailButtons trail={trail} onGo={(d) => openTopic("", d)} />}
-        <div style={{ minWidth: 0 }}><div className="label" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{where}</div><div style={{ font: "500 22px/1.3 var(--display)" }}>{title}</div></div>
+        <div style={{ minWidth: 0 }}><div className="label" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{where}</div><div style={{ font: "500 22px/1.3 var(--display)", display: "flex", alignItems: "center", gap: 10 }}>{title}{target && isApocrypha(target.book, target.chapter) && <ApoPill />}</div></div>
         {target && <div style={{ marginLeft: "auto", display: "flex", gap: 6 }}><button className="btn" type="button" onClick={() => app.open(target, "compare")}>Compare</button><button className="btn primary" type="button" onClick={() => app.open(target, "read")}>Open<span style={{ opacity: 0.75 }}>⏎</span></button></div>}
       </div>
       <div className="scroll" style={{ flexGrow: 1, padding: "16px 22px" }}>
