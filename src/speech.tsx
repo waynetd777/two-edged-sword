@@ -6,9 +6,10 @@
 import { createContext, ReactNode, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { listen } from "@tauri-apps/api/event";
 import { api, TtsEvent, Verse, Voice } from "./api";
-import { book, nextChapter, Ref } from "./bible";
+import { book, nextChapter, Ref, stepChapter } from "./bible";
 import { docSegments, plainText, tokenize } from "./esword";
-import { findRefs } from "./md";
+import { findRefs, mdToHtml } from "./md";
+import { bibleBooks } from "./ui";
 import { useApp } from "./state";
 import { Icon } from "./icons";
 
@@ -23,16 +24,18 @@ export interface PlayerState {
   count: number;
   /** Character offset of the current word in the verse's plain text (-1 before the first). */
   char: number;
+  /** Length of the verse's plain text, for how far through it `char` is. */
+  len: number;
   sleepAt: number | null;
   sleepEndOfChapter: boolean;
   /** Which sleep option was chosen, so the menu can tick it. */
   sleepChoice: number | "chapter" | null;
   /** Reading a reference book instead of the Bible: "verse" is then the paragraph number. */
-  doc: { module: string; title: string; kind?: "reference" | "devotional" } | null;
+  doc: { module: string; title: string; kind?: "reference" | "devotional"; id?: string } | null;
 }
 
 /** For a guided session (Quiet time): stop at `toVerse`, and call `onEnd` when the reading finishes by itself. */
-export interface PlayOpts { toVerse?: number; onEnd?: () => void }
+export interface PlayOpts { toVerse?: number; onEnd?: () => void; /** The journal entry being read (module "journal"). */ id?: string }
 
 interface PlayerCtx {
   state: PlayerState;
@@ -46,6 +49,10 @@ interface PlayerCtx {
   toggle: () => void;
   stop: () => void;
   skip: (d: number) => void;
+  /** The next (1) or previous (-1) chapter, book chapter or journal entry, read from its start. */
+  jump: (d: 1 | -1) => void;
+  /** What ⌘P and F8 do when nothing is being read: set by the screen showing (useListenKey). */
+  starter: React.MutableRefObject<(() => void) | null>;
   sleep: (minutes: number | "chapter" | null) => void;
   /** Pronounces a Greek or Hebrew word (Strong's `num` says which), pausing any reading. */
   say: (word: string, num: string, pron?: string) => void;
@@ -54,6 +61,34 @@ interface PlayerCtx {
 }
 
 const Ctx = createContext<PlayerCtx | null>(null);
+
+/** What ⌘P and F8 start when nothing is being read: this screen's text. */
+export function useListenKey(start: () => void) {
+  const { starter } = usePlayer();
+  const fn = useRef(start);
+  fn.current = start;
+  useEffect(() => {
+    const me = () => fn.current();
+    starter.current = me;
+    return () => { if (starter.current === me) starter.current = null; };
+  }, [starter]);
+}
+
+/**
+ * The blocks of a journal entry as it is read aloud, one paragraph (line, list item, heading or
+ * quote) each, in order: the editor's own, so the highlight finds the words on the page.
+ */
+export function speechBlocks(root: Element): HTMLElement[] {
+  const sel = "p, li, h1, h2, h3, h4, blockquote, div";
+  return [...root.querySelectorAll<HTMLElement>(sel)].filter((b) => !b.querySelector(sel) && (b.textContent || "").trim());
+}
+const escHtml = (t: string) => t.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+/** An entry's paragraphs to read (speakFrom reads a book's paragraphs as HTML). */
+export function journalParas(body: string): string[] {
+  const d = document.createElement("div");
+  d.innerHTML = mdToHtml(body);
+  return speechBlocks(d).map((b) => escHtml(b.textContent || ""));
+}
 export const usePlayer = () => {
   const c = useContext(Ctx);
   if (!c) throw new Error("no player");
@@ -126,7 +161,7 @@ export function speakable(text: string): { spoken: string; at: number[] } {
   return { spoken, at };
 }
 
-const IDLE: PlayerState = { on: false, paused: false, bible: "", book: 0, chapter: 0, verse: 0, count: 0, char: -1, sleepAt: null, sleepEndOfChapter: false, sleepChoice: null, doc: null };
+const IDLE: PlayerState = { on: false, paused: false, bible: "", book: 0, chapter: 0, verse: 0, count: 0, char: -1, len: 0, sleepAt: null, sleepEndOfChapter: false, sleepChoice: null, doc: null };
 
 export function PlayerProvider({ children }: { children: ReactNode }) {
   const app = useApp();
@@ -143,7 +178,8 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const appRef = useRef(app);
   appRef.current = app;
   const gen = useRef(0);
-  const opts = useRef<PlayOpts>({}); // this reading's stopping point and what to do after it
+  const opts = useRef<PlayOpts>({});
+  const held = useRef(false); // paused mid-utterance, so play carries on with it // this reading's stopping point and what to do after it
   const announce = useRef<string | null>(null); // said before the next verse: the chapter just begun // bumps on every restart, so stale utterance callbacks do nothing
 
   // Reloaded when the window regains focus, so voices downloaded in System Settings appear.
@@ -192,7 +228,28 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     setState(IDLE);
   }, []);
 
+  // A book's next or previous chapter, from its start, after `wait` ms; `g` is the reading's generation.
+  const turnDoc = (d: 1 | -1, g: number, wait: number) => {
+    const { module, title, kind } = st.current.doc!;
+    api.referenceTitles(module).then(async (ts) => {
+      const next = ts[ts.indexOf(title) + d];
+      if (!next) { if (g === gen.current && d > 0) stop(); return; }
+      const art = await api.article("reference", module, next);
+      if (g !== gen.current) return;
+      const segs = docSegments(art?.html ?? "");
+      verses.current = segs.map((text, k) => ({ v: k + 1, text }));
+      const doc = { module, title: next, kind };
+      announce.current = next;
+      st.current = { ...st.current, doc, paused: false };
+      setState((p) => ({ ...p, doc, paused: false, verse: 1, count: segs.length, char: -1 }));
+      // Turn the page too, if the book is open.
+      if (appRef.current.doc?.module === module && appRef.current.doc.title === title) appRef.current.openDoc(module, next, kind);
+      window.setTimeout(() => { if (g === gen.current) speakFrom(0); }, wait);
+    }).catch(() => { if (g === gen.current) stop(); });
+  };
+
   const speakFrom = useCallback((i: number) => {
+    held.current = false;
     const g = ++gen.current;
     api.ttsStop();
     const vs = verses.current;
@@ -208,24 +265,9 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       return;
     }
     if (i >= vs.length && s.doc) {
-      const { module, title, kind } = s.doc;
-      // A devotional is one day's reading; only a book carries on into its next chapter.
-      if (kind === "devotional" || !settings.current.continueChapter || s.sleepEndOfChapter) { stop(); return; }
-      api.referenceTitles(module).then(async (ts) => {
-        const next = ts[ts.indexOf(title) + 1];
-        if (!next) { if (g === gen.current) stop(); return; }
-        const art = await api.article("reference", module, next);
-        if (g !== gen.current) return;
-        const segs = docSegments(art?.html ?? "");
-        verses.current = segs.map((text, k) => ({ v: k + 1, text }));
-        const doc = { module, title: next, kind };
-        announce.current = next;
-        st.current = { ...st.current, doc };
-        setState((p) => ({ ...p, doc, verse: 1, count: segs.length, char: -1 }));
-        // Turn the page too, if the book is open.
-        if (appRef.current.doc?.module === module && appRef.current.doc.title === title) appRef.current.openDoc(module, next, kind);
-        window.setTimeout(() => { if (g === gen.current) speakFrom(0); }, 600);
-      }).catch(() => { if (g === gen.current) stop(); });
+      // A devotional is one day's reading and a journal entry one entry; only a book carries on into its next chapter.
+      if (s.doc.kind === "devotional" || s.doc.module === "journal" || !settings.current.continueChapter || s.sleepEndOfChapter) { stop(); return; }
+      turnDoc(1, g, 600);
       return;
     }
     if (i >= vs.length) {
@@ -244,7 +286,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     }
     const verse = vs[i];
     const text = s.doc ? plainText(verse.text) : speechText(verse.text);
-    if (!text) { setState((p) => ({ ...p, verse: verse.v, char: -1 })); speakFrom(i + 1); return; }
+    if (!text) { setState((p) => ({ ...p, verse: verse.v, char: -1, len: 0 })); speakFrom(i + 1); return; }
     const heading = announce.current ? `${announce.current}. ` : "";
     announce.current = null;
     // The heading and verse number are English: not said in a Hebrew, Greek or Latin voice.
@@ -252,7 +294,8 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     const prefix = scriptOf(text) || latin ? "" : heading + (settings.current.readNumbers && !s.doc ? `Verse ${verse.v}. ` : "");
     const { spoken, at } = speakable(text);
     utt.current = { id: g, prefix: prefix.length, at, onEnd: () => speakFrom(i + 1) };
-    setState((p) => ({ ...p, verse: verse.v, char: -1 }));
+    held.current = false;
+    setState((p) => ({ ...p, verse: verse.v, char: -1, len: text.length }));
     api.ttsSpeak(g, prefix + spoken, voiceFor(text, latin), settings.current.rate).catch(() => { if (g === gen.current) stop(); });
   }, [stop, voiceFor]);
 
@@ -278,22 +321,26 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     announce.current = from > 0 ? null : kind === "devotional" ? `${appRef.current.mod("devotional", module)?.abbrev || module}, ${title}` : title;
     verses.current = paragraphs.map((text, k) => ({ v: k + 1, text }));
     const i = Math.max(0, Math.min(from, paragraphs.length - 1));
-    const next = { ...st.current, on: true, paused: false, doc: { module, title, kind }, verse: i + 1, count: paragraphs.length, char: -1 };
+    const next = { ...st.current, on: true, paused: false, doc: { module, title, kind, id: o.id }, verse: i + 1, count: paragraphs.length, char: -1 };
     st.current = next;
     setState(next);
     speakFrom(i);
   }, [speakFrom]);
 
+  // Pause holds the utterance mid-word and play carries on from there. Only when something else
+  // has been said in between (a word pronounced, a new speed or voice) is the verse begun again.
   const toggle = useCallback(() => {
     const s = st.current;
     if (!s.on) return;
     if (s.paused) {
-      // Resume by restarting the verse.
+      st.current = { ...s, paused: false };
       setState((p) => ({ ...p, paused: false }));
-      speakFrom(Math.max(0, verses.current.findIndex((v) => v.v === s.verse)));
+      if (held.current && utt.current?.id === gen.current) { held.current = false; api.ttsPause(false); }
+      else speakFrom(Math.max(0, verses.current.findIndex((v) => v.v === s.verse)));
     } else {
-      gen.current++;
-      api.ttsStop();
+      st.current = { ...s, paused: true };
+      if (utt.current?.id === gen.current) { held.current = true; api.ttsPause(true); }
+      else { gen.current++; api.ttsStop(); } // between verses, or a chapter still loading
       setState((p) => ({ ...p, paused: true }));
     }
   }, [speakFrom]);
@@ -306,6 +353,60 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     speakFrom(Math.max(0, i));
   }, [speakFrom]);
 
+  // F7 and F9: the previous or next chapter of the Bible or book, or journal entry (in the
+  // journal's order, skipping empty ones). Not in a Quiet time's reading, which has its own steps.
+  const jump = useCallback((d: 1 | -1) => {
+    const s = st.current;
+    if (!s.on || opts.current.onEnd) return;
+    if (s.doc?.module === "journal") {
+      const all = appRef.current.journal;
+      for (let k = all.findIndex((e) => e.id === s.doc!.id) + d; k >= 0 && k < all.length; k += d) {
+        const paras = journalParas(all[k].body);
+        if (paras.length) { playDoc("journal", all[k].title || "Untitled entry", paras, 0, "reference", { id: all[k].id }); return; }
+      }
+      return;
+    }
+    if (s.doc) {
+      if (s.doc.kind === "devotional") return;
+      const g = ++gen.current;
+      api.ttsStop();
+      turnDoc(d, g, 0);
+      return;
+    }
+    bibleBooks(s.bible).then((books) => {
+      const n = stepChapter(s.book, s.chapter, d, books.size ? books : null);
+      if (n && st.current.bible === s.bible && st.current.book === s.book && st.current.chapter === s.chapter) play(s.bible, n[0], n[1]);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [play, playDoc]);
+
+  // ⌘P and F8 play or pause, anywhere (Space does in the readers, but types a space in the
+  // journal); F7 and F9 go back or on. With fn held, or with standard function keys set, the
+  // F keys arrive here; otherwise macOS sends them as media keys, through media.rs.
+  const starter = useRef<(() => void) | null>(null);
+  const playPause = useCallback(() => { if (st.current.on) toggle(); else starter.current?.(); }, [toggle]);
+  // In a Quiet time's Worship part the F keys stay the music's.
+  const worship = () => { const q = appRef.current.session; return q?.steps[q.i]?.kind === "worship"; };
+  useEffect(() => {
+    const k = (e: KeyboardEvent) => {
+      if (/^F[789]$/.test(e.key) && worship()) return;
+      if ((e.metaKey && !e.shiftKey && !e.altKey && !e.ctrlKey && e.key.toLowerCase() === "p") || e.key === "F8") { e.preventDefault(); playPause(); }
+      else if ((e.key === "F7" || e.key === "F9") && st.current.on) { e.preventDefault(); jump(e.key === "F9" ? 1 : -1); }
+    };
+    window.addEventListener("keydown", k);
+    const un = listen<string>("media", ({ payload: m }) => {
+      const s = st.current;
+      if (worship()) return;
+      if (m === "toggle" || (m === "play" && (!s.on || s.paused)) || (m === "pause" && s.on && !s.paused)) playPause();
+      else if (m === "next" || m === "previous") jump(m === "next" ? 1 : -1);
+    });
+    return () => { window.removeEventListener("keydown", k); un.then((f) => f()); };
+  }, [playPause, jump]);
+
+  // Tell macOS what is being read, so the media keys and Control Centre come here.
+  const npTitle = !state.on ? null : state.doc ? state.doc.title : state.book ? `${book(state.book).name} ${state.chapter}` : null;
+  useEffect(() => { api.mediaState(npTitle, state.on && !state.paused).catch(() => {}); }, [npTitle, state.on, state.paused]);
+
   const sleep = useCallback((m: number | "chapter" | null) => {
     const next = { sleepAt: typeof m === "number" ? Date.now() + m * 60000 : null, sleepEndOfChapter: m === "chapter", sleepChoice: m };
     st.current = { ...st.current, ...next };
@@ -317,8 +418,17 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const s = st.current;
     if (s.on && !s.paused) speakFrom(Math.max(0, verses.current.findIndex((v) => v.v === s.verse)));
+    else held.current = false; // paused: play begins the verse again, in the new speed or voice
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rate, voice, voiceHe, voiceEl, voiceLa]);
+
+  // Going from the journal to a reader, or from a reader to the journal, stops what was being read.
+  const screen = app.screen;
+  useEffect(() => {
+    const s = st.current;
+    if (s.on && (s.doc?.module === "journal") !== (screen === "journal")) stop();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [screen]);
 
   // Another translation chosen while a chapter is being read: stop, rather than read on in the one
   // no longer showing. (Not a Quiet time's reading, which has its own Bible, nor a book.)
@@ -337,6 +447,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const say = useCallback(async (word: string, num: string, pron?: string) => {
     const s = st.current;
     if (s.on && !s.paused) { gen.current++; st.current = { ...s, paused: true }; setState((p) => ({ ...p, paused: true })); }
+    held.current = false;
     const lang = num.startsWith("H") ? "he" : "el";
     const v = (await api.ttsVoices().catch(() => [])).filter((x) => x.lang.startsWith(lang)).sort((a, b) => b.quality - a.quality)[0];
     if (v) api.ttsSpeak(0, word, v.id, 0.8);
@@ -349,7 +460,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const awake = state.on && !state.paused;
   useEffect(() => { api.keepAwake(awake).catch(() => {}); }, [awake]);
 
-  return <Ctx.Provider value={{ state, voices, allVoices, play, playDoc, toggle, stop, skip, sleep, say, still }}>{children}</Ctx.Provider>;
+  return <Ctx.Provider value={{ state, voices, allVoices, play, playDoc, toggle, stop, skip, jump, starter, sleep, say, still }}>{children}</Ctx.Provider>;
 }
 
 /** A speaker button that pronounces an original-language word. A span, not a button, so it can sit

@@ -134,6 +134,17 @@ mod mac {
         });
     }
 
+    /// Pauses mid-word (`on`), or carries on from there.
+    pub fn pause(app: &AppHandle, on: bool) {
+        with_synth(app, move |synth, _| unsafe {
+            if on {
+                synth.pauseSpeakingAtBoundary(AVSpeechBoundary::Immediate);
+            } else {
+                synth.continueSpeaking();
+            }
+        });
+    }
+
     pub fn stop(app: &AppHandle) {
         with_synth(app, |synth, _| unsafe {
             synth.stopSpeakingAtBoundary(AVSpeechBoundary::Immediate);
@@ -158,6 +169,14 @@ pub fn tts_speak(app: AppHandle, id: u64, text: String, voice: Option<String>, r
     mac::speak(&app, id, text, voice, rate);
     #[cfg(not(target_os = "macos"))]
     let _ = (app, id, text, voice, rate);
+}
+
+#[tauri::command]
+pub fn tts_pause(app: AppHandle, on: bool) {
+    #[cfg(target_os = "macos")]
+    mac::pause(&app, on);
+    #[cfg(not(target_os = "macos"))]
+    let _ = (app, on);
 }
 
 #[tauri::command]

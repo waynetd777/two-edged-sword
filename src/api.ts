@@ -132,6 +132,9 @@ export const api = {
   ttsVoices: () => invoke<Voice[]>("tts_voices"),
   ttsSpeak: (id: number, text: string, voice: string | undefined, rate: number) => invoke<void>("tts_speak", { id, text, voice: voice ?? null, rate }),
   ttsStop: () => invoke<void>("tts_stop"),
+  /** Pauses (true) the utterance being spoken, or carries on with it (false). */
+  ttsPause: (on: boolean) => invoke<void>("tts_pause", { on }),
+  mediaState: (title: string | null, playing: boolean) => invoke<void>("media_state", { title, playing }),
   /** What the menu-bar menu shows and when the daily reminder fires; the menu's clicks come back as "tray" events. */
   setTray: (state: TrayState) => invoke<void>("set_tray", { state }),
 };

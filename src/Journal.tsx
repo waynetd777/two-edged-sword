@@ -4,7 +4,7 @@ import { revealItemInDir } from "@tauri-apps/plugin-opener";
 import { api, JournalEntry } from "./api";
 import { AskPanel, useAskOpener } from "./Ask";
 import { fmtRef, parseRef, Ref } from "./bible";
-import { plainText } from "./esword";
+import { plainText, wordRangeAt } from "./esword";
 import { Icon } from "./icons";
 import { HL_PAINT, htmlToMd, mdPlain, mdToHtml } from "./md";
 import { HL, HL_DOT } from "./Read";
@@ -16,7 +16,7 @@ import { docModule, parseDocLabel } from "./docref";
 import { useRefPreview } from "./StudyPane";
 import { useSpelling } from "./spelling";
 import { useFind } from "./find";
-import { usePlayer } from "./speech";
+import { journalParas, speechBlocks, useListenKey, usePlayer } from "./speech";
 
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const longDate = (s: string) => {
@@ -124,24 +124,34 @@ export function JournalScreen({ openPalette, focus = false, setFocus = () => {} 
   }, [focus, setFocus]);
 
   // Listen: the entry read aloud, its title and then each paragraph, in the reading voice.
-  const listening = player.state.on && player.state.doc?.module === "journal" && player.state.doc.title === (cur?.title || "Untitled entry");
+  const listening = player.state.on && player.state.doc?.module === "journal" && player.state.doc.id === cur?.id;
   const listen = () => {
     if (!cur) return;
     if (listening) { player.toggle(); return; }
-    const paras = cur.body.split(/\n\s*\n/).map((p) => mdPlain(p)).filter(Boolean);
-    if (paras.length) player.playDoc("journal", cur.title || "Untitled entry", paras);
+    pendingSave.current?.run();
+    const paras = journalParas(cur.body);
+    if (paras.length) player.playDoc("journal", cur.title || "Untitled entry", paras, 0, "reference", { id: cur.id });
   };
+  useListenKey(listen);
+  // When the reading moves on to another entry (F9, F7), show that one, if the one it left was showing.
+  const readingId = player.state.on && player.state.doc?.module === "journal" ? player.state.doc.id : undefined;
+  const lastRead = useRef(readingId);
+  useEffect(() => {
+    const prev = lastRead.current;
+    lastRead.current = readingId;
+    if (readingId && prev && prev !== readingId && prev === selId) setSelId(readingId);
+  }, [readingId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   let lastMonth = "";
   return (
     <div className="main">
       <Topbar right={
         <div style={{ display: "flex", gap: 2 }}>
-          <button className={`ibtn ${listening && !player.state.paused ? "on" : ""}`} type="button" aria-label="Listen" title={listening && !player.state.paused ? "Pause" : "Listen to this entry"} disabled={!cur?.body.trim()} onClick={listen}><Icon name="speaker" /></button>
+          <button className={`ibtn ${listening && !player.state.paused ? "on" : ""}`} type="button" aria-label="Listen" title={listening ? `${player.state.paused ? "Play" : "Pause"} (Space · ⌘P)` : "Listen to this entry (⌘P)"} disabled={!cur?.body.trim()} onClick={listen}><Icon name="speaker" /></button>
           <button className={`ibtn ${focus ? "on" : ""}`} type="button" aria-label="Focus mode" title={focus ? "Leave focus mode (Esc)" : "Focus mode (⌘.)"} onClick={() => setFocus(!focus)}><Icon name="focus" /></button>
         </div>
       }><SearchField onOpen={openPalette} /></Topbar>
-      <div style={{ flexGrow: 1, minHeight: 0, display: "grid", gridTemplateColumns: focus ? "minmax(0,900px)" : "320px minmax(0,1fr)", justifyContent: focus ? "center" : undefined }}>
+      <div style={{ flexGrow: 1, minHeight: 0, display: "grid", gridTemplateColumns: focus ? "minmax(0,80%)" : "320px minmax(0,1fr)", justifyContent: focus ? "center" : undefined }}>
         <div style={{ display: focus ? "none" : "flex", borderRight: "1px solid var(--border)", padding: "14px 12px 0", flexDirection: "column", gap: 10, minHeight: 0 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "0 4px" }}>
             <h1 style={{ margin: 0, font: "500 26px/1.2 var(--display)" }}>Journal</h1>
@@ -251,6 +261,7 @@ function Editor({ entry, onChange, saved, err, onDelete, onExport, listed, liste
   const insertAnswer = (md: string) => {
     const root = ed.current;
     if (!root) return;
+    if (reading) { app.toast("Stop the reading to add this to the entry"); return; }
     root.focus();
     const at = saved_range.current && root.contains(saved_range.current.endContainer) ? saved_range.current.endContainer : null;
     const block = ((at?.nodeType === Node.TEXT_NODE ? at.parentElement : (at as HTMLElement | null))?.closest("p, li, h3, blockquote") as HTMLElement | null) ?? root;
@@ -289,9 +300,49 @@ function Editor({ entry, onChange, saved, err, onDelete, onExport, listed, liste
     sync();
   };
   const words = mdPlain(entry.body).split(/\s+/).filter(Boolean).length;
+
+  // While the entry is being read aloud (or paused), it can't be edited, and the word being read
+  // is highlighted as in the readers: boxes drawn behind it, so the editor's markup is left alone.
+  const player = usePlayer();
+  const ps = player.state;
+  const reading = ps.on && ps.doc?.module === "journal" && ps.doc.id === entry.id;
+  const wrap = useRef<HTMLDivElement>(null);
+  const [boxes, setBoxes] = useState<{ cls: string; left: number; top: number; width: number; height: number }[]>([]);
+  useEffect(() => {
+    const place = () => {
+      const block = reading && ed.current ? speechBlocks(ed.current)[ps.verse - 1] : undefined;
+      const o = wrap.current?.getBoundingClientRect();
+      if (!block || !o) { setBoxes((b) => (b.length ? [] : b)); return; }
+      const rel = (x: DOMRect) => ({ left: x.left - o.left, top: x.top - o.top, width: x.width, height: x.height });
+      if (!app.settings.highlightWords) { setBoxes([{ cls: "speaktint", ...rel(block.getBoundingClientRect()) }]); return; }
+      const r = ps.char >= 0 ? wordRangeAt(block, ps.char) : null;
+      setBoxes(r ? [...r.getClientRects()].filter((x) => x.width > 0).map((x) => ({ cls: "speakbox", ...rel(x) })) : []);
+    };
+    place();
+    window.addEventListener("resize", place);
+    return () => window.removeEventListener("resize", place);
+  }, [reading, ps.verse, ps.char, app.settings.highlightWords]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Keep the paragraph being read in view.
+  useEffect(() => {
+    if (reading && !ps.paused && ed.current) speechBlocks(ed.current)[ps.verse - 1]?.scrollIntoView({ block: "center", behavior: "smooth" });
+  }, [reading, ps.verse, ps.paused]);
+  // Reading starts: whatever is typed is saved, and the caret leaves the entry.
+  useEffect(() => { if (reading) { sync(); (document.activeElement as HTMLElement | null)?.blur(); } }, [reading]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Nothing can be typed while it's read, so Space plays and pauses, as in the readers.
+  useEffect(() => {
+    if (!reading) return;
+    const k = (e: KeyboardEvent) => {
+      if (e.key !== " " || e.metaKey || e.ctrlKey || e.altKey || (e.target as HTMLElement).closest("input:not([readonly]), textarea, select, [contenteditable='true']")) return;
+      e.preventDefault();
+      player.toggle();
+    };
+    window.addEventListener("keydown", k);
+    return () => window.removeEventListener("keydown", k);
+  }, [reading, player]);
+
   return (
     <div style={{ display: "flex", flexDirection: "column", minWidth: 0, minHeight: 0, background: "var(--panel)", position: "relative" }}>
-      <div role="toolbar" aria-label="Formatting" style={{ display: "flex", alignItems: "center", gap: 2, padding: "8px 20px", borderBottom: "1px solid var(--border)" }} onMouseDown={(e) => { if ((e.target as HTMLElement).closest("button")) e.preventDefault(); }}>
+      <div role="toolbar" aria-label="Formatting" aria-disabled={reading} title={reading ? "Being read aloud: stop or close the player to edit" : undefined} style={{ display: "flex", alignItems: "center", gap: 2, padding: "8px 20px", borderBottom: "1px solid var(--border)", ...(reading ? { opacity: 0.45, pointerEvents: "none" } : {}) }} onMouseDown={(e) => { if ((e.target as HTMLElement).closest("button")) e.preventDefault(); }}>
         <button className="ibtn" type="button" aria-label="Heading" title="Heading" style={{ font: "600 14px var(--display)", color: "var(--text)" }} onClick={() => cmd("formatBlock", "h3")}>H</button>
         <button className="ibtn" type="button" aria-label="Bold" title="Bold ⌘B" style={{ fontWeight: 700, color: "var(--text)" }} onClick={() => cmd("bold")}>B</button>
         <button className="ibtn" type="button" aria-label="Italic" title="Italic ⌘I" style={{ fontStyle: "italic", fontFamily: "var(--serif)", color: "var(--text)" }} onClick={() => cmd("italic")}>I</button>
@@ -315,16 +366,16 @@ function Editor({ entry, onChange, saved, err, onDelete, onExport, listed, liste
         </div>
         {canAsk && <><span style={{ width: 1, height: 18, background: "var(--border)", margin: "0 4px 0 10px" }} /><button className={`btn small ${ask ? "on" : ""}`} type="button" onClick={() => setAsk(!ask)}><Icon name="chat" />Ask</button></>}
       </div>
-      {find.bar}
+      {!reading && find.bar}
       <div className="scroll" style={{ flexGrow: 1, padding: "28px 0 40px" }}>
         <article style={{ padding: "0 40px", display: "flex", flexDirection: "column", gap: 14, minHeight: "100%" }} onClick={(e) => { if (e.target === e.currentTarget) ed.current?.focus(); }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
             <span className="label">{longDate(entry.created)}</span>
             <span style={{ marginLeft: "auto", display: "flex", gap: 5, flexWrap: "wrap" }}>
-              {entry.tags.map((t) => <button key={t} type="button" className="chip" title="Remove tag" onClick={() => onChange({ tags: entry.tags.filter((x) => x !== t) })}>#{t}<Icon name="x" size={11} /></button>)}
+              {entry.tags.map((t) => <button key={t} type="button" className="chip" title="Remove tag" disabled={reading} onClick={() => onChange({ tags: entry.tags.filter((x) => x !== t) })}>#{t}<Icon name="x" size={11} /></button>)}
             </span>
           </div>
-          <input value={entry.title} autoFocus={!entry.title} onChange={(e) => onChange({ title: e.target.value })} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); ed.current?.focus(); } }} placeholder="Title" aria-label="Title" style={{ border: 0, outline: 0, background: "transparent", font: "500 36px/1.15 var(--display)", color: "var(--text)", padding: 0 }} />
+          <input value={entry.title} readOnly={reading} autoFocus={!entry.title} onChange={(e) => onChange({ title: e.target.value })} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); ed.current?.focus(); } }} placeholder="Title" aria-label="Title" style={{ border: 0, outline: 0, background: "transparent", font: "500 36px/1.15 var(--display)", color: "var(--text)", padding: 0 }} />
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
             <span className="n">{entry.verses.length ? "Linked to" : "No verses linked"}</span>
             {entry.verses.map((v) => {
@@ -334,17 +385,20 @@ function Editor({ entry, onChange, saved, err, onDelete, onExport, listed, liste
               return (
                 <span key={v} className="rchip" style={{ gap: 6 }}>
                   <a onClick={() => { if (r) app.open({ book: r.book, chapter: r.chapter, verse: r.verse, to: r.to }, "read"); else if (d && dm) app.openDoc(dm.id, d.chapter, dm.kind === "devotional" ? "devotional" : "reference", d.from); }}>{v}</a>
-                  <button className="ibtn" type="button" aria-label={`Unlink ${v}`} style={{ width: 16, height: 16 }} onClick={() => onChange({ verses: entry.verses.filter((x) => x !== v) })}><Icon name="x" size={11} /></button>
+                  <button className="ibtn" type="button" disabled={reading} aria-label={`Unlink ${v}`} style={{ width: 16, height: 16 }} onClick={() => onChange({ verses: entry.verses.filter((x) => x !== v) })}><Icon name="x" size={11} /></button>
                 </span>
               );
             })}
           </div>
-          <div ref={ed} className={`md editor selectable ${entry.body.trim() ? "" : "blank"}`} contentEditable suppressContentEditableWarning spellCheck={false} onInput={() => { sync(); spell.recheck(); find.refresh(); }} onBlur={() => { remember(); sync(); }} onKeyUp={remember} onMouseUp={remember} onKeyDown={(e) => { spell.onKey(e); keys(e); }}
+          <div ref={wrap} style={{ position: "relative", zIndex: 0 }}>
+          {boxes.map((b, j) => <span key={j} className={b.cls} style={{ left: b.left, top: b.top, width: b.width, height: b.height }} />)}
+          <div ref={ed} className={`md editor selectable ${entry.body.trim() ? "" : "blank"}`} contentEditable={!reading} suppressContentEditableWarning spellCheck={false} onInput={() => { sync(); spell.recheck(); find.refresh(); }} onBlur={() => { remember(); sync(); }} onKeyUp={remember} onMouseUp={remember} onKeyDown={(e) => { spell.onKey(e); keys(e); }}
             onClick={(e) => { const a = refAt(e.target); if (a?.dataset.ref) { e.preventDefault(); hide(); const r: Ref = JSON.parse(a.dataset.ref); app.open({ book: r.book, chapter: r.chapter, verse: r.verse, to: r.to }, "read"); } else spell.onClick(e); }}
             onMouseOver={(e) => { const a = refAt(e.target); if (a?.dataset.ref && !a.contains(e.relatedTarget as Node)) onRefHover(JSON.parse(a.dataset.ref), a); }}
             onMouseOut={(e) => { const a = refAt(e.target); if (a && !a.contains(e.relatedTarget as Node)) onRefHover(null, null); }}
             onPaste={(e) => { e.preventDefault(); document.execCommand("insertText", false, e.clipboardData.getData("text/plain")); }}
             data-placeholder="Write here…" style={{ font: "400 17px/1.7 var(--serif)", outline: "none", minHeight: 300 }} />
+          </div>
           {canAsk && !entry.body.trim() && !ask && <button className="btn small" type="button" style={{ alignSelf: "flex-start", border: 0, color: "var(--muted)" }} onClick={() => { setScope("entry"); setAsk(true); }}><Icon name="chat" />Stuck? Ask for a prompt to start</button>}
         </article>
         {preview}
@@ -369,7 +423,7 @@ function Editor({ entry, onChange, saved, err, onDelete, onExport, listed, liste
         {entry.verses.length > 0 && <><span>·</span><span>Shows beside {entry.verses.join(", ")} in Read</span></>}
         <button className="btn" type="button" style={{ marginLeft: "auto" }} onClick={() => revealItemInDir(`${app.journalDir}/Me. Journal - ${entry.created.slice(0, 7)}.md`).catch(() => app.toast("Save the entry first"))}><Icon name="finder" />Show in Finder</button>
         <button className="btn" type="button" onClick={onExport}><Icon name="export" />Export…</button>
-        <button className="ibtn" type="button" aria-label="Delete entry" title="Delete entry" onClick={onDelete}><Icon name="trash" /></button>
+        <button className="ibtn" type="button" aria-label="Delete entry" title="Delete entry" disabled={reading} onClick={onDelete}><Icon name="trash" /></button>
       </div>
       {ask && (
         <div className="card" style={{ position: "absolute", right: 20, bottom: 60, width: 380, zIndex: 20, boxShadow: "0 14px 40px var(--shadow)", borderRadius: 12, padding: 0, display: "flex", flexDirection: "column" }}>

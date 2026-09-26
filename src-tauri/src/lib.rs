@@ -14,6 +14,7 @@ mod spell;
 mod store;
 mod study;
 mod tray;
+mod media;
 mod tts;
 
 use library::{Kind, Library, ModuleInfo};
@@ -482,9 +483,11 @@ pub fn run() {
             ask_cancel,
             print_page,
             scene,
+            media::media_state,
             tts::tts_voices,
             tts::tts_speak,
             tts::tts_stop,
+            tts::tts_pause,
             tray::set_tray
         ])
         .setup(|app| {

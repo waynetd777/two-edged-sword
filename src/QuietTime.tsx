@@ -277,9 +277,9 @@ export function QuietTime({ focus }: { focus: boolean }) {
         <b style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", minWidth: 0 }}>{step.label}</b>
         {step.kind === "online" && <span className="n" style={{ whiteSpace: "nowrap" }}>in its own window · Next when done</span>}
         {step.kind === "worship" && <WorshipNow step={step} now={now} started={playing} onPlay={() => setPlaying(true)} control={control} />}
-        <button className="ibtn" type="button" aria-label="Previous part" title="Previous" disabled={s.i === 0} onClick={() => go(-1)}><Icon name="back" /></button>
-        <button className="btn primary small" type="button" onClick={() => go(1)} style={{ whiteSpace: "nowrap" }}>{next ? <>Next: {next.label}<Icon name="fwd" size={13} /></> : <><Icon name="check" size={13} />Finish</>}</button>
-        <button className="ibtn" type="button" aria-label="End quiet time" title="End" onClick={end}><Icon name="x" /></button>
+        <button className="ibtn" type="button" aria-label="Previous part" title="Previous part" disabled={s.i === 0} onClick={() => go(-1)}><Icon name="back" /></button>
+        <button className="btn primary small" type="button" title={next ? `Go on to ${next.label}` : "Finish today's quiet time"} onClick={() => go(1)} style={{ whiteSpace: "nowrap" }}>{next ? <>Next: {next.label}<Icon name="fwd" size={13} /></> : <><Icon name="check" size={13} />Finish</>}</button>
+        <button className="ibtn" type="button" aria-label="End quiet time" title="End quiet time" onClick={end}><Icon name="x" /></button>
       </div>
     </div>
       {/* Outside the bar's box: its transform would otherwise be what "fixed" is fixed to. */}
@@ -297,7 +297,7 @@ function WorshipNow({ step, now, started, onPlay, control }: { step: Extract<Qui
   // Wrapped: .working keeps to the top of a column (Ask's), and the bar centres its items.
   if (!step.picked) return <span style={{ display: "inline-flex", alignItems: "center" }}><Working text="Choosing songs" /></span>;
   if (!step.picked.length) return null; // the card says why
-  if (!started) return <button className="btn small" type="button" onClick={onPlay}><Play size={11} />Play songs</button>;
+  if (!started) return <button className="btn small" type="button" title="Play today's songs in Music" onClick={onPlay}><Play size={11} />Play songs</button>;
   const playing = now?.ours && now.state === "playing";
   const k = now?.ours ? step.picked.findIndex((x) => x.name === now.name) : -1;
   return (
@@ -306,8 +306,8 @@ function WorshipNow({ step, now, started, onPlay, control }: { step: Extract<Qui
         {now?.ours ? <>{k >= 0 ? `${k + 1} of ${step.picked.length} · ` : ""}{now.name} — {now.artist}</> : "Starting…"}
       </span>
       {/* Until Music says the playlist is on, there's nothing of ours to pause or skip. */}
-      <button className="ibtn" type="button" disabled={!now?.ours} aria-label={playing ? "Pause" : "Play"} title={playing ? "Pause" : "Play"} onClick={() => control(playing ? "pause" : "play")}>{playing ? <Pause size={12} /> : <Play size={12} />}</button>
-      <button className="ibtn" type="button" disabled={!now?.ours} aria-label="Next song" title="Next song" onClick={() => control("next")}><Icon name="fwd" /></button>
+      <button className="ibtn" type="button" disabled={!now?.ours} aria-label={playing ? "Pause" : "Play"} title={playing ? "Pause (Space · F8)" : "Play (F8)"} onClick={() => control(playing ? "pause" : "play")}>{playing ? <Pause size={12} /> : <Play size={12} />}</button>
+      <button className="ibtn" type="button" disabled={!now?.ours} aria-label="Next song" title="Next song (F9)" onClick={() => control("next")}><Icon name="fwd" /></button>
       <button className="btn small" type="button" disabled={!now?.ours} title="Open Music, where its lyrics button shows the words as the song plays" onClick={() => control("show")}><Icon name="quote" size={12} />Lyrics</button>
     </>
   );
@@ -324,7 +324,7 @@ function WorshipCard({ step, now, started, countdown, onPlay }: { step: Extract<
       {/* Picked up by its heading, so the songs' reasons can still be selected and scrolled. */}
       <div {...drag.bind} style={{ display: "flex", alignItems: "center", gap: 8, cursor: "grab", touchAction: "none" }}>
         <span className="label">Worship · {step.when === "before" ? "before your reading" : "after your reading"}</span>
-        <button className="ibtn" type="button" aria-label="Hide" title="Hide" style={{ marginLeft: "auto" }} onClick={() => setHidden(true)}><Icon name="x" /></button>
+        <button className="ibtn" type="button" aria-label="Hide" title="Hide this card" style={{ marginLeft: "auto" }} onClick={() => setHidden(true)}><Icon name="x" /></button>
       </div>
       {step.intro && <p style={{ margin: 0, font: "400 15px/1.55 var(--serif)" }}>{step.intro}</p>}
       {step.note && <div className={step.picked.length ? "hint" : "err"} style={{ fontSize: 12.5 }}>{step.note}</div>}
@@ -340,7 +340,7 @@ function WorshipCard({ step, now, started, countdown, onPlay }: { step: Extract<
       )}
       {!started && step.picked.length > 0 && (
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <button className="btn primary" type="button" onClick={onPlay}><Play size={12} />Play songs</button>
+          <button className="btn primary" type="button" title="Play today's songs in Music" onClick={onPlay}><Play size={12} />Play songs</button>
           {countdown !== null && <span className="n">Starting in {countdown}s</span>}
         </div>
       )}

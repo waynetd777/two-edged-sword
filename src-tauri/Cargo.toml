@@ -30,6 +30,8 @@ tauri-plugin-opener = "2"
 tauri-plugin-notification = "2"
 # Ask ends a CLI and everything it started by signalling its process group.
 libc = "0.2"
+objc2-media-player = { version = "0.3", default-features = false, features = ["std", "block2", "MPRemoteCommandCenter", "MPRemoteCommand", "MPRemoteCommandEvent", "MPNowPlayingInfoCenter", "MPMediaItem"] }
+block2 = "0.6"
 
 [target.'cfg(target_os = "macos")'.dependencies]
 objc2 = "0.6"

@@ -4,7 +4,7 @@ import { book, fmtRef, parseRef, Ref, sectionOf, stepChapter, testament } from "
 import { alignStrongs, EDITIONS, isOriginal, kjvGloss, plainText, Token, tokenize, variantSource } from "./esword";
 import { Icon, Pause, Play } from "./icons";
 import { BibleSelect, RefButton, SearchField, Topbar } from "./Shell";
-import { rankVoices, usePlayer } from "./speech";
+import { rankVoices, useListenKey, usePlayer } from "./speech";
 import { DictAt, HlColor, hlName, useApp, vkey } from "./state";
 import { StudyPane, StudyTab } from "./StudyPane";
 import { Popover, RefPicker, Seg, SideNav, useBibleBooks, useDrag } from "./ui";
@@ -239,6 +239,7 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [books, bible]);
 
+  useListenKey(() => player.play(bible, loc.book, loc.chapter, sel?.from));
   // Arrow keys turn the page; N adds a note; Space plays or pauses.
   useEffect(() => {
     const k = (e: KeyboardEvent) => {
@@ -389,7 +390,7 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
       })}
     </div>
   ) : (
-    <div style={{ position: "relative", maxWidth: focus ? 1040 : undefined, margin: focus ? "0 auto" : undefined, paddingTop: sel && !focus ? 46 : 0 }}>
+    <div style={{ position: "relative", paddingTop: sel && !focus ? 46 : 0 }}>
       {!focus && sel && <div style={{ position: "sticky", top: 0, zIndex: 20, height: 0 }}><div style={{ position: "relative", top: -44 }}>{toolbar}</div></div>}
       <p className="para selectable" dir={dir} style={{ margin: 0, fontSize: focus ? 21 : undefined, lineHeight: focus ? 1.85 : undefined }}>
         {verses.map((v) => {
@@ -415,7 +416,7 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
         <header className="topbar drag" style={{ borderBottom: 0, paddingLeft: 84 }}>
           <button className="ibtn" type="button" aria-label="Previous chapter" title="Previous chapter (←)" onClick={() => go(-1)}><Icon name="back" /></button>
           <div className="spacer" style={{ display: "flex", alignItems: "center", justifyContent: "center", color: "var(--muted)" }}>{book(loc.book).name} {loc.chapter} · {bmod?.title}</div>
-          <button className={`ibtn ${player.state.on ? "on" : ""}`} type="button" aria-label="Listen" onClick={() => (player.state.on ? player.toggle() : player.play(bible, loc.book, loc.chapter))}><Icon name="speaker" /></button>
+          <button className={`ibtn ${player.state.on ? "on" : ""}`} type="button" aria-label="Listen" title="Listen (Space · ⌘P)" onClick={() => (player.state.on ? player.toggle() : player.play(bible, loc.book, loc.chapter))}><Icon name="speaker" /></button>
           <TextSizeButton />
           <button className="btn" type="button" onClick={() => setFocus(false)}>Exit focus<span className="kbd">esc</span></button>
           <button className="ibtn" type="button" aria-label="Next chapter" title="Next chapter (→)" onClick={() => go(1)}><Icon name="fwd" /></button>
@@ -423,7 +424,7 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
       ) : (
         <Topbar right={
           <div style={{ display: "flex", gap: 2 }}>
-            <button className={`ibtn ${player.state.on ? "on" : ""}`} type="button" aria-label="Listen" title="Listen (space)" onClick={() => (player.state.on ? player.toggle() : player.play(bible, loc.book, loc.chapter, sel?.from))}><Icon name="speaker" /></button>
+            <button className={`ibtn ${player.state.on ? "on" : ""}`} type="button" aria-label="Listen" title="Listen (Space · ⌘P)" onClick={() => (player.state.on ? player.toggle() : player.play(bible, loc.book, loc.chapter, sel?.from))}><Icon name="speaker" /></button>
             <TextSizeButton />
             <button className="ibtn" type="button" aria-label="Focus mode" title="Focus mode (⌘.)" onClick={() => setFocus(true)}><Icon name="focus" /></button>
             <button className={`ibtn ${settings.studyPane ? "on" : ""}`} type="button" aria-label="Study pane" title="Study pane (⌘\\)" onClick={() => app.set({ studyPane: !settings.studyPane })}><Icon name="pane" /></button>
@@ -444,7 +445,7 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
       )}
       <div style={{ flexGrow: 1, minHeight: 0, display: "grid", gridTemplateColumns: !focus && settings.studyPane ? "minmax(0,1fr) 520px" : "minmax(0,1fr)" }}>
         <div className="sidenav-wrap">
-          <main ref={scroller} className="scroll readcol" style={{ position: "relative", padding: focus ? "0 40px 120px" : "0 40px 120px 36px" }} onClick={() => setSel(null)}>
+          <main ref={scroller} className="scroll readcol" style={{ position: "relative", padding: focus ? "0 10% 120px" : "0 40px 120px 36px" }} onClick={() => setSel(null)}>
             {header}
             {err ? <div className="err" style={{ padding: 20 }}>{err}</div> : <>{noVerse && hint(`The ${name} has no verse ${loc.verse} in ${place}.`)}{body}</>}
           </main>
@@ -535,7 +536,10 @@ export function PlayerBar({ focus = false }: { focus?: boolean }) {
   }, [p.state.sleepAt]);
   if (!p.state.on) return null;
   const s = p.state;
-  const pct = s.count ? Math.round(((s.verse - 1) / s.count) * 100) : 0;
+  // Through the chapter by verse, and through the verse by the word being read.
+  // Space plays and pauses in the readers, and in the journal while it's reading (it can't be edited then).
+  const space = app.screen === "read" || (app.screen === "journal" && s.doc?.module === "journal");
+  const pct = s.count ? Math.min(100, ((s.verse - 1 + (s.char > 0 && s.len ? Math.min(1, s.char / s.len) : 0)) / s.count) * 100) : 0;
   const minsLeft = s.sleepAt ? Math.max(1, Math.ceil((s.sleepAt - Date.now()) / 60000)) : 0;
   const sleepLabel = s.sleepAt ? `${minsLeft} min` : s.sleepEndOfChapter ? "end of ch." : "";
   const SLEEP: [number | "chapter" | null, string][] = [[15, "In 15 minutes"], [30, "In 30 minutes"], [60, "In an hour"], ["chapter", "At the end of this chapter"], [null, "Off"]];
@@ -543,20 +547,20 @@ export function PlayerBar({ focus = false }: { focus?: boolean }) {
     <div role="region" aria-label="Listen" style={{ position: "fixed", left: focus ? 0 : 200, right: app.screen === "read" && !focus && app.settings.studyPane ? 520 : 0, bottom: 18, display: "flex", justifyContent: "center", pointerEvents: "none", zIndex: 40 }}>
       <div {...drag.bind} style={{ ...drag.style, pointerEvents: "auto", width: "min(600px, calc(100% - 48px))", height: 56, display: "flex", alignItems: "center", gap: 14, padding: "0 10px 0 8px", borderRadius: 28, background: "var(--panel)", border: "1px solid var(--border)", boxShadow: "0 10px 30px var(--shadow)" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
-          <button className="ibtn" type="button" aria-label={s.doc ? "Previous paragraph" : "Previous verse"} onClick={() => p.skip(-1)}><Icon name="prev" /></button>
-          <button type="button" aria-label={s.paused ? "Play" : "Pause"} onClick={p.toggle} style={{ width: 40, height: 40, borderRadius: "50%", border: 0, background: "var(--accent)", color: "var(--onaccent)", display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>{s.paused ? <Play /> : <Pause />}</button>
-          <button className="ibtn" type="button" aria-label={s.doc ? "Next paragraph" : "Next verse"} onClick={() => p.skip(1)}><Icon name="next" /></button>
+          <button className="ibtn" type="button" aria-label={s.doc ? "Previous paragraph" : "Previous verse"} title={`${s.doc ? "Previous paragraph" : "Previous verse"} · F7: previous ${s.doc?.module === "journal" ? "entry" : "chapter"}`} onClick={() => p.skip(-1)}><Icon name="prev" /></button>
+          <button type="button" aria-label={s.paused ? "Play" : "Pause"} title={`${s.paused ? "Play" : "Pause"} (${space ? "Space · " : ""}⌘P)`} onClick={p.toggle} style={{ width: 40, height: 40, borderRadius: "50%", border: 0, background: "var(--accent)", color: "var(--onaccent)", display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>{s.paused ? <Play /> : <Pause />}</button>
+          <button className="ibtn" type="button" aria-label={s.doc ? "Next paragraph" : "Next verse"} title={`${s.doc ? "Next paragraph" : "Next verse"} · F9: next ${s.doc?.module === "journal" ? "entry" : "chapter"}`} onClick={() => p.skip(1)}><Icon name="next" /></button>
         </div>
-        <button type="button" onClick={() => (s.doc ? app.openDoc(s.doc.module, s.doc.title, s.doc.kind) : app.open({ book: s.book, chapter: s.chapter, verse: s.verse }, "read"))} style={{ flexGrow: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 7, border: 0, background: "transparent", cursor: "pointer", textAlign: "left", padding: 0 }}>
+        <button type="button" title={s.doc?.module === "journal" ? "Show this entry" : s.doc ? `Open ${s.doc.title}` : `Go to ${book(s.book).name} ${s.chapter}:${s.verse}`} onClick={() => (s.doc?.module === "journal" ? app.startEntry({ openId: s.doc.id }) : s.doc ? app.openDoc(s.doc.module, s.doc.title, s.doc.kind) : app.open({ book: s.book, chapter: s.chapter, verse: s.verse }, "read"))} style={{ flexGrow: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 7, border: 0, background: "transparent", cursor: "pointer", textAlign: "left", padding: 0 }}>
           <span style={{ display: "flex", alignItems: "baseline", gap: 8, whiteSpace: "nowrap", width: "100%" }}>{s.doc
             ? <><b style={{ fontSize: 13, overflow: "hidden", textOverflow: "ellipsis" }}>{s.doc.title}</b><span className="n" style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{app.mod(s.doc.kind ?? "reference", s.doc.module)?.abbrev}</span></>
             : <><b style={{ fontSize: 13 }}>{book(s.book).name} {s.chapter}:{s.verse}</b><span className="n">{app.mod("bible", s.bible)?.abbrev}</span></>}<span className="n" style={{ marginLeft: "auto", fontVariantNumeric: "tabular-nums" }}>{s.verse} of {s.count}</span></span>
           <span style={{ position: "relative", height: 3, borderRadius: 999, background: "var(--border)", width: "100%" }}><span style={{ position: "absolute", left: 0, top: 0, width: `${pct}%`, height: 3, borderRadius: 999, background: "var(--accent)" }} /><span style={{ position: "absolute", left: `${pct}%`, top: -3, width: 9, height: 9, marginLeft: -4, borderRadius: "50%", background: "var(--accent)" }} /></span>
         </button>
         <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
-          <button type="button" aria-label="Speed and voice" onClick={(e) => setMenu(e.currentTarget.getBoundingClientRect())} style={{ height: 28, padding: "0 10px", borderRadius: 999, border: 0, background: "var(--accentsoft)", color: "var(--accent)", fontWeight: 600, fontVariantNumeric: "tabular-nums", cursor: "pointer" }}>{app.settings.rate}×</button>
+          <button type="button" aria-label="Speed and voice" title="Speed and voice" onClick={(e) => setMenu(e.currentTarget.getBoundingClientRect())} style={{ height: 28, padding: "0 10px", borderRadius: 999, border: 0, background: "var(--accentsoft)", color: "var(--accent)", fontWeight: 600, fontVariantNumeric: "tabular-nums", cursor: "pointer" }}>{app.settings.rate}×</button>
           <button className={`ibtn ${sleepLabel ? "on" : ""}`} type="button" aria-label={sleepLabel ? `Sleep timer: ${sleepLabel}` : "Sleep timer"} title={sleepLabel ? `Stops ${s.sleepAt ? "in " + sleepLabel : "at the end of the chapter"}` : "Sleep timer"} onClick={(e) => setSleepMenu(e.currentTarget.getBoundingClientRect())} style={sleepLabel ? { width: "auto", padding: "0 8px", gap: 5, fontSize: 11.5, fontWeight: 600, fontVariantNumeric: "tabular-nums" } : undefined}><Icon name="moon" />{sleepLabel}</button>
-          <button className="ibtn" type="button" aria-label="Stop and close" onClick={p.stop}><Icon name="x" /></button>
+          <button className="ibtn" type="button" aria-label="Stop and close" title="Stop and close (Esc)" onClick={p.stop}><Icon name="x" /></button>
         </div>
       </div>
       {menu && (

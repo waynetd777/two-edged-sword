@@ -3,7 +3,7 @@ import { api, Article } from "./api";
 import { fmtRef } from "./bible";
 import { docSegments, plainText, renderHtml, wordRangeAt } from "./esword";
 import { Icon } from "./icons";
-import { usePlayer } from "./speech";
+import { useListenKey, usePlayer } from "./speech";
 import { AskPanel, withheld } from "./Ask";
 import { HL, HL_DOT, TextSizeButton, textToken, WordPick } from "./Read";
 import { docHlKey, docLabel, parseDocLabel } from "./docref";
@@ -48,6 +48,7 @@ export function DocReader({ focus, setFocus, openPalette }: { focus: boolean; se
   const ps = player.state;
   const reading = ps.on && ps.doc?.module === doc.module && ps.doc.title === doc.title;
   const listen = (from = 0) => player.playDoc(doc.module, doc.title, segs, from, kind);
+  useListenKey(() => { if (segs.length) listen(); });
 
   // Ask: the chapter (or the part around the paragraph asked about) goes with the question; the
   // rest of the book is exported once so the model can search it rather than carry it.
@@ -273,14 +274,14 @@ export function DocReader({ focus, setFocus, openPalette }: { focus: boolean; se
         <header className="topbar drag" style={{ borderBottom: 0, paddingLeft: 84 }}>
           <button className="ibtn" type="button" aria-label="Previous chapter" title={`Previous ${unit} (←)`} disabled={i <= 0} onClick={() => go(titles[i - 1])}><Icon name="back" /></button>
           <div className="spacer" style={{ display: "flex", alignItems: "center", justifyContent: "center", color: "var(--muted)", minWidth: 0 }}><span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{doc.title} · {mod?.title}</span></div>
-          <button className={`ibtn ${reading ? "on" : ""}`} type="button" aria-label="Listen" title="Listen (space)" disabled={!segs.length} onClick={() => (reading ? player.toggle() : listen())}><Icon name="speaker" /></button>
+          <button className={`ibtn ${reading ? "on" : ""}`} type="button" aria-label="Listen" title="Listen (Space · ⌘P)" disabled={!segs.length} onClick={() => (reading ? player.toggle() : listen())}><Icon name="speaker" /></button>
           <TextSizeButton />
           <button className="btn" type="button" onClick={() => setFocus(false)}>Exit focus<span className="kbd">esc</span></button>
           <button className="ibtn" type="button" aria-label="Next chapter" title={`Next ${unit} (→)`} disabled={i < 0 || i >= titles.length - 1} onClick={() => go(titles[i + 1])}><Icon name="fwd" /></button>
         </header>
       ) : <Topbar right={
         <div style={{ display: "flex", gap: 2 }}>
-          <button className={`ibtn ${reading ? "on" : ""}`} type="button" aria-label="Listen" title="Listen (space)" disabled={!segs.length} onClick={() => (reading ? player.toggle() : listen())}><Icon name="speaker" /></button>
+          <button className={`ibtn ${reading ? "on" : ""}`} type="button" aria-label="Listen" title="Listen (Space · ⌘P)" disabled={!segs.length} onClick={() => (reading ? player.toggle() : listen())}><Icon name="speaker" /></button>
           <TextSizeButton />
           <button className="ibtn" type="button" aria-label="Focus mode" title="Focus mode (⌘.)" onClick={() => setFocus(true)}><Icon name="focus" /></button>
           <button className={`ibtn ${app.settings.studyPane ? "on" : ""}`} type="button" aria-label="Study pane" title="Study pane: notes, dictionaries and Ask (⌘\)" onClick={() => app.set({ studyPane: !app.settings.studyPane })}><Icon name="pane" /></button>
@@ -310,7 +311,7 @@ export function DocReader({ focus, setFocus, openPalette }: { focus: boolean; se
           </div>
         </aside>}
         <div className="sidenav-wrap">
-          <main ref={scroller} className="scroll" style={{ padding: focus ? "0 40px 120px" : "0 40px 120px 36px" }} onClick={(e) => {
+          <main ref={scroller} className="scroll" style={{ padding: focus ? "0 10% 120px" : "0 40px 120px 36px" }} onClick={(e) => {
             // A click in the margin beside a paragraph selects it, as beside a verse; elsewhere clears.
             if (e.target === e.currentTarget || (e.target as HTMLElement).dataset.margin !== undefined) {
               const seg = [...(scroller.current?.querySelectorAll<HTMLElement>("[data-seg]") ?? [])].find((el) => { const r = el.getBoundingClientRect(); return e.clientY >= r.top - 8 && e.clientY <= r.bottom + 8; });
@@ -318,7 +319,7 @@ export function DocReader({ focus, setFocus, openPalette }: { focus: boolean; se
             }
             setSel(null);
           }}>
-            <div data-margin style={focus ? { maxWidth: 1040, margin: "0 auto" } : undefined}>
+            <div data-margin>
               {focus ? (
                 <div style={{ padding: "24px 0 22px", display: "flex", flexDirection: "column", alignItems: "center", gap: 6, textAlign: "center" }}>
                   <div className="label">{mod?.title}{titles.length ? ` · ${i + 1} of ${titles.length}` : ""}</div>
