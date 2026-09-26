@@ -16,6 +16,7 @@ import { docModule, parseDocLabel } from "./docref";
 import { useRefPreview } from "./StudyPane";
 import { useSpelling } from "./spelling";
 import { useFind } from "./find";
+import { usePlayer } from "./speech";
 
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const longDate = (s: string) => {
@@ -42,7 +43,8 @@ const EntryRow = memo(function EntryRow({ e, selected, onSelect }: { e: JournalE
   );
 });
 
-export function JournalScreen({ openPalette }: { openPalette: () => void }) {
+export function JournalScreen({ openPalette, focus = false, setFocus = () => {} }: { openPalette: () => void; focus?: boolean; setFocus?: (f: boolean) => void }) {
+  const player = usePlayer();
   const app = useApp();
   const [selId, setSelId] = useState<string | null>(app.journal[0]?.id ?? null);
   const [draft, setDraft] = useState<JournalEntry | null>(null);
@@ -114,12 +116,33 @@ export function JournalScreen({ openPalette }: { openPalette: () => void }) {
     return () => window.removeEventListener("keydown", k);
   });
 
+  // Esc leaves focus mode (after anything open in the editor has had it).
+  useEffect(() => {
+    const k = (e: KeyboardEvent) => { if (e.key === "Escape" && focus && !e.defaultPrevented) setFocus(false); };
+    window.addEventListener("keydown", k);
+    return () => window.removeEventListener("keydown", k);
+  }, [focus, setFocus]);
+
+  // Listen: the entry read aloud, its title and then each paragraph, in the reading voice.
+  const listening = player.state.on && player.state.doc?.module === "journal" && player.state.doc.title === (cur?.title || "Untitled entry");
+  const listen = () => {
+    if (!cur) return;
+    if (listening) { player.toggle(); return; }
+    const paras = cur.body.split(/\n\s*\n/).map((p) => mdPlain(p)).filter(Boolean);
+    if (paras.length) player.playDoc("journal", cur.title || "Untitled entry", paras);
+  };
+
   let lastMonth = "";
   return (
     <div className="main">
-      <Topbar><SearchField onOpen={openPalette} /></Topbar>
-      <div style={{ flexGrow: 1, minHeight: 0, display: "grid", gridTemplateColumns: "320px minmax(0,1fr)" }}>
-        <div style={{ borderRight: "1px solid var(--border)", padding: "14px 12px 0", display: "flex", flexDirection: "column", gap: 10, minHeight: 0 }}>
+      <Topbar right={
+        <div style={{ display: "flex", gap: 2 }}>
+          <button className={`ibtn ${listening && !player.state.paused ? "on" : ""}`} type="button" aria-label="Listen" title={listening && !player.state.paused ? "Pause" : "Listen to this entry"} disabled={!cur?.body.trim()} onClick={listen}><Icon name="speaker" /></button>
+          <button className={`ibtn ${focus ? "on" : ""}`} type="button" aria-label="Focus mode" title={focus ? "Leave focus mode (Esc)" : "Focus mode (⌘.)"} onClick={() => setFocus(!focus)}><Icon name="focus" /></button>
+        </div>
+      }><SearchField onOpen={openPalette} /></Topbar>
+      <div style={{ flexGrow: 1, minHeight: 0, display: "grid", gridTemplateColumns: focus ? "minmax(0,900px)" : "320px minmax(0,1fr)", justifyContent: focus ? "center" : undefined }}>
+        <div style={{ display: focus ? "none" : "flex", borderRight: "1px solid var(--border)", padding: "14px 12px 0", flexDirection: "column", gap: 10, minHeight: 0 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "0 4px" }}>
             <h1 style={{ margin: 0, font: "500 26px/1.2 var(--display)" }}>Journal</h1>
             <button className="btn primary" type="button" style={{ marginLeft: "auto" }} onClick={create}><Icon name="plus" />New entry<span style={{ opacity: 0.75 }}>⌘N</span></button>

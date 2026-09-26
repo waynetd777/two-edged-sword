@@ -40,7 +40,7 @@ function Screens() {
       if (n >= 1 && n <= SCREEN_KEYS.length) { app.go(SCREEN_KEYS[n - 1]); setFocus(false); e.preventDefault(); }
       else if (e.key === "k") { setPalette(true); e.preventDefault(); }
       else if (e.key === ",") { app.go("settings"); e.preventDefault(); }
-      else if (e.key === ".") { app.go("read"); setFocus((f) => !f); e.preventDefault(); }
+      else if (e.key === ".") { if (app.screen !== "journal") app.go("read"); setFocus((f) => !f); e.preventDefault(); }
       else if (e.key === "[") { app.back(); e.preventDefault(); }
       else if (e.key === "]") { app.forward(); e.preventDefault(); }
       else if (e.key === "\\") { app.set({ studyPane: !app.settings.studyPane }); e.preventDefault(); }
@@ -64,20 +64,22 @@ function Screens() {
   }
   const screen = app.screen;
   const openPalette = () => setPalette(true);
+  // Focus mode is Read's and the Journal's: the sidebar goes, and so do their side panes.
+  const focused = focus && (screen === "read" || screen === "journal");
   return (
-    <div className={`shell ${focus && screen === "read" ? "nosidebar" : ""}`}>
-      {!(focus && screen === "read") && <Sidebar />}
+    <div className={`shell ${focused ? "nosidebar" : ""}`}>
+      {!focused && <Sidebar />}
       {screen === "read" && app.doc && <DocReader focus={focus} setFocus={setFocus} openPalette={openPalette} />}
       {screen === "read" && !app.doc && <ReadScreen focus={focus} setFocus={setFocus} openPalette={openPalette} />}
       {screen === "compare" && <CompareScreen openPalette={openPalette} />}
       {screen === "search" && <SearchScreen />}
       {screen === "word" && <WordStudyScreen />}
-      {screen === "journal" && <JournalScreen openPalette={openPalette} />}
+      {screen === "journal" && <JournalScreen openPalette={openPalette} focus={focus} setFocus={setFocus} />}
       {screen === "plans" && <PlansScreen openPalette={openPalette} />}
       {screen === "library" && <LibraryScreen />}
       {screen === "history" && <KjvHistoryScreen />}
       {screen === "settings" && <SettingsScreen />}
-      {(screen !== "read" || app.doc) && <PlayerBar focus={focus && screen === "read"} />}
+      {(screen !== "read" || app.doc) && <PlayerBar focus={focused} />}
       {palette && <Palette onClose={() => setPalette(false)} onAsk={() => app.setPending({ ask: "" })} />}
       {app.toastMsg && <div className="toast" role="status">{app.toastMsg}{app.toastUndo && <button type="button" className="toastundo" onClick={app.toastUndo}>Undo</button>}</div>}
       <StrongsHover />
