@@ -205,6 +205,27 @@ export function QuietTime({ focus }: { focus: boolean }) {
     return () => { dead = true; checkNow.current = () => {}; window.clearInterval(poll); api.musicControl("pause").catch(() => {}); };
   }, [s?.started, s?.i, !!songs, playing]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // A part read aloud, going on to the next part when it finishes.
+  const speakStep = async (step: QuietStep) => {
+    const onEnd = () => goRef.current(1);
+    if (step.kind === "bible") player.play(step.bible, step.b, step.c, step.v, { toVerse: step.v2, onEnd });
+    else if (step.kind === "devotional") {
+      const html = await api.devotion(step.module, step.title).catch(() => null);
+      const segs = html ? docSegments(html) : [];
+      if (segs.length) player.playDoc(step.module, step.title, segs, 0, "devotional", { onEnd });
+      else onEnd();
+    }
+  };
+  // F7 and F9 go to the previous or next part, and F8 (or ⌘P) reads this one when nothing is playing.
+  const sRef = useRef(s);
+  sRef.current = s;
+  useEffect(() => {
+    if (!s) return;
+    const me = { step: (d: 1 | -1) => goRef.current(d), start: () => { const x = sRef.current; if (x) { window.clearTimeout(timer.current); speakStep(x.steps[x.i]); } } };
+    player.quiet.current = me;
+    return () => { if (player.quiet.current === me) player.quiet.current = null; };
+  }, [!!s]); // eslint-disable-line react-hooks/exhaustive-deps
+
   useEffect(() => {
     window.clearTimeout(timer.current);
     if (!s) return;
@@ -219,18 +240,11 @@ export function QuietTime({ focus }: { focus: boolean }) {
     } else {
       api.openWeb(step.id, step.url, step.label).catch((e) => app.toast(String(e)));
     }
+    // Songs, or a devotional on the web, aren't read aloud: the reading before them stops and its player closes.
+    if (step.kind === "worship" || step.kind === "online") player.stop();
     if (s.audio && step.kind !== "online" && step.kind !== "worship") {
       const delay = first.current ? FIRST_DELAY : NEXT_DELAY;
-      const onEnd = () => goRef.current(1);
-      timer.current = window.setTimeout(async () => {
-        if (step.kind === "bible") player.play(step.bible, step.b, step.c, step.v, { toVerse: step.v2, onEnd });
-        else if (step.kind === "devotional") {
-          const html = await api.devotion(step.module, step.title).catch(() => null);
-          const segs = html ? docSegments(html) : [];
-          if (segs.length) player.playDoc(step.module, step.title, segs, 0, "devotional", { onEnd });
-          else onEnd();
-        }
-      }, delay);
+      timer.current = window.setTimeout(() => speakStep(step), delay);
     }
     first.current = false;
     return () => window.clearTimeout(timer.current);
@@ -277,8 +291,8 @@ export function QuietTime({ focus }: { focus: boolean }) {
         <b style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", minWidth: 0 }}>{step.label}</b>
         {step.kind === "online" && <span className="n" style={{ whiteSpace: "nowrap" }}>in its own window · Next when done</span>}
         {step.kind === "worship" && <WorshipNow step={step} now={now} started={playing} onPlay={() => setPlaying(true)} control={control} />}
-        <button className="ibtn" type="button" aria-label="Previous part" title="Previous part" disabled={s.i === 0} onClick={() => go(-1)}><Icon name="back" /></button>
-        <button className="btn primary small" type="button" title={next ? `Go on to ${next.label}` : "Finish today's quiet time"} onClick={() => go(1)} style={{ whiteSpace: "nowrap" }}>{next ? <>Next: {next.label}<Icon name="fwd" size={13} /></> : <><Icon name="check" size={13} />Finish</>}</button>
+        <button className="ibtn" type="button" aria-label="Previous part" title="Previous part (F7)" disabled={s.i === 0} onClick={() => go(-1)}><Icon name="back" /></button>
+        <button className="btn primary small" type="button" title={next ? `Go on to ${next.label} (F9)` : "Finish today's quiet time (F9)"} onClick={() => go(1)} style={{ whiteSpace: "nowrap" }}>{next ? <>Next: {next.label}<Icon name="fwd" size={13} /></> : <><Icon name="check" size={13} />Finish</>}</button>
         <button className="ibtn" type="button" aria-label="End quiet time" title="End quiet time" onClick={end}><Icon name="x" /></button>
       </div>
     </div>

@@ -526,6 +526,7 @@ function WorshipCard({ plan, update }: { plan: Plan; update: (p: Plan) => void }
           </label>
           <Seg value={w.when} options={[["before", "Before the reading"], ["after", "After the reading"]]} onChange={(when) => set({ ...w, when })} />
           <button className="btn small" type="button" style={{ marginLeft: "auto" }} disabled={!t?.parts.length} title="Go through today's Quiet time with its songs, without ticking anything off or marking the day read" onClick={() => t && startQuiet(plan, t.parts, false, true)}><Play size={11} />Try it now</button>
+          <button className="btn small" type="button" disabled={!t?.parts.length} title="The same, with the readings read aloud and the songs starting by themselves" onClick={() => t && startQuiet(plan, t.parts, true, true)}><Icon name="speaker" size={12} />Try it with audio</button>
         </div>
       )}
     </div>

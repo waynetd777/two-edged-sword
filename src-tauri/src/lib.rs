@@ -320,9 +320,43 @@ fn devotion(st: State<AppState>, module: String, title: String) -> Result<Option
 }
 
 /// An online page (a devotional) in its own window inside the app, reused if already open.
+/// The app in dark mode: a devotional's web page shown dark by inverting it, with pictures and
+/// video inverted back so they look as they should. Crude, but it works on any site.
+const DARK_PAGE: &str = r##"(() => {
+  const css = "html { filter: invert(1) hue-rotate(180deg) !important; background: #fff !important; }"
+    + " img, video, picture, canvas, svg image, [style*='background-image'] { filter: invert(1) hue-rotate(180deg) !important; }";
+  const add = () => {
+    const at = document.head || document.documentElement;
+    if (!document.getElementById("tes-dark")) {
+      const s = document.createElement("style");
+      s.id = "tes-dark";
+      s.textContent = css;
+      at.appendChild(s);
+    }
+    // macOS colours the title bar from the page's theme colour, or failing that from the top of the
+    // page as it was before the inversion (white, often): a dark one of our own instead.
+    document.querySelectorAll("meta[name='theme-color']:not(#tes-theme)").forEach((m) => m.remove());
+    if (!document.getElementById("tes-theme")) {
+      const m = document.createElement("meta");
+      m.id = "tes-theme";
+      m.name = "theme-color";
+      m.content = "#121214";
+      at.appendChild(m);
+    }
+  };
+  add();
+  document.addEventListener("DOMContentLoaded", add);
+})();"##;
+
 #[tauri::command]
-fn open_web(app: AppHandle, key: String, url: String, title: String) -> Result<(), String> {
-    let label = format!("web-{}", key.chars().filter(|c| c.is_ascii_alphanumeric()).collect::<String>());
+fn open_web(app: AppHandle, key: String, url: String, title: String, dark: bool) -> Result<(), String> {
+    // A window's scripts are fixed when it is made, so dark and light pages are separate windows;
+    // the other one, if open, is closed.
+    let base = format!("web-{}", key.chars().filter(|c| c.is_ascii_alphanumeric()).collect::<String>());
+    let label = format!("{base}-{}", if dark { "dark" } else { "light" });
+    if let Some(other) = app.get_webview_window(&format!("{base}-{}", if dark { "light" } else { "dark" })) {
+        let _ = other.close();
+    }
     let parsed: tauri::Url = url.parse().map_err(|e| format!("bad address: {e}"))?;
     if parsed.scheme() != "https" { return Err("only https pages can be opened".into()); }
     // Same size and place as the main window, so it reads like a page of the app.
@@ -336,6 +370,8 @@ fn open_web(app: AppHandle, key: String, url: String, title: String) -> Result<(
     if let Some(w) = app.get_webview_window(&label) {
         let _ = w.navigate(parsed);
         let _ = w.set_title(&title);
+        let _ = w.set_theme(Some(if dark { tauri::Theme::Dark } else { tauri::Theme::Light }));
+        title_bar(&w, dark);
         if let Some((size, pos)) = frame {
             let _ = w.set_size(size);
             let _ = w.set_position(pos);
@@ -345,12 +381,38 @@ fn open_web(app: AppHandle, key: String, url: String, title: String) -> Result<(
         return Ok(());
     }
     let mut b = tauri::WebviewWindowBuilder::new(&app, &label, tauri::WebviewUrl::External(parsed)).title(&title);
+    if dark {
+        // The title bar too: left alone, macOS draws it light or dark as it pleases.
+        b = b.initialization_script(DARK_PAGE).background_color(tauri::window::Color(18, 18, 20, 255)).theme(Some(tauri::Theme::Dark));
+    } else {
+        b = b.theme(Some(tauri::Theme::Light));
+    }
     b = match frame {
         Some((size, pos)) => b.inner_size(size.width, size.height).position(pos.x, pos.y),
         None => b.inner_size(1000.0, 820.0),
     };
-    b.build().map_err(|e| e.to_string())?;
+    let w = b.build().map_err(|e| e.to_string())?;
+    title_bar(&w, dark);
     Ok(())
+}
+
+/// A web window's title bar in the app's theme. Asking for a dark window isn't enough: macOS still
+/// drew some sites' title bars white. A transparent title bar over the window's own dark
+/// background always comes out dark, with dark appearance for light title text.
+fn title_bar(w: &tauri::WebviewWindow, dark: bool) {
+    #[cfg(target_os = "macos")]
+    unsafe {
+        use objc2_app_kit::{NSAppearance, NSAppearanceCustomization, NSAppearanceNameAqua, NSAppearanceNameDarkAqua, NSColor, NSWindow};
+        let Ok(ptr) = w.ns_window() else { return };
+        let win = &*(ptr as *const NSWindow);
+        win.setAppearance(NSAppearance::appearanceNamed(if dark { NSAppearanceNameDarkAqua } else { NSAppearanceNameAqua }).as_deref());
+        win.setTitlebarAppearsTransparent(dark);
+        if dark {
+            win.setBackgroundColor(Some(&NSColor::colorWithSRGBRed_green_blue_alpha(18.0 / 255.0, 18.0 / 255.0, 20.0 / 255.0, 1.0)));
+        }
+    }
+    #[cfg(not(target_os = "macos"))]
+    let _ = (w, dark);
 }
 
 #[tauri::command]

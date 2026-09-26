@@ -53,6 +53,8 @@ interface PlayerCtx {
   jump: (d: 1 | -1) => void;
   /** What ⌘P and F8 do when nothing is being read: set by the screen showing (useListenKey). */
   starter: React.MutableRefObject<(() => void) | null>;
+  /** Set during a Quiet time: F7 and F9 step through its parts, and F8 reads the part shown. */
+  quiet: React.MutableRefObject<{ step: (d: 1 | -1) => void; start: () => void } | null>;
   sleep: (minutes: number | "chapter" | null) => void;
   /** Pronounces a Greek or Hebrew word (Strong's `num` says which), pausing any reading. */
   say: (word: string, num: string, pron?: string) => void;
@@ -388,24 +390,26 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   // journal); F7 and F9 go back or on. With fn held, or with standard function keys set, the
   // F keys arrive here; otherwise macOS sends them as media keys, through media.rs.
   const starter = useRef<(() => void) | null>(null);
-  const playPause = useCallback(() => { if (st.current.on) toggle(); else starter.current?.(); }, [toggle]);
+  const quiet = useRef<{ step: (d: 1 | -1) => void; start: () => void } | null>(null);
+  const playPause = useCallback(() => { if (st.current.on) toggle(); else (quiet.current?.start ?? starter.current)?.(); }, [toggle]);
+  const step = useCallback((d: 1 | -1) => { if (quiet.current) quiet.current.step(d); else jump(d); }, [jump]);
   // In a Quiet time's Worship part the F keys stay the music's.
   const worship = () => { const q = appRef.current.session; return q?.steps[q.i]?.kind === "worship"; };
   useEffect(() => {
     const k = (e: KeyboardEvent) => {
       if (/^F[789]$/.test(e.key) && worship()) return;
       if ((e.metaKey && !e.shiftKey && !e.altKey && !e.ctrlKey && e.key.toLowerCase() === "p") || e.key === "F8") { e.preventDefault(); playPause(); }
-      else if ((e.key === "F7" || e.key === "F9") && st.current.on) { e.preventDefault(); jump(e.key === "F9" ? 1 : -1); }
+      else if ((e.key === "F7" || e.key === "F9") && (st.current.on || quiet.current)) { e.preventDefault(); step(e.key === "F9" ? 1 : -1); }
     };
     window.addEventListener("keydown", k);
     const un = listen<string>("media", ({ payload: m }) => {
       const s = st.current;
       if (worship()) return;
       if (m === "toggle" || (m === "play" && (!s.on || s.paused)) || (m === "pause" && s.on && !s.paused)) playPause();
-      else if (m === "next" || m === "previous") jump(m === "next" ? 1 : -1);
+      else if (m === "next" || m === "previous") step(m === "next" ? 1 : -1);
     });
     return () => { window.removeEventListener("keydown", k); un.then((f) => f()); };
-  }, [playPause, jump]);
+  }, [playPause, step]);
 
   // Tell macOS what is being read, so the media keys and Control Centre come here.
   const npTitle = !state.on ? null : state.doc ? state.doc.title : state.book ? `${book(state.book).name} ${state.chapter}` : null;
@@ -426,11 +430,12 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rate, voice, voiceHe, voiceEl, voiceLa]);
 
-  // Going from the journal to a reader, or from a reader to the journal, stops what was being read.
+  // Reading aloud belongs to the readers (Read, with its books and Quiet time) and the journal:
+  // going anywhere else, or from one of those to the other, stops it and closes the player.
   const screen = app.screen;
   useEffect(() => {
     const s = st.current;
-    if (s.on && (s.doc?.module === "journal") !== (screen === "journal")) stop();
+    if (s.on && (!(screen === "read" || screen === "journal") || (s.doc?.module === "journal") !== (screen === "journal"))) stop();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [screen]);
 
@@ -464,7 +469,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const awake = state.on && !state.paused;
   useEffect(() => { api.keepAwake(awake).catch(() => {}); }, [awake]);
 
-  return <Ctx.Provider value={{ state, voices, allVoices, play, playDoc, toggle, stop, skip, jump, starter, sleep, say, still }}>{children}</Ctx.Provider>;
+  return <Ctx.Provider value={{ state, voices, allVoices, play, playDoc, toggle, stop, skip, jump, starter, quiet, sleep, say, still }}>{children}</Ctx.Provider>;
 }
 
 /** A speaker button that pronounces an original-language word. A span, not a button, so it can sit

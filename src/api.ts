@@ -124,7 +124,12 @@ export const api = {
   /** The reading for a day, by its title ("September 24"). */
   devotion: (module: string, title: string) => invoke<string | null>("devotion", { module, title }),
   /** Opens an https page in its own window inside the app; `key` reuses the window. */
-  openWeb: (key: string, url: string, title: string) => invoke<void>("open_web", { key, url, title }),
+  /** Opens a web page (an online devotional) in its own window, dark when the app is. */
+  openWeb: (key: string, url: string, title: string) => {
+    const t = document.documentElement.getAttribute("data-theme");
+    const dark = t ? t === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+    return invoke<void>("open_web", { key, url, title, dark });
+  },
   askCancel: (chatId: string) => invoke<void>("ask_cancel", { chatId }),
   print: () => invoke<void>("print_page"),
   /** The screenshot scene the app was launched with (TES_SCENE), as JSON, or null. */
