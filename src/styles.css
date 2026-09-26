@@ -230,6 +230,12 @@ button.ks-chip { cursor: pointer; }
 .ks-chip-have { background: var(--pdbg); color: var(--pdfg); }
 .ks-chip-near { background: var(--pubg); color: var(--pufg); }
 .ks-chip-rel { background: var(--accentsoft); color: var(--accent); }
+/* Which parts of the Bible a chip's module covers: OT, NT, Apocrypha (KjvHistory's CoverageBar). */
+.ks-cov { display: inline-flex; gap: 2px; margin-left: 5px; }
+.ks-seg { width: 6px; height: 7px; border-radius: 1.5px; border: 1px solid currentColor; box-sizing: border-box; }
+.ks-seg-2 { background: currentColor; }
+.ks-seg-1 { background: currentColor; opacity: 0.45; }
+.ks-seg-0 { opacity: 0.35; }
 
 /* Interlinear Bibles: each original word over its English and Strong's number (esword.tsx tokenize). */
 .il { display: inline-flex; flex-direction: column; align-items: center; vertical-align: top; margin: 0 0 8px 0; margin-inline-end: 5px; line-height: 1.35; }

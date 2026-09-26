@@ -1,9 +1,10 @@
-import { useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { ModuleInfo } from "./api";
 import { AskPanel } from "./Ask";
 import { Icon } from "./icons";
 import { Topbar } from "./Shell";
 import { useApp } from "./state";
+import { bibleBooks } from "./ui";
 
 /** Where the King James Version came from: the manuscript traditions, the printed editions the
  * translators worked from (1604–1611), the English Bibles before it, and which of them, or what
@@ -39,14 +40,14 @@ const TIERS: { name: string; hint: string; items: Source[] }[] = [
     name: "Printed editions the translators used",
     hint: "On the desks of the six companies at Westminster, Oxford and Cambridge",
     items: [
-      { id: "bomberg", name: "Rabbinic Bible", date: "Bomberg, 1524–25", note: "Jacob ben Chayyim's edition of the Masoretic text with the Targums: the standard Hebrew Bible of the day.", from: ["mt", "tg"], near: /Westminster Leningrad|Hebrew Old Testament \(Tanach\)/i, nearNote: "The same Masoretic text from the Leningrad Codex." },
+      { id: "bomberg", name: "Rabbinic Bible", date: "Bomberg, 1524–25", note: "Jacob ben Chayyim's edition of the Masoretic text with the Targums: the standard Hebrew Bible of the day.", from: ["mt", "tg"], have: /^Hebrew Bible \(Ginsburg/i, near: /Westminster Leningrad|Hebrew Old Testament \(Tanach\)/i, nearNote: "The same Masoretic text from the Leningrad Codex." },
       { id: "compl", name: "Complutensian Polyglot", date: "Alcalá, 1514–17", note: "Hebrew, Greek, Latin and Aramaic in parallel columns; the first printed Greek New Testament.", from: ["mt", "lxx", "vul", "tg", "byz"] },
       { id: "antwerp", name: "Antwerp Polyglot", date: "Plantin, 1569–72", note: "Hebrew, Greek, Latin, the Targums and the Syriac New Testament.", from: ["mt", "lxx", "vul", "tg", "syr"] },
       { id: "erasmus", name: "Erasmus' Greek NT", date: "1516–1535", note: "The first published Greek New Testament, from about seven late Byzantine manuscripts; the root of the Textus Receptus.", from: ["byz", "vul"], near: /Textus Receptus/i, nearNote: "Stephanus' 1550 text, built on Erasmus'." },
       { id: "stephanus", name: "Stephanus' Greek NT", date: "1550", note: "Robert Estienne's edition of Erasmus' text with readings from other manuscripts: the Textus Receptus.", from: ["byz"], have: /Textus Receptus/i },
-      { id: "beza", name: "Beza's Greek NT", date: "1588–89, 1598", note: "Theodore Beza's revisions of the Textus Receptus, the translators' main Greek text.", from: ["byz"], near: /Textus Receptus|\(Interlinear\)/i, nearNote: "Scrivener's 1894 reconstruction of the KJV's Greek (shown as variants in TR+, and σ in INT+) follows Beza where the KJV does." },
+      { id: "beza", name: "Beza's Greek NT", date: "1588–89, 1598", note: "Theodore Beza's revisions of the Textus Receptus, the translators' main Greek text.", from: ["byz"], have: /^Greek NT: Beza \(1598\)$/i, near: /Textus Receptus|\(Interlinear\)/i, nearNote: "Scrivener's 1894 reconstruction of the KJV's Greek (shown as variants in TR+, and σ in INT+) follows Beza where the KJV does." },
       { id: "tremellius", name: "Tremellius–Junius Latin", date: "1575–79", note: "A Protestant Latin translation from the Hebrew, with Tremellius' Latin of the Syriac New Testament.", from: ["mt", "syr"] },
-      { id: "sixtine", name: "Sixtine Septuagint", date: "Rome, 1587", note: "The Septuagint printed from Codex Vaticanus.", from: ["lxx"], near: /Brenton|Greek Old Testament \(Septuagint\)/i, nearNote: "Brenton's English (1844) translates a text descended from the Sixtine; Rahlfs' Greek (1935) also rests mainly on Vaticanus." },
+      { id: "sixtine", name: "Sixtine Septuagint", date: "Rome, 1587", note: "The Septuagint printed from Codex Vaticanus.", from: ["lxx"], have: /^Septuagint \(Greek, Brenton/i, near: /Brenton|Greek Old Testament \(Septuagint\)/i, nearNote: "Brenton's English (1844) translates a text descended from the Sixtine; Rahlfs' Greek (1935) also rests mainly on Vaticanus." },
       { id: "clementine", name: "Clementine Vulgate", date: "1592", note: "The Vulgate as revised under Pope Clement VIII.", from: ["vul"], have: /Clementine/i, near: /Latin Vulgate/i, nearNote: "A modern critical edition of the Vulgate, not the Clementine." },
     ],
   },
@@ -83,6 +84,27 @@ function pairs<T extends { m: ModuleInfo }>(xs: T[]): T[][] {
     rows.set(base, [...(rows.get(base) ?? []), x]);
   }
   return [...rows.values()].map((r) => r.sort((a, b) => Number(a.m.id.endsWith("+")) - Number(b.m.id.endsWith("+"))));
+}
+
+/** How much of each part of the Bible a module has: 0 none, 1 some books, 2 all (or all but one or two). */
+interface Coverage { ot: number; nt: number; ap: number; books: Set<number> }
+const part = (have: number, all: number) => (have === 0 ? 0 : have >= all - 2 ? 2 : 1);
+function coverageOf(books: Set<number>): Coverage {
+  const n = (lo: number, hi: number) => [...books].filter((b) => b >= lo && b <= hi).length;
+  return { ot: part(n(1, 39), 39), nt: part(n(40, 66), 27), ap: n(67, 99) ? 2 : 0, books };
+}
+function coverageText(c: Coverage): string {
+  const say = (v: number, name: string, n: number) => (v === 2 ? name : v === 1 ? `${n} books of the ${name}` : "");
+  const ot = say(c.ot, "Old Testament", [...c.books].filter((b) => b <= 39).length), nt = say(c.nt, "New Testament", [...c.books].filter((b) => b >= 40 && b <= 66).length);
+  return [[ot, nt].filter(Boolean).join(" and "), c.ap ? "the Apocrypha" : ""].filter(Boolean).join(", with ") || "no books";
+}
+
+/** A chip's coverage: a segment for the Old Testament, one for the New, and one for the Apocrypha
+ *  when it has them; solid for the whole, faint for some books, hollow for none. */
+function CoverageBar({ c }: { c?: Coverage }) {
+  if (!c) return null;
+  const seg = (v: number, key: string) => <span key={key} className={`ks-seg ks-seg-${v}`} />;
+  return <span className="ks-cov" aria-hidden="true">{seg(c.ot, "ot")}{seg(c.nt, "nt")}{c.ap ? seg(2, "ap") : null}</span>;
 }
 
 const names = (ms: ModuleInfo[]) => ms.map((m) => `${m.title} (${m.abbrev})`).join(", ");
@@ -148,6 +170,14 @@ export function KjvHistoryScreen() {
   const on = (id: string) => !hover || lit.has(id);
 
   const open = (m: ModuleInfo) => { app.set({ bible: m.id }); app.go("read"); };
+  // Which parts of the Bible each module covers, for the bars on the chips.
+  const [cov, setCov] = useState<Record<string, Coverage>>({});
+  useEffect(() => {
+    let live = true;
+    Promise.all(bibles.map((b) => bibleBooks(b.id).then((books) => [b.id, coverageOf(books)] as const))).then((r) => { if (live) setCov(Object.fromEntries(r)); });
+    return () => { live = false; };
+  }, [bibles]);
+  const covTip = (m: ModuleInfo) => (cov[m.id] ? ` · ${coverageText(cov[m.id])}` : "");
   const haveCount = ALL.filter((s) => matches(s, bibles).have.length).length;
   const nearCount = ALL.filter((s) => { const m = matches(s, bibles); return !m.have.length && m.near.length; }).length;
 
@@ -168,9 +198,9 @@ export function KjvHistoryScreen() {
                 // Beside its plain edition, a + edition is just "+" (its name is in the tooltip).
                 const label = i > 0 ? "+" : m.abbrev;
                 return kind === "have"
-                  ? <button key={m.id} type="button" className="ks-chip ks-chip-have" title={`Read ${m.title}`} onClick={() => open(m)}>{i === 0 && <Icon name="check" size={11} />}{label}</button>
+                  ? <button key={m.id} type="button" className="ks-chip ks-chip-have" title={`Read ${m.title}${covTip(m)}`} onClick={() => open(m)}>{i === 0 && <Icon name="check" size={11} />}{label}{i === 0 && <CoverageBar c={cov[m.id]} />}</button>
                   // The closest stands in for a text the library lacks; the rest are related.
-                  : <button key={m.id} type="button" className={`ks-chip ${kind === "closest" ? "ks-chip-near" : "ks-chip-rel"}`} title={`${kind === "closest" ? "Closest" : "Related"}: ${m.title}`} onClick={() => open(m)}>{i === 0 ? (kind === "closest" ? "Closest: " : "Related: ") : ""}{label}</button>;
+                  : <button key={m.id} type="button" className={`ks-chip ${kind === "closest" ? "ks-chip-near" : "ks-chip-rel"}`} title={`${kind === "closest" ? "Closest" : "Related"}: ${m.title}${covTip(m)}`} onClick={() => open(m)}>{i === 0 ? (kind === "closest" ? "Closest: " : "Related: ") : ""}{label}{i === 0 && <CoverageBar c={cov[m.id]} />}</button>;
               })}
             </div>
           ))}
@@ -196,6 +226,7 @@ export function KjvHistoryScreen() {
             <span className="ks-chip ks-chip-near" style={{ cursor: "default" }}>Closest</span>
             <span className="ks-chip ks-chip-rel" style={{ cursor: "default" }}>Related</span>
             <span className="ks-chip" style={{ cursor: "default" }}>Not in library</span>
+            <span className="ks-chip" style={{ cursor: "default" }} title="Old Testament, New Testament, and the Apocrypha when it has them: solid for the whole, faint for some books">OT · NT · Apocrypha<CoverageBar c={{ ot: 2, nt: 2, ap: 2, books: new Set() }} /></span>
           </div>
           <div ref={box} style={{ position: "relative", padding: "22px 24px 40px", display: "flex", flexDirection: "column", gap: 44 }}>
             <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", overflow: "visible" }}>

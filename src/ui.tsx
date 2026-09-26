@@ -206,13 +206,17 @@ export function Seg<T extends string | number>({ value, options, onChange }: { v
 /** Book then chapter, as two grids. */
 /** Book, then chapter, then verse (or the whole chapter). */
 const booksCache = new Map<string, Promise<Set<number>>>();
+/** The books a Bible has, once looked up. */
+export function bibleBooks(bible: string): Promise<Set<number>> {
+  if (!booksCache.has(bible)) booksCache.set(bible, api.chapterSizes(bible).then((s) => new Set(s.map((x) => x[0]))).catch(() => new Set<number>()));
+  return booksCache.get(bible)!;
+}
 /** The books a Bible has (an Old or New Testament alone has only its own), or null until known. */
 export function useBibleBooks(bible: string): Set<number> | null {
   const [got, setGot] = useState<{ bible: string; books: Set<number> } | null>(null);
   useEffect(() => {
     let live = true;
-    if (!booksCache.has(bible)) booksCache.set(bible, api.chapterSizes(bible).then((s) => new Set(s.map((x) => x[0]))).catch(() => new Set<number>()));
-    booksCache.get(bible)!.then((books) => { if (live) setGot({ bible, books }); });
+    bibleBooks(bible).then((books) => { if (live) setGot({ bible, books }); });
     return () => { live = false; };
   }, [bible]);
   return got && got.bible === bible && got.books.size ? got.books : null;
