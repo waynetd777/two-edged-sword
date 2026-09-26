@@ -45,7 +45,7 @@ const TIERS: { name: string; hint: string; items: Source[] }[] = [
       { id: "antwerp", name: "Antwerp Polyglot", date: "Plantin, 1569–72", note: "Hebrew, Greek, Latin, the Targums and the Syriac New Testament.", from: ["mt", "lxx", "vul", "tg", "syr"] },
       { id: "erasmus", name: "Erasmus' Greek NT", date: "1516–1535", note: "The first published Greek New Testament, from about seven late Byzantine manuscripts; the root of the Textus Receptus.", from: ["byz", "vul"], near: /Textus Receptus/i, nearNote: "Stephanus' 1550 text, built on Erasmus'." },
       { id: "stephanus", name: "Stephanus' Greek NT", date: "1550", note: "Robert Estienne's edition of Erasmus' text with readings from other manuscripts: the Textus Receptus.", from: ["byz"], have: /Textus Receptus/i },
-      { id: "beza", name: "Beza's Greek NT", date: "1588–89, 1598", note: "Theodore Beza's revisions of the Textus Receptus, the translators' main Greek text.", from: ["byz"], have: /^Greek NT: Beza \(1598\)$/i, near: /Textus Receptus|\(Interlinear\)/i, nearNote: "Scrivener's 1894 reconstruction of the KJV's Greek (shown as variants in TR+, and σ in INT+) follows Beza where the KJV does." },
+      { id: "beza", name: "Beza's Greek NT", date: "1588–89, 1598", note: "Theodore Beza's revisions of the Textus Receptus, the translators' main Greek text.", from: ["byz"], have: /^Greek NT: Beza \(1598\)( w\/ glosses)?$/i, near: /Textus Receptus|\(Interlinear\)/i, nearNote: "Scrivener's 1894 reconstruction of the KJV's Greek (shown as variants in TR+, and σ in INT+) follows Beza where the KJV does." },
       { id: "tremellius", name: "Tremellius–Junius Latin", date: "1575–79", note: "A Protestant Latin translation from the Hebrew, with Tremellius' Latin of the Syriac New Testament.", from: ["mt", "syr"] },
       { id: "sixtine", name: "Sixtine Septuagint", date: "Rome, 1587", note: "The Septuagint printed from Codex Vaticanus.", from: ["lxx"], have: /^Septuagint \(Greek, Brenton/i, near: /Brenton|Greek Old Testament \(Septuagint\)/i, nearNote: "Brenton's English (1844) translates a text descended from the Sixtine; Rahlfs' Greek (1935) also rests mainly on Vaticanus." },
       { id: "clementine", name: "Clementine Vulgate", date: "1592", note: "The Vulgate as revised under Pope Clement VIII.", from: ["vul"], have: /Clementine/i, near: /Latin Vulgate/i, nearNote: "A modern critical edition of the Vulgate, not the Clementine." },
@@ -99,12 +99,11 @@ function coverageText(c: Coverage): string {
   return [[ot, nt].filter(Boolean).join(" and "), c.ap ? "the Apocrypha" : ""].filter(Boolean).join(", with ") || "no books";
 }
 
-/** A chip's coverage: a segment for the Old Testament, one for the New, and one for the Apocrypha
- *  when it has them; solid for the whole, faint for some books, hollow for none. */
-function CoverageBar({ c }: { c?: Coverage }) {
-  if (!c) return null;
-  const seg = (v: number, key: string) => <span key={key} className={`ks-seg ks-seg-${v}`} />;
-  return <span className="ks-cov" aria-hidden="true">{seg(c.ot, "ot")}{seg(c.nt, "nt")}{c.ap ? seg(2, "ap") : null}</span>;
+/** A chip's coverage as a dot: one colour for the Old Testament alone, one for the New alone, half of
+ *  each for both (the Apocrypha are in the tooltip). */
+function CoverageDot({ c }: { c?: Coverage }) {
+  if (!c || (!c.ot && !c.nt)) return null;
+  return <span className={`ks-dot ks-dot-${c.ot && c.nt ? "both" : c.ot ? "ot" : "nt"}`} aria-hidden="true" />;
 }
 
 const names = (ms: ModuleInfo[]) => ms.map((m) => `${m.title} (${m.abbrev})`).join(", ");
@@ -198,9 +197,9 @@ export function KjvHistoryScreen() {
                 // Beside its plain edition, a + edition is just "+" (its name is in the tooltip).
                 const label = i > 0 ? "+" : m.abbrev;
                 return kind === "have"
-                  ? <button key={m.id} type="button" className="ks-chip ks-chip-have" title={`Read ${m.title}${covTip(m)}`} onClick={() => open(m)}>{i === 0 && <Icon name="check" size={11} />}{label}{i === 0 && <CoverageBar c={cov[m.id]} />}</button>
+                  ? <button key={m.id} type="button" className="ks-chip ks-chip-have" title={`Read ${m.title}${covTip(m)}`} onClick={() => open(m)}>{i === 0 && <Icon name="check" size={11} />}{label}{i === 0 && <CoverageDot c={cov[m.id]} />}</button>
                   // The closest stands in for a text the library lacks; the rest are related.
-                  : <button key={m.id} type="button" className={`ks-chip ${kind === "closest" ? "ks-chip-near" : "ks-chip-rel"}`} title={`${kind === "closest" ? "Closest" : "Related"}: ${m.title}${covTip(m)}`} onClick={() => open(m)}>{i === 0 ? (kind === "closest" ? "Closest: " : "Related: ") : ""}{label}{i === 0 && <CoverageBar c={cov[m.id]} />}</button>;
+                  : <button key={m.id} type="button" className={`ks-chip ${kind === "closest" ? "ks-chip-near" : "ks-chip-rel"}`} title={`${kind === "closest" ? "Closest" : "Related"}: ${m.title}${covTip(m)}`} onClick={() => open(m)}>{i === 0 ? (kind === "closest" ? "Closest: " : "Related: ") : ""}{label}{i === 0 && <CoverageDot c={cov[m.id]} />}</button>;
               })}
             </div>
           ))}
@@ -226,7 +225,9 @@ export function KjvHistoryScreen() {
             <span className="ks-chip ks-chip-near" style={{ cursor: "default" }}>Closest</span>
             <span className="ks-chip ks-chip-rel" style={{ cursor: "default" }}>Related</span>
             <span className="ks-chip" style={{ cursor: "default" }}>Not in library</span>
-            <span className="ks-chip" style={{ cursor: "default" }} title="Old Testament, New Testament, and the Apocrypha when it has them: solid for the whole, faint for some books">OT · NT · Apocrypha<CoverageBar c={{ ot: 2, nt: 2, ap: 2, books: new Set() }} /></span>
+            <span className="ks-key"><span className="ks-dot ks-dot-ot" />Old Testament</span>
+            <span className="ks-key"><span className="ks-dot ks-dot-nt" />New Testament</span>
+            <span className="ks-key"><span className="ks-dot ks-dot-both" />Both</span>
           </div>
           <div ref={box} style={{ position: "relative", padding: "22px 24px 40px", display: "flex", flexDirection: "column", gap: 44 }}>
             <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", overflow: "visible" }}>
