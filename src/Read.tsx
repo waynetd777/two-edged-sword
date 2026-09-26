@@ -436,6 +436,7 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
           <button className="ibtn" type="button" aria-label="Previous chapter" title="Previous chapter (←)" onClick={() => go(-1)}><Icon name="back" /></button>
           <div className="spacer" style={{ display: "flex", alignItems: "center", justifyContent: "center", color: "var(--muted)" }}>{book(loc.book).name} {loc.chapter} · {bmod?.title}</div>
           <button className={`ibtn ${player.state.on ? "on" : ""}`} type="button" aria-label="Listen" title="Listen (Space · ⌘P)" onClick={() => (player.state.on ? player.toggle() : player.play(bible, loc.book, loc.chapter))}><Icon name="speaker" /></button>
+          <HighlightsButton />
           <TextSizeButton />
           <button className="btn" type="button" onClick={() => setFocus(false)}>Exit focus<span className="kbd">esc</span></button>
           <button className="ibtn" type="button" aria-label="Next chapter" title="Next chapter (→)" onClick={() => go(1)}><Icon name="fwd" /></button>
@@ -444,7 +445,8 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
         <Topbar right={
           <div style={{ display: "flex", gap: 2 }}>
             <button className={`ibtn ${player.state.on ? "on" : ""}`} type="button" aria-label="Listen" title="Listen (Space · ⌘P)" onClick={() => (player.state.on ? player.toggle() : player.play(bible, loc.book, loc.chapter, sel?.from))}><Icon name="speaker" /></button>
-            <TextSizeButton />
+            <HighlightsButton />
+          <TextSizeButton />
             <button className="ibtn" type="button" aria-label="Focus mode" title="Focus mode (⌘.)" onClick={() => setFocus(true)}><Icon name="focus" /></button>
             <button className={`ibtn ${settings.studyPane ? "on" : ""}`} type="button" aria-label="Study pane" title="Study pane (⌘\\)" onClick={() => app.set({ studyPane: !settings.studyPane })}><Icon name="pane" /></button>
           </div>
@@ -501,6 +503,13 @@ function ChapterNav({ onGo, sizes }: { onGo: (d: 1 | -1) => void; sizes: BookSiz
   const { loc } = useApp();
   const p = stepChapter(loc.book, loc.chapter, -1, sizes), n = stepChapter(loc.book, loc.chapter, 1, sizes);
   return <SideNav prev={p && { label: `Previous chapter: ${book(p[0]).name} ${p[1]} (←)`, go: () => onGo(-1) }} next={n && { label: `Next chapter: ${book(n[0]).name} ${n[1]} (→)`, go: () => onGo(1) }} />;
+}
+
+/** Shows or hides highlights in the readers and the journal; highlighting something shows them again. */
+export function HighlightsButton() {
+  const app = useApp();
+  const on = app.settings.showHighlights !== false;
+  return <button className={`ibtn ${on ? "on" : ""}`} type="button" aria-label="Show highlights" aria-pressed={on} title={on ? "Hide highlights" : "Show highlights"} onClick={() => app.set({ showHighlights: !on })}><Icon name="highlight" /></button>;
 }
 
 export function TextSizeButton() {

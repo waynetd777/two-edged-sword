@@ -347,3 +347,5 @@ mark { background: var(--hl-gold); color: inherit; border-radius: 3px; padding: 
 .readcol [data-v] { scroll-margin-top: 80px; }
 /* KJV History: a Bible that has the Apocrypha (tooltip: which books). */
 .ks-apo { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 4px; background: var(--pubg); color: var(--pufg); font: 700 10px/1 var(--ui); cursor: help; flex: none; }
+/* Highlights hidden (the Show highlights button): the readers' verse and paragraph colours, the journal's marks, and what its highlighter has just painted. */
+.hide-hl [class^="hl-"], .hide-hl [class*=" hl-"], .hide-hl .editor span[style*="rgb(250, 1,"] { background: none !important; background-color: transparent !important; }

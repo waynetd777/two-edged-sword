@@ -47,6 +47,8 @@ export interface Settings {
   journalHighlight: HlColor;
   /** What each highlight colour stands for, e.g. a theme; shown in the pickers. Blank is the colour's own name. */
   hlNames: Partial<Record<HlColor, string>>;
+  /** Highlights shown in the readers and the journal; adding one turns them back on. */
+  showHighlights: boolean;
   /** Grammar checking in the journal, with spelling. */
   journalGrammar: boolean;
   model: Model;
@@ -73,7 +75,7 @@ export interface Settings {
 const DEFAULTS: Settings = {
   theme: "auto", readSize: 19, readFont: "literata", studyTab: "commentary", docTab: "ask", studyCommentary: null, studyDict: null, dictModule: null, studyFollow: true, redLetters: true, kjvGlosses: true, layout: "verse", bible: "kjv", compare: ["kjv", "asv", "kjv+"], favBibles: [], hiddenBibles: [],
   commentaryOrder: ["barnes", "henry", "clarke", "gill", "jfb", "wesley", "darby", "meyer"], dictionaryOrder: ["isbe", "smith", "nave", "cyclopedia"],
-  voice: "", voiceHebrew: "", voiceGreek: "", voiceLatin: "", rate: 1, continueChapter: true, continueEntry: false, readNumbers: false, highlightWords: true, journalDir: "", showNotes: true, journalHighlight: "yellow", hlNames: {}, journalGrammar: true,
+  voice: "", voiceHebrew: "", voiceGreek: "", voiceLatin: "", rate: 1, continueChapter: true, continueEntry: false, readNumbers: false, highlightWords: true, journalDir: "", showNotes: true, journalHighlight: "yellow", hlNames: {}, showHighlights: true, journalGrammar: true,
   model: "claude-sonnet-5", includeCommentaries: true, askJournal: false, allowLicensed: true, reminder: false, reminderTime: "06:30", whenBehind: "ask", studyPane: true, copyNumbers: true,
 };
 
@@ -416,6 +418,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     document.documentElement.style.setProperty("--serif", stack);
     document.documentElement.style.setProperty("--display", stack);
   }, [settings.theme, settings.readSize, settings.readFont]);
+  useEffect(() => { document.documentElement.classList.toggle("hide-hl", settings.showHighlights === false); }, [settings.showHighlights]);
 
   const journalDir = settings.journalDir || defaultDir;
   // Only the latest listing is kept: at startup the default folder's can arrive after the chosen one's.
@@ -576,7 +579,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }),
     docPara, clearDocPara: () => setDocPara(null),
     highlights,
-    setHighlight: (k, c) => setHighlights((h) => { const n = { ...h }; if (c) n[k] = c; else delete n[k]; return n; }),
+    setHighlight: (k, c) => { setHighlights((h) => { const n = { ...h }; if (c) n[k] = c; else delete n[k]; return n; }); if (c) setSettings((s) => (s.showHighlights === false ? { ...s, showHighlights: true } : s)); },
     recent: nav.recent,
     session, setSession,
     doc: nav.doc, docAt: nav.docAt ?? {},

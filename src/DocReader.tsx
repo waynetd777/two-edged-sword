@@ -5,7 +5,7 @@ import { docSegments, plainText, renderHtml, wordRangeAt } from "./esword";
 import { Icon } from "./icons";
 import { useListenKey, usePlayer } from "./speech";
 import { AskPanel, withheld } from "./Ask";
-import { HL, HL_DOT, hlLabel, TextSizeButton, textToken, WordPick } from "./Read";
+import { HighlightsButton, HL, HL_DOT, hlLabel, TextSizeButton, textToken, WordPick } from "./Read";
 import { docHlKey, docLabel, parseDocLabel } from "./docref";
 import { WordLookup } from "./WordLookup";
 import { SearchField, Topbar } from "./Shell";
@@ -275,6 +275,7 @@ export function DocReader({ focus, setFocus, openPalette }: { focus: boolean; se
           <button className="ibtn" type="button" aria-label="Previous chapter" title={`Previous ${unit} (←)`} disabled={i <= 0} onClick={() => go(titles[i - 1])}><Icon name="back" /></button>
           <div className="spacer" style={{ display: "flex", alignItems: "center", justifyContent: "center", color: "var(--muted)", minWidth: 0 }}><span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{doc.title} · {mod?.title}</span></div>
           <button className={`ibtn ${reading ? "on" : ""}`} type="button" aria-label="Listen" title="Listen (Space · ⌘P)" disabled={!segs.length} onClick={() => (reading ? player.toggle() : listen())}><Icon name="speaker" /></button>
+          <HighlightsButton />
           <TextSizeButton />
           <button className="btn" type="button" onClick={() => setFocus(false)}>Exit focus<span className="kbd">esc</span></button>
           <button className="ibtn" type="button" aria-label="Next chapter" title={`Next ${unit} (→)`} disabled={i < 0 || i >= titles.length - 1} onClick={() => go(titles[i + 1])}><Icon name="fwd" /></button>
@@ -282,6 +283,7 @@ export function DocReader({ focus, setFocus, openPalette }: { focus: boolean; se
       ) : <Topbar right={
         <div style={{ display: "flex", gap: 2 }}>
           <button className={`ibtn ${reading ? "on" : ""}`} type="button" aria-label="Listen" title="Listen (Space · ⌘P)" disabled={!segs.length} onClick={() => (reading ? player.toggle() : listen())}><Icon name="speaker" /></button>
+          <HighlightsButton />
           <TextSizeButton />
           <button className="ibtn" type="button" aria-label="Focus mode" title="Focus mode (⌘.)" onClick={() => setFocus(true)}><Icon name="focus" /></button>
           <button className={`ibtn ${app.settings.studyPane ? "on" : ""}`} type="button" aria-label="Study pane" title="Study pane: notes, dictionaries and Ask (⌘\)" onClick={() => app.set({ studyPane: !app.settings.studyPane })}><Icon name="pane" /></button>

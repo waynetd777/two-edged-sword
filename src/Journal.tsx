@@ -7,7 +7,7 @@ import { fmtRef, parseRef, Ref } from "./bible";
 import { plainText, wordRangeAt } from "./esword";
 import { Icon } from "./icons";
 import { HL_PAINT, htmlToMd, mdPlain, mdToHtml } from "./md";
-import { HL, HL_DOT, hlLabel } from "./Read";
+import { HighlightsButton, HL, HL_DOT, hlLabel } from "./Read";
 import { SearchField, Topbar } from "./Shell";
 import { HlColor, HlTheme, nowLocal, onFlush, themesOf, uid, useApp } from "./state";
 import { ClearButton, confirmDelete, Dialog, Popover, Seg } from "./ui";
@@ -250,6 +250,7 @@ function Editor({ entry, onChange, saved, err, onDelete, onExport, listed, liste
     if (s && !(s.rangeCount && ed.current?.contains(s.anchorNode)) && saved_range.current) { s.removeAllRanges(); s.addRange(saved_range.current); }
     if (!s || s.isCollapsed || !ed.current?.contains(s.anchorNode)) { if (!picking) app.toast("Select the text to highlight"); return; }
     document.execCommand("hiliteColor", false, HL_PAINT[c ?? "none"]);
+    if (c && app.settings.showHighlights === false) app.set({ showHighlights: true });
     sync();
   };
   const remember = () => { const s = window.getSelection(); if (s && s.rangeCount && ed.current?.contains(s.anchorNode)) saved_range.current = s.getRangeAt(0).cloneRange(); };
@@ -394,6 +395,7 @@ function Editor({ entry, onChange, saved, err, onDelete, onExport, listed, liste
           <Icon name="highlight" /><span style={{ width: 14, height: 3, borderRadius: 2, background: HL_DOT[hlLast] }} />
         </button>
         <button className="ibtn" type="button" aria-label="Highlight colour" title="Highlight colour" style={{ width: 16, marginLeft: -2 }} onClick={(e) => { remember(); setHlAt(e.currentTarget.getBoundingClientRect()); }}><Icon name="down" size={11} /></button>
+        <HighlightsButton />
         <span style={{ width: 1, height: 18, background: "var(--border)", margin: "0 4px" }} />
         <button className="ibtn" type="button" aria-label="Bulleted list" onClick={() => cmd("insertUnorderedList")}><Icon name="list" /></button>
         <button className="ibtn" type="button" aria-label="Numbered list" onClick={() => cmd("insertOrderedList")}><Icon name="olist" /></button>

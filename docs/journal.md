@@ -9,7 +9,8 @@ Dated entries with headings, bold, italic, lists, quotes and verses inserted fro
 (Settings › Journal › Show notes beside verses). Entries are Markdown files, one per month, in
 `~/Documents/Two-edged Sword/` (change it in Settings, e.g. to a folder in your Obsidian vault).
 The toolbar highlights in the reader's eight colours, listed by name once they have names in
-Settings › Highlights (the button keeps the colour last picked;
+Settings › Highlights, and the button after them hides and shows highlights, as in the readers (the
+highlight button keeps the colour last picked;
 saved as `==text==` for yellow, which Obsidian shows too, and `<mark class="hl-green">` for the
 others), inserts a verse, links one, and adds a tag. Typing # in an entry opens the same list
 of tags: the highlight themes first (Settings › Highlights names them; each theme's tag is its
