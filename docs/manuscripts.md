@@ -20,7 +20,7 @@ NIV has been reviewed. Building a list for another translation is described in
 
 ## Greek and Hebrew
 
-<a href="images/index.md#translations-and-manuscripts"><picture><source media="(prefers-color-scheme: dark)" srcset="images/interlinear-dark.png"><img alt="Luke 17 in the Greek Textus Receptus: each word over its Strong's number, with Scrivener's readings in angle brackets" src="images/interlinear-light.png"></picture></a>
+<a href="images/index.md#translations-and-manuscripts"><picture><source media="(prefers-color-scheme: dark)" srcset="images/interlinear-dark.png"><img alt="Luke 17 in Beza's Greek New Testament of 1598, word by word: each Greek word over its English and its Strong's number" src="images/interlinear-light.png"></picture></a>
 
 Word-by-word Bibles show each original word over its English and its Strong's number.
 

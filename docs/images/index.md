@@ -29,7 +29,7 @@ On [Study](../study.md).
 On [Translations and manuscripts](../manuscripts.md).
 
 - Colossians 1:14 in the ASV, with the popup saying it omits “through his blood” and why: [light](differences-light.png) · [dark](differences-dark.png)
-- Luke 17 in the Greek Textus Receptus: each word over its Strong's number, with Scrivener's readings in angle brackets: [light](interlinear-light.png) · [dark](interlinear-dark.png)
+- Luke 17 in Beza's Greek New Testament of 1598, word by word: each Greek word over its English and its Strong's number: [light](interlinear-light.png) · [dark](interlinear-dark.png)
 - Psalm 23 in WLC+, the Hebrew read right to left, each word over its English and Strong's number: [light](interlinear-hebrew-light.png) · [dark](interlinear-hebrew-dark.png)
 - Matthew 6 in Peshitta+, the Syriac read right to left, each word over its English: [light](interlinear-syriac-light.png) · [dark](interlinear-syriac-dark.png)
 - The KJV's family tree: manuscript traditions, printed editions, earlier English Bibles, and which are in the library: [light](kjv-history-light.png) · [dark](kjv-history-dark.png)
