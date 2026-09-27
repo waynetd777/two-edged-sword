@@ -100,7 +100,15 @@ fn toggle_login(app: &AppHandle) {
 #[tauri::command]
 pub fn set_tray(app: AppHandle, tray: tauri::State<'_, Tray>, state: TrayState) -> Result<(), String> {
     let m = menu(&app, Some(&state)).map_err(|e| e.to_string())?;
-    *tray.0.lock().unwrap_or_else(|p| p.into_inner()) = Some(state);
+    let (on, at) = (state.reminder, state.reminder_time.clone());
+    let prev = tray.0.lock().unwrap_or_else(|p| p.into_inner()).replace(state);
+    // Turning the reminder on sends one notification straight away, so macOS asks for permission
+    // now rather than when the first reminder is due.
+    if on && prev.is_some_and(|p| !p.reminder) {
+        if let Err(e) = app.notification().builder().title("Quiet Time").body(format!("You'll be reminded at {at} if today's reading isn't done.")).show() {
+            eprintln!("reminder: {e}");
+        }
+    }
     if let Some(t) = app.tray_by_id("main") {
         t.set_menu(Some(m)).map_err(|e| e.to_string())?;
     }

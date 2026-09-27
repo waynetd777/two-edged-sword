@@ -43,6 +43,9 @@ The first time, macOS asks whether the app may control Music.
 Settings › Quiet time sends a notification at the time you choose, with the day's readings, if
 you haven't read yet.
 
+Turning it on sends one notification straight away, so macOS can ask to allow them. If none
+arrive, allow Two-edged Sword in System Settings › Notifications.
+
 The reminder comes while the app runs, including in the menu bar with its window closed. Turn on
 **Open at Login** (below) so it's always running.
 

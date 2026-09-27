@@ -15,6 +15,24 @@ It only reads them, and keeps your journal, highlights and plans separately.
 | [Ask](ask.md) | The AI assistant and what it sends |
 | [Library](library.md) | Your modules, adding and building more |
 
+## First run
+
+The app isn't notarised by Apple, so macOS blocks it the first time it's opened. To open it:
+
+1. Open it once and close the warning.
+2. Go to System Settings › Privacy & Security and click **Open Anyway** beside Two-edged Sword.
+
+After that, macOS asks once for each thing the app uses:
+
+| Prompt | When | For |
+|---|---|---|
+| Access data from other apps | First launch, if e-Sword X is installed | Reading e-Sword X's library |
+| Documents folder | First journal save | The journal, in Documents › Two-edged Sword |
+| Notifications | Turning on the daily reminder | The [reminder](quiet-time.md#daily-reminder) |
+| Control Music | First worship song | [Worship music](quiet-time.md#worship-music) |
+
+Something refused by mistake can be allowed in System Settings › Privacy & Security.
+
 ## Getting around
 
 | Keys | Does |

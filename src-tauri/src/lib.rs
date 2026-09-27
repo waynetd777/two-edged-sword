@@ -191,13 +191,11 @@ fn app_version(app: AppHandle) -> (String, String) {
     (app.package_info().version.to_string(), option_env!("TES_BUILD").unwrap_or("dev").to_string())
 }
 
-/// The journal lives in the Obsidian vault when there is one, so entries show up there too.
+/// The journal's folder unless Settings names another.
 #[tauri::command]
 fn journal_default_dir() -> String {
     let home = PathBuf::from(std::env::var("HOME").unwrap_or_default());
-    let vault = home.join("Library/CloudStorage/OneDrive-Personal/Notes");
-    let dir = if vault.is_dir() { vault.join("Two-edged Sword") } else { home.join("Documents/Two-edged Sword") };
-    dir.to_string_lossy().to_string()
+    home.join("Documents/Two-edged Sword").to_string_lossy().to_string()
 }
 
 /// A folder the user chose: an absolute path with no `..` in it.
@@ -207,8 +205,8 @@ fn chosen_dir(dir: &str) -> Result<PathBuf, String> {
     Ok(p)
 }
 
-// The journal and file commands run off the main thread: the vault is on OneDrive, where
-// reading a file that is only in the cloud first downloads it.
+// The journal and file commands run off the main thread: the folder may be on a cloud drive
+// such as OneDrive, where reading a file that is only in the cloud first downloads it.
 #[tauri::command(async)]
 fn journal_list(dir: String) -> Result<Vec<journal::Entry>, String> {
     journal::list(&chosen_dir(&dir)?)

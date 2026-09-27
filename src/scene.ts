@@ -63,7 +63,11 @@ export function runScene(app: ReturnType<typeof useApp>, still: (s: Partial<Play
     window.setTimeout(() => {
       if (sc.chat) { const chat = sc.chat; app.setChats(() => [chat]); setSceneChat(chat.id); }
       // The KJV unless the scene says otherwise: never the user's own choice, which may be licensed.
-      app.set({ bible: "kjv", ...sc.settings });
+      // Nor the user's highlight names, plans' Bibles or Recent list, which are theirs.
+      app.set({ bible: "kjv", hlNames: {}, ...sc.settings });
+      app.setPlans((ps) => ps.map((p) => ({ ...p, bible: "kjv" })));
+      const at = new Date().toISOString();
+      app.setRecent([[43, 3], [19, 23], [45, 8], [23, 53], [1, 1]].map(([book, chapter]) => ({ book, chapter, at })));
       if (sc.loc) app.open(sc.loc, sc.screen ?? "read");
       else if (sc.screen) app.go(sc.screen);
       if (sc.doc) app.openDoc(sc.doc.module, sc.doc.title, sc.doc.kind ?? "reference", sc.doc.para);

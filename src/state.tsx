@@ -307,6 +307,8 @@ interface Ctx {
   removeBookmark: (id: string) => void;
   removeRecent: (r: Recent) => void;
   clearRecent: () => void;
+  /** Replaces the Recent list (screenshot scenes, which save nothing). */
+  setRecent: (r: Recent[]) => void;
 }
 
 const C = createContext<Ctx | null>(null);
@@ -641,6 +643,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (gone) toast("Removed from Recent", () => setNav((n) => ({ ...n, recent: n.recent.some((x) => sameRecent(x, gone)) ? n.recent : [...n.recent.slice(0, i), gone, ...n.recent.slice(i)] })));
     },
     clearRecent: () => setNav((n) => ({ ...n, recent: [] })),
+    setRecent: (r) => setNav((n) => ({ ...n, recent: r })),
   };
   return <C.Provider value={value}>{children}</C.Provider>;
 }

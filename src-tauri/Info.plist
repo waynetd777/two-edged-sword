@@ -6,6 +6,8 @@
 	<string>Two-edged Sword.help</string>
 	<key>CFBundleHelpBookName</key>
 	<string>com.wayned.two-edged-sword.help</string>
+	<key>NSDocumentsFolderUsageDescription</key>
+	<string>Two-edged Sword keeps your journal in Documents › Two-edged Sword unless you choose another folder in Settings.</string>
 	<key>NSAppleEventsUsageDescription</key>
 	<string>Two-edged Sword plays the worship songs chosen for your Quiet time in the Music app.</string>
 </dict>

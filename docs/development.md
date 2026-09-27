@@ -36,7 +36,7 @@ the release.
 | The app's modules folder (read first; `tools/` writes here) | `~/Library/Application Support/Two-edged Sword/Modules/` (`TES_LIBRARY` overrides it for `tools/`) |
 | e-Sword X modules (read-only, if Library › Read e-Sword X is on) | `~/Library/Containers/net.e-sword.e-Sword-X/Data/Library/Application Support/` |
 | Modules built into the app (read last) | `Contents/Resources/modules/` in the app; `src-tauri/modules/` in a debug build |
-| Journal, a Markdown file per month | `~/Library/CloudStorage/OneDrive-Personal/Notes/Two-edged Sword/` if that exists, else `~/Documents/Two-edged Sword/` |
+| Journal, a Markdown file per month | `~/Documents/Two-edged Sword/`, or the folder chosen in Settings |
 | Settings, bookmarks, highlights, plans, chats | `~/Library/Application Support/Two-edged Sword/*.json` |
 | Search index | `~/Library/Application Support/Two-edged Sword/search-index.sqlite` |
 | Library material written out for Ask | `~/Library/Application Support/Two-edged Sword/ask/` and `books/` |
