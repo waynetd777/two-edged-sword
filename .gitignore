@@ -5,6 +5,8 @@ dist-ssr
 signing.local
 src-tauri/target
 src-tauri/gen/schemas
+# Built from docs/ by tools/helpbook.py
+src-tauri/gen/help
 .DS_Store
 .vscode/*
 !.vscode/extensions.json

@@ -1,42 +1,27 @@
 # Two-edged Sword
 
-A personal Bible study app for macOS, built on the Bibles, commentaries, dictionaries, lexicons,
-reference books, devotionals and maps you already have in e-Sword X. It opens every module
-read-only and keeps what you make (journal, bookmarks, highlights, plans, chats) separately.
+A Bible study app for macOS, built on the Bibles, commentaries, dictionaries and books you already
+have in e-Sword X. It only reads your modules, and keeps your journal, highlights and plans
+separately.
 
 <a href="docs/images/index.md#the-readme"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/read-dark.png"><img alt="Reading 1 John 1 with the study pane open on the commentaries" src="docs/images/read-light.png"></picture></a>
 
 ## What it does
 
-- **Read** a chapter beside a study pane with every commentary on the verse, cross-references,
-  dictionaries, your notes and maps. Click any word for its Greek or Hebrew.
-- **Highlight** in eight colours, each of which can stand for a theme you name, in Scripture,
-  books and the journal; one button hides and shows them all.
-- **Books and devotionals** from your library, with the same tools as Scripture: highlight,
-  bookmark and note a paragraph, listen, and ask about it.
-- **Listen** to a chapter, book or journal entry read aloud in any macOS voice, including the
-  Premium ones, with each word highlighted as it is spoken; ⌘P and the keyboard's media keys
-  control it from anywhere.
-- **Differences from the KJV**: a mark beside each verse where a translation differs in meaning,
-  with both readings and the manuscript reason.
-- **Greek and Hebrew** Bibles word by word, each word over its English and Strong's number, with
-  other editions' readings marked.
-- **Ask** questions about what you're reading. The assistant searches your own commentaries,
-  lexicons and dictionaries and names its sources. It runs on Claude Code, Codex,
-  Antigravity or GitHub Copilot, whichever is installed.
-- **Compare** any number of translations verse by verse, with the differences highlighted.
-- **Search** across the whole library.
-- **Word Study** a Strong's number: where it is used, every verse in context, and the articles
-  about it in your library.
-- **Journal** entries linked to the verses they're about, kept in step with your Obsidian vault,
-  tagged from a list that opens when you type #.
-- **Quiet time** plans: daily readings and devotionals, worship songs from your Music library
-  chosen for the day's reading, and a daily reminder.
-- The **menu-bar** menu starts today's Quiet time or picks up where you left off.
-- **Build more modules** from free sources: the Targums, the Talmud, the Clementine Vulgate, the
-  Syriac Peshitta, Tyndale and the Geneva Bible.
-- **KJV History**: the manuscripts and editions behind the King James Version, and which of them
-  you have.
+- **Read** a chapter beside every commentary on the verse, cross-references, dictionaries and
+  your notes. Click any word for its Greek or Hebrew.
+- **Highlight** in eight colours, each standing for a theme you name.
+- **Books and devotionals** from your library, with the same tools as Scripture.
+- **Listen** to anything read aloud, each word highlighted as it's spoken.
+- **Differences from the KJV**: a mark wherever a translation differs in meaning, and why.
+- **Greek and Hebrew** word by word, each word over its English and Strong's number.
+- **Ask** questions about what you're reading, answered from your own library.
+- **Compare** translations side by side, **Search** the whole library, and **Word Study** a Greek
+  or Hebrew word.
+- **Journal** entries linked to their verses, kept in step with Obsidian.
+- **Quiet time** plans, with worship songs chosen for the day and a daily reminder.
+- **Build more modules** from free sources, such as the Targums, the Talmud and the Vulgate.
+- **KJV History**: the manuscripts and editions behind the KJV, and which you have.
 
 <table>
   <tr>
@@ -60,34 +45,35 @@ read-only and keeps what you make (journal, bookmarks, highlights, plans, chats)
     <td align="center"><a href="docs/quiet-time.md#plans"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/quiet-time-dark.png"><img alt="Quiet time with today's readings" src="docs/images/quiet-time-light.png"></picture></a><br><sub><a href="docs/quiet-time.md#plans">Quiet time plans</a></sub></td>
   </tr>
   <tr>
-    <td align="center"><a href="docs/quiet-time.md#plans"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/worship-dark.png"><img alt="The Worship part of Quiet time: why each song suits the day's reading" src="docs/images/worship-light.png"></picture></a><br><sub><a href="docs/quiet-time.md#plans">Worship songs for the day</a></sub></td>
+    <td align="center"><a href="docs/quiet-time.md#worship-music"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/worship-dark.png"><img alt="The Worship part of Quiet time: why each song suits the day's reading" src="docs/images/worship-light.png"></picture></a><br><sub><a href="docs/quiet-time.md#worship-music">Worship songs for the day</a></sub></td>
     <td align="center"><a href="docs/manuscripts.md#kjv-history"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/kjv-history-dark.png"><img alt="The KJV's family tree, and which sources are in the library" src="docs/images/kjv-history-light.png"></picture></a><br><sub><a href="docs/manuscripts.md#kjv-history">KJV History</a></sub></td>
   </tr>
 </table>
 
 ## Quick start
 
-Needs macOS 13+, the Xcode Command Line Tools, e-Sword X with some modules, Rust and Node. Ask
-also needs Claude Code, Codex, Antigravity or GitHub Copilot.
+Needs macOS 13 or later, the Xcode Command Line Tools, e-Sword X with some modules, Rust, Node and
+pandoc. Ask also needs Claude Code, Codex, Antigravity or GitHub Copilot.
 
 ```sh
 npm install
-make dev            # the app with hot reload
-cp signing.local.example signing.local   # then name your signing certificate in it
-make install-app    # build it and put it in /Applications
+make dev                                  # the app with hot reload
+cp signing.local.example signing.local    # then name your signing certificate in it
+make install-app                          # build it and put it in /Applications
 ```
 
-Without a signing certificate, macOS asks for access to e-Sword's data after every build: see
-[Signing and Full Disk Access](docs/development.md#signing-and-full-disk-access).
+Without a signing certificate, macOS asks for access to e-Sword's data after every build
+([Signing and Full Disk Access](docs/development.md#signing-and-full-disk-access)).
 
 Licensed Bibles are read where e-Sword keeps them and never copied into this repo.
 
 ## Documentation
 
-- [Features](docs/features.md): getting around, and Settings, with a page for each part:
-  [Reading](docs/reading.md), [Study](docs/study.md),
-  [Translations and manuscripts](docs/manuscripts.md), [Journal](docs/journal.md) and
-  [Quiet time](docs/quiet-time.md)
-- [Ask](docs/ask.md): the AI assistant, which models it offers, and what it sends
-- [Library](docs/library.md): e-Sword modules, adding and building more, and free ones worth having
+The same guides are in the app, under Help (⌘?).
+
+- [Features](docs/features.md): getting around and Settings, then [Reading](docs/reading.md),
+  [Study](docs/study.md), [Translations and manuscripts](docs/manuscripts.md),
+  [Journal](docs/journal.md) and [Quiet time](docs/quiet-time.md)
+- [Ask](docs/ask.md): the AI assistant and what it sends
+- [Library](docs/library.md): your modules, adding and building more, and free ones worth having
 - [Development](docs/development.md): building, signing, where data lives, and the code

@@ -2,6 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CFBundleHelpBookFolder</key>
+	<string>Two-edged Sword.help</string>
+	<key>CFBundleHelpBookName</key>
+	<string>com.wayned.two-edged-sword.help</string>
 	<key>NSAppleEventsUsageDescription</key>
 	<string>Two-edged Sword plays the worship songs chosen for your Quiet time in the Music app.</string>
 </dict>

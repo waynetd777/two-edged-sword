@@ -1,6 +1,7 @@
 mod assistant;
 mod books;
 mod content;
+mod help;
 mod index;
 mod journal;
 mod library;
@@ -552,6 +553,11 @@ pub fn run() {
             tts::tts_pause,
             tray::set_tray
         ])
+        .on_menu_event(|app, ev| {
+            if ev.id() == help::MENU_ID {
+                help::show(app);
+            }
+        })
         .setup(|app| {
             // Did Login Items start this, rather than someone opening the app? Asked first: the
             // answer is in the launch AppleEvent AppKit is dispatching now, and it has to be known
@@ -563,6 +569,7 @@ pub fn run() {
             if quiet {
                 set_in_dock(app.handle(), false);
             }
+            help::add_to_menu(app.handle())?;
             // Until the frontend sends today's reading, the menu has its choices without the details.
             let menu = tray::menu(app.handle(), None)?;
             let tray_icon = tauri::image::Image::from_bytes(include_bytes!("../icons/tray@2x.png")).expect("tray icon is a valid png");

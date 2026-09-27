@@ -1,7 +1,8 @@
 //! Ask: runs an AI coding CLI already installed and signed in on this Mac — Claude Code, Codex,
 //! Antigravity or GitHub Copilot — non-interactively, and streams its answer back to the window as events. It has no
 //! tools, except read-only search in a folder: a reference book's exported files (books.rs) or
-//! the library's material on a Bible passage, or the user's journal (study.rs). The model id says which CLI answers.
+//! the library's material on a Bible passage, or the user's journal (study.rs); and in every chat,
+//! the app's user guide (help.rs). The model id says which CLI answers.
 
 mod antigravity;
 mod claude;
@@ -49,6 +50,14 @@ Search the entries (by word, verse, tag or date) and read the ones that bear on 
 Speak of them as theirs and say which entry each point comes from, by title and date (for example: in “Grace at work”, 3 March 2026, you wrote …). \
 Where their thinking has changed over time, say how. If the journal has nothing on a point, say so.";
 
+/// Added in every chat: the app's own user guide, which help::write_guides puts in the working directory.
+const HELP: &str = "The working directory also has help/, this app's user guide (the app is Two-edged Sword): help/index.txt lists its files and their sections. \
+When the question is about the app itself (how to do something in it, what a feature or setting does, where to find it), search help/ and answer from it, \
+naming the screens, buttons, menus and keys as it does. If the guide doesn't describe something, say so rather than guessing how the app works.";
+
+/// A chat with no folder of its own (Compare, Word Study, search results) can still search the guide.
+const APP: &str = "The message has what the user is looking at; answer from it and what you know.";
+
 /// Where an answer may search: nowhere, a book, the library's material on a passage, or the journal.
 pub enum Folder {
     None,
@@ -64,14 +73,16 @@ impl Folder {
             Folder::Book(d) | Folder::Study(d) | Folder::Journal(d) => Some(d),
         }
     }
-    /// What to add to the system prompt; each CLI appends how to search with its own tools.
-    fn prompt(&self) -> Option<String> {
-        match self {
-            Folder::None => None,
-            Folder::Book(_) => Some(BOOK.to_string()),
-            Folder::Study(_) => Some(STUDY.to_string()),
-            Folder::Journal(_) => Some(JOURNAL.to_string()),
-        }
+    /// What to add to the system prompt; each CLI appends how to search with its own tools. Every
+    /// chat has the guide to search, so every chat gets the read-only search tools.
+    fn prompt(&self) -> String {
+        let what = match self {
+            Folder::None => APP,
+            Folder::Book(_) => BOOK,
+            Folder::Study(_) => STUDY,
+            Folder::Journal(_) => JOURNAL,
+        };
+        format!("{what} {HELP}")
     }
 }
 
@@ -97,6 +108,7 @@ fn emit_status(app: &tauri::AppHandle, chat_id: &str, text: String) {
 
 /// A file the model opens, named as the user would: "Matthew Henry's Commentary on the Whole Bible".
 fn stem(path: &str) -> Option<String> {
+    if path == "help" || path.ends_with("/help") || path.contains("help/") { return Some("the help".into()); }
     let name = path.rsplit('/').next()?;
     let name = name.strip_suffix(".txt").unwrap_or(name);
     (!name.is_empty() && name != "index").then(|| name.to_string())
@@ -223,6 +235,7 @@ pub fn ask(app: tauri::AppHandle, running: std::sync::Arc<Running>, data: &std::
     let cli = if model.starts_with(antigravity::PREFIX) { "agy" } else if model.starts_with(copilot::PREFIX) { "copilot" } else if model.starts_with("claude") { "claude" } else { "codex" };
     let cwd = folder.dir().cloned().unwrap_or_else(|| data.join(cli));
     std::fs::create_dir_all(&cwd).map_err(|e| e.to_string())?;
+    crate::help::write_guides(&cwd).map_err(|e| e.to_string())?;
     match cli {
         "agy" => antigravity::ask(app, running, cwd, chat_id, prompt, model, session, folder),
         "copilot" => copilot::ask(app, running, cwd, chat_id, prompt, model, session, folder),

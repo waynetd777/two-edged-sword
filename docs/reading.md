@@ -8,107 +8,89 @@
 
 <a href="images/index.md#reading"><picture><source media="(prefers-color-scheme: dark)" srcset="images/read-dark.png"><img alt="Reading 1 John 1 with the study pane on the commentaries" src="images/read-light.png"></picture></a>
 
-The chapter, one verse per line or as paragraphs, beside a study pane that follows the
-selected verse:
+The chapter shows beside a study pane that follows the verse you select.
 
-- **Commentary**: every commentary that covers the verse, in your order, with each one's
-  chapter and book introductions, and Treasury of Scripture Knowledge cross-references with
-  previews.
-- **Dictionary**: type in the box at the top; once you do, only the dictionaries with a matching
-  entry keep a pill, and the rest are counted as "with nothing here".
-- **Notes** (your journal entries on the verse) and **Maps** for the book.
-- **Ask**: questions about the verse or chapter (see [Ask](ask.md)).
+### The study pane
 
-Click any word to look it up: its Greek or Hebrew (for a Bible without Strong's numbers, the
-words the KJV+ most often translates it with), how the KJV translates it, dictionary articles,
-the commentaries on that verse, and buttons for Search, Word study, Dictionary (looks the word up
-in the Dictionary tab and opens the first match) and Ask. The speaker beside a
-Greek or Hebrew word pronounces it, with macOS's Greek or Hebrew voice (modern pronunciation) if
-installed, otherwise from Strong's pronunciation guide. Words in commentary, dictionary articles
-and books can be clicked the same way.
+- **Commentary**: every commentary on the verse, in your order, with cross-references from the
+  Treasury of Scripture Knowledge.
+- **Dictionary**: type a word to look it up in all your dictionaries.
+- **Notes**: your journal entries on the verse.
+- **Maps** for the book.
+- **Ask**: questions about the verse or chapter ([Ask](ask.md)).
 
-Click a verse (anywhere but a word) to select it; ⇧-click for a range. The toolbar above it
-offers highlight (eight colours, each of which can be given a name such as a theme in
-Settings › Highlights; the toolbar shows the name of the verse's colour; the highlighter button
-in the top bar hides and shows all highlights, and highlighting something shows them again), bookmark, note (a journal entry on the verse, N), compare, listen
-from here, ask and copy (⌘C). Its labels fold to icons when the column is narrow.
+⌘\ shows or hides the pane.
 
-Hover a reference or a Strong's number for a preview. The passage picker goes book, chapter,
-then verse, and lists only the books the Bible has: an Old or New Testament alone opens where it
-starts, and ← and → skip the books it lacks. The Bible and Books menus have a search box (type,
-then ↑↓ and Enter).
+### Look up a word
 
-**The Apocrypha.** A Bible that has them (the Douay-Rheims, the Vulgates, the Bishops' Bible,
-Brenton and the Septuagints) shows an Apocrypha section in the passage picker, between the
-Testaments where the KJV of 1611 printed them: Tobit, Judith, Wisdom, Sirach, Baruch, 1 and 2
-Maccabees, and in the Septuagints 1 Esdras, 3 and 4 Maccabees and the Prayer of Manasseh. The
-chapters some Bibles add to canonical books (Esther 11–16, Daniel 13 Susanna and 14 Bel and the
-Dragon, Psalm 151) are yellow in the chapter grid. Wherever one shows, it has a yellow
-**Apocrypha** pill: beside the chapter's name, in Compare, in search results and in the player,
-and the passage button turns yellow. Turning the page and reading aloud go from Malachi into
-them and on to Matthew; references such as "Tob 4:15", "Ecclus. 24:1" and "1 Macc 2:7" link.
+Click any word for its Greek or Hebrew, how the KJV translates it, and dictionary articles. The
+speaker beside it says the word aloud. Words in commentaries, dictionaries and books work the
+same way.
 
-The chapter's name stays at the top of the column as you scroll.
+### Select verses
 
-The Bible you choose here is for this session. The default in Settings (or the Library) comes
-back when you reopen the window or restart the app, or with the button beside the Bible picker
-(greyed out when the default is the one showing). Up to three favourite translations (Settings ›
-Bibles) get buttons to the left of Paragraph and Verse, to switch between them in one click, keeping your
-place in the chapter; back (⌘[) returns to the translation before.
+Click a verse to select it, or ⇧-click for a range. The toolbar above it can:
 
-In Verse layout, a ≠ beside a verse marks where the translation differs in meaning from the KJV,
-and Greek and Hebrew Bibles show each word over its English and Strong's number: see
-[Translations and manuscripts](manuscripts.md). "See ASTRONOMY" in a dictionary and "see on Gen 12:8" in a commentary open that entry
-or note in the pane, with back and forward.
+- highlight it in one of eight colours
+- bookmark it
+- add a note (a journal entry on the verse; N)
+- compare, listen from here, or ask about it
+- copy it (⌘C)
 
-⌘. is focus mode (Esc leaves it), the text across 80% of the window; ← and → turn the page (as do the chevrons at the middle of the
-column's sides, in books and Compare too), and ⌘\\ shows or hides the study pane.
+The highlighter in the top bar hides and shows all highlights.
+
+### Move around
+
+- ← and → turn the page. The passage picker goes book, chapter, verse.
+- Hover a reference or Strong's number for a preview.
+- ⌘. is focus mode: the text across most of the window. Esc leaves it.
+
+### Choose a translation
+
+The Bible you pick lasts until you close the window; then your default (Settings › Bibles) comes
+back. Favourite translations get one-click buttons in the top bar.
+
+A ≠ beside a verse marks where the translation differs from the KJV
+([Translations and manuscripts](manuscripts.md)).
+
+### The Apocrypha
+
+Bibles that have them (the Douay-Rheims, the Vulgates, the Bishops' Bible and the Septuagints) show
+an Apocrypha section in the passage picker, between the Testaments. Apocrypha chapters are marked
+in yellow wherever they appear.
 
 ## Books and devotionals
 
 <a href="images/index.md#reading"><picture><source media="(prefers-color-scheme: dark)" srcset="images/books-dark.png"><img alt="Foxe's Book of Martyrs with a paragraph selected and highlighted" src="images/books-light.png"></picture></a>
 
-The Books menu beside the Bible picker opens a reference book or a devotional in the reading
-column: chapters (a devotional's days) down the side, charts at full width, images full screen
-on a click, read aloud paragraph by paragraph, and focus mode. A devotional opens on today's
-reading.
+The **Books** menu, beside the Bible picker, opens a reference book or devotional. Chapters are
+down the side; a devotional opens on today's reading.
 
-Paragraphs work like verses: numbered, outlined on hover, selected with a click (⇧-click for a
-run), with the same toolbar to highlight, bookmark, note (a journal entry quoting it, linked to
-it), listen from here, ask and copy. Bookmarks and notes show beside the paragraph. The study
-pane beside the book has **Notes** (journal entries on the chapter), **Dictionary** and **Ask**.
+Paragraphs work like verses: click one to highlight, bookmark, note, listen, ask about or copy it.
+The study pane has your notes on the chapter, the dictionaries and Ask.
 
 ## Listen
 
 <a href="images/index.md#reading"><picture><source media="(prefers-color-scheme: dark)" srcset="images/listen-dark.png"><img alt="Listening to 1 John 1, the word being spoken highlighted" src="images/listen-light.png"></picture></a>
 
-Reads the chapter aloud, highlighting each word as it is spoken, at 0.5× to 2×, with a sleep
-timer (minutes, or the end of the chapter). It carries on into the next chapter and announces
-each one ("First Samuel, chapter 3"). The progress bar moves word by word.
+Reads the chapter aloud, highlighting each word as it's spoken, and carries on into the next
+chapter. Choose the speed (0.5× to 2×) and a sleep timer in the player.
 
-- **Space** (in the readers) or **⌘P** (anywhere) plays and pauses; with nothing playing they
-  start the chapter, book or entry showing. Pause stops mid-word and play carries on from there.
-- **F7** and **F9** go to the previous or next chapter (a book's, or the next journal entry). The
-  keyboard's media keys work without fn: while it reads, the app is what macOS's Now Playing and
-  headphone buttons control.
-- **Esc** closes the player (after any open menu or focus mode).
+| Keys | Does |
+|---|---|
+| Space or ⌘P | Play and pause |
+| F7 and F9 | Previous or next chapter |
+| Esc | Close the player |
 
-Choosing another translation stops the reading, as does going to a screen that can't read aloud,
-or between the readers and the journal.
+The keyboard's media keys and headphone buttons work too.
 
-It speaks through macOS's own synthesiser, so every voice installed on the Mac can be chosen,
-including the far more natural **Premium** and **Enhanced** ones. They are a separate download:
+### Better voices
 
-1. System Settings › Accessibility › Spoken Content › System voice › Manage Voices.
-2. Under English, download a voice marked (Premium): for example Zoe, Ava or Evan (US), or
-   Jamie or Serena (UK).
-3. Pick it from the voice menu in the player or in Settings. It appears once the download
-   finishes and you switch back to the app.
+The app uses the voices installed on your Mac. The **Premium** ones sound far more natural:
 
-Bibles in Hebrew (and the Aramaic Targums) and in Greek are read in a Hebrew or Greek voice
-(Settings › Listening; Automatic picks the best one installed, Carmit and Melina come with
-macOS), in the modern pronunciation. The Latin Vulgates are read in an Italian voice (Alice
-comes with macOS), which says Church Latin the way it is said; any voice can be chosen instead.
-Better ones download the same way as the English voices, under Hebrew, Greek and Italian in
-Manage Voices. A word-by-word Bible is read in its own language only, not the English and
-grammar under its words; the chapter heading and verse numbers are left out.
+1. Open System Settings › Accessibility › Spoken Content › System voice › Manage Voices.
+2. Under English, download a voice marked (Premium), such as Zoe or Ava (US), or Jamie (UK).
+3. Choose it in the player's voice menu or in Settings › Listening.
+
+Hebrew, Greek and Latin Bibles are read in a Hebrew, Greek or Italian voice. Better ones download
+the same way.

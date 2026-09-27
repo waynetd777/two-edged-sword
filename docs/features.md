@@ -12,29 +12,26 @@
 
 ## Getting around
 
-- ⌘1 to ⌘8 switch screens, ⌘K goes to any reference, word, Strong's number or command, and ⌘,
-  opens Settings. ⌘P plays and pauses reading aloud, and F7 and F9 go back or on
-  ([Listen](reading.md#listen)).
-- **Back and forward** (top left, or ⌘[ and ⌘]) step through every screen, passage, book
-  chapter, word, search and favourite translation you've been to, scrolled back to where you were.
-- The sidebar lists your bookmarks and recent chapters, eight of each, with **Show all** for the
-  rest. Hover one for a preview; × removes it, with **Undo**.
-- Hover any control for what it does. Deleting a journal entry, a plan or a chat asks first.
+| Keys | Does |
+|---|---|
+| ⌘1 to ⌘8 | Switch screens |
+| ⌘K | Go to a reference, word, Strong's number or command |
+| ⌘[ and ⌘] | Back and forward, to where you were |
+| ⌘, | Settings |
+| ⌘P | Play or pause reading aloud ([Listen](reading.md#listen)) |
+| ⌘? | Help |
+
+- **Back and forward** (top left) remember screens, passages, words and searches.
+- The **sidebar** lists your bookmarks and recent chapters. Hover one for a preview; × removes it.
+- Hover any control to see what it does.
 
 ## Settings
 
-- **Appearance**: theme (match macOS, light or dark), font and size, words of Jesus in red,
-  English under each word of Greek and Hebrew Bibles that have none of their own, verse numbers
-  when copying, and verse or paragraph layout.
-- **Bibles**: the default translation (what the reader opens with; choosing another Bible while
-  reading lasts until you close the window, or the button beside the Bible picker), up to three
-  favourite translations, the Compare columns, and the library.
-- **Highlights**: a name for each of the eight highlight colours, such as a theme. The highlight
-  pickers show the names, the journal's tag list offers each theme as a tag, and Ask knows them.
-- **Listening**: the voice, the voices for Hebrew, Greek and Latin Bibles, speed, and whether to
-  highlight each word, continue into the next chapter or journal entry, and read verse numbers.
+- **Appearance**: theme, font and size, words of Jesus in red, verse or paragraph layout.
+- **Bibles**: the default translation, up to three favourites, and the Compare columns.
+- **Highlights**: a name for each of the eight colours, such as a theme.
+- **Listening**: voices, speed, and whether to highlight each word and read on.
 - **Journal**: its folder, notes beside verses, and grammar checking.
-- **Quiet time**: the daily reminder, and what to do when you fall behind a plan.
-- **AI assistant**: which of Claude Code, Codex, Antigravity and Copilot are installed, the
-  default model, whether Ask may search your library and your journal, **Licensed text** (off:
-  no licensed module's text goes to Ask), and your saved chats. See [Ask](ask.md).
+- **Quiet time**: the daily reminder, and what to do when you fall behind.
+- **AI assistant**: which tools are installed, the default model, and what Ask may read and send
+  ([Ask](ask.md)).

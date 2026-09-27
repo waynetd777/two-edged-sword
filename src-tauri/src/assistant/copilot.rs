@@ -1,6 +1,5 @@
 //! GitHub Copilot CLI (`copilot -p --output-format json --stream on`). Only its read and search
-//! tools exist in a folder chat (`--available-tools=view,grep,glob`), and outside one only `view`,
-//! in an empty working folder (an empty list would mean every tool, web_fetch included); reading
+//! tools exist (`--available-tools=view,grep,glob`; an empty list would mean every tool, web_fetch included); reading
 //! outside the folder needs permission, which prompt mode can't ask for, so it is refused and the
 //! answer carries on without it. Its built-in GitHub MCP server and the user's instruction files
 //! are left out. It lists no models, so the app offers "auto" and Copilot routes to whatever the
@@ -15,7 +14,6 @@ use tauri::{AppHandle, Emitter};
 
 pub const PREFIX: &str = "copilot:";
 const TOOLS: &str = "Search with grep, find files with glob, and open them with view, several at once where you can. Read nothing outside this folder.";
-const NO_TOOLS: &str = "Answer from the message alone.";
 
 pub fn find() -> Option<PathBuf> {
     super::find("copilot", &[])
@@ -28,10 +26,7 @@ pub fn models() -> Vec<Model> {
 #[allow(clippy::too_many_arguments)]
 pub fn ask(app: AppHandle, running: Arc<Running>, cwd: PathBuf, chat_id: String, prompt: String, model: String, session: Option<String>, folder: Folder) -> Result<(), String> {
     let bin = find().ok_or("GitHub Copilot CLI isn't installed, or couldn't be found. Install it and sign in, then try again.")?;
-    let (tools, extra) = match folder.prompt() {
-        Some(extra) => (vec!["view", "grep", "glob"], format!("{extra} {TOOLS}")),
-        None => (vec!["view"], NO_TOOLS.to_string()),
-    };
+    let (tools, extra) = (["view", "grep", "glob"], format!("{} {TOOLS}", folder.prompt()));
     // A follow-up resumes the session, which has the instructions already.
     let prompt = if session.is_some() { prompt } else { format!("<instructions>\n{SYSTEM}\n\n{extra}\n</instructions>\n\n{prompt}") };
     let mut cmd = Command::new(bin);

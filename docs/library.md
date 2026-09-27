@@ -1,7 +1,7 @@
 # Library
 
-The app has no library of its own: it reads the modules e-Sword X keeps, where e-Sword keeps
-them, and never changes them. (The build scripts below add new ones there.)
+The app reads the modules you have in e-Sword X, where e-Sword keeps them, and never changes
+them:
 
 ```
 ~/Library/Containers/net.e-sword.e-Sword-X/Data/Library/Application Support/
@@ -9,112 +9,95 @@ them, and never changes them. (The build scripts below add new ones there.)
 
 ## The Library screen
 
-Every module and the space it takes, which Bibles appear in the Bible menu (**In picker**), the
-default Bible, and the order of commentaries and dictionaries. The search box finds modules by
-title, abbreviation or file name; reference books and devotionals open from here. **Rescan**
-picks up modules added since the app started.
+- Every module, with its size and features. The ⓘ beside one shows its description.
+- **In picker** chooses which Bibles appear in the Bible menu.
+- Set the default Bible, and the order of commentaries and dictionaries.
+- **Rescan** picks up modules added since the app started.
 
 ## Formats
 
-It reads e-Sword X's Mac formats, which are SQLite files:
+The app reads e-Sword X's Mac formats:
 
 | Extension | What |
 |---|---|
-| `.bbli` | Bibles (with Strong's numbers when the module has them) |
-| `.cmti` | Commentaries, including the Treasury of Scripture Knowledge |
-| `.dcti` | Dictionaries and topical indexes |
-| `.lexi` | Lexicons (Strong's, Thayer, BDB and others) |
+| `.bbli` | Bibles |
+| `.cmti` | Commentaries |
+| `.dcti` | Dictionaries |
+| `.lexi` | Lexicons |
 | `.refi` | Reference books |
 | `.devi` | Devotionals |
 
-It does not read the older Windows e-Sword formats (`.bblx`, `.cmtx`, `.dctx`, `.lexx`, `.refx`,
-`.topx`), EPUB, plain text or SWORD modules. Bible Support offers many modules in both formats;
-take the Mac one.
+It doesn't read the Windows formats (`.bblx`, `.cmtx` and so on), EPUB or SWORD modules. Where a
+module comes in both, take the Mac one.
 
 ## Adding modules
 
-- **From e-Sword**: e-Sword X's Download window installs modules straight into the folder
-  above.
-- **From elsewhere**: copy the file into that folder itself (not a subfolder).
+- **From e-Sword**: e-Sword X's Download window installs them in the folder above.
+- **From elsewhere**: copy the file into that folder (not a subfolder).
 
-Then press **Rescan** on the Library screen (or reopen the app, which rescans on its own). The
-search index and the dictionaries Ask searches update in the background.
+Then press **Rescan**.
 
 ## Building modules
 
-Some texts aren't e-Sword downloads, so scripts in `tools/` build them from free sources into
-the folder above. Each caches its downloads in `~/Library/Caches/Two-edged Sword/` and puts
-everything in the KJV's verse numbering, so it reads and compares beside the KJV. Rescan after.
+Some texts aren't e-Sword downloads. Scripts in `tools/` build them from free sources, numbered
+like the KJV so they compare beside it. Run the one you want, then press **Rescan**.
 
-| Script | Builds | From |
-|---|---|---|
-| `python3 tools/ginsburg/build.py` | Ginsburg's Hebrew Bible (1894), which follows Ben Chayyim's text of Bomberg's Rabbinic Bible, in the KJV's numbering (run tools/wlc first; its words are lined up with the WLC's to number them) | ahembd/Ginsburg_Hebrew_Bible (Apache-2.0; a few gaps from its GPL-3.0 sister repo) |
-| `python3 tools/beza/build.py` | Beza's Greek New Testament of 1598 | textus-receptus.com's transcription (no licence stated; the 1598 text is public domain) |
-| `python3 tools/lxx/build.py` | The Septuagint in Greek as Brenton printed it (1844), the Vatican text of the Sixtine edition of 1587, moved to the KJV's numbering, with the Apocrypha | eBible.org's grcbrent (public domain), SIL's versification tables (MIT) |
-| `python3 tools/ginsburg/plus.py` | Ginsburg+: Ginsburg's Hebrew word by word, each word with WLC+'s English, Strong's number and grammar (run tools/ginsburg first) | WLC+ (morphhb, STEPBible TBESH) |
-| `python3 tools/beza/plus.py` | Beza 1598+: Beza's Greek word by word, with Strong's numbers and grammar from TR+ and INT+ and English from STEPBible's TBESG (run tools/beza first) | TR+, INT+, STEPBible TBESG (CC BY 4.0) |
-| `python3 tools/lxx/plus.py` | LXX-Brenton+: the Greek Septuagint word by word, with Strong's numbers and grammar from Greek OT+ (Rahlfs; some of its numbers corrected against the Greek NTs) and English from TBESG (run tools/lxx first) | Greek OT+, STEPBible TBESG (CC BY 4.0) |
-| `python3 tools/rheims/build.py` | The Rheims New Testament (1582), in Bagster's modernised spelling, from Google Books' OCR (Bible Support file 11077: the HTML zip and the RTF, in ~/Downloads), divided into verses by lining it up with Challoner's DRC (run tools/crosswire first) | Bible Support / Google Books |
-| `python3 tools/sefaria/build.py` | Targum (Aramaic and English), Targum Pseudo-Jonathan, and the Babylonian Talmud (a book per tractate, English with the Aramaic, linked to the verses it cites) | Sefaria |
-| `python3 tools/vulgate/build.py` | The Clementine Vulgate (1592), with the deuterocanon | The Clementine Vulgate Project |
-| `python3 tools/crosswire/build.py` | The Syriac Peshitta NT, Murdock's and Etheridge's English of it, Tyndale (1525/1530), the Geneva Bible (1599), and the Douay-Rheims (Challoner) | CrossWire |
-| `python3 tools/wlc/build.py` | WLC+: the Westminster Leningrad Codex word by word, each word with its English, Strong's number and grammar, in the KJV's numbering | Open Scriptures Hebrew Bible (CC BY 4.0), with English from STEPBible's TBESH (CC BY 4.0) |
-| `python3 tools/latin/build.py` | Latin+ and Vulg-C+: the two Latin Vulgates word by word, each word with its English meaning, dictionary form and grammar (the first run installs Stanza, about 1 GB, in the cache) | Stanza's PROIEL Latin model and Whitaker's WORDS |
-| `python3 tools/targum/build.py` | Targum+ and Ps-Jon+: the Aramaic Targums word by word, each word with English and, where it renders a Hebrew word, that word's Strong's number (run tools/sefaria and tools/wlc first) | WLC+, a commonest-words table and Jastrow's dictionary (Sefaria's digitisation, CC BY-NC) |
-| `python3 tools/syriac/build.py` | Peshitta+: the Peshitta NT word by word, each word with its English meaning, dictionary form, root and grammar (run tools/crosswire first) | ETCBC's syrnt and SEDRA |
+| Script | Builds | Run first | From |
+|---|---|---|---|
+| `tools/crosswire/build.py` | Syriac Peshitta NT, Murdock, Etheridge, Tyndale, Geneva 1599, Douay-Rheims | | CrossWire |
+| `tools/sefaria/build.py` | Targum, Targum Pseudo-Jonathan, the Babylonian Talmud | | Sefaria |
+| `tools/vulgate/build.py` | Clementine Vulgate (1592) | | Clementine Vulgate Project |
+| `tools/wlc/build.py` | WLC+: the Hebrew Old Testament word by word | | Open Scriptures, STEPBible |
+| `tools/ginsburg/build.py` | Ginsburg's Hebrew Bible (1894) | wlc | ahembd/Ginsburg_Hebrew_Bible |
+| `tools/ginsburg/plus.py` | Ginsburg+, word by word | ginsburg | WLC+ |
+| `tools/beza/build.py` | Beza's Greek New Testament (1598) | | textus-receptus.com |
+| `tools/beza/plus.py` | Beza 1598+, word by word | beza | TR+, INT+, STEPBible |
+| `tools/lxx/build.py` | Brenton's Greek Septuagint, with the Apocrypha | | eBible.org |
+| `tools/lxx/plus.py` | LXX-Brenton+, word by word | lxx | Greek OT+, STEPBible |
+| `tools/latin/build.py` | Latin+ and Vulg-C+, word by word (downloads about 1 GB) | | Stanza, Whitaker's WORDS |
+| `tools/targum/build.py` | Targum+ and Ps-Jon+, word by word | sefaria, wlc | WLC+, Jastrow |
+| `tools/syriac/build.py` | Peshitta+, word by word | crosswire | ETCBC, SEDRA |
+| `tools/rheims/build.py` | The Rheims New Testament (1582) | crosswire | Bible Support file 11077, in ~/Downloads |
 
-All are public domain except some Sefaria translations, which are CC-BY-NC, and SEDRA's glosses,
-which are for non-commercial use: fine for personal study.
+Run each with `python3`. Downloads are cached in `~/Library/Caches/Two-edged Sword/`.
+
+All are public domain or openly licensed, except some Sefaria translations and SEDRA's glosses,
+which are for non-commercial use. That's fine for personal study.
 
 ## Free modules worth having
 
-Public domain unless noted. Those marked e-Sword come through e-Sword X's Download window;
-Bible Support ([biblesupport.com](https://www.biblesupport.com), free sign-in) has the rest.
+These are public domain. Those marked e-Sword come from e-Sword X's Download window; the rest are
+on [Bible Support](https://www.biblesupport.com) (free sign-in).
 
 **Bibles**
 
 - Young's Literal Translation (e-Sword): very literal, a good second column beside the KJV.
 - Brenton's English Septuagint (e-Sword): the Greek Old Testament the apostles quoted.
-- Greek NT INT+ (e-Sword): an interlinear with each word's meaning, grammar, and which printed
-  editions have it. The best single tool for comparing the Greek behind the KJV and modern
-  versions.
-- Greek NT TR+, BYZ+ and WH+ (e-Sword): the Textus Receptus, the Byzantine Majority Text and
-  Westcott-Hort, with Strong's numbers and grammar.
-- Greek OT+ (e-Sword): Rahlfs' Septuagint with Strong's numbers. Hebrew OT+ (e-Sword): the
-  Hebrew Old Testament with Strong's numbers; Westminster Leningrad Codex (Bible Support) has
-  the vowel points.
+- Greek NT INT+ (e-Sword): the best single tool for the Greek behind the KJV and modern versions.
+- Greek NT TR+, BYZ+ and WH+ (e-Sword): three Greek texts with Strong's numbers and grammar.
+- Greek OT+ and Hebrew OT+ (e-Sword): the Old Testament in Greek and Hebrew, with Strong's
+  numbers.
 - Darby, Webster, Weymouth, the Revised Version, the World English Bible and the Berean Standard
   Bible (e-Sword).
 
 **Commentaries**
 
-- Keil & Delitzsch on the Old Testament (e-Sword).
-- Spurgeon's Treasury of David, on the Psalms (e-Sword).
-- Robertson's Word Pictures and Vincent's Word Studies (e-Sword): Greek word studies, which suit
-  Word Study and Ask.
-- The Cambridge Bible for Schools, Bullinger's Companion Bible and MacLaren's Expositions
-  (e-Sword); Lange's and Meyer's commentaries (Bible Support).
+- Keil & Delitzsch on the Old Testament, and Spurgeon's Treasury of David on the Psalms
+  (e-Sword).
+- Robertson's Word Pictures and Vincent's Word Studies (e-Sword): Greek word studies.
+- The Cambridge Bible, Bullinger's Companion Bible and MacLaren's Expositions (e-Sword); Lange and
+  Meyer (Bible Support).
 
 **Dictionaries**
 
-- Torrey's New Topical Textbook and Hitchcock's Bible Names (e-Sword).
+- Torrey's Topical Textbook and Hitchcock's Bible Names (e-Sword).
 - Webster's 1828 Dictionary (e-Sword): what KJV-era English words meant.
 
 **Books and devotionals**
 
-- Edersheim's Life and Times of Jesus the Messiah (e-Sword).
-- The Ante-Nicene Fathers, Calvin's Institutes and Schaff's History of the Christian Church
-  (e-Sword).
+- Edersheim's Life and Times of Jesus the Messiah, the Ante-Nicene Fathers, Calvin's Institutes
+  and Schaff's History of the Christian Church (e-Sword).
 - Spurgeon's Faith's Checkbook and his sermons (Bible Support).
 
-Leave out copyrighted modules shared without the publisher's permission. Some modern texts (the
-Lexham English Bible, Mounce's Greek dictionary) are free but copyrighted, so they are fine for
-personal use. Ask treats any module whose description carries a copyright notice as licensed;
-see [Ask](ask.md#what-is-sent).
-
-Classics that only exist as EPUB or text (Augustine's Confessions, Pilgrim's Progress, the later
-church fathers) would need converting into a `.refi` module first. A `.refi` is a SQLite file with
-two tables: `Details (Title, Abbreviation, Information, Version)`, one row, with Version 4; and
-`Reference (Chapter, Content)`, one row per chapter in reading order, with an index on `Chapter`.
-Chapter names must be unique. Content is HTML: paragraphs, bold and italics, tables, `<ref>Rom
-8:28</ref>` for a Bible reference, and images inline as `data:` URLs.
+Avoid copyrighted modules shared without the publisher's permission. Books that exist only as
+EPUB or text need converting to a `.refi` first ([Development](development.md#reference-book-format)).

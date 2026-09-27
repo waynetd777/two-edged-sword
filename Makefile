@@ -11,7 +11,7 @@ SIGN_ID  := $(APPLE_SIGNING_IDENTITY)
 # "-" is an ad-hoc signature: an empty identity makes the bundler fail instead.
 export APPLE_SIGNING_IDENTITY := $(if $(SIGN_ID),$(SIGN_ID),-)
 
-.PHONY: check test app install-app dev icons sign-check
+.PHONY: check test app install-app dev icons sign-check help
 
 ## cargo test + TypeScript type-check.
 check:
@@ -35,9 +35,13 @@ RELEASE_RUSTFLAGS += -Clink-arg=-fuse-ld=lld -Clink-arg=-B$(LLD_DIR)
 RELEASE_ENV := SDKROOT=$(lastword $(OLD_SDK))
 endif
 
+# Each build gets its own build number (CFBundleVersion). macOS caches the Help Book's search index
+# by the app's version and only re-indexes a new one, so without this Help search keeps the old pages.
+BUILD := $(shell date +%Y%m%d.%H%M%S)
+
 ## Build the .app, signed with the identity in signing.local when there is one.
 app:
-	$(RELEASE_ENV) RUSTFLAGS="$(RELEASE_RUSTFLAGS)" npm run tauri build
+	$(RELEASE_ENV) RUSTFLAGS="$(RELEASE_RUSTFLAGS)" npm run tauri build -- --config '{"bundle":{"macOS":{"bundleVersion":"$(BUILD)"}}}'
 	@if [ -n "$(SIGN_ID)" ]; then \
 	  codesign -dv --verbose=2 "$(APP)" 2>&1 | grep -E "^Authority=$(SIGN_ID)" >/dev/null \
 	    && echo "signed with $(SIGN_ID)" \
@@ -65,5 +69,9 @@ screenshots:
 sign-check:
 	@codesign -dv --verbose=2 "/Applications/Two-edged Sword.app" 2>&1 | grep -E "^(Identifier|Authority|Signature|TeamIdentifier)"
 
-dev:
+## Build the Help Book from docs/ (the release build does this itself; for the dev build's Help menu).
+help:
+	@python3 tools/helpbook.py
+
+dev: help
 	npm run tauri dev

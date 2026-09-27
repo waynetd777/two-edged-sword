@@ -10,7 +10,6 @@ use std::sync::Arc;
 use tauri::{AppHandle, Emitter};
 
 const TOOLS: &str = "Search with rg and print only the relevant lines, covering several files in one command where you can; do not read whole files unless the question needs it. Read nothing outside the folders named here.";
-const NO_TOOLS: &str = "Answer from the message alone; do not run commands.";
 
 pub fn find() -> Option<PathBuf> {
     super::find("codex", &[])
@@ -40,7 +39,7 @@ pub fn models() -> Vec<Model> {
 #[allow(clippy::too_many_arguments)]
 pub fn ask(app: AppHandle, running: Arc<Running>, cwd: PathBuf, chat_id: String, prompt: String, model: String, session: Option<String>, folder: Folder) -> Result<(), String> {
     let bin = find().ok_or("Codex isn't installed, or couldn't be found. Install it and sign in, then try again.")?;
-    let instructions = match folder.prompt() { Some(extra) => format!("{SYSTEM}\n\n{extra} {TOOLS}"), None => format!("{SYSTEM}\n\n{NO_TOOLS}") };
+    let instructions = format!("{SYSTEM}\n\n{} {TOOLS}", folder.prompt());
     // -c values are TOML; a JSON string is a valid TOML basic string.
     let instructions = format!("developer_instructions={}", serde_json::to_string(&instructions).map_err(|e| e.to_string())?);
     let mut cmd = Command::new(bin);
