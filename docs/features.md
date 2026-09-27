@@ -1,7 +1,8 @@
 # Features
 
 A Bible study app for macOS, for reading Bibles, commentaries, dictionaries and books beside your own
-notes. It comes with the KJV, Strong's dictionaries and the Treasury of Scripture Knowledge, and reads
+notes. It comes with the KJV, Strong's dictionaries, the Treasury of Scripture Knowledge, Matthew Henry's
+commentary and Easton's Bible Dictionary, and reads
 more modules in e-Sword X's formats: your own, and e-Sword X's library if you have it.
 It only reads them, and keeps your journal, highlights and plans separately.
 
@@ -73,7 +74,7 @@ The Bibles and books keep their own terms:
 
 | What | Terms |
 |---|---|
-| The built-in modules | Public domain: eBible.org and the CrossWire Bible Society (the KJV, the TSK), Open Scriptures (Strong's) |
+| The built-in modules | Public domain: eBible.org and the CrossWire Bible Society (the KJV, the TSK), Open Scriptures (Strong's), CrossWire and the Christian Classics Ethereal Library (Matthew Henry, Easton's) |
 | Modules built by `tools/` | As each script says: most public domain or CC BY (STEPBible, Open Scriptures), a few for personal study |
 | e-Sword X's modules | e-Sword's licence: read where e-Sword keeps them, never copied |
 

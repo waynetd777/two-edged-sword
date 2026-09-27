@@ -35,6 +35,8 @@ The app comes with these, so it works with nothing else installed. All are publi
 | Strong's Hebrew and Greek Dictionaries | Open Scriptures |
 | King James Concordance (KJC) | Counted from the KJV+ |
 | Treasury of Scripture Knowledge (TSK), the cross-references | CrossWire |
+| Matthew Henry's Commentary on the Whole Bible | CrossWire, from the Christian Classics Ethereal Library |
+| Easton's Bible Dictionary | CrossWire, from the Christian Classics Ethereal Library |
 
 If you have e-Sword X, its copies of these are used instead while **Read e-Sword X** is on.
 
