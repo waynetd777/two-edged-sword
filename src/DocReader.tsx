@@ -306,7 +306,7 @@ export function DocReader({ focus, setFocus, openPalette }: { focus: boolean; se
       <div style={{ flexGrow: 1, minHeight: 0, display: "grid", gridTemplateColumns: focus ? "minmax(0,1fr)" : pane ? "260px minmax(0,1fr) 440px" : "260px minmax(0,1fr)" }}>
         {!focus && <aside style={{ display: "flex", flexDirection: "column", minHeight: 0, borderRight: "1px solid var(--border)" }}>
           {titles.length > 12 && (
-            <label className="field" style={{ margin: "10px 12px 4px" }}><Icon name="search" /><input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder={`Filter ${titles.length} ${devo ? "days" : "chapters"}`} aria-label="Filter chapters" /><ClearButton show={!!filter} onClear={() => setFilter("")} /></label>
+            <label className="field" style={{ margin: "10px 12px 4px" }}><Icon name="search" /><input value={filter} onChange={(e) => setFilter(e.target.value)} onKeyDown={(e) => { if (e.key === "Escape" && filter) { e.preventDefault(); e.stopPropagation(); setFilter(""); } }} placeholder={`Filter ${titles.length} ${devo ? "days" : "chapters"}`} aria-label="Filter chapters" /><ClearButton show={!!filter} onClear={() => setFilter("")} /></label>
           )}
           <div ref={list} className="scroll doclist" style={{ padding: "6px 8px 20px" }}>
             {shown.map((t) => <button key={t} type="button" aria-current={t === doc.title} className={t === doc.title ? "on" : ""} title={t} onClick={() => go(t)}>{t}</button>)}

@@ -29,7 +29,7 @@ const longDate = (s: string) => {
 const plainOf = new WeakMap<JournalEntry, string>();
 const plain = (e: JournalEntry) => { let t = plainOf.get(e); if (t === undefined) { t = mdPlain(e.body); plainOf.set(e, t); } return t; };
 const hayOf = new WeakMap<JournalEntry, string>();
-const hay = (e: JournalEntry) => { let t = hayOf.get(e); if (t === undefined) { t = (e.title + " " + e.tags.join(" ") + " " + e.verses.join(" ") + " " + plain(e)).toLowerCase(); hayOf.set(e, t); } return t; };
+const hay = (e: JournalEntry) => { let t = hayOf.get(e); if (t === undefined) { t = (e.title + " " + e.tags.map((t) => "#" + t).join(" ") + " " + e.verses.join(" ") + " " + plain(e)).toLowerCase(); hayOf.set(e, t); } return t; };
 
 /** One entry in the list; drawn again only when it or its selection changes. */
 const EntryRow = memo(function EntryRow({ e, selected, onSelect }: { e: JournalEntry; selected: boolean; onSelect: (id: string) => void }) {
@@ -79,7 +79,10 @@ export function JournalScreen({ openPalette, focus = false, setFocus = () => {} 
     const f = filter.toLowerCase();
     return all.filter((e) => (!tag || e.tags.includes(tag)) && (!f || hay(e).includes(f)));
   }, [app.journal, draft, filter, tag]);
-  const tags = useMemo(() => Array.from(new Set(app.journal.flatMap((e) => e.tags))).sort(), [app.journal]);
+  // The filter's tags, most used first; past the first five they wait behind "more" (the chosen one always shows).
+  const tags = useMemo(() => { const m = new Map<string, number>(); for (const e of app.journal) for (const t of e.tags) m.set(t, (m.get(t) ?? 0) + 1); return [...m.keys()].sort((a, b) => m.get(b)! - m.get(a)! || a.localeCompare(b)); }, [app.journal]);
+  const [allTags, setAllTags] = useState(false);
+  const shownTags = allTags ? tags : tags.slice(0, 5).concat(tag && tags.indexOf(tag) >= 5 ? [tag] : []);
   const cur = (draft && draft.id === selId ? draft : app.journal.find((e) => e.id === selId)) ?? null;
 
   const persist = (e: JournalEntry) => {
@@ -157,8 +160,8 @@ export function JournalScreen({ openPalette, focus = false, setFocus = () => {} 
             <h1 style={{ margin: 0, font: "500 26px/1.2 var(--display)" }}>Journal</h1>
             <button className="btn primary" type="button" style={{ marginLeft: "auto" }} onClick={create}><Icon name="plus" />New entry<span style={{ opacity: 0.75 }}>⌘N</span></button>
           </div>
-          <label className="field" style={{ margin: "0 4px" }}><Icon name="search" /><input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Filter entries, tags or verses" aria-label="Filter entries" /><ClearButton show={!!filter} onClear={() => setFilter("")} /></label>
-          {tags.length > 0 && <div style={{ display: "flex", gap: 5, padding: "0 4px", flexWrap: "wrap" }}><button type="button" className={`chip ${!tag ? "on" : ""}`} onClick={() => setTag(null)}>All</button>{tags.slice(0, 8).map((t) => <button key={t} type="button" className={`chip ${tag === t ? "on" : ""}`} onClick={() => setTag(tag === t ? null : t)}>#{t}</button>)}</div>}
+          <label className="field" style={{ margin: "0 4px" }}><Icon name="search" /><input value={filter} onChange={(e) => setFilter(e.target.value)} onKeyDown={(e) => { if (e.key === "Escape" && filter) { e.preventDefault(); e.stopPropagation(); setFilter(""); } }} placeholder="Filter entries, tags or verses" aria-label="Filter entries" /><ClearButton show={!!filter} onClear={() => setFilter("")} /></label>
+          {tags.length > 0 && <div style={{ display: "flex", gap: 5, padding: "0 4px", flexWrap: "wrap" }}><button type="button" className={`chip ${!tag ? "on" : ""}`} onClick={() => setTag(null)}>All</button>{shownTags.map((t) => <button key={t} type="button" className={`chip ${tag === t ? "on" : ""}`} onClick={() => setTag(tag === t ? null : t)}>#{t}</button>)}{tags.length > 5 && <button type="button" className="chip" onClick={() => setAllTags(!allTags)}>{allTags ? "Fewer" : `+${tags.length - 5} more`}</button>}</div>}
           <div className="scroll" style={{ flexGrow: 1, paddingBottom: 20 }}>
             {!entries.length && <div className="empty">{app.journal.length ? "Nothing matches." : "No entries yet. Start one with New entry, or press N on a verse."}</div>}
             {entries.map((e) => {

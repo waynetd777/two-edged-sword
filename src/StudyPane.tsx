@@ -334,7 +334,7 @@ export function DictionaryTab({ dict, setDict, onWord }: { dict: DictAt | null; 
   return (
     <div style={{ display: "flex", flexDirection: "column", minHeight: 0, flexGrow: 1 }}>
       <div style={{ padding: "10px 18px 0", position: "relative" }}>
-        <label className="field"><Icon name="search" /><input value={q} placeholder="Look up a word or name" aria-label="Look up" onChange={(e) => { enter.current = false; setQ(e.target.value); }} onKeyDown={(e) => { if (e.key === "Enter" && topics[0]) pick(topics[0]); }} /><ClearButton show={!!q} onClear={() => setQ("")} /></label>
+        <label className="field"><Icon name="search" /><input value={q} placeholder="Look up a word or name" aria-label="Look up" onChange={(e) => { enter.current = false; setQ(e.target.value); }} onKeyDown={(e) => { if (e.key === "Enter" && topics[0]) pick(topics[0]); else if (e.key === "Escape" && q) { e.preventDefault(); e.stopPropagation(); setQ(""); } }} /><ClearButton show={!!q} onClear={() => setQ("")} /></label>
         {topics.length > 0 && q !== art?.topic && (
           <div className="card" style={{ position: "absolute", left: 18, right: 18, top: 44, zIndex: 10, maxHeight: 260, overflowY: "auto", padding: 4, boxShadow: "0 10px 30px var(--shadow)" }}>
             {topics.map((t) => <button key={t} type="button" className="bm" onClick={() => pick(t)}>{t}</button>)}

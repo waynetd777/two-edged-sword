@@ -20,6 +20,8 @@ The toolbar has headings, bold, italic, lists and quotes, and can:
 
 **Tags.** Type # to pick a tag from a list: your highlight themes first, then the tags you use
 most. Arrow keys and Enter choose one.
+The tags above the list filter it: your most used come first, and **+ more** shows the rest.
+The box above them filters by words, tags (with or without #) or verses; Esc clears it.
 
 **Verse references** you type become links. Hover one for the verse, click it to open it. Most
 ways of writing a reference work, even common misspellings ("Isiah").
