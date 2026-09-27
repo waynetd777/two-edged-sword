@@ -46,6 +46,8 @@ pub struct ModuleInfo {
     pub strongs: bool,
     /// Bibles only: the text reads right to left (Hebrew, Arabic, …).
     pub rtl: bool,
+    /// Bibles only: what it has beyond plain text, for the library ("Strong's numbers", "Glosses", …).
+    pub features: Vec<&'static str>,
     /// The file's size in bytes.
     pub size: u64,
     #[serde(skip)]
@@ -97,9 +99,9 @@ impl Library {
                 let (Some(stem), Some(ext)) = (path.file_stem().and_then(|s| s.to_str()), path.extension().and_then(|s| s.to_str())) else { continue };
                 let Some(kind) = Kind::from_ext(&ext.to_ascii_lowercase()) else { continue };
                 match read_details(&path, kind) {
-                    Ok((title, abbrev, info, strongs, rtl)) => {
+                    Ok((title, abbrev, info, strongs, rtl, features)) => {
                         let size = e.metadata().map(|m| m.len()).unwrap_or(0);
-                        modules.push(ModuleInfo { id: stem.to_string(), kind, title, abbrev, info, strongs, rtl, size, path })
+                        modules.push(ModuleInfo { id: stem.to_string(), kind, title, abbrev, info, strongs, rtl, features, size, path })
                     }
                     Err(err) => eprintln!("skipping {}: {err}", path.display()),
                 }
@@ -132,7 +134,7 @@ impl Library {
     }
 }
 
-fn read_details(path: &Path, kind: Kind) -> rusqlite::Result<(String, String, String, bool, bool)> {
+fn read_details(path: &Path, kind: Kind) -> rusqlite::Result<(String, String, String, bool, bool, Vec<&'static str>)> {
     let c = open_readonly(path)?;
     let (title, abbrev, info): (String, String, String) = c.query_row("SELECT Title, Abbreviation, Information FROM Details LIMIT 1", [], |r| {
         Ok((r.get::<_, Option<String>>(0)?.unwrap_or_default(), r.get::<_, Option<String>>(1)?.unwrap_or_default(), r.get::<_, Option<String>>(2)?.unwrap_or_default()))
@@ -145,7 +147,29 @@ fn read_details(path: &Path, kind: Kind) -> rusqlite::Result<(String, String, St
     let rtl = kind == Kind::Bible
         && (c.query_row("SELECT RightToLeft FROM Details LIMIT 1", [], |r| r.get::<_, Option<bool>>(0)).ok().flatten().unwrap_or(false)
             || c.query_row("SELECT Scripture FROM Bible ORDER BY Book, Chapter, Verse LIMIT 1", [], |r| r.get::<_, Option<String>>(0)).optional()?.flatten().is_some_and(|t| is_rtl_text(&t)));
-    Ok((title, abbrev, info, strongs, rtl))
+    let features = if kind == Kind::Bible { bible_features(&c, strongs)? } else { Vec::new() };
+    Ok((title, abbrev, info, strongs, rtl, features))
+}
+
+/// What a Bible has beyond plain text, judged from a few chapters (Gen 1, Psa 23, Mat 5, Joh 3) and which books it has.
+fn bible_features(c: &Connection, strongs: bool) -> rusqlite::Result<Vec<&'static str>> {
+    let sample: String = c.query_row(
+        "SELECT group_concat(Scripture, ' ') FROM Bible WHERE (Book = 1 AND Chapter = 1) OR (Book = 19 AND Chapter = 23) OR (Book = 40 AND Chapter = 5) OR (Book = 43 AND Chapter = 3)",
+        [], |r| r.get::<_, Option<String>>(0),
+    )?.unwrap_or_default().to_ascii_lowercase();
+    let has = |sql: &str| c.query_row(sql, [], |_| Ok(())).optional().map(|r| r.is_some());
+    let notes = sample.contains("<not>") || has("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'Notes'")? && has("SELECT 1 FROM Notes LIMIT 1")?;
+    let (ot, nt) = (has("SELECT 1 FROM Bible WHERE Book BETWEEN 1 AND 39 LIMIT 1")?, has("SELECT 1 FROM Bible WHERE Book BETWEEN 40 AND 66 LIMIT 1")?);
+    let mut f = Vec::new();
+    if strongs { f.push("Strong's numbers"); }
+    if sample.contains("<tvm>") { f.push("Grammar"); }
+    if sample.contains("<gra>") { f.push("Glosses"); }
+    if notes { f.push("Notes"); }
+    if sample.contains("<red>") { f.push("Words of Jesus in red"); }
+    if has("SELECT 1 FROM Bible WHERE Book > 66 LIMIT 1")? { f.push("Apocrypha"); }
+    if ot && !nt { f.push("Old Testament only"); }
+    if nt && !ot { f.push("New Testament only"); }
+    Ok(f)
 }
 
 /// Whether most of the letters outside markup are in a right-to-left script (Hebrew, Syriac, Arabic, …).

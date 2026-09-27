@@ -61,12 +61,20 @@ function cls(el: Element): string | undefined {
   return c && /^indent\d$/.test(c) ? c : undefined;
 }
 
+// Windows-1252 punctuation some modules store as raw C1 control characters (the ISV's "\x93ISV,\x94"),
+// which show as nothing or a box. The C1 codes 1252 leaves undefined are dropped.
+const CP1252 = "€\0‚ƒ„…†‡ˆ‰Š‹Œ\0Ž\0\0‘’“”•–—˜™š›œ\0žŸ";
+const fixC1 = (t: string) => t.replace(/[\x80-\x9f]/g, (c) => CP1252[c.charCodeAt(0) - 0x80].replace("\0", ""));
+
+/** A module's HTML as plain text, its whitespace collapsed. */
+export const htmlText = (html: string) => fixC1(parse(html.replace(/<(?:br|\/p|\/h\d|\/div)\b[^>]*>/gi, "$& ")).textContent || "").replace(/\s+/g, " ").trim();
+
 export function renderHtml(html: string, opts: RenderOpts = {}): ReactNode {
   let lastBook: number | undefined;
   let noteChain = false; // "see notes on A; B": B is a note too
   let key = 0;
   const walk = (node: Node): ReactNode => {
-    if (node.nodeType === Node.TEXT_NODE) return opts.topic && opts.onTopic ? linkSees(node.textContent || "") : node.textContent;
+    if (node.nodeType === Node.TEXT_NODE) { const t = fixC1(node.textContent || ""); return opts.topic && opts.onTopic ? linkSees(t) : t; }
     if (node.nodeType !== Node.ELEMENT_NODE) return null;
     const el = node as Element;
     const kids = () => Array.from(el.childNodes).map((c) => <Fragment key={key++}>{walk(c)}</Fragment>);

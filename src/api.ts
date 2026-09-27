@@ -20,6 +20,8 @@ export interface ModuleInfo {
   strongs: boolean;
   /** Bibles only: the text reads right to left (Hebrew, Arabic, …). */
   rtl: boolean;
+  /** Bibles only: what it has beyond plain text ("Strong's numbers", "Glosses", "Notes", …). */
+  features: string[];
   /** The file's size in bytes. */
   size: number;
 }

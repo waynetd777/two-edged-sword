@@ -2,7 +2,7 @@ import { useState } from "react";
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
 import { ModuleInfo } from "./api";
 import { isLicensed } from "./Ask";
-import { renderHtml } from "./esword";
+import { htmlText, renderHtml } from "./esword";
 import { Icon } from "./icons";
 import { BibleSelect, Topbar } from "./Shell";
 import { useApp } from "./state";
@@ -16,8 +16,23 @@ const total = (ms: ModuleInfo[]) => fmtSize(ms.reduce((t, m) => t + (m.size ?? 0
 
 const matches = (m: ModuleInfo, q: string) => { const t = `${m.title} ${m.abbrev} ${m.id}`.toLowerCase(); return q.toLowerCase().split(/\s+/).filter(Boolean).every((w) => t.includes(w)); };
 
+/** A module name's tooltip: its title, then the start of its description when that says more. */
+function blurb(m: ModuleInfo) {
+  let t = htmlText(m.info);
+  if (t.toLowerCase().startsWith(m.title.toLowerCase())) t = t.slice(m.title.length).replace(/^[\s.,:;–—-]+/, "");
+  if (!t) return m.title;
+  if (t.length > 160) t = t.slice(0, 160).replace(/\s+\S*$/, "") + "…";
+  return `${m.title}: ${t}`;
+}
+
+type ShowInfo = (m: ModuleInfo, rect: DOMRect) => void;
+/** The ⓘ beside a module: its e-Sword description in a popover. */
+const InfoButton = ({ m, onInfo }: { m: ModuleInfo; onInfo: ShowInfo }) => (
+  <button className="ibtn" type="button" aria-label={`About ${m.title}`} title="About" style={{ width: 22, height: 22, flexShrink: 0 }} onClick={(e) => onInfo(m, e.currentTarget.getBoundingClientRect())}><Icon name="info" size={13} /></button>
+);
+
 // While filtering, only the matches are listed, keeping their place numbers, and they can't be moved.
-function Ordered({ kind, title, orderKey, q }: { kind: ModuleInfo["kind"]; title: string; orderKey: "commentaryOrder" | "dictionaryOrder"; q: string }) {
+function Ordered({ kind, title, orderKey, q, onInfo }: { kind: ModuleInfo["kind"]; title: string; orderKey: "commentaryOrder" | "dictionaryOrder"; q: string; onInfo: ShowInfo }) {
   const app = useApp();
   const ms = orderModules((app.lib?.modules ?? []).filter((m) => m.kind === kind && m.id !== app.tsk), app.settings[orderKey]);
   const move = (i: number, d: number) => {
@@ -35,7 +50,8 @@ function Ordered({ kind, title, orderKey, q }: { kind: ModuleInfo["kind"]; title
       {shown.map(({ m, i }) => (
         <div key={m.id} style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 12.5, minHeight: 26 }}>
           <span className="n" style={{ width: 22, flexShrink: 0 }}>{i + 1}</span>
-          <span style={{ flexGrow: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={m.title}>{m.title}</span>
+          <span style={{ flexGrow: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={blurb(m)}>{m.title}</span>
+          <InfoButton m={m} onInfo={onInfo} />
           {!q && <><button className="ibtn" type="button" aria-label={`Move ${m.title} up`} style={{ width: 22, height: 22 }} disabled={i === 0} onClick={() => move(i, -1)}><Icon name="up" size={13} /></button>
           <button className="ibtn" type="button" aria-label={`Move ${m.title} down`} style={{ width: 22, height: 22 }} disabled={i === ms.length - 1} onClick={() => move(i, 1)}><Icon name="down" size={13} /></button></>}
         </div>
@@ -54,6 +70,7 @@ export function LibraryScreen() {
   const ms = app.lib?.modules ?? [];
   const n = (k: ModuleInfo["kind"]) => ms.filter((m) => m.kind === k).length;
   const hidden = app.settings.hiddenBibles;
+  const showInfo: ShowInfo = (m, rect) => setInfo({ m, rect });
   const none = !!q && !ms.some((m) => m.id !== app.tsk && matches(m, q));
   return (
     <div className="main">
@@ -87,16 +104,16 @@ export function LibraryScreen() {
           <BibleSelect all value={app.defaultBible} onChange={app.setDefaultBible} />
         </div>
         <table style={{ borderCollapse: "separate", borderSpacing: 0, width: "100%", background: "var(--panel)", border: "1px solid var(--border)", borderRadius: 10, overflow: "hidden" }}>
-          <thead><tr>{["Translation", "Abbrev.", "Features", "Licence", "In picker"].map((h, i) => <th key={h} style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.04em", textTransform: "uppercase", color: "var(--muted)", textAlign: i === 4 ? "right" : "left", background: "var(--panel2)", padding: "8px 14px", borderBottom: "1px solid var(--border)" }}>{h}</th>)}</tr></thead>
+          <thead><tr>{["Translation", "Abbrev.", "Features", "Licence", "In picker"].map((h, i) => <th key={h} style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.04em", textTransform: "uppercase", color: "var(--muted)", textAlign: i === 4 ? "right" : "left", background: "var(--panel2)", padding: "8px 14px", borderBottom: "1px solid var(--border)", whiteSpace: "nowrap" }}>{h}</th>)}</tr></thead>
           <tbody>
             {bibles.map((b) => {
               const lic = isLicensed(b);
               return (
                 <tr key={b.id}>
-                  <td style={{ padding: "8px 14px", borderBottom: "1px solid var(--border)" }}><a onClick={(e) => setInfo({ m: b, rect: e.currentTarget.getBoundingClientRect() })} style={{ color: "var(--text)" }}>{b.title}</a></td>
-                  <td style={{ padding: "8px 14px", borderBottom: "1px solid var(--border)" }}>{b.abbrev}</td>
-                  <td style={{ padding: "8px 14px", borderBottom: "1px solid var(--border)", color: "var(--muted)" }}>{b.strongs ? "Strong's numbers" : ""}</td>
-                  <td style={{ padding: "8px 14px", borderBottom: "1px solid var(--border)" }}><span style={{ display: "inline-flex", alignItems: "center", height: 20, padding: "0 8px", borderRadius: 999, fontSize: 11.5, fontWeight: 500, background: lic ? "var(--pubg)" : "var(--pdbg)", color: lic ? "var(--pufg)" : "var(--pdfg)" }}>{lic ? "Personal use" : "Public domain"}</span></td>
+                  <td style={{ padding: "8px 14px", borderBottom: "1px solid var(--border)" }}><span style={{ display: "flex", alignItems: "center", gap: 6 }}><span title={blurb(b)}>{b.title}</span><InfoButton m={b} onInfo={showInfo} /></span></td>
+                  <td style={{ padding: "8px 14px", borderBottom: "1px solid var(--border)", whiteSpace: "nowrap" }}>{b.abbrev}</td>
+                  <td style={{ padding: "8px 14px", borderBottom: "1px solid var(--border)", color: "var(--muted)" }}>{b.features.join(", ")}</td>
+                  <td style={{ padding: "8px 14px", borderBottom: "1px solid var(--border)", whiteSpace: "nowrap" }}><span style={{ display: "inline-flex", alignItems: "center", height: 20, padding: "0 8px", borderRadius: 999, fontSize: 11.5, fontWeight: 500, background: lic ? "var(--pubg)" : "var(--pdbg)", color: lic ? "var(--pufg)" : "var(--pdfg)" }}>{lic ? "Personal use" : "Public domain"}</span></td>
                   <td style={{ padding: "8px 14px", borderBottom: "1px solid var(--border)", textAlign: "right" }}><Switch on={!hidden.includes(b.id)} onChange={(on) => app.set({ hiddenBibles: on ? hidden.filter((x) => x !== b.id) : [...hidden, b.id] })} /></td>
                 </tr>
               );
@@ -105,15 +122,20 @@ export function LibraryScreen() {
         </table>
         </>}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 12 }}>
-          <Ordered kind="commentary" title="Commentaries" orderKey="commentaryOrder" q={q} />
-          <Ordered kind="dictionary" title="Dictionaries" orderKey="dictionaryOrder" q={q} />
+          <Ordered kind="commentary" title="Commentaries" orderKey="commentaryOrder" q={q} onInfo={showInfo} />
+          <Ordered kind="dictionary" title="Dictionaries" orderKey="dictionaryOrder" q={q} onInfo={showInfo} />
           {(["lexicon", "reference", "devotional"] as const).filter((k) => !q || ms.some((m) => m.kind === k && matches(m, q))).map((k) => (
             <div key={k} className="card" style={{ padding: "14px 16px", display: "flex", flexDirection: "column", gap: 4 }}>
               <div style={{ display: "flex", justifyContent: "space-between", paddingBottom: 4 }}><span className="label">{k === "lexicon" ? "Lexicons" : k === "devotional" ? "Devotionals" : "Reference and maps"}</span><span className="n">{q ? `${ms.filter((m) => m.kind === k && matches(m, q)).length} of ${n(k)}` : n(k)} · {total(ms.filter((m) => m.kind === k))}</span></div>
-              {ms.filter((m) => m.kind === k && (!q || matches(m, q))).map((m) => <a key={m.id} style={{ fontSize: 12.5, color: "var(--text)", minHeight: 24, display: "flex", alignItems: "center" }} onClick={(e) => setInfo({ m, rect: e.currentTarget.getBoundingClientRect() })}>{m.title}</a>)}
+              {ms.filter((m) => m.kind === k && (!q || matches(m, q))).map((m) => (
+                <div key={m.id} style={{ fontSize: 12.5, minHeight: 24, display: "flex", alignItems: "center", gap: 4 }}>
+                  <span style={{ flexGrow: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={blurb(m)}>{m.title}</span>
+                  <InfoButton m={m} onInfo={showInfo} />
+                </div>
+              ))}
             </div>
           ))}
-          {app.tsk && !q && <div className="card" style={{ padding: "14px 16px" }}><span style={{ display: "flex", justifyContent: "space-between" }}><span className="label">Cross-references</span><span className="n">{total(ms.filter((m) => m.id === app.tsk && m.kind === "commentary"))}</span></span><div style={{ fontSize: 12.5, marginTop: 6 }}>{app.mod("commentary", app.tsk)?.title}</div><div className="hint" style={{ marginTop: 4 }}>Always shown under the commentary.</div></div>}
+          {app.tsk && !q && <div className="card" style={{ padding: "14px 16px" }}><span style={{ display: "flex", justifyContent: "space-between" }}><span className="label">Cross-references</span><span className="n">{total(ms.filter((m) => m.id === app.tsk && m.kind === "commentary"))}</span></span>{(() => { const t = app.mod("commentary", app.tsk); return t && <div style={{ fontSize: 12.5, marginTop: 6, display: "flex", alignItems: "center", gap: 4 }}><span style={{ flexGrow: 1 }} title={blurb(t)}>{t.title}</span><InfoButton m={t} onInfo={showInfo} /></div>; })()}<div className="hint" style={{ marginTop: 4 }}>Always shown under the commentary.</div></div>}
         </div>
       </div>
       {info && (
@@ -122,6 +144,7 @@ export function LibraryScreen() {
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <b style={{ font: "500 20px var(--display)", flexGrow: 1 }}>{info.m.title}</b>
               {(info.m.kind === "reference" || info.m.kind === "devotional") && <button className="btn small" type="button" onClick={() => { setInfo(null); app.openDoc(info.m.id, undefined, info.m.kind as "reference" | "devotional"); }}><Icon name="read" size={13} />Read</button>}
+              {info.m.kind === "bible" && <button className="btn small" type="button" onClick={() => { setInfo(null); app.set({ bible: info.m.id }); app.open(app.loc, "read"); }}><Icon name="read" size={13} />Read</button>}
             </div>
             <div className="es" style={{ fontSize: 12.5, lineHeight: 1.5, maxHeight: 300, overflowY: "auto" }}>{renderHtml(info.m.info)}</div>
           </div>
