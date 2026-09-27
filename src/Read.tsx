@@ -44,14 +44,19 @@ export function VerseText({ tokens, red, speakingChar, onWord, activeWi, showNum
   // One with grammar but no English reads inline, like any Strong's Bible, the grammar in the word's tooltip.
   if (tokens.some((t) => t.gloss !== undefined)) {
     const marked = tokens.some((t) => t.editions);
+    const boxed = (t?: Token) => !!t?.word && (t.gloss !== undefined || t.parse !== undefined || t.strongs.length > 0);
+    // Punctuation straight after a word goes in its box, or the box's margin puts a space before it ("ἔσται .").
+    const trailing = (i: number) => (!tokens[i].word && !tokens[i].variant && /^[^\s\p{L}\p{N}]+$/u.test(tokens[i].text) && boxed(tokens[i - 1]) ? tokens[i].text : "");
     return (
     <>
       {tokens.map((t, i) => {
-        if (!t.word || !(t.gloss !== undefined || t.parse !== undefined || t.strongs.length)) return t.text.trim() ? <span key={i} className={`il-p ${t.variant ? "var" : ""}`} title={t.variant ? vtitle : undefined}>{t.text}</span> : <Fragment key={i}>{" "}</Fragment>;
+        if (trailing(i)) return null;
+        if (!boxed(t)) return t.text.trim() ? <span key={i} className={`il-p ${t.variant ? "var" : ""}`} title={t.variant ? vtitle : undefined}>{t.text}</span> : <Fragment key={i}>{" "}</Fragment>;
         const speaking = speakingChar !== undefined && speakingChar >= t.at && speakingChar < t.at + t.text.length;
+        const after = i + 1 < tokens.length ? trailing(i + 1) : "";
         return (
           <span key={i} className={`il ${t.variant ? "var" : ""}`} title={tip(t)}>
-            <span className={`w ${activeWi === t.wi ? "on" : ""} ${speaking ? "speaking" : ""}`} onClick={(e) => { e.stopPropagation(); onWord?.(t, e.currentTarget); }}>{t.text}</span>
+            <span><span className={`w ${activeWi === t.wi ? "on" : ""} ${speaking ? "speaking" : ""}`} onClick={(e) => { e.stopPropagation(); onWord?.(t, e.currentTarget); }}>{t.text}</span>{after}</span>
             <span className="il-g">{t.gloss ?? "\u00a0"}</span>
             {showNums && <span className="il-n">{t.strongs.length ? t.strongs.map((n, k) => <Fragment key={n}>{k ? " " : ""}<span className="strongs" data-num={n}>{n}</span></Fragment>) : "\u00a0"}</span>}
             {marked && <span className="il-e">{t.editions || "\u00a0"}</span>}
