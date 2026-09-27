@@ -37,7 +37,9 @@ fn stamp(path: &Path) -> String {
     let m = std::fs::metadata(path).ok();
     let len = m.as_ref().map(|m| m.len()).unwrap_or(0);
     let mtime = m.and_then(|m| m.modified().ok()).and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok()).map(|d| d.as_secs()).unwrap_or(0);
-    format!("{len}-{mtime}")
+    // The version changes when what goes in the index does (2: hyphens inside words taken out), so
+    // every module is indexed again.
+    format!("2-{len}-{mtime}")
 }
 
 fn open(path: &Path) -> rusqlite::Result<Connection> {
@@ -167,7 +169,8 @@ fn build_one(c: &mut Connection, lib: &Library, kind: Kind, id: &str, path: &Pat
         for (src, html) in rows {
             map.execute(params![k, src]).map_err(|e| e.to_string())?;
             let rowid = tx.last_insert_rowid();
-            doc.execute(params![rowid, plain(&html)]).map_err(|e| e.to_string())?;
+            // Without the hyphens inside words, as search takes them out of the query.
+            doc.execute(params![rowid, crate::search::unhyphen(&plain(&html)).0]).map_err(|e| e.to_string())?;
         }
     }
     tx.execute("INSERT OR REPLACE INTO modules(key, stamp) VALUES (?1, ?2)", params![k, stamp(path)]).map_err(|e| e.to_string())?;

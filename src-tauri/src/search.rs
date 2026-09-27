@@ -1,6 +1,8 @@
 //! Search across the Bible, commentaries and dictionaries. SQLite's LIKE finds candidate rows;
 //! the match rules (phrase, all or any words, whole words) are applied here to the plain text,
 //! so markup such as `<red>` or Strong's numbers never splits or fakes a match.
+//! A hyphen inside a word doesn't count, in the query or the text: "Bethel" finds the KJV's
+//! "Beth-el" and "beth-el" finds "Bethel" (Bibles differ in which they print).
 
 use crate::library::{Kind, Library};
 use rusqlite::params_from_iter;
@@ -175,12 +177,33 @@ pub fn lower(s: &str) -> (String, Option<Vec<usize>>) {
     (out, Some(map))
 }
 
-/// Where the first match starts in `plain_text`, if it matches the query (terms already lowered).
+/// `s` without the hyphens inside words ("Beth-el" → "Bethel"; a hyphen with a letter or digit on
+/// both sides), and, if any went, where each byte of the result came from in `s`.
+pub fn unhyphen(s: &str) -> (String, Option<Vec<usize>>) {
+    let inner = |i: usize| {
+        let before = s[..i].chars().next_back().is_some_and(char::is_alphanumeric);
+        let after = s[i + 1..].chars().next().is_some_and(char::is_alphanumeric);
+        before && after
+    };
+    if !s.char_indices().any(|(i, c)| c == '-' && inner(i)) { return (s.to_string(), None); }
+    let (mut out, mut map) = (String::with_capacity(s.len()), Vec::with_capacity(s.len()));
+    for (i, c) in s.char_indices() {
+        if c == '-' && inner(i) { continue; }
+        out.push(c);
+        map.resize(out.len(), i);
+    }
+    (out, Some(map))
+}
+
+/// Where the first match starts in `plain_text`, if it matches the query (terms already lowered
+/// and unhyphened, as `run` does).
 pub fn matches(plain_text: &str, terms: &[String], phrase: &str, mode: Mode, whole: bool) -> Option<usize> {
+    let (text, hyphens) = unhyphen(plain_text);
     // An ASCII query can only match ASCII letters, so the (much quicker) ASCII lowering does.
-    let (lowered, map) = if phrase.is_ascii() && terms.iter().all(|t| t.is_ascii()) { (plain_text.to_ascii_lowercase(), None) } else { lower(plain_text) };
+    let (lowered, map) = if phrase.is_ascii() && terms.iter().all(|t| t.is_ascii()) { (text.to_ascii_lowercase(), None) } else { lower(&text) };
     let at = find_lowered(&lowered, terms, phrase, mode, whole)?;
-    Some(map.map_or(at, |m| m.get(at).copied().unwrap_or(plain_text.len())))
+    let at = map.map_or(at, |m| m.get(at).copied().unwrap_or(text.len()));
+    Some(hyphens.map_or(at, |m| m.get(at).copied().unwrap_or(plain_text.len())))
 }
 
 fn find_lowered(plain_text: &str, terms: &[String], phrase: &str, mode: Mode, whole: bool) -> Option<usize> {
@@ -211,7 +234,8 @@ fn snippet(text: &str, at: usize) -> String {
 /// SQL LIKE conditions that narrow the candidates: every term for phrase/all, any for "any".
 /// LIKE runs on the stored markup, where only plain ASCII letters and digits are sure to appear as
 /// typed (LIKE ignores case only for ASCII, and `'` or `"` may be stored as entities). Any other
-/// word can't narrow them: it is left to `matches`, and for "any" nothing narrows at all.
+/// word can't narrow them: it is left to `matches`, and for "any" nothing narrows at all. Hyphens
+/// are taken out of the text first, as the terms have none ("Beth-el" is LIKE "%bethel%").
 fn like_clause(col: &str, terms: &[String], phrase: &str, mode: Mode) -> (String, Vec<String>) {
     let words: Vec<&str> = match mode {
         Mode::Phrase => phrase.split_whitespace().collect(),
@@ -226,7 +250,7 @@ fn like_clause(col: &str, terms: &[String], phrase: &str, mode: Mode) -> (String
         return ("1".into(), vec![]);
     }
     let joiner = if mode == Mode::Any { " OR " } else { " AND " };
-    let clause = pats.iter().map(|_| format!("{col} LIKE ?")).collect::<Vec<_>>().join(joiner);
+    let clause = pats.iter().map(|_| format!("replace({col}, '-', '') LIKE ?")).collect::<Vec<_>>().join(joiner);
     (format!("({clause})"), pats)
 }
 
@@ -254,7 +278,7 @@ pub fn run(lib: &Library, index: Option<&crate::index::Index>, q: &Query) -> Res
         });
     }
 
-    let phrase = lower(raw).0.split_whitespace().collect::<Vec<_>>().join(" ");
+    let phrase = unhyphen(&lower(raw).0).0.split_whitespace().collect::<Vec<_>>().join(" ");
     let terms: Vec<String> = phrase.split_whitespace().map(|s| s.to_string()).collect();
     if terms.is_empty() {
         return Err("Type something to search for".into());
@@ -399,7 +423,18 @@ mod tests {
         assert_eq!(&t[at..], "ÉLIE");
         assert_eq!(like_clause("c", &terms, "élie", Mode::Any).0, "1");
         let both = vec!["saw".to_string(), "élie".to_string()];
-        assert_eq!(like_clause("c", &both, "saw élie", Mode::All), ("(c LIKE ?)".to_string(), vec!["%saw%".to_string()]));
+        assert_eq!(like_clause("c", &both, "saw élie", Mode::All), ("(replace(c, '-', '') LIKE ?)".to_string(), vec!["%saw%".to_string()]));
+    }
+
+    #[test]
+    fn hyphens_inside_words_dont_count() {
+        let t = vec!["bethel".to_string()];
+        let at = matches("Jacob came to Beth-el, the house of God", &t, "bethel", Mode::Phrase, true);
+        assert_eq!(at, Some(14), "the match starts at Beth-el in the text as it is");
+        assert!(matches("Jacob came to Bethel", &t, "bethel", Mode::Phrase, true).is_some());
+        assert!(matches("born - again", &["born".into()], "born", Mode::Phrase, true).is_some(), "a dash between words stays");
+        assert_eq!(unhyphen("Beth-el and Beer-sheba - far").0, "Bethel and Beersheba - far");
+        assert_eq!(like_clause("c", &t, "bethel", Mode::Phrase).1, vec!["%bethel%".to_string()]);
     }
 
     #[test]

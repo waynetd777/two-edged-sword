@@ -221,6 +221,9 @@ def text(t, source):
         t = re.sub(r'<q\b[^>]*who="Jesus"[^>]*>(.*?)</q>', r"<red>\1</red>", t, flags=re.S)
         t = re.sub(r"<(?!/?(i|red|blu)>)[^>]*>", " ", t)
     t = html.unescape(t)
+    # A few verses lost a space in CrossWire's text ("saydeWylt", Tyndale's Gen 18:23; "toAsaph", the
+    # Geneva's Ps 75:1): no word in these Bibles has a capital after its second letter.
+    t = re.sub(r"(?<=[a-z]{2})(?=[A-Z][a-z])", " ", t)
     t = re.sub(r"\s+([,;:?!)]|\.(?!\w))", r"\1", re.sub(r"\s+", " ", t))  # not Tyndale's numbers: .iij.
     return re.sub(r"<(i|red|blu)>\s*</\1>", "", t).strip()
 

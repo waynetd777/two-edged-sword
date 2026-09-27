@@ -441,6 +441,11 @@ mod library_tests {
         let ch = chapter(&lib, "kjv", 43, 3).unwrap();
         assert_eq!(ch.len(), 36);
         assert!(ch[15].text.contains("<red>For God so loved the world"), "{}", ch[15].text);
+        // Spaces kept where the source's markup closed ("\nd LORD\nd* is"), and split words joined.
+        assert!(chapter(&lib, "kjv", 19, 23).unwrap()[0].text.contains("The LORD <i>is</i> my shepherd"));
+        assert!(chapter(&lib, "kjv", 44, 4).unwrap()[15].text.contains("we cannot deny"));
+        assert!(chapter(&lib, "kjv", 46, 4).unwrap()[16].text.contains("every where in every church"));
+        assert!(article(&lib, Kind::Lexicon, "strong", "H323").unwrap().unwrap().html.contains("<i>governor</i> <i>of a</i>"));
         assert!(lib.module(Kind::Bible, "kjv+").unwrap().strongs);
         assert!(!lib.module(Kind::Bible, "kjv").unwrap().strongs);
         assert!(article(&lib, Kind::Lexicon, "strong", "G25").unwrap().unwrap().html.contains("<lat>agap"));
@@ -451,6 +456,11 @@ mod library_tests {
         assert!(love.iter().take(6).any(|w| w.num == "G25"));
         let agape = translit_search(&lib, "strong", "agape", 10).unwrap();
         assert!(agape.iter().any(|h| h.num == "G26"), "{agape:?}");
+        // "Bethel" finds the KJV's "Beth-el", and "beth-el" the same verses.
+        let q = |text: &str| search::Query { text: text.into(), mode: search::Mode::Phrase, whole_words: true, bible: "kjv".into(), book_from: 1, book_to: 66, strongs_bible: None };
+        let bethel = search::run(&lib, None, &q("Bethel")).unwrap().bible.count;
+        assert!(bethel >= 55, "{bethel}");  // 59: its 66 in 59 verses
+        assert_eq!(search::run(&lib, None, &q("beth-el")).unwrap().bible.count, bethel);
         assert!(lib.modules.iter().all(|m| m.source == crate::library::Source::Bundled && !m.info.contains("Meyers")));
     }
 

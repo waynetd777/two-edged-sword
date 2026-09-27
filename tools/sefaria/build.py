@@ -69,10 +69,14 @@ def text(tocmap, title, lang):
 
 def clean(s):
     """Plain text for a verse: footnotes out, tags out, entities decoded."""
-    s = re.sub(r'<sup class="footnote-marker">.*?</sup>\s*<i class="footnote">.*?</i>', "", s, flags=re.S)
+    # A footnote is its marker (<sup class="footnote-marker">1</sup>, or a bare <sup>Alternate targum</sup>)
+    # and its text (<i class="footnote">…</i>); both go.
+    s = re.sub(r'<sup\b[^>]*>.*?</sup>\s*(?=<i class="footnote">)', "", s, flags=re.S)
+    s = re.sub(r'<sup class="footnote-marker">.*?</sup>', "", s, flags=re.S)
     s = re.sub(r"<i class=\"footnote\">.*?</i>", "", s, flags=re.S)
     s = re.sub(r"<br\s*/?>", " ", s)
     s = re.sub(r"<[^>]+>", "", s)
+    s = re.sub(r"(?<=[a-z])I(?=[a-z])", "l", s)  # the OCR's I for l in Pseudo-Jonathan ("thyseIf", "singIe")
     return re.sub(r"\s+", " ", html.unescape(s)).strip()
 
 
@@ -265,6 +269,45 @@ def chapter_lengths(module):
     return {(b, ch): n for b, ch, n in c.execute("SELECT Book, Chapter, MAX(Verse) FROM Bible GROUP BY Book, Chapter")}
 
 
+def english_words():
+    """Words, for telling "bean</b>before" (two words) from "establish</b>es" (one): the system's word list."""
+    try:
+        return {w.strip().lower() for w in open("/usr/share/dict/words", encoding="utf-8")}
+    except OSError:
+        return set()
+
+
+WORDS = None
+
+
+def is_word(w):
+    w = w.lower().replace("’", "'")
+    stems = [w, w[:-1] if w.endswith("s") else None, w[:-2] if w.endswith(("es", "ed", "'s")) else None,
+             w[:-3] if w.endswith("ing") else None, w[:-1] if w.endswith("d") else None]
+    return any(x and x in WORDS for x in stems)
+
+
+def spaced(t):
+    """Spaces the Talmud's English is missing in a few dozen places: after a sentence or clause
+    that runs into the next ("coin.<b>The king", "home,as"), and where bold or italics close
+    between two words ("a split bean</b>before", "<i>se’a</i>of"). Bold that closes inside a word
+    ("establish</b>es", the Steinsaltz bolding the literal part) is left alone."""
+    global WORDS
+    if WORDS is None:
+        WORDS = english_words()
+    # The space goes after any closing tags and before any opening ones: "coin.</b> <b>The".
+    close = r"(?:</(?:b|i)>)*"
+    t = re.sub(rf"([a-z’']{close}[.?!]{close})(?=(?:<(?:b|i)>)*[A-Z][a-z])", r"\1 ", t)
+    t = re.sub(rf"([a-z]{close}[,;:]{close})(?=(?:<(?:b|i)>)*[a-z])", r"\1 ", t)
+
+    def join(m):
+        a, tag, b = m[1], m[2], m[3]
+        if WORDS and not is_word(a + b) and (is_word(a) or "’" in a) and is_word(b):
+            return f"{a}{tag} {b}"
+        return m[0]
+    return re.sub(r"([A-Za-z’']+)(</(?:b|i)>)([a-z][A-Za-z’']*)", join, t)
+
+
 def amud(i):
     """The text's index as a daf and side: 0 → 1a, 1 → 1b, 2 → 2a."""
     return i // 2 + 1, "ab"[i % 2]
@@ -285,7 +328,7 @@ def tractate(tocmap, title, links, heb, kjv):
         body = [f"<h3>{daf}{side}</h3>"]
         for j in range(max(len(e), len(h))):
             if j < len(e) and e[j]:
-                body.append(f"<p>{e[j]}</p>")
+                body.append(f"<p>{spaced(e[j])}</p>")
             if j < len(h) and h[j]:
                 body.append(f'<p class="heb" dir="rtl" lang="arc" style="color: var(--muted)">{h[j]}</p>')
         chapters.setdefault(daf, []).extend(body)

@@ -145,6 +145,15 @@ def subscription(verses, book, chapter, heading):
         verses[last] = (f"{p0} <blu>{heading}</blu>", f"{t0} <blu>{heading}</blu>")
 
 
+SPLIT = {"can": ("not",), "what": ("soever",), "where": ("unto", "in")}
+
+
+def join_split(m):
+    """"can not" → "cannot" (with Strong's numbers, "can<num>G1410</num> not<num>G3756</num>" → "cannot<num>G1410</num><num>G3756</num>")."""
+    first, nums, second = m[1], m[2], m[3]
+    return f"{first}{second}{nums}" if second in SPLIT[first.lower()] else m[0]
+
+
 def inline(s):
     """USFM character markup → e-Sword markup, without Strong's numbers and with them."""
     s = re.sub(r"\\f .*?\\f\*", "", s, flags=re.S)  # the translators' notes
@@ -160,13 +169,21 @@ def inline(s):
         t = re.sub(r"\\\+?wj\*", "</red>", t)
         t = re.sub(r"\\\+?add ", "<i>", t)
         t = re.sub(r"\\\+?add\*", "</i>", t)
-        t = re.sub(r"\\\+?(nd|tl|sc|bk|qs|k|pn|em|it|bd|no)\*?\s?", "", t)
-        t = re.sub(r"\\\S+\s?", "", t)  # anything else left
+        # An opening marker's one space is part of the marker; a closing marker (\nd*) has none, and
+        # the space after it is the text's ("\nd LORD\nd* is": "LORD is").
+        t = re.sub(r"\\\+?(nd|tl|sc|bk|qs|k|pn|em|it|bd|no)\*", "", t)
+        t = re.sub(r"\\\+?(nd|tl|sc|bk|qs|k|pn|em|it|bd|no)(?: |(?=\\)|$)", "", t)
+        t = re.sub(r"\\[^\s\\*]+\*", "", t)  # anything else left: closing markers,
+        t = re.sub(r"\\[^\s\\]+ ?", "", t)    # then opening ones
         # e-Sword's spellings, so a search for "Caesar" or "God's" finds them.
         t = t.replace("æ", "ae").replace("Æ", "Ae").replace("œ", "oe").replace("’", "'")
         t = re.sub(r"\s+", " ", t).strip()
         t = re.sub(r"\s+([,.;:?!)])", r"\1", t).replace("<red> ", " <red>").replace(" </red>", "</red> ")
-        return re.sub(r"(</red>|</i>)\s+([,.;:?!)])", r"\1\2", t).strip()
+        t = re.sub(r"(</red>|</i>)\s+([,.;:?!)])", r"\1\2", t)
+        # Words the source splits in a few verses where the 1769 text has one ("can not" in Acts 4:16):
+        # cannot, whatsoever, whereunto, wherein; but "every where in" (1 Cor 4:17) is two.
+        t = re.sub(r"(?<!every )\b([Cc]an|[Ww]hat|[Ww]here)((?:<num>[^<]*</num>)*) (not|soever|unto|in)\b", join_split, t)
+        return t.strip()
 
     return conv(False), conv(True)
 
@@ -252,6 +269,9 @@ def hebrew_text(el):
             else:
                 out.append(f"<heb>{html.escape(c.get('lemma', ''))}</heb> <lat>{html.escape(c.get('xlit', ''))}</lat>")
         elif tag == "hi":
+            # Italic runs that touch are separate words ("<hi>governor</hi><hi>of a</hi>").
+            if "".join(out).endswith("</i>"):
+                out.append(" ")
             out.append(f"<i>{hebrew_text(c)}</i>")
         elif tag == "note":
             pass  # typo notes inside a note
@@ -346,6 +366,8 @@ def tsk_html(s):
     s = re.sub(r'<reference osisRef="strong:([GH]\d+)">[^<]*</reference>', lambda m: f"<num>{num(m[1])}</num>", s)
     s = re.sub(r'<reference osisRef="([^"]+)">[^<]*</reference>', lambda m: f"<ref>{ref(m[1])}</ref>", s)
     s = s.replace('<lb type="x-begin-paragraph"/>', "<p>").replace('<lb type="x-end-paragraph"/>', "</p>")
+    s = s.replace("<lb/>", "<br>")  # a line break in a quoted hymn (Lev 19:5)
+    s = re.sub(r" -par(?=[A-Z])", "</p><p>", s)  # an RTF paragraph mark left in the text (Num 7:73)
     # A catchword opens its paragraph, in italics: e-Sword's TSK shows it bold with a colon.
     s = re.sub(r'<p>\s*<hi type="italic">([^<]*)</hi>', r"<p><b>\1:</b>", s)
     s = re.sub(r'<hi type="italic">([^<]*)</hi>', r"<i>\1</i>", s)
