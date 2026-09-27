@@ -40,4 +40,27 @@ It only reads them, and keeps your journal, highlights and plans separately.
 - **Quiet time**: the daily reminder, and what to do when you fall behind.
 - **AI assistant**: which tools are installed, the default model, and what Ask may read and send
   ([Ask](ask.md)).
-- At the bottom: the app's version and build number.
+- At the bottom: the app's version and build number, and its licence.
+
+## Licence and credits
+
+Two-edged Sword is free software under the GNU General Public License, version 3 or later.
+
+- You may use it, share it and change it.
+- Anything you pass on, changed or not, must stay free under the same licence, with its source.
+- It comes with no warranty.
+- The licence is in `LICENSE` in the source, and at [gnu.org](https://www.gnu.org/licenses/gpl-3.0.html).
+
+The Bibles and books keep their own terms:
+
+| What | Terms |
+|---|---|
+| The built-in modules | Public domain: eBible.org and the CrossWire Bible Society (the KJV, the TSK), Open Scriptures (Strong's) |
+| Modules built by `tools/` | As each script says: most public domain or CC BY (STEPBible, Open Scriptures), a few for personal study |
+| e-Sword X's modules | e-Sword's licence: read where e-Sword keeps them, never copied |
+
+The app is built with Tauri, React and SQLite (MIT, Apache 2.0 and public domain), and its
+fonts (Literata, Source Serif 4, EB Garamond, Inter, Atkinson Hyperlegible Next and Cinzel
+Decorative) are under the SIL Open Font License.
+
+Thanks to Rick Meyers for e-Sword ([Library](library.md#thanks-to-e-sword)).

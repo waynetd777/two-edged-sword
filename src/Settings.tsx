@@ -132,7 +132,12 @@ function AppVersion() {
   const [v, setV] = useState<[string, string] | null>(null);
   useEffect(() => { api.appVersion().then(setV).catch(() => {}); }, []);
   if (!v) return null;
-  return <div className="hint" style={{ textAlign: "center", userSelect: "text" }}>Two-edged Sword {v[0]} (build {v[1]})</div>;
+  return (
+    <div className="hint" style={{ textAlign: "center", userSelect: "text", display: "flex", flexDirection: "column", gap: 2 }}>
+      <span>Two-edged Sword {v[0]} (build {v[1]})</span>
+      <span>Free software under the GNU General Public License, version 3 or later</span>
+    </div>
+  );
 }
 
 function FavBibles() {

@@ -74,6 +74,14 @@ To Rick Meyers, whose free e-Sword has put God's word into the hands of millions
 app reads e-Sword X's formats and library, and owes that to his work
 ([e-sword.net](https://www.e-sword.net)).
 
+## Licence
+
+Two-edged Sword is free software under the [GNU General Public License](LICENSE), version 3 or
+later: you may use, share and change it, and anything you pass on must stay free under the same
+licence. The Bible texts and books it reads keep their own terms: the built-in modules are public
+domain ([Library](docs/library.md#built-in-modules)), and so on for the rest
+([Licence and credits](docs/features.md#licence-and-credits)).
+
 ## Documentation
 
 The same guides are in the app, under Help (⌘?).
