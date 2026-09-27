@@ -1,0 +1,709 @@
+{
+ "module": "mkjv",
+ "base": "kjv",
+ "updated": "2026-09-27",
+ "records": [
+  {
+   "book": 1,
+   "chapter": 3,
+   "verse": 5,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"as gods\" becomes \"as God\"",
+   "note": "A translation choice: the Hebrew elohim can mean \"God\" or \"gods\". The serpent's promise is read as being like the one God rather than like divine beings."
+  },
+  {
+   "book": 1,
+   "chapter": 3,
+   "verse": 15,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"her Seed\" and \"He\"/\"His\" capitalised; \"it\" becomes \"He\"",
+   "note": "A translation choice: the Masoretic pronoun (hu) can be read \"he\" or \"it\", and the MKJV's capitals read the verse as a direct prophecy of Christ. The KJV leaves that reading to interpretation."
+  },
+  {
+   "book": 1,
+   "chapter": 49,
+   "verse": 6,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"digged down a wall\" becomes \"hamstrung a bull\"",
+   "note": "The Masoretic vowels read shor (ox) with a verb meaning to hamstring; the KJV reads shur (wall) and \"dig down\". The act of violence recalled is different, though no doctrine turns on it."
+  },
+  {
+   "book": 5,
+   "chapter": 32,
+   "verse": 36,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"none shut up, or left\" becomes \"only the imprisoned and abandoned remain\"",
+   "note": "A translation choice on the Hebrew ephes, which can mean \"none\" or \"only\"; the two readings say opposite things about who is left."
+  },
+  {
+   "book": 6,
+   "chapter": 5,
+   "verse": 14,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Capitalises \"Commander\" and \"my Lord\", treating the captain as divine",
+   "note": "A translation choice: the Hebrew adoni (\"my lord\") is lower-case in the KJV; the MKJV's capitals identify the captain of the LORD's host as God himself. Both keep that Joshua worshipped him."
+  },
+  {
+   "book": 9,
+   "chapter": 6,
+   "verse": 19,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"fifty thousand and threescore and ten\" becomes seventy, \"including fifty chief men\"",
+   "note": "The Masoretic text has 50,070, which the KJV follows; some Hebrew manuscripts and Josephus have 70, and the MKJV reinterprets the \"fifty\". The number struck is very different."
+  },
+  {
+   "book": 10,
+   "chapter": 21,
+   "verse": 19,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"slew the brother of Goliath\" becomes \"killed one of Goliath\"",
+   "note": "The Masoretic text reads simply \"Goliath\"; the KJV supplies \"the brother of\" from 1 Chronicles 20:5, and the MKJV's \"one of\" is vaguer. Who Elhanan killed is left unclear."
+  },
+  {
+   "book": 11,
+   "chapter": 11,
+   "verse": 33,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Milcom called \"the goddess\" instead of \"the god\"",
+   "note": "The Masoretic text uses the same word (elohei, \"god of\") for Chemosh and Milcom; the MKJV's \"goddess\" for Milcom has no basis in the Hebrew and looks like an error."
+  },
+  {
+   "book": 11,
+   "chapter": 11,
+   "verse": 43,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"his son\" after Rehoboam",
+   "note": "\"His son\" (beno) is in the Masoretic text; the MKJV drops it. The parallel in 2 Chronicles 9:31 keeps \"his son\"."
+  },
+  {
+   "book": 11,
+   "chapter": 12,
+   "verse": 21,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"chosen\": \"chosen men, which were warriors\" becomes \"warriors\"",
+   "note": "The Masoretic text has bachur (\"chosen\"); the MKJV drops it. Small loss of detail, no doctrine affected."
+  },
+  {
+   "book": 12,
+   "chapter": 8,
+   "verse": 9,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"Thy son Benhadad\" becomes \"Your servant Ben-hadad\"",
+   "note": "The Masoretic text has binkha (\"your son\"), a courtesy title; the MKJV's \"servant\" is a paraphrase that changes the word."
+  },
+  {
+   "book": 14,
+   "chapter": 4,
+   "verse": 16,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"his father\" after Huram",
+   "note": "The Masoretic text has Huram abiv (\"Huram his father\", probably a title of honour); the MKJV drops it. The same title appears in 2 Chronicles 2:13."
+  },
+  {
+   "book": 14,
+   "chapter": 33,
+   "verse": 19,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"How God was intreated of him\" becomes \"his entreaty\"",
+   "note": "The Hebrew (vehe'ater lo) says he was heard; the MKJV keeps only that he prayed. That God answered him is still stated in 2 Chronicles 33:13."
+  },
+  {
+   "book": 14,
+   "chapter": 36,
+   "verse": 23,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"of heaven\" from \"the LORD God of heaven\"",
+   "note": "\"God of heaven\" (Elohei hashamayim) is in the Masoretic text; the MKJV drops it. The parallel Ezra 1:2 keeps the title."
+  },
+  {
+   "book": 18,
+   "chapter": 27,
+   "verse": 22,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"God shall cast upon him\" becomes \"it will hurl at him\"",
+   "note": "The Hebrew verb has no stated subject; the KJV supplies God, the MKJV takes it as the east wind of verse 21. The actor in the judgment changes."
+  },
+  {
+   "book": 19,
+   "chapter": 8,
+   "verse": 5,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"lower than the angels\" becomes \"lack a little from God\"",
+   "note": "The Hebrew is elohim; the KJV follows the Septuagint's \"angels\", which Hebrews 2:7 quotes of Christ, while the MKJV renders the Hebrew literally."
+  },
+  {
+   "book": 19,
+   "chapter": 9,
+   "verse": 12,
+   "kind": "other",
+   "weight": "minor",
+   "change": "God remembers \"the seekers of bloodshed\", not the humble when avenging blood",
+   "note": "A translation choice on doresh damim (\"he who requires blood\"); the KJV has God as the avenger who remembers the afflicted, the MKJV makes \"them\" the bloodthirsty."
+  },
+  {
+   "book": 19,
+   "chapter": 19,
+   "verse": 3,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"where their voice is not heard\" becomes \"their voice is not heard\"",
+   "note": "A translation choice with the same Hebrew: the KJV says the heavens' voice is heard in every language, the MKJV that their speech is silent. The universal witness is still stated in verse 4."
+  },
+  {
+   "book": 19,
+   "chapter": 97,
+   "verse": 7,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Command \"worship him, all ye gods\" becomes statement \"all gods bow down\"",
+   "note": "The Hebrew hishtachavu can be imperative or past; the KJV's command matches Hebrews 1:6's use of the verse (from the Septuagint), which the MKJV's statement loses."
+  },
+  {
+   "book": 19,
+   "chapter": 139,
+   "verse": 8,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"Hell\" becomes \"Sheol\"",
+   "note": "The Hebrew is sheol; the KJV renders it \"hell\" here, the MKJV transliterates it, leaving open whether the place of the dead or of punishment is meant."
+  },
+  {
+   "book": 20,
+   "chapter": 18,
+   "verse": 24,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"must shew himself friendly\" becomes \"may be broken up\"",
+   "note": "A translation choice: the Hebrew verb is taken as \"come to ruin\" rather than \"be friendly\". The first line becomes a warning about many friends instead of a duty of friendliness."
+  },
+  {
+   "book": 20,
+   "chapter": 26,
+   "verse": 10,
+   "kind": "other",
+   "weight": "minor",
+   "change": "God rewarding fools becomes a saying about hiring a fool",
+   "note": "The Hebrew is obscure and read many ways; the KJV makes it a statement about God's judgment, the MKJV a proverb about employers."
+  },
+  {
+   "book": 20,
+   "chapter": 29,
+   "verse": 21,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"Become his son\" becomes \"be his successor\"",
+   "note": "A translation choice on the rare Hebrew word manon, whose meaning is uncertain; the outcome for the pampered servant differs."
+  },
+  {
+   "book": 21,
+   "chapter": 3,
+   "verse": 11,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"set the world in their heart\" becomes \"set eternity\"",
+   "note": "The Hebrew olam can mean \"world\" or \"eternity\"; a translation choice that changes what God is said to have put in the human heart."
+  },
+  {
+   "book": 23,
+   "chapter": 14,
+   "verse": 12,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"O Lucifer\" becomes \"O shining star\"",
+   "note": "The Hebrew helel means \"shining one\"; \"Lucifer\" is the Vulgate's Latin for it. The MKJV's rendering loses the name long read as Satan's, though the verse is the same."
+  },
+  {
+   "book": 23,
+   "chapter": 19,
+   "verse": 10,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Sluices and fish ponds become broken foundations and wage-earners grieving",
+   "note": "A translation choice for obscure Hebrew words; the MKJV reads different senses of the same consonants. The prophecy against Egypt stands either way."
+  },
+  {
+   "book": 23,
+   "chapter": 48,
+   "verse": 16,
+   "kind": "trinity",
+   "weight": "minor",
+   "change": "Capitalises \"sent Me\", making the speaker divine",
+   "note": "A translation choice on the same Hebrew: the MKJV's capitals read the speaker as God, sent by the Lord and his Spirit, a reading often taken as trinitarian; the KJV's lower-case \"me\" leaves it open."
+  },
+  {
+   "book": 23,
+   "chapter": 56,
+   "verse": 8,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Loses \"others\": gathering beyond Israel's outcasts becomes gathering \"his gathered ones\"",
+   "note": "The Hebrew (od akabbets alav lenikbatsav) reads \"yet I will gather to him, besides his gathered ones\"; the MKJV's wording drops the promise of others, often read as the Gentiles, joining Israel."
+  },
+  {
+   "book": 23,
+   "chapter": 59,
+   "verse": 19,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"lift up a standard against him\" becomes \"make him flee\"",
+   "note": "A translation choice for the Hebrew verb nosesah (raise a banner, or put to flight). The Spirit's defeat of the enemy is kept, but the familiar image is lost."
+  },
+  {
+   "book": 23,
+   "chapter": 65,
+   "verse": 11,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"that troop\" and \"that number\" become \"Fortune\" and \"Fate\"",
+   "note": "The Hebrew Gad and Meni are taken as names of pagan deities rather than common nouns; a translation choice that makes the idolatry explicit."
+  },
+  {
+   "book": 26,
+   "chapter": 28,
+   "verse": 2,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"the heart of God\" becomes \"the heart of gods\"",
+   "note": "Translation choice: the Hebrew elohim can be read as God or gods. The prince's claim to be divine is still stated (\"I am a god\")."
+  },
+  {
+   "book": 26,
+   "chapter": 28,
+   "verse": 6,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"the heart of God\" becomes \"the heart of gods\"",
+   "note": "Translation choice over the Hebrew elohim, as in verse 2; the rebuke of the prince's pride is unchanged."
+  },
+  {
+   "book": 26,
+   "chapter": 28,
+   "verse": 9,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"I am God\" becomes \"I am of the gods\"",
+   "note": "Translation choice over the Hebrew elohim; the MKJV still has \"not God\" in the second half of the verse."
+  },
+  {
+   "book": 26,
+   "chapter": 32,
+   "verse": 32,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"my terror\" becomes \"his terror\"",
+   "note": "The written Hebrew text (ketiv) has \"his terror\" and the marginal reading (qere) \"my terror\"; the KJV follows the qere, the MKJV the ketiv."
+  },
+  {
+   "book": 26,
+   "chapter": 37,
+   "verse": 9,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"wind\" and \"breath\" become \"Spirit\"",
+   "note": "Translation choice: the Hebrew ruach means wind, breath or spirit. The MKJV makes the life-giving breath God's Spirit, which verse 14 states anyway (\"my spirit in you\")."
+  },
+  {
+   "book": 26,
+   "chapter": 38,
+   "verse": 3,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"chief prince\" becomes \"chief ruler of Rosh\"",
+   "note": "Translation choice: the Hebrew rosh can mean \"chief\" or be a place name, as the Septuagint takes it. It bears on how the Gog prophecy is identified."
+  },
+  {
+   "book": 26,
+   "chapter": 39,
+   "verse": 1,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"chief prince\" becomes \"chief ruler of Rosh\"",
+   "note": "The same choice as 38:3: rosh read as a place name, following the Septuagint, rather than as \"chief\"."
+  },
+  {
+   "book": 27,
+   "chapter": 3,
+   "verse": 25,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"the Son of God\" becomes \"a son of the gods\"",
+   "note": "Translation choice: the Aramaic bar elahin can be read either way, and Nebuchadnezzar was a pagan speaker. The KJV's reading lets the fourth figure be taken as the pre-incarnate Christ; the MKJV's does not."
+  },
+  {
+   "book": 27,
+   "chapter": 7,
+   "verse": 9,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "Thrones \"cast down\" become thrones \"set in place\"",
+   "note": "The Aramaic verb can mean \"cast\" or \"placed\"; the MKJV has thrones set up for judgment rather than earthly thrones overthrown."
+  },
+  {
+   "book": 27,
+   "chapter": 9,
+   "verse": 27,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"a covenant\"; abominations \"on a corner of the altar\"; poured on \"the desolator\"",
+   "note": "Translation choices in difficult Hebrew; the MKJV's wording bears on whether the verse is read of Christ or of an antichrist figure, and has judgment fall on the desolator rather than the desolate."
+  },
+  {
+   "book": 27,
+   "chapter": 11,
+   "verse": 38,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"the God of forces\" becomes \"the god of forces\"",
+   "note": "The Hebrew eloah can be either; the KJV's capital suggests the true God, the MKJV's lower case a false god of fortresses."
+  },
+  {
+   "book": 28,
+   "chapter": 1,
+   "verse": 9,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"God\" and \"your God\" not written; \"I will not be for you\"",
+   "note": "The Hebrew says \"and he said\" and \"I will not be (ehyeh) for you\"; the KJV supplies \"God\" and \"your God\" in italics. The MKJV's literal reading can echo the divine name \"I AM\"."
+  },
+  {
+   "book": 28,
+   "chapter": 6,
+   "verse": 7,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"like men\" becomes \"like Adam\"",
+   "note": "The Hebrew ke'adam can mean \"like men\" or \"like Adam\"; the MKJV's reading implies a covenant made with Adam, which the KJV's does not."
+  },
+  {
+   "book": 30,
+   "chapter": 5,
+   "verse": 26,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"Moloch\" becomes \"your king\"; \"your god\" becomes \"your gods\"",
+   "note": "Translation choice: the Hebrew malkekem can mean \"your king\" or name the god Molech, as the Septuagint and Acts 7:43 read it."
+  },
+  {
+   "book": 32,
+   "chapter": 2,
+   "verse": 2,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"hell\" becomes \"Sheol\"",
+   "note": "Translation choice: the Hebrew sheol is transliterated rather than rendered \"hell\"; the words are the same underneath."
+  },
+  {
+   "book": 35,
+   "chapter": 1,
+   "verse": 12,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"O mighty God\" becomes \"my Rock\"",
+   "note": "The Hebrew tsur means \"rock\", a title of God; the KJV renders its sense as \"mighty God\". God is still addressed either way."
+  },
+  {
+   "book": 35,
+   "chapter": 2,
+   "verse": 5,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"hell\" becomes \"Sheol\"",
+   "note": "Translation choice: the Hebrew sheol is transliterated rather than rendered \"hell\"."
+  },
+  {
+   "book": 38,
+   "chapter": 9,
+   "verse": 9,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"having salvation\" becomes \"victorious\"",
+   "note": "Translation choice over the Hebrew nosha (saved, delivered). In this messianic verse, quoted in Matthew 21:5, the KJV's wording ties the King to salvation."
+  },
+  {
+   "book": 41,
+   "chapter": 13,
+   "verse": 6,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"I am Christ\" rendered \"I AM\"",
+   "note": "The Greek has only \"egō eimi\" and the KJV supplies \"Christ\" in italics; the MKJV renders it as the divine name. A translation choice: the deceivers claim God's name rather than the title Messiah."
+  },
+  {
+   "book": 41,
+   "chapter": 16,
+   "verse": 17,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"them that believe\" becomes \"those believing these things\"",
+   "note": "The Greek \"tauta\" (these) goes with \"signs\" in the KJV (\"these signs\"); the MKJV attaches it to believing. A translation choice that shifts the object of faith to the preceding words."
+  },
+  {
+   "book": 42,
+   "chapter": 21,
+   "verse": 8,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"I am Christ\" as \"I AM\"; \"time draweth near\" as \"has come\"",
+   "note": "The Greek has \"egō eimi\" and \"ēngiken\"; the KJV supplies \"Christ\" and reads the nearness as future. The MKJV makes the deceivers claim the divine name and announce the time as arrived; a translation choice."
+  },
+  {
+   "book": 44,
+   "chapter": 2,
+   "verse": 27,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"hell\" becomes \"Hades\"",
+   "note": "The Greek is \"hadēs\" in both texts; the MKJV transliterates where the KJV translates. A translation choice about the place of the dead, not a textual difference."
+  },
+  {
+   "book": 44,
+   "chapter": 2,
+   "verse": 31,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"hell\" becomes \"Hades\"",
+   "note": "The Greek is \"hadēs\" in both texts; the MKJV transliterates where the KJV translates. Christ's resurrection from the place of the dead is stated the same way."
+  },
+  {
+   "book": 44,
+   "chapter": 7,
+   "verse": 45,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"Joshua\"",
+   "note": "Both translate the same Greek name (Iēsous); the MKJV supplies the historical referent, Joshua son of Nun, who brought the tabernacle into Canaan. No doctrine is affected."
+  },
+  {
+   "book": 45,
+   "chapter": 9,
+   "verse": 14,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Question adds \"not\", inviting the answer yes",
+   "note": "The Greek question begins with \"mē\", which expects the answer no, as the KJV renders it; the MKJV's \"not\" reads the other way, though \"Let it not be!\" still follows."
+  },
+  {
+   "book": 45,
+   "chapter": 11,
+   "verse": 1,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Question adds \"not\", inviting the answer yes",
+   "note": "The Greek question begins with \"mē\", which expects the answer no, as the KJV renders it; the MKJV's \"not\" reads the other way, though \"Let it not be!\" still follows."
+  },
+  {
+   "book": 45,
+   "chapter": 11,
+   "verse": 11,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Question adds \"not\", inviting the answer yes",
+   "note": "The Greek question begins with \"mē\", which expects the answer no, as the KJV renders it; the MKJV's \"not\" reads the other way, though \"Let it not be!\" still follows."
+  },
+  {
+   "book": 45,
+   "chapter": 16,
+   "verse": 27,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription naming Corinth and Phebe",
+   "note": "The subscription is a later scribal note printed in KJV editions, not part of the letter in the Greek text; the MKJV prints only the closing words."
+  },
+  {
+   "book": 46,
+   "chapter": 7,
+   "verse": 37,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"keep his virgin\" becomes \"keep his virginity\"",
+   "note": "The Greek \"parthenos\" can mean a virgin daughter or betrothed, or virginity; the MKJV reads it of the man's own celibacy. A translation choice that changes who the verse concerns."
+  },
+  {
+   "book": 46,
+   "chapter": 16,
+   "verse": 24,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription naming Philippi and the bearers",
+   "note": "The subscription is a later scribal note printed in KJV editions, not part of the letter in the Greek text; the MKJV prints only the closing words."
+  },
+  {
+   "book": 47,
+   "chapter": 13,
+   "verse": 14,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription naming Philippi, Titus and Lucas",
+   "note": "The subscription is a later scribal note printed in KJV editions, not part of the letter in the Greek text; the MKJV prints only the closing words."
+  },
+  {
+   "book": 48,
+   "chapter": 6,
+   "verse": 18,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription \"To the Galatians written from Rome\"",
+   "note": "The subscription is a later scribal note printed in KJV editions, not part of the letter in the Greek text; the MKJV prints only the closing words."
+  },
+  {
+   "book": 49,
+   "chapter": 6,
+   "verse": 24,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription naming Rome and Tychicus",
+   "note": "The subscription is a later scribal note printed in KJV editions, not part of the letter in the Greek text; the MKJV prints only the closing words."
+  },
+  {
+   "book": 50,
+   "chapter": 4,
+   "verse": 23,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription naming Rome and Epaphroditus",
+   "note": "The subscription is a later scribal note printed in KJV editions, not part of the letter in the Greek text; the MKJV prints only the closing words."
+  },
+  {
+   "book": 51,
+   "chapter": 4,
+   "verse": 18,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription naming Rome, Tychicus and Onesimus",
+   "note": "The subscription is a later scribal note printed in KJV editions, not part of the letter in the Greek text; the MKJV prints only the closing words."
+  },
+  {
+   "book": 52,
+   "chapter": 5,
+   "verse": 28,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription \"written from Athens\"",
+   "note": "The subscription is a later scribal note printed in KJV editions, not part of the letter in the Greek text; the MKJV prints only the closing words."
+  },
+  {
+   "book": 53,
+   "chapter": 3,
+   "verse": 18,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription \"written from Athens\"",
+   "note": "The subscription is a later scribal note printed in KJV editions, not part of the letter in the Greek text; the MKJV prints only the closing words."
+  },
+  {
+   "book": 54,
+   "chapter": 4,
+   "verse": 10,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"the Saviour of all men\" becomes \"the preserver\"",
+   "note": "The Greek \"sōtēr\" is the usual word for Saviour; the MKJV renders it \"preserver\", reading the verse of God's providential care. A translation choice; God as Saviour is still stated in 1 Timothy 1:1 and 2:3."
+  },
+  {
+   "book": 54,
+   "chapter": 6,
+   "verse": 21,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription naming Laodicea",
+   "note": "The subscription is a later scribal note printed in KJV editions, not part of the letter in the Greek text; the MKJV prints only the closing words."
+  },
+  {
+   "book": 55,
+   "chapter": 4,
+   "verse": 22,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription naming Timotheus as first bishop and Rome",
+   "note": "The subscription is a later scribal note printed in KJV editions, not part of the letter in the Greek text; the MKJV prints only the closing words."
+  },
+  {
+   "book": 56,
+   "chapter": 3,
+   "verse": 15,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription naming Titus as bishop of Crete",
+   "note": "The subscription is a later scribal note printed in KJV editions, not part of the letter in the Greek text; the MKJV prints only the closing words."
+  },
+  {
+   "book": 57,
+   "chapter": 1,
+   "verse": 25,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription naming Rome and Onesimus",
+   "note": "The subscription is a later scribal note printed in KJV editions, not part of the letter in the Greek text; the MKJV prints only the closing words."
+  },
+  {
+   "book": 58,
+   "chapter": 4,
+   "verse": 8,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"Joshua\"",
+   "note": "Both translate the same Greek name (Iēsous); the MKJV supplies the historical referent, Joshua son of Nun, since the passage concerns the entry into Canaan. No doctrine is affected."
+  },
+  {
+   "book": 58,
+   "chapter": 13,
+   "verse": 25,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription \"Written to the Hebrews from Italy\"",
+   "note": "The subscription is a later scribal note printed in KJV editions, not part of the letter in the Greek text; the MKJV prints only the closing words."
+  },
+  {
+   "book": 59,
+   "chapter": 2,
+   "verse": 1,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"our Lord Jesus Christ\" becomes \"our Lord Christ\"",
+   "note": "\"Iēsou\" is in the Textus Receptus and the critical text alike, so the omission looks like the MKJV's own; Christ is still called \"the Lord of glory\" in the verse."
+  },
+  {
+   "book": 61,
+   "chapter": 2,
+   "verse": 4,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"hell\" becomes \"Tartarus\"",
+   "note": "The Greek verb \"tartaroō\" names Tartarus; the MKJV transliterates where the KJV translates \"hell\". A translation choice; the judgment of the fallen angels is stated the same way."
+  },
+  {
+   "book": 62,
+   "chapter": 4,
+   "verse": 3,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"that spirit of antichrist\" becomes \"the antichrist\"",
+   "note": "The Greek \"to tou antichristou\" means \"that [spirit] of the antichrist\"; the MKJV drops the implied \"spirit\", making the verse speak of the person rather than his spirit. A translation choice."
+  },
+  {
+   "book": 65,
+   "chapter": 1,
+   "verse": 4,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the only Lord God, and our Lord\" read as one person",
+   "note": "Both follow the Textus Receptus (\"despotēn theon kai kyrion\"); the MKJV applies one article to both titles, so \"Master, God\" names Jesus Christ, where the KJV can be read as two persons. A translation choice."
+  }
+ ]
+}

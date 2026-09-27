@@ -180,6 +180,11 @@ fn store_read(st: State<AppState>, name: String) -> Result<serde_json::Value, St
 }
 
 #[tauri::command]
+fn variances_read(st: State<AppState>, name: String) -> Result<serde_json::Value, String> {
+    store::variances(&st.data, &name)
+}
+
+#[tauri::command]
 fn store_write(st: State<AppState>, name: String, value: serde_json::Value) -> Result<(), String> {
     store::write(&st.data, &name, &value)
 }
@@ -549,6 +554,7 @@ pub fn run() {
             search,
             index_progress,
             store_read,
+            variances_read,
             store_write,
             journal_default_dir,
             app_version,

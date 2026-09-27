@@ -14,8 +14,11 @@ KJV, such as an omitted phrase or a changed name of God. It's faint for minor di
 
 Click it to see both readings, what changed, and why (usually which manuscripts each follows).
 
-Ask uses the same list, so you can ask "how does this chapter differ from the KJV?". So far the
-NIV has been reviewed. Building a list for another translation is described in
+Ask uses the same list, so you can ask "how does this chapter differ from the KJV?".
+
+The app comes with lists for the NIV, ESV, ESV+, ASV, CEV, GNB, MKJV and ISV, each reviewed
+across the whole Bible. They show when you have that translation. Building a list for another
+translation is described in
 [Development](development.md#differences-from-the-kjv).
 
 ## Greek and Hebrew

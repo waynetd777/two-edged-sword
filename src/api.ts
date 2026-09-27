@@ -91,6 +91,8 @@ export const api = {
   search: (query: SearchQuery) => invoke<SearchResults>("search", { query }),
   indexProgress: () => invoke<{ building: boolean; done: number; total: number }>("index_progress"),
   storeRead: <T>(name: string) => invoke<T | null>("store_read", { name }),
+  /** A translation's differences from the KJV: the list built on this Mac, else the app's. */
+  variancesRead: <T>(name: string) => invoke<T | null>("variances_read", { name }),
   storeWrite: (name: string, value: unknown) => (readOnly ? Promise.resolve() : invoke<void>("store_write", { name, value })),
   journalDefaultDir: () => invoke<string>("journal_default_dir"),
   /** [version, build number]: "1.0.3", "20260927.142514" ("dev" outside a release build). */

@@ -184,14 +184,14 @@ fn cited_in_books(lib: &Library, req: &Request, from: i64, to: i64, dir: &Path, 
 const BOOKS: [&str; 66] = ["Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy", "Joshua", "Judges", "Ruth", "1 Samuel", "2 Samuel", "1 Kings", "2 Kings", "1 Chronicles", "2 Chronicles", "Ezra", "Nehemiah", "Esther", "Job", "Psalms", "Proverbs", "Ecclesiastes", "Song of Solomon", "Isaiah", "Jeremiah", "Lamentations", "Ezekiel", "Daniel", "Hosea", "Joel", "Amos", "Obadiah", "Jonah", "Micah", "Nahum", "Habakkuk", "Zephaniah", "Haggai", "Zechariah", "Malachi", "Matthew", "Mark", "Luke", "John", "Acts", "Romans", "1 Corinthians", "2 Corinthians", "Galatians", "Ephesians", "Philippians", "Colossians", "1 Thessalonians", "2 Thessalonians", "1 Timothy", "2 Timothy", "Titus", "Philemon", "Hebrews", "James", "1 Peter", "2 Peter", "1 John", "2 John", "3 John", "Jude", "Revelation"];
 
 /// Where each translation's meaning differs from the KJV, from the reviewed `variances-<module>.json`
-/// files beside the app's other data (tools/variances/ builds them): the passage's, and the whole list.
+/// files (tools/variances/ builds them; the app ships a set): the passage's, and the whole list.
 fn differences(lib: &Library, root: &Path, req: &Request, from: i64, to: i64, dir: &Path, index: &mut String) -> Result<(), String> {
     let data = root.parent().unwrap_or(root);
     let mut listed = false;
     for m in lib.of_kind(Kind::Bible) {
         let name: String = m.id.chars().map(|c| if c.is_ascii_alphanumeric() || c == '-' || c == '_' { c } else { '_' }).collect();
-        let Ok(text) = std::fs::read_to_string(data.join(format!("variances-{name}.json"))) else { continue };
-        let Ok(doc) = serde_json::from_str::<serde_json::Value>(&text) else { continue };
+        let Ok(doc) = crate::store::variances(data, &format!("variances-{name}")) else { continue };
+        if doc.is_null() { continue; }
         let base = doc["base"].as_str().unwrap_or("kjv").to_uppercase();
         let records = doc["records"].as_array().cloned().unwrap_or_default();
         let line = |r: &serde_json::Value| {
@@ -486,10 +486,10 @@ mod tests {
         let req = Request { book: 43, chapter: 3, from: None, to: None, bibles: vec![], strongs_bible: None, label: "John 3".into(), journal: vec![], exclude: vec![] };
         let mut index = String::new();
         differences(&lib, &root, &req, 1, 999, &out, &mut index).unwrap();
-        let file = |name: &str| std::fs::read_to_string(std::fs::read_dir(&out).unwrap().flatten().find(|e| e.file_name().to_string_lossy().ends_with(name)).unwrap().path()).unwrap();
-        let here = file("KJV.txt");
+        let file = |name: &str| std::fs::read_to_string(std::fs::read_dir(&out).unwrap().flatten().find(|e| e.file_name().to_string_lossy() == name).unwrap().path()).unwrap();
+        let here = file("KJV vs KJV.txt");
         assert!(here.contains("John 3:16 [deity, major] In John") && !here.contains("Colossians"));
-        assert!(file("all.txt").contains("Colossians 1:14"));
+        assert!(file("KJV vs KJV - all.txt").contains("Colossians 1:14"));
         assert!(index.contains("differences/"));
         let _ = std::fs::remove_dir_all(&data);
     }

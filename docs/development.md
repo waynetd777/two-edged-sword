@@ -48,7 +48,7 @@ let the terminal control Finder.
 | Settings, bookmarks, highlights, plans, chats | `~/Library/Application Support/Two-edged Sword/*.json` |
 | Search index | `~/Library/Application Support/Two-edged Sword/search-index.sqlite` |
 | Library material written out for Ask | `~/Library/Application Support/Two-edged Sword/ask/` and `books/` |
-| Differences from the KJV | `~/Library/Application Support/Two-edged Sword/variances-<module>.json`, `variances-work/` |
+| Differences from the KJV | Shipped: `src-tauri/variances/`. Built on this Mac (read first): `~/Library/Application Support/Two-edged Sword/variances-<module>.json`, with `variances-work/` |
 | Downloads cached by `tools/` | `~/Library/Caches/Two-edged Sword/` |
 
 ## Signing and Full Disk Access
@@ -109,7 +109,8 @@ Command Line Tools and Screen Recording permission for the terminal.
 
 ## Differences from the KJV
 
-The ≠ lists are reviewed one translation at a time and kept with the app's data, not in the repo.
+The ≠ lists are reviewed one translation at a time. The app ships the ones in `src-tauri/variances/`;
+a list in the app's data folder takes their place, so a new or rebuilt one shows at once.
 To make one for another translation:
 
 ```sh
@@ -126,6 +127,7 @@ python3 tools/variances/build.py esv --work "$W/esv-nt"   # check them and merge
 22:19, John 7:53–8:11), for `--refs`; drop any the other batches already hold. `build.py` merges
 verse by verse, so folders and books can be added one at a time. Candidates ignore note markers,
 count "Jehovah" as "LORD", and don't call a verse missing when GNB joins it to the one before.
+To ship a list, copy `variances-<module>.json` into `src-tauri/variances/`.
 
 ## Writing modules
 

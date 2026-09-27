@@ -41,6 +41,21 @@ pub fn write(dir: &std::path::Path, name: &str, value: &Value) -> Result<(), Str
     std::fs::rename(&tmp, &p).map_err(|e| e.to_string())
 }
 
+/// The difference lists shipped in the app (Contents/Resources/variances); in a debug build,
+/// src-tauri/variances.
+fn bundled_variances() -> PathBuf {
+    if cfg!(debug_assertions) { return std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("variances"); }
+    std::env::current_exe().ok().and_then(|e| Some(e.parent()?.parent()?.join("Resources/variances"))).unwrap_or_default()
+}
+
+/// A translation's differences from the KJV (`variances-<module>`): the list built on this Mac
+/// by tools/variances/ if there is one, else the one shipped with the app.
+pub fn variances(dir: &std::path::Path, name: &str) -> Result<Value, String> {
+    let own = read(dir, name)?;
+    if !own.is_null() { return Ok(own); }
+    read(&bundled_variances(), name)
+}
+
 /// A hidden temporary name beside `p`, unique to this write, so it can't clobber a file of the
 /// user's (`Notes.tmp`) or another write in flight.
 fn tmp_beside(p: &std::path::Path) -> PathBuf {

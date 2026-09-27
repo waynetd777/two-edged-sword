@@ -8,7 +8,7 @@ import { useRefPreview } from "./StudyPane";
 import { Popover } from "./ui";
 
 /** Where a translation's reading differs in meaning from a base Bible's (the KJV), from
- * `variances-<module>.json` in the app's data folder. tools/variances/ builds the file. */
+ * `variances-<module>.json`: the one tools/variances/ built in the app's data folder, else the app's own. */
 export interface Variance { book: number; chapter: number; verse: number; kind: string; weight: "major" | "minor"; change: string; note: string }
 export interface VarianceFile { module: string; base: string; updated: string; records: Variance[] }
 
@@ -25,7 +25,7 @@ export function useVariances(module: string, book: number, chapter: number) {
     let live = true;
     setFile(null);
     if (sceneVariances) { setFile(sceneVariances.module === module ? sceneVariances : null); return; }
-    api.storeRead<VarianceFile>(varianceStore(module)).then((f) => { if (live) setFile(f); }).catch(() => {});
+    api.variancesRead<VarianceFile>(varianceStore(module)).then((f) => { if (live) setFile(f); }).catch(() => {});
     return () => { live = false; };
   }, [module]);
   const byVerse = new Map<number, Variance>();
