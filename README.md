@@ -5,6 +5,17 @@ notes. It comes with the KJV, Strong's dictionaries and the Treasury of Scriptur
 more modules in e-Sword X's formats: your own, and e-Sword X's library if you have it.
 It only reads them, and keeps your journal, highlights and plans separately.
 
+## Download
+
+For a Mac with Apple silicon (M1 or later) and macOS 13 or later.
+
+1. Download [Two-edged-Sword.dmg](https://github.com/waynetd777/two-edged-sword/releases/latest/download/Two-edged-Sword.dmg) from the [latest release](https://github.com/waynetd777/two-edged-sword/releases/latest).
+2. Open it and drag **Two-edged Sword** onto **Applications**.
+3. Open Two-edged Sword from Applications. macOS says it can't check the app for malicious software, because it isn't notarised by Apple. Click **Done**.
+4. Open System Settings › Privacy & Security, scroll down and click **Open Anyway** beside Two-edged Sword, then **Open Anyway** again and enter your password.
+
+It opens normally after that. The first time you use some features, macOS asks for permission: see [First run](docs/features.md#first-run).
+
 <a href="docs/images/index.md#the-readme"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/read-dark.png"><img alt="Reading 1 John 1 with the study pane open on the commentaries" src="docs/images/read-light.png"></picture></a>
 
 ## What it does
