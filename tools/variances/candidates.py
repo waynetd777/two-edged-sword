@@ -18,14 +18,14 @@ DATA = HOME / "Library/Application Support/Two-edged Sword"
 # A term the base uses more often than the translation does (after its modern equivalents are
 # counted) is a sign that something was dropped or changed.
 TERMS = {
-    "jesus": ["jesus"], "christ": ["christ", "messiah"], "lord": ["lord"], "god": ["god"],
+    "jesus": ["jesus"], "christ": ["christ", "messiah"], "lord": ["lord", "jehovah", "yahweh"], "god": ["god"],
     "blood": ["blood"], "spirit": ["spirit"], "holy ghost": ["holy spirit"], "son": ["son"],
     "father": ["father"], "begotten": ["begotten", "one and only"], "hell": ["hell"],
     "fasting": ["fasting", "fast"], "virgin": ["virgin"], "saviour": ["savior", "saviour"],
     "cross": ["cross"], "amen": ["amen"], "believe": ["believe"], "repent": ["repent"],
     "grace": ["grace"], "heaven": ["heaven", "heavens"], "damnation": ["damnation", "condemn"],
     "lucifer": ["lucifer"], "godhead": ["godhead"], "worship": ["worship"], "for ever": ["for ever", "forever"],
-    "joseph": ["joseph"], "commandments": ["commandments", "commands"], "firstborn": ["firstborn"],
+    "joseph": ["joseph"], "commandments": ["commandments", "commands"], "firstborn": ["firstborn", "first-born", "first born"],
     "everlasting": ["everlasting", "eternal"], "salvation": ["salvation", "saved"], "church": ["church"], "chosen": ["chosen"], "on me": ["on me", "in me"],
 }
 WORD = re.compile(r"[a-z']+")
@@ -36,7 +36,7 @@ KNOWN = {(19, 2, 12), (19, 12, 7), (27, 9, 25), (27, 9, 26), (27, 3, 25), (23, 9
 
 
 def clean(t):
-    t = re.sub(r"<num>[^<]*</num>|<sup>[^<]*</sup>", "", t or "")
+    t = re.sub(r"<num>[^<]*</num>|<sup>[^<]*</sup>|<not>[^<]*</not>", "", t or "")
     t = re.sub(r"<[^>]+>", "", t)
     return re.sub(r"&mdash;", "—", re.sub(r"\s+", " ", t)).strip()
 
@@ -47,6 +47,16 @@ def load(module):
         sys.exit(f"no Bible module {module!r} in {LIBRARY}")
     c = sqlite3.connect(f"file:{p}?immutable=1", uri=True)
     return {(b, ch, v): clean(t) for b, ch, v, t in c.execute("select Book, Chapter, Verse, Scripture from Bible")}
+
+
+def bridged(mod):
+    """Verses a translation joins into an earlier one, which it marks "(6-7) …" (GNB): not missing."""
+    out = set()
+    for (b, ch, v), t in mod.items():
+        m = re.match(r"\((\d+)-(\d+)\)", t)
+        if m and int(m.group(1)) == v:
+            out |= {(b, ch, n) for n in range(v + 1, int(m.group(2)) + 1)}
+    return out
 
 
 def count(text, phrase):
@@ -79,6 +89,7 @@ def main():
     only = None
     if a.refs:
         only = {tuple(int(x) for x in line.split("#")[0].split()) for line in a.refs.read_text().splitlines() if line.split("#")[0].strip()}
+    joined = bridged(mod)
     found = []
     for ref in sorted(base):
         if only is not None:
@@ -86,6 +97,8 @@ def main():
                 found.append({"book": ref[0], "chapter": ref[1], "verse": ref[2], "why": reasons(base[ref], mod.get(ref, ""), False) or ["often disputed"], "base": base[ref], "text": mod.get(ref, "")})
             continue
         if not lo <= ref[0] <= hi:
+            continue
+        if not mod.get(ref) and ref in joined:
             continue
         why = reasons(base[ref], mod.get(ref, ""), not a.no_shorter)
         if not why and ref in KNOWN:

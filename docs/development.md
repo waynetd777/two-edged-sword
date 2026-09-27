@@ -113,13 +113,19 @@ The ≠ lists are reviewed one translation at a time and kept with the app's dat
 To make one for another translation:
 
 ```sh
-python3 tools/variances/candidates.py esv --books 40-66   # verses that may differ
-# review the batches as tools/variances/review.md says
-python3 tools/variances/build.py esv                       # check them and write the list
+W=~/Library/Application\ Support/Two-edged\ Sword/variances-work
+python3 tools/variances/candidates.py esv --books 40-66 --out "$W/esv-nt"                # New Testament
+python3 tools/variances/candidates.py esv --books 1-39 --no-shorter --out "$W/esv-ot"    # Old Testament
+python3 tools/variances/candidates.py esv --refs tools/variances/disputed-ot.txt --out "$W/esv-disputed"
+python3 tools/variances/candidates.py esv --refs tools/variances/disputed-nt.txt --out "$W/esv-disputed-nt"
+# review every batch as tools/variances/review.md says, then for each folder:
+python3 tools/variances/build.py esv --work "$W/esv-nt"   # check them and merge into the list
 ```
 
-`tools/variances/disputed-ot.txt` lists often-disputed Old Testament verses, for
-`candidates.py --refs`. `build.py` merges verse by verse, so books can be added a batch at a time.
+`disputed-ot.txt` and `disputed-nt.txt` list often-disputed verses a word count misses (Revelation
+22:19, John 7:53–8:11), for `--refs`; drop any the other batches already hold. `build.py` merges
+verse by verse, so folders and books can be added one at a time. Candidates ignore note markers,
+count "Jehovah" as "LORD", and don't call a verse missing when GNB joins it to the one before.
 
 ## Writing modules
 
