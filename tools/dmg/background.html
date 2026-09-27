@@ -1,0 +1,24 @@
+<!doctype html>
+<!-- The DMG window's background, 660×400. make_dmg.py fills in the fonts and wordmark, and puts
+     the icons on it: the app centred at (165, 230), Applications at (495, 230). -->
+<meta charset="utf-8">
+<style>
+  /*FONTS*/
+  html, body { margin: 0; width: 660px; height: 400px; overflow: hidden; }
+  body { background: linear-gradient(#fbf9f4, #efe9dd); color: #0b1f3a; font-family: "EB Garamond", Georgia, serif; position: relative; }
+  .wordmark { position: absolute; left: 50%; top: 26px; width: 216px; transform: translateX(-50%); overflow: visible;
+    --wm-bg: #0b1f3a; --wm-disc: #26354a; --wm-1: #fff6d8; --wm-2: #efcb76; --wm-3: #8f631c; --wm-4: #f7dc95; --wm-5: #b5832b; --wm-edge: #6b4a17; --wm-shadow: rgba(0, 0, 0, 0.7); }
+  .wordmark .medal { --sw-light: #efd9a4; --sw-dark: #c6974a; --sw-fuller: #8a6630; --sw-gold: #d8b160; --sw-grip: #6e4526; --sw-wrap: #8e5d35; --sw-pin: #b48a3e; }
+  .tag { position: absolute; top: 107px; width: 100%; text-align: center; font-size: 16px; color: #3d4a5c; }
+  .arrow { position: absolute; left: 250px; top: 206px; width: 160px; height: 48px; }
+  .hint { position: absolute; top: 334px; width: 100%; text-align: center; font-size: 16px; color: #3d4a5c; }
+  .hint b { font-weight: 500; color: #0b1f3a; }
+</style>
+<body>
+  <!--WORDMARK-->
+  <div class="tag">A Bible study app for reading Scripture beside commentaries, dictionaries and your own notes</div>
+  <svg class="arrow" viewBox="0 0 160 48" fill="none" stroke="#b5832b" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M8 24 H146" /><path d="M126 8 L148 24 L126 40" />
+  </svg>
+  <div class="hint">Drag <b>Two-edged Sword</b> onto <b>Applications</b> to install it</div>
+</body>

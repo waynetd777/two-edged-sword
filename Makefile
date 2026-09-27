@@ -11,7 +11,7 @@ SIGN_ID  := $(APPLE_SIGNING_IDENTITY)
 # "-" is an ad-hoc signature: an empty identity makes the bundler fail instead.
 export APPLE_SIGNING_IDENTITY := $(if $(SIGN_ID),$(SIGN_ID),-)
 
-.PHONY: check test app install-app dev icons sign-check help core
+.PHONY: check test app install-app dmg dev icons sign-check help core
 
 ## cargo test + TypeScript type-check.
 check:
@@ -49,6 +49,10 @@ app:
 	    && echo "signed with $(SIGN_ID)" \
 	    || { echo "WARNING: app is not signed with $(SIGN_ID)"; exit 1; }; \
 	else echo "note: no signing.local, so the app is signed ad hoc"; fi
+
+## Pack the built app into the release DMG (src-tauri/target/release/bundle/dmg/), laid out like other Mac installers.
+dmg:
+	@python3 tools/dmg/make_dmg.py
 
 ## Build and replace /Applications/Two-edged Sword.app.
 install-app: app

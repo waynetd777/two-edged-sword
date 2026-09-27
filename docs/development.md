@@ -12,6 +12,7 @@ runs the AI tools for Ask. The frontend is everything you see.
 | `make check` | Rust tests (some read the modules on this Mac, and skip without them) and the TypeScript check |
 | `make app` | Bump the version (1.0.4 → 1.0.5) and build the .app, signed with the identity in `signing.local` if there is one |
 | `make install-app` | Build it and replace the copy in /Applications |
+| `make dmg` | Pack the built app into `Two-edged-Sword.dmg` for a release |
 | `make help` | Build the Help Book from `docs/` |
 | `make core` | Build the built-in modules into `src-tauri/modules/` (`make dev` and `make app` build them if they're missing) |
 | `make screenshots` | Retake the screenshots in `docs/images/` |
@@ -28,6 +29,13 @@ Every release build gets the next patch version (`tools/bump_version.py`, which 
 stamped on the app, its Help book and the binary; Settings shows both. For a minor or major step,
 run `python3 tools/bump_version.py 1.1.0` first: `make app` then builds 1.1.1. Commit the bump with
 the release.
+
+To publish one: `make install-app`, `make dmg`, commit and push, then
+`gh release create v<version> src-tauri/target/release/bundle/dmg/Two-edged-Sword.dmg`. The README's
+download link points at the latest release's `Two-edged-Sword.dmg`, so keep that name.
+`tools/dmg/make_dmg.py` draws the window's background from `tools/dmg/background.html` (the app's
+wordmark and fonts, rendered by WebKit) and has Finder lay out the icons, so the first run asks to
+let the terminal control Finder.
 
 ## Where things live
 
