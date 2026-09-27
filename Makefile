@@ -35,13 +35,15 @@ RELEASE_RUSTFLAGS += -Clink-arg=-fuse-ld=lld -Clink-arg=-B$(LLD_DIR)
 RELEASE_ENV := SDKROOT=$(lastword $(OLD_SDK))
 endif
 
-# Each build gets its own build number (CFBundleVersion). macOS caches the Help Book's search index
-# by the app's version and only re-indexes a new one, so without this Help search keeps the old pages.
+# Each release build bumps the version (tools/bump_version.py: 1.0.4 → 1.0.5) and gets its own build
+# number, the same on the app (CFBundleVersion), its Help Book and the binary (Settings shows it).
+# macOS caches the Help Book by its version (1.0.5) and only re-reads a new one, so every release needs one.
 BUILD := $(shell date +%Y%m%d.%H%M%S)
 
-## Build the .app, signed with the identity in signing.local when there is one.
+## Bump the version and build the .app, signed with the identity in signing.local when there is one.
 app:
-	$(RELEASE_ENV) RUSTFLAGS="$(RELEASE_RUSTFLAGS)" npm run tauri build -- --config '{"bundle":{"macOS":{"bundleVersion":"$(BUILD)"}}}'
+	@echo "version $$(python3 tools/bump_version.py), build $(BUILD)"
+	TES_BUILD=$(BUILD) $(RELEASE_ENV) RUSTFLAGS="$(RELEASE_RUSTFLAGS)" npm run tauri build -- --config '{"bundle":{"macOS":{"bundleVersion":"$(BUILD)"}}}'
 	@if [ -n "$(SIGN_ID)" ]; then \
 	  codesign -dv --verbose=2 "$(APP)" 2>&1 | grep -E "^Authority=$(SIGN_ID)" >/dev/null \
 	    && echo "signed with $(SIGN_ID)" \

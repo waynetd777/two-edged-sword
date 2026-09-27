@@ -1,5 +1,6 @@
 import { ReactNode, useEffect, useState } from "react";
 import { open as openDialog } from "@tauri-apps/plugin-dialog";
+import { api } from "./api";
 import { Icon } from "./icons";
 import { HL, HL_DOT, hlLabel, VoiceSelect } from "./Read";
 import { BibleSelect, Topbar } from "./Shell";
@@ -102,6 +103,7 @@ export function SettingsScreen() {
             <Row label="Daily reminder" hint="A notification at this time if today's reading isn't done. The app keeps running in the menu bar after its window is closed; it can't remind you once you quit it."><div style={{ display: "flex", gap: 10, alignItems: "center" }}><Switch on={s.reminder} onChange={(v) => app.set({ reminder: v })}>Remind me</Switch><input className="btn" type="time" value={s.reminderTime} disabled={!s.reminder} onChange={(e) => e.target.value && app.set({ reminderTime: e.target.value })} /></div></Row>
             <Row label="When I fall behind"><select className="btn" style={{ maxWidth: "min(360px, 100%)" }} value={s.whenBehind} onChange={(e) => app.set({ whenBehind: e.target.value as typeof s.whenBehind })}><option value="ask">Ask me each time</option><option value="move">Move the rest later</option><option value="skip">Skip the missed readings</option></select></Row>
           </Section>
+          <AppVersion />
         </div>
       </div>
     </div>
@@ -123,6 +125,14 @@ function HlNames() {
       ))}
     </div>
   );
+}
+
+/** "Two-edged Sword 1.0.3 (build 20260927.142514)", under the last section. */
+function AppVersion() {
+  const [v, setV] = useState<[string, string] | null>(null);
+  useEffect(() => { api.appVersion().then(setV).catch(() => {}); }, []);
+  if (!v) return null;
+  return <div className="hint" style={{ textAlign: "center", userSelect: "text" }}>Two-edged Sword {v[0]} (build {v[1]})</div>;
 }
 
 function FavBibles() {

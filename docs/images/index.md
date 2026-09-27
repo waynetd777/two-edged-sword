@@ -56,3 +56,9 @@ On [Quiet time](../quiet-time.md).
 - The Worship part of Quiet time: why each song suits the day's reading: [light](worship-light.png) · [dark](worship-dark.png)
 - The daily reminder in Settings: [light](reminder-light.png) · [dark](reminder-dark.png)
 - The menu-bar menu: [full size](menu-bar.png)
+
+## Library
+
+On [Library](../library.md).
+
+- The Library searched for "Strong": the Bibles with Strong's numbers, each with its features and licence: [light](library-light.png) · [dark](library-dark.png)

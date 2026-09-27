@@ -8,10 +8,12 @@ app's Info.plist names it (CFBundleHelpBookFolder, CFBundleHelpBookName).
 """
 
 import json
+import os
 import re
 import shutil
 import subprocess
 import sys
+import time
 from html import escape
 from pathlib import Path
 
@@ -137,6 +139,11 @@ def main() -> None:
     if not shutil.which("pandoc"):
         sys.exit("helpbook: pandoc is needed to build the help (brew install pandoc)")
     version = json.loads((ROOT / "src-tauri/tauri.conf.json").read_text())["version"]
+    # helpd caches a book as "identifier*CFBundleShortVersionString" and serves the cached pages until
+    # that version changes (and a book whose version no longer matches its entry won't open at all),
+    # so the book carries the app's version, which every release build bumps. CFBundleVersion is the
+    # app's build number when the Makefile gives one (TES_BUILD), else the time.
+    build = os.environ.get("TES_BUILD") or time.strftime("%Y%m%d.%H%M%S")
     if BOOK.exists():
         shutil.rmtree(BOOK)
     res = BOOK / "Contents/Resources"
@@ -188,7 +195,7 @@ def main() -> None:
 	<key>CFBundlePackageType</key><string>BNDL</string>
 	<key>CFBundleShortVersionString</key><string>{version}</string>
 	<key>CFBundleSignature</key><string>hbwr</string>
-	<key>CFBundleVersion</key><string>{version}</string>
+	<key>CFBundleVersion</key><string>{build}</string>
 	<key>HPDBookAccessPath</key><string>index.html</string>
 	<key>HPDBookIconPath</key><string>shared/icon.png</string>
 	<key>HPDBookIndexPath</key><string>search.helpindex</string>

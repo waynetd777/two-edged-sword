@@ -1,6 +1,6 @@
 [package]
 name = "two-edged-sword"
-version = "0.1.0"
+version = "1.0.2"
 description = "A personal Bible study app that reads the e-Sword X library"
 authors = ["Wayne Davies"]
 edition = "2021"

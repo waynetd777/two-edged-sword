@@ -14,6 +14,8 @@ The app reads Bibles and books from three places, and never changes them:
 
 ## The Library screen
 
+<a href="images/index.md#library"><picture><source media="(prefers-color-scheme: dark)" srcset="images/library-dark.png"><img alt="The Library searched for Strong: the Bibles with Strong's numbers, each with its features and licence" src="images/library-light.png"></picture></a>
+
 - Every module, with its size and features. The ⓘ beside one shows its description and which
   folder it came from.
 - **In picker** chooses which Bibles appear in the Bible menu.

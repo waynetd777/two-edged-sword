@@ -93,6 +93,8 @@ export const api = {
   storeRead: <T>(name: string) => invoke<T | null>("store_read", { name }),
   storeWrite: (name: string, value: unknown) => (readOnly ? Promise.resolve() : invoke<void>("store_write", { name, value })),
   journalDefaultDir: () => invoke<string>("journal_default_dir"),
+  /** [version, build number]: "1.0.3", "20260927.142514" ("dev" outside a release build). */
+  appVersion: () => invoke<[string, string]>("app_version"),
   journalList: (dir: string) => (sceneJournal ? Promise.resolve(sceneJournal) : invoke<JournalEntry[]>("journal_list", { dir })),
   // With a scene's entries the stamp changes every time, so the journal is sure to reload onto them.
   journalStamp: (dir: string) => (sceneJournal ? Promise.resolve(`scene:${Date.now()}`) : invoke<string>("journal_stamp", { dir })),

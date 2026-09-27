@@ -10,7 +10,7 @@ runs the AI tools for Ask. The frontend is everything you see.
 |---|---|
 | `make dev` | Build the help, then run the app with hot reload |
 | `make check` | Rust tests (some read the modules on this Mac, and skip without them) and the TypeScript check |
-| `make app` | Build the .app, signed with the identity in `signing.local` if there is one |
+| `make app` | Bump the version (1.0.4 → 1.0.5) and build the .app, signed with the identity in `signing.local` if there is one |
 | `make install-app` | Build it and replace the copy in /Applications |
 | `make help` | Build the Help Book from `docs/` |
 | `make core` | Build the built-in modules into `src-tauri/modules/` (`make dev` and `make app` build them if they're missing) |
@@ -22,6 +22,12 @@ runs the AI tools for Ask. The frontend is everything you see.
   `make dev` before treating it as a bug.
 - On macOS 27, release builds link with Rust's lld against the macOS 26 SDK, because macOS 27's
   linker sometimes breaks proc-macro builds ("can't find crate"). The Makefile explains.
+
+Every release build gets the next patch version (`tools/bump_version.py`, which keeps
+`tauri.conf.json`, `package.json`, `Cargo.toml` and the lock files in step) and one build number,
+stamped on the app, its Help book and the binary; Settings shows both. For a minor or major step,
+run `python3 tools/bump_version.py 1.1.0` first: `make app` then builds 1.1.1. Commit the bump with
+the release.
 
 ## Where things live
 
@@ -57,7 +63,8 @@ bundle as a login item, which survives rebuilds while the bundle identifier stay
 The app's Help menu opens an Apple Help Book built from the user guides in `docs/` (all but this
 one). `tools/helpbook.py` converts them with pandoc, a page per `##` section, styled like the app,
 with search indexes from `hiutil`. The release build runs it and copies the book into the app's
-Resources; `src-tauri/Info.plist` registers it. Under `make dev`, Help opens the pages in the
+Resources; `src-tauri/Info.plist` registers it. The book carries the app's version, which every
+release build bumps, because macOS keeps showing a cached book until its version changes. Under `make dev`, Help opens the pages in the
 browser instead.
 
 Ask gets the same guides: `src-tauri/src/help.rs` builds them into the app, and before each

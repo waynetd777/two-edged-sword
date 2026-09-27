@@ -1,5 +1,10 @@
 # Features
 
+A Bible study app for macOS, for reading Bibles, commentaries, dictionaries and books beside your own
+notes. It comes with the KJV, Strong's dictionaries and the Treasury of Scripture Knowledge, and reads
+more modules in e-Sword X's formats: your own, and e-Sword X's library if you have it.
+It only reads them, and keeps your journal, highlights and plans separately.
+
 | Page | What's in it |
 |---|---|
 | [Reading](reading.md) | Read with the study pane, books and devotionals, Listen |
@@ -35,3 +40,4 @@
 - **Quiet time**: the daily reminder, and what to do when you fall behind.
 - **AI assistant**: which tools are installed, the default model, and what Ask may read and send
   ([Ask](ask.md)).
+- At the bottom: the app's version and build number.

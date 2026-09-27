@@ -184,6 +184,13 @@ fn store_write(st: State<AppState>, name: String, value: serde_json::Value) -> R
     store::write(&st.data, &name, &value)
 }
 
+/// The app's version and build number (the Makefile's, the same as CFBundleVersion and the Help
+/// Book's; "dev" outside a release build), for Settings.
+#[tauri::command]
+fn app_version(app: AppHandle) -> (String, String) {
+    (app.package_info().version.to_string(), option_env!("TES_BUILD").unwrap_or("dev").to_string())
+}
+
 /// The journal lives in the Obsidian vault when there is one, so entries show up there too.
 #[tauri::command]
 fn journal_default_dir() -> String {
@@ -546,6 +553,7 @@ pub fn run() {
             store_read,
             store_write,
             journal_default_dir,
+            app_version,
             journal_list,
             journal_save,
             journal_delete,

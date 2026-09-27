@@ -221,5 +221,10 @@
   {
     "name": "kjv-history",
     "screen": "history"
+  },
+  {
+    "name": "library",
+    "screen": "library",
+    "type": ["[placeholder=\"Find a Bible, commentary or book in the library\"]", "Strong"]
   }
 ]
