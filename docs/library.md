@@ -4,7 +4,7 @@ The app reads Bibles and books from three places, and never changes them:
 
 | Folder | What |
 |---|---|
-| `~/Library/Application Support/Two-edged Sword/Modules/` | Your modules folder: what you copy in, and what the scripts in `tools/` build |
+| `~/Library/Application Support/Two-edged Sword/Modules/` | Your modules folder: what you copy in, and modules you build |
 | `~/Library/Containers/net.e-sword.e-Sword-X/Data/Library/Application Support/` | e-Sword X's library, if you have e-Sword X |
 | Inside the app | The built-in modules (below) |
 
@@ -42,7 +42,7 @@ If you have e-Sword X, its copies of these are used instead while **Read e-Sword
 
 ## Formats
 
-The app reads e-Sword X's Mac formats, and the scripts in `tools/` write them:
+The app reads e-Sword X's Mac formats:
 
 | Extension | What |
 |---|---|
@@ -66,35 +66,26 @@ Then press **Rescan**.
 
 ## Building modules
 
-Some texts aren't e-Sword downloads. Scripts in `tools/` build them from free sources, numbered
-like the KJV so they compare beside it. They write to your modules folder. Run the one you want,
-then press **Rescan**.
+Some texts aren't e-Sword downloads. They are built from free sources by scripts that come with
+the app's source code, not with the app itself. Once built, they go in your modules folder and
+show after **Rescan**. They're numbered like the KJV, so they compare beside it.
 
-| Script | Builds | Run first | From |
-|---|---|---|---|
-| `tools/crosswire/build.py` | Syriac Peshitta NT, Murdock, Etheridge, Tyndale, Geneva 1599, Douay-Rheims | | CrossWire |
-| `tools/sefaria/build.py` | Targum, Targum Pseudo-Jonathan, the Babylonian Talmud | | Sefaria |
-| `tools/vulgate/build.py` | Clementine Vulgate (1592) | | Clementine Vulgate Project |
-| `tools/wlc/build.py` | WLC+: the Hebrew Old Testament word by word | | Open Scriptures, STEPBible |
-| `tools/ginsburg/build.py` | Ginsburg's Hebrew Bible (1894) | wlc | ahembd/Ginsburg_Hebrew_Bible |
-| `tools/ginsburg/plus.py` | Ginsburg+, word by word | ginsburg | WLC+ |
-| `tools/beza/build.py` | Beza's Greek New Testament (1598) | | textus-receptus.com; e-Sword's TR+ if you have it |
-| `tools/beza/plus.py` | Beza 1598+, word by word | beza | STEPBible |
-| `tools/lxx/build.py` | Brenton's Greek Septuagint, with the Apocrypha | | eBible.org |
-| `tools/lxx/plus.py` | LXX-Brenton+, word by word | lxx | e-Sword's Greek OT+, STEPBible |
-| `tools/latin/build.py` | Latin+ and Vulg-C+, word by word (downloads about 1 GB) | | Stanza, Whitaker's WORDS |
-| `tools/targum/build.py` | Targum+ and Ps-Jon+, word by word | sefaria, wlc | WLC+, Jastrow |
-| `tools/syriac/build.py` | Peshitta+, word by word | crosswire | ETCBC, SEDRA |
-| `tools/rheims/build.py` | The Rheims New Testament (1582) | crosswire | Bible Support file 11077, in ~/Downloads |
-
-Run each with `python3`. Downloads are cached in `~/Library/Caches/Two-edged Sword/`.
+| Text | From |
+|---|---|
+| Syriac Peshitta NT, Murdock, Etheridge, Tyndale, Geneva 1599, Douay-Rheims | CrossWire |
+| Targum, Targum Pseudo-Jonathan, the Babylonian Talmud | Sefaria |
+| Clementine Vulgate (1592) | Clementine Vulgate Project |
+| WLC+: the Hebrew Old Testament word by word | Open Scriptures, STEPBible |
+| Ginsburg's Hebrew Bible (1894), and Ginsburg+ word by word | Ginsburg Hebrew Bible project |
+| Beza's Greek New Testament (1598), and Beza 1598+ word by word | textus-receptus.com, STEPBible |
+| Brenton's Greek Septuagint with the Apocrypha, and LXX-Brenton+ word by word | eBible.org, STEPBible |
+| Latin+ and Vulg-C+, word by word | Stanza, Whitaker's WORDS |
+| Targum+ and Ps-Jon+, word by word | Sefaria, Jastrow |
+| Peshitta+, word by word | ETCBC, SEDRA |
+| The Rheims New Testament (1582) | Bible Support |
 
 All are public domain or openly licensed, except some Sefaria translations, SEDRA's glosses and
 Jastrow, which are for non-commercial use. That's fine for personal study.
-
-- `lxx/plus.py` needs e-Sword X's Greek OT+. No openly licensed tagged Septuagint exists.
-- `beza/build.py` uses e-Sword X's Greek NT TR+, if you have it, to correct the transcription. Without
-  it, the transcription is kept as it is.
 
 ## Free modules worth having
 
@@ -132,7 +123,7 @@ on [Bible Support](https://www.biblesupport.com) (free sign-in).
 - Spurgeon's Faith's Checkbook and his sermons (Bible Support).
 
 Avoid copyrighted modules shared without the publisher's permission. Books that exist only as
-EPUB or text need converting to a `.refi` first ([Development](development.md#reference-book-format)).
+EPUB or text need converting to a `.refi` first.
 
 ## Thanks to e-Sword
 

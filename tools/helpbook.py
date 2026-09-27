@@ -109,8 +109,10 @@ def split(page: str, md: str) -> tuple[Topic, list[Topic]]:
 def to_html(md: str, where: dict[tuple[str, str], str], page: str) -> str:
     # The screenshots link to the docs' gallery page, which isn't in the book: keep just the picture.
     md = re.sub(r'<a href="images/index\.md[^"]*">(<picture>.*?</picture>|<img [^>]*>)</a>', r"\1", md, flags=re.S)
-    # Links to other docs (development.md, for contributors) aren't in the book: keep their text.
-    md = re.sub(r"\[([^\]]+)\]\((?!https?:|#|(?:" + "|".join(PAGES) + r")\.md)[^)]*\.md[^)]*\)", r"\1", md)
+    # A link to a doc that isn't in the book (development.md, for contributors) would be dead text in Help.
+    outside = re.findall(r"\[[^\]]+\]\((?!https?:|#|(?:" + "|".join(PAGES) + r")\.md)[^)]*\.md[^)]*\)", md)
+    if outside:
+        sys.exit(f"{page}.md links to docs that aren't in Help: {', '.join(outside)}")
     def link(m: re.Match) -> str:
         target, anchor = m[1] or page, (m[2] or "")[1:]
         return f"]({where.get((target, anchor)) or where.get((target, '')) or m[0][2:-1]})"

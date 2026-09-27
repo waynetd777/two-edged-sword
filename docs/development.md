@@ -89,7 +89,8 @@ Keep them short:
 - A `##` section per topic: each becomes a help page, and its first sentence is the page's
   summary in Help search. `###` headings split up anything longer.
 - Lists and tables rather than paragraphs; no edge cases, internals or history.
-- Developer detail goes here, not in the user guides.
+- Developer detail goes here, not in the user guides, and the guides don't link here: Help
+  hasn't this page, so `make help` stops on a link to it.
 
 Run `make help` to check the result.
 
@@ -128,6 +129,38 @@ python3 tools/variances/build.py esv --work "$W/esv-nt"   # check them and merge
 verse by verse, so folders and books can be added one at a time. Candidates ignore note markers,
 count "Jehovah" as "LORD", and don't call a verse missing when GNB joins it to the one before.
 To ship a list, copy `variances-<module>.json` into `src-tauri/variances/`.
+
+## Building modules
+
+The texts listed under Library › Building modules in the user guide are built by scripts in
+`tools/`, numbered like the KJV so they compare beside it. Each writes to the app's modules folder;
+then press **Rescan**.
+
+| Script | Builds | Run first | From |
+|---|---|---|---|
+| `tools/crosswire/build.py` | Syriac Peshitta NT, Murdock, Etheridge, Tyndale, Geneva 1599, Douay-Rheims | | CrossWire |
+| `tools/sefaria/build.py` | Targum, Targum Pseudo-Jonathan, the Babylonian Talmud | | Sefaria |
+| `tools/vulgate/build.py` | Clementine Vulgate (1592) | | Clementine Vulgate Project |
+| `tools/wlc/build.py` | WLC+: the Hebrew Old Testament word by word | | Open Scriptures, STEPBible |
+| `tools/ginsburg/build.py` | Ginsburg's Hebrew Bible (1894) | wlc | ahembd/Ginsburg_Hebrew_Bible |
+| `tools/ginsburg/plus.py` | Ginsburg+, word by word | ginsburg | WLC+ |
+| `tools/beza/build.py` | Beza's Greek New Testament (1598) | | textus-receptus.com; e-Sword's TR+ if you have it |
+| `tools/beza/plus.py` | Beza 1598+, word by word | beza | STEPBible |
+| `tools/lxx/build.py` | Brenton's Greek Septuagint, with the Apocrypha | | eBible.org |
+| `tools/lxx/plus.py` | LXX-Brenton+, word by word | lxx | e-Sword's Greek OT+, STEPBible |
+| `tools/latin/build.py` | Latin+ and Vulg-C+, word by word (downloads about 1 GB) | | Stanza, Whitaker's WORDS |
+| `tools/targum/build.py` | Targum+ and Ps-Jon+, word by word | sefaria, wlc | WLC+, Jastrow |
+| `tools/syriac/build.py` | Peshitta+, word by word | crosswire | ETCBC, SEDRA |
+| `tools/rheims/build.py` | The Rheims New Testament (1582) | crosswire | Bible Support file 11077, in ~/Downloads |
+
+Run each with `python3`. Downloads are cached in `~/Library/Caches/Two-edged Sword/`.
+
+All are public domain or openly licensed, except some Sefaria translations, SEDRA's glosses and
+Jastrow, which are for non-commercial use. That's fine for personal study.
+
+- `lxx/plus.py` needs e-Sword X's Greek OT+. No openly licensed tagged Septuagint exists.
+- `beza/build.py` uses e-Sword X's Greek NT TR+, if you have it, to correct the transcription. Without
+  it, the transcription is kept as it is.
 
 ## Writing modules
 
@@ -183,7 +216,7 @@ reference, and images inline as `data:` URLs.
 | `src/scene.ts`, `tools/screenshots.py` | Screenshot mode and the script that drives it |
 | `src/variances.tsx`, `src/KjvHistory.tsx` | The ≠ marks and their popup, and the KJV History page |
 | `tools/variances/` | Building each translation's differences from the KJV |
-| `tools/sefaria/`, `tools/vulgate/`, `tools/crosswire/` and the rest | Building modules from free sources ([Library](library.md#building-modules)) |
+| `tools/sefaria/`, `tools/vulgate/`, `tools/crosswire/` and the rest | Building modules from free sources ([Building modules](#building-modules)) |
 | `tools/make_icons.py` | The icon artwork |
 
 Design decisions and known bugs are logged in `_sift/`; `python3 _sift/bin/sift.py decisions`

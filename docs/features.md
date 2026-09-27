@@ -75,7 +75,7 @@ The Bibles and books keep their own terms:
 | What | Terms |
 |---|---|
 | The built-in modules | Public domain: eBible.org and the CrossWire Bible Society (the KJV, the TSK), Open Scriptures (Strong's), CrossWire and the Christian Classics Ethereal Library (Matthew Henry, Easton's) |
-| Modules built by `tools/` | As each script says: most public domain or CC BY (STEPBible, Open Scriptures), a few for personal study |
+| Modules built from the source code's scripts | As each script says: most public domain or CC BY (STEPBible, Open Scriptures), a few for personal study |
 | e-Sword X's modules | e-Sword's licence: read where e-Sword keeps them, never copied |
 
 The app is built with Tauri, React and SQLite (MIT, Apache 2.0 and public domain), and its
