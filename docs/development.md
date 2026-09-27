@@ -64,7 +64,7 @@ The app's Help menu opens an Apple Help Book built from the user guides in `docs
 one). `tools/helpbook.py` converts them with pandoc, a page per `##` section, styled like the app,
 with search indexes from `hiutil`. The release build runs it and copies the book into the app's
 Resources; `src-tauri/Info.plist` registers it. The book carries the app's version, which every
-release build bumps, because macOS keeps showing a cached book until its version changes. Under `make dev`, Help opens the pages in the
+release build bumps, because macOS keeps showing a cached book until its version changes. `make install-app` also clears the Help cache (`~/Library/Caches/com.apple.helpd/`) and re-registers the app, since the old book cached at the same path otherwise makes Help show "The selected content is currently unavailable". Under `make dev`, Help opens the pages in the
 browser instead.
 
 Ask gets the same guides: `src-tauri/src/help.rs` builds them into the app, and before each

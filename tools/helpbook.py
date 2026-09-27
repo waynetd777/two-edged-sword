@@ -39,7 +39,7 @@ CSS = """
   :root { --bg: #0d1117; --panel: #161b22; --panel2: #11161d; --border: #30363d; --text: #e6edf3; --muted: #8b949e; --accent: #58a6ff; --ring: #1f6feb; --hover: rgba(177, 186, 196, 0.12); }
 }
 * { box-sizing: border-box; }
-body { font: 14px/1.55 var(--ui); color: var(--text); background: var(--bg); -webkit-font-smoothing: antialiased; margin: 0; padding: 20px 28px 56px; max-width: 800px; }
+body { font: 14px/1.55 var(--ui); color: var(--text); background: var(--bg); -webkit-font-smoothing: antialiased; margin: 0; padding: 20px 28px 56px; }
 h1 { font: 500 30px/1.1 var(--display); margin: 6px 0 14px; }
 h2 { font: 500 22px/1.2 var(--display); margin: 28px 0 8px; }
 h3 { font: 600 17px/1.3 var(--display); margin: 22px 0 6px; }

@@ -56,6 +56,10 @@ install-app: app
 	@rm -rf "/Applications/Two-edged Sword.app"
 	@ditto "$(APP)" "/Applications/Two-edged Sword.app"
 	@echo "installed /Applications/Two-edged Sword.app"
+	@# helpd keeps the old book cached under the same path and then shows "content unavailable", so drop its cache and re-register.
+	@killall helpd 2>/dev/null || true
+	@rm -rf ~/Library/Caches/com.apple.helpd/*
+	@/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f "/Applications/Two-edged Sword.app"
 
 ## Redraw design/icon.png and the tray template, then regenerate the Tauri icon set.
 icons:
