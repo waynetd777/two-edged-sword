@@ -47,29 +47,49 @@ impl AppState {
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 struct LibraryInfo {
-    dir: String,
-    found: bool,
+    /// The folders read, in order.
+    dirs: Vec<LibraryDir>,
     modules: Vec<ModuleInfo>,
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct LibraryDir {
+    source: library::Source,
+    path: String,
+    found: bool,
+}
+
+impl LibraryInfo {
+    fn of(lib: &Library) -> LibraryInfo {
+        let dirs = lib.dirs.iter().map(|(source, p)| LibraryDir { source: *source, path: p.to_string_lossy().to_string(), found: p.is_dir() }).collect();
+        LibraryInfo { dirs, modules: lib.modules.clone() }
+    }
+}
+
+/// Settings › readEsword (the frontend's settings document), on unless turned off.
+fn read_esword(data: &std::path::Path) -> bool {
+    store::read(data, "settings").ok().and_then(|v| v.get("readEsword").and_then(|b| b.as_bool())).unwrap_or(true)
 }
 
 #[tauri::command]
 fn library_info(st: State<AppState>) -> LibraryInfo {
-    let lib = st.lib();
-    LibraryInfo { dir: lib.dir.to_string_lossy().to_string(), found: lib.dir.is_dir(), modules: lib.modules.clone() }
+    LibraryInfo::of(&st.lib())
 }
 
-/// Looks for modules again (after new ones are downloaded in e-Sword).
+/// Looks for modules again (after new ones are added), reading e-Sword's folder or not as
+/// `esword` says, or as the saved setting says without it.
 #[tauri::command]
-async fn rescan_library(st: State<'_, AppState>) -> Result<LibraryInfo, String> {
-    let dir = st.lib().dir.clone();
-    let fresh = Arc::new(tauri::async_runtime::spawn_blocking(move || Library::scan(dir)).await.map_err(|e| e.to_string())?);
+async fn rescan_library(st: State<'_, AppState>, esword: Option<bool>) -> Result<LibraryInfo, String> {
+    let dirs = library::dirs(esword.unwrap_or_else(|| read_esword(&st.data)));
+    let fresh = Arc::new(tauri::async_runtime::spawn_blocking(move || Library::scan(dirs)).await.map_err(|e| e.to_string())?);
     *st.lib_cell.write().map_err(|e| e.to_string())? = fresh.clone();
     let (lib, index, ask_root) = (fresh.clone(), st.index.clone(), study::root(&st.data));
     std::thread::spawn(move || {
         let _ = index.update(&lib);
         study::export_dictionaries(&lib, &ask_root);
     });
-    Ok(LibraryInfo { dir: fresh.dir.to_string_lossy().to_string(), found: fresh.dir.is_dir(), modules: fresh.modules.clone() })
+    Ok(LibraryInfo::of(&fresh))
 }
 
 #[tauri::command]
@@ -474,8 +494,10 @@ fn show_main(app: &AppHandle) {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    let lib = Arc::new(Library::scan(library::default_dir()));
     let data = store::data_dir();
+    // Made up front, so Show in Finder has somewhere to go before anything is built into it.
+    let _ = std::fs::create_dir_all(library::app_dir());
+    let lib = Arc::new(Library::scan(library::dirs(read_esword(&data))));
     let index = Arc::new(index::Index::new(data.join("search-index.sqlite")));
     // The KJV's words, so the journal's spell checker takes its spellings as right.
     { let lib = lib.clone(); std::thread::spawn(move || spell::load_kjv(&lib)); }

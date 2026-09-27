@@ -5,7 +5,7 @@ translators used. It stands in for the Rabbinic Bible on the KJV History page.
 
     python3 tools/ginsburg/build.py
 
-Writes to the e-Sword library, where the app finds it after Library → Rescan.
+Writes to the app's modules folder, where the app finds it after Library → Rescan.
 
 Source: github.com/ahembd/Ginsburg_Hebrew_Bible (Apache-2.0), one text file per book, with vowels
 and accents (the edition without the rafe mark). Its files have lost some verses (Daniel 11:26 to
@@ -35,7 +35,8 @@ from difflib import SequenceMatcher
 from pathlib import Path
 
 HOME = Path(os.environ.get("HOME", ""))
-LIBRARY = Path(os.environ.get("ESWORD_LIBRARY") or HOME / "Library/Containers/net.e-sword.e-Sword-X/Data/Library/Application Support")
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from modules import LIBRARY, find  # noqa: E402
 CACHE = HOME / "Library/Caches/Two-edged Sword/ginsburg"
 REPO = "https://github.com/ahembd/Ginsburg_Hebrew_Bible"
 REPO_RAFE = "https://github.com/ahembd/Ginsburg_Hebrew_Bible_w_rafe"
@@ -220,8 +221,7 @@ def halves(text):
 
 
 def main():
-    if not LIBRARY.is_dir():
-        sys.exit(f"no e-Sword library at {LIBRARY}")
+    LIBRARY.mkdir(parents=True, exist_ok=True)
     files, rafe = repo(), repo(REPO_RAFE, "rafe")
     moves = wlc.verse_map()
     verses = {}

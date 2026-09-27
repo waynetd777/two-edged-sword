@@ -200,13 +200,12 @@ mod tests {
         assert_eq!(found.iter().filter(|x| x.start >= g.start && x.start < g.start + g.len).count(), 1);
     }
 
-    /// Against the e-Sword X library on this Mac; skips itself where it is absent.
+    /// Against the modules on this Mac; skips itself where it is absent.
     #[test]
     fn kjv_spellings_and_sentences_pass() {
-        let dir = crate::library::default_dir();
-        if !dir.join("kjv.bbli").is_file() { return; }
+        let Some(lib) = crate::library::local("kjv.bbli") else { return };
         let t = std::time::Instant::now();
-        super::load_kjv(&crate::library::Library::scan(dir));
+        super::load_kjv(&lib);
         println!("KJV words loaded: {} in {:?}", super::KJV.get().map_or(0, |k| k.len()), t.elapsed());
         let text = "He maketh me to lie down; there remaineth therefore a rest. Recieve this.";
         let u: Vec<u16> = text.encode_utf16().collect();

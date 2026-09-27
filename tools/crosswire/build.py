@@ -6,7 +6,7 @@ translations of it (Murdock, Etheridge), Tyndale, the Geneva Bible of 1599 and t
 Writes peshitta.bbli ("Syriac Peshitta", right to left), murdock.bbli ("Murdock's Peshitta
 (English)"), etheridge.bbli ("Etheridge's Peshitta (English)"), tyndale.bbli ("Tyndale Bible
 (1525/1530)"), geneva1599.bbli ("Geneva Bible (1599)") and drc.bbli ("Douay-Rheims (Challoner)")
-to the e-Sword library, where the app (after Library → Rescan) and e-Sword both find them. With
+to the app's modules folder, where the app finds them after Library → Rescan. With
 module names, builds only those.
 
 Sources: CrossWire's raw module zips, https://www.crosswire.org/ftpmirror/pub/sword/packages/rawzip/
@@ -49,7 +49,8 @@ vulgate = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(vulgate)
 
 HOME = Path(os.environ.get("HOME", ""))
-LIBRARY = HOME / "Library/Containers/net.e-sword.e-Sword-X/Data/Library/Application Support"
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from modules import LIBRARY, find  # noqa: E402
 CACHE = HOME / "Library/Caches/Two-edged Sword/crosswire"
 RAWZIP = "https://www.crosswire.org/ftpmirror/pub/sword/packages/rawzip/{}.zip"
 CANON = "https://crosswire.org/svn/sword/trunk/include/{}"
@@ -268,7 +269,7 @@ def trim(rows, rules, all_empty=False):
 
 
 def chapter_lengths(module):
-    c = sqlite3.connect(f"file:{LIBRARY / module}.bbli?immutable=1", uri=True)
+    c = sqlite3.connect(f"file:{find(module + '.bbli')}?immutable=1", uri=True)
     return {(b, ch): n for b, ch, n in c.execute("SELECT Book, Chapter, MAX(Verse) FROM Bible GROUP BY Book, Chapter")}
 
 
@@ -380,8 +381,7 @@ def build(name):
 
 
 def main():
-    if not LIBRARY.is_dir():
-        sys.exit(f"no e-Sword library at {LIBRARY}")
+    LIBRARY.mkdir(parents=True, exist_ok=True)
     for name in sys.argv[1:] or MODULES:
         if name not in MODULES:
             sys.exit(f"unknown module {name}; one of {', '.join(MODULES)}")

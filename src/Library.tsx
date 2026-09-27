@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
-import { ModuleInfo } from "./api";
+import { LibrarySource, ModuleInfo } from "./api";
 import { isLicensed } from "./Ask";
 import { htmlText, renderHtml } from "./esword";
 import { Icon } from "./icons";
@@ -27,6 +27,15 @@ function blurb(m: ModuleInfo) {
 
 type ShowInfo = (m: ModuleInfo, rect: DOMRect) => void;
 /** The ⓘ beside a module: its e-Sword description in a popover. */
+const SOURCE: Record<LibrarySource, string> = { app: "your modules folder", esword: "e-Sword X", bundled: "built in" };
+
+/** "12 from your modules folder, 140 from e-Sword X and 4 built in." */
+const fromSources = (ms: ModuleInfo[]) => {
+  const parts = (["app", "esword", "bundled"] as const).map((s) => [s, ms.filter((m) => m.source === s).length] as const).filter(([, k]) => k)
+    .map(([s, k]) => (s === "bundled" ? `${k} ${SOURCE[s]}` : `${k} from ${SOURCE[s]}`));
+  return parts.length ? `${parts.length > 1 ? parts.slice(0, -1).join(", ") + " and " + parts[parts.length - 1] : parts[0]}.` : "";
+};
+
 const InfoButton = ({ m, onInfo }: { m: ModuleInfo; onInfo: ShowInfo }) => (
   <button className="ibtn" type="button" aria-label={`About ${m.title}`} title="About" style={{ width: 22, height: 22, flexShrink: 0 }} onClick={(e) => onInfo(m, e.currentTarget.getBoundingClientRect())}><Icon name="info" size={13} /></button>
 );
@@ -87,8 +96,9 @@ export function LibraryScreen() {
         </div>
         <div className="card" style={{ padding: "14px 16px", display: "flex", alignItems: "center", gap: 14 }}>
           <Icon name="check" size={22} style={{ color: "var(--good)" }} />
-          <div style={{ flexGrow: 1, display: "flex", flexDirection: "column", gap: 2 }}><b>Reading your e-Sword X library</b><span className="hint" style={{ fontSize: 12.5 }}>Read-only. Nothing is copied or changed, and e-Sword keeps working as before. New modules you download in e-Sword appear after a rescan.</span></div>
-          <button className="btn" type="button" onClick={() => app.lib && revealItemInDir(app.lib.dir)}><Icon name="finder" />Show in Finder</button>
+          <div style={{ flexGrow: 1, display: "flex", flexDirection: "column", gap: 2 }}><b>Reading {n("bible")} Bibles and {ms.length - n("bible")} books</b><span className="hint" style={{ fontSize: 12.5 }}>{fromSources(ms)} Read-only: nothing is copied or changed. Modules added to your folder or in e-Sword appear after a rescan.</span></div>
+          <span style={{ whiteSpace: "nowrap", flexShrink: 0 }}><Switch on={app.settings.readEsword} onChange={async (v) => { app.set({ readEsword: v }); setBusy(true); await app.rescan(v); setBusy(false); }}>Read e-Sword X</Switch></span>
+          <button className="btn" type="button" onClick={() => { const d = app.lib?.dirs.find((x) => x.source === "app"); if (d) revealItemInDir(d.path); }}><Icon name="finder" />Show in Finder</button>
           <button className="btn" type="button" disabled={busy} onClick={async () => { setBusy(true); await app.rescan(); setBusy(false); app.toast("Library rescanned"); }}><Icon name="refresh" />{busy ? "Rescanning…" : "Rescan"}</button>
         </div>
         {!q && <div className="card" style={{ padding: "14px 16px", display: "flex", alignItems: "center", gap: 14 }}>
@@ -147,6 +157,7 @@ export function LibraryScreen() {
               {info.m.kind === "bible" && <button className="btn small" type="button" onClick={() => { setInfo(null); app.set({ bible: info.m.id }); app.open(app.loc, "read"); }}><Icon name="read" size={13} />Read</button>}
             </div>
             <div className="es" style={{ fontSize: 12.5, lineHeight: 1.5, maxHeight: 300, overflowY: "auto" }}>{renderHtml(info.m.info)}</div>
+            <div className="hint" style={{ fontSize: 12 }}>{info.m.source === "bundled" ? "Built in" : `From ${SOURCE[info.m.source]}`}</div>
           </div>
         </Popover>
       )}

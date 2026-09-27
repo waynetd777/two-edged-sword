@@ -1,7 +1,7 @@
 # Development
 
 Tauri 2, with a React and TypeScript frontend (Vite) and a Rust backend. The Rust side reads the
-e-Sword modules (SQLite, read-only), keeps the search index, writes the journal, speaks aloud and
+modules (e-Sword X's SQLite formats, read-only), keeps the search index, writes the journal, speaks aloud and
 runs the AI tools for Ask. The frontend is everything you see.
 
 ## Commands
@@ -9,10 +9,11 @@ runs the AI tools for Ask. The frontend is everything you see.
 | Command | What it does |
 |---|---|
 | `make dev` | Build the help, then run the app with hot reload |
-| `make check` | Rust tests (some read your e-Sword library) and the TypeScript check |
+| `make check` | Rust tests (some read the modules on this Mac, and skip without them) and the TypeScript check |
 | `make app` | Build the .app, signed with the identity in `signing.local` if there is one |
 | `make install-app` | Build it and replace the copy in /Applications |
 | `make help` | Build the Help Book from `docs/` |
+| `make core` | Build the built-in modules into `src-tauri/modules/` (`make dev` and `make app` build them if they're missing) |
 | `make screenshots` | Retake the screenshots in `docs/images/` |
 | `make icons` | Redraw the icon artwork and regenerate the icon set |
 | `make sign-check` | Show how the installed app is signed |
@@ -26,7 +27,9 @@ runs the AI tools for Ask. The frontend is everything you see.
 
 | What | Where |
 |---|---|
-| e-Sword X modules (read-only) | `~/Library/Containers/net.e-sword.e-Sword-X/Data/Library/Application Support/` |
+| The app's modules folder (read first; `tools/` writes here) | `~/Library/Application Support/Two-edged Sword/Modules/` (`TES_LIBRARY` overrides it for `tools/`) |
+| e-Sword X modules (read-only, if Library › Read e-Sword X is on) | `~/Library/Containers/net.e-sword.e-Sword-X/Data/Library/Application Support/` |
+| Modules built into the app (read last) | `Contents/Resources/modules/` in the app; `src-tauri/modules/` in a debug build |
 | Journal, a Markdown file per month | `~/Library/CloudStorage/OneDrive-Personal/Notes/Two-edged Sword/` if that exists, else `~/Documents/Two-edged Sword/` |
 | Settings, bookmarks, highlights, plans, chats | `~/Library/Application Support/Two-edged Sword/*.json` |
 | Search index | `~/Library/Application Support/Two-edged Sword/search-index.sqlite` |
@@ -102,6 +105,27 @@ python3 tools/variances/build.py esv                       # check them and writ
 
 `tools/variances/disputed-ot.txt` lists often-disputed Old Testament verses, for
 `candidates.py --refs`. `build.py` merges verse by verse, so books can be added a batch at a time.
+
+## Writing modules
+
+Scripts in `tools/` share `tools/modules.py`:
+
+- `LIBRARY`: the app's modules folder, where every script writes.
+- `find(name)`: an input module from the app's folder, e-Sword X's library or the built-in
+  modules, in the order the app reads them.
+- `module(file, title, abbrev, info)`: a writer for any of the six formats. It yields the new
+  module's connection and replaces the old file only when the block finishes.
+
+`tools/core/build.py` builds the built-in modules from public-domain sources only (its docstring
+lists them), under the ids the app looks for first: `kjv`, `kjv+`, `strong`, `kjc` and `tsk`.
+
+Nothing from e-Sword X goes into a module that could be shipped: its licence forbids passing its
+modules on. Two scripts read e-Sword modules, so what they build is for your own library only:
+`lxx/plus.py` (Greek OT+) and `beza/build.py` (TR+, if it's there).
+
+`tools/stepbible.py` reads STEPBible's TAGNT: every Greek NT edition's words with Strong's numbers
+and grammar, numbered as the KJV. It gives ἐγώ, σύ and εἰμί their forms' numbers (μου G3450), as
+Strong's and the KJV+ do.
 
 ## Reference book format
 

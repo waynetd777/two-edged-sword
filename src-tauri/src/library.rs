@@ -1,5 +1,7 @@
-//! The e-Sword X library: every module is a SQLite file in e-Sword's container, opened
-//! read-only and immutable so nothing we do can change it or take a lock e-Sword would notice.
+//! The library: every module is a SQLite file in e-Sword X's formats, opened read-only and
+//! immutable so nothing we do can change it or take a lock e-Sword would notice. Modules come
+//! from three folders (`Source`), and the first to have a module wins; a folder that isn't there
+//! is skipped.
 
 use rusqlite::{Connection, OpenFlags, OptionalExtension};
 use serde::Serialize;
@@ -50,12 +52,27 @@ pub struct ModuleInfo {
     pub features: Vec<&'static str>,
     /// The file's size in bytes.
     pub size: u64,
+    /// Which folder it was found in.
+    pub source: Source,
     #[serde(skip)]
     pub path: PathBuf,
 }
 
+/// Where a module was found, in the order the folders are read.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "lowercase")]
+pub enum Source {
+    /// The app's own modules folder: what `tools/` builds, and what the user copies in.
+    App,
+    /// e-Sword X's library, when e-Sword is installed and reading it is on.
+    Esword,
+    /// The modules inside the app bundle, so it works with nothing installed.
+    Bundled,
+}
+
 pub struct Library {
-    pub dir: PathBuf,
+    /// The folders read, in order, whether or not each exists.
+    pub dirs: Vec<(Source, PathBuf)>,
     pub modules: Vec<ModuleInfo>,
     /// Idle connections per module. A query takes one out (or opens another) and puts it back,
     /// so a long export or index build on one module never holds up reading another, or the same one.
@@ -63,9 +80,36 @@ pub struct Library {
 }
 
 /// Where e-Sword X keeps its modules.
-pub fn default_dir() -> PathBuf {
+pub fn esword_dir() -> PathBuf {
     let home = std::env::var("HOME").unwrap_or_default();
     Path::new(&home).join("Library/Containers/net.e-sword.e-Sword-X/Data/Library/Application Support")
+}
+
+/// The app's own modules folder.
+pub fn app_dir() -> PathBuf {
+    crate::store::data_dir().join("Modules")
+}
+
+/// The modules in the app bundle (Contents/Resources/modules); in a debug build, the ones
+/// `make core` builds into src-tauri/modules.
+pub fn bundled_dir() -> PathBuf {
+    if cfg!(debug_assertions) { return Path::new(env!("CARGO_MANIFEST_DIR")).join("modules"); }
+    std::env::current_exe().ok().and_then(|e| Some(e.parent()?.parent()?.join("Resources/modules"))).unwrap_or_default()
+}
+
+/// For tests against the modules on this Mac: every folder, if one of them has `file`.
+#[cfg(test)]
+pub fn local(file: &str) -> Option<Library> {
+    let dirs = dirs(true);
+    dirs.iter().any(|(_, d)| d.join(file).is_file()).then(|| Library::scan(dirs))
+}
+
+/// The folders to read, in order.
+pub fn dirs(esword: bool) -> Vec<(Source, PathBuf)> {
+    let mut d = vec![(Source::App, app_dir())];
+    if esword { d.push((Source::Esword, esword_dir())); }
+    d.push((Source::Bundled, bundled_dir()));
+    d
 }
 
 pub fn open_readonly(path: &Path) -> rusqlite::Result<Connection> {
@@ -91,24 +135,28 @@ fn url_escape(p: &str) -> String {
 }
 
 impl Library {
-    pub fn scan(dir: PathBuf) -> Library {
-        let mut modules = Vec::new();
-        if let Ok(rd) = std::fs::read_dir(&dir) {
-            for e in rd.flatten() {
-                let path = e.path();
+    pub fn scan(dirs: Vec<(Source, PathBuf)>) -> Library {
+        let mut modules: Vec<ModuleInfo> = Vec::new();
+        for (source, dir) in &dirs {
+            // A folder that isn't there (no e-Sword, nothing built yet) has nothing to add.
+            let Ok(rd) = std::fs::read_dir(dir) else { continue };
+            let mut entries: Vec<_> = rd.flatten().map(|e| e.path()).collect();
+            entries.sort();
+            for path in entries {
                 let (Some(stem), Some(ext)) = (path.file_stem().and_then(|s| s.to_str()), path.extension().and_then(|s| s.to_str())) else { continue };
                 let Some(kind) = Kind::from_ext(&ext.to_ascii_lowercase()) else { continue };
+                if modules.iter().any(|m| m.kind == kind && m.id == stem) { continue }
                 match read_details(&path, kind) {
                     Ok((title, abbrev, info, strongs, rtl, features)) => {
-                        let size = e.metadata().map(|m| m.len()).unwrap_or(0);
-                        modules.push(ModuleInfo { id: stem.to_string(), kind, title, abbrev, info, strongs, rtl, features, size, path })
+                        let size = std::fs::metadata(&path).map(|m| m.len()).unwrap_or(0);
+                        modules.push(ModuleInfo { id: stem.to_string(), kind, title, abbrev, info, strongs, rtl, features, size, source: *source, path })
                     }
                     Err(err) => eprintln!("skipping {}: {err}", path.display()),
                 }
             }
         }
         modules.sort_by(|a, b| a.title.to_lowercase().cmp(&b.title.to_lowercase()));
-        Library { dir, modules, conns: Mutex::new(HashMap::new()) }
+        Library { dirs, modules, conns: Mutex::new(HashMap::new()) }
     }
 
     pub fn module(&self, kind: Kind, id: &str) -> Result<&ModuleInfo, String> {

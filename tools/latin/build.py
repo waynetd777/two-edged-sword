@@ -4,7 +4,7 @@ its English meaning, dictionary form and grammar, as the Greek interlinears are.
 
     python3 tools/latin/build.py [latin clementine]
 
-Reads the plain modules from the e-Sword library (tools/vulgate builds the Clementine) and writes
+Reads the plain modules from the library (tools/modules.py finds them) (tools/vulgate builds the Clementine) and writes
 the new ones beside them; the app finds them after Library → Rescan. With module names, builds only
 those.
 
@@ -31,7 +31,8 @@ import html, os, re, sqlite3, subprocess, sys, urllib.request
 from pathlib import Path
 
 HOME = Path(os.environ.get("HOME", ""))
-LIBRARY = Path(os.environ.get("ESWORD_LIBRARY") or HOME / "Library/Containers/net.e-sword.e-Sword-X/Data/Library/Application Support")
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from modules import LIBRARY, find  # noqa: E402
 CACHE = HOME / "Library/Caches/Two-edged Sword/latin"
 VENV = CACHE / "venv"
 DICTLINE = "https://raw.githubusercontent.com/mk270/whitakers-words/master/DICTLINE.GEN"
@@ -236,7 +237,7 @@ def split_que(w):
 
 
 def build(name, nlp, dic):
-    src = LIBRARY / f"{name}.bbli"
+    src = find(f"{name}.bbli")
     if not src.exists():
         print(f"  no {src.name}; skipped")
         return

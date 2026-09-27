@@ -3,7 +3,7 @@ word, each word with its English, Strong's number and grammar, as the Greek inte
 
     python3 tools/wlc/build.py
 
-Writes to the e-Sword library, where the app finds it after Library → Rescan.
+Writes to the app's modules folder, where the app finds it after Library → Rescan.
 
 Source: the Open Scriptures Hebrew Bible, https://github.com/openscriptures/morphhb (CC BY 4.0):
 the WLC in OSIS, one file per book, every word with its lemma (a Strong's number, with the prefixes
@@ -31,7 +31,8 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 HOME = Path(os.environ.get("HOME", ""))
-LIBRARY = Path(os.environ.get("ESWORD_LIBRARY") or HOME / "Library/Containers/net.e-sword.e-Sword-X/Data/Library/Application Support")
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from modules import LIBRARY, find  # noqa: E402
 CACHE = HOME / "Library/Caches/Two-edged Sword/wlc"
 SRC = "https://raw.githubusercontent.com/openscriptures/morphhb/master/wlc/{}.xml"
 NS = "{http://www.bibletechnologies.net/2003/OSIS/namespace}"
@@ -218,8 +219,7 @@ def verse(v):
 
 
 def main():
-    if not LIBRARY.is_dir():
-        sys.exit(f"no e-Sword library at {LIBRARY}")
+    LIBRARY.mkdir(parents=True, exist_ok=True)
     GLOSS.update(glosses())
     moves = verse_map()
     verses = {}

@@ -1,8 +1,9 @@
 # Two-edged Sword
 
-A Bible study app for macOS, built on the Bibles, commentaries, dictionaries and books you already
-have in e-Sword X. It only reads your modules, and keeps your journal, highlights and plans
-separately.
+A Bible study app for macOS, for reading Bibles, commentaries, dictionaries and books beside your own
+notes. It comes with the KJV, Strong's dictionaries and the Treasury of Scripture Knowledge, and reads
+more modules in e-Sword X's formats: your own, and e-Sword X's library if you have it.
+It only reads them, and keeps your journal, highlights and plans separately.
 
 <a href="docs/images/index.md#the-readme"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/read-dark.png"><img alt="Reading 1 John 1 with the study pane open on the commentaries" src="docs/images/read-light.png"></picture></a>
 
@@ -52,8 +53,8 @@ separately.
 
 ## Quick start
 
-Needs macOS 13 or later, the Xcode Command Line Tools, e-Sword X with some modules, Rust, Node and
-pandoc. Ask also needs Claude Code, Codex, Antigravity or GitHub Copilot.
+Needs macOS 13 or later, the Xcode Command Line Tools, Rust, Node and pandoc. The built-in modules
+are downloaded and built on the first `make dev` or `make app` (`make core`). Ask also needs Claude Code, Codex, Antigravity or GitHub Copilot.
 
 ```sh
 npm install
@@ -62,10 +63,16 @@ cp signing.local.example signing.local    # then name your signing certificate i
 make install-app                          # build it and put it in /Applications
 ```
 
-Without a signing certificate, macOS asks for access to e-Sword's data after every build
+Without a signing certificate, macOS asks for access to e-Sword's data after every build, if you have e-Sword X
 ([Signing and Full Disk Access](docs/development.md#signing-and-full-disk-access)).
 
 Licensed Bibles are read where e-Sword keeps them and never copied into this repo.
+
+## Thanks
+
+To Rick Meyers, whose free e-Sword has put God's word into the hands of millions since 2000. This
+app reads e-Sword X's formats and library, and owes that to his work
+([e-sword.net](https://www.e-sword.net)).
 
 ## Documentation
 

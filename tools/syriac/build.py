@@ -3,7 +3,7 @@ each word with its English meaning, dictionary form, root and grammar, as the Gr
 
     python3 tools/syriac/build.py
 
-Reads peshitta.bbli (tools/crosswire builds it) from the e-Sword library and writes peshitta+.bbli
+Reads peshitta.bbli (tools/crosswire builds it) from the library (tools/modules.py finds them) and writes peshitta+.bbli
 beside it; the app finds it after Library → Rescan.
 
 Sources:
@@ -31,7 +31,8 @@ from difflib import SequenceMatcher
 from pathlib import Path
 
 HOME = Path(os.environ.get("HOME", ""))
-LIBRARY = Path(os.environ.get("ESWORD_LIBRARY") or HOME / "Library/Containers/net.e-sword.e-Sword-X/Data/Library/Application Support")
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from modules import LIBRARY, find  # noqa: E402
 CACHE = HOME / "Library/Caches/Two-edged Sword/syriac"
 TF = "https://raw.githubusercontent.com/ETCBC/syrnt/master/tf/0.1/{}.tf"
 SEDRA = "https://sedra.bethmardutho.org/api/word/{}.json"
@@ -252,7 +253,7 @@ def split(text):
 
 
 def main():
-    src = LIBRARY / "peshitta.bbli"
+    src = find("peshitta.bbli")
     if not src.exists():
         sys.exit(f"no {src}; build it first: python3 tools/crosswire/build.py Peshitta")
     print("syrnt")

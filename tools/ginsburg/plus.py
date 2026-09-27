@@ -3,7 +3,7 @@ Ginsburg's Hebrew word by word, each word with its English, Strong's number and 
 
     python3 tools/ginsburg/plus.py
 
-Reads ginsburg.bbli (tools/ginsburg/build.py) and wlc+.bbli (tools/wlc) from the e-Sword library
+Reads ginsburg.bbli (tools/ginsburg/build.py) and wlc+.bbli (tools/wlc) from the library (tools/modules.py finds them)
 and writes ginsburg+.bbli beside them; the app finds it after Library → Rescan.
 
 Sources and licences: the text is Ginsburg's 1894 Hebrew Bible (github.com/ahembd/Ginsburg_Hebrew_Bible,
@@ -27,7 +27,8 @@ from difflib import SequenceMatcher
 from pathlib import Path
 
 HOME = Path(os.environ.get("HOME", ""))
-LIBRARY = Path(os.environ.get("ESWORD_LIBRARY") or HOME / "Library/Containers/net.e-sword.e-Sword-X/Data/Library/Application Support")
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from modules import LIBRARY, find  # noqa: E402
 FINAL = str.maketrans("ךםןףץ", "כמנפצ")
 DIV = re.compile(r"<div><grk>(.*?)</grk>((?:<num>.*?</num>)*)<tvm>(.*?)</tvm><gra>(.*?)</gra></div>")
 
@@ -95,14 +96,14 @@ def pair(g, w):
 
 def main():
     for f in ("ginsburg.bbli", "wlc+.bbli"):
-        if not (LIBRARY / f).exists():
+        if not find(f).exists():
             sys.exit(f"no {f}; build it first")
-    db = sqlite3.connect(f"file:{LIBRARY / 'wlc+.bbli'}?mode=ro", uri=True)
+    db = sqlite3.connect(f"file:{find('wlc+.bbli')}?mode=ro", uri=True)
     wlc = {}
     for b, c, v, t in db.execute("SELECT Book, Chapter, Verse, Scripture FROM Bible"):
         wlc[(b, c, v)] = [(m.group(1), m.group(2), m.group(3), m.group(4)) for m in DIV.finditer(t or "")]
     db.close()
-    db = sqlite3.connect(f"file:{LIBRARY / 'ginsburg.bbli'}?mode=ro", uri=True)
+    db = sqlite3.connect(f"file:{find('ginsburg.bbli')}?mode=ro", uri=True)
     rows = db.execute("SELECT Book, Chapter, Verse, Scripture FROM Bible ORDER BY Book, Chapter, Verse").fetchall()
     db.close()
 

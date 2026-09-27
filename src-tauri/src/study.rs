@@ -458,12 +458,10 @@ mod tests {
         let _ = std::fs::remove_dir_all(&root);
     }
 
-    /// Against the e-Sword X library on this Mac, with tools/sefaria's Talmud; skips itself without them.
+    /// Against the modules on this Mac, with tools/sefaria's Talmud; skips itself without them.
     #[test]
     fn talmud_passages_citing_a_verse() {
-        let dir = crate::library::default_dir();
-        if !dir.join("talmud_sanhedrin.refi").is_file() { return; }
-        let lib = Library::scan(dir);
+        let Some(lib) = crate::library::local("talmud_sanhedrin.refi") else { return };
         let out = std::env::temp_dir().join(format!("tes-ask-cited-{}", std::process::id()));
         std::fs::create_dir_all(&out).unwrap();
         let req = Request { book: 1, chapter: 49, from: Some(10), to: Some(10), bibles: vec![], strongs_bible: None, label: "Genesis 49:10".into(), journal: vec![], exclude: vec![] };
@@ -475,12 +473,10 @@ mod tests {
         let _ = std::fs::remove_dir_all(&out);
     }
 
-    /// Against the e-Sword X library on this Mac; skips itself where it is absent.
+    /// Against the modules on this Mac; skips itself where it is absent.
     #[test]
     fn differences_list_the_passage_and_the_whole_file() {
-        let dir = crate::library::default_dir();
-        if !dir.join("kjv.bbli").is_file() { return; }
-        let lib = Library::scan(dir);
+        let Some(lib) = crate::library::local("kjv.bbli") else { return };
         let data = std::env::temp_dir().join(format!("tes-ask-diff-{}", std::process::id()));
         let (root, out) = (data.join("ask"), data.join("out"));
         std::fs::create_dir_all(&out).unwrap();
@@ -498,12 +494,10 @@ mod tests {
         let _ = std::fs::remove_dir_all(&data);
     }
 
-    /// Against the e-Sword X library on this Mac; skips itself where it is absent.
+    /// Against the modules on this Mac; skips itself where it is absent.
     #[test]
     fn export_links_dictionaries_and_leaves_out_excluded() {
-        let dir = crate::library::default_dir();
-        if !dir.join("kjv.bbli").is_file() { return; }
-        let lib = Library::scan(dir);
+        let Some(lib) = crate::library::local("kjv.bbli") else { return };
         let root = std::env::temp_dir().join(format!("tes-ask-study-{}", std::process::id()));
         export_dictionaries(&lib, &root);
         let comm: Vec<_> = lib.of_kind(Kind::Commentary).collect();

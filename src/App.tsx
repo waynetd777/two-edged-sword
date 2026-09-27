@@ -50,14 +50,14 @@ function Screens() {
   }, [app]);
 
   if (!app.lib) return null;
-  if (!app.lib.found || !app.bibles.length) {
+  if (!app.bibles.length) {
     return (
       <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center", padding: 40 }} className="drag">
         <div className="card" style={{ maxWidth: 520, padding: 28, display: "flex", flexDirection: "column", gap: 10 }}>
-          <h1 style={{ margin: 0, font: "500 28px var(--display)" }}>No e-Sword library found</h1>
-          <p style={{ margin: 0, color: "var(--muted)" }}>Two-edged Sword reads the Bibles and books you have in e-Sword X. Install e-Sword X and download at least one Bible, then press Rescan.</p>
-          <code style={{ fontSize: 12, color: "var(--muted)" }}>{app.lib.dir}</code>
-          <div><button className="btn primary" type="button" onClick={app.rescan}>Rescan</button></div>
+          <h1 style={{ margin: 0, font: "500 28px var(--display)" }}>No Bibles found</h1>
+          <p style={{ margin: 0, color: "var(--muted)" }}>Two-edged Sword reads Bibles and books from these folders. Copy a module into the first, or download one in e-Sword X, then press Rescan.</p>
+          {app.lib.dirs.map((d) => <code key={d.source} style={{ fontSize: 12, color: "var(--muted)" }}>{d.path}</code>)}
+          <div><button className="btn primary" type="button" onClick={() => app.rescan()}>Rescan</button></div>
         </div>
       </div>
     );

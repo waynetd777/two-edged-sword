@@ -1,21 +1,20 @@
 """Builds beza1598+.bbli ("Greek NT: Beza (1598) w/ glosses"): Beza's 1598 Greek New Testament word
-by word, each word with English under it, its Strong's number and its grammar, as Greek NT INT+ has
-them.
+by word, each word with English under it, its Strong's number and its grammar.
 
     python3 tools/beza/plus.py
 
-Reads beza1598.bbli (tools/beza/build.py makes it) and Greek NT TR+ and INT+ from the e-Sword
-library, and writes beza1598+.bbli beside them; the app finds it after Library → Rescan.
+Reads beza1598.bbli (tools/beza/build.py makes it) and writes beza1598+.bbli beside it; the app
+finds it after Library → Rescan.
 
 Sources:
   Strong's numbers and grammar (Robinson's codes, spelled out: V-AAI-3S "verb · aorist active
-    indicative · 3rd sing."): Greek NT TR+ (greeknttr+.bbli), Stephanus 1550 with Scrivener 1894's
-    readings marked | Stephanus | Scrivener |, a number and a code after every word. Scrivener
-    follows Beza but for some 190 places, so each verse's words are lined up first with Scrivener's
-    reading of it, then with Stephanus', then with Greek NT INT+'s (greekntint+.bbli), accents,
-    case and movable ν ignored; a word misspelt in the transcription takes the number of the word
-    in its place when it is like it; and a word none of them has in that verse (a reading of Beza's
-    alone) takes the number and code the same form has most often elsewhere in TR+ or INT+.
+    indicative · 3rd sing."): STEPBible's TAGNT (Translators Amalgamated Greek NT, Tyndale House,
+    CC BY 4.0; tools/stepbible.py), every word of the major editions with its number, code and
+    editions. Scrivener's 1894 TR follows Beza but for some 190 places, so each verse's words are
+    lined up first with the TR's words, then with the Byzantine text's, then with any edition's,
+    accents, case and movable ν ignored; a word misspelt in the transcription takes the number of
+    the word in its place when it is like it; and a word none of them has in that verse (a reading
+    of Beza's alone) takes the number and code the same form has most often elsewhere in TAGNT.
   English: STEPBible's TBESG (Translators Brief lexicon of Extended Strongs for Greek, Tyndale
     House, CC BY 4.0, https://github.com/STEPBible/STEPBible-Data), the short gloss for each
     Strong's number, as WLC+ has TBESH's. It is the dictionary sense: where TBESG gives choices
@@ -34,7 +33,9 @@ from difflib import SequenceMatcher
 from pathlib import Path
 
 HOME = Path(os.environ.get("HOME", ""))
-LIBRARY = Path(os.environ.get("ESWORD_LIBRARY") or HOME / "Library/Containers/net.e-sword.e-Sword-X/Data/Library/Application Support")
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from modules import LIBRARY, find  # noqa: E402
+from stepbible import has, tagnt  # noqa: E402
 CACHE = HOME / "Library/Caches/Two-edged Sword/beza"
 TBESG = ("https://raw.githubusercontent.com/STEPBible/STEPBible-Data/master/Lexicons/"
          + urllib.parse.quote("TBESG - Translators Brief lexicon of Extended Strongs for Greek - STEPBible.org CC BY.txt"))
@@ -52,49 +53,17 @@ def key(w):
 
 
 def rows(name):
-    db = sqlite3.connect(f"file:{LIBRARY / name}?mode=ro", uri=True)
+    db = sqlite3.connect(f"file:{find(name)}?mode=ro", uri=True)
     out = {(b, c, v): t or "" for b, c, v, t in db.execute("SELECT Book, Chapter, Verse, Scripture FROM Bible WHERE Book BETWEEN 40 AND 66")}
     db.close()
     return out
 
 
-# ---------- TR+ and INT+: words with their numbers and codes ----------
+# ---------- TAGNT: words with their numbers and codes ----------
 
-WORD = re.compile(r"([^\s<>|]+)\s*(?:<num>\s*(G\d+)[^<]*</num>)?\s*(?:<tvm>([^<]*)</tvm>)?")
-
-
-def tagged(segment):
-    """[(key, number, code)] for a stretch of TR+'s markup."""
-    out = []
-    for m in WORD.finditer(re.sub(r"</?grk>", " ", segment)):
-        k = key(m.group(1))
-        if k:
-            out.append((k, m.group(2), (m.group(3) or "").strip()))
-    return out
-
-
-def tr_readings(t):
-    """TR+'s verse as two word lists, Scrivener's reading and Stephanus', each word (key, number, code)."""
-    t = re.sub(r"</?grk>", " ", t)
-    if t.count("|") and t.count("|") % 3 == 0:
-        parts = t.split("|")
-        scr = [x for i, p in enumerate(parts) if i % 3 != 1 for x in tagged(p)]
-        ste = [x for i, p in enumerate(parts) if i % 3 != 2 for x in tagged(p)]
-        return scr, ste
-    w = tagged(t)
-    return w, w
-
-
-def int_words(t):
-    """INT+'s verse: [(key, number, code)] from its boxes (word, number, grammar, lemma, meaning)."""
-    out = []
-    for box in re.findall(r"<div[^>]*>(.*?)</div>", t, re.S):
-        g = re.findall(r"<grk>(.*?)</grk>", box)
-        n = re.search(r"<num>\s*(G\d+)", box)
-        c = re.search(r"<tvm>(.*?)</tvm>", box)
-        if g and key(g[0]):
-            out.append((key(g[0]), n.group(1) if n else None, c.group(1).strip() if c else ""))
-    return out
+def words(ws, edition=None):
+    """[(key, number, code)] for TAGNT's words, or those of one edition."""
+    return [(key(w.greek), w.num, w.code) for w in ws if key(w.greek) and (edition is None or has(w, edition))]
 
 
 # ---------- English ----------
@@ -254,20 +223,14 @@ def line_up(bk, cand, got):
 
 
 def main():
-    for f in ("beza1598.bbli", "greeknttr+.bbli"):
-        if not (LIBRARY / f).exists():
-            sys.exit(f"no {f} in the library" + ("; build it: python3 tools/beza/build.py" if f.startswith("beza") else ""))
-    beza, tr = rows("beza1598.bbli"), rows("greeknttr+.bbli")
-    intp = rows("greekntint+.bbli") if (LIBRARY / "greekntint+.bbli").exists() else {}
+    if not find("beza1598.bbli").exists():
+        sys.exit("no beza1598.bbli in the library; build it: python3 tools/beza/build.py")
+    beza, nt = rows("beza1598.bbli"), tagnt()
     G = glosses()
     # Each form's commonest number and code anywhere, for a word no edition has in the verse.
     forms = {}
-    for t in tr.values():
-        for w in tagged(re.sub(r"\|", " ", t)):
-            if w[1]:
-                forms.setdefault(w[0], Counter())[(w[1], w[2])] += 1
-    for t in intp.values():
-        for w in int_words(t):
+    for ws in nt.values():
+        for w in words(ws):
             if w[1]:
                 forms.setdefault(w[0], Counter())[(w[1], w[2])] += 1
     common = {k: c.most_common(1)[0][0] for k, c in forms.items()}
@@ -280,10 +243,11 @@ def main():
         idx = [i for i, t in enumerate(toks) if key(t)]
         bk = [key(toks[i]) for i in idx]
         got = [None] * len(bk)
-        scr, ste = tr_readings(tr.get((b, c, v), ""))
+        ws = nt.get((b, c, v), [])
+        scr, ste = words(ws, "TR"), words(ws, "Byz")
         line_up(bk, scr, got)
         line_up(bk, ste, got)
-        line_up(bk, int_words(intp.get((b, c, v), "")), got)
+        line_up(bk, words(ws), got)
         # A word left over where the edition has one word left over too, in the same place (a typo
         # in the transcription: σονετέλεσεν for συνετέλεσεν): that word's number and code.
         for cand in (scr, ste):
@@ -327,14 +291,14 @@ def main():
         out.append((b, c, v, "".join(s)))
 
     w = stats["words"]
-    print(f"{len(out)} verses, {w} words: numbered from the verse's own TR+/INT+ words {stats['verse'] / w:.1%}, "
+    print(f"{len(out)} verses, {w} words: numbered from the verse's own TAGNT words {stats['verse'] / w:.1%}, "
           f"from the same form elsewhere {stats['elsewhere'] / w:.1%}, none {stats['none'] / w:.2%}; glossed {stats['glossed'] / w:.1%}")
     print("  by book: " + ", ".join(f"{BOOKS[b - 40]} {n / max(t, 1):.1%}" for b, (n, t) in sorted(by_book.items())))
     worst.sort()
     print("  least matched in the verse: " + ", ".join(f"{BOOKS[b - 40]} {c}:{v} {s:.0%}" for s, (b, c, v) in worst[:10]))
 
     info = ("<p>Theodore Beza's Greek New Testament of 1598 word by word: each word with its Strong's number and grammar (Robinson's "
-            "codes, from Greek NT TR+ and INT+, lining Beza's words up with Scrivener's and Stephanus' texts) and the English of "
+            "codes, from STEPBible's TAGNT, Tyndale House, CC BY 4.0, lining Beza's words up with Scrivener's TR, the Byzantine text and the other editions) and the English of "
             "STEPBible's TBESG (Tyndale House, CC BY 4.0, https://github.com/STEPBible/STEPBible-Data). The English is the "
             "dictionary sense, not a translation of the verse. The Greek is tools/beza's text of the textus-receptus.com "
             "transcription. Built by Two-edged Sword's tools/beza/plus.py.</p>")

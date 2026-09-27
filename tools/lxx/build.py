@@ -4,7 +4,7 @@ Septuagint of 1587 that the KJV's translators used.
 
     python3 tools/lxx/build.py
 
-Writes to the e-Sword library, where the app finds it after Library → Rescan.
+Writes to the app's modules folder, where the app finds it after Library → Rescan.
 
 Source: eBible.org's grcbrent (https://ebible.org/Scriptures/grcbrent_usfm.zip), "The Greek
 Septuagint with Apocrypha, compiled by Sir Lancelot C. L. Brenton", public domain, in USFM. Brenton
@@ -39,7 +39,8 @@ import html, io, os, re, sqlite3, sys, urllib.request, zipfile
 from pathlib import Path
 
 HOME = Path(os.environ.get("HOME", ""))
-LIBRARY = Path(os.environ.get("ESWORD_LIBRARY") or HOME / "Library/Containers/net.e-sword.e-Sword-X/Data/Library/Application Support")
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from modules import LIBRARY, find  # noqa: E402
 CACHE = HOME / "Library/Caches/Two-edged Sword/lxx"
 USFM = "https://ebible.org/Scriptures/grcbrent_usfm.zip"
 VRS = "https://raw.githubusercontent.com/sillsdev/libpalaso/master/SIL.Scripture/Resources/{}.vrs.txt"
@@ -150,7 +151,7 @@ def versification(name):
 
 
 def kjv_lengths():
-    db = sqlite3.connect(f"file:{LIBRARY / 'kjv.bbli'}?mode=ro", uri=True)
+    db = sqlite3.connect(f"file:{find('kjv.bbli')}?mode=ro", uri=True)
     out = {(b, c): n for b, c, n in db.execute("SELECT Book, Chapter, MAX(Verse) FROM Bible GROUP BY Book, Chapter")}
     db.close()
     return out
@@ -267,8 +268,8 @@ def kjv_verses(kjv, _cache={}):
 
 
 def main():
-    if not (LIBRARY / "kjv.bbli").exists():
-        sys.exit(f"no kjv.bbli in {LIBRARY}")
+    if not find("kjv.bbli").exists():
+        sys.exit(f"no kjv.bbli in {LIBRARY}, e-Sword X's library or the app")
     rows, about, joined, notes = build()
     kjv = kjv_lengths()
     have = {(b, c, v) for b, c, v, _ in rows}

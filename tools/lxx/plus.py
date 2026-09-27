@@ -4,9 +4,10 @@ Greek NT INT+ has them.
 
     python3 tools/lxx/plus.py
 
-Reads lxx_brenton.bbli (tools/lxx/build.py builds it) and the library's Greek OT+ (greekot+.bbli)
-and Greek NTs with Strong's numbers, and writes lxx_brenton+.bbli beside them; the app finds it after
-Library → Rescan.
+Reads lxx_brenton.bbli (tools/lxx/build.py builds it), the library's Greek OT+ (greekot+.bbli) and
+STEPBible's TAGNT (tools/stepbible.py), and writes lxx_brenton+.bbli beside them; the app finds it
+after Library → Rescan. Greek OT+ is e-Sword's, so the module is for personal use: the tagged
+Septuagints there are (CATSS's and those made from it) are licensed restrictively too.
 
 Sources:
   Strong's numbers and grammar: Greek OT+ ("Greek Old Testament (Septuagint) w/ Strong's Numbers",
@@ -24,8 +25,8 @@ the verse's rarer words and its own number), and the words are lined up in order
 final sigma and a closing movable nu ignored; where the texts differ a word matches its like in the
 same place (δαυιδ, Δαυίδ; one letter apart). A matched word takes the Rahlfs word's number and
 grammar. A word matched to none, and every word of the Apocrypha (Greek OT+ hasn't them), takes the
-number and grammar most often given to the same form in Greek OT+ and the Greek NTs, if it occurs
-there. Greek OT+'s numbers are checked against the Greek NTs': where the NTs give a form one number
+number and grammar most often given to the same form in Greek OT+ and the Greek NT (TAGNT's
+editions), if it occurs there. Greek OT+'s numbers are checked against the Greek NT's: where the NTs give a form one number
 nearly always and practically never Greek OT+'s, the NTs' is taken (Greek OT+ has γῆ, earth, as
 G1065, γε, throughout). The gloss is TBESG's for the number; a name with no number is transliterated.
 
@@ -37,11 +38,12 @@ from difflib import SequenceMatcher
 from pathlib import Path
 
 HOME = Path(os.environ.get("HOME", ""))
-LIBRARY = Path(os.environ.get("ESWORD_LIBRARY") or HOME / "Library/Containers/net.e-sword.e-Sword-X/Data/Library/Application Support")
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from modules import LIBRARY, find  # noqa: E402
+from stepbible import tagnt  # noqa: E402
 CACHE = HOME / "Library/Caches/Two-edged Sword/lxx"
 TBESG = ("https://raw.githubusercontent.com/STEPBible/STEPBible-Data/master/Lexicons/"
          + urllib.parse.quote("TBESG - Translators Brief lexicon of Extended Strongs for Greek - STEPBible.org CC BY.txt"))
-TAGGED_NT = ["greeknttr+.bbli", "greekntbyz+.bbli", "greekntwh+.bbli"]
 BOOK_NAMES = {67: "Tobit", 68: "Judith", 69: "Wisdom", 70: "Sirach", 71: "Baruch", 72: "1 Maccabees", 73: "2 Maccabees",
               74: "1 Esdras", 76: "3 Maccabees", 77: "4 Maccabees", 78: "Prayer of Manasseh"}
 
@@ -106,8 +108,13 @@ def tagged(html_text):
     return out
 
 
+def nt_words():
+    """STEPBible's TAGNT (every edition's words, CC BY 4.0), verse by verse, as tagged() gives them."""
+    return [[(key(w.greek), w.num, w.code or None) for w in ws if key(w.greek)] for ws in tagnt().values()]
+
+
 def library(name, where=""):
-    db = sqlite3.connect(f"file:{LIBRARY / name}?mode=ro", uri=True)
+    db = sqlite3.connect(f"file:{find(name)}?mode=ro", uri=True)
     rows = db.execute(f"SELECT Book, Chapter, Verse, Scripture FROM Bible {where} ORDER BY Book, Chapter, Verse").fetchall()
     db.close()
     return rows
@@ -196,6 +203,9 @@ GREEK_WORD = re.compile(r"[Ͱ-Ͽἀ-῿᾽᾿᾽’']+")
 def main():
     gl = glosses()
     brenton = library("lxx_brenton.bbli")
+    if not find("greekot+.bbli").exists():
+        sys.exit("no greekot+.bbli (e-Sword's Greek OT+, Rahlfs with Strong's numbers) in the library; there is no openly "
+                 "licensed tagged Septuagint to use instead, so this module can be built only with e-Sword's")
     rahlfs = library("greekot+.bbli")
     print(f"Brenton: {len(brenton)} verses; Greek OT+: {len(rahlfs)}; TBESG: {len(gl)} numbers")
 
@@ -215,24 +225,24 @@ def main():
 
     # Every tagged form's commonest number and grammar, for words matched to none.
     forms = defaultdict(Counter)
-    for name in ["greekot+.bbli"] + TAGGED_NT:
-        if (LIBRARY / name).exists():
-            for _, _, _, t in library(name):
-                for k, n, g in tagged(t):
-                    if n:
-                        forms[k][(n, g)] += 1
+    for _, _, _, t in rahlfs:
+        for k, n, g in tagged(t):
+            if n:
+                forms[k][(n, g)] += 1
+    for ws in nt_words():
+        for k, n, g in ws:
+            if n:
+                forms[k][(n, g)] += 1
     common = {k: c.most_common(1)[0][0] for k, c in forms.items()}
     # Greek OT+'s numbers checked against the Greek NTs': where the NTs give a form one number
     # (90% of the time or more) and practically never Greek OT+'s, Greek OT+'s is a slip in its
     # tagging, however often it's made (it has γῆ as G1065, γε, throughout) and the NTs' is taken.
     # A form the NTs give several (η: the article, "which", "or") is left as Greek OT+ has it.
     nt = defaultdict(Counter)
-    for name in TAGGED_NT:
-        if (LIBRARY / name).exists():
-            for _, _, _, t in library(name):
-                for k, n, _ in tagged(t):
-                    if n:
-                        nt[k][n] += 1
+    for ws in nt_words():
+        for k, n, _ in ws:
+            if n:
+                nt[k][n] += 1
     def usual(k, n):
         c = nt.get(k)
         if not c or not n:

@@ -12,8 +12,8 @@ gets a VerseLinks table (e-Sword ignores it): Sefaria's links from its passages 
 they cite, in the KJV's numbering, with the passage's English, so Ask can be given the Talmud's
 discussion of the verses a question is about.
 
-Downloads are cached in ~/Library/Caches/Two-edged Sword/sefaria. Modules are written to the
-e-Sword library, where the app (after Library → Rescan) and e-Sword both find them. English is
+Downloads are cached in ~/Library/Caches/Two-edged Sword/sefaria. Modules are written to
+the app's modules folder, where the app finds them after Library → Rescan. English is
 Sefaria's merged text: its best version for each verse, whose sources and licences are listed
 in each module's information. Several are CC-BY-NC: fine for personal study, not for resale.
 """
@@ -22,7 +22,8 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 HOME = Path(os.environ.get("HOME", ""))
-LIBRARY = HOME / "Library/Containers/net.e-sword.e-Sword-X/Data/Library/Application Support"
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from modules import LIBRARY, find  # noqa: E402
 CACHE = HOME / "Library/Caches/Two-edged Sword/sefaria"
 EXPORT = "https://storage.googleapis.com/sefaria-export/json/"
 
@@ -134,7 +135,7 @@ HEB_TO_KJV = [
 
 
 def kjv_counts():
-    c = sqlite3.connect(f"file:{LIBRARY / 'kjv.bbli'}?immutable=1", uri=True)
+    c = sqlite3.connect(f"file:{find('kjv.bbli')}?immutable=1", uri=True)
     return {(b, ch): n for b, ch, n in c.execute("SELECT Book, Chapter, MAX(Verse) FROM Bible GROUP BY Book, Chapter")}
 
 
@@ -329,8 +330,7 @@ def talmud(tocmap):
 
 
 def main():
-    if not LIBRARY.is_dir():
-        sys.exit(f"no e-Sword library at {LIBRARY}")
+    LIBRARY.mkdir(parents=True, exist_ok=True)
     what = sys.argv[1:] or ["targums", "talmud"]
     tocmap = toc()
     if "targums" in what:

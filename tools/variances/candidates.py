@@ -3,7 +3,7 @@
     python3 tools/variances/candidates.py niv --books 40-66
     python3 tools/variances/candidates.py niv --refs tools/variances/disputed-ot.txt
 
-Reads both modules from the e-Sword library and writes batches of candidates, with both texts,
+Reads both modules from the library (tools/modules.py finds them) and writes batches of candidates, with both texts,
 to a work folder outside the repo (the translation's text is copyrighted; it is never committed).
 Each candidate says why it was picked. The review (see review.md) decides which are real.
 """
@@ -11,7 +11,8 @@ import argparse, json, os, re, sqlite3, sys
 from pathlib import Path
 
 HOME = Path(os.environ.get("HOME", ""))
-LIBRARY = HOME / "Library/Containers/net.e-sword.e-Sword-X/Data/Library/Application Support"
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from modules import LIBRARY, find  # noqa: E402
 DATA = HOME / "Library/Application Support/Two-edged Sword"
 
 # A term the base uses more often than the translation does (after its modern equivalents are
@@ -41,7 +42,7 @@ def clean(t):
 
 
 def load(module):
-    p = LIBRARY / f"{module}.bbli"
+    p = find(f"{module}.bbli")
     if not p.exists():
         sys.exit(f"no Bible module {module!r} in {LIBRARY}")
     c = sqlite3.connect(f"file:{p}?immutable=1", uri=True)

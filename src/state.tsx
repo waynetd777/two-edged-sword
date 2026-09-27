@@ -21,6 +21,8 @@ export interface Settings {
   redLetters: boolean;
   /** Strong's Bibles in Greek or Hebrew without English of their own: each word's commonest KJV rendering under it. */
   kjvGlosses: boolean;
+  /** Read e-Sword X's library as well as the app's own modules (skipped quietly if it isn't there). */
+  readEsword: boolean;
   layout: "verse" | "paragraph";
   bible: string;
   compare: string[];
@@ -73,7 +75,7 @@ export interface Settings {
 }
 
 const DEFAULTS: Settings = {
-  theme: "auto", readSize: 19, readFont: "literata", studyTab: "commentary", docTab: "ask", studyCommentary: null, studyDict: null, dictModule: null, studyFollow: true, redLetters: true, kjvGlosses: true, layout: "verse", bible: "kjv", compare: ["kjv", "asv", "kjv+"], favBibles: [], hiddenBibles: [],
+  theme: "auto", readSize: 19, readFont: "literata", studyTab: "commentary", docTab: "ask", studyCommentary: null, studyDict: null, dictModule: null, studyFollow: true, redLetters: true, kjvGlosses: true, readEsword: true, layout: "verse", bible: "kjv", compare: ["kjv", "asv", "kjv+"], favBibles: [], hiddenBibles: [],
   commentaryOrder: ["barnes", "henry", "clarke", "gill", "jfb", "wesley", "darby", "meyer"], dictionaryOrder: ["isbe", "smith", "nave", "cyclopedia"],
   voice: "", voiceHebrew: "", voiceGreek: "", voiceLatin: "", rate: 1, continueChapter: true, continueEntry: false, readNumbers: false, highlightWords: true, journalDir: "", showNotes: true, journalHighlight: "yellow", hlNames: {}, showHighlights: true, journalGrammar: true,
   model: "claude-sonnet-5", includeCommentaries: true, askJournal: false, allowLicensed: true, reminder: false, reminderTime: "06:30", whenBehind: "ask", studyPane: true, copyNumbers: true,
@@ -224,7 +226,8 @@ interface Ctx {
   lexicon: string | null;
   concordance: string | null;
   tsk: string | null;
-  rescan: () => Promise<void>;
+  /** Looks for modules again; `esword` says whether to read e-Sword X's library (the setting if left out). */
+  rescan: (esword?: boolean) => Promise<void>;
 
   /** The settings, with `bible` the Bible being read this session (see set). */
   settings: Settings;
@@ -548,7 +551,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const value: Ctx = {
     lib, bibles, mod, strongsBible, lexicon, concordance, tsk,
-    rescan: async () => { setLib(await api.rescan()); },
+    rescan: async (esword) => { setLib(await api.rescan(typeof esword === "boolean" ? esword : settings.readEsword)); },
     settings: view,
     set: ({ bible, ...rest }) => {
       if (bible !== undefined) {

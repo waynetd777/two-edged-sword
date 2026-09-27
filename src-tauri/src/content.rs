@@ -389,15 +389,14 @@ pub fn translit_search(lib: &Library, lexicon: &str, query: &str, limit: usize) 
     Ok(exact)
 }
 
-/// These run against the e-Sword X library on this Mac and skip themselves where it is absent.
+/// These run against the modules on this Mac and skip themselves where they are absent.
 #[cfg(test)]
 mod library_tests {
     use super::*;
     use crate::search;
 
     fn lib() -> Option<Library> {
-        let dir = crate::library::default_dir();
-        dir.join("kjv.bbli").is_file().then(|| Library::scan(dir))
+        crate::library::local("kjv.bbli")
     }
 
     #[test]
@@ -431,6 +430,28 @@ mod library_tests {
         assert!(devotion(&lib, "spurgeon", "September 24").unwrap().unwrap().contains("Ezr 8:22"));
         let agape = translit_search(&lib, "strong", "agape", 10).unwrap();
         assert!(agape.iter().any(|h| h.num == "G26"), "{agape:?}");
+    }
+
+    /// The built-in modules alone (`make core`), as a Mac without e-Sword X sees them.
+    #[test]
+    fn the_built_in_modules_alone() {
+        let dir = crate::library::bundled_dir();
+        if !dir.join("kjv+.bbli").is_file() { return; }
+        let lib = Library::scan(vec![(crate::library::Source::Bundled, dir)]);
+        let ch = chapter(&lib, "kjv", 43, 3).unwrap();
+        assert_eq!(ch.len(), 36);
+        assert!(ch[15].text.contains("<red>For God so loved the world"), "{}", ch[15].text);
+        assert!(lib.module(Kind::Bible, "kjv+").unwrap().strongs);
+        assert!(!lib.module(Kind::Bible, "kjv").unwrap().strongs);
+        assert!(article(&lib, Kind::Lexicon, "strong", "G25").unwrap().unwrap().html.contains("<lat>agap"));
+        assert!(article(&lib, Kind::Lexicon, "kjc", "G25").unwrap().unwrap().html.contains("<b>love, "));
+        let tsk = commentary(&lib, "tsk", 43, 3, 16).unwrap();
+        assert!(tsk.verse.iter().any(|e| e.html.contains("<ref>1Jn 4:9-10</ref>")));
+        let love = strongs_for_word(&lib, "kjv+", "love").unwrap();
+        assert!(love.iter().take(6).any(|w| w.num == "G25"));
+        let agape = translit_search(&lib, "strong", "agape", 10).unwrap();
+        assert!(agape.iter().any(|h| h.num == "G26"), "{agape:?}");
+        assert!(lib.modules.iter().all(|m| m.source == crate::library::Source::Bundled && !m.info.contains("Meyers")));
     }
 
     #[test]

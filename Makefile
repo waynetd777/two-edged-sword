@@ -11,7 +11,7 @@ SIGN_ID  := $(APPLE_SIGNING_IDENTITY)
 # "-" is an ad-hoc signature: an empty identity makes the bundler fail instead.
 export APPLE_SIGNING_IDENTITY := $(if $(SIGN_ID),$(SIGN_ID),-)
 
-.PHONY: check test app install-app dev icons sign-check help
+.PHONY: check test app install-app dev icons sign-check help core
 
 ## cargo test + TypeScript type-check.
 check:
@@ -73,5 +73,10 @@ sign-check:
 help:
 	@python3 tools/helpbook.py
 
+## Build the modules built into the app (src-tauri/modules/) from public-domain sources.
+core:
+	@python3 tools/core/build.py
+
 dev: help
+	@python3 tools/core/build.py --if-missing
 	npm run tauri dev

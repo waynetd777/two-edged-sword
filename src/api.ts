@@ -24,11 +24,15 @@ export interface ModuleInfo {
   features: string[];
   /** The file's size in bytes. */
   size: number;
+  /** Which folder it was found in: the app's own, e-Sword X's, or the app bundle. */
+  source: LibrarySource;
 }
 
+export type LibrarySource = "app" | "esword" | "bundled";
+
 export interface LibraryInfo {
-  dir: string;
-  found: boolean;
+  /** The folders read, in order; the first to have a module wins. */
+  dirs: { source: LibrarySource; path: string; found: boolean }[];
   modules: ModuleInfo[];
 }
 
@@ -67,7 +71,7 @@ export interface TrayState { today: string | null; done: boolean; reading: strin
 
 export const api = {
   library: () => invoke<LibraryInfo>("library_info"),
-  rescan: () => invoke<LibraryInfo>("rescan_library"),
+  rescan: (esword?: boolean) => invoke<LibraryInfo>("rescan_library", { esword }),
   chapter: (bible: string, book: number, chapter: number) => invoke<Verse[]>("get_chapter", { bible, book, chapter }),
   passages: (bible: string, ranges: Range[]) => invoke<Passage[]>("get_passages", { bible, ranges }),
   chapterSizes: (bible: string) => invoke<[number, number, number][]>("chapter_sizes", { bible }),

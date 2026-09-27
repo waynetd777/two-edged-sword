@@ -4,7 +4,7 @@ word with English under it and, where it renders a word of the Hebrew, that word
 
     python3 tools/targum/build.py [targum_aramaic pseudojonathan_aramaic]
 
-Reads the Targums (tools/sefaria builds them) and WLC+ (tools/wlc) from the e-Sword library, and
+Reads the Targums (tools/sefaria builds them) and WLC+ (tools/wlc) from the library (tools/modules.py finds them), and
 writes the new modules beside them; the app finds them after Library → Rescan.
 
 A Targum follows its Hebrew closely, word for word in Onkelos and Jonathan, and its words are
@@ -28,7 +28,8 @@ import html, json, os, re, sqlite3, sys, unicodedata, urllib.request
 from pathlib import Path
 
 HOME = Path(os.environ.get("HOME", ""))
-LIBRARY = Path(os.environ.get("ESWORD_LIBRARY") or HOME / "Library/Containers/net.e-sword.e-Sword-X/Data/Library/Application Support")
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from modules import LIBRARY, find  # noqa: E402
 CACHE = HOME / "Library/Caches/Two-edged Sword/targum"
 JASTROW = "https://raw.githubusercontent.com/UniquePixels/jastrow/main/data/jastrow-part{}.jsonl"
 MODULES = {
@@ -227,7 +228,7 @@ WORD = re.compile(r"[א-ת][֑-ׇא-ת]*")
 
 
 def hebrew():
-    db = sqlite3.connect(f"file:{LIBRARY / 'wlc+.bbli'}?mode=ro", uri=True)
+    db = sqlite3.connect(f"file:{find('wlc+.bbli')}?mode=ro", uri=True)
     out = {}
     for b, c, v, t in db.execute("SELECT Book, Chapter, Verse, Scripture FROM Bible"):
         words = [(m.group(1), re.findall(r"<num>(.*?)</num>", m.group(2)), html.unescape(m.group(3))) for m in DIV.finditer(t or "")]
@@ -239,7 +240,7 @@ def hebrew():
 
 
 def build(name, heb, jas):
-    src = LIBRARY / f"{name}.bbli"
+    src = find(f"{name}.bbli")
     if not src.exists():
         print(f"  no {src.name}; skipped")
         return
@@ -302,7 +303,7 @@ def main():
     for n in names:
         if n not in MODULES:
             sys.exit(f"unknown module {n}; one of {', '.join(MODULES)}")
-    if not (LIBRARY / "wlc+.bbli").exists():
+    if not find("wlc+.bbli").exists():
         sys.exit("no wlc+.bbli; build it first: python3 tools/wlc/build.py")
     heb = hebrew()
     jas = jastrow()

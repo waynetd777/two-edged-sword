@@ -3,7 +3,7 @@ of 1598, the edition the KJV's translators had most in hand.
 
     python3 tools/beza/build.py
 
-Writes to the e-Sword library, where the app finds it after Library → Rescan.
+Writes to the app's modules folder, where the app finds it after Library → Rescan.
 
 Source: the textus-receptus.com wiki, a page per chapter ("Luke 2 Greek NT: Beza's Textus Receptus
 (1598)"; a one-chapter book is "3 John Greek NT: …" or "Jude 1 Greek NT: …"), read through its
@@ -19,7 +19,7 @@ The Details say which chapters.
 
 Where the wiki runs two verses together (Matt 17:20–21) or divides a chapter otherwise than the KJV
 (John 1:38–39), the chapter is divided again at the KJV's verses by lining its words up with Greek
-NT TR+'s (whose base is Stephanus 1550). The wiki's editorial notes, which are in English ("(*omits
+NT TR+'s (whose base is Stephanus 1550), or without TR+ in the library, STEPBible's TR (tools/stepbible.py). The wiki's editorial notes, which are in English ("(*omits
 σου)", "(Checked)", "Beza does not have this verse", a caption), are dropped.
 
 The pages' wikitext is reduced to the verses: templates ({{…}}), references, links, tags and
@@ -39,14 +39,16 @@ verses typed without punctuation get Scrivener's, with capitals on the names Bez
 word misspelt in the typing (σονετέλεσεν) or in a later edition's form (Μαθθαῖος), found nowhere else
 in Beza, becomes the word Stephanus and Scrivener both have in its place, when it's a letter or two
 from it.
-Enclitics (μου, τις) and elided words (δι᾽) are left unaccented.
+Enclitics (μου, τις) and elided words (δι᾽) are left unaccented. These corrections need TR+ (e-Sword's,
+for personal use); without it the transcription is kept as it is.
 """
 import html, json, os, re, sqlite3, sys, time, unicodedata, urllib.parse, urllib.request
 from difflib import SequenceMatcher
 from pathlib import Path
 
 HOME = Path(os.environ.get("HOME", ""))
-LIBRARY = Path(os.environ.get("ESWORD_LIBRARY") or HOME / "Library/Containers/net.e-sword.e-Sword-X/Data/Library/Application Support")
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from modules import LIBRARY, find  # noqa: E402
 CACHE = HOME / "Library/Caches/Two-edged Sword/beza"
 API = "https://textus-receptus.com/api.php"
 SCRIVENER = "https://raw.githubusercontent.com/byztxt/greektext-scrivener/master/textonly/{}.SCV"
@@ -228,8 +230,19 @@ def scrivener(book):
     return out
 
 
+def tr_reference():
+    """The Textus Receptus to line the wiki's text up with: Greek NT TR+ from the library when it's
+    there (Stephanus 1550 with Scrivener 1894's readings marked | Stephanus | Scrivener |), else
+    STEPBible's TAGNT's TR (Scrivener 1894 alone, CC BY 4.0), as plain words. Returns the verses
+    and which it is."""
+    if find("greeknttr+.bbli").exists():
+        return {(b, c, v): t for b, c, v, t in library_chapters("greeknttr+.bbli")}, "TR+"
+    from stepbible import has, tagnt
+    return {k: " ".join(w.greek for w in ws if has(w, "TR")) for k, ws in tagnt().items()}, "STEPBible's TR (Scrivener 1894)"
+
+
 def library_chapters(name):
-    db = sqlite3.connect(f"file:{LIBRARY / name}?mode=ro", uri=True)
+    db = sqlite3.connect(f"file:{find(name)}?mode=ro", uri=True)
     rows = db.execute("SELECT Book, Chapter, Verse, Scripture FROM Bible WHERE Book BETWEEN 40 AND 66").fetchall()
     db.close()
     return rows
@@ -433,7 +446,8 @@ def main():
         name = BOOKS[b - 40]
         titles[(b, c)] = [f"{name} {c} {SUFFIX}"] + ([f"{name} {SUFFIX}"] if max(cc for bb, cc in chapters if bb == b) == 1 else [])
     got = pages([t for ts in titles.values() for t in ts])
-    trraw = {(b, c, v): t for b, c, v, t in library_chapters("greeknttr+.bbli")}
+    trraw, source = tr_reference()
+    print(f"reference text: {source}")
     tr = {k: plain_greek(t) or plain_greek(re.sub(r"\|[^|]*\|([^|]*)\|", r"\1", t or "")) for k, t in trraw.items()}
     rows, from_scrivener, redivided, problems = [], [], [], []
     for b, c in chapters:
@@ -478,13 +492,16 @@ def main():
         if have != want:
             problems.append(f"{name}: {len(have)} verses, KJV {len(want)}; none for {sorted(want - have)[:8]}, beyond {sorted(have - want)[:8]}")
         rows += [(b, c, v, t) for v, t in sorted(vs.items()) if t]
-    rows, fixed, samples = correct(rows, trraw, scrivener_pages(chapters))
-    print(f"typing slips and later editions' forms put right: {fixed['slips']}; e.g. " + "; ".join(SLIPS[:14]))
-    print(f"put back as Beza printed it: {fixed['readings']} readings the wiki took from Stephanus, {fixed['spellings']} modern spellings; "
-          f"{fixed['punctuated']} verses typed without punctuation given Scrivener's")
-    for x in samples:
-        print("  " + x)
-    print(f"{len(chapters)} chapters, {len(rows)} verses; divided again by TR+: {len(redivided)} ({', '.join(redivided)}); from Scrivener: {', '.join(from_scrivener) or 'none'}")
+    if source == "TR+":
+        rows, fixed, samples = correct(rows, trraw, scrivener_pages(chapters))
+        print(f"typing slips and later editions' forms put right: {fixed['slips']}; e.g. " + "; ".join(SLIPS[:14]))
+        print(f"put back as Beza printed it: {fixed['readings']} readings the wiki took from Stephanus, {fixed['spellings']} modern spellings; "
+              f"{fixed['punctuated']} verses typed without punctuation given Scrivener's")
+        for x in samples:
+            print("  " + x)
+    else:
+        print("no Greek NT TR+ in the library: the transcription is not corrected (that needs Stephanus' readings)")
+    print(f"{len(chapters)} chapters, {len(rows)} verses; divided again by {source}: {len(redivided)} ({', '.join(redivided)}); from Scrivener: {', '.join(from_scrivener) or 'none'}")
     for p in problems:
         print("  " + p)
 
@@ -500,7 +517,7 @@ def main():
             x = by_ch.setdefault((b, c), [0, 0])
             x[0] += m
             x[1] += max(len(a), len(s))
-        print(f"agreement with Stephanus 1550 (TR+): {same / max(total, 1):.1%} of words")
+        print(f"agreement with {'Stephanus 1550 (TR+)' if source == 'TR+' else source}: {same / max(total, 1):.1%} of words")
         worst = sorted(by_ch.items(), key=lambda kv: kv[1][0] / max(kv[1][1], 1))[:6]
         print("  least alike: " + ", ".join(f"{BOOKS[b - 40]} {c} {m / max(n, 1):.0%}" for (b, c), (m, n) in worst))
 

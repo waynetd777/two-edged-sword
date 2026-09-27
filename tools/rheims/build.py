@@ -29,14 +29,15 @@ What can't be mended is left: real words misread, and words lost at the edge of 
 starting with a small letter has usually lost its first word). A verse neither reading has, like the first verses of Matthew, is left out. The Details
 record how many verses there are and how closely they follow Challoner's.
 
-Writes to the e-Sword library, where the app finds it after Library → Rescan.
+Writes to the app's modules folder, where the app finds it after Library → Rescan.
 """
 import html, os, re, sqlite3, subprocess, sys, zipfile
 from difflib import SequenceMatcher
 from pathlib import Path
 
 HOME = Path(os.environ.get("HOME", ""))
-LIBRARY = Path(os.environ.get("ESWORD_LIBRARY") or HOME / "Library/Containers/net.e-sword.e-Sword-X/Data/Library/Application Support")
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from modules import LIBRARY, find  # noqa: E402
 ZIP = HOME / "Downloads/DR_NT_2016_GoogleOCR_HTMLtext.zip"
 RTF = HOME / "Downloads/NT_Text_RAW.rtf"
 
@@ -83,7 +84,7 @@ def tokens(text):
 
 
 def challoner():
-    db = sqlite3.connect(f"file:{LIBRARY / 'drc.bbli'}?mode=ro", uri=True)
+    db = sqlite3.connect(f"file:{find('drc.bbli')}?mode=ro", uri=True)
     rows = db.execute("SELECT Book, Chapter, Verse, Scripture FROM Bible WHERE Book BETWEEN 40 AND 66 ORDER BY Book, Chapter, Verse").fetchall()
     db.close()
     out = []
@@ -436,7 +437,7 @@ def vocabulary():
         known |= {w.strip().lower() for w in words.read_text().splitlines()}
     for f in ("kjv.bbli", "drc.bbli", "geneva1599.bbli", "tyndale.bbli"):
         modern = f in ("kjv.bbli", "drc.bbli")
-        p = LIBRARY / f
+        p = find(f)
         if p.exists():
             db = sqlite3.connect(f"file:{p}?mode=ro", uri=True)
             for (t,) in db.execute("SELECT Scripture FROM Bible"):
@@ -451,7 +452,7 @@ def vocabulary():
                         counts[n] = counts.get(n, 0) + 1
             db.close()
     for f in ("latin.bbli", "clementine.bbli"):
-        p = LIBRARY / f
+        p = find(f)
         if p.exists():
             db = sqlite3.connect(f"file:{p}?mode=ro", uri=True)
             for (t,) in db.execute("SELECT Scripture FROM Bible WHERE Book BETWEEN 40 AND 66"):
@@ -464,7 +465,7 @@ def vocabulary():
 def main():
     zp = Path(sys.argv[1]) if len(sys.argv) > 1 else ZIP
     rp = Path(sys.argv[2]) if len(sys.argv) > 2 else RTF
-    for p in (zp, rp, LIBRARY / "drc.bbli"):
+    for p in (zp, rp, find("drc.bbli")):
         if not p.exists():
             sys.exit(f"no {p}")
     ref = challoner()

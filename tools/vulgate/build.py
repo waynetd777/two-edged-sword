@@ -3,8 +3,8 @@ Clementine Vulgate Project's text.
 
     python3 tools/vulgate/build.py
 
-Writes clementine.bbli ("Latin Vulgate (Clementine)", Vulg-C) to the e-Sword library, where the
-app (after Library → Rescan) and e-Sword both find it. Unlike latin.bbli (the modern critical
+Writes clementine.bbli ("Latin Vulgate (Clementine)", Vulg-C) to the app's modules folder, where the
+app finds it after Library → Rescan. Unlike latin.bbli (the modern critical
 Stuttgart/Weber text) the Clementine has the Comma Johanneum (1 John 5:7), Acts 8:37, and the
 Vulgate's spelling of the Sixto-Clementine edition (cælum, ejus, Jesus).
 
@@ -31,7 +31,8 @@ import io, os, re, sqlite3, sys, urllib.request, zipfile
 from pathlib import Path
 
 HOME = Path(os.environ.get("HOME", ""))
-LIBRARY = HOME / "Library/Containers/net.e-sword.e-Sword-X/Data/Library/Application Support"
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from modules import LIBRARY, find  # noqa: E402
 CACHE = HOME / "Library/Caches/Two-edged Sword/vulgate"
 SOURCE = "https://bitbucket.org/clementinetextproject/text/get/master.zip"
 
@@ -201,13 +202,12 @@ def move(rows, rules, kjv, b):
 
 
 def chapter_lengths(module):
-    c = sqlite3.connect(f"file:{LIBRARY / module}.bbli?immutable=1", uri=True)
+    c = sqlite3.connect(f"file:{find(module + '.bbli')}?immutable=1", uri=True)
     return {(b, ch): n for b, ch, n in c.execute("SELECT Book, Chapter, MAX(Verse) FROM Bible GROUP BY Book, Chapter")}
 
 
 def main():
-    if not LIBRARY.is_dir():
-        sys.exit(f"no e-Sword library at {LIBRARY}")
+    LIBRARY.mkdir(parents=True, exist_ok=True)
     kjv = chapter_lengths("kjv")
     src = source()
     verses = []
