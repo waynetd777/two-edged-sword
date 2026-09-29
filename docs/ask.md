@@ -17,7 +17,7 @@ names its sources.
 Ask runs an AI tool you already have installed and signed in on this Mac, so it uses your own
 account:
 
-- **Claude Code**: Claude Opus, Sonnet and Haiku.
+- **Claude Code**: Claude Opus, Sonnet and Haiku, each the newest of its kind (a new Sonnet shows up without an app update).
 - **Codex**: the models your Codex account offers.
 - **Antigravity**: the models your Google account offers, such as Gemini.
 - **GitHub Copilot**: whichever model your plan allows.

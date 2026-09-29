@@ -12,6 +12,9 @@ use tauri::{AppHandle, Emitter};
 
 const TOOLS: &str = "Use Grep to find the relevant passages and Read only those lines; do not read whole files unless the question needs it. Several Read or Grep calls can go in one turn.";
 
+/// The app's ids for Claude Code's aliases: "claude:sonnet" runs `--model sonnet`.
+pub const PREFIX: &str = "claude:";
+
 pub fn find() -> Option<PathBuf> {
     super::find("claude", &[".claude/local/claude"])
 }
@@ -31,7 +34,7 @@ pub fn ask(
     let mut cmd = Command::new(bin);
     cmd.current_dir(&cwd).arg("-p").arg(&prompt).args([
         "--model",
-        &model,
+        model.strip_prefix(PREFIX).unwrap_or(&model),
         "--output-format",
         "stream-json",
         "--verbose",

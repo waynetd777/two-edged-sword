@@ -9,6 +9,7 @@ import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, 
 import type { Song } from "./worship";
 import { listen } from "@tauri-apps/api/event";
 import { api, JournalEntry, LibraryInfo, ModuleInfo } from "./api";
+import { claudeAlias } from "./assistant";
 import { Ref } from "./bible";
 import { Plan } from "./plans";
 import type { StudyTab } from "./StudyPane";
@@ -112,7 +113,7 @@ const DEFAULTS: Settings = {
   hlNames: {},
   showHighlights: true,
   journalGrammar: true,
-  model: "claude-sonnet-5",
+  model: "claude:sonnet",
   includeCommentaries: true,
   askJournal: false,
   allowLicensed: true,
@@ -662,6 +663,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (settingsLoaded && bibles.length && !bibles.some((b) => b.id === settings.bible))
       setSettings((s) => ({ ...s, bible: bibles[0].id }));
   }, [settingsLoaded, bibles, settings.bible, setSettings]);
+
+  // A Claude model saved before the aliases ("claude-sonnet-5") becomes its family's ("claude:sonnet").
+  useEffect(() => {
+    if (settingsLoaded && claudeAlias(settings.model) !== settings.model) setSettings((s) => ({ ...s, model: claudeAlias(s.model) }));
+  }, [settingsLoaded, settings.model, setSettings]);
 
   // The Bible being read this session, when it isn't the saved default (settings.bible). Closing
   // the window (the app stays in the menu bar) goes back to the default for next time.

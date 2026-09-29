@@ -15,11 +15,21 @@ export interface ModelOpt {
   provider: Provider;
 }
 
+// Claude Code's aliases, which it resolves to the newest model of each family, so a new Sonnet
+// needs no app update. "claude:" routes the id to Claude Code and is stripped before it runs.
 const CLAUDE_MODELS: ModelOpt[] = [
-  { id: "claude-opus-5-5", name: "Claude Opus 5.5", provider: "claude" },
-  { id: "claude-sonnet-5", name: "Claude Sonnet 5", provider: "claude" },
-  { id: "claude-haiku-4-5-20251001", name: "Claude Haiku 4.5", provider: "claude" },
+  { id: "claude:opus", name: "Claude Opus", provider: "claude" },
+  { id: "claude:sonnet", name: "Claude Sonnet", provider: "claude" },
+  { id: "claude:haiku", name: "Claude Haiku", provider: "claude" },
 ];
+/** Pinned ids from before the aliases, kept so old chats still show their model's name. */
+const OLD_CLAUDE_NAMES: Record<string, string> = {
+  "claude-opus-5-5": "Claude Opus 5.5",
+  "claude-sonnet-5": "Claude Sonnet 5",
+  "claude-haiku-4-5-20251001": "Claude Haiku 4.5",
+};
+/** A pinned Claude id ("claude-sonnet-5") as its family's alias ("claude:sonnet"); anything else unchanged. */
+export const claudeAlias = (id: string) => id.replace(/^claude-(opus|sonnet|haiku)\b.*$/, "claude:$1");
 
 export const providerOf = (id: string): Provider =>
   id.startsWith("agy:") ? "antigravity" : id.startsWith("copilot:") ? "copilot" : id.startsWith("claude") ? "claude" : "codex";
@@ -88,7 +98,7 @@ export function useAssistant(): Assistant {
 
 /** A model's display name, also for one no longer offered (an old chat's). */
 export function modelName(id: string): string {
-  return state.models.find((m) => m.id === id)?.name ?? CLAUDE_MODELS.find((m) => m.id === id)?.name ?? id;
+  return state.models.find((m) => m.id === id)?.name ?? CLAUDE_MODELS.find((m) => m.id === id)?.name ?? OLD_CLAUDE_NAMES[id] ?? id;
 }
 
 /** The model to use: the preferred one if it is still offered, else the first that is. */

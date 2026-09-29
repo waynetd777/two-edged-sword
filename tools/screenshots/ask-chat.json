@@ -5,7 +5,7 @@
   "source": "Read",
   "created": "2026-09-24T09:00:00.000Z",
   "updated": "2026-09-24T09:01:00.000Z",
-  "model": "claude-sonnet-5",
+  "model": "claude:sonnet",
   "messages": [
     {
       "role": "user",

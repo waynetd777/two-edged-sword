@@ -265,7 +265,7 @@ pub fn ask(
     model: String,
     session: Option<String>,
 ) -> Result<(), String> {
-    // "agy:…" is Antigravity (which offers Claude models too), "copilot:…" Copilot, "claude…" Claude Code, the rest Codex.
+    // "agy:…" is Antigravity (which offers Claude models too), "copilot:…" Copilot, "claude:…" (and the older pinned "claude-…") Claude Code, the rest Codex.
     let cli = if model.starts_with(antigravity::PREFIX) {
         "agy"
     } else if model.starts_with(copilot::PREFIX) {
