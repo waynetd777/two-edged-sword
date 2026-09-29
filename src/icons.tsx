@@ -1,16 +1,22 @@
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
+
 import { useId } from "react";
 
 // Stroke icons on a 16px grid, drawn in currentColor.
 
 const P: Record<string, string> = {
   read: "M2 3h4a2 2 0 0 1 2 2v8.5A1.5 1.5 0 0 0 6.5 12H2zM14 3h-4a2 2 0 0 0-2 2v8.5A1.5 1.5 0 0 1 9.5 12H14z",
-  compare: "M3 2.5h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1zM10 2.5h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-3a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1z",
+  compare:
+    "M3 2.5h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1zM10 2.5h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-3a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1z",
   search: "M7 2.5a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9zM10.5 10.5L14 14",
   word: "M2 13L5.5 3 9 13M3.3 9.5h4.4M12 8.5a2 2 0 1 1 0 4 2 2 0 0 1 0-4zM14 8v5",
   journal: "M3 13.5l.8-3.2L10.6 3.5l2.4 2.4-6.8 6.8zM9.2 4.9l2.4 2.4",
-  plans: "M4 3.5h8a1.5 1.5 0 0 1 1.5 1.5v7A1.5 1.5 0 0 1 12 13.5H4A1.5 1.5 0 0 1 2.5 12V5A1.5 1.5 0 0 1 4 3.5zM2.5 6.5h11M5.5 2v3M10.5 2v3M5.5 10l1.5 1.5 3-3",
+  plans:
+    "M4 3.5h8a1.5 1.5 0 0 1 1.5 1.5v7A1.5 1.5 0 0 1 12 13.5H4A1.5 1.5 0 0 1 2.5 12V5A1.5 1.5 0 0 1 4 3.5zM2.5 6.5h11M5.5 2v3M10.5 2v3M5.5 10l1.5 1.5 3-3",
   library: "M3 2.5v11M6 2.5v11M9 3.2l3.6 10",
-  settings: "M8 5.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM8 1.5v2M8 12.5v2M1.5 8h2M12.5 8h2M3.4 3.4l1.4 1.4M11.2 11.2l1.4 1.4M3.4 12.6l1.4-1.4M11.2 4.8l1.4-1.4",
+  settings:
+    "M8 5.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM8 1.5v2M8 12.5v2M1.5 8h2M12.5 8h2M3.4 3.4l1.4 1.4M11.2 11.2l1.4 1.4M3.4 12.6l1.4-1.4M11.2 4.8l1.4-1.4",
   bookmark: "M4 2.5h8v11l-4-3-4 3z",
   bible: "M4.5 2.5h7.5v9H5a1.5 1.5 0 0 0 0 3h7v-3M3.5 13V4a1.5 1.5 0 0 1 1-1.5M8.25 4.5v4.5M6.5 6h3.5",
   folder: "M2.5 4.5h4l1.5 1.5h5.5v7h-11z",
@@ -51,19 +57,43 @@ const P: Record<string, string> = {
   lineage: "M8 2.5v4M8 6.5L3.5 10M8 6.5l4.5 3.5M8 6.5v7M3.5 10v3.5M12.5 10v3.5",
 };
 
-export function Icon({ name, size, className, style }: { name: keyof typeof P | string; size?: number; className?: string; style?: React.CSSProperties }) {
+export function Icon({
+  name,
+  size,
+  className,
+  style,
+}: {
+  name: keyof typeof P | string;
+  size?: number;
+  className?: string;
+  style?: React.CSSProperties;
+}) {
   return (
-    <svg className={`i ${className ?? ""}`} viewBox="0 0 16 16" aria-hidden="true" style={{ ...(size ? { width: size, height: size } : null), ...style }}>
+    <svg
+      className={`i ${className ?? ""}`}
+      viewBox="0 0 16 16"
+      aria-hidden="true"
+      style={{ ...(size ? { width: size, height: size } : null), ...style }}
+    >
       <path d={P[name] ?? ""} />
     </svg>
   );
 }
 
 export function Play({ size = 14 }: { size?: number }) {
-  return <svg viewBox="0 0 16 16" aria-hidden="true" style={{ width: size, height: size, fill: "currentColor" }}><path d="M4.5 2.8v10.4a.6.6 0 0 0 .9.5l8.2-5.2a.6.6 0 0 0 0-1L5.4 2.3a.6.6 0 0 0-.9.5z" /></svg>;
+  return (
+    <svg viewBox="0 0 16 16" aria-hidden="true" style={{ width: size, height: size, fill: "currentColor" }}>
+      <path d="M4.5 2.8v10.4a.6.6 0 0 0 .9.5l8.2-5.2a.6.6 0 0 0 0-1L5.4 2.3a.6.6 0 0 0-.9.5z" />
+    </svg>
+  );
 }
 export function Pause({ size = 14 }: { size?: number }) {
-  return <svg viewBox="0 0 16 16" aria-hidden="true" style={{ width: size, height: size, fill: "currentColor" }}><rect x="3.5" y="2.5" width="3" height="11" rx="1" /><rect x="9.5" y="2.5" width="3" height="11" rx="1" /></svg>;
+  return (
+    <svg viewBox="0 0 16 16" aria-hidden="true" style={{ width: size, height: size, fill: "currentColor" }}>
+      <rect x="3.5" y="2.5" width="3" height="11" rx="1" />
+      <rect x="9.5" y="2.5" width="3" height="11" rx="1" />
+    </svg>
+  );
 }
 
 /** The sword's shapes in 1024-space (tools/make_icons.py is the source of truth). */
@@ -74,10 +104,12 @@ function SwordParts() {
       <path d="M512 176L554 262V640H512Z" fill="var(--sw-dark)" />
       <path d="M512 292V604" stroke="var(--sw-fuller)" strokeWidth="8" strokeLinecap="round" fill="none" />
       <path d="M334 648Q512 612 690 648V684Q512 652 334 684Z" fill="var(--sw-gold)" />
-      <circle cx="334" cy="666" r="26" fill="var(--sw-gold)" /><circle cx="690" cy="666" r="26" fill="var(--sw-gold)" />
+      <circle cx="334" cy="666" r="26" fill="var(--sw-gold)" />
+      <circle cx="690" cy="666" r="26" fill="var(--sw-gold)" />
       <rect x="486" y="674" width="52" height="136" rx="12" fill="var(--sw-grip)" />
       <path d="M486 704L538 720M486 734L538 750M486 764L538 780" stroke="var(--sw-wrap)" strokeWidth="8" fill="none" />
-      <circle cx="512" cy="840" r="40" fill="var(--sw-gold)" /><circle cx="512" cy="840" r="14" fill="var(--sw-pin)" />
+      <circle cx="512" cy="840" r="40" fill="var(--sw-gold)" />
+      <circle cx="512" cy="840" r="14" fill="var(--sw-pin)" />
     </>
   );
 }
@@ -108,9 +140,19 @@ export function Wordmark() {
         <circle cx="512" cy="440" r="290" style={{ fill: "var(--wm-disc)" }} />
         <SwordParts />
       </svg>
-      <g fill={`url(#g${id})`} stroke="var(--wm-edge)" strokeWidth="0.35" filter={`url(#s${id})`} style={{ fontFamily: "'Cinzel Decorative', serif" }}>
-        <text x="50" y="21" fontSize="12" fontWeight="700" letterSpacing="2.3">Two-edged</text>
-        <text x="49" y="46.5" fontSize="27" fontWeight="900" letterSpacing="0.6">Sword</text>
+      <g
+        fill={`url(#g${id})`}
+        stroke="var(--wm-edge)"
+        strokeWidth="0.35"
+        filter={`url(#s${id})`}
+        style={{ fontFamily: "'Cinzel Decorative', serif" }}
+      >
+        <text x="50" y="21" fontSize="12" fontWeight="700" letterSpacing="2.3">
+          Two-edged
+        </text>
+        <text x="49" y="46.5" fontSize="27" fontWeight="900" letterSpacing="0.6">
+          Sword
+        </text>
       </g>
     </svg>
   );

@@ -1,3 +1,6 @@
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
+
 //! The Help menu's "Two-edged Sword Help" (⌘?), opening the Help Book tools/helpbook.py builds from
 //! docs/. The app's Info.plist names the book, so macOS also searches it from the Help menu's search
 //! field. A dev build has no bundle to hold the book, so there it opens the built pages in the browser.
@@ -27,13 +30,18 @@ fn set_shortcut() {
     unsafe {
         let nsapp: *mut AnyObject = objc2::msg_send![cls, sharedApplication];
         let menu: *mut AnyObject = objc2::msg_send![nsapp, helpMenu];
-        if menu.is_null() { return; }
+        if menu.is_null() {
+            return;
+        }
         let title = NSString::from_str("Two-edged Sword Help");
         let item: *mut AnyObject = objc2::msg_send![menu, itemWithTitle: &*title];
-        if item.is_null() { return; }
+        if item.is_null() {
+            return;
+        }
         let key = NSString::from_str("?");
         let _: () = objc2::msg_send![item, setKeyEquivalent: &*key];
-        let _: () = objc2::msg_send![item, setKeyEquivalentModifierMask: 1usize << 20]; // NSEventModifierFlagCommand
+        let _: () = objc2::msg_send![item, setKeyEquivalentModifierMask: 1usize << 20];
+        // NSEventModifierFlagCommand
     }
 }
 
@@ -57,7 +65,8 @@ pub fn show(app: &AppHandle) {
     #[cfg(debug_assertions)]
     {
         use tauri_plugin_opener::OpenerExt;
-        let page = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("gen/help").join(BOOK).join("Contents/Resources/en.lproj/index.html");
+        let page =
+            std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("gen/help").join(BOOK).join("Contents/Resources/en.lproj/index.html");
         if page.exists() {
             let _ = app.opener().open_path(page.to_string_lossy(), None::<&str>);
         } else {
@@ -80,7 +89,17 @@ const GUIDES: &[(&str, &str)] = &[
 
 /// A guide without its screenshots and breadcrumb, which are HTML and say nothing to a model.
 fn text(md: &str) -> String {
-    md.lines().filter(|l| !l.contains("images/") && !l.starts_with("<sub>") && !l.starts_with("<table>") && !l.starts_with("</table>") && !l.trim_start().starts_with("<tr>") && !l.trim_start().starts_with("</tr>")).collect::<Vec<_>>().join("\n")
+    md.lines()
+        .filter(|l| {
+            !l.contains("images/")
+                && !l.starts_with("<sub>")
+                && !l.starts_with("<table>")
+                && !l.starts_with("</table>")
+                && !l.trim_start().starts_with("<tr>")
+                && !l.trim_start().starts_with("</tr>")
+        })
+        .collect::<Vec<_>>()
+        .join("\n")
 }
 
 /// Writes the guides into `<dir>/help/`, with an index.txt of each file's title and sections.
@@ -100,7 +119,9 @@ pub fn write_guides(dir: &std::path::Path) -> std::io::Result<()> {
 }
 
 fn write_if_changed(path: &std::path::Path, text: &str) -> std::io::Result<()> {
-    if std::fs::read_to_string(path).is_ok_and(|t| t == text) { return Ok(()); }
+    if std::fs::read_to_string(path).is_ok_and(|t| t == text) {
+        return Ok(());
+    }
     std::fs::write(path, text)
 }
 

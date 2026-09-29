@@ -1,3 +1,5 @@
+# Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+# SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 """Builds lxx_brenton.bbli ("Septuagint (Greek, Brenton 1844)"): the Greek Old Testament with the
 Apocrypha as Sir Lancelot Brenton printed it, the stand-in in the library for the Sixtine
 Septuagint of 1587 that the KJV's translators used.

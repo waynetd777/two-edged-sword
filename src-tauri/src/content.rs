@@ -1,3 +1,6 @@
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
+
 //! Reading text out of the modules: chapters, commentary, dictionary and lexicon entries,
 //! reference books. The HTML is passed through as e-Sword stores it; the frontend renders it.
 
@@ -14,7 +17,8 @@ pub struct Verse {
 pub fn chapter(lib: &Library, bible: &str, book: i64, chapter: i64) -> Result<Vec<Verse>, String> {
     lib.with(Kind::Bible, bible, |c| {
         let mut st = c.prepare_cached("SELECT Verse, Scripture FROM Bible WHERE Book = ?1 AND Chapter = ?2 ORDER BY Verse")?;
-        let rows = st.query_map(params![book, chapter], |r| Ok(Verse { v: r.get(0)?, text: r.get::<_, Option<String>>(1)?.unwrap_or_default() }))?;
+        let rows =
+            st.query_map(params![book, chapter], |r| Ok(Verse { v: r.get(0)?, text: r.get::<_, Option<String>>(1)?.unwrap_or_default() }))?;
         rows.collect()
     })
 }
@@ -35,11 +39,15 @@ pub struct Passage {
 
 pub fn passages(lib: &Library, bible: &str, ranges: &[Range]) -> Result<Vec<Passage>, String> {
     lib.with(Kind::Bible, bible, |c| {
-        let mut st = c.prepare_cached("SELECT Verse, Scripture FROM Bible WHERE Book = ?1 AND Chapter = ?2 AND Verse BETWEEN ?3 AND ?4 ORDER BY Verse")?;
+        let mut st = c.prepare_cached(
+            "SELECT Verse, Scripture FROM Bible WHERE Book = ?1 AND Chapter = ?2 AND Verse BETWEEN ?3 AND ?4 ORDER BY Verse",
+        )?;
         let mut out = Vec::new();
         for r in ranges {
             let verses = st
-                .query_map(params![r.book, r.chapter, r.from, r.to], |row| Ok(Verse { v: row.get(0)?, text: row.get::<_, Option<String>>(1)?.unwrap_or_default() }))?
+                .query_map(params![r.book, r.chapter, r.from, r.to], |row| {
+                    Ok(Verse { v: row.get(0)?, text: row.get::<_, Option<String>>(1)?.unwrap_or_default() })
+                })?
                 .collect::<rusqlite::Result<Vec<_>>>()?;
             out.push(Passage { range: *r, verses });
         }
@@ -95,16 +103,22 @@ pub struct Coverage {
 /// Verses per chapter, for splitting reading plans into days of similar length.
 pub fn chapter_sizes(lib: &Library, bible: &str) -> Result<Vec<(i64, i64, i64)>, String> {
     lib.with(Kind::Bible, bible, |c| {
-        let mut st = c.prepare("SELECT Book, Chapter, count(*) FROM Bible WHERE Book >= 1 GROUP BY Book, Chapter ORDER BY Book, Chapter")?;
+        let mut st =
+            c.prepare("SELECT Book, Chapter, count(*) FROM Bible WHERE Book >= 1 GROUP BY Book, Chapter ORDER BY Book, Chapter")?;
         let rows = st.query_map([], |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?)))?;
         rows.collect()
     })
 }
 
+/// (book, chapter begin, verse begin, chapter end, verse end).
+pub type VerseRange = (i64, i64, i64, i64, i64);
+
 /// Every verse range a commentary comments on, in order (F. B. Meyer's daily readings).
-pub fn commentary_ranges(lib: &Library, module: &str) -> Result<Vec<(i64, i64, i64, i64, i64)>, String> {
+pub fn commentary_ranges(lib: &Library, module: &str) -> Result<Vec<VerseRange>, String> {
     lib.with(Kind::Commentary, module, |c| {
-        let mut st = c.prepare("SELECT Book, ChapterBegin, VerseBegin, ChapterEnd, VerseEnd FROM VerseCommentary ORDER BY Book, ChapterBegin, VerseBegin")?;
+        let mut st = c.prepare(
+            "SELECT Book, ChapterBegin, VerseBegin, ChapterEnd, VerseEnd FROM VerseCommentary ORDER BY Book, ChapterBegin, VerseBegin",
+        )?;
         let rows = st.query_map([], |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?, r.get(3)?, r.get(4)?)))?;
         rows.collect()
     })
@@ -143,7 +157,11 @@ fn table_for(kind: Kind) -> (&'static str, &'static str) {
 }
 
 fn key_col(kind: Kind) -> &'static str {
-    if kind == Kind::Reference { "Chapter" } else { "Topic" }
+    if kind == Kind::Reference {
+        "Chapter"
+    } else {
+        "Topic"
+    }
 }
 
 pub fn article(lib: &Library, kind: Kind, module: &str, topic: &str) -> Result<Option<Article>, String> {
@@ -152,7 +170,12 @@ pub fn article(lib: &Library, kind: Kind, module: &str, topic: &str) -> Result<O
     let title = lib.module(kind, module)?.title.clone();
     lib.with(kind, module, |c| {
         c.query_row(&format!("SELECT {key}, {col} FROM {table} WHERE {key} = ?1 COLLATE NOCASE LIMIT 1"), params![topic], |r| {
-            Ok(Article { module: module.to_string(), title: title.clone(), topic: r.get(0)?, html: r.get::<_, Option<String>>(1)?.unwrap_or_default() })
+            Ok(Article {
+                module: module.to_string(),
+                title: title.clone(),
+                topic: r.get(0)?,
+                html: r.get::<_, Option<String>>(1)?.unwrap_or_default(),
+            })
         })
         .optional()
     })
@@ -170,7 +193,9 @@ pub fn find_topics(lib: &Library, word: &str, limit: usize) -> Vec<TopicHit> {
     let mut out = Vec::new();
     for m in lib.of_kind(Kind::Dictionary) {
         let hits = lib.with(Kind::Dictionary, &m.id, |c| {
-            let mut st = c.prepare_cached("SELECT Topic FROM Dictionary WHERE Topic = ?1 COLLATE NOCASE OR Topic LIKE ?2 ORDER BY length(Topic) LIMIT ?3")?;
+            let mut st = c.prepare_cached(
+                "SELECT Topic FROM Dictionary WHERE Topic = ?1 COLLATE NOCASE OR Topic LIKE ?2 ORDER BY length(Topic) LIMIT ?3",
+            )?;
             let rows = st.query_map(params![word, format!("{word},%"), limit as i64], |r| r.get::<_, String>(0))?;
             rows.collect::<rusqlite::Result<Vec<_>>>()
         });
@@ -225,7 +250,8 @@ pub fn strongs_verses(lib: &Library, bible: &str, number: &str, book: Option<i64
     })
 }
 
-const MONTHS: [&str; 12] = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const MONTHS: [&str; 12] =
+    ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 /// A devotional's day as a title: "September 24". Month 13 is how one module files a December day.
 fn day_title(month: i64, day: i64) -> String {
@@ -245,7 +271,11 @@ pub fn devotion_titles(lib: &Library, module: &str) -> Result<Vec<String>, Strin
         let rows = st.query_map([], |r| Ok((r.get::<_, i64>(0)?, r.get::<_, i64>(1)?)))?;
         rows.collect::<rusqlite::Result<Vec<_>>>()
     })?;
-    for d in days.iter_mut() { if d.0 == 13 { d.0 = 12; } }
+    for d in days.iter_mut() {
+        if d.0 == 13 {
+            d.0 = 12;
+        }
+    }
     days.sort();
     days.dedup();
     Ok(days.into_iter().map(|(m, d)| day_title(m, d)).collect())
@@ -255,12 +285,19 @@ pub fn devotion_titles(lib: &Library, module: &str) -> Result<Vec<String>, Strin
 pub fn devotion(lib: &Library, module: &str, title: &str) -> Result<Option<String>, String> {
     let Some((m, d)) = title_day(title) else { return Ok(None) };
     let mut tries = vec![(m, d)];
-    if m == 12 { tries.push((13, d)); }
-    if m == 2 && d == 29 { tries.push((2, 28)); }
+    if m == 12 {
+        tries.push((13, d));
+    }
+    if m == 2 && d == 29 {
+        tries.push((2, 28));
+    }
     lib.with(Kind::Devotional, module, |c| {
         for (m, d) in tries {
-            let html: Option<String> = c.query_row("SELECT Devotion FROM Devotional WHERE Month = ?1 AND Day = ?2", params![m, d], |r| r.get(0)).optional()?;
-            if html.is_some() { return Ok(html); }
+            let html: Option<String> =
+                c.query_row("SELECT Devotion FROM Devotional WHERE Month = ?1 AND Day = ?2", params![m, d], |r| r.get(0)).optional()?;
+            if html.is_some() {
+                return Ok(html);
+            }
         }
         Ok(None)
     })
@@ -285,7 +322,9 @@ fn is_form(w: &str, q: &str) -> bool {
 /// the number(s) it renders ("loved<num>G25</num>"), so count the numbers after groups holding the word.
 pub fn strongs_for_word(lib: &Library, bible: &str, word: &str) -> Result<Vec<WordNumber>, String> {
     let q = word.trim().to_lowercase();
-    if q.is_empty() { return Ok(vec![]); }
+    if q.is_empty() {
+        return Ok(vec![]);
+    }
     let rows = lib.with(Kind::Bible, bible, |c| {
         let mut st = c.prepare("SELECT Scripture FROM Bible WHERE Scripture LIKE ?1")?;
         let rows = st.query_map(params![format!("%{q}%")], |r| r.get::<_, Option<String>>(0))?;
@@ -317,7 +356,9 @@ pub fn strongs_for_word(lib: &Library, bible: &str, word: &str) -> Result<Vec<Wo
             } else {
                 let end = rest.find('<').unwrap_or(rest.len());
                 for w in rest[..end].split(|c: char| !(c.is_alphabetic() || c == '\'')).filter(|w| !w.is_empty()) {
-                    if !nums.is_empty() { flush(&mut words, &mut nums); }
+                    if !nums.is_empty() {
+                        flush(&mut words, &mut nums);
+                    }
                     words.push(w.trim_end_matches('\'').to_lowercase());
                 }
                 rest = &rest[end..];
@@ -325,11 +366,14 @@ pub fn strongs_for_word(lib: &Library, bible: &str, word: &str) -> Result<Vec<Wo
         }
         flush(&mut words, &mut nums);
     }
-    let mut out: Vec<WordNumber> = counts.into_iter().map(|(num, (count, forms))| {
-        let mut forms: Vec<(String, i64)> = forms.into_iter().collect();
-        forms.sort_by(|a, b| b.1.cmp(&a.1).then(a.0.cmp(&b.0)));
-        WordNumber { num, count, forms }
-    }).collect();
+    let mut out: Vec<WordNumber> = counts
+        .into_iter()
+        .map(|(num, (count, forms))| {
+            let mut forms: Vec<(String, i64)> = forms.into_iter().collect();
+            forms.sort_by(|a, b| b.1.cmp(&a.1).then(a.0.cmp(&b.0)));
+            WordNumber { num, count, forms }
+        })
+        .collect();
     out.sort_by(|a, b| b.count.cmp(&a.count).then(a.num.cmp(&b.num)));
     out.truncate(40);
     Ok(out)
@@ -345,29 +389,37 @@ pub struct TranslitHit {
 
 /// Lower-case ASCII letters only, accents taken off: "agapáō" → "agapao", "ʼĕlôhîym" → "elohiym".
 fn fold(s: &str) -> String {
-    s.chars().flat_map(|c| c.to_lowercase()).filter_map(|c| {
-        let b = match c {
-            'a'..='z' => c,
-            'à'..='å' | 'ā' | 'ă' | 'ą' | 'ǎ' => 'a',
-            'è'..='ë' | 'ē' | 'ĕ' | 'ė' | 'ę' | 'ě' => 'e',
-            'ì'..='ï' | 'ī' | 'ĭ' | 'į' | 'ǐ' => 'i',
-            'ò'..='ö' | 'ø' | 'ō' | 'ŏ' | 'ő' | 'ǒ' => 'o',
-            'ù'..='ü' | 'ū' | 'ŭ' | 'ů' | 'ű' | 'ǔ' => 'u',
-            'ý' | 'ÿ' | 'ŷ' => 'y',
-            'ç' | 'ć' | 'č' => 'c',
-            'ñ' | 'ń' | 'ň' => 'n',
-            'š' | 'ś' | 'ş' => 's',
-            'ž' | 'ź' | 'ż' => 'z',
-            'ḥ' => 'h', 'ṭ' => 't', 'ṣ' => 's', 'ḳ' | 'ḵ' => 'k',
-            _ => return None,
-        };
-        Some(b)
-    }).collect()
+    s.chars()
+        .flat_map(|c| c.to_lowercase())
+        .filter_map(|c| {
+            let b = match c {
+                'a'..='z' => c,
+                'à'..='å' | 'ā' | 'ă' | 'ą' | 'ǎ' => 'a',
+                'è'..='ë' | 'ē' | 'ĕ' | 'ė' | 'ę' | 'ě' => 'e',
+                'ì'..='ï' | 'ī' | 'ĭ' | 'į' | 'ǐ' => 'i',
+                'ò'..='ö' | 'ø' | 'ō' | 'ŏ' | 'ő' | 'ǒ' => 'o',
+                'ù'..='ü' | 'ū' | 'ŭ' | 'ů' | 'ű' | 'ǔ' => 'u',
+                'ý' | 'ÿ' | 'ŷ' => 'y',
+                'ç' | 'ć' | 'č' => 'c',
+                'ñ' | 'ń' | 'ň' => 'n',
+                'š' | 'ś' | 'ş' => 's',
+                'ž' | 'ź' | 'ż' => 'z',
+                'ḥ' => 'h',
+                'ṭ' => 't',
+                'ṣ' => 's',
+                'ḳ' | 'ḵ' => 'k',
+                _ => return None,
+            };
+            Some(b)
+        })
+        .collect()
 }
 
 pub fn translit_search(lib: &Library, lexicon: &str, query: &str, limit: usize) -> Result<Vec<TranslitHit>, String> {
     let q = fold(query);
-    if q.len() < 2 { return Ok(vec![]); }
+    if q.len() < 2 {
+        return Ok(vec![]);
+    }
     let rows = lib.with(Kind::Lexicon, lexicon, |c| {
         let mut st = c.prepare("SELECT Topic, Definition FROM Lexicon")?;
         let rows = st.query_map([], |r| Ok((r.get::<_, String>(0)?, r.get::<_, Option<String>>(1)?.unwrap_or_default())))?;
@@ -379,9 +431,15 @@ pub fn translit_search(lib: &Library, lexicon: &str, query: &str, limit: usize) 
     for (num, html) in rows {
         let translit = para(&html, 1);
         let f = fold(&translit);
-        if f.is_empty() { continue; }
+        if f.is_empty() {
+            continue;
+        }
         let hit = TranslitHit { num, word: para(&html, 0), translit };
-        if f == q { exact.push(hit) } else if f.starts_with(&q) { starts.push(hit) }
+        if f == q {
+            exact.push(hit)
+        } else if f.starts_with(&q) {
+            starts.push(hit)
+        }
     }
     starts.sort_by_key(|h| h.translit.chars().count());
     exact.extend(starts);
@@ -436,7 +494,9 @@ mod library_tests {
     #[test]
     fn the_built_in_modules_alone() {
         let dir = crate::library::bundled_dir();
-        if !dir.join("kjv+.bbli").is_file() { return; }
+        if !dir.join("kjv+.bbli").is_file() {
+            return;
+        }
         let lib = Library::scan(vec![(crate::library::Source::Bundled, dir)]);
         let ch = chapter(&lib, "kjv", 43, 3).unwrap();
         assert_eq!(ch.len(), 36);
@@ -457,9 +517,17 @@ mod library_tests {
         let agape = translit_search(&lib, "strong", "agape", 10).unwrap();
         assert!(agape.iter().any(|h| h.num == "G26"), "{agape:?}");
         // "Bethel" finds the KJV's "Beth-el", and "beth-el" the same verses.
-        let q = |text: &str| search::Query { text: text.into(), mode: search::Mode::Phrase, whole_words: true, bible: "kjv".into(), book_from: 1, book_to: 66, strongs_bible: None };
+        let q = |text: &str| search::Query {
+            text: text.into(),
+            mode: search::Mode::Phrase,
+            whole_words: true,
+            bible: "kjv".into(),
+            book_from: 1,
+            book_to: 66,
+            strongs_bible: None,
+        };
         let bethel = search::run(&lib, None, &q("Bethel")).unwrap().bible.count;
-        assert!(bethel >= 55, "{bethel}");  // 59: its 66 in 59 verses
+        assert!(bethel >= 55, "{bethel}"); // 59: its 66 in 59 verses
         assert_eq!(search::run(&lib, None, &q("beth-el")).unwrap().bible.count, bethel);
         assert!(lib.modules.iter().all(|m| m.source == crate::library::Source::Bundled && !m.info.contains("Meyers")));
     }
@@ -467,7 +535,15 @@ mod library_tests {
     #[test]
     fn searches_the_real_modules() {
         let Some(lib) = lib() else { return };
-        let q = search::Query { text: "born again".into(), mode: search::Mode::Phrase, whole_words: true, bible: "kjv".into(), book_from: 1, book_to: 66, strongs_bible: Some("kjv+".into()) };
+        let q = search::Query {
+            text: "born again".into(),
+            mode: search::Mode::Phrase,
+            whole_words: true,
+            bible: "kjv".into(),
+            book_from: 1,
+            book_to: 66,
+            strongs_bible: Some("kjv+".into()),
+        };
         let r = search::run(&lib, None, &q).unwrap();
         assert_eq!(r.bible.count, 3);
         assert!(r.commentaries.iter().any(|m| m.module == "gill" && m.count > 50));

@@ -1,3 +1,5 @@
+# Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+# SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 """Builds the modules built into the app, so it works with nothing else installed: the KJV, the
 KJV with Strong's numbers, Strong's Hebrew and Greek dictionaries, a King James concordance, the
 Treasury of Scripture Knowledge, Matthew Henry's commentary and Easton's Bible Dictionary.

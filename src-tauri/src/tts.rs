@@ -1,3 +1,6 @@
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
+
 //! Reading aloud through macOS's own synthesiser (AVSpeechSynthesizer). WebKit's speechSynthesis
 //! only offers the voices that ship with the system and hides the Premium and Enhanced ones
 //! people download, so the page speaks through here instead. Each utterance carries the page's
@@ -32,8 +35,8 @@ mod mac {
     use objc2::runtime::ProtocolObject;
     use objc2::{define_class, msg_send, AllocAnyThread, DefinedClass};
     use objc2_avf_audio::{
-        AVSpeechBoundary, AVSpeechSynthesisVoice, AVSpeechSynthesizer, AVSpeechSynthesizerDelegate, AVSpeechUtterance, AVSpeechUtteranceDefaultSpeechRate,
-        AVSpeechUtteranceMaximumSpeechRate, AVSpeechUtteranceMinimumSpeechRate,
+        AVSpeechBoundary, AVSpeechSynthesisVoice, AVSpeechSynthesizer, AVSpeechSynthesizerDelegate, AVSpeechUtterance,
+        AVSpeechUtteranceDefaultSpeechRate, AVSpeechUtteranceMaximumSpeechRate, AVSpeechUtteranceMinimumSpeechRate,
     };
     use objc2_foundation::{NSObject, NSObjectProtocol, NSRange, NSString};
     use std::cell::RefCell;
@@ -114,7 +117,13 @@ mod mac {
                 .iter()
                 .map(|v| {
                     let id = v.identifier().to_string();
-                    Voice { default: default.as_deref() == Some(id.as_str()), id, name: v.name().to_string(), lang: v.language().to_string(), quality: v.quality().0 }
+                    Voice {
+                        default: default.as_deref() == Some(id.as_str()),
+                        id,
+                        name: v.name().to_string(),
+                        lang: v.language().to_string(),
+                        quality: v.quality().0,
+                    }
                 })
                 .collect()
         }
@@ -128,7 +137,9 @@ mod mac {
             if let Some(v) = voice.and_then(|v| AVSpeechSynthesisVoice::voiceWithIdentifier(&NSString::from_str(&v))) {
                 u.setVoice(Some(&v));
             }
-            u.setRate((AVSpeechUtteranceDefaultSpeechRate * rate).clamp(AVSpeechUtteranceMinimumSpeechRate, AVSpeechUtteranceMaximumSpeechRate));
+            u.setRate(
+                (AVSpeechUtteranceDefaultSpeechRate * rate).clamp(AVSpeechUtteranceMinimumSpeechRate, AVSpeechUtteranceMaximumSpeechRate),
+            );
             del.ivars().ids.lock().unwrap().insert(Retained::as_ptr(&u) as usize, id);
             synth.speakUtterance(&u);
         });

@@ -1,3 +1,6 @@
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
+
 //! Worship songs from the user's Music library, for Quiet time: the library listed, the chosen
 //! songs queued as one playlist and played in the Music app. Driven by osascript (JavaScript for
 //! Automation); the first use asks the user to let the app control Music.
@@ -81,7 +84,8 @@ pub fn state() -> Result<State, String> {
         try { ours = m.currentPlaylist().name() === argv[0]; } catch (e) {}
         return JSON.stringify([state, name, artist, ours]);
     }"#;
-    let (state, name, artist, ours): (String, String, String, bool) = serde_json::from_str(&jxa(js, PLAYLIST)?).map_err(|e| e.to_string())?;
+    let (state, name, artist, ours): (String, String, String, bool) =
+        serde_json::from_str(&jxa(js, PLAYLIST)?).map_err(|e| e.to_string())?;
     Ok(State { state, name, artist, ours })
 }
 

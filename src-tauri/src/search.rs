@@ -1,3 +1,6 @@
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
+
 //! Search across the Bible, commentaries and dictionaries. SQLite's LIKE finds candidate rows;
 //! the match rules (phrase, all or any words, whole words) are applied here to the plain text,
 //! so markup such as `<red>` or Strong's numbers never splits or fakes a match.
@@ -83,7 +86,9 @@ pub fn plain(html: &str) -> String {
                 if let Some(end) = html[i..].find("</num>") {
                     let stop = i + end + 6;
                     while let Some(&(j, _)) = chars.peek() {
-                        if j >= stop { break; }
+                        if j >= stop {
+                            break;
+                        }
                         chars.next();
                     }
                     continue;
@@ -93,10 +98,14 @@ pub fn plain(html: &str) -> String {
             let is_block = html[i..].starts_with("<p") || html[i..].starts_with("</p") || html[i..].starts_with("<br");
             if let Some(stop) = tag_end {
                 while let Some(&(j, _)) = chars.peek() {
-                    if j > stop { break; }
+                    if j > stop {
+                        break;
+                    }
                     chars.next();
                 }
-                if is_block { out.push(' '); }
+                if is_block {
+                    out.push(' ');
+                }
                 continue;
             }
         }
@@ -121,7 +130,9 @@ pub fn plain(html: &str) -> String {
                 if let Some(d) = decoded {
                     out.push(d);
                     while let Some(&(j, _)) = chars.peek() {
-                        if j > i + semi { break; }
+                        if j > i + semi {
+                            break;
+                        }
                         chars.next();
                     }
                     continue;
@@ -150,7 +161,9 @@ fn find_term(hay: &str, term: &str, whole: bool) -> Option<usize> {
             return Some(at);
         }
         start = at + term.len().max(1);
-        if start >= hay.len() { break; }
+        if start >= hay.len() {
+            break;
+        }
     }
     None
 }
@@ -159,14 +172,18 @@ fn find_term(hay: &str, term: &str, whole: bool) -> Option<usize> {
 /// non-ASCII text, also where each byte of the result came from in `s`, as lowering can change
 /// lengths ("İ" is two characters lowered).
 pub fn lower(s: &str) -> (String, Option<Vec<usize>>) {
-    if s.is_ascii() { return (s.to_ascii_lowercase(), None); }
+    if s.is_ascii() {
+        return (s.to_ascii_lowercase(), None);
+    }
     let (mut out, mut same) = (String::with_capacity(s.len()), true);
     for c in s.chars() {
         let n = out.len();
         out.extend(c.to_lowercase());
         same &= out.len() - n == c.len_utf8();
     }
-    if same { return (out, None); }
+    if same {
+        return (out, None);
+    }
     let (mut out, mut map) = (String::with_capacity(s.len()), Vec::with_capacity(s.len()));
     for (i, c) in s.char_indices() {
         for l in c.to_lowercase() {
@@ -185,10 +202,14 @@ pub fn unhyphen(s: &str) -> (String, Option<Vec<usize>>) {
         let after = s[i + 1..].chars().next().is_some_and(char::is_alphanumeric);
         before && after
     };
-    if !s.char_indices().any(|(i, c)| c == '-' && inner(i)) { return (s.to_string(), None); }
+    if !s.char_indices().any(|(i, c)| c == '-' && inner(i)) {
+        return (s.to_string(), None);
+    }
     let (mut out, mut map) = (String::with_capacity(s.len()), Vec::with_capacity(s.len()));
     for (i, c) in s.char_indices() {
-        if c == '-' && inner(i) { continue; }
+        if c == '-' && inner(i) {
+            continue;
+        }
         out.push(c);
         map.resize(out.len(), i);
     }
@@ -200,7 +221,8 @@ pub fn unhyphen(s: &str) -> (String, Option<Vec<usize>>) {
 pub fn matches(plain_text: &str, terms: &[String], phrase: &str, mode: Mode, whole: bool) -> Option<usize> {
     let (text, hyphens) = unhyphen(plain_text);
     // An ASCII query can only match ASCII letters, so the (much quicker) ASCII lowering does.
-    let (lowered, map) = if phrase.is_ascii() && terms.iter().all(|t| t.is_ascii()) { (text.to_ascii_lowercase(), None) } else { lower(&text) };
+    let (lowered, map) =
+        if phrase.is_ascii() && terms.iter().all(|t| t.is_ascii()) { (text.to_ascii_lowercase(), None) } else { lower(&text) };
     let at = find_lowered(&lowered, terms, phrase, mode, whole)?;
     let at = map.map_or(at, |m| m.get(at).copied().unwrap_or(text.len()));
     Some(hyphens.map_or(at, |m| m.get(at).copied().unwrap_or(plain_text.len())))
@@ -225,9 +247,13 @@ fn snippet(text: &str, at: usize) -> String {
     let start = text[..at].char_indices().rev().nth(140).map(|(i, _)| i).unwrap_or(0);
     let end = text[at..].char_indices().nth(220).map(|(i, _)| at + i).unwrap_or(text.len());
     let mut s = String::new();
-    if start > 0 { s.push('…'); }
+    if start > 0 {
+        s.push('…');
+    }
     s.push_str(text[start..end].trim());
-    if end < text.len() { s.push('…'); }
+    if end < text.len() {
+        s.push('…');
+    }
     s
 }
 
@@ -271,7 +297,13 @@ pub fn run(lib: &Library, index: Option<&crate::index::Index>, q: &Query) -> Res
         })?;
         let count = hits.len();
         return Ok(Results {
-            bible: ModuleMatches { module: m.id, title: m.title, abbrev: m.abbrev, count, hits: hits.into_iter().take(MAX_VERSES).collect() },
+            bible: ModuleMatches {
+                module: m.id,
+                title: m.title,
+                abbrev: m.abbrev,
+                count,
+                hits: hits.into_iter().take(MAX_VERSES).collect(),
+            },
             commentaries: vec![],
             dictionaries: vec![],
             strongs: true,
@@ -289,7 +321,10 @@ pub fn run(lib: &Library, index: Option<&crate::index::Index>, q: &Query) -> Res
     let (clause, pats) = like_clause("Scripture", &terms, &phrase, q.mode);
     let mut verse_hits = Vec::new();
     lib.with(Kind::Bible, &q.bible, |c| {
-        let sql = format!("SELECT Book, Chapter, Verse, Scripture FROM Bible WHERE Book BETWEEN {} AND {} AND {clause} ORDER BY Book, Chapter, Verse", q.book_from, q.book_to);
+        let sql = format!(
+            "SELECT Book, Chapter, Verse, Scripture FROM Bible WHERE Book BETWEEN {} AND {} AND {clause} ORDER BY Book, Chapter, Verse",
+            q.book_from, q.book_to
+        );
         let mut st = c.prepare(&sql)?;
         let mut rows = st.query(params_from_iter(pats.iter()))?;
         while let Some(r) = rows.next()? {
@@ -300,7 +335,13 @@ pub fn run(lib: &Library, index: Option<&crate::index::Index>, q: &Query) -> Res
         }
         Ok(())
     })?;
-    let bible = ModuleMatches { module: bm.id, title: bm.title, abbrev: bm.abbrev, count: verse_hits.len(), hits: verse_hits.into_iter().take(MAX_VERSES).collect() };
+    let bible = ModuleMatches {
+        module: bm.id,
+        title: bm.title,
+        abbrev: bm.abbrev,
+        count: verse_hits.len(),
+        hits: verse_hits.into_iter().take(MAX_VERSES).collect(),
+    };
 
     // Commentaries (TSK is a list of references, not prose: leave it out)
     let mut commentaries = Vec::new();
@@ -309,43 +350,92 @@ pub fn run(lib: &Library, index: Option<&crate::index::Index>, q: &Query) -> Res
         let mut count = 0;
         let cols = "Book, ChapterBegin, VerseBegin, ChapterEnd, VerseEnd, Comments";
         let range = format!("Book BETWEEN {} AND {}", q.book_from, q.book_to);
-        let exact = candidate_rows(lib, index, Kind::Commentary, &m.id, "VerseCommentary", cols, "Comments", &range, "Book, ChapterBegin, VerseBegin", &terms, &phrase, q, MAX_COMMENT_HITS, |r| {
-            let html: String = r.get::<_, Option<String>>(5)?.unwrap_or_default();
-            let p = plain(&html);
-            if let Some(at) = matches(&p, &terms, &phrase, q.mode, q.whole_words) {
-                count += 1;
-                if hits.len() < MAX_COMMENT_HITS {
-                    hits.push(CommentMatch { book: r.get(0)?, chapter_begin: r.get(1)?, verse_begin: r.get(2)?, chapter_end: r.get(3)?, verse_end: r.get(4)?, snippet: snippet(&p, at) });
+        let exact = candidate_rows(
+            lib,
+            index,
+            Kind::Commentary,
+            &m.id,
+            "VerseCommentary",
+            cols,
+            "Comments",
+            &range,
+            "Book, ChapterBegin, VerseBegin",
+            &terms,
+            &phrase,
+            q,
+            MAX_COMMENT_HITS,
+            |r| {
+                let html: String = r.get::<_, Option<String>>(5)?.unwrap_or_default();
+                let p = plain(&html);
+                if let Some(at) = matches(&p, &terms, &phrase, q.mode, q.whole_words) {
+                    count += 1;
+                    if hits.len() < MAX_COMMENT_HITS {
+                        hits.push(CommentMatch {
+                            book: r.get(0)?,
+                            chapter_begin: r.get(1)?,
+                            verse_begin: r.get(2)?,
+                            chapter_end: r.get(3)?,
+                            verse_end: r.get(4)?,
+                            snippet: snippet(&p, at),
+                        });
+                    }
                 }
-            }
-            Ok(())
-        });
-        if let Ok(Some(n)) = exact { count = n; }
+                Ok(())
+            },
+        );
+        if let Ok(Some(n)) = exact {
+            count = n;
+        }
         if count > 0 {
             commentaries.push(ModuleMatches { module: m.id.clone(), title: m.title.clone(), abbrev: m.abbrev.clone(), count, hits });
         }
     }
-    commentaries.sort_by(|a, b| b.count.cmp(&a.count));
+    commentaries.sort_by_key(|c| std::cmp::Reverse(c.count));
 
     // Dictionaries (the whole library, not limited by book range)
     let mut dictionaries = Vec::new();
     for m in lib.of_kind(Kind::Dictionary) {
         let mut topics = Vec::new();
         let mut count = 0;
-        let exact = candidate_rows(lib, index, Kind::Dictionary, &m.id, "Dictionary", "Topic, Definition", "Definition", "1", "Topic COLLATE NOCASE", &terms, &phrase, q, MAX_TOPICS, |r| {
-            let def: String = r.get::<_, Option<String>>(1)?.unwrap_or_default();
-            if matches(&plain(&def), &terms, &phrase, q.mode, q.whole_words).is_some() {
-                count += 1;
-                if topics.len() < MAX_TOPICS { topics.push(r.get::<_, String>(0)?); }
-            }
-            Ok(())
-        });
-        if let Ok(Some(n)) = exact { count = n; }
+        let exact = candidate_rows(
+            lib,
+            index,
+            Kind::Dictionary,
+            &m.id,
+            "Dictionary",
+            "Topic, Definition",
+            "Definition",
+            "1",
+            "Topic COLLATE NOCASE",
+            &terms,
+            &phrase,
+            q,
+            MAX_TOPICS,
+            |r| {
+                let def: String = r.get::<_, Option<String>>(1)?.unwrap_or_default();
+                if matches(&plain(&def), &terms, &phrase, q.mode, q.whole_words).is_some() {
+                    count += 1;
+                    if topics.len() < MAX_TOPICS {
+                        topics.push(r.get::<_, String>(0)?);
+                    }
+                }
+                Ok(())
+            },
+        );
+        if let Ok(Some(n)) = exact {
+            count = n;
+        }
         if count > 0 {
-            dictionaries.push(ModuleMatches { module: m.id.clone(), title: m.title.clone(), abbrev: m.abbrev.clone(), count, hits: topics });
+            dictionaries.push(ModuleMatches {
+                module: m.id.clone(),
+                title: m.title.clone(),
+                abbrev: m.abbrev.clone(),
+                count,
+                hits: topics,
+            });
         }
     }
-    dictionaries.sort_by(|a, b| b.count.cmp(&a.count));
+    dictionaries.sort_by_key(|d| std::cmp::Reverse(d.count));
 
     Ok(Results { bible, commentaries, dictionaries, strongs: false })
 }
@@ -383,7 +473,9 @@ fn candidate_rows(
             let sql = format!("SELECT {cols} FROM {table} WHERE rowid IN ({list}) AND {filter} ORDER BY {order} LIMIT {}", limit + 10);
             let mut st = c.prepare(&sql)?;
             let mut rows = st.query([])?;
-            while let Some(r) = rows.next()? { f(r)?; }
+            while let Some(r) = rows.next()? {
+                f(r)?;
+            }
             Ok(Some(n as usize))
         });
     }
@@ -392,7 +484,9 @@ fn candidate_rows(
         let sql = format!("SELECT {cols} FROM {table} WHERE {filter} AND {clause} ORDER BY {order}");
         let mut st = c.prepare(&sql)?;
         let mut rows = st.query(params_from_iter(pats.iter()))?;
-        while let Some(r) = rows.next()? { f(r)?; }
+        while let Some(r) = rows.next()? {
+            f(r)?;
+        }
         Ok(None)
     })
 }
@@ -447,4 +541,3 @@ mod tests {
         assert!(matches("born", &terms, "born spirit", Mode::All, true).is_none());
     }
 }
-

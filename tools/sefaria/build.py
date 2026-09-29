@@ -1,3 +1,5 @@
+# Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+# SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 """Builds e-Sword modules of the Targums and the Babylonian Talmud from Sefaria's public export.
 
     python3 tools/sefaria/build.py            # everything

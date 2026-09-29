@@ -1,3 +1,6 @@
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
+
 // The menu-bar menu: keeps its labels (today's reading, where reading left off, the reminder) in
 // step with the app, and carries out what is chosen from it. The reminder itself is timed on the
 // Rust side, which keeps running while the window is closed.
@@ -24,7 +27,7 @@ export function useTray() {
 
   const plan = current(app.plans);
   const t = plan && !(plan.kind === "sequence" && firstUndone(plan) < 0) ? todayFor(plan) : null;
-  const done = !!plan && (plan.kind === "ppo" ? plan.doneDates : plan.readDates ?? []).includes(day);
+  const done = !!plan && (plan.kind === "ppo" ? plan.doneDates : (plan.readDates ?? [])).includes(day);
   const reading = app.doc ? app.doc.title : `${book(app.loc.book).name} ${app.loc.chapter}`;
   const { reminder, reminderTime } = app.settings;
 
@@ -37,14 +40,18 @@ export function useTray() {
   // The listener is set up once; what it does is read from here, so it always sees the current state.
   const act = useRef<(a: TrayAction) => void>(() => {});
   act.current = (a) => {
-    if (a === "quiet") { if (plan && t && !done && t.parts.length) startQuiet(plan, t.parts, false); else app.go("plans"); }
-    else if (a === "continue") app.go("read");
+    if (a === "quiet") {
+      if (plan && t && !done && t.parts.length) startQuiet(plan, t.parts, false);
+      else app.go("plans");
+    } else if (a === "continue") app.go("read");
     else if (a === "search") app.go("search");
     else if (a === "journal") app.startEntry({});
     else if (a === "reminder") app.set({ reminder: !reminder });
   };
   useEffect(() => {
     const un = listen<TrayAction>("tray", (e) => act.current(e.payload));
-    return () => { un.then((f) => f()); };
+    return () => {
+      un.then((f) => f());
+    };
   }, []);
 }

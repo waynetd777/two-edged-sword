@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+# SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 """Draw the app's artwork: design/icon.png (the Dock icon source) and src-tauri/icons/tray@2x.png.
 
 The icon is a two-edged sword (Hebrews 4:12): a gold blade with a light and a dark edge, a

@@ -1,3 +1,6 @@
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
+
 //! GitHub Copilot CLI (`copilot -p --output-format json --stream on`). Only its read and search
 //! tools exist (`--available-tools=view,grep,glob`; an empty list would mean every tool, web_fetch included); reading
 //! outside the folder needs permission, which prompt mode can't ask for, so it is refused and the
@@ -13,7 +16,8 @@ use std::sync::Arc;
 use tauri::{AppHandle, Emitter};
 
 pub const PREFIX: &str = "copilot:";
-const TOOLS: &str = "Search with grep, find files with glob, and open them with view, several at once where you can. Read nothing outside this folder.";
+const TOOLS: &str =
+    "Search with grep, find files with glob, and open them with view, several at once where you can. Read nothing outside this folder.";
 
 pub fn find() -> Option<PathBuf> {
     super::find("copilot", &[])
@@ -24,7 +28,16 @@ pub fn models() -> Vec<Model> {
 }
 
 #[allow(clippy::too_many_arguments)]
-pub fn ask(app: AppHandle, running: Arc<Running>, cwd: PathBuf, chat_id: String, prompt: String, model: String, session: Option<String>, folder: Folder) -> Result<(), String> {
+pub fn ask(
+    app: AppHandle,
+    running: Arc<Running>,
+    cwd: PathBuf,
+    chat_id: String,
+    prompt: String,
+    model: String,
+    session: Option<String>,
+    folder: Folder,
+) -> Result<(), String> {
     let bin = find().ok_or("GitHub Copilot CLI isn't installed, or couldn't be found. Install it and sign in, then try again.")?;
     let (tools, extra) = (["view", "grep", "glob"], format!("{} {TOOLS}", folder.prompt()));
     // A follow-up resumes the session, which has the instructions already.
@@ -70,11 +83,15 @@ pub fn ask(app: AppHandle, running: Arc<Running>, cwd: PathBuf, chat_id: String,
                         Some("glob") => Some("Looking through the library".to_string()),
                         _ => None,
                     };
-                    if let Some(t) = what { emit_status(&app, &chat_id, t); }
+                    if let Some(t) = what {
+                        emit_status(&app, &chat_id, t);
+                    }
                 }
                 Some("session.error") => error = Some(d["message"].as_str().unwrap_or("Copilot returned an error").to_string()),
                 Some("result") => {
-                    if let Some(s) = v["sessionId"].as_str() { session_id = Some(s.to_string()); }
+                    if let Some(s) = v["sessionId"].as_str() {
+                        session_id = Some(s.to_string());
+                    }
                 }
                 _ => {}
             }

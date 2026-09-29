@@ -1,3 +1,6 @@
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
+
 //! Codex (`codex exec --json`): messages arrive whole, not as deltas, so the answer is sent once, at the end.
 //! The user's own Codex config (MCP servers, hooks, rules) is left out; sign-in still comes from
 //! ~/.codex. Runs in the read-only sandbox.
@@ -37,7 +40,16 @@ pub fn models() -> Vec<Model> {
 }
 
 #[allow(clippy::too_many_arguments)]
-pub fn ask(app: AppHandle, running: Arc<Running>, cwd: PathBuf, chat_id: String, prompt: String, model: String, session: Option<String>, folder: Folder) -> Result<(), String> {
+pub fn ask(
+    app: AppHandle,
+    running: Arc<Running>,
+    cwd: PathBuf,
+    chat_id: String,
+    prompt: String,
+    model: String,
+    session: Option<String>,
+    folder: Folder,
+) -> Result<(), String> {
     let bin = find().ok_or("Codex isn't installed, or couldn't be found. Install it and sign in, then try again.")?;
     let instructions = format!("{SYSTEM}\n\n{} {TOOLS}", folder.prompt());
     // -c values are TOML; a JSON string is a valid TOML basic string.
@@ -64,7 +76,9 @@ pub fn ask(app: AppHandle, running: Arc<Running>, cwd: PathBuf, chat_id: String,
             let Ok(v) = serde_json::from_str::<serde_json::Value>(&line) else { continue };
             match v["type"].as_str() {
                 Some("thread.started") => {
-                    if let Some(s) = v["thread_id"].as_str() { session_id = Some(s.to_string()); }
+                    if let Some(s) = v["thread_id"].as_str() {
+                        session_id = Some(s.to_string());
+                    }
                 }
                 // A shell command it runs to search: name the file it reads, if one is named.
                 Some("item.started") if v["item"]["type"] == "command_execution" => {
@@ -75,7 +89,9 @@ pub fn ask(app: AppHandle, running: Arc<Running>, cwd: PathBuf, chat_id: String,
                 // When it searches first, earlier messages are progress notes ("I'll read index.txt…");
                 // the answer is the last one, sent with ask-done.
                 Some("item.completed") if v["item"]["type"] == "agent_message" => {
-                    if let Some(t) = v["item"]["text"].as_str() { text = t.to_string(); }
+                    if let Some(t) = v["item"]["text"].as_str() {
+                        text = t.to_string();
+                    }
                 }
                 Some("turn.failed") => error = Some(v["error"]["message"].as_str().unwrap_or("Codex returned an error").to_string()),
                 Some("error") => error = Some(v["message"].as_str().unwrap_or("Codex returned an error").to_string()),

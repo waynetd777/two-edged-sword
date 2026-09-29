@@ -1,0 +1,9 @@
+dist
+node_modules
+src-tauri
+_sift
+docs
+tools
+*.md
+*.json
+*.html

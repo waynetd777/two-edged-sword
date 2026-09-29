@@ -1,3 +1,5 @@
+# Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+# SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 """Builds e-Sword Bibles from CrossWire's SWORD modules: the Syriac Peshitta, the two English
 translations of it (Murdock, Etheridge), Tyndale, the Geneva Bible of 1599 and the Douay-Rheims.
 

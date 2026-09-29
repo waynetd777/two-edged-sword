@@ -10,6 +10,8 @@ runs the AI tools for Ask. The frontend is everything you see.
 |---|---|
 | `make dev` | Build the help, then run the app with hot reload |
 | `make check` | Rust tests (some read the modules on this Mac, and skip without them) and the TypeScript check |
+| `make lint` | rustfmt, clippy, Prettier and ESLint; any warning fails it |
+| `make fmt` | Format the Rust (rustfmt) and TypeScript and CSS (Prettier) |
 | `make app` | Bump the version (1.0.4 → 1.0.5) and build the .app, signed with the identity in `signing.local` if there is one |
 | `make install-app` | Build it and replace the copy in /Applications |
 | `make dmg` | Pack the built app into `Two-edged-Sword.dmg` for a release |
@@ -218,6 +220,10 @@ reference, and images inline as `data:` URLs.
 | `tools/variances/` | Building each translation's differences from the KJV |
 | `tools/sefaria/`, `tools/vulgate/`, `tools/crosswire/` and the rest | Building modules from free sources ([Building modules](#building-modules)) |
 | `tools/make_icons.py` | The icon artwork |
+
+Every source file starts with the copyright notice from the About box and `SPDX-License-Identifier: GPL-3.0-or-later`; add both to a new file.
+Formatting is `src-tauri/rustfmt.toml` and `.prettierrc.json` (140 columns); lint rules are clippy's defaults and `eslint.config.js`.
+Run `make lint` before committing.
 
 Design decisions and known bugs are logged in `_sift/`; `python3 _sift/bin/sift.py decisions`
 lists them.

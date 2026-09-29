@@ -1,3 +1,6 @@
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
+
 //! Antigravity CLI (`agy -p --output-format stream-json`), Google's successor to Gemini CLI.
 //! It has no flag to limit its tools, and some it would use unasked (web search); but a custom
 //! agent's `tools` list is enforced, so each run writes one into its working folder
@@ -43,14 +46,29 @@ fn write_agent(cwd: &Path, folder: &Folder) -> Result<(), String> {
 }
 
 #[allow(clippy::too_many_arguments)]
-pub fn ask(app: AppHandle, running: Arc<Running>, cwd: PathBuf, chat_id: String, prompt: String, model: String, session: Option<String>, folder: Folder) -> Result<(), String> {
+pub fn ask(
+    app: AppHandle,
+    running: Arc<Running>,
+    cwd: PathBuf,
+    chat_id: String,
+    prompt: String,
+    model: String,
+    session: Option<String>,
+    folder: Folder,
+) -> Result<(), String> {
     let bin = find().ok_or("Antigravity CLI isn't installed, or couldn't be found. Install it and sign in, then try again.")?;
     write_agent(&cwd, &folder)?;
     let mut cmd = Command::new(bin);
-    cmd.current_dir(&cwd)
-        .arg("-p")
-        .arg(&prompt)
-        .args(["--agent", AGENT, "--model", model.strip_prefix(PREFIX).unwrap_or(&model), "--sandbox", "--disable-slash-commands", "--output-format", "stream-json"]);
+    cmd.current_dir(&cwd).arg("-p").arg(&prompt).args([
+        "--agent",
+        AGENT,
+        "--model",
+        model.strip_prefix(PREFIX).unwrap_or(&model),
+        "--sandbox",
+        "--disable-slash-commands",
+        "--output-format",
+        "stream-json",
+    ]);
     if let Some(s) = &session {
         cmd.args(["--conversation", s]);
     }
@@ -66,7 +84,9 @@ pub fn ask(app: AppHandle, running: Arc<Running>, cwd: PathBuf, chat_id: String,
             match v["event"].as_str() {
                 Some("step_update") => {
                     let s = &v["step_update"];
-                    if let Some(c) = s["conversation_id"].as_str() { session_id = Some(c.to_string()); }
+                    if let Some(c) = s["conversation_id"].as_str() {
+                        session_id = Some(c.to_string());
+                    }
                     match s["step_type"].as_str() {
                         Some("agent_response") => {
                             let Some(t) = s["text_delta"].as_str().filter(|t| !t.is_empty()) else { continue };
@@ -88,19 +108,26 @@ pub fn ask(app: AppHandle, running: Arc<Running>, cwd: PathBuf, chat_id: String,
                                 Some("find_by_name") | Some("list_dir") => Some("Looking through the library".to_string()),
                                 _ => None,
                             };
-                            if let Some(t) = what { emit_status(&app, &chat_id, t); }
+                            if let Some(t) = what {
+                                emit_status(&app, &chat_id, t);
+                            }
                         }
                         _ => {}
                     }
                 }
                 Some("result") => {
                     let r = &v["result"];
-                    if let Some(c) = r["conversation_id"].as_str() { session_id = Some(c.to_string()); }
+                    if let Some(c) = r["conversation_id"].as_str() {
+                        session_id = Some(c.to_string());
+                    }
                     if text.is_empty() {
-                        if let Some(t) = r["response"].as_str() { text = t.to_string(); }
+                        if let Some(t) = r["response"].as_str() {
+                            text = t.to_string();
+                        }
                     }
                     // A refused action (a read outside the folder, a command) ends the turn with no answer.
-                    let denied: Vec<&str> = r["denied_actions"].as_array().into_iter().flatten().filter_map(|d| d["display_name"].as_str()).collect();
+                    let denied: Vec<&str> =
+                        r["denied_actions"].as_array().into_iter().flatten().filter_map(|d| d["display_name"].as_str()).collect();
                     if text.trim().is_empty() && !denied.is_empty() {
                         error = Some(format!("Antigravity stopped without answering: it tried something Ask doesn't allow ({}). Try asking again, or another model.", denied.join(", ")));
                     } else if r["status"].as_str().is_some_and(|s| s != "SUCCESS") && text.is_empty() {
@@ -131,7 +158,9 @@ mod tests {
         let md = std::fs::read_to_string(dir.join(".agents/agents/tes-ask.md")).unwrap();
         assert!(md.contains("tools:\n  - view_file\n  - grep_search\n  - find_by_name\n  - list_dir\n---"));
         assert!(!md.contains("search_web") && !md.contains("run_command"));
-        if let Ok(keep) = std::env::var("TES_AGY_KEEP") { write_agent(Path::new(&keep), &Folder::Study(PathBuf::from(&keep))).unwrap(); }
+        if let Ok(keep) = std::env::var("TES_AGY_KEEP") {
+            write_agent(Path::new(&keep), &Folder::Study(PathBuf::from(&keep))).unwrap();
+        }
         let _ = std::fs::remove_dir_all(&dir);
     }
 }

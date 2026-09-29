@@ -1,3 +1,5 @@
+# Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+# SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 """Builds beza1598+.bbli ("Greek NT: Beza (1598) w/ glosses"): Beza's 1598 Greek New Testament word
 by word, each word with English under it, its Strong's number and its grammar.
 

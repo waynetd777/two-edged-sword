@@ -1,3 +1,6 @@
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
+
 //! The app's own data (settings, bookmarks, highlights, plans, chats): one JSON document per
 //! name under ~/Library/Application Support/Two-edged Sword/. The frontend owns the shapes;
 //! this side only reads and writes whole documents, atomically.
@@ -44,7 +47,9 @@ pub fn write(dir: &std::path::Path, name: &str, value: &Value) -> Result<(), Str
 /// The difference lists shipped in the app (Contents/Resources/variances); in a debug build,
 /// src-tauri/variances.
 fn bundled_variances() -> PathBuf {
-    if cfg!(debug_assertions) { return std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("variances"); }
+    if cfg!(debug_assertions) {
+        return std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("variances");
+    }
     std::env::current_exe().ok().and_then(|e| Some(e.parent()?.parent()?.join("Resources/variances"))).unwrap_or_default()
 }
 
@@ -52,7 +57,9 @@ fn bundled_variances() -> PathBuf {
 /// by tools/variances/ if there is one, else the one shipped with the app.
 pub fn variances(dir: &std::path::Path, name: &str) -> Result<Value, String> {
     let own = read(dir, name)?;
-    if !own.is_null() { return Ok(own); }
+    if !own.is_null() {
+        return Ok(own);
+    }
     read(&bundled_variances(), name)
 }
 
@@ -91,8 +98,12 @@ pub fn replace_dir<T>(dir: &std::path::Path, build: impl FnOnce(&std::path::Path
     let _ = fs::remove_dir_all(&new);
     let _ = fs::remove_dir_all(&old);
     fs::create_dir_all(&new).map_err(|e| e.to_string())?;
-    let r = build(&new).inspect_err(|_| { let _ = fs::remove_dir_all(&new); })?;
-    if dir.exists() { fs::rename(dir, &old).map_err(|e| e.to_string())?; }
+    let r = build(&new).inspect_err(|_| {
+        let _ = fs::remove_dir_all(&new);
+    })?;
+    if dir.exists() {
+        fs::rename(dir, &old).map_err(|e| e.to_string())?;
+    }
     if let Err(e) = fs::rename(&new, dir) {
         let _ = fs::rename(&old, dir);
         return Err(e.to_string());
@@ -120,7 +131,10 @@ mod tests {
     fn replaces_folders_whole() {
         let dir = std::env::temp_dir().join(format!("tes-replace-{}", std::process::id())).join("book");
         replace_dir(&dir, |d| std::fs::write(d.join("a.txt"), "1").map_err(|e| e.to_string())).unwrap();
-        let r: Result<(), String> = replace_dir(&dir, |d| { std::fs::write(d.join("b.txt"), "2").unwrap(); Err("failed".into()) });
+        let r: Result<(), String> = replace_dir(&dir, |d| {
+            std::fs::write(d.join("b.txt"), "2").unwrap();
+            Err("failed".into())
+        });
         assert!(r.is_err());
         assert!(dir.join("a.txt").exists() && !dir.join("b.txt").exists(), "a failed build leaves the old folder");
         replace_dir(&dir, |d| std::fs::write(d.join("b.txt"), "2").map_err(|e| e.to_string())).unwrap();

@@ -1,3 +1,5 @@
+# Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+# SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 """Builds the Latin Bibles word by word: latin+.bbli ("Latin Vulgate w/ glosses") from latin.bbli
 and clementine+.bbli ("Latin Vulgate (Clementine) w/ glosses") from clementine.bbli, each word with
 its English meaning, dictionary form and grammar, as the Greek interlinears are.

@@ -1,3 +1,6 @@
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
+
 //! Spelling for the journal, from macOS's own spell checker (the one TextEdit and Mail use):
 //! the misspelled words in a text, the guesses for one, the automatic correction for one when
 //! the user has "Correct spelling automatically" on, and learning or ignoring a word. Offsets
@@ -16,7 +19,8 @@ use std::sync::OnceLock;
 static KJV: OnceLock<HashSet<String>> = OnceLock::new();
 
 /// Words that mark a sentence as KJV English even though macOS knows them.
-const KJV_MARKERS: &[&str] = &["thee", "thou", "thy", "thine", "ye", "hast", "hath", "dost", "doth", "shalt", "wast", "wert", "canst", "saith", "unto", "spake"];
+const KJV_MARKERS: &[&str] =
+    &["thee", "thou", "thy", "thine", "ye", "hast", "hath", "dost", "doth", "shalt", "wast", "wert", "canst", "saith", "unto", "spake"];
 
 fn norm(w: &str) -> String {
     w.trim_matches(|c: char| c == '\'' || c == '’').replace('’', "'").to_lowercase()
@@ -42,7 +46,15 @@ pub fn load_kjv(lib: &crate::library::Library) {
         let mut plain = String::with_capacity(t.len());
         let mut tag = false;
         for c in t.chars() {
-            match c { '<' => tag = true, '>' => { tag = false; plain.push(' ') } _ if !tag => plain.push(c), _ => {} }
+            match c {
+                '<' => tag = true,
+                '>' => {
+                    tag = false;
+                    plain.push(' ')
+                }
+                _ if !tag => plain.push(c),
+                _ => {}
+            }
         }
         set.extend(words(&plain));
     }
@@ -67,7 +79,16 @@ fn kjv_sentence(sc: &NSSpellChecker, sentence: &str) -> bool {
     let s = NSString::from_str(sentence);
     let (len, mut at) = (s.length(), 0usize);
     while at < len {
-        let r = unsafe { sc.checkSpellingOfString_startingAt_language_wrap_inSpellDocumentWithTag_wordCount(&s, at as isize, None, false, tag(), std::ptr::null_mut()) };
+        let r = unsafe {
+            sc.checkSpellingOfString_startingAt_language_wrap_inSpellDocumentWithTag_wordCount(
+                &s,
+                at as isize,
+                None,
+                false,
+                tag(),
+                std::ptr::null_mut(),
+            )
+        };
         if r.length == 0 || r.location >= len {
             return false;
         }
@@ -91,7 +112,16 @@ pub fn check(text: &str) -> Vec<(usize, usize)> {
     let s = NSString::from_str(text);
     let (len, mut at, mut out) = (s.length(), 0usize, Vec::new());
     while at < len && out.len() < 1000 {
-        let r = unsafe { sc.checkSpellingOfString_startingAt_language_wrap_inSpellDocumentWithTag_wordCount(&s, at as isize, None, false, tag(), std::ptr::null_mut()) };
+        let r = unsafe {
+            sc.checkSpellingOfString_startingAt_language_wrap_inSpellDocumentWithTag_wordCount(
+                &s,
+                at as isize,
+                None,
+                false,
+                tag(),
+                std::ptr::null_mut(),
+            )
+        };
         if r.length == 0 || r.location >= len {
             break;
         }
@@ -123,7 +153,16 @@ pub fn grammar(text: &str) -> Vec<GrammarIssue> {
     let (len, mut at, mut out) = (s.length(), 0usize, Vec::<GrammarIssue>::new());
     while at < len && out.len() < 500 {
         let mut details: Option<objc2::rc::Retained<NSArray<NSDictionary<NSString, AnyObject>>>> = None;
-        let r = unsafe { sc.checkGrammarOfString_startingAt_language_wrap_inSpellDocumentWithTag_details(&s, at as isize, Some(&lang), false, tag(), Some(&mut details)) };
+        let r = unsafe {
+            sc.checkGrammarOfString_startingAt_language_wrap_inSpellDocumentWithTag_details(
+                &s,
+                at as isize,
+                Some(&lang),
+                false,
+                tag(),
+                Some(&mut details),
+            )
+        };
         if r.length == 0 || r.location >= len {
             break;
         }
@@ -135,7 +174,9 @@ pub fn grammar(text: &str) -> Vec<GrammarIssue> {
         }
         for d in details.iter().flat_map(|ds| (0..ds.count()).map(move |i| ds.objectAtIndex(i))) {
             // The range is from the start of the sentence.
-            let Some(g) = key("NSGrammarRange", &d).and_then(|v| v.downcast::<NSValue>().ok()).and_then(|v| v.get_range()) else { continue };
+            let Some(g) = key("NSGrammarRange", &d).and_then(|v| v.downcast::<NSValue>().ok()).and_then(|v| v.get_range()) else {
+                continue;
+            };
             let (start, glen) = (r.location + g.location, g.length);
             let whole = s.substringWithRange(r).to_string();
             let body = whole.trim_end_matches(|c: char| c.is_whitespace() || ".!?".contains(c)).encode_utf16().count();
@@ -145,8 +186,10 @@ pub fn grammar(text: &str) -> Vec<GrammarIssue> {
             if glen == 0 || out[first..].iter().any(|o| o.start <= start && start + glen <= o.start + o.len) {
                 continue;
             }
-            let description = key("NSGrammarUserDescription", &d).and_then(|v| v.downcast::<NSString>().ok()).map(|v| v.to_string()).unwrap_or_default();
-            let corrections = key("NSGrammarCorrections", &d).and_then(|v| v.downcast::<NSArray>().ok())
+            let description =
+                key("NSGrammarUserDescription", &d).and_then(|v| v.downcast::<NSString>().ok()).map(|v| v.to_string()).unwrap_or_default();
+            let corrections = key("NSGrammarCorrections", &d)
+                .and_then(|v| v.downcast::<NSArray>().ok())
                 .map(|a| (0..a.count()).filter_map(|i| a.objectAtIndex(i).downcast::<NSString>().ok().map(|x| x.to_string())).collect())
                 .unwrap_or_default();
             out.push(GrammarIssue { start, len: glen, description, corrections });
@@ -159,7 +202,9 @@ pub fn grammar(text: &str) -> Vec<GrammarIssue> {
 pub fn guesses(word: &str) -> Vec<String> {
     let sc = NSSpellChecker::sharedSpellChecker();
     let s = NSString::from_str(word);
-    let Some(a) = sc.guessesForWordRange_inString_language_inSpellDocumentWithTag(NSRange::new(0, s.length()), &s, None, tag()) else { return vec![] };
+    let Some(a) = sc.guessesForWordRange_inString_language_inSpellDocumentWithTag(NSRange::new(0, s.length()), &s, None, tag()) else {
+        return vec![];
+    };
     (0..a.count()).map(|i| a.objectAtIndex(i).to_string()).collect()
 }
 

@@ -1,3 +1,5 @@
+# Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+# SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 """Builds ginsburg.bbli ("Hebrew Bible (Ginsburg 1894, Ben Chayyim)"): the Hebrew Old Testament as
 Christian David Ginsburg edited it for the Trinitarian Bible Society in 1894, following Jacob ben
 Chayyim's text of Daniel Bomberg's second Rabbinic Bible (Venice, 1524–25), the Hebrew the KJV's

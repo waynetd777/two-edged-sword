@@ -1,3 +1,6 @@
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
+
 // Reading plans. A "sequence" plan is a fixed list of daily readings laid out on the calendar
 // from a start date. The "ppo" plan (a Psalm, a Proverb and one more) has no end: Proverbs
 // follows the date, while the Psalm and the other chapter move on each time a day is read.
@@ -5,7 +8,13 @@
 import { book, BOOKS, isApocrypha, Ref } from "./bible";
 
 /** One passage: whole chapters (c..c2), or a verse range when v is set. */
-export interface Part { b: number; c: number; c2?: number; v?: number; v2?: number }
+export interface Part {
+  b: number;
+  c: number;
+  c2?: number;
+  v?: number;
+  v2?: number;
+}
 
 export interface SequencePlan {
   id: string;
@@ -33,10 +42,16 @@ export interface SequencePlan {
 }
 
 /** Which day `done` belongs to, and the parts of it read: "43.3" for a chapter, a devotional's id. */
-export interface Progress { key: string; done: string[] }
+export interface Progress {
+  key: string;
+  done: string[];
+}
 
 /** Worship songs in Quiet time: how many, and whether they come before the reading or after it. */
-export interface Worship { songs: number; when: "before" | "after" }
+export interface Worship {
+  songs: number;
+  when: "before" | "after";
+}
 
 export interface PpoPlan {
   id: string;
@@ -63,14 +78,26 @@ export type Plan = SequencePlan | PpoPlan;
 // ---------- dates ----------
 
 export const ymd = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-export const parseYmd = (s: string) => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); };
-export const addDays = (d: Date, n: number) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+export const parseYmd = (s: string) => {
+  const [y, m, d] = s.split("-").map(Number);
+  return new Date(y, m - 1, d);
+};
+export const addDays = (d: Date, n: number) => {
+  const x = new Date(d);
+  x.setDate(x.getDate() + n);
+  return x;
+};
 const isWeekend = (d: Date) => d.getDay() === 0 || d.getDay() === 6;
 /** A reading day starts at 4am, not midnight: a late-night Quiet time counts for the day before. */
 export const DAY_STARTS_AT = 4;
 /** Midnight of the reading day it is now. */
-export const today = () => { const d = new Date(Date.now() - DAY_STARTS_AT * 3_600_000); d.setHours(0, 0, 0, 0); return d; };
-export const fmtDay = (d: Date, opts: Intl.DateTimeFormatOptions = { weekday: "short", day: "numeric", month: "short" }) => d.toLocaleDateString("en-GB", opts);
+export const today = () => {
+  const d = new Date(Date.now() - DAY_STARTS_AT * 3_600_000);
+  d.setHours(0, 0, 0, 0);
+  return d;
+};
+export const fmtDay = (d: Date, opts: Intl.DateTimeFormatOptions = { weekday: "short", day: "numeric", month: "short" }) =>
+  d.toLocaleDateString("en-GB", opts);
 export const fmtLong = (d: Date) => d.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
 
 /** The calendar date of plan day i. */
@@ -79,7 +106,10 @@ export function dateOf(p: SequencePlan, i: number): Date {
   let n = i + p.shift;
   if (!p.weekdaysOnly) return addDays(d, n);
   while (isWeekend(d)) d = addDays(d, 1);
-  while (n > 0) { d = addDays(d, 1); if (!isWeekend(d)) n--; }
+  while (n > 0) {
+    d = addDays(d, 1);
+    if (!isWeekend(d)) n--;
+  }
   return d;
 }
 
@@ -92,7 +122,11 @@ function dayOn(p: SequencePlan, date: Date): number {
   if (date < start) return -1;
   let n: number;
   if (!p.weekdaysOnly) n = Math.round((date.getTime() - start.getTime()) / 86400000);
-  else { n = 0; for (let d = new Date(start); d < date; d = addDays(d, 1)) if (!isWeekend(d)) n++; if (isWeekend(date)) n--; }
+  else {
+    n = 0;
+    for (let d = new Date(start); d < date; d = addDays(d, 1)) if (!isWeekend(d)) n++;
+    if (isWeekend(date)) n--;
+  }
   return n - p.shift;
 }
 
@@ -108,7 +142,14 @@ export function behind(p: SequencePlan): number {
 // ---------- labels ----------
 
 export function partRef(x: Part): Ref {
-  if (x.v) return { book: x.b, chapter: x.c, verse: x.v, to: x.c2 && x.c2 !== x.c ? x.v2 : x.v2, toChapter: x.c2 && x.c2 !== x.c ? x.c2 : undefined };
+  if (x.v)
+    return {
+      book: x.b,
+      chapter: x.c,
+      verse: x.v,
+      to: x.c2 && x.c2 !== x.c ? x.v2 : x.v2,
+      toChapter: x.c2 && x.c2 !== x.c ? x.c2 : undefined,
+    };
   return { book: x.b, chapter: x.c };
 }
 
@@ -158,7 +199,8 @@ export function perDay(chs: Sizes, n: number): Part[][] {
 
 /** One OT and one NT chapter a day, until both run out. */
 export function paired(chs: Sizes): Part[][] {
-  const ot = chs.filter((c) => c[0] <= 39), nt = chs.filter((c) => c[0] >= 40);
+  const ot = chs.filter((c) => c[0] <= 39),
+    nt = chs.filter((c) => c[0] >= 40);
   const out: Part[][] = [];
   for (let i = 0; i < Math.max(ot.length, nt.length); i++) {
     const day: [number, number][] = [];
@@ -214,7 +256,8 @@ export function ppoReading(p: PpoPlan, d: Date): Part[] {
 /** The PPO readings for the coming days, assuming each day is read. */
 export function ppoPreview(p: PpoPlan, from: Date, n: number): { date: Date; parts: Part[] }[] {
   const out = [];
-  let psalm = p.nextPsalm, other = p.nextOther;
+  let psalm = p.nextPsalm,
+    other = p.nextOther;
   for (let i = 0; i < n; i++) {
     const d = addDays(from, i);
     out.push({ date: d, parts: ppoReading({ ...p, nextPsalm: psalm, nextOther: other }, d) });
@@ -225,14 +268,31 @@ export function ppoPreview(p: PpoPlan, from: Date, n: number): { date: Date; par
 }
 
 /** The days after `today`. Until today is marked read the plan has not moved on, so skip today's chapters. */
-const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const MONTH_NAMES = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
 /** A day as a devotional's title: "September 24". */
 export const dayTitle = (d: Date) => `${MONTH_NAMES[d.getMonth()]} ${d.getDate()}`;
 
 /** Devotionals read online, opened in a window of their own. */
 export const ONLINE_DEVOTIONALS: { id: string; title: string; url: (d: Date) => string }[] = [
   { id: "online:odb", title: "Our Daily Bread", url: () => "https://www.odbm.org/en/devotionals" },
-  { id: "online:heartlight", title: "Heartlight", url: (d) => `https://www.heartlight.org/cgi-shl/todaysverse.cgi?day=${ymd(d).replace(/-/g, "")}&ver=niv` },
+  {
+    id: "online:heartlight",
+    title: "Heartlight",
+    url: (d) => `https://www.heartlight.org/cgi-shl/todaysverse.cgi?day=${ymd(d).replace(/-/g, "")}&ver=niv`,
+  },
 ];
 
 /** The day being read: a sequence plan's next unread day, a Psalm-and-Proverb plan's date. */
@@ -262,14 +322,20 @@ export function unmarkDayRead(p: Plan, d: Date): Plan {
   const progress = p.progress?.key === key ? undefined : p.progress;
   if (p.kind === "ppo") {
     if (!p.doneDates.includes(k)) return p;
-    return { ...p, nextPsalm: ((p.nextPsalm + 148) % 150) + 1, nextOther: prevOtherBefore(p.nextOther, p.otherFrom), doneDates: p.doneDates.filter((x) => x !== k), progress };
+    return {
+      ...p,
+      nextPsalm: ((p.nextPsalm + 148) % 150) + 1,
+      nextOther: prevOtherBefore(p.nextOther, p.otherFrom),
+      doneDates: p.doneDates.filter((x) => x !== k),
+      progress,
+    };
   }
   if (!p.readDates?.includes(k) || !p.done.length) return p;
   return { ...p, done: p.done.slice(0, -1), readDates: p.readDates.filter((x) => x !== k), progress };
 }
 
 /** Whether today was marked read (a sequence plan only knows this for days marked since dates were recorded). */
-export const readOn = (p: Plan, d: Date) => (p.kind === "ppo" ? p.doneDates : p.readDates ?? []).includes(ymd(d));
+export const readOn = (p: Plan, d: Date) => (p.kind === "ppo" ? p.doneDates : (p.readDates ?? [])).includes(ymd(d));
 
 export interface Streak {
   /** Days in a row up to today, or up to yesterday while today isn't read yet. */
@@ -283,18 +349,26 @@ export interface Streak {
 
 /** Streaks from the dates a plan was read on. A weekdays-only plan doesn't break on weekends. */
 export function streak(p: Plan, now = today()): Streak {
-  const dates = new Set(p.kind === "ppo" ? p.doneDates : p.readDates ?? []);
+  const dates = new Set(p.kind === "ppo" ? p.doneDates : (p.readDates ?? []));
   const counts = (d: Date) => !(p.kind === "sequence" && p.weekdaysOnly && isWeekend(d));
-  const prev = (d: Date) => { let x = addDays(d, -1); while (!counts(x)) x = addDays(x, -1); return x; };
+  const prev = (d: Date) => {
+    let x = addDays(d, -1);
+    while (!counts(x)) x = addDays(x, -1);
+    return x;
+  };
   const read = (d: Date) => dates.has(ymd(d));
   let day = counts(now) ? now : prev(now);
   const isToday = read(now);
   if (!read(day)) day = prev(day);
   let current = 0;
-  while (read(day)) { current++; day = prev(day); }
+  while (read(day)) {
+    current++;
+    day = prev(day);
+  }
   let best = 0;
   const sorted = [...dates].sort();
-  let run = 0, last: Date | null = null;
+  let run = 0,
+    last: Date | null = null;
   for (const s of sorted) {
     const d = parseYmd(s);
     if (!counts(d)) continue;
@@ -316,7 +390,8 @@ export function tickPart(p: Plan, key: string, part: string, bibleParts: string[
   const done = Array.from(new Set([...doneToday(p, key), part]));
   let next: Plan = { ...p, progress: { key, done } };
   const dayRead = p.kind === "ppo" ? p.doneDates.includes(key) : p.done.includes(+key.slice(4));
-  if (!dayRead && bibleParts.length && bibleParts.every((x) => done.includes(x))) next = markDayRead(next, p.kind === "ppo" ? parseYmd(key) : d);
+  if (!dayRead && bibleParts.length && bibleParts.every((x) => done.includes(x)))
+    next = markDayRead(next, p.kind === "ppo" ? parseYmd(key) : d);
   return next;
 }
 
@@ -332,7 +407,12 @@ export function markPpoRead(p: PpoPlan, d: Date): PpoPlan {
 
 // ---------- summary for the sidebar ----------
 
-export interface Today { label: string; progress: string; pct: number; parts: Part[] }
+export interface Today {
+  label: string;
+  progress: string;
+  pct: number;
+  parts: Part[];
+}
 
 export function current(plans: Plan[]): Plan | undefined {
   return plans.find((p) => p.active);
@@ -347,13 +427,29 @@ export function todayFor(p: Plan): Today {
     const bs = otherBooks(p.otherFrom);
     const total = bs.reduce((n, b) => n + book(b).chapters, 0);
     let pos = 0;
-    for (const b of bs) { if (b === p.nextOther[0]) { pos += p.nextOther[1] - 1; break; } pos += book(b).chapters; }
-    return { label: parts.map((x) => partLabel(x).replace("Psalms", "Psalm")).join(" · "), progress: done ? "read today" : `day ${p.doneDates.length + 1}`, pct: Math.round((pos / total) * 100), parts };
+    for (const b of bs) {
+      if (b === p.nextOther[0]) {
+        pos += p.nextOther[1] - 1;
+        break;
+      }
+      pos += book(b).chapters;
+    }
+    return {
+      label: parts.map((x) => partLabel(x).replace("Psalms", "Psalm")).join(" · "),
+      progress: done ? "read today" : `day ${p.doneDates.length + 1}`,
+      pct: Math.round((pos / total) * 100),
+      parts,
+    };
   }
   const i = firstUndone(p);
   const idx = i < 0 ? p.days.length - 1 : i;
   const parts = p.days[idx] ?? [];
-  return { label: i < 0 ? "Finished" : dayLabel(parts), progress: `day ${idx + 1} of ${p.days.length}`, pct: Math.round((p.done.length / p.days.length) * 100), parts };
+  return {
+    label: i < 0 ? "Finished" : dayLabel(parts),
+    progress: `day ${idx + 1} of ${p.days.length}`,
+    pct: Math.round((p.done.length / p.days.length) * 100),
+    parts,
+  };
 }
 
 export function todayReading(app: { plans: Plan[] }): Today | null {

@@ -1,3 +1,6 @@
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
+
 import React from "react";
 import ReactDOM from "react-dom/client";
 import "@fontsource/cinzel-decorative/700.css";
@@ -19,7 +22,12 @@ import "./styles.css";
 // If anything fails before the first screen, say so on the splash rather than leaving it spinning.
 function showStartupError(msg: string) {
   const el = document.querySelector("#splash .what");
-  if (el) { el.textContent = `Something went wrong: ${msg}`; (el as HTMLElement).style.whiteSpace = "pre-wrap"; (el as HTMLElement).style.maxWidth = "80vw"; (el as HTMLElement).style.fontStyle = "normal"; }
+  if (el) {
+    el.textContent = `Something went wrong: ${msg}`;
+    (el as HTMLElement).style.whiteSpace = "pre-wrap";
+    (el as HTMLElement).style.maxWidth = "80vw";
+    (el as HTMLElement).style.fontStyle = "normal";
+  }
 }
 window.addEventListener("error", (e) => showStartupError(`${e.message}\n${e.error?.stack ?? ""}`.slice(0, 1200)));
 window.addEventListener("unhandledrejection", (e) => showStartupError(String(e.reason).slice(0, 1200)));

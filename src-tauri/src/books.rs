@@ -1,3 +1,6 @@
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
+
 //! A reference book written out as plain files, for Ask to search and read on demand instead of
 //! carrying the whole book in its prompt: `index.txt`, one `NN Title.txt` per chapter with
 //! paragraphs on their own lines, and each chart as `NN-imgK.png` where the text says
@@ -29,7 +32,12 @@ pub fn export(lib: &Library, root: &Path, module: &str, kind: Kind) -> Result<Ex
     let _held = lock.lock().unwrap_or_else(|e| e.into_inner());
     // The module file's size and date too, so a book e-Sword has updated is exported again.
     let meta = std::fs::metadata(&lib.module(kind, module)?.path).ok();
-    let mtime = meta.as_ref().and_then(|m| m.modified().ok()).and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok()).map(|d| d.as_secs()).unwrap_or(0);
+    let mtime = meta
+        .as_ref()
+        .and_then(|m| m.modified().ok())
+        .and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok())
+        .map(|d| d.as_secs())
+        .unwrap_or(0);
     let stamp = format!("{VERSION} {} {mtime}", meta.map(|m| m.len()).unwrap_or(0));
     if std::fs::read_to_string(dir.join(".complete")).ok() == Some(stamp.clone()) {
         return Ok(Export { dir: dir.to_string_lossy().into(), files });
@@ -93,14 +101,20 @@ pub fn paragraphs(html: &str) -> String {
         s = s.replace(pat, &format!("{pat}{PARA}"));
     }
     let text = plain(&s);
-    let paras: Vec<String> = text.split(PARA).map(|p| p.split_whitespace().collect::<Vec<_>>().join(" ")).filter(|p| !p.is_empty()).collect();
+    let paras: Vec<String> =
+        text.split(PARA).map(|p| p.split_whitespace().collect::<Vec<_>>().join(" ")).filter(|p| !p.is_empty()).collect();
     paras.join("\n\n")
 }
 
 fn data_uri(tag: &str) -> Option<(&str, &str)> {
     let start = tag.find("data:image/")? + "data:image/".len();
     let semi = tag[start..].find(";base64,")? + start;
-    let ext = match &tag[start..semi] { "jpeg" | "jpg" => "jpg", "gif" => "gif", "bmp" => "bmp", _ => "png" };
+    let ext = match &tag[start..semi] {
+        "jpeg" | "jpg" => "jpg",
+        "gif" => "gif",
+        "bmp" => "bmp",
+        _ => "png",
+    };
     let data = &tag[semi + 8..];
     let end = data.find(['"', '\'']).unwrap_or(data.len());
     Some((ext, &data[..end]))
@@ -108,16 +122,31 @@ fn data_uri(tag: &str) -> Option<(&str, &str)> {
 
 fn base64(s: &str) -> Option<Vec<u8>> {
     let val = |c: u8| -> Option<u32> {
-        Some(match c { b'A'..=b'Z' => c - b'A', b'a'..=b'z' => c - b'a' + 26, b'0'..=b'9' => c - b'0' + 52, b'+' | b'-' => 62, b'/' | b'_' => 63, _ => return None } as u32)
+        Some(match c {
+            b'A'..=b'Z' => c - b'A',
+            b'a'..=b'z' => c - b'a' + 26,
+            b'0'..=b'9' => c - b'0' + 52,
+            b'+' | b'-' => 62,
+            b'/' | b'_' => 63,
+            _ => return None,
+        } as u32)
     };
     let mut out = Vec::with_capacity(s.len() * 3 / 4);
     let (mut acc, mut bits) = (0u32, 0);
     for &c in s.as_bytes() {
-        if c == b'=' { break; }
-        if c.is_ascii_whitespace() { continue; }
+        if c == b'=' {
+            break;
+        }
+        if c.is_ascii_whitespace() {
+            continue;
+        }
         acc = (acc << 6) | val(c)?;
         bits += 6;
-        if bits >= 8 { bits -= 8; out.push((acc >> bits) as u8); acc &= (1 << bits) - 1; }
+        if bits >= 8 {
+            bits -= 8;
+            out.push((acc >> bits) as u8);
+            acc &= (1 << bits) - 1;
+        }
     }
     Some(out)
 }
@@ -128,7 +157,11 @@ fn sanitize(s: &str, max: usize) -> String {
     let t = t.split_whitespace().collect::<Vec<_>>().join(" ");
     let t: String = t.chars().take(max).collect();
     let t = t.trim_matches(|c: char| c == '.' || c == ' ').to_string();
-    if t.is_empty() { "untitled".into() } else { t }
+    if t.is_empty() {
+        "untitled".into()
+    } else {
+        t
+    }
 }
 
 pub fn root(data: &Path) -> PathBuf {

@@ -1,3 +1,6 @@
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
+
 mod assistant;
 mod books;
 mod content;
@@ -9,13 +12,13 @@ mod library;
 mod login_item;
 #[cfg(target_os = "macos")]
 mod login_launch;
+mod media;
 mod music;
 mod search;
 mod spell;
 mod store;
 mod study;
 mod tray;
-mod media;
 mod tts;
 
 use library::{Kind, Library, ModuleInfo};
@@ -62,7 +65,11 @@ struct LibraryDir {
 
 impl LibraryInfo {
     fn of(lib: &Library) -> LibraryInfo {
-        let dirs = lib.dirs.iter().map(|(source, p)| LibraryDir { source: *source, path: p.to_string_lossy().to_string(), found: p.is_dir() }).collect();
+        let dirs = lib
+            .dirs
+            .iter()
+            .map(|(source, p)| LibraryDir { source: *source, path: p.to_string_lossy().to_string(), found: p.is_dir() })
+            .collect();
         LibraryInfo { dirs, modules: lib.modules.clone() }
     }
 }
@@ -108,7 +115,7 @@ fn chapter_sizes(st: State<AppState>, bible: String) -> Result<Vec<(i64, i64, i6
 }
 
 #[tauri::command]
-fn commentary_ranges(st: State<AppState>, module: String) -> Result<Vec<(i64, i64, i64, i64, i64)>, String> {
+fn commentary_ranges(st: State<AppState>, module: String) -> Result<Vec<content::VerseRange>, String> {
     content::commentary_ranges(&st.lib(), &module)
 }
 
@@ -158,7 +165,13 @@ fn translit_search(st: State<AppState>, lexicon: String, query: String, limit: u
 }
 
 #[tauri::command(async)]
-fn strongs_verses(st: State<AppState>, bible: String, number: String, book: Option<i64>, limit: usize) -> Result<Vec<content::VerseHit>, String> {
+fn strongs_verses(
+    st: State<AppState>,
+    bible: String,
+    number: String,
+    book: Option<i64>,
+    limit: usize,
+) -> Result<Vec<content::VerseHit>, String> {
     content::strongs_verses(&st.lib(), &bible, &number, book, limit)
 }
 
@@ -206,7 +219,9 @@ fn journal_default_dir() -> String {
 /// A folder the user chose: an absolute path with no `..` in it.
 fn chosen_dir(dir: &str) -> Result<PathBuf, String> {
     let p = PathBuf::from(dir);
-    if !p.is_absolute() || p.components().any(|c| c == std::path::Component::ParentDir) { return Err(format!("not a usable folder: {dir}")); }
+    if !p.is_absolute() || p.components().any(|c| c == std::path::Component::ParentDir) {
+        return Err(format!("not a usable folder: {dir}"));
+    }
     Ok(p)
 }
 
@@ -225,13 +240,21 @@ fn journal_save(dir: String, entry: journal::Entry) -> Result<(), String> {
 // Music: each runs osascript, which can take a moment (and, the first time, waits on the
 // permission prompt), so off the main thread.
 #[tauri::command(async)]
-fn music_tracks() -> Result<Vec<music::Track>, String> { music::tracks() }
+fn music_tracks() -> Result<Vec<music::Track>, String> {
+    music::tracks()
+}
 #[tauri::command(async)]
-fn music_play(ids: Vec<String>) -> Result<usize, String> { music::play(&ids) }
+fn music_play(ids: Vec<String>) -> Result<usize, String> {
+    music::play(&ids)
+}
 #[tauri::command(async)]
-fn music_state() -> Result<music::State, String> { music::state() }
+fn music_state() -> Result<music::State, String> {
+    music::state()
+}
 #[tauri::command(async)]
-fn music_control(cmd: String) -> Result<(), String> { music::control(&cmd) }
+fn music_control(cmd: String) -> Result<(), String> {
+    music::control(&cmd)
+}
 
 /// While reading aloud, the display is kept from sleeping (so the screen doesn't lock) by a
 /// `caffeinate`, which ends with the reading, or with the app (-w) if it quits first.
@@ -243,9 +266,14 @@ fn keep_awake(on: bool) -> Result<(), String> {
     if on {
         // One at a time; a finished one (killed from outside) is replaced.
         if let Some(ch) = c.as_mut() {
-            if ch.try_wait().ok().flatten().is_none() { return Ok(()); }
+            if ch.try_wait().ok().flatten().is_none() {
+                return Ok(());
+            }
         }
-        let child = std::process::Command::new("/usr/bin/caffeinate").args(["-d", "-i", "-w", &std::process::id().to_string()]).spawn().map_err(|e| e.to_string())?;
+        let child = std::process::Command::new("/usr/bin/caffeinate")
+            .args(["-d", "-i", "-w", &std::process::id().to_string()])
+            .spawn()
+            .map_err(|e| e.to_string())?;
         *c = Some(child);
     } else if let Some(mut ch) = c.take() {
         let _ = ch.kill();
@@ -256,19 +284,37 @@ fn keep_awake(on: bool) -> Result<(), String> {
 
 // Spelling (spell.rs): not async, so they run on the main thread, as AppKit wants.
 #[tauri::command]
-fn spell_check(st: State<AppState>, text: String) -> Vec<(usize, usize)> { kjv_words(&st); spell::check(&text) }
+fn spell_check(st: State<AppState>, text: String) -> Vec<(usize, usize)> {
+    kjv_words(&st);
+    spell::check(&text)
+}
 #[tauri::command]
-fn spell_grammar(st: State<AppState>, text: String) -> Vec<spell::GrammarIssue> { kjv_words(&st); spell::grammar(&text) }
+fn spell_grammar(st: State<AppState>, text: String) -> Vec<spell::GrammarIssue> {
+    kjv_words(&st);
+    spell::grammar(&text)
+}
 /// The KJV's words, read here if a check comes before the start-up read has finished.
-fn kjv_words(st: &AppState) { if !spell::kjv_ready() { spell::load_kjv(&st.lib()); } }
+fn kjv_words(st: &AppState) {
+    if !spell::kjv_ready() {
+        spell::load_kjv(&st.lib());
+    }
+}
 #[tauri::command]
-fn spell_guesses(word: String) -> Vec<String> { spell::guesses(&word) }
+fn spell_guesses(word: String) -> Vec<String> {
+    spell::guesses(&word)
+}
 #[tauri::command]
-fn spell_correction(word: String) -> Option<String> { spell::correction(&word) }
+fn spell_correction(word: String) -> Option<String> {
+    spell::correction(&word)
+}
 #[tauri::command]
-fn spell_learn(word: String) { spell::learn(&word) }
+fn spell_learn(word: String) {
+    spell::learn(&word)
+}
 #[tauri::command]
-fn spell_ignore(word: String) { spell::ignore(&word) }
+fn spell_ignore(word: String) {
+    spell::ignore(&word)
+}
 
 #[tauri::command(async)]
 fn journal_stamp(dir: String) -> Result<String, String> {
@@ -286,7 +332,9 @@ fn write_text_file(path: String, text: String) -> Result<(), String> {
     let p = chosen_dir(&path)?;
     let name = p.file_name().and_then(|n| n.to_str()).unwrap_or("");
     let ext = p.extension().and_then(|e| e.to_str()).unwrap_or("").to_ascii_lowercase();
-    if name.starts_with('.') || !["md", "txt", "html", "json"].contains(&ext.as_str()) { return Err(format!("won't write {name}: only .md, .txt, .html or .json files")); }
+    if name.starts_with('.') || !["md", "txt", "html", "json"].contains(&ext.as_str()) {
+        return Err(format!("won't write {name}: only .md, .txt, .html or .json files"));
+    }
     store::write_text_atomic(&p, &text)
 }
 
@@ -298,7 +346,16 @@ async fn assistant_status() -> Result<assistant::CliStatus, String> {
 /// Async so finding the CLI (which can ask a login shell) doesn't hold up the window.
 #[tauri::command(async)]
 #[allow(clippy::too_many_arguments)]
-fn ask(app: AppHandle, st: State<AppState>, chat_id: String, prompt: String, model: String, session: Option<String>, book_dir: Option<String>, study_dir: Option<String>) -> Result<(), String> {
+fn ask(
+    app: AppHandle,
+    st: State<AppState>,
+    chat_id: String,
+    prompt: String,
+    model: String,
+    session: Option<String>,
+    book_dir: Option<String>,
+    study_dir: Option<String>,
+) -> Result<(), String> {
     // A folder chat runs in that folder with read-only search tools; only the app's own folders count.
     let root = study::root(&st.data);
     // Canonical first, so `..` can't lead out of them.
@@ -306,7 +363,11 @@ fn ask(app: AppHandle, st: State<AppState>, chat_id: String, prompt: String, mod
         let (d, top) = (std::fs::canonicalize(d?).ok()?, std::fs::canonicalize(top).ok()?);
         d.starts_with(&top).then_some(d)
     };
-    let folder = match (inside(book_dir, books::root(&st.data)), inside(study_dir.clone(), study::studies_root(&root)), inside(study_dir, study::journal_root(&root))) {
+    let folder = match (
+        inside(book_dir, books::root(&st.data)),
+        inside(study_dir.clone(), study::studies_root(&root)),
+        inside(study_dir, study::journal_root(&root)),
+    ) {
         (Some(b), _, _) => assistant::Folder::Book(b),
         (None, Some(dir), _) => assistant::Folder::Study(dir),
         (None, None, Some(dir)) => assistant::Folder::Journal(dir),
@@ -323,14 +384,25 @@ fn ask(app: AppHandle, st: State<AppState>, chat_id: String, prompt: String, mod
 #[tauri::command]
 async fn study_export(st: State<'_, AppState>, chat_id: String, req: study::Request) -> Result<String, String> {
     let (lib, root) = (st.lib(), study::root(&st.data));
-    tauri::async_runtime::spawn_blocking(move || study::export(&lib, &root, &chat_id, &req).map(|d| d.to_string_lossy().to_string())).await.map_err(|e| e.to_string())?
+    tauri::async_runtime::spawn_blocking(move || study::export(&lib, &root, &chat_id, &req).map(|d| d.to_string_lossy().to_string()))
+        .await
+        .map_err(|e| e.to_string())?
 }
 
 /// Writes out journal entries for a chat about them; returns the folder (passed to `ask` as its study_dir).
 #[tauri::command]
-async fn journal_export(st: State<'_, AppState>, chat_id: String, label: String, entries: Vec<study::JournalNote>) -> Result<String, String> {
+async fn journal_export(
+    st: State<'_, AppState>,
+    chat_id: String,
+    label: String,
+    entries: Vec<study::JournalNote>,
+) -> Result<String, String> {
     let root = study::root(&st.data);
-    tauri::async_runtime::spawn_blocking(move || study::export_journal(&root, &chat_id, &label, &entries).map(|d| d.to_string_lossy().to_string())).await.map_err(|e| e.to_string())?
+    tauri::async_runtime::spawn_blocking(move || {
+        study::export_journal(&root, &chat_id, &label, &entries).map(|d| d.to_string_lossy().to_string())
+    })
+    .await
+    .map_err(|e| e.to_string())?
 }
 
 #[tauri::command]
@@ -389,7 +461,9 @@ fn open_web(app: AppHandle, key: String, url: String, title: String, dark: bool)
         let _ = other.close();
     }
     let parsed: tauri::Url = url.parse().map_err(|e| format!("bad address: {e}"))?;
-    if parsed.scheme() != "https" { return Err("only https pages can be opened".into()); }
+    if parsed.scheme() != "https" {
+        return Err("only https pages can be opened".into());
+    }
     // Same size and place as the main window, so it reads like a page of the app.
     let main = app.get_webview_window("main");
     let frame = main.as_ref().and_then(|m| {
@@ -510,11 +584,16 @@ pub fn run() {
     let lib = Arc::new(Library::scan(library::dirs(read_esword(&data))));
     let index = Arc::new(index::Index::new(data.join("search-index.sqlite")));
     // The KJV's words, so the journal's spell checker takes its spellings as right.
-    { let lib = lib.clone(); std::thread::spawn(move || spell::load_kjv(&lib)); }
+    {
+        let lib = lib.clone();
+        std::thread::spawn(move || spell::load_kjv(&lib));
+    }
     {
         let (lib, index, ask_root) = (lib.clone(), index.clone(), study::root(&data));
         std::thread::spawn(move || {
-            if let Err(e) = index.update(&lib) { eprintln!("search index: {e}"); }
+            if let Err(e) = index.update(&lib) {
+                eprintln!("search index: {e}");
+            }
             // Then the dictionaries Ask searches, written out once (slow only the first time).
             study::prune(&ask_root);
             study::export_dictionaries(&lib, &ask_root);
@@ -523,7 +602,12 @@ pub fn run() {
     let state = AppState { lib_cell: std::sync::RwLock::new(lib), data, running: Arc::new(assistant::Running::default()), index };
 
     tauri::Builder::default()
-        .plugin(tauri_plugin_window_state::Builder::default().with_state_flags(STATE_FLAGS).with_filter(|label| !label.starts_with("web-")).build())
+        .plugin(
+            tauri_plugin_window_state::Builder::default()
+                .with_state_flags(STATE_FLAGS)
+                .with_filter(|label| !label.starts_with("web-"))
+                .build(),
+        )
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_notification::init())
@@ -642,7 +726,12 @@ pub fn run() {
                         unsafe {
                             use objc2::runtime::AnyObject;
                             let webview: *mut AnyObject = wv.inner() as *mut AnyObject;
-                            let color = objc2_app_kit::NSColor::colorWithSRGBRed_green_blue_alpha(r as f64 / 255.0, g as f64 / 255.0, b as f64 / 255.0, 1.0);
+                            let color = objc2_app_kit::NSColor::colorWithSRGBRed_green_blue_alpha(
+                                r as f64 / 255.0,
+                                g as f64 / 255.0,
+                                b as f64 / 255.0,
+                                1.0,
+                            );
                             let _: () = objc2::msg_send![webview, setUnderPageBackgroundColor: &*color];
                             let no = objc2_foundation::NSNumber::new_bool(false);
                             let key = objc2_foundation::NSString::from_str("drawsBackground");

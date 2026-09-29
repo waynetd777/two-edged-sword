@@ -1,3 +1,6 @@
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
+
 // Reading aloud with the voices macOS provides, through the native synthesiser (src-tauri/src/tts.rs;
 // WebKit's speech API hides downloaded Premium voices). One verse is one utterance; word events
 // drive the highlight in the text; at the end of a chapter it carries on into the next one when
@@ -35,7 +38,11 @@ export interface PlayerState {
 }
 
 /** For a guided session (Quiet time): stop at `toVerse`, and call `onEnd` when the reading finishes by itself. */
-export interface PlayOpts { toVerse?: number; onEnd?: () => void; /** The journal entry being read (module "journal"). */ id?: string }
+export interface PlayOpts {
+  toVerse?: number;
+  onEnd?: () => void;
+  /** The journal entry being read (module "journal"). */ id?: string;
+}
 
 interface PlayerCtx {
   state: PlayerState;
@@ -72,7 +79,9 @@ export function useListenKey(start: () => void) {
   useEffect(() => {
     const me = () => fn.current();
     starter.current = me;
-    return () => { if (starter.current === me) starter.current = null; };
+    return () => {
+      if (starter.current === me) starter.current = null;
+    };
   }, [starter]);
 }
 
@@ -106,7 +115,11 @@ export function spokenChapter(b: number, c: number, fromVerse?: number): string 
 
 /** A reference as it should be heard: "Exo 31:18" is "Exodus 31 18", "1 Cor 13" "First Corinthians 13". */
 function sayRef(r: Ref): string {
-  const name = book(r.book).name.replace(/^Psalms$/, "Psalm").replace(/^1 /, "First ").replace(/^2 /, "Second ").replace(/^3 /, "Third ");
+  const name = book(r.book)
+    .name.replace(/^Psalms$/, "Psalm")
+    .replace(/^1 /, "First ")
+    .replace(/^2 /, "Second ")
+    .replace(/^3 /, "Third ");
   if (!r.verse) return `${name} ${r.chapter}`;
   if (book(r.book).chapters === 1) return `${name} ${r.verse}${r.to && r.to !== r.verse ? ` to ${r.to}` : ""}`;
   if (r.toChapter && r.toChapter !== r.chapter) return `${name} ${r.chapter} ${r.verse} to ${r.toChapter} ${r.to}`;
@@ -118,17 +131,20 @@ function sayRef(r: Ref): string {
  * character of `text` it stands for, so the word highlight still lands on the page's words.
  */
 // Apple's character voices, in every language: last when Automatic picks one.
-const NOVELTY = /^(Eddy|Flo|Grandma|Grandpa|Reed|Rocko|Sandy|Shelley|Bahh|Bells|Boing|Bubbles|Cellos|Jester|Organ|Trinoids|Whisper|Zarvox|Wobble|Bad News|Good News|Superstar|Albert|Fred|Junior|Kathy|Ralph)\b/;
+const NOVELTY =
+  /^(Eddy|Flo|Grandma|Grandpa|Reed|Rocko|Sandy|Shelley|Bahh|Bells|Boing|Bubbles|Cellos|Jester|Organ|Trinoids|Whisper|Zarvox|Wobble|Bad News|Good News|Superstar|Albert|Fred|Junior|Kathy|Ralph)\b/;
 
 /** Voices best first: Premium, then Enhanced, then the rest, character voices last. */
-export const rankVoices = (vs: Voice[]) => [...vs].sort((a, b) => Number(NOVELTY.test(a.name)) - Number(NOVELTY.test(b.name)) || b.quality - a.quality);
+export const rankVoices = (vs: Voice[]) =>
+  [...vs].sort((a, b) => Number(NOVELTY.test(a.name)) - Number(NOVELTY.test(b.name)) || b.quality - a.quality);
 
 /** A Latin Bible: the Vulgates (Latin, Latin+, Vulg-C, Vulg-C+). */
 export const isLatin = (m?: { title: string; abbrev: string }) => !!m && /\b(latin|vulg)/i.test(`${m.title} ${m.abbrev}`);
 
 /** "he" for a text mostly in Hebrew letters, "el" for Greek, else null. */
 export function scriptOf(text: string): "he" | "el" | null {
-  const he = (text.match(/[\u0590-\u05FF]/g) ?? []).length, el = (text.match(/[\u0370-\u03FF\u1F00-\u1FFF]/g) ?? []).length;
+  const he = (text.match(/[\u0590-\u05FF]/g) ?? []).length,
+    el = (text.match(/[\u0370-\u03FF\u1F00-\u1FFF]/g) ?? []).length;
   const en = (text.match(/[A-Za-z]/g) ?? []).length;
   if (he > en && he >= el) return "he";
   if (el > en) return "el";
@@ -142,15 +158,21 @@ export function scriptOf(text: string): "he" | "el" | null {
  * blanked out, the same length.
  */
 export function speechText(html: string): string {
-  return tokenize(html).map((t) => (t.variant ? " ".repeat(t.text.length) : t.text)).join("");
+  return tokenize(html)
+    .map((t) => (t.variant ? " ".repeat(t.text.length) : t.text))
+    .join("");
 }
 
 export function speakable(text: string): { spoken: string; at: number[] } {
   // e-Sword writes references "Psa_82:1"; the same length with a space, so positions hold.
   const t = text.replace(/([A-Za-z])_(\d)/g, "$1 $2");
-  let spoken = "", last = 0;
+  let spoken = "",
+    last = 0;
   const at: number[] = [];
-  const copy = (to: number) => { for (let k = last; k < to; k++) at.push(k); spoken += t.slice(last, to); };
+  const copy = (to: number) => {
+    for (let k = last; k < to; k++) at.push(k);
+    spoken += t.slice(last, to);
+  };
   for (const h of findRefs(t, true)) {
     copy(h.index);
     const say = sayRef(h.ref);
@@ -163,7 +185,21 @@ export function speakable(text: string): { spoken: string; at: number[] } {
   return { spoken, at };
 }
 
-const IDLE: PlayerState = { on: false, paused: false, bible: "", book: 0, chapter: 0, verse: 0, count: 0, char: -1, len: 0, sleepAt: null, sleepEndOfChapter: false, sleepChoice: null, doc: null };
+const IDLE: PlayerState = {
+  on: false,
+  paused: false,
+  bible: "",
+  book: 0,
+  chapter: 0,
+  verse: 0,
+  count: 0,
+  char: -1,
+  len: 0,
+  sleepAt: null,
+  sleepEndOfChapter: false,
+  sleepChoice: null,
+  doc: null,
+};
 
 export function PlayerProvider({ children }: { children: ReactNode }) {
   const app = useApp();
@@ -187,7 +223,11 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
   // Reloaded when the window regains focus, so voices downloaded in System Settings appear.
   useEffect(() => {
-    const load = () => api.ttsVoices().then(setAllVoices).catch(() => {});
+    const load = () =>
+      api
+        .ttsVoices()
+        .then(setAllVoices)
+        .catch(() => {});
     load();
     window.addEventListener("focus", load);
     return () => window.removeEventListener("focus", load);
@@ -200,10 +240,17 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     const un = listen<TtsEvent>("tts", ({ payload: e }) => {
       const u = utt.current;
       if (!u || e.id !== u.id || e.id !== gen.current) return;
-      if (e.kind === "word") { const k = e.char - u.prefix; setState((p) => ({ ...p, char: k < 0 ? k : u.at[k] ?? k })); }
-      else { utt.current = null; u.onEnd(); }
+      if (e.kind === "word") {
+        const k = e.char - u.prefix;
+        setState((p) => ({ ...p, char: k < 0 ? k : (u.at[k] ?? k) }));
+      } else {
+        utt.current = null;
+        u.onEnd();
+      }
     });
-    return () => { un.then((f) => f()); };
+    return () => {
+      un.then((f) => f());
+    };
   }, []);
 
   // Settings keep the voice's identifier; a name (or an old WebKit voiceURI) still matches.
@@ -216,12 +263,21 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     if (lang) {
       const s = settings.current;
       const want = lang === "he" ? s.voiceHebrew : lang === "el" ? s.voiceGreek : s.voiceLatin;
-      const mine = voicesRef.current.filter((v) => v.lang.startsWith(lang === "la" ? "it" : lang) || (lang === "la" && v.lang.startsWith("la")));
+      const mine = voicesRef.current.filter(
+        (v) => v.lang.startsWith(lang === "la" ? "it" : lang) || (lang === "la" && v.lang.startsWith("la")),
+      );
       const v = mine.find((x) => x.id === want) ?? rankVoices(mine)[0];
       if (v) return v.id;
     }
-    const all = voicesRef.current.filter((v) => v.lang.startsWith("en")), want = settings.current.voice;
-    return (all.find((v) => v.id === want) ?? voicesRef.current.find((v) => v.id === want) ?? all.find((v) => v.name === want) ?? all.find((v) => v.default) ?? all[0])?.id;
+    const all = voicesRef.current.filter((v) => v.lang.startsWith("en")),
+      want = settings.current.voice;
+    return (
+      all.find((v) => v.id === want) ??
+      voicesRef.current.find((v) => v.id === want) ??
+      all.find((v) => v.name === want) ??
+      all.find((v) => v.default) ??
+      all[0]
+    )?.id;
   }, []);
 
   const stop = useCallback(() => {
@@ -245,116 +301,203 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   // A book's next or previous chapter, from its start, after `wait` ms; `g` is the reading's generation.
   const turnDoc = (d: 1 | -1, g: number, wait: number) => {
     const { module, title, kind } = st.current.doc!;
-    api.referenceTitles(module).then(async (ts) => {
-      const next = ts[ts.indexOf(title) + d];
-      // Past the last chapter the reading ends; before the first, this one starts again.
-      if (!next) { if (g === gen.current) { if (d > 0) stop(); else speakFrom(0); } return; }
-      const art = await api.article("reference", module, next);
-      if (g !== gen.current) return;
-      const segs = docSegments(art?.html ?? "");
-      verses.current = segs.map((text, k) => ({ v: k + 1, text }));
-      const doc = { module, title: next, kind };
-      announce.current = next;
-      st.current = { ...st.current, doc, paused: false };
-      setState((p) => ({ ...p, doc, paused: false, verse: 1, count: segs.length, char: -1 }));
-      // Turn the page too, if the book is open.
-      if (appRef.current.doc?.module === module && appRef.current.doc.title === title) appRef.current.openDoc(module, next, kind);
-      window.setTimeout(() => { if (g === gen.current) speakFrom(0); }, wait);
-    }).catch(() => { if (g === gen.current) stop(); });
+    api
+      .referenceTitles(module)
+      .then(async (ts) => {
+        const next = ts[ts.indexOf(title) + d];
+        // Past the last chapter the reading ends; before the first, this one starts again.
+        if (!next) {
+          if (g === gen.current) {
+            if (d > 0) stop();
+            else speakFrom(0);
+          }
+          return;
+        }
+        const art = await api.article("reference", module, next);
+        if (g !== gen.current) return;
+        const segs = docSegments(art?.html ?? "");
+        verses.current = segs.map((text, k) => ({ v: k + 1, text }));
+        const doc = { module, title: next, kind };
+        announce.current = next;
+        st.current = { ...st.current, doc, paused: false };
+        setState((p) => ({ ...p, doc, paused: false, verse: 1, count: segs.length, char: -1 }));
+        // Turn the page too, if the book is open.
+        if (appRef.current.doc?.module === module && appRef.current.doc.title === title) appRef.current.openDoc(module, next, kind);
+        window.setTimeout(() => {
+          if (g === gen.current) speakFrom(0);
+        }, wait);
+      })
+      .catch(() => {
+        if (g === gen.current) stop();
+      });
   };
 
-  const speakFrom = useCallback((i: number) => {
-    held.current = false;
-    resumeAt.current = null;
-    const g = ++gen.current;
-    api.ttsStop();
-    const vs = verses.current;
-    const s = st.current;
-    if (s.sleepAt && Date.now() > s.sleepAt) { stop(); return; }
-    // Finished by itself in a guided session: hand over rather than carry on (a sleep timer set for
-    // the end of the chapter ends the session too).
-    const to = opts.current.toVerse;
-    if (opts.current.onEnd && (i >= vs.length || (to && vs[i].v > to))) {
-      const next = s.sleepEndOfChapter ? undefined : opts.current.onEnd;
-      stop();
-      next?.();
-      return;
-    }
-    if (i >= vs.length && s.doc) {
-      // A journal entry goes on to the next one in the list, when Settings says so.
-      if (s.doc.module === "journal") {
-        if (!settings.current.continueEntry || s.sleepEndOfChapter || !nextEntry(s.doc.id, 1)) { stop(); return; }
-        window.setTimeout(() => { if (g === gen.current) jumpRef.current(1); }, 600);
+  const speakFrom = useCallback(
+    (i: number) => {
+      held.current = false;
+      resumeAt.current = null;
+      const g = ++gen.current;
+      api.ttsStop();
+      const vs = verses.current;
+      const s = st.current;
+      if (s.sleepAt && Date.now() > s.sleepAt) {
+        stop();
         return;
       }
-      // A devotional is one day's reading; only a book carries on into its next chapter.
-      if (s.doc.kind === "devotional" || !settings.current.continueChapter || s.sleepEndOfChapter) { stop(); return; }
-      turnDoc(1, g, 600);
-      return;
-    }
-    if (i >= vs.length) {
-      if (settings.current.continueChapter && !s.sleepEndOfChapter) {
-        // On in reading order, the Bible's own: into its Apocrypha after Malachi, if it has them.
-        bibleSizes(s.bible).then((sizes) => {
-          const nx = stepChapter(s.book, s.chapter, 1, sizes.size ? sizes : null);
-          if (!nx) { if (g === gen.current) stop(); return null; }
-          return api.chapter(s.bible, nx[0], nx[1]).then((v) => [nx, v] as const);
-        }).then((got) => {
-          if (!got) return;
-          const [nx, v] = got;
-          if (g !== gen.current) return;
-          verses.current = v;
-          announce.current = spokenChapter(nx[0], nx[1]);
-          setState((p) => ({ ...p, book: nx[0], chapter: nx[1], verse: v[0]?.v ?? 1, count: v.length, char: -1 }));
-          st.current = { ...st.current, book: nx[0], chapter: nx[1] };
-          window.setTimeout(() => { if (g === gen.current) speakFrom(0); }, 600);
-        }).catch((e) => { console.error(e); if (g === gen.current) stop(); });
-      } else stop();
-      return;
-    }
-    const verse = vs[i];
-    const text = s.doc ? plainText(verse.text) : speechText(verse.text);
-    if (!text) { setState((p) => ({ ...p, verse: verse.v, char: -1, len: 0 })); speakFrom(i + 1); return; }
-    const heading = announce.current ? `${announce.current}. ` : "";
-    announce.current = null;
-    // The heading and verse number are English: not said in a Hebrew, Greek or Latin voice.
-    const latin = !s.doc && isLatin(appRef.current.mod("bible", s.bible));
-    const prefix = scriptOf(text) || latin ? "" : heading + (settings.current.readNumbers && !s.doc ? `Verse ${verse.v}. ` : "");
-    const { spoken, at } = speakable(text);
-    // Paused just as the verse ended: play goes on from the next one.
-    utt.current = { id: g, prefix: prefix.length, at, onEnd: () => { if (st.current.paused) { held.current = false; resumeAt.current = i + 1; } else speakFrom(i + 1); } };
-    held.current = false;
-    setState((p) => ({ ...p, verse: verse.v, char: -1, len: text.length }));
-    api.ttsSpeak(g, prefix + spoken, voiceFor(text, latin), settings.current.rate).catch(() => { if (g === gen.current) stop(); });
-  }, [stop, voiceFor]);
+      // Finished by itself in a guided session: hand over rather than carry on (a sleep timer set for
+      // the end of the chapter ends the session too).
+      const to = opts.current.toVerse;
+      if (opts.current.onEnd && (i >= vs.length || (to && vs[i].v > to))) {
+        const next = s.sleepEndOfChapter ? undefined : opts.current.onEnd;
+        stop();
+        next?.();
+        return;
+      }
+      if (i >= vs.length && s.doc) {
+        // A journal entry goes on to the next one in the list, when Settings says so.
+        if (s.doc.module === "journal") {
+          if (!settings.current.continueEntry || s.sleepEndOfChapter || !nextEntry(s.doc.id, 1)) {
+            stop();
+            return;
+          }
+          window.setTimeout(() => {
+            if (g === gen.current) jumpRef.current(1);
+          }, 600);
+          return;
+        }
+        // A devotional is one day's reading; only a book carries on into its next chapter.
+        if (s.doc.kind === "devotional" || !settings.current.continueChapter || s.sleepEndOfChapter) {
+          stop();
+          return;
+        }
+        turnDoc(1, g, 600);
+        return;
+      }
+      if (i >= vs.length) {
+        if (settings.current.continueChapter && !s.sleepEndOfChapter) {
+          // On in reading order, the Bible's own: into its Apocrypha after Malachi, if it has them.
+          bibleSizes(s.bible)
+            .then((sizes) => {
+              const nx = stepChapter(s.book, s.chapter, 1, sizes.size ? sizes : null);
+              if (!nx) {
+                if (g === gen.current) stop();
+                return null;
+              }
+              return api.chapter(s.bible, nx[0], nx[1]).then((v) => [nx, v] as const);
+            })
+            .then((got) => {
+              if (!got) return;
+              const [nx, v] = got;
+              if (g !== gen.current) return;
+              verses.current = v;
+              announce.current = spokenChapter(nx[0], nx[1]);
+              setState((p) => ({ ...p, book: nx[0], chapter: nx[1], verse: v[0]?.v ?? 1, count: v.length, char: -1 }));
+              st.current = { ...st.current, book: nx[0], chapter: nx[1] };
+              window.setTimeout(() => {
+                if (g === gen.current) speakFrom(0);
+              }, 600);
+            })
+            .catch((e) => {
+              console.error(e);
+              if (g === gen.current) stop();
+            });
+        } else stop();
+        return;
+      }
+      const verse = vs[i];
+      const text = s.doc ? plainText(verse.text) : speechText(verse.text);
+      if (!text) {
+        setState((p) => ({ ...p, verse: verse.v, char: -1, len: 0 }));
+        speakFrom(i + 1);
+        return;
+      }
+      const heading = announce.current ? `${announce.current}. ` : "";
+      announce.current = null;
+      // The heading and verse number are English: not said in a Hebrew, Greek or Latin voice.
+      const latin = !s.doc && isLatin(appRef.current.mod("bible", s.bible));
+      const prefix = scriptOf(text) || latin ? "" : heading + (settings.current.readNumbers && !s.doc ? `Verse ${verse.v}. ` : "");
+      const { spoken, at } = speakable(text);
+      // Paused just as the verse ended: play goes on from the next one.
+      utt.current = {
+        id: g,
+        prefix: prefix.length,
+        at,
+        onEnd: () => {
+          if (st.current.paused) {
+            held.current = false;
+            resumeAt.current = i + 1;
+          } else speakFrom(i + 1);
+        },
+      };
+      held.current = false;
+      setState((p) => ({ ...p, verse: verse.v, char: -1, len: text.length }));
+      api.ttsSpeak(g, prefix + spoken, voiceFor(text, latin), settings.current.rate).catch(() => {
+        if (g === gen.current) stop();
+      });
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [stop, voiceFor],
+  );
 
-  const play = useCallback((bible: string, b: number, c: number, fromVerse?: number, o: PlayOpts = {}) => {
-    // A Stop, or another Play, while the chapter loads wins over this one.
-    const g = ++gen.current;
-    api.chapter(bible, b, c).then((v) => {
-      if (g !== gen.current) return;
+  const play = useCallback(
+    (bible: string, b: number, c: number, fromVerse?: number, o: PlayOpts = {}) => {
+      // A Stop, or another Play, while the chapter loads wins over this one.
+      const g = ++gen.current;
+      api
+        .chapter(bible, b, c)
+        .then((v) => {
+          if (g !== gen.current) return;
+          opts.current = o;
+          verses.current = v;
+          announce.current = spokenChapter(b, c, fromVerse);
+          const i = Math.max(0, fromVerse ? v.findIndex((x) => x.v === fromVerse) : 0);
+          const next = {
+            ...st.current,
+            on: true,
+            paused: false,
+            bible,
+            book: b,
+            chapter: c,
+            verse: v[i]?.v ?? 1,
+            count: v.length,
+            char: -1,
+            doc: null,
+          };
+          st.current = next;
+          setState(next);
+          speakFrom(i);
+        })
+        .catch((e) => {
+          console.error(e);
+          if (g === gen.current) stop();
+        });
+    },
+    [speakFrom, stop],
+  );
+
+  const playDoc = useCallback(
+    (module: string, title: string, paragraphs: string[], from = 0, kind: "reference" | "devotional" = "reference", o: PlayOpts = {}) => {
       opts.current = o;
-      verses.current = v;
-      announce.current = spokenChapter(b, c, fromVerse);
-      const i = Math.max(0, fromVerse ? v.findIndex((x) => x.v === fromVerse) : 0);
-      const next = { ...st.current, on: true, paused: false, bible, book: b, chapter: c, verse: v[i]?.v ?? 1, count: v.length, char: -1, doc: null };
+      // A devotional is announced by name and day ("Morning & Evening, September 24"), a book by its chapter.
+      announce.current =
+        from > 0 ? null : kind === "devotional" ? `${appRef.current.mod("devotional", module)?.abbrev || module}, ${title}` : title;
+      verses.current = paragraphs.map((text, k) => ({ v: k + 1, text }));
+      const i = Math.max(0, Math.min(from, paragraphs.length - 1));
+      const next = {
+        ...st.current,
+        on: true,
+        paused: false,
+        doc: { module, title, kind, id: o.id },
+        verse: i + 1,
+        count: paragraphs.length,
+        char: -1,
+      };
       st.current = next;
       setState(next);
       speakFrom(i);
-    }).catch((e) => { console.error(e); if (g === gen.current) stop(); });
-  }, [speakFrom, stop]);
-
-  const playDoc = useCallback((module: string, title: string, paragraphs: string[], from = 0, kind: "reference" | "devotional" = "reference", o: PlayOpts = {}) => {
-    opts.current = o;
-    // A devotional is announced by name and day ("Morning & Evening, September 24"), a book by its chapter.
-    announce.current = from > 0 ? null : kind === "devotional" ? `${appRef.current.mod("devotional", module)?.abbrev || module}, ${title}` : title;
-    verses.current = paragraphs.map((text, k) => ({ v: k + 1, text }));
-    const i = Math.max(0, Math.min(from, paragraphs.length - 1));
-    const next = { ...st.current, on: true, paused: false, doc: { module, title, kind, id: o.id }, verse: i + 1, count: paragraphs.length, char: -1 };
-    st.current = next;
-    setState(next);
-    speakFrom(i);
-  }, [speakFrom]);
+    },
+    [speakFrom],
+  );
 
   // Pause holds the utterance mid-word and play carries on from there. Only when something else
   // has been said in between (a word pronounced, a new speed or voice) is the verse begun again.
@@ -364,47 +507,67 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     if (s.paused) {
       st.current = { ...s, paused: false };
       setState((p) => ({ ...p, paused: false }));
-      if (held.current && utt.current?.id === gen.current) { held.current = false; api.ttsPause(false); }
-      else speakFrom(resumeAt.current ?? Math.max(0, verses.current.findIndex((v) => v.v === s.verse)));
+      if (held.current && utt.current?.id === gen.current) {
+        held.current = false;
+        api.ttsPause(false);
+      } else
+        speakFrom(
+          resumeAt.current ??
+            Math.max(
+              0,
+              verses.current.findIndex((v) => v.v === s.verse),
+            ),
+        );
     } else {
       st.current = { ...s, paused: true };
-      if (utt.current?.id === gen.current) { held.current = true; api.ttsPause(true); }
-      else { gen.current++; api.ttsStop(); } // between verses, or a chapter still loading
+      if (utt.current?.id === gen.current) {
+        held.current = true;
+        api.ttsPause(true);
+      } else {
+        gen.current++;
+        api.ttsStop();
+      } // between verses, or a chapter still loading
       setState((p) => ({ ...p, paused: true }));
     }
   }, [speakFrom]);
 
-  const skip = useCallback((d: number) => {
-    const s = st.current;
-    if (!s.on) return;
-    const i = verses.current.findIndex((v) => v.v === s.verse) + d;
-    setState((p) => ({ ...p, paused: false }));
-    speakFrom(Math.max(0, i));
-  }, [speakFrom]);
+  const skip = useCallback(
+    (d: number) => {
+      const s = st.current;
+      if (!s.on) return;
+      const i = verses.current.findIndex((v) => v.v === s.verse) + d;
+      setState((p) => ({ ...p, paused: false }));
+      speakFrom(Math.max(0, i));
+    },
+    [speakFrom],
+  );
 
   // F7 and F9: the previous or next chapter of the Bible or book, or journal entry (in the
   // journal's order, skipping empty ones). Not in a Quiet time's reading, which has its own steps.
-  const jump = useCallback((d: 1 | -1) => {
-    const s = st.current;
-    if (!s.on || opts.current.onEnd) return;
-    if (s.doc?.module === "journal") {
-      const n = nextEntry(s.doc.id, d);
-      if (n) playDoc("journal", n.entry.title || "Untitled entry", n.paras, 0, "reference", { id: n.entry.id });
-      return;
-    }
-    if (s.doc) {
-      if (s.doc.kind === "devotional") return;
-      const g = ++gen.current;
-      api.ttsStop();
-      turnDoc(d, g, 0);
-      return;
-    }
-    bibleSizes(s.bible).then((sizes) => {
-      const n = stepChapter(s.book, s.chapter, d, sizes.size ? sizes : null);
-      if (n && st.current.bible === s.bible && st.current.book === s.book && st.current.chapter === s.chapter) play(s.bible, n[0], n[1]);
-    });
+  const jump = useCallback(
+    (d: 1 | -1) => {
+      const s = st.current;
+      if (!s.on || opts.current.onEnd) return;
+      if (s.doc?.module === "journal") {
+        const n = nextEntry(s.doc.id, d);
+        if (n) playDoc("journal", n.entry.title || "Untitled entry", n.paras, 0, "reference", { id: n.entry.id });
+        return;
+      }
+      if (s.doc) {
+        if (s.doc.kind === "devotional") return;
+        const g = ++gen.current;
+        api.ttsStop();
+        turnDoc(d, g, 0);
+        return;
+      }
+      bibleSizes(s.bible).then((sizes) => {
+        const n = stepChapter(s.book, s.chapter, d, sizes.size ? sizes : null);
+        if (n && st.current.bible === s.bible && st.current.book === s.book && st.current.chapter === s.chapter) play(s.bible, n[0], n[1]);
+      });
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [play, playDoc]);
+    [play, playDoc],
+  );
 
   jumpRef.current = jump;
 
@@ -413,15 +576,32 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   // F keys arrive here; otherwise macOS sends them as media keys, through media.rs.
   const starter = useRef<(() => void) | null>(null);
   const quiet = useRef<{ step: (d: 1 | -1) => void; start: () => void } | null>(null);
-  const playPause = useCallback(() => { if (st.current.on) toggle(); else (quiet.current?.start ?? starter.current)?.(); }, [toggle]);
-  const step = useCallback((d: 1 | -1) => { if (quiet.current) quiet.current.step(d); else jump(d); }, [jump]);
+  const playPause = useCallback(() => {
+    if (st.current.on) toggle();
+    else (quiet.current?.start ?? starter.current)?.();
+  }, [toggle]);
+  const step = useCallback(
+    (d: 1 | -1) => {
+      if (quiet.current) quiet.current.step(d);
+      else jump(d);
+    },
+    [jump],
+  );
   // In a Quiet time's Worship part the F keys stay the music's.
-  const worship = () => { const q = appRef.current.session; return q?.steps[q.i]?.kind === "worship"; };
+  const worship = () => {
+    const q = appRef.current.session;
+    return q?.steps[q.i]?.kind === "worship";
+  };
   useEffect(() => {
     const k = (e: KeyboardEvent) => {
       if (/^F[789]$/.test(e.key) && worship()) return;
-      if ((e.metaKey && !e.shiftKey && !e.altKey && !e.ctrlKey && e.key.toLowerCase() === "p") || e.key === "F8") { e.preventDefault(); playPause(); }
-      else if ((e.key === "F7" || e.key === "F9") && (st.current.on || quiet.current)) { e.preventDefault(); step(e.key === "F9" ? 1 : -1); }
+      if ((e.metaKey && !e.shiftKey && !e.altKey && !e.ctrlKey && e.key.toLowerCase() === "p") || e.key === "F8") {
+        e.preventDefault();
+        playPause();
+      } else if ((e.key === "F7" || e.key === "F9") && (st.current.on || quiet.current)) {
+        e.preventDefault();
+        step(e.key === "F9" ? 1 : -1);
+      }
     };
     window.addEventListener("keydown", k);
     const un = listen<string>("media", ({ payload: m }) => {
@@ -430,12 +610,17 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       if (m === "toggle" || (m === "play" && (!s.on || s.paused)) || (m === "pause" && s.on && !s.paused)) playPause();
       else if (m === "next" || m === "previous") step(m === "next" ? 1 : -1);
     });
-    return () => { window.removeEventListener("keydown", k); un.then((f) => f()); };
+    return () => {
+      window.removeEventListener("keydown", k);
+      un.then((f) => f());
+    };
   }, [playPause, step]);
 
   // Tell macOS what is being read, so the media keys and Control Centre come here.
   const npTitle = !state.on ? null : state.doc ? state.doc.title : state.book ? `${book(state.book).name} ${state.chapter}` : null;
-  useEffect(() => { api.mediaState(npTitle, state.on && !state.paused).catch(() => {}); }, [npTitle, state.on, state.paused]);
+  useEffect(() => {
+    api.mediaState(npTitle, state.on && !state.paused).catch(() => {});
+  }, [npTitle, state.on, state.paused]);
 
   const sleep = useCallback((m: number | "chapter" | null) => {
     const next = { sleepAt: typeof m === "number" ? Date.now() + m * 60000 : null, sleepEndOfChapter: m === "chapter", sleepChoice: m };
@@ -444,10 +629,20 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // A change of speed or voice takes effect from the current verse.
-  const rate = app.settings.rate, voice = app.settings.voice, voiceHe = app.settings.voiceHebrew, voiceEl = app.settings.voiceGreek, voiceLa = app.settings.voiceLatin;
+  const rate = app.settings.rate,
+    voice = app.settings.voice,
+    voiceHe = app.settings.voiceHebrew,
+    voiceEl = app.settings.voiceGreek,
+    voiceLa = app.settings.voiceLatin;
   useEffect(() => {
     const s = st.current;
-    if (s.on && !s.paused) speakFrom(Math.max(0, verses.current.findIndex((v) => v.v === s.verse)));
+    if (s.on && !s.paused)
+      speakFrom(
+        Math.max(
+          0,
+          verses.current.findIndex((v) => v.v === s.verse),
+        ),
+      );
     else held.current = false; // paused: play begins the verse again, in the new speed or voice
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rate, voice, voiceHe, voiceEl, voiceLa]);
@@ -470,38 +665,74 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shownBible]);
 
-  useEffect(() => () => { api.ttsStop(); }, []);
+  useEffect(
+    () => () => {
+      api.ttsStop();
+    },
+    [],
+  );
 
   // In a Greek or Hebrew voice when one is installed (macOS has Melina and Carmit; both speak the
   // modern language), otherwise Strong's pronunciation guide ("ag-ah'-pay") in the reading voice.
   // Utterance id 0 is never a reading's, so its events are ignored.
-  const say = useCallback(async (word: string, num: string, pron?: string) => {
-    const s = st.current;
-    if (s.on && !s.paused) { gen.current++; st.current = { ...s, paused: true }; setState((p) => ({ ...p, paused: true })); }
-    held.current = false;
-    const lang = num.startsWith("H") ? "he" : "el";
-    const v = (await api.ttsVoices().catch(() => [])).filter((x) => x.lang.startsWith(lang)).sort((a, b) => b.quality - a.quality)[0];
-    if (v) api.ttsSpeak(0, word, v.id, 0.8);
-    else if (pron) api.ttsSpeak(0, pron.replace(/[-'ʼ]/g, " "), voiceFor(), 0.9);
-  }, [voiceFor]);
+  const say = useCallback(
+    async (word: string, num: string, pron?: string) => {
+      const s = st.current;
+      if (s.on && !s.paused) {
+        gen.current++;
+        st.current = { ...s, paused: true };
+        setState((p) => ({ ...p, paused: true }));
+      }
+      held.current = false;
+      const lang = num.startsWith("H") ? "he" : "el";
+      const v = (await api.ttsVoices().catch(() => [])).filter((x) => x.lang.startsWith(lang)).sort((a, b) => b.quality - a.quality)[0];
+      if (v) api.ttsSpeak(0, word, v.id, 0.8);
+      else if (pron) api.ttsSpeak(0, pron.replace(/[-'ʼ]/g, " "), voiceFor(), 0.9);
+    },
+    [voiceFor],
+  );
 
-  const still = useCallback((s: Partial<PlayerState>) => { const next = { ...IDLE, on: true, ...s }; st.current = next; setState(next); }, []);
+  const still = useCallback((s: Partial<PlayerState>) => {
+    const next = { ...IDLE, on: true, ...s };
+    st.current = next;
+    setState(next);
+  }, []);
 
   // Reading aloud anywhere keeps the screen from sleeping and locking; pausing or stopping lets it.
   const awake = state.on && !state.paused;
-  useEffect(() => { api.keepAwake(awake).catch(() => {}); }, [awake]);
+  useEffect(() => {
+    api.keepAwake(awake).catch(() => {});
+  }, [awake]);
 
-  return <Ctx.Provider value={{ state, voices, allVoices, play, playDoc, toggle, stop, skip, jump, starter, quiet, sleep, say, still }}>{children}</Ctx.Provider>;
+  return (
+    <Ctx.Provider value={{ state, voices, allVoices, play, playDoc, toggle, stop, skip, jump, starter, quiet, sleep, say, still }}>
+      {children}
+    </Ctx.Provider>
+  );
 }
 
 /** A speaker button that pronounces an original-language word. A span, not a button, so it can sit
  *  inside a row that is itself a button; it stops the click reaching the row. */
 export function SayButton({ word, num, pron, size = 14 }: { word: string; num: string; pron?: string; size?: number }) {
   const { say } = usePlayer();
-  const go = (e: React.SyntheticEvent) => { e.stopPropagation(); e.preventDefault(); say(word, num, pron); };
+  const go = (e: React.SyntheticEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    say(word, num, pron);
+  };
   return (
-    <span role="button" tabIndex={0} className="ibtn say" aria-label={`Pronounce ${word}`} title="Pronounce" onClick={go}
-      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") go(e); }} style={{ width: size + 12, height: size + 12, alignSelf: "center" }}>
+    <span
+      role="button"
+      tabIndex={0}
+      className="ibtn say"
+      aria-label={`Pronounce ${word}`}
+      title="Pronounce"
+      onClick={go}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") go(e);
+      }}
+      style={{ width: size + 12, height: size + 12, alignSelf: "center" }}
+    >
       <Icon name="speaker" size={size} />
     </span>
   );

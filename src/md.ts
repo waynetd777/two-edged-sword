@@ -1,3 +1,6 @@
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
+
 // The small Markdown the journal is stored in, and the HTML the editor shows. Only what the
 // journal toolbar can make round-trips: headings (###), bold, italic, quotes, bullet and
 // numbered lists, and paragraphs. Verse references anywhere in the text become links.
@@ -9,35 +12,55 @@ const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replac
 // "John 3:16", "1 John 4:9-10", "Joh 3:16", "Num 21:8–9", "Ps 23:1"; as spoken, "1 John 5, verse 4"
 // and "Job 19, verses 25 to 27", "Genesis chapter 3:1 - 5"; a whole chapter, "Hebrews 11"; and a
 // range into a later chapter, "Mat 5:3-7:29".
-const REF_RE = /\b((?:[123]\s?)?[A-Z][a-z]{1,15}(?:\s(?:of\s)?(?!Chapter\b)[A-Z][a-z]+)?)\.?\s(?:(?:[Cc]hapter|[Cc]hap\.|[Cc]h\.)\s)?(\d{1,3})(?::(\d{1,3})(?:\s?[-–]\s?(\d{1,3})(?::(\d{1,3}))?)?|,?\s(?:verses?|vv?\.?)\s(\d{1,3})(?:\s?(?:[-–]|to)\s?(\d{1,3}))?)?(?!\d|:\d)/g;
+const REF_RE =
+  /\b((?:[123]\s?)?[A-Z][a-z]{1,15}(?:\s(?:of\s)?(?!Chapter\b)[A-Z][a-z]+)?)\.?\s(?:(?:[Cc]hapter|[Cc]hap\.|[Cc]h\.)\s)?(\d{1,3})(?::(\d{1,3})(?:\s?[-–]\s?(\d{1,3})(?::(\d{1,3}))?)?|,?\s(?:verses?|vv?\.?)\s(\d{1,3})(?:\s?(?:[-–]|to)\s?(\d{1,3}))?)?(?!\d|:\d)/g;
 
 /** `loose` also takes a short name with a chapter alone ("1 Cor 13", "Dan 4"): right for reading
  *  aloud, where saying the book in full does no harm, but too eager for links. */
 export function findRefs(text: string, loose = false): { index: number; length: number; ref: Ref }[] {
   const out = [];
   REF_RE.lastIndex = 0;
-  for (let m: RegExpExecArray | null; (m = REF_RE.exec(text)); ) {
+  for (let m: RegExpExecArray | null; (m = REF_RE.exec(text));) {
     // Not a reference ("In 1 Peter 1:22" first tries "In 1"): look again from the next word, so
     // the text it took can still be one.
-    const reject = () => { REF_RE.lastIndex = m!.index + (m![0].search(/\s/) + 1 || 1); };
-    let b = findBook(m[1]), skip = 0;
+    const reject = () => {
+      REF_RE.lastIndex = m!.index + (m![0].search(/\s/) + 1 || 1);
+    };
+    let b = findBook(m[1]),
+      skip = 0;
     // "See John 3:16": the capitalised word before the book was taken as part of its name.
     const w = !b && !/^[123]/.test(m[1]) ? m[1].match(/\s(\S+)$/) : null;
-    if (w) { b = findBook(w[1]); skip = m[1].length - w[1].length; }
-    if (!b) { reject(); continue; }
-    let chapter = +m[2], verse = m[3] ?? m[6] ? +(m[3] ?? m[6]) : undefined;
+    if (w) {
+      b = findBook(w[1]);
+      skip = m[1].length - w[1].length;
+    }
+    if (!b) {
+      reject();
+      continue;
+    }
+    let chapter = +m[2],
+      verse = (m[3] ?? m[6]) ? +(m[3] ?? m[6]) : undefined;
     // "5:3-7:29": the range ends in chapter 7.
     const toChapter = m[5] ? +m[4] : undefined;
-    const to = m[5] ? +m[5] : m[4] ?? m[7] ? +(m[4] ?? m[7]) : undefined;
+    const to = m[5] ? +m[5] : (m[4] ?? m[7]) ? +(m[4] ?? m[7]) : undefined;
     if (verse === undefined) {
       // A chapter on its own only by the book's name or a long form of it ("Job 3", "Psalm 23"),
       // not "Dan 4" or "Song 3"; "Jude 5" is a verse.
       const name = m[1].slice(skip).replace(/^[123]\s?/, "");
       const full = book(b).name.replace(/^[123]\s?/, "");
-      if (name !== full && (name === "Song" || (name.length < 4 && !loose))) { reject(); continue; }
-      if (book(b).chapters === 1 && chapter > 1) { verse = chapter; chapter = 1; }
+      if (name !== full && (name === "Song" || (name.length < 4 && !loose))) {
+        reject();
+        continue;
+      }
+      if (book(b).chapters === 1 && chapter > 1) {
+        verse = chapter;
+        chapter = 1;
+      }
     }
-    if (chapter < 1 || chapter > book(b).chapters || (toChapter !== undefined && (toChapter <= chapter || toChapter > book(b).chapters))) { reject(); continue; }
+    if (chapter < 1 || chapter > book(b).chapters || (toChapter !== undefined && (toChapter <= chapter || toChapter > book(b).chapters))) {
+      reject();
+      continue;
+    }
     out.push({ index: m.index! + skip, length: m[0].length - skip, ref: { book: b, chapter, verse, to, toChapter } });
   }
   return out;
@@ -45,7 +68,8 @@ export function findRefs(text: string, loose = false): { index: number; length: 
 
 /** Escaped text with verse references wrapped in links the page can catch. */
 function linkRefs(text: string): string {
-  let out = "", last = 0;
+  let out = "",
+    last = 0;
   for (const h of findRefs(text)) {
     out += esc(text.slice(last, h.index));
     out += `<a class="ref" data-ref="${esc(JSON.stringify(h.ref))}">${esc(text.slice(h.index, h.index + h.length))}</a>`;
@@ -59,7 +83,8 @@ function linkRefs(text: string): string {
 // <mark class="hl-green">the other colours</mark>; and <sup>superscript</sup> and <sub>subscript</sub>
 // ("17<sup>th</sup>"), as Obsidian shows them.
 const HL_COLOURS = ["red", "orange", "yellow", "green", "teal", "blue", "purple", "grey"];
-const INLINE_RE = /\\[\\*_=]|<(sup|sub)>.+?<\/\1>|<mark class="hl-(?:red|orange|yellow|green|teal|blue|purple|grey)">.+?<\/mark>|==(?=\S)(?:\\.|[^\\])+?==|\*\*\*(?=\S)(?:\\.|[^\\])+?\*\*\*|\*\*(?=\S)(?:\\.|[^\\])+?\*\*|\*(?=[^\s*])(?:\\.|[^*\\])+\*|(?<![\p{L}\p{N}_\\])_(?=[^\s_])(?:\\.|[^_\\])+_(?![\p{L}\p{N}_])/gu;
+const INLINE_RE =
+  /\\[\\*_=]|<(sup|sub)>.+?<\/\1>|<mark class="hl-(?:red|orange|yellow|green|teal|blue|purple|grey)">.+?<\/mark>|==(?=\S)(?:\\.|[^\\])+?==|\*\*\*(?=\S)(?:\\.|[^\\])+?\*\*\*|\*\*(?=\S)(?:\\.|[^\\])+?\*\*|\*(?=[^\s*])(?:\\.|[^*\\])+\*|(?<![\p{L}\p{N}_\\])_(?=[^\s_])(?:\\.|[^_\\])+_(?![\p{L}\p{N}_])/gu;
 
 function inline(s: string, links: boolean): string {
   // Split on the marks first, then escape and link the plain parts.
@@ -91,15 +116,24 @@ export function mdToHtml(md: string, links = true): string {
   let i = 0;
   while (i < lines.length) {
     const l = lines[i];
-    if (!l.trim()) { i++; continue; }
+    if (!l.trim()) {
+      i++;
+      continue;
+    }
     const h = l.match(/^(#{1,6})\s+(.*)$/);
-    if (h) { out.push(`<h3>${inline(h[2], links)}</h3>`); i++; continue; }
+    if (h) {
+      out.push(`<h3>${inline(h[2], links)}</h3>`);
+      i++;
+      continue;
+    }
     if (/^>\s?/.test(l)) {
       const q: string[] = [];
       while (i < lines.length && /^>\s?/.test(lines[i])) q.push(lines[i++].replace(/^>\s?/, ""));
       // A quote whose last line is "— John 3:8 KJV" is a verse inserted from the Bible.
       const cite = q.length > 1 && /^[—–-]\s/.test(q[q.length - 1]) ? q.pop()!.replace(/^[—–-]\s/, "") : null;
-      out.push(`<blockquote${cite ? ' class="verse"' : ""}>${q.map((x) => inline(x, links)).join("<br>")}${cite ? `<cite>${inline(cite, links)}</cite>` : ""}</blockquote>`);
+      out.push(
+        `<blockquote${cite ? ' class="verse"' : ""}>${q.map((x) => inline(x, links)).join("<br>")}${cite ? `<cite>${inline(cite, links)}</cite>` : ""}</blockquote>`,
+      );
       continue;
     }
     if (/^[-*]\s+/.test(l)) {
@@ -125,7 +159,11 @@ export function mdToHtml(md: string, links = true): string {
 export function htmlToMd(root: HTMLElement): string {
   const inl = (n: Node): string => {
     // Marks typed as text are escaped, so they read back as text; a _ inside a word needs none.
-    if (n.nodeType === Node.TEXT_NODE) return highlighted((n.textContent || "").replace(/ /g, " ").replace(/\\(?=[\\*_=])|\*|(?<![\p{L}\p{N}])_|_(?![\p{L}\p{N}])|=(?==)/gu, "\\$&"), hlOf(n, root));
+    if (n.nodeType === Node.TEXT_NODE)
+      return highlighted(
+        (n.textContent || "").replace(/\u00a0/g, " ").replace(/\\(?=[\\*_=])|\*|(?<![\p{L}\p{N}])_|_(?![\p{L}\p{N}])|=(?==)/gu, "\\$&"),
+        hlOf(n, root),
+      );
     if (n.nodeType !== Node.ELEMENT_NODE) return "";
     const el = n as HTMLElement;
     const kids = Array.from(el.childNodes).map(inl).join("");
@@ -140,7 +178,11 @@ export function htmlToMd(root: HTMLElement): string {
   };
   const blocks: string[] = [];
   const block = (el: Node) => {
-    if (el.nodeType === Node.TEXT_NODE) { const t = (el.textContent || "").trim(); if (t) blocks.push(t); return; }
+    if (el.nodeType === Node.TEXT_NODE) {
+      const t = (el.textContent || "").trim();
+      if (t) blocks.push(t);
+      return;
+    }
     if (el.nodeType !== Node.ELEMENT_NODE) return;
     const e = el as HTMLElement;
     const tag = e.tagName.toLowerCase();
@@ -149,7 +191,10 @@ export function htmlToMd(root: HTMLElement): string {
       const cite = e.querySelector("cite");
       const citeText = cite ? inl(cite).trim() : "";
       cite?.remove();
-      const lines = inl(e).split("\n").map((x) => x.trim()).filter(Boolean);
+      const lines = inl(e)
+        .split("\n")
+        .map((x) => x.trim())
+        .filter(Boolean);
       if (citeText) lines.push(`— ${citeText}`);
       blocks.push(lines.map((x) => `> ${x}`).join("\n"));
       if (cite) e.appendChild(cite);
@@ -158,7 +203,10 @@ export function htmlToMd(root: HTMLElement): string {
       blocks.push(items.map((li, k) => `${tag === "ol" ? `${k + 1}.` : "-"} ${inl(li).replace(/\n+/g, " ").trim()}`).join("\n"));
     } else if (tag === "p" || tag === "div") {
       // A div holding blocks (what WebKit makes on Enter) is walked, not flattened.
-      if (Array.from(e.children).some((c) => /^(P|DIV|UL|OL|BLOCKQUOTE|H\d)$/.test(c.tagName))) { e.childNodes.forEach(block); return; }
+      if (Array.from(e.children).some((c) => /^(P|DIV|UL|OL|BLOCKQUOTE|H\d)$/.test(c.tagName))) {
+        e.childNodes.forEach(block);
+        return;
+      }
       const t = inl(e).replace(/\n+$/, "").trim();
       if (t) blocks.push(t.split("\n").join("  \n"));
     } else {
@@ -173,7 +221,17 @@ export function htmlToMd(root: HTMLElement): string {
 
 /** Sentinel colours the editor's highlighter paints with (execCommand hiliteColor, so ⌘Z undoes
  *  it); the stylesheet shows each as its theme's colour, and "none" as no highlight. */
-export const HL_PAINT: Record<string, string> = { red: "rgb(250, 1, 1)", orange: "rgb(250, 1, 2)", yellow: "rgb(250, 1, 3)", green: "rgb(250, 1, 4)", blue: "rgb(250, 1, 5)", purple: "rgb(250, 1, 6)", none: "rgb(250, 1, 7)", teal: "rgb(250, 1, 8)", grey: "rgb(250, 1, 9)" };
+export const HL_PAINT: Record<string, string> = {
+  red: "rgb(250, 1, 1)",
+  orange: "rgb(250, 1, 2)",
+  yellow: "rgb(250, 1, 3)",
+  green: "rgb(250, 1, 4)",
+  blue: "rgb(250, 1, 5)",
+  purple: "rgb(250, 1, 6)",
+  none: "rgb(250, 1, 7)",
+  teal: "rgb(250, 1, 8)",
+  grey: "rgb(250, 1, 9)",
+};
 const PAINTED = new Map(Object.entries(HL_PAINT).map(([c, v]) => [v, c]));
 
 /** The highlight a text node shows: the nearest mark, or span painted by the highlighter. */
@@ -196,9 +254,21 @@ function highlighted(t: string, c: string | null): string {
 
 function joinMarks(s: string): string {
   let t = s.replace(/(?<!\\)====/g, "");
-  for (let was = ""; was !== t; ) { was = t; t = t.replace(/(<mark class="hl-(\w+)">(?:(?!<\/?mark).)*)<\/mark><mark class="hl-\2">/g, "$1"); }
+  for (let was = ""; was !== t;) {
+    was = t;
+    t = t.replace(/(<mark class="hl-(\w+)">(?:(?!<\/?mark).)*)<\/mark><mark class="hl-\2">/g, "$1");
+  }
   return t;
 }
 
 /** Plain text with the Markdown marks taken out, for excerpts. */
-export const mdPlain = (md: string) => md.replace(/<\/?(mark|sup|sub)\b[^>]*>/g, "").replace(/(?<!\\)==(?=\S)(.+?)==/g, "$1").replace(/^#+\s+/gm, "").replace(/^>\s?/gm, "").replace(/^[-*]\s+/gm, "").replace(/\\([\\*_=])|\*+|(?<![\p{L}\p{N}])_+|_+(?![\p{L}\p{N}])/gu, (_m, e) => e ?? "").replace(/\s+/g, " ").trim();
+export const mdPlain = (md: string) =>
+  md
+    .replace(/<\/?(mark|sup|sub)\b[^>]*>/g, "")
+    .replace(/(?<!\\)==(?=\S)(.+?)==/g, "$1")
+    .replace(/^#+\s+/gm, "")
+    .replace(/^>\s?/gm, "")
+    .replace(/^[-*]\s+/gm, "")
+    .replace(/\\([\\*_=])|\*+|(?<![\p{L}\p{N}])_+|_+(?![\p{L}\p{N}])/gu, (_m, e) => e ?? "")
+    .replace(/\s+/g, " ")
+    .trim();

@@ -1,3 +1,6 @@
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
+
 import { ReactNode, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { APOCRYPHA, apocryphaName, BookSizes, BOOKS, book, isApocrypha, SECTIONS } from "./bible";
 import { api, isReadOnly } from "./api";
@@ -13,15 +16,23 @@ export function Tooltips() {
   useEffect(() => {
     let timer: number | undefined;
     let el: HTMLElement | null = null;
-    const hide = () => { window.clearTimeout(timer); el = null; setTip(null); };
+    const hide = () => {
+      window.clearTimeout(timer);
+      el = null;
+      setTip(null);
+    };
     const over = (e: MouseEvent) => {
       // The nearest element with a title; failing that, an icon-only button's aria-label.
       const target = e.target as HTMLElement;
-      const t = (target.closest?.("[title], [data-tip]") ?? target.closest?.("button[aria-label], [role=button][aria-label]")) as HTMLElement | null;
+      const t = (target.closest?.("[title], [data-tip]") ??
+        target.closest?.("button[aria-label], [role=button][aria-label]")) as HTMLElement | null;
       if (t === el) return;
       hide();
       if (!t) return;
-      if (t.title) { t.dataset.tip = t.title; t.removeAttribute("title"); }
+      if (t.title) {
+        t.dataset.tip = t.title;
+        t.removeAttribute("title");
+      }
       const text = t.dataset.tip || (!t.textContent?.trim() ? t.getAttribute("aria-label") : null);
       if (!text) return;
       el = t;
@@ -38,13 +49,24 @@ export function Tooltips() {
     document.addEventListener("mousedown", hide, true);
     document.addEventListener("scroll", hide, true);
     window.addEventListener("blur", hide);
-    return () => { hide(); document.removeEventListener("mouseover", over); document.removeEventListener("mousedown", hide, true); document.removeEventListener("scroll", hide, true); window.removeEventListener("blur", hide); };
+    return () => {
+      hide();
+      document.removeEventListener("mouseover", over);
+      document.removeEventListener("mousedown", hide, true);
+      document.removeEventListener("scroll", hide, true);
+      window.removeEventListener("blur", hide);
+    };
   }, []);
   if (!tip) return null;
-  const style: React.CSSProperties = tip.side === "right"
-    ? { left: tip.x, top: tip.y, transform: "translateY(-50%)" }
-    : { left: tip.x, top: tip.y, transform: tip.side === "above" ? "translate(-50%, -100%)" : "translateX(-50%)" };
-  return <div className="tip" role="tooltip" style={style}>{tip.text}</div>;
+  const style: React.CSSProperties =
+    tip.side === "right"
+      ? { left: tip.x, top: tip.y, transform: "translateY(-50%)" }
+      : { left: tip.x, top: tip.y, transform: tip.side === "above" ? "translate(-50%, -100%)" : "translateX(-50%)" };
+  return (
+    <div className="tip" role="tooltip" style={style}>
+      {tip.text}
+    </div>
+  );
 }
 
 /** The word under a click in rendered text (commentary, a book), and where it is, for the same
@@ -63,7 +85,8 @@ function wordAtPoint(x: number, y: number, target: HTMLElement): { word: string;
   if (!r || !node || node.nodeType !== Node.TEXT_NODE) return null;
   const text = node.textContent ?? "";
   const isW = (c: string | undefined) => !!c && /[\p{L}\p{M}'’]/u.test(c);
-  let a = r.startOffset, b = r.startOffset;
+  let a = r.startOffset,
+    b = r.startOffset;
   while (a > 0 && isW(text[a - 1])) a--;
   while (b < text.length && isW(text[b])) b++;
   while (a < b && /['’]/.test(text[a])) a++;
@@ -88,14 +111,21 @@ export function WordHoverBox() {
     setWordBox = setBox;
     const clear = () => setBox(null);
     document.addEventListener("scroll", clear, true);
-    return () => { setWordBox = null; document.removeEventListener("scroll", clear, true); };
+    return () => {
+      setWordBox = null;
+      document.removeEventListener("scroll", clear, true);
+    };
   }, []);
   return box && <div className="whover" style={{ left: box.left - 2, top: box.top, width: box.width + 4, height: box.height }} />;
 }
 /** Spread on text that wordAt makes clickable. */
 export const wordHover = {
   onMouseMove: (e: React.MouseEvent<HTMLElement>) => {
-    const el = e.currentTarget, x = e.clientX, y = e.clientY, t = e.target as HTMLElement, dragging = e.buttons !== 0;
+    const el = e.currentTarget,
+      x = e.clientX,
+      y = e.clientY,
+      t = e.target as HTMLElement,
+      dragging = e.buttons !== 0;
     cancelAnimationFrame(hoverFrame);
     hoverFrame = requestAnimationFrame(() => {
       const w = dragging ? null : wordAtPoint(x, y, t);
@@ -120,11 +150,22 @@ export function confirmDelete(what: string, detail = "This can't be undone."): P
 export function useDismiss(ref: React.RefObject<HTMLElement | null>, onClose: () => void, active = true) {
   useEffect(() => {
     if (!active) return;
-    const key = (e: KeyboardEvent) => { if (e.key === "Escape") { e.stopPropagation(); onClose(); } };
-    const down = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) onClose(); };
+    const key = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.stopPropagation();
+        onClose();
+      }
+    };
+    const down = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) onClose();
+    };
     window.addEventListener("keydown", key, true);
     const t = window.setTimeout(() => window.addEventListener("mousedown", down), 0);
-    return () => { window.removeEventListener("keydown", key, true); window.removeEventListener("mousedown", down); window.clearTimeout(t); };
+    return () => {
+      window.removeEventListener("keydown", key, true);
+      window.removeEventListener("mousedown", down);
+      window.clearTimeout(t);
+    };
   }, [ref, onClose, active]);
 }
 
@@ -133,15 +174,21 @@ export function useDismiss(ref: React.RefObject<HTMLElement | null>, onClose: ()
  *  isn't saved, and goes back to nothing while `open` is false, so the bar always opens where it was made to. */
 export function useDrag(open: boolean) {
   const [off, setOff] = useState({ x: 0, y: 0 });
-  useEffect(() => { if (!open) setOff({ x: 0, y: 0 }); }, [open]);
+  useEffect(() => {
+    if (!open) setOff({ x: 0, y: 0 });
+  }, [open]);
   const onPointerDown = (e: React.PointerEvent<HTMLElement>) => {
     if (e.button !== 0 || (e.target as HTMLElement).closest("input, select, textarea")) return;
     // A handle inside the card (marked data-drag) moves the card, so that's what's kept on screen.
-    const el = e.currentTarget.closest<HTMLElement>("[data-drag]") ?? e.currentTarget, sx = e.clientX, sy = e.clientY, start = off;
+    const el = e.currentTarget.closest<HTMLElement>("[data-drag]") ?? e.currentTarget,
+      sx = e.clientX,
+      sy = e.clientY,
+      start = off;
     const r = el.getBoundingClientRect();
     let moved = false;
     const move = (m: PointerEvent) => {
-      const dx = m.clientX - sx, dy = m.clientY - sy;
+      const dx = m.clientX - sx,
+        dy = m.clientY - sy;
       if (!moved && Math.hypot(dx, dy) < 4) return;
       moved = true;
       setOff({
@@ -155,7 +202,10 @@ export function useDrag(open: boolean) {
       window.removeEventListener("pointercancel", up);
       if (!moved) return;
       // The click that ends a drag isn't one; if none comes, the next real one must still get through.
-      const eat = (c: MouseEvent) => { c.stopPropagation(); c.preventDefault(); };
+      const eat = (c: MouseEvent) => {
+        c.stopPropagation();
+        c.preventDefault();
+      };
       window.addEventListener("click", eat, { capture: true, once: true });
       window.setTimeout(() => window.removeEventListener("click", eat, true), 0);
     };
@@ -163,18 +213,38 @@ export function useDrag(open: boolean) {
     window.addEventListener("pointerup", up);
     window.addEventListener("pointercancel", up);
   };
-  return { off, bind: { onPointerDown }, style: { transform: `translate(${off.x}px, ${off.y}px)`, cursor: "grab", touchAction: "none" } as React.CSSProperties };
+  return {
+    off,
+    bind: { onPointerDown },
+    style: { transform: `translate(${off.x}px, ${off.y}px)`, cursor: "grab", touchAction: "none" } as React.CSSProperties,
+  };
 }
 
 /** A floating card placed below (or above) an anchor rectangle and kept on screen. */
-export function Popover({ anchor, onClose, children, width = 380, style, place = "below" }: { anchor: DOMRect; onClose: () => void; children: ReactNode; width?: number; style?: React.CSSProperties; place?: "below" | "above" | "right" }) {
+export function Popover({
+  anchor,
+  onClose,
+  children,
+  width = 380,
+  style,
+  place = "below",
+}: {
+  anchor: DOMRect;
+  onClose: () => void;
+  children: ReactNode;
+  width?: number;
+  style?: React.CSSProperties;
+  place?: "below" | "above" | "right";
+}) {
   const ref = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState<{ left: number; top: number }>({ left: anchor.left, top: anchor.bottom + 8 });
   useDismiss(ref, onClose);
   useLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
-    const h = el.offsetHeight, vw = window.innerWidth, vh = window.innerHeight;
+    const h = el.offsetHeight,
+      vw = window.innerWidth,
+      vh = window.innerHeight;
     let left = place === "right" ? anchor.right + 8 : anchor.left + anchor.width / 2 - width / 2;
     left = Math.max(12, Math.min(left, vw - width - 12));
     let top = place === "above" ? anchor.top - h - 8 : place === "right" ? anchor.top - 12 : anchor.bottom + 8;
@@ -182,25 +252,68 @@ export function Popover({ anchor, onClose, children, width = 380, style, place =
     if (top < 12) top = 12;
     setPos({ left, top });
   }, [anchor, width, place, children]);
-  return <div ref={ref} className="popover" style={{ left: pos.left, top: pos.top, width, maxHeight: "calc(100vh - 24px)", overflowY: "auto", ...style }}>{children}</div>;
+  return (
+    <div
+      ref={ref}
+      className="popover"
+      style={{ left: pos.left, top: pos.top, width, maxHeight: "calc(100vh - 24px)", overflowY: "auto", ...style }}
+    >
+      {children}
+    </div>
+  );
 }
 
-export function Dialog({ onClose, children, width, height, label }: { onClose: () => void; children: ReactNode; width: number; height?: number; label: string }) {
+export function Dialog({
+  onClose,
+  children,
+  width,
+  height,
+  label,
+}: {
+  onClose: () => void;
+  children: ReactNode;
+  width: number;
+  height?: number;
+  label: string;
+}) {
   const ref = useRef<HTMLDivElement>(null);
   useDismiss(ref, onClose);
   return (
     <div className="scrim">
-      <div ref={ref} role="dialog" aria-label={label} className="dialog" style={{ width, height }}>{children}</div>
+      <div ref={ref} role="dialog" aria-label={label} className="dialog" style={{ width, height }}>
+        {children}
+      </div>
     </div>
   );
 }
 
 export function Switch({ on, onChange, children }: { on: boolean; onChange: (v: boolean) => void; children?: ReactNode }) {
-  return <button type="button" className="sw" aria-pressed={on} onClick={() => onChange(!on)}><span className="trk" />{children}</button>;
+  return (
+    <button type="button" className="sw" aria-pressed={on} onClick={() => onChange(!on)}>
+      <span className="trk" />
+      {children}
+    </button>
+  );
 }
 
-export function Seg<T extends string | number>({ value, options, onChange }: { value: T; options: [T, string][]; onChange: (v: T) => void }) {
-  return <div className="seg">{options.map(([v, l]) => <button key={String(v)} type="button" className={v === value ? "on" : ""} onClick={() => onChange(v)}>{l}</button>)}</div>;
+export function Seg<T extends string | number>({
+  value,
+  options,
+  onChange,
+}: {
+  value: T;
+  options: [T, string][];
+  onChange: (v: T) => void;
+}) {
+  return (
+    <div className="seg">
+      {options.map(([v, l]) => (
+        <button key={String(v)} type="button" className={v === value ? "on" : ""} onClick={() => onChange(v)}>
+          {l}
+        </button>
+      ))}
+    </div>
+  );
 }
 
 /** Book then chapter, as two grids. */
@@ -208,11 +321,18 @@ export function Seg<T extends string | number>({ value, options, onChange }: { v
 const sizesCache = new Map<string, Promise<BookSizes>>();
 /** The books a Bible has and how many chapters each, from its text (Esther has 16 in the Vulgate). */
 export function bibleSizes(bible: string): Promise<BookSizes> {
-  if (!sizesCache.has(bible)) sizesCache.set(bible, api.chapterSizes(bible).then((s) => {
-    const m: BookSizes = new Map();
-    for (const [b, c] of s) m.set(b, Math.max(m.get(b) ?? 0, c));
-    return m;
-  }).catch(() => new Map()));
+  if (!sizesCache.has(bible))
+    sizesCache.set(
+      bible,
+      api
+        .chapterSizes(bible)
+        .then((s) => {
+          const m: BookSizes = new Map();
+          for (const [b, c] of s) m.set(b, Math.max(m.get(b) ?? 0, c));
+          return m;
+        })
+        .catch(() => new Map()),
+    );
   return sizesCache.get(bible)!;
 }
 /** The books a Bible has, once looked up. */
@@ -222,28 +342,53 @@ export function useBibleSizes(bible: string): BookSizes | null {
   const [got, setGot] = useState<{ bible: string; sizes: BookSizes } | null>(null);
   useEffect(() => {
     let live = true;
-    bibleSizes(bible).then((sizes) => { if (live) setGot({ bible, sizes }); });
-    return () => { live = false; };
+    bibleSizes(bible).then((sizes) => {
+      if (live) setGot({ bible, sizes });
+    });
+    return () => {
+      live = false;
+    };
   }, [bible]);
   return got && got.bible === bible && got.sizes.size ? got.sizes : null;
 }
 
 /** The yellow pill marking the Apocrypha, wherever a book or chapter of it shows. */
 export function ApoPill({ title, small }: { title?: string; small?: boolean }) {
-  return <span className={`apopill ${small ? "small" : ""}`} title={title ?? "Apocrypha: not in the Protestant canon (the KJV of 1611 printed it between the Testaments)"}>Apocrypha</span>;
+  return (
+    <span
+      className={`apopill ${small ? "small" : ""}`}
+      title={title ?? "Apocrypha: not in the Protestant canon (the KJV of 1611 printed it between the Testaments)"}
+    >
+      Apocrypha
+    </span>
+  );
 }
 /** The books a Bible has (an Old or New Testament alone has only its own), or null until known. */
 export function useBibleBooks(bible: string): Set<number> | null {
   const [got, setGot] = useState<{ bible: string; books: Set<number> } | null>(null);
   useEffect(() => {
     let live = true;
-    bibleBooks(bible).then((books) => { if (live) setGot({ bible, books }); });
-    return () => { live = false; };
+    bibleBooks(bible).then((books) => {
+      if (live) setGot({ bible, books });
+    });
+    return () => {
+      live = false;
+    };
   }, [bible]);
   return got && got.bible === bible && got.books.size ? got.books : null;
 }
 
-export function RefPicker({ anchor, onClose, onPick, initialBook }: { anchor: DOMRect; onClose: () => void; onPick: (b: number, c: number, v?: number) => void; initialBook?: number }) {
+export function RefPicker({
+  anchor,
+  onClose,
+  onPick,
+  initialBook,
+}: {
+  anchor: DOMRect;
+  onClose: () => void;
+  onPick: (b: number, c: number, v?: number) => void;
+  initialBook?: number;
+}) {
   const bible = useApp().settings.bible;
   const sizes = useBibleSizes(bible);
   const has = (n: number) => (!sizes ? n <= 66 : sizes.has(n));
@@ -254,27 +399,54 @@ export function RefPicker({ anchor, onClose, onPick, initialBook }: { anchor: DO
   useEffect(() => {
     if (b === null || c === null) return;
     setCount(0);
-    api.passages(bible, [{ book: b, chapter: c, from: 1, to: 200 }]).then(([p]) => setCount(p?.verses.length ?? 0)).catch(() => onPick(b, c));
+    api
+      .passages(bible, [{ book: b, chapter: c, from: 1, to: 200 }])
+      .then(([p]) => setCount(p?.verses.length ?? 0))
+      .catch(() => onPick(b, c));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [b, c, bible]);
-  const pickChapter = (bk: number, ch: number) => { setB(bk); setC(ch); };
+  const pickChapter = (bk: number, ch: number) => {
+    setB(bk);
+    setC(ch);
+  };
   return (
     <Popover anchor={anchor} onClose={onClose} width={560}>
       {b !== null && c !== null ? (
         <div style={{ padding: 14, display: "flex", flexDirection: "column", gap: 10 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <button type="button" className="ibtn" aria-label="Back to chapters" onClick={() => (chapters(b) === 1 ? setB(null) : setC(null))}><Icon name="back" /></button>
-            <b style={{ font: "500 22px var(--display)" }}>{book(b).name} {c}</b>
+            <button
+              type="button"
+              className="ibtn"
+              aria-label="Back to chapters"
+              onClick={() => (chapters(b) === 1 ? setB(null) : setC(null))}
+            >
+              <Icon name="back" />
+            </button>
+            <b style={{ font: "500 22px var(--display)" }}>
+              {book(b).name} {c}
+            </b>
             {isApocrypha(b, c) && <ApoPill title={apocryphaName(b, c)} />}
-            <button type="button" className="btn small" style={{ marginLeft: "auto" }} onClick={() => onPick(b, c)}>Whole chapter</button>
+            <button type="button" className="btn small" style={{ marginLeft: "auto" }} onClick={() => onPick(b, c)}>
+              Whole chapter
+            </button>
           </div>
           {count ? (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(10, minmax(0,1fr))", gap: 4 }}>
               {Array.from({ length: count }, (_, i) => i + 1).map((v) => (
-                <button key={v} type="button" className="btn" style={{ justifyContent: "center", padding: 0 }} onClick={() => onPick(b, c, v)}>{v}</button>
+                <button
+                  key={v}
+                  type="button"
+                  className="btn"
+                  style={{ justifyContent: "center", padding: 0 }}
+                  onClick={() => onPick(b, c, v)}
+                >
+                  {v}
+                </button>
               ))}
             </div>
-          ) : <Spinner />}
+          ) : (
+            <Spinner />
+          )}
         </div>
       ) : b === null ? (
         <div style={{ padding: 14, display: "flex", flexDirection: "column", gap: 10 }}>
@@ -285,10 +457,20 @@ export function RefPicker({ anchor, onClose, onPick, initialBook }: { anchor: DO
             const apo = s.from > 66;
             return (
               <div key={s.name} style={{ display: "grid", gridTemplateColumns: "84px minmax(0,1fr)", gap: 8, alignItems: "start" }}>
-                <span className="label" style={{ paddingTop: 5, color: apo ? "var(--pufg)" : undefined }}>{s.name}</span>
+                <span className="label" style={{ paddingTop: 5, color: apo ? "var(--pufg)" : undefined }}>
+                  {s.name}
+                </span>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
                   {list.map((x) => (
-                    <button key={x.n} type="button" className={`chip ${apo ? "apo" : ""} ${x.n === initialBook ? "on" : ""}`} title={apo ? `${x.name} (Apocrypha)` : undefined} onClick={() => (chapters(x.n) === 1 ? pickChapter(x.n, 1) : setB(x.n))}>{x.name}</button>
+                    <button
+                      key={x.n}
+                      type="button"
+                      className={`chip ${apo ? "apo" : ""} ${x.n === initialBook ? "on" : ""}`}
+                      title={apo ? `${x.name} (Apocrypha)` : undefined}
+                      onClick={() => (chapters(x.n) === 1 ? pickChapter(x.n, 1) : setB(x.n))}
+                    >
+                      {x.name}
+                    </button>
                   ))}
                 </div>
               </div>
@@ -298,17 +480,35 @@ export function RefPicker({ anchor, onClose, onPick, initialBook }: { anchor: DO
       ) : (
         <div style={{ padding: 14, display: "flex", flexDirection: "column", gap: 10 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <button type="button" className="ibtn" aria-label="Back to books" onClick={() => setB(null)}><Icon name="back" /></button>
+            <button type="button" className="ibtn" aria-label="Back to books" onClick={() => setB(null)}>
+              <Icon name="back" />
+            </button>
             <b style={{ font: "500 22px var(--display)" }}>{book(b).name}</b>
             {b > 66 && <ApoPill />}
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(10, minmax(0,1fr))", gap: 4 }}>
             {Array.from({ length: chapters(b) }, (_, i) => i + 1).map((c) => {
               const extra = b <= 66 && isApocrypha(b, c);
-              return <button key={c} type="button" className={`btn ${extra ? "apo" : ""}`} title={extra ? `${apocryphaName(b, c)} (Apocrypha)` : undefined} style={{ justifyContent: "center", padding: 0 }} onClick={() => pickChapter(b, c)}>{c}</button>;
+              return (
+                <button
+                  key={c}
+                  type="button"
+                  className={`btn ${extra ? "apo" : ""}`}
+                  title={extra ? `${apocryphaName(b, c)} (Apocrypha)` : undefined}
+                  style={{ justifyContent: "center", padding: 0 }}
+                  onClick={() => pickChapter(b, c)}
+                >
+                  {c}
+                </button>
+              );
             })}
           </div>
-          {b <= 66 && chapters(b) > book(b).chapters && <div className="hint">Yellow chapters are Apocrypha: {apocryphaName(b, book(b).chapters + 1)}{b === 27 ? " (13) and Bel and the Dragon (14)" : ""}.</div>}
+          {b <= 66 && chapters(b) > book(b).chapters && (
+            <div className="hint">
+              Yellow chapters are Apocrypha: {apocryphaName(b, book(b).chapters + 1)}
+              {b === 27 ? " (13) and Bel and the Dragon (14)" : ""}.
+            </div>
+          )}
         </div>
       )}
     </Popover>
@@ -337,53 +537,142 @@ export function useTrail<T>(same: (a: T, b: T) => boolean) {
 export function TrailButtons({ trail, onGo }: { trail: { canBack: boolean; canForward: boolean }; onGo: (d: number) => void }) {
   return (
     <span style={{ display: "inline-flex", gap: 2 }}>
-      <button className="ibtn" type="button" aria-label="Back" title="Back" disabled={!trail.canBack} onClick={() => onGo(-1)} style={{ width: 24, height: 24 }}><Icon name="back" size={13} /></button>
-      <button className="ibtn" type="button" aria-label="Forward" title="Forward" disabled={!trail.canForward} onClick={() => onGo(1)} style={{ width: 24, height: 24 }}><Icon name="fwd" size={13} /></button>
+      <button
+        className="ibtn"
+        type="button"
+        aria-label="Back"
+        title="Back"
+        disabled={!trail.canBack}
+        onClick={() => onGo(-1)}
+        style={{ width: 24, height: 24 }}
+      >
+        <Icon name="back" size={13} />
+      </button>
+      <button
+        className="ibtn"
+        type="button"
+        aria-label="Forward"
+        title="Forward"
+        disabled={!trail.canForward}
+        onClick={() => onGo(1)}
+        style={{ width: 24, height: 24 }}
+      >
+        <Icon name="fwd" size={13} />
+      </button>
     </span>
   );
 }
 
 export function Spinner() {
-  return <span className="n" style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>Loading…</span>;
+  return (
+    <span className="n" style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+      Loading…
+    </span>
+  );
 }
 
 /** The x at the end of a search box, shown while it has text; clicking it keeps the box focused. */
-export interface ListItem { key: string; label: string; /** Muted, after the label. */ sub?: string; title?: string; /** A heading shown above the first item of each group. */ group?: string; /** Also searched. */ terms?: string }
+export interface ListItem {
+  key: string;
+  label: string;
+  /** Muted, after the label. */ sub?: string;
+  title?: string;
+  /** A heading shown above the first item of each group. */ group?: string;
+  /** Also searched. */ terms?: string;
+}
 
 /** A long list in a popover with a search box on top: typing filters it, ↑↓ move, Enter picks,
  *  Esc clears the search (or closes, when it's empty). */
-export function SearchList({ items, current, onPick, onClose, placeholder }: { items: ListItem[]; current?: string; onPick: (key: string) => void; onClose: () => void; placeholder: string }) {
+export function SearchList({
+  items,
+  current,
+  onPick,
+  onClose,
+  placeholder,
+}: {
+  items: ListItem[];
+  current?: string;
+  onPick: (key: string) => void;
+  onClose: () => void;
+  placeholder: string;
+}) {
   const [q, setQ] = useState("");
   const [at, setAt] = useState(0);
   const list = useRef<HTMLDivElement>(null);
   const words = q.toLowerCase().split(/\s+/).filter(Boolean);
-  const shown = items.filter((it) => { const hay = `${it.label} ${it.sub ?? ""} ${it.terms ?? ""}`.toLowerCase(); return words.every((w) => hay.includes(w)); });
-  useEffect(() => { setAt(Math.max(0, q ? 0 : shown.findIndex((it) => it.key === current))); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [q]);
-  useEffect(() => { list.current?.querySelector<HTMLElement>(`[data-i="${at}"]`)?.scrollIntoView({ block: "nearest" }); }, [at]);
+  const shown = items.filter((it) => {
+    const hay = `${it.label} ${it.sub ?? ""} ${it.terms ?? ""}`.toLowerCase();
+    return words.every((w) => hay.includes(w));
+  });
+  useEffect(() => {
+    setAt(Math.max(0, q ? 0 : shown.findIndex((it) => it.key === current)));
+  }, [q]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    list.current?.querySelector<HTMLElement>(`[data-i="${at}"]`)?.scrollIntoView({ block: "nearest" });
+  }, [at]);
   const key = (e: React.KeyboardEvent) => {
-    if (e.key === "ArrowDown") { setAt((i) => Math.min(shown.length - 1, i + 1)); e.preventDefault(); }
-    else if (e.key === "ArrowUp") { setAt((i) => Math.max(0, i - 1)); e.preventDefault(); }
-    else if (e.key === "Enter" && shown[at]) { onPick(shown[at].key); e.preventDefault(); }
-    else if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); if (q) setQ(""); else onClose(); }
+    if (e.key === "ArrowDown") {
+      setAt((i) => Math.min(shown.length - 1, i + 1));
+      e.preventDefault();
+    } else if (e.key === "ArrowUp") {
+      setAt((i) => Math.max(0, i - 1));
+      e.preventDefault();
+    } else if (e.key === "Enter" && shown[at]) {
+      onPick(shown[at].key);
+      e.preventDefault();
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      e.stopPropagation();
+      if (q) setQ("");
+      else onClose();
+    }
   };
   return (
     <div style={{ display: "flex", flexDirection: "column", minHeight: 0 }}>
       <div style={{ padding: 8, borderBottom: "1px solid var(--border)" }}>
-        <label className="field"><Icon name="search" />
-          <input autoFocus value={q} onChange={(e) => setQ(e.target.value)} onKeyDown={key} placeholder={placeholder} aria-label={placeholder} />
+        <label className="field">
+          <Icon name="search" />
+          <input
+            autoFocus
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            onKeyDown={key}
+            placeholder={placeholder}
+            aria-label={placeholder}
+          />
           <ClearButton show={!!q} onClear={() => setQ("")} />
         </label>
       </div>
       <div ref={list} className="doclist" style={{ padding: 6, maxHeight: 440, overflowY: "auto" }}>
         {shown.map((it, i) => (
           <div key={it.key} style={{ display: "contents" }}>
-            {it.group && it.group !== shown[i - 1]?.group && <div className="label" style={{ padding: `${i ? 10 : 6}px 10px 4px` }}>{it.group}</div>}
-            <button type="button" data-i={i} title={it.title ?? it.label} className={`${it.key === current ? "on" : ""} ${i === at ? "at" : ""}`} onMouseMove={() => setAt(i)} onClick={() => onPick(it.key)}>
-              {it.label}{it.sub && <span className="n" style={{ marginLeft: 8 }}>{it.sub}</span>}
+            {it.group && it.group !== shown[i - 1]?.group && (
+              <div className="label" style={{ padding: `${i ? 10 : 6}px 10px 4px` }}>
+                {it.group}
+              </div>
+            )}
+            <button
+              type="button"
+              data-i={i}
+              title={it.title ?? it.label}
+              className={`${it.key === current ? "on" : ""} ${i === at ? "at" : ""}`}
+              onMouseMove={() => setAt(i)}
+              onClick={() => onPick(it.key)}
+            >
+              {it.label}
+              {it.sub && (
+                <span className="n" style={{ marginLeft: 8 }}>
+                  {it.sub}
+                </span>
+              )}
             </button>
           </div>
         ))}
-        {!shown.length && <div className="hint" style={{ padding: "8px 10px" }}>Nothing matches “{q}”.</div>}
+        {!shown.length && (
+          <div className="hint" style={{ padding: "8px 10px" }}>
+            Nothing matches “{q}”.
+          </div>
+        )}
       </div>
     </div>
   );
@@ -391,16 +680,60 @@ export function SearchList({ items, current, onPick, onClose, placeholder }: { i
 
 export function ClearButton({ show, onClear, label = "Clear" }: { show: boolean; onClear: () => void; label?: string }) {
   if (!show) return null;
-  return <button type="button" className="ibtn" aria-label={label} title={label} onMouseDown={(e) => e.preventDefault()} onClick={onClear} style={{ width: 20, height: 20, flexShrink: 0 }}><Icon name="x" size={12} /></button>;
+  return (
+    <button
+      type="button"
+      className="ibtn"
+      aria-label={label}
+      title={label}
+      onMouseDown={(e) => e.preventDefault()}
+      onClick={onClear}
+      style={{ width: 20, height: 20, flexShrink: 0 }}
+    >
+      <Icon name="x" size={12} />
+    </button>
+  );
 }
 
 /** Previous and next, as chevrons floating at the middle of the reading column's sides; each one's
  *  tooltip says where it goes. Put inside a `.sidenav-wrap` around the scrolling column. */
-export function SideNav({ prev, next }: { prev?: { label: string; go: () => void } | null; next?: { label: string; go: () => void } | null }) {
+export function SideNav({
+  prev,
+  next,
+}: {
+  prev?: { label: string; go: () => void } | null;
+  next?: { label: string; go: () => void } | null;
+}) {
   return (
     <>
-      {prev && <button type="button" className="sidenav left" aria-label={prev.label} title={prev.label} onClick={(e) => { e.stopPropagation(); prev.go(); }}><Icon name="back" /></button>}
-      {next && <button type="button" className="sidenav right" aria-label={next.label} title={next.label} onClick={(e) => { e.stopPropagation(); next.go(); }}><Icon name="fwd" /></button>}
+      {prev && (
+        <button
+          type="button"
+          className="sidenav left"
+          aria-label={prev.label}
+          title={prev.label}
+          onClick={(e) => {
+            e.stopPropagation();
+            prev.go();
+          }}
+        >
+          <Icon name="back" />
+        </button>
+      )}
+      {next && (
+        <button
+          type="button"
+          className="sidenav right"
+          aria-label={next.label}
+          title={next.label}
+          onClick={(e) => {
+            e.stopPropagation();
+            next.go();
+          }}
+        >
+          <Icon name="fwd" />
+        </button>
+      )}
     </>
   );
 }

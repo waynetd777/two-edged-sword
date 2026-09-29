@@ -1,3 +1,6 @@
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
+
 //! The keyboard's media keys (F7 ⏮, F8 ⏯, F9 ⏭), headphone buttons and Control Centre's Now
 //! Playing, for reading aloud. macOS sends these to the app it thinks is playing, so the page says
 //! what is being read and whether it is playing; the keys come back as "media" events ("toggle",
@@ -11,8 +14,8 @@ mod mac {
     use objc2::runtime::AnyObject;
     use objc2_foundation::{NSDictionary, NSString};
     use objc2_media_player::{
-        MPMediaItemPropertyTitle, MPNowPlayingInfoCenter, MPNowPlayingPlaybackState, MPRemoteCommand, MPRemoteCommandCenter, MPRemoteCommandEvent,
-        MPRemoteCommandHandlerStatus,
+        MPMediaItemPropertyTitle, MPNowPlayingInfoCenter, MPNowPlayingPlaybackState, MPRemoteCommand, MPRemoteCommandCenter,
+        MPRemoteCommandEvent, MPRemoteCommandHandlerStatus,
     };
     use std::ptr::NonNull;
     use std::sync::Once;

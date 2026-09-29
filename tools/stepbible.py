@@ -1,3 +1,5 @@
+# Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+# SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 """STEPBible's Translators Amalgamated Greek NT (TAGNT, Tyndale House, CC BY 4.0,
 https://github.com/STEPBible/STEPBible-Data): every word of the major Greek editions (NA27/28, SBL,
 Tyndale House, Tregelles, Westcott-Hort, the Textus Receptus as Scrivener 1894, Byzantine), each

@@ -1,3 +1,6 @@
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
+
 //! Claude Code in print mode, streaming JSON: text arrives as deltas while it is written.
 
 use super::{emit_status, finish, spawn, stem, Chunk, Done, Folder, Running, SYSTEM};
@@ -14,16 +17,37 @@ pub fn find() -> Option<PathBuf> {
 }
 
 #[allow(clippy::too_many_arguments)]
-pub fn ask(app: AppHandle, running: Arc<Running>, cwd: PathBuf, chat_id: String, prompt: String, model: String, session: Option<String>, folder: Folder) -> Result<(), String> {
+pub fn ask(
+    app: AppHandle,
+    running: Arc<Running>,
+    cwd: PathBuf,
+    chat_id: String,
+    prompt: String,
+    model: String,
+    session: Option<String>,
+    folder: Folder,
+) -> Result<(), String> {
     let bin = find().ok_or("Claude Code isn't installed, or couldn't be found. Install it and sign in, then try again.")?;
     let mut cmd = Command::new(bin);
-    cmd.current_dir(&cwd)
-        .arg("-p")
-        .arg(&prompt)
-        .args(["--model", &model, "--output-format", "stream-json", "--verbose", "--include-partial-messages", "--strict-mcp-config"]);
+    cmd.current_dir(&cwd).arg("-p").arg(&prompt).args([
+        "--model",
+        &model,
+        "--output-format",
+        "stream-json",
+        "--verbose",
+        "--include-partial-messages",
+        "--strict-mcp-config",
+    ]);
     // Reads inside the working directory need no permission; anything else would ask, and print
     // mode refuses what it would have to ask for. Pin the mode in case the user's settings bypass it.
-    cmd.args(["--tools", "Read,Grep,Glob", "--permission-mode", "default", "--append-system-prompt", &format!("{SYSTEM}\n\n{} {TOOLS}", folder.prompt())]);
+    cmd.args([
+        "--tools",
+        "Read,Grep,Glob",
+        "--permission-mode",
+        "default",
+        "--append-system-prompt",
+        &format!("{SYSTEM}\n\n{} {TOOLS}", folder.prompt()),
+    ]);
     if let Some(s) = &session {
         cmd.args(["--resume", s]);
     }
@@ -40,7 +64,11 @@ pub fn ask(app: AppHandle, running: Arc<Running>, cwd: PathBuf, chat_id: String,
                     let ev = &v["event"];
                     // Text written after a search is a new block; without a break it runs on from
                     // the text before it ("…notes on John 1:1.Across the commentaries…").
-                    if ev["type"] == "content_block_start" && ev["content_block"]["type"] == "text" && !text.is_empty() && !text.ends_with("\n\n") {
+                    if ev["type"] == "content_block_start"
+                        && ev["content_block"]["type"] == "text"
+                        && !text.is_empty()
+                        && !text.ends_with("\n\n")
+                    {
                         let sep = if text.ends_with('\n') { "\n" } else { "\n\n" };
                         text.push_str(sep);
                         let _ = app.emit("ask-chunk", Chunk { chat_id: chat_id.clone(), text: sep.to_string() });
@@ -65,18 +93,26 @@ pub fn ask(app: AppHandle, running: Arc<Running>, cwd: PathBuf, chat_id: String,
                             Some("Glob") => Some("Looking through the library".into()),
                             _ => None,
                         };
-                        if let Some(t) = what { emit_status(&app, &chat_id, t); }
+                        if let Some(t) = what {
+                            emit_status(&app, &chat_id, t);
+                        }
                     }
                 }
                 Some("system") => {
-                    if let Some(s) = v["session_id"].as_str() { session_id = Some(s.to_string()); }
+                    if let Some(s) = v["session_id"].as_str() {
+                        session_id = Some(s.to_string());
+                    }
                 }
                 Some("result") => {
-                    if let Some(s) = v["session_id"].as_str() { session_id = Some(s.to_string()); }
+                    if let Some(s) = v["session_id"].as_str() {
+                        session_id = Some(s.to_string());
+                    }
                     if v["is_error"].as_bool() == Some(true) {
                         error = Some(v["result"].as_str().unwrap_or("Claude returned an error").to_string());
                     } else if text.is_empty() {
-                        if let Some(r) = v["result"].as_str() { text = r.to_string(); }
+                        if let Some(r) = v["result"].as_str() {
+                            text = r.to_string();
+                        }
                     }
                 }
                 _ => {}

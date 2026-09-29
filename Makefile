@@ -11,7 +11,7 @@ SIGN_ID  := $(APPLE_SIGNING_IDENTITY)
 # "-" is an ad-hoc signature: an empty identity makes the bundler fail instead.
 export APPLE_SIGNING_IDENTITY := $(if $(SIGN_ID),$(SIGN_ID),-)
 
-.PHONY: check test app install-app dmg dev icons sign-check help core
+.PHONY: check lint fmt test app install-app dmg dev icons sign-check help core
 
 ## cargo test + TypeScript type-check.
 check:
@@ -19,6 +19,17 @@ check:
 	npx tsc --noEmit -p tsconfig.json
 
 test: check
+
+## Check the code: rustfmt, clippy, Prettier and ESLint. Fails on any warning.
+lint:
+	cd src-tauri && cargo fmt --check && cargo clippy --all-targets -- -D warnings
+	npx prettier --check .
+	npx eslint . --max-warnings 0
+
+## Format the Rust and TypeScript.
+fmt:
+	cd src-tauri && cargo fmt
+	npx prettier --write .
 
 # Release builds strip the builder's home directory out of the binary (Rust bakes absolute
 # paths into panic metadata). Debug builds skip this so `make dev` keeps its incremental cache.

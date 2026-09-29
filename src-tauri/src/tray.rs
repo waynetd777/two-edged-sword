@@ -1,3 +1,6 @@
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
+
 //! The menu-bar menu and the daily Quiet time reminder. The frontend owns what they say: it sends
 //! a TrayState whenever today's reading, the place or the reminder setting changes (src/tray.tsx),
 //! and gets the menu's choices back as "tray" events. The reminder is timed here because the
@@ -105,7 +108,13 @@ pub fn set_tray(app: AppHandle, tray: tauri::State<'_, Tray>, state: TrayState) 
     // Turning the reminder on sends one notification straight away, so macOS asks for permission
     // now rather than when the first reminder is due.
     if on && prev.is_some_and(|p| !p.reminder) {
-        if let Err(e) = app.notification().builder().title("Quiet Time").body(format!("You'll be reminded at {at} if today's reading isn't done.")).show() {
+        if let Err(e) = app
+            .notification()
+            .builder()
+            .title("Quiet Time")
+            .body(format!("You'll be reminded at {at} if today's reading isn't done."))
+            .show()
+        {
             eprintln!("reminder: {e}");
         }
     }

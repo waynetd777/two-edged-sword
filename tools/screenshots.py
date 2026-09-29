@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+# SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 """Retake the README and docs screenshots: docs/images/<scene>-<theme>.png.
 
 Launches the dev build once per scene and theme with the scene in TES_SCENE (src/scene.ts sets it

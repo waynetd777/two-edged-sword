@@ -1,3 +1,6 @@
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
+
 // Rendering e-Sword's HTML. Modules use ordinary tags plus their own: <red> (words of Jesus),
 // <num>G25</num> (Strong's number for the words before it), <grk>, <heb>, <lat>, <ref>Joh 3:16</ref>
 // and <blu>. Text is never injected as HTML: it is parsed and rebuilt as React elements, so a
@@ -37,7 +40,10 @@ const SEE_AT_END = /\b(?:[Ss]ee(?: also| under)?|[Cc]ompare|[Cc]f\.)\s*$/;
 function leadingTopic(s: string, topic: (n: string) => string | undefined): { text: string; topic: string } | undefined {
   const words = s.trim().split(/\s+/);
   for (let n = Math.min(words.length, 6); n > 0; n--) {
-    const text = words.slice(0, n).join(" ").replace(/[,;:'’]+$/, "");
+    const text = words
+      .slice(0, n)
+      .join(" ")
+      .replace(/[,;:'’]+$/, "");
     const t = text && topic(text);
     if (t) return { text, topic: t };
   }
@@ -52,7 +58,10 @@ export function parseEswordRef(text: string, lastBook?: number): Ref | undefined
   const m = t.match(/^(\d+):(\d+)(?:-(\d+))?$/);
   if (m && lastBook) return { book: lastBook, chapter: +m[1], verse: +m[2], to: m[3] ? +m[3] : undefined };
   const m2 = t.match(/^([1-3]?[A-Za-z]{2,4})\s+(\d+)$/);
-  if (m2) { const b = findBook(m2[1]); if (b) return { book: b, chapter: +m2[2] }; }
+  if (m2) {
+    const b = findBook(m2[1]);
+    if (b) return { book: b, chapter: +m2[2] };
+  }
   return undefined;
 }
 
@@ -67,14 +76,20 @@ const CP1252 = "€\0‚ƒ„…†‡ˆ‰Š‹Œ\0Ž\0\0‘’“”•–—�
 const fixC1 = (t: string) => t.replace(/[\x80-\x9f]/g, (c) => CP1252[c.charCodeAt(0) - 0x80].replace("\0", ""));
 
 /** A module's HTML as plain text, its whitespace collapsed. */
-export const htmlText = (html: string) => fixC1(parse(html.replace(/<(?:br|\/p|\/h\d|\/div)\b[^>]*>/gi, "$& ")).textContent || "").replace(/\s+/g, " ").trim();
+export const htmlText = (html: string) =>
+  fixC1(parse(html.replace(/<(?:br|\/p|\/h\d|\/div)\b[^>]*>/gi, "$& ")).textContent || "")
+    .replace(/\s+/g, " ")
+    .trim();
 
 export function renderHtml(html: string, opts: RenderOpts = {}): ReactNode {
   let lastBook: number | undefined;
   let noteChain = false; // "see notes on A; B": B is a note too
   let key = 0;
   const walk = (node: Node): ReactNode => {
-    if (node.nodeType === Node.TEXT_NODE) { const t = fixC1(node.textContent || ""); return opts.topic && opts.onTopic ? linkSees(t) : t; }
+    if (node.nodeType === Node.TEXT_NODE) {
+      const t = fixC1(node.textContent || "");
+      return opts.topic && opts.onTopic ? linkSees(t) : t;
+    }
     if (node.nodeType !== Node.ELEMENT_NODE) return null;
     const el = node as Element;
     const kids = () => Array.from(el.childNodes).map((c) => <Fragment key={key++}>{walk(c)}</Fragment>);
@@ -82,33 +97,104 @@ export function renderHtml(html: string, opts: RenderOpts = {}): ReactNode {
     switch (tag) {
       case "p": {
         const center = (el.getAttribute("align") || "").toLowerCase() === "center";
-        return <p className={cls(el)} style={center ? { textAlign: "center", fontWeight: 600 } : undefined}>{kids()}</p>;
+        return (
+          <p className={cls(el)} style={center ? { textAlign: "center", fontWeight: 600 } : undefined}>
+            {kids()}
+          </p>
+        );
       }
-      case "b": case "strong": return seeTarget(el) ?? <b>{kids()}</b>;
-      case "i": case "em": return seeTarget(el) ?? <i>{kids()}</i>;
-      case "u": return <u>{kids()}</u>;
-      case "sup": return <sup>{kids()}</sup>;
-      case "sub": return <sub>{kids()}</sub>;
-      case "br": return <br />;
-      case "red": return <span className="red">{kids()}</span>;
-      case "blu": return <span className="blu">{kids()}</span>;
-      case "grk": return <span className="grk" lang="grc">{kids()}</span>;
-      case "heb": return <span className="heb" lang="he">{kids()}</span>;
-      case "lat": return <span className="lat">{kids()}</span>;
-      case "table": return <table><tbody>{Array.from(el.querySelectorAll(":scope > tbody > tr, :scope > tr")).map((tr) => walk(tr))}</tbody></table>;
-      case "tbody": return <>{kids()}</>;
-      case "tr": return <tr key={key++}>{kids()}</tr>;
-      case "td": case "th": return <td colSpan={+(el.getAttribute("colspan") || 1)}>{kids()}</td>;
+      case "b":
+      case "strong":
+        return seeTarget(el) ?? <b>{kids()}</b>;
+      case "i":
+      case "em":
+        return seeTarget(el) ?? <i>{kids()}</i>;
+      case "u":
+        return <u>{kids()}</u>;
+      case "sup":
+        return <sup>{kids()}</sup>;
+      case "sub":
+        return <sub>{kids()}</sub>;
+      case "br":
+        return <br />;
+      case "red":
+        return <span className="red">{kids()}</span>;
+      case "blu":
+        return <span className="blu">{kids()}</span>;
+      case "grk":
+        return (
+          <span className="grk" lang="grc">
+            {kids()}
+          </span>
+        );
+      case "heb":
+        return (
+          <span className="heb" lang="he">
+            {kids()}
+          </span>
+        );
+      case "lat":
+        return <span className="lat">{kids()}</span>;
+      case "table":
+        return (
+          <table>
+            <tbody>{Array.from(el.querySelectorAll(":scope > tbody > tr, :scope > tr")).map((tr) => walk(tr))}</tbody>
+          </table>
+        );
+      case "tbody":
+        return <>{kids()}</>;
+      case "tr":
+        return <tr key={key++}>{kids()}</tr>;
+      case "td":
+      case "th":
+        return <td colSpan={+(el.getAttribute("colspan") || 1)}>{kids()}</td>;
       case "img": {
         const src = el.getAttribute("src") || "";
         if (!src.startsWith("data:image/")) return null;
         const onImage = opts.onImage;
-        return onImage ? <img src={src} alt="" draggable={false} className="zoomable" onClick={(e) => { e.stopPropagation(); onImage(src); }} /> : <img src={src} alt="" draggable={false} />;
+        return onImage ? (
+          <img
+            src={src}
+            alt=""
+            draggable={false}
+            className="zoomable"
+            onClick={(e) => {
+              e.stopPropagation();
+              onImage(src);
+            }}
+          />
+        ) : (
+          <img src={src} alt="" draggable={false} />
+        );
       }
       case "num": {
         const n = (el.textContent || "").trim();
-        if (opts.inlineNums) return <a className="ref" onClick={(e) => { e.preventDefault(); e.stopPropagation(); opts.onStrongs?.(n); }}>{n}</a>;
-        return <span className="strongs" role="link" tabIndex={-1} onClick={(e) => { e.stopPropagation(); opts.onStrongs?.(n); }}>{n}</span>;
+        if (opts.inlineNums)
+          return (
+            <a
+              className="ref"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                opts.onStrongs?.(n);
+              }}
+            >
+              {n}
+            </a>
+          );
+        return (
+          <span
+            className="strongs"
+            role="link"
+            tabIndex={-1}
+            onClick={(e) => {
+              e.stopPropagation();
+              opts.onStrongs?.(n);
+            }}
+          >
+            {n}
+          </span>
+        );
       }
       case "ref": {
         const text = el.textContent || "";
@@ -121,20 +207,55 @@ export function renderHtml(html: string, opts: RenderOpts = {}): ReactNode {
           noteChain = NOTE_BEFORE.test(before) || NOTE_AFTER.test(after) || (noteChain && LIST_GAP.test(before));
           if (noteChain) {
             return (
-              <a className="ref" title="Open this commentary's note" onClick={(e) => { e.preventDefault(); e.stopPropagation(); opts.onNote!(r); }}
-                onMouseEnter={(e) => opts.onRefHover?.(r, e.currentTarget)} onMouseLeave={() => opts.onRefHover?.(null, null)}>{text}</a>
+              <a
+                className="ref"
+                title="Open this commentary's note"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  opts.onNote!(r);
+                }}
+                onMouseEnter={(e) => opts.onRefHover?.(r, e.currentTarget)}
+                onMouseLeave={() => opts.onRefHover?.(null, null)}
+              >
+                {text}
+              </a>
             );
           }
         }
         return (
-          <a className="ref" onClick={(e) => { e.preventDefault(); e.stopPropagation(); opts.onRef!(r, text); }}
-            onMouseEnter={(e) => opts.onRefHover?.(r, e.currentTarget)} onMouseLeave={() => opts.onRefHover?.(null, null)}>{text}</a>
+          <a
+            className="ref"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              opts.onRef!(r, text);
+            }}
+            onMouseEnter={(e) => opts.onRefHover?.(r, e.currentTarget)}
+            onMouseLeave={() => opts.onRefHover?.(null, null)}
+          >
+            {text}
+          </a>
         );
       }
-      default: return <>{kids()}</>;
+      default:
+        return <>{kids()}</>;
     }
   };
-  const link = (text: string, topic: string) => <a key={key++} className="ref" title={`Open ${topic}`} onClick={(e) => { e.preventDefault(); e.stopPropagation(); opts.onTopic!(topic); }}>{text}</a>;
+  const link = (text: string, topic: string) => (
+    <a
+      key={key++}
+      className="ref"
+      title={`Open ${topic}`}
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        opts.onTopic!(topic);
+      }}
+    >
+      {text}
+    </a>
+  );
   // "See ASTRONOMY. III, 3" or "see also Meal; Banquet": each name after the cue that is an entry here becomes a link.
   const linkSees = (text: string): ReactNode => {
     const out: ReactNode[] = [];
@@ -188,7 +309,13 @@ export function docSegments(html: string): string[] {
   const meaningful = (n: Node) => n.nodeType === Node.ELEMENT_NODE || (n.textContent || "").trim() !== "";
   for (;;) {
     const kids = Array.from(root.childNodes).filter(meaningful);
-    if (kids.length === 1 && kids[0].nodeType === Node.ELEMENT_NODE && !["p", "table"].includes((kids[0] as Element).tagName.toLowerCase()) && (kids[0] as Element).querySelector("p, br, table, div")) root = kids[0] as Element;
+    if (
+      kids.length === 1 &&
+      kids[0].nodeType === Node.ELEMENT_NODE &&
+      !["p", "table"].includes((kids[0] as Element).tagName.toLowerCase()) &&
+      (kids[0] as Element).querySelector("p, br, table, div")
+    )
+      root = kids[0] as Element;
     else break;
   }
   const out: string[] = [];
@@ -197,7 +324,8 @@ export function docSegments(html: string): string[] {
   const flush = () => {
     const h = run.join("").replace(/^(\s|<br\s*\/?>)+|(\s|<br\s*\/?>)+$/gi, "");
     if (h && (plainText(h) || /<img/i.test(h))) out.push(h);
-    run = []; brs = 0;
+    run = [];
+    brs = 0;
   };
   for (const n of Array.from(root.childNodes)) {
     if (n.nodeType === Node.ELEMENT_NODE) {
@@ -209,7 +337,11 @@ export function docSegments(html: string): string[] {
         else if (plainText(el.outerHTML) || el.querySelector("img")) out.push(el.outerHTML);
         continue;
       }
-      if (tag === "br") { if (++brs >= 2) flush(); else run.push("<br>"); continue; }
+      if (tag === "br") {
+        if (++brs >= 2) flush();
+        else run.push("<br>");
+        continue;
+      }
       brs = 0;
       run.push(el.outerHTML);
     } else if (n.nodeType === Node.TEXT_NODE) {
@@ -250,7 +382,8 @@ export function wordRangeAt(el: Element, char: number): Range | null {
   }
   if (char < 0 || char >= at.length) return null;
   const isWord = (k: number) => k >= 0 && k < at.length && !/\s/.test(at[k][0].data[at[k][1]]);
-  let a = char, b = char;
+  let a = char,
+    b = char;
   while (isWord(a - 1)) a--;
   while (isWord(b + 1)) b++;
   if (!isWord(a)) return null;
@@ -263,7 +396,9 @@ export function wordRangeAt(el: Element, char: number): Range | null {
 export function plainText(html: string): string {
   const body = parse(html);
   body.querySelectorAll("num").forEach((n) => n.remove());
-  body.querySelectorAll("sup").forEach((n) => { if (/^[()]$/.test(n.textContent || "")) n.remove(); });
+  body.querySelectorAll("sup").forEach((n) => {
+    if (/^[()]$/.test(n.textContent || "")) n.remove();
+  });
   let text = body.textContent || "";
   // Greek NT TR+/WH+ "| base | other |": the base reading only.
   if ((text.match(/\|/g) ?? []).length % 3 === 0) text = text.replace(/\|([^|]*)\|[^|]*\|/g, "$1");
@@ -303,7 +438,13 @@ export function variantSource(info: string): string {
 }
 
 /** INT+'s edition markers. */
-export const EDITIONS: Record<string, string> = { ν: "NA28/UBS5", α: "Alexandrian (UBS3–4, NA26–27)", τ: "Stephanus 1550 (TR)", σ: "Scrivener 1894 (TR)", β: "Byzantine Majority" };
+export const EDITIONS: Record<string, string> = {
+  ν: "NA28/UBS5",
+  α: "Alexandrian (UBS3–4, NA26–27)",
+  τ: "Stephanus 1550 (TR)",
+  σ: "Scrivener 1894 (TR)",
+  β: "Byzantine Majority",
+};
 
 const CODES = new Set(["PREP", "CONJ", "ADV", "PRT", "INJ", "COND", "HEB", "ARAM"]);
 /** A grammar code (N-NSF, V-2AAI-3S, PREP), as opposed to an English gloss (THE, WORD,). */
@@ -330,7 +471,9 @@ export function tokenize(html: string): Token[] {
   const out: Token[] = [];
   const interlinear = /<tvm>/i.test(html);
   /** The last original-language word so far: glosses and codes after it belong to it. */
-  const lastOriginal = () => { for (let k = out.length - 1; k >= 0; k--) if (out[k].word && ORIGINAL.test(out[k].text)) return out[k]; };
+  const lastOriginal = () => {
+    for (let k = out.length - 1; k >= 0; k--) if (out[k].word && ORIGINAL.test(out[k].text)) return out[k];
+  };
   let at = 0;
   let wi = 0;
   let groupStart = 0; // first token since the previous <num>
@@ -338,16 +481,28 @@ export function tokenize(html: string): Token[] {
   // brackets, or "omit" when it leaves the base reading out. Only when the pipes come in threes.
   const pipes = (html.match(/\|/g) ?? []).length;
   const variants = pipes > 0 && pipes % 3 === 0;
-  let vstate = 0, vstart = 0;
-  const mark = (text: string) => { out.push({ text, word: false, red: false, italic: false, strongs: [], at, wi: -1, variant: true }); at += text.length; };
+  let vstate = 0,
+    vstart = 0;
+  const mark = (text: string) => {
+    out.push({ text, word: false, red: false, italic: false, strongs: [], at, wi: -1, variant: true });
+    at += text.length;
+  };
   const pipe = () => {
     vstate = (vstate + 1) % 3;
-    if (vstate === 2) { mark("⟨"); vstart = out.length; }
-    else if (vstate === 0) { if (!out.slice(vstart).some((t) => t.word)) mark("omit"); mark("⟩"); }
+    if (vstate === 2) {
+      mark("⟨");
+      vstart = out.length;
+    } else if (vstate === 0) {
+      if (!out.slice(vstart).some((t) => t.word)) mark("omit");
+      mark("⟩");
+    }
   };
   const push = (text: string, red: boolean, italic: boolean) => {
     if (variants && text.includes("|")) {
-      text.split("|").forEach((part, i) => { if (i) pipe(); pushText(part, red, italic); });
+      text.split("|").forEach((part, i) => {
+        if (i) pipe();
+        pushText(part, red, italic);
+      });
       return;
     }
     pushText(text, red, italic);
@@ -356,15 +511,26 @@ export function tokenize(html: string): Token[] {
     const variant = vstate === 2 || undefined;
     let last = 0;
     for (const m of text.matchAll(WORD)) {
-      if (m.index! > last) { const t = text.slice(last, m.index); out.push({ text: t, word: false, red, italic, strongs: [], at, wi: -1, variant }); at += t.length; }
+      if (m.index! > last) {
+        const t = text.slice(last, m.index);
+        out.push({ text: t, word: false, red, italic, strongs: [], at, wi: -1, variant });
+        at += t.length;
+      }
       out.push({ text: m[0], word: true, red, italic, strongs: [], at, wi: wi++, variant });
       at += m[0].length;
       last = m.index! + m[0].length;
     }
-    if (last < text.length) { const t = text.slice(last); out.push({ text: t, word: false, red, italic, strongs: [], at, wi: -1, variant }); at += t.length; }
+    if (last < text.length) {
+      const t = text.slice(last);
+      out.push({ text: t, word: false, red, italic, strongs: [], at, wi: -1, variant });
+      at += t.length;
+    }
   };
   const walk = (node: Node, red: boolean, italic: boolean) => {
-    if (node.nodeType === Node.TEXT_NODE) { push(node.textContent || "", red, italic); return; }
+    if (node.nodeType === Node.TEXT_NODE) {
+      push(node.textContent || "", red, italic);
+      return;
+    }
     if (node.nodeType !== Node.ELEMENT_NODE) return;
     const el = node as Element;
     const tag = el.tagName.toLowerCase();
@@ -373,7 +539,10 @@ export function tokenize(html: string): Token[] {
       // "G1526 [G5748]": the Strong's number, then a tense code, which is grammar, not a word.
       const code = raw.match(/\[(\w+)\]/)?.[1];
       const n = raw.replace(/\s*\[\w+\]/g, "").trim();
-      if (code && interlinear) { const t = lastOriginal(); if (t) t.parse = t.parse ? `${t.parse} ${code}` : code; }
+      if (code && interlinear) {
+        const t = lastOriginal();
+        if (t) t.parse = t.parse ? `${t.parse} ${code}` : code;
+      }
       const words = out.slice(groupStart).filter((t) => t.word);
       words.forEach((t) => t.strongs.push(n));
       const lastWord = words[words.length - 1];
@@ -385,12 +554,19 @@ export function tokenize(html: string): Token[] {
     if (interlinear && tag === "div" && el.querySelector("gra")) {
       let t: Token | undefined;
       for (const k of Array.from(el.children)) {
-        const kt = k.tagName.toLowerCase(), text = (k.textContent || "").trim();
+        const kt = k.tagName.toLowerCase(),
+          text = (k.textContent || "").trim();
         if (!text) continue;
-        if (kt === "grk" && !t) { push(text, red, italic); t = [...out].reverse().find((x) => x.word); groupStart = out.length; } // the box's word, in any script (Latin+ too)
+        if (kt === "grk" && !t) {
+          push(text, red, italic);
+          t = [...out].reverse().find((x) => x.word);
+          groupStart = out.length;
+        } // the box's word, in any script (Latin+ too)
         else if (!t) continue;
-        else if (kt === "num") { t.strongs.push(text); (t.showNums ??= []).push(text); }
-        else if (kt === "tvm") t.parse = text;
+        else if (kt === "num") {
+          t.strongs.push(text);
+          (t.showNums ??= []).push(text);
+        } else if (kt === "tvm") t.parse = text;
         else if (kt === "grk") t.lemma = text;
         else if (kt === "gra") t.gloss = text;
         else if (kt === "red") t.editions = text;
@@ -403,7 +579,12 @@ export function tokenize(html: string): Token[] {
       const t = lastOriginal();
       const numbered = tag === "tvm" ? text.match(/^(\d*)\[([^\]]+)\]$/) : null;
       if (t && numbered) {
-        if (numbered[1]) { const n = `G${numbered[1]}`; t.strongs.push(n); (t.showNums ??= []).push(n); groupStart = out.length; }
+        if (numbered[1]) {
+          const n = `G${numbered[1]}`;
+          t.strongs.push(n);
+          (t.showNums ??= []).push(n);
+          groupStart = out.length;
+        }
         t.parse = numbered[2];
       } else if (t && text) {
         if (tag === "sup" || !isCode(text)) t.gloss = t.gloss ? `${t.gloss} ${text}` : text;
@@ -439,22 +620,42 @@ export function alignStrongs(plainTokens: Token[], strongTokens: Token[]): Token
     // Walk forward in b to the next word with the same spelling (tolerates small differences).
     let k = j;
     while (k < b.length && norm(b[k].text) !== norm(t.text) && k - j < 3) k++;
-    if (k < b.length && norm(b[k].text) === norm(t.text)) { t.strongs = b[k].strongs; j = k + 1; }
+    if (k < b.length && norm(b[k].text) === norm(t.text)) {
+      t.strongs = b[k].strongs;
+      j = k + 1;
+    }
   }
   return plainTokens;
 }
 
 /** A word reduced to a dictionary headword: "loved" → ["loved", "love"]. */
 export function headwords(word: string): string[] {
-  const w = word.toLowerCase().replace(/[’']s$/, "").replace(/[’']/g, "'");
+  const w = word
+    .toLowerCase()
+    .replace(/[’']s$/, "")
+    .replace(/[’']/g, "'");
   const out = [w];
-  const add = (s: string) => { if (s.length > 2 && !out.includes(s)) out.push(s); };
-  if (w.endsWith("eth")) { add(w.slice(0, -3)); add(w.slice(0, -3) + "e"); }
-  if (w.endsWith("est")) { add(w.slice(0, -3)); add(w.slice(0, -3) + "e"); }
+  const add = (s: string) => {
+    if (s.length > 2 && !out.includes(s)) out.push(s);
+  };
+  if (w.endsWith("eth")) {
+    add(w.slice(0, -3));
+    add(w.slice(0, -3) + "e");
+  }
+  if (w.endsWith("est")) {
+    add(w.slice(0, -3));
+    add(w.slice(0, -3) + "e");
+  }
   if (w.endsWith("ied")) add(w.slice(0, -3) + "y");
   if (w.endsWith("ies")) add(w.slice(0, -3) + "y");
-  if (w.endsWith("ed")) { add(w.slice(0, -2)); add(w.slice(0, -1)); }
-  if (w.endsWith("ing")) { add(w.slice(0, -3)); add(w.slice(0, -3) + "e"); }
+  if (w.endsWith("ed")) {
+    add(w.slice(0, -2));
+    add(w.slice(0, -1));
+  }
+  if (w.endsWith("ing")) {
+    add(w.slice(0, -3));
+    add(w.slice(0, -3) + "e");
+  }
   if (w.endsWith("es")) add(w.slice(0, -2));
   if (w.endsWith("s") && !w.endsWith("ss")) add(w.slice(0, -1));
   return out;
@@ -480,10 +681,13 @@ export function kjvGloss(concordance: string, num: string): Promise<string | nul
   const key = `${concordance}/${num}`;
   let p = kjvGlossCache.get(key);
   if (!p) {
-    p = api.article("lexicon", concordance, num).then((a) => {
-      const r = a ? concordanceRenderings(a.html) : [];
-      return r.length ? r.reduce((x, y) => (y[1] > x[1] ? y : x))[0] : null;
-    }).catch(() => null);
+    p = api
+      .article("lexicon", concordance, num)
+      .then((a) => {
+        const r = a ? concordanceRenderings(a.html) : [];
+        return r.length ? r.reduce((x, y) => (y[1] > x[1] ? y : x))[0] : null;
+      })
+      .catch(() => null);
     kjvGlossCache.set(key, p);
   }
   return p;

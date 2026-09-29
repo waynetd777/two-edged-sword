@@ -1,3 +1,6 @@
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
+
 // Worship songs for Quiet time: chosen from the user's Music library to suit the day's reading.
 // The assistant picks them from the library's worship songs by number, so it can only name songs
 // that are there; without an assistant, or if its answer can't be read, they are picked at random.
@@ -13,21 +16,36 @@ const WORSHIP = /christian|gospel|worship|praise|religious|inspirational|ccm/i;
 let library: Promise<MusicTrack[]> | null = null;
 /** The library's worship songs, one of each title and artist; read once a session. */
 function worshipSongs(): Promise<MusicTrack[]> {
-  library ??= api.musicTracks().then((ts) => {
-    const seen = new Set<string>();
-    return ts.filter((t) => {
-      const k = `${t.name.toLowerCase()}|${t.artist.toLowerCase()}`;
-      if (!WORSHIP.test(t.genre) || !t.name.trim() || seen.has(k)) return false;
-      seen.add(k);
-      return true;
+  library ??= api
+    .musicTracks()
+    .then((ts) => {
+      const seen = new Set<string>();
+      return ts.filter((t) => {
+        const k = `${t.name.toLowerCase()}|${t.artist.toLowerCase()}`;
+        if (!WORSHIP.test(t.genre) || !t.name.trim() || seen.has(k)) return false;
+        seen.add(k);
+        return true;
+      });
+    })
+    .catch((e) => {
+      library = null;
+      throw e;
     });
-  }).catch((e) => { library = null; throw e; });
   return library;
 }
 
-export interface Song { id: string; name: string; artist: string; /** Why it suits the reading. */ why?: string }
+export interface Song {
+  id: string;
+  name: string;
+  artist: string;
+  /** Why it suits the reading. */ why?: string;
+}
 /** The songs, with the assistant's word on the day's themes (`intro`), or why it had to guess (`note`). */
-export interface Picked { songs: Song[]; intro?: string; note?: string }
+export interface Picked {
+  songs: Song[];
+  intro?: string;
+  note?: string;
+}
 
 // A day's choice is kept, so starting Quiet time again doesn't wait for the assistant again.
 const chosen = new Map<string, Promise<Picked>>();
@@ -40,7 +58,12 @@ export function pickSongs(n: number, about: string[], when: "before" | "after", 
     p = choose(n, about, when, model);
     chosen.set(key, p);
     // Only a real choice is kept; a random one (or a failure) is tried again next time.
-    p.then((x) => { if (x.note) chosen.delete(key); }, () => chosen.delete(key));
+    p.then(
+      (x) => {
+        if (x.note) chosen.delete(key);
+      },
+      () => chosen.delete(key),
+    );
   }
   return p;
 }
@@ -65,8 +88,13 @@ ${list}`;
     const answer = await askOnce(prompt, pickModel(model, models));
     const r = readAnswer(answer);
     const seen = new Set<number>();
-    const songs = r.songs.filter((x) => all[x.n - 1] && !seen.has(x.n) && seen.add(x.n)).slice(0, n)
-      .map(({ n: k, why }) => { const { id, name, artist } = all[k - 1]; return { id, name, artist, why }; });
+    const songs = r.songs
+      .filter((x) => all[x.n - 1] && !seen.has(x.n) && seen.add(x.n))
+      .slice(0, n)
+      .map(({ n: k, why }) => {
+        const { id, name, artist } = all[k - 1];
+        return { id, name, artist, why };
+      });
     if (!songs.length) return random("Chosen at random: the assistant's answer couldn't be read.");
     return { songs, intro: r.intro };
   } catch (e) {
@@ -80,13 +108,25 @@ function readAnswer(text: string): { intro?: string; songs: { n: number; why?: s
   if (obj) {
     try {
       const j = JSON.parse(obj) as { intro?: unknown; songs?: unknown };
-      const songs = Array.isArray(j.songs) ? j.songs.flatMap((x) => {
-        const o = x as { n?: unknown; why?: unknown };
-        return typeof o.n === "number" ? [{ n: o.n, why: typeof o.why === "string" ? o.why : undefined }] : typeof x === "number" ? [{ n: x }] : [];
-      }) : [];
+      const songs = Array.isArray(j.songs)
+        ? j.songs.flatMap((x) => {
+            const o = x as { n?: unknown; why?: unknown };
+            return typeof o.n === "number"
+              ? [{ n: o.n, why: typeof o.why === "string" ? o.why : undefined }]
+              : typeof x === "number"
+                ? [{ n: x }]
+                : [];
+          })
+        : [];
       return { intro: typeof j.intro === "string" ? j.intro : undefined, songs };
-    } catch { /* fall through */ }
+    } catch {
+      /* fall through */
+    }
   }
   const nums = text.match(/\[[\d,\s]*\]/)?.[0];
-  try { return { songs: (nums ? (JSON.parse(nums) as number[]) : []).map((n) => ({ n })) }; } catch { return { songs: [] }; }
+  try {
+    return { songs: (nums ? (JSON.parse(nums) as number[]) : []).map((n) => ({ n })) };
+  } catch {
+    return { songs: [] };
+  }
 }

@@ -1,3 +1,6 @@
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
+
 import { useEffect, useMemo, useRef, useState } from "react";
 import { api, Article } from "./api";
 import { fmtRef } from "./bible";
@@ -26,7 +29,9 @@ export function DocReader({ focus, setFocus, openPalette }: { focus: boolean; se
   // The study pane: notes on the chapter, the dictionaries, and Ask (when an assistant is installed).
   const pane = app.settings.studyPane;
   const tab = app.settings.docTab === "ask" && !canAsk ? "notes" : app.settings.docTab;
-  const setTab = (t: typeof tab) => { app.set({ docTab: t, ...(app.settings.studyPane ? {} : { studyPane: true }) }); };
+  const setTab = (t: typeof tab) => {
+    app.set({ docTab: t, ...(app.settings.studyPane ? {} : { studyPane: true }) });
+  };
   const doc = app.doc!;
   const kind = doc.kind ?? "reference";
   const devo = kind === "devotional";
@@ -34,7 +39,7 @@ export function DocReader({ focus, setFocus, openPalette }: { focus: boolean; se
   const books = (app.lib?.modules ?? []).filter((m) => m.kind === kind);
   const mod = books.find((m) => m.id === doc.module);
   const [loaded, setLoaded] = useState<{ module: string; titles: string[] }>({ module: "", titles: [] });
-  const titles = loaded.module === doc.module ? loaded.titles : [];
+  const titles = useMemo(() => (loaded.module === doc.module ? loaded.titles : []), [loaded, doc.module]);
   const i = titles.indexOf(doc.title);
   const [art, setArt] = useState<Article | null>(null);
   const [filter, setFilter] = useState("");
@@ -48,7 +53,9 @@ export function DocReader({ focus, setFocus, openPalette }: { focus: boolean; se
   const ps = player.state;
   const reading = ps.on && ps.doc?.module === doc.module && ps.doc.title === doc.title;
   const listen = (from = 0) => player.playDoc(doc.module, doc.title, segs, from, kind);
-  useListenKey(() => { if (segs.length) listen(); });
+  useListenKey(() => {
+    if (segs.length) listen();
+  });
 
   // Ask: the chapter (or the part around the paragraph asked about) goes with the question; the
   // rest of the book is exported once so the model can search it rather than carry it.
@@ -61,7 +68,9 @@ export function DocReader({ focus, setFocus, openPalette }: { focus: boolean; se
   const exportBook = () => {
     if (exported.current?.module !== doc.module) {
       const p = api.docExport(doc.module, kind);
-      p.catch(() => { exported.current = null; });
+      p.catch(() => {
+        exported.current = null;
+      });
       exported.current = { module: doc.module, p };
     }
     return exported.current.p;
@@ -75,54 +84,68 @@ export function DocReader({ focus, setFocus, openPalette }: { focus: boolean; se
     const paras = segs.map((h) => plainText(h.replace(/<img[^>]*>/gi, () => ` [Chart: ${nn}-img${++img}.png] `)));
     const words = (k: number) => paras[k].split(/\s+/).length;
     // About 6,000 words of the chapter: all of it when it fits, else a window around the paragraph asked about.
-    let from = 0, to = paras.length - 1;
+    let from = 0,
+      to = paras.length - 1;
     if (paras.reduce((n, _, k) => n + words(k), 0) > 6000) {
       const at = asking ?? 0;
-      from = at; to = at;
+      from = at;
+      to = at;
       let n = words(at);
       while (n < 6000 && (from > 0 || to < paras.length - 1)) {
         if (to < paras.length - 1) n += words(++to);
         if (from > 0 && n < 6000) n += words(--from);
       }
     }
-    const part = from === 0 && to === paras.length - 1 ? `the whole ${unit}` : `paragraphs ${from + 1} to ${to + 1} of ${paras.length}; the rest is in the file`;
-    const where = devo ? `the devotional "${mod?.title ?? doc.module}", the reading for ${doc.title}` : `"${mod?.title ?? doc.module}", chapter "${doc.title}"`;
+    const part =
+      from === 0 && to === paras.length - 1
+        ? `the whole ${unit}`
+        : `paragraphs ${from + 1} to ${to + 1} of ${paras.length}; the rest is in the file`;
+    const where = devo
+      ? `the devotional "${mod?.title ?? doc.module}", the reading for ${doc.title}`
+      : `"${mod?.title ?? doc.module}", chapter "${doc.title}"`;
     const lines = [`The reader has open ${where}${file ? ` (file "${file}")` : ""}. Here is ${part}, numbered by paragraph:`];
     for (let k = from; k <= to; k++) lines.push(`[${k + 1}] ${paras[k]}`);
     if (asking !== null) lines.push(`\nThe question is about paragraph ${asking + 1}:\n${paras[asking]}`);
     return lines.join("\n");
   };
   // Only offer what fits: a chart question when there is a chart, the wider book when there is one.
-  const para = asking !== null ? segs[asking] ?? "" : "";
+  const para = asking !== null ? (segs[asking] ?? "") : "";
   const multi = titles.length > 1;
   const chapterRefs = segs.reduce((n, h) => n + (h.match(/<ref>/gi)?.length ?? 0), 0);
-  const suggestions = (asking === null && devo
-    ? [
-        "Summarise today's reading",
-        "What is the key verse here, and why?",
-        "How can I put this into practice today?",
-        "Give me a short prayer drawn from this",
-        chapterRefs >= 2 ? "Read me the verses it quotes" : "",
-      ]
-    : asking === null
-    ? [
-        "Summarise this chapter",
-        images.length === 1 ? "Explain the chart in this chapter" : images.length > 1 ? "Explain the main chart in this chapter" : "",
-        chapterRefs >= 5 ? "Which Scriptures does this chapter lean on most?" : "",
-        multi && i > 0 ? "How does this build on the previous chapter?" : "",
-        multi ? "How does this chapter fit the book's overall scheme?" : "",
-        "How do other interpretive traditions see this?",
-      ]
-    : [
-        /<img/i.test(para) ? "Explain this chart" : "Explain this paragraph",
-        plainText(para).split(/\s+/).length > 80 ? "Put this in simpler words" : "",
-        /<ref>/i.test(para) ? "How do the verses cited here support this?" : "What Scriptures support this?",
-        multi ? (devo ? "Where else does this devotional touch on this?" : "Where else does the book discuss this?") : "",
-        "What would someone who disagrees say?",
-      ]
-  ).filter(Boolean).slice(0, 5);
-  const marked = (k: number) => app.bookmarks.some((b) => b.doc?.module === doc.module && b.doc.title === doc.title && b.doc.para === k + 1);
-  const askAbout = (k: number) => { setAsking(k); setTab("ask"); };
+  const suggestions = (
+    asking === null && devo
+      ? [
+          "Summarise today's reading",
+          "What is the key verse here, and why?",
+          "How can I put this into practice today?",
+          "Give me a short prayer drawn from this",
+          chapterRefs >= 2 ? "Read me the verses it quotes" : "",
+        ]
+      : asking === null
+        ? [
+            "Summarise this chapter",
+            images.length === 1 ? "Explain the chart in this chapter" : images.length > 1 ? "Explain the main chart in this chapter" : "",
+            chapterRefs >= 5 ? "Which Scriptures does this chapter lean on most?" : "",
+            multi && i > 0 ? "How does this build on the previous chapter?" : "",
+            multi ? "How does this chapter fit the book's overall scheme?" : "",
+            "How do other interpretive traditions see this?",
+          ]
+        : [
+            /<img/i.test(para) ? "Explain this chart" : "Explain this paragraph",
+            plainText(para).split(/\s+/).length > 80 ? "Put this in simpler words" : "",
+            /<ref>/i.test(para) ? "How do the verses cited here support this?" : "What Scriptures support this?",
+            multi ? (devo ? "Where else does this devotional touch on this?" : "Where else does the book discuss this?") : "",
+            "What would someone who disagrees say?",
+          ]
+  )
+    .filter(Boolean)
+    .slice(0, 5);
+  const marked = (k: number) =>
+    app.bookmarks.some((b) => b.doc?.module === doc.module && b.doc.title === doc.title && b.doc.para === k + 1);
+  const askAbout = (k: number) => {
+    setAsking(k);
+    setTab("ask");
+  };
 
   // Paragraphs select like verses: a click (not on a word, a link or an image) selects one,
   // ⇧-click a run; the toolbar above offers highlight, bookmark, note, listen, ask and copy.
@@ -130,14 +153,22 @@ export function DocReader({ focus, setFocus, openPalette }: { focus: boolean; se
   useEffect(() => setSel(null), [doc.module, doc.title]);
   const bookTitle = mod?.title ?? doc.module;
   const selLabel = sel ? docLabel(bookTitle, doc.title, sel.from, sel.to) : "";
-  const selText = () => (sel ? segs.slice(sel.from - 1, sel.to).map((h) => plainText(h)).join("\n\n") : "");
+  const selText = () =>
+    sel
+      ? segs
+          .slice(sel.from - 1, sel.to)
+          .map((h) => plainText(h))
+          .join("\n\n")
+      : "";
   const clickPara = (n: number, shift: boolean) => {
     if (shift && sel) setSel({ from: Math.min(sel.from, n), to: Math.max(sel.to, n) });
     else if (sel && sel.from === n && sel.to === n) setSel(null);
     else setSel({ from: n, to: n });
   };
   const hlOf = (n: number) => app.highlights[docHlKey(doc.module, doc.title, n)];
-  const setHl = (c: HlColor | null) => { if (sel) for (let n = sel.from; n <= sel.to; n++) app.setHighlight(docHlKey(doc.module, doc.title, n), c); };
+  const setHl = (c: HlColor | null) => {
+    if (sel) for (let n = sel.from; n <= sel.to; n++) app.setHighlight(docHlKey(doc.module, doc.title, n), c);
+  };
   const curHl = sel && hlOf(sel.from) ? hlName(hlOf(sel.from)) : undefined;
   const copySel = () => {
     const t = selText();
@@ -161,28 +192,87 @@ export function DocReader({ focus, setFocus, openPalette }: { focus: boolean; se
   });
   const noteOnSel = () => {
     if (!sel) return;
-    const quote = selText().split("\n\n").map((p) => `> ${p}`).join("\n>\n");
-    app.startEntry({ verses: [selLabel], title: `${doc.title} ¶${sel.from}${sel.to !== sel.from ? `–${sel.to}` : ""}`, body: `${quote}\n\n` });
+    const quote = selText()
+      .split("\n\n")
+      .map((p) => `> ${p}`)
+      .join("\n>\n");
+    app.startEntry({
+      verses: [selLabel],
+      title: `${doc.title} ¶${sel.from}${sel.to !== sel.from ? `–${sel.to}` : ""}`,
+      body: `${quote}\n\n`,
+    });
   };
   const selMarked = !!sel && marked(sel.from - 1);
   const toolbar = sel && (
-    <div className="vtool fold-doc" role="toolbar" aria-label="Paragraph actions" style={{ top: -44, left: 44 }} onClick={(e) => e.stopPropagation()}>
+    <div
+      className="vtool fold-doc"
+      role="toolbar"
+      aria-label="Paragraph actions"
+      style={{ top: -44, left: 44 }}
+      onClick={(e) => e.stopPropagation()}
+    >
       <div style={{ display: "flex", gap: 6, padding: "0 6px 0 4px" }}>
-        {HL.map((c) => <button key={c} type="button" className="dot" aria-label={`Highlight: ${hlLabel(c, app.settings.hlNames)}`} title={hlLabel(c, app.settings.hlNames)} aria-pressed={curHl === c} style={{ background: HL_DOT[c], outline: curHl === c ? "2px solid var(--vt-ring)" : undefined }} onClick={() => setHl(curHl === c ? null : c)} />)}
-        {curHl && app.settings.hlNames?.[curHl]?.trim() && <span style={{ fontSize: 12, alignSelf: "center", whiteSpace: "nowrap", maxWidth: 160, overflow: "hidden", textOverflow: "ellipsis" }}>{hlLabel(curHl, app.settings.hlNames)}</span>}
+        {HL.map((c) => (
+          <button
+            key={c}
+            type="button"
+            className="dot"
+            aria-label={`Highlight: ${hlLabel(c, app.settings.hlNames)}`}
+            title={hlLabel(c, app.settings.hlNames)}
+            aria-pressed={curHl === c}
+            style={{ background: HL_DOT[c], outline: curHl === c ? "2px solid var(--vt-ring)" : undefined }}
+            onClick={() => setHl(curHl === c ? null : c)}
+          />
+        ))}
+        {curHl && app.settings.hlNames?.[curHl]?.trim() && (
+          <span
+            style={{ fontSize: 12, alignSelf: "center", whiteSpace: "nowrap", maxWidth: 160, overflow: "hidden", textOverflow: "ellipsis" }}
+          >
+            {hlLabel(curHl, app.settings.hlNames)}
+          </span>
+        )}
       </div>
       <span className="sep" />
       {/* Labels show when the column has room, and fold to icons when it doesn't (.lbl, styles.css). */}
-      <button type="button" className="tb" title={selMarked ? "Remove the bookmark" : "Bookmark this paragraph"} onClick={() => app.toggleDocBookmark({ module: doc.module, title: doc.title, kind, para: sel.from })}><Icon name="bookmark" style={{ fill: selMarked ? "currentColor" : "none" }} /><span className="lbl">{selMarked ? "Bookmarked" : "Bookmark"}</span></button>
-      <button type="button" className="tb" title="Note: a journal entry quoting this, linked to it" onClick={noteOnSel}><Icon name="note" /><span className="lbl">Note</span></button>
-      <button type="button" className="tb" title="Listen from here" onClick={() => listen(sel.from - 1)}><Icon name="speaker" /><span className="lbl">Listen from here</span></button>
-      {canAsk && <button type="button" className="tb" title="Ask about this" onClick={() => askAbout(sel.from - 1)}><Icon name="chat" /><span className="lbl">Ask</span></button>}
-      <button type="button" className="tb" title="Copy, with where it's from (⌘C)" onClick={copySel}><Icon name="copy" /><span className="lbl">Copy<span style={{ opacity: 0.6 }}> ⌘C</span></span></button>
+      <button
+        type="button"
+        className="tb"
+        title={selMarked ? "Remove the bookmark" : "Bookmark this paragraph"}
+        onClick={() => app.toggleDocBookmark({ module: doc.module, title: doc.title, kind, para: sel.from })}
+      >
+        <Icon name="bookmark" style={{ fill: selMarked ? "currentColor" : "none" }} />
+        <span className="lbl">{selMarked ? "Bookmarked" : "Bookmark"}</span>
+      </button>
+      <button type="button" className="tb" title="Note: a journal entry quoting this, linked to it" onClick={noteOnSel}>
+        <Icon name="note" />
+        <span className="lbl">Note</span>
+      </button>
+      <button type="button" className="tb" title="Listen from here" onClick={() => listen(sel.from - 1)}>
+        <Icon name="speaker" />
+        <span className="lbl">Listen from here</span>
+      </button>
+      {canAsk && (
+        <button type="button" className="tb" title="Ask about this" onClick={() => askAbout(sel.from - 1)}>
+          <Icon name="chat" />
+          <span className="lbl">Ask</span>
+        </button>
+      )}
+      <button type="button" className="tb" title="Copy, with where it's from (⌘C)" onClick={copySel}>
+        <Icon name="copy" />
+        <span className="lbl">
+          Copy<span style={{ opacity: 0.6 }}> ⌘C</span>
+        </span>
+      </button>
     </div>
   );
 
   // Journal entries linked to this chapter (any of its paragraphs), for the Notes tab.
-  const notes = app.journal.filter((e) => e.verses.some((v) => { const l = parseDocLabel(v); return l && l.book === bookTitle && l.chapter === doc.title; }));
+  const notes = app.journal.filter((e) =>
+    e.verses.some((v) => {
+      const l = parseDocLabel(v);
+      return l && l.book === bookTitle && l.chapter === doc.title;
+    }),
+  );
 
   // Opened from a bookmark: bring its paragraph into view and flash it, once the chapter is in.
   const [flash, setFlash] = useState<number | null>(null);
@@ -201,11 +291,21 @@ export function DocReader({ focus, setFocus, openPalette }: { focus: boolean; se
   const [wordBoxes, setWordBoxes] = useState<{ left: number; top: number; width: number; height: number }[]>([]);
   useEffect(() => {
     const place = () => {
-      const seg = reading && app.settings.highlightWords && ps.char >= 0 ? scroller.current?.querySelector<HTMLElement>(`[data-seg="${ps.verse}"] .dsegtext`) : null;
+      const seg =
+        reading && app.settings.highlightWords && ps.char >= 0
+          ? scroller.current?.querySelector<HTMLElement>(`[data-seg="${ps.verse}"] .dsegtext`)
+          : null;
       const r = seg ? wordRangeAt(seg, ps.char) : null;
-      if (!seg || !r) { setWordBoxes((b) => (b.length ? [] : b)); return; }
+      if (!seg || !r) {
+        setWordBoxes((b) => (b.length ? [] : b));
+        return;
+      }
       const o = seg.getBoundingClientRect();
-      setWordBoxes([...r.getClientRects()].filter((x) => x.width > 0).map((x) => ({ left: x.left - o.left, top: x.top - o.top, width: x.width, height: x.height })));
+      setWordBoxes(
+        [...r.getClientRects()]
+          .filter((x) => x.width > 0)
+          .map((x) => ({ left: x.left - o.left, top: x.top - o.top, width: x.width, height: x.height })),
+      );
     };
     place();
     window.addEventListener("resize", place);
@@ -214,15 +314,24 @@ export function DocReader({ focus, setFocus, openPalette }: { focus: boolean; se
 
   // Keep the paragraph being read in view.
   useEffect(() => {
-    if (reading && !ps.paused) scroller.current?.querySelector(`[data-seg="${ps.verse}"]`)?.scrollIntoView({ block: "center", behavior: "smooth" });
+    if (reading && !ps.paused)
+      scroller.current?.querySelector(`[data-seg="${ps.verse}"]`)?.scrollIntoView({ block: "center", behavior: "smooth" });
   }, [reading, ps.verse, ps.paused]);
 
   useEffect(() => {
     setFilter("");
     const module = doc.module;
     let dead = false;
-    (devo ? api.devotionTitles(module) : api.referenceTitles(module)).then((titles) => { if (!dead) setLoaded({ module, titles }); }).catch(() => { if (!dead) setLoaded({ module, titles: [] }); });
-    return () => { dead = true; };
+    (devo ? api.devotionTitles(module) : api.referenceTitles(module))
+      .then((titles) => {
+        if (!dead) setLoaded({ module, titles });
+      })
+      .catch(() => {
+        if (!dead) setLoaded({ module, titles: [] });
+      });
+    return () => {
+      dead = true;
+    };
   }, [doc.module, devo]);
 
   // No chapter yet: a book starts at its first, a devotional at today's reading.
@@ -233,36 +342,61 @@ export function DocReader({ focus, setFocus, openPalette }: { focus: boolean; se
   }, [doc.title, doc.module, titles, app, devo, kind]);
 
   useEffect(() => {
-    if (!doc.title) { setArt(null); return; }
-    const module = doc.module, title = doc.title;
+    if (!doc.title) {
+      setArt(null);
+      return;
+    }
+    const module = doc.module,
+      title = doc.title;
     let dead = false;
     (devo
       ? api.devotion(module, title).then((html) => (html ? { module, title: mod?.title ?? module, topic: title, html } : null))
       : api.article("reference", module, title)
-    ).then((a) => { if (!dead) setArt(a); }).catch(() => { if (!dead) setArt(null); });
+    )
+      .then((a) => {
+        if (!dead) setArt(a);
+      })
+      .catch(() => {
+        if (!dead) setArt(null);
+      });
     scroller.current?.scrollTo({ top: 0 });
     list.current?.querySelector<HTMLElement>("[aria-current=true]")?.scrollIntoView({ block: "nearest" });
-    return () => { dead = true; };
-  }, [doc.module, doc.title]);
+    return () => {
+      dead = true;
+    };
+  }, [doc.module, doc.title]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // The list arrives after the first chapter is open: bring the current one into view.
-  useEffect(() => { list.current?.querySelector<HTMLElement>("[aria-current=true]")?.scrollIntoView({ block: "nearest" }); }, [loaded]);
+  useEffect(() => {
+    list.current?.querySelector<HTMLElement>("[aria-current=true]")?.scrollIntoView({ block: "nearest" });
+  }, [loaded]);
 
   const shown = useMemo(() => {
     const q = filter.trim().toLowerCase();
     return q ? titles.filter((t) => t.toLowerCase().includes(q)) : titles;
   }, [titles, filter]);
-  const go = (t: string | undefined) => { if (t) { hide(); app.openDoc(doc.module, t, kind); } };
+  const go = (t: string | undefined) => {
+    if (t) {
+      hide();
+      app.openDoc(doc.module, t, kind);
+    }
+  };
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (image || e.metaKey || e.ctrlKey || e.altKey || (e.target as HTMLElement)?.closest("input, textarea, select, [contenteditable]")) return;
+      if (image || e.metaKey || e.ctrlKey || e.altKey || (e.target as HTMLElement)?.closest("input, textarea, select, [contenteditable]"))
+        return;
       if (e.key === "Escape" && focus) setFocus(false);
-      else if (e.key === "ArrowLeft") { go(titles[i - 1]); e.preventDefault(); }
-      else if (e.key === "ArrowRight") { go(titles[i + 1]); e.preventDefault(); }
-      else if (e.key === " ") {
+      else if (e.key === "ArrowLeft") {
+        go(titles[i - 1]);
         e.preventDefault();
-        if (player.state.on) player.toggle(); else if (segs.length) listen();
+      } else if (e.key === "ArrowRight") {
+        go(titles[i + 1]);
+        e.preventDefault();
+      } else if (e.key === " ") {
+        e.preventDefault();
+        if (player.state.on) player.toggle();
+        else if (segs.length) listen();
       }
     };
     window.addEventListener("keydown", onKey);
@@ -273,163 +407,488 @@ export function DocReader({ focus, setFocus, openPalette }: { focus: boolean; se
     <div className="main" style={{ minHeight: 0 }}>
       {focus ? (
         <header className="topbar drag" style={{ borderBottom: 0, paddingLeft: 84 }}>
-          <button className="ibtn" type="button" aria-label="Previous chapter" title={`Previous ${unit} (←)`} disabled={i <= 0} onClick={() => go(titles[i - 1])}><Icon name="back" /></button>
-          <div className="spacer" style={{ display: "flex", alignItems: "center", justifyContent: "center", color: "var(--muted)", minWidth: 0 }}><span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{doc.title} · {mod?.title}</span></div>
-          <button className={`ibtn ${reading ? "on" : ""}`} type="button" aria-label="Listen" title="Listen (Space · ⌘P)" disabled={!segs.length} onClick={() => (reading ? player.toggle() : listen())}><Icon name="speaker" /></button>
-          <HighlightsButton />
-          <TextSizeButton />
-          <button className="btn" type="button" onClick={() => setFocus(false)}>Exit focus<span className="kbd">esc</span></button>
-          <button className="ibtn" type="button" aria-label="Next chapter" title={`Next ${unit} (→)`} disabled={i < 0 || i >= titles.length - 1} onClick={() => go(titles[i + 1])}><Icon name="fwd" /></button>
-        </header>
-      ) : <Topbar right={
-        <div style={{ display: "flex", gap: 2 }}>
-          <button className={`ibtn ${reading ? "on" : ""}`} type="button" aria-label="Listen" title="Listen (Space · ⌘P)" disabled={!segs.length} onClick={() => (reading ? player.toggle() : listen())}><Icon name="speaker" /></button>
-          <HighlightsButton />
-          <TextSizeButton />
-          <button className="ibtn" type="button" aria-label="Focus mode" title="Focus mode (⌘.)" onClick={() => setFocus(true)}><Icon name="focus" /></button>
-          <button className={`ibtn ${app.settings.studyPane ? "on" : ""}`} type="button" aria-label="Study pane" title="Study pane: notes, dictionaries and Ask (⌘\)" onClick={() => app.set({ studyPane: !app.settings.studyPane })}><Icon name="pane" /></button>
-        </div>
-      }>
-        <button className="btn" type="button" title="Back to the Bible" onClick={app.closeDoc}><Icon name="read" />{fmtRef(app.loc)}</button>
-        <button className="btn" type="button" aria-label="Reference book" style={{ maxWidth: 320 }} title={mod?.title} onClick={(e) => setBookMenu(e.currentTarget.getBoundingClientRect())}>
-          <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{mod?.title ?? doc.module}</span>
-          <Icon name="down" className="sm" style={{ color: "var(--muted)" }} />
-        </button>
-        {bookMenu && (
-          <Popover anchor={bookMenu} onClose={() => setBookMenu(null)} width={380} style={{ padding: 0, overflow: "hidden" }}>
-            <SearchList placeholder={kind === "devotional" ? "Find a devotional" : "Find a book"} current={doc.module} onClose={() => setBookMenu(null)}
-              onPick={(id) => { setBookMenu(null); app.openDoc(id, undefined, kind); }} items={books.map((b) => ({ key: b.id, label: b.title, terms: b.abbrev }))} />
-          </Popover>
-        )}
-        <SearchField onOpen={openPalette} />
-      </Topbar>}
-      <div style={{ flexGrow: 1, minHeight: 0, display: "grid", gridTemplateColumns: focus ? "minmax(0,1fr)" : pane ? "260px minmax(0,1fr) 440px" : "260px minmax(0,1fr)" }}>
-        {!focus && <aside style={{ display: "flex", flexDirection: "column", minHeight: 0, borderRight: "1px solid var(--border)" }}>
-          {titles.length > 12 && (
-            <label className="field" style={{ margin: "10px 12px 4px" }}><Icon name="search" /><input value={filter} onChange={(e) => setFilter(e.target.value)} onKeyDown={(e) => { if (e.key === "Escape" && filter) { e.preventDefault(); e.stopPropagation(); setFilter(""); } }} placeholder={`Filter ${titles.length} ${devo ? "days" : "chapters"}`} aria-label="Filter chapters" /><ClearButton show={!!filter} onClear={() => setFilter("")} /></label>
-          )}
-          <div ref={list} className="scroll doclist" style={{ padding: "6px 8px 20px" }}>
-            {shown.map((t) => <button key={t} type="button" aria-current={t === doc.title} className={t === doc.title ? "on" : ""} title={t} onClick={() => go(t)}>{t}</button>)}
-            {!titles.length && <div className="n" style={{ padding: 10 }}>Loading…</div>}
+          <button
+            className="ibtn"
+            type="button"
+            aria-label="Previous chapter"
+            title={`Previous ${unit} (←)`}
+            disabled={i <= 0}
+            onClick={() => go(titles[i - 1])}
+          >
+            <Icon name="back" />
+          </button>
+          <div
+            className="spacer"
+            style={{ display: "flex", alignItems: "center", justifyContent: "center", color: "var(--muted)", minWidth: 0 }}
+          >
+            <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {doc.title} · {mod?.title}
+            </span>
           </div>
-        </aside>}
+          <button
+            className={`ibtn ${reading ? "on" : ""}`}
+            type="button"
+            aria-label="Listen"
+            title="Listen (Space · ⌘P)"
+            disabled={!segs.length}
+            onClick={() => (reading ? player.toggle() : listen())}
+          >
+            <Icon name="speaker" />
+          </button>
+          <HighlightsButton />
+          <TextSizeButton />
+          <button className="btn" type="button" onClick={() => setFocus(false)}>
+            Exit focus<span className="kbd">esc</span>
+          </button>
+          <button
+            className="ibtn"
+            type="button"
+            aria-label="Next chapter"
+            title={`Next ${unit} (→)`}
+            disabled={i < 0 || i >= titles.length - 1}
+            onClick={() => go(titles[i + 1])}
+          >
+            <Icon name="fwd" />
+          </button>
+        </header>
+      ) : (
+        <Topbar
+          right={
+            <div style={{ display: "flex", gap: 2 }}>
+              <button
+                className={`ibtn ${reading ? "on" : ""}`}
+                type="button"
+                aria-label="Listen"
+                title="Listen (Space · ⌘P)"
+                disabled={!segs.length}
+                onClick={() => (reading ? player.toggle() : listen())}
+              >
+                <Icon name="speaker" />
+              </button>
+              <HighlightsButton />
+              <TextSizeButton />
+              <button className="ibtn" type="button" aria-label="Focus mode" title="Focus mode (⌘.)" onClick={() => setFocus(true)}>
+                <Icon name="focus" />
+              </button>
+              <button
+                className={`ibtn ${app.settings.studyPane ? "on" : ""}`}
+                type="button"
+                aria-label="Study pane"
+                title="Study pane: notes, dictionaries and Ask (⌘\)"
+                onClick={() => app.set({ studyPane: !app.settings.studyPane })}
+              >
+                <Icon name="pane" />
+              </button>
+            </div>
+          }
+        >
+          <button className="btn" type="button" title="Back to the Bible" onClick={app.closeDoc}>
+            <Icon name="read" />
+            {fmtRef(app.loc)}
+          </button>
+          <button
+            className="btn"
+            type="button"
+            aria-label="Reference book"
+            style={{ maxWidth: 320 }}
+            title={mod?.title}
+            onClick={(e) => setBookMenu(e.currentTarget.getBoundingClientRect())}
+          >
+            <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{mod?.title ?? doc.module}</span>
+            <Icon name="down" className="sm" style={{ color: "var(--muted)" }} />
+          </button>
+          {bookMenu && (
+            <Popover anchor={bookMenu} onClose={() => setBookMenu(null)} width={380} style={{ padding: 0, overflow: "hidden" }}>
+              <SearchList
+                placeholder={kind === "devotional" ? "Find a devotional" : "Find a book"}
+                current={doc.module}
+                onClose={() => setBookMenu(null)}
+                onPick={(id) => {
+                  setBookMenu(null);
+                  app.openDoc(id, undefined, kind);
+                }}
+                items={books.map((b) => ({ key: b.id, label: b.title, terms: b.abbrev }))}
+              />
+            </Popover>
+          )}
+          <SearchField onOpen={openPalette} />
+        </Topbar>
+      )}
+      <div
+        style={{
+          flexGrow: 1,
+          minHeight: 0,
+          display: "grid",
+          gridTemplateColumns: focus ? "minmax(0,1fr)" : pane ? "260px minmax(0,1fr) 440px" : "260px minmax(0,1fr)",
+        }}
+      >
+        {!focus && (
+          <aside style={{ display: "flex", flexDirection: "column", minHeight: 0, borderRight: "1px solid var(--border)" }}>
+            {titles.length > 12 && (
+              <label className="field" style={{ margin: "10px 12px 4px" }}>
+                <Icon name="search" />
+                <input
+                  value={filter}
+                  onChange={(e) => setFilter(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Escape" && filter) {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setFilter("");
+                    }
+                  }}
+                  placeholder={`Filter ${titles.length} ${devo ? "days" : "chapters"}`}
+                  aria-label="Filter chapters"
+                />
+                <ClearButton show={!!filter} onClear={() => setFilter("")} />
+              </label>
+            )}
+            <div ref={list} className="scroll doclist" style={{ padding: "6px 8px 20px" }}>
+              {shown.map((t) => (
+                <button
+                  key={t}
+                  type="button"
+                  aria-current={t === doc.title}
+                  className={t === doc.title ? "on" : ""}
+                  title={t}
+                  onClick={() => go(t)}
+                >
+                  {t}
+                </button>
+              ))}
+              {!titles.length && (
+                <div className="n" style={{ padding: 10 }}>
+                  Loading…
+                </div>
+              )}
+            </div>
+          </aside>
+        )}
         <div className="sidenav-wrap">
-          <main ref={scroller} className="scroll" style={{ padding: focus ? "0 10% 120px" : "0 40px 120px 36px" }} onClick={(e) => {
-            // A click in the margin beside a paragraph selects it, as beside a verse; elsewhere clears.
-            if (e.target === e.currentTarget || (e.target as HTMLElement).dataset.margin !== undefined) {
-              const seg = [...(scroller.current?.querySelectorAll<HTMLElement>("[data-seg]") ?? [])].find((el) => { const r = el.getBoundingClientRect(); return e.clientY >= r.top - 8 && e.clientY <= r.bottom + 8; });
-              if (seg) { clickPara(+seg.dataset.seg!, e.shiftKey); return; }
-            }
-            setSel(null);
-          }}>
+          <main
+            ref={scroller}
+            className="scroll"
+            style={{ padding: focus ? "0 10% 120px" : "0 40px 120px 36px" }}
+            onClick={(e) => {
+              // A click in the margin beside a paragraph selects it, as beside a verse; elsewhere clears.
+              if (e.target === e.currentTarget || (e.target as HTMLElement).dataset.margin !== undefined) {
+                const seg = [...(scroller.current?.querySelectorAll<HTMLElement>("[data-seg]") ?? [])].find((el) => {
+                  const r = el.getBoundingClientRect();
+                  return e.clientY >= r.top - 8 && e.clientY <= r.bottom + 8;
+                });
+                if (seg) {
+                  clickPara(+seg.dataset.seg!, e.shiftKey);
+                  return;
+                }
+              }
+              setSel(null);
+            }}
+          >
             <div data-margin>
               {focus ? (
-                <div style={{ padding: "24px 0 22px", display: "flex", flexDirection: "column", alignItems: "center", gap: 6, textAlign: "center" }}>
-                  <div className="label">{mod?.title}{titles.length ? ` · ${i + 1} of ${titles.length}` : ""}</div>
-                  <h1 data-quiet-anchor style={{ margin: 0, font: "400 40px/1.1 var(--display)", letterSpacing: "0.02em" }}>{doc.title}</h1>
+                <div
+                  style={{
+                    padding: "24px 0 22px",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: 6,
+                    textAlign: "center",
+                  }}
+                >
+                  <div className="label">
+                    {mod?.title}
+                    {titles.length ? ` · ${i + 1} of ${titles.length}` : ""}
+                  </div>
+                  <h1 data-quiet-anchor style={{ margin: 0, font: "400 40px/1.1 var(--display)", letterSpacing: "0.02em" }}>
+                    {doc.title}
+                  </h1>
                 </div>
               ) : (
                 <div style={{ padding: "18px 0 14px" }}>
-                  <div className="label">{mod?.title}{titles.length ? ` · ${i + 1} of ${titles.length}` : ""}</div>
-                  <h1 data-quiet-anchor style={{ margin: "6px 0 0", font: "500 30px/1.15 var(--display)" }}>{doc.title}</h1>
+                  <div className="label">
+                    {mod?.title}
+                    {titles.length ? ` · ${i + 1} of ${titles.length}` : ""}
+                  </div>
+                  <h1 data-quiet-anchor style={{ margin: "6px 0 0", font: "500 30px/1.15 var(--display)" }}>
+                    {doc.title}
+                  </h1>
                 </div>
               )}
-              {art
-                ? <div className="es prose selectable docbody clickwords" {...wordHover} onClick={(e) => {
+              {art ? (
+                <div
+                  className="es prose selectable docbody clickwords"
+                  {...wordHover}
+                  onClick={(e) => {
                     e.stopPropagation();
                     const w = wordAt(e);
-                    if (w) { setWord({ token: textToken(w.word), verse: 0, rect: w.rect }); return; }
+                    if (w) {
+                      setWord({ token: textToken(w.word), verse: 0, rect: w.rect });
+                      return;
+                    }
                     const t = e.target as HTMLElement;
                     if (t.closest("a, button, img, .vtool") || window.getSelection()?.toString()) return;
                     const seg = t.closest<HTMLElement>("[data-seg]");
                     if (seg) clickPara(+seg.dataset.seg!, e.shiftKey);
-                  }} style={{ fontSize: focus ? "calc(var(--read-size) + 2px)" : "var(--read-size)", lineHeight: focus ? 1.85 : 1.7 }}>
-                    {segs.map((h, k) => {
-                      // Laid out as a verse row: number, text (highlighted line by line), and markers.
-                      const n = k + 1;
-                      const isSel = !!sel && n >= sel.from && n <= sel.to;
-                      const hl = hlOf(n);
-                      // A paragraph that is one <p> is shown inline, so its highlight follows the lines.
-                      const onePara = /^\s*<p[\s>]/i.test(h) && (h.match(/<p[\s>]/gi)?.length ?? 0) === 1 && !/<(img|table|div|ul|ol)/i.test(h);
-                      const noted = notes.some((e) => e.verses.some((v) => { const l = parseDocLabel(v); return !!l && l.book === bookTitle && l.chapter === doc.title && !!l.from && l.from <= n && n <= (l.to ?? l.from); }));
-                      return (
-                        <div key={k} data-seg={n} className={`v dseg ${isSel ? "sel" : ""} ${reading && ps.verse === n ? `speaking${app.settings.highlightWords ? "" : " tint"}` : ""} ${asking === k ? "asking" : ""} ${flash === n ? "flash" : ""}`} style={isSel && sel!.from === n ? { marginTop: 46 } : undefined}>
-                          {isSel && sel!.from === n && toolbar}
-                          <div className="vn dsegn"><span title="Click the paragraph (not a word) to select it · ⇧-click for a range">{n}</span></div>
-                          <div className={`dsegtext ${onePara ? "inl" : ""}`}>
-                            {reading && ps.verse === n && wordBoxes.map((b, j) => <span key={j} className="speakbox" style={b} />)}
-                            <span className={hl ? `hl-${hlName(hl)}` : undefined}>
-                            {renderHtml(h, { onRef: (r) => { hide(); app.open({ book: r.book, chapter: r.chapter, verse: r.verse, to: r.to }, "read"); }, onRefHover, onStrongs: app.studyWord, onImage: setImage })}
-                          </span></div>
-                          <div className="gut">
-                            {marked(k) && <Icon name="bookmark" style={{ fill: "var(--accent)" }} />}
-                            {noted && <button className="ibtn" style={{ width: 16, height: 16 }} aria-label="Journal notes on this paragraph" title="Journal notes on this paragraph" onClick={(e) => { e.stopPropagation(); setTab("notes"); }}><Icon name="note" /></button>}
-                          </div>
+                  }}
+                  style={{ fontSize: focus ? "calc(var(--read-size) + 2px)" : "var(--read-size)", lineHeight: focus ? 1.85 : 1.7 }}
+                >
+                  {segs.map((h, k) => {
+                    // Laid out as a verse row: number, text (highlighted line by line), and markers.
+                    const n = k + 1;
+                    const isSel = !!sel && n >= sel.from && n <= sel.to;
+                    const hl = hlOf(n);
+                    // A paragraph that is one <p> is shown inline, so its highlight follows the lines.
+                    const onePara =
+                      /^\s*<p[\s>]/i.test(h) && (h.match(/<p[\s>]/gi)?.length ?? 0) === 1 && !/<(img|table|div|ul|ol)/i.test(h);
+                    const noted = notes.some((e) =>
+                      e.verses.some((v) => {
+                        const l = parseDocLabel(v);
+                        return !!l && l.book === bookTitle && l.chapter === doc.title && !!l.from && l.from <= n && n <= (l.to ?? l.from);
+                      }),
+                    );
+                    return (
+                      <div
+                        key={k}
+                        data-seg={n}
+                        className={`v dseg ${isSel ? "sel" : ""} ${reading && ps.verse === n ? `speaking${app.settings.highlightWords ? "" : " tint"}` : ""} ${asking === k ? "asking" : ""} ${flash === n ? "flash" : ""}`}
+                        style={isSel && sel!.from === n ? { marginTop: 46 } : undefined}
+                      >
+                        {isSel && sel!.from === n && toolbar}
+                        <div className="vn dsegn">
+                          <span title="Click the paragraph (not a word) to select it · ⇧-click for a range">{n}</span>
                         </div>
-                      );
-                    })}
-                  </div>
-                : doc.title && <div className="n">Loading…</div>}
+                        <div className={`dsegtext ${onePara ? "inl" : ""}`}>
+                          {reading && ps.verse === n && wordBoxes.map((b, j) => <span key={j} className="speakbox" style={b} />)}
+                          <span className={hl ? `hl-${hlName(hl)}` : undefined}>
+                            {renderHtml(h, {
+                              onRef: (r) => {
+                                hide();
+                                app.open({ book: r.book, chapter: r.chapter, verse: r.verse, to: r.to }, "read");
+                              },
+                              onRefHover,
+                              onStrongs: app.studyWord,
+                              onImage: setImage,
+                            })}
+                          </span>
+                        </div>
+                        <div className="gut">
+                          {marked(k) && <Icon name="bookmark" style={{ fill: "var(--accent)" }} />}
+                          {noted && (
+                            <button
+                              className="ibtn"
+                              style={{ width: 16, height: 16 }}
+                              aria-label="Journal notes on this paragraph"
+                              title="Journal notes on this paragraph"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setTab("notes");
+                              }}
+                            >
+                              <Icon name="note" />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                doc.title && <div className="n">Loading…</div>
+              )}
             </div>
           </main>
-          <SideNav prev={i > 0 ? { label: `Previous ${unit}: ${titles[i - 1]} (←)`, go: () => go(titles[i - 1]) } : null}
-            next={i >= 0 && i < titles.length - 1 ? { label: `Next ${unit}: ${titles[i + 1]} (→)`, go: () => go(titles[i + 1]) } : null} />
+          <SideNav
+            prev={i > 0 ? { label: `Previous ${unit}: ${titles[i - 1]} (←)`, go: () => go(titles[i - 1]) } : null}
+            next={i >= 0 && i < titles.length - 1 ? { label: `Next ${unit}: ${titles[i + 1]} (→)`, go: () => go(titles[i + 1]) } : null}
+          />
         </div>
         {!focus && pane && (
-          <aside className="study" aria-label="Study pane" style={{ display: "flex", flexDirection: "column", minHeight: 0, borderLeft: "1px solid var(--border)", background: "var(--panel)" }}>
+          <aside
+            className="study"
+            aria-label="Study pane"
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              minHeight: 0,
+              borderLeft: "1px solid var(--border)",
+              background: "var(--panel)",
+            }}
+          >
             <div className="tabs">
-              {([["notes", "Notes", "Your journal entries on this " + unit], ["dictionary", "Dictionary", "Dictionary and encyclopedia articles"], ...(canAsk ? [["ask", "Ask", `Ask about this ${unit}, answered from the book`]] : [])] as [typeof tab, string, string][]).map(([t, l, tip]) => (
+              {(
+                [
+                  ["notes", "Notes", "Your journal entries on this " + unit],
+                  ["dictionary", "Dictionary", "Dictionary and encyclopedia articles"],
+                  ...(canAsk ? [["ask", "Ask", `Ask about this ${unit}, answered from the book`]] : []),
+                ] as [typeof tab, string, string][]
+              ).map(([t, l, tip]) => (
                 <button key={t} type="button" className={`tab ${tab === t ? "on" : ""}`} title={tip} onClick={() => setTab(t)}>
-                  {t === "ask" && <Icon name="chat" />}{l}{t === "notes" && notes.length > 0 && <span className="n">{notes.length}</span>}
+                  {t === "ask" && <Icon name="chat" />}
+                  {l}
+                  {t === "notes" && notes.length > 0 && <span className="n">{notes.length}</span>}
                 </button>
               ))}
             </div>
             {tab === "notes" && (
               <div className="scroll" style={{ flexGrow: 1, padding: "14px 18px", display: "flex", flexDirection: "column", gap: 10 }}>
-                <button className="btn" type="button" style={{ alignSelf: "flex-start" }} onClick={() => (sel ? noteOnSel() : app.startEntry({ verses: [docLabel(bookTitle, doc.title)], title: doc.title }))}><Icon name="plus" size={13} />{sel ? `New note on ¶${sel.from}${sel.to !== sel.from ? `–${sel.to}` : ""}` : `New note on this ${unit}`}</button>
-                {notes.length === 0 && <div className="hint">No journal entries on this {unit} yet. Select a paragraph and choose Note, or start one here.</div>}
+                <button
+                  className="btn"
+                  type="button"
+                  style={{ alignSelf: "flex-start" }}
+                  onClick={() => (sel ? noteOnSel() : app.startEntry({ verses: [docLabel(bookTitle, doc.title)], title: doc.title }))}
+                >
+                  <Icon name="plus" size={13} />
+                  {sel ? `New note on ¶${sel.from}${sel.to !== sel.from ? `–${sel.to}` : ""}` : `New note on this ${unit}`}
+                </button>
+                {notes.length === 0 && (
+                  <div className="hint">No journal entries on this {unit} yet. Select a paragraph and choose Note, or start one here.</div>
+                )}
                 {notes.map((e) => {
-                  const where = e.verses.map(parseDocLabel).filter((l) => l && l.book === bookTitle && l.chapter === doc.title).map((l) => (l!.from ? `¶${l!.from}${l!.to !== l!.from ? `–${l!.to}` : ""}` : `whole ${unit}`)).join(", ");
+                  const where = e.verses
+                    .map(parseDocLabel)
+                    .filter((l) => l && l.book === bookTitle && l.chapter === doc.title)
+                    .map((l) => (l!.from ? `¶${l!.from}${l!.to !== l!.from ? `–${l!.to}` : ""}` : `whole ${unit}`))
+                    .join(", ");
                   return (
-                    <button key={e.id} type="button" className="card" style={{ textAlign: "left", padding: "10px 12px", cursor: "pointer", display: "flex", flexDirection: "column", gap: 4 }} title="Open in the journal" onClick={() => app.startEntry({ openId: e.id })}>
+                    <button
+                      key={e.id}
+                      type="button"
+                      className="card"
+                      style={{
+                        textAlign: "left",
+                        padding: "10px 12px",
+                        cursor: "pointer",
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 4,
+                      }}
+                      title="Open in the journal"
+                      onClick={() => app.startEntry({ openId: e.id })}
+                    >
                       <b style={{ fontSize: 13 }}>{e.title || "Untitled"}</b>
-                      <span className="n">{where} · {e.updated.slice(0, 10)}</span>
-                      <span style={{ fontSize: 12.5, color: "var(--muted)", display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{e.body.replace(/^>\s?/gm, "").replace(/[#*_]/g, "").trim()}</span>
+                      <span className="n">
+                        {where} · {e.updated.slice(0, 10)}
+                      </span>
+                      <span
+                        style={{
+                          fontSize: 12.5,
+                          color: "var(--muted)",
+                          display: "-webkit-box",
+                          WebkitLineClamp: 3,
+                          WebkitBoxOrient: "vertical",
+                          overflow: "hidden",
+                        }}
+                      >
+                        {e.body.replace(/^>\s?/gm, "").replace(/[#*_]/g, "").trim()}
+                      </span>
                     </button>
                   );
                 })}
               </div>
             )}
             {tab === "dictionary" && (
-              <DictionaryTab dict={app.settings.studyDict} setDict={(d) => app.set({ studyDict: d })}
-                onWord={(w, rect, where) => setWord({ token: textToken(w), verse: 0, rect, where })} />
+              <DictionaryTab
+                dict={app.settings.studyDict}
+                setDict={(d) => app.set({ studyDict: d })}
+                onWord={(w, rect, where) => setWord({ token: textToken(w), verse: 0, rect, where })}
+              />
             )}
-            {tab === "ask" && canAsk && <>
-            {asking !== null && (
-              <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 18px", borderBottom: "1px solid var(--border)", fontSize: 12.5 }}>
-                <Icon name="chat" size={13} style={{ color: "var(--accent)" }} /><span>Asking about paragraph {asking + 1}</span>
-                <button className="btn small" type="button" style={{ marginLeft: "auto" }} onClick={() => setAsking(null)}>Whole chapter</button>
-              </div>
+            {tab === "ask" && canAsk && (
+              <>
+                {asking !== null && (
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 8,
+                      padding: "8px 18px",
+                      borderBottom: "1px solid var(--border)",
+                      fontSize: 12.5,
+                    }}
+                  >
+                    <Icon name="chat" size={13} style={{ color: "var(--accent)" }} />
+                    <span>Asking about paragraph {asking + 1}</span>
+                    <button className="btn small" type="button" style={{ marginLeft: "auto" }} onClick={() => setAsking(null)}>
+                      Whole chapter
+                    </button>
+                  </div>
+                )}
+                <AskPanel
+                  key={`${doc.module}|${doc.title}|${asking}`}
+                  full
+                  source="Reader"
+                  opened={asking === null ? undefined : { para: asking + 1 }}
+                  about={asking === null ? doc.title : `${doc.title} ¶${asking + 1}`}
+                  {...(withheld(app.settings.allowLicensed, mod)
+                    ? {
+                        context: () =>
+                          `The user is reading ${mod?.title ?? doc.title}, a licensed book; they have chosen not to send its text.`,
+                        hint: `${mod?.title ?? "This book"} is licensed, so its text isn't sent (Settings › AI assistant › Licensed text). Ask general questions, or turn that on.`,
+                      }
+                    : {
+                        context: askContext,
+                        bookDir: () => exportBook().then((x) => x.dir),
+                        hint: `Ask anything about ${asking === null ? `this ${unit}` : "this paragraph"}. The ${unit} goes with the question, and the model can search the rest of ${mod?.title ?? "the book"}${devo ? "" : " and look at its charts"} when it needs to.`,
+                      })}
+                  suggestions={suggestions}
+                  seed={askSeed}
+                  clearSeed={() => setAskSeed(null)}
+                />
+              </>
             )}
-            <AskPanel key={`${doc.module}|${doc.title}|${asking}`} full source="Reader" opened={asking === null ? undefined : { para: asking + 1 }} about={asking === null ? doc.title : `${doc.title} ¶${asking + 1}`}
-              {...(withheld(app.settings.allowLicensed, mod)
-                ? { context: () => `The user is reading ${mod?.title ?? doc.title}, a licensed book; they have chosen not to send its text.`, hint: `${mod?.title ?? "This book"} is licensed, so its text isn't sent (Settings › AI assistant › Licensed text). Ask general questions, or turn that on.` }
-                : { context: askContext, bookDir: () => exportBook().then((x) => x.dir), hint: `Ask anything about ${asking === null ? `this ${unit}` : "this paragraph"}. The ${unit} goes with the question, and the model can search the rest of ${mod?.title ?? "the book"}${devo ? "" : " and look at its charts"} when it needs to.` })}
-              suggestions={suggestions} seed={askSeed} clearSeed={() => setAskSeed(null)} />
-            </>}
           </aside>
         )}
       </div>
       {preview}
       {word && (
-        <WordLookup pick={word} context={word.where ?? `${mod?.title ?? "This book"}, ${doc.title}`} bible={app.settings.bible} onClose={() => setWord(null)}
-          onDictionary={(module, topic, search) => { setWord(null); app.set({ studyDict: { module, topic, search } }); setTab("dictionary"); }}
-          onAsk={(q) => { setWord(null); setAskSeed(q); if (focus) setFocus(false); setTab("ask"); }} />
+        <WordLookup
+          pick={word}
+          context={word.where ?? `${mod?.title ?? "This book"}, ${doc.title}`}
+          bible={app.settings.bible}
+          onClose={() => setWord(null)}
+          onDictionary={(module, topic, search) => {
+            setWord(null);
+            app.set({ studyDict: { module, topic, search } });
+            setTab("dictionary");
+          }}
+          onAsk={(q) => {
+            setWord(null);
+            setAskSeed(q);
+            if (focus) setFocus(false);
+            setTab("ask");
+          }}
+        />
       )}
-      {focus && <div style={{ position: "fixed", bottom: 18, left: 0, right: 0, display: "flex", justifyContent: "center", gap: 18, color: "var(--muted)", fontSize: 12, pointerEvents: "none" }}>
-        <span>Click an image to see it full screen</span><span>·</span><span><span className="kbd">space</span> listen</span><span>·</span><span><span className="kbd">←</span> <span className="kbd">→</span> chapters</span>
-      </div>}
-      {image && <ImageViewer images={images.length ? images : [image]} start={Math.max(0, images.indexOf(image))} onClose={() => setImage(null)} />}
+      {focus && (
+        <div
+          style={{
+            position: "fixed",
+            bottom: 18,
+            left: 0,
+            right: 0,
+            display: "flex",
+            justifyContent: "center",
+            gap: 18,
+            color: "var(--muted)",
+            fontSize: 12,
+            pointerEvents: "none",
+          }}
+        >
+          <span>Click an image to see it full screen</span>
+          <span>·</span>
+          <span>
+            <span className="kbd">space</span> listen
+          </span>
+          <span>·</span>
+          <span>
+            <span className="kbd">←</span> <span className="kbd">→</span> chapters
+          </span>
+        </div>
+      )}
+      {image && (
+        <ImageViewer images={images.length ? images : [image]} start={Math.max(0, images.indexOf(image))} onClose={() => setImage(null)} />
+      )}
     </div>
   );
 }
@@ -440,24 +899,91 @@ export function ImageViewer({ images, start, onClose }: { images: string[]; star
   const [full, setFull] = useState(false);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") { e.stopPropagation(); onClose(); }
-      if (e.key === "ArrowLeft" && i > 0) { setI(i - 1); setFull(false); }
-      if (e.key === "ArrowRight" && i < images.length - 1) { setI(i + 1); setFull(false); }
+      if (e.key === "Escape") {
+        e.stopPropagation();
+        onClose();
+      }
+      if (e.key === "ArrowLeft" && i > 0) {
+        setI(i - 1);
+        setFull(false);
+      }
+      if (e.key === "ArrowRight" && i < images.length - 1) {
+        setI(i + 1);
+        setFull(false);
+      }
     };
     window.addEventListener("keydown", onKey, true);
     return () => window.removeEventListener("keydown", onKey, true);
   }, [i, images.length, onClose]);
   return (
     <div className="viewer" role="dialog" aria-label="Image" onClick={onClose}>
-      <div className="scroll" style={{ position: "absolute", inset: 0, display: "flex", alignItems: full ? "flex-start" : "center", justifyContent: full ? "flex-start" : "center", overflow: full ? "auto" : "hidden", padding: full ? 0 : "56px 40px 40px" }}>
-        <img src={images[i]} alt="" draggable={false} onClick={(e) => { e.stopPropagation(); setFull(!full); }}
-          style={full ? { maxWidth: "none", margin: "auto", cursor: "zoom-out" } : { maxWidth: "100%", maxHeight: "100%", objectFit: "contain", cursor: "zoom-in" }} />
+      <div
+        className="scroll"
+        style={{
+          position: "absolute",
+          inset: 0,
+          display: "flex",
+          alignItems: full ? "flex-start" : "center",
+          justifyContent: full ? "flex-start" : "center",
+          overflow: full ? "auto" : "hidden",
+          padding: full ? 0 : "56px 40px 40px",
+        }}
+      >
+        <img
+          src={images[i]}
+          alt=""
+          draggable={false}
+          onClick={(e) => {
+            e.stopPropagation();
+            setFull(!full);
+          }}
+          style={
+            full
+              ? { maxWidth: "none", margin: "auto", cursor: "zoom-out" }
+              : { maxWidth: "100%", maxHeight: "100%", objectFit: "contain", cursor: "zoom-in" }
+          }
+        />
       </div>
-      <div style={{ position: "absolute", top: 14, right: 16, display: "flex", alignItems: "center", gap: 8 }} onClick={(e) => e.stopPropagation()}>
-        {images.length > 1 && <span style={{ color: "#ccc", fontSize: 12, fontVariantNumeric: "tabular-nums" }}>{i + 1} of {images.length}</span>}
-        {images.length > 1 && <button className="ibtn" type="button" aria-label="Previous image" disabled={i === 0} onClick={() => { setI(i - 1); setFull(false); }}><Icon name="back" /></button>}
-        {images.length > 1 && <button className="ibtn" type="button" aria-label="Next image" disabled={i === images.length - 1} onClick={() => { setI(i + 1); setFull(false); }}><Icon name="fwd" /></button>}
-        <button className="ibtn" type="button" aria-label="Close" onClick={onClose}><Icon name="x" /></button>
+      <div
+        style={{ position: "absolute", top: 14, right: 16, display: "flex", alignItems: "center", gap: 8 }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {images.length > 1 && (
+          <span style={{ color: "#ccc", fontSize: 12, fontVariantNumeric: "tabular-nums" }}>
+            {i + 1} of {images.length}
+          </span>
+        )}
+        {images.length > 1 && (
+          <button
+            className="ibtn"
+            type="button"
+            aria-label="Previous image"
+            disabled={i === 0}
+            onClick={() => {
+              setI(i - 1);
+              setFull(false);
+            }}
+          >
+            <Icon name="back" />
+          </button>
+        )}
+        {images.length > 1 && (
+          <button
+            className="ibtn"
+            type="button"
+            aria-label="Next image"
+            disabled={i === images.length - 1}
+            onClick={() => {
+              setI(i + 1);
+              setFull(false);
+            }}
+          >
+            <Icon name="fwd" />
+          </button>
+        )}
+        <button className="ibtn" type="button" aria-label="Close" onClick={onClose}>
+          <Icon name="x" />
+        </button>
       </div>
     </div>
   );
@@ -474,15 +1000,33 @@ export function BooksButton() {
   const sorted = [...books].sort((x, y) => (last.includes(y.id) ? 1 : 0) - (last.includes(x.id) ? 1 : 0) || x.title.localeCompare(y.title));
   return (
     <>
-      <button className="btn" type="button" title="Read a reference book" onClick={(e) => setA(e.currentTarget.getBoundingClientRect())}><Icon name="library" />Books<Icon name="down" className="sm" style={{ color: "var(--muted)" }} /></button>
+      <button className="btn" type="button" title="Read a reference book" onClick={(e) => setA(e.currentTarget.getBoundingClientRect())}>
+        <Icon name="library" />
+        Books
+        <Icon name="down" className="sm" style={{ color: "var(--muted)" }} />
+      </button>
       {a && (
         <Popover anchor={a} onClose={() => setA(null)} width={380} style={{ padding: 0, overflow: "hidden" }}>
-          <SearchList placeholder="Find a book or devotional" onClose={() => setA(null)}
-            onPick={(k) => { setA(null); const [kind, id] = [k.slice(0, 1), k.slice(2)]; if (kind === "d") app.openDoc(id, dayTitle(new Date()), "devotional"); else app.openDoc(id); }}
+          <SearchList
+            placeholder="Find a book or devotional"
+            onClose={() => setA(null)}
+            onPick={(k) => {
+              setA(null);
+              const [kind, id] = [k.slice(0, 1), k.slice(2)];
+              if (kind === "d") app.openDoc(id, dayTitle(new Date()), "devotional");
+              else app.openDoc(id);
+            }}
             items={[
               ...devotionals.map((m) => ({ key: `d:${m.id}`, label: m.title, group: "Devotionals · today", terms: m.abbrev })),
-              ...sorted.map((m) => ({ key: `b:${m.id}`, label: m.title, sub: app.docAt[m.id], group: devotionals.length ? "Books" : undefined, terms: m.abbrev })),
-            ]} />
+              ...sorted.map((m) => ({
+                key: `b:${m.id}`,
+                label: m.title,
+                sub: app.docAt[m.id],
+                group: devotionals.length ? "Books" : undefined,
+                terms: m.abbrev,
+              })),
+            ]}
+          />
         </Popover>
       )}
     </>

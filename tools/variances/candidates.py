@@ -1,3 +1,5 @@
+# Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+# SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 """Verses where a translation may differ in meaning from a base Bible (the KJV by default), for review.
 
     python3 tools/variances/candidates.py niv --books 40-66

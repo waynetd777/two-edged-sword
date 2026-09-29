@@ -1,3 +1,5 @@
+# Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+# SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 """Builds peshitta+.bbli ("Syriac Peshitta w/ glosses"): the Peshitta New Testament word by word,
 each word with its English meaning, dictionary form, root and grammar, as the Greek interlinears are.
 

@@ -1,3 +1,6 @@
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
+
 //! A full-text index of the commentaries and dictionaries, so searching them does not mean
 //! reading several hundred megabytes of HTML with LIKE each time. It is derived data, kept in
 //! the app's data folder, built in the background, and rebuilt per module whenever a module's
@@ -36,7 +39,8 @@ pub fn key(kind: Kind, id: &str) -> String {
 fn stamp(path: &Path) -> String {
     let m = std::fs::metadata(path).ok();
     let len = m.as_ref().map(|m| m.len()).unwrap_or(0);
-    let mtime = m.and_then(|m| m.modified().ok()).and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok()).map(|d| d.as_secs()).unwrap_or(0);
+    let mtime =
+        m.and_then(|m| m.modified().ok()).and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok()).map(|d| d.as_secs()).unwrap_or(0);
     // The version changes when what goes in the index does (2: hyphens inside words taken out), so
     // every module is indexed again.
     format!("2-{len}-{mtime}")
@@ -76,7 +80,11 @@ impl Index {
     }
 
     pub fn progress(&self) -> Progress {
-        Progress { building: self.building.load(Ordering::SeqCst), done: self.done.load(Ordering::SeqCst), total: self.total.load(Ordering::SeqCst) }
+        Progress {
+            building: self.building.load(Ordering::SeqCst),
+            done: self.done.load(Ordering::SeqCst),
+            total: self.total.load(Ordering::SeqCst),
+        }
     }
 
     /// Brings the index up to date with the library. Runs on a background thread.
@@ -105,7 +113,9 @@ impl Index {
                 let k = key(*kind, id);
                 let fresh = have.get(&k).is_some_and(|s| *s == stamp(path));
                 ready.insert(k, fresh);
-                if !fresh { todo.push((*kind, id.clone(), path.clone())); }
+                if !fresh {
+                    todo.push((*kind, id.clone(), path.clone()));
+                }
             }
         }
         // Drop modules that are gone.

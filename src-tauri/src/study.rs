@@ -1,3 +1,6 @@
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
+
 //! The library's material on a Bible passage, written out as plain files for Ask to search and
 //! read, so answers can come from the user's own commentaries, lexicons and dictionaries rather
 //! than from what the model happens to know. One folder per chat (`<data>/ask/studies/<chat id>`):
@@ -122,7 +125,10 @@ pub fn export(lib: &Library, root: &Path, chat_id: &str, req: &Request) -> Resul
 
         let numbers = req.strongs_bible.as_deref().map(|b| strongs(lib, b, req.book, req.chapter, from, to)).unwrap_or_default();
         if !numbers.is_empty() {
-            index.push_str(&format!("\nlexicons/ — entries for the Strong's numbers in the passage ({}), headed == number ==:\n", numbers.iter().cloned().collect::<Vec<_>>().join(" ")));
+            index.push_str(&format!(
+                "\nlexicons/ — entries for the Strong's numbers in the passage ({}), headed == number ==:\n",
+                numbers.iter().cloned().collect::<Vec<_>>().join(" ")
+            ));
             for m in lib.of_kind(Kind::Lexicon).filter(|m| !req.exclude.contains(&m.id)) {
                 let text = lexicon(lib, &m.id, &numbers).unwrap_or_default();
                 if text.is_empty() {
@@ -140,8 +146,15 @@ pub fn export(lib: &Library, root: &Path, chat_id: &str, req: &Request) -> Resul
         }
 
         let dicts = dictionaries_dir(root);
-        let done: Vec<String> = lib.of_kind(Kind::Dictionary).filter(|m| !req.exclude.contains(&m.id) && dict_current(&dicts, m)).map(|m| format!("{}.txt", file_name(&m.title)))
-            .filter(|f| std::fs::hard_link(dicts.join(f), dir.join("dictionaries").join(f)).inspect_err(|e| eprintln!("dictionary link {f}: {e}")).is_ok())
+        let done: Vec<String> = lib
+            .of_kind(Kind::Dictionary)
+            .filter(|m| !req.exclude.contains(&m.id) && dict_current(&dicts, m))
+            .map(|m| format!("{}.txt", file_name(&m.title)))
+            .filter(|f| {
+                std::fs::hard_link(dicts.join(f), dir.join("dictionaries").join(f))
+                    .inspect_err(|e| eprintln!("dictionary link {f}: {e}"))
+                    .is_ok()
+            })
             .collect();
         if !done.is_empty() {
             index.push_str("\ndictionaries/ — their dictionaries, whole, one file each, articles headed == Topic ==:\n");
@@ -172,7 +185,8 @@ fn cited_in_books(lib: &Library, req: &Request, from: i64, to: i64, dir: &Path, 
             index.push_str("\nreferences/ — passages in their reference books (such as the Talmud) that cite these verses, each headed == verse · place ==, with a passage either side for context:\n");
             listed = true;
         }
-        let body: String = rows.iter().map(|(v, seg, text)| format!("== {}:{v} · {} {seg} ==\n{text}\n\n", req.chapter, m.abbrev)).collect();
+        let body: String =
+            rows.iter().map(|(v, seg, text)| format!("== {}:{v} · {} {seg} ==\n{text}\n\n", req.chapter, m.abbrev)).collect();
         let file = format!("{}.txt", file_name(&m.title));
         write(&dir.join(&file), &format!("{} — passages citing {}\n\n{body}", m.title, req.label))?;
         index.push_str(&format!("  {file}  ({} passages)\n", rows.len()));
@@ -181,7 +195,74 @@ fn cited_in_books(lib: &Library, req: &Request, from: i64, to: i64, dir: &Path, 
 }
 
 /// e-Sword's book numbers, from 1.
-const BOOKS: [&str; 66] = ["Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy", "Joshua", "Judges", "Ruth", "1 Samuel", "2 Samuel", "1 Kings", "2 Kings", "1 Chronicles", "2 Chronicles", "Ezra", "Nehemiah", "Esther", "Job", "Psalms", "Proverbs", "Ecclesiastes", "Song of Solomon", "Isaiah", "Jeremiah", "Lamentations", "Ezekiel", "Daniel", "Hosea", "Joel", "Amos", "Obadiah", "Jonah", "Micah", "Nahum", "Habakkuk", "Zephaniah", "Haggai", "Zechariah", "Malachi", "Matthew", "Mark", "Luke", "John", "Acts", "Romans", "1 Corinthians", "2 Corinthians", "Galatians", "Ephesians", "Philippians", "Colossians", "1 Thessalonians", "2 Thessalonians", "1 Timothy", "2 Timothy", "Titus", "Philemon", "Hebrews", "James", "1 Peter", "2 Peter", "1 John", "2 John", "3 John", "Jude", "Revelation"];
+const BOOKS: [&str; 66] = [
+    "Genesis",
+    "Exodus",
+    "Leviticus",
+    "Numbers",
+    "Deuteronomy",
+    "Joshua",
+    "Judges",
+    "Ruth",
+    "1 Samuel",
+    "2 Samuel",
+    "1 Kings",
+    "2 Kings",
+    "1 Chronicles",
+    "2 Chronicles",
+    "Ezra",
+    "Nehemiah",
+    "Esther",
+    "Job",
+    "Psalms",
+    "Proverbs",
+    "Ecclesiastes",
+    "Song of Solomon",
+    "Isaiah",
+    "Jeremiah",
+    "Lamentations",
+    "Ezekiel",
+    "Daniel",
+    "Hosea",
+    "Joel",
+    "Amos",
+    "Obadiah",
+    "Jonah",
+    "Micah",
+    "Nahum",
+    "Habakkuk",
+    "Zephaniah",
+    "Haggai",
+    "Zechariah",
+    "Malachi",
+    "Matthew",
+    "Mark",
+    "Luke",
+    "John",
+    "Acts",
+    "Romans",
+    "1 Corinthians",
+    "2 Corinthians",
+    "Galatians",
+    "Ephesians",
+    "Philippians",
+    "Colossians",
+    "1 Thessalonians",
+    "2 Thessalonians",
+    "1 Timothy",
+    "2 Timothy",
+    "Titus",
+    "Philemon",
+    "Hebrews",
+    "James",
+    "1 Peter",
+    "2 Peter",
+    "1 John",
+    "2 John",
+    "3 John",
+    "Jude",
+    "Revelation",
+];
 
 /// Where each translation's meaning differs from the KJV, from the reviewed `variances-<module>.json`
 /// files (tools/variances/ builds them; the app ships a set): the passage's, and the whole list.
@@ -191,7 +272,9 @@ fn differences(lib: &Library, root: &Path, req: &Request, from: i64, to: i64, di
     for m in lib.of_kind(Kind::Bible) {
         let name: String = m.id.chars().map(|c| if c.is_ascii_alphanumeric() || c == '-' || c == '_' { c } else { '_' }).collect();
         let Ok(doc) = crate::store::variances(data, &format!("variances-{name}")) else { continue };
-        if doc.is_null() { continue; }
+        if doc.is_null() {
+            continue;
+        }
         let base = doc["base"].as_str().unwrap_or("kjv").to_uppercase();
         let records = doc["records"].as_array().cloned().unwrap_or_default();
         let line = |r: &serde_json::Value| {
@@ -200,14 +283,27 @@ fn differences(lib: &Library, root: &Path, req: &Request, from: i64, to: i64, di
             let book = BOOKS.get((n("book") - 1).max(0) as usize).copied().unwrap_or("?");
             format!("{book} {}:{} [{}, {}] {}\n  {}\n", n("chapter"), n("verse"), s("kind"), s("weight"), s("change"), s("note"))
         };
-        let here: String = records.iter().filter(|r| r["book"].as_i64() == Some(req.book) && r["chapter"].as_i64() == Some(req.chapter) && (from..=to).contains(&r["verse"].as_i64().unwrap_or(0))).map(line).collect();
+        let here: String = records
+            .iter()
+            .filter(|r| {
+                r["book"].as_i64() == Some(req.book)
+                    && r["chapter"].as_i64() == Some(req.chapter)
+                    && (from..=to).contains(&r["verse"].as_i64().unwrap_or(0))
+            })
+            .map(line)
+            .collect();
         let all: String = records.iter().map(line).collect();
         if !listed {
             index.push_str("\ndifferences/ — reviewed places where a translation's meaning differs from the KJV (omitted verses and phrases, changed names of God and Christ, doctrinal words), with the manuscript reason. Only reviewed books are covered; a translation with no file has not been compared:\n");
             listed = true;
         }
         let file = format!("{}.txt", file_name(&format!("{} vs {base}", m.abbrev)));
-        let head = format!("{} compared with the {base} ({} differences in all, reviewed {}).\n\n", m.title, records.len(), doc["updated"].as_str().unwrap_or("?"));
+        let head = format!(
+            "{} compared with the {base} ({} differences in all, reviewed {}).\n\n",
+            m.title,
+            records.len(),
+            doc["updated"].as_str().unwrap_or("?")
+        );
         let body = if here.is_empty() { format!("None recorded in {}.\n", req.label) } else { here };
         write(&dir.join(&file), &format!("{head}In {}:\n\n{body}", req.label))?;
         let whole = format!("{}.txt", file_name(&format!("{} vs {base} - all", m.abbrev)));
@@ -257,7 +353,10 @@ fn write_journal(dir: &Path, notes: &[JournalNote], index: &mut String) -> Resul
     for (i, e) in notes.iter().enumerate() {
         let date = e.created.get(..10).unwrap_or("");
         let mut file = format!("{}.md", file_name(&format!("{date} {}", e.title)));
-        if !used.insert(file.clone()) { file = format!("{}.md", file_name(&format!("{date} {} {}", e.title, i + 1))); used.insert(file.clone()); }
+        if !used.insert(file.clone()) {
+            file = format!("{}.md", file_name(&format!("{date} {} {}", e.title, i + 1)));
+            used.insert(file.clone());
+        }
         let on = if e.verses.is_empty() { String::new() } else { format!(" · on {}", e.verses.join(", ")) };
         let tags = if e.tags.is_empty() { String::new() } else { format!(" · #{}", e.tags.join(" #")) };
         write(&dir.join(&file), &format!("{}\n{date}{on}{tags}\n\n{}\n", e.title, e.body))?;
@@ -282,7 +381,10 @@ pub fn export_journal(root: &Path, chat_id: &str, label: &str, notes: &[JournalN
     let lock = crate::store::dir_lock(&dest);
     let _held = lock.lock().unwrap_or_else(|e| e.into_inner());
     crate::store::replace_dir(&dest, |dir| {
-        let mut index = format!("The user's journal: {label}, {} entries, newest first, one file each (date, the verses it is on, tags, word count):\n", notes.len());
+        let mut index = format!(
+            "The user's journal: {label}, {} entries, newest first, one file each (date, the verses it is on, tags, word count):\n",
+            notes.len()
+        );
         write_journal(dir, notes, &mut index)?;
         write(&dir.join("index.txt"), &index)?;
         Ok(dest.clone())
@@ -301,8 +403,12 @@ fn text(html: &str) -> String {
 
 fn verses(lib: &Library, bible: &str, book: i64, chapter: i64, from: i64, to: i64) -> Result<Vec<(i64, String)>, String> {
     lib.with(Kind::Bible, bible, |c| {
-        let mut st = c.prepare_cached("SELECT Verse, Scripture FROM Bible WHERE Book = ?1 AND Chapter = ?2 AND Verse BETWEEN ?3 AND ?4 ORDER BY Verse")?;
-        let rows = st.query_map(params![book, chapter, from, to], |r| Ok((r.get::<_, i64>(0)?, text(&r.get::<_, Option<String>>(1)?.unwrap_or_default()).replace("\n\n", " "))))?;
+        let mut st = c.prepare_cached(
+            "SELECT Verse, Scripture FROM Bible WHERE Book = ?1 AND Chapter = ?2 AND Verse BETWEEN ?3 AND ?4 ORDER BY Verse",
+        )?;
+        let rows = st.query_map(params![book, chapter, from, to], |r| {
+            Ok((r.get::<_, i64>(0)?, text(&r.get::<_, Option<String>>(1)?.unwrap_or_default()).replace("\n\n", " ")))
+        })?;
         rows.collect()
     })
 }
@@ -317,18 +423,34 @@ fn commentary(lib: &Library, module: &str, book: i64, chapter: i64, from: i64, t
              AND (ChapterBegin < ?2 OR (ChapterBegin = ?2 AND VerseBegin <= ?4)) \
              AND (ChapterEnd > ?2 OR (ChapterEnd = ?2 AND (VerseEnd >= ?3 OR VerseEnd = 0))) ORDER BY ChapterBegin, VerseBegin",
         )?;
-        let rows = st.query_map(params![book, chapter, from, to], |r| Ok((r.get::<_, i64>(0)?, r.get::<_, i64>(1)?, r.get::<_, i64>(2)?, r.get::<_, i64>(3)?, r.get::<_, Option<String>>(4)?.unwrap_or_default())))?;
+        let rows = st.query_map(params![book, chapter, from, to], |r| {
+            Ok((
+                r.get::<_, i64>(0)?,
+                r.get::<_, i64>(1)?,
+                r.get::<_, i64>(2)?,
+                r.get::<_, i64>(3)?,
+                r.get::<_, Option<String>>(4)?.unwrap_or_default(),
+            ))
+        })?;
         for row in rows {
             let (cb, vb, ce, ve, html) = row?;
             let t = text(&html);
             if t.trim().is_empty() {
                 continue;
             }
-            let end = if ve == 0 { format!("{ce}") } else if ce == cb { format!("{ve}") } else { format!("{ce}:{ve}") };
+            let end = if ve == 0 {
+                format!("{ce}")
+            } else if ce == cb {
+                format!("{ve}")
+            } else {
+                format!("{ce}:{ve}")
+            };
             let range = if (ce, ve) == (cb, vb) { format!("{cb}:{vb}") } else { format!("{cb}:{vb}-{end}") };
             out.push_str(&format!("== {range} ==\n{}\n\n", t.trim()));
         }
-        let intro = |sql: &str, p: &[&dyn rusqlite::ToSql]| c.query_row(sql, p, |r| r.get::<_, Option<String>>(0)).ok().flatten().map(|h| text(&h)).filter(|t| !t.trim().is_empty());
+        let intro = |sql: &str, p: &[&dyn rusqlite::ToSql]| {
+            c.query_row(sql, p, |r| r.get::<_, Option<String>>(0)).ok().flatten().map(|h| text(&h)).filter(|t| !t.trim().is_empty())
+        };
         if let Some(t) = intro("SELECT Comments FROM ChapterCommentary WHERE Book = ?1 AND Chapter = ?2", &[&book, &chapter]) {
             out.push_str(&format!("== Introduction to chapter {chapter} ==\n{}\n\n", t.trim()));
         }
@@ -379,7 +501,8 @@ fn lexicon(lib: &Library, module: &str, numbers: &BTreeSet<String>) -> Result<St
 fn dict_stamp(m: &crate::library::ModuleInfo) -> String {
     let meta = std::fs::metadata(&m.path).ok();
     let len = meta.as_ref().map(|x| x.len()).unwrap_or(0);
-    let mtime = meta.and_then(|x| x.modified().ok()).and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok()).map(|d| d.as_secs()).unwrap_or(0);
+    let mtime =
+        meta.and_then(|x| x.modified().ok()).and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok()).map(|d| d.as_secs()).unwrap_or(0);
     format!("{DICT_VERSION} {len} {mtime}")
 }
 
@@ -436,9 +559,12 @@ fn file_name(s: &str) -> String {
     let t = t.split_whitespace().collect::<Vec<_>>().join(" ");
     let t: String = t.chars().take(80).collect();
     let t = t.trim_matches(|c: char| c == '.' || c == ' ').to_string();
-    if t.is_empty() { "untitled".into() } else { t }
+    if t.is_empty() {
+        "untitled".into()
+    } else {
+        t
+    }
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -447,7 +573,13 @@ mod tests {
     #[test]
     fn journal_export_lists_each_entry() {
         let root = std::env::temp_dir().join(format!("tes-ask-journal-{}", std::process::id()));
-        let note = |t: &str, tags: &[&str]| JournalNote { title: t.into(), created: "2026-09-01T07:00".into(), verses: vec!["John 3:16".into()], tags: tags.iter().map(|s| s.to_string()).collect(), body: "So loved.".into() };
+        let note = |t: &str, tags: &[&str]| JournalNote {
+            title: t.into(),
+            created: "2026-09-01T07:00".into(),
+            verses: vec!["John 3:16".into()],
+            tags: tags.iter().map(|s| s.to_string()).collect(),
+            body: "So loved.".into(),
+        };
         let dir = export_journal(&root, "chat-1", "the whole journal", &[note("Love", &["prayer"]), note("Love", &[])]).unwrap();
         let index = std::fs::read_to_string(dir.join("index.txt")).unwrap();
         assert!(index.contains("2 entries"));
@@ -464,10 +596,31 @@ mod tests {
         let Some(lib) = crate::library::local("talmud_sanhedrin.refi") else { return };
         let out = std::env::temp_dir().join(format!("tes-ask-cited-{}", std::process::id()));
         std::fs::create_dir_all(&out).unwrap();
-        let req = Request { book: 1, chapter: 49, from: Some(10), to: Some(10), bibles: vec![], strongs_bible: None, label: "Genesis 49:10".into(), journal: vec![], exclude: vec![] };
+        let req = Request {
+            book: 1,
+            chapter: 49,
+            from: Some(10),
+            to: Some(10),
+            bibles: vec![],
+            strongs_bible: None,
+            label: "Genesis 49:10".into(),
+            journal: vec![],
+            exclude: vec![],
+        };
         let mut index = String::new();
         cited_in_books(&lib, &req, 10, 10, &out, &mut index).unwrap();
-        let text = std::fs::read_to_string(out.join("Talmud_ Sanhedrin.txt")).or_else(|_| std::fs::read_to_string(std::fs::read_dir(&out).unwrap().flatten().find(|e| e.file_name().to_string_lossy().contains("Sanhedrin")).unwrap().path())).unwrap();
+        let text = std::fs::read_to_string(out.join("Talmud_ Sanhedrin.txt"))
+            .or_else(|_| {
+                std::fs::read_to_string(
+                    std::fs::read_dir(&out)
+                        .unwrap()
+                        .flatten()
+                        .find(|e| e.file_name().to_string_lossy().contains("Sanhedrin"))
+                        .unwrap()
+                        .path(),
+                )
+            })
+            .unwrap();
         assert!(text.contains("== 49:10 · Sanhedrin 98b"), "{text}");
         assert!(index.contains("references/"));
         let _ = std::fs::remove_dir_all(&out);
@@ -483,10 +636,25 @@ mod tests {
         let rec = |b: i64, c: i64, v: i64, change: &str| serde_json::json!({"book": b, "chapter": c, "verse": v, "kind": "deity", "weight": "major", "change": change, "note": "Why."});
         let doc = serde_json::json!({"module": "kjv", "base": "kjv", "updated": "2026-09-25", "records": [rec(43, 3, 16, "In John"), rec(51, 1, 14, "In Colossians")]});
         std::fs::write(data.join("variances-kjv.json"), doc.to_string()).unwrap();
-        let req = Request { book: 43, chapter: 3, from: None, to: None, bibles: vec![], strongs_bible: None, label: "John 3".into(), journal: vec![], exclude: vec![] };
+        let req = Request {
+            book: 43,
+            chapter: 3,
+            from: None,
+            to: None,
+            bibles: vec![],
+            strongs_bible: None,
+            label: "John 3".into(),
+            journal: vec![],
+            exclude: vec![],
+        };
         let mut index = String::new();
         differences(&lib, &root, &req, 1, 999, &out, &mut index).unwrap();
-        let file = |name: &str| std::fs::read_to_string(std::fs::read_dir(&out).unwrap().flatten().find(|e| e.file_name().to_string_lossy() == name).unwrap().path()).unwrap();
+        let file = |name: &str| {
+            std::fs::read_to_string(
+                std::fs::read_dir(&out).unwrap().flatten().find(|e| e.file_name().to_string_lossy() == name).unwrap().path(),
+            )
+            .unwrap()
+        };
         let here = file("KJV vs KJV.txt");
         assert!(here.contains("John 3:16 [deity, major] In John") && !here.contains("Colossians"));
         assert!(file("KJV vs KJV - all.txt").contains("Colossians 1:14"));
@@ -503,7 +671,17 @@ mod tests {
         let comm: Vec<_> = lib.of_kind(Kind::Commentary).collect();
         let dicts: Vec<_> = lib.of_kind(Kind::Dictionary).collect();
         let (Some(c), Some(d)) = (comm.first(), dicts.first()) else { return };
-        let req = |exclude: Vec<String>| Request { book: 43, chapter: 3, from: Some(16), to: Some(16), bibles: vec!["kjv".into()], strongs_bible: None, label: "John 3:16".into(), journal: vec![], exclude };
+        let req = |exclude: Vec<String>| Request {
+            book: 43,
+            chapter: 3,
+            from: Some(16),
+            to: Some(16),
+            bibles: vec!["kjv".into()],
+            strongs_bible: None,
+            label: "John 3:16".into(),
+            journal: vec![],
+            exclude,
+        };
         let all = export(&lib, &root, "all", &req(vec![])).unwrap();
         let fewer = export(&lib, &root, "fewer", &req(vec![c.id.clone(), d.id.clone()])).unwrap();
         let count = |p: PathBuf| std::fs::read_dir(p).map(|r| r.count()).unwrap_or(0);

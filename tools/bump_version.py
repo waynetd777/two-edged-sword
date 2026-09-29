@@ -1,3 +1,5 @@
+# Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+# SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 """Bumps the app's version for a release build: the last number of tauri.conf.json's version
 (1.0.4 → 1.0.5), written to package.json and src-tauri/Cargo.toml (and both lock files) too, so
 they agree. Prints the new version.

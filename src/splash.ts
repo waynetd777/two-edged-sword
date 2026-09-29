@@ -1,3 +1,6 @@
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
+
 // The splash index.html paints before React starts. Kept out of main.tsx so that importing it
 // does not re-run the entry point on a hot reload, which would mount a second copy of the app.
 

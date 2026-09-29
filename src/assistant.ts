@@ -1,3 +1,6 @@
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
+
 // Which AI CLIs are installed and the models they offer. Ask needs Claude Code, Codex,
 // Antigravity or GitHub Copilot on this Mac; with none, every Ask control is hidden. Checked once at start and again when Settings
 // opens, so installing one takes effect without a restart.
@@ -6,7 +9,11 @@ import { useSyncExternalStore } from "react";
 import { api, AssistantStatus } from "./api";
 
 export type Provider = "claude" | "codex" | "antigravity" | "copilot";
-export interface ModelOpt { id: string; name: string; provider: Provider }
+export interface ModelOpt {
+  id: string;
+  name: string;
+  provider: Provider;
+}
 
 const CLAUDE_MODELS: ModelOpt[] = [
   { id: "claude-opus-5-5", name: "Claude Opus 5.5", provider: "claude" },
@@ -14,14 +21,27 @@ const CLAUDE_MODELS: ModelOpt[] = [
   { id: "claude-haiku-4-5-20251001", name: "Claude Haiku 4.5", provider: "claude" },
 ];
 
-export const providerOf = (id: string): Provider => (id.startsWith("agy:") ? "antigravity" : id.startsWith("copilot:") ? "copilot" : id.startsWith("claude") ? "claude" : "codex");
-export const PROVIDER_NAME: Record<Provider, string> = { claude: "Claude Code", codex: "Codex", antigravity: "Antigravity", copilot: "GitHub Copilot" };
+export const providerOf = (id: string): Provider =>
+  id.startsWith("agy:") ? "antigravity" : id.startsWith("copilot:") ? "copilot" : id.startsWith("claude") ? "claude" : "codex";
+export const PROVIDER_NAME: Record<Provider, string> = {
+  claude: "Claude Code",
+  codex: "Codex",
+  antigravity: "Antigravity",
+  copilot: "GitHub Copilot",
+};
 /** The model menus' headings: by the tool that runs them (Antigravity offers Claude and GPT models too). */
-const GROUP_NAME: Record<Provider, string> = { claude: "Claude Code", codex: "ChatGPT (Codex)", antigravity: "Antigravity (Google)", copilot: "GitHub Copilot" };
+const GROUP_NAME: Record<Provider, string> = {
+  claude: "Claude Code",
+  codex: "ChatGPT (Codex)",
+  antigravity: "Antigravity (Google)",
+  copilot: "GitHub Copilot",
+};
 
 /** The models by the tool that runs them, in a fixed order, leaving out tools with none. */
 export const modelGroups = (models: ModelOpt[]) =>
-  (["claude", "codex", "antigravity", "copilot"] as const).map((p) => ({ provider: p, name: GROUP_NAME[p], models: models.filter((m) => m.provider === p) })).filter((g) => g.models.length);
+  (["claude", "codex", "antigravity", "copilot"] as const)
+    .map((p) => ({ provider: p, name: GROUP_NAME[p], models: models.filter((m) => m.provider === p) }))
+    .filter((g) => g.models.length);
 
 export interface Assistant {
   /** null until the first check returns. */
@@ -35,13 +55,21 @@ let state: Assistant = { status: null, models: [], available: true };
 const listeners = new Set<() => void>();
 
 export function refreshAssistant() {
-  api.assistantStatus().then((status) => {
-    const agy = (status.antigravity?.path ? status.antigravity.models : []).map((m) => ({ ...m, provider: "antigravity" as const }));
-    const copilot = (status.copilot?.path ? status.copilot.models : []).map((m) => ({ ...m, provider: "copilot" as const }));
-    const models = [...(status.claude.path ? CLAUDE_MODELS : []), ...(status.codex.path ? status.codex.models.map((m) => ({ ...m, provider: "codex" as const })) : []), ...agy, ...copilot];
-    state = { status, models, available: models.length > 0 };
-    listeners.forEach((l) => l());
-  }).catch(() => {});
+  api
+    .assistantStatus()
+    .then((status) => {
+      const agy = (status.antigravity?.path ? status.antigravity.models : []).map((m) => ({ ...m, provider: "antigravity" as const }));
+      const copilot = (status.copilot?.path ? status.copilot.models : []).map((m) => ({ ...m, provider: "copilot" as const }));
+      const models = [
+        ...(status.claude.path ? CLAUDE_MODELS : []),
+        ...(status.codex.path ? status.codex.models.map((m) => ({ ...m, provider: "codex" as const })) : []),
+        ...agy,
+        ...copilot,
+      ];
+      state = { status, models, available: models.length > 0 };
+      listeners.forEach((l) => l());
+    })
+    .catch(() => {});
 }
 refreshAssistant();
 
@@ -49,7 +77,13 @@ refreshAssistant();
 export const assistantModels = () => state.models;
 
 export function useAssistant(): Assistant {
-  return useSyncExternalStore((l) => { listeners.add(l); return () => listeners.delete(l); }, () => state);
+  return useSyncExternalStore(
+    (l) => {
+      listeners.add(l);
+      return () => listeners.delete(l);
+    },
+    () => state,
+  );
 }
 
 /** A model's display name, also for one no longer offered (an old chat's). */

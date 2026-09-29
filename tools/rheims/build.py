@@ -1,3 +1,5 @@
+# Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+# SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 """Builds rheims1582.bbli ("Rheims New Testament (1582)"): the Catholic English New Testament of 1582,
 in the modernised spelling of Bagster's 1872 parallel edition, from a machine reading (OCR) of it.
 

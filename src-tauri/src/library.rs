@@ -1,3 +1,6 @@
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
+
 //! The library: every module is a SQLite file in e-Sword X's formats, opened read-only and
 //! immutable so nothing we do can change it or take a lock e-Sword would notice. Modules come
 //! from three folders (`Source`), and the first to have a module wins; a folder that isn't there
@@ -93,7 +96,9 @@ pub fn app_dir() -> PathBuf {
 /// The modules in the app bundle (Contents/Resources/modules); in a debug build, the ones
 /// `make core` builds into src-tauri/modules.
 pub fn bundled_dir() -> PathBuf {
-    if cfg!(debug_assertions) { return Path::new(env!("CARGO_MANIFEST_DIR")).join("modules"); }
+    if cfg!(debug_assertions) {
+        return Path::new(env!("CARGO_MANIFEST_DIR")).join("modules");
+    }
     std::env::current_exe().ok().and_then(|e| Some(e.parent()?.parent()?.join("Resources/modules"))).unwrap_or_default()
 }
 
@@ -107,7 +112,9 @@ pub fn local(file: &str) -> Option<Library> {
 /// The folders to read, in order.
 pub fn dirs(esword: bool) -> Vec<(Source, PathBuf)> {
     let mut d = vec![(Source::App, app_dir())];
-    if esword { d.push((Source::Esword, esword_dir())); }
+    if esword {
+        d.push((Source::Esword, esword_dir()));
+    }
     d.push((Source::Bundled, bundled_dir()));
     d
 }
@@ -143,19 +150,35 @@ impl Library {
             let mut entries: Vec<_> = rd.flatten().map(|e| e.path()).collect();
             entries.sort();
             for path in entries {
-                let (Some(stem), Some(ext)) = (path.file_stem().and_then(|s| s.to_str()), path.extension().and_then(|s| s.to_str())) else { continue };
+                let (Some(stem), Some(ext)) = (path.file_stem().and_then(|s| s.to_str()), path.extension().and_then(|s| s.to_str())) else {
+                    continue;
+                };
                 let Some(kind) = Kind::from_ext(&ext.to_ascii_lowercase()) else { continue };
-                if modules.iter().any(|m| m.kind == kind && m.id == stem) { continue }
+                if modules.iter().any(|m| m.kind == kind && m.id == stem) {
+                    continue;
+                }
                 match read_details(&path, kind) {
                     Ok((title, abbrev, info, strongs, rtl, features)) => {
                         let size = std::fs::metadata(&path).map(|m| m.len()).unwrap_or(0);
-                        modules.push(ModuleInfo { id: stem.to_string(), kind, title, abbrev, info, strongs, rtl, features, size, source: *source, path })
+                        modules.push(ModuleInfo {
+                            id: stem.to_string(),
+                            kind,
+                            title,
+                            abbrev,
+                            info,
+                            strongs,
+                            rtl,
+                            features,
+                            size,
+                            source: *source,
+                            path,
+                        })
                     }
                     Err(err) => eprintln!("skipping {}: {err}", path.display()),
                 }
             }
         }
-        modules.sort_by(|a, b| a.title.to_lowercase().cmp(&b.title.to_lowercase()));
+        modules.sort_by_key(|m| m.title.to_lowercase());
         Library { dirs, modules, conns: Mutex::new(HashMap::new()) }
     }
 
@@ -172,21 +195,34 @@ impl Library {
         let m = self.module(kind, id)?;
         let key = format!("{kind:?}/{id}");
         let idle = self.conns.lock().map_err(|e| e.to_string())?.get_mut(&key).and_then(Vec::pop);
-        let c = match idle { Some(c) => c, None => open_readonly(&m.path).map_err(|e| e.to_string())? };
+        let c = match idle {
+            Some(c) => c,
+            None => open_readonly(&m.path).map_err(|e| e.to_string())?,
+        };
         let r = f(&c).map_err(|e| e.to_string());
         if let Ok(mut conns) = self.conns.lock() {
             let pool = conns.entry(key).or_default();
-            if pool.len() < 4 { pool.push(c); }
+            if pool.len() < 4 {
+                pool.push(c);
+            }
         }
         r
     }
 }
 
-fn read_details(path: &Path, kind: Kind) -> rusqlite::Result<(String, String, String, bool, bool, Vec<&'static str>)> {
+/// (title, abbreviation, information, has Strong's numbers, right to left, features).
+type Details = (String, String, String, bool, bool, Vec<&'static str>);
+
+fn read_details(path: &Path, kind: Kind) -> rusqlite::Result<Details> {
     let c = open_readonly(path)?;
-    let (title, abbrev, info): (String, String, String) = c.query_row("SELECT Title, Abbreviation, Information FROM Details LIMIT 1", [], |r| {
-        Ok((r.get::<_, Option<String>>(0)?.unwrap_or_default(), r.get::<_, Option<String>>(1)?.unwrap_or_default(), r.get::<_, Option<String>>(2)?.unwrap_or_default()))
-    })?;
+    let (title, abbrev, info): (String, String, String) =
+        c.query_row("SELECT Title, Abbreviation, Information FROM Details LIMIT 1", [], |r| {
+            Ok((
+                r.get::<_, Option<String>>(0)?.unwrap_or_default(),
+                r.get::<_, Option<String>>(1)?.unwrap_or_default(),
+                r.get::<_, Option<String>>(2)?.unwrap_or_default(),
+            ))
+        })?;
     // e-Sword's graphical books are titled "* Classic Bible Maps" so they sort first there.
     let title = title.trim_start_matches(|c: char| c == '*' || c.is_whitespace()).to_string();
     let strongs = kind == Kind::Bible
@@ -194,7 +230,10 @@ fn read_details(path: &Path, kind: Kind) -> rusqlite::Result<(String, String, St
     // e-Sword's RightToLeft flag where the module sets it; otherwise the script of its first verse.
     let rtl = kind == Kind::Bible
         && (c.query_row("SELECT RightToLeft FROM Details LIMIT 1", [], |r| r.get::<_, Option<bool>>(0)).ok().flatten().unwrap_or(false)
-            || c.query_row("SELECT Scripture FROM Bible ORDER BY Book, Chapter, Verse LIMIT 1", [], |r| r.get::<_, Option<String>>(0)).optional()?.flatten().is_some_and(|t| is_rtl_text(&t)));
+            || c.query_row("SELECT Scripture FROM Bible ORDER BY Book, Chapter, Verse LIMIT 1", [], |r| r.get::<_, Option<String>>(0))
+                .optional()?
+                .flatten()
+                .is_some_and(|t| is_rtl_text(&t)));
     let features = if kind == Kind::Bible { bible_features(&c, strongs)? } else { Vec::new() };
     Ok((title, abbrev, info, strongs, rtl, features))
 }
@@ -206,17 +245,35 @@ fn bible_features(c: &Connection, strongs: bool) -> rusqlite::Result<Vec<&'stati
         [], |r| r.get::<_, Option<String>>(0),
     )?.unwrap_or_default().to_ascii_lowercase();
     let has = |sql: &str| c.query_row(sql, [], |_| Ok(())).optional().map(|r| r.is_some());
-    let notes = sample.contains("<not>") || has("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'Notes'")? && has("SELECT 1 FROM Notes LIMIT 1")?;
-    let (ot, nt) = (has("SELECT 1 FROM Bible WHERE Book BETWEEN 1 AND 39 LIMIT 1")?, has("SELECT 1 FROM Bible WHERE Book BETWEEN 40 AND 66 LIMIT 1")?);
+    let notes = sample.contains("<not>")
+        || has("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'Notes'")? && has("SELECT 1 FROM Notes LIMIT 1")?;
+    let (ot, nt) =
+        (has("SELECT 1 FROM Bible WHERE Book BETWEEN 1 AND 39 LIMIT 1")?, has("SELECT 1 FROM Bible WHERE Book BETWEEN 40 AND 66 LIMIT 1")?);
     let mut f = Vec::new();
-    if strongs { f.push("Strong's numbers"); }
-    if sample.contains("<tvm>") { f.push("Grammar"); }
-    if sample.contains("<gra>") { f.push("Glosses"); }
-    if notes { f.push("Notes"); }
-    if sample.contains("<red>") { f.push("Words of Jesus in red"); }
-    if has("SELECT 1 FROM Bible WHERE Book > 66 LIMIT 1")? { f.push("Apocrypha"); }
-    if ot && !nt { f.push("Old Testament only"); }
-    if nt && !ot { f.push("New Testament only"); }
+    if strongs {
+        f.push("Strong's numbers");
+    }
+    if sample.contains("<tvm>") {
+        f.push("Grammar");
+    }
+    if sample.contains("<gra>") {
+        f.push("Glosses");
+    }
+    if notes {
+        f.push("Notes");
+    }
+    if sample.contains("<red>") {
+        f.push("Words of Jesus in red");
+    }
+    if has("SELECT 1 FROM Bible WHERE Book > 66 LIMIT 1")? {
+        f.push("Apocrypha");
+    }
+    if ot && !nt {
+        f.push("Old Testament only");
+    }
+    if nt && !ot {
+        f.push("New Testament only");
+    }
     Ok(f)
 }
 

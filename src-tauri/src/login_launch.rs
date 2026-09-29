@@ -1,3 +1,6 @@
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
+
 //! Was this process started by the Login Items list, or by someone opening the app?
 //!
 //! macOS says so in the launch AppleEvent: the `kAEOpenApplication` ('oapp') event that starts

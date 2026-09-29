@@ -1,3 +1,6 @@
+// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
+
 //! Ask: runs an AI coding CLI already installed and signed in on this Mac — Claude Code, Codex,
 //! Antigravity or GitHub Copilot — non-interactively, and streams its answer back to the window as events. It has no
 //! tools, except read-only search in a folder: a reference book's exported files (books.rs) or
@@ -108,7 +111,9 @@ fn emit_status(app: &tauri::AppHandle, chat_id: &str, text: String) {
 
 /// A file the model opens, named as the user would: "Matthew Henry's Commentary on the Whole Bible".
 fn stem(path: &str) -> Option<String> {
-    if path == "help" || path.ends_with("/help") || path.contains("help/") { return Some("the help".into()); }
+    if path == "help" || path.ends_with("/help") || path.contains("help/") {
+        return Some("the help".into());
+    }
     let name = path.rsplit('/').next()?;
     let name = name.strip_suffix(".txt").unwrap_or(name);
     (!name.is_empty() && name != "index").then(|| name.to_string())
@@ -132,24 +137,35 @@ pub struct Running {
 
 impl Running {
     fn remove(&self, pid: u32) {
-        if let Ok(mut ch) = self.children.lock() { ch.retain(|(_, p)| *p != pid); }
+        if let Ok(mut ch) = self.children.lock() {
+            ch.retain(|(_, p)| *p != pid);
+        }
     }
     /// On quit: nothing is left running once the app has gone.
     pub fn kill_all(&self) {
         if let Ok(ch) = self.children.lock() {
-            for (_, pid) in ch.iter() { kill_group(*pid); }
+            for (_, pid) in ch.iter() {
+                kill_group(*pid);
+            }
         }
     }
 }
 
 fn kill_group(pid: u32) {
     // SAFETY: kill(2) takes no pointers; a negative pid addresses the process group.
-    unsafe { libc::kill(-(pid as libc::pid_t), libc::SIGTERM); }
+    unsafe {
+        libc::kill(-(pid as libc::pid_t), libc::SIGTERM);
+    }
 }
 
 /// Starts the CLI in its own process group and registers it. Its stderr is read on a thread
 /// from the start (a full pipe would stall it); join that for the text when it fails.
-fn spawn(cmd: &mut Command, running: &Running, chat_id: &str, name: &str) -> Result<(Child, ChildStdout, std::thread::JoinHandle<String>), String> {
+fn spawn(
+    cmd: &mut Command,
+    running: &Running,
+    chat_id: &str,
+    name: &str,
+) -> Result<(Child, ChildStdout, std::thread::JoinHandle<String>), String> {
     use std::os::unix::process::CommandExt;
     cmd.stdin(Stdio::null()).stdout(Stdio::piped()).stderr(Stdio::piped()).process_group(0);
     let mut child = cmd.spawn().map_err(|e| format!("couldn't start {name}: {e}"))?;
@@ -157,10 +173,14 @@ fn spawn(cmd: &mut Command, running: &Running, chat_id: &str, name: &str) -> Res
     let stderr = child.stderr.take();
     let err = std::thread::spawn(move || {
         let mut s = String::new();
-        if let Some(mut e) = stderr { let _ = std::io::Read::read_to_string(&mut e, &mut s); }
+        if let Some(mut e) = stderr {
+            let _ = std::io::Read::read_to_string(&mut e, &mut s);
+        }
         s
     });
-    if let Ok(mut ch) = running.children.lock() { ch.push((chat_id.to_string(), child.id())); }
+    if let Ok(mut ch) = running.children.lock() {
+        ch.push((chat_id.to_string(), child.id()));
+    }
     Ok((child, stdout, err))
 }
 
@@ -224,15 +244,37 @@ pub fn status() -> CliStatus {
         models: if bin.is_some() { models } else { Vec::new() },
         path: bin.map(|p| p.to_string_lossy().to_string()),
     };
-    CliStatus { claude: cli(claude::find(), Vec::new()), codex: cli(codex::find(), codex::models()), antigravity: cli(antigravity::find(), antigravity::models()), copilot: cli(copilot::find(), copilot::models()) }
+    CliStatus {
+        claude: cli(claude::find(), Vec::new()),
+        codex: cli(codex::find(), codex::models()),
+        antigravity: cli(antigravity::find(), antigravity::models()),
+        copilot: cli(copilot::find(), copilot::models()),
+    }
 }
 
 /// Outside a folder chat each CLI gets its own working folder under `data` (Claude Code files
 /// its sessions by working directory, so Claude's stays "claude").
 #[allow(clippy::too_many_arguments)]
-pub fn ask(app: tauri::AppHandle, running: std::sync::Arc<Running>, data: &std::path::Path, folder: Folder, chat_id: String, prompt: String, model: String, session: Option<String>) -> Result<(), String> {
+pub fn ask(
+    app: tauri::AppHandle,
+    running: std::sync::Arc<Running>,
+    data: &std::path::Path,
+    folder: Folder,
+    chat_id: String,
+    prompt: String,
+    model: String,
+    session: Option<String>,
+) -> Result<(), String> {
     // "agy:…" is Antigravity (which offers Claude models too), "copilot:…" Copilot, "claude…" Claude Code, the rest Codex.
-    let cli = if model.starts_with(antigravity::PREFIX) { "agy" } else if model.starts_with(copilot::PREFIX) { "copilot" } else if model.starts_with("claude") { "claude" } else { "codex" };
+    let cli = if model.starts_with(antigravity::PREFIX) {
+        "agy"
+    } else if model.starts_with(copilot::PREFIX) {
+        "copilot"
+    } else if model.starts_with("claude") {
+        "claude"
+    } else {
+        "codex"
+    };
     let cwd = folder.dir().cloned().unwrap_or_else(|| data.join(cli));
     std::fs::create_dir_all(&cwd).map_err(|e| e.to_string())?;
     crate::help::write_guides(&cwd).map_err(|e| e.to_string())?;
@@ -246,6 +288,8 @@ pub fn ask(app: tauri::AppHandle, running: std::sync::Arc<Running>, data: &std::
 
 pub fn cancel(running: &Running, chat_id: &str) {
     if let Ok(ch) = running.children.lock() {
-        for (_, pid) in ch.iter().filter(|(id, _)| id == chat_id) { kill_group(*pid); }
+        for (_, pid) in ch.iter().filter(|(id, _)| id == chat_id) {
+            kill_group(*pid);
+        }
     }
 }

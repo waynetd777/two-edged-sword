@@ -1,3 +1,5 @@
+# Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+# SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 """Builds the Targums word by word: targum_aramaic+.bbli ("Targum (Aramaic) w/ glosses", Targum+) and
 pseudojonathan_aramaic+.bbli ("Targum Pseudo-Jonathan (Aramaic) w/ glosses", Ps-Jon+), each Aramaic
 word with English under it and, where it renders a word of the Hebrew, that word's Strong's number.
