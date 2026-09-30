@@ -1,0 +1,19 @@
+{
+  "planId": "scene",
+  "dayKey": "scene",
+  "i": 3,
+  "audio": false,
+  "preview": true,
+  "steps": [
+    { "key": "19.59", "label": "Psalm 59", "kind": "bible", "bible": "kjv", "b": 19, "c": 59 },
+    { "key": "20.26", "label": "Proverbs 26", "kind": "bible", "bible": "kjv", "b": 20, "c": 26 },
+    { "key": "18.11", "label": "Job 11", "kind": "bible", "bible": "kjv", "b": 18, "c": 11 },
+    {
+      "key": "closing", "label": "Closing verse", "kind": "closing", "bible": "kjv",
+      "picked": {
+        "b": 19, "c": 59, "v": 16, "v2": 17, "label": "Psalm 59:16–17",
+        "why": "Today you watched David, hunted and surrounded, keep turning his eyes from his enemies to God, while Proverbs showed how empty the fool's ways are beside that, and Job was reminded that God's wisdom is deeper than ours. These verses gather it up: whatever pressed on you through the night, God is your fortress, and the morning is for singing of His mercy."
+      }
+    }
+  ]
+}

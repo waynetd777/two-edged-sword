@@ -32,10 +32,12 @@ export interface SequencePlan {
   shift: number;
   /** Commentary whose note goes with each day (F. B. Meyer). */
   noteModule?: string;
-  /** Devotionals read each day alongside the plan: e-Sword module ids, or ONLINE_DEVOTIONALS ids. */
+  /** Devotionals read each day alongside the plan: e-Sword module ids, or online ones' (onlineDevotionals). */
   devotionals?: string[];
   /** Songs from the Music library, chosen for the day's reading; absent for none. */
   worship?: Worship;
+  /** A closing verse, chosen by the assistant to wrap up the day's Quiet time (closing.ts). */
+  closing?: boolean;
   /** Parts of the current day ticked off so far (see progressKey). */
   progress?: Progress;
   active: boolean;
@@ -69,6 +71,7 @@ export interface PpoPlan {
   devotionals?: string[];
   /** Songs from the Music library, chosen for the day's reading; absent for none. */
   worship?: Worship;
+  closing?: boolean;
   progress?: Progress;
   active: boolean;
 }
@@ -285,8 +288,50 @@ const MONTH_NAMES = [
 /** A day as a devotional's title: "September 24". */
 export const dayTitle = (d: Date) => `${MONTH_NAMES[d.getMonth()]} ${d.getDate()}`;
 
-/** Devotionals read online, opened in a window of their own. */
-export const ONLINE_DEVOTIONALS: { id: string; title: string; url: (d: Date) => string }[] = [
+/** A devotional read online: its page is shown in the reading column (WebPage), or with `window`
+ *  in a window of its own, for a site that won't be shown inside another. */
+export interface OnlineDevotional {
+  id: string;
+  title: string;
+  url: (d: Date) => string;
+  window?: boolean;
+  /** Added by the user (a WebDevotional). */
+  own?: boolean;
+}
+
+/** A devotional website the user added. Its address may hold today's date: {yyyy}, {yy}, {mm},
+ *  {m}, {dd}, {d}, {month} ("september") and {mon} ("sep"). */
+export interface WebDevotional {
+  id: string;
+  title: string;
+  url: string;
+  window?: boolean;
+}
+
+/** An address with today's date put in for its placeholders. */
+export function fillDate(url: string, d: Date): string {
+  const month = MONTH_NAMES[d.getMonth()].toLowerCase();
+  const two = (n: number) => String(n).padStart(2, "0");
+  const parts: Record<string, string> = {
+    yyyy: String(d.getFullYear()),
+    yy: two(d.getFullYear() % 100),
+    mm: two(d.getMonth() + 1),
+    m: String(d.getMonth() + 1),
+    dd: two(d.getDate()),
+    d: String(d.getDate()),
+    month,
+    mon: month.slice(0, 3),
+  };
+  return url.replace(/\{(yyyy|yy|mm|m|dd|d|month|mon)\}/gi, (_, k: string) => parts[k.toLowerCase()]);
+}
+
+/** The online devotionals there are: the app's own, then the user's. */
+export const onlineDevotionals = (own: WebDevotional[] = []): OnlineDevotional[] => [
+  ...ONLINE_DEVOTIONALS,
+  ...own.map((w) => ({ id: w.id, title: w.title, url: (d: Date) => fillDate(w.url, d), window: w.window, own: true })),
+];
+
+export const ONLINE_DEVOTIONALS: OnlineDevotional[] = [
   { id: "online:odb", title: "Our Daily Bread", url: () => "https://www.odbm.org/en/devotionals" },
   {
     id: "online:heartlight",

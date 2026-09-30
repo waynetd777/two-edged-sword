@@ -54,6 +54,8 @@ On [Quiet time](../quiet-time.md).
 
 - Quiet time with today's readings: [light](quiet-time-light.png) · [dark](quiet-time-dark.png)
 - The Worship part of Quiet time: why each song suits the day's reading: [light](worship-light.png) · [dark](worship-dark.png)
+- A song's words in the reading column as it plays: [light](lyrics-light.png) · [dark](lyrics-dark.png)
+- The closing verse, with how it sums up the day: [light](closing-light.png) · [dark](closing-dark.png)
 - The daily reminder in Settings: [light](reminder-light.png) · [dark](reminder-dark.png)
 - The menu-bar menu: [full size](menu-bar.png)
 

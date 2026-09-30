@@ -29,7 +29,9 @@ import {
   Plan,
   PpoPlan,
   dayTitle,
-  ONLINE_DEVOTIONALS,
+  fillDate,
+  onlineDevotionals,
+  WebDevotional,
   doneToday,
   progressKey,
   ppoPreview,
@@ -42,6 +44,7 @@ import {
 } from "./plans";
 import { BibleSelect, SearchField, Topbar } from "./Shell";
 import { uid, useApp } from "./state";
+import { InvertButton, inverts } from "./WebPage";
 import { confirmDelete, Dialog, Popover, Seg, Switch } from "./ui";
 import { useStartQuietTime } from "./QuietTime";
 import { useAssistant } from "./assistant";
@@ -432,8 +435,13 @@ export function PlansScreen({ openPalette }: { openPalette: () => void }) {
             )}
           </div>
         </div>
-        <DevotionalsCard plan={plan} update={update} />
-        <WorshipCard plan={plan} update={update} />
+        {/* Side by side, three across on a wide window, fewer as it narrows. */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 16, alignItems: "stretch" }}>
+          <DevotionalsCard plan={plan} update={update} />
+          <WorshipCard plan={plan} update={update} />
+          <ClosingSetting plan={plan} update={update} />
+        </div>
+        <TryQuietTime plan={plan} />
         <div style={{ display: "grid", gridTemplateColumns: "420px minmax(0,1fr)", gap: 16 }}>
           <div className="card" style={{ padding: "16px 18px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
@@ -1179,7 +1187,8 @@ function DevotionalsCard({ plan, update }: { plan: Plan; update: (p: Plan) => vo
   const [choose, setChoose] = useState<DOMRect | null>(null);
   const [heads, setHeads] = useState<Record<string, string>>({});
   const local = (app.lib?.modules ?? []).filter((m) => m.kind === "devotional");
-  const chosen = (plan.devotionals ?? []).filter((id) => local.some((m) => m.id === id) || ONLINE_DEVOTIONALS.some((o) => o.id === id));
+  const online = onlineDevotionals(app.settings.webDevotionals);
+  const chosen = (plan.devotionals ?? []).filter((id) => local.some((m) => m.id === id) || online.some((o) => o.id === id));
   const read = doneToday(plan, progressKey(plan, today()));
   const day = today();
   const title = dayTitle(day);
@@ -1189,7 +1198,7 @@ function DevotionalsCard({ plan, update }: { plan: Plan; update: (p: Plan) => vo
     let live = true;
     Promise.all(
       chosen
-        .filter((id) => !id.startsWith("online:"))
+        .filter((id) => !online.some((o) => o.id === id))
         .map(async (id) => {
           const html = await api.devotion(id, title).catch(() => null);
           if (!html) return [id, ""] as const;
@@ -1209,8 +1218,9 @@ function DevotionalsCard({ plan, update }: { plan: Plan; update: (p: Plan) => vo
     update({ ...plan, devotionals: cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id] });
   };
   const open = (id: string) => {
-    const o = ONLINE_DEVOTIONALS.find((x) => x.id === id);
-    if (o) api.openWeb(o.id, o.url(day), o.title).catch((e) => app.toast(String(e)));
+    const o = online.find((x) => x.id === id);
+    if (o?.window) api.openWeb(o.id, o.url(day), o.title, inverts(app.settings, o.id)).catch((e) => app.toast(String(e)));
+    else if (o) app.openWebDoc(o.id, o.url(day), o.title);
     else app.openDoc(id, title, "devotional");
   };
   return (
@@ -1233,7 +1243,7 @@ function DevotionalsCard({ plan, update }: { plan: Plan; update: (p: Plan) => vo
         </div>
       )}
       {chosen.map((id) => {
-        const o = ONLINE_DEVOTIONALS.find((x) => x.id === id);
+        const o = online.find((x) => x.id === id);
         const m = local.find((x) => x.id === id);
         return (
           <div
@@ -1253,7 +1263,7 @@ function DevotionalsCard({ plan, update }: { plan: Plan; update: (p: Plan) => vo
                 {read.includes(id) && <Icon name="check" size={13} style={{ color: "var(--good)" }} />}
               </b>
               <div className="n" style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                {o ? "Online · opens in its own window" : (heads[id] ?? "…")}
+                {o ? (o.window ? "Online · opens in its own window" : "Online · shown in the reading column") : (heads[id] ?? "…")}
               </div>
             </div>
             <button className="btn" type="button" onClick={() => open(id)}>
@@ -1289,12 +1299,32 @@ function DevotionalsCard({ plan, update }: { plan: Plan; update: (p: Plan) => vo
             <div className="label" style={{ padding: "10px 0 4px" }}>
               Online
             </div>
-            {ONLINE_DEVOTIONALS.map((o) => (
-              <label key={o.id} className="opt">
-                <input type="checkbox" checked={chosen.includes(o.id)} onChange={() => toggle(o.id)} />
-                {o.title}
-              </label>
+            {online.map((o) => (
+              <div key={o.id} style={{ display: "flex", alignItems: "center" }}>
+                <label className="opt" style={{ flex: 1, minWidth: 0 }}>
+                  <input type="checkbox" checked={chosen.includes(o.id)} onChange={() => toggle(o.id)} />
+                  <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{o.title}</span>
+                </label>
+                {o.own && (
+                  <button
+                    className="ibtn"
+                    type="button"
+                    aria-label={`Remove ${o.title}`}
+                    title="Remove this website"
+                    onClick={() => app.set({ webDevotionals: app.settings.webDevotionals.filter((w) => w.id !== o.id) })}
+                  >
+                    <Icon name="x" size={12} />
+                  </button>
+                )}
+                <InvertButton id={o.id} />
+              </div>
             ))}
+            <AddWebsite
+              onAdd={(w) => {
+                app.set({ webDevotionals: [...app.settings.webDevotionals, w] });
+                update({ ...plan, devotionals: [...(plan.devotionals ?? []), w.id] });
+              }}
+            />
           </div>
         </Popover>
       )}
@@ -1302,11 +1332,86 @@ function DevotionalsCard({ plan, update }: { plan: Plan; update: (p: Plan) => vo
   );
 }
 
+/** In the devotionals list: a website of the user's own, by name and address. Checked as it's
+ *  added: a site that won't be shown inside the app is marked to open in its own window. */
+function AddWebsite({ onAdd }: { onAdd: (w: WebDevotional) => void }) {
+  const [open, setOpen] = useState(false);
+  const [title, setTitle] = useState("");
+  const [url, setUrl] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  if (!open)
+    return (
+      <button
+        className="btn small"
+        type="button"
+        title="Add a devotional website of your own"
+        style={{ alignSelf: "flex-start", marginTop: 6 }}
+        onClick={() => setOpen(true)}
+      >
+        <Icon name="plus" size={12} />
+        Add a website…
+      </button>
+    );
+  const address = /^https?:\/\//i.test(url.trim()) ? url.trim() : `https://${url.trim()}`;
+  const add = async () => {
+    if (!title.trim() || !url.trim()) return;
+    if (address.startsWith("http://")) {
+      setErr("The address must start with https://");
+      return;
+    }
+    setBusy(true);
+    setErr(null);
+    try {
+      // Checked with today's date in, as it will be opened.
+      const frameable = await api.webFrameable(fillDate(address, today()));
+      onAdd({ id: `web:${Date.now().toString(36)}`, title: title.trim(), url: address, ...(frameable ? {} : { window: true }) });
+      setOpen(false);
+      setTitle("");
+      setUrl("");
+    } catch (e) {
+      setErr(String(e));
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <form
+      style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 8 }}
+      onSubmit={(e) => {
+        e.preventDefault();
+        add();
+      }}
+    >
+      <label className="field">
+        <input placeholder="Name" aria-label="Name" value={title} autoFocus onChange={(e) => setTitle(e.target.value)} />
+      </label>
+      <label className="field">
+        <input placeholder="https://…" aria-label="Address" value={url} onChange={(e) => setUrl(e.target.value)} />
+      </label>
+      <div className="hint" style={{ fontSize: 12 }}>
+        For a page that changes address each day, put {"{yyyy}"}, {"{mm}"} and {"{dd}"} where today's date goes.
+      </div>
+      {err && (
+        <div className="err" style={{ fontSize: 12.5 }}>
+          {err}
+        </div>
+      )}
+      <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+        <button className="btn small" type="button" onClick={() => setOpen(false)}>
+          Cancel
+        </button>
+        <button className="btn small primary" type="submit" disabled={busy || !title.trim() || !url.trim()}>
+          {busy ? "Checking…" : "Add"}
+        </button>
+      </div>
+    </form>
+  );
+}
+
 /** Worship songs in Quiet time: whether to have them, how many, and before or after the reading. */
 function WorshipCard({ plan, update }: { plan: Plan; update: (p: Plan) => void }) {
   const w = plan.worship;
-  const startQuiet = useStartQuietTime();
-  const t = !(plan.kind === "sequence" && firstUndone(plan) < 0) ? todayFor(plan) : null;
   const set = (x: Plan["worship"]) => update({ ...plan, worship: x });
   return (
     <div className="card" style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
@@ -1346,29 +1451,59 @@ function WorshipCard({ plan, update }: { plan: Plan; update: (p: Plan) => void }
             ]}
             onChange={(when) => set({ ...w, when })}
           />
-          <button
-            className="btn small"
-            type="button"
-            style={{ marginLeft: "auto" }}
-            disabled={!t?.parts.length}
-            title="Go through today's Quiet time with its songs, without ticking anything off or marking the day read"
-            onClick={() => t && startQuiet(plan, t.parts, false, true)}
-          >
-            <Play size={11} />
-            Try it now
-          </button>
-          <button
-            className="btn small"
-            type="button"
-            disabled={!t?.parts.length}
-            title="The same, with the readings read aloud and the songs starting by themselves"
-            onClick={() => t && startQuiet(plan, t.parts, true, true)}
-          >
-            <Icon name="speaker" size={12} />
-            Try it with audio
-          </button>
         </div>
       )}
+    </div>
+  );
+}
+
+/** The closing verse in Quiet time: whether to end with one. */
+function ClosingSetting({ plan, update }: { plan: Plan; update: (p: Plan) => void }) {
+  return (
+    <div className="card" style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <span className="label">Closing verse</span>
+        <span style={{ marginLeft: "auto" }}>
+          <Switch on={!!plan.closing} onChange={(on) => update({ ...plan, closing: on || undefined })} />
+        </span>
+      </div>
+      <div className="hint">
+        End Quiet time with a verse or short passage, chosen by the AI assistant to gather up what the day's reading taught.
+      </div>
+    </div>
+  );
+}
+
+/** Under the worship and closing verse settings: today's Quiet time run through with them, to try. */
+function TryQuietTime({ plan }: { plan: Plan }) {
+  const startQuiet = useStartQuietTime();
+  const t = !(plan.kind === "sequence" && firstUndone(plan) < 0) ? todayFor(plan) : null;
+  if (!plan.worship && !plan.closing) return null;
+  return (
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 10, marginTop: -4 }}>
+      <span className="n" style={{ marginRight: "auto" }}>
+        Try today's Quiet time with these, without ticking anything off or marking the day read.
+      </span>
+      <button
+        className="btn small"
+        type="button"
+        disabled={!t?.parts.length}
+        title="Go through today's Quiet time, without ticking anything off or marking the day read"
+        onClick={() => t && startQuiet(plan, t.parts, false, true)}
+      >
+        <Play size={11} />
+        Try it now
+      </button>
+      <button
+        className="btn small"
+        type="button"
+        disabled={!t?.parts.length}
+        title="The same, with the readings read aloud and the songs starting by themselves"
+        onClick={() => t && startQuiet(plan, t.parts, true, true)}
+      >
+        <Icon name="speaker" size={12} />
+        Try it with audio
+      </button>
     </div>
   );
 }

@@ -96,6 +96,25 @@
     "sessionFile": "worship-session.json"
   },
   {
+    "name": "closing",
+    "loc": {
+      "book": 19,
+      "chapter": 59
+    },
+    "settings": {
+      "bible": "kjv",
+      "studyPane": false
+    },
+    "sessionFile": "closing-session.json"
+  },
+  {
+    "name": "lyrics",
+    "settings": {
+      "studyPane": false
+    },
+    "songFile": "lyrics-song.json"
+  },
+  {
     "name": "reminder",
     "screen": "settings",
     "scrollTo": "input[type=time]",

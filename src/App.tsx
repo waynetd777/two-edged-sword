@@ -13,6 +13,8 @@ import { WordStudyScreen } from "./WordStudy";
 import { Palette } from "./Palette";
 import { PlayerBar, ReadScreen } from "./Read";
 import { DocReader } from "./DocReader";
+import { WebPage } from "./WebPage";
+import { LyricsPage } from "./LyricsPage";
 import { StrongsHover } from "./WordLookup";
 import { QuietTime, useWorshipAhead } from "./QuietTime";
 import { SCREEN_KEYS, Sidebar } from "./Shell";
@@ -104,7 +106,11 @@ function Screens() {
   return (
     <div className={`shell ${focused ? "nosidebar" : ""}`}>
       {!focused && <Sidebar />}
-      {screen === "read" && app.doc && <DocReader focus={focus} setFocus={setFocus} openPalette={openPalette} />}
+      {screen === "read" && app.doc?.url && <WebPage focus={focus} setFocus={setFocus} />}
+      {screen === "read" && app.doc?.view === "lyrics" && <LyricsPage focus={focus} setFocus={setFocus} />}
+      {screen === "read" && app.doc && !app.doc.url && !app.doc.view && (
+        <DocReader focus={focus} setFocus={setFocus} openPalette={openPalette} />
+      )}
       {screen === "read" && !app.doc && <ReadScreen focus={focus} setFocus={setFocus} openPalette={openPalette} />}
       {screen === "compare" && <CompareScreen openPalette={openPalette} />}
       {screen === "search" && <SearchScreen />}

@@ -27,6 +27,14 @@ pub struct State {
     pub artist: String,
     /// Whether what is playing is the Quiet time playlist.
     pub ours: bool,
+    pub album: String,
+    /// Seconds into the song, and its length.
+    pub position: f64,
+    pub duration: f64,
+    /// Lyrics saved with the song in the library, if any (Apple Music's own aren't readable).
+    pub lyrics: String,
+    /// Beats per minute, if Music knows it (0 when not).
+    pub bpm: f64,
 }
 
 /// Runs a JXA script with one argument (read as `argv[0]`) and returns what it printed.
@@ -77,22 +85,24 @@ pub fn play(ids: &[String]) -> Result<usize, String> {
 pub fn state() -> Result<State, String> {
     let js = r#"function run(argv) {
         const m = Application("Music");
-        if (!m.running()) return JSON.stringify(["stopped", "", "", false]);
+        if (!m.running()) return JSON.stringify(["stopped", "", "", false, "", 0, 0, "", 0]);
         const state = m.playerState();
-        let name = "", artist = "", ours = false;
-        try { const t = m.currentTrack(); name = t.name(); artist = t.artist(); } catch (e) {}
+        let name = "", artist = "", ours = false, album = "", position = 0, duration = 0, lyrics = "", bpm = 0;
+        try { const t = m.currentTrack(); name = t.name(); artist = t.artist(); album = t.album() || ""; duration = t.duration() || 0; } catch (e) {}
+        try { lyrics = m.currentTrack().lyrics() || ""; } catch (e) {}
+        try { bpm = m.currentTrack().bpm() || 0; } catch (e) {}
+        try { position = m.playerPosition() || 0; } catch (e) {}
         try { ours = m.currentPlaylist().name() === argv[0]; } catch (e) {}
-        return JSON.stringify([state, name, artist, ours]);
+        return JSON.stringify([state, name, artist, ours, album, position, duration, lyrics, bpm]);
     }"#;
-    let (state, name, artist, ours): (String, String, String, bool) =
+    let (state, name, artist, ours, album, position, duration, lyrics, bpm): (String, String, String, bool, String, f64, f64, String, f64) =
         serde_json::from_str(&jxa(js, PLAYLIST)?).map_err(|e| e.to_string())?;
-    Ok(State { state, name, artist, ours })
+    Ok(State { state, name, artist, ours, album, position, duration, lyrics, bpm })
 }
 
 /// "pause", "play" or "next", for the Quiet time playlist only: nothing else the user is
 /// listening to is paused or skipped. "stop" is sent as the playlist ends, and stops whatever
-/// Music has gone on to play after it (AutoPlay's similar songs) as well. "show" brings Music to the front, where its lyrics are:
-/// they aren't in the library's files, and Apple Music's own can't be read by another app.
+/// Music has gone on to play after it (AutoPlay's similar songs) as well. "show" brings Music to the front.
 pub fn control(cmd: &str) -> Result<(), String> {
     if cmd == "show" {
         return jxa(r#"function run(argv) { Application("Music").activate(); return ""; }"#, "").map(|_| ());
@@ -114,4 +124,32 @@ pub fn control(cmd: &str) -> Result<(), String> {
         return "";
     }"#;
     jxa(js, &serde_json::to_string(&(cmd, PLAYLIST)).map_err(|e| e.to_string())?).map(|_| ())
+}
+
+/// The playing song's artwork, as the image file's bytes (JPEG or PNG), or none. AppleScript, not
+/// JXA: only it can write the artwork's raw data out, to a temporary file read back here.
+pub fn artwork() -> Result<Vec<u8>, String> {
+    let script = r#"on run argv
+  tell application "Music"
+    if not running then return ""
+    try
+      set d to raw data of artwork 1 of current track
+    on error
+      return ""
+    end try
+  end tell
+  set fh to open for access (POSIX file (item 1 of argv)) with write permission
+  set eof fh to 0
+  write d to fh
+  close access fh
+  return "ok"
+end run"#;
+    let path = std::env::temp_dir().join(format!("tes-artwork-{}", std::process::id()));
+    let out = Command::new("/usr/bin/osascript").args(["-e", script, &path.to_string_lossy()]).output().map_err(|e| e.to_string())?;
+    if !out.status.success() || String::from_utf8_lossy(&out.stdout).trim() != "ok" {
+        return Ok(Vec::new());
+    }
+    let bytes = std::fs::read(&path).map_err(|e| e.to_string());
+    let _ = std::fs::remove_file(&path);
+    bytes
 }

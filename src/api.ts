@@ -164,6 +164,14 @@ export interface MusicState {
   name: string;
   artist: string;
   ours: boolean;
+  album: string;
+  /** Seconds into the song, and its length. */
+  position: number;
+  duration: number;
+  /** Lyrics saved with the song in the library, if any. */
+  lyrics: string;
+  /** Beats per minute, if Music knows it (0 when not). */
+  bpm: number;
 }
 export interface JournalEntry {
   id: string;
@@ -226,6 +234,8 @@ export const api = {
   /** Queues these songs as the Quiet time playlist and plays it; returns how many were found. */
   musicPlay: (ids: string[]) => (readOnly ? Promise.resolve(0) : invoke<number>("music_play", { ids })),
   musicState: () => invoke<MusicState>("music_state"),
+  /** The playing song's artwork as image bytes; empty when it has none. */
+  musicArtwork: () => invoke<ArrayBuffer>("music_artwork"),
   /** macOS's spell checker (spell.rs): misspelled words as [start, length] in UTF-16, as JS strings count. */
   spellCheck: (text: string) => invoke<[number, number][]>("spell_check", { text }),
   /** Grammar problems, with macOS's explanation and fixes; offsets as for spellCheck. */
@@ -279,11 +289,14 @@ export const api = {
   devotion: (module: string, title: string) => invoke<string | null>("devotion", { module, title }),
   /** Opens an https page in its own window inside the app; `key` reuses the window. */
   /** Opens a web page (an online devotional) in its own window, dark when the app is. */
-  openWeb: (key: string, url: string, title: string) => {
+  /** `invert` false leaves the page as the site made it, even in the dark theme. */
+  openWeb: (key: string, url: string, title: string, invert = true) => {
     const t = document.documentElement.getAttribute("data-theme");
     const dark = t ? t === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
-    return invoke<void>("open_web", { key, url, title, dark });
+    return invoke<void>("open_web", { key, url, title, dark: dark && invert, darkApp: dark });
   },
+  /** Whether a web page lets itself be shown inside the app, rather than in a window of its own. */
+  webFrameable: (url: string) => invoke<boolean>("web_frameable", { url }),
   askCancel: (chatId: string) => invoke<void>("ask_cancel", { chatId }),
   print: () => invoke<void>("print_page"),
   /** The screenshot scene the app was launched with (TES_SCENE), as JSON, or null. */

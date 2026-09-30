@@ -255,6 +255,11 @@ fn music_state() -> Result<music::State, String> {
 fn music_control(cmd: String) -> Result<(), String> {
     music::control(&cmd)
 }
+/// Sent as raw bytes (an ArrayBuffer in the page), not a JSON array of numbers.
+#[tauri::command(async)]
+fn music_artwork() -> Result<tauri::ipc::Response, String> {
+    music::artwork().map(tauri::ipc::Response::new)
+}
 
 /// While reading aloud, the display is kept from sleeping (so the screen doesn't lock) by a
 /// `caffeinate`, which ends with the reading, or with the app (-w) if it quits first.
@@ -451,8 +456,46 @@ const DARK_PAGE: &str = r##"(() => {
   document.addEventListener("DOMContentLoaded", add);
 })();"##;
 
+/// Whether a web page lets itself be shown inside another page (an online devotional added by the
+/// user, framed in the reading column), from its headers: X-Frame-Options, or a
+/// Content-Security-Policy with frame-ancestors, says no. Fetched with the system's curl.
+#[tauri::command(async)]
+fn web_frameable(url: String) -> Result<bool, String> {
+    if !url.starts_with("https://") {
+        return Err("only https pages can be opened".into());
+    }
+    let out = std::process::Command::new("/usr/bin/curl")
+        .args([
+            "-sL",
+            "--max-time",
+            "15",
+            "-o",
+            "/dev/null",
+            "-D",
+            "-",
+            "-A",
+            "Mozilla/5.0 (Macintosh) AppleWebKit/605.1.15 Safari/605.1.15",
+            &url,
+        ])
+        .output()
+        .map_err(|e| e.to_string())?;
+    if !out.status.success() {
+        return Err("couldn't reach that address".into());
+    }
+    let text = String::from_utf8_lossy(&out.stdout).to_lowercase();
+    // After redirects, the last response's headers.
+    let last = text.rsplit("http/").next().unwrap_or("");
+    Ok(!last.lines().any(|l| {
+        l.starts_with("x-frame-options:")
+            || (l.starts_with("content-security-policy:") && l.contains("frame-ancestors") && !l.contains("frame-ancestors *"))
+    }))
+}
+
 #[tauri::command]
-fn open_web(app: AppHandle, key: String, url: String, title: String, dark: bool) -> Result<(), String> {
+/// `dark` inverts the page to look dark; `dark_app` is the app's dark theme, where the window is
+/// black while the page loads, and has a dark title bar, even for a page left as it is.
+fn open_web(app: AppHandle, key: String, url: String, title: String, dark: bool, dark_app: bool) -> Result<(), String> {
+    let black = dark || dark_app;
     // A window's scripts are fixed when it is made, so dark and light pages are separate windows;
     // the other one, if open, is closed.
     let base = format!("web-{}", key.chars().filter(|c| c.is_ascii_alphanumeric()).collect::<String>());
@@ -475,8 +518,10 @@ fn open_web(app: AppHandle, key: String, url: String, title: String, dark: bool)
     if let Some(w) = app.get_webview_window(&label) {
         let _ = w.navigate(parsed);
         let _ = w.set_title(&title);
-        let _ = w.set_theme(Some(if dark { tauri::Theme::Dark } else { tauri::Theme::Light }));
-        title_bar(&w, dark);
+        let _ = w.set_theme(Some(if black { tauri::Theme::Dark } else { tauri::Theme::Light }));
+        let _ =
+            w.set_background_color(Some(if black { tauri::window::Color(0, 0, 0, 255) } else { tauri::window::Color(255, 255, 255, 255) }));
+        title_bar(&w, black);
         if let Some((size, pos)) = frame {
             let _ = w.set_size(size);
             let _ = w.set_position(pos);
@@ -487,17 +532,20 @@ fn open_web(app: AppHandle, key: String, url: String, title: String, dark: bool)
     }
     let mut b = tauri::WebviewWindowBuilder::new(&app, &label, tauri::WebviewUrl::External(parsed)).title(&title);
     if dark {
-        // The title bar too: left alone, macOS draws it light or dark as it pleases.
-        b = b.initialization_script(DARK_PAGE).background_color(tauri::window::Color(18, 18, 20, 255)).theme(Some(tauri::Theme::Dark));
-    } else {
-        b = b.theme(Some(tauri::Theme::Light));
+        b = b.initialization_script(DARK_PAGE);
     }
+    // The title bar too: left alone, macOS draws it light or dark as it pleases.
+    b = if black {
+        b.background_color(tauri::window::Color(0, 0, 0, 255)).theme(Some(tauri::Theme::Dark))
+    } else {
+        b.theme(Some(tauri::Theme::Light))
+    };
     b = match frame {
         Some((size, pos)) => b.inner_size(size.width, size.height).position(pos.x, pos.y),
         None => b.inner_size(1000.0, 820.0),
     };
     let w = b.build().map_err(|e| e.to_string())?;
-    title_bar(&w, dark);
+    title_bar(&w, black);
     Ok(())
 }
 
@@ -633,6 +681,7 @@ pub fn run() {
             devotion_titles,
             devotion,
             open_web,
+            web_frameable,
             strongs_by_book,
             strongs_verses,
             search,
@@ -658,6 +707,7 @@ pub fn run() {
             music_play,
             music_state,
             music_control,
+            music_artwork,
             write_text_file,
             assistant_status,
             ask,

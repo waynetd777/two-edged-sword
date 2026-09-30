@@ -7,11 +7,12 @@
 
 import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import type { Song } from "./worship";
+import type { Closing } from "./closing";
 import { listen } from "@tauri-apps/api/event";
 import { api, JournalEntry, LibraryInfo, ModuleInfo } from "./api";
 import { claudeAlias } from "./assistant";
 import { Ref } from "./bible";
-import { Plan } from "./plans";
+import { Plan, WebDevotional } from "./plans";
 import type { StudyTab } from "./StudyPane";
 
 export type Theme = "auto" | "light" | "dark";
@@ -76,6 +77,11 @@ export interface Settings {
   studyDict: DictAt | null;
   dictModule: string | null;
   studyFollow: boolean;
+  /** Devotional websites the user has added, for any plan (plans.ts onlineDevotionals). */
+  webDevotionals: WebDevotional[];
+  /** Online devotionals, by id, whose pages are left as they are in the dark theme rather than
+   *  inverted to look dark (a site that is dark already): false. Absent is inverted. */
+  webInvert: Record<string, boolean>;
 }
 
 const DEFAULTS: Settings = {
@@ -122,6 +128,8 @@ const DEFAULTS: Settings = {
   whenBehind: "ask",
   studyPane: true,
   copyNumbers: true,
+  webDevotionals: [],
+  webInvert: {},
 };
 
 /** Faces for Scripture, commentary and notes. Greek and Hebrew stay in --display. */
@@ -320,11 +328,15 @@ function restoreScrolls(want: number[]) {
   };
   window.setTimeout(apply, 30);
 }
-/** A reference book open in the reading column, and the chapter being read. */
+/** A reference book open in the reading column, and the chapter being read. With `url`, an online
+ *  devotional's page instead (WebPage): `module` is its id and `title` its name. */
 export interface Doc {
   module: string;
   title: string;
   kind?: DocKind;
+  url?: string;
+  /** "lyrics": the words of the song playing in Music (LyricsPage) instead. */
+  view?: "lyrics";
 }
 export type DocKind = "reference" | "devotional";
 
@@ -332,9 +344,12 @@ export type DocKind = "reference" | "devotional";
 export type QuietStep = { key: string; label: string } & (
   | { kind: "bible"; bible: string; b: number; c: number; v?: number; v2?: number }
   | { kind: "devotional"; module: string; title: string }
-  | { kind: "online"; id: string; url: string }
+  /** `window`: the site won't be shown inside the app, so it opens in a window of its own. */
+  | { kind: "online"; id: string; url: string; window?: boolean }
   /** Songs for the day's reading; `picked` once they are chosen (worship.ts), with why when it had to guess. */
   | { kind: "worship"; songs: number; when: "before" | "after"; picked?: Song[]; intro?: string; note?: string }
+  /** The last part: a verse or passage chosen to wrap up the day (closing.ts); `picked` once it is. */
+  | { kind: "closing"; bible: string; picked?: Closing }
 );
 export interface Session {
   planId: string;
@@ -399,6 +414,10 @@ interface Ctx {
   /** Opens a reference book, at the given chapter or wherever it was last left. */
   openDoc: (module: string, title?: string, kind?: DocKind, para?: number) => void;
   closeDoc: () => void;
+  /** Shows an online devotional's page in the reading column. */
+  openWebDoc: (id: string, url: string, title: string) => void;
+  /** Shows the words of the song playing in Music in the reading column. */
+  openLyrics: () => void;
   /** The chapter last read in each reference book. */
   docAt: Record<string, string>;
 
@@ -864,6 +883,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (t) addRecent({ book: 0, chapter: 0, at: new Date().toISOString(), doc: { module, title: t, kind } });
     },
     closeDoc: () => navigate({ doc: null }),
+    openWebDoc: (id, url, title) => navigate({ doc: { module: id, title, kind: "devotional", url }, screen: "read" }),
+    openLyrics: () => {
+      if (nav.doc?.view !== "lyrics" || screen !== "read")
+        navigate({ doc: { module: "music:lyrics", title: "Lyrics", kind: "devotional", view: "lyrics" }, screen: "read" });
+    },
     journal,
     journalDir,
     // A save or delete updates the one entry here rather than reading the whole journal again

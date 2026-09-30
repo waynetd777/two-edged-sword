@@ -34,7 +34,7 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 HERE = ROOT / "tools" / "screenshots"
 OUT = ROOT / "docs" / "images"
 BIN = ROOT / "src-tauri" / "target" / "debug" / "TwoEdgedSword"
-DEV_URL = "http://localhost:1420"
+DEV_URL = "http://localhost:1430"
 WIDTH = 1400
 SETTLE = 6.0  # seconds after the window appears: splash, library load, scene, fonts
 
@@ -60,7 +60,7 @@ def dev_server():
         return None
     except OSError:
         pass
-    p = subprocess.Popen(["npx", "vite", "--port", "1420", "--strictPort"], cwd=ROOT, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    p = subprocess.Popen(["npx", "vite", "--port", "1430", "--strictPort"], cwd=ROOT, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     for _ in range(60):
         time.sleep(0.5)
         try:
@@ -91,7 +91,7 @@ def window_of(window_id, pid, timeout=30):
 
 def shoot(scene, theme, window_id):
     # A fixture from a file beside scenes.json: "chatFile" becomes "chat", and so on.
-    files = {"chatFile": "chat", "sessionFile": "session", "entriesFile": "entries", "variancesFile": "variances"}
+    files = {"chatFile": "chat", "sessionFile": "session", "entriesFile": "entries", "variancesFile": "variances", "songFile": "song"}
     sc = {k: v for k, v in scene.items() if k not in files and k != "crop"}
     for f, k in files.items():
         if f in scene:

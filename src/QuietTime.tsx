@@ -2,18 +2,19 @@
 // SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 // Quiet time: today's plan and devotionals as one session. Each part opens in turn (a chapter in
-// the Bible reader, a devotional in the reading column, an online one in its own window) under a
+// the Bible reader, a devotional or an online one's page in the reading column) under a
 // floating bar with Previous and Next. With audio, a part that finishes reading opens the next,
 // waits two seconds and reads on. Parts are ticked off as they are finished, and the plan's day is
 // marked read once all its Bible parts are. A plan with worship songs gets a Worship part before
 // or after the reading: songs from the Music library chosen for the day (worship.ts), played in
-// Music while the part is open, moving on when they finish.
+// Music while the part is open, their words in the reading column (LyricsPage), moving on when they finish.
+// A plan with a closing verse ends with one chosen to wrap up the day (closing.ts).
 
 import { useEffect, useRef, useState } from "react";
 import { Working } from "./Ask";
 import { api, isReadOnly, MusicState } from "./api";
 import { book } from "./bible";
-import { docSegments } from "./esword";
+import { docSegments, plainText } from "./esword";
 import { Icon, Pause, Play } from "./icons";
 import {
   current,
@@ -21,6 +22,8 @@ import {
   doneToday,
   firstUndone,
   ONLINE_DEVOTIONALS,
+  OnlineDevotional,
+  onlineDevotionals,
   Part,
   Plan,
   progressKey,
@@ -33,13 +36,21 @@ import { usePlayer } from "./speech";
 import { QuietStep, useApp } from "./state";
 import { useDrag } from "./ui";
 import { Picked, pickSongs } from "./worship";
+import { Closing, pickClosing } from "./closing";
+import { inverts } from "./WebPage";
 
 const FIRST_DELAY = 900; // let the first part's screen open before reading starts
 const NEXT_DELAY = 2000;
 const AUTO_PLAY = 12; // seconds the worship card shows, with audio, before its songs start
 
 /** Today's parts, one chapter at a time, then the chosen devotionals; worship songs first or last. */
-export function quietSteps(plan: Plan, parts: Part[], devotionalIds: string[], day: Date): QuietStep[] {
+export function quietSteps(
+  plan: Plan,
+  parts: Part[],
+  devotionalIds: string[],
+  day: Date,
+  online: OnlineDevotional[] = ONLINE_DEVOTIONALS,
+): QuietStep[] {
   const steps: QuietStep[] = [];
   for (const p of parts) {
     const last = p.c2 ?? p.c;
@@ -50,8 +61,8 @@ export function quietSteps(plan: Plan, parts: Part[], devotionalIds: string[], d
     }
   }
   for (const id of devotionalIds) {
-    const o = ONLINE_DEVOTIONALS.find((x) => x.id === id);
-    if (o) steps.push({ key: id, label: o.title, kind: "online", id, url: o.url(day) });
+    const o = online.find((x) => x.id === id);
+    if (o) steps.push({ key: id, label: o.title, kind: "online", id, url: o.url(day), window: o.window });
     else steps.push({ key: id, label: id, kind: "devotional", module: id, title: dayTitle(day) });
   }
   const w = plan.worship;
@@ -60,22 +71,25 @@ export function quietSteps(plan: Plan, parts: Part[], devotionalIds: string[], d
     if (w.when === "before") steps.unshift(step);
     else steps.push(step);
   }
+  if (plan.closing && steps.length) steps.push({ key: "closing", label: "Closing verse", kind: "closing", bible: plan.bible });
   return steps;
 }
 
 /** The session's parts as the app shows them: devotionals it has, named by their abbreviations. */
 function sessionSteps(app: ReturnType<typeof useApp>, plan: Plan, parts: Part[], day: Date): QuietStep[] {
-  const ids = (plan.devotionals ?? []).filter((id) => id.startsWith("online:") || app.mod("devotional", id));
-  return quietSteps(plan, parts, ids, day).map((s) =>
+  const online = onlineDevotionals(app.settings.webDevotionals);
+  const ids = (plan.devotionals ?? []).filter((id) => online.some((o) => o.id === id) || app.mod("devotional", id));
+  return quietSteps(plan, parts, ids, day, online).map((s) =>
     s.kind === "devotional" ? { ...s, label: app.mod("devotional", s.module)?.abbrev || s.label } : s,
   );
 }
 
-/** What worship songs are chosen for: the session's other parts. */
-const worshipAbout = (steps: QuietStep[]) => steps.filter((x) => x.kind !== "worship").map((x) => x.label);
+/** What worship songs and the closing verse are chosen for: the session's readings. */
+const worshipAbout = (steps: QuietStep[]) => steps.filter((x) => x.kind !== "worship" && x.kind !== "closing").map((x) => x.label);
 
-/** Chooses today's worship songs a little after the app opens, when the plan has them and today
- *  isn't read yet, so they're ready when Quiet time starts (the assistant can take most of a minute). */
+/** Chooses today's worship songs and closing verse a little after the app opens, when the plan has
+ *  them and today isn't read yet, so they're ready when Quiet time starts (the assistant can take
+ *  most of a minute). */
 export function useWorshipAhead() {
   const app = useApp();
   const plan = current(app.plans);
@@ -83,12 +97,16 @@ export function useWorshipAhead() {
   const done = !!plan && (plan.kind === "ppo" ? plan.doneDates : (plan.readDates ?? [])).includes(ymd(startOfToday()));
   const w = plan?.worship;
   const ready = app.plansReady && !!app.lib;
-  const key = plan && t && w && !done ? JSON.stringify([plan.id, t.label, w, (plan.devotionals ?? []).join(), app.settings.model]) : null;
+  const key =
+    plan && t && (w || plan.closing) && !done
+      ? JSON.stringify([plan.id, t.label, w, plan.closing, (plan.devotionals ?? []).join(), app.settings.model])
+      : null;
   useEffect(() => {
-    if (!ready || !key || !plan || !t || !w || isReadOnly()) return;
+    if (!ready || !key || !plan || !t || isReadOnly()) return;
     const timer = window.setTimeout(() => {
       const steps = sessionSteps(app, plan, t.parts, startOfToday());
-      if (steps.some((x) => x.kind === "worship")) pickSongs(w.songs, worshipAbout(steps), w.when, app.settings.model).catch(() => {});
+      if (w && steps.some((x) => x.kind === "worship")) pickSongs(w.songs, worshipAbout(steps), w.when, app.settings.model).catch(() => {});
+      if (steps.some((x) => x.kind === "closing")) pickClosing(worshipAbout(steps), plan.bible, app.settings.model).catch(() => {});
     }, 8000);
     return () => window.clearTimeout(timer);
   }, [ready, key]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -172,10 +190,24 @@ export function QuietTime({ focus }: { focus: boolean }) {
       .catch((e) => put({ songs: [], note: e instanceof Error ? e.message : String(e) }));
   }, [s?.started]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // And the closing verse, ready by the end.
+  useEffect(() => {
+    const c = s?.steps.find((x) => x.kind === "closing");
+    if (!s || !c || c.kind !== "closing" || c.picked || isReadOnly()) return;
+    const started = s.started;
+    const put = (p: Closing) =>
+      app.setSession((x) =>
+        x && x.started === started ? { ...x, steps: x.steps.map((y) => (y.kind === "closing" ? { ...y, picked: p } : y)) } : x,
+      );
+    // pickClosing never fails: without the assistant's choice, the blessing closes.
+    pickClosing(worshipAbout(s.steps), c.bible, app.settings.model).then(put);
+  }, [s?.started]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // The Worship part: once its songs are chosen, a card says why each suits the reading, and they
   // play in Music when asked (Play, or by themselves after a few seconds with audio). The bar and
   // card show what's playing; the part moves on when they finish, and leaving it pauses them.
   const cur = s?.steps[s.i];
+  const closingReady = cur?.kind === "closing" && !!cur.picked;
   const songs = cur?.kind === "worship" ? cur.picked : undefined;
   const [now, setNow] = useState<MusicState | null>(null);
   /** Asks Music what's playing now (after pause or skip, so the bar keeps up). */
@@ -188,9 +220,12 @@ export function QuietTime({ focus }: { focus: boolean }) {
   const nowRef = useRef<MusicState | null>(null);
   const [playing, setPlaying] = useState(false);
   const [countdown, setCountdown] = useState<number | null>(null);
+  // With audio, the closing verse waits long enough to read the card's summary before it's read aloud.
+  const [readIn, setReadIn] = useState<number | null>(null);
   useEffect(() => {
     setPlaying(false);
     setCountdown(null);
+    setReadIn(null);
   }, [s?.started, s?.i]);
   useEffect(() => {
     if (!songs?.length || playing || !s?.audio) {
@@ -265,6 +300,8 @@ export function QuietTime({ focus }: { focus: boolean }) {
           app.toast("Couldn't find the songs in Music");
           return;
         }
+        // The words in the reading column while the songs play.
+        app.openLyrics();
         // At once, so pause and skip work as soon as it's playing, then every second.
         check();
         poll = window.setInterval(check, 1000);
@@ -280,11 +317,17 @@ export function QuietTime({ focus }: { focus: boolean }) {
     };
   }, [s?.started, s?.i, !!songs, playing]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // A part read aloud, going on to the next part when it finishes.
+  // A part read aloud, going on to the next part when it finishes. The closing verse stays open
+  // afterwards, until Finish.
   const speakStep = async (step: QuietStep) => {
     const onEnd = () => goRef.current(1);
     if (step.kind === "bible") player.play(step.bible, step.b, step.c, step.v, { toVerse: step.v2, onEnd });
-    else if (step.kind === "devotional") {
+    else if (step.kind === "closing" && step.picked) {
+      setReadIn(null);
+      const p = step.picked;
+      // An onEnd, even one doing nothing, is what stops it at the passage's last verse.
+      player.play(step.bible, p.b, p.c, p.v, { toVerse: p.v2 ?? p.v, onEnd: () => {} });
+    } else if (step.kind === "devotional") {
       const html = await api.devotion(step.module, step.title).catch(() => null);
       const segs = html ? docSegments(html) : [];
       if (segs.length) player.playDoc(step.module, step.title, segs, 0, "devotional", { onEnd });
@@ -322,19 +365,43 @@ export function QuietTime({ focus }: { focus: boolean }) {
     } else if (step.kind === "devotional") {
       app.openDoc(step.module, step.title, "devotional");
     } else if (step.kind === "worship") {
-      // Plays where it is (the effect above); the page stays as it was.
+      // Plays where it is (the effect above); the Lyrics page opens once the songs start.
+    } else if (step.kind === "closing") {
+      // Opens once it's chosen (closingReady brings this back round), highlighted in the reader.
+      const p = step.picked;
+      if (!p) return;
+      if (app.mod("bible", step.bible) && app.settings.bible !== step.bible) app.set({ bible: step.bible });
+      app.open({ book: p.b, chapter: p.c, verse: p.v, to: p.v2 }, "read");
+    } else if (step.window) {
+      api.openWeb(step.id, step.url, step.label, inverts(app.settings, step.id)).catch((e) => app.toast(String(e)));
     } else {
-      api.openWeb(step.id, step.url, step.label).catch((e) => app.toast(String(e)));
+      app.openWebDoc(step.id, step.url, step.label);
     }
     // Songs, or a devotional on the web, aren't read aloud: the reading before them stops and its player closes.
     if (step.kind === "worship" || step.kind === "online") player.stop();
-    if (s.audio && step.kind !== "online" && step.kind !== "worship") {
+    if (s.audio && step.kind === "closing" && step.picked) {
+      // Time to read the summary first: at about three words a second, 8 to 40 seconds.
+      const words = `${step.picked.why ?? ""} ${step.picked.note ?? ""}`.split(/\s+/).filter(Boolean).length;
+      setReadIn(Math.min(40, Math.max(8, Math.round(words / 3) + 3)));
+    } else if (s.audio && step.kind !== "online" && step.kind !== "worship") {
       const delay = first.current ? FIRST_DELAY : NEXT_DELAY;
       timer.current = window.setTimeout(() => speakStep(step), delay);
     }
     first.current = false;
     return () => window.clearTimeout(timer.current);
-  }, [s?.started, s?.i]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [s?.started, s?.i, closingReady]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // The closing verse's countdown, reading it aloud at the end.
+  useEffect(() => {
+    if (readIn === null) return;
+    if (readIn <= 0) {
+      const x = sRef.current;
+      if (x) speakStep(x.steps[x.i]);
+      return;
+    }
+    const t = window.setTimeout(() => setReadIn((n) => (n === null ? null : n - 1)), 1000);
+    return () => window.clearTimeout(t);
+  }, [readIn]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Where the bar sits: level with the page's heading (data-quiet-anchor), centred over the page,
   // or in focus mode just right of the heading's text. Measured as if scrolled to the top, so the
@@ -344,6 +411,11 @@ export function QuietTime({ focus }: { focus: boolean }) {
   useEffect(() => {
     if (!s) return;
     const measure = () => {
+      // While the songs play, up in the top bar, level with Back and Forward, out of the lyrics' way.
+      if (s.steps[s.i]?.kind === "worship" && playing) {
+        setAt({ y: 26 });
+        return;
+      }
       const el = document.querySelector<HTMLElement>("[data-quiet-anchor]");
       if (!el) {
         setAt({ y: 84 });
@@ -352,7 +424,13 @@ export function QuietTime({ focus }: { focus: boolean }) {
       const range = document.createRange();
       range.selectNodeContents(el);
       const r = range.getBoundingClientRect();
-      const y = r.top + r.height / 2 + (el.closest(".scroll")?.scrollTop ?? 0);
+      // A heading held in place while the page scrolls (sticky, as the Bible reader's is) is where
+      // it is; one that scrolls away is measured from where it would be at the top.
+      const scroller = el.closest<HTMLElement>(".scroll");
+      let held = false;
+      for (let x: HTMLElement | null = el; x && x !== scroller; x = x.parentElement)
+        if (getComputedStyle(x).position === "sticky") held = true;
+      const y = r.top + r.height / 2 + (scroller && !held ? scroller.scrollTop : 0);
       setAt(focus ? { x: r.right + 24, y } : { y });
     };
     const ts = [0, 80, 400, 1000].map((ms) => window.setTimeout(measure, ms)); // headings arrive with the content
@@ -361,7 +439,7 @@ export function QuietTime({ focus }: { focus: boolean }) {
       ts.forEach(window.clearTimeout);
       window.removeEventListener("resize", measure);
     };
-  }, [s?.i, s?.started, focus, app.loc.book, app.loc.chapter, app.doc?.title, app.settings.studyPane]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [s?.i, s?.started, playing, focus, app.loc.book, app.loc.chapter, app.doc?.title, app.settings.studyPane]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!s) return null;
   const step = s.steps[s.i];
@@ -442,9 +520,14 @@ export function QuietTime({ focus }: { focus: boolean }) {
             ))}
           </span>
           <b style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", minWidth: 0 }}>{step.label}</b>
-          {step.kind === "online" && (
+          {step.kind === "closing" && !step.picked && (
+            <span style={{ display: "inline-flex", alignItems: "center" }}>
+              <Working text="Choosing a verse" />
+            </span>
+          )}
+          {step.kind === "closing" && step.picked && (
             <span className="n" style={{ whiteSpace: "nowrap" }}>
-              in its own window · Next when done
+              {step.picked.label}
             </span>
           )}
           {step.kind === "worship" && (
@@ -485,6 +568,22 @@ export function QuietTime({ focus }: { focus: boolean }) {
         </div>
       </div>
       {/* Outside the bar's box: its transform would otherwise be what "fixed" is fixed to. */}
+      {step.kind === "closing" && step.picked && (
+        <div
+          style={{
+            position: "fixed",
+            top: (at?.y ?? 84) + 30,
+            left: at?.x ?? (focus ? 0 : 200),
+            right: at?.x !== undefined ? 16 : 0,
+            display: "flex",
+            justifyContent: at?.x !== undefined ? "flex-start" : "center",
+            pointerEvents: "none",
+            zIndex: 45,
+          }}
+        >
+          <ClosingCard key={s.started} picked={step.picked} bible={step.bible} readIn={readIn} onReadNow={() => setReadIn(0)} />
+        </div>
+      )}
       {step.kind === "worship" && (
         <div
           style={{
@@ -519,6 +618,7 @@ function WorshipNow({
   onPlay: () => void;
   control: (cmd: "pause" | "play" | "next" | "show") => void;
 }) {
+  const app = useApp();
   // Wrapped: .working keeps to the top of a column (Ask's), and the bar centres its items.
   if (!step.picked)
     return (
@@ -573,8 +673,8 @@ function WorshipNow({
         className="btn small"
         type="button"
         disabled={!now?.ours}
-        title="Open Music, where its lyrics button shows the words as the song plays"
-        onClick={() => control("show")}
+        title="Show the words in the reading column"
+        onClick={() => app.openLyrics()}
       >
         <Icon name="quote" size={12} />
         Lyrics
@@ -599,7 +699,8 @@ function WorshipCard({
 }) {
   const [hidden, setHidden] = useState(false);
   const drag = useDrag(true); // remounted for each Worship part, so it opens in place
-  if (!step.picked || hidden) return null;
+  // Once the songs play, the Lyrics page takes over, with each song's reason under its name.
+  if (!step.picked || hidden || started) return null;
   const k = started && now?.ours ? step.picked.findIndex((x) => x.name === now.name) : -1;
   return (
     <div
@@ -661,6 +762,86 @@ function WorshipCard({
             Play songs
           </button>
           {countdown !== null && <span className="n">Starting in {countdown}s</span>}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** Under the bar during the closing verse: the passage's words, what the day's readings came to,
+ *  and how the passage sums it up. The chapter is open behind it, the passage lit. */
+function ClosingCard({
+  picked,
+  bible,
+  readIn,
+  onReadNow,
+}: {
+  picked: Closing;
+  bible: string;
+  /** Seconds until it's read aloud, with audio. */
+  readIn: number | null;
+  onReadNow: () => void;
+}) {
+  const [hidden, setHidden] = useState(false);
+  const drag = useDrag(true);
+  const [words, setWords] = useState("");
+  useEffect(() => {
+    let dead = false;
+    api
+      .passages(bible, [{ book: picked.b, chapter: picked.c, from: picked.v, to: picked.v2 ?? picked.v }])
+      .then(([p]) => !dead && setWords(p.verses.map((x) => plainText(x.text)).join(" ")))
+      .catch(() => {});
+    return () => {
+      dead = true;
+    };
+  }, [bible, picked.b, picked.c, picked.v, picked.v2]);
+  if (hidden) return null;
+  return (
+    <div
+      className="card"
+      data-drag
+      style={{
+        ...drag.style,
+        cursor: undefined,
+        pointerEvents: "auto",
+        width: 620,
+        maxWidth: "calc(100% - 48px)",
+        padding: "14px 18px 16px",
+        boxShadow: "0 14px 40px var(--shadow)",
+        display: "flex",
+        flexDirection: "column",
+        gap: 8,
+        maxHeight: "40vh",
+        overflow: "auto",
+      }}
+    >
+      <div {...drag.bind} style={{ display: "flex", alignItems: "center", gap: 8, cursor: "grab", touchAction: "none" }}>
+        <span className="label">Closing verse · {picked.label}</span>
+        <button
+          className="ibtn"
+          type="button"
+          aria-label="Hide"
+          title="Hide this card"
+          style={{ marginLeft: "auto" }}
+          onClick={() => setHidden(true)}
+        >
+          <Icon name="x" />
+        </button>
+      </div>
+      {words && <p style={{ margin: 0, font: "400 20px/1.5 var(--serif)" }}>{words}</p>}
+      {picked.why && <p style={{ margin: 0, font: "400 14.5px/1.55 var(--serif)", color: "var(--muted)" }}>{picked.why}</p>}
+      {picked.note && (
+        <div className="hint" style={{ fontSize: 12.5 }}>
+          {picked.note}
+        </div>
+      )}
+      {readIn !== null && readIn > 0 && (
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <span className="n">Read aloud in {readIn}s</span>
+          <button className="btn small" type="button" onClick={onReadNow}>
+            <Icon name="speaker" size={12} />
+            Read now
+          </button>
         </div>
       )}
     </div>

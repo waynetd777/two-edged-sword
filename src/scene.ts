@@ -10,6 +10,7 @@ import { setSceneChat } from "./Ask";
 import { Chat, Loc, Pending, Screen, Session, Settings, useApp } from "./state";
 import type { PlayerState } from "./speech";
 import { setSceneVariances, VarianceFile } from "./variances";
+import { SceneSong, setSceneSong } from "./lyrics";
 
 export interface Scene {
   name: string;
@@ -48,6 +49,8 @@ export interface Scene {
   type?: [string, string];
   /** A translation's differences from the KJV, shown instead of the user's (from variancesFile). */
   variances?: VarianceFile;
+  /** A song shown on the Lyrics page, as if playing in Music (from songFile). */
+  song?: SceneSong;
 }
 
 let started = false;
@@ -158,6 +161,10 @@ export function runScene(app: ReturnType<typeof useApp>, still: (s: Partial<Play
         if (sc.word) app.studyWord(sc.word);
         if (sc.search) app.searchText(sc.search);
         if (sc.player) still(sc.player);
+        if (sc.song) {
+          setSceneSong(sc.song);
+          app.openLyrics();
+        }
         if (sc.pending) {
           const x = sc.pending;
           window.setTimeout(() => app.setPending(x), 1500);

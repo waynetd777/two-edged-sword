@@ -1,11 +1,11 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "Two-edged Sword",
-  "version": "1.0.14",
+  "version": "1.0.15",
   "identifier": "com.wayned.two-edged-sword",
   "build": {
     "beforeDevCommand": "npm run dev",
-    "devUrl": "http://localhost:1420",
+    "devUrl": "http://localhost:1430",
     "beforeBuildCommand": "python3 tools/helpbook.py && python3 tools/core/build.py --if-missing && npm run build",
     "frontendDist": "../dist"
   },

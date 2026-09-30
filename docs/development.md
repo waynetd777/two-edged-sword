@@ -104,8 +104,9 @@ Command Line Tools and Screen Recording permission for the terminal.
 
 - Each scene is in `tools/screenshots/scenes.json`. `src/scene.ts` sets it up, and nothing is
   saved.
-- Ask, Worship and Journal shots use fixtures in `tools/screenshots/`, so no model is asked and
-  your journal stays private.
+- Ask, Worship, Closing verse, Lyrics and Journal shots use fixtures in `tools/screenshots/`, so no
+  model or service is asked and your journal stays private. The Lyrics shot is a public-domain hymn
+  with the app's icon as its artwork.
 - Scenes use public-domain Bibles only. `AGENTS.md` lists the scene fields.
 - The menu-bar menu can't be opened by the script, so `docs/images/menu-bar.png` is taken by hand
   (⌘⇧4 with the menu open).
@@ -208,6 +209,9 @@ reference, and images inline as `data:` URLs.
 | `src-tauri/src/journal.rs` | The journal's monthly Markdown files |
 | `src-tauri/src/store.rs` | The JSON files in Application Support |
 | `src-tauri/src/music.rs` | Quiet time's worship songs, played through Music |
+| `src/LyricsPage.tsx`, `src/lyrics.ts`, `src/Flames.tsx` | The playing song's words (LRCLIB), artwork (Music, else the iTunes search API) and the flames shown when it has none |
+| `src/closing.ts` | Quiet time's closing verse, chosen by the assistant |
+| `src/WebPage.tsx` | An online devotional framed in the reading column; `open_web` in `lib.rs` is its own window, and `web_frameable` checks (with curl) whether a site added by the user can be framed |
 | `src/tray.tsx`, `src-tauri/src/tray.rs` | The menu-bar menu and the daily reminder |
 | `src-tauri/src/login_item.rs`, `login_launch.rs` | Open at Login |
 | `src-tauri/src/tts.rs` | Speech through AVSpeechSynthesizer (WebKit's speech API hides downloaded voices) |
