@@ -261,8 +261,9 @@ fn music_artwork() -> Result<tauri::ipc::Response, String> {
     music::artwork().map(tauri::ipc::Response::new)
 }
 
-/// While reading aloud, the display is kept from sleeping (so the screen doesn't lock) by a
-/// `caffeinate`, which ends with the reading, or with the app (-w) if it quits first.
+/// While reading aloud, in Quiet time or on a reading screen (awake.ts), the display is kept from
+/// sleeping (so the screensaver and lock don't come on) by a `caffeinate`, which ends when they do,
+/// or with the app (-w) if it quits first.
 #[tauri::command]
 fn keep_awake(on: bool) -> Result<(), String> {
     use std::sync::Mutex;

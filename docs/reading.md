@@ -10,6 +10,9 @@
 
 The chapter shows beside a study pane that follows the verse you select.
 
+While Read or Compare is in front, and all through Quiet time, the screen doesn't sleep, so the
+screensaver and lock don't come on.
+
 ### The study pane
 
 - **Commentary**: every commentary on the verse, in your order, with cross-references from the

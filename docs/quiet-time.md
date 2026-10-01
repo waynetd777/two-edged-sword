@@ -16,6 +16,9 @@ library, or Our Daily Bread and Heartlight online.
 - **Read with audio** reads them aloud, one after another.
 - Click a reading on the day's card to open just that one.
 - **Mark as unread** undoes today's mark.
+- **Pause plan** stops a plan being today's reading. A paused plan shows **Paused** at the top
+  of its card, with **Resume plan** beside it.
+- Deleting your current plan, when you have others, asks which one to carry on with.
 - **Add a website…**, under Online in the devotionals list, adds a devotional site of your own:
   a name and its address. For a page whose address changes each day, put `{yyyy}`, `{mm}` and
   `{dd}` where the date goes. Your sites can be chosen for any plan; × removes one.
@@ -29,6 +32,9 @@ library, or Our Daily Bread and Heartlight online.
 Parts are ticked off as you finish them. Under the progress bar are your streak, your best run,
 and how many of the last seven days you read.
 
+In the calendar, a dot marks a day you read. Hover over a day to see its readings; click it to
+open the first.
+
 | Keys | Does |
 |---|---|
 | F7 and F9 | Previous or next part |
@@ -39,15 +45,21 @@ and how many of the last seven days you read.
 <a href="images/index.md#quiet-time"><picture><source media="(prefers-color-scheme: dark)" srcset="images/worship-dark.png"><img alt="The Worship part of Quiet time: why each song suits the day's reading" src="images/worship-light.png"></picture></a>
 
 Turn it on in a plan's page. The AI assistant picks songs from your Music library to suit the
-day's readings, and a card explains each choice. **Play songs** plays them in Music.
+day's readings, and a card explains each choice. **Play songs** plays them in Music, or they
+start by themselves after a countdown that leaves time to read the card.
+
+- **Songs before the reading** and **Songs after the reading** each turn on separately, with
+  their own number of songs.
+- With both on, different songs play after the reading.
 
 While the songs play, their words show in the reading column, and the Quiet time bar moves up
-into the top bar:
+into the top bar. The song's name, cover and why it was chosen stay at the top while the words
+scroll:
 
 <a href="images/index.md#quiet-time"><picture><source media="(prefers-color-scheme: dark)" srcset="images/lyrics-dark.png"><img alt="A song's words in the reading column as it plays" src="images/lyrics-light.png"></picture></a>
 
-- The line being sung is lit in blue and kept in view, when the lyrics are timed. Dots show
-  where nothing is sung.
+- The line being sung is lit in blue, with a light sweeping across it, and kept in view, when
+  the lyrics are timed. Dots show where nothing is sung.
 - Why each song was chosen shows under its name.
 - A song with no lyrics found gets softly burning flames instead, swelling to the song's tempo
   (Music's BPM for it, or a slow tempo if it has none). The app can't hear the music itself.

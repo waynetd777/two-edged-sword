@@ -49,10 +49,21 @@ export interface Progress {
   done: string[];
 }
 
-/** Worship songs in Quiet time: how many, and whether they come before the reading or after it. */
+/** Worship songs in Quiet time: how many before the reading and how many after it (different
+ *  songs each time). Older plans saved one count and where it went (`songs`, `when`). */
 export interface Worship {
-  songs: number;
-  when: "before" | "after";
+  before?: number;
+  after?: number;
+  songs?: number;
+  when?: "before" | "after" | "both";
+}
+
+/** How many worship songs come before the reading and after it; 0 for none. */
+export function worshipCounts(w: Worship | undefined): { before: number; after: number } {
+  if (!w) return { before: 0, after: 0 };
+  if (w.before !== undefined || w.after !== undefined) return { before: w.before ?? 0, after: w.after ?? 0 };
+  const n = w.songs ?? 3;
+  return { before: w.when !== "after" ? n : 0, after: w.when === "after" || w.when === "both" ? n : 0 };
 }
 
 export interface PpoPlan {
@@ -254,6 +265,21 @@ export function prevOtherBefore(cur: [number, number], from: PpoPlan["otherFrom"
 export function ppoReading(p: PpoPlan, d: Date): Part[] {
   const [p1, p2] = proverbsFor(d, p.shortMonths);
   return [{ b: 19, c: p.nextPsalm }, p1 === p2 ? { b: 20, c: p1 } : { b: 20, c: p1, c2: p2 }, { b: p.nextOther[0], c: p.nextOther[1] }];
+}
+
+/** What a Psalm-and-Proverb plan read on each date it was read (YYYY-MM-DD), worked back from where
+ *  it is now: each day read moved the psalm and the other chapter on by one. */
+export function ppoHistory(p: PpoPlan): Map<string, Part[]> {
+  const dates = [...new Set(p.doneDates)].sort();
+  const out = new Map<string, Part[]>();
+  let psalm = p.nextPsalm,
+    other = p.nextOther;
+  for (let i = dates.length - 1; i >= 0; i--) {
+    psalm = ((psalm + 148) % 150) + 1;
+    other = prevOtherBefore(other, p.otherFrom);
+    out.set(dates[i], ppoReading({ ...p, nextPsalm: psalm, nextOther: other }, parseYmd(dates[i])));
+  }
+  return out;
 }
 
 /** The PPO readings for the coming days, assuming each day is read. */

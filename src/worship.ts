@@ -50,12 +50,13 @@ export interface Picked {
 // A day's choice is kept, so starting Quiet time again doesn't wait for the assistant again.
 const chosen = new Map<string, Promise<Picked>>();
 
-/** `n` songs for a Quiet time reading `about` (its parts, "John 3", "My Utmost for His Highest"). */
-export function pickSongs(n: number, about: string[], when: "before" | "after", model: string): Promise<Picked> {
-  const key = JSON.stringify([n, about, when, today().toDateString()]);
+/** `n` songs for a Quiet time reading `about` (its parts, "John 3", "My Utmost for His Highest"),
+ *  leaving out the songs in `avoid` (by id). */
+export function pickSongs(n: number, about: string[], when: "before" | "after", model: string, avoid: string[] = []): Promise<Picked> {
+  const key = JSON.stringify([n, about, when, avoid, today().toDateString()]);
   let p = chosen.get(key);
   if (!p) {
-    p = choose(n, about, when, model);
+    p = choose(n, about, when, model, new Set(avoid));
     chosen.set(key, p);
     // Only a real choice is kept; a random one (or a failure) is tried again next time.
     p.then(
@@ -68,8 +69,8 @@ export function pickSongs(n: number, about: string[], when: "before" | "after", 
   return p;
 }
 
-async function choose(n: number, about: string[], when: "before" | "after", model: string): Promise<Picked> {
-  const all = await worshipSongs();
+async function choose(n: number, about: string[], when: "before" | "after", model: string, avoid: Set<string>): Promise<Picked> {
+  const all = (await worshipSongs()).filter((t) => !avoid.has(t.id));
   if (!all.length) throw new Error("No worship songs in your Music library (Christian, gospel or worship genres).");
   const take = (xs: MusicTrack[]) => xs.slice(0, n).map(({ id, name, artist }) => ({ id, name, artist }));
   const random = (note: string): Picked => ({ songs: take([...all].sort(() => Math.random() - 0.5)), note });

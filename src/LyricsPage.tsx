@@ -188,19 +188,20 @@ export function LyricsPage({ focus, setFocus }: { focus: boolean; setFocus: (f: 
           </button>
         </Topbar>
       )}
-      <main ref={scroller} className="scroll" style={{ flex: "1 1 auto", padding: focus ? "0 10% 40vh" : "0 40px 40vh 36px" }}>
-        <div style={{ padding: "18px 0 14px", textAlign: focus ? "center" : undefined }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 16, justifyContent: focus ? "center" : undefined }}>
-            {artUrl && <img className="lyrics-cover" src={artUrl} alt="" />}
-            <div>
-              <div className="label">{stopped ? "Lyrics" : `Lyrics · ${artist}`}</div>
-              <h1 data-quiet-anchor style={{ margin: "6px 0 0", font: "500 30px/1.15 var(--display)" }}>
-                {stopped ? "Nothing playing" : name}
-              </h1>
-            </div>
+      {/* The song's heading stays put while its words scroll under it. */}
+      <div style={{ flexShrink: 0, padding: focus ? "18px 10% 14px" : "18px 40px 14px 36px", textAlign: focus ? "center" : undefined }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 16, justifyContent: focus ? "center" : undefined }}>
+          {artUrl && <img className="lyrics-cover" src={artUrl} alt="" />}
+          <div>
+            <div className="label">{stopped ? "Lyrics" : `Lyrics · ${artist}`}</div>
+            <h1 data-quiet-anchor style={{ margin: "6px 0 0", font: "500 30px/1.15 var(--display)" }}>
+              {stopped ? "Nothing playing" : name}
+            </h1>
           </div>
-          {why && <p style={{ margin: "10px 0 0", font: "400 15px/1.55 var(--serif)", color: "var(--muted)" }}>{why}</p>}
         </div>
+        {why && <p style={{ margin: "10px 0 0", font: "400 15px/1.55 var(--serif)", color: "var(--muted)" }}>{why}</p>}
+      </div>
+      <main ref={scroller} className="scroll lyrics-words" style={{ flex: "1 1 auto", padding: focus ? "0 10% 40vh" : "0 40px 40vh 36px" }}>
         {error ? (
           <p className="err">{error}</p>
         ) : stopped ? (

@@ -9,6 +9,7 @@
 import { createContext, ReactNode, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { listen } from "@tauri-apps/api/event";
 import { api, TtsEvent, Verse, Voice } from "./api";
+import { useKeepAwake } from "./awake";
 import { book, Ref, stepChapter } from "./bible";
 import { docSegments, plainText, tokenize } from "./esword";
 import { findRefs, mdToHtml } from "./md";
@@ -700,9 +701,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
   // Reading aloud anywhere keeps the screen from sleeping and locking; pausing or stopping lets it.
   const awake = state.on && !state.paused;
-  useEffect(() => {
-    api.keepAwake(awake).catch(() => {});
-  }, [awake]);
+  useKeepAwake("reading aloud", awake);
 
   return (
     <Ctx.Provider value={{ state, voices, allVoices, play, playDoc, toggle, stop, skip, jump, starter, quiet, sleep, say, still }}>

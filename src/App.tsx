@@ -21,6 +21,7 @@ import { SCREEN_KEYS, Sidebar } from "./Shell";
 import { PlayerProvider, usePlayer } from "./speech";
 import { runScene } from "./scene";
 import { AppProvider, useApp } from "./state";
+import { useKeepAwake } from "./awake";
 import { hideSplash } from "./splash";
 import { useTray } from "./tray";
 import { Tooltips, WordHoverBox } from "./ui";
@@ -29,6 +30,20 @@ function Screens() {
   const app = useApp();
   useTray();
   useWorshipAhead();
+  // The screen stays awake through Quiet time, and while Read or Compare is in front.
+  const [front, setFront] = useState(() => document.hasFocus());
+  useEffect(() => {
+    const on = () => setFront(true);
+    const off = () => setFront(false);
+    window.addEventListener("focus", on);
+    window.addEventListener("blur", off);
+    return () => {
+      window.removeEventListener("focus", on);
+      window.removeEventListener("blur", off);
+    };
+  }, []);
+  useKeepAwake("Quiet time", !!app.session);
+  useKeepAwake("reading", front && (app.screen === "read" || app.screen === "compare"));
   const [focus, setFocus] = useState(false);
   const [palette, setPalette] = useState(false);
 

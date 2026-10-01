@@ -34,6 +34,7 @@ import {
   WebDevotional,
   doneToday,
   progressKey,
+  ppoHistory,
   ppoPreview,
   ppoUpcoming,
   SequencePlan,
@@ -41,6 +42,7 @@ import {
   today,
   todayFor,
   ymd,
+  worshipCounts,
 } from "./plans";
 import { BibleSelect, SearchField, Topbar } from "./Shell";
 import { uid, useApp } from "./state";
@@ -62,6 +64,8 @@ export function PlansScreen({ openPalette }: { openPalette: () => void }) {
   const [picker, setPicker] = useState(false);
   const [builder, setBuilder] = useState(false);
   const [behindOpen, setBehindOpen] = useState(false);
+  /** After the current plan is deleted, with others left: which to carry on with. */
+  const [nextOpen, setNextOpen] = useState(false);
   const [month, setMonth] = useState(() => {
     const d = today();
     d.setDate(1);
@@ -121,6 +125,8 @@ export function PlansScreen({ openPalette }: { openPalette: () => void }) {
     else plan.done.forEach((i) => s.add(ymd(dateOf(plan, i))));
     return s;
   }, [plan]);
+  // What a Psalm-and-Proverb plan read on each day it was read, for the calendar's tooltips.
+  const ppoRead = useMemo(() => (plan?.kind === "ppo" ? ppoHistory(plan) : null), [plan]);
   const upcoming = useMemo(() => {
     if (!plan) return [];
     if (plan.kind === "ppo")
@@ -207,13 +213,15 @@ export function PlansScreen({ openPalette }: { openPalette: () => void }) {
               ))}
             </select>
           )}
-          <button className="btn" type="button" style={{ marginLeft: "auto" }} onClick={() => setPicker(true)}>
-            <Icon name="plus" />
-            Choose a plan…
-          </button>
-          <button className="btn" type="button" onClick={() => setBuilder(true)}>
-            Make a plan…
-          </button>
+          <div style={{ marginLeft: "auto", alignSelf: "center", display: "flex", alignItems: "center", gap: 14 }}>
+            <button className="btn" type="button" onClick={() => setPicker(true)}>
+              <Icon name="plus" />
+              Choose a plan…
+            </button>
+            <button className="btn" type="button" onClick={() => setBuilder(true)}>
+              Make a plan…
+            </button>
+          </div>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) 440px", gap: 16 }}>
           <div className="card" style={{ padding: "22px 24px", display: "flex", flexDirection: "column", gap: 16 }}>
@@ -235,9 +243,18 @@ export function PlansScreen({ openPalette }: { openPalette: () => void }) {
                   </span>
                 ))}
               {!plan.active && (
-                <span className="chip" style={{ cursor: "default" }}>
-                  Paused
-                </span>
+                <>
+                  <span
+                    className="chip"
+                    style={{ color: "var(--pufg)", borderColor: "var(--pufg)", background: "var(--pubg)", cursor: "default" }}
+                  >
+                    Paused
+                  </span>
+                  <button className="btn primary small" type="button" onClick={() => update({ ...plan, active: true })}>
+                    <Play size={11} />
+                    Resume plan
+                  </button>
+                </>
               )}
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
@@ -282,9 +299,11 @@ export function PlansScreen({ openPalette }: { openPalette: () => void }) {
               )
             )}
             <div style={{ display: "flex", gap: 8, marginTop: "auto", flexWrap: "wrap" }}>
-              <button className="btn" type="button" onClick={() => update({ ...plan, active: !plan.active })}>
-                {plan.active ? "Pause plan" : "Resume plan"}
-              </button>
+              {plan.active && (
+                <button className="btn" type="button" onClick={() => update({ ...plan, active: false })}>
+                  Pause plan
+                </button>
+              )}
               {seq && (
                 <button className="btn" type="button" onClick={() => setBehindOpen(true)}>
                   Move the rest later…
@@ -295,8 +314,9 @@ export function PlansScreen({ openPalette }: { openPalette: () => void }) {
                 type="button"
                 style={{ marginLeft: "auto", color: "var(--bad)" }}
                 onClick={async () => {
-                  if (await confirmDelete(`the plan “${plan.name}”`, "Its progress is lost too. This can't be undone."))
-                    app.setPlans((ps) => ps.filter((p) => p.id !== plan.id));
+                  if (!(await confirmDelete(`the plan “${plan.name}”`, "Its progress is lost too. This can't be undone."))) return;
+                  app.setPlans((ps) => ps.filter((p) => p.id !== plan.id));
+                  if (plan.active && app.plans.length > 1) setNextOpen(true);
                 }}
               >
                 <Icon name="trash" />
@@ -475,12 +495,12 @@ export function PlansScreen({ openPalette }: { openPalette: () => void }) {
                 const key = ymd(d),
                   done = doneDays.has(key),
                   isToday = key === tk;
-                const r = readingFor(d);
+                const r = readingFor(d) ?? ppoRead?.get(key) ?? null;
                 return (
                   <button
                     key={k}
                     type="button"
-                    title={r ? dayLabel(r) : undefined}
+                    title={r ? `${done ? "Read: " : ""}${dayLabel(r)}` : undefined}
                     disabled={!r && plan.kind !== "ppo"}
                     onClick={() => {
                       if (r) {
@@ -552,6 +572,15 @@ export function PlansScreen({ openPalette }: { openPalette: () => void }) {
         />
       )}
       {builder && <PlanBuilder onClose={() => setBuilder(false)} />}
+      {nextOpen && (
+        <NextPlanDialog
+          onClose={() => setNextOpen(false)}
+          onChoose={(id) => {
+            app.setPlans((ps) => ps.map((p) => ({ ...p, active: p.id === id })));
+            setNextOpen(false);
+          }}
+        />
+      )}
       {behindOpen && seq && (
         <BehindDialog
           plan={seq}
@@ -1181,6 +1210,32 @@ function BehindDialog({ plan, onClose, onApply }: { plan: SequencePlan; onClose:
   );
 }
 
+/** After the current plan is deleted: one of the others to make current, or none for now. */
+function NextPlanDialog({ onClose, onChoose }: { onClose: () => void; onChoose: (id: string) => void }) {
+  const app = useApp();
+  return (
+    <Dialog onClose={onClose} width={480} label="Choose your current plan">
+      <div style={{ padding: "20px 24px 8px" }}>
+        <div style={{ font: "500 26px/1.15 var(--display)" }}>Carry on with another plan?</div>
+        <div style={{ color: "var(--muted)" }}>Choose one to make it your current plan. The others stay paused.</div>
+      </div>
+      <div style={{ padding: "6px 24px 14px", display: "flex", flexDirection: "column", gap: 6 }}>
+        {app.plans.map((p) => (
+          <button key={p.id} className="btn" type="button" style={{ justifyContent: "flex-start" }} onClick={() => onChoose(p.id)}>
+            <Play size={11} />
+            {p.name}
+          </button>
+        ))}
+      </div>
+      <div className="foot">
+        <button className="btn" type="button" style={{ marginLeft: "auto" }} onClick={onClose}>
+          Not now
+        </button>
+      </div>
+    </Dialog>
+  );
+}
+
 /** The day's reading in each devotional chosen for the plan, with a way to choose them. */
 function DevotionalsCard({ plan, update }: { plan: Plan; update: (p: Plan) => void }) {
   const app = useApp();
@@ -1409,16 +1464,22 @@ function AddWebsite({ onAdd }: { onAdd: (w: WebDevotional) => void }) {
   );
 }
 
-/** Worship songs in Quiet time: whether to have them, how many, and before or after the reading. */
+/** Worship songs in Quiet time: whether to have them, and how many before the reading and after it. */
 function WorshipCard({ plan, update }: { plan: Plan; update: (p: Plan) => void }) {
   const w = plan.worship;
   const set = (x: Plan["worship"]) => update({ ...plan, worship: x });
+  const counts = worshipCounts(w);
+  /** Sets one side's count (0 for none); with neither side left, worship is off. */
+  const setSide = (side: "before" | "after", n: number) => {
+    const c = { ...counts, [side]: n };
+    set(c.before || c.after ? c : undefined);
+  };
   return (
     <div className="card" style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
         <span className="label">Worship music</span>
         <span style={{ marginLeft: "auto" }}>
-          <Switch on={!!w} onChange={(on) => set(on ? { songs: 3, when: "before" } : undefined)} />
+          <Switch on={!!w} onChange={(on) => set(on ? { before: 3 } : undefined)} />
         </span>
       </div>
       <div className="hint">
@@ -1426,33 +1487,29 @@ function WorshipCard({ plan, update }: { plan: Plan; update: (p: Plan) => void }
           ? "Songs from your Music library, chosen by the AI assistant to suit each day's reading, play in Quiet time."
           : "Play a few worship songs from your Music library in Quiet time, chosen to suit each day's reading."}
       </div>
-      {w && (
-        <div style={{ display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap" }}>
-          <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13 }}>
-            Songs
-            <select
-              className="btn small"
-              value={w.songs}
-              onChange={(e) => set({ ...w, songs: +e.target.value })}
-              aria-label="Number of songs"
-            >
-              {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
-                <option key={n} value={n}>
-                  {n}
-                </option>
-              ))}
-            </select>
-          </label>
-          <Seg
-            value={w.when}
-            options={[
-              ["before", "Before the reading"],
-              ["after", "After the reading"],
-            ]}
-            onChange={(when) => set({ ...w, when })}
-          />
-        </div>
-      )}
+      {w &&
+        (["before", "after"] as const).map((side) => (
+          <div key={side} style={{ display: "flex", alignItems: "center", gap: 14, minHeight: 28 }}>
+            <Switch on={counts[side] > 0} onChange={(on) => setSide(side, on ? 3 : 0)}>
+              {side === "before" ? "Songs before the reading" : "Songs after the reading"}
+            </Switch>
+            {counts[side] > 0 && (
+              <select
+                className="btn small"
+                style={{ marginLeft: "auto" }}
+                value={counts[side]}
+                onChange={(e) => setSide(side, +e.target.value)}
+                aria-label={side === "before" ? "Songs before the reading" : "Songs after the reading"}
+              >
+                {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
+                  <option key={n} value={n}>
+                    {n}
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
+        ))}
     </div>
   );
 }

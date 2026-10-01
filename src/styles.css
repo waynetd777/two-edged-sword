@@ -1814,18 +1814,29 @@ mark {
     opacity 0.35s,
     transform 0.45s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
+/* The line being sung: blue, with a light sweeping across it as Ask's progress line has, and a
+   soft glow that breathes. Only as wide as its words, so the sweep crosses the words alone. */
 .lyric.now {
-  color: var(--accent);
+  --shine: color-mix(in srgb, var(--accent) 35%, #fff);
+  width: fit-content;
+  max-width: 100%;
   transform: scale(1.04);
-  animation: lyric-glow 2.6s ease-in-out infinite;
+  background: linear-gradient(100deg, var(--accent) 0%, var(--accent) 38%, var(--shine) 50%, var(--accent) 62%, var(--accent) 100%) 0 0 /
+    250% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation:
+    sweep 2.4s linear infinite,
+    lyric-glow 2.6s ease-in-out infinite;
 }
 @keyframes lyric-glow {
   0%,
   100% {
-    text-shadow: 0 0 0 transparent;
+    filter: drop-shadow(0 0 0 transparent);
   }
   50% {
-    text-shadow: 0 0 18px color-mix(in srgb, var(--accent) 45%, transparent);
+    filter: drop-shadow(0 0 14px color-mix(in srgb, var(--accent) 50%, transparent));
   }
 }
 /* A rest in the singing: three dots, breathing. */
@@ -1864,6 +1875,10 @@ mark {
   .lyric-rest {
     animation: none;
   }
+  .lyric.now {
+    background: none;
+    color: var(--accent);
+  }
 }
 
 /* Its background: the song's artwork, blown up and blurred, faint enough to read over. */
@@ -1892,13 +1907,20 @@ mark {
   opacity: 0.22;
   animation: lyrics-art-in 1.2s ease-out;
 }
+/* Dimmed in the dark theme, so grey text over a bright cover stays readable. */
 :root[data-theme="dark"] .lyrics-art img {
-  opacity: 0.5;
+  opacity: 0.4;
+  filter: blur(70px) saturate(1.3) brightness(0.5);
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .lyrics-art img {
-    opacity: 0.5;
+    opacity: 0.4;
+    filter: blur(70px) saturate(1.3) brightness(0.5);
   }
+}
+/* The words fade in under the song's heading, rather than being cut off by it. */
+.lyrics-words {
+  mask-image: linear-gradient(to bottom, transparent 0, #000 28px);
 }
 @keyframes lyrics-art-in {
   from {

@@ -31,6 +31,7 @@ import {
   today as startOfToday,
   todayFor,
   ymd,
+  worshipCounts,
 } from "./plans";
 import { usePlayer } from "./speech";
 import { QuietStep, useApp } from "./state";
@@ -41,7 +42,8 @@ import { inverts } from "./WebPage";
 
 const FIRST_DELAY = 900; // let the first part's screen open before reading starts
 const NEXT_DELAY = 2000;
-const AUTO_PLAY = 12; // seconds the worship card shows, with audio, before its songs start
+/** Seconds to read a card before what follows starts: about three words a second, 8 to 40. */
+const readTime = (text: string) => Math.min(40, Math.max(8, Math.round(text.split(/\s+/).filter(Boolean).length / 3) + 3));
 
 /** Today's parts, one chapter at a time, then the chosen devotionals; worship songs first or last. */
 export function quietSteps(
@@ -65,11 +67,11 @@ export function quietSteps(
     if (o) steps.push({ key: id, label: o.title, kind: "online", id, url: o.url(day), window: o.window });
     else steps.push({ key: id, label: id, kind: "devotional", module: id, title: dayTitle(day) });
   }
-  const w = plan.worship;
-  if (w && steps.length) {
-    const step: QuietStep = { key: "worship", label: "Worship", kind: "worship", songs: w.songs, when: w.when };
-    if (w.when === "before") steps.unshift(step);
-    else steps.push(step);
+  const w = worshipCounts(plan.worship);
+  if (steps.length) {
+    const step = (when: "before" | "after", key: string): QuietStep => ({ key, label: "Worship", kind: "worship", songs: w[when], when });
+    if (w.before) steps.unshift(step("before", "worship"));
+    if (w.after) steps.push(step("after", w.before ? "worship-after" : "worship"));
   }
   if (plan.closing && steps.length) steps.push({ key: "closing", label: "Closing verse", kind: "closing", bible: plan.bible });
   return steps;
@@ -86,6 +88,22 @@ function sessionSteps(app: ReturnType<typeof useApp>, plan: Plan, parts: Part[],
 
 /** What worship songs and the closing verse are chosen for: the session's readings. */
 const worshipAbout = (steps: QuietStep[]) => steps.filter((x) => x.kind !== "worship" && x.kind !== "closing").map((x) => x.label);
+
+/** Chooses the songs for each Worship part in turn, so with worship before and after the reading
+ *  the second part's songs differ from the first's. `put` gets each part's songs as they come. */
+async function pickWorship(steps: QuietStep[], model: string, put: (key: string, p: Picked) => void) {
+  const about = worshipAbout(steps);
+  const avoid: string[] = [];
+  for (const w of steps) {
+    if (w.kind !== "worship") continue;
+    const p = await pickSongs(w.songs, about, w.when, model, [...avoid]).catch((e): Picked => ({
+      songs: [],
+      note: e instanceof Error ? e.message : String(e),
+    }));
+    avoid.push(...p.songs.map((x) => x.id));
+    put(w.key, p);
+  }
+}
 
 /** Chooses today's worship songs and closing verse a little after the app opens, when the plan has
  *  them and today isn't read yet, so they're ready when Quiet time starts (the assistant can take
@@ -105,7 +123,7 @@ export function useWorshipAhead() {
     if (!ready || !key || !plan || !t || isReadOnly()) return;
     const timer = window.setTimeout(() => {
       const steps = sessionSteps(app, plan, t.parts, startOfToday());
-      if (w && steps.some((x) => x.kind === "worship")) pickSongs(w.songs, worshipAbout(steps), w.when, app.settings.model).catch(() => {});
+      if (w) pickWorship(steps, app.settings.model, () => {});
       if (steps.some((x) => x.kind === "closing")) pickClosing(worshipAbout(steps), plan.bible, app.settings.model).catch(() => {});
     }, 8000);
     return () => window.clearTimeout(timer);
@@ -178,16 +196,18 @@ export function QuietTime({ focus }: { focus: boolean }) {
     // Not in screenshot mode, where a scene gives its songs (or shows them still being chosen).
     if (!s || !w || w.kind !== "worship" || w.picked || isReadOnly()) return;
     const started = s.started;
-    const about = worshipAbout(s.steps);
-    const put = (p: Picked) =>
+    pickWorship(s.steps, app.settings.model, (key, p) =>
       app.setSession((x) =>
         x && x.started === started
-          ? { ...x, steps: x.steps.map((y) => (y.kind === "worship" ? { ...y, picked: p.songs, intro: p.intro, note: p.note } : y)) }
+          ? {
+              ...x,
+              steps: x.steps.map((y) =>
+                y.kind === "worship" && y.key === key ? { ...y, picked: p.songs, intro: p.intro, note: p.note } : y,
+              ),
+            }
           : x,
-      );
-    pickSongs(w.songs, about, w.when, app.settings.model)
-      .then(put)
-      .catch((e) => put({ songs: [], note: e instanceof Error ? e.message : String(e) }));
+      ),
+    );
   }, [s?.started]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // And the closing verse, ready by the end.
@@ -204,7 +224,7 @@ export function QuietTime({ focus }: { focus: boolean }) {
   }, [s?.started]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // The Worship part: once its songs are chosen, a card says why each suits the reading, and they
-  // play in Music when asked (Play, or by themselves after a few seconds with audio). The bar and
+  // play in Music when asked (Play, or by themselves after a few seconds). The bar and
   // card show what's playing; the part moves on when they finish, and leaving it pauses them.
   const cur = s?.steps[s.i];
   const closingReady = cur?.kind === "closing" && !!cur.picked;
@@ -228,11 +248,13 @@ export function QuietTime({ focus }: { focus: boolean }) {
     setReadIn(null);
   }, [s?.started, s?.i]);
   useEffect(() => {
-    if (!songs?.length || playing || !s?.audio) {
+    if (!songs?.length || playing) {
       setCountdown(null);
       return;
     }
-    let n = AUTO_PLAY;
+    // Time to read the card first, as the closing verse has.
+    const w = cur?.kind === "worship" ? cur : null;
+    let n = readTime([w?.intro, w?.note, ...(w?.picked ?? []).map((x) => x.why)].join(" "));
     setCountdown(n);
     const t = window.setInterval(() => {
       n -= 1;
@@ -380,9 +402,8 @@ export function QuietTime({ focus }: { focus: boolean }) {
     // Songs, or a devotional on the web, aren't read aloud: the reading before them stops and its player closes.
     if (step.kind === "worship" || step.kind === "online") player.stop();
     if (s.audio && step.kind === "closing" && step.picked) {
-      // Time to read the summary first: at about three words a second, 8 to 40 seconds.
-      const words = `${step.picked.why ?? ""} ${step.picked.note ?? ""}`.split(/\s+/).filter(Boolean).length;
-      setReadIn(Math.min(40, Math.max(8, Math.round(words / 3) + 3)));
+      // Time to read the summary first.
+      setReadIn(readTime(`${step.picked.why ?? ""} ${step.picked.note ?? ""}`));
     } else if (s.audio && step.kind !== "online" && step.kind !== "worship") {
       const delay = first.current ? FIRST_DELAY : NEXT_DELAY;
       timer.current = window.setTimeout(() => speakStep(step), delay);

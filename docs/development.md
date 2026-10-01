@@ -203,6 +203,7 @@ reference, and images inline as `data:` URLs.
 |---|---|
 | `src/` | The screens (`Read.tsx`, `Compare.tsx`, `WordStudy.tsx`, `QuietTime.tsx`, `Journal.tsx`…), shared state (`state.tsx`), the Rust calls (`api.ts`), e-Sword markup rendering (`esword.tsx`) |
 | `src/speech.tsx` | Reading aloud: word highlighting, sleep timer |
+| `src/awake.ts`, `keep_awake` in `lib.rs` | Keeping the screen awake (a `caffeinate`) while reading aloud, in Quiet time, or on Read or Compare in front |
 | `src/Ask.tsx`, `src/assistant.ts` | The Ask panels, and which AI tools and models are available |
 | `src-tauri/src/library.rs`, `content.rs` | Finding modules and reading text out of them |
 | `src-tauri/src/search.rs`, `index.rs` | Search and its index |
