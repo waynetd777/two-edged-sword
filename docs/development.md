@@ -108,7 +108,7 @@ Command Line Tools and Screen Recording permission for the terminal.
   model or service is asked and your journal stays private. The Lyrics shot is a public-domain hymn
   with the app's icon as its artwork.
 - Scenes use public-domain Bibles only. `AGENTS.md` lists the scene fields.
-- A scene with `"tray": true` shows the menu-bar window alone (the main window runs hidden to send it what to show), and `width` keeps the image at its own width.
+- A scene with `"tray": true` shows the menu-bar window alone (the main window runs hidden to send it what to show), and `width` keeps the image at its own width. `"unread": true` shows today's reading as not yet done, so the menu-bar window shows Start Quiet time.
 
 ## Differences from the KJV
 

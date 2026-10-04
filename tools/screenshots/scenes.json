@@ -249,6 +249,7 @@
   {
     "name": "tray",
     "tray": true,
+    "unread": true,
     "width": 680
   }
 ]

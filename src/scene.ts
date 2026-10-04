@@ -11,6 +11,7 @@ import { Chat, Loc, Pending, Screen, Session, Settings, useApp } from "./state";
 import type { PlayerState } from "./speech";
 import { setSceneVariances, VarianceFile } from "./variances";
 import { SceneSong, setSceneSong } from "./lyrics";
+import { today as startOfToday, ymd } from "./plans";
 
 export interface Scene {
   name: string;
@@ -51,6 +52,8 @@ export interface Scene {
   variances?: VarianceFile;
   /** A song shown on the Lyrics page, as if playing in Music (from songFile). */
   song?: SceneSong;
+  /** Today's reading shown as not yet done (for the menu-bar window's Start Quiet time). */
+  unread?: boolean;
 }
 
 let started = false;
@@ -77,7 +80,15 @@ export function runScene(app: ReturnType<typeof useApp>, still: (s: Partial<Play
         // The KJV unless the scene says otherwise: never the user's own choice, which may be licensed.
         // Nor the user's highlight names, plans' Bibles or Recent list, which are theirs.
         app.set({ bible: "kjv", hlNames: {}, ...sc.settings });
-        app.setPlans((ps) => ps.map((p) => ({ ...p, bible: "kjv" })));
+        const today = ymd(startOfToday());
+        const unread = (d?: string[]) => (sc.unread && d ? d.filter((x) => x !== today) : d);
+        app.setPlans((ps) =>
+          ps.map((p) =>
+            p.kind === "ppo"
+              ? { ...p, bible: "kjv", doneDates: unread(p.doneDates)! }
+              : { ...p, bible: "kjv", readDates: unread(p.readDates) },
+          ),
+        );
         const at = new Date().toISOString();
         app.setRecent(
           [
