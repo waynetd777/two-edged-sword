@@ -37,6 +37,7 @@ import { usePlayer } from "./speech";
 import { QuietStep, useApp } from "./state";
 import { useDrag } from "./ui";
 import { markPlayed, Picked, pickSongs } from "./worship";
+import { sceneSong } from "./lyrics";
 import { Closing, pickClosing } from "./closing";
 import { inverts } from "./WebPage";
 
@@ -297,6 +298,12 @@ export function QuietTime({ focus }: { focus: boolean }) {
       heard = false,
       onLast = false,
       poll: number | undefined;
+    // Screenshot mode: the scene's song, as if Music were playing it, and Music left alone.
+    if (sceneSong) {
+      setNow({ state: "playing", ours: true, album: "", lyrics: "", bpm: 0, ...sceneSong });
+      app.openLyrics();
+      return;
+    }
     const last = songs[songs.length - 1].name;
     const check = async () => {
       const st = await api.musicState().catch(() => null);
@@ -691,6 +698,7 @@ function WorshipNow({
       >
         <Icon name="fwd" />
       </button>
+      {now?.ours && now.duration > 0 && <SongProgress now={now} />}
       <button
         className="btn small"
         type="button"
@@ -702,6 +710,30 @@ function WorshipNow({
         Lyrics
       </button>
     </>
+  );
+}
+
+const mmss = (sec: number) => `${Math.floor(sec / 60)}:${String(Math.floor(sec % 60)).padStart(2, "0")}`;
+
+/** How far through the song Music is: asked every second, counted on here in between. */
+function SongProgress({ now }: { now: MusicState }) {
+  const [t, setT] = useState(now.position);
+  useEffect(() => {
+    const from = performance.now();
+    setT(now.position);
+    if (now.state !== "playing") return;
+    const tick = window.setInterval(() => setT(now.position + (performance.now() - from) / 1000), 250);
+    return () => window.clearInterval(tick);
+  }, [now]);
+  const at = Math.min(Math.max(t, 0), now.duration);
+  return (
+    <span className="song-progress" title={`${mmss(at)} of ${mmss(now.duration)}`}>
+      <span className="song-time">{mmss(at)}</span>
+      <span className="song-track">
+        <i style={{ width: `${(at / now.duration) * 100}%` }} />
+      </span>
+      <span className="song-time">−{mmss(now.duration - at)}</span>
+    </span>
   );
 }
 

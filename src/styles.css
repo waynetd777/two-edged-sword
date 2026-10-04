@@ -2115,3 +2115,33 @@ html.tray-view #root {
   gap: 10px;
   height: 28px;
 }
+
+/* Quiet time's bar while a worship song plays: how far through it is. */
+.song-progress {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.song-time {
+  font-size: 11px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  min-width: 30px;
+}
+.song-time:first-child {
+  text-align: right;
+}
+.song-track {
+  width: 90px;
+  height: 4px;
+  border-radius: 99px;
+  background: var(--track);
+  overflow: hidden;
+}
+.song-track i {
+  display: block;
+  height: 100%;
+  border-radius: 99px;
+  background: var(--accent);
+}
