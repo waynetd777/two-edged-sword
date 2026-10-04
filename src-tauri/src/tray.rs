@@ -64,6 +64,9 @@ pub fn build(app: &AppHandle) -> tauri::Result<()> {
         let t2 = t.clone();
         t.on_window_event(move |ev| {
             if let tauri::WindowEvent::Focused(false) = ev {
+                if t2.is_visible().unwrap_or(false) {
+                    *TRAY_BLURRED_AT.lock().unwrap() = Some(std::time::Instant::now());
+                }
                 let _ = t2.hide();
             }
         });
@@ -72,10 +75,22 @@ pub fn build(app: &AppHandle) -> tauri::Result<()> {
 }
 
 /// Opens the menu window under the icon, or closes it.
+/// When the menu window last closed itself on losing focus.
+static TRAY_BLURRED_AT: std::sync::Mutex<Option<std::time::Instant>> = std::sync::Mutex::new(None);
+
+/// A click on the icon this soon after the menu closed on losing focus is the click that took the
+/// focus: it closes the menu rather than opening it again.
+const CLICK_AFTER_BLUR: std::time::Duration = std::time::Duration::from_millis(400);
+
 fn toggle(app: &AppHandle, rect: tauri::Rect) {
     let Some(w) = app.get_webview_window("tray") else { return };
     if w.is_visible().unwrap_or(false) {
         let _ = w.hide();
+        return;
+    }
+    // With the main window closed, clicking the icon takes the focus from the menu first, so it has
+    // just hidden itself: this click was meant to close it.
+    if TRAY_BLURRED_AT.lock().unwrap().take().is_some_and(|t| t.elapsed() < CLICK_AFTER_BLUR) {
         return;
     }
     // The icon's place is in physical pixels across all screens: find the screen it's on and use
