@@ -57,8 +57,8 @@ Something refused by mistake can be allowed in System Settings › Privacy & Sec
 - **Listening**: voices, speed, and whether to highlight each word and read on.
 - **Journal**: its folder, notes beside verses, and grammar checking.
 - **Quiet time**: the daily reminder, and what to do when you fall behind.
-- **AI assistant**: which tools are installed, the default model, and what Ask may read and send
-  ([Ask](ask.md)).
+- **AI assistant**: which tools are installed, the default model, what Ask may read and send, and
+  whether it suggests a next question ([Ask](ask.md)).
 - At the bottom: the app's version and build number, and its licence.
 
 ## Licence and credits

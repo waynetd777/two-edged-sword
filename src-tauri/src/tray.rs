@@ -1,21 +1,27 @@
 // Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
 // SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
-//! The menu-bar menu and the daily Quiet time reminder. The frontend owns what they say: it sends
-//! a TrayState whenever today's reading, the place or the reminder setting changes (src/tray.tsx),
-//! and gets the menu's choices back as "tray" events. The reminder is timed here because the
+//! The menu-bar icon, its window and the daily Quiet time reminder. Clicking the icon opens a
+//! small window of its own under it (src/TrayWindow.tsx, the page with `?view=tray`), which
+//! closes when it loses focus. The main window owns what it says: it sends a TrayState whenever
+//! today's reading, the place, the streak or the reminder setting changes (src/tray.tsx), and gets
+//! the window's choices back as "tray" events. The reminder is timed here because the main
 //! window's page is throttled once the window is hidden.
 
 use crate::store;
 use chrono::Timelike;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::sync::Mutex;
-use tauri::menu::{CheckMenuItem, Menu, MenuItem, PredefinedMenuItem};
-use tauri::{AppHandle, Emitter, Manager, Wry};
+use tauri::tray::{MouseButtonState, TrayIconBuilder, TrayIconEvent};
+use tauri::{AppHandle, Emitter, Manager};
 use tauri_plugin_notification::NotificationExt;
 
-#[derive(Deserialize, Clone, Default)]
-#[serde(rename_all = "camelCase")]
+const ID: &str = "main";
+/// The menu window's width, in points.
+const WIDTH: f64 = 340.0;
+
+#[derive(Serialize, Deserialize, Clone, Default)]
+#[serde(rename_all = "camelCase", default)]
 pub struct TrayState {
     /// Today's reading ("Psalm 23 · John 3"), or None without an active plan.
     today: Option<String>,
@@ -26,67 +32,127 @@ pub struct TrayState {
     reminder: bool,
     /// "HH:MM", local time.
     reminder_time: String,
+    /// The active plan's name, how far through it is ("day 12 of 365") and as a percentage.
+    plan: Option<String>,
+    progress: Option<String>,
+    pct: u32,
+    /// Days read in a row, the best run, and of the last seven reading days how many were read.
+    streak: u32,
+    best: u32,
+    week: u32,
+    /// Days a dated plan is behind.
+    behind: u32,
 }
 
 /// None until the frontend has sent its first state (it waits for the saved settings and plans).
 #[derive(Default)]
 pub struct Tray(Mutex<Option<TrayState>>);
 
-/// A choice from the menu that the frontend carries out ("open" and "quit" are handled in lib.rs).
-/// It brings the window up first, except for the reminder, which only flips a setting.
-pub fn on_action(app: &AppHandle, id: &str) {
-    if id == "login" {
-        toggle_login(app);
+pub fn build(app: &AppHandle) -> tauri::Result<()> {
+    let icon = tauri::image::Image::from_bytes(include_bytes!("../icons/tray@2x.png"))?;
+    TrayIconBuilder::with_id(ID)
+        .icon(icon)
+        .icon_as_template(true)
+        .tooltip("Two-edged Sword")
+        .on_tray_icon_event(|tray, ev| {
+            if let TrayIconEvent::Click { button_state: MouseButtonState::Up, rect, .. } = ev {
+                toggle(tray.app_handle(), rect);
+            }
+        })
+        .build(app)?;
+    if let Some(t) = app.get_webview_window("tray") {
+        let t2 = t.clone();
+        t.on_window_event(move |ev| {
+            if let tauri::WindowEvent::Focused(false) = ev {
+                let _ = t2.hide();
+            }
+        });
+    }
+    Ok(())
+}
+
+/// Opens the menu window under the icon, or closes it.
+fn toggle(app: &AppHandle, rect: tauri::Rect) {
+    let Some(w) = app.get_webview_window("tray") else { return };
+    if w.is_visible().unwrap_or(false) {
+        let _ = w.hide();
         return;
     }
-    if !["quiet", "continue", "journal", "search", "reminder"].contains(&id) {
-        return;
-    }
-    if id != "reminder" {
-        crate::show_main(app);
-    }
-    let _ = app.emit("tray", id);
-}
-
-pub fn menu(app: &AppHandle, s: Option<&TrayState>) -> tauri::Result<Menu<Wry>> {
-    let quiet_label = match s {
-        Some(TrayState { today: Some(t), done: false, .. }) => format!("Start Quiet Time: {t}"),
-        Some(TrayState { today: Some(_), done: true, .. }) => "Quiet Time: done today".to_string(),
-        _ => "Quiet Time…".to_string(),
+    // The icon's place is in physical pixels across all screens: find the screen it's on and use
+    // that screen's scale, as the window's own is the screen it was last on.
+    let guess = w.scale_factor().unwrap_or(2.0);
+    let (pos, size) = (rect.position.to_physical::<f64>(guess), rect.size.to_physical::<f64>(guess));
+    let monitors = app.available_monitors().unwrap_or_default();
+    let screen = monitors.iter().find(|m| {
+        let (p, s) = (m.position(), m.size());
+        pos.x >= p.x as f64 && pos.x < (p.x + s.width as i32) as f64 && pos.y >= p.y as f64 && pos.y < (p.y + s.height as i32) as f64
+    });
+    let scale = screen.map_or(guess, |m| m.scale_factor());
+    let (pos, size) = if (scale - guess).abs() > f64::EPSILON {
+        (rect.position.to_physical::<f64>(scale), rect.size.to_physical::<f64>(scale))
+    } else {
+        (pos, size)
     };
-    let reading = s.map(|s| s.reading.as_str()).filter(|r| !r.is_empty());
-    let continue_label = reading.map_or("Continue Reading".to_string(), |r| format!("Continue Reading {r}"));
-    let reminder_label = match s {
-        Some(s) if !s.reminder_time.is_empty() => format!("Daily Reminder at {}", s.reminder_time),
-        _ => "Daily Reminder".to_string(),
-    };
-    let quiet = MenuItem::with_id(app, "quiet", quiet_label, true, None::<&str>)?;
-    let cont = MenuItem::with_id(app, "continue", continue_label, true, None::<&str>)?;
-    let journal = MenuItem::with_id(app, "journal", "New Journal Entry", true, None::<&str>)?;
-    let search = MenuItem::with_id(app, "search", "Search…", true, None::<&str>)?;
-    let reminder = CheckMenuItem::with_id(app, "reminder", reminder_label, s.is_some(), s.is_some_and(|s| s.reminder), None::<&str>)?;
-    let login = login_menu_item(app)?;
-    let open = MenuItem::with_id(app, "open", "Open Two-edged Sword", true, None::<&str>)?;
-    let quit = MenuItem::with_id(app, "quit", "Quit", true, Some("CmdOrCtrl+Q"))?;
-    let sep = || PredefinedMenuItem::separator(app);
-    Menu::with_items(app, &[&open, &sep()?, &quiet, &cont, &journal, &search, &sep()?, &reminder, &login, &sep()?, &quit])
+    let width = WIDTH * scale;
+    let mut x = pos.x + size.width / 2.0 - width / 2.0;
+    if let Some(m) = screen {
+        let right = (m.position().x + m.size().width as i32) as f64;
+        x = x.min(right - width - 8.0 * scale).max(m.position().x as f64 + 8.0 * scale);
+    }
+    let y = pos.y + size.height + 6.0 * scale;
+    let place = tauri::PhysicalPosition::new(x, y);
+    let _ = w.set_position(place);
+    let _ = w.show();
+    // Once on that screen, place it again: macOS converts the first move with the old screen's scale.
+    let _ = w.set_position(place);
+    let _ = w.set_focus();
+    let _ = w.emit("tray-opened", ());
 }
 
-/// "Open at Login", ticked from what macOS reports. Disabled where there is nothing to register
-/// (the unbundled `make dev` binary).
-#[cfg(target_os = "macos")]
-fn login_menu_item(app: &AppHandle) -> tauri::Result<CheckMenuItem<Wry>> {
-    CheckMenuItem::with_id(app, "login", "Open at Login", crate::login_item::available(), crate::login_item::status().is_on(), None::<&str>)
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TrayInfo {
+    state: Option<TrayState>,
+    /// Open at Login can be set (not in the unbundled `make dev` binary), and whether it's on.
+    login_available: bool,
+    login: bool,
 }
 
-#[cfg(not(target_os = "macos"))]
-fn login_menu_item(app: &AppHandle) -> tauri::Result<CheckMenuItem<Wry>> {
-    CheckMenuItem::with_id(app, "login", "Open at Login", false, false, None::<&str>)
+/// What the menu window shows.
+#[tauri::command]
+pub fn tray_info(tray: tauri::State<'_, Tray>) -> TrayInfo {
+    #[cfg(target_os = "macos")]
+    let (login_available, login) = (crate::login_item::available(), crate::login_item::status().is_on());
+    #[cfg(not(target_os = "macos"))]
+    let (login_available, login) = (false, false);
+    TrayInfo { state: tray.0.lock().unwrap_or_else(|p| p.into_inner()).clone(), login_available, login }
 }
 
-/// Flips Open at Login and rebuilds the menu from the status macOS reports afterwards. If macOS
-/// wants the user to approve it, System Settings opens at Login Items.
-fn toggle_login(app: &AppHandle) {
+/// A choice in the menu window. "open", "quit" and "login" are done here; the rest the main
+/// window carries out, brought up first, except the reminder, which only flips a setting.
+#[tauri::command]
+pub fn tray_do(app: AppHandle, id: String) {
+    match id.as_str() {
+        "open" => crate::show_main(&app),
+        "quit" => crate::quit(&app),
+        "login" => toggle_login(),
+        "quiet" | "continue" | "journal" | "search" | "plans" | "settings" | "reminder" => {
+            if id != "reminder" {
+                crate::show_main(&app);
+            }
+            let _ = app.emit_to("main", "tray", &id);
+        }
+        _ => return,
+    }
+    if id != "reminder" && id != "login" {
+        if let Some(t) = app.get_webview_window("tray") {
+            let _ = t.hide();
+        }
+    }
+}
+
+/// Flips Open at Login. If macOS wants the user to approve it, System Settings opens at Login Items.
+fn toggle_login() {
     #[cfg(target_os = "macos")]
     {
         use crate::login_item::{self, Status};
@@ -94,15 +160,10 @@ fn toggle_login(app: &AppHandle) {
             login_item::open_settings();
         }
     }
-    let s = app.state::<Tray>().0.lock().unwrap_or_else(|p| p.into_inner()).clone();
-    if let (Ok(m), Some(t)) = (menu(app, s.as_ref()), app.tray_by_id("main")) {
-        let _ = t.set_menu(Some(m));
-    }
 }
 
 #[tauri::command]
 pub fn set_tray(app: AppHandle, tray: tauri::State<'_, Tray>, state: TrayState) -> Result<(), String> {
-    let m = menu(&app, Some(&state)).map_err(|e| e.to_string())?;
     let (on, at) = (state.reminder, state.reminder_time.clone());
     let prev = tray.0.lock().unwrap_or_else(|p| p.into_inner()).replace(state);
     // Turning the reminder on sends one notification straight away, so macOS asks for permission
@@ -118,9 +179,7 @@ pub fn set_tray(app: AppHandle, tray: tauri::State<'_, Tray>, state: TrayState) 
             eprintln!("reminder: {e}");
         }
     }
-    if let Some(t) = app.tray_by_id("main") {
-        t.set_menu(Some(m)).map_err(|e| e.to_string())?;
-    }
+    let _ = app.emit_to("tray", "tray-state", ());
     Ok(())
 }
 
@@ -164,7 +223,14 @@ mod tests {
     use super::*;
 
     fn st(reminder: bool, done: bool, time: &str) -> TrayState {
-        TrayState { today: Some("John 3".into()), done, reading: "John 3".into(), reminder, reminder_time: time.into() }
+        TrayState {
+            today: Some("John 3".into()),
+            done,
+            reading: "John 3".into(),
+            reminder,
+            reminder_time: time.into(),
+            ..Default::default()
+        }
     }
 
     #[test]

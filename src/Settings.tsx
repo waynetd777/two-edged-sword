@@ -297,6 +297,12 @@ export function SettingsScreen() {
               <Switch on={s.askJournal} onChange={(v) => app.set({ askJournal: v })} />
             </Row>
             <Row
+              label="Suggest a next question"
+              hint="After each answer, the assistant reads the last few questions and answers and offers a follow-up in the empty box; → or Tab types it in. It's one more call to the assistant per answer."
+            >
+              <Switch on={s.askSuggest} onChange={(v) => app.set({ askSuggest: v })} />
+            </Row>
+            <Row
               label="Licensed text"
               hint="When off, no copyrighted module's text is sent: questions about the NIV, ESV and other licensed Bibles send public-domain text instead, and licensed commentaries, lexicons, dictionaries and books are left out."
             >

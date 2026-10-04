@@ -245,5 +245,10 @@
     "name": "library",
     "screen": "library",
     "type": ["[placeholder=\"Find a Bible, commentary or book in the library\"]", "Strong"]
+  },
+  {
+    "name": "tray",
+    "tray": true,
+    "width": 680
   }
 ]

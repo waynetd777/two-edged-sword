@@ -20,8 +20,24 @@
         "titleBarStyle": "Overlay",
         "hiddenTitle": true,
         "visible": false
+      },
+      {
+        "label": "tray",
+        "url": "index.html?view=tray",
+        "title": "Two-edged Sword",
+        "width": 340,
+        "height": 420,
+        "decorations": false,
+        "transparent": true,
+        "resizable": false,
+        "alwaysOnTop": true,
+        "skipTaskbar": true,
+        "visible": false,
+        "shadow": true,
+        "visibleOnAllWorkspaces": true
       }
     ],
+    "macOSPrivateApi": true,
     "security": {
       "csp": null
     },

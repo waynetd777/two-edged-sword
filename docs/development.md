@@ -108,8 +108,7 @@ Command Line Tools and Screen Recording permission for the terminal.
   model or service is asked and your journal stays private. The Lyrics shot is a public-domain hymn
   with the app's icon as its artwork.
 - Scenes use public-domain Bibles only. `AGENTS.md` lists the scene fields.
-- The menu-bar menu can't be opened by the script, so `docs/images/menu-bar.png` is taken by hand
-  (⌘⇧4 with the menu open).
+- A scene with `"tray": true` shows the menu-bar window alone (the main window runs hidden to send it what to show), and `width` keeps the image at its own width.
 
 ## Differences from the KJV
 
@@ -213,7 +212,7 @@ reference, and images inline as `data:` URLs.
 | `src/LyricsPage.tsx`, `src/lyrics.ts`, `src/Flames.tsx` | The playing song's words (LRCLIB), artwork (Music, else the iTunes search API) and the flames shown when it has none |
 | `src/closing.ts` | Quiet time's closing verse, chosen by the assistant |
 | `src/WebPage.tsx` | An online devotional framed in the reading column; `open_web` in `lib.rs` is its own window, and `web_frameable` checks (with curl) whether a site added by the user can be framed |
-| `src/tray.tsx`, `src-tauri/src/tray.rs` | The menu-bar menu and the daily reminder |
+| `src/tray.tsx`, `src/TrayWindow.tsx`, `src-tauri/src/tray.rs` | The menu-bar window (what it shows comes from the main window) and the daily reminder |
 | `src-tauri/src/login_item.rs`, `login_launch.rs` | Open at Login |
 | `src-tauri/src/tts.rs` | Speech through AVSpeechSynthesizer (WebKit's speech API hides downloaded voices) |
 | `src-tauri/src/help.rs`, `tools/helpbook.py` | The Help menu and the Help Book |

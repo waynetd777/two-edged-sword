@@ -62,6 +62,8 @@ export interface Settings {
   includeCommentaries: boolean;
   /** Passage chats also get the user's journal entries on the passage. */
   askJournal: boolean;
+  /** After each answer, a second call suggests the next question, offered in the empty box. */
+  askSuggest: boolean;
   allowLicensed: boolean;
   reminder: boolean;
   reminderTime: string;
@@ -122,6 +124,7 @@ const DEFAULTS: Settings = {
   model: "claude:sonnet",
   includeCommentaries: true,
   askJournal: false,
+  askSuggest: true,
   allowLicensed: true,
   reminder: false,
   reminderTime: "06:30",

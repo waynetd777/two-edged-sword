@@ -17,6 +17,7 @@ import "@fontsource-variable/inter/index.css";
 import "@fontsource-variable/atkinson-hyperlegible-next/wght.css";
 import "@fontsource-variable/atkinson-hyperlegible-next/wght-italic.css";
 import App from "./App";
+import { TrayWindow } from "./TrayWindow";
 import "./styles.css";
 
 // If anything fails before the first screen, say so on the splash rather than leaving it spinning.
@@ -32,8 +33,12 @@ function showStartupError(msg: string) {
 window.addEventListener("error", (e) => showStartupError(`${e.message}\n${e.error?.stack ?? ""}`.slice(0, 1200)));
 window.addEventListener("unhandledrejection", (e) => showStartupError(String(e.reason).slice(0, 1200)));
 
+// The menu-bar window (src-tauri/src/tray.rs) runs the same page with ?view=tray.
+const tray = new URLSearchParams(location.search).get("view") === "tray";
+if (tray) {
+  document.documentElement.classList.add("tray-view");
+  document.getElementById("splash")?.remove();
+}
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
+  <React.StrictMode>{tray ? <TrayWindow /> : <App />}</React.StrictMode>,
 );

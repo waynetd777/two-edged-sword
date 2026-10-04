@@ -25,7 +25,6 @@ use library::{Kind, Library, ModuleInfo};
 use serde::Serialize;
 use std::path::PathBuf;
 use std::sync::Arc;
-use tauri::tray::TrayIconBuilder;
 use tauri::{AppHandle, Emitter, Manager, State};
 use tauri_plugin_window_state::{AppHandleExt, StateFlags};
 
@@ -613,6 +612,12 @@ fn activate() {
 #[cfg(not(target_os = "macos"))]
 fn activate() {}
 
+/// Quits from the menu bar, keeping the main window's size and place.
+fn quit(app: &AppHandle) {
+    let _ = app.save_window_state(STATE_FLAGS);
+    app.exit(0)
+}
+
 fn show_main(app: &AppHandle) {
     // Back in the Dock before the window is shown: done afterwards, the window can come up
     // behind whatever had focus.
@@ -654,7 +659,7 @@ pub fn run() {
         .plugin(
             tauri_plugin_window_state::Builder::default()
                 .with_state_flags(STATE_FLAGS)
-                .with_filter(|label| !label.starts_with("web-"))
+                .with_filter(|label| !label.starts_with("web-") && label != "tray")
                 .build(),
         )
         .plugin(tauri_plugin_dialog::init())
@@ -720,7 +725,9 @@ pub fn run() {
             tts::tts_speak,
             tts::tts_stop,
             tts::tts_pause,
-            tray::set_tray
+            tray::set_tray,
+            tray::tray_info,
+            tray::tray_do
         ])
         .on_menu_event(|app, ev| {
             if ev.id() == help::MENU_ID {
@@ -731,32 +738,26 @@ pub fn run() {
             // Did Login Items start this, rather than someone opening the app? Asked first: the
             // answer is in the launch AppleEvent AppKit is dispatching now, and it has to be known
             // before anything shows the window. A login launch stays in the menu bar.
+            // A scene with "tray": true shows the menu-bar window alone, for its screenshot; the
+            // main window runs hidden to send it what to show.
+            let tray_scene = scene().and_then(|sc| serde_json::from_str::<serde_json::Value>(&sc).ok()).is_some_and(|v| v["tray"] == true);
             #[cfg(target_os = "macos")]
-            let quiet = login_launch::probe() && scene().is_none();
+            let quiet = (login_launch::probe() && scene().is_none()) || tray_scene;
             #[cfg(not(target_os = "macos"))]
-            let quiet = false;
+            let quiet = tray_scene;
             if quiet {
                 set_in_dock(app.handle(), false);
             }
             help::add_to_menu(app.handle())?;
-            // Until the frontend sends today's reading, the menu has its choices without the details.
-            let menu = tray::menu(app.handle(), None)?;
-            let tray_icon = tauri::image::Image::from_bytes(include_bytes!("../icons/tray@2x.png")).expect("tray icon is a valid png");
-            TrayIconBuilder::with_id("main")
-                .icon(tray_icon)
-                .icon_as_template(true)
-                .menu(&menu)
-                .show_menu_on_left_click(true)
-                .tooltip("Two-edged Sword")
-                .on_menu_event(|app, ev| match ev.id.as_ref() {
-                    "open" => show_main(app),
-                    "quit" => {
-                        let _ = app.save_window_state(STATE_FLAGS);
-                        app.exit(0)
-                    }
-                    id => tray::on_action(app, id),
-                })
-                .build(app)?;
+            // The menu-bar icon and the window it opens; until the main window sends today's
+            // reading, that window has its choices without the details.
+            tray::build(app.handle())?;
+            if tray_scene {
+                if let Some(t) = app.get_webview_window("tray") {
+                    let _ = t.set_position(tauri::LogicalPosition::new(200.0, 120.0));
+                    let _ = t.show();
+                }
+            }
             tray::start_reminders(app.handle().clone());
 
             if let Some(w) = app.get_webview_window("main") {

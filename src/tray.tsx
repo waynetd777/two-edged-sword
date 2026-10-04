@@ -1,19 +1,20 @@
 // Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
 // SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
-// The menu-bar menu: keeps its labels (today's reading, where reading left off, the reminder) in
-// step with the app, and carries out what is chosen from it. The reminder itself is timed on the
+// The menu-bar window's data: keeps what it shows (today's reading, the plan and streak, where
+// reading left off, the reminder) in step with the app, and carries out what is chosen in it
+// (src/TrayWindow.tsx). The reminder itself is timed on the
 // Rust side, which keeps running while the window is closed.
 
 import { useEffect, useRef, useState } from "react";
 import { listen } from "@tauri-apps/api/event";
 import { api } from "./api";
 import { book } from "./bible";
-import { current, firstUndone, todayFor, ymd, today as startOfToday } from "./plans";
+import { behind, current, firstUndone, streak, todayFor, ymd, today as startOfToday } from "./plans";
 import { useStartQuietTime } from "./QuietTime";
 import { useApp } from "./state";
 
-type TrayAction = "quiet" | "continue" | "search" | "journal" | "reminder";
+type TrayAction = "quiet" | "continue" | "search" | "journal" | "plans" | "settings" | "reminder";
 
 export function useTray() {
   const app = useApp();
@@ -30,12 +31,31 @@ export function useTray() {
   const done = !!plan && (plan.kind === "ppo" ? plan.doneDates : (plan.readDates ?? [])).includes(day);
   const reading = app.doc ? app.doc.title : `${book(app.loc.book).name} ${app.loc.chapter}`;
   const { reminder, reminderTime } = app.settings;
+  const st = plan ? streak(plan) : null;
+  const [run, best, week] = [st?.current ?? 0, st?.best ?? 0, st?.week ?? 0];
+  const late = plan?.kind === "sequence" ? behind(plan) : 0;
 
   // Nothing is sent until the saved settings and plans are in, so the reminder can't fire on the defaults.
   const ready = app.plansReady;
   useEffect(() => {
-    if (ready) api.setTray({ today: t?.label ?? null, done, reading, reminder, reminderTime }).catch((e) => console.error("tray", e));
-  }, [ready, t?.label, done, reading, reminder, reminderTime]);
+    if (ready)
+      api
+        .setTray({
+          today: t?.label ?? null,
+          done,
+          reading,
+          reminder,
+          reminderTime,
+          plan: plan?.name ?? null,
+          progress: t?.progress ?? null,
+          pct: t?.pct ?? 0,
+          streak: run,
+          best,
+          week,
+          behind: late,
+        })
+        .catch((e) => console.error("tray", e));
+  }, [ready, t?.label, t?.progress, t?.pct, done, reading, reminder, reminderTime, plan?.name, run, best, week, late]);
 
   // The listener is set up once; what it does is read from here, so it always sees the current state.
   const act = useRef<(a: TrayAction) => void>(() => {});
@@ -45,6 +65,8 @@ export function useTray() {
       else app.go("plans");
     } else if (a === "continue") app.go("read");
     else if (a === "search") app.go("search");
+    else if (a === "plans") app.go("plans");
+    else if (a === "settings") app.go("settings");
     else if (a === "journal") app.startEntry({});
     else if (a === "reminder") app.set({ reminder: !reminder });
   };

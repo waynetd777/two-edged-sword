@@ -51,6 +51,7 @@ const P: Record<string, string> = {
   export: "M8 10V2.5M5 5.5l3-3 3 3M3 9.5v3.5h10V9.5",
   finder: "M2.5 3.5h11v9h-11zM2.5 6h11",
   stop: "M4 4h8v8H4z",
+  power: "M8 2.5v5M5.2 4.4a5 5 0 1 0 5.6 0",
   info: "M8 2.5a5.5 5.5 0 1 1 0 11 5.5 5.5 0 0 1 0-11zM8 7.5v3.5M8 5v.5",
   dots: "M3.5 8h.01M8 8h.01M12.5 8h.01",
   variance: "M3 6h10M3 10h10M11 2.5l-6 11",

@@ -79,10 +79,10 @@ def build(tmp):
     return exe
 
 
-def window_of(window_id, pid, timeout=30):
+def window_of(window_id, pid, timeout=30, floating=False):
     end = time.time() + timeout
     while time.time() < end:
-        out = subprocess.run([str(window_id), str(pid)], capture_output=True, text=True).stdout.strip()
+        out = subprocess.run([str(window_id), str(pid)] + (["floating"] if floating else []), capture_output=True, text=True).stdout.strip()
         if out:
             return out
         time.sleep(0.3)
@@ -92,7 +92,7 @@ def window_of(window_id, pid, timeout=30):
 def shoot(scene, theme, window_id):
     # A fixture from a file beside scenes.json: "chatFile" becomes "chat", and so on.
     files = {"chatFile": "chat", "sessionFile": "session", "entriesFile": "entries", "variancesFile": "variances", "songFile": "song"}
-    sc = {k: v for k, v in scene.items() if k not in files and k != "crop"}
+    sc = {k: v for k, v in scene.items() if k not in files and k not in ("crop", "width")}
     for f, k in files.items():
         if f in scene:
             sc[k] = json.loads((HERE / scene[f]).read_text())
@@ -101,19 +101,23 @@ def shoot(scene, theme, window_id):
     env = {**os.environ, "TES_SCENE": json.dumps(sc)}
     app = subprocess.Popen([str(BIN)], cwd=ROOT / "src-tauri", env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     try:
-        win = window_of(window_id, app.pid)
+        # The menu-bar window ("tray": true) floats above other windows.
+        floating = bool(scene.get("tray"))
+        win = window_of(window_id, app.pid, floating=floating)
         if not win:
             print(f"  {scene['name']} {theme}: no window")
             return False
         time.sleep(SETTLE)
         # Found again just before capturing: the window can be replaced while the page settles.
-        win = window_of(window_id, app.pid, timeout=5) or win
+        win = window_of(window_id, app.pid, timeout=5, floating=floating) or win
         with tempfile.NamedTemporaryFile(suffix=".png") as raw:
             subprocess.run(["screencapture", "-x", "-o", f"-l{win}", raw.name], check=True)
             im = Image.open(raw.name)
             im.load()
             im = to_srgb(im)
-        im = im.resize((WIDTH, round(im.height * WIDTH / im.width)), Image.LANCZOS)
+        # A scene may keep its own width (the menu-bar window, at its natural 2x size).
+        width = scene.get("width", WIDTH)
+        im = im.resize((width, round(im.height * width / im.width)), Image.LANCZOS)
         # "crop": [x, y, width, height] of the 1400px-wide image, for a shot of one part of a screen.
         if "crop" in scene:
             x, y, w, h = scene["crop"]

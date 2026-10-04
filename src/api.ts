@@ -192,6 +192,22 @@ export interface TrayState {
   reading: string;
   reminder: boolean;
   reminderTime: string;
+  plan: string | null;
+  /** "day 12 of 365", and as a percentage. */
+  progress: string | null;
+  pct: number;
+  streak: number;
+  best: number;
+  /** Of the last seven reading days, how many were read. */
+  week: number;
+  behind: number;
+}
+
+/** What the menu-bar window shows: the main window's TrayState (null until it has sent one) and Open at Login. */
+export interface TrayInfo {
+  state: TrayState | null;
+  loginAvailable: boolean;
+  login: boolean;
 }
 
 export const api = {
@@ -310,4 +326,7 @@ export const api = {
   mediaState: (title: string | null, playing: boolean) => invoke<void>("media_state", { title, playing }),
   /** What the menu-bar menu shows and when the daily reminder fires; the menu's clicks come back as "tray" events. */
   setTray: (state: TrayState) => invoke<void>("set_tray", { state }),
+  trayInfo: () => invoke<TrayInfo>("tray_info"),
+  /** A choice in the menu-bar window, carried out by Rust or the main window (tray.rs). */
+  trayDo: (id: string) => invoke<void>("tray_do", { id }),
 };

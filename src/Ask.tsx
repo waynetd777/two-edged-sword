@@ -66,6 +66,35 @@ export function askOnce(prompt: string, model: string): Promise<string> {
   });
 }
 
+/** The question asked for a suggested next one: what the chat is about and its last three
+ *  exchanges, each cut short, newest last. */
+export function nextPrompt(about: string, turns: [string, string][]): string {
+  const cut = (t: string, n: number) => (t.length > n ? t.slice(0, n) + "…" : t);
+  return (
+    `You suggest the user's next question in a Bible study chat about ${about}. ` +
+    "Suggest the single most useful next message they could send: a natural follow-up that goes deeper, asks what the commentators or the original words say, or applies it. " +
+    "Write it as the user would type it, in the first person, at most 20 words, specific to what was discussed (name the verses, people or words). " +
+    "Don't open any files. Reply with the one message only: no quotes, no preamble, no list.\n" +
+    turns
+      .slice(-3)
+      .map(([q, a]) => `\nUser: ${cut(q, 1500)}\n\nAssistant: ${cut(a, 4000)}\n`)
+      .join("")
+  );
+}
+
+/** The suggestion in a reply: its first line, without quotes, a label or a list marker. Null when
+ *  there's nothing usable (empty, or too long to be one message). */
+export function parseNext(reply: string): string | null {
+  let line = reply
+    .split("\n")
+    .map((l) => l.trim())
+    .find((l) => l);
+  if (!line) return null;
+  line = line.replace(/^[-*•>\s]+/, "").replace(/^(Suggestion|Next message|Next|User):\s*/i, "");
+  line = line.replace(/^["'“”`]+|["'“”`]+$/g, "").trim();
+  return line && line.length <= 200 ? line : null;
+}
+
 /** Screenshot mode: the chat the next Ask panel opens on (scene.ts). */
 let sceneChat: string | null = null;
 // A panel already on screen takes it too, from the event.
@@ -256,6 +285,8 @@ export function AskPanel(p: AskProps) {
   const [scope, setScope] = useState<"passage" | "chapter">("passage");
   const [recent, setRecent] = useState<DOMRect | null>(null);
   const [modelMenu, setModelMenu] = useState<DOMRect | null>(null);
+  /** A next question to offer after an answer, for the chat as it was then (its message count). */
+  const [next, setNext] = useState<{ chat: string; at: number; text: string } | null>(null);
   // Every passage chat gets the library to search; the model decides whether a question needs it.
   const withLibrary = app.settings.includeCommentaries;
   const endRef = useRef<HTMLDivElement>(null);
@@ -314,6 +345,7 @@ export function AskPanel(p: AskProps) {
     const question = text.trim();
     if (!question || busy) return;
     setQ("");
+    setNext(null);
     setBusy(true);
     let id = chat?.id;
     let prompt = question;
@@ -389,14 +421,18 @@ export function AskPanel(p: AskProps) {
       messages: [...c.messages, { role: "user", text: question }, { role: "assistant", text: "" }],
     }));
     setStatus(null);
+    const before = chat?.messages ?? [];
+    let answer = "";
     subs.set(cid, {
       status: (t) => setStatus(t),
-      chunk: (t) =>
+      chunk: (t) => {
+        answer += t;
         update(cid, (c) => {
           const m = [...c.messages];
           m[m.length - 1] = { ...m[m.length - 1], text: m[m.length - 1].text + t };
           return { ...c, messages: m };
-        }),
+        });
+      },
       done: (d) => {
         update(cid, (c) => {
           const m = [...c.messages];
@@ -408,6 +444,14 @@ export function AskPanel(p: AskProps) {
         running.current = null;
         setBusy(false);
         setStatus(null);
+        if (!d.error && app.settings.askSuggest) {
+          const turns = exchanges([...before, { role: "user", text: question }, { role: "assistant", text: answer || d.text }], themes);
+          const at = before.length + 2;
+          askOnce(nextPrompt(about, turns), model)
+            .then(parseNext)
+            .then((text) => text && setNext({ chat: cid, at, text }))
+            .catch(() => {});
+        }
       },
     });
     try {
@@ -490,6 +534,8 @@ export function AskPanel(p: AskProps) {
   // so what you see is what gets asked. Not in a chat already under way.
   const defaultQ = messages.length === 0 ? offered[0] : undefined;
   const toSend = q.trim() ? q : (defaultQ ?? "");
+  // Offered only while the chat is as it was when the answer came.
+  const hint = !busy && chat && next?.chat === chat.id && next.at === messages.length ? next.text : null;
   const convo = (
     <>
       {chat?.opened && !samePlace(chat.opened, app.here()) && (
@@ -619,10 +665,16 @@ export function AskPanel(p: AskProps) {
       <textarea
         rows={2}
         value={q}
-        placeholder={defaultQ ?? (messages.length ? "Ask a follow-up…" : `Ask about ${about}…`)}
+        placeholder={defaultQ ?? (hint ? `${hint}   → to use it` : messages.length ? "Ask a follow-up…" : `Ask about ${about}…`)}
         aria-label="Question"
         onChange={(e) => setQ(e.target.value)}
         onKeyDown={(e) => {
+          // → (or Tab) in an empty box types the suggested next question, to edit or send.
+          if ((e.key === "ArrowRight" || e.key === "Tab") && !q && hint) {
+            e.preventDefault();
+            setQ(hint);
+            return;
+          }
           if (e.key === "Enter" && (e.metaKey || !e.shiftKey)) {
             e.preventDefault();
             send(toSend);
@@ -812,6 +864,20 @@ export function AskPanel(p: AskProps) {
       {popovers}
     </section>
   );
+}
+
+/** The pairs of question and answer in a chat, oldest first, without the answers' Themes line. */
+function exchanges(messages: Chat["messages"], themes: HlTheme[]): [string, string][] {
+  const out: [string, string][] = [];
+  let q: string | null = null;
+  for (const m of messages) {
+    if (m.role === "user") q = m.text;
+    else if (q !== null && !m.error && m.text) {
+      out.push([q, splitThemes(m.text, themes).body]);
+      q = null;
+    }
+  }
+  return out;
 }
 
 /** Whether a chat's place is where the user is now (then there is nothing to reopen). */

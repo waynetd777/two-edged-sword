@@ -106,13 +106,14 @@ The reminder comes while the app runs, including in the menu bar with its window
 
 ## Menu bar
 
-Closing the window leaves the app in the menu bar. Its menu has:
+Closing the window leaves the app in the menu bar. Click its icon for a small window; click elsewhere or press Esc to close it.
 
-<a href="images/index.md#quiet-time"><img alt="The menu-bar menu" src="images/menu-bar.png" width="340"></a>
+<a href="images/index.md#quiet-time"><picture><source media="(prefers-color-scheme: dark)" srcset="images/tray-dark.png"><img alt="The menu-bar window: today's reading, the streak and Start Quiet time" src="images/tray-light.png" width="340"></picture></a>
 
-- **Start Quiet Time**, with today's readings
-- **Continue Reading**, where you left off
-- **New Journal Entry** and **Search…**
-- **Daily Reminder**, to turn it on or off
-- **Open at Login**, to start the app in the menu bar when you log in
-- **Open Two-edged Sword** and **Quit**
+- Today's reading, the plan and how far through it you are. It says when today is done.
+- **Streak**, **This week** and **Plan**: days read in a row, days read of the last seven, and the plan's progress. Click one for Plans.
+- **Start Quiet time** (↩), or **Choose a plan** without one.
+- **Continue reading** where you left off (⌘R), **New journal entry** (⌘J) and **Search the Bible** (⌘F).
+- **Daily reminder**, to turn it on or off.
+- **Open at login**, to start the app in the menu bar when you log in.
+- **Open Two-edged Sword** (⌘O), **Settings…** (⌘,) and **Quit** (⌘Q).

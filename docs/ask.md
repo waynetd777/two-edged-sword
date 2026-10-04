@@ -9,6 +9,7 @@ names its sources.
 - Chats stay on this Mac. Find them under **Recent** on any Ask panel.
 - Opening an old chat takes you back to where it started.
 - An answer can be added to your journal in one click.
+- After each answer the box offers a next question in grey; → or Tab types it in. Settings › AI assistant › **Suggest a next question** turns it off.
 - Ask also knows this guide, so you can ask how to do something in the app ("how do I hide my
   highlights?").
 
