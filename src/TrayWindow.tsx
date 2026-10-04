@@ -82,7 +82,7 @@ export function TrayWindow() {
   useEffect(() => {
     const k = (e: KeyboardEvent) => {
       if (e.key === "Escape") return hide();
-      if (e.key === "Enter" && !e.metaKey) return act("quiet");
+      if (e.key === "Enter" && !e.metaKey) return act(e.altKey ? "quiet-audio" : "quiet");
       if (!e.metaKey) return;
       const id = (
         { o: "open", r: "continue", j: "journal", f: "search", p: "plans", ",": "settings", q: "quit" } as Record<string, string>
@@ -152,11 +152,22 @@ export function TrayWindow() {
       )}
       <div className="tray-cta">
         {hasPlan && !s.done ? (
-          <button type="button" className="btn primary tray-go" onClick={() => act("quiet")}>
-            <Icon name="plans" size={14} />
-            Start Quiet time
-            <span className="kbd">↩</span>
-          </button>
+          <div className="tray-go-row">
+            <button type="button" className="btn primary tray-go" onClick={() => act("quiet")}>
+              <Icon name="plans" size={14} />
+              Start Quiet time
+              <span className="kbd">↩</span>
+            </button>
+            <button
+              type="button"
+              className="btn primary tray-go tray-audio"
+              aria-label="Start Quiet time read with audio"
+              title="Start Quiet time read with audio (⌥↩)"
+              onClick={() => act("quiet-audio")}
+            >
+              <Icon name="speaker" size={14} />
+            </button>
+          </div>
         ) : (
           <button type="button" className="btn tray-go" onClick={() => act("plans")}>
             <Icon name="plans" size={14} />

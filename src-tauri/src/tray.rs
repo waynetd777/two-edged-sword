@@ -151,7 +151,7 @@ pub fn tray_do(app: AppHandle, id: String) {
         "open" => crate::show_main(&app),
         "quit" => crate::quit(&app),
         "login" => toggle_login(),
-        "quiet" | "continue" | "journal" | "search" | "plans" | "settings" | "reminder" => {
+        "quiet" | "quiet-audio" | "continue" | "journal" | "search" | "plans" | "settings" | "reminder" => {
             if id != "reminder" {
                 crate::show_main(&app);
             }

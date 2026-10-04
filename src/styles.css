@@ -2055,6 +2055,14 @@ html.tray-view #root {
   justify-content: center;
   gap: 8px;
 }
+.tray-go-row {
+  display: flex;
+  gap: 6px;
+}
+.tray-go-row .tray-audio {
+  width: 40px;
+  flex-shrink: 0;
+}
 .tray-go .kbd {
   margin-left: 4px;
   background: transparent;

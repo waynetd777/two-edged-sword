@@ -14,7 +14,7 @@ import { behind, current, firstUndone, streak, todayFor, ymd, today as startOfTo
 import { useStartQuietTime } from "./QuietTime";
 import { useApp } from "./state";
 
-type TrayAction = "quiet" | "continue" | "search" | "journal" | "plans" | "settings" | "reminder";
+type TrayAction = "quiet" | "quiet-audio" | "continue" | "search" | "journal" | "plans" | "settings" | "reminder";
 
 export function useTray() {
   const app = useApp();
@@ -60,8 +60,8 @@ export function useTray() {
   // The listener is set up once; what it does is read from here, so it always sees the current state.
   const act = useRef<(a: TrayAction) => void>(() => {});
   act.current = (a) => {
-    if (a === "quiet") {
-      if (plan && t && !done && t.parts.length) startQuiet(plan, t.parts, false);
+    if (a === "quiet" || a === "quiet-audio") {
+      if (plan && t && !done && t.parts.length) startQuiet(plan, t.parts, a === "quiet-audio");
       else app.go("plans");
     } else if (a === "continue") app.go("read");
     else if (a === "search") app.go("search");

@@ -113,7 +113,7 @@ Closing the window leaves the app in the menu bar. Click its icon for a small wi
 
 - Today's reading, the plan and how far through it you are. It says when today is done.
 - **Streak**, **This week** and **Plan**: days read in a row, days read of the last seven, and the plan's progress. Click one for Plans.
-- **Start Quiet time** (↩), or **Choose a plan** without one.
+- **Start Quiet time** (↩), or **Choose a plan** without one. The speaker button beside it (⌥↩) starts it read with audio.
 - **Continue reading** where you left off (⌘R), **New journal entry** (⌘J) and **Search the Bible** (⌘F).
 - **Daily reminder**, to turn it on or off.
 - **Open at login**, to start the app in the menu bar when you log in.
