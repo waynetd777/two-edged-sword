@@ -36,7 +36,7 @@ import {
 import { usePlayer } from "./speech";
 import { QuietStep, useApp } from "./state";
 import { useDrag } from "./ui";
-import { Picked, pickSongs } from "./worship";
+import { markPlayed, Picked, pickSongs } from "./worship";
 import { Closing, pickClosing } from "./closing";
 import { inverts } from "./WebPage";
 
@@ -322,6 +322,7 @@ export function QuietTime({ focus }: { focus: boolean }) {
           app.toast("Couldn't find the songs in Music");
           return;
         }
+        markPlayed(songs).catch((e) => console.error("worship-history", e));
         // The words in the reading column while the songs play.
         app.openLyrics();
         // At once, so pause and skip work as soon as it's playing, then every second.

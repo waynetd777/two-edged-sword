@@ -4,11 +4,13 @@
 // Worship songs for Quiet time: chosen from the user's Music library to suit the day's reading.
 // The assistant picks them from the library's worship songs by number, so it can only name songs
 // that are there; without an assistant, or if its answer can't be read, they are picked at random.
+// Songs Quiet time has played are kept (worship-history), and none played in the last two weeks
+// is chosen again.
 
 import { api, MusicTrack } from "./api";
 import { askOnce } from "./Ask";
 import { assistantModels, pickModel } from "./assistant";
-import { today } from "./plans";
+import { today, ymd } from "./plans";
 
 /** Genres that hold worship music, as the Music app and the stores name them. */
 const WORSHIP = /christian|gospel|worship|praise|religious|inspirational|ccm/i;
@@ -21,7 +23,7 @@ function worshipSongs(): Promise<MusicTrack[]> {
     .then((ts) => {
       const seen = new Set<string>();
       return ts.filter((t) => {
-        const k = `${t.name.toLowerCase()}|${t.artist.toLowerCase()}`;
+        const k = songKey(t);
         if (!WORSHIP.test(t.genre) || !t.name.trim() || seen.has(k)) return false;
         seen.add(k);
         return true;
@@ -32,6 +34,47 @@ function worshipSongs(): Promise<MusicTrack[]> {
       throw e;
     });
   return library;
+}
+
+/** Days a played song is left out of the choice for. */
+const REST_DAYS = 14;
+const HISTORY = "worship-history";
+
+/** A song Quiet time played, and the day (yyyy-mm-dd). */
+interface Played {
+  id: string;
+  name: string;
+  artist: string;
+  date: string;
+}
+
+const songKey = (t: { name: string; artist: string }) => `${t.name.toLowerCase()}|${t.artist.toLowerCase()}`;
+
+let history: Promise<Played[]> | null = null;
+function playedSongs(): Promise<Played[]> {
+  history ??= api.storeRead<Played[]>(HISTORY).then(
+    (x) => (Array.isArray(x) ? x : []),
+    () => [],
+  );
+  return history;
+}
+
+/** Records that Quiet time is playing these songs today. */
+export async function markPlayed(songs: Song[]) {
+  const date = ymd(new Date());
+  const all = await playedSongs();
+  const fresh = songs.filter((s) => !all.some((p) => p.id === s.id && p.date === date));
+  if (!fresh.length) return;
+  all.push(...fresh.map(({ id, name, artist }) => ({ id, name, artist, date })));
+  await api.storeWrite(HISTORY, all);
+}
+
+/** The songs played in the last REST_DAYS days, by id and by title and artist. */
+async function recentlyPlayed(): Promise<Set<string>> {
+  const d = new Date();
+  d.setDate(d.getDate() - REST_DAYS);
+  const since = ymd(d);
+  return new Set((await playedSongs()).filter((p) => p.date > since).flatMap((p) => [p.id, songKey(p)]));
 }
 
 export interface Song {
@@ -70,8 +113,12 @@ export function pickSongs(n: number, about: string[], when: "before" | "after", 
 }
 
 async function choose(n: number, about: string[], when: "before" | "after", model: string, avoid: Set<string>): Promise<Picked> {
-  const all = (await worshipSongs()).filter((t) => !avoid.has(t.id));
-  if (!all.length) throw new Error("No worship songs in your Music library (Christian, gospel or worship genres).");
+  const library = (await worshipSongs()).filter((t) => !avoid.has(t.id));
+  if (!library.length) throw new Error("No worship songs in your Music library (Christian, gospel or worship genres).");
+  // Leaving out what was played lately, unless that leaves too few.
+  const recent = await recentlyPlayed();
+  const rested = library.filter((t) => !recent.has(t.id) && !recent.has(songKey(t)));
+  const all = rested.length >= n ? rested : library;
   const take = (xs: MusicTrack[]) => xs.slice(0, n).map(({ id, name, artist }) => ({ id, name, artist }));
   const random = (note: string): Picked => ({ songs: take([...all].sort(() => Math.random() - 0.5)), note });
   const models = assistantModels();

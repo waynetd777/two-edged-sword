@@ -51,6 +51,7 @@ start by themselves after a countdown that leaves time to read the card.
 - **Songs before the reading** and **Songs after the reading** each turn on separately, with
   their own number of songs.
 - With both on, different songs play after the reading.
+- A song Quiet time has played isn't chosen again for 14 days.
 
 While the songs play, their words show in the reading column, and the Quiet time bar moves up
 into the top bar. The song's name, cover and why it was chosen stay at the top while the words
