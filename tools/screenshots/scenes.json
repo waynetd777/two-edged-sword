@@ -9,8 +9,30 @@
       "bible": "kjv",
       "studyPane": true,
       "studyTab": "commentary",
-      "favBibles": ["kjv", "asv", "ylt"]
+      "favBibles": [
+        "kjv",
+        "asv",
+        "ylt"
+      ]
     }
+  },
+  {
+    "name": "help",
+    "loc": {
+      "book": 62,
+      "chapter": 1
+    },
+    "settings": {
+      "bible": "kjv",
+      "studyPane": true,
+      "studyTab": "commentary",
+      "favBibles": [
+        "kjv",
+        "asv",
+        "ylt"
+      ]
+    },
+    "help": true
   },
   {
     "name": "ask",
@@ -245,7 +267,10 @@
   {
     "name": "library",
     "screen": "library",
-    "type": ["[placeholder=\"Find a Bible, commentary or book in the library\"]", "Strong"]
+    "type": [
+      "[placeholder=\"Find a Bible, commentary or book in the library\"]",
+      "Strong"
+    ]
   },
   {
     "name": "tray",

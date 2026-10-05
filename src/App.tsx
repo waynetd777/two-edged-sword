@@ -13,6 +13,7 @@ import { WordStudyScreen } from "./WordStudy";
 import { Palette } from "./Palette";
 import { PlayerBar, ReadScreen } from "./Read";
 import { DocReader } from "./DocReader";
+import { HelpDrawer } from "./Help";
 import { WebPage } from "./WebPage";
 import { LyricsPage } from "./LyricsPage";
 import { StrongsHover } from "./WordLookup";
@@ -147,6 +148,7 @@ function Screens() {
           )}
         </div>
       )}
+      <HelpDrawer />
       <StrongsHover />
       <Tooltips />
       <WordHoverBox />

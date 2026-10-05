@@ -3,6 +3,7 @@
 
 import { ReactNode, useState } from "react";
 import { fmtRef, isApocrypha } from "./bible";
+import { HelpButton } from "./Help";
 import { Icon, Wordmark } from "./icons";
 import { Screen, useApp } from "./state";
 import { todayReading } from "./plans";
@@ -233,7 +234,7 @@ export function Sidebar() {
   );
 }
 
-/** The 52px bar at the top of every screen: history, reference and Bible pickers, search, tools. */
+/** The 52px bar at the top of every screen: history, reference and Bible pickers, search, tools, help. */
 export function Topbar({ children, right }: { children?: ReactNode; right?: ReactNode }) {
   const app = useApp();
   return (
@@ -247,6 +248,7 @@ export function Topbar({ children, right }: { children?: ReactNode; right?: Reac
       {children}
       <div className="spacer" />
       {right}
+      <HelpButton />
     </header>
   );
 }

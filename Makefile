@@ -47,8 +47,7 @@ RELEASE_ENV := SDKROOT=$(lastword $(OLD_SDK))
 endif
 
 # Each release build bumps the version (tools/bump_version.py: 1.0.4 → 1.0.5) and gets its own build
-# number, the same on the app (CFBundleVersion), its Help Book and the binary (Settings shows it).
-# macOS caches the Help Book by its version (1.0.5) and only re-reads a new one, so every release needs one.
+# number, the same on the app (CFBundleVersion) and the binary (Settings shows it).
 BUILD := $(shell date +%Y%m%d.%H%M%S)
 
 ## Bump the version and build the .app, signed with the identity in signing.local when there is one.
@@ -71,10 +70,6 @@ install-app: app
 	@rm -rf "/Applications/Two-edged Sword.app"
 	@ditto "$(APP)" "/Applications/Two-edged Sword.app"
 	@echo "installed /Applications/Two-edged Sword.app"
-	@# helpd keeps the old book cached under the same path and then shows "content unavailable", so drop its cache and re-register.
-	@killall helpd 2>/dev/null || true
-	@rm -rf ~/Library/Caches/com.apple.helpd/*
-	@/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f "/Applications/Two-edged Sword.app"
 
 ## Redraw design/icon.png and the tray template, then regenerate the Tauri icon set.
 icons:
@@ -90,14 +85,14 @@ screenshots:
 sign-check:
 	@codesign -dv --verbose=2 "/Applications/Two-edged Sword.app" 2>&1 | grep -E "^(Identifier|Authority|Signature|TeamIdentifier)"
 
-## Build the Help Book from docs/ (the release build does this itself; for the dev build's Help menu).
+## Check the help: every link in the user guides, and each screen's section, points at a section that exists.
 help:
-	@python3 tools/helpbook.py
+	@python3 tools/helpcheck.py
 
 ## Build the modules built into the app (src-tauri/modules/) from public-domain sources.
 core:
 	@python3 tools/core/build.py
 
-dev: help
+dev:
 	@python3 tools/core/build.py --if-missing
 	npm run tauri dev

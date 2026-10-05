@@ -8,6 +8,12 @@ On [the README](../../README.md).
 
 - Reading 1 John 1 with the study pane open on the commentaries: [light](read-light.png) · [dark](read-dark.png)
 
+## Features
+
+On [Features](../features.md).
+
+- The help beside Read, open at the Read section of the Reading guide: [light](help-light.png) · [dark](help-dark.png)
+
 ## Reading
 
 On [Reading](../reading.md).

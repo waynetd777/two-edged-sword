@@ -65,7 +65,7 @@ It opens normally after that. The first time you use some features, macOS asks f
 
 ## Quick start
 
-Needs macOS 13 or later, the Xcode Command Line Tools, Rust, Node and pandoc. The built-in modules
+Needs macOS 13 or later, the Xcode Command Line Tools, Rust and Node. The built-in modules
 are downloaded and built on the first `make dev` or `make app` (`make core`). Ask also needs Claude Code, Codex, Antigravity or GitHub Copilot.
 
 ```sh

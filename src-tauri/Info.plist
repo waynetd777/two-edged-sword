@@ -2,10 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>CFBundleHelpBookFolder</key>
-	<string>Two-edged Sword.help</string>
-	<key>CFBundleHelpBookName</key>
-	<string>com.wayned.two-edged-sword.help</string>
 	<key>NSDocumentsFolderUsageDescription</key>
 	<string>Two-edged Sword keeps your journal in Documents › Two-edged Sword unless you choose another folder in Settings.</string>
 	<key>NSAppleEventsUsageDescription</key>

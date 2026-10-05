@@ -43,11 +43,16 @@ Something refused by mistake can be allowed in System Settings › Privacy & Sec
 | ⌘[ and ⌘] | Back and forward, to where you were |
 | ⌘, | Settings |
 | ⌘P | Play or pause reading aloud ([Listen](reading.md#listen)) |
-| ⌘? | Help |
+| ? or ⌘? | Help for the screen you're on |
 
 - **Back and forward** (top left) remember screens, passages, words and searches.
 - The **sidebar** lists your bookmarks and recent chapters. Hover one for a preview; × removes it.
 - Hover any control to see what it does.
+- The **?** at the top right opens the help beside the screen, at the part of the guides for that
+  screen. Type to search every page; **Ask about Two-edged Sword** asks the assistant instead.
+  Esc closes it.
+
+<a href="images/index.md#features"><picture><source media="(prefers-color-scheme: dark)" srcset="images/help-dark.png"><img alt="The help beside Read, open at the Read section of the Reading guide" src="images/help-light.png"></picture></a>
 
 ## Settings
 

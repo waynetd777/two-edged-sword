@@ -8,7 +8,7 @@ they agree. Prints the new version.
     python3 tools/bump_version.py 1.1.0      # set it (a minor or major step is chosen by hand)
 
 `make app` runs it before every release build. The build number (CFBundleVersion) is separate: the
-Makefile stamps one per build on the app, its Help book and the binary.
+Makefile stamps one per build on the app and the binary.
 """
 import json, re, sys
 from pathlib import Path

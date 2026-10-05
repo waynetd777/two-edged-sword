@@ -8,6 +8,7 @@
 import { api, JournalEntry, setReadOnly, setSceneJournal } from "./api";
 import { setSceneChat } from "./Ask";
 import { assistantChecked } from "./assistant";
+import { openHelp } from "./Help";
 import { Chat, Loc, Pending, Screen, Session, Settings, useApp } from "./state";
 import type { PlayerState } from "./speech";
 import { setSceneVariances, VarianceFile } from "./variances";
@@ -43,6 +44,8 @@ export interface Scene {
   entries?: JournalEntry[];
   /** A journal entry to open, by id. */
   journal?: string;
+  /** The help drawer open, at the screen's section. */
+  help?: boolean;
   /** A CSS selector clicked after that (a toolbar button, say), to show what it does. */
   click?: string | string[];
   /** Before `click`: a click on the first place this text is shown (a misspelled word, say). */
@@ -103,6 +106,7 @@ export function runScene(app: ReturnType<typeof useApp>, still: (s: Partial<Play
         if (sc.loc) app.open(sc.loc, sc.screen ?? "read");
         else if (sc.screen) app.go(sc.screen);
         if (sc.doc) app.openDoc(sc.doc.module, sc.doc.title, sc.doc.kind ?? "reference", sc.doc.para);
+        if (sc.help) openHelp({});
         // Then text typed into a box. React tracks an input's value itself, so it's set through the
         // native setter and announced.
         const type = () => {

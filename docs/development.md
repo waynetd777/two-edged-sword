@@ -8,14 +8,14 @@ runs the AI tools for Ask. The frontend is everything you see.
 
 | Command | What it does |
 |---|---|
-| `make dev` | Build the help, then run the app with hot reload |
+| `make dev` | Run the app with hot reload |
 | `make check` | Rust tests (some read the modules on this Mac, and skip without them) and the TypeScript check |
 | `make lint` | rustfmt, clippy, Prettier and ESLint; any warning fails it |
 | `make fmt` | Format the Rust (rustfmt) and TypeScript and CSS (Prettier) |
 | `make app` | Bump the version (1.0.4 → 1.0.5) and build the .app, signed with the identity in `signing.local` if there is one |
 | `make install-app` | Build it and replace the copy in /Applications |
 | `make dmg` | Pack the built app into `Two-edged-Sword.dmg` for a release |
-| `make help` | Build the Help Book from `docs/` |
+| `make help` | Check the help: every link in the guides, and each screen's section, resolves |
 | `make core` | Build the built-in modules into `src-tauri/modules/` (`make dev` and `make app` build them if they're missing) |
 | `make screenshots` | Retake the screenshots in `docs/images/` |
 | `make icons` | Redraw the icon artwork and regenerate the icon set |
@@ -28,7 +28,7 @@ runs the AI tools for Ask. The frontend is everything you see.
 
 Every release build gets the next patch version (`tools/bump_version.py`, which keeps
 `tauri.conf.json`, `package.json`, `Cargo.toml` and the lock files in step) and one build number,
-stamped on the app, its Help book and the binary; Settings shows both. For a minor or major step,
+stamped on the app and the binary; Settings shows both. For a minor or major step,
 run `python3 tools/bump_version.py 1.1.0` first: `make app` then builds 1.1.1. Commit the bump with
 the release.
 
@@ -70,12 +70,12 @@ bundle as a login item, which survives rebuilds while the bundle identifier stay
 
 ## Help
 
-The app's Help menu opens an Apple Help Book built from the user guides in `docs/` (all but this
-one). `tools/helpbook.py` converts them with pandoc, a page per `##` section, styled like the app,
-with search indexes from `hiutil`. The release build runs it and copies the book into the app's
-Resources; `src-tauri/Info.plist` registers it. The book carries the app's version, which every
-release build bumps, because macOS keeps showing a cached book until its version changes. `make install-app` also clears the Help cache (`~/Library/Caches/com.apple.helpd/`) and re-registers the app, since the old book cached at the same path otherwise makes Help show "The selected content is currently unavailable". Under `make dev`, Help opens the pages in the
-browser instead.
+The help is a drawer on the right of the window (`src/Help.tsx`), showing the user guides in
+`docs/` (all but this one). `?`, the top bar's ? button and Help › Two-edged Sword Help (⌘?, which
+`src-tauri/src/help.rs` turns into a `help` event) open it. `src/guides.ts` imports the guides at
+build time, drops their screenshots and breadcrumbs, and splits each into its `##` sections; its
+`SCREEN_HELP` says which section each screen opens on. Links between guides stay in the drawer.
+`make help` (`tools/helpcheck.py`) checks every link and screen points at a heading that exists.
 
 Ask gets the same guides: `src-tauri/src/help.rs` builds them into the app, and before each
 question writes them to `help/` in the chat's folder, where the assistant searches them when a
@@ -88,10 +88,10 @@ Keep them short:
 
 - Only what someone needs to use the feature: what it does, how to do it, the keys.
 - Short sentences in plain words. One idea per sentence or bullet.
-- A `##` section per topic: each becomes a help page, and its first sentence is the page's
-  summary in Help search. `###` headings split up anything longer.
+- A `##` section per topic: each is a folding section in the help, found by the help's search.
+  `###` headings split up anything longer.
 - Lists and tables rather than paragraphs; no edge cases, internals or history.
-- Developer detail goes here, not in the user guides, and the guides don't link here: Help
+- Developer detail goes here, not in the user guides, and the guides don't link here: the help
   hasn't this page, so `make help` stops on a link to it.
 
 Run `make help` to check the result.
@@ -220,7 +220,7 @@ reference, and images inline as `data:` URLs.
 | `src/tray.tsx`, `src/TrayWindow.tsx`, `src-tauri/src/tray.rs` | The menu-bar window (what it shows comes from the main window) and the daily reminder |
 | `src-tauri/src/login_item.rs`, `login_launch.rs` | Open at Login |
 | `src-tauri/src/tts.rs` | Speech through AVSpeechSynthesizer (WebKit's speech API hides downloaded voices) |
-| `src-tauri/src/help.rs`, `tools/helpbook.py` | The Help menu and the Help Book |
+| `src/Help.tsx`, `src/guides.ts`, `src-tauri/src/help.rs`, `tools/helpcheck.py` | The help drawer, the guides it shows, and the Help menu |
 | `src-tauri/src/assistant/` | Running Claude Code, Codex, Antigravity or Copilot for Ask |
 | `src-tauri/src/study.rs`, `books.rs` | Writing library material out as files for Ask to search |
 | `index.html` | The splash screen, painted before React starts |

@@ -6,7 +6,7 @@
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:1430",
-    "beforeBuildCommand": "python3 tools/helpbook.py && python3 tools/core/build.py --if-missing && npm run build",
+    "beforeBuildCommand": "python3 tools/core/build.py --if-missing && npm run build",
     "frontendDist": "../dist"
   },
   "app": {
@@ -62,10 +62,7 @@
     ],
     "macOS": {
       "minimumSystemVersion": "13.0",
-      "entitlements": "Entitlements.plist",
-      "files": {
-        "Resources/Two-edged Sword.help": "gen/help/Two-edged Sword.help"
-      }
+      "entitlements": "Entitlements.plist"
     }
   }
 }

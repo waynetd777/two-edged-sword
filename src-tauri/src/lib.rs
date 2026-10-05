@@ -664,7 +664,7 @@ fn quit(app: &AppHandle) {
     app.exit(0)
 }
 
-fn show_main(app: &AppHandle) {
+pub(crate) fn show_main(app: &AppHandle) {
     // Back in the Dock before the window is shown: done afterwards, the window can come up
     // behind whatever had focus.
     set_in_dock(app, true);
