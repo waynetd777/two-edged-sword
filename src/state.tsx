@@ -48,6 +48,8 @@ export interface Settings {
   continueEntry: boolean;
   readNumbers: boolean;
   highlightWords: boolean;
+  /** Faint pictures (a cross, a dove, stars…) behind a playing song's words (Visions). */
+  songVisions: boolean;
   journalDir: string;
   showNotes: boolean;
   /** The journal highlighter's colour, kept until another is picked. */
@@ -115,6 +117,7 @@ const DEFAULTS: Settings = {
   continueEntry: false,
   readNumbers: false,
   highlightWords: true,
+  songVisions: true,
   journalDir: "",
   showNotes: true,
   journalHighlight: "yellow",

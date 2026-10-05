@@ -13,6 +13,7 @@ import { artworkFor, Lyrics, lyricsFor, sceneSong } from "./lyrics";
 import { Topbar } from "./Shell";
 import { useApp } from "./state";
 import { Flames } from "./Flames";
+import { Visions } from "./Visions";
 import { useDark } from "./WebPage";
 
 const plainLines = (text: string): Lyrics => ({
@@ -154,6 +155,30 @@ export function LyricsPage({ focus, setFocus }: { focus: boolean; setFocus: (f: 
   );
 
   const stopped = !now || now.state === "stopped" || !name;
+  // How far across the page the words run, focus mode or not: every line's text (not its box,
+  // which is the column's width), and the heading above them, so a picture can keep beside them.
+  const wordsAt = () => {
+    const page = scroller.current?.parentElement?.getBoundingClientRect();
+    if (!page) return null;
+    let left = Infinity,
+      right = -Infinity;
+    const r = document.createRange();
+    for (const el of scroller.current!.querySelectorAll("[data-line], [data-rest], p")) {
+      r.selectNodeContents(el);
+      const b = el.hasAttribute("data-rest") ? el.getBoundingClientRect() : r.getBoundingClientRect();
+      if (!b.width) continue;
+      left = Math.min(left, b.left);
+      right = Math.max(right, b.right + 16); // the line being sung is drawn a little larger
+    }
+    for (const el of scroller.current!.parentElement!.querySelectorAll(".lyrics-cover, [data-quiet-anchor]")) {
+      r.selectNodeContents(el);
+      const b = el.tagName === "IMG" ? el.getBoundingClientRect() : r.getBoundingClientRect();
+      if (!b.width) continue;
+      left = Math.min(left, b.left);
+      right = Math.max(right, b.right);
+    }
+    return left < right ? { left: left - page.left, right: right - page.left } : null;
+  };
   const songTime = () => {
     const h = heard.current;
     return h.playing ? h.pos + (performance.now() - h.t) / 1000 : h.pos;
@@ -170,6 +195,12 @@ export function LyricsPage({ focus, setFocus }: { focus: boolean; setFocus: (f: 
       {!stopped && lyrics === null && (
         <div className="lyrics-art" aria-hidden style={{ opacity: 0.85 }}>
           <Flames bpm={now?.bpm ?? 0} playing={now?.state === "playing"} time={songTime} dark={dark} />
+        </div>
+      )}
+      {/* Pictures that come and go, words or not, in the artwork's colours (Visions). */}
+      {!stopped && app.settings.songVisions && (
+        <div className="lyrics-art" aria-hidden>
+          <Visions bpm={now?.bpm ?? 0} playing={now?.state === "playing"} time={songTime} dark={dark} art={artUrl} words={wordsAt} />
         </div>
       )}
       {focus ? (

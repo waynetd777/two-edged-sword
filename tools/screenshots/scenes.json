@@ -134,7 +134,8 @@
     "settings": {
       "studyPane": false
     },
-    "songFile": "lyrics-song.json"
+    "songFile": "lyrics-song.json",
+    "songVision": "cross"
   },
   {
     "name": "reminder",

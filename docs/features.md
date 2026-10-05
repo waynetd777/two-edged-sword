@@ -60,7 +60,8 @@ Something refused by mistake can be allowed in System Settings › Privacy & Sec
 - **Appearance**: theme, font and size, words of Jesus in red, verse or paragraph layout.
 - **Bibles**: the default translation, up to three favourites, and the Compare columns.
 - **Highlights**: a name for each of the eight colours, such as a theme.
-- **Listening**: voices, speed, and whether to highlight each word and read on.
+- **Listening**: voices, speed, whether to highlight each word and read on, and the pictures
+  shown while a song plays.
 - **Journal**: its folder, notes beside verses, and grammar checking.
 - **Quiet time**: the daily reminder, and what to do when you fall behind.
 - **AI assistant**: which tools are installed, the default model, what Ask may read and send, and

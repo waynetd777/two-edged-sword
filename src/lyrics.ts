@@ -35,6 +35,9 @@ export interface SceneSong {
   duration: number;
   lrc: string;
   art?: string;
+  /** One of the pictures behind the words (Visions), shown this far through (0–1). */
+  vision?: string;
+  visionAt?: number;
 }
 export let sceneSong: SceneSong | null = null;
 export const setSceneSong = (s: SceneSong) => (sceneSong = s);

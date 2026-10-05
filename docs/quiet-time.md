@@ -64,6 +64,10 @@ scroll:
 - Why each song was chosen shows under its name.
 - A song with no lyrics found gets softly burning flames instead, swelling to the song's tempo
   (Music's BPM for it, or a slow tempo if it has none). The app can't hear the music itself.
+- Faint pictures come and go behind the words, with lyrics or without, in the colours of the
+  song's artwork: a cross, a dove passing over, stars, rain, wheat and more, one or two at a time.
+  The larger ones keep beside the words, in focus mode too.
+  Settings › Listening › **While a song plays** turns them off.
 - The bar shows how far through the song Music is, with the time gone and the time left.
 - **Lyrics** on the bar brings the words back if you've gone elsewhere.
 - **Open Music** (top right) switches to Music.

@@ -13,6 +13,7 @@ import { Chat, Loc, Pending, Screen, Session, Settings, useApp } from "./state";
 import type { PlayerState } from "./speech";
 import { setSceneVariances, VarianceFile } from "./variances";
 import { SceneSong, setSceneSong } from "./lyrics";
+import { setSceneVision } from "./Visions";
 import { today as startOfToday, ymd } from "./plans";
 
 export interface Scene {
@@ -179,6 +180,7 @@ export function runScene(app: ReturnType<typeof useApp>, still: (s: Partial<Play
         if (sc.player) still(sc.player);
         if (sc.song) {
           setSceneSong(sc.song);
+          if (sc.song.vision) setSceneVision(sc.song.vision, sc.song.visionAt);
           app.openLyrics();
         }
         if (sc.pending) {

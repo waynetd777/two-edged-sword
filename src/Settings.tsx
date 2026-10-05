@@ -214,6 +214,11 @@ export function SettingsScreen() {
                 Read verse numbers
               </Switch>
             </Row>
+            <Row label="While a song plays" hint="Behind the words on the Lyrics page, in the artwork's colours.">
+              <Switch on={s.songVisions} onChange={(v) => app.set({ songVisions: v })}>
+                Show pictures: a cross, a dove, stars and more
+              </Switch>
+            </Row>
           </Section>
           <Section title="Journal">
             <Row

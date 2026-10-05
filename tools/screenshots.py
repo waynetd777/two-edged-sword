@@ -83,10 +83,13 @@ def capture(scene, theme):
     """Launches the app on the scene, unseen, and returns its webview's snapshot as an sRGB image, or None."""
     # A fixture from a file beside scenes.json: "chatFile" becomes "chat", and so on.
     files = {"chatFile": "chat", "sessionFile": "session", "entriesFile": "entries", "variancesFile": "variances", "songFile": "song"}
-    sc = {k: v for k, v in scene.items() if k not in files and k not in ("crop", "width", "settle")}
+    sc = {k: v for k, v in scene.items() if k not in files and k not in ("crop", "width", "settle", "songVision")}
     for f, k in files.items():
         if f in scene:
             sc[k] = json.loads((HERE / scene[f]).read_text())
+    # "songVision": one of the pictures behind the song's words, shown in full (Visions.tsx).
+    if "songVision" in scene and "song" in sc:
+        sc["song"] = {**sc["song"], "vision": scene["songVision"]}
     # No favourite translations unless the scene names them: the user's own could be licensed Bibles.
     sc["settings"] = {"favBibles": [], **sc.get("settings", {}), "theme": theme}
     with tempfile.TemporaryDirectory() as tmp:

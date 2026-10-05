@@ -215,6 +215,7 @@ reference, and images inline as `data:` URLs.
 | `src-tauri/src/store.rs` | The JSON files in Application Support |
 | `src-tauri/src/music.rs` | Quiet time's worship songs, played through Music |
 | `src/LyricsPage.tsx`, `src/lyrics.ts`, `src/Flames.tsx` | The playing song's words (LRCLIB), artwork (Music, else the iTunes search API) and the flames shown when it has none |
+| `src/Visions.tsx`, `src/pictures/` | The fifty pictures behind a playing song's words, by subject (`sky`, `land`, `places`, `signs`, `creatures`), drawn with `pictures/kit.ts`, in the artwork's colours; a scene's `song.vision` shows one |
 | `src/closing.ts` | Quiet time's closing verse, chosen by the assistant |
 | `src/WebPage.tsx` | An online devotional framed in the reading column; `open_web` in `lib.rs` is its own window, and `web_frameable` checks (with curl) whether a site added by the user can be framed |
 | `src/tray.tsx`, `src/TrayWindow.tsx`, `src-tauri/src/tray.rs` | The menu-bar window (what it shows comes from the main window) and the daily reminder |
