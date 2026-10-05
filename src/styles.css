@@ -1424,6 +1424,10 @@ button.ks-chip {
   font: 400 15.5px/1.65 var(--serif);
   text-wrap: pretty;
 }
+/* A commentary, dictionary or book in the study pane follows the reading text size. */
+.es.prose {
+  font-size: calc(var(--read-size) - 3.5px);
+}
 
 /* ---------- Markdown (journal, answers) ---------- */
 .md p {
@@ -1451,6 +1455,21 @@ button.ks-chip {
   background: var(--panel2);
   border: 1px solid var(--border);
   font-style: italic;
+}
+/* In the editor the card is drawn behind the quote, so the word being read aloud (a box behind the
+   words, after the editor in Journal.tsx) shows on it. */
+.editor blockquote {
+  position: relative;
+  background: none;
+}
+.editor blockquote::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: 9px;
+  background: var(--panel2);
+  pointer-events: none;
 }
 .md blockquote.verse {
   font-style: italic;

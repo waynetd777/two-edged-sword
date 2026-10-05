@@ -140,6 +140,10 @@ mod mac {
             u.setRate(
                 (AVSpeechUtteranceDefaultSpeechRate * rate).clamp(AVSpeechUtteranceMinimumSpeechRate, AVSpeechUtteranceMaximumSpeechRate),
             );
+            // Screenshot mode reads in silence: the words still move, so a scene can show them.
+            if std::env::var_os("TES_SCENE").is_some() {
+                u.setVolume(0.0);
+            }
             del.ivars().ids.lock().unwrap().insert(Retained::as_ptr(&u) as usize, id);
             synth.speakUtterance(&u);
         });

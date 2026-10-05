@@ -953,9 +953,6 @@ function Editor({
             })}
           </div>
           <div ref={wrap} style={{ position: "relative", zIndex: 0 }}>
-            {boxes.map((b, j) => (
-              <span key={j} className={b.cls} style={{ left: b.left, top: b.top, width: b.width, height: b.height }} />
-            ))}
             <div
               ref={ed}
               className={`md editor selectable ${entry.body.trim() ? "" : "blank"}`}
@@ -1000,8 +997,12 @@ function Editor({
                 document.execCommand("insertText", false, e.clipboardData.getData("text/plain"));
               }}
               data-placeholder="Write here…"
-              style={{ font: "400 17px/1.7 var(--serif)", outline: "none", minHeight: 300 }}
+              style={{ font: "400 calc(var(--read-size) - 2px)/1.7 var(--serif)", outline: "none", minHeight: 300 }}
             />
+            {/* After the editor: drawn over a quote's card, under the words (styles.css, .editor blockquote). */}
+            {boxes.map((b, j) => (
+              <span key={j} className={b.cls} style={{ left: b.left, top: b.top, width: b.width, height: b.height }} />
+            ))}
           </div>
           {canAsk && !entry.body.trim() && !ask && (
             <button

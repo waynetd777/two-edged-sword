@@ -802,7 +802,7 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
       <p
         className="para selectable"
         dir={dir}
-        style={{ margin: 0, fontSize: focus ? 21 : undefined, lineHeight: focus ? 1.85 : undefined }}
+        style={{ margin: 0, fontSize: focus ? "calc(var(--read-size) + 2px)" : undefined, lineHeight: focus ? 1.85 : undefined }}
       >
         {verses.map((v) => {
           const k = vkey(loc.book, loc.chapter, v.v);

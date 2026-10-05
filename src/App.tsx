@@ -57,7 +57,8 @@ function Screens() {
     if (app.lib) runScene(app, player.still);
   }, [app.lib]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ⌘1–⌘7 switch screens, ⌘K opens the palette, ⌘, Settings, ⌘. focus mode, ⌘[ ⌘] history.
+  // ⌘1–⌘7 switch screens, ⌘K opens the palette, ⌘, Settings, ⌘. focus mode, ⌘[ ⌘] history,
+  // ⌘+ ⌘− the reading text size (as its slider does).
   useEffect(() => {
     const k = (e: KeyboardEvent) => {
       if (!e.metaKey) return;
@@ -81,6 +82,10 @@ function Screens() {
         e.preventDefault();
       } else if (e.key === "]") {
         app.forward();
+        e.preventDefault();
+      } else if (e.key === "=" || e.key === "+" || e.key === "-") {
+        const size = app.settings.readSize + (e.key === "-" ? -1 : 1);
+        if (size >= 14 && size <= 28) app.set({ readSize: size });
         e.preventDefault();
       } else if (e.key === "\\") {
         app.set({ studyPane: !app.settings.studyPane });

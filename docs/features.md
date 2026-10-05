@@ -42,6 +42,7 @@ Something refused by mistake can be allowed in System Settings › Privacy & Sec
 | ⌘K | Go to a reference, word, Strong's number or command |
 | ⌘[ and ⌘] | Back and forward, to where you were |
 | ⌘, | Settings |
+| ⌘+ and ⌘− | Bigger or smaller reading text: the Bible, books, the journal and the Study pane |
 | ⌘P | Play or pause reading aloud ([Listen](reading.md#listen)) |
 | ? or ⌘? | Help for the screen you're on |
 
