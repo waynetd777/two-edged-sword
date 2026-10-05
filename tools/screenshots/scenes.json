@@ -156,6 +156,7 @@
   },
   {
     "name": "ask-models",
+    "settle": 12,
     "screen": "journal",
     "entriesFile": "journal-entries.json",
     "journal": "scene-rest",

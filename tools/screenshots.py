@@ -83,7 +83,7 @@ def capture(scene, theme):
     """Launches the app on the scene, unseen, and returns its webview's snapshot as an sRGB image, or None."""
     # A fixture from a file beside scenes.json: "chatFile" becomes "chat", and so on.
     files = {"chatFile": "chat", "sessionFile": "session", "entriesFile": "entries", "variancesFile": "variances", "songFile": "song"}
-    sc = {k: v for k, v in scene.items() if k not in files and k not in ("crop", "width")}
+    sc = {k: v for k, v in scene.items() if k not in files and k not in ("crop", "width", "settle")}
     for f, k in files.items():
         if f in scene:
             sc[k] = json.loads((HERE / scene[f]).read_text())
@@ -91,11 +91,11 @@ def capture(scene, theme):
     sc["settings"] = {"favBibles": [], **sc.get("settings", {}), "theme": theme}
     with tempfile.TemporaryDirectory() as tmp:
         shot = pathlib.Path(tmp) / "shot.tiff"
-        env = {**os.environ, "TES_SCENE": json.dumps(sc), "TES_SNAPSHOT": str(shot), "TES_SNAPSHOT_AFTER": str(SETTLE)}
+        env = {**os.environ, "TES_SCENE": json.dumps(sc), "TES_SNAPSHOT": str(shot), "TES_SNAPSHOT_AFTER": str(scene.get("settle", SETTLE))}
         app = subprocess.Popen([str(BIN)], cwd=ROOT / "src-tauri", env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         try:
             # The app writes the file whole (atomically) once WebKit has drawn it.
-            end = time.time() + SETTLE + 30
+            end = time.time() + scene.get("settle", SETTLE) + 30
             while not shot.exists() and app.poll() is None and time.time() < end:
                 time.sleep(0.2)
             if not shot.exists():

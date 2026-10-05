@@ -83,6 +83,9 @@ export function refreshAssistant() {
 }
 refreshAssistant();
 
+/** Whether the first check has returned (screenshot scenes wait for it before opening the model menu). */
+export const assistantChecked = () => state.status !== null;
+
 /** The models on offer now, for code outside a component. */
 export const assistantModels = () => state.models;
 

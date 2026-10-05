@@ -7,6 +7,7 @@
 
 import { api, JournalEntry, setReadOnly, setSceneJournal } from "./api";
 import { setSceneChat } from "./Ask";
+import { assistantChecked } from "./assistant";
 import { Chat, Loc, Pending, Screen, Session, Settings, useApp } from "./state";
 import type { PlayerState } from "./speech";
 import { setSceneVariances, VarianceFile } from "./variances";
@@ -146,16 +147,16 @@ export function runScene(app: ReturnType<typeof useApp>, still: (s: Partial<Play
           };
           go();
         };
-        if (sc.click || sc.type || sc.clickText)
-          window.setTimeout(
-            () => {
-              if (sc.clickText) {
-                clickText(sc.clickText);
-                window.setTimeout(click, 700);
-              } else click();
-            },
-            sc.journal && sc.entries ? 4300 : 2800,
-          );
+        // Once the assistant check is back too (up to 15s), so the model menu has its models.
+        const start = () => {
+          if (sc.clickText) {
+            clickText(sc.clickText);
+            window.setTimeout(click, 700);
+          } else click();
+        };
+        const checked = (at = Date.now()) =>
+          assistantChecked() || Date.now() - at > 15000 ? start() : window.setTimeout(() => checked(at), 200);
+        if (sc.click || sc.type || sc.clickText) window.setTimeout(() => checked(), sc.journal && sc.entries ? 4300 : 2800);
         if (sc.selectPara) {
           const n = sc.selectPara;
           window.setTimeout(() => (document.querySelector(`[data-seg="${n}"]`) as HTMLElement | null)?.click(), 2000);
