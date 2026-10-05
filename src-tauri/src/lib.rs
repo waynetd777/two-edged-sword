@@ -595,6 +595,52 @@ fn set_in_dock(app: &AppHandle, shown: bool) {
 #[cfg(not(target_os = "macos"))]
 fn set_in_dock(_app: &AppHandle, _shown: bool) {}
 
+/// Makes a window invisible and click-through while it still draws, for screenshots
+/// (tools/screenshots.py saves its webview's snapshot): nothing flashes on screen. macOS only.
+fn make_unseen(w: &tauri::WebviewWindow) {
+    #[cfg(target_os = "macos")]
+    if let Ok(ns) = w.ns_window() {
+        // Tauri's own NSWindow, alive as long as the window is; setup runs on the main thread.
+        let window = unsafe { &*(ns as *const objc2_app_kit::NSWindow) };
+        window.setAlphaValue(0.0);
+        window.setIgnoresMouseEvents(true);
+    }
+    #[cfg(not(target_os = "macos"))]
+    let _ = w;
+}
+
+/// Saves what the window's webview shows to `dest` as a TIFF, for screenshots taken unseen
+/// (make_unseen: an invisible window's own capture is blank, its webview's snapshot isn't). The file
+/// appears when WebKit has drawn it. macOS only.
+fn snapshot(w: &tauri::WebviewWindow, dest: &std::path::Path) -> Result<(), String> {
+    #[cfg(target_os = "macos")]
+    {
+        let dest = dest.to_path_buf();
+        w.with_webview(move |wv| unsafe {
+            use objc2::runtime::AnyObject;
+            let webview = wv.inner() as *mut AnyObject;
+            let done = block2::RcBlock::new(move |image: *mut AnyObject, _error: *mut AnyObject| {
+                if image.is_null() {
+                    return;
+                }
+                let tiff: *mut AnyObject = objc2::msg_send![image, TIFFRepresentation];
+                if !tiff.is_null() {
+                    let path = objc2_foundation::NSString::from_str(&dest.to_string_lossy());
+                    let _: bool = objc2::msg_send![tiff, writeToFile: &*path, atomically: true];
+                }
+            });
+            let config: *mut AnyObject = std::ptr::null_mut();
+            let _: () = objc2::msg_send![webview, takeSnapshotWithConfiguration: config, completionHandler: &*done];
+        })
+        .map_err(|e| e.to_string())
+    }
+    #[cfg(not(target_os = "macos"))]
+    {
+        let _ = (w, dest);
+        Err("Snapshots are macOS only.".into())
+    }
+}
+
 /// Brings the app to the front: after coming back from Accessory, `set_focus()` alone can leave
 /// the window behind whatever the user was working in.
 #[cfg(target_os = "macos")]
@@ -755,16 +801,32 @@ pub fn run() {
             if tray_scene {
                 if let Some(t) = app.get_webview_window("tray") {
                     let _ = t.set_position(tauri::LogicalPosition::new(200.0, 120.0));
+                    make_unseen(&t);
                     let _ = t.show();
                 }
             }
             tray::start_reminders(app.handle().clone());
+            // tools/screenshots.py: the scene's snapshot to TES_SNAPSHOT, once it has settled.
+            if let (Some(_), Some(out)) = (scene(), std::env::var_os("TES_SNAPSHOT")) {
+                let label = if tray_scene { "tray" } else { "main" };
+                let after = std::env::var("TES_SNAPSHOT_AFTER").ok().and_then(|s| s.parse().ok()).unwrap_or(6.0);
+                let app = app.handle().clone();
+                std::thread::spawn(move || {
+                    std::thread::sleep(std::time::Duration::from_secs_f64(after));
+                    if let Some(w) = app.get_webview_window(label) {
+                        let _ = snapshot(&w, std::path::Path::new(&out));
+                    }
+                });
+            }
 
             if let Some(w) = app.get_webview_window("main") {
                 // Screenshots are taken at one size, whatever size the window was left at.
+                // They're taken unseen and out of the Dock, without taking the focus.
                 if scene().is_some() {
                     let _ = w.set_size(tauri::LogicalSize::new(1440.0, 900.0));
                     let _ = w.center();
+                    make_unseen(&w);
+                    set_in_dock(app.handle(), false);
                 }
                 // Paint the window and the webview in the theme's background before showing it,
                 // so no white frame appears. Keep in step with --bg in src/styles.css and index.html.
@@ -791,7 +853,9 @@ pub fn run() {
                         }
                         if !quiet {
                             let _ = w_show.show();
-                            let _ = w_show.set_focus();
+                            if scene().is_none() {
+                                let _ = w_show.set_focus();
+                            }
                         }
                     });
                     if !quiet {

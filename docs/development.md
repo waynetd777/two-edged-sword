@@ -99,8 +99,13 @@ Run `make help` to check the result.
 ## Screenshots
 
 `make screenshots` retakes every image in `docs/images/`, in both themes;
-`python3 tools/screenshots.py read ask --theme dark` retakes some. It needs Pillow, the Xcode
-Command Line Tools and Screen Recording permission for the terminal.
+`python3 tools/screenshots.py read ask --theme dark` retakes some, and `-j N` sets how many apps
+run side by side (4 by default). It needs Pillow.
+
+- The window is invisible, click-through and out of the Dock, and never takes the focus, so
+  nothing flashes on screen. The app saves its webview's snapshot to the file in `TES_SNAPSHOT`
+  after `TES_SNAPSHOT_AFTER` seconds; the script draws the window's buttons and rounded corners
+  back on, and takes a blank shot again.
 
 - Each scene is in `tools/screenshots/scenes.json`. `src/scene.ts` sets it up, and nothing is
   saved.

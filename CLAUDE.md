@@ -10,19 +10,19 @@ There are no subsystem pages here and none are to be written; `_sift/conventions
 
 # Seeing the app
 
-To see a screen, check a UI change, or reproduce a bug, use screenshot mode rather than driving the app with clicks or the accessibility tree (clicks don't get through, and walking the accessibility tree of a big screen takes minutes). The app launches straight into a described state, saves nothing, and its window is captured to a PNG you can look at.
+To see a screen, check a UI change, or reproduce a bug, use screenshot mode rather than driving the app with clicks or the accessibility tree (clicks don't get through, and walking the accessibility tree of a big screen takes minutes). The app launches straight into a described state, saves nothing, and its webview is saved to a PNG you can look at. The window is invisible and never takes the focus, so several can run at once (`-j`, 4 by default).
 
 - Standard scenes: `python3 tools/screenshots.py <scene> --theme dark` (names in `tools/screenshots/scenes.json`; writes `docs/images/<scene>-<theme>.png`). `make screenshots` retakes them all for the docs.
 - A one-off scene, e.g. to reproduce a bug: call the script's functions with your own scene, then delete the image it wrote:
   ```python
-  import sys, tempfile; sys.path.insert(0, "tools"); import screenshots as s
+  import sys; sys.path.insert(0, "tools"); import screenshots as s
   srv = s.dev_server()
-  with tempfile.TemporaryDirectory() as tmp:
-      s.shoot({"name": "debug", "word": "G26", "pending": {"article": {"module": "isbe", "topic": "Love"}}}, "dark", s.build(tmp))
+  s.build()
+  s.shoot({"name": "debug", "word": "G26", "pending": {"article": {"module": "isbe", "topic": "Love"}}}, "dark")
   if srv: srv.terminate()
   ```
 - A scene (the `Scene` type in `src/scene.ts`) can set `settings`, `screen`, `loc`, `word` (Word Study), `search`, a fixture `chat`, a still `player`, `scrollTop`, `scrollTo` (a CSS selector scrolled into view), `pending` (an article, commentary or question asked for after the page settles, as a click elsewhere would), `doc` (open a book at a chapter), `selectPara` (click a paragraph), `click` (click any CSS selector afterwards, e.g. a toolbar button; a list is clicked in turn), `clickText` (a real click on the first place some text is shown, before `click`; e.g. a misspelled word, to open its menu), `type` (then type into a box: `["[aria-label=\"Find\"]", "rest"]`), a Quiet time `session`, a `song` shown on the Lyrics page as if playing in Music (timed lyrics as LRC, and an image for its artwork), sample journal `entries` (shown instead of the user's), `journal` (open an entry by id) and `unread` (today's reading shown as not yet done). In scenes.json, `chatFile`, `sessionFile`, `entriesFile` and `songFile` load those fixtures from `tools/screenshots/`. Add a field there when a bug needs one. In `tools/screenshots/scenes.json`, `crop: [x, y, width, height]` trims the saved 1400px-wide image to one part of the screen, and `"tray": true` shoots the menu-bar window instead of the main one. Hover can't be simulated.
-- It needs the Vite dev server (the script starts it) and Screen Recording permission for the terminal. Scenes read the user's real library and data, without changing them. Show only public-domain Bibles in anything committed.
+- It needs the Vite dev server (the script starts it). Screenshots are macOS only. Scenes read the user's real library and data, without changing them. Show only public-domain Bibles in anything committed.
 
 # Docs and help
 
