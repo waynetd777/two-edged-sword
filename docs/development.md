@@ -18,6 +18,7 @@ runs the AI tools for Ask. The frontend is everything you see.
 | `make help` | Check the help: every link in the guides, and each screen's section, resolves |
 | `make core` | Build the built-in modules into `src-tauri/modules/` (`make dev` and `make app` build them if they're missing) |
 | `make screenshots` | Retake the screenshots in `docs/images/` |
+| `make visions` | Flick through the pictures behind a song's words in Safari, drawn as on the Lyrics page (`visions.html`; ← → step, keys for theme, words, colours, beat). `make visions v=eagle` starts at one |
 | `make icons` | Redraw the icon artwork and regenerate the icon set |
 | `make sign-check` | Show how the installed app is signed |
 

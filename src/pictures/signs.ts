@@ -3,7 +3,7 @@
 
 // Signs and symbols, drawn as if by hand, and music.
 
-import { displayFont, flame, glow, rnd, smooth, TAU, traced, Vision } from "./kit";
+import { displayFont, flame, glow, rnd, smooth, TAU, Vision } from "./kit";
 
 export const SIGNS: Vision[] = [
   {
@@ -86,37 +86,99 @@ export const SIGNS: Vision[] = [
       const { x, scale } = room.place(S0 * 4);
       const y = h * rnd(0.35, 0.55),
         S = S0 * scale;
+      let layer: HTMLCanvasElement | null = null;
       return (f) => {
         const { ctx } = f;
         const p = smooth(f.k * 2.4);
+        const ay = y + Math.sin(f.t * 0.8) * 4,
+          tilt = Math.sin(f.t * 0.6) * 0.04;
+        // An admiralty anchor, solid iron: the ring, a shank thickening to the crown, the stock across
+        // it with knobbed ends, and the curved arms ending in spade-shaped flukes. Drawn on a layer
+        // in one piece, shaded as lit from above left, and coming into view from the ring down.
+        const dpr = ctx.getTransform().a || 1;
+        if (!layer || layer.width !== Math.round(w * dpr) || layer.height !== Math.round(h * dpr)) {
+          layer = document.createElement("canvas");
+          layer.width = Math.round(w * dpr);
+          layer.height = Math.round(h * dpr);
+        }
+        const L = layer.getContext("2d")!;
+        L.setTransform(1, 0, 0, 1, 0, 0);
+        L.clearRect(0, 0, layer.width, layer.height);
+        L.setTransform(dpr, 0, 0, dpr, x * dpr, ay * dpr);
+        L.rotate(tilt);
+        L.scale(S, S);
+        const iron = L.createLinearGradient(-0.8, -1.2, 0.8, 1.1);
+        iron.addColorStop(0, f.ink(1));
+        iron.addColorStop(0.5, f.ink(0.7));
+        iron.addColorStop(1, f.ink(0.4));
+        // Every part solid first, then the shading laid over the whole, so there are no seams where they join.
+        L.fillStyle = "#fff";
+        L.strokeStyle = "#fff";
+        // The ring.
+        L.lineWidth = 0.065;
+        L.beginPath();
+        L.arc(0, -1.12, 0.14, 0, TAU);
+        L.stroke();
+        // The shank, from the ring down to the crown.
+        L.beginPath();
+        L.moveTo(-0.045, -0.99);
+        L.lineTo(0.045, -0.99);
+        L.quadraticCurveTo(0.07, 0, 0.075, 0.9);
+        L.lineTo(-0.075, 0.9);
+        L.quadraticCurveTo(-0.07, 0, -0.045, -0.99);
+        L.fill();
+        // The stock, with a knob at each end.
+        L.beginPath();
+        L.moveTo(-0.46, -0.745);
+        L.quadraticCurveTo(0, -0.77, 0.46, -0.745);
+        L.lineTo(0.46, -0.695);
+        L.quadraticCurveTo(0, -0.67, -0.46, -0.695);
+        L.fill();
+        for (const sx of [-1, 1]) {
+          L.beginPath();
+          L.arc(sx * 0.48, -0.72, 0.05, 0, TAU);
+          L.fill();
+        }
+        // The arms, thick at the crown and tapering up to the flukes, and the crown's point.
+        for (const sx of [-1, 1]) {
+          L.beginPath();
+          L.moveTo(0, 1.03);
+          L.quadraticCurveTo(sx * 0.74, 1.0, sx * 0.86, 0.36);
+          L.lineTo(sx * 0.76, 0.38);
+          L.quadraticCurveTo(sx * 0.62, 0.84, 0, 0.84);
+          L.closePath();
+          L.fill();
+          // The fluke: a spade on the arm's end, its bill pointing up and out.
+          L.beginPath();
+          L.moveTo(sx * 0.9, 0.16);
+          L.quadraticCurveTo(sx * 1.02, 0.36, sx * 0.97, 0.52);
+          L.quadraticCurveTo(sx * 0.86, 0.5, sx * 0.8, 0.6);
+          L.quadraticCurveTo(sx * 0.66, 0.5, sx * 0.62, 0.44);
+          L.quadraticCurveTo(sx * 0.8, 0.36, sx * 0.9, 0.16);
+          L.fill();
+        }
+        L.beginPath();
+        L.moveTo(-0.07, 1.0);
+        L.lineTo(0, 1.1);
+        L.lineTo(0.07, 1.0);
+        L.fill();
+        L.globalCompositeOperation = "source-in";
+        L.fillStyle = iron;
+        L.fillRect(-1.3, -1.4, 2.6, 2.7);
+        // Not yet come into view below this line (erased, not clipped: WebKit's clip and source-in disagree).
+        L.globalCompositeOperation = "destination-out";
+        L.fillStyle = "#000";
+        L.fillRect(-1.5, -1.1 + 2.6 * p, 3, 3);
+        L.globalCompositeOperation = "source-over";
         ctx.save();
-        ctx.translate(x, y + Math.sin(f.t * 0.8) * 4);
-        ctx.rotate(Math.sin(f.t * 0.6) * 0.04);
-        ctx.strokeStyle = f.ink(0.5 * f.env);
+        ctx.globalAlpha = 0.5 * f.env;
         ctx.shadowColor = f.ink(0.6 * f.env);
         ctx.shadowBlur = 10;
-        ctx.lineWidth = 2.4;
-        ctx.lineCap = "round";
-        // Ring, shank, stock, then the arms and their flukes, drawn in that order.
-        ctx.beginPath();
-        ctx.arc(0, -S * 1.1, S * 0.14, Math.PI / 2, Math.PI / 2 + TAU);
-        ctx.moveTo(0, -S * 0.96);
-        ctx.lineTo(0, S);
-        ctx.moveTo(-S * 0.42, -S * 0.7);
-        ctx.lineTo(S * 0.42, -S * 0.7);
-        ctx.moveTo(-S * 0.8, S * 0.35);
-        ctx.quadraticCurveTo(-S * 0.7, S, 0, S);
-        ctx.quadraticCurveTo(S * 0.7, S, S * 0.8, S * 0.35);
-        ctx.moveTo(-S * 0.8, S * 0.35);
-        ctx.lineTo(-S * 0.92, S * 0.52);
-        ctx.moveTo(-S * 0.8, S * 0.35);
-        ctx.lineTo(-S * 0.62, S * 0.42);
-        ctx.moveTo(S * 0.8, S * 0.35);
-        ctx.lineTo(S * 0.92, S * 0.52);
-        ctx.moveTo(S * 0.8, S * 0.35);
-        ctx.lineTo(S * 0.62, S * 0.42);
-        traced(ctx, p, S * 7.5);
-        ctx.shadowBlur = 0;
+        ctx.drawImage(layer, 0, 0, w, h);
+        ctx.restore();
+        ctx.save();
+        ctx.translate(x, ay);
+        ctx.rotate(tilt);
         ctx.font = `italic 400 ${Math.round(S * 0.17)}px ${displayFont()}`;
         ctx.textAlign = "center";
         ctx.fillStyle = f.ink(0.35 * f.env * smooth(f.k * 3 - 1.6));
@@ -134,57 +196,128 @@ export const SIGNS: Vision[] = [
       const { x, scale } = room.place(S0 * 2.6);
       const y = h * rnd(0.35, 0.5),
         S = S0 * scale;
-      const crownPath = (ctx: CanvasRenderingContext2D) => {
-        ctx.beginPath();
-        ctx.moveTo(-S, S * 0.4);
-        ctx.lineTo(-S * 1.05, -S * 0.45);
-        ctx.lineTo(-S * 0.6, -S * 0.05);
-        ctx.lineTo(-S * 0.3, -S * 0.65);
-        ctx.lineTo(0, -S * 0.1);
-        ctx.lineTo(S * 0.3, -S * 0.65);
-        ctx.lineTo(S * 0.6, -S * 0.05);
-        ctx.lineTo(S * 1.05, -S * 0.45);
-        ctx.lineTo(S, S * 0.4);
-        ctx.closePath();
+      // A circlet crown seen a little from above, in its own units (S): a round band in perspective
+      // (an ellipse `ry` deep), points rising from its rim, those at the back seen across its hollow.
+      const ry = 0.22,
+        band = 0.42,
+        H = 0.5;
+      const rimAt = (t: number) => [Math.cos(t), ry * Math.sin(t)] as const; // front for t in 0–π
+      const point = (G: CanvasRenderingContext2D, t: number, tall: number) => {
+        const [px, py] = rimAt(t);
+        const wd = 0.4 * Math.abs(Math.sin(t)) + 0.06;
+        G.beginPath();
+        G.moveTo(px - wd / 2, py + 0.02);
+        G.quadraticCurveTo(px - wd * 0.18, py - tall * 0.3, px, py - tall);
+        G.quadraticCurveTo(px + wd * 0.18, py - tall * 0.3, px + wd / 2, py + 0.02);
+        G.closePath();
+        G.fill();
+        return [px, py - tall] as const;
       };
+      const front = [0.1, 0.3, 0.5, 0.7, 0.9].map((k) => k * Math.PI),
+        back = [0.2, 0.4, 0.6, 0.8].map((k) => Math.PI + k * Math.PI);
+      let layer: HTMLCanvasElement | null = null;
       return (f) => {
         const { ctx } = f;
-        ctx.save();
-        ctx.translate(x, y + Math.sin(f.t * 0.7) * 5);
-        glow(ctx, 0, 0, S * 2.2, f.ink(0.1 * f.env), f.ink(0));
-        ctx.fillStyle = f.ink(0.1 * f.env);
-        crownPath(ctx);
-        ctx.fill();
-        ctx.strokeStyle = f.ink(0.45 * f.env);
-        ctx.lineWidth = 1.8;
-        ctx.lineJoin = "round";
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(-S * 0.98, S * 0.2);
-        ctx.lineTo(S * 0.98, S * 0.2);
-        ctx.stroke();
-        // Jewels on the band and pearls on the points.
-        for (const [jx, jy, r, cool] of [
-          [-S * 1.05, -S * 0.5, 4, false],
-          [-S * 0.3, -S * 0.7, 4.5, false],
-          [S * 0.3, -S * 0.7, 4.5, false],
-          [S * 1.05, -S * 0.5, 4, false],
-          [-S * 0.5, S * 0.3, 3.5, true],
-          [0, S * 0.3, 4.5, true],
-          [S * 0.5, S * 0.3, 3.5, true],
-        ] as [number, number, number, boolean][]) {
-          glow(ctx, jx, jy, r * 3, f.ink(0.4 * f.env, cool), f.ink(0, cool));
+        const cy = y + Math.sin(f.t * 0.7) * 5;
+        glow(ctx, x, cy, S * 2.2, f.ink(0.1 * f.env), f.ink(0));
+        const dpr = ctx.getTransform().a || 1;
+        if (!layer || layer.width !== Math.round(w * dpr) || layer.height !== Math.round(h * dpr)) {
+          layer = document.createElement("canvas");
+          layer.width = Math.round(w * dpr);
+          layer.height = Math.round(h * dpr);
         }
-        // A gleam sweeping across it.
-        crownPath(ctx);
-        ctx.clip();
-        const gx = -S * 1.6 + ((f.t * 0.35) % 1.4) * S * 2.4;
-        const g = ctx.createLinearGradient(gx - S * 0.3, 0, gx + S * 0.3, 0);
-        g.addColorStop(0, f.ink(0));
-        g.addColorStop(0.5, f.ink(0.4 * f.env));
-        g.addColorStop(1, f.ink(0));
-        ctx.fillStyle = g;
-        ctx.fillRect(-S * 1.2, -S, S * 2.4, S * 1.6);
+        const L = layer.getContext("2d")!;
+        L.setTransform(1, 0, 0, 1, 0, 0);
+        L.clearRect(0, 0, layer.width, layer.height);
+        L.setTransform(dpr * S, 0, 0, dpr * S, x * dpr, cy * dpr);
+        // Solid colours, mixed from the page's own and the ink (warm gold, or cool for gems).
+        const mix = (cool: boolean) => {
+          const ink = f.ink(1, cool).slice(5).split(",").slice(0, 3).map(Number);
+          const page = f.dark ? [13, 17, 23] : [246, 248, 250];
+          return (k: number) => `rgb(${page.map((p, i) => Math.round(p + (ink[i] - p) * Math.min(1, k))).join(",")})`;
+        };
+        const gold = mix(false),
+          gem = mix(true);
+        // Gold shaded as a curved surface: dark at the sides, brightest a little left of the middle.
+        const curved = (k: number) => {
+          const g = L.createLinearGradient(-1.05, 0, 1.05, 0);
+          g.addColorStop(0, gold(0.22 * k));
+          g.addColorStop(0.38, gold(0.75 * k));
+          g.addColorStop(0.6, gold(0.58 * k));
+          g.addColorStop(1, gold(0.2 * k));
+          return g;
+        };
+        // The back points, darker, then the hollow inside the band, then the band and its front points.
+        L.fillStyle = curved(0.55);
+        const pearls: (readonly [number, number, number])[] = [];
+        for (const t of back) pearls.push([...point(L, t, H * 0.92), 0.6]);
+        L.fillStyle = gold(0.07);
+        L.beginPath();
+        L.ellipse(0, 0, 1, ry, 0, 0, TAU);
+        L.fill();
+        L.fillStyle = curved(1);
+        L.beginPath();
+        L.moveTo(-1, 0);
+        for (let i = 0; i <= 40; i++) {
+          const [px, py] = rimAt(Math.PI - (i / 40) * Math.PI);
+          L.lineTo(px, py);
+        }
+        L.lineTo(1, band);
+        for (let i = 0; i <= 40; i++) {
+          const [px, py] = rimAt((i / 40) * Math.PI);
+          L.lineTo(px, py + band);
+        }
+        L.closePath();
+        L.fill();
+        for (const t of front) pearls.push([...point(L, t, H * (0.85 + 0.15 * Math.sin(t))), 1]);
+        // The band's raised edges.
+        L.strokeStyle = curved(1.35);
+        L.lineWidth = 0.035;
+        for (const off of [0.02, band - 0.02]) {
+          L.beginPath();
+          for (let i = 0; i <= 40; i++) {
+            const [px, py] = rimAt((i / 40) * Math.PI);
+            if (i) L.lineTo(px, py + off);
+            else L.moveTo(px, py + off);
+          }
+          L.stroke();
+        }
+        // Gems set in the band, narrowing as it curves away; pearls on the points.
+        [0.18, 0.34, 0.5, 0.66, 0.82].forEach((k, i) => {
+          const t = k * Math.PI;
+          const [px, py] = rimAt(t);
+          const r = i === 2 ? 0.085 : 0.065;
+          L.fillStyle = i % 2 ? gold(0.95) : gem(0.75);
+          L.beginPath();
+          L.ellipse(px, py + band / 2, r * Math.sin(t), r, 0, 0, TAU);
+          L.fill();
+          L.fillStyle = gem(1.2);
+          L.beginPath();
+          L.arc(px - r * 0.3 * Math.sin(t), py + band / 2 - r * 0.35, r * 0.22, 0, TAU);
+          L.fill();
+        });
+        for (const [px, py, k] of pearls) {
+          L.fillStyle = gold(0.9 * k);
+          L.beginPath();
+          L.arc(px, py, 0.05 * (0.6 + 0.4 * k), 0, TAU);
+          L.fill();
+        }
+        // A gleam sweeping across the gold.
+        const gx = -1.6 + ((f.t * 0.35) % 1.4) * 2.4;
+        const gl = L.createLinearGradient(gx - 0.3, 0, gx + 0.3, 0);
+        gl.addColorStop(0, "rgba(255,255,255,0)");
+        gl.addColorStop(0.5, f.dark ? "rgba(255,250,235,0.35)" : "rgba(255,255,255,0.45)");
+        gl.addColorStop(1, "rgba(255,255,255,0)");
+        L.globalCompositeOperation = "source-atop";
+        L.fillStyle = gl;
+        L.fillRect(-1.3, -1, 2.6, 1.7);
+        L.globalCompositeOperation = "source-over";
+        ctx.save();
+        ctx.globalAlpha = 0.75 * f.env;
+        ctx.globalCompositeOperation = "source-over";
+        ctx.shadowColor = f.ink(0.4 * f.env);
+        ctx.shadowBlur = 12;
+        ctx.drawImage(layer, 0, 0, w, h);
         ctx.restore();
       };
     },
@@ -199,48 +332,149 @@ export const SIGNS: Vision[] = [
       const left = x < w / 2;
       const H = H0 * scale,
         y = h * 0.5;
-      const n = 10;
+      const n = 12;
+      // In the harp's own units (H): the soundbox runs up from the foot of the pillar to the top
+      // of the neck, wide at the bottom; the neck makes the harp's curve between them.
+      const box = (u: number) => [-0.24 + 0.56 * u, 0.46 - 0.78 * u] as const;
+      const half = (u: number) => 0.1 - 0.068 * u;
+      const nx = 0.81,
+        ny = 0.58; // across the soundbox, towards its back
+      const neckY = (px: number) => {
+        const s = (px + 0.32) / 0.66;
+        return -0.5 - 0.06 * Math.sin(Math.PI * Math.min(1, s * 1.4)) + 0.18 * s * s;
+      };
+      // The strings hang straight down from the neck to the soundboard, each a little longer.
+      const strings = Array.from({ length: n }, (_, i) => {
+        const sx = -0.25 + (i / (n - 1)) * 0.5;
+        // Where it meets the soundboard's middle strip (a little in front of the box's middle line):
+        // that strip's x grows steadily with u, so solve for u, then take its y.
+        const k = 0.35;
+        const u = Math.min(1, Math.max(0, (sx + 0.24 + nx * k * 0.1) / (0.56 + nx * k * 0.068)));
+        const [, by] = box(u);
+        return { sx, top: neckY(sx) + 0.035, bottom: by - ny * half(u) * k };
+      });
+      let layer: HTMLCanvasElement | null = null;
       return (f) => {
         const { ctx } = f;
-        ctx.save();
-        ctx.translate(x, y);
-        if (!left) ctx.scale(-1, 1);
         const rise = (1 - smooth(f.env)) * 20;
-        ctx.translate(0, rise);
-        // The frame: the pillar, the curved neck and the soundboard.
-        const neck = (u: number) => [-H * 0.3 + u * H * 0.62, -H * 0.5 + Math.sin(u * Math.PI) * -H * 0.08 + u * H * 0.1] as const;
-        const board = (u: number) => [-H * 0.24 + u * H * 0.56, H * 0.5 - u * H * 0.85] as const;
-        ctx.strokeStyle = f.ink(0.4 * f.env);
-        ctx.lineWidth = 2.4;
-        ctx.lineCap = "round";
-        ctx.beginPath();
-        ctx.moveTo(-H * 0.3, -H * 0.5);
-        ctx.quadraticCurveTo(-H * 0.36, 0, -H * 0.24, H * 0.5);
-        ctx.stroke();
-        ctx.beginPath();
-        for (let u = 0; u <= 1.001; u += 0.05) ctx.lineTo(...neck(u));
-        ctx.stroke();
-        ctx.lineWidth = 3.4;
-        ctx.beginPath();
-        ctx.moveTo(...board(0));
-        ctx.lineTo(...board(1));
-        ctx.stroke();
+        const flip = left ? 1 : -1;
+        const dpr = ctx.getTransform().a || 1;
+        if (!layer || layer.width !== Math.round(w * dpr) || layer.height !== Math.round(h * dpr)) {
+          layer = document.createElement("canvas");
+          layer.width = Math.round(w * dpr);
+          layer.height = Math.round(h * dpr);
+        }
+        const L = layer.getContext("2d")!;
+        L.setTransform(1, 0, 0, 1, 0, 0);
+        L.clearRect(0, 0, layer.width, layer.height);
+        L.setTransform(dpr * H * flip, 0, 0, dpr * H, x * dpr, (y + rise) * dpr);
+        // Solid wood, in colours mixed from the page's own and the ink.
+        const ink = f.ink(1).slice(5).split(",").slice(0, 3).map(Number);
+        const page = f.dark ? [13, 17, 23] : [246, 248, 250];
+        const wood = (k: number) => `rgb(${page.map((p, i) => Math.round(p + (ink[i] - p) * k)).join(",")})`;
+        // The soundbox: lit on its face, towards the strings, darker at its back.
+        const bg = L.createLinearGradient(0.04 - nx * 0.08, 0.08 - ny * 0.08, 0.04 + nx * 0.08, 0.08 + ny * 0.08);
+        bg.addColorStop(0, wood(0.6));
+        bg.addColorStop(1, wood(0.22));
+        L.fillStyle = bg;
+        // Its face and back run on down to the floor line (y 0.5), where it stands flat.
+        const floorAt = (side: number) => {
+          const [a, b] = [0.46 + side * ny * 0.1, 0.78 + side * ny * 0.068]; // y = a - b·u
+          return (a - 0.5) / b;
+        };
+        const uFace = floorAt(-1),
+          uBack = floorAt(1);
+        L.beginPath();
+        for (let i = 0; i <= 20; i++) {
+          const u = uFace + (i / 20) * (1 - uFace),
+            [bx, by] = box(u);
+          L.lineTo(bx - nx * half(u), by - ny * half(u));
+        }
+        for (let i = 20; i >= 0; i--) {
+          const u = uBack + (i / 20) * (1 - uBack),
+            [bx, by] = box(u);
+          L.lineTo(bx + nx * half(u), by + ny * half(u));
+        }
+        L.closePath();
+        L.fill();
+        // The soundboard's middle strip, where the strings are fixed.
+        L.strokeStyle = wood(0.75);
+        L.lineWidth = 0.012;
+        L.beginPath();
+        const [b0x, b0y] = box(0.02),
+          [b1x, b1y] = box(0.98);
+        L.moveTo(b0x - nx * half(0.02) * 0.35, b0y - ny * half(0.02) * 0.35);
+        L.lineTo(b1x - nx * half(0.98) * 0.35, b1y - ny * half(0.98) * 0.35);
+        L.stroke();
+        // The pillar, gently bowed, with a carved knob at its head and a foot.
+        L.strokeStyle = wood(0.5);
+        L.lineCap = "round";
+        L.lineWidth = 0.05;
+        L.beginPath();
+        L.moveTo(-0.32, -0.5);
+        L.quadraticCurveTo(-0.39, 0, -0.27, 0.5);
+        L.stroke();
+        L.strokeStyle = wood(0.72);
+        L.lineWidth = 0.015;
+        L.beginPath();
+        L.moveTo(-0.33, -0.46);
+        L.quadraticCurveTo(-0.392, 0, -0.283, 0.46);
+        L.stroke();
+        L.fillStyle = wood(0.6);
+        L.beginPath();
+        L.arc(-0.33, -0.54, 0.042, 0, TAU);
+        L.fill();
+        // The plinth both stand on.
+        const [fx] = box(uFace),
+          [bkx] = box(uBack);
+        const x0 = fx - nx * half(uFace) - 0.02,
+          x1 = bkx + nx * half(uBack) + 0.02;
+        L.beginPath();
+        L.moveTo(x0, 0.5);
+        L.lineTo(x1, 0.5);
+        L.quadraticCurveTo(x1 + 0.01, 0.535, x1 - 0.02, 0.535);
+        L.lineTo(x0 + 0.02, 0.535);
+        L.quadraticCurveTo(x0 - 0.01, 0.535, x0, 0.5);
+        L.fill();
+        // The neck, in the harp's curve, with its row of tuning pins.
+        L.strokeStyle = wood(0.55);
+        L.lineWidth = 0.055;
+        L.beginPath();
+        for (let i = 0; i <= 30; i++) {
+          const px = -0.32 + (i / 30) * 0.66;
+          if (i) L.lineTo(px, neckY(px));
+          else L.moveTo(px, neckY(px));
+        }
+        L.stroke();
+        L.fillStyle = wood(0.85);
+        for (const st of strings) {
+          L.beginPath();
+          L.arc(st.sx, neckY(st.sx) - 0.008, 0.008, 0, TAU);
+          L.fill();
+        }
+        ctx.save();
+        ctx.globalAlpha = 0.6 * f.env;
+        ctx.globalCompositeOperation = "source-over";
+        ctx.shadowColor = f.ink(0.4 * f.env);
+        ctx.shadowBlur = 10;
+        ctx.drawImage(layer, 0, 0, w, h);
+        ctx.restore();
         // The strings, plucked in turn, each trembling and lit as it sounds.
-        ctx.lineWidth = 1;
-        for (let i = 0; i < n; i++) {
-          const u = (i + 0.7) / (n + 0.4);
-          const [x1, y1] = neck(u),
-            [x2, y2] = board(u);
+        ctx.save();
+        ctx.translate(x, y + rise);
+        ctx.scale(H * flip, H);
+        ctx.lineWidth = 1 / H;
+        strings.forEach((st, i) => {
           const since = (f.t * 2.2 - i * 0.5 + 100) % (n * 0.5 + 2);
           const ring = since < 2 ? Math.exp(-since * 1.8) : 0;
-          const wob = Math.sin(f.t * 40) * ring * 4;
-          ctx.strokeStyle = f.ink((0.22 + 0.5 * ring) * f.env);
+          const wob = (Math.sin(f.t * 40) * ring * 4) / H;
+          ctx.strokeStyle = f.ink((0.25 + 0.5 * ring) * f.env);
           ctx.beginPath();
-          ctx.moveTo(x1, y1);
-          ctx.quadraticCurveTo((x1 + x2) / 2 + wob, (y1 + y2) / 2, x2, y2);
+          ctx.moveTo(st.sx, st.top);
+          ctx.quadraticCurveTo(st.sx + wob, (st.top + st.bottom) / 2, st.sx, st.bottom);
           ctx.stroke();
-          if (ring > 0.1) glow(ctx, (x1 + x2) / 2, (y1 + y2) / 2, 30, f.ink(0.1 * ring * f.env), f.ink(0));
-        }
+          if (ring > 0.1) glow(ctx, st.sx, (st.top + st.bottom) / 2, 30 / H, f.ink(0.1 * ring * f.env), f.ink(0));
+        });
         ctx.restore();
       };
     },

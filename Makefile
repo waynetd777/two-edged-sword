@@ -11,7 +11,7 @@ SIGN_ID  := $(APPLE_SIGNING_IDENTITY)
 # "-" is an ad-hoc signature: an empty identity makes the bundler fail instead.
 export APPLE_SIGNING_IDENTITY := $(if $(SIGN_ID),$(SIGN_ID),-)
 
-.PHONY: check lint fmt test app install-app dmg dev icons sign-check help core
+.PHONY: check lint fmt test app install-app dmg dev icons sign-check help core visions
 
 ## cargo test + TypeScript type-check.
 check:
@@ -84,6 +84,10 @@ screenshots:
 
 sign-check:
 	@codesign -dv --verbose=2 "/Applications/Two-edged Sword.app" 2>&1 | grep -E "^(Identifier|Authority|Signature|TeamIdentifier)"
+
+## The pictures behind a song's words, one at a time, in Safari (visions.html); uses the dev server if it's running.
+visions:
+	@lsof -ti :1430 >/dev/null || (npx vite >/dev/null 2>&1 &) ; sleep 2; open -a Safari "http://localhost:1430/visions.html$(if $(v),?v=$(v))"
 
 ## Check the help: every link in the user guides, and each screen's section, points at a section that exists.
 help:

@@ -141,31 +141,59 @@ export const SKY: Vision[] = [
       const cx = w * rnd(0.35, 0.65),
         cy = h * 1.08,
         R = Math.max(w * 0.5, h * 0.75);
-      const cols: RGB[] = [
-        [235, 90, 90],
-        [240, 150, 70],
-        [235, 210, 90],
-        [110, 200, 120],
-        [90, 160, 230],
-        [110, 110, 210],
-        [160, 110, 200],
+      // Violet inside to red outside, blending into each other.
+      const spectrum: RGB[] = [
+        [150, 90, 220],
+        [80, 120, 240],
+        [70, 190, 210],
+        [90, 210, 110],
+        [245, 225, 80],
+        [250, 150, 60],
+        [240, 70, 70],
       ];
+      // Drawn on a layer, faded towards the ground there, then laid over the page faintly.
+      let layer: HTMLCanvasElement | null = null;
+      const bow = (L: CanvasRenderingContext2D, r: number, band: number, cols: RGB[], a: number) => {
+        const g = L.createRadialGradient(cx, cy, r - band, cx, cy, r);
+        g.addColorStop(0, `rgba(${cols[0].join(",")},0)`);
+        cols.forEach((c, i) => g.addColorStop(0.08 + (i / (cols.length - 1)) * 0.84, `rgba(${c.join(",")},${a})`));
+        g.addColorStop(1, `rgba(${cols[cols.length - 1].join(",")},0)`);
+        L.fillStyle = g;
+        L.fillRect(0, 0, w, h);
+      };
       return (f) => {
         const { ctx } = f;
-        const bw = R * 0.016;
-        const seg = 48;
-        ctx.lineWidth = bw * 1.6;
-        cols.forEach((c, i) => {
-          const r = R - i * bw;
-          for (let s = 0; s < seg; s++) {
-            const a0 = Math.PI + (s / seg) * Math.PI,
-              a1 = Math.PI + ((s + 1.05) / seg) * Math.PI;
-            ctx.strokeStyle = `rgba(${c.join(",")},${(f.dark ? 0.085 : 0.11) * f.env * Math.sin(Math.PI * ((s + 0.5) / seg)) ** 1.5})`;
-            ctx.beginPath();
-            ctx.arc(cx, cy, r, a0, a1);
-            ctx.stroke();
-          }
-        });
+        const dpr = ctx.getTransform().a || 1;
+        if (!layer || layer.width !== Math.round(w * dpr) || layer.height !== Math.round(h * dpr)) {
+          layer = document.createElement("canvas");
+          layer.width = Math.round(w * dpr);
+          layer.height = Math.round(h * dpr);
+        }
+        const L = layer.getContext("2d")!;
+        L.setTransform(1, 0, 0, 1, 0, 0);
+        L.globalCompositeOperation = "source-over";
+        L.clearRect(0, 0, layer.width, layer.height);
+        L.setTransform(dpr, 0, 0, dpr, 0, 0);
+        const band = R * 0.17;
+        // The sky inside the bow is a little brighter than outside it.
+        const glowIn = L.createRadialGradient(cx, cy, R * 0.55, cx, cy, R - band * 0.6);
+        glowIn.addColorStop(0, "rgba(255,255,255,0)");
+        glowIn.addColorStop(0.97, f.dark ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.35)");
+        glowIn.addColorStop(1, "rgba(255,255,255,0)");
+        L.fillStyle = glowIn;
+        L.fillRect(0, 0, w, h);
+        bow(L, R, band, spectrum, 1);
+        // Fading out towards its feet.
+        L.globalCompositeOperation = "destination-in";
+        const fade = L.createLinearGradient(0, cy - R * 1.35, 0, h);
+        fade.addColorStop(0, "rgba(0,0,0,1)");
+        fade.addColorStop(0.55, "rgba(0,0,0,0.85)");
+        fade.addColorStop(1, "rgba(0,0,0,0.05)");
+        L.fillStyle = fade;
+        L.fillRect(0, 0, w, h);
+        ctx.globalAlpha = (f.dark ? 0.15 : 0.19) * f.env;
+        ctx.drawImage(layer, 0, 0, w, h);
+        ctx.globalAlpha = 1;
       };
     },
   },

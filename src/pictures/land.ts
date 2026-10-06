@@ -3,7 +3,7 @@
 
 // The land and water: hills, fields, trees, rivers, the sea.
 
-import { beam, Branch, glow, grow, ridge, rnd, smooth, TAU, Vision } from "./kit";
+import { beam, glow, ridge, rnd, smooth, TAU, Vision } from "./kit";
 
 export const LAND: Vision[] = [
   {
@@ -73,39 +73,125 @@ export const LAND: Vision[] = [
     name: "tree of life",
     lane: "back",
     dur: [24, 40],
-    make: (_w, h, room) => {
-      const { x: x0, scale } = room.place(h * 0.55);
-      const max = 7;
-      const tree = grow(h * 0.17 * scale, -Math.PI / 2, 0, max, 0.42);
+    make: (w, h, room) => {
+      const { x: x0, scale } = room.place(h * 0.85);
+      const max = 6;
+      const W0 = h * 0.034 * scale; // the trunk's width at its foot
+      const lc = h * 0.05 * scale; // how far a cluster of leaves spreads
+      type Limb = { len: number; ang: number; bend: number; depth: number; kids: Limb[]; leaves: { dx: number; dy: number; r: number; a: number }[] };
+      const limb = (len: number, ang: number, depth: number): Limb => {
+        const kids: Limb[] = [];
+        if (depth < max) {
+          const n = depth === 0 || Math.random() < 0.4 ? 3 : 2;
+          for (let i = 0; i < n; i++) {
+            let a = ang + (i - (n - 1) / 2) * (depth === 0 ? 0.62 : 0.48) * rnd(0.7, 1.3) + rnd(-0.12, 0.12);
+            a += (a + Math.PI / 2) * 0.1; // reaching outwards, as a broad tree does
+            a = Math.min(0.05, Math.max(-Math.PI - 0.05, a)); // but not drooping
+            kids.push(limb(len * rnd(0.7, 0.8), a, depth + 1));
+          }
+        }
+        const leaves =
+          depth >= max - 2
+            ? Array.from({ length: depth === max ? 12 : 6 }, () => ({ dx: rnd(-1, 1) * lc, dy: rnd(-1, 0.6) * lc, r: rnd(3.5, 7.5) * Math.max(0.6, scale), a: rnd(0, TAU) }))
+            : [];
+        return { len, ang, bend: rnd(-0.12, 0.12), depth, kids, leaves };
+      };
+      const tree = limb(h * 0.17 * scale, -Math.PI / 2 + rnd(-0.04, 0.04), 0);
+      const width = (d: number) => W0 * 0.6 ** d;
+      // Twelve fruits, hung among the leaves of twelve of the twigs.
+      const fruitAt = new Set<number>();
+      const twigs = (b: Limb): number => (b.depth === max ? 1 : b.kids.reduce((n, k) => n + twigs(k), 0));
+      const nTwigs = twigs(tree);
+      while (fruitAt.size < Math.min(12, nTwigs)) fruitAt.add(Math.floor(rnd(0, nTwigs)));
+      let layer: HTMLCanvasElement | null = null;
       return (f) => {
         const { ctx } = f;
-        ctx.lineCap = "round";
-        const tips: [number, number, number][] = [];
-        const draw = (b: Branch, x: number, y: number, i: number) => {
-          const g = smooth(f.k * 2.2 - b.depth * 0.18);
-          if (g <= 0) return;
-          const a = b.ang + Math.sin(f.t * 0.5 + b.depth) * 0.012 * b.depth;
-          const x2 = x + Math.cos(a) * b.len * g,
-            y2 = y + Math.sin(a) * b.len * g;
-          ctx.strokeStyle = f.ink(0.3 * f.env);
-          ctx.lineWidth = (max + 1 - b.depth) * 1.3;
-          ctx.beginPath();
-          ctx.moveTo(x, y);
-          ctx.lineTo(x2, y2);
-          ctx.stroke();
-          if (!b.kids.length && g >= 1) tips.push([x2, y2, i]);
-          b.kids.forEach((k, j) => draw(k, x2, y2, i * 3 + j));
-        };
-        draw(tree, x0, h + 4, 1);
-        // Leaves of light at the tips, coming out once the tree is grown.
-        const dot = f.dot(true);
-        const leaf = smooth(f.k * 3 - 1.6);
-        for (const [x, y, i] of tips) {
-          const r = 5 + (i % 4);
-          ctx.globalAlpha = 0.55 * f.env * leaf * (0.6 + 0.4 * Math.sin(f.t * 1.2 + i));
-          ctx.drawImage(dot, x - r, y - r, r * 2, r * 2);
+        const dpr = ctx.getTransform().a || 1;
+        if (!layer || layer.width !== Math.round(w * dpr) || layer.height !== Math.round(h * dpr)) {
+          layer = document.createElement("canvas");
+          layer.width = Math.round(w * dpr);
+          layer.height = Math.round(h * dpr);
         }
+        // Drawn solid on a layer, so the branches don't brighten where they join, then laid on faintly.
+        const L = layer.getContext("2d")!;
+        L.setTransform(1, 0, 0, 1, 0, 0);
+        L.clearRect(0, 0, layer.width, layer.height);
+        L.setTransform(dpr, 0, 0, dpr, 0, 0);
+        const wood = f.ink(1);
+        const leafy = smooth(f.k * 3.2 - 1.4);
+        // It starts as a slim shoot: the wood thickens and the roots spread as it grows.
+        const girth = 0.25 + 0.75 * smooth(f.k * 2.2);
+        const clusters: [number, number, Limb, number][] = [];
+        let twig = 0;
+        const draw = (b: Limb, x: number, y: number) => {
+          const g = smooth(f.k * 3.2 - b.depth * 0.2);
+          if (g <= 0) return;
+          const a = b.ang + Math.sin(f.t * 0.45 + b.depth) * 0.01 * b.depth;
+          const len = b.len * g;
+          const x2 = x + Math.cos(a) * len,
+            y2 = y + Math.sin(a) * len;
+          // A tapered limb, bowed a little.
+          const wa = (width(b.depth) / 2) * girth,
+            wb = ((b.kids.length ? width(b.depth + 1) : width(b.depth) * 0.4) / 2) * girth;
+          const nx = -Math.sin(a),
+            ny = Math.cos(a);
+          const mx = (x + x2) / 2 + nx * b.bend * len,
+            my = (y + y2) / 2 + ny * b.bend * len;
+          L.fillStyle = wood;
+          L.beginPath();
+          L.moveTo(x + nx * wa, y + ny * wa);
+          L.quadraticCurveTo(mx + nx * (wa + wb) / 2, my + ny * (wa + wb) / 2, x2 + nx * wb, y2 + ny * wb);
+          L.lineTo(x2 - nx * wb, y2 - ny * wb);
+          L.quadraticCurveTo(mx - nx * (wa + wb) / 2, my - ny * (wa + wb) / 2, x - nx * wa, y - ny * wa);
+          L.closePath();
+          L.fill();
+          L.beginPath();
+          L.arc(x2, y2, wb, 0, TAU);
+          L.fill();
+          if (b.leaves.length && g >= 0.98) clusters.push([x2, y2, b, b.depth === max ? twig++ : -1]);
+          for (const k of b.kids) draw(k, x2, y2);
+        };
+        // Roots flaring into the ground.
+        const by = h + 2,
+          rw = W0 * girth,
+          rh = W0 * 3 * smooth(f.k * 2.2);
+        L.fillStyle = wood;
+        L.beginPath();
+        L.moveTo(x0 - rw * 1.6, by);
+        L.quadraticCurveTo(x0 - rw * 0.48, by - rh * 0.13, x0 - rw * 0.36, by - rh);
+        L.lineTo(x0 + rw * 0.36, by - rh);
+        L.quadraticCurveTo(x0 + rw * 0.48, by - rh * 0.13, x0 + rw * 1.6, by);
+        L.fill();
+        draw(tree, x0, by);
+        // The leaves, in clusters, coming out once the tree is grown, stirring a little.
+        if (leafy > 0) {
+          for (const [x, y, b] of clusters) {
+            L.fillStyle = f.ink(0.5, true);
+            for (const l of b.leaves) {
+              const sway = Math.sin(f.t * 0.8 + l.a) * 1.5;
+              L.beginPath();
+              L.ellipse(x + l.dx * leafy + sway, y + l.dy * leafy, l.r * leafy, l.r * 0.55 * leafy, l.a + sway * 0.05, 0, TAU);
+              L.fill();
+            }
+          }
+        }
+        const fruit = smooth(f.k * 4 - 2.3);
+        ctx.globalAlpha = (f.dark ? 0.34 : 0.42) * f.env;
+        ctx.drawImage(layer, 0, 0, w, h);
         ctx.globalAlpha = 1;
+        if (fruit > 0)
+          for (const [x, y, b, i] of clusters) {
+            if (!fruitAt.has(i)) continue;
+            const l = b.leaves[0];
+            const fx = x + l.dx * 0.6,
+              fy = y + l.dy * 0.6 + 4;
+            const r = 4 * Math.max(0.7, scale);
+            glow(ctx, fx, fy, r * 4, f.ink(0.25 * f.env * fruit), f.ink(0));
+            ctx.fillStyle = f.ink(0.6 * f.env * fruit * (0.85 + 0.15 * Math.sin(f.t * 1.2 + i)));
+            ctx.beginPath();
+            ctx.arc(fx, fy, r, 0, TAU);
+            ctx.fill();
+          }
       };
     },
   },
@@ -150,13 +236,16 @@ export const LAND: Vision[] = [
     dur: [22, 36],
     make: (w, h) => {
       const hill = (x: number) => h * 0.8 - Math.sin((x / w) * Math.PI) * h * 0.08 - Math.sin(x * 0.006) * h * 0.02;
-      const sheep = Array.from({ length: 9 }, () => ({
-        x: rnd(0.08, 0.92) * w,
-        s: rnd(16, 24),
-        v: rnd(-2, 2),
-        p: rnd(0, TAU),
-        dir: Math.random() < 0.5 ? 1 : -1,
-      }));
+      // Sheep further off (`d` near 0) stand higher up the hill and smaller; a lamb or two keeps by its mother.
+      const sheep: { x: number; d: number; s: number; dir: number; p: number; graze: number; step: number }[] = [];
+      for (let i = 0; i < 10; i++) {
+        const d = rnd(0, 1);
+        sheep.push({ x: rnd(0.06, 0.94) * w, d, s: 8 + d * 9, dir: Math.random() < 0.5 ? 1 : -1, p: rnd(0, TAU), graze: 1, step: 0 });
+        if (i < 2) sheep.push({ ...sheep[i * 2], x: sheep[i * 2].x + rnd(20, 34), s: sheep[i * 2].s * 0.62, p: rnd(0, TAU) });
+      }
+      sheep.sort((a, b) => a.d - b.d);
+      // Each sheep is drawn solid on a layer, then the layer faintly, so their parts don't add up where they overlap.
+      let layer: HTMLCanvasElement | null = null;
       return (f) => {
         const { ctx } = f;
         const g = ctx.createLinearGradient(0, h * 0.7, 0, h);
@@ -168,35 +257,102 @@ export const LAND: Vision[] = [
         for (let x = 0; x <= w; x += 12) ctx.lineTo(x, hill(x));
         ctx.lineTo(w, h);
         ctx.fill();
-        for (const s of sheep) {
-          const x = s.x + Math.sin(f.t * 0.1 + s.p) * 20 + s.v * f.t * 0.3;
-          const y = hill(x) - s.s * 0.55;
-          // Grazing: the head goes down now and then.
-          const graze = smooth(Math.sin(f.t * 0.4 + s.p) * 3);
-          ctx.save();
-          ctx.translate(x, y);
-          ctx.scale(s.dir, 1);
-          ctx.fillStyle = f.ink(0.3 * f.env);
-          ctx.strokeStyle = f.ink(0.3 * f.env);
-          ctx.lineWidth = 1.4;
-          for (const lx of [-0.5, -0.2, 0.25, 0.55]) {
-            ctx.beginPath();
-            ctx.moveTo(lx * s.s, 0);
-            ctx.lineTo(lx * s.s, s.s * 0.55);
-            ctx.stroke();
-          }
-          // The fleece, in puffs.
-          for (let i = 0; i < 7; i++) {
-            const a = (i / 7) * TAU;
-            ctx.beginPath();
-            ctx.arc(Math.cos(a) * s.s * 0.62, Math.sin(a) * s.s * 0.32 - s.s * 0.1, s.s * 0.36, 0, TAU);
-            ctx.fill();
-          }
-          ctx.beginPath();
-          ctx.ellipse(s.s * 0.95, -s.s * 0.15 + graze * s.s * 0.45, s.s * 0.28, s.s * 0.2, 0.4 + graze * 0.6, 0, TAU);
-          ctx.fill();
-          ctx.restore();
+
+        const dpr = ctx.getTransform().a || 1;
+        if (!layer || layer.width !== Math.round(w * dpr) || layer.height !== Math.round(h * dpr)) {
+          layer = document.createElement("canvas");
+          layer.width = Math.round(w * dpr);
+          layer.height = Math.round(h * dpr);
         }
+        const L = layer.getContext("2d")!;
+        L.setTransform(1, 0, 0, 1, 0, 0);
+        L.clearRect(0, 0, layer.width, layer.height);
+        L.setTransform(dpr, 0, 0, dpr, 0, 0);
+        const ink = (a: number) => f.ink(a);
+        for (const sh of sheep) {
+          // Mostly grazing; now and then a few slow steps, head up.
+          const walking = Math.sin(f.t * 0.13 + sh.p) > 0.55;
+          const v = walking ? sh.s * 0.35 : 0;
+          sh.x += sh.dir * v * f.dt;
+          if (sh.x < w * 0.04 || sh.x > w * 0.96) sh.dir = sh.x < w / 2 ? 1 : -1;
+          if (walking) sh.step += f.dt * 5;
+          const lookUp = walking || Math.sin(f.t * 0.27 + sh.p * 3) > 0.7;
+          sh.graze += ((lookUp ? 0 : 1) - sh.graze) * Math.min(1, f.dt * 1.5);
+          const gz = smooth(sh.graze);
+          const ground = hill(sh.x) + sh.d * h * 0.09;
+          const u = sh.s;
+          L.save();
+          L.translate(sh.x, ground - 1.17 * u + (walking ? -Math.abs(Math.sin(sh.step)) * 0.04 * u : 0));
+          L.scale(sh.dir * u, u);
+          // Legs: the far pair a shade dimmer, swinging in diagonal pairs as it walks.
+          const leg = (x: number, swing: number, a: number) => {
+            L.save();
+            L.translate(x, 0.35);
+            L.rotate(walking ? Math.sin(sh.step + swing) * 0.15 : 0);
+            L.fillStyle = ink(a);
+            L.beginPath();
+            L.moveTo(-0.08, 0);
+            L.lineTo(0.08, 0);
+            L.lineTo(0.05, 0.82);
+            L.lineTo(-0.05, 0.82);
+            L.fill();
+            L.restore();
+          };
+          leg(0.48, Math.PI, 0.55);
+          leg(-0.72, 0, 0.55);
+          leg(0.62, 0, 0.8);
+          leg(-0.58, Math.PI, 0.8);
+          // The tail, then the fleece: an oval with a woolly edge, brighter on the back than the belly.
+          L.fillStyle = ink(0.85);
+          L.beginPath();
+          L.ellipse(-1.02, 0.05, 0.13, 0.24, -0.3, 0, TAU);
+          L.fill();
+          const fl = L.createLinearGradient(0, -0.6, 0, 0.55);
+          fl.addColorStop(0, ink(1));
+          fl.addColorStop(1, ink(0.72));
+          L.fillStyle = fl;
+          L.beginPath();
+          for (let i = 0; i <= 64; i++) {
+            const a = (i / 64) * TAU;
+            const wool = 1 + 0.07 * Math.abs(Math.sin(a * 11 + sh.p));
+            const y = Math.sin(a) * 0.6 * wool;
+            const x = Math.cos(a) * wool;
+            if (i) L.lineTo(x, y > 0 ? y * 0.9 : y);
+            else L.moveTo(x, y);
+          }
+          L.fill();
+          // Neck and head: up and looking about, or down to the grass. The face is darker than the wool.
+          const hx = 1.3 - 0.1 * gz + (gz ? 0 : Math.sin(f.t * 0.5 + sh.p) * 0.04),
+            hy = -0.5 + 1.45 * gz + (gz > 0.9 ? Math.sin(f.t * 3 + sh.p) * 0.03 : 0);
+          L.strokeStyle = ink(0.9);
+          L.lineWidth = 0.42;
+          L.lineCap = "round";
+          L.beginPath();
+          L.moveTo(0.7, -0.12);
+          L.quadraticCurveTo(1.05, -0.2 + 0.6 * gz, hx - 0.08, hy);
+          L.stroke();
+          L.save();
+          L.translate(hx, hy);
+          L.rotate(0.45 + 0.95 * gz);
+          L.fillStyle = ink(0.68);
+          L.beginPath();
+          L.ellipse(-0.18, -0.1, 0.17, 0.06, -0.5, 0, TAU); // the ear
+          L.fill();
+          L.beginPath();
+          L.moveTo(-0.2, -0.17);
+          L.quadraticCurveTo(0.12, -0.2, 0.36, -0.03);
+          L.quadraticCurveTo(0.4, 0.09, 0.3, 0.13);
+          L.quadraticCurveTo(0, 0.2, -0.2, 0.15);
+          L.quadraticCurveTo(-0.3, 0, -0.2, -0.17);
+          L.fillStyle = ink(0.78);
+          L.fill();
+          L.restore();
+          L.restore();
+        }
+        for (const sh of sheep) glow(ctx, sh.x, hill(sh.x) + sh.d * h * 0.09 - sh.s, sh.s * 2.6, f.ink(0.05 * f.env), f.ink(0));
+        ctx.globalAlpha = (f.dark ? 0.32 : 0.42) * f.env;
+        ctx.drawImage(layer, 0, 0, w, h);
+        ctx.globalAlpha = 1;
       };
     },
   },
@@ -285,10 +441,11 @@ export const LAND: Vision[] = [
           ctx.restore();
           if (n.grapes && g > 0.5) {
             ctx.fillStyle = f.ink(0.3 * f.env * smooth(g * 2 - 1), true);
-            for (let r = 0; r < 4; r++)
-              for (let c = 0; c <= 3 - r; c++) {
+            // A bunch hanging from its stem: five rows, narrowing to one grape at the bottom.
+            for (let r = 0; r < 5; r++)
+              for (let c = 0; c <= 4 - r; c++) {
                 ctx.beginPath();
-                ctx.arc(x - 6 + c * 5 + r * 2.5, y + 6 + r * 5, 2.6, 0, TAU);
+                ctx.arc(x - 15 + c * 7.5 + r * 3.75, y + 9 + r * 6.8, 3.9, 0, TAU);
                 ctx.fill();
               }
           }
@@ -307,6 +464,7 @@ export const LAND: Vision[] = [
       const s = s0 * scale;
       const glints = Array.from({ length: 40 }, () => ({ x: rnd(-0.08, 0.08), y: rnd(0, 1), p: rnd(0, TAU), l: rnd(6, 18) }));
       const wave = (x: number, t: number, k: number) => Math.sin(x * 0.012 + t * 0.9 + k) * 4 + Math.sin(x * 0.031 - t * 1.3 + k * 2) * 1.6;
+      let layer: HTMLCanvasElement | null = null;
       return (f) => {
         const { ctx } = f;
         // The light's path on the water, behind the boat.
@@ -324,33 +482,60 @@ export const LAND: Vision[] = [
           for (let x = 0; x <= w; x += 10) ctx.lineTo(x, y0 + wave(x, f.t, i) * (1 + i * 0.3));
           ctx.stroke();
         }
-        // The boat, rocking on them, with its sail.
+        // The boat, rocking on them, with its sail: drawn in soft fills on a layer (no outlines),
+        // laid on with a soft edge, and faintly mirrored in the water.
+        const dpr = ctx.getTransform().a || 1;
+        if (!layer || layer.width !== Math.round(w * dpr) || layer.height !== Math.round(h * dpr)) {
+          layer = document.createElement("canvas");
+          layer.width = Math.round(w * dpr);
+          layer.height = Math.round(h * dpr);
+        }
+        const L = layer.getContext("2d")!;
+        L.setTransform(1, 0, 0, 1, 0, 0);
+        L.clearRect(0, 0, layer.width, layer.height);
+        L.setTransform(dpr, 0, 0, dpr, 0, 0);
         const y = sea + wave(bx, f.t, 0) - 2;
+        L.translate(bx, y);
+        L.rotate(Math.sin(f.t * 0.9) * 0.05);
+        const hull = L.createLinearGradient(0, -s * 0.4, 0, s * 0.18);
+        hull.addColorStop(0, f.ink(0.9));
+        hull.addColorStop(1, f.ink(0.45));
+        L.fillStyle = hull;
+        L.beginPath();
+        L.moveTo(-s * 1.3, -s * 0.35);
+        L.quadraticCurveTo(-s * 1.0, s * 0.15, 0, s * 0.18);
+        L.quadraticCurveTo(s * 1.0, s * 0.15, s * 1.3, -s * 0.4);
+        L.quadraticCurveTo(0, -s * 0.28, -s * 1.3, -s * 0.35);
+        L.fill();
+        L.strokeStyle = f.ink(0.75);
+        L.lineWidth = 1.2;
+        L.lineCap = "round";
+        L.beginPath();
+        L.moveTo(0, -s * 0.25);
+        L.lineTo(0, -s * 2.1);
+        L.stroke();
+        const sail = L.createLinearGradient(-s * 0.9, -s * 0.5, s * 0.6, -s * 1.6);
+        sail.addColorStop(0, f.ink(0.5));
+        sail.addColorStop(0.6, f.ink(0.85));
+        sail.addColorStop(1, f.ink(0.6));
+        L.fillStyle = sail;
+        L.beginPath();
+        L.moveTo(-s * 0.9, -s * 0.45);
+        L.quadraticCurveTo(-s * 0.2, -s * 1.3, s * 0.15, -s * 2.15);
+        L.quadraticCurveTo(s * 0.5, -s * 1.1, s * 0.9, -s * 0.5);
+        L.quadraticCurveTo(0, -s * 0.4, -s * 0.9, -s * 0.45);
+        L.fill();
         ctx.save();
-        ctx.translate(bx, y);
-        ctx.rotate(Math.sin(f.t * 0.9) * 0.05);
-        ctx.strokeStyle = f.ink(0.42 * f.env);
-        ctx.fillStyle = f.ink(0.1 * f.env);
-        ctx.lineWidth = 1.5;
-        ctx.beginPath();
-        ctx.moveTo(-s * 1.3, -s * 0.35);
-        ctx.quadraticCurveTo(-s * 1.0, s * 0.15, 0, s * 0.18);
-        ctx.quadraticCurveTo(s * 1.0, s * 0.15, s * 1.3, -s * 0.4);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(0, -s * 0.2);
-        ctx.lineTo(0, -s * 2.1);
-        ctx.stroke();
-        ctx.fillStyle = f.ink(0.16 * f.env);
-        ctx.beginPath();
-        ctx.moveTo(-s * 0.9, -s * 0.45);
-        ctx.quadraticCurveTo(-s * 0.2, -s * 1.3, s * 0.15, -s * 2.15);
-        ctx.quadraticCurveTo(s * 0.5, -s * 1.1, s * 0.9, -s * 0.5);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
+        ctx.globalAlpha = 0.4 * f.env;
+        ctx.shadowColor = f.ink(0.5 * f.env);
+        ctx.shadowBlur = s * 0.35;
+        ctx.drawImage(layer, 0, 0, w, h);
+        ctx.restore();
+        ctx.save();
+        ctx.globalAlpha = 0.05 * f.env;
+        ctx.translate(0, y * 2 + s * 0.3);
+        ctx.scale(1, -1);
+        ctx.drawImage(layer, 0, 0, w, h);
         ctx.restore();
       };
     },

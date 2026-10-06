@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pictures viewer</title>
+    <!-- The pictures behind a song's words, one at a time (src/VisionsViewer.tsx). Dev server only: `make visions`. -->
+    <style>
+      html, body, #root { margin: 0; height: 100%; }
+      .viewer { position: fixed; inset: 0; overflow: hidden; font: 13px -apple-system, BlinkMacSystemFont, sans-serif; }
+      .viewer.dark { background: #0d1117; color: #e6edf3; }
+      .viewer.light { background: #f6f8fa; color: #1f2328; }
+      /* As .lyrics-art in src/styles.css. */
+      .lyrics-art { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+      .lyrics-art img { position: absolute; inset: -20%; width: 140%; height: 140%; object-fit: cover; filter: blur(70px) saturate(1.5); opacity: 0.22; }
+      .dark .lyrics-art img { opacity: 0.4; filter: blur(70px) saturate(1.3) brightness(0.5); }
+      #words { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -55%); width: max-content; max-width: 46vw; font: 22px/1.6 Georgia, serif; opacity: 0.75; }
+      #words p { margin: 0; }
+      #words p.now { opacity: 1; font-size: 25px; color: #c6974a; }
+      .bar { position: absolute; left: 0; right: 0; bottom: 0; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding: 10px 16px; background: rgba(127, 127, 127, 0.12); backdrop-filter: blur(8px); }
+      .bar select, .bar button { font: inherit; }
+      .bar .keys { margin-left: auto; opacity: 0.6; }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/VisionsViewer.tsx"></script>
+  </body>
+</html>

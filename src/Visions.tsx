@@ -73,8 +73,9 @@ export async function artPalette(url: string): Promise<{ warm: Pair; cool: Pair 
   };
 }
 /** Screenshot mode: one picture shown, this far through, in full. */
-let scenePick: { name: string; at: number } | null = null;
-export const setSceneVision = (name: string, at = 0.5) => (scenePick = { name, at });
+// `loop` (the pictures viewer, visions.html): it fades in and out as when chosen, then begins again.
+let scenePick: { name: string; at: number; loop?: boolean } | null = null;
+export const setSceneVision = (name: string, at = 0.5, loop = false) => (scenePick = { name, at, loop });
 export const VISION_NAMES = VISIONS.map((v) => v.name);
 
 const DEFAULT_BPM = 72;
@@ -203,6 +204,7 @@ export function Visions({
       if (rec.length > 4) rec.shift();
     };
     const pick = scenePick ? VISIONS.find((v) => v.name === scenePick!.name) : undefined;
+    const looping = !!pick && !!scenePick!.loop;
     if (pick) {
       begin(pick.lane, pick, 0, scenePick!.at);
       lanes.back.next = lanes.pass.next = Infinity;
@@ -245,19 +247,19 @@ export function Visions({
       for (const lane of ["back", "pass"] as Lane[]) {
         const L = lanes[lane];
         if (L.cur && (clock - L.cur.start >= L.cur.dur || (L.cur.quit !== undefined && clock - L.cur.quit >= QUIT))) {
-          L.next = clock + (L.cur.quit !== undefined ? rnd(1.5, 4) : lane === "back" ? rnd(6, 18) : rnd(8, 26));
+          L.next = looping ? clock + 1.5 : clock + (L.cur.quit !== undefined ? rnd(1.5, 4) : lane === "back" ? rnd(4, 12) : rnd(6, 18));
           L.cur = null;
         }
         if (!L.cur && clock >= L.next) {
-          const choices = VISIONS.filter((v) => v.lane === lane && !L.recent.includes(v.name) && !(still && v.moving));
+          const choices = looping ? [pick] : VISIONS.filter((v) => v.lane === lane && !L.recent.includes(v.name) && !(still && v.moving));
           if (choices.length) begin(lane, choices[Math.floor(Math.random() * choices.length)], clock);
         }
         const a = L.cur;
         if (!a) continue;
         const t = clock - a.start;
-        const fade = Math.min(4, a.dur * 0.25);
+        const fade = Math.min(3, a.dur * 0.2);
         const env =
-          (pick ? 1 : smooth(t / fade) * smooth((a.dur - t) / fade)) * (a.quit === undefined ? 1 : smooth(1 - (clock - a.quit) / QUIT));
+          (pick && !looping ? 1 : smooth(t / fade) * smooth((a.dur - t) / fade)) * (a.quit === undefined ? 1 : smooth(1 - (clock - a.quit) / QUIT));
         const f: Frame = {
           ctx,
           w,
