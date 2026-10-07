@@ -2,7 +2,7 @@
 
 <sub>[Features](features.md) › Quiet time</sub>
 
-[Plans](#plans) · [Worship music](#worship-music) · [Closing verse](#closing-verse) · [Daily reminder](#daily-reminder) · [Menu bar](#menu-bar)
+[Plans](#plans) · [Worship music](#worship-music) · [Closing verse](#closing-verse) · [Favourite passage](#favourite-passage) · [Daily reminder](#daily-reminder) · [Menu bar](#menu-bar)
 
 ## Plans
 
@@ -95,6 +95,13 @@ assistant to gather up what the day's reading taught.
 - It stays open when it's done. **Finish** ends Quiet time.
 - It is chosen while you read, so it's usually ready by the end.
 - Without an AI assistant, the blessing of Numbers 6:24–26 closes instead.
+
+## Favourite passage
+
+A passage of your own, such as Proverbs 3:5–6, read every day at the end of Quiet time, before the closing verse. Set it under the closing verse, in a plan's page.
+
+- Type the passage and click **Add**.
+- **Remove** stops it.
 
 ## Daily reminder
 

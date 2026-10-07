@@ -32,6 +32,7 @@ import {
   todayFor,
   ymd,
   worshipCounts,
+  partLabel,
 } from "./plans";
 import { usePlayer } from "./speech";
 import { QuietStep, useApp } from "./state";
@@ -73,6 +74,20 @@ export function quietSteps(
     const step = (when: "before" | "after", key: string): QuietStep => ({ key, label: "Worship", kind: "worship", songs: w[when], when });
     if (w.before) steps.unshift(step("before", "worship"));
     if (w.after) steps.push(step("after", w.before ? "worship-after" : "worship"));
+  }
+  // A favourite passage, read every day at the end, before the closing verse.
+  const f = plan.finale;
+  if (f && steps.length) {
+    const label = partLabel(f).replace(/^Psalms/, "Psalm");
+    steps.push({
+      key: "finale",
+      label,
+      kind: "bible",
+      bible: plan.bible,
+      b: f.b,
+      c: f.c,
+      ...(f.v ? { v: f.v, v2: f.c2 ? undefined : f.v2 } : {}),
+    });
   }
   if (plan.closing && steps.length) steps.push({ key: "closing", label: "Closing verse", kind: "closing", bible: plan.bible });
   return steps;

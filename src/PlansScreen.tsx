@@ -24,7 +24,9 @@ import {
   streak,
   unmarkDayRead,
   parseYmd,
+  partLabel,
   partRef,
+  refPart,
   perDay,
   Plan,
   PpoPlan,
@@ -1514,7 +1516,7 @@ function WorshipCard({ plan, update }: { plan: Plan; update: (p: Plan) => void }
   );
 }
 
-/** The closing verse in Quiet time: whether to end with one. */
+/** The closing verse in Quiet time: whether to end with one; and a favourite passage read every day before it. */
 function ClosingSetting({ plan, update }: { plan: Plan; update: (p: Plan) => void }) {
   return (
     <div className="card" style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
@@ -1526,6 +1528,55 @@ function ClosingSetting({ plan, update }: { plan: Plan; update: (p: Plan) => voi
       </div>
       <div className="hint">
         End Quiet time with a verse or short passage, chosen by the AI assistant to gather up what the day's reading taught.
+      </div>
+      <FinaleSetting plan={plan} update={update} />
+    </div>
+  );
+}
+
+/** A favourite passage read at the end of every day's Quiet time. */
+function FinaleSetting({ plan, update }: { plan: Plan; update: (p: Plan) => void }) {
+  const [text, setText] = useState("");
+  const ref = parseRef(text);
+  const save = () => {
+    if (!ref) return;
+    update({ ...plan, finale: refPart(ref) });
+    setText("");
+  };
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 10, borderTop: "1px solid var(--border)", paddingTop: 12, marginTop: 2 }}>
+      <span className="label">Every day</span>
+      {plan.finale ? (
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <b>{partLabel(plan.finale).replace("Psalms", "Psalm")}</b>
+          <button
+            className="btn small"
+            type="button"
+            style={{ marginLeft: "auto" }}
+            title="Stop reading it each day"
+            onClick={() => update({ ...plan, finale: undefined })}
+          >
+            Remove
+          </button>
+        </div>
+      ) : (
+        <form
+          style={{ display: "flex", gap: 8, alignItems: "center" }}
+          onSubmit={(e) => {
+            e.preventDefault();
+            save();
+          }}
+        >
+          <label className="field" style={{ flex: 1 }}>
+            <input value={text} onChange={(e) => setText(e.target.value)} placeholder="e.g. Pro 3:5-6" aria-label="Favourite passage" />
+          </label>
+          <button className="btn small" type="submit" disabled={!ref}>
+            Add
+          </button>
+        </form>
+      )}
+      <div className="hint">
+        {text && !ref ? "Not a passage: try Proverbs 3:5-6 or Psalm 23." : "A favourite passage, read every day at the end of Quiet time."}
       </div>
     </div>
   );

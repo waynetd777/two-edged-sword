@@ -40,6 +40,8 @@ export interface SequencePlan {
   closing?: boolean;
   /** Parts of the current day ticked off so far (see progressKey). */
   progress?: Progress;
+  /** A favourite passage read every day, at the end of Quiet time (before the closing verse). */
+  finale?: Part;
   active: boolean;
 }
 
@@ -83,6 +85,7 @@ export interface PpoPlan {
   /** Songs from the Music library, chosen for the day's reading; absent for none. */
   worship?: Worship;
   closing?: boolean;
+  finale?: Part;
   progress?: Progress;
   active: boolean;
 }
@@ -176,6 +179,12 @@ export function partLabel(x: Part): string {
   return x.c2 && x.c2 !== x.c ? `${b} ${x.c}–${x.c2}` : `${b} ${x.c}`;
 }
 export const dayLabel = (parts: Part[]) => parts.map(partLabel).join(", ");
+
+/** A reference as a part: "Proverbs 3:5-6", "Psalm 23". */
+export const refPart = (r: Ref): Part =>
+  r.verse
+    ? { b: r.book, c: r.chapter, v: r.verse, v2: r.to, ...(r.toChapter && r.toChapter !== r.chapter ? { c2: r.toChapter } : {}) }
+    : { b: r.book, c: r.chapter };
 
 /** Whole chapters as parts, merging runs in the same book: Genesis 1, 2, 3 → Genesis 1–3. */
 export function chaptersToParts(chs: [number, number][]): Part[] {
