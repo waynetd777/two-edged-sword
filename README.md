@@ -6,6 +6,8 @@ commentary and Easton's Bible Dictionary, and reads
 more modules in e-Sword X's formats: your own, and e-Sword X's library if you have it.
 It only reads them, and keeps your journal, highlights and plans separately.
 
+See it on the [Two-edged Sword website](https://two-edged-sword.davies.co.za/).
+
 ## Download
 
 For a Mac with Apple silicon (M1 or later) and macOS 13 or later.

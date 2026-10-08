@@ -49,6 +49,8 @@ Something refused by mistake can be allowed in System Settings › Privacy & Sec
 - **Back and forward** (top left) remember screens, passages, words and searches.
 - The **sidebar** lists your bookmarks and recent chapters. Hover one for a preview; × removes it.
 - Hover any control to see what it does.
+- The **Help** menu has this help (⌘?) and **Two-edged Sword Website**. **About Two-edged Sword**, in the
+  app menu, shows the version, with the website under it.
 - The **?** at the top right opens the help beside the screen, at the part of the guides for that
   screen. Type to search every page; **Ask about Two-edged Sword** asks the assistant instead.
   Esc closes it.
@@ -66,7 +68,8 @@ Something refused by mistake can be allowed in System Settings › Privacy & Sec
 - **Quiet time**: the daily reminder, and what to do when you fall behind.
 - **AI assistant**: which tools are installed, the default model, what Ask may read and send, and
   whether it suggests a next question ([Ask](ask.md)).
-- At the bottom: the app's version and build number, and its licence.
+- At the bottom: the app's version and build number, its licence, and **Website**, which opens
+  [two-edged-sword.davies.co.za](https://two-edged-sword.davies.co.za/).
 
 ## Licence and credits
 

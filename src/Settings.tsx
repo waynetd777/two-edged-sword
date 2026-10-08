@@ -5,11 +5,13 @@ import { ReactNode, useEffect, useState } from "react";
 import { open as openDialog } from "@tauri-apps/plugin-dialog";
 import { api } from "./api";
 import { Icon } from "./icons";
+import { openUrl } from "@tauri-apps/plugin-opener";
 import { HL, HL_DOT, hlLabel, VoiceSelect } from "./Read";
 import { BibleSelect, Topbar } from "./Shell";
 import { modelGroups, PROVIDER_NAME, pickModel, refreshAssistant, useAssistant } from "./assistant";
 import { READ_FONTS, ReadFont, useApp } from "./state";
 import { confirmDelete, Popover, SearchList, Seg, Switch } from "./ui";
+import { WEBSITE } from "./website";
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -396,7 +398,7 @@ function HlNames() {
   );
 }
 
-/** "Two-edged Sword 1.0.3 (build 20260927.142514)", under the last section. */
+/** "Two-edged Sword 1.0.3 (build 20260927.142514)", under the last section, with the licence and a Website button. */
 function AppVersion() {
   const [v, setV] = useState<[string, string] | null>(null);
   useEffect(() => {
@@ -412,6 +414,11 @@ function AppVersion() {
         Two-edged Sword {v[0]} (build {v[1]})
       </span>
       <span>Free software under the GNU General Public License, version 3 or later</span>
+      <span style={{ marginTop: 6 }}>
+        <button className="btn" title="Open the Two-edged Sword website" onClick={() => void openUrl(WEBSITE)}>
+          <Icon name="globe" size={14} /> Website
+        </button>
+      </span>
     </div>
   );
 }

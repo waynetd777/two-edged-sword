@@ -14,12 +14,14 @@ mod login_item;
 mod login_launch;
 mod media;
 mod music;
+mod platform;
 mod search;
 mod spell;
 mod store;
 mod study;
 mod tray;
 mod tts;
+mod website;
 
 use library::{Kind, Library, ModuleInfo};
 use serde::Serialize;
@@ -778,6 +780,10 @@ pub fn run() {
         .on_menu_event(|app, ev| {
             if ev.id() == help::MENU_ID {
                 help::show(app);
+            } else if ev.id() == website::MENU_ID {
+                website::open(app);
+            } else if ev.id() == website::ABOUT_ID {
+                website::about(app);
             }
         })
         .setup(|app| {
@@ -795,6 +801,7 @@ pub fn run() {
                 set_in_dock(app.handle(), false);
             }
             help::add_to_menu(app.handle())?;
+            website::add_to_menu(app.handle())?;
             // The menu-bar icon and the window it opens; until the main window sends today's
             // reading, that window has its choices without the details.
             tray::build(app.handle())?;

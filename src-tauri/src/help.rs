@@ -106,7 +106,7 @@ mod tests {
         let dir = std::env::temp_dir().join(format!("tes-help-{}", std::process::id()));
         super::write_guides(&dir).unwrap();
         let index = std::fs::read_to_string(dir.join("help/index.txt")).unwrap();
-        assert!(index.contains("reading.md: Reading (Read; Books and devotionals; Listen)"));
+        assert!(index.contains("reading.md: Reading (Read; Books and devotionals; Listen; Songs for the chapter)"));
         let reading = std::fs::read_to_string(dir.join("help/reading.md")).unwrap();
         assert!(reading.contains("## Listen") && !reading.contains("images/"));
         let _ = std::fs::remove_dir_all(&dir);
