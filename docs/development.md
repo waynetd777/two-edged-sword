@@ -214,7 +214,7 @@ reference, and images inline as `data:` URLs.
 | `src-tauri/src/search.rs`, `index.rs` | Search and its index |
 | `src-tauri/src/journal.rs` | The journal's monthly Markdown files |
 | `src-tauri/src/store.rs` | The JSON files in Application Support |
-| `src-tauri/src/music.rs` | Quiet time's worship songs, played through Music |
+| `src-tauri/src/music.rs` | Worship songs played through Music, for Quiet time and for a chapter (`src/ChapterSongs.tsx`) |
 | `src/LyricsPage.tsx`, `src/lyrics.ts`, `src/Flames.tsx` | The playing song's words (LRCLIB), artwork (Music, else the iTunes search API) and the flames shown when it has none |
 | `src/Visions.tsx`, `src/pictures/` | The fifty pictures behind a playing song's words, by subject (`sky`, `land`, `places`, `signs`, `creatures`), drawn with `pictures/kit.ts`, in the artwork's colours; a scene's `song.vision` shows one |
 | `src/closing.ts` | Quiet time's closing verse, chosen by the assistant |
