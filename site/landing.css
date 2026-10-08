@@ -1,4 +1,52 @@
-/* Two-edged Sword: the product page (docs/index.html). Dark only, like the hero screenshots. */
+/* Two-edged Sword: the product page (site/index.html). Dark only, like the hero screenshots. */
+
+/* The fonts come with the site (site/fonts/, with their OFL licences), so the page paints in them at once. */
+@font-face {
+  font-family: "Atkinson Hyperlegible Next";
+  font-style: normal;
+  font-weight: 200 800;
+  font-display: swap;
+  src: url(fonts/atkinson-hyperlegible-next.woff2) format("woff2");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191,
+    U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Atkinson Hyperlegible Next";
+  font-style: italic;
+  font-weight: 200 800;
+  font-display: swap;
+  src: url(fonts/atkinson-hyperlegible-next-italic.woff2) format("woff2");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191,
+    U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "EB Garamond";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(fonts/eb-garamond-greek.woff2) format("woff2");
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: "EB Garamond";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(fonts/eb-garamond-greek-ext.woff2) format("woff2");
+  unicode-range: U+1F00-1FFF;
+}
+@font-face {
+  font-family: "EB Garamond";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(fonts/eb-garamond-latin.woff2) format("woff2");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191,
+    U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
 
 :root {
   --page: #07090c;
@@ -12,8 +60,8 @@
   --gold-soft: rgba(198, 151, 74, 0.18);
   --blue: #58a6ff;
   --blue-deep: #1f6feb;
-  --display: "Atkinson Hyperlegible", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
-  --ui: "Atkinson Hyperlegible", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+  --display: "Atkinson Hyperlegible Next", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+  --ui: "Atkinson Hyperlegible Next", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
   --greek: "EB Garamond", Garamond, "Iowan Old Style", Georgia, serif;
   --mono: ui-monospace, "SF Mono", Menlo, monospace;
   --wrap: 1120px;
@@ -132,8 +180,7 @@ p {
   font-size: 13px;
   letter-spacing: 0.04em;
   margin-bottom: 26px;
-  opacity: 0;
-  animation: fade 0.8s var(--ease) 0.2s forwards;
+  animation: rise 0.8s var(--ease) both;
 }
 
 .interlinear {
@@ -151,9 +198,7 @@ p {
   flex-direction: column;
   align-items: center;
   line-height: 1;
-  opacity: 0;
-  transform: translateY(8px);
-  animation: rise 0.7s var(--ease) forwards;
+  animation: rise 0.8s var(--ease) both;
 }
 .interlinear b {
   font-family: var(--greek);
@@ -183,47 +228,46 @@ p {
   color: var(--gold);
 }
 .interlinear span:nth-child(1) {
-  animation-delay: 0.45s;
+  animation-delay: 0.06s;
 }
 .interlinear span:nth-child(2) {
-  animation-delay: 0.6s;
+  animation-delay: 0.12s;
 }
 .interlinear span:nth-child(3) {
-  animation-delay: 0.72s;
+  animation-delay: 0.18s;
 }
 .interlinear span:nth-child(4) {
-  animation-delay: 0.84s;
+  animation-delay: 0.24s;
 }
 .interlinear span:nth-child(5) {
-  animation-delay: 0.96s;
+  animation-delay: 0.3s;
 }
 .interlinear span:nth-child(6) {
-  animation-delay: 1.08s;
+  animation-delay: 0.36s;
 }
 .interlinear span:nth-child(7) {
-  animation-delay: 1.22s;
+  animation-delay: 0.42s;
 }
 .interlinear span:nth-child(8) {
-  animation-delay: 1.34s;
+  animation-delay: 0.48s;
 }
 .interlinear span:nth-child(9) {
-  animation-delay: 1.48s;
+  animation-delay: 0.54s;
 }
 .interlinear span:nth-child(10) {
-  animation-delay: 1.6s;
+  animation-delay: 0.6s;
 }
 .interlinear span:nth-child(11) {
-  animation-delay: 1.72s;
+  animation-delay: 0.66s;
 }
 .interlinear span:nth-child(12) {
-  animation-delay: 1.84s;
+  animation-delay: 0.72s;
 }
 .interlinear span:nth-child(13) {
-  animation-delay: 1.96s;
+  animation-delay: 0.78s;
 }
 .interlinear span:nth-child(14) {
-  animation-delay: 2.25s;
-  animation-duration: 1s;
+  animation-delay: 0.84s;
 }
 
 .hero h1 {
@@ -231,14 +275,16 @@ p {
   line-height: 1;
   letter-spacing: -0.035em;
   margin-top: clamp(44px, 6vw, 72px);
-  opacity: 0;
-  animation: rise 1s var(--ease) 2.7s forwards;
+  animation: rise 0.8s var(--ease) 0.3s both;
 }
-.hero .tagline,
-.hero .actions,
+.hero .tagline {
+  animation: rise 0.8s var(--ease) 0.36s both;
+}
+.hero .actions {
+  animation: rise 0.8s var(--ease) 0.42s both;
+}
 .hero .fine {
-  opacity: 0;
-  animation: rise 0.9s var(--ease) 3.05s forwards;
+  animation: rise 0.8s var(--ease) 0.48s both;
 }
 .tagline {
   font-size: clamp(18px, 2.2vw, 23px);
@@ -293,11 +339,13 @@ p {
 }
 .hero-shot {
   transform-origin: 50% 0;
-  transform: rotateX(14deg) translateY(30px);
-  opacity: 0;
-  animation: settle 1.4s var(--ease) 3.2s forwards;
+  animation: settle 1.2s var(--ease) 0.55s both;
 }
 @keyframes settle {
+  from {
+    opacity: 0;
+    transform: rotateX(14deg) translateY(30px);
+  }
   to {
     opacity: 1;
     transform: none;
@@ -329,6 +377,22 @@ p {
     0 1px 0 rgba(255, 255, 255, 0.04) inset,
     0 30px 90px -30px rgba(0, 0, 0, 0.9),
     0 10px 30px -10px rgba(0, 0, 0, 0.6);
+}
+.shot:not(.loaded)::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, 0.06) 50%, transparent 70%) 0 0 / 220% 100%;
+  animation: shimmer 1.6s linear infinite;
+  pointer-events: none;
+}
+@keyframes shimmer {
+  from {
+    background-position: 120% 0;
+  }
+  to {
+    background-position: -120% 0;
+  }
 }
 .shot img {
   display: block;
@@ -691,12 +755,11 @@ footer .small {
   transform: none;
 }
 
-@keyframes fade {
-  to {
-    opacity: 1;
-  }
-}
 @keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
   to {
     opacity: 1;
     transform: none;
@@ -713,12 +776,11 @@ footer .small {
   .hero .tagline,
   .hero .actions,
   .hero .fine,
-  .hero-shot {
+  .hero-shot,
+  .shot:not(.loaded)::before {
     animation: none;
-    opacity: 1;
-    transform: none;
   }
-  .rise {
+  .js .rise {
     opacity: 1;
     transform: none;
     transition: none;

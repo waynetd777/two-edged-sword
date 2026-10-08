@@ -125,6 +125,7 @@ run side by side (4 by default). It needs Pillow.
 - Its pictures are WebP copies of the dark screenshots, in `site/img/`. After `make screenshots`, `make site` remakes them (it needs `cwebp`, from `brew install webp`). `img/og.png` is the share card, 1200×630, rendered from `tools/og.html` with headless Chrome: `make og`.
 - Each zoomable screenshot is a `.tour`: the `li` steps under it carry the spot to centre on (`data-x`, `data-y`, in percent of the picture, and `data-s`, the scale) or the picture to show (`data-img`), and `data-caption` for the line under it. `landing.js` plays them while the tour is on screen.
 - To view it locally: `python3 -m http.server 8787` in `site/`, then open http://localhost:8787/.
+- The fonts are served from `site/fonts/` (Atkinson Hyperlegible Next and EB Garamond for the Greek, both OFL, copied from `node_modules`), so the page paints in them at once.
 - The website's address is in `src/website.ts` and `src-tauri/src/website.rs` (Settings, the Help menu and the About panel use it); a test in `website.rs` keeps the two the same.
 
 ## Differences from the KJV

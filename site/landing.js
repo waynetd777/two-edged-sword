@@ -7,7 +7,6 @@
   // (html.js), and a scroll check backs up the observer, so no screenshot can stay hidden.
   var rises = Array.prototype.slice.call(document.querySelectorAll(".rise"));
   if ("IntersectionObserver" in window && !reduced) {
-    document.documentElement.classList.add("js");
     var riser = new IntersectionObserver(
       function (entries) {
         entries.forEach(function (e) {
@@ -36,7 +35,28 @@
     window.addEventListener("scroll", sweep, { passive: true });
     window.addEventListener("load", sweep);
     setTimeout(sweep, 1200);
+  } else {
+    rises.forEach(function (el) {
+      el.classList.add("in");
+    });
   }
+
+  // A screenshot frame shimmers until its picture has loaded (landing.css, .shot:not(.loaded)).
+  document.querySelectorAll(".shot").forEach(function (shot) {
+    var img = shot.querySelector("img");
+    if (!img) {
+      shot.classList.add("loaded");
+      return;
+    }
+    function done() {
+      shot.classList.add("loaded");
+    }
+    if (img.complete) done();
+    else {
+      img.addEventListener("load", done);
+      img.addEventListener("error", done);
+    }
+  });
 
   // The hero screenshot lies back a little and comes upright as the page scrolls.
   var hero = document.getElementById("heroShot");
