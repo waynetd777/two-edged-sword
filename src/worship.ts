@@ -14,7 +14,7 @@ import { assistantModels, pickModel } from "./assistant";
 import { today, ymd } from "./plans";
 
 /** Genres that hold worship music, as the Music app and the stores name them. */
-const WORSHIP = /christian|gospel|worship|praise|religious|inspirational|ccm/i;
+const WORSHIP = /christian|gospel|worship|praise|religious|inspirational|ccm|messianic/i;
 
 let library: Promise<MusicTrack[]> | null = null;
 /** The library's worship songs, one of each title and artist; read once a session. */
