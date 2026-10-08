@@ -8,7 +8,7 @@ It only reads them, and keeps your journal, highlights and plans separately.
 
 | Page | What's in it |
 |---|---|
-| [Reading](reading.md) | Read with the study pane, books and devotionals, Listen |
+| [Reading](reading.md) | Read with the study pane, books and devotionals, Listen, songs for the chapter |
 | [Study](study.md) | Compare translations, Search, Word Study |
 | [Translations and manuscripts](manuscripts.md) | Differences from the KJV, Greek and Hebrew, KJV History, the Targums and Talmud |
 | [Journal](journal.md) | Entries linked to verses, kept in step with Obsidian |

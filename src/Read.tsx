@@ -5,6 +5,7 @@ import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "rea
 import { api, Verse, Voice } from "./api";
 import { apocryphaName, book, BookSizes, fmtRef, isApocrypha, parseRef, Ref, sectionOf, stepChapter, testament } from "./bible";
 import { alignStrongs, EDITIONS, isOriginal, kjvGloss, plainText, Token, tokenize, variantSource } from "./esword";
+import { SongsButton } from "./ChapterSongs";
 import { Icon, Pause, Play } from "./icons";
 import { BibleSelect, RefButton, SearchField, Topbar } from "./Shell";
 import { rankVoices, useListenKey, usePlayer } from "./speech";
@@ -872,6 +873,7 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
               >
                 <Icon name="speaker" />
               </button>
+              <SongsButton about={fmtRef({ book: loc.book, chapter: loc.chapter })} />
               <HighlightsButton />
               <TextSizeButton />
               <button className="ibtn" type="button" aria-label="Focus mode" title="Focus mode (⌘.)" onClick={() => setFocus(true)}>

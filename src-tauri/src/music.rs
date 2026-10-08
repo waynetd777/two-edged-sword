@@ -1,15 +1,17 @@
 // Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
 // SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
-//! Worship songs from the user's Music library, for Quiet time: the library listed, the chosen
+//! Worship songs from the user's Music library, for Quiet time or a chapter: the library listed, the chosen
 //! songs queued as one playlist and played in the Music app. Driven by osascript (JavaScript for
 //! Automation); the first use asks the user to let the app control Music.
 
 use serde::Serialize;
 use std::process::Command;
 
-/// The app's own playlist, remade for each Quiet time. Nothing else in the library is touched.
-const PLAYLIST: &str = "Two-edged Sword · Quiet time";
+/// The app's own playlist, remade each time songs are played. Nothing else in the library is touched.
+const PLAYLIST: &str = "Two-edged Sword";
+/// Its name before chapters had songs too, removed if it's still there.
+const OLD_PLAYLIST: &str = "Two-edged Sword · Quiet time";
 
 #[derive(Serialize)]
 pub struct Track {
@@ -25,7 +27,7 @@ pub struct State {
     pub state: String,
     pub name: String,
     pub artist: String,
-    /// Whether what is playing is the Quiet time playlist.
+    /// Whether what is playing is the app's playlist.
     pub ours: bool,
     pub album: String,
     /// Seconds into the song, and its length.
@@ -63,13 +65,13 @@ pub fn tracks() -> Result<Vec<Track>, String> {
     Ok(rows.into_iter().map(|(id, name, artist, genre)| Track { id, name, artist, genre }).collect())
 }
 
-/// Makes the Quiet time playlist of these songs, in this order, and plays it. Returns how many it found.
+/// Makes the app's playlist of these songs, in this order, and plays it. Returns how many it found.
 pub fn play(ids: &[String]) -> Result<usize, String> {
     let js = r#"function run(argv) {
-        const [name, ids] = JSON.parse(argv[0]);
+        const [name, old, ids] = JSON.parse(argv[0]);
         const m = Application("Music");
         // Remade each time: deleting a playlist leaves its songs in the library.
-        m.userPlaylists.whose({ name })().forEach((p) => m.delete(p));
+        for (const n of [name, old]) m.userPlaylists.whose({ name: n })().forEach((p) => m.delete(p));
         const pl = m.make({ new: "playlist", withProperties: { name } });
         const lib = m.libraryPlaylists[0].tracks;
         for (const id of ids) { const t = lib.whose({ persistentID: id })(); if (t.length) m.duplicate(t[0], { to: pl }); }
@@ -78,7 +80,7 @@ pub fn play(ids: &[String]) -> Result<usize, String> {
         if (n) { m.shuffleEnabled = false; m.songRepeat = "off"; pl.play(); }
         return String(n);
     }"#;
-    let arg = serde_json::to_string(&(PLAYLIST, ids)).map_err(|e| e.to_string())?;
+    let arg = serde_json::to_string(&(PLAYLIST, OLD_PLAYLIST, ids)).map_err(|e| e.to_string())?;
     jxa(js, &arg)?.parse().map_err(|_| "Music didn't say what it queued".to_string())
 }
 
@@ -100,7 +102,7 @@ pub fn state() -> Result<State, String> {
     Ok(State { state, name, artist, ours, album, position, duration, lyrics, bpm })
 }
 
-/// "pause", "play" or "next", for the Quiet time playlist only: nothing else the user is
+/// "pause", "play" or "next", for the app's playlist only: nothing else the user is
 /// listening to is paused or skipped. "stop" is sent as the playlist ends, and stops whatever
 /// Music has gone on to play after it (AutoPlay's similar songs) as well. "show" brings Music to the front.
 pub fn control(cmd: &str) -> Result<(), String> {

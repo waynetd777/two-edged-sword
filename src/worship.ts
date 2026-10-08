@@ -1,7 +1,8 @@
 // Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
 // SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
-// Worship songs for Quiet time: chosen from the user's Music library to suit the day's reading.
+// Worship songs for Quiet time, or for the chapter being read: chosen from the user's Music
+// library to suit the reading.
 // The assistant picks them from the library's worship songs by number, so it can only name songs
 // that are there; without an assistant, or if its answer can't be read, they are picked at random.
 // Songs Quiet time has played are kept (worship-history), and none played in the last two weeks
@@ -90,16 +91,14 @@ export interface Picked {
   note?: string;
 }
 
-// A day's choice is kept, so starting Quiet time again doesn't wait for the assistant again.
+// A day's choice is kept, so starting Quiet time again doesn't wait for the assistant again; a
+// chapter's for the session.
 const chosen = new Map<string, Promise<Picked>>();
-
-/** `n` songs for a Quiet time reading `about` (its parts, "John 3", "My Utmost for His Highest"),
- *  leaving out the songs in `avoid` (by id). */
-export function pickSongs(n: number, about: string[], when: "before" | "after", model: string, avoid: string[] = []): Promise<Picked> {
-  const key = JSON.stringify([n, about, when, avoid, today().toDateString()]);
+function kept(key: string, pick: () => Promise<Picked>, fresh = false): Promise<Picked> {
+  if (fresh) chosen.delete(key);
   let p = chosen.get(key);
   if (!p) {
-    p = choose(n, about, when, model, new Set(avoid));
+    p = pick();
     chosen.set(key, p);
     // Only a real choice is kept; a random one (or a failure) is tried again next time.
     p.then(
@@ -112,11 +111,41 @@ export function pickSongs(n: number, about: string[], when: "before" | "after", 
   return p;
 }
 
-async function choose(n: number, about: string[], when: "before" | "after", model: string, avoid: Set<string>): Promise<Picked> {
+const nSongs = (n: number) => `${n} worship song${n === 1 ? "" : "s"}`;
+
+/** `n` songs for a Quiet time reading `about` (its parts, "John 3", "My Utmost for His Highest"),
+ *  leaving out the songs in `avoid` (by id). */
+export function pickSongs(n: number, about: string[], when: "before" | "after", model: string, avoid: string[] = []): Promise<Picked> {
+  const key = JSON.stringify([n, about, when, avoid, today().toDateString()]);
+  const ask = `Choose ${nSongs(n)} for someone's quiet time with God, to play ${when === "before" ? "before their reading, preparing their heart for it" : "after their reading, as a response to it"}.
+Today they are reading: ${about.join("; ")}.`;
+  return kept(key, () => choose(n, ask, ["these passages", "today's reading"], model, new Set(avoid), true));
+}
+
+/** `n` songs to play while reading a chapter: `about` names it ("Romans 8", or a book's chapter),
+ *  and `text` is its opening, for a book's chapter whose name alone says little. Songs Quiet time
+ *  played lately can be chosen, and these don't count as played. `fresh`: not the choice kept. */
+export function pickChapterSongs(n: number, about: string, text: string, model: string, fresh = false): Promise<Picked> {
+  const opening = text.trim().slice(0, 1500);
+  const ask = `Choose ${nSongs(n)} to play for someone reading ${about}.${opening ? `\nIt begins:\n"""\n${opening}\n"""` : ""}`;
+  return kept(
+    JSON.stringify(["chapter", n, about]),
+    () => choose(n, ask, ["this chapter", "this chapter"], model, new Set(), false),
+    fresh,
+  );
+}
+
+/** The songs last played from a chapter, so the Lyrics page can say why each was chosen. */
+export let chapterPlaying: Song[] = [];
+export const setChapterPlaying = (s: Song[]) => (chapterPlaying = s);
+
+/** Asks the assistant to choose: `ask` says what for, `it` names the reading as the songs should
+ *  fit it and as the intro describes it. With `rest`, songs played lately are left out. */
+async function choose(n: number, ask: string, it: [string, string], model: string, avoid: Set<string>, rest: boolean): Promise<Picked> {
   const library = (await worshipSongs()).filter((t) => !avoid.has(t.id));
   if (!library.length) throw new Error("No worship songs in your Music library (Christian, gospel or worship genres).");
   // Leaving out what was played lately, unless that leaves too few.
-  const recent = await recentlyPlayed();
+  const recent = rest ? await recentlyPlayed() : new Set<string>();
   const rested = library.filter((t) => !recent.has(t.id) && !recent.has(songKey(t)));
   const all = rested.length >= n ? rested : library;
   const take = (xs: MusicTrack[]) => xs.slice(0, n).map(({ id, name, artist }) => ({ id, name, artist }));
@@ -124,11 +153,10 @@ async function choose(n: number, about: string[], when: "before" | "after", mode
   const models = assistantModels();
   if (!models.length) return random("Chosen at random: no AI assistant is set up.");
   const list = all.map((t, i) => `${i + 1}. ${t.name} — ${t.artist}`).join("\n");
-  const prompt = `Choose ${n} worship song${n === 1 ? "" : "s"} for someone's quiet time with God, to play ${when === "before" ? "before their reading, preparing their heart for it" : "after their reading, as a response to it"}.
-Today they are reading: ${about.join("; ")}.
-Choose songs whose words and themes fit what these passages are about, and that suit worship (not upbeat rock or songs about something else). Choose only from the numbered list below, which is their own music library.
+  const prompt = `${ask}
+Choose songs whose words and themes fit what ${it[0]} ${it[0] === "this chapter" ? "is" : "are"} about, and that suit worship (not upbeat rock or songs about something else). Choose only from the numbered list below, which is their own music library.
 Reply with only JSON, and nothing else, in this form:
-{"intro": "one or two sentences on what today's reading is about and how the songs answer it", "songs": [{"n": 12, "why": "one sentence on how this song relates to the reading"}]}
+{"intro": "one or two sentences on what ${it[1]} is about and how the songs answer it", "songs": [{"n": 12, "why": "one sentence on how this song relates to the reading"}]}
 with the songs in the order to play them. Speak to the reader as "you", warmly and plainly; name passages, not verse numbers alone.
 
 ${list}`;

@@ -247,7 +247,7 @@ export const api = {
   journalStamp: (dir: string) => (sceneJournal ? Promise.resolve(`scene:${Date.now()}`) : invoke<string>("journal_stamp", { dir })),
   /** The songs in the Music app's library (music.rs). */
   musicTracks: () => invoke<MusicTrack[]>("music_tracks"),
-  /** Queues these songs as the Quiet time playlist and plays it; returns how many were found. */
+  /** Queues these songs as the app's playlist and plays it; returns how many were found. */
   musicPlay: (ids: string[]) => (readOnly ? Promise.resolve(0) : invoke<number>("music_play", { ids })),
   musicState: () => invoke<MusicState>("music_state"),
   /** The playing song's artwork as image bytes; empty when it has none. */
@@ -264,7 +264,7 @@ export const api = {
   spellIgnore: (word: string) => invoke<void>("spell_ignore", { word }),
   /** Keeps the display awake (and so the screen unlocked) while reading aloud. */
   keepAwake: (on: boolean) => invoke<void>("keep_awake", { on }),
-  /** Pauses, resumes or skips, but only while the Quiet time playlist is what's playing; "show" brings Music to the front. */
+  /** Pauses, resumes or skips, but only while the app's playlist is what's playing; "show" brings Music to the front. */
   musicControl: (cmd: "pause" | "play" | "next" | "stop" | "show") =>
     readOnly ? Promise.resolve() : invoke<void>("music_control", { cmd }),
   journalSave: (dir: string, entry: JournalEntry) => (readOnly ? Promise.resolve() : invoke<void>("journal_save", { dir, entry })),

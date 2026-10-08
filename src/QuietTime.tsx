@@ -37,7 +37,7 @@ import {
 import { usePlayer } from "./speech";
 import { QuietStep, useApp } from "./state";
 import { useDrag } from "./ui";
-import { markPlayed, Picked, pickSongs } from "./worship";
+import { markPlayed, Picked, pickSongs, setChapterPlaying } from "./worship";
 import { sceneSong } from "./lyrics";
 import { Closing, pickClosing } from "./closing";
 import { inverts } from "./WebPage";
@@ -344,6 +344,7 @@ export function QuietTime({ focus }: { focus: boolean }) {
           app.toast("Couldn't find the songs in Music");
           return;
         }
+        setChapterPlaying([]); // the playlist is Quiet time's now
         markPlayed(songs).catch((e) => console.error("worship-history", e));
         // The words in the reading column while the songs play.
         app.openLyrics();

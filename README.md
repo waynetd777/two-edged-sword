@@ -32,7 +32,7 @@ It opens normally after that. The first time you use some features, macOS asks f
 - **Compare** translations side by side, **Search** the whole library, and **Word Study** a Greek
   or Hebrew word.
 - **Journal** entries linked to their verses, kept in step with Obsidian.
-- **Quiet time** plans, with worship songs chosen for the day and a daily reminder.
+- **Quiet time** plans, with worship songs chosen for the day and a daily reminder. Songs can be chosen for any chapter too.
 - **Build more modules** from free sources, such as the Targums, the Talmud and the Vulgate.
 - **KJV History**: the manuscripts and editions behind the KJV, and which you have.
 

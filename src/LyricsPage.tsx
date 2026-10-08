@@ -3,17 +3,18 @@
 
 // The words of the song playing in Music, in the reading column: the line being sung lit and kept
 // in the middle, when the lyrics are timed. Music is asked where it is every second; in between
-// the time is counted on here. During Quiet time's Worship part, why the song was chosen is shown.
+// the time is counted on here. Why the song was chosen is shown, for Quiet time's Worship part or a chapter.
 
 import { Fragment, useEffect, useRef, useState } from "react";
 import { api, MusicState } from "./api";
 import { fmtRef } from "./bible";
-import { Icon } from "./icons";
+import { Icon, Pause, Play } from "./icons";
 import { artworkFor, Lyrics, lyricsFor, sceneSong } from "./lyrics";
 import { Topbar } from "./Shell";
 import { useApp } from "./state";
 import { Flames } from "./Flames";
 import { Visions } from "./Visions";
+import { chapterPlaying } from "./worship";
 import { useDark } from "./WebPage";
 
 const plainLines = (text: string): Lyrics => ({
@@ -130,13 +131,37 @@ export function LyricsPage({ focus, setFocus }: { focus: boolean; setFocus: (f: 
     return () => window.removeEventListener("keydown", onKey);
   }, [focus, setFocus]);
 
-  // Why Quiet time chose this song, while it plays in the Worship part.
+  // Why the song was chosen: by Quiet time, while it plays in the Worship part, or for a chapter.
   const s = app.session;
   const step = s?.steps[s.i];
-  const why = step?.kind === "worship" && now?.ours ? step.picked?.find((x) => x.name === name)?.why : undefined;
+  const worship = step?.kind === "worship";
+  const why = !now?.ours
+    ? undefined
+    : worship
+      ? step.picked?.find((x) => x.name === name)?.why
+      : chapterPlaying.find((x) => x.name === name)?.why;
+  // Pause and skip for the app's playlist; in the Worship part, the Quiet time bar has them.
+  const control = (cmd: "pause" | "play" | "next") => api.musicControl(cmd).catch((e) => app.toast(String(e)));
+  const playing = now?.state === "playing";
 
   const tools = (
     <div style={{ display: "flex", gap: 2 }}>
+      {now?.ours && !worship && (
+        <>
+          <button
+            className="ibtn"
+            type="button"
+            aria-label={playing ? "Pause" : "Play"}
+            title={playing ? "Pause" : "Play"}
+            onClick={() => control(playing ? "pause" : "play")}
+          >
+            {playing ? <Pause size={12} /> : <Play size={12} />}
+          </button>
+          <button className="ibtn" type="button" aria-label="Next song" title="Next song" onClick={() => control("next")}>
+            <Icon name="fwd" />
+          </button>
+        </>
+      )}
       <button
         className="ibtn"
         type="button"

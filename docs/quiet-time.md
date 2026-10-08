@@ -62,6 +62,7 @@ scroll:
 - The line being sung is lit in blue, with a light sweeping across it, and kept in view, when
   the lyrics are timed. Dots show where nothing is sung.
 - Why each song was chosen shows under its name.
+- Songs chosen for a chapter play the same way: see [Songs for the chapter](reading.md#songs-for-the-chapter).
 - A song with no lyrics found gets softly burning flames instead, swelling to the song's tempo
   (Music's BPM for it, or a slow tempo if it has none). The app can't hear the music itself.
 - Faint pictures come and go behind the words, with lyrics or without, in the colours of the

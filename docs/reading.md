@@ -2,7 +2,7 @@
 
 <sub>[Features](features.md) › Reading</sub>
 
-[Read](#read) · [Books and devotionals](#books-and-devotionals) · [Listen](#listen)
+[Read](#read) · [Books and devotionals](#books-and-devotionals) · [Listen](#listen) · [Songs for the chapter](#songs-for-the-chapter)
 
 ## Read
 
@@ -98,3 +98,19 @@ The app uses the voices installed on your Mac. The **Premium** ones sound far mo
 
 Hebrew, Greek and Latin Bibles are read in a Hebrew, Greek or Italian voice. Better ones download
 the same way.
+
+## Songs for the chapter
+
+The ♫ button in the top bar has the AI assistant choose worship songs from your Music library to
+suit the chapter you're reading, in the Bible or in a book or devotional.
+
+1. Click ♫ and choose how many songs.
+2. Click **Choose songs**. A card says what the chapter is about and why each song suits it.
+3. Click **Play songs** to play them in Music. Their words show in the reading column, as in
+   [Worship music](quiet-time.md#worship-music), with Pause and Next song in the top bar. Reading
+   aloud stops and its player closes.
+
+- **Choose again** picks different songs.
+- These songs don't count as played for Quiet time, which leaves out songs it played in the last
+  14 days.
+- Without an assistant set up, songs are picked at random.

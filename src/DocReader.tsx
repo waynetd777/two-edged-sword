@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { api, Article } from "./api";
 import { fmtRef } from "./bible";
 import { docSegments, plainText, renderHtml, wordRangeAt } from "./esword";
+import { SongsButton } from "./ChapterSongs";
 import { Icon } from "./icons";
 import { useListenKey, usePlayer } from "./speech";
 import { AskPanel, withheld } from "./Ask";
@@ -465,6 +466,17 @@ export function DocReader({ focus, setFocus, openPalette }: { focus: boolean; se
               >
                 <Icon name="speaker" />
               </button>
+              {doc.title && (
+                <SongsButton
+                  label={doc.title}
+                  about={
+                    devo
+                      ? `the devotional "${mod?.title ?? doc.module}", the reading for ${doc.title}`
+                      : `"${mod?.title ?? doc.module}", chapter "${doc.title}"`
+                  }
+                  text={() => segs.map(plainText).join("\n")}
+                />
+              )}
               <HighlightsButton />
               <TextSizeButton />
               <button className="ibtn" type="button" aria-label="Focus mode" title="Focus mode (⌘.)" onClick={() => setFocus(true)}>
