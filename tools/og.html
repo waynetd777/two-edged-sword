@@ -1,0 +1,38 @@
+<!doctype html>
+<!-- Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
+     SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root. -->
+<!-- The product page's share card, site/img/og.png (1200×630): rendered by `make og` with headless Chrome. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=EB+Garamond&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; }
+  body {
+    position: relative; background: #07090c; color: #e6edf3;
+    font: 400 28px/1.35 "Atkinson Hyperlegible", -apple-system, sans-serif;
+    background-image: radial-gradient(ellipse 60% 50% at 50% 110%, rgba(31, 111, 235, 0.22), transparent 70%);
+  }
+  .greek { position: absolute; left: 72px; top: 56px; font: 400 34px/1 "EB Garamond", serif; color: #c6974a; letter-spacing: 0.01em; }
+  .greek small { display: block; margin-top: 10px; font: 400 15px/1 "Atkinson Hyperlegible", sans-serif; color: #8b949e; letter-spacing: 0.02em; }
+  .brand { position: absolute; left: 72px; top: 136px; display: flex; align-items: center; gap: 22px; }
+  .brand img { width: 84px; height: 84px; border-radius: 19px; box-shadow: 0 16px 40px -14px rgba(0, 0, 0, 0.9); }
+  h1 { margin: 0; font-size: 72px; line-height: 1; letter-spacing: -0.035em; font-weight: 400; }
+  p { position: absolute; left: 72px; top: 256px; margin: 0; width: 1056px; font-size: 31px; color: #9aa4af; line-height: 1.35; }
+  .fine { position: absolute; left: 72px; top: 352px; font-size: 20px; color: #5b6470; }
+  .shot {
+    position: absolute; left: 72px; right: 72px; top: 404px; height: 300px; overflow: hidden; border-radius: 14px 14px 0 0;
+    border: 1px solid rgba(255, 255, 255, 0.1); border-bottom: 0; background: #0d1117;
+    box-shadow: 0 -20px 80px -30px rgba(0, 0, 0, 0.9);
+  }
+  .shot img { display: block; width: 100%; }
+</style>
+</head>
+<body>
+  <div class="greek">μάχαιραν δίστομον<small>Hebrews 4:12</small></div>
+  <div class="brand"><img src="../site/img/icon.png" alt=""><h1>Two-edged Sword</h1></div>
+  <p>Bible study for the Mac. Every commentary, lexicon and note you own, open at the verse you're reading.</p>
+  <div class="fine">Free software · Apple silicon · macOS 13 or later · two-edged-sword.davies.co.za</div>
+  <div class="shot"><img src="../site/img/read.webp" alt=""></div>
+</body>
+</html>

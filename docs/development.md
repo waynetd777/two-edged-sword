@@ -18,6 +18,8 @@ runs the AI tools for Ask. The frontend is everything you see.
 | `make help` | Check the help: every link in the guides, and each screen's section, resolves |
 | `make core` | Build the built-in modules into `src-tauri/modules/` (`make dev` and `make app` build them if they're missing) |
 | `make screenshots` | Retake the screenshots in `docs/images/` |
+| `make site` | Remake the product page's WebP pictures from the dark screenshots |
+| `make og` | Render the product page's share card, `site/img/og.png` |
 | `make visions` | Flick through the pictures behind a song's words in Safari, drawn as on the Lyrics page (`visions.html`; ← → step, keys for theme, words, colours, beat). `make visions v=eagle` starts at one |
 | `make icons` | Redraw the icon artwork and regenerate the icon set |
 | `make sign-check` | Show how the installed app is signed |
@@ -115,6 +117,15 @@ run side by side (4 by default). It needs Pillow.
   with the app's icon as its artwork.
 - Scenes use public-domain Bibles only. `AGENTS.md` lists the scene fields.
 - A scene with `"tray": true` shows the menu-bar window alone (the main window runs hidden to send it what to show), and `width` keeps the image at its own width. `"unread": true` shows today's reading as not yet done, so the menu-bar window shows Start Quiet time.
+
+## The product page
+
+`site/` is the app's web page, https://two-edged-sword.davies.co.za/: plain HTML, CSS and JavaScript with no build step. `.github/workflows/pages.yml` publishes it to GitHub Pages on every push to `main` that changes `site/`; `site/.nojekyll` keeps Pages from running Jekyll over it, and `site/sitemap.xml` is what Google Search Console is given.
+
+- Its pictures are WebP copies of the dark screenshots, in `site/img/`. After `make screenshots`, `make site` remakes them (it needs `cwebp`, from `brew install webp`). `img/og.png` is the share card, 1200×630, rendered from `tools/og.html` with headless Chrome: `make og`.
+- Each zoomable screenshot is a `.tour`: the `li` steps under it carry the spot to centre on (`data-x`, `data-y`, in percent of the picture, and `data-s`, the scale) or the picture to show (`data-img`), and `data-caption` for the line under it. `landing.js` plays them while the tour is on screen.
+- To view it locally: `python3 -m http.server 8787` in `site/`, then open http://localhost:8787/.
+- The website's address is in `src/website.ts` and `src-tauri/src/website.rs` (Settings, the Help menu and the About panel use it); a test in `website.rs` keeps the two the same.
 
 ## Differences from the KJV
 
