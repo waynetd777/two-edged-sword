@@ -21,6 +21,7 @@ On [Reading](../reading.md).
 - Reading 1 John 1 with the study pane on the commentaries: [light](read-light.png) · [dark](read-dark.png)
 - Foxe's Book of Martyrs with a paragraph selected and highlighted: [light](books-light.png) · [dark](books-dark.png)
 - Listening to 1 John 1, the word being spoken highlighted: [light](listen-light.png) · [dark](listen-dark.png)
+- Songs for Romans 8: what the chapter is about and why each song relates to it: [light](chapter-songs-light.png) · [dark](chapter-songs-dark.png)
 
 ## Study
 

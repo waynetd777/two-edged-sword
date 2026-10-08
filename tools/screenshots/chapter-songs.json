@@ -1,0 +1,23 @@
+{
+  "intro": "Romans 8 is about life in the Spirit: no condemnation for those in Christ, adoption as God's children, and a love nothing can separate you from. These songs answer it with freedom, belonging and confidence in that love.",
+  "songs": [
+    {
+      "id": "scene-1",
+      "name": "No Longer Slaves",
+      "artist": "Bethel Music",
+      "why": "It sings the heart of Romans 8:15, that you have not received a spirit of fear but of adoption, crying \"Abba, Father\"."
+    },
+    {
+      "id": "scene-2",
+      "name": "Who You Say I Am",
+      "artist": "Hillsong Worship",
+      "why": "It celebrates being a child of God and an heir with Christ, as Romans 8 says the Spirit bears witness you are."
+    },
+    {
+      "id": "scene-3",
+      "name": "In Christ Alone",
+      "artist": "Keith & Kristyn Getty",
+      "why": "Its last verse echoes the chapter's close: no power of hell or scheme of man can pluck you from His hand."
+    }
+  ]
+}

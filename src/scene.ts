@@ -14,6 +14,7 @@ import type { PlayerState } from "./speech";
 import { setSceneVariances, VarianceFile } from "./variances";
 import { SceneSong, setSceneSong } from "./lyrics";
 import { setSceneVision } from "./Visions";
+import { Picked, setSceneChapterSongs } from "./worship";
 import { today as startOfToday, ymd } from "./plans";
 
 export interface Scene {
@@ -57,6 +58,8 @@ export interface Scene {
   variances?: VarianceFile;
   /** A song shown on the Lyrics page, as if playing in Music (from songFile). */
   song?: SceneSong;
+  /** The songs Songs for this chapter chooses, instead of asking the assistant (from chapterSongsFile). */
+  chapterSongs?: Picked;
   /** Today's reading shown as not yet done (for the menu-bar window's Start Quiet time). */
   unread?: boolean;
 }
@@ -75,6 +78,7 @@ export function runScene(app: ReturnType<typeof useApp>, still: (s: Partial<Play
       setReadOnly(true);
       if (sc.entries) setSceneJournal(sc.entries);
       if (sc.variances) setSceneVariances(sc.variances);
+      if (sc.chapterSongs) setSceneChapterSongs(sc.chapterSongs);
       // Give the stored settings and place a moment to load, so the scene is applied on top of them.
       window.setTimeout(() => {
         if (sc.chat) {

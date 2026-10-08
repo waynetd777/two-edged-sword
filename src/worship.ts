@@ -126,6 +126,7 @@ Today they are reading: ${about.join("; ")}.`;
  *  and `text` is its opening, for a book's chapter whose name alone says little. Songs Quiet time
  *  played lately can be chosen, and these don't count as played. `fresh`: not the choice kept. */
 export function pickChapterSongs(n: number, about: string, text: string, model: string, fresh = false): Promise<Picked> {
+  if (sceneChapterSongs) return Promise.resolve(sceneChapterSongs);
   const opening = text.trim().slice(0, 1500);
   const ask = `Choose ${nSongs(n)} to play for someone reading ${about}.${opening ? `\nIt begins:\n"""\n${opening}\n"""` : ""}`;
   return kept(
@@ -134,6 +135,10 @@ export function pickChapterSongs(n: number, about: string, text: string, model: 
     fresh,
   );
 }
+
+/** Screenshot mode: the songs a scene gives, instead of asking the assistant. */
+let sceneChapterSongs: Picked | null = null;
+export const setSceneChapterSongs = (p: Picked) => (sceneChapterSongs = p);
 
 /** The songs last played from a chapter, so the Lyrics page can say why each was chosen. */
 export let chapterPlaying: Song[] = [];

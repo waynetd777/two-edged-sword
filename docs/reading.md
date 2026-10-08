@@ -101,6 +101,8 @@ the same way.
 
 ## Songs for the chapter
 
+<a href="images/index.md#reading"><picture><source media="(prefers-color-scheme: dark)" srcset="images/chapter-songs-dark.png"><img alt="Songs for Romans 8: what the chapter is about and why each song relates to it" src="images/chapter-songs-light.png"></picture></a>
+
 The ♫ button in the top bar has the AI assistant choose worship songs from your Music library to
 suit the chapter you're reading, in the Bible or in a book or devotional.
 

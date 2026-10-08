@@ -82,7 +82,7 @@ def build():
 def capture(scene, theme):
     """Launches the app on the scene, unseen, and returns its webview's snapshot as an sRGB image, or None."""
     # A fixture from a file beside scenes.json: "chatFile" becomes "chat", and so on.
-    files = {"chatFile": "chat", "sessionFile": "session", "entriesFile": "entries", "variancesFile": "variances", "songFile": "song"}
+    files = {"chatFile": "chat", "sessionFile": "session", "entriesFile": "entries", "variancesFile": "variances", "songFile": "song", "chapterSongsFile": "chapterSongs"}
     sc = {k: v for k, v in scene.items() if k not in files and k not in ("crop", "width", "settle", "songVision")}
     for f, k in files.items():
         if f in scene:

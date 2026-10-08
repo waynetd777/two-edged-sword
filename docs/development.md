@@ -110,7 +110,7 @@ run side by side (4 by default). It needs Pillow.
 
 - Each scene is in `tools/screenshots/scenes.json`. `src/scene.ts` sets it up, and nothing is
   saved.
-- Ask, Worship, Closing verse, Lyrics and Journal shots use fixtures in `tools/screenshots/`, so no
+- Ask, Worship, Songs for the chapter, Closing verse, Lyrics and Journal shots use fixtures in `tools/screenshots/`, so no
   model or service is asked and your journal stays private. The Lyrics shot is a public-domain hymn
   with the app's icon as its artwork.
 - Scenes use public-domain Bibles only. `AGENTS.md` lists the scene fields.

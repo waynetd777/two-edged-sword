@@ -90,6 +90,28 @@
     }
   },
   {
+    "name": "chapter-songs",
+    "loc": {
+      "book": 45,
+      "chapter": 8
+    },
+    "settings": {
+      "bible": "kjv",
+      "studyPane": false
+    },
+    "chapterSongsFile": "chapter-songs.json",
+    "click": [
+      "[aria-label=\"Songs for this chapter\"]",
+      ".popover .btn.primary"
+    ],
+    "crop": [
+      560,
+      0,
+      840,
+      460
+    ]
+  },
+  {
     "name": "books",
     "doc": {
       "module": "foxes_book_of_martyrs",
