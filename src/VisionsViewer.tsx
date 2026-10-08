@@ -126,7 +126,8 @@ function Viewer() {
         </select>
         <button onClick={() => setI((x) => (x + 1) % VISIONS.length)}>→</button>
         <span>
-          {i + 1}/{VISIONS.length} · {v.lane === "back" ? "backdrop" : "passing"} · {v.dur[0]}–{v.dur[1]}s · {ARTS[art].name} · {bpm || "no"} bpm
+          {i + 1}/{VISIONS.length} · {v.lane === "back" ? "backdrop" : "passing"} · {v.dur[0]}–{v.dur[1]}s · {ARTS[art].name} ·{" "}
+          {bpm || "no"} bpm
           {playing ? "" : " · paused"}
         </span>
         <span className="keys">← → pictures · space pause · t theme · w words · c colours · b beat · r restart</span>

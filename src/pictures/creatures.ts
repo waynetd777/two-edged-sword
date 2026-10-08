@@ -177,10 +177,12 @@ export const CREATURES: Vision[] = [
         const page = f.dark ? [13, 17, 23] : [246, 248, 250];
         const tone = (k: number) => `rgb(${page.map((p, i) => Math.round(p + (ink[i] - p) * k)).join(",")})`;
         const beat = flap * 0.7;
-        const see = (side: number) => ([bx, z]: [number, number]): [number, number] => {
-          const k = side > 0 ? 0.9 : 0.6;
-          return [bx, side * z * k * Math.cos(beat) - z * 0.1];
-        };
+        const see =
+          (side: number) =>
+          ([bx, z]: [number, number]): [number, number] => {
+            const k = side > 0 ? 0.9 : 0.6;
+            return [bx, side * z * k * Math.cos(beat) - z * 0.1];
+          };
         // One wing, flat: the leading edge out to the wrist and on to the hand; seven fingers fanned
         // at the tip; then the trailing edge, bulging with the inner feathers, back to the body.
         const wingFlat: [number, number][] = [
@@ -203,7 +205,13 @@ export const CREATURES: Vision[] = [
           const bx = 0.3 - i * 0.08,
             bz = 1.82 - i * 0.03;
           const nx = bx - 0.05;
-          wingFlat.push([bx, bz], [(bx + tx) / 2 + 0.015, (bz + tz) / 2], [tx, tz], [(nx + tx) / 2 - 0.015, (bz + tz) / 2], [nx, bz - 0.015]);
+          wingFlat.push(
+            [bx, bz],
+            [(bx + tx) / 2 + 0.015, (bz + tz) / 2],
+            [tx, tz],
+            [(nx + tx) / 2 - 0.015, (bz + tz) / 2],
+            [nx, bz - 0.015],
+          );
         });
         wingFlat.push([-0.32, 1.62], [-0.44, 1.15], [-0.42, 0.6], [-0.3, 0.12]);
         const wing = (side: number, k: number) => {
@@ -767,7 +775,13 @@ export const CREATURES: Vision[] = [
         curl: Math.random() < 0.2,
       }));
       // Dust and specks swept along, and a couple of leaves tumbling.
-      const specks = Array.from({ length: 45 }, () => ({ y: rnd(0.05, 0.95) * h, v: rnd(0.8, 1.5) * w * 0.4, o: rnd(0, 2), r: rnd(1, 2.6), p: rnd(0, TAU) }));
+      const specks = Array.from({ length: 45 }, () => ({
+        y: rnd(0.05, 0.95) * h,
+        v: rnd(0.8, 1.5) * w * 0.4,
+        o: rnd(0, 2),
+        r: rnd(1, 2.6),
+        p: rnd(0, TAU),
+      }));
       const leaves = Array.from({ length: 2 }, () => ({ y: rnd(0.25, 0.75) * h, v: w * rnd(0.35, 0.5), o: rnd(0, 1), p: rnd(0, TAU) }));
       const span = (o: number, v: number, len: number, t: number) => ((o * w + t * v) % (w * 2 + len)) - len * 0.5;
       return (f) => {

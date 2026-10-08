@@ -259,7 +259,8 @@ export function Visions({
         const t = clock - a.start;
         const fade = Math.min(3, a.dur * 0.2);
         const env =
-          (pick && !looping ? 1 : smooth(t / fade) * smooth((a.dur - t) / fade)) * (a.quit === undefined ? 1 : smooth(1 - (clock - a.quit) / QUIT));
+          (pick && !looping ? 1 : smooth(t / fade) * smooth((a.dur - t) / fade)) *
+          (a.quit === undefined ? 1 : smooth(1 - (clock - a.quit) / QUIT));
         const f: Frame = {
           ctx,
           w,

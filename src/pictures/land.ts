@@ -78,7 +78,14 @@ export const LAND: Vision[] = [
       const max = 6;
       const W0 = h * 0.034 * scale; // the trunk's width at its foot
       const lc = h * 0.05 * scale; // how far a cluster of leaves spreads
-      type Limb = { len: number; ang: number; bend: number; depth: number; kids: Limb[]; leaves: { dx: number; dy: number; r: number; a: number }[] };
+      type Limb = {
+        len: number;
+        ang: number;
+        bend: number;
+        depth: number;
+        kids: Limb[];
+        leaves: { dx: number; dy: number; r: number; a: number }[];
+      };
       const limb = (len: number, ang: number, depth: number): Limb => {
         const kids: Limb[] = [];
         if (depth < max) {
@@ -92,7 +99,12 @@ export const LAND: Vision[] = [
         }
         const leaves =
           depth >= max - 2
-            ? Array.from({ length: depth === max ? 12 : 6 }, () => ({ dx: rnd(-1, 1) * lc, dy: rnd(-1, 0.6) * lc, r: rnd(3.5, 7.5) * Math.max(0.6, scale), a: rnd(0, TAU) }))
+            ? Array.from({ length: depth === max ? 12 : 6 }, () => ({
+                dx: rnd(-1, 1) * lc,
+                dy: rnd(-1, 0.6) * lc,
+                r: rnd(3.5, 7.5) * Math.max(0.6, scale),
+                a: rnd(0, TAU),
+              }))
             : [];
         return { len, ang, bend: rnd(-0.12, 0.12), depth, kids, leaves };
       };
@@ -140,9 +152,9 @@ export const LAND: Vision[] = [
           L.fillStyle = wood;
           L.beginPath();
           L.moveTo(x + nx * wa, y + ny * wa);
-          L.quadraticCurveTo(mx + nx * (wa + wb) / 2, my + ny * (wa + wb) / 2, x2 + nx * wb, y2 + ny * wb);
+          L.quadraticCurveTo(mx + (nx * (wa + wb)) / 2, my + (ny * (wa + wb)) / 2, x2 + nx * wb, y2 + ny * wb);
           L.lineTo(x2 - nx * wb, y2 - ny * wb);
-          L.quadraticCurveTo(mx - nx * (wa + wb) / 2, my - ny * (wa + wb) / 2, x - nx * wa, y - ny * wa);
+          L.quadraticCurveTo(mx - (nx * (wa + wb)) / 2, my - (ny * (wa + wb)) / 2, x - nx * wa, y - ny * wa);
           L.closePath();
           L.fill();
           L.beginPath();

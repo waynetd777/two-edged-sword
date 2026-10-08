@@ -106,7 +106,12 @@ export const PLACES: Vision[] = [
         [[60, 160, 105], true],
         [[135, 85, 195], true],
       ];
-      const rgbOf = (ink: string) => ink.slice(ink.indexOf("(") + 1).split(",").slice(0, 3).map(Number);
+      const rgbOf = (ink: string) =>
+        ink
+          .slice(ink.indexOf("(") + 1)
+          .split(",")
+          .slice(0, 3)
+          .map(Number);
       let tint = ["", "", "", "", ""];
       // The light falls slanting down towards the middle of the page, as sunlight through a real
       // window: only through the glass (the stone between the lancets leaves a darker gap), its
@@ -238,7 +243,14 @@ export const PLACES: Vision[] = [
         const kE = 1.14;
         for (let j = 0; j < 14; j++) {
           b.globalAlpha = 0.07;
-          b.setTransform(R * kE * dpr, 0, -R * kE * Math.tan(th) * dpr, -0.15 * R * kE * dpr, (x + dx * len + rnd(-0.09, 0.09) * R) * dpr, (floor + rnd(-0.025, 0.025) * R) * dpr);
+          b.setTransform(
+            R * kE * dpr,
+            0,
+            -R * kE * Math.tan(th) * dpr,
+            -0.15 * R * kE * dpr,
+            (x + dx * len + rnd(-0.09, 0.09) * R) * dpr,
+            (floor + rnd(-0.025, 0.025) * R) * dpr,
+          );
           b.drawImage(S, -0.7, -1.5, 1.4, 2.6);
         }
         // Not over the window itself.
@@ -249,7 +261,13 @@ export const PLACES: Vision[] = [
         b.fill();
         return B;
       };
-      const motes = Array.from({ length: 40 }, () => ({ s: rnd(0, 1), u: rnd(-0.55, 0.55), v: rnd(-0.3, 1), p: rnd(0, TAU), vel: rnd(0.003, 0.008) }));
+      const motes = Array.from({ length: 40 }, () => ({
+        s: rnd(0, 1),
+        u: rnd(-0.55, 0.55),
+        v: rnd(-0.3, 1),
+        p: rnd(0, TAU),
+        vel: rnd(0.003, 0.008),
+      }));
       let layer: HTMLCanvasElement | null = null;
       let lightOf: { key: string; canvas: HTMLCanvasElement } | null = null;
       return (f) => {
@@ -367,7 +385,10 @@ export const PLACES: Vision[] = [
       const hinge = x - dw / 2,
         spring = foot - dh + dw / 2;
       // The doorway's outline, closed-door shape: up the hinge side, over the round head, down.
-      const outline: [number, number][] = [[hinge, foot], [hinge, spring]];
+      const outline: [number, number][] = [
+        [hinge, foot],
+        [hinge, spring],
+      ];
       for (let i = 0; i <= 32; i++) {
         const t = Math.PI + (i / 32) * Math.PI;
         outline.push([x + Math.cos(t) * (dw / 2), spring + Math.sin(t) * (dw / 2)]);
@@ -381,11 +402,13 @@ export const PLACES: Vision[] = [
       // A point of the door, swung out towards us by `phi` on its hinge: it comes nearer the hinge
       // across the page, and nearer us (so taller, about the eye's height) the further it is from it.
       const eye = foot - dh * 0.45;
-      const swing = (phi: number) => ([px, py]: [number, number]): [number, number] => {
-        const u = (px - hinge) / dw;
-        const s = 1 / (1 - u * Math.sin(phi) * 0.3);
-        return [hinge + u * dw * Math.cos(phi), eye + (py - eye) * s];
-      };
+      const swing =
+        (phi: number) =>
+        ([px, py]: [number, number]): [number, number] => {
+          const u = (px - hinge) / dw;
+          const s = 1 / (1 - u * Math.sin(phi) * 0.3);
+          return [hinge + u * dw * Math.cos(phi), eye + (py - eye) * s];
+        };
       // Its two panels, as outlines in the closed door, each side sampled so they bend with it.
       const panel = (u0: number, u1: number, y0: number, y1: number): [number, number][] => {
         const pts: [number, number][] = [];
@@ -492,7 +515,10 @@ export const PLACES: Vision[] = [
         r = r0 * scale;
       // The stone's rough edge, its chisel marks, and the rays' lengths, fixed for this showing.
       const lump = rnd(0, TAU);
-      const rim = Array.from({ length: 72 }, (_, i) => 1 + 0.025 * Math.sin((i / 72) * TAU * 3 + lump) + 0.012 * Math.sin((i / 72) * TAU * 7 + lump * 2));
+      const rim = Array.from(
+        { length: 72 },
+        (_, i) => 1 + 0.025 * Math.sin((i / 72) * TAU * 3 + lump) + 0.012 * Math.sin((i / 72) * TAU * 7 + lump * 2),
+      );
       const marks = Array.from({ length: 14 }, () => ({ a: rnd(0, TAU), r: rnd(0.15, 0.7), l: rnd(-0.4, 0.4), d: rnd(-0.12, 0.12) }));
       const rays = Array.from({ length: 9 }, () => rnd(4, 4.4));
       let layer: HTMLCanvasElement | null = null;
