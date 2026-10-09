@@ -40,6 +40,11 @@ export interface Vision {
   dur: [number, number];
   /** Not with reduced motion: a picture that is all movement. */
   moving?: boolean;
+  /**
+   * What the picture is of, as words (or short phrases) a song about it would use: a picture whose
+   * themes are in the song's title or words is chosen more often while it plays (Visions.tsx).
+   */
+  themes?: string[];
   make: (w: number, h: number, room: Room) => (f: Frame) => void;
 }
 
@@ -138,4 +143,81 @@ export function grow(len: number, ang: number, depth: number, max: number, sprea
     }
   }
   return { len, ang, depth, kids };
+}
+
+/** The page's own colour (as in styles.css), which solid shapes are mixed from. */
+export const pageRGB = (dark: boolean): RGB => (dark ? [13, 17, 23] : [246, 248, 250]);
+
+/** The ink's colour as numbers. */
+export const inkRGB = (f: Frame, cool = false): RGB => f.ink(1, cool).slice(5).split(",").slice(0, 3).map(Number) as RGB;
+
+/**
+ * Solid colours mixed from the page's own and the ink: `k` 0 is the page, 1 the ink. For shapes
+ * drawn whole on a layer (see `layering`), so their parts don't add up where they overlap and
+ * what's behind them is hidden.
+ */
+export function tones(f: Frame, cool = false) {
+  const ink = inkRGB(f, cool),
+    page = pageRGB(f.dark);
+  return (k: number) => `rgb(${page.map((p, i) => Math.round(p + (ink[i] - p) * Math.min(1, Math.max(0, k)))).join(",")})`;
+}
+
+/**
+ * A layer the page's size to draw on before laying it on the page (with `lay`): made once, and
+ * again if the page changes size; cleared each frame, scaled to the page's pixels.
+ */
+export function layering() {
+  let c: HTMLCanvasElement | null = null;
+  return (f: Frame) => {
+    const dpr = f.ctx.getTransform().a || 1;
+    const W = Math.round(f.w * dpr),
+      H = Math.round(f.h * dpr);
+    if (!c || c.width !== W || c.height !== H) {
+      c = document.createElement("canvas");
+      c.width = W;
+      c.height = H;
+    }
+    const L = c.getContext("2d")!;
+    L.setTransform(1, 0, 0, 1, 0, 0);
+    L.globalCompositeOperation = "source-over";
+    L.globalAlpha = 1;
+    L.clearRect(0, 0, W, H);
+    L.setTransform(dpr, 0, 0, dpr, 0, 0);
+    return { L, canvas: c, dpr };
+  };
+}
+
+/**
+ * Lay a layer on the page, `a` strong, with a soft edge `blur` wide: solid (what's drawn hides
+ * what's behind it) unless `add`, when it is added to the light as the rest of a picture is.
+ */
+export function lay(f: Frame, canvas: HTMLCanvasElement, a: number, blur = 0, add = false) {
+  const { ctx } = f;
+  ctx.save();
+  ctx.globalAlpha = a;
+  if (!add) ctx.globalCompositeOperation = "source-over";
+  if (blur) {
+    ctx.shadowColor = f.ink(0.5 * f.env);
+    ctx.shadowBlur = blur;
+  }
+  ctx.drawImage(canvas, 0, 0, f.w, f.h);
+  ctx.restore();
+}
+
+/** A smooth wandering value in -1..1, from a few sines: `seed` makes it its own. */
+export const wander = (t: number, seed: number) =>
+  (Math.sin(t * 0.7 + seed) + Math.sin(t * 0.43 + seed * 2.1) * 0.6 + Math.sin(t * 1.3 + seed * 0.7) * 0.3) / 1.9;
+
+/** A ring of ripples spreading from (x, y): `q` is how far along (0–1), `rx` their reach. */
+export function ripples(f: Frame, x: number, y: number, q: number, rx: number, a: number, cool = true) {
+  const { ctx } = f;
+  for (let j = 0; j < 3; j++) {
+    const qq = q - j * 0.08;
+    if (qq <= 0) continue;
+    ctx.strokeStyle = f.ink(a * f.env * (1 - q) ** 1.5 * (1 - j * 0.3), cool);
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.ellipse(x, y, qq * rx, qq * rx * 0.26, 0, 0, TAU);
+    ctx.stroke();
+  }
 }

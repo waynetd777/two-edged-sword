@@ -8,6 +8,7 @@ import { beam, glow, rnd, smooth, TAU, Vision, RGB } from "./kit";
 export const SKY: Vision[] = [
   {
     name: "rays",
+    themes: ["light", "shine", "glory", "heaven", "radiance", "sun", "light of the world", "shine on", "brighter", "glorious light"],
     lane: "back",
     dur: [20, 36],
     make: (w, h) => {
@@ -35,6 +36,7 @@ export const SKY: Vision[] = [
   },
   {
     name: "stars",
+    themes: ["star", "stars", "night", "sky", "heavens", "universe", "shining", "bright morning star", "constellation"],
     lane: "back",
     dur: [24, 40],
     make: (w, h) => {
@@ -82,6 +84,7 @@ export const SKY: Vision[] = [
   },
   {
     name: "glory",
+    themes: ["glory", "glorious", "heaven", "splendour", "splendor", "majesty", "radiant", "shine", "unveiled"],
     lane: "back",
     dur: [24, 40],
     make: (w, h) => {
@@ -112,6 +115,19 @@ export const SKY: Vision[] = [
   },
   {
     name: "sunrise",
+    themes: [
+      "morning",
+      "sunrise",
+      "dawn",
+      "new day",
+      "rising sun",
+      "sun comes up",
+      "mercies",
+      "new every morning",
+      "break of day",
+      "daybreak",
+      "light of day",
+    ],
     lane: "back",
     dur: [24, 40],
     make: (w, h, room) => {
@@ -135,6 +151,7 @@ export const SKY: Vision[] = [
   },
   {
     name: "rainbow",
+    themes: ["rainbow", "promise", "covenant", "storm", "after the rain", "faithful", "promises"],
     lane: "back",
     dur: [18, 30],
     make: (w, h) => {
@@ -199,6 +216,7 @@ export const SKY: Vision[] = [
   },
   {
     name: "clouds",
+    themes: ["cloud", "clouds", "sky", "heaven", "above", "carried", "on the clouds"],
     lane: "back",
     dur: [24, 40],
     make: (w, h) => {
@@ -224,6 +242,7 @@ export const SKY: Vision[] = [
   },
   {
     name: "twelve stars",
+    themes: ["star", "stars", "crown", "twelve", "israel", "heavens"],
     lane: "back",
     dur: [20, 34],
     make: (w, h, room) => {
@@ -248,6 +267,7 @@ export const SKY: Vision[] = [
   },
   {
     name: "galaxy",
+    themes: ["galaxy", "galaxies", "universe", "stars", "heavens", "creation", "stars in the sky", "spoke", "cosmos", "planets", "formed"],
     lane: "back",
     dur: [24, 40],
     make: (w, h, room) => {
@@ -291,6 +311,7 @@ export const SKY: Vision[] = [
   },
   {
     name: "moon",
+    themes: ["moon", "night", "silent", "still", "sleep", "watch", "midnight", "quiet"],
     lane: "back",
     dur: [24, 40],
     make: (w, h, room) => {
@@ -344,6 +365,7 @@ export const SKY: Vision[] = [
   },
   {
     name: "shooting stars",
+    themes: ["star", "stars", "night", "sky", "heavens", "falling"],
     lane: "pass",
     dur: [10, 16],
     moving: true,

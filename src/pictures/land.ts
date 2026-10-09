@@ -8,6 +8,18 @@ import { beam, glow, ridge, rnd, smooth, TAU, Vision } from "./kit";
 export const LAND: Vision[] = [
   {
     name: "hills",
+    themes: [
+      "hill",
+      "hills",
+      "mountain",
+      "mountains",
+      "valley",
+      "high places",
+      "lift my eyes",
+      "help comes",
+      "everlasting hills",
+      "the heights",
+    ],
     lane: "back",
     dur: [24, 40],
     make: (w, h) => {
@@ -31,6 +43,7 @@ export const LAND: Vision[] = [
   },
   {
     name: "still waters",
+    themes: ["still", "peace", "quiet", "rest", "waters", "shepherd", "still waters", "restores my soul", "be still", "calm"],
     lane: "back",
     dur: [20, 34],
     make: (w, h) => {
@@ -71,6 +84,7 @@ export const LAND: Vision[] = [
   },
   {
     name: "tree of life",
+    themes: ["tree", "root", "roots", "branch", "planted", "grow", "fruit", "life", "leaves", "rooted", "like a tree"],
     lane: "back",
     dur: [24, 40],
     make: (w, h, room) => {
@@ -209,6 +223,7 @@ export const LAND: Vision[] = [
   },
   {
     name: "river of life",
+    themes: ["river", "stream", "flow", "living water", "rivers", "flowing", "water of life", "flows"],
     lane: "back",
     dur: [22, 36],
     make: (w, h, room) => {
@@ -244,6 +259,19 @@ export const LAND: Vision[] = [
   },
   {
     name: "flock",
+    themes: [
+      "sheep",
+      "shepherd",
+      "lamb",
+      "flock",
+      "pasture",
+      "he leadeth me",
+      "good shepherd",
+      "lost sheep",
+      "ninety-nine",
+      "the lord is my shepherd",
+      "green pastures",
+    ],
     lane: "back",
     dur: [22, 36],
     make: (w, h) => {
@@ -370,6 +398,7 @@ export const LAND: Vision[] = [
   },
   {
     name: "narrow path",
+    themes: ["path", "way", "road", "walk", "follow", "journey", "lead", "narrow", "guide me", "lead me", "footsteps", "walk with"],
     lane: "back",
     dur: [22, 36],
     make: (w, h, room) => {
@@ -403,6 +432,7 @@ export const LAND: Vision[] = [
   },
   {
     name: "vine",
+    themes: ["vine", "branch", "branches", "fruit", "abide", "harvest", "vineyard", "bear fruit", "remain in me", "grapes"],
     lane: "back",
     dur: [22, 36],
     make: (w, h) => {
@@ -467,6 +497,21 @@ export const LAND: Vision[] = [
   },
   {
     name: "boat on galilee",
+    themes: [
+      "boat",
+      "sea",
+      "storm",
+      "waves",
+      "galilee",
+      "sail",
+      "walk on water",
+      "oceans",
+      "shore",
+      "deep waters",
+      "the deep",
+      "in the storm",
+      "water",
+    ],
     lane: "back",
     dur: [22, 36],
     make: (w, h, room) => {
@@ -554,6 +599,7 @@ export const LAND: Vision[] = [
   },
   {
     name: "wheat",
+    themes: ["harvest", "field", "fields", "wheat", "bread", "seed", "reap", "sow", "white unto harvest", "grain", "labourers", "laborers"],
     lane: "pass",
     dur: [14, 22],
     make: (w, h) => {
@@ -608,6 +654,7 @@ export const LAND: Vision[] = [
   },
   {
     name: "lily",
+    themes: ["lily", "lilies", "flower", "bloom", "consider the lilies", "garden", "beauty", "rose of sharon", "lily of the valley"],
     lane: "pass",
     dur: [12, 18],
     make: (w, h, room) => {

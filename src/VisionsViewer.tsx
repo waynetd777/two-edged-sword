@@ -104,7 +104,16 @@ function Viewer() {
         </div>
       )}
       <div className="lyrics-art" aria-hidden>
-        <Visions key={`${v.name}/${run}/${words}`} bpm={bpm} playing={playing} time={time} dark={dark} art={artUrl} words={wordsAt} />
+        <Visions
+          key={`${v.name}/${run}/${words}`}
+          bpm={bpm}
+          playing={playing}
+          time={time}
+          dark={dark}
+          art={artUrl}
+          words={wordsAt}
+          song={LINES.join("\n")}
+        />
       </div>
       {words && (
         <div id="words">
@@ -130,6 +139,7 @@ function Viewer() {
           {bpm || "no"} bpm
           {playing ? "" : " · paused"}
         </span>
+        {v.themes && <span style={{ opacity: 0.6 }}>themes: {v.themes.join(", ")}</span>}
         <span className="keys">← → pictures · space pause · t theme · w words · c colours · b beat · r restart</span>
       </div>
     </div>

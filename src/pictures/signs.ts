@@ -8,6 +8,7 @@ import { displayFont, flame, glow, rnd, smooth, TAU, Vision } from "./kit";
 export const SIGNS: Vision[] = [
   {
     name: "ichthys",
+    themes: ["fish", "fisher", "fishers of men", "follow", "disciples", "follow me", "christian"],
     lane: "pass",
     dur: [10, 15],
     make: (w, h, room) => {
@@ -51,6 +52,19 @@ export const SIGNS: Vision[] = [
   },
   {
     name: "alpha and omega",
+    themes: [
+      "alpha",
+      "omega",
+      "beginning",
+      "end",
+      "first and the last",
+      "eternal",
+      "forever",
+      "everlasting",
+      "ancient of days",
+      "from everlasting",
+      "without end",
+    ],
     lane: "pass",
     dur: [12, 18],
     make: (w, h, room) => {
@@ -79,6 +93,7 @@ export const SIGNS: Vision[] = [
   },
   {
     name: "anchor",
+    themes: ["anchor", "hope", "steadfast", "hold", "sure", "secure", "anchored", "holds", "my hope", "unshaken", "storm"],
     lane: "pass",
     dur: [11, 16],
     make: (w, h, room) => {
@@ -189,6 +204,7 @@ export const SIGNS: Vision[] = [
   },
   {
     name: "crown",
+    themes: ["crown", "king", "king of kings", "reign", "throne", "majesty", "royal", "crowned", "glory", "exalted"],
     lane: "pass",
     dur: [11, 16],
     make: (w, h, room) => {
@@ -324,6 +340,7 @@ export const SIGNS: Vision[] = [
   },
   {
     name: "harp",
+    themes: ["harp", "sing", "song", "praise", "music", "melody", "play", "psalm", "strings", "instrument", "make music"],
     lane: "pass",
     dur: [12, 18],
     make: (w, h, room) => {
@@ -481,6 +498,7 @@ export const SIGNS: Vision[] = [
   },
   {
     name: "music",
+    themes: ["sing", "song", "music", "melody", "voice", "praise", "shout", "new song", "rejoice", "joyful noise", "singing", "choir"],
     lane: "pass",
     dur: [12, 18],
     moving: true,
@@ -519,6 +537,20 @@ export const SIGNS: Vision[] = [
   },
   {
     name: "tongues of fire",
+    themes: [
+      "fire",
+      "pentecost",
+      "holy spirit",
+      "spirit",
+      "flame",
+      "tongues",
+      "power",
+      "holy ghost",
+      "burn",
+      "set a fire",
+      "consuming fire",
+      "fire fall",
+    ],
     lane: "pass",
     dur: [12, 18],
     make: (w, h) => {
@@ -542,6 +574,7 @@ export const SIGNS: Vision[] = [
   },
   {
     name: "motes",
+    themes: ["light", "shine", "dust", "quiet", "sanctuary", "still", "holy", "presence", "sacred"],
     lane: "pass",
     dur: [12, 20],
     moving: true,
@@ -584,6 +617,7 @@ export const SIGNS: Vision[] = [
   },
   {
     name: "lanterns",
+    themes: ["light", "lamp", "night", "hope", "lantern", "shine", "lift", "darkness", "carry"],
     lane: "pass",
     dur: [14, 22],
     moving: true,
@@ -624,6 +658,7 @@ export const SIGNS: Vision[] = [
   },
   {
     name: "fireflies",
+    themes: ["light", "night", "little", "shine", "dark", "wonder", "glow", "lights"],
     lane: "pass",
     dur: [14, 22],
     moving: true,

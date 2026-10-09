@@ -8,6 +8,7 @@ import { glow, rnd, smooth, TAU, Vision } from "./kit";
 export const CREATURES: Vision[] = [
   {
     name: "dove",
+    themes: ["dove", "spirit", "holy spirit", "peace", "descend", "holy ghost", "comforter", "rest on me", "gentle", "come down"],
     lane: "pass",
     dur: [11, 16],
     moving: true,
@@ -135,6 +136,7 @@ export const CREATURES: Vision[] = [
   },
   {
     name: "eagle",
+    themes: ["eagle", "eagles", "wings", "soar", "rise", "mount up", "fly", "high", "renew", "strength", "above the storm", "on wings"],
     lane: "pass",
     dur: [12, 18],
     moving: true,
@@ -274,6 +276,7 @@ export const CREATURES: Vision[] = [
   },
   {
     name: "sparrows",
+    themes: ["sparrow", "sparrows", "bird", "birds", "his eye is on", "care", "fly", "watches", "worry", "little"],
     lane: "pass",
     dur: [10, 15],
     moving: true,
@@ -350,6 +353,7 @@ export const CREATURES: Vision[] = [
   },
   {
     name: "butterfly",
+    themes: ["new", "new creation", "change", "transform", "transformed", "wings", "free", "old has gone", "born again", "made new"],
     lane: "pass",
     dur: [12, 18],
     moving: true,
@@ -489,6 +493,7 @@ export const CREATURES: Vision[] = [
   },
   {
     name: "petals",
+    themes: ["flower", "flowers", "petal", "petals", "bloom", "beauty", "garden", "rose", "blossom", "fragrance"],
     lane: "pass",
     dur: [12, 20],
     moving: true,
@@ -525,6 +530,7 @@ export const CREATURES: Vision[] = [
   },
   {
     name: "olive leaves",
+    themes: ["olive", "peace", "dove", "branch", "gethsemane", "oil", "garden", "anoint"],
     lane: "pass",
     dur: [12, 18],
     moving: true,
@@ -623,6 +629,7 @@ export const CREATURES: Vision[] = [
   },
   {
     name: "seeds",
+    themes: ["seed", "seeds", "sow", "plant", "grow", "faith", "mustard", "scattered", "harvest", "small"],
     lane: "pass",
     dur: [12, 20],
     moving: true,
@@ -673,6 +680,7 @@ export const CREATURES: Vision[] = [
   },
   {
     name: "snow",
+    themes: ["snow", "white", "whiter than snow", "wash", "clean", "pure", "winter", "spotless", "washed", "cleanse"],
     lane: "pass",
     dur: [12, 20],
     moving: true,
@@ -719,6 +727,20 @@ export const CREATURES: Vision[] = [
   },
   {
     name: "rain",
+    themes: [
+      "rain",
+      "pour",
+      "shower",
+      "showers",
+      "latter rain",
+      "let it rain",
+      "downpour",
+      "storm",
+      "open the floodgates",
+      "raining",
+      "pour out",
+      "send the rain",
+    ],
     lane: "pass",
     dur: [10, 16],
     moving: true,
@@ -759,6 +781,7 @@ export const CREATURES: Vision[] = [
   },
   {
     name: "wind",
+    themes: ["wind", "breath", "breathe", "blow", "spirit", "fresh wind", "mighty wind", "rushing", "breath of god", "winds"],
     lane: "pass",
     dur: [10, 15],
     moving: true,

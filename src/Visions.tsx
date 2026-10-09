@@ -3,8 +3,10 @@
 
 // Faint pictures behind a playing song's words (LyricsPage), with or without the flames: a cross
 // in light, a dove passing over, stars, rain, a field of wheat and more. One backdrop and one
-// passing picture at most at a time, each chosen at random (not one of the last few shown) for a
-// random while, fading in and out. They swell a little on the beat, as the flames do; paused,
+// passing picture at most at a time, each chosen (not one of the last few shown) for a random
+// while, fading in and out. A picture whose themes (pictures/kit.ts) are in the song's title or
+// words is chosen more often than the rest, so a song about fire gets fire; a song whose words
+// aren't known gets them all alike. They swell a little on the beat, as the flames do; paused,
 // they fade away and wait. Their colours are the artwork's (the page's background), lightened in
 // the dark theme and deepened on paper. Settings › Listening turns them off.
 
@@ -78,6 +80,35 @@ let scenePick: { name: string; at: number; loop?: boolean } | null = null;
 export const setSceneVision = (name: string, at = 0.5, loop = false) => (scenePick = { name, at, loop });
 export const VISION_NAMES = VISIONS.map((v) => v.name);
 
+/**
+ * How well a picture suits a song: how many of its themes are in the song's title and words.
+ * `text` is the song's, lowercased, with its punctuation gone and a space either end; a theme
+ * of one word matches that word or a simple form of it (fires, fired, firing), a phrase is
+ * looked for as it is.
+ */
+export function suits(v: Vision, text: string): number {
+  if (!v.themes || !text.trim()) return 0;
+  let n = 0;
+  for (const t of v.themes) {
+    if (
+      t.includes(" ")
+        ? text.includes(` ${t} `)
+        : new RegExp(`\\b${t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(s|es|ed|ing|'s)?\\b`).test(text)
+    )
+      n++;
+  }
+  return n;
+}
+/** A song's title and words as `suits` wants them. */
+export const songText = (song: string) =>
+  ` ${song
+    .toLowerCase()
+    .replace(/[^a-z0-9' ]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()} `;
+/** How much more often a picture that suits the song is chosen: once for none of its themes, more for each. */
+const weightOf = (n: number) => 1 + 4 * Math.min(n, 3);
+
 const DEFAULT_BPM = 72;
 /** Seconds a picture takes to fade out when the words move from beside it. */
 const QUIT = 1.2;
@@ -120,6 +151,7 @@ export function Visions({
   dark,
   art,
   words,
+  song,
 }: {
   bpm: number;
   playing: boolean;
@@ -128,6 +160,8 @@ export function Visions({
   art: string | null;
   /** Where the words are across the page now (its pixels), for the pictures to keep beside them. */
   words: () => { left: number; right: number } | null;
+  /** The song's title and its words, as far as they're known, for choosing pictures that suit it. */
+  song: string;
 }) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const colours = useRef({ warm: WARM, cool: COOL });
@@ -140,8 +174,8 @@ export function Visions({
       dead = true;
     };
   }, [art]);
-  const live = useRef({ bpm, playing, time, dark, words });
-  live.current = { bpm, playing, time, dark, words };
+  const live = useRef({ bpm, playing, time, dark, words, song });
+  live.current = { bpm, playing, time, dark, words, song };
 
   useEffect(() => {
     const c = canvas.current!;
@@ -203,6 +237,26 @@ export function Visions({
       rec.push(v.name);
       if (rec.length > 4) rec.shift();
     };
+    // Each picture's weight for this song, worked out when the song (or its words) changes.
+    let weighed = "",
+      weights = new Map<string, number>();
+    const weigh = () => {
+      const song = live.current.song;
+      if (song === weighed) return;
+      weighed = song;
+      const text = songText(song);
+      weights = new Map(VISIONS.map((v) => [v.name, weightOf(suits(v, text))]));
+    };
+    const choose = (choices: Vision[]) => {
+      weigh();
+      const total = choices.reduce((s, v) => s + (weights.get(v.name) ?? 1), 0);
+      let r = Math.random() * total;
+      for (const v of choices) {
+        r -= weights.get(v.name) ?? 1;
+        if (r <= 0) return v;
+      }
+      return choices[choices.length - 1];
+    };
     const pick = scenePick ? VISIONS.find((v) => v.name === scenePick!.name) : undefined;
     const looping = !!pick && !!scenePick!.loop;
     if (pick) {
@@ -252,7 +306,7 @@ export function Visions({
         }
         if (!L.cur && clock >= L.next) {
           const choices = looping ? [pick] : VISIONS.filter((v) => v.lane === lane && !L.recent.includes(v.name) && !(still && v.moving));
-          if (choices.length) begin(lane, choices[Math.floor(Math.random() * choices.length)], clock);
+          if (choices.length) begin(lane, choose(choices), clock);
         }
         const a = L.cur;
         if (!a) continue;

@@ -8,6 +8,22 @@ import { beam, Branch, flame, glow, grow, rnd, smooth, TAU, Vision } from "./kit
 export const PLACES: Vision[] = [
   {
     name: "cross",
+    themes: [
+      "cross",
+      "calvary",
+      "crucified",
+      "blood",
+      "saviour",
+      "savior",
+      "sacrifice",
+      "died",
+      "nails",
+      "the cross",
+      "old rugged",
+      "forgiven",
+      "grace",
+      "redeemed",
+    ],
     lane: "back",
     dur: [22, 40],
     make: (w, h, room) => {
@@ -43,6 +59,7 @@ export const PLACES: Vision[] = [
   },
   {
     name: "calvary",
+    themes: ["calvary", "cross", "golgotha", "hill", "crucified", "died", "it is finished", "the hill", "three crosses", "paid"],
     lane: "back",
     dur: [22, 36],
     make: (w, h, room) => {
@@ -83,6 +100,7 @@ export const PLACES: Vision[] = [
   },
   {
     name: "rose window",
+    themes: ["church", "cathedral", "holy", "sanctuary", "worship", "light", "glass", "house of the lord", "gather", "congregation"],
     lane: "back",
     dur: [24, 40],
     make: (w, h, room) => {
@@ -325,6 +343,7 @@ export const PLACES: Vision[] = [
   },
   {
     name: "menorah",
+    themes: ["lamp", "light", "seven", "israel", "candlestick", "lampstand", "zion", "jerusalem", "temple", "lights"],
     lane: "back",
     dur: [22, 36],
     make: (w, h, room) => {
@@ -375,6 +394,22 @@ export const PLACES: Vision[] = [
   },
   {
     name: "open door",
+    themes: [
+      "door",
+      "doors",
+      "open",
+      "enter",
+      "knock",
+      "welcome",
+      "come",
+      "come in",
+      "gates",
+      "way",
+      "threshold",
+      "invitation",
+      "run to",
+      "home",
+    ],
     lane: "back",
     dur: [20, 34],
     make: (w, h, room) => {
@@ -505,6 +540,24 @@ export const PLACES: Vision[] = [
   },
   {
     name: "empty tomb",
+    themes: [
+      "tomb",
+      "grave",
+      "risen",
+      "resurrection",
+      "alive",
+      "he is risen",
+      "rose again",
+      "easter",
+      "stone",
+      "death",
+      "defeated",
+      "the grave",
+      "death could not",
+      "victory over",
+      "he lives",
+      "third day",
+    ],
     lane: "back",
     dur: [22, 36],
     make: (w, h, room) => {
@@ -634,6 +687,7 @@ export const PLACES: Vision[] = [
   },
   {
     name: "jacob's ladder",
+    themes: ["ladder", "angel", "angels", "heaven", "dream", "bethel", "climb", "ascend", "higher", "gate of heaven", "stairway"],
     lane: "back",
     dur: [22, 36],
     make: (w, h, room) => {
@@ -701,6 +755,23 @@ export const PLACES: Vision[] = [
   },
   {
     name: "new jerusalem",
+    themes: [
+      "jerusalem",
+      "city",
+      "heaven",
+      "zion",
+      "home",
+      "gates",
+      "new jerusalem",
+      "eternal",
+      "gold",
+      "streets",
+      "mansion",
+      "heavenly",
+      "forevermore",
+      "i'm going home",
+      "city of god",
+    ],
     lane: "back",
     dur: [24, 40],
     make: (w, h, room) => {
@@ -795,6 +866,7 @@ export const PLACES: Vision[] = [
   },
   {
     name: "burning bush",
+    themes: ["burn", "burning", "bush", "holy ground", "moses", "i am", "consume", "fire", "take off", "barefoot", "great i am"],
     lane: "back",
     dur: [20, 32],
     make: (_w, h, room) => {
@@ -838,6 +910,7 @@ export const PLACES: Vision[] = [
   },
   {
     name: "lamp",
+    themes: ["lamp", "light", "lamp unto my feet", "word", "path", "shine", "oil", "candle", "light my way", "guide"],
     lane: "pass",
     dur: [12, 18],
     make: (w, h, room) => {

@@ -225,7 +225,15 @@ export function LyricsPage({ focus, setFocus }: { focus: boolean; setFocus: (f: 
       {/* Pictures that come and go, words or not, in the artwork's colours (Visions). */}
       {!stopped && app.settings.songVisions && (
         <div className="lyrics-art" aria-hidden>
-          <Visions bpm={now?.bpm ?? 0} playing={now?.state === "playing"} time={songTime} dark={dark} art={artUrl} words={wordsAt} />
+          <Visions
+            bpm={now?.bpm ?? 0}
+            playing={now?.state === "playing"}
+            time={songTime}
+            dark={dark}
+            art={artUrl}
+            words={wordsAt}
+            song={[name, ...(lyrics?.lines.map((l) => l.text) ?? [])].join("\n")}
+          />
         </div>
       )}
       {focus ? (
