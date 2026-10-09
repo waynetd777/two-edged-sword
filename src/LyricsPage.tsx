@@ -15,7 +15,6 @@ import { useApp } from "./state";
 import { Flames } from "./Flames";
 import { Visions } from "./Visions";
 import { chapterPlaying } from "./worship";
-import { useDark } from "./WebPage";
 
 const plainLines = (text: string): Lyrics => ({
   lines: text.split(/\r?\n/).map((l) => ({ text: l.trim() })),
@@ -23,9 +22,13 @@ const plainLines = (text: string): Lyrics => ({
   source: "music",
 });
 
+/** How much larger the line being sung is drawn. */
+const LIT = 1.32;
+
 export function LyricsPage({ focus, setFocus }: { focus: boolean; setFocus: (f: boolean) => void }) {
   const app = useApp();
-  const dark = useDark();
+  // Always dark, whatever the theme (styles.css, .lyrics-body).
+  const dark = true;
   const [now, setNow] = useState<MusicState | null>(null);
   const [error, setError] = useState<string | null>(null);
   // Music's position when last asked, and when that was, so the time runs on between asks.
@@ -33,10 +36,20 @@ export function LyricsPage({ focus, setFocus }: { focus: boolean; setFocus: (f: 
   const [t, setT] = useState(0);
   useEffect(() => {
     let dead = false;
+    // Screenshot mode: the scene's song plays on from its position, as Music's would.
+    const began = performance.now();
     const check = async () => {
       const sc = sceneSong;
       const scene: MusicState | null = sc
-        ? { state: "playing", ours: false, album: "", lyrics: "", bpm: 0, ...sc, position: sc.position }
+        ? {
+            state: "playing",
+            ours: false,
+            album: "",
+            lyrics: "",
+            bpm: 0,
+            ...sc,
+            position: sc.position + (performance.now() - began) / 1000,
+          }
         : null;
       const st =
         scene ??
@@ -182,6 +195,9 @@ export function LyricsPage({ focus, setFocus }: { focus: boolean; setFocus: (f: 
   const stopped = !now || now.state === "stopped" || !name;
   // How far across the page the words run, focus mode or not: every line's text (not its box,
   // which is the column's width), and the heading above them, so a picture can keep beside them.
+  // Each sung line is measured as if it were the one being sung, at its largest: measured as
+  // drawn, the words' width changed whenever the line being sung did, or a rest's dots came, and
+  // the pictures beside them faded out before their time.
   const wordsAt = () => {
     const page = scroller.current?.parentElement?.getBoundingClientRect();
     if (!page) return null;
@@ -192,8 +208,19 @@ export function LyricsPage({ focus, setFocus }: { focus: boolean; setFocus: (f: 
       r.selectNodeContents(el);
       const b = el.hasAttribute("data-rest") ? el.getBoundingClientRect() : r.getBoundingClientRect();
       if (!b.width) continue;
-      left = Math.min(left, b.left);
-      right = Math.max(right, b.right + 16); // the line being sung is drawn a little larger
+      let l = b.left,
+        rt = b.right;
+      const line = el as HTMLElement;
+      if (line.dataset.line !== undefined && line.style.transform) {
+        // Its scale now, and the point it grows from (its left edge, or its middle in focus mode).
+        const now = new DOMMatrix(getComputedStyle(line).transform).a || 1;
+        const box = line.getBoundingClientRect();
+        const o = focus ? box.left + box.width / 2 : box.left;
+        l = o + ((l - o) / now) * LIT;
+        rt = o + ((rt - o) / now) * LIT;
+      }
+      left = Math.min(left, l);
+      right = Math.max(right, rt);
     }
     for (const el of scroller.current!.parentElement!.querySelectorAll(".lyrics-cover, [data-quiet-anchor]")) {
       r.selectNodeContents(el);
@@ -210,41 +237,8 @@ export function LyricsPage({ focus, setFocus }: { focus: boolean; setFocus: (f: 
   };
   return (
     <div className="main lyrics-page" style={{ minHeight: 0 }}>
-      {/* The artwork, large and blurred, behind everything: as Music's full-screen view. */}
-      {artUrl && (
-        <div className="lyrics-art" aria-hidden>
-          <img key={artUrl} src={artUrl} alt="" />
-        </div>
-      )}
-      {/* No words: flames, swelling to the song's tempo, in front of the artwork. */}
-      {!stopped && lyrics === null && (
-        <div className="lyrics-art" aria-hidden style={{ opacity: 0.85 }}>
-          <Flames bpm={now?.bpm ?? 0} playing={now?.state === "playing"} time={songTime} dark={dark} />
-        </div>
-      )}
-      {/* Pictures that come and go, words or not, in the artwork's colours (Visions). */}
-      {!stopped && app.settings.songVisions && (
-        <div className="lyrics-art" aria-hidden>
-          <Visions
-            bpm={now?.bpm ?? 0}
-            playing={now?.state === "playing"}
-            time={songTime}
-            dark={dark}
-            art={artUrl}
-            words={wordsAt}
-            song={[name, ...(lyrics?.lines.map((l) => l.text) ?? [])].join("\n")}
-          />
-        </div>
-      )}
-      {focus ? (
-        <header className="topbar drag" style={{ borderBottom: 0, paddingLeft: 84 }}>
-          <div className="spacer" />
-          {tools}
-          <button className="btn" type="button" onClick={() => setFocus(false)}>
-            Exit focus<span className="kbd">esc</span>
-          </button>
-        </header>
-      ) : (
+      {/* The top bar keeps the app's theme, except in focus mode, where it is part of the dark page. */}
+      {!focus && (
         <Topbar right={tools}>
           <button className="btn" type="button" title="Back to the Bible" onClick={app.closeDoc}>
             <Icon name="read" />
@@ -252,70 +246,111 @@ export function LyricsPage({ focus, setFocus }: { focus: boolean; setFocus: (f: 
           </button>
         </Topbar>
       )}
-      {/* The song's heading stays put while its words scroll under it. */}
-      <div style={{ flexShrink: 0, padding: focus ? "18px 10% 14px" : "18px 40px 14px 36px", textAlign: focus ? "center" : undefined }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 16, justifyContent: focus ? "center" : undefined }}>
-          {artUrl && <img className="lyrics-cover" src={artUrl} alt="" />}
-          <div>
-            <div className="label">{stopped ? "Lyrics" : `Lyrics · ${artist}`}</div>
-            <h1 data-quiet-anchor style={{ margin: "6px 0 0", font: "500 30px/1.15 var(--display)" }}>
-              {stopped ? "Nothing playing" : name}
-            </h1>
-          </div>
-        </div>
-        {why && <p style={{ margin: "10px 0 0", font: "400 15px/1.55 var(--serif)", color: "var(--muted)" }}>{why}</p>}
-      </div>
-      <main ref={scroller} className="scroll lyrics-words" style={{ flex: "1 1 auto", padding: focus ? "0 10% 40vh" : "0 40px 40vh 36px" }}>
-        {error ? (
-          <p className="err">{error}</p>
-        ) : stopped ? (
-          <p className="n">Play a song in Music and its words show here.</p>
-        ) : lyrics === undefined ? (
-          <p className="n">Finding the words…</p>
-        ) : !lyrics ? (
-          <p className="n">No lyrics found for this song{words?.offline ? " (couldn't reach LRCLIB)" : ""}.</p>
-        ) : (
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: focus ? "center" : undefined,
-              textAlign: focus ? "center" : undefined,
-              gap: lyrics.timed ? 14 : 4,
-              paddingTop: 8,
-            }}
-          >
-            {rest?.after === -1 && <Rest {...rest} t={t} focus={focus} />}
-            {lyrics.lines.map((l, i) => (
-              <Fragment key={i}>
-                <div
-                  data-line={i}
-                  className={lyrics.timed ? `lyric${i === lit ? " now" : ""}` : undefined}
-                  style={{
-                    font: lyrics.timed ? "600 30px/1.3 var(--display)" : "400 20px/1.5 var(--serif)",
-                    minHeight: l.text ? undefined : lyrics.timed ? 0 : "0.8em",
-                    transformOrigin: focus ? "center" : "left center",
-                    // The line being sung stands forward, larger; those before and after fall
-                    // away into the distance, smaller and fainter the further from it they are.
-                    // 1.32 for the line being sung, 1.16 for the ones next to it, then each line further
-                    // away a step closer to 0.62, the smallest, so the sizes fall away in proportion.
-                    transform: lyrics.timed ? `scale(${i === lit ? 1.32 : 0.62 + 0.54 * 0.82 ** (Math.abs(i - lit) - 1)})` : undefined,
-                    transition: lyrics.timed ? "transform 0.5s ease, opacity 0.5s ease" : undefined,
-                    opacity: lyrics.timed && i !== lit ? Math.max(0.2, (i < cur ? 0.4 : 0.6) - 0.06 * Math.abs(i - lit)) : 1,
-                  }}
-                >
-                  {l.text}
-                </div>
-                {rest?.after === i && <Rest {...rest} t={t} focus={focus} />}
-              </Fragment>
-            ))}
-            <p className="n" style={{ marginTop: 28, fontSize: 12 }}>
-              {lyrics.source === "lrclib" ? "Lyrics from LRCLIB" : "Lyrics saved with the song in Music"}
-              {lyrics.timed ? "" : " · not timed"}
-            </p>
+      <div className="lyrics-body">
+        {/* The artwork, large and blurred, behind everything: as Music's full-screen view. */}
+        {artUrl && (
+          <div className="lyrics-art" aria-hidden>
+            <img key={artUrl} src={artUrl} alt="" />
           </div>
         )}
-      </main>
+        {/* No words: flames, swelling to the song's tempo, in front of the artwork. */}
+        {!stopped && lyrics === null && (
+          <div className="lyrics-art" aria-hidden style={{ opacity: 0.85 }}>
+            <Flames bpm={now?.bpm ?? 0} playing={now?.state === "playing"} time={songTime} dark={dark} />
+          </div>
+        )}
+        {/* Pictures that come and go, words or not, in the artwork's colours (Visions). */}
+        {!stopped && app.settings.songVisions && (
+          <div className="lyrics-art" aria-hidden>
+            <Visions
+              bpm={now?.bpm ?? 0}
+              playing={now?.state === "playing"}
+              time={songTime}
+              dark={dark}
+              art={artUrl}
+              words={wordsAt}
+              song={[name, ...(lyrics?.lines.map((l) => l.text) ?? [])].join("\n")}
+            />
+          </div>
+        )}
+        {focus && (
+          <header className="topbar drag" style={{ borderBottom: 0, paddingLeft: 84 }}>
+            <div className="spacer" />
+            {tools}
+            <button className="btn" type="button" onClick={() => setFocus(false)}>
+              Exit focus<span className="kbd">esc</span>
+            </button>
+          </header>
+        )}
+        {/* The song's heading stays put while its words scroll under it. */}
+        <div style={{ flexShrink: 0, padding: focus ? "18px 10% 14px" : "18px 40px 14px 36px", textAlign: focus ? "center" : undefined }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 16, justifyContent: focus ? "center" : undefined }}>
+            {artUrl && <img className="lyrics-cover" src={artUrl} alt="" />}
+            <div>
+              <div className="label">{stopped ? "Lyrics" : `Lyrics · ${artist}`}</div>
+              <h1 data-quiet-anchor style={{ margin: "6px 0 0", font: "500 30px/1.15 var(--display)" }}>
+                {stopped ? "Nothing playing" : name}
+              </h1>
+            </div>
+          </div>
+          {why && <p style={{ margin: "10px 0 0", font: "400 15px/1.55 var(--serif)", color: "var(--muted)" }}>{why}</p>}
+        </div>
+        <main
+          ref={scroller}
+          className="scroll lyrics-words"
+          style={{ flex: "1 1 auto", padding: focus ? "0 10% 40vh" : "0 40px 40vh 36px" }}
+        >
+          {error ? (
+            <p className="err">{error}</p>
+          ) : stopped ? (
+            <p className="n">Play a song in Music and its words show here.</p>
+          ) : lyrics === undefined ? (
+            <p className="n">Finding the words…</p>
+          ) : !lyrics ? (
+            <p className="n">No lyrics found for this song{words?.offline ? " (couldn't reach LRCLIB)" : ""}.</p>
+          ) : (
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: focus ? "center" : undefined,
+                textAlign: focus ? "center" : undefined,
+                gap: lyrics.timed ? 14 : 4,
+                paddingTop: 8,
+              }}
+            >
+              {rest?.after === -1 && <Rest {...rest} t={t} focus={focus} />}
+              {lyrics.lines.map((l, i) => (
+                <Fragment key={i}>
+                  <div
+                    data-line={i}
+                    className={lyrics.timed ? `lyric${i === lit ? " now" : ""}` : undefined}
+                    style={{
+                      font: lyrics.timed ? "600 30px/1.3 var(--display)" : "400 20px/1.5 var(--serif)",
+                      minHeight: l.text ? undefined : lyrics.timed ? 0 : "0.8em",
+                      transformOrigin: focus ? "center" : "left center",
+                      // The line being sung stands forward, larger; those before and after fall
+                      // away into the distance, smaller and fainter the further from it they are.
+                      // 1.32 for the line being sung, 1.16 for the ones next to it, then each line further
+                      // away a step closer to 0.62, the smallest, so the sizes fall away in proportion.
+                      transform: lyrics.timed ? `scale(${i === lit ? LIT : 0.62 + 0.54 * 0.82 ** (Math.abs(i - lit) - 1)})` : undefined,
+                      transition: lyrics.timed ? "transform 0.5s ease, opacity 0.5s ease" : undefined,
+                      opacity: lyrics.timed && i !== lit ? Math.max(0.2, (i < cur ? 0.4 : 0.6) - 0.06 * Math.abs(i - lit)) : 1,
+                    }}
+                  >
+                    {l.text}
+                  </div>
+                  {rest?.after === i && <Rest {...rest} t={t} focus={focus} />}
+                </Fragment>
+              ))}
+              <p className="n" style={{ marginTop: 28, fontSize: 12 }}>
+                {lyrics.source === "lrclib" ? "Lyrics from LRCLIB" : "Lyrics saved with the song in Music"}
+                {lyrics.timed ? "" : " · not timed"}
+              </p>
+            </div>
+          )}
+        </main>
+      </div>
     </div>
   );
 }

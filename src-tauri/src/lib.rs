@@ -631,7 +631,19 @@ fn snapshot(w: &tauri::WebviewWindow, dest: &std::path::Path) -> Result<(), Stri
                     let _: bool = objc2::msg_send![tiff, writeToFile: &*path, atomically: true];
                 }
             });
-            let config: *mut AnyObject = std::ptr::null_mut();
+            // TES_SNAPSHOT_WIDTH: the snapshot this many points wide, which is quicker to take
+            // (an animated screenshot's frames); otherwise the window's full size.
+            let width = std::env::var("TES_SNAPSHOT_WIDTH").ok().and_then(|s| s.parse::<f64>().ok());
+            let config: *mut AnyObject =
+                match (objc2::runtime::AnyClass::get(c"WKSnapshotConfiguration"), objc2::runtime::AnyClass::get(c"NSNumber"), width) {
+                    (Some(cls), Some(num), Some(width)) => {
+                        let c: *mut AnyObject = objc2::msg_send![cls, new];
+                        let n: *mut AnyObject = objc2::msg_send![num, numberWithDouble: width];
+                        let _: () = objc2::msg_send![c, setSnapshotWidth: n];
+                        c
+                    }
+                    _ => std::ptr::null_mut(),
+                };
             let _: () = objc2::msg_send![webview, takeSnapshotWithConfiguration: config, completionHandler: &*done];
         })
         .map_err(|e| e.to_string())
@@ -659,6 +671,28 @@ fn activate() {
 
 #[cfg(not(target_os = "macos"))]
 fn activate() {}
+
+/// Shrinks the main window to fit its screen when the size it was left at comes back larger. With
+/// a second screen at a different scale (an AirPlay display at 1x beside a Retina one), the saved
+/// size, kept in pixels, can be read back as points, so it doubled on every quit and relaunch
+/// until the window was far wider than any screen and drew only in parts.
+fn fit_on_screen(w: &tauri::WebviewWindow) {
+    let Some(m) = w.current_monitor().ok().flatten().or_else(|| w.primary_monitor().ok().flatten()) else { return };
+    let scale = m.scale_factor();
+    // The whole screen, not its work area: a full-screen window is as big as the screen.
+    let screen = m.size().to_logical::<f64>(scale);
+    let Ok(size) = w.outer_size() else { return };
+    let size = size.to_logical::<f64>(w.scale_factor().unwrap_or(scale));
+    if size.width <= screen.width + 1.0 && size.height <= screen.height + 1.0 {
+        return;
+    }
+    // The window's first size (tauri.conf.json), or the screen's if that is smaller.
+    let fit = tauri::LogicalSize::new(1320f64.min(screen.width), 840f64.min(screen.height));
+    let _ = w.set_size(fit);
+    // In the middle of that screen: center() can put it off every screen while it is this large.
+    let at = m.position().to_logical::<f64>(scale);
+    let _ = w.set_position(tauri::LogicalPosition::new(at.x + (screen.width - fit.width) / 2.0, at.y + (screen.height - fit.height) / 2.0));
+}
 
 /// Quits from the menu bar, keeping the main window's size and place.
 fn quit(app: &AppHandle) {
@@ -816,12 +850,38 @@ pub fn run() {
             // tools/screenshots.py: the scene's snapshot to TES_SNAPSHOT, once it has settled.
             if let (Some(_), Some(out)) = (scene(), std::env::var_os("TES_SNAPSHOT")) {
                 let label = if tray_scene { "tray" } else { "main" };
-                let after = std::env::var("TES_SNAPSHOT_AFTER").ok().and_then(|s| s.parse().ok()).unwrap_or(6.0);
+                let num = |k: &str, d: f64| std::env::var(k).ok().and_then(|s| s.parse().ok()).unwrap_or(d);
+                let after = num("TES_SNAPSHOT_AFTER", 6.0);
+                // An animated screenshot: TES_SNAPSHOT_FRAMES of them, at least TES_SNAPSHOT_EVERY
+                // seconds apart, each to TES_SNAPSHOT with its number before the extension
+                // (shot-007.tiff). Each waits for the one before: asked for faster than WebKit draws
+                // them, they all come back the same. When each was taken goes in shot-times.txt.
+                let frames = num("TES_SNAPSHOT_FRAMES", 1.0).max(1.0) as usize;
+                let every = num("TES_SNAPSHOT_EVERY", 0.1);
                 let app = app.handle().clone();
                 std::thread::spawn(move || {
                     std::thread::sleep(std::time::Duration::from_secs_f64(after));
-                    if let Some(w) = app.get_webview_window(label) {
-                        let _ = snapshot(&w, std::path::Path::new(&out));
+                    let out = std::path::PathBuf::from(out);
+                    let start = std::time::Instant::now();
+                    let stem = out.file_stem().unwrap_or_default().to_string_lossy().into_owned();
+                    let ext = out.extension().unwrap_or_default().to_string_lossy().into_owned();
+                    let mut times = String::new();
+                    for i in 0..frames {
+                        let dest = if frames == 1 { out.clone() } else { out.with_file_name(format!("{stem}-{i:03}.{ext}")) };
+                        let at = start.elapsed();
+                        if let Some(w) = app.get_webview_window(label) {
+                            let _ = snapshot(&w, &dest);
+                        }
+                        let given_up = std::time::Instant::now() + std::time::Duration::from_secs(5);
+                        while !dest.exists() && std::time::Instant::now() < given_up {
+                            std::thread::sleep(std::time::Duration::from_millis(5));
+                        }
+                        times.push_str(&format!("{:.3}\n", at.as_secs_f64()));
+                        let next = at + std::time::Duration::from_secs_f64(every);
+                        std::thread::sleep(next.saturating_sub(start.elapsed()));
+                    }
+                    if frames > 1 {
+                        let _ = std::fs::write(out.with_file_name(format!("{stem}-times.txt")), times);
                     }
                 });
             }
@@ -834,6 +894,16 @@ pub fn run() {
                     let _ = w.center();
                     make_unseen(&w);
                     set_in_dock(app.handle(), false);
+                } else {
+                    // The window-state plugin puts the saved size back after this, so the window
+                    // is checked whenever its size changes too.
+                    fit_on_screen(&w);
+                    let w_fit = w.clone();
+                    w.on_window_event(move |ev| {
+                        if let tauri::WindowEvent::Resized(_) = ev {
+                            fit_on_screen(&w_fit);
+                        }
+                    });
                 }
                 // Paint the window and the webview in the theme's background before showing it,
                 // so no white frame appears. Keep in step with --bg in src/styles.css and index.html.

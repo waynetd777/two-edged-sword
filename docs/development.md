@@ -116,6 +116,11 @@ run side by side (4 by default). It needs Pillow.
   model or service is asked and your journal stays private. The Lyrics shot is a public-domain hymn
   with the app's icon as its artwork.
 - Scenes use public-domain Bibles only. `AGENTS.md` lists the scene fields.
+- A scene with `"frames": N` and `"every": seconds` is animated: the app takes N snapshots, each
+  once the one before is saved and at least `every` seconds after it (`TES_SNAPSHOT_FRAMES`,
+  `TES_SNAPSHOT_EVERY`), at half size (`TES_SNAPSHOT_WIDTH`), which is quicker to take; the script
+  makes them a looping WebP, each frame shown for as long as it was on screen. About 7 frames a
+  second is the most the unseen window gives. `"darkOnly": true` shoots a scene in dark only.
 - A scene with `"tray": true` shows the menu-bar window alone (the main window runs hidden to send it what to show), and `width` keeps the image at its own width. `"unread": true` shows today's reading as not yet done, so the menu-bar window shows Start Quiet time.
 
 ## The product page

@@ -107,7 +107,8 @@
     color-scheme: dark;
   }
 }
-:root[data-theme="dark"] {
+:root[data-theme="dark"],
+.lyrics-body {
   --bg: #0d1117;
   --panel: #161b22;
   --panel2: #11161d;
@@ -1900,12 +1901,21 @@ mark {
   }
 }
 
-/* Its background: the song's artwork, blown up and blurred, faint enough to read over. */
-.lyrics-page {
+/* The Lyrics page under its top bar is always dark, whatever the theme: its pictures and the lit
+   line are made for it. The dark theme's colours are given to it alongside :root[data-theme="dark"]. */
+.lyrics-body {
   position: relative;
   overflow: hidden;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  color: var(--text);
+  color-scheme: dark;
 }
-.lyrics-page > :not(.lyrics-art) {
+/* Its background: the song's artwork, blown up and blurred, faint enough to read over. */
+.lyrics-body > :not(.lyrics-art) {
   position: relative;
   z-index: 1;
 }
@@ -1927,7 +1937,8 @@ mark {
   animation: lyrics-art-in 1.2s ease-out;
 }
 /* Dimmed in the dark theme, so grey text over a bright cover stays readable. */
-:root[data-theme="dark"] .lyrics-art img {
+:root[data-theme="dark"] .lyrics-art img,
+.lyrics-body .lyrics-art img {
   opacity: 0.4;
   filter: blur(70px) saturate(1.3) brightness(0.5);
 }

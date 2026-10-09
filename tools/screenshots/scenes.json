@@ -160,6 +160,20 @@
     "songVision": "cross"
   },
   {
+    "name": "lyrics-focus",
+    "darkOnly": true,
+    "settings": {
+      "studyPane": false
+    },
+    "songFile": "lyrics-song.json",
+    "songVision": "dove",
+    "songVisionAt": 0.1,
+    "focus": true,
+    "settle": 5,
+    "frames": 90,
+    "every": 0.1
+  },
+  {
     "name": "reminder",
     "screen": "settings",
     "scrollTo": "input[type=time]",

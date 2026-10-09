@@ -80,32 +80,53 @@ def build():
 
 
 def capture(scene, theme):
-    """Launches the app on the scene, unseen, and returns its webview's snapshot as an sRGB image, or None."""
+    """Launches the app on the scene, unseen, and returns its webview's snapshots as sRGB images
+    (one, or the scene's "frames" of them), or None."""
     # A fixture from a file beside scenes.json: "chatFile" becomes "chat", and so on.
     files = {"chatFile": "chat", "sessionFile": "session", "entriesFile": "entries", "variancesFile": "variances", "songFile": "song", "chapterSongsFile": "chapterSongs"}
-    sc = {k: v for k, v in scene.items() if k not in files and k not in ("crop", "width", "settle", "songVision")}
+    sc = {k: v for k, v in scene.items() if k not in files and k not in ("crop", "width", "settle", "songVision", "songVisionAt", "frames", "every", "darkOnly")}
     for f, k in files.items():
         if f in scene:
             sc[k] = json.loads((HERE / scene[f]).read_text())
-    # "songVision": one of the pictures behind the song's words, shown in full (Visions.tsx).
+    # "songVision": one of the pictures behind the song's words, shown in full (Visions.tsx),
+    # "songVisionAt" (0–1) of the way through it.
     if "songVision" in scene and "song" in sc:
         sc["song"] = {**sc["song"], "vision": scene["songVision"]}
+        if "songVisionAt" in scene:
+            sc["song"]["visionAt"] = scene["songVisionAt"]
     # No favourite translations unless the scene names them: the user's own could be licensed Bibles.
     sc["settings"] = {"favBibles": [], **sc.get("settings", {}), "theme": theme}
     with tempfile.TemporaryDirectory() as tmp:
         shot = pathlib.Path(tmp) / "shot.tiff"
-        env = {**os.environ, "TES_SCENE": json.dumps(sc), "TES_SNAPSHOT": str(shot), "TES_SNAPSHOT_AFTER": str(scene.get("settle", SETTLE))}
+        frames, every = scene.get("frames", 1), scene.get("every", 0.1)
+        env = {**os.environ, "TES_SCENE": json.dumps(sc), "TES_SNAPSHOT": str(shot), "TES_SNAPSHOT_AFTER": str(scene.get("settle", SETTLE)),
+               "TES_SNAPSHOT_FRAMES": str(frames), "TES_SNAPSHOT_EVERY": str(every)}
+        if frames > 1:
+            # Half the window's 1440 points, 1440px at 2x: a full-size snapshot takes 0.75s, this 0.14s.
+            env["TES_SNAPSHOT_WIDTH"] = "720"
+        # An animated scene's frames are shot-000.tiff, shot-001.tiff and so on.
+        shots = [shot] if frames == 1 else [shot.with_name(f"shot-{i:03}.tiff") for i in range(frames)]
         app = subprocess.Popen([str(BIN)], cwd=ROOT / "src-tauri", env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         try:
             # The app writes the file whole (atomically) once WebKit has drawn it.
-            end = time.time() + scene.get("settle", SETTLE) + 30
-            while not shot.exists() and app.poll() is None and time.time() < end:
+            # The last thing written: the snapshot, or an animation's list of when each frame was taken.
+            done = shot if frames == 1 else shot.with_name("shot-times.txt")
+            end = time.time() + scene.get("settle", SETTLE) + frames * max(every, 1) + 30
+            while not done.exists() and app.poll() is None and time.time() < end:
                 time.sleep(0.2)
-            if not shot.exists():
+            if not done.exists():
                 return None
-            im = Image.open(shot)
-            im.load()
-            return to_srgb(im.convert("RGBA") if im.mode not in ("RGB", "RGBA") else im)
+            times = [0.0] if frames == 1 else [float(t) for t in done.read_text().split()]
+            ims = []
+            for f, t in zip(shots, times):
+                if not f.exists():
+                    continue  # a frame WebKit didn't draw in time
+                im = Image.open(f)
+                im.load()
+                im = to_srgb(im.convert("RGBA") if im.mode not in ("RGB", "RGBA") else im)
+                im.info["at"] = t
+                ims.append(im)
+            return ims or None
         finally:
             # SIGKILL, not a normal quit: a normal quit saves the window's size and place.
             app.send_signal(signal.SIGKILL)
@@ -138,24 +159,40 @@ def blank(im):
 def shoot(scene, theme):
     # A shot that came out blank (or never came) is taken again, from a fresh launch.
     for _ in range(3):
-        im = capture(scene, theme)
-        if im is not None and not blank(im):
+        ims = capture(scene, theme)
+        if ims is not None and not blank(ims[0]):
             break
     else:
-        print(f"  {scene['name']} {theme}: " + ("no window" if im is None else "blank"))
+        print(f"  {scene['name']} {theme}: " + ("no window" if ims is None else "blank"))
         return False
     # A scene may keep its own width (the menu-bar window, at its natural 2x size).
     width = scene.get("width", WIDTH)
-    im = im.resize((width, round(im.height * width / im.width)), Image.LANCZOS)
-    if not scene.get("tray"):
-        im = chrome(im, theme)
-    # "crop": [x, y, width, height] of the 1400px-wide image, for a shot of one part of a screen.
-    if "crop" in scene:
-        x, y, w, h = scene["crop"]
-        im = im.crop((x, y, x + w, y + h))
-    out = OUT / f"{scene['name']}-{theme}.png"
-    im.save(out, optimize=True)
-    print(f"  {out.relative_to(ROOT)}  {im.width}x{im.height}")
+
+    def finish(im):
+        at = im.info.get("at", 0.0)
+        im = im.resize((width, round(im.height * width / im.width)), Image.LANCZOS)
+        if not scene.get("tray"):
+            im = chrome(im, theme)
+        # "crop": [x, y, width, height] of the 1400px-wide image, for a shot of one part of a screen.
+        if "crop" in scene:
+            x, y, w, h = scene["crop"]
+            im = im.crop((x, y, x + w, y + h))
+        im.info["at"] = at
+        return im
+
+    # Every frame the first one's size (a frame taken mid-resize is dropped).
+    ims = [finish(im) for im in ims if im.size == ims[0].size]
+    im = ims[0]
+    if scene.get("frames", 1) > 1:
+        # Animated: a looping WebP, each frame shown for as long as it was on screen.
+        out = OUT / f"{scene['name']}-{theme}.webp"
+        at = [i.info["at"] for i in ims]
+        durations = [max(20, round((b - a) * 1000)) for a, b in zip(at, at[1:])] + [round(scene.get("every", 0.1) * 1000)]
+        im.save(out, save_all=True, append_images=ims[1:], duration=durations, loop=0, quality=80, method=6)
+    else:
+        out = OUT / f"{scene['name']}-{theme}.png"
+        im.save(out, optimize=True)
+    print(f"  {out.relative_to(ROOT)}  {im.width}x{im.height}" + (f", {len(ims)} frames" if len(ims) > 1 else ""))
     return True
 
 
@@ -176,7 +213,8 @@ def main():
     server = dev_server()
     try:
         build()
-        jobs = [(s, t) for s in scenes for t in themes]
+        # "darkOnly": a screen that is always dark (the Lyrics page) is shot only in dark.
+        jobs = [(s, t) for s in scenes for t in themes if not (s.get("darkOnly") and t == "light")]
         with concurrent.futures.ThreadPoolExecutor(max(1, a.j)) as pool:
             ok = all(list(pool.map(lambda job: shoot(*job), jobs)))
     finally:

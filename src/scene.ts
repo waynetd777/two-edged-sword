@@ -62,6 +62,8 @@ export interface Scene {
   chapterSongs?: Picked;
   /** Today's reading shown as not yet done (for the menu-bar window's Start Quiet time). */
   unread?: boolean;
+  /** Focus mode, as ⌘. turns it on, once the page has settled. */
+  focus?: boolean;
 }
 
 let started = false;
@@ -187,6 +189,7 @@ export function runScene(app: ReturnType<typeof useApp>, still: (s: Partial<Play
           if (sc.song.vision) setSceneVision(sc.song.vision, sc.song.visionAt);
           app.openLyrics();
         }
+        if (sc.focus) window.setTimeout(() => window.dispatchEvent(new KeyboardEvent("keydown", { key: ".", metaKey: true })), 1500);
         if (sc.pending) {
           const x = sc.pending;
           window.setTimeout(() => app.setPending(x), 1500);

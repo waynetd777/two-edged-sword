@@ -73,6 +73,12 @@ scroll:
   ones keep beside the words, in focus mode too, and clear of each other.
   Settings › Listening › **While a song plays** turns them off.
 - The bar shows how far through the song Music is, with the time gone and the time left.
+- The Lyrics page is always dark below its top bar, in the light theme too. In focus mode the
+  top bar is dark as well.
+- ⌘. is focus mode: the song across the whole window, the pictures beside it. Esc leaves it.
+
+<a href="images/index.md#quiet-time"><img alt="A song playing in focus mode: the lit line moves on through the words as a dove passes behind them" src="images/lyrics-focus-dark.webp"></a>
+
 - **Lyrics** on the bar brings the words back if you've gone elsewhere.
 - **Open Music** (top right) switches to Music.
 
