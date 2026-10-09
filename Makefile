@@ -85,6 +85,7 @@ screenshots:
 ## Remake the product page's pictures (site/img/*.webp) from the dark screenshots. Needs cwebp (brew install webp).
 site:
 	@for f in docs/images/*-dark.png; do cwebp -quiet -q 80 -m 6 "$$f" -o "site/img/$$(basename "$$f" -dark.png).webp"; done
+	@for f in docs/images/*-dark.webp; do cp "$$f" "site/img/$$(basename "$$f" -dark.webp).webp"; done
 	@cp src-tauri/icons/128x128@2x.png site/img/icon.png
 	@sips -Z 180 src-tauri/icons/128x128@2x.png --out site/img/icon-180.png >/dev/null
 

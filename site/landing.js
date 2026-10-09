@@ -83,7 +83,8 @@
 
   // A tour: a screenshot with steps. Each step zooms the picture so that one spot (data-x, data-y, in
   // percent) is at the centre, data-s times larger, or shows another picture (data-img); data-caption
-  // is written under the picture. Steps play in turn while the tour is on screen; a click picks one.
+  // is written under the picture. Steps play in turn while the tour is on screen, each for data-ms
+  // (an animated picture's length) or the tour's data-auto; a click picks one.
   function Tour(root) {
     var img = root.querySelector(".shot:not(.swap) img");
     var swaps = root.querySelectorAll(".shot.swap img");
@@ -113,6 +114,7 @@
 
     function show(i) {
       at = i;
+      root.style.setProperty("--dur", stay(i) + "ms");
       steps.forEach(function (li, k) {
         li.classList.remove("on");
         if (k === i) {
@@ -151,16 +153,20 @@
         }, 380);
       }
     }
+    function stay(i) {
+      return parseInt(steps[i].getAttribute("data-ms"), 10) || every;
+    }
     function next() {
       show((at + 1) % steps.length);
+      timer = setTimeout(next, stay(at));
     }
     function start() {
       stop();
-      if (!reduced && steps.length > 1) timer = setInterval(next, every);
+      if (!reduced && steps.length > 1) timer = setTimeout(next, stay(at));
     }
     function stop() {
       if (timer) {
-        clearInterval(timer);
+        clearTimeout(timer);
         timer = null;
       }
     }
