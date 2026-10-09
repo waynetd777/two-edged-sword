@@ -60,7 +60,8 @@ scroll:
 <a href="images/index.md#quiet-time"><picture><source media="(prefers-color-scheme: dark)" srcset="images/lyrics-dark.png"><img alt="A song's words in the reading column as it plays" src="images/lyrics-light.png"></picture></a>
 
 - The line being sung is lit in blue, with a light sweeping across it, and kept in view, when
-  the lyrics are timed. Dots show where nothing is sung.
+  the lyrics are timed. It stands forward, larger, and the lines before and after it fall away,
+  smaller and fainter the further off they are. Dots show where nothing is sung.
 - Why each song was chosen shows under its name.
 - Songs chosen for a chapter play the same way: see [Songs for the chapter](reading.md#songs-for-the-chapter).
 - A song with no lyrics found gets softly burning flames instead, swelling to the song's tempo

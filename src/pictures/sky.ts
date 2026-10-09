@@ -276,12 +276,12 @@ export const SKY: Vision[] = [
       const y = h * rnd(0.3, 0.5),
         R = R0 * scale,
         tilt = rnd(-0.5, 0.5);
-      const stars = Array.from({ length: 700 }, (_, i) => {
+      const stars = Array.from({ length: 1300 }, (_, i) => {
         const arm = i % 2;
         const d = Math.random() ** 0.7;
         return {
           d,
-          a: arm * Math.PI + d * 5.2 + rnd(-0.35, 0.35) * (1.2 - d),
+          a: arm * Math.PI + d * 5.2 + rnd(-0.45, 0.45) * (1.2 - d),
           r: rnd(0.8, 2.6) * (1.2 - d * 0.6),
           cool: Math.random() < 0.5,
           p: rnd(0, TAU),
@@ -292,7 +292,7 @@ export const SKY: Vision[] = [
         ctx.save();
         ctx.translate(x, y);
         ctx.rotate(tilt);
-        ctx.scale(1, 0.42);
+        ctx.scale(1, 0.56);
         glow(ctx, 0, 0, R * 0.5, f.ink(0.3 * f.env), f.ink(0));
         const spin = f.t * 0.02;
         const warm = f.dot(),

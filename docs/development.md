@@ -20,7 +20,7 @@ runs the AI tools for Ask. The frontend is everything you see.
 | `make screenshots` | Retake the screenshots in `docs/images/` |
 | `make site` | Remake the product page's WebP pictures from the dark screenshots |
 | `make og` | Render the product page's share card, `site/img/og.png` |
-| `make visions` | Flick through the pictures behind a song's words in Safari, drawn as on the Lyrics page (`visions.html`; ← → step, keys for theme, words, colours, beat). `make visions v=eagle` starts at one |
+| `make visions` | Flick through the pictures behind a song's words in Safari, drawn as on the Lyrics page (`visions.html`; ← → step, keys for theme, words, colours, beat; a box to find one by name or theme; each picture's themes on the bar). `make visions v=eagle` starts at one; `?theme=light` shows it on paper |
 | `make icons` | Redraw the icon artwork and regenerate the icon set |
 | `make sign-check` | Show how the installed app is signed |
 
