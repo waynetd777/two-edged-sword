@@ -8,7 +8,8 @@
 // marked read once all its Bible parts are. A plan with worship songs gets a Worship part before
 // or after the reading: songs from the Music library chosen for the day (worship.ts), played in
 // Music while the part is open, their words in the reading column (LyricsPage), moving on when they finish.
-// A plan with a closing verse ends with one chosen to wrap up the day (closing.ts).
+// A plan with a closing verse ends with one chosen to wrap up the day (closing.ts); a favourite
+// passage read every day comes after it, last of all.
 
 import { useEffect, useRef, useState } from "react";
 import { Working } from "./Ask";
@@ -75,7 +76,8 @@ export function quietSteps(
     if (w.before) steps.unshift(step("before", "worship"));
     if (w.after) steps.push(step("after", w.before ? "worship-after" : "worship"));
   }
-  // A favourite passage, read every day at the end, before the closing verse.
+  if (plan.closing && steps.length) steps.push({ key: "closing", label: "Closing verse", kind: "closing", bible: plan.bible });
+  // A favourite passage, read every day at the very end, after the closing verse.
   const f = plan.finale;
   if (f && steps.length) {
     const label = partLabel(f).replace(/^Psalms/, "Psalm");
@@ -89,7 +91,6 @@ export function quietSteps(
       ...(f.v ? { v: f.v, v2: f.c2 ? undefined : f.v2 } : {}),
     });
   }
-  if (plan.closing && steps.length) steps.push({ key: "closing", label: "Closing verse", kind: "closing", bible: plan.bible });
   return steps;
 }
 
@@ -102,13 +103,29 @@ function sessionSteps(app: ReturnType<typeof useApp>, plan: Plan, parts: Part[],
   );
 }
 
-/** What worship songs and the closing verse are chosen for: the session's readings. */
-const worshipAbout = (steps: QuietStep[]) => steps.filter((x) => x.kind !== "worship" && x.kind !== "closing").map((x) => x.label);
+/** What the closing verse is chosen for: the day's readings, not the songs, the closing verse
+ *  itself or the favourite passage (read every day, so it says nothing about the day). */
+const readingsOf = (steps: QuietStep[]) =>
+  steps.filter((x) => x.kind !== "worship" && x.kind !== "closing" && x.key !== "finale").map((x) => x.label);
+/** The favourite passage's label, for the closing verse to steer clear of. */
+const finaleOf = (steps: QuietStep[]) => steps.find((x) => x.key === "finale")?.label;
+/** Chooses the closing verse (kept for the day, so this is quick once it's been chosen). */
+const closingFor = (steps: QuietStep[], model: string) => {
+  const c = steps.find((x) => x.kind === "closing");
+  return c?.kind === "closing"
+    ? c.picked
+      ? Promise.resolve(c.picked)
+      : pickClosing(readingsOf(steps), c.bible, model, finaleOf(steps))
+    : null;
+};
 
 /** Chooses the songs for each Worship part in turn, so with worship before and after the reading
- *  the second part's songs differ from the first's. `put` gets each part's songs as they come. */
+ *  the second part's songs differ from the first's. `put` gets each part's songs as they come.
+ *  The songs are chosen for the closing verse as well as the readings, so that is chosen first. */
 async function pickWorship(steps: QuietStep[], model: string, put: (key: string, p: Picked) => void) {
-  const about = worshipAbout(steps);
+  const about = readingsOf(steps);
+  const closing = await closingFor(steps, model);
+  if (closing) about.push(closing.label);
   const avoid: string[] = [];
   for (const w of steps) {
     if (w.kind !== "worship") continue;
@@ -140,7 +157,7 @@ export function useWorshipAhead() {
     const timer = window.setTimeout(() => {
       const steps = sessionSteps(app, plan, t.parts, startOfToday());
       if (w) pickWorship(steps, app.settings.model, () => {});
-      if (steps.some((x) => x.kind === "closing")) pickClosing(worshipAbout(steps), plan.bible, app.settings.model).catch(() => {});
+      else closingFor(steps, app.settings.model)?.catch(() => {});
     }, 8000);
     return () => window.clearTimeout(timer);
   }, [ready, key]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -236,7 +253,7 @@ export function QuietTime({ focus }: { focus: boolean }) {
         x && x.started === started ? { ...x, steps: x.steps.map((y) => (y.kind === "closing" ? { ...y, picked: p } : y)) } : x,
       );
     // pickClosing never fails: without the assistant's choice, the blessing closes.
-    pickClosing(worshipAbout(s.steps), c.bible, app.settings.model).then(put);
+    closingFor(s.steps, app.settings.model)?.then(put);
   }, [s?.started]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // The Worship part: once its songs are chosen, a card says why each suits the reading, and they
@@ -363,16 +380,20 @@ export function QuietTime({ focus }: { focus: boolean }) {
     };
   }, [s?.started, s?.i, !!songs, playing]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // A part read aloud, going on to the next part when it finishes. The closing verse stays open
-  // afterwards, until Finish.
+  // A part read aloud, going on to the next part when it finishes. The last part stays open
+  // afterwards, until Finish, when it is the closing verse or the favourite passage.
+  const sRef = useRef(s);
+  sRef.current = s;
   const speakStep = async (step: QuietStep) => {
-    const onEnd = () => goRef.current(1);
-    if (step.kind === "bible") player.play(step.bible, step.b, step.c, step.v, { toVerse: step.v2, onEnd });
+    const x = sRef.current;
+    const last = !!x && x.steps[x.steps.length - 1] === step && (step.kind === "closing" || step.key === "finale");
+    // An onEnd, even one doing nothing, is what stops a passage at its last verse.
+    const onEnd = last ? () => {} : () => goRef.current(1);
+    if (step.kind === "bible") player.play(step.bible, step.b, step.c, step.v, { toVerse: step.v2 ?? step.v, onEnd });
     else if (step.kind === "closing" && step.picked) {
       setReadIn(null);
       const p = step.picked;
-      // An onEnd, even one doing nothing, is what stops it at the passage's last verse.
-      player.play(step.bible, p.b, p.c, p.v, { toVerse: p.v2 ?? p.v, onEnd: () => {} });
+      player.play(step.bible, p.b, p.c, p.v, { toVerse: p.v2 ?? p.v, onEnd });
     } else if (step.kind === "devotional") {
       const html = await api.devotion(step.module, step.title).catch(() => null);
       const segs = html ? docSegments(html) : [];
@@ -381,8 +402,6 @@ export function QuietTime({ focus }: { focus: boolean }) {
     }
   };
   // F7 and F9 go to the previous or next part, and F8 (or ⌘P) reads this one when nothing is playing.
-  const sRef = useRef(s);
-  sRef.current = s;
   useEffect(() => {
     if (!s) return;
     const me = {

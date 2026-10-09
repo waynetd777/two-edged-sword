@@ -93,16 +93,18 @@ assistant to gather up what the day's reading taught.
   on how it sums up the day.
 - With audio, it is read aloud after a countdown that leaves time to read the card. **Read now**
   skips the wait.
-- It stays open when it's done. **Finish** ends Quiet time.
-- It is chosen while you read, so it's usually ready by the end.
+- It stays open when it's done. **Finish** ends Quiet time. With a favourite passage, that is read after it instead.
+- It is chosen while you read, so it's usually ready by the end. The worship songs are chosen for it too.
 - Without an AI assistant, the blessing of Numbers 6:24–26 closes instead.
 
 ## Favourite passage
 
-A passage of your own, such as Proverbs 3:5–6, read every day at the end of Quiet time, before the closing verse. Set it under the closing verse, in a plan's page.
+A passage of your own, such as Proverbs 3:5–6, read every day at the very end of Quiet time, after the closing verse. Set it under the closing verse, in a plan's page.
 
 - Type the passage and click **Add**.
 - **Remove** stops it.
+- It stays open when it's done. **Finish** ends Quiet time.
+- Being the same every day, it plays no part in choosing the day's songs or closing verse.
 
 ## Daily reminder
 

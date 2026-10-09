@@ -40,7 +40,7 @@ export interface SequencePlan {
   closing?: boolean;
   /** Parts of the current day ticked off so far (see progressKey). */
   progress?: Progress;
-  /** A favourite passage read every day, at the end of Quiet time (before the closing verse). */
+  /** A favourite passage read every day, at the very end of Quiet time (after the closing verse). */
   finale?: Part;
   active: boolean;
 }
