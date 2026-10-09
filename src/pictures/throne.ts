@@ -4,7 +4,9 @@
 // The throne room: the throne, the Lamb, the Lion of Judah, the sea of glass, crowns cast down,
 // the seraph's six wings, lightnings, the scroll, the trumpet, the heavenly host.
 
-import { beam, glow, lay, layering, rnd, smooth, TAU, tones, Vision } from "./kit";
+import { beam, bitmap, glow, lay, layering, rnd, smooth, TAU, tones, Vision } from "./kit";
+import { LAMB_BITMAP } from "./lamb-bitmap";
+import { LION_BITMAP } from "./lion-bitmap";
 
 /**
  * A wing, in its own units: the shoulder at (0, 0), the span out along x to the tip at 1. The
@@ -222,123 +224,17 @@ export const THRONE: Vision[] = [
       "agnus",
     ],
     make: (w, h, room) => {
-      const S0 = Math.min(w, h) * 0.09;
-      const { x, scale } = room.place(S0 * 4);
-      const S = S0 * scale,
-        y = h * 0.62;
-      const dir = x < w / 2 ? 1 : -1;
-      const wool = Array.from({ length: 48 }, () => rnd(0.9, 1.1));
-      const layer = layering();
+      const W0 = Math.min(w, h) * 0.5;
+      const { x, scale } = room.place(W0);
+      const W = W0 * scale,
+        y = h * 0.55;
+      // The Lamb: a young lamb standing in the grass, looking at us (pictures/lamb-bitmap.ts), in
+      // the artwork's colour, the grass about it falling away; a light about it, and it breathes.
+      const pic = bitmap(LAMB_BITMAP, 0.5, "photo");
       return (f) => {
-        const { ctx } = f;
         const come = smooth(f.k * 2.4);
-        // Light about it, and the rise it stands on.
-        glow(ctx, x, y - S * 0.3, S * 2.6, f.ink(0.16 * f.env * come * (0.92 + 0.08 * f.beat)), f.ink(0));
-        const hg = ctx.createLinearGradient(0, y + S * 1.0, 0, y + S * 2.0);
-        hg.addColorStop(0, f.ink(0.1 * f.env * come));
-        hg.addColorStop(1, f.ink(0));
-        ctx.fillStyle = hg;
-        ctx.beginPath();
-        ctx.ellipse(x, y + S * 1.35, S * 2.2, S * 0.5, 0, 0, TAU);
-        ctx.fill();
-        // The lamb, side on, standing with its head up, in its own units (S): the body a cloud of
-        // wool, long slim legs, a woolly neck to a small head with a rounded muzzle and ears laid
-        // back; the face and legs darker than the fleece. Solid, on a layer.
-        const { L, canvas } = layer(f);
-        const tone = tones(f);
-        L.translate(x, y + (1 - come) * 16);
-        L.scale(dir * S, S);
-        const breathe = 1 + 0.01 * Math.sin(f.t * 1.6);
-        // The legs: far pair dimmer, each a slim tapering line with a knee and a dark hoof.
-        const leg = (lx: number, k: number, back: boolean) => {
-          L.strokeStyle = tone(k);
-          L.lineCap = "round";
-          L.lineWidth = 0.13;
-          L.beginPath();
-          L.moveTo(lx, 0.3);
-          L.lineTo(lx + (back ? -0.04 : 0.02), 0.75);
-          L.lineTo(lx + (back ? 0.02 : 0.03), 1.15);
-          L.stroke();
-          L.fillStyle = tone(k * 0.6);
-          L.beginPath();
-          L.ellipse(lx + (back ? 0.03 : 0.04), 1.17, 0.08, 0.05, 0, 0, TAU);
-          L.fill();
-        };
-        leg(-0.55, 0.42, true);
-        leg(0.62, 0.42, false);
-        leg(-0.75, 0.6, true);
-        leg(0.42, 0.6, false);
-        // The tail, a woolly stub.
-        L.fillStyle = tone(0.8);
-        L.beginPath();
-        L.ellipse(-1.05, -0.05, 0.13, 0.2, -0.4, 0, TAU);
-        L.fill();
-        // The fleece: an oval with a woolly edge, brighter on the back than the belly.
-        const fl = L.createLinearGradient(0, -0.65, 0, 0.45);
-        fl.addColorStop(0, tone(1));
-        fl.addColorStop(1, tone(0.7));
-        L.fillStyle = fl;
-        L.beginPath();
-        for (let i = 0; i <= 48; i++) {
-          const a = (i / 48) * TAU;
-          const k = (1 + 0.06 * Math.abs(Math.sin(a * 12))) * wool[i % 48] * breathe;
-          const px = Math.cos(a) * 1.0 * k,
-            py = Math.sin(a) * 0.6 * k * (Math.sin(a) > 0 ? 0.85 : 1);
-          if (i) L.lineTo(px, py);
-          else L.moveTo(px, py);
-        }
-        L.closePath();
-        L.fill();
-        // The neck, woolly, rising to the head; it lifts and turns a little as the lamb looks about.
-        const look = Math.sin(f.t * 0.4) * 0.04;
-        L.strokeStyle = tone(0.92);
-        L.lineCap = "round";
-        L.lineWidth = 0.34;
-        L.beginPath();
-        L.moveTo(0.72, -0.2);
-        L.quadraticCurveTo(0.9, -0.42, 1.0 + look, -0.62);
-        L.stroke();
-        // The head: the skull, the muzzle rounding to the nose, the ear laid back, the eye.
-        L.save();
-        L.translate(1.04 + look, -0.68);
-        L.rotate(0.3 + look);
-        L.fillStyle = tone(0.72);
-        L.beginPath();
-        L.ellipse(0, 0, 0.26, 0.21, 0, 0, TAU);
-        L.fill();
-        L.beginPath();
-        L.moveTo(0.1, -0.16);
-        L.quadraticCurveTo(0.5, -0.14, 0.52, 0.02);
-        L.quadraticCurveTo(0.5, 0.14, 0.3, 0.16);
-        L.quadraticCurveTo(0.1, 0.18, 0.05, 0.1);
-        L.closePath();
-        L.fill();
-        L.fillStyle = tone(0.45); // the nose and mouth
-        L.beginPath();
-        L.ellipse(0.5, 0.0, 0.045, 0.035, 0, 0, TAU);
-        L.fill();
-        L.strokeStyle = tone(0.5);
-        L.lineWidth = 0.015;
-        L.beginPath();
-        L.moveTo(0.48, 0.05);
-        L.quadraticCurveTo(0.42, 0.11, 0.34, 0.1);
-        L.stroke();
-        L.fillStyle = tone(0.62); // the ear, laid back and down
-        L.beginPath();
-        L.ellipse(-0.18, -0.06, 0.2, 0.08, 0.35, 0, TAU);
-        L.fill();
-        L.fillStyle = tone(1.0); // a tuft of wool on the crown
-        L.beginPath();
-        L.ellipse(-0.02, -0.2, 0.14, 0.08, 0, 0, TAU);
-        L.fill();
-        L.globalCompositeOperation = "destination-out"; // the eye
-        L.beginPath();
-        L.ellipse(0.1, -0.05, 0.035, 0.03, 0.3, 0, TAU);
-        L.fill();
-        L.restore();
-        lay(f, canvas, 0.7 * f.env, S * 0.2);
-        // A nimbus about its head.
-        glow(ctx, x + dir * S * 1.2, y - S * 0.7, S * 0.7, f.ink(0.2 * f.env * come), f.ink(0));
+        glow(f.ctx, x, y - W * 0.05, W * 0.6, f.ink(0.12 * f.env * come * (0.92 + 0.08 * f.beat)), f.ink(0));
+        pic.draw(f, x, y + (1 - come) * 16, W, f.env * come, 1 + 0.005 * Math.sin(f.t * 1.2));
       };
     },
   },
@@ -364,164 +260,17 @@ export const THRONE: Vision[] = [
       "triumph",
     ],
     make: (w, h, room) => {
-      const S0 = Math.min(w, h) * 0.1;
-      const { x, scale } = room.place(S0 * 4.4);
-      const S = S0 * scale,
-        y = h * 0.6;
-      const dir = x < w / 2 ? 1 : -1;
-      const mane = Array.from({ length: 40 }, () => rnd(0.92, 1.12));
-      const layer = layering();
+      const W0 = Math.min(w, h) * 0.6;
+      const { x, scale } = room.place(W0);
+      const W = W0 * scale,
+        y = h * 0.48;
+      // A lion's face, looking at us out of its mane: Rosa Bonheur's lion (pictures/lion-bitmap.ts),
+      // in the artwork's colour, breathing a little.
+      const pic = bitmap(LION_BITMAP);
       return (f) => {
-        const { ctx } = f;
         const come = smooth(f.k * 2.4);
-        const roar = Math.max(0, Math.sin(f.t * 0.45 - 1)) ** 6; // now and then it lifts its head and roars
-        glow(ctx, x, y - S * 0.4, S * 2.8, f.ink(0.12 * f.env * come * (0.9 + 0.1 * f.beat)), f.ink(0));
-        // The lion, side on, standing on a rock, in its own units (S): a long deep-chested body,
-        // the great mane about the head and down over the chest, the head in profile with its
-        // muzzle, the tail hanging in a curve to its tuft. Solid, on a layer.
-        const { L, canvas } = layer(f);
-        const tone = tones(f);
-        L.translate(x, y + (1 - come) * 16);
-        L.scale(dir * S, S);
-        // The rock.
-        const rg = L.createLinearGradient(0, 1.1, 0, 2.0);
-        rg.addColorStop(0, tone(0.3));
-        rg.addColorStop(1, tone(0.1));
-        L.fillStyle = rg;
-        L.beginPath();
-        L.moveTo(-2.3, 2.0);
-        L.quadraticCurveTo(-2.0, 1.1, -1.5, 1.12);
-        L.lineTo(1.4, 1.1);
-        L.quadraticCurveTo(2.1, 1.15, 2.3, 2.0);
-        L.closePath();
-        L.fill();
-        // The tail, swinging slowly, with its tuft.
-        const sw = Math.sin(f.t * 0.7) * 0.15;
-        L.strokeStyle = tone(0.5);
-        L.lineWidth = 0.09;
-        L.lineCap = "round";
-        L.beginPath();
-        L.moveTo(-1.15, -0.35);
-        L.bezierCurveTo(-1.6, -0.1, -1.75 + sw, 0.55, -1.5 + sw * 1.6, 0.75);
-        L.stroke();
-        L.fillStyle = tone(0.4);
-        L.beginPath();
-        L.ellipse(-1.5 + sw * 1.6, 0.78, 0.11, 0.18, 0.4, 0, TAU);
-        L.fill();
-        // The far legs, dimmer, then the body, then the near legs over it.
-        const legs = (k: number, dx: number) => {
-          L.fillStyle = tone(k);
-          // The hind leg: the thigh, the hock bending back, the shank down to the paw.
-          L.beginPath();
-          L.moveTo(-0.55 + dx, -0.1);
-          L.quadraticCurveTo(-1.25 + dx, -0.15, -1.2 + dx, 0.45);
-          L.lineTo(-1.05 + dx, 0.62);
-          L.lineTo(-1.0 + dx, 1.08);
-          L.lineTo(-0.78 + dx, 1.08);
-          L.lineTo(-0.8 + dx, 0.6);
-          L.quadraticCurveTo(-0.6 + dx, 0.4, -0.5 + dx, 0.4);
-          L.closePath();
-          L.fill();
-          // The foreleg, straight down from the shoulder.
-          L.beginPath();
-          L.moveTo(0.42 + dx, -0.05);
-          L.lineTo(0.78 + dx, -0.05);
-          L.lineTo(0.76 + dx, 1.08);
-          L.lineTo(0.5 + dx, 1.08);
-          L.closePath();
-          L.fill();
-          // The paws.
-          L.fillStyle = tone(k * 0.85);
-          for (const px of [-0.86 + dx, 0.65 + dx]) {
-            L.beginPath();
-            L.ellipse(px + 0.03, 1.08, 0.17, 0.07, 0, 0, TAU);
-            L.fill();
-          }
-        };
-        legs(0.38, -0.12);
-        const bg = L.createLinearGradient(0, -0.6, 0, 0.5);
-        bg.addColorStop(0, tone(0.7));
-        bg.addColorStop(1, tone(0.45));
-        L.fillStyle = bg;
-        L.beginPath();
-        L.moveTo(0.3, -0.6);
-        L.quadraticCurveTo(-0.4, -0.72, -1.0, -0.5);
-        L.quadraticCurveTo(-1.3, -0.3, -1.2, 0.1);
-        L.quadraticCurveTo(-1.1, 0.42, -0.7, 0.45);
-        L.quadraticCurveTo(-0.1, 0.52, 0.5, 0.45);
-        L.quadraticCurveTo(0.85, 0.3, 0.8, -0.2);
-        L.quadraticCurveTo(0.75, -0.55, 0.3, -0.6);
-        L.closePath();
-        L.fill();
-        legs(0.55, 0);
-        // The mane: a great tufted mass about the head, deepest below, falling over the chest;
-        // darker than the coat, as a lion's is, stirring a little.
-        const mx = 0.8,
-          my = -0.6 - roar * 0.1;
-        const mg = L.createRadialGradient(mx, my, 0.1, mx, my, 1.0);
-        mg.addColorStop(0, tone(0.55));
-        mg.addColorStop(1, tone(0.3));
-        L.fillStyle = mg;
-        L.beginPath();
-        for (let i = 0; i <= 40; i++) {
-          const a = (i / 40) * TAU;
-          const down = Math.max(0, Math.sin(a)); // fuller below, over the chest
-          const r = (0.7 + 0.3 * down) * mane[i % 40] * (1 + 0.015 * Math.sin(f.t * 1.5 + i));
-          const px = mx + Math.cos(a) * r * 0.9,
-            py = my + Math.sin(a) * r;
-          if (i) L.lineTo(px, py);
-          else L.moveTo(px, py);
-        }
-        L.closePath();
-        L.fill();
-        // The head within it, in profile: the brow and skull, the muzzle to the nose, the jaw;
-        // the ear; the eye. Lifted as it roars, the mouth opening.
-        L.save();
-        L.translate(mx + 0.2, my - 0.1);
-        L.rotate(-roar * 0.4);
-        const hg = L.createLinearGradient(0, -0.4, 0, 0.3);
-        hg.addColorStop(0, tone(0.82));
-        hg.addColorStop(1, tone(0.6));
-        L.fillStyle = hg;
-        L.beginPath();
-        L.moveTo(-0.3, -0.35); // the brow
-        L.quadraticCurveTo(0.1, -0.45, 0.35, -0.3);
-        L.quadraticCurveTo(0.62, -0.25, 0.68, -0.08); // the muzzle to the nose
-        L.quadraticCurveTo(0.7, 0.08, 0.55, 0.12 + roar * 0.1); // the upper lip
-        L.quadraticCurveTo(0.3, 0.3 + roar * 0.08, 0.0, 0.3); // the jaw
-        L.quadraticCurveTo(-0.3, 0.25, -0.35, 0.0);
-        L.closePath();
-        L.fill();
-        L.fillStyle = tone(0.25); // the nose
-        L.beginPath();
-        L.ellipse(0.64, -0.1, 0.07, 0.05, 0.3, 0, TAU);
-        L.fill();
-        L.strokeStyle = tone(0.3); // the mouth
-        L.lineWidth = 0.02 + roar * 0.06;
-        L.beginPath();
-        L.moveTo(0.6, 0.02);
-        L.quadraticCurveTo(0.4, 0.14 + roar * 0.06, 0.15, 0.1 + roar * 0.04);
-        L.stroke();
-        L.fillStyle = tone(0.5); // the ear
-        L.beginPath();
-        L.ellipse(-0.18, -0.42, 0.11, 0.1, 0, 0, TAU);
-        L.fill();
-        L.globalCompositeOperation = "destination-out"; // the eye
-        L.beginPath();
-        L.ellipse(0.22, -0.2, 0.05, 0.035, 0.2, 0, TAU);
-        L.fill();
-        L.restore();
-        lay(f, canvas, 0.65 * f.env, S * 0.18);
-        // Its roar, going out.
-        if (roar > 0.05)
-          for (let i = 0; i < 3; i++) {
-            const q = (roar * 1.5 + i * 0.25) % 1;
-            ctx.strokeStyle = f.ink(0.2 * f.env * (1 - q) * roar);
-            ctx.lineWidth = 1.5;
-            ctx.beginPath();
-            ctx.arc(x + dir * S * 1.7, y - S * 0.8, S * 0.4 + q * S * 1.8, dir > 0 ? -0.8 : Math.PI - 0.8, dir > 0 ? 0.8 : Math.PI + 0.8);
-            ctx.stroke();
-          }
+        glow(f.ctx, x, y, W * 0.7, f.ink(0.1 * f.env * come * (0.92 + 0.08 * f.beat)), f.ink(0));
+        pic.draw(f, x, y + (1 - come) * 16, W, f.env * come, 1 + 0.006 * Math.sin(f.t * 1.4));
       };
     },
   },
@@ -1147,3 +896,181 @@ export const THRONE: Vision[] = [
     },
   },
 ];
+
+/**
+ * The lamb as it was drawn by hand, kept to try again: a woolly outline with faint tufts, a
+ * shaded face, an eye with a glint. Swap it in for "lamb" in THRONE to use it.
+ */
+export const LAMB_DRAWN: Vision = {
+  name: "lamb (drawn)",
+  lane: "pass",
+  dur: [13, 20],
+  themes: [
+    "lamb",
+    "worthy",
+    "slain",
+    "lamb of god",
+    "the lamb",
+    "blood",
+    "sacrifice",
+    "takes away",
+    "worthy is the lamb",
+    "innocent",
+    "spotless",
+    "behold",
+    "lamb upon the throne",
+    "agnus",
+  ],
+  make: (w, h, room) => {
+    const S0 = Math.min(w, h) * 0.09;
+    const { x, scale } = room.place(S0 * 4);
+    const S = S0 * scale,
+      y = h * 0.62;
+    const dir = x < w / 2 ? 1 : -1;
+    const wool = Array.from({ length: 48 }, () => rnd(0.9, 1.1));
+    const layer = layering();
+    return (f) => {
+      const { ctx } = f;
+      const come = smooth(f.k * 2.4);
+      // Light about it, and the rise it stands on.
+      glow(ctx, x, y - S * 0.3, S * 2.6, f.ink(0.16 * f.env * come * (0.92 + 0.08 * f.beat)), f.ink(0));
+      const hg = ctx.createLinearGradient(0, y + S * 1.0, 0, y + S * 2.0);
+      hg.addColorStop(0, f.ink(0.1 * f.env * come));
+      hg.addColorStop(1, f.ink(0));
+      ctx.fillStyle = hg;
+      ctx.beginPath();
+      ctx.ellipse(x, y + S * 1.35, S * 2.2, S * 0.5, 0, 0, TAU);
+      ctx.fill();
+      // The lamb, side on, standing with its head up, in its own units (S): the body a cloud of
+      // wool, long slim legs, a woolly neck to a small head with a rounded muzzle and ears laid
+      // back; the face and legs darker than the fleece. Solid, on a layer.
+      const { L, canvas } = layer(f);
+      const tone = tones(f);
+      L.translate(x, y + (1 - come) * 16);
+      L.scale(dir * S, S);
+      const breathe = 1 + 0.01 * Math.sin(f.t * 1.6);
+      // Its shadow on the ground.
+      L.fillStyle = tone(0.1);
+      L.beginPath();
+      L.ellipse(0.1, 1.17, 1.3, 0.12, 0, 0, TAU);
+      L.fill();
+      // The legs: far pair dimmer, each a slim tapering line with a knee and a dark hoof.
+      const leg = (lx: number, k: number, back: boolean) => {
+        L.strokeStyle = tone(k);
+        L.lineCap = "round";
+        L.lineWidth = 0.13;
+        L.beginPath();
+        L.moveTo(lx, 0.3);
+        L.lineTo(lx + (back ? -0.04 : 0.02), 0.75);
+        L.lineTo(lx + (back ? 0.02 : 0.03), 1.15);
+        L.stroke();
+        L.fillStyle = tone(k * 0.6);
+        L.beginPath();
+        L.ellipse(lx + (back ? 0.03 : 0.04), 1.17, 0.08, 0.05, 0, 0, TAU);
+        L.fill();
+      };
+      leg(-0.55, 0.42, true);
+      leg(0.62, 0.42, false);
+      leg(-0.75, 0.6, true);
+      leg(0.42, 0.6, false);
+      // The tail, a woolly stub.
+      L.fillStyle = tone(0.8);
+      L.beginPath();
+      L.ellipse(-1.05, -0.05, 0.13, 0.2, -0.4, 0, TAU);
+      L.fill();
+      // The fleece: a body with a woolly outline, brighter on the back than the belly, and over
+      // it a light scattering of soft tufts, faint, so it reads as wool without becoming balls.
+      const fl = L.createLinearGradient(0, -0.65, 0, 0.45);
+      fl.addColorStop(0, tone(1));
+      fl.addColorStop(1, tone(0.68));
+      L.fillStyle = fl;
+      L.beginPath();
+      for (let i = 0; i <= 48; i++) {
+        const a = (i / 48) * TAU;
+        const k = (1 + 0.06 * Math.abs(Math.sin(a * 12))) * (1 + (wool[i % 48] - 1) * 0.4) * breathe;
+        const px = Math.cos(a) * 1.0 * k,
+          py = Math.sin(a) * 0.6 * k * (Math.sin(a) > 0 ? 0.85 : 1);
+        if (i) L.lineTo(px, py);
+        else L.moveTo(px, py);
+      }
+      L.closePath();
+      L.fill();
+      L.save();
+      L.clip();
+      for (let i = 0; i < 30; i++) {
+        const a = (i / 30) * TAU * 1.7 + 0.4;
+        const d = (0.25 + 0.6 * wool[(i * 5) % 48] * 0.8) * breathe;
+        const tx = Math.cos(a) * d,
+          ty = Math.sin(a) * d * 0.58;
+        const r = 0.26 * wool[(i * 7) % 48];
+        const lit = 0.06 - 0.1 * Math.max(0, ty); // lighter above, darker below
+        const tg = L.createRadialGradient(tx - r * 0.25, ty - r * 0.3, r * 0.2, tx, ty, r);
+        tg.addColorStop(0, lit > 0 ? `rgba(255,255,255,${lit})` : `rgba(0,0,0,${-lit * 1.4})`);
+        tg.addColorStop(0.7, lit > 0 ? `rgba(0,0,0,${0.04})` : `rgba(0,0,0,${-lit * 0.6})`);
+        tg.addColorStop(1, "rgba(0,0,0,0)");
+        L.fillStyle = tg;
+        L.beginPath();
+        L.arc(tx, ty, r, 0, TAU);
+        L.fill();
+      }
+      L.restore();
+      // The neck, woolly, rising to the head; it lifts and turns a little as the lamb looks about.
+      const look = Math.sin(f.t * 0.4) * 0.04;
+      L.strokeStyle = tone(0.92);
+      L.lineCap = "round";
+      L.lineWidth = 0.34;
+      L.beginPath();
+      L.moveTo(0.72, -0.2);
+      L.quadraticCurveTo(0.9, -0.42, 1.0 + look, -0.62);
+      L.stroke();
+      // The head: the skull, the muzzle rounding to the nose, the ear laid back, the eye.
+      L.save();
+      L.translate(1.04 + look, -0.68);
+      L.rotate(0.3 + look);
+      const face = L.createLinearGradient(0, -0.25, 0.2, 0.2);
+      face.addColorStop(0, tone(0.8));
+      face.addColorStop(1, tone(0.5));
+      L.fillStyle = face;
+      L.beginPath();
+      L.ellipse(0, 0, 0.26, 0.21, 0, 0, TAU);
+      L.fill();
+      L.beginPath();
+      L.moveTo(0.1, -0.16);
+      L.quadraticCurveTo(0.5, -0.14, 0.52, 0.02);
+      L.quadraticCurveTo(0.5, 0.14, 0.3, 0.16);
+      L.quadraticCurveTo(0.1, 0.18, 0.05, 0.1);
+      L.closePath();
+      L.fill();
+      L.fillStyle = tone(0.45); // the nose and mouth
+      L.beginPath();
+      L.ellipse(0.5, 0.0, 0.045, 0.035, 0, 0, TAU);
+      L.fill();
+      L.strokeStyle = tone(0.5);
+      L.lineWidth = 0.015;
+      L.beginPath();
+      L.moveTo(0.48, 0.05);
+      L.quadraticCurveTo(0.42, 0.11, 0.34, 0.1);
+      L.stroke();
+      L.fillStyle = tone(0.62); // the ear, laid back and down
+      L.beginPath();
+      L.ellipse(-0.18, -0.06, 0.2, 0.08, 0.35, 0, TAU);
+      L.fill();
+      L.fillStyle = tone(1.0); // a tuft of wool on the crown
+      L.beginPath();
+      L.ellipse(-0.02, -0.2, 0.14, 0.08, 0, 0, TAU);
+      L.fill();
+      L.fillStyle = tone(0.12); // the eye, with its glint
+      L.beginPath();
+      L.ellipse(0.1, -0.05, 0.035, 0.03, 0.3, 0, TAU);
+      L.fill();
+      L.fillStyle = tone(1);
+      L.beginPath();
+      L.arc(0.115, -0.06, 0.009, 0, TAU);
+      L.fill();
+      L.restore();
+      lay(f, canvas, 0.7 * f.env, S * 0.2);
+      // A nimbus about its head.
+      glow(ctx, x + dir * S * 1.2, y - S * 0.7, S * 0.7, f.ink(0.2 * f.env * come), f.ink(0));
+    };
+  },
+};

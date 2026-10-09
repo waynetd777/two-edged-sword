@@ -3,12 +3,14 @@
 
 // Faint pictures behind a playing song's words (LyricsPage), with or without the flames: a cross
 // in light, a dove passing over, stars, rain, a field of wheat and more. One backdrop and one
-// passing picture at most at a time, each chosen (not one of the last few shown) for a random
-// while, fading in and out. A picture whose themes (pictures/kit.ts) are in the song's title or
+// passing picture at most at a time, each chosen (none shown again during a song until all of
+// its lane have been) for a random while, fading in and out. A picture whose themes (pictures/kit.ts) are in the song's title or
 // words is chosen more often than the rest, so a song about fire gets fire; a song whose words
 // aren't known gets them all alike. They swell a little on the beat, as the flames do; paused,
-// they fade away and wait. Their colours are the artwork's (the page's background), lightened in
-// the dark theme and deepened on paper. Settings › Listening turns them off.
+// they fade away and wait. A picture placed beside the words keeps clear of the other lane's
+// picture too, so a passing picture doesn't land on a backdrop's. Their colours are the
+// artwork's (the page's background), lightened in the dark theme and deepened on paper.
+// Settings › Listening turns them off.
 
 import { useEffect, useRef } from "react";
 import { Frame, Lane, RGB, rnd, Room, smooth, Vision } from "./pictures/kit";
@@ -80,11 +82,16 @@ let scenePick: { name: string; at: number; loop?: boolean } | null = null;
 export const setSceneVision = (name: string, at = 0.5, loop = false) => (scenePick = { name, at, loop });
 export const VISION_NAMES = VISIONS.map((v) => v.name);
 
+/** How many pictures share each theme: a theme few pictures have says more about a song than one many have. */
+const sharers = new Map<string, number>();
+for (const v of VISIONS) for (const t of v.themes ?? []) sharers.set(t, (sharers.get(t) ?? 0) + 1);
+
 /**
- * How well a picture suits a song: how many of its themes are in the song's title and words.
- * `text` is the song's, lowercased, with its punctuation gone and a space either end; a theme
- * of one word matches that word or a simple form of it (fires, fired, firing), a phrase is
- * looked for as it is.
+ * How well a picture suits a song: its themes found in the song's title and words, each counting
+ * for one over the number of pictures that share it, so "jericho" counts for a whole picture and
+ * "praise", which a dozen have, for a twelfth. `text` is the song's, lowercased, with its
+ * punctuation gone and a space either end; a theme of one word matches that word or a simple
+ * form of it (fires, fired, firing), a phrase is looked for as it is.
  */
 export function suits(v: Vision, text: string): number {
   if (!v.themes || !text.trim()) return 0;
@@ -95,7 +102,7 @@ export function suits(v: Vision, text: string): number {
         ? text.includes(` ${t} `)
         : new RegExp(`\\b${t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(s|es|ed|ing|'s)?\\b`).test(text)
     )
-      n++;
+      n += 1 / (sharers.get(t) ?? 1);
   }
   return n;
 }
@@ -106,20 +113,24 @@ export const songText = (song: string) =>
     .replace(/[^a-z0-9' ]+/g, " ")
     .replace(/\s+/g, " ")
     .trim()} `;
-/** How much more often a picture that suits the song is chosen: once for none of its themes, more for each. */
-const weightOf = (n: number) => 1 + 4 * Math.min(n, 3);
+/** How much more often a picture that suits the song is chosen: once for nothing of it in the song, up to thirteen times for much. */
+const weightOf = (n: number) => 1 + 6 * Math.min(n, 2);
 
 const DEFAULT_BPM = 72;
+/** How strongly all the pictures show, at most: the whole canvas is held at this, so they stay faint behind the words. */
+const FAINT = 0.72;
 /** Seconds a picture takes to fade out when the words move from beside it. */
 const QUIT = 1.2;
 
 /**
  * Room beside the words, which run from `left` to `right` across a page `w` wide (in the page's
  * own pixels): a clear stretch on either side, a little apart from the words and the page's
- * edges, chosen at random among those wide enough. When neither is, the wider, with the picture
- * shrunk to fit (to a third of its size at most); when the words fill the page, anywhere.
+ * edges, and clear too of `taken`, the stretches another picture already stands in; chosen at
+ * random among those wide enough. When none is, a stretch beside the words regardless of what
+ * stands there; when none of those is wide enough either, the widest, with the picture shrunk
+ * to fit (to a third of its size at most); when the words fill the page, anywhere.
  */
-export function roomBeside(w: number, words: { left: number; right: number } | null): Room {
+export function roomBeside(w: number, words: { left: number; right: number } | null, taken: [number, number][] = []): Room {
   const gap = 32,
     edge = w * 0.03;
   const spans = (
@@ -130,13 +141,29 @@ export function roomBeside(w: number, words: { left: number; right: number } | n
         ]
       : [[edge, w - edge]]
   ).filter(([a, b]) => b > a);
+  // The spans with what's taken cut out of them (a little apart from it).
+  const free = taken.reduce<number[][]>(
+    (acc, [t0, t1]) =>
+      acc.flatMap(([a, b]) =>
+        t1 + gap <= a || t0 - gap >= b
+          ? [[a, b]]
+          : [
+              [a, Math.min(b, t0 - gap)],
+              [Math.max(a, t1 + gap), b],
+            ].filter(([p, q]) => q > p),
+      ),
+    spans,
+  );
+  const pick = (from: number[][], width: number) => {
+    const fits = from.filter(([a, b]) => b - a >= width);
+    if (!fits.length) return null;
+    const [a, b] = fits[Math.floor(Math.random() * fits.length)];
+    return { x: a + width / 2 + Math.random() * (b - a - width), scale: 1 };
+  };
   return {
     place: (width) => {
-      const fits = spans.filter(([a, b]) => b - a >= width);
-      if (fits.length) {
-        const [a, b] = fits[Math.floor(Math.random() * fits.length)];
-        return { x: a + width / 2 + Math.random() * (b - a - width), scale: 1 };
-      }
+      const found = pick(free, width) ?? pick(spans, width);
+      if (found) return found;
       const best = spans.sort((p, q) => q[1] - q[0] - (p[1] - p[0]))[0];
       if (best && best[1] - best[0] >= width * 0.35) return { x: (best[0] + best[1]) / 2, scale: (best[1] - best[0]) / width };
       return { x: rnd(Math.min(w / 2, edge + width / 2), Math.max(w / 2, w - edge - width / 2)), scale: 1 };
@@ -210,32 +237,50 @@ export function Visions({
     const ro = new ResizeObserver(fit);
     ro.observe(c);
 
-    // `placed`: it was put beside the words, so it fades out early (`quit`) when they move.
-    type Active = { v: Vision; draw: (f: Frame) => void; start: number; dur: number; placed: boolean; quit?: number };
-    const lanes: Record<Lane, { cur: Active | null; next: number; recent: string[] }> = {
-      back: { cur: null, next: rnd(2, 5), recent: [] },
-      pass: { cur: null, next: rnd(9, 18), recent: [] },
+    // `placed`: it was put beside the words, so it fades out early (`quit`) when they move;
+    // `span`: the stretch of the page it stands in, which the other lane's picture keeps clear of.
+    type Active = {
+      v: Vision;
+      lane: Lane;
+      draw: (f: Frame) => void;
+      start: number;
+      dur: number;
+      placed: boolean;
+      quit?: number;
+      span?: [number, number];
+    };
+    // `recent`: the last few shown, never chosen next; `shown`: all shown during this song, not
+    // chosen again until every picture of the lane has had its turn.
+    const lanes: Record<Lane, { cur: Active | null; next: number; recent: string[]; shown: Set<string> }> = {
+      back: { cur: null, next: rnd(2, 5), recent: [], shown: new Set() },
+      pass: { cur: null, next: rnd(9, 18), recent: [], shown: new Set() },
     };
     // The words where pictures were last placed beside them, looked at twice a second.
     let words = live.current.words(),
       looked = 0;
     const make = (a: Active) => {
-      const room = roomBeside(c.clientWidth, words);
+      const other = lanes[a.lane === "back" ? "pass" : "back"].cur;
+      const room = roomBeside(c.clientWidth, words, other?.span ? [other.span] : []);
+      a.span = undefined;
       return a.v.make(c.clientWidth, c.clientHeight, {
         place: (width) => {
           a.placed = true;
-          return room.place(width);
+          const at = room.place(width);
+          // The first placing is the picture's own; later ones are parts of it, within that.
+          if (!a.span) a.span = [at.x - (width * at.scale) / 2, at.x + (width * at.scale) / 2];
+          return at;
         },
       });
     };
     const begin = (lane: Lane, v: Vision, clock: number, at = 0) => {
       const dur = rnd(v.dur[0], v.dur[1]);
-      const a: Active = { v, draw: () => {}, start: clock - at * dur, dur, placed: false };
+      const a: Active = { v, lane, draw: () => {}, start: clock - at * dur, dur, placed: false };
       a.draw = make(a);
       lanes[lane].cur = a;
       const rec = lanes[lane].recent;
       rec.push(v.name);
       if (rec.length > 4) rec.shift();
+      lanes[lane].shown.add(v.name);
     };
     // Each picture's weight for this song, worked out when the song (or its words) changes.
     let weighed = "",
@@ -243,6 +288,8 @@ export function Visions({
     const weigh = () => {
       const song = live.current.song;
       if (song === weighed) return;
+      // A new song: every picture may be shown again.
+      if (weighed) for (const L of Object.values(lanes)) L.shown.clear();
       weighed = song;
       const text = songText(song);
       weights = new Map(VISIONS.map((v) => [v.name, weightOf(suits(v, text))]));
@@ -278,7 +325,7 @@ export function Visions({
       const w = c.clientWidth,
         h = c.clientHeight;
       ctx.clearRect(0, 0, w, h);
-      c.style.opacity = String(shown);
+      c.style.opacity = String(shown * FAINT);
       const phase = (time() * (bpm || DEFAULT_BPM)) / 60;
       const beat = playing && !still ? Math.exp(-(phase % 1) * 4) : 0;
       const pal = (p: Pair) => (dark ? p.dark : p.light);
@@ -305,7 +352,14 @@ export function Visions({
           L.cur = null;
         }
         if (!L.cur && clock >= L.next) {
-          const choices = looping ? [pick] : VISIONS.filter((v) => v.lane === lane && !L.recent.includes(v.name) && !(still && v.moving));
+          weigh();
+          const fit = (v: Vision) => v.lane === lane && !L.recent.includes(v.name) && !(still && v.moving);
+          let choices = looping ? [pick] : VISIONS.filter((v) => fit(v) && !L.shown.has(v.name));
+          if (!choices.length && !looping) {
+            // Every picture of the lane has been shown this song: begin again.
+            L.shown.clear();
+            choices = VISIONS.filter(fit);
+          }
           if (choices.length) begin(lane, choose(choices), clock);
         }
         const a = L.cur;

@@ -295,7 +295,13 @@ export function LyricsPage({ focus, setFocus }: { focus: boolean; setFocus: (f: 
                     font: lyrics.timed ? "600 30px/1.3 var(--display)" : "400 20px/1.5 var(--serif)",
                     minHeight: l.text ? undefined : lyrics.timed ? 0 : "0.8em",
                     transformOrigin: focus ? "center" : "left center",
-                    opacity: lyrics.timed && i !== lit ? (i < cur ? 0.35 : 0.55) : 1,
+                    // The line being sung stands forward, larger; those before and after fall
+                    // away into the distance, smaller and fainter the further from it they are.
+                    // 1.32 for the line being sung, 1.16 for the ones next to it, then each line further
+                    // away a step closer to 0.62, the smallest, so the sizes fall away in proportion.
+                    transform: lyrics.timed ? `scale(${i === lit ? 1.32 : 0.62 + 0.54 * 0.82 ** (Math.abs(i - lit) - 1)})` : undefined,
+                    transition: lyrics.timed ? "transform 0.5s ease, opacity 0.5s ease" : undefined,
+                    opacity: lyrics.timed && i !== lit ? Math.max(0.2, (i < cur ? 0.4 : 0.6) - 0.06 * Math.abs(i - lit)) : 1,
                   }}
                 >
                   {l.text}

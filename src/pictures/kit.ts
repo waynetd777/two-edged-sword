@@ -170,8 +170,8 @@ export function layering() {
   let c: HTMLCanvasElement | null = null;
   return (f: Frame) => {
     const dpr = f.ctx.getTransform().a || 1;
-    const W = Math.round(f.w * dpr),
-      H = Math.round(f.h * dpr);
+    const W = Math.max(1, Math.round(f.w * dpr)),
+      H = Math.max(1, Math.round(f.h * dpr));
     if (!c || c.width !== W || c.height !== H) {
       c = document.createElement("canvas");
       c.width = W;
@@ -188,13 +188,22 @@ export function layering() {
 }
 
 /**
- * Lay a layer on the page, `a` strong, with a soft edge `blur` wide: solid (what's drawn hides
- * what's behind it) unless `add`, when it is added to the light as the rest of a picture is.
+ * How faintly the pictures that use `lay` sit on the page: their asked strengths are scaled by
+ * this, so their solid shapes show through the words about as much as the first pictures'
+ * (which draw their layers at a third to a half) do.
+ */
+export const LAID = 0.62;
+
+/**
+ * Lay a layer on the page, `a` strong (of `LAID`), with a soft edge `blur` wide: solid (what's
+ * drawn hides what's behind it) unless `add`, when it is added to the light as the rest of a
+ * picture is.
  */
 export function lay(f: Frame, canvas: HTMLCanvasElement, a: number, blur = 0, add = false) {
   const { ctx } = f;
+  if (!canvas.width || !canvas.height) return; // a page with no size yet (as while the app reloads) has nothing to lay
   ctx.save();
-  ctx.globalAlpha = a;
+  ctx.globalAlpha = a * LAID;
   if (!add) ctx.globalCompositeOperation = "source-over";
   if (blur) {
     ctx.shadowColor = f.ink(0.5 * f.env);
@@ -220,4 +229,59 @@ export function ripples(f: Frame, x: number, y: number, q: number, rx: number, a
     ctx.ellipse(x, y, qq * rx, qq * rx * 0.26, 0, 0, TAU);
     ctx.stroke();
   }
+}
+
+/**
+ * A picture from a small grey bitmap (made by tools/bitmap.py, its edges already faded): shown
+ * in the ink's colour, tinted once per colour and kept. On the dark page its lights are the
+ * ink and its darks fall to nothing, so the subject stands out of the dark. `floor` is the grey
+ * (0-1) at and below which nothing shows, for a background. On paper, `light` says how: a dark
+ * subject is "inverted", its darks the ink and its background (below the floor) gone; a pale
+ * one (a white lamb, a book's pages) is shown as the "photo" it is, every dark as ink and every
+ * light as the paper, its background kept so the pale subject stands against it.
+ */
+export function bitmap(uri: string, floor = 0.3, light: "inverted" | "photo" = "inverted") {
+  const img = new Image();
+  img.src = uri;
+  let tinted: { key: string; canvas: HTMLCanvasElement } | null = null;
+  const tint = (f: Frame) => {
+    const c = document.createElement("canvas");
+    c.width = img.naturalWidth;
+    c.height = img.naturalHeight;
+    const g = c.getContext("2d")!;
+    g.drawImage(img, 0, 0);
+    const d = g.getImageData(0, 0, c.width, c.height);
+    const [r, gr, bl] = inkRGB(f);
+    for (let i = 0; i < d.data.length; i += 4) {
+      const lum = d.data[i] / 255;
+      const above = Math.max(0, (lum - floor) / (1 - floor)); // how far above the background
+      const k = f.dark ? above ** 1.4 : light === "inverted" ? Math.max(0, (1 - floor - lum) / (1 - floor)) ** 1.4 : (1 - lum) ** 1.2;
+      d.data[i] = r;
+      d.data[i + 1] = gr;
+      d.data[i + 2] = bl;
+      d.data[i + 3] = Math.round(d.data[i + 3] * k);
+    }
+    g.putImageData(d, 0, 0);
+    return c;
+  };
+  return {
+    /** Draw it centred at (x, y), `width` wide, `a` strong, scaled by `k` about its middle. */
+    draw(f: Frame, x: number, y: number, width: number, a: number, k = 1) {
+      // `a` is of LAID, as the drawn pictures' layers are, so all sit at the same strength.
+      a *= LAID;
+      if (!img.complete || !img.naturalWidth) return;
+      const key = `${f.ink(1)}|${f.dark}`;
+      if (!tinted || tinted.key !== key) tinted = { key, canvas: tint(f) };
+      const h = (width * img.naturalHeight) / img.naturalWidth;
+      const { ctx } = f;
+      ctx.save();
+      ctx.globalAlpha = a;
+      ctx.translate(x, y);
+      ctx.scale(k, k);
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
+      ctx.drawImage(tinted.canvas, -width / 2, -h / 2, width, h);
+      ctx.restore();
+    },
+  };
 }

@@ -68,8 +68,8 @@ scroll:
 - Faint pictures come and go behind the words, with lyrics or without, in the colours of the
   song's artwork: a cross, a dove passing over, tongues of fire, hands raised, the throne, chains
   breaking, a river and a hundred more, one or two at a time. Pictures of what the song sings
-  about come more often: a song about fire gets fire. The larger ones keep beside the words, in
-  focus mode too.
+  about come more often: a song about fire gets fire, and none comes twice in a song. The larger
+  ones keep beside the words, in focus mode too, and clear of each other.
   Settings › Listening › **While a song plays** turns them off.
 - The bar shows how far through the song Music is, with the time gone and the time left.
 - **Lyrics** on the bar brings the words back if you've gone elsewhere.

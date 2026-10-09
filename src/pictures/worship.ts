@@ -1,10 +1,55 @@
 // Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
 // SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
-// The worshippers: hands raised, a banner, the timbrel, the shofar, hallelujah, the holy mountain,
+// The worshippers: hands raised, a banner, dancing lights, the shofar, hallelujah, the holy mountain,
 // the open Word, the bread and cup, lights held high, the Name.
 
-import { displayFont, flame, glow, lay, layering, ridge, rnd, smooth, TAU, tones, Vision, wander } from "./kit";
+import { bitmap, displayFont, flame, glow, lay, layering, ridge, rnd, smooth, TAU, tones, Vision, wander } from "./kit";
+import { BIBLE_BITMAP } from "./bible-bitmap";
+
+/** An open hand, in units of the palm's width: the wrist at (0, 0), the fingers upward and
+ *  spread, the thumb to the right for a left hand (seen from the back) and to the left for a right. */
+function hand(G: CanvasRenderingContext2D, spread: number, left: boolean) {
+  const t = left ? -1 : 1; // the thumb's side
+  // The palm: the wrist's width where it leaves the forearm (overlapping it a little, so
+  // there is no seam), widening to the knuckles, rounded.
+  G.beginPath();
+  G.moveTo(-0.36, 0.25);
+  G.lineTo(-0.36, -0.05);
+  G.quadraticCurveTo(-0.5, -0.6, -0.5, -1.05);
+  G.quadraticCurveTo(0, -1.2, 0.5, -1.05);
+  G.quadraticCurveTo(0.5, -0.6, 0.36, -0.05);
+  G.lineTo(0.36, 0.25);
+  G.closePath();
+  G.fill();
+  // Four fingers from the knuckles, the middle longest, each a tapering rounded stroke.
+  G.lineCap = "round";
+  const fingers = [
+    [-0.36, 0.9],
+    [-0.12, 1.0],
+    [0.12, 0.95],
+    [0.36, 0.72],
+  ];
+  for (const [fx, len] of fingers) {
+    const ang = fx * 0.55 * spread;
+    G.lineWidth = 0.22;
+    G.beginPath();
+    G.moveTo(fx, -1.05);
+    G.lineTo(fx + Math.sin(ang) * len, -1.05 - Math.cos(ang) * len);
+    G.stroke();
+    G.lineWidth = 0.17;
+    G.beginPath();
+    G.moveTo(fx + Math.sin(ang) * len * 0.6, -1.05 - Math.cos(ang) * len * 0.6);
+    G.lineTo(fx + Math.sin(ang) * len * 1.1, -1.05 - Math.cos(ang) * len * 1.1);
+    G.stroke();
+  }
+  // The thumb, from the side of the palm, angled out.
+  G.lineWidth = 0.24;
+  G.beginPath();
+  G.moveTo(t * 0.42, -0.35);
+  G.lineTo(t * (0.42 + 0.5 * spread), -0.75 - 0.25 * spread);
+  G.stroke();
+}
 
 export const WORSHIP: Vision[] = [
   {
@@ -52,48 +97,6 @@ export const WORSHIP: Vision[] = [
       });
       arms.sort((a, b) => a.near - b.near);
       const layer = layering();
-      // The hand, in units of the palm's width, the wrist at (0, 0), the fingers upward.
-      const hand = (G: CanvasRenderingContext2D, spread: number, left: boolean) => {
-        const t = left ? -1 : 1; // the thumb's side
-        // The palm: the wrist's width where it leaves the forearm (overlapping it a little, so
-        // there is no seam), widening to the knuckles, rounded.
-        G.beginPath();
-        G.moveTo(-0.36, 0.25);
-        G.lineTo(-0.36, -0.05);
-        G.quadraticCurveTo(-0.5, -0.6, -0.5, -1.05);
-        G.quadraticCurveTo(0, -1.2, 0.5, -1.05);
-        G.quadraticCurveTo(0.5, -0.6, 0.36, -0.05);
-        G.lineTo(0.36, 0.25);
-        G.closePath();
-        G.fill();
-        // Four fingers from the knuckles, the middle longest, each a tapering rounded stroke.
-        G.lineCap = "round";
-        const fingers = [
-          [-0.36, 0.9],
-          [-0.12, 1.0],
-          [0.12, 0.95],
-          [0.36, 0.72],
-        ];
-        for (const [fx, len] of fingers) {
-          const ang = fx * 0.55 * spread;
-          G.lineWidth = 0.22;
-          G.beginPath();
-          G.moveTo(fx, -1.05);
-          G.lineTo(fx + Math.sin(ang) * len, -1.05 - Math.cos(ang) * len);
-          G.stroke();
-          G.lineWidth = 0.17;
-          G.beginPath();
-          G.moveTo(fx + Math.sin(ang) * len * 0.6, -1.05 - Math.cos(ang) * len * 0.6);
-          G.lineTo(fx + Math.sin(ang) * len * 1.1, -1.05 - Math.cos(ang) * len * 1.1);
-          G.stroke();
-        }
-        // The thumb, from the side of the palm, angled out.
-        G.lineWidth = 0.24;
-        G.beginPath();
-        G.moveTo(t * 0.42, -0.35);
-        G.lineTo(t * (0.42 + 0.5 * spread), -0.75 - 0.25 * spread);
-        G.stroke();
-      };
       return (f) => {
         const { ctx } = f;
         glow(ctx, w / 2, -h * 0.1, h * 0.7, f.ink(0.16 * f.env), f.ink(0));
@@ -269,115 +272,91 @@ export const WORSHIP: Vision[] = [
     },
   },
   {
-    name: "timbrel",
+    name: "dancing lights",
     lane: "pass",
     dur: [12, 18],
+    moving: true,
     themes: [
       "dance",
       "dancing",
-      "timbrel",
-      "tambourine",
       "rejoice",
       "joy",
+      "joyful",
       "celebrate",
-      "miriam",
+      "clap",
       "shout",
       "praise",
-      "feast",
-      "clap",
       "glad",
       "jump",
       "leap",
-      "undignified",
       "sing and dance",
+      "dance before",
+      "rejoice in the lord",
+      "joy of the lord",
+      "timbrel",
+      "tambourine",
+      "festival",
+      "party",
     ],
     make: (w, h, room) => {
-      const S0 = Math.min(w, h) * 0.12;
-      const { x, scale } = room.place(S0 * 2.8);
-      const S = S0 * scale,
+      const R0 = Math.min(w, h) * 0.2;
+      const { x, scale } = room.place(R0 * 2.4);
+      const R = R0 * scale,
         y = h * rnd(0.42, 0.55);
-      const n = 8; // pairs of jingles in the frame
-      const layer = layering();
+      // Lights that dance: two rings of them, circling the same middle opposite ways, weaving in
+      // and out as they go, each leaving a short trail; all leaping on the beat.
+      const lights = Array.from({ length: 22 }, (_, i) => ({
+        ring: i % 2,
+        a: (i / 22) * TAU * 2,
+        r: rnd(0.55, 1),
+        wave: rnd(0.8, 1.6),
+        p: rnd(0, TAU),
+        cool: i % 3 === 0,
+        size: rnd(2.5, 4.5),
+      }));
+      const trails: { x: number; y: number; t: number; cool: boolean }[][] = lights.map(() => []);
+      const at = (l: (typeof lights)[number], t: number, beat: number) => {
+        const dir = l.ring ? 1 : -1;
+        const a = l.a + dir * t * (0.35 + 0.12 * l.ring);
+        const r = R * l.r * (0.8 + 0.2 * Math.sin(t * l.wave + l.p));
+        return [x + Math.cos(a) * r, y + Math.sin(a) * r * 0.45 - beat * R * 0.25 * (0.5 + 0.5 * Math.sin(l.p + t))] as const;
+      };
       return (f) => {
         const { ctx } = f;
-        const come = smooth(f.k * 2.4);
-        // Shaken: a quick tilt and a lift on each beat, settling back; and a slow sway.
-        const shake = Math.sin(f.t * 12) * 0.07 * f.beat + Math.sin(f.t * 1.1) * 0.06;
-        const lift = -f.beat * S * 0.12 + Math.sin(f.t * 1.3) * S * 0.06;
-        const { L, canvas } = layer(f);
-        const tone = tones(f);
-        L.translate(x, y + lift + (1 - come) * 20);
-        L.rotate(shake);
-        L.scale(S, S);
-        // A tambourine seen from in front and above: the hoop a wooden band `D` deep, its top rim
-        // an ellipse squashed by the tilt (`sq`), the skin stretched across the top, and the
-        // jingles in slots in the band, pairs of small metal discs on a pin.
-        const sq = 0.42,
-          D = 0.3;
-        const rim = (a: number, dy: number) => [Math.cos(a), Math.sin(a) * sq + dy] as const;
-        // The band's front half, from one side round to the other, lit from the left.
-        const wood = L.createLinearGradient(-1, 0, 1, 0);
-        wood.addColorStop(0, tone(0.72));
-        wood.addColorStop(0.4, tone(0.5));
-        wood.addColorStop(1, tone(0.26));
-        L.fillStyle = wood;
-        L.beginPath();
-        for (let i = 0; i <= 40; i++) L.lineTo(...rim((i / 40) * Math.PI, 0));
-        for (let i = 40; i >= 0; i--) L.lineTo(...rim((i / 40) * Math.PI, D));
-        L.closePath();
-        L.fill();
-        // The skin across the top, pale and taut, brightest where the light falls; the rim about it.
-        const skin = L.createRadialGradient(-0.3, -0.12, 0.05, 0, 0, 1);
-        skin.addColorStop(0, tone(0.8));
-        skin.addColorStop(1, tone(0.5));
-        L.fillStyle = skin;
-        L.beginPath();
-        L.ellipse(0, 0, 1, sq, 0, 0, TAU);
-        L.fill();
-        L.strokeStyle = tone(0.62);
-        L.lineWidth = 0.06;
-        L.beginPath();
-        L.ellipse(0, 0, 1, sq, 0, 0, TAU);
-        L.stroke();
-        L.strokeStyle = tone(0.2);
-        L.lineWidth = 0.015;
-        L.beginPath();
-        L.ellipse(0, D, 1, sq, 0, 0, Math.PI);
-        L.stroke();
-        // The jingles, in the slots: those at the front seen edge on, those at the sides face on.
-        for (let i = 0; i < n; i++) {
-          const a = (i / n) * TAU + Math.PI / n;
-          if (Math.sin(a) < -0.15) continue; // round the back
-          const [px, py] = rim(a, D / 2);
-          const face = Math.abs(Math.cos(a)); // how much of the disc's face we see
-          const tx = -Math.sin(a),
-            ty = Math.cos(a) * sq; // along the band, where the pin runs
-          // The slot, dark.
-          L.fillStyle = tone(0.08);
-          L.beginPath();
-          L.ellipse(px, py, 0.05 + 0.1 * (1 - face), 0.11, 0, 0, TAU);
-          L.fill();
-          // The pair of discs, a little apart on their pin, rattling together as it is shaken.
-          const jolt = Math.sin(f.t * 14 + i * 1.7) * 0.02 * f.beat;
-          for (const k of [-1, 1]) {
-            const flash = Math.max(0, Math.sin(f.t * 9 + i * 1.3 + k)) ** 3 * (0.4 + 0.6 * f.beat);
-            L.fillStyle = tone(0.75 + 0.5 * flash);
-            L.beginPath();
-            L.ellipse(px + tx * (0.045 + jolt) * k, py + ty * (0.045 + jolt) * k, 0.025 + 0.085 * face, 0.1, 0, 0, TAU);
-            L.fill();
+        glow(ctx, x, y, R * 1.3, f.ink(0.08 * f.env * (0.8 + 0.2 * f.beat)), f.ink(0));
+        const warm = f.dot(),
+          cool = f.dot(true);
+        lights.forEach((l, i) => {
+          const [px, py] = at(l, f.t, f.beat);
+          const tr = trails[i];
+          if (!tr.length || f.t - tr[tr.length - 1].t > 0.05) tr.push({ x: px, y: py, t: f.t, cool: l.cool });
+          while (tr.length && f.t - tr[0].t > 1.2) tr.shift();
+          // The trail, fading behind it.
+          for (const p of tr) {
+            const age = (f.t - p.t) / 1.2;
+            const r = l.size * (1 - age) * 0.8;
+            ctx.globalAlpha = 0.25 * f.env * (1 - age) ** 2;
+            ctx.drawImage(p.cool ? cool : warm, p.x - r, p.y - r, r * 2, r * 2);
           }
-        }
-        lay(f, canvas, 0.8 * f.env * come, S * 0.1);
-        // The light off the jingles as they flash.
-        for (let i = 0; i < n; i++) {
-          const a = (i / n) * TAU + Math.PI / n;
-          if (Math.sin(a) < -0.15) continue;
-          const flash = Math.max(0, Math.sin(f.t * 9 + i * 1.3)) ** 4 * (0.3 + 0.7 * f.beat);
-          if (flash < 0.15) continue;
-          const [px, py] = rim(a, D / 2);
-          const gx = x + (px * Math.cos(shake) - py * Math.sin(shake)) * S,
-            gy = y + lift + (px * Math.sin(shake) + py * Math.cos(shake)) * S;
-          glow(ctx, gx, gy, S * 0.3, f.ink(0.3 * f.env * flash), f.ink(0));
+          // The light itself, brighter on the beat.
+          const dot = l.cool ? cool : warm;
+          const r = l.size * (1 + 0.5 * f.beat);
+          ctx.globalAlpha = f.env * 0.3;
+          ctx.drawImage(dot, px - r * 3, py - r * 3, r * 6, r * 6);
+          ctx.globalAlpha = f.env * 0.95;
+          ctx.drawImage(dot, px - r, py - r, r * 2, r * 2);
+        });
+        ctx.globalAlpha = 1;
+        // Sparks flung out on the beat.
+        if (f.beat > 0.6) {
+          const dot = f.dot();
+          for (let i = 0; i < 10; i++) {
+            const a = (i / 10) * TAU + f.t;
+            const d = R * (1.1 + (1 - f.beat) * 0.8);
+            ctx.globalAlpha = f.env * (f.beat - 0.6) * 1.5;
+            ctx.drawImage(dot, x + Math.cos(a) * d - 2, y + Math.sin(a) * d * 0.45 - 2, 4, 4);
+          }
+          ctx.globalAlpha = 1;
         }
       };
     },
@@ -436,7 +415,14 @@ export const WORSHIP: Vision[] = [
         return [-(y2 - y1) / l, (x2 - x1) / l] as const;
       };
       const girth = (u: number) => 0.03 + 0.3 * u ** 1.6;
-      const bands = [0.8, 0.86, 0.92]; // the light bands near the bell
+      // The horn's surface: the ridges across it, denser towards the mouthpiece, each skewed a
+      // little as the horn twists; and the mottling of its colour.
+      const ridges = Array.from({ length: 34 }, (_, i) => ({
+        u: 0.06 + (i / 34) ** 1.3 * 0.9 + rnd(-0.006, 0.006),
+        skew: rnd(0.2, 0.45),
+        a: rnd(0.12, 0.3),
+      }));
+      const mottle = Array.from({ length: 10 }, () => ({ u: rnd(0.3, 0.98), v: rnd(-0.7, 0.7), r: rnd(0.08, 0.2), k: rnd(-0.1, 0.12) }));
       const layer = layering();
       return (f) => {
         const { ctx } = f;
@@ -446,88 +432,128 @@ export const WORSHIP: Vision[] = [
         L.translate(x, y + (1 - raise) * 30);
         L.scale(dir * S, S);
         L.rotate(Math.sin(f.t * 0.6) * 0.02);
-        // The body: the outline run along one side and back along the other, filled as a shaded
-        // tube, dark horn at the mouthpiece warming to the polished flare of the bell.
-        const N = 40;
-        L.beginPath();
-        for (let i = 0; i <= N; i++) {
-          const u = i / N,
-            [px, py] = spine(u),
-            [nx, ny] = normal(u),
-            g = girth(u);
-          L.lineTo(px + nx * g, py + ny * g);
-        }
-        for (let i = N; i >= 0; i--) {
-          const u = i / N,
-            [px, py] = spine(u),
-            [nx, ny] = normal(u),
-            g = girth(u);
-          L.lineTo(px - nx * g, py - ny * g);
-        }
-        L.closePath();
-        const body = L.createLinearGradient(-1.1, 0, 1.0, 0);
-        body.addColorStop(0, tone(0.22));
-        body.addColorStop(0.5, tone(0.36));
-        body.addColorStop(1, tone(0.5));
-        L.fillStyle = body;
-        L.fill();
-        // The light along its upper side, and the shadow under it: a highlight run along the spine,
-        // offset towards the light, wide where the horn is wide.
-        for (const [off, k, wd] of [
-          [0.45, 0.62, 0.5],
-          [-0.55, 0.18, 0.4],
-        ]) {
-          L.strokeStyle = tone(k);
-          L.lineCap = "round";
+        // The body, as short pieces along the spine, each shaded across its width as a round
+        // tube is: light on the outer side, into shadow on the inner. Dark horn at the mouthpiece
+        // warming and paling towards the bell.
+        const N = 48;
+        const shade = (u: number) => 0.3 + 0.35 * u ** 1.4; // how pale the horn is here
+        for (let i = 0; i < N; i++) {
+          const u0 = i / N,
+            u1 = (i + 1) / N + 0.004;
+          const [ax, ay] = spine(u0),
+            [bx, by] = spine(u1),
+            [nx, ny] = normal((u0 + u1) / 2);
+          const g0 = girth(u0),
+            g1 = girth(u1),
+            k = shade((u0 + u1) / 2);
+          const mx = (ax + bx) / 2,
+            my = (ay + by) / 2,
+            gm = (g0 + g1) / 2;
+          const g = L.createLinearGradient(mx + nx * gm, my + ny * gm, mx - nx * gm, my - ny * gm);
+          g.addColorStop(0, tone(k * 0.55));
+          g.addColorStop(0.3, tone(k * 1.15));
+          g.addColorStop(0.65, tone(k * 0.9));
+          g.addColorStop(1, tone(k * 0.45));
+          L.fillStyle = g;
           L.beginPath();
-          for (let i = 1; i < N; i++) {
+          L.moveTo(ax + nx * g0, ay + ny * g0);
+          L.lineTo(bx + nx * g1, by + ny * g1);
+          L.lineTo(bx - nx * g1, by - ny * g1);
+          L.lineTo(ax - nx * g0, ay - ny * g0);
+          L.closePath();
+          L.fill();
+        }
+        // The body's outline, for what follows to keep within.
+        const bodyPath = () => {
+          L.beginPath();
+          for (let i = 0; i <= N; i++) {
             const u = i / N,
               [px, py] = spine(u),
               [nx, ny] = normal(u),
               g = girth(u);
-            L.lineWidth = g * wd;
-            L.lineTo(px + nx * g * off, py + ny * g * off);
+            L.lineTo(px + nx * g, py + ny * g);
           }
-          L.stroke();
+          for (let i = N; i >= 0; i--) {
+            const u = i / N,
+              [px, py] = spine(u),
+              [nx, ny] = normal(u),
+              g = girth(u);
+            L.lineTo(px - nx * g, py - ny * g);
+          }
+          L.closePath();
+        };
+        L.save();
+        bodyPath();
+        L.clip();
+        // The mottling of the horn, soft patches darker and paler.
+        for (const m of mottle) {
+          const [px, py] = spine(m.u),
+            [nx, ny] = normal(m.u),
+            g = girth(m.u);
+          const cx = px + nx * g * m.v,
+            cy = py + ny * g * m.v;
+          const mg = L.createRadialGradient(cx, cy, 0, cx, cy, m.r);
+          mg.addColorStop(0, m.k > 0 ? `rgba(255,255,255,${m.k})` : `rgba(0,0,0,${-m.k * 1.5})`);
+          mg.addColorStop(1, "rgba(0,0,0,0)");
+          L.fillStyle = mg;
+          L.fillRect(cx - m.r, cy - m.r, m.r * 2, m.r * 2);
         }
-        // The pale bands that ring the horn near its bell, each following its roundness.
-        L.strokeStyle = tone(0.65);
-        L.lineWidth = 0.03;
-        for (const u of bands) {
-          const [px, py] = spine(u),
-            [nx, ny] = normal(u),
-            g = girth(u) * 0.97;
+        // The ridges across the horn, each a fine dark line following its roundness, skewed as
+        // the horn twists; between them, the surface a shade lighter on the ridge's far side.
+        for (const r of ridges) {
+          const [px, py] = spine(r.u),
+            [nx, ny] = normal(r.u),
+            g = girth(r.u) * 0.98,
+            [tx, ty] = [ny, -nx]; // along the horn
+          L.strokeStyle = `rgba(0,0,0,${r.a})`;
+          L.lineWidth = 0.008 + g * 0.03;
           L.beginPath();
           L.moveTo(px + nx * g, py + ny * g);
-          L.quadraticCurveTo(px + ny * g * 0.35, py - nx * g * 0.35, px - nx * g, py - ny * g);
+          L.quadraticCurveTo(px + tx * g * r.skew, py + ty * g * r.skew, px - nx * g, py - ny * g);
+          L.stroke();
+          L.strokeStyle = "rgba(255,255,255,0.07)";
+          L.beginPath();
+          L.moveTo(px + nx * g + tx * 0.012, py + ny * g + ty * 0.012);
+          L.quadraticCurveTo(
+            px + tx * (g * r.skew + 0.012),
+            py + ty * (g * r.skew + 0.012),
+            px - nx * g + tx * 0.012,
+            py - ny * g + ty * 0.012,
+          );
           L.stroke();
         }
-        // The keel: the ridge that runs the length of a ram's horn, a faint line along it.
-        L.strokeStyle = tone(0.38);
-        L.lineWidth = 0.01;
+        // The keel, the ridge that runs the horn's length, a soft line of light along it.
+        L.strokeStyle = "rgba(255,255,255,0.12)";
+        L.lineWidth = 0.014;
+        L.lineCap = "round";
         L.beginPath();
-        for (let i = 0; i <= N; i++) {
+        for (let i = 2; i <= N; i++) {
           const u = i / N,
             [px, py] = spine(u),
             [nx, ny] = normal(u);
-          L.lineTo(px + nx * girth(u) * 0.1, py + ny * girth(u) * 0.1);
+          L.lineTo(px + nx * girth(u) * 0.35, py + ny * girth(u) * 0.35);
         }
         L.stroke();
-        // The bell: its open mouth an oval, dark within, with a bright rim; and the mouthpiece's
-        // small round end.
+        L.restore();
+        // The bell: its mouth an oval, the thickness of the horn's wall showing as a pale rim,
+        // the hollow within dark; and the mouthpiece, small and dark.
         const [bx, by] = spine(1),
           [bnx, bny] = normal(1);
         const bg = girth(1);
         L.save();
         L.translate(bx, by);
         L.rotate(Math.atan2(bny, bnx));
-        L.fillStyle = tone(0.6);
+        L.fillStyle = tone(shade(1) * 1.2);
         L.beginPath();
-        L.ellipse(0, 0, bg * 1.02, bg * 0.42, 0, 0, TAU);
+        L.ellipse(0, 0, bg * 1.02, bg * 0.4, 0, 0, TAU);
         L.fill();
-        L.fillStyle = tone(0.08);
+        const hollow = L.createRadialGradient(bg * 0.2, 0, 0, 0, 0, bg * 0.9);
+        hollow.addColorStop(0, tone(0.04));
+        hollow.addColorStop(0.7, tone(0.08));
+        hollow.addColorStop(1, tone(0.2));
+        L.fillStyle = hollow;
         L.beginPath();
-        L.ellipse(0, 0, bg * 0.9, bg * 0.32, 0, 0, TAU);
+        L.ellipse(0, 0, bg * 0.9, bg * 0.3, 0, 0, TAU);
         L.fill();
         L.restore();
         const [mx, my] = spine(0),
@@ -535,8 +561,10 @@ export const WORSHIP: Vision[] = [
         L.save();
         L.translate(mx, my);
         L.rotate(Math.atan2(mny, mnx));
-        L.fillStyle = tone(0.2);
-        L.fillRect(-girth(0) * 1.2, -0.03, girth(0) * 2.4, 0.06);
+        L.fillStyle = tone(0.18);
+        L.beginPath();
+        L.ellipse(0, 0, girth(0) * 1.3, 0.035, 0, 0, TAU);
+        L.fill();
         L.restore();
         lay(f, canvas, 0.55 * f.env, S * 0.04);
         // Its blasts: rings of sound going out from the bell, long and short, as the shofar is blown.
@@ -753,120 +781,29 @@ export const WORSHIP: Vision[] = [
       "it is written",
     ],
     make: (w, h, room) => {
-      const S0 = Math.min(w, h) * 0.17;
-      const { x, scale } = room.place(S0 * 2.5);
-      const S = S0 * scale,
-        y = h * rnd(0.52, 0.6);
-      const lines = [0, 1].map(() => Array.from({ length: 11 }, () => rnd(0.72, 1)));
-      const layer = layering();
+      const W0 = Math.min(w, h) * 0.5;
+      const { x, scale } = room.place(W0);
+      const W = W0 * scale,
+        y = h * 0.56;
+      // The Word, open: a Bible lying open on a wooden table among fallen leaves
+      // (pictures/bible-bitmap.ts), its pages light in the artwork's colour, still, with a soft
+      // light rising off them.
+      const pic = bitmap(BIBLE_BITMAP, 0.45, "photo");
       return (f) => {
         const { ctx } = f;
-        // Soft light rising off the open pages.
-        const g = ctx.createLinearGradient(0, y, 0, y - S * 1.6);
-        g.addColorStop(0, f.ink(0.14 * f.env));
+        const come = smooth(f.k * 2.4);
+        const H = W * 1.1;
+        const g = ctx.createLinearGradient(0, y, 0, y - H * 1.1);
+        g.addColorStop(0, f.ink((f.dark ? 0.1 : 0.03) * f.env * come));
         g.addColorStop(1, f.ink(0));
         ctx.fillStyle = g;
         ctx.beginPath();
-        ctx.moveTo(x - S * 1.0, y);
-        ctx.lineTo(x + S * 1.0, y);
-        ctx.lineTo(x + S * 1.3, y - S * 1.6);
-        ctx.lineTo(x - S * 1.3, y - S * 1.6);
+        ctx.moveTo(x - W * 0.5, y);
+        ctx.lineTo(x + W * 0.5, y);
+        ctx.lineTo(x + W * 0.7, y - H * 1.1);
+        ctx.lineTo(x - W * 0.7, y - H * 1.1);
         ctx.fill();
-        const { L, canvas } = layer(f);
-        const tone = tones(f);
-        L.translate(x, y);
-        L.scale(S, S);
-        // The book lies open, seen from in front and a little above. In its own units: the spine
-        // at x 0; each page runs out to x ±1, its top and bottom edges bowing up a little as the
-        // page curves away from the gutter; the cover a little larger beneath, and the block of
-        // leaves showing at the fore-edge.
-        const page = (side: number, k: number) => {
-          // The outline of one page, `k` larger than the page itself (1 for the page, more for the cover).
-          const o = (k - 1) * 0.5;
-          L.beginPath();
-          L.moveTo(0, 0.3 + o * 0.5);
-          L.quadraticCurveTo(side * 0.5 * k, 0.2 + o * 0.5, side * (1.0 + o), 0.14 + o * 0.3);
-          L.lineTo(side * (1.0 + o), -0.5 - o * 0.3);
-          L.quadraticCurveTo(side * 0.5 * k, -0.44 - o * 0.5, 0, -0.36 - o * 0.5);
-          L.closePath();
-        };
-        // The cover, dark, with its lighter edge.
-        for (const side of [-1, 1]) {
-          L.fillStyle = tone(0.55);
-          page(side, 1.14);
-          L.fill();
-          L.fillStyle = tone(0.28);
-          page(side, 1.1);
-          L.fill();
-        }
-        // The spine, standing a little proud below the pages.
-        L.fillStyle = tone(0.35);
-        L.fillRect(-0.06, -0.42, 0.12, 0.78);
-        // The block of leaves at the fore-edges and foot: fine lines a little inside the cover.
-        L.strokeStyle = tone(0.7);
-        L.lineWidth = 0.008;
-        for (const side of [-1, 1])
-          for (let i = 1; i <= 4; i++) {
-            const o = i * 0.012;
-            L.beginPath();
-            L.moveTo(side * (1.0 + o), 0.14 + o * 0.8);
-            L.lineTo(side * (1.0 + o), -0.5 - o * 0.5);
-            L.stroke();
-            L.beginPath();
-            L.moveTo(0, 0.3 + o * 1.1);
-            L.quadraticCurveTo(side * 0.5, 0.2 + o * 1.1, side * (1.0 + o), 0.14 + o * 0.8);
-            L.stroke();
-          }
-        // The two open pages, pale, shaded into the gutter.
-        for (const side of [-1, 1]) {
-          const pg = L.createLinearGradient(0, 0, side, 0);
-          pg.addColorStop(0, tone(0.6));
-          pg.addColorStop(0.2, tone(0.9));
-          pg.addColorStop(1, tone(0.82));
-          L.fillStyle = pg;
-          page(side, 1);
-          L.fill();
-          // Two columns of text on each page, as lines following the page's curve.
-          L.strokeStyle = tone(0.5);
-          L.lineWidth = 0.014;
-          L.lineCap = "round";
-          lines[side > 0 ? 1 : 0].forEach((len, i) => {
-            const v = i / 10; // down the page
-            const yIn = -0.28 + v * 0.5,
-              yOut = -0.42 + v * 0.5;
-            for (const [c0, c1] of [
-              [0.1, 0.5],
-              [0.56, 0.92],
-            ]) {
-              const l = c1 - (c1 - c0) * (1 - len) * (i % 3 === 2 ? 1 : 0.1);
-              L.beginPath();
-              L.moveTo(side * c0, yIn + (yOut - yIn) * c0 - Math.sin(Math.PI * c0) * 0.03);
-              L.lineTo(side * l, yIn + (yOut - yIn) * l - Math.sin(Math.PI * l) * 0.03);
-              L.stroke();
-            }
-          });
-        }
-        // The gutter's shadow, and the ribbon marker lying in it and over the foot of the right page.
-        const gg = L.createLinearGradient(-0.12, 0, 0.12, 0);
-        gg.addColorStop(0, "rgba(0,0,0,0)");
-        gg.addColorStop(0.5, tone(0.4));
-        gg.addColorStop(1, "rgba(0,0,0,0)");
-        L.fillStyle = gg;
-        L.beginPath();
-        L.moveTo(-0.12, -0.38);
-        L.lineTo(0.12, -0.38);
-        L.lineTo(0.12, 0.3);
-        L.lineTo(-0.12, 0.3);
-        L.fill();
-        L.strokeStyle = tone(0.45);
-        L.lineWidth = 0.05;
-        L.lineCap = "butt";
-        L.beginPath();
-        L.moveTo(0.02, -0.3);
-        L.quadraticCurveTo(0.08, 0.1, 0.18, 0.28);
-        L.lineTo(0.22, 0.5);
-        L.stroke();
-        lay(f, canvas, 0.85 * f.env, S * 0.1);
+        pic.draw(f, x, y + (1 - come) * 16, W, f.env * come);
       };
     },
   },

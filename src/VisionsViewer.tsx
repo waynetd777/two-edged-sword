@@ -49,7 +49,7 @@ function Viewer() {
   );
   const [i, setI] = useState(start);
   const [run, setRun] = useState(0); // bumped to begin the picture again
-  const [dark, setDark] = useState(true);
+  const [dark, setDark] = useState(new URLSearchParams(location.search).get("theme") !== "light"); // `?theme=light`: on paper
   const [words, setWords] = useState(new URLSearchParams(location.search).get("w") !== "0"); // `?w=0`: without the words
   const [playing, setPlaying] = useState(true);
   const [art, setArt] = useState(0);
@@ -65,7 +65,7 @@ function Viewer() {
   }, [i, start, v.name]);
   useEffect(() => {
     const key = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLSelectElement) return;
+      if (e.target instanceof HTMLSelectElement || e.target instanceof HTMLInputElement) return;
       const n = VISIONS.length;
       if (e.key === "ArrowRight" || e.key === "ArrowDown") setI((x) => (x + 1) % n);
       else if (e.key === "ArrowLeft" || e.key === "ArrowUp") setI((x) => (x - 1 + n) % n);
@@ -125,6 +125,20 @@ function Viewer() {
         </div>
       )}
       <div className="bar">
+        <input
+          type="search"
+          placeholder="find a picture"
+          aria-label="Find a picture"
+          size={14}
+          onChange={(e) => {
+            // Typing jumps to the first picture whose name has what's typed; a theme word will do too.
+            const q = e.target.value.trim().toLowerCase();
+            if (!q) return;
+            const n = VISIONS.findIndex((p) => p.name.includes(q));
+            const m = n >= 0 ? n : VISIONS.findIndex((p) => p.themes?.some((t) => t.includes(q)));
+            if (m >= 0) setI(m);
+          }}
+        />
         <button onClick={() => setI((x) => (x - 1 + VISIONS.length) % VISIONS.length)}>←</button>
         <select value={i} onChange={(e) => setI(Number(e.target.value))}>
           {VISIONS.map((p, n) => (

@@ -323,7 +323,7 @@ export const SKY: Vision[] = [
       const moon = document.createElement("canvas");
       return (f) => {
         const { ctx } = f;
-        glow(ctx, x + r * 0.3, y, r * 5, f.ink(0.1 * f.env, true), f.ink(0, true));
+        glow(ctx, x + r * 0.3, y, r * 5, f.ink(0.06 * f.env, true), f.ink(0, true));
         // The dark of the moon, just there (earthshine).
         ctx.fillStyle = f.ink(0.05 * f.env, true);
         ctx.beginPath();
@@ -335,7 +335,7 @@ export const SKY: Vision[] = [
         const m = moon.getContext("2d")!;
         m.clearRect(0, 0, d, d);
         m.globalCompositeOperation = "source-over";
-        m.fillStyle = f.ink(0.8 * f.env, true);
+        m.fillStyle = f.ink(0.45 * f.env, true);
         m.beginPath();
         m.arc(d / 2, d / 2, r, 0, TAU);
         m.fill();
@@ -345,7 +345,7 @@ export const SKY: Vision[] = [
         m.arc(d / 2 - r * 0.45, d / 2 - r * 0.12, r * 0.94, 0, TAU);
         m.fill();
         ctx.save();
-        ctx.shadowColor = f.ink(0.6 * f.env, true);
+        ctx.shadowColor = f.ink(0.35 * f.env, true);
         ctx.shadowBlur = r * 0.35;
         ctx.drawImage(moon, x - d / 2, y - d / 2);
         ctx.restore();
