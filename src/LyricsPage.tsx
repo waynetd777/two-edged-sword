@@ -329,6 +329,8 @@ export function LyricsPage({ focus, setFocus }: { focus: boolean; setFocus: (f: 
                       font: lyrics.timed ? "600 30px/1.3 var(--display)" : "400 20px/1.5 var(--serif)",
                       minHeight: l.text ? undefined : lyrics.timed ? 0 : "0.8em",
                       transformOrigin: focus ? "center" : "left center",
+                      // Short enough to fit the column even drawn at its largest, as the line being sung.
+                      maxWidth: lyrics.timed ? `${100 / LIT}%` : undefined,
                       // The line being sung stands forward, larger; those before and after fall
                       // away into the distance, smaller and fainter the further from it they are.
                       // 1.32 for the line being sung, 1.16 for the ones next to it, then each line further

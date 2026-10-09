@@ -1949,8 +1949,13 @@ mark {
   }
 }
 /* The words fade in under the song's heading, rather than being cut off by it. */
+/* The words keep in step with the song by themselves, as in Music, so they show no scroll bars. */
 .lyrics-words {
   mask-image: linear-gradient(to bottom, transparent 0, #000 28px);
+  overflow-x: hidden;
+}
+.lyrics-words::-webkit-scrollbar {
+  display: none;
 }
 @keyframes lyrics-art-in {
   from {
