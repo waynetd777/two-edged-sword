@@ -126,11 +126,17 @@ const QUIT = 1.2;
  * Room beside the words, which run from `left` to `right` across a page `w` wide (in the page's
  * own pixels): a clear stretch on either side, a little apart from the words and the page's
  * edges, and clear too of `taken`, the stretches another picture already stands in; chosen at
- * random among those wide enough. When none is, a stretch beside the words regardless of what
- * stands there; when none of those is wide enough either, the widest, with the picture shrunk
- * to fit (to a third of its size at most); when the words fill the page, anywhere.
+ * random among those wide enough. When none is, the widest clear one with the picture shrunk to
+ * fit (to half its size at most). Failing that, a stretch beside the words regardless of what
+ * stands there, and `crowded` says so (the picture then waits for another time); when none of
+ * those is wide enough either, the widest, shrunk to fit (to a third at most); when the words
+ * fill the page, anywhere.
  */
-export function roomBeside(w: number, words: { left: number; right: number } | null, taken: [number, number][] = []): Room {
+export function roomBeside(
+  w: number,
+  words: { left: number; right: number } | null,
+  taken: [number, number][] = [],
+): Room & { crowded: boolean } {
   const gap = 32,
     edge = w * 0.03;
   const spans = (
@@ -160,15 +166,23 @@ export function roomBeside(w: number, words: { left: number; right: number } | n
     const [a, b] = fits[Math.floor(Math.random() * fits.length)];
     return { x: a + width / 2 + Math.random() * (b - a - width), scale: 1 };
   };
-  return {
-    place: (width) => {
-      const found = pick(free, width) ?? pick(spans, width);
+  const widest = (from: number[][]) => [...from].sort((p, q) => q[1] - q[0] - (p[1] - p[0]))[0];
+  const room = {
+    crowded: false,
+    place: (width: number) => {
+      const clear = pick(free, width);
+      if (clear) return clear;
+      const roomy = widest(free);
+      if (roomy && roomy[1] - roomy[0] >= width * 0.5) return { x: (roomy[0] + roomy[1]) / 2, scale: (roomy[1] - roomy[0]) / width };
+      if (taken.length) room.crowded = true;
+      const found = pick(spans, width);
       if (found) return found;
       const best = spans.sort((p, q) => q[1] - q[0] - (p[1] - p[0]))[0];
       if (best && best[1] - best[0] >= width * 0.35) return { x: (best[0] + best[1]) / 2, scale: (best[1] - best[0]) / width };
       return { x: rnd(Math.min(w / 2, edge + width / 2), Math.max(w / 2, w - edge - width / 2)), scale: 1 };
     },
   };
+  return room;
 }
 
 export function Visions({
@@ -262,7 +276,7 @@ export function Visions({
       const other = lanes[a.lane === "back" ? "pass" : "back"].cur;
       const room = roomBeside(c.clientWidth, words, other?.span ? [other.span] : []);
       a.span = undefined;
-      return a.v.make(c.clientWidth, c.clientHeight, {
+      const draw = a.v.make(c.clientWidth, c.clientHeight, {
         place: (width) => {
           a.placed = true;
           const at = room.place(width);
@@ -271,11 +285,18 @@ export function Visions({
           return at;
         },
       });
+      return { draw, crowded: room.crowded };
     };
     const begin = (lane: Lane, v: Vision, clock: number, at = 0) => {
       const dur = rnd(v.dur[0], v.dur[1]);
       const a: Active = { v, lane, draw: () => {}, start: clock - at * dur, dur, placed: false };
-      a.draw = make(a);
+      const made = make(a);
+      // No room clear of the other lane's picture: none now; another try in a few seconds.
+      if (made.crowded && !scenePick) {
+        lanes[lane].next = clock + rnd(2, 4);
+        return;
+      }
+      a.draw = made.draw;
       lanes[lane].cur = a;
       const rec = lanes[lane].recent;
       rec.push(v.name);
@@ -341,7 +362,7 @@ export function Visions({
           for (const L of Object.values(lanes)) {
             const a = L.cur;
             if (!a?.placed || a.quit !== undefined) continue;
-            if (pick) a.draw = make(a);
+            if (pick) a.draw = make(a).draw;
             else a.quit = clock;
           }
       }

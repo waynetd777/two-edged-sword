@@ -3,7 +3,8 @@
 
 // Signs and symbols, drawn as if by hand, and music.
 
-import { displayFont, flame, glow, rnd, smooth, TAU, Vision } from "./kit";
+import { bitmap, displayFont, flame, glow, rnd, smooth, TAU, Vision } from "./kit";
+import { THORNS_BITMAP } from "./thorns-bitmap";
 
 export const SIGNS: Vision[] = [
   {
@@ -109,7 +110,7 @@ export const SIGNS: Vision[] = [
           tilt = Math.sin(f.t * 0.6) * 0.04;
         // An admiralty anchor, solid iron: the ring, a shank thickening to the crown, the stock across
         // it with knobbed ends, and the curved arms ending in spade-shaped flukes. Drawn on a layer
-        // in one piece, shaded as lit from above left, and coming into view from the ring down.
+        // in one piece, shaded as lit from above left, and fading into view whole.
         const dpr = ctx.getTransform().a || 1;
         if (!layer || layer.width !== Math.round(w * dpr) || layer.height !== Math.round(h * dpr)) {
           layer = document.createElement("canvas");
@@ -180,13 +181,9 @@ export const SIGNS: Vision[] = [
         L.globalCompositeOperation = "source-in";
         L.fillStyle = iron;
         L.fillRect(-1.3, -1.4, 2.6, 2.7);
-        // Not yet come into view below this line (erased, not clipped: WebKit's clip and source-in disagree).
-        L.globalCompositeOperation = "destination-out";
-        L.fillStyle = "#000";
-        L.fillRect(-1.5, -1.1 + 2.6 * p, 3, 3);
         L.globalCompositeOperation = "source-over";
         ctx.save();
-        ctx.globalAlpha = 0.5 * f.env;
+        ctx.globalAlpha = 0.5 * f.env * p;
         ctx.shadowColor = f.ink(0.6 * f.env);
         ctx.shadowBlur = 10;
         ctx.drawImage(layer, 0, 0, w, h);
@@ -335,6 +332,42 @@ export const SIGNS: Vision[] = [
         ctx.shadowBlur = 12;
         ctx.drawImage(layer, 0, 0, w, h);
         ctx.restore();
+      };
+    },
+  },
+  {
+    name: "crown of thorns",
+    lane: "pass",
+    dur: [13, 20],
+    themes: [
+      "thorns",
+      "crown of thorns",
+      "wounds",
+      "wounded",
+      "stripes",
+      "by his stripes",
+      "man of sorrows",
+      "sorrows",
+      "suffered",
+      "bore",
+      "pierced",
+      "despised",
+      "rejected",
+      "mocked",
+      "passion",
+    ],
+    make: (w, h, room) => {
+      const W0 = Math.min(w, h) * 0.85;
+      const { x, scale } = room.place(W0);
+      const W = W0 * scale,
+        y = h * rnd(0.42, 0.52);
+      // A crown of thorns (pictures/thorns-bitmap.ts), in the artwork's colour, a faint light
+      // within its ring; it barely turns.
+      const pic = bitmap(THORNS_BITMAP, 0.05, "photo");
+      return (f) => {
+        const come = smooth(f.k * 2.4);
+        glow(f.ctx, x, y, W * 0.45, f.ink(0.1 * f.env * come * (0.92 + 0.08 * f.beat)), f.ink(0));
+        pic.draw(f, x, y + (1 - come) * 14, W, f.env * come, 1 + 0.005 * Math.sin(f.t * 0.9));
       };
     },
   },

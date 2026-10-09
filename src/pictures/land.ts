@@ -3,7 +3,8 @@
 
 // The land and water: hills, fields, trees, rivers, the sea.
 
-import { beam, glow, ridge, rnd, smooth, TAU, Vision } from "./kit";
+import { beam, bitmap, glow, ridge, rnd, smooth, TAU, Vision } from "./kit";
+import { ROSE_BITMAP } from "./rose-bitmap";
 
 export const LAND: Vision[] = [
   {
@@ -718,6 +719,41 @@ export const LAND: Vision[] = [
           ctx.fill();
         }
         ctx.restore();
+      };
+    },
+  },
+  {
+    name: "rose of sharon",
+    lane: "pass",
+    dur: [13, 20],
+    themes: [
+      "rose of sharon",
+      "sharon",
+      "beauty",
+      "beautiful",
+      "bloom",
+      "blossom",
+      "flower",
+      "lovely",
+      "fairest",
+      "altogether lovely",
+      "song of songs",
+      "beloved",
+      "fragrance",
+      "bride",
+    ],
+    make: (w, h, room) => {
+      const W0 = Math.min(w, h) * 0.5;
+      const { x, scale } = room.place(W0);
+      const W = W0 * scale,
+        y = h * 0.5;
+      // The rose of Sharon: Redouté's Provence rose (pictures/rose-bitmap.ts), in the artwork's
+      // colour, the paper it is printed on kept about it.
+      const pic = bitmap(ROSE_BITMAP, 0.1, "photo");
+      return (f) => {
+        const come = smooth(f.k * 2.4);
+        glow(f.ctx, x, y, W * 0.5, f.ink(0.08 * f.env * come * (0.92 + 0.08 * f.beat)), f.ink(0));
+        pic.draw(f, x, y + (1 - come) * 14, W, f.env * come, 1 + 0.004 * Math.sin(f.t * 1.1));
       };
     },
   },

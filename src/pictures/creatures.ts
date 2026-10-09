@@ -3,7 +3,8 @@
 
 // Living things passing over, and what the wind carries.
 
-import { glow, rnd, smooth, TAU, Vision } from "./kit";
+import { bitmap, glow, rnd, smooth, TAU, Vision } from "./kit";
+import { EAGLE_BITMAP } from "./eagle-bitmap";
 
 export const CREATURES: Vision[] = [
   {
@@ -139,138 +140,19 @@ export const CREATURES: Vision[] = [
     themes: ["eagle", "eagles", "wings", "soar", "rise", "mount up", "fly", "high", "renew", "strength", "above the storm", "on wings"],
     lane: "pass",
     dur: [12, 18],
-    moving: true,
-    make: (w, h) => {
-      const dir = Math.random() < 0.5 ? 1 : -1;
-      const s = Math.min(w, h) * rnd(0.06, 0.08);
-      const y0 = h * rnd(0.45, 0.6),
-        y1 = h * rnd(0.1, 0.22);
-      let layer: HTMLCanvasElement | null = null;
+    make: (w, h, room) => {
+      const W0 = Math.min(w, h) * 1;
+      const { x, scale } = room.place(W0);
+      const W = W0 * scale,
+        y = h * rnd(0.35, 0.45);
+      // They shall mount up with wings: a bald eagle in flight (pictures/eagle-bitmap.ts), in the
+      // artwork's colour, gliding on a little the way it heads, down and to the left, and rising.
+      const pic = bitmap(EAGLE_BITMAP, 0.05, "photo");
       return (f) => {
-        const { ctx } = f;
-        const q = f.t / f.dur;
-        let x = -s * 3 + q * (w + s * 6);
-        if (dir < 0) x = w - x;
-        // They shall mount up with wings: rising as it goes, wings still, a slow beat now and then.
-        const y = y0 + (y1 - y0) * smooth(q) + Math.sin(f.t * 0.5) * s * 0.3;
-        const flap = Math.sin(f.t * 3) * Math.max(0, Math.sin(f.t * 0.35)) ** 4;
-        glow(ctx, x, y, s * 3, f.ink(0.08 * f.env), f.ink(0));
-        // Drawn whole and solid on a layer, so the wings don't brighten where they meet the body,
-        // then laid on the page faintly with a soft edge.
-        const dpr = ctx.getTransform().a || 1;
-        if (!layer || layer.width !== Math.round(w * dpr) || layer.height !== Math.round(h * dpr)) {
-          layer = document.createElement("canvas");
-          layer.width = Math.round(w * dpr);
-          layer.height = Math.round(h * dpr);
-        }
-        const L = layer.getContext("2d")!;
-        L.setTransform(1, 0, 0, 1, 0, 0);
-        L.clearRect(0, 0, layer.width, layer.height);
-        L.setTransform(dpr, 0, 0, dpr, 0, 0);
-        L.translate(x, y);
-        L.scale(dir * s, s);
-        L.rotate(-0.06 + Math.sin(f.t * 0.4) * 0.06);
-        // Soaring, seen from below and a little to one side. The wings are laid out flat (along the
-        // body x, out along the span z), then seen: the near wing (towards the bottom of the page)
-        // fuller, the far one foreshortened, both lifted a little in a V, and both drawn shorter as
-        // they sweep up and down with the beat. All of it one colour.
-        // Solid colours (mixed from the page's own and the ink), so overlapping parts don't show seams.
-        const ink = f.ink(1).slice(5).split(",").slice(0, 3).map(Number);
-        const page = f.dark ? [13, 17, 23] : [246, 248, 250];
-        const tone = (k: number) => `rgb(${page.map((p, i) => Math.round(p + (ink[i] - p) * k)).join(",")})`;
-        const beat = flap * 0.7;
-        const see =
-          (side: number) =>
-          ([bx, z]: [number, number]): [number, number] => {
-            const k = side > 0 ? 0.9 : 0.6;
-            return [bx, side * z * k * Math.cos(beat) - z * 0.1];
-          };
-        // One wing, flat: the leading edge out to the wrist and on to the hand; seven fingers fanned
-        // at the tip; then the trailing edge, bulging with the inner feathers, back to the body.
-        const wingFlat: [number, number][] = [
-          [0.3, 0.1],
-          [0.42, 0.7],
-          [0.45, 1.25], // the wrist
-          [0.32, 1.78],
-        ];
-        // The fingers spread wider at their tips than at their roots.
-        const fingers: [number, number][] = [
-          [0.27, 2.42],
-          [0.14, 2.52],
-          [0.0, 2.55],
-          [-0.13, 2.5],
-          [-0.24, 2.4],
-          [-0.33, 2.26],
-          [-0.4, 2.08],
-        ];
-        fingers.forEach(([tx, tz], i) => {
-          const bx = 0.3 - i * 0.08,
-            bz = 1.82 - i * 0.03;
-          const nx = bx - 0.05;
-          wingFlat.push(
-            [bx, bz],
-            [(bx + tx) / 2 + 0.015, (bz + tz) / 2],
-            [tx, tz],
-            [(nx + tx) / 2 - 0.015, (bz + tz) / 2],
-            [nx, bz - 0.015],
-          );
-        });
-        wingFlat.push([-0.32, 1.62], [-0.44, 1.15], [-0.42, 0.6], [-0.3, 0.12]);
-        const wing = (side: number, k: number) => {
-          const pts = wingFlat.map(see(side));
-          L.fillStyle = tone(k);
-          L.beginPath();
-          L.moveTo(...pts[0]);
-          for (let i = 1; i < pts.length; i++) {
-            const [px, py] = pts[i - 1],
-              [qx, qy] = pts[i];
-            L.quadraticCurveTo(px, py, (px + qx) / 2, (py + qy) / 2);
-          }
-          L.closePath();
-          L.fill();
-        };
-        wing(-1, 0.45); // the far wing
-        wing(1, 0.55); // the near wing
-        // The body over the wings' roots, in the near wing's tone so they run into it: heavy, from
-        // the breast back to the base of the tail, fullest at the shoulders.
-        L.fillStyle = tone(0.55);
-        L.beginPath();
-        L.moveTo(0.75, -0.12);
-        L.bezierCurveTo(0.45, -0.3, -0.1, -0.28, -0.65, -0.13);
-        L.lineTo(-0.65, 0.13);
-        L.bezierCurveTo(-0.1, 0.3, 0.45, 0.32, 0.75, 0.12);
-        L.closePath();
-        L.fill();
-        // The tail, short and fanned, its end gently rounded, in the body's colour.
-        L.fillStyle = tone(0.55);
-        L.beginPath();
-        L.moveTo(-0.6, -0.12);
-        L.lineTo(-1.12, -0.24);
-        L.quadraticCurveTo(-1.2, 0, -1.12, 0.24);
-        L.lineTo(-0.6, 0.12);
-        L.closePath();
-        L.fill();
-        // The head jutting forward, and its hooked beak.
-        L.beginPath();
-        L.moveTo(0.62, -0.13);
-        L.bezierCurveTo(0.85, -0.17, 1.12, -0.15, 1.2, -0.04);
-        L.quadraticCurveTo(1.24, 0.04, 1.16, 0.09);
-        L.bezierCurveTo(1.0, 0.13, 0.8, 0.14, 0.62, 0.13);
-        L.closePath();
-        L.fill();
-        L.fillStyle = tone(0.55);
-        L.beginPath();
-        L.moveTo(1.18, -0.05);
-        L.quadraticCurveTo(1.34, -0.03, 1.36, 0.06);
-        L.quadraticCurveTo(1.3, 0.05, 1.18, 0.06);
-        L.fill();
-        ctx.save();
-        ctx.globalAlpha = 0.45 * f.env;
-        ctx.globalCompositeOperation = "source-over";
-        ctx.shadowColor = f.ink(0.6 * f.env);
-        ctx.shadowBlur = s * 0.45;
-        ctx.drawImage(layer, 0, 0, w, h);
-        ctx.restore();
+        const come = smooth(f.k * 2.4),
+          q = f.t / f.dur;
+        glow(f.ctx, x, y, W * 0.6, f.ink(0.08 * f.env * come), f.ink(0));
+        pic.draw(f, x + (0.5 - q) * W * 0.25, y + (0.5 - q) * W * 0.06 + Math.sin(f.t * 0.5) * W * 0.01, W, f.env * come);
       };
     },
   },

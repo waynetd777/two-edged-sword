@@ -190,9 +190,13 @@ export function layering() {
 /**
  * How faintly the pictures that use `lay` sit on the page: their asked strengths are scaled by
  * this, so their solid shapes show through the words about as much as the first pictures'
- * (which draw their layers at a third to a half) do.
+ * (which draw their layers at a third to a half) do, while keeping fine lines such as a wall's
+ * bricks.
  */
-export const LAID = 0.62;
+export const LAID = 0.8;
+
+/** How faintly the bitmaps sit: fainter than `LAID`, as a photo's shading is denser than a drawing's. */
+const PHOTO = 0.62;
 
 /**
  * Lay a layer on the page, `a` strong (of `LAID`), with a soft edge `blur` wide: solid (what's
@@ -267,8 +271,7 @@ export function bitmap(uri: string, floor = 0.3, light: "inverted" | "photo" = "
   return {
     /** Draw it centred at (x, y), `width` wide, `a` strong, scaled by `k` about its middle. */
     draw(f: Frame, x: number, y: number, width: number, a: number, k = 1) {
-      // `a` is of LAID, as the drawn pictures' layers are, so all sit at the same strength.
-      a *= LAID;
+      a *= PHOTO;
       if (!img.complete || !img.naturalWidth) return;
       const key = `${f.ink(1)}|${f.dark}`;
       if (!tinted || tinted.key !== key) tinted = { key, canvas: tint(f) };

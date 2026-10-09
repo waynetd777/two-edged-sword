@@ -222,6 +222,7 @@ export const SPIRIT: Vision[] = [
       const x0 = room.place(w * 0.22).x,
         ground = h * 0.82;
       const dunes = ridge(ground, h * 0.035);
+      const foot = dunes(x0) + h * 0.006; // the sand where it stands, a little into it so no gap shows
       const stars = Array.from({ length: 30 }, () => ({ x: rnd(0, w), y: rnd(0, h * 0.5), r: rnd(1, 2.2), p: rnd(0, TAU) }));
       const fire = kindle(26);
       return (f) => {
@@ -235,7 +236,7 @@ export const SPIRIT: Vision[] = [
         ctx.globalAlpha = 1;
         // The sand, lit about its foot.
         ctx.save();
-        ctx.translate(x0, ground);
+        ctx.translate(x0, foot);
         ctx.scale(3, 0.5);
         glow(ctx, 0, 0, h * 0.28, f.ink(0.26 * f.env * rise), f.ink(0));
         ctx.restore();
@@ -249,7 +250,7 @@ export const SPIRIT: Vision[] = [
         ctx.lineTo(w, h);
         ctx.fill();
         // The fire: a pillar of flame rooted in the ground, reaching the top of the page as it grows.
-        burn(f, fire, x0, ground, w * 0.045, (ground + h * 0.1) * rise, rise);
+        burn(f, fire, x0, foot, w * 0.045, (foot + h * 0.1) * rise, rise);
       };
     },
   },

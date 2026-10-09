@@ -3,7 +3,8 @@
 
 // Places and holy things: the cross, Calvary, the tomb, the city, the lampstand.
 
-import { beam, Branch, flame, glow, grow, rnd, smooth, TAU, Vision } from "./kit";
+import { beam, bitmap, Branch, flame, glow, grow, rnd, smooth, TAU, Vision } from "./kit";
+import { ALABASTER_BITMAP } from "./alabaster-bitmap";
 
 export const PLACES: Vision[] = [
   {
@@ -998,6 +999,42 @@ export const PLACES: Vision[] = [
         // The flame's warmth on the spout and the air about it, then the flame.
         glow(ctx, fx, fy - S * 0.2, S * 1.4, f.ink(0.22 * f.env), f.ink(0));
         flame(f, fx, fy, S * 0.9, 1.3);
+      };
+    },
+  },
+  {
+    name: "alabaster jar",
+    lane: "pass",
+    dur: [13, 20],
+    themes: [
+      "anoint",
+      "anointing",
+      "oil",
+      "alabaster",
+      "poured",
+      "pour out",
+      "fragrance",
+      "perfume",
+      "costly",
+      "at his feet",
+      "broken",
+      "worship",
+      "extravagant",
+      "sweet aroma",
+      "offering",
+    ],
+    make: (w, h, room) => {
+      const W0 = Math.min(w, h) * 0.42;
+      const { x, scale } = room.place(W0);
+      const W = W0 * scale,
+        y = h * 0.5;
+      // Poured out at his feet: an alabaster jar (pictures/alabaster-bitmap.ts), in the artwork's
+      // colour.
+      const pic = bitmap(ALABASTER_BITMAP, 0.1, "photo");
+      return (f) => {
+        const come = smooth(f.k * 2.4);
+        glow(f.ctx, x, y, W * 0.5, f.ink(0.08 * f.env * come * (0.92 + 0.08 * f.beat)), f.ink(0));
+        pic.draw(f, x, y + (1 - come) * 14, W, f.env * come, 1 + 0.004 * Math.sin(f.t * 1.1));
       };
     },
   },

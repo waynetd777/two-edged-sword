@@ -5,6 +5,11 @@
 // the open Word, the bread and cup, lights held high, the Name.
 
 import { bitmap, displayFont, flame, glow, lay, layering, ridge, rnd, smooth, TAU, tones, Vision, wander } from "./kit";
+import { CENSER_BITMAP } from "./censer-bitmap";
+import { CHALICE_BITMAP } from "./chalice-bitmap";
+import { LYRE_BITMAP } from "./lyre-bitmap";
+import { SHOFAR_BITMAP } from "./shofar-bitmap";
+import { HANDS_BITMAP } from "./hands-bitmap";
 import { BIBLE_BITMAP } from "./bible-bitmap";
 
 /** An open hand, in units of the palm's width: the wrist at (0, 0), the fingers upward and
@@ -145,6 +150,77 @@ export const WORSHIP: Vision[] = [
             ty = foot - Math.cos(a.lean + sway) * (H + a.s);
           glow(ctx, tx, ty, a.s * 2.2, f.ink(0.1 * f.env * up * (0.9 + 0.1 * f.beat)), f.ink(0));
         }
+      };
+    },
+  },
+  {
+    name: "praying hands",
+    lane: "pass",
+    dur: [13, 20],
+    themes: [
+      "pray",
+      "prayer",
+      "praying",
+      "kneel",
+      "intercede",
+      "seek your face",
+      "seek",
+      "hear my",
+      "hear our",
+      "humble",
+      "wait upon",
+      "call upon",
+      "lord hear",
+      "in your presence",
+      "amen",
+    ],
+    make: (w, h, room) => {
+      const W0 = Math.min(w, h) * 0.75;
+      const { x, scale } = room.place(W0);
+      const W = W0 * scale,
+        y = h * 0.5;
+      // Albrecht Dürer's Praying Hands (pictures/hands-bitmap.ts), in the artwork's
+      // colour, a soft light rising behind them.
+      const pic = bitmap(HANDS_BITMAP, 0.1, "photo");
+      return (f) => {
+        const come = smooth(f.k * 2.2);
+        glow(f.ctx, x, y - W * 0.2, W * 0.6, f.ink(0.1 * f.env * come * (0.92 + 0.08 * f.beat)), f.ink(0));
+        pic.draw(f, x, y + (1 - come) * 14, W, f.env * come);
+      };
+    },
+  },
+  {
+    name: "censer",
+    lane: "pass",
+    dur: [13, 20],
+    themes: [
+      "incense",
+      "censer",
+      "prayer",
+      "prayers",
+      "let my prayer",
+      "sweet aroma",
+      "fragrance",
+      "offering",
+      "altar",
+      "before the throne",
+      "smoke",
+      "holy place",
+      "priest",
+      "sacrifice of praise",
+    ],
+    make: (w, h, room) => {
+      const W0 = Math.min(w, h) * 0.45;
+      const { x, scale } = room.place(W0);
+      const W = W0 * scale,
+        y = h * 0.5;
+      // Let my prayer rise as incense: a censer on its chains (pictures/censer-bitmap.ts), in the
+      // artwork's colour.
+      const pic = bitmap(CENSER_BITMAP, 0.1, "photo");
+      return (f) => {
+        const come = smooth(f.k * 2.4);
+        glow(f.ctx, x, y, W * 0.5, f.ink(0.08 * f.env * come * (0.92 + 0.08 * f.beat)), f.ink(0));
+        pic.draw(f, x, y + (1 - come) * 14, W, f.env * come, 1 + 0.004 * Math.sin(f.t * 1.1));
       };
     },
   },
@@ -386,210 +462,17 @@ export const WORSHIP: Vision[] = [
       "wake up",
     ],
     make: (w, h, room) => {
-      const S0 = Math.min(w, h) * 0.16;
-      const { x, scale } = room.place(S0 * 2.6);
-      const S = S0 * scale,
+      const W0 = Math.min(w, h) * 1.05;
+      const { x, scale } = room.place(W0);
+      const W = W0 * scale,
         y = h * rnd(0.42, 0.55);
-      const dir = x < w / 2 ? 1 : -1; // its bell towards the middle of the page
-      const blasts: number[] = [];
-      let next = 1.5;
-      // The horn's spine, in its own units (S): from the mouthpiece, up and over in a ram's
-      // horn's sweep, to the bell; and its girth along the way, narrow at the mouth, flaring wide.
-      const P = [
-        [-1.15, -0.6],
-        [-0.85, 0.75],
-        [0.35, 1.0],
-        [1.0, -0.25],
-      ] as const;
-      const spine = (u: number) => {
-        const v = 1 - u;
-        return [
-          v * v * v * P[0][0] + 3 * v * v * u * P[1][0] + 3 * v * u * u * P[2][0] + u * u * u * P[3][0],
-          v * v * v * P[0][1] + 3 * v * v * u * P[1][1] + 3 * v * u * u * P[2][1] + u * u * u * P[3][1],
-        ] as const;
-      };
-      const normal = (u: number) => {
-        const [x1, y1] = spine(Math.max(0, u - 0.01)),
-          [x2, y2] = spine(Math.min(1, u + 0.01));
-        const l = Math.hypot(x2 - x1, y2 - y1) || 1;
-        return [-(y2 - y1) / l, (x2 - x1) / l] as const;
-      };
-      const girth = (u: number) => 0.03 + 0.3 * u ** 1.6;
-      // The horn's surface: the ridges across it, denser towards the mouthpiece, each skewed a
-      // little as the horn twists; and the mottling of its colour.
-      const ridges = Array.from({ length: 34 }, (_, i) => ({
-        u: 0.06 + (i / 34) ** 1.3 * 0.9 + rnd(-0.006, 0.006),
-        skew: rnd(0.2, 0.45),
-        a: rnd(0.12, 0.3),
-      }));
-      const mottle = Array.from({ length: 10 }, () => ({ u: rnd(0.3, 0.98), v: rnd(-0.7, 0.7), r: rnd(0.08, 0.2), k: rnd(-0.1, 0.12) }));
-      const layer = layering();
+      // A long twisting shofar, a kudu's horn (pictures/shofar-bitmap.ts), in the artwork's colour;
+      // its bell, at the right, lights on the beat as if it sounded.
+      const pic = bitmap(SHOFAR_BITMAP, 0.1, "photo");
       return (f) => {
-        const { ctx } = f;
-        const raise = smooth(f.k * 2.4);
-        const { L, canvas } = layer(f);
-        const tone = tones(f);
-        L.translate(x, y + (1 - raise) * 30);
-        L.scale(dir * S, S);
-        L.rotate(Math.sin(f.t * 0.6) * 0.02);
-        // The body, as short pieces along the spine, each shaded across its width as a round
-        // tube is: light on the outer side, into shadow on the inner. Dark horn at the mouthpiece
-        // warming and paling towards the bell.
-        const N = 48;
-        const shade = (u: number) => 0.3 + 0.35 * u ** 1.4; // how pale the horn is here
-        for (let i = 0; i < N; i++) {
-          const u0 = i / N,
-            u1 = (i + 1) / N + 0.004;
-          const [ax, ay] = spine(u0),
-            [bx, by] = spine(u1),
-            [nx, ny] = normal((u0 + u1) / 2);
-          const g0 = girth(u0),
-            g1 = girth(u1),
-            k = shade((u0 + u1) / 2);
-          const mx = (ax + bx) / 2,
-            my = (ay + by) / 2,
-            gm = (g0 + g1) / 2;
-          const g = L.createLinearGradient(mx + nx * gm, my + ny * gm, mx - nx * gm, my - ny * gm);
-          g.addColorStop(0, tone(k * 0.55));
-          g.addColorStop(0.3, tone(k * 1.15));
-          g.addColorStop(0.65, tone(k * 0.9));
-          g.addColorStop(1, tone(k * 0.45));
-          L.fillStyle = g;
-          L.beginPath();
-          L.moveTo(ax + nx * g0, ay + ny * g0);
-          L.lineTo(bx + nx * g1, by + ny * g1);
-          L.lineTo(bx - nx * g1, by - ny * g1);
-          L.lineTo(ax - nx * g0, ay - ny * g0);
-          L.closePath();
-          L.fill();
-        }
-        // The body's outline, for what follows to keep within.
-        const bodyPath = () => {
-          L.beginPath();
-          for (let i = 0; i <= N; i++) {
-            const u = i / N,
-              [px, py] = spine(u),
-              [nx, ny] = normal(u),
-              g = girth(u);
-            L.lineTo(px + nx * g, py + ny * g);
-          }
-          for (let i = N; i >= 0; i--) {
-            const u = i / N,
-              [px, py] = spine(u),
-              [nx, ny] = normal(u),
-              g = girth(u);
-            L.lineTo(px - nx * g, py - ny * g);
-          }
-          L.closePath();
-        };
-        L.save();
-        bodyPath();
-        L.clip();
-        // The mottling of the horn, soft patches darker and paler.
-        for (const m of mottle) {
-          const [px, py] = spine(m.u),
-            [nx, ny] = normal(m.u),
-            g = girth(m.u);
-          const cx = px + nx * g * m.v,
-            cy = py + ny * g * m.v;
-          const mg = L.createRadialGradient(cx, cy, 0, cx, cy, m.r);
-          mg.addColorStop(0, m.k > 0 ? `rgba(255,255,255,${m.k})` : `rgba(0,0,0,${-m.k * 1.5})`);
-          mg.addColorStop(1, "rgba(0,0,0,0)");
-          L.fillStyle = mg;
-          L.fillRect(cx - m.r, cy - m.r, m.r * 2, m.r * 2);
-        }
-        // The ridges across the horn, each a fine dark line following its roundness, skewed as
-        // the horn twists; between them, the surface a shade lighter on the ridge's far side.
-        for (const r of ridges) {
-          const [px, py] = spine(r.u),
-            [nx, ny] = normal(r.u),
-            g = girth(r.u) * 0.98,
-            [tx, ty] = [ny, -nx]; // along the horn
-          L.strokeStyle = `rgba(0,0,0,${r.a})`;
-          L.lineWidth = 0.008 + g * 0.03;
-          L.beginPath();
-          L.moveTo(px + nx * g, py + ny * g);
-          L.quadraticCurveTo(px + tx * g * r.skew, py + ty * g * r.skew, px - nx * g, py - ny * g);
-          L.stroke();
-          L.strokeStyle = "rgba(255,255,255,0.07)";
-          L.beginPath();
-          L.moveTo(px + nx * g + tx * 0.012, py + ny * g + ty * 0.012);
-          L.quadraticCurveTo(
-            px + tx * (g * r.skew + 0.012),
-            py + ty * (g * r.skew + 0.012),
-            px - nx * g + tx * 0.012,
-            py - ny * g + ty * 0.012,
-          );
-          L.stroke();
-        }
-        // The keel, the ridge that runs the horn's length, a soft line of light along it.
-        L.strokeStyle = "rgba(255,255,255,0.12)";
-        L.lineWidth = 0.014;
-        L.lineCap = "round";
-        L.beginPath();
-        for (let i = 2; i <= N; i++) {
-          const u = i / N,
-            [px, py] = spine(u),
-            [nx, ny] = normal(u);
-          L.lineTo(px + nx * girth(u) * 0.35, py + ny * girth(u) * 0.35);
-        }
-        L.stroke();
-        L.restore();
-        // The bell: its mouth an oval, the thickness of the horn's wall showing as a pale rim,
-        // the hollow within dark; and the mouthpiece, small and dark.
-        const [bx, by] = spine(1),
-          [bnx, bny] = normal(1);
-        const bg = girth(1);
-        L.save();
-        L.translate(bx, by);
-        L.rotate(Math.atan2(bny, bnx));
-        L.fillStyle = tone(shade(1) * 1.2);
-        L.beginPath();
-        L.ellipse(0, 0, bg * 1.02, bg * 0.4, 0, 0, TAU);
-        L.fill();
-        const hollow = L.createRadialGradient(bg * 0.2, 0, 0, 0, 0, bg * 0.9);
-        hollow.addColorStop(0, tone(0.04));
-        hollow.addColorStop(0.7, tone(0.08));
-        hollow.addColorStop(1, tone(0.2));
-        L.fillStyle = hollow;
-        L.beginPath();
-        L.ellipse(0, 0, bg * 0.9, bg * 0.3, 0, 0, TAU);
-        L.fill();
-        L.restore();
-        const [mx, my] = spine(0),
-          [mnx, mny] = normal(0);
-        L.save();
-        L.translate(mx, my);
-        L.rotate(Math.atan2(mny, mnx));
-        L.fillStyle = tone(0.18);
-        L.beginPath();
-        L.ellipse(0, 0, girth(0) * 1.3, 0.035, 0, 0, TAU);
-        L.fill();
-        L.restore();
-        lay(f, canvas, 0.55 * f.env, S * 0.04);
-        // Its blasts: rings of sound going out from the bell, long and short, as the shofar is blown.
-        const ang = Math.atan2(bny, bnx);
-        const ex = x + dir * S * (bx + Math.cos(ang) * 0.05),
-          ey = y + (1 - raise) * 30 + S * (by + Math.sin(ang) * 0.05);
-        if (raise > 0.9 && f.t >= next) {
-          blasts.push(f.t);
-          next = f.t + (blasts.length % 3 ? rnd(0.5, 0.9) : rnd(2, 3.5));
-        }
-        glow(ctx, ex, ey, S * 0.5, f.ink(0.05 * f.env * raise), f.ink(0));
-        // The sound goes the way the bell faces.
-        const out = Math.atan2(Math.sin(ang) * 1, dir * Math.cos(ang));
-        for (let i = blasts.length - 1; i >= 0; i--) {
-          const q = (f.t - blasts[i]) / 3;
-          if (q >= 1) {
-            blasts.splice(i, 1);
-            continue;
-          }
-          ctx.strokeStyle = f.ink(0.16 * f.env * (1 - q) ** 1.5);
-          ctx.lineWidth = 1.2;
-          ctx.beginPath();
-          ctx.arc(ex, ey, q * S * 3.2, out - 0.9, out + 0.9);
-          ctx.stroke();
-        }
+        const come = smooth(f.k * 2.4);
+        glow(f.ctx, x + W * 0.28, y - W * 0.04, W * 0.15, f.ink(0.14 * f.env * come * (0.6 + 0.4 * f.beat)), f.ink(0));
+        pic.draw(f, x, y + (1 - come) * 12, W, f.env * come);
       };
     },
   },
@@ -916,6 +799,77 @@ export const WORSHIP: Vision[] = [
         lay(f, canvas, 0.85 * f.env, S * 0.12);
         // The wine's gleam.
         glow(ctx, x + S * 0.9, y - S * 1.0, S * 0.4, f.ink(0.3 * f.env * come, true), f.ink(0, true));
+      };
+    },
+  },
+  {
+    name: "the cup",
+    lane: "pass",
+    dur: [13, 20],
+    themes: [
+      "cup",
+      "blood",
+      "new covenant",
+      "remember",
+      "communion",
+      "take and drink",
+      "this is my blood",
+      "covenant",
+      "table",
+      "do this",
+      "poured out",
+      "cup of salvation",
+      "my cup",
+      "runneth over",
+      "drink",
+    ],
+    make: (w, h, room) => {
+      const W0 = Math.min(w, h) * 0.5;
+      const { x, scale } = room.place(W0);
+      const W = W0 * scale,
+        y = h * 0.5;
+      // The cup of the new covenant: a medieval chalice (pictures/chalice-bitmap.ts), in the artwork's
+      // colour, its museum light kept about it.
+      const pic = bitmap(CHALICE_BITMAP, 0.1, "photo");
+      return (f) => {
+        const come = smooth(f.k * 2.4);
+        glow(f.ctx, x, y, W * 0.5, f.ink(0.08 * f.env * come * (0.92 + 0.08 * f.beat)), f.ink(0));
+        pic.draw(f, x, y + (1 - come) * 14, W, f.env * come, 1 + 0.004 * Math.sin(f.t * 1.1));
+      };
+    },
+  },
+  {
+    name: "lyre",
+    lane: "pass",
+    dur: [13, 20],
+    themes: [
+      "harp",
+      "lyre",
+      "sing",
+      "song",
+      "new song",
+      "play",
+      "psalm",
+      "david",
+      "strings",
+      "praise",
+      "melody",
+      "skillfully",
+      "instrument",
+      "sing to the lord",
+      "make music",
+    ],
+    make: (w, h, room) => {
+      const W0 = Math.min(w, h) * 0.45;
+      const { x, scale } = room.place(W0);
+      const W = W0 * scale,
+        y = h * 0.5;
+      // David's harp: an ancient harp-lyre (pictures/lyre-bitmap.ts), in the artwork's colour.
+      const pic = bitmap(LYRE_BITMAP, 0.1, "photo");
+      return (f) => {
+        const come = smooth(f.k * 2.4);
+        glow(f.ctx, x, y, W * 0.5, f.ink(0.08 * f.env * come * (0.92 + 0.08 * f.beat)), f.ink(0));
+        pic.draw(f, x, y + (1 - come) * 14, W, f.env * come, 1 + 0.004 * Math.sin(f.t * 1.1));
       };
     },
   },

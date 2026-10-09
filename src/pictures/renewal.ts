@@ -4,7 +4,8 @@
 // Healing and new life: the waterfall, the potter's wheel, streams in the desert, the well, the
 // garden, the table, new wine, the rock of ages, the net full of fish, manna.
 
-import { beam, flame, glow, lay, layering, ridge, ripples, rnd, smooth, TAU, tones, Vision } from "./kit";
+import { beam, bitmap, flame, glow, lay, layering, ridge, ripples, rnd, smooth, TAU, tones, Vision } from "./kit";
+import { WATER_JAR_BITMAP } from "./water-jar-bitmap";
 
 export const RENEWAL: Vision[] = [
   {
@@ -563,6 +564,42 @@ export const RENEWAL: Vision[] = [
           ctx.drawImage(dot, x + d.x * S - 2, dy - 2, 4, 4);
         }
         ctx.globalAlpha = 1;
+      };
+    },
+  },
+  {
+    name: "water jar",
+    lane: "pass",
+    dur: [13, 20],
+    themes: [
+      "water",
+      "living water",
+      "jar",
+      "well",
+      "woman at the well",
+      "never thirst",
+      "thirst",
+      "drink",
+      "cana",
+      "wine",
+      "springs",
+      "overflow",
+      "fill",
+      "pour",
+      "jars",
+    ],
+    make: (w, h, room) => {
+      const W0 = Math.min(w, h) * 0.45;
+      const { x, scale } = room.place(W0);
+      const W = W0 * scale,
+        y = h * 0.5;
+      // Living water: an ancient terracotta water jar on its stand (pictures/water-jar-bitmap.ts), in
+      // the artwork's colour.
+      const pic = bitmap(WATER_JAR_BITMAP, 0.1, "photo");
+      return (f) => {
+        const come = smooth(f.k * 2.4);
+        glow(f.ctx, x, y, W * 0.5, f.ink(0.08 * f.env * come * (0.92 + 0.08 * f.beat)), f.ink(0));
+        pic.draw(f, x, y + (1 - come) * 14, W, f.env * come, 1 + 0.004 * Math.sin(f.t * 1.1));
       };
     },
   },

@@ -4,7 +4,10 @@
 // Breakthrough and freedom: chains broken, the veil torn, Jericho, the Red Sea, the fiery
 // furnace, the dry bones, the prison doors, five smooth stones, the storm stilled, the shield.
 
-import { beam, flame, glow, lay, layering, ridge, rnd, smooth, TAU, tones, Vision } from "./kit";
+import { beam, bitmap, flame, glow, lay, layering, ridge, rnd, smooth, TAU, tones, Vision } from "./kit";
+import { KEY_BITMAP } from "./key-bitmap";
+import { BREASTPLATE_BITMAP } from "./breastplate-bitmap";
+import { HELMET_BITMAP } from "./helmet-bitmap";
 
 export const DELIVERANCE: Vision[] = [
   {
@@ -35,100 +38,125 @@ export const DELIVERANCE: Vision[] = [
     ],
     make: (w, h, room) => {
       const S0 = Math.min(w, h) * 0.07;
-      const { x, scale } = room.place(S0 * 10);
+      // The room is for the links about the break (the chain itself runs off the page).
+      const { x, scale } = room.place(S0 * 6.2);
       const S = S0 * scale,
-        y = h * 0.7; // the ground
+        y = h * 0.5;
+      const flip = x < w / 2 ? -1 : 1; // on the left of the words, mirrored: rising to the left
       const layer = layering();
+      // The fragments of the link that broke, each flying out from the break in its own way.
+      const bits = Array.from({ length: 16 }, () => {
+        const a = rnd(0, TAU);
+        return { a, d: rnd(0.35, 1.3), s: rnd(0.05, 0.13), spin: rnd(-6, 6), r0: rnd(0, TAU), k: rnd(0.5, 1) };
+      });
       return (f) => {
-        const { ctx } = f;
         const come = smooth(f.k * 2.5);
-        // A chain that held someone by the ankle, broken: from a ring bolted to the ground, its
-        // links lie along the floor to the break; past the break the last links and the open
-        // cuff lie where they fell. Still; it comes in with the light.
+        const snap = smooth(f.k * 3 - 0.7); // the break: the halves pull apart, the pieces fly
+        // A chain across the page, rising to the right, broken in the middle: links seen face on
+        // (a long ring) and edge on (a bar) by turns, the two links at the break torn open and
+        // the one between them shattered into pieces. Iron, lit from above. It runs off the page
+        // both ways, whole at first, until the middle link snaps.
         const { L, canvas } = layer(f);
         const tone = tones(f);
-        L.translate(x, y);
-        L.scale(S, S);
-        // The shadow under the chain.
-        L.fillStyle = tone(0.1);
-        L.beginPath();
-        L.ellipse(0, 0.15, 5.2, 0.35, 0, 0, TAU);
-        L.fill();
-        // Iron, shaded as a rounded surface: light along the top, dark beneath.
-        const iron = (k: number) => {
-          const g = L.createLinearGradient(0, -0.6, 0, 0.3);
-          g.addColorStop(0, tone(0.95 * k));
-          g.addColorStop(0.5, tone(0.6 * k));
-          g.addColorStop(1, tone(0.3 * k));
-          return g;
-        };
-        // One link, lying on the ground at (cx, cy): flat links are seen as broad ovals, the ones
-        // standing on edge between them as narrow ones; `open` leaves a gap in it, torn apart.
-        const link = (cx: number, cy: number, flat: boolean, open = 0, k = 1) => {
-          L.save();
-          L.translate(cx, cy);
-          L.strokeStyle = iron(k);
-          L.lineWidth = 0.19;
-          L.lineCap = "round";
+        const d = 0.8, // from one link's middle to the next
+          len = 1.05, // a link's length, end to end
+          r = 0.27, // half its width, face on
+          bar = 0.17; // the iron's thickness
+        const ring = (open: boolean) => {
+          const a = len / 2 - r;
           L.beginPath();
-          if (open) L.ellipse(0, 0, 0.55, flat ? 0.3 : 0.14, 0, -Math.PI / 2 + open, (Math.PI * 3) / 2 - open);
-          else L.ellipse(0, 0, 0.55, flat ? 0.3 : 0.14, 0, 0, TAU);
+          if (open) {
+            // Torn at its near end (−x): the sides stop short, ragged, of the end that broke away.
+            L.moveTo(-a + 0.06, -r);
+            L.lineTo(a, -r);
+            L.arc(a, 0, r, -Math.PI / 2, Math.PI / 2);
+            L.lineTo(-a + 0.16, r);
+          } else {
+            L.moveTo(-a, -r);
+            L.lineTo(a, -r);
+            L.arc(a, 0, r, -Math.PI / 2, Math.PI / 2);
+            L.lineTo(-a, r);
+            L.arc(-a, 0, r, Math.PI / 2, (Math.PI * 3) / 2);
+          }
           L.stroke();
+        };
+        const edge = () => {
+          L.beginPath();
+          L.moveTo(-len / 2 + bar / 2, 0);
+          L.lineTo(len / 2 - bar / 2, 0);
+          L.stroke();
+        };
+        // One link at `k` along the chain (0 the break): odd ones face on, even ones edge on.
+        const link = (k: number, shade: () => CanvasGradient) => {
+          const half = Math.sign(k);
+          L.save();
+          L.translate(k * d + half * snap * 0.22, 0);
+          if (k < 0) L.scale(-1, 1); // the near end towards the break
+          L.lineWidth = bar;
+          L.lineCap = "round";
+          L.lineJoin = "round";
+          L.strokeStyle = shade();
+          if (Math.abs(k) % 2)
+            ring(Math.abs(k) === 1 && snap > 0.2); // torn open only when it breaks
+          else edge();
           L.restore();
         };
-        // The ring bolted to the ground, at the left.
-        L.fillStyle = iron(0.9);
-        L.beginPath();
-        L.ellipse(-4.3, 0.05, 0.55, 0.2, 0, 0, TAU);
-        L.fill();
-        L.fillStyle = tone(0.2);
-        L.beginPath();
-        L.ellipse(-4.3, 0.02, 0.4, 0.1, 0, 0, TAU);
-        L.fill();
-        L.strokeStyle = iron(1);
-        L.lineWidth = 0.2;
-        L.beginPath();
-        L.ellipse(-4.3, -0.35, 0.42, 0.45, 0, Math.PI * 0.95, Math.PI * 2.05);
-        L.stroke();
-        // The chain from the ring to the break, sagging a little between, then the torn link.
-        const along = (u: number) => [-3.75 + u * 3.0, Math.sin(Math.PI * u) * 0.12] as const;
-        for (let i = 0; i < 7; i++) {
-          const [cx, cy] = along(i / 6);
-          link(cx, cy, i % 2 === 0, i === 6 ? 0.55 : 0, 1 - i * 0.02);
-        }
-        // The far side of the break: the other torn link and two more, fallen askew; then the cuff.
-        link(0.45, 0.08, true, 0.6, 0.9);
-        link(1.35, 0.02, false, 0, 0.9);
-        link(2.2, 0.06, true, 0, 0.92);
-        // The cuff: a heavy ring, open on its hinge, lying on its side; its hinge pin and the
-        // hasp where the bolt held it.
+        const iron = () => {
+          const g = L.createLinearGradient(0, -r - bar, 0, r + bar);
+          g.addColorStop(0, tone(1));
+          g.addColorStop(0.45, tone(0.7));
+          g.addColorStop(1, tone(0.35));
+          return g;
+        };
+        // Long enough to run off the page both ways.
+        const ks = Array.from({ length: 40 }, (_, i) => i - 20).filter((k) => k !== 0);
+        const chain = () => {
+          L.save();
+          L.translate(x, y);
+          L.scale(flip, 1);
+          L.rotate(-0.88);
+          L.scale(S, S);
+          for (const k of ks) link(k, iron);
+          // The link between them, whole until it shatters.
+          const whole = 1 - Math.min(1, snap * 5);
+          if (whole > 0) {
+            L.globalAlpha = whole;
+            L.lineWidth = bar;
+            L.lineCap = "round";
+            L.strokeStyle = iron();
+            L.beginPath();
+            L.moveTo(-len / 2 + bar / 2, 0);
+            L.lineTo(len / 2 - bar / 2, 0);
+            L.stroke();
+            L.globalAlpha = 1;
+          }
+          L.restore();
+        };
+        chain();
+        // The pieces of the shattered link: they fly from the break and fade as they go.
         L.save();
-        L.translate(3.6, -0.1);
-        L.rotate(-0.25);
-        L.strokeStyle = iron(1);
-        L.lineWidth = 0.34;
-        L.lineCap = "butt";
-        L.beginPath();
-        L.ellipse(0, 0, 0.95, 0.55, 0, 0.75, TAU + 0.05); // the band, open at its lower right
-        L.stroke();
-        L.beginPath(); // the leaf that swung open on the hinge
-        L.ellipse(0.1, 0.1, 0.95, 0.55, 0.9, 0.1, 0.72);
-        L.stroke();
-        L.fillStyle = tone(0.95);
-        L.beginPath(); // the hinge pin
-        L.arc(0.95, 0, 0.14, 0, TAU);
-        L.fill();
-        L.fillStyle = tone(0.5);
-        L.beginPath(); // the hasp, hanging
-        L.rect(0.55, 0.42, 0.26, 0.4);
-        L.fill();
+        L.translate(x, y);
+        L.scale(flip, 1);
+        L.rotate(-0.88);
+        L.scale(S, S);
+        for (const b of bits) {
+          const q = snap;
+          if (q <= 0) continue;
+          L.save();
+          L.translate(Math.cos(b.a) * b.d * q * 1.4, Math.sin(b.a) * b.d * q * 1.1);
+          L.rotate(b.r0 + b.spin * q);
+          L.globalAlpha = Math.min(1, q * 4) * (1 - q * 0.55);
+          L.fillStyle = tone(0.75 * b.k);
+          L.beginPath();
+          L.moveTo(0, -b.s);
+          L.lineTo(b.s * 0.9, b.s * 0.6);
+          L.lineTo(-b.s * 0.7, b.s * 0.4);
+          L.closePath();
+          L.fill();
+          L.restore();
+        }
         L.restore();
-        // The last link, the one that held the cuff, still through its hasp.
-        link(2.95, 0.12, false, 0, 0.95);
-        lay(f, canvas, 0.8 * f.env * come, S * 0.12);
-        // Light at the break, where it was broken.
-        glow(ctx, x - S * 0.15, y - S * 0.1, S * 1.8, f.ink(0.22 * f.env * come * (0.9 + 0.1 * f.beat)), f.ink(0));
-        glow(ctx, x, y + S * 0.3, S * 5, f.ink(0.05 * f.env * come), f.ink(0));
+        lay(f, canvas, 0.85 * f.env * come);
       };
     },
   },
@@ -291,9 +319,12 @@ export const DELIVERANCE: Vision[] = [
         hg.addColorStop(0, f.ink(0.1 * f.env));
         hg.addColorStop(1, f.ink(0.01 * f.env));
         ctx.fillStyle = hg;
+        // Its top level where the wall stands, falling away on either side.
         ctx.beginPath();
         ctx.moveTo(0, h);
-        ctx.quadraticCurveTo(x, ground - S * 0.1, w, h);
+        ctx.quadraticCurveTo(x - S * 0.75, ground, x - S * 0.58, ground);
+        ctx.lineTo(x + S * 0.58, ground);
+        ctx.quadraticCurveTo(x + S * 0.75, ground, w, h);
         ctx.fill();
         // Trumpets sounding, before: rings going up from below the wall.
         if (shout < 0.2 && f.k > 0.15 && f.t >= next) {
@@ -923,6 +954,41 @@ export const DELIVERANCE: Vision[] = [
     },
   },
   {
+    name: "key",
+    lane: "pass",
+    dur: [13, 20],
+    themes: [
+      "key",
+      "keys",
+      "keys of the kingdom",
+      "unlock",
+      "open",
+      "open door",
+      "doors",
+      "set free",
+      "free",
+      "freedom",
+      "loosed",
+      "release",
+      "authority",
+      "bind",
+      "chains",
+    ],
+    make: (w, h, room) => {
+      const W0 = Math.min(w, h) * 0.55;
+      const { x, scale } = room.place(W0);
+      const W = W0 * scale,
+        y = h * 0.5;
+      // The keys of the kingdom: an old iron key (pictures/key-bitmap.ts), in the artwork's colour.
+      const pic = bitmap(KEY_BITMAP, 0.1, "photo");
+      return (f) => {
+        const come = smooth(f.k * 2.4);
+        glow(f.ctx, x, y, W * 0.5, f.ink(0.08 * f.env * come * (0.92 + 0.08 * f.beat)), f.ink(0));
+        pic.draw(f, x, y + (1 - come) * 14, W, f.env * come, 1 + 0.004 * Math.sin(f.t * 1.1));
+      };
+    },
+  },
+  {
     name: "five smooth stones",
     lane: "pass",
     dur: [12, 18],
@@ -1243,6 +1309,77 @@ export const DELIVERANCE: Vision[] = [
             glow(ctx, x + side * S * 1.0, dy, S * 0.6 * (1 + qq), f.ink(0.5 * f.env * (1 - qq) ** 2), f.ink(0));
           }
         }
+      };
+    },
+  },
+  {
+    name: "helmet",
+    lane: "pass",
+    dur: [13, 20],
+    themes: [
+      "helmet",
+      "helmet of salvation",
+      "armour",
+      "armor",
+      "armour of god",
+      "put on",
+      "stand",
+      "battle",
+      "warfare",
+      "salvation",
+      "soldier",
+      "strong in the lord",
+      "fight",
+      "victory",
+      "the full armour",
+    ],
+    make: (w, h, room) => {
+      const W0 = Math.min(w, h) * 0.5;
+      const { x, scale } = room.place(W0);
+      const W = W0 * scale,
+        y = h * 0.5;
+      // The helmet of salvation: a close-helmet (pictures/helmet-bitmap.ts), in the artwork's colour.
+      const pic = bitmap(HELMET_BITMAP, 0.1, "photo");
+      return (f) => {
+        const come = smooth(f.k * 2.4);
+        glow(f.ctx, x, y, W * 0.5, f.ink(0.08 * f.env * come * (0.92 + 0.08 * f.beat)), f.ink(0));
+        pic.draw(f, x, y + (1 - come) * 14, W, f.env * come, 1 + 0.004 * Math.sin(f.t * 1.1));
+      };
+    },
+  },
+  {
+    name: "breastplate",
+    lane: "pass",
+    dur: [13, 20],
+    themes: [
+      "breastplate",
+      "righteousness",
+      "breastplate of righteousness",
+      "armour",
+      "armor",
+      "armour of god",
+      "put on",
+      "stand",
+      "clothed",
+      "battle",
+      "warfare",
+      "guard my heart",
+      "heart",
+      "stand firm",
+      "the full armour",
+    ],
+    make: (w, h, room) => {
+      const W0 = Math.min(w, h) * 0.5;
+      const { x, scale } = room.place(W0);
+      const W = W0 * scale,
+        y = h * 0.5;
+      // The breastplate of righteousness: a steel breastplate etched with a star
+      // (pictures/breastplate-bitmap.ts), in the artwork's colour.
+      const pic = bitmap(BREASTPLATE_BITMAP, 0.1, "photo");
+      return (f) => {
+        const come = smooth(f.k * 2.4);
+        glow(f.ctx, x, y, W * 0.5, f.ink(0.08 * f.env * come * (0.92 + 0.08 * f.beat)), f.ink(0));
+        pic.draw(f, x, y + (1 - come) * 14, W, f.env * come, 1 + 0.004 * Math.sin(f.t * 1.1));
       };
     },
   },
