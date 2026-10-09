@@ -83,6 +83,12 @@ function Screens() {
       } else if (e.key === "]") {
         app.forward();
         e.preventDefault();
+      } else if ((e.key === "=" || e.key === "+" || e.key === "-") && app.screen === "read" && app.doc?.url) {
+        // An online devotional's page: its own size, kept for that site.
+        const id = app.doc.module;
+        const z = Math.round(((app.settings.webZoom[id] ?? 1) + (e.key === "-" ? -0.1 : 0.1)) * 10) / 10;
+        if (z >= 0.5 && z <= 2.5) app.set({ webZoom: { ...app.settings.webZoom, [id]: z } });
+        e.preventDefault();
       } else if (e.key === "=" || e.key === "+" || e.key === "-") {
         const size = app.settings.readSize + (e.key === "-" ? -1 : 1);
         if (size >= 14 && size <= 28) app.set({ readSize: size });

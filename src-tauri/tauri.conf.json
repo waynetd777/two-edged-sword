@@ -12,6 +12,8 @@
   "app": {
     "windows": [
       {
+        "label": "main",
+        "create": false,
         "title": "Two-edged Sword",
         "width": 1320,
         "height": 840,

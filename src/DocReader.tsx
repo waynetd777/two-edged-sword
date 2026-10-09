@@ -15,7 +15,7 @@ import { WordLookup } from "./WordLookup";
 import { SearchField, Topbar } from "./Shell";
 import { HlColor, hlName, useApp } from "./state";
 import { DictionaryTab, useRefPreview } from "./StudyPane";
-import { ClearButton, Popover, SearchList, SideNav, wordAt, wordHover } from "./ui";
+import { ClearButton, Popover, scrollToThird, SearchList, SideNav, wordAt, wordHover } from "./ui";
 import { dayTitle } from "./plans";
 import { useAssistant } from "./assistant";
 
@@ -315,8 +315,7 @@ export function DocReader({ focus, setFocus, openPalette }: { focus: boolean; se
 
   // Keep the paragraph being read in view.
   useEffect(() => {
-    if (reading && !ps.paused)
-      scroller.current?.querySelector(`[data-seg="${ps.verse}"]`)?.scrollIntoView({ block: "center", behavior: "smooth" });
+    if (reading && !ps.paused) scrollToThird(scroller.current?.querySelector(`[data-seg="${ps.verse}"]`));
   }, [reading, ps.verse, ps.paused]);
 
   useEffect(() => {

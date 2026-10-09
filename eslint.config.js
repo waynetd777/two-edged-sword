@@ -9,7 +9,8 @@ import globals from "globals";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-  { ignores: ["dist", "node_modules", "src-tauri", "_sift", "tools"] },
+  // Of src-tauri, only the scripts the app runs in web pages (frame.js) are JavaScript to check.
+  { ignores: ["dist", "node_modules", "src-tauri/*", "!src-tauri/src", "src-tauri/src/*", "!src-tauri/src/*.js", "_sift", "tools"] },
   {
     files: ["**/*.{ts,tsx}"],
     extends: [js.configs.recommended, ...tseslint.configs.recommended, prettier],
@@ -18,5 +19,11 @@ export default tseslint.config(
     // compiler, which this app doesn't use.
     plugins: { "react-hooks": reactHooks },
     rules: { "react-hooks/rules-of-hooks": "error", "react-hooks/exhaustive-deps": "warn" },
+  },
+  // Plain browser scripts, run in the pages the app shows.
+  {
+    files: ["src-tauri/src/*.js"],
+    extends: [js.configs.recommended, prettier],
+    languageOptions: { globals: globals.browser, sourceType: "script" },
   },
 );

@@ -35,7 +35,7 @@ export interface PlayerState {
   /** Which sleep option was chosen, so the menu can tick it. */
   sleepChoice: number | "chapter" | null;
   /** Reading a reference book instead of the Bible: "verse" is then the paragraph number. */
-  doc: { module: string; title: string; kind?: "reference" | "devotional"; id?: string } | null;
+  doc: { module: string; title: string; kind?: "reference" | "devotional"; id?: string; url?: string } | null;
 }
 
 /** For a guided session (Quiet time): stop at `toVerse`, and call `onEnd` when the reading finishes by itself. */
@@ -43,6 +43,7 @@ export interface PlayOpts {
   toVerse?: number;
   onEnd?: () => void;
   /** The journal entry being read (module "journal"). */ id?: string;
+  /** An online devotional's page being read (WebPage). */ url?: string;
 }
 
 interface PlayerCtx {
@@ -174,9 +175,15 @@ export function speakable(text: string): { spoken: string; at: number[] } {
     for (let k = last; k < to; k++) at.push(k);
     spoken += t.slice(last, to);
   };
-  for (const h of findRefs(t, true)) {
+  // References, and "v. 12" / "vv. 3–5" (said "verse", not "version"), in the order they come.
+  const said = findRefs(t, true).map((h) => ({ index: h.index, length: h.length, say: sayRef(h.ref) }));
+  for (const m of t.matchAll(/\b(vv?|vs|ver)\.\s*(?=\d)/gi))
+    if (!said.some((h) => m.index < h.index + h.length && h.index < m.index + m[0].length))
+      said.push({ index: m.index, length: m[0].length, say: /^vv$/i.test(m[1]) ? "verses " : "verse " });
+  said.sort((x, y) => x.index - y.index);
+  for (const h of said) {
     copy(h.index);
-    const say = sayRef(h.ref);
+    const say = h.say;
     // Each spoken character of the reference points into the written one, in proportion.
     for (let k = 0; k < say.length; k++) at.push(h.index + Math.min(h.length - 1, Math.floor((k * h.length) / say.length)));
     spoken += say;
@@ -481,14 +488,20 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       opts.current = o;
       // A devotional is announced by name and day ("Morning & Evening, September 24"), a book by its chapter.
       announce.current =
-        from > 0 ? null : kind === "devotional" ? `${appRef.current.mod("devotional", module)?.abbrev || module}, ${title}` : title;
+        from > 0
+          ? null
+          : o.url
+            ? title
+            : kind === "devotional"
+              ? `${appRef.current.mod("devotional", module)?.abbrev || module}, ${title}`
+              : title;
       verses.current = paragraphs.map((text, k) => ({ v: k + 1, text }));
       const i = Math.max(0, Math.min(from, paragraphs.length - 1));
       const next = {
         ...st.current,
         on: true,
         paused: false,
-        doc: { module, title, kind, id: o.id },
+        doc: { module, title, kind, id: o.id, url: o.url },
         verse: i + 1,
         count: paragraphs.length,
         char: -1,

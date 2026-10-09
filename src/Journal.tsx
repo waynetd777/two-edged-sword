@@ -13,7 +13,7 @@ import { HL_PAINT, htmlToMd, mdPlain, mdToHtml } from "./md";
 import { HighlightsButton, HL, HL_DOT, hlLabel } from "./Read";
 import { SearchField, Topbar } from "./Shell";
 import { HlColor, HlTheme, nowLocal, onFlush, themesOf, uid, useApp } from "./state";
-import { ClearButton, confirmDelete, Dialog, Popover, Seg } from "./ui";
+import { ClearButton, confirmDelete, Dialog, Popover, scrollToThird, Seg } from "./ui";
 import { useAssistant } from "./assistant";
 import { docModule, parseDocLabel } from "./docref";
 import { useRefPreview } from "./StudyPane";
@@ -677,8 +677,7 @@ function Editor({
   }, [reading, ps.verse, ps.char, app.settings.highlightWords]);
   // Keep the paragraph being read in view.
   useEffect(() => {
-    if (reading && !ps.paused && ed.current)
-      speechBlocks(ed.current)[ps.verse - 1]?.scrollIntoView({ block: "center", behavior: "smooth" });
+    if (reading && !ps.paused && ed.current) scrollToThird(speechBlocks(ed.current)[ps.verse - 1]);
   }, [reading, ps.verse, ps.paused]);
   // Reading starts: whatever is typed is saved, and the caret leaves the entry.
   useEffect(() => {

@@ -24,10 +24,18 @@ library, or Our Daily Bread and Heartlight online.
   `{dd}` where the date goes. Your sites can be chosen for any plan; × removes one.
 - A site that won't be shown inside another app opens in its own window instead.
 - An online devotional shows in the reading column, under the Quiet time bar. In the dark theme
-  its page is inverted to look dark, pictures too. **Open in window** shows it in a window of its
-  own, with pictures as they should be.
+  its page is inverted to look dark, with its pictures as they should be. **Open in window** shows
+  it in a window of its own.
+- Our Daily Bread opens at today's devotion: the app follows the link to it from the site's list.
+- With audio, Our Daily Bread and Heartlight are read aloud by themselves once their page has
+  loaded, from the top of the day's reading, as the Bible is. Other online devotionals wait for
+  you to click **Listen**.
 - In the dark theme, each online devotional has a moon button, in the devotionals list and over its
   page. Turn it off for a site that's dark already, to show it as the site made it.
+- To hear an online devotional, click **Listen** over its page, then click where reading should
+  start: the pointer is a hand until you do. Esc cancels. The word being read is highlighted as in
+  the Bible reader.
+- ⌘+ and ⌘− make an online devotional's page bigger or smaller. Each site keeps its own size.
 
 Parts are ticked off as you finish them. Under the progress bar are your streak, your best run,
 and how many of the last seven days you read.
@@ -68,9 +76,11 @@ scroll:
   (Music's BPM for it, or a slow tempo if it has none). The app can't hear the music itself.
 - Faint pictures come and go behind the words, with lyrics or without, in the colours of the
   song's artwork: a cross, a dove passing over, tongues of fire, hands raised, the throne, chains
-  breaking, a river and a hundred more, one or two at a time. Pictures of what the song sings
-  about come more often: a song about fire gets fire, and none comes twice in a song. The larger
-  ones keep beside the words, in focus mode too, and clear of each other.
+  breaking, a river and over a hundred more, one or two at a time. Some are old photographs,
+  engravings and paintings: the lion of Judah, Dürer's praying hands, the ark of the covenant,
+  the Creation of Adam. Pictures of what the song sings about come more often: a song about
+  fire gets fire, and none comes twice in a song. The larger ones keep beside the words, in
+  focus mode too. One that has no room clear of the other waits, or comes smaller.
   Settings › Listening › **While a song plays** turns them off.
 - The bar shows how far through the song Music is, with the time gone and the time left.
 - The Lyrics page is always dark below its top bar, in the light theme too. In focus mode the

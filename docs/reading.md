@@ -78,7 +78,8 @@ The study pane has your notes on the chapter, the dictionaries and Ask.
 <a href="images/index.md#reading"><picture><source media="(prefers-color-scheme: dark)" srcset="images/listen-dark.png"><img alt="Listening to 1 John 1, the word being spoken highlighted" src="images/listen-light.png"></picture></a>
 
 Reads the chapter aloud, highlighting each word as it's spoken, and carries on into the next
-chapter. Choose the speed (0.5× to 2×) and a sleep timer in the player.
+chapter. The verse being read stays a third of the way down the page. Choose the speed (0.5× to
+2×) and a sleep timer in the player.
 
 | Keys | Does |
 |---|---|

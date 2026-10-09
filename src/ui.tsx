@@ -73,6 +73,21 @@ export function Tooltips() {
  *  look-up popup as a Bible word. Found from the click point rather than by wrapping every word in
  *  an element, so long HTML stays as it is. Null for links, numbers, images, a selection being
  *  made, or a click between words. */
+/** Scrolls `el` so it stands a third of the way down the box that scrolls it, where the eye is when
+ *  following text being read or sung (centred, the next lines start too far down). */
+export function scrollToThird(el: Element | null | undefined, smooth = true) {
+  if (!el) return;
+  let box = el.parentElement;
+  while (box && !(box.scrollHeight > box.clientHeight && /auto|scroll/.test(getComputedStyle(box).overflowY))) box = box.parentElement;
+  if (!box) return el.scrollIntoView({ block: "center", behavior: smooth ? "smooth" : "auto" });
+  const r = el.getBoundingClientRect(),
+    b = box.getBoundingClientRect();
+  box.scrollTo({
+    top: box.scrollTop + r.top - b.top - b.height / 3 + Math.min(r.height, b.height / 3) / 2,
+    behavior: smooth ? "smooth" : "auto",
+  });
+}
+
 export function wordAt(e: React.MouseEvent): { word: string; rect: DOMRect } | null {
   if (window.getSelection()?.toString()) return null;
   return wordAtPoint(e.clientX, e.clientY, e.target as HTMLElement);

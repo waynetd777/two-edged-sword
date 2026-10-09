@@ -14,6 +14,7 @@ import { Topbar } from "./Shell";
 import { useApp } from "./state";
 import { Flames } from "./Flames";
 import { Visions } from "./Visions";
+import { scrollToThird } from "./ui";
 import { chapterPlaying } from "./worship";
 
 const plainLines = (text: string): Lyrics => ({
@@ -132,7 +133,7 @@ export function LyricsPage({ focus, setFocus }: { focus: boolean; setFocus: (f: 
   const scroller = useRef<HTMLElement>(null);
   const target = rest ? `[data-rest]` : lit >= 0 ? `[data-line="${lit}"]` : null;
   useEffect(() => {
-    if (target) scroller.current?.querySelector(target)?.scrollIntoView({ block: "center", behavior: "smooth" });
+    if (target) scrollToThird(scroller.current?.querySelector(target));
   }, [target, lit]);
   useEffect(() => scroller.current?.scrollTo({ top: 0 }), [key]);
 
@@ -298,7 +299,7 @@ export function LyricsPage({ focus, setFocus }: { focus: boolean; setFocus: (f: 
         <main
           ref={scroller}
           className="scroll lyrics-words"
-          style={{ flex: "1 1 auto", padding: focus ? "0 10% 40vh" : "0 40px 40vh 36px" }}
+          style={{ flex: "1 1 auto", padding: focus ? "0 10% 66vh" : "0 40px 66vh 36px" }}
         >
           {error ? (
             <p className="err">{error}</p>

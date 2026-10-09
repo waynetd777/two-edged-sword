@@ -432,31 +432,7 @@ fn devotion(st: State<AppState>, module: String, title: String) -> Result<Option
 /// An online page (a devotional) in its own window inside the app, reused if already open.
 /// The app in dark mode: a devotional's web page shown dark by inverting it, with pictures and
 /// video inverted back so they look as they should. Crude, but it works on any site.
-const DARK_PAGE: &str = r##"(() => {
-  const css = "html { filter: invert(1) hue-rotate(180deg) !important; background: #fff !important; }"
-    + " img, video, picture, canvas, svg image, [style*='background-image'] { filter: invert(1) hue-rotate(180deg) !important; }";
-  const add = () => {
-    const at = document.head || document.documentElement;
-    if (!document.getElementById("tes-dark")) {
-      const s = document.createElement("style");
-      s.id = "tes-dark";
-      s.textContent = css;
-      at.appendChild(s);
-    }
-    // macOS colours the title bar from the page's theme colour, or failing that from the top of the
-    // page as it was before the inversion (white, often): a dark one of our own instead.
-    document.querySelectorAll("meta[name='theme-color']:not(#tes-theme)").forEach((m) => m.remove());
-    if (!document.getElementById("tes-theme")) {
-      const m = document.createElement("meta");
-      m.id = "tes-theme";
-      m.name = "theme-color";
-      m.content = "#121214";
-      at.appendChild(m);
-    }
-  };
-  add();
-  document.addEventListener("DOMContentLoaded", add);
-})();"##;
+const DARK_PAGE: &str = include_str!("dark_page.js");
 
 /// Whether a web page lets itself be shown inside another page (an online devotional added by the
 /// user, framed in the reading column), from its headers: X-Frame-Options, or a
@@ -821,6 +797,13 @@ pub fn run() {
             }
         })
         .setup(|app| {
+            // The main window is made here rather than from the config alone, so a script can run in
+            // the frames inside it: an online devotional's page (frame.js).
+            if let Some(cfg) = app.config().app.windows.iter().find(|w| w.label == "main").cloned() {
+                tauri::WebviewWindowBuilder::from_config(app.handle(), &cfg)?
+                    .initialization_script_for_all_frames(include_str!("frame.js"))
+                    .build()?;
+            }
             // Did Login Items start this, rather than someone opening the app? Asked first: the
             // answer is in the launch AppleEvent AppKit is dispatching now, and it has to be known
             // before anything shows the window. A login launch stays in the menu bar.

@@ -330,6 +330,12 @@ export interface OnlineDevotional {
   title: string;
   url: (d: Date) => string;
   window?: boolean;
+  /** For a site whose address can't say the day: links on its page to the day's reading match
+   *  this (a regular expression for the address), and the first is followed (frame.js). */
+  follow?: string;
+  /** Where on the day's page its reading starts (a CSS selector): known, so a Quiet time with
+   *  audio reads it aloud by itself, as it does the Bible. */
+  start?: string;
   /** Added by the user (a WebDevotional). */
   own?: boolean;
 }
@@ -367,11 +373,19 @@ export const onlineDevotionals = (own: WebDevotional[] = []): OnlineDevotional[]
 ];
 
 export const ONLINE_DEVOTIONALS: OnlineDevotional[] = [
-  { id: "online:odb", title: "Our Daily Bread", url: () => "https://www.odbm.org/en/devotionals" },
+  {
+    id: "online:odb",
+    title: "Our Daily Bread",
+    url: () => "https://www.odbm.org/en/devotionals",
+    // Its list, newest first: today's is the first link to one.
+    follow: "/en/devotionals/devotional-category/[a-z0-9-]+/?$",
+    start: "h1",
+  },
   {
     id: "online:heartlight",
     title: "Heartlight",
     url: (d) => `https://www.heartlight.org/cgi-shl/todaysverse.cgi?day=${ymd(d).replace(/-/g, "")}&ver=niv`,
+    start: ".subpage-head h1",
   },
 ];
 

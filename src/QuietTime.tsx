@@ -41,7 +41,7 @@ import { useDrag } from "./ui";
 import { markPlayed, Picked, pickSongs, setChapterPlaying } from "./worship";
 import { sceneSong } from "./lyrics";
 import { Closing, pickClosing } from "./closing";
-import { inverts } from "./WebPage";
+import { cancelAutoRead, inverts, readWhenReady } from "./WebPage";
 
 const FIRST_DELAY = 900; // let the first part's screen open before reading starts
 const NEXT_DELAY = 2000;
@@ -384,6 +384,10 @@ export function QuietTime({ focus }: { focus: boolean }) {
   // afterwards, until Finish, when it is the closing verse or the favourite passage.
   const sRef = useRef(s);
   sRef.current = s;
+  // An online devotional whose page says where its reading starts is read aloud too, unless it
+  // opens in a window of its own.
+  const readsItself = (step: QuietStep) =>
+    step.kind === "online" && !step.window && !!onlineDevotionals(app.settings.webDevotionals).find((o) => o.id === step.id)?.start;
   const speakStep = async (step: QuietStep) => {
     const x = sRef.current;
     const last = !!x && x.steps[x.steps.length - 1] === step && (step.kind === "closing" || step.key === "finale");
@@ -399,7 +403,7 @@ export function QuietTime({ focus }: { focus: boolean }) {
       const segs = html ? docSegments(html) : [];
       if (segs.length) player.playDoc(step.module, step.title, segs, 0, "devotional", { onEnd });
       else onEnd();
-    }
+    } else if (step.kind === "online" && readsItself(step)) readWhenReady(step.id, onEnd);
   };
   // F7 and F9 go to the previous or next part, and F8 (or ⌘P) reads this one when nothing is playing.
   useEffect(() => {
@@ -442,17 +446,21 @@ export function QuietTime({ focus }: { focus: boolean }) {
     } else {
       app.openWebDoc(step.id, step.url, step.label);
     }
-    // Songs, or a devotional on the web, aren't read aloud: the reading before them stops and its player closes.
+    // Songs, or a devotional on the web, stop the reading before them and close its player (one the
+    // app knows how to read is read aloud once its page is ready).
     if (step.kind === "worship" || step.kind === "online") player.stop();
     if (s.audio && step.kind === "closing" && step.picked) {
       // Time to read the summary first.
       setReadIn(readTime(`${step.picked.why ?? ""} ${step.picked.note ?? ""}`));
-    } else if (s.audio && step.kind !== "online" && step.kind !== "worship") {
+    } else if (s.audio && step.kind !== "worship" && (step.kind !== "online" || readsItself(step))) {
       const delay = first.current ? FIRST_DELAY : NEXT_DELAY;
       timer.current = window.setTimeout(() => speakStep(step), delay);
     }
     first.current = false;
-    return () => window.clearTimeout(timer.current);
+    return () => {
+      window.clearTimeout(timer.current);
+      cancelAutoRead();
+    };
   }, [s?.started, s?.i, closingReady]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // The closing verse's countdown, reading it aloud at the end.

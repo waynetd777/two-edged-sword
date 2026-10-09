@@ -86,6 +86,8 @@ export interface Settings {
   /** Online devotionals, by id, whose pages are left as they are in the dark theme rather than
    *  inverted to look dark (a site that is dark already): false. Absent is inverted. */
   webInvert: Record<string, boolean>;
+  /** Online devotionals' pages, by id, shown larger or smaller (⌘+ ⌘−): 1 is as the site made it. */
+  webZoom: Record<string, number>;
 }
 
 const DEFAULTS: Settings = {
@@ -136,6 +138,7 @@ const DEFAULTS: Settings = {
   copyNumbers: true,
   webDevotionals: [],
   webInvert: {},
+  webZoom: {},
 };
 
 /** Faces for Scripture, commentary and notes. Greek and Hebrew stay in --display. */

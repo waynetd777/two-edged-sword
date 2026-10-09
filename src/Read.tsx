@@ -11,7 +11,7 @@ import { BibleSelect, RefButton, SearchField, Topbar } from "./Shell";
 import { rankVoices, useListenKey, usePlayer } from "./speech";
 import { DictAt, HL_COLOURS, HlColor, hlName, useApp, vkey } from "./state";
 import { StudyPane, StudyTab } from "./StudyPane";
-import { ApoPill, Popover, RefPicker, Seg, SideNav, useBibleBooks, useBibleSizes, useDrag } from "./ui";
+import { ApoPill, Popover, RefPicker, scrollToThird, Seg, SideNav, useBibleBooks, useBibleSizes, useDrag } from "./ui";
 import { WordLookup } from "./WordLookup";
 import { BooksButton } from "./DocReader";
 import { useAssistant } from "./assistant";
@@ -309,8 +309,7 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
   // Follow the verse being read aloud.
   const reading = player.state.on && player.state.bible === bible && player.state.book === loc.book && player.state.chapter === loc.chapter;
   useEffect(() => {
-    if (reading)
-      scroller.current?.querySelector(`[data-v="${player.state.verse}"]`)?.scrollIntoView({ block: "center", behavior: "smooth" });
+    if (reading) scrollToThird(scroller.current?.querySelector(`[data-v="${player.state.verse}"]`));
   }, [reading, player.state.verse]);
   // When reading carries on into the next chapter, turn the page, if it was showing the one just finished.
   const lastPlayed = useRef<[number, number] | null>(null);
@@ -1251,9 +1250,11 @@ export function PlayerBar({ focus = false }: { focus?: boolean }) {
           onClick={() =>
             s.doc?.module === "journal"
               ? app.startEntry({ openId: s.doc.id })
-              : s.doc
-                ? app.openDoc(s.doc.module, s.doc.title, s.doc.kind)
-                : app.open({ book: s.book, chapter: s.chapter, verse: s.verse }, "read")
+              : s.doc?.url
+                ? app.openWebDoc(s.doc.module, s.doc.url, s.doc.title)
+                : s.doc
+                  ? app.openDoc(s.doc.module, s.doc.title, s.doc.kind)
+                  : app.open({ book: s.book, chapter: s.chapter, verse: s.verse }, "read")
           }
           style={{
             flexGrow: 1,
