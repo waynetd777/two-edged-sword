@@ -1,6 +1,6 @@
 [package]
 name = "two-edged-sword"
-version = "1.0.22"
+version = "1.0.23"
 description = "A Bible study app for macOS that reads modules in e-Sword X's formats"
 authors = ["Wayne Davies"]
 license = "GPL-3.0-or-later"
