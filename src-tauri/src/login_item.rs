@@ -17,8 +17,6 @@
 //! Nothing here works for the unbundled `make dev` binary: SMAppService registers a BUNDLE, so
 //! the menu item is left disabled there (see `available`).
 
-#![cfg(target_os = "macos")]
-
 use objc2::msg_send;
 use objc2::runtime::{AnyClass, AnyObject};
 

@@ -12,9 +12,8 @@ import { useApp } from "./state";
 import { orderModules } from "./StudyPane";
 import { ClearButton, Popover, Switch } from "./ui";
 
-/** Whether a module matches the library filter: every word typed is in its title, abbreviation or file name. */
 /** A file size the way Finder shows it (decimal units). */
-export function fmtSize(b: number) {
+function fmtSize(b: number) {
   return b >= 1e9
     ? `${(b / 1e9).toFixed(1)} GB`
     : b >= 1e6
@@ -23,6 +22,7 @@ export function fmtSize(b: number) {
 }
 const total = (ms: ModuleInfo[]) => fmtSize(ms.reduce((t, m) => t + (m.size ?? 0), 0));
 
+/** Whether a module matches the library filter: every word typed is in its title, abbreviation or file name. */
 const matches = (m: ModuleInfo, q: string) => {
   const t = `${m.title} ${m.abbrev} ${m.id}`.toLowerCase();
   return q
@@ -42,7 +42,6 @@ function blurb(m: ModuleInfo) {
 }
 
 type ShowInfo = (m: ModuleInfo, rect: DOMRect) => void;
-/** The ⓘ beside a module: its e-Sword description in a popover. */
 const SOURCE: Record<LibrarySource, string> = { app: "your modules folder", esword: "e-Sword X", bundled: "built in" };
 
 /** "12 from your modules folder, 140 from e-Sword X and 4 built in." */
@@ -54,6 +53,7 @@ const fromSources = (ms: ModuleInfo[]) => {
   return parts.length ? `${parts.length > 1 ? parts.slice(0, -1).join(", ") + " and " + parts[parts.length - 1] : parts[0]}.` : "";
 };
 
+/** The ⓘ beside a module: its e-Sword description in a popover. */
 const InfoButton = ({ m, onInfo }: { m: ModuleInfo; onInfo: ShowInfo }) => (
   <button
     className="ibtn"
@@ -155,6 +155,19 @@ export function LibraryScreen() {
   const n = (k: ModuleInfo["kind"]) => ms.filter((m) => m.kind === k).length;
   const hidden = app.settings.hiddenBibles;
   const showInfo: ShowInfo = (m, rect) => setInfo({ m, rect });
+  // A rescan that fails says why, and the buttons come back.
+  const rescan = async (esword?: boolean) => {
+    setBusy(true);
+    try {
+      await app.rescan(esword);
+      return true;
+    } catch (e) {
+      app.toast(`Couldn't rescan the library: ${e}`);
+      return false;
+    } finally {
+      setBusy(false);
+    }
+  };
   const none = !!q && !ms.some((m) => m.id !== app.tsk && matches(m, q));
   return (
     <div className="main">
@@ -198,11 +211,9 @@ export function LibraryScreen() {
           <span style={{ whiteSpace: "nowrap", flexShrink: 0 }}>
             <Switch
               on={app.settings.readEsword}
-              onChange={async (v) => {
+              onChange={(v) => {
                 app.set({ readEsword: v });
-                setBusy(true);
-                await app.rescan(v);
-                setBusy(false);
+                rescan(v);
               }}
             >
               Read e-Sword X
@@ -213,7 +224,7 @@ export function LibraryScreen() {
             type="button"
             onClick={() => {
               const d = app.lib?.dirs.find((x) => x.source === "app");
-              if (d) revealItemInDir(d.path);
+              if (d) revealItemInDir(d.path).catch((e) => app.toast(String(e)));
             }}
           >
             <Icon name="finder" />
@@ -224,10 +235,7 @@ export function LibraryScreen() {
             type="button"
             disabled={busy}
             onClick={async () => {
-              setBusy(true);
-              await app.rescan();
-              setBusy(false);
-              app.toast("Library rescanned");
+              if (await rescan()) app.toast("Library rescanned");
             }}
           >
             <Icon name="refresh" />

@@ -4,7 +4,25 @@
 // Healing and new life: the waterfall, the potter's wheel, streams in the desert, the well, the
 // garden, the table, new wine, the rock of ages, the net full of fish, manna.
 
-import { beam, bitmap, flame, glow, lay, layering, ridge, ripples, rnd, smooth, TAU, tones, Vision } from "./kit";
+import {
+  beam,
+  drift,
+  flame,
+  flatGlow,
+  glow,
+  lay,
+  layering,
+  photo,
+  random,
+  rangePath,
+  ridge,
+  ripples,
+  rnd,
+  smooth,
+  TAU,
+  tones,
+  Vision,
+} from "./kit";
 import { WATER_JAR_BITMAP } from "./water-jar-bitmap";
 
 export const RENEWAL: Vision[] = [
@@ -42,12 +60,12 @@ export const RENEWAL: Vision[] = [
       const streams = Array.from({ length: 36 }, () => ({
         x: rnd(-1, 1),
         v: rnd(0.5, 0.9),
-        o: Math.random(),
+        o: random(),
         a: rnd(0.3, 1),
         wd: rnd(1, 3),
       }));
       const mist = Array.from({ length: 40 }, () => ({
-        u: Math.random(),
+        u: random(),
         x: rnd(-1.6, 1.6),
         s: rnd(0.05, 0.12),
         p: rnd(0, TAU),
@@ -92,14 +110,10 @@ export const RENEWAL: Vision[] = [
         }
         beam(f, x - S, lip, x + S, lip, 2, 0.3 * f.env * flow);
         // The pool, the plunge churning white, mist rising, rings spreading.
-        ctx.save();
-        ctx.translate(x, pool);
-        ctx.scale(2.4, 0.5);
-        glow(ctx, 0, 0, S * 0.9, f.ink(0.4 * f.env * flow, true), f.ink(0, true));
-        ctx.restore();
+        flatGlow(ctx, x, pool, S * 0.9, 2.4, 0.5, f.ink(0.4 * f.env * flow, true), f.ink(0, true));
         const dot = f.dot(true);
         for (const m of mist) {
-          const u = (m.u + f.t * m.s) % 1;
+          const u = drift(m, f.t);
           const r = m.r * (0.5 + u);
           ctx.globalAlpha = 0.14 * f.env * flow * Math.sin(Math.PI * u);
           ctx.drawImage(dot, x + m.x * S * (0.6 + u * 0.6) + Math.sin(f.t + m.p) * 8 - r, pool - u * S * 1.6 - r, r * 2, r * 2);
@@ -274,7 +288,7 @@ export const RENEWAL: Vision[] = [
       const half = (y: number) => 2 + ((y - hz) / (h - hz)) ** 1.5 * w * 0.09;
       const plants = Array.from({ length: 34 }, () => ({
         u: rnd(0.15, 1),
-        side: Math.random() < 0.5 ? -1 : 1,
+        side: random() < 0.5 ? -1 : 1,
         off: rnd(1.1, 2.6),
         s: rnd(10, 22),
         d: rnd(0, 1),
@@ -292,10 +306,7 @@ export const RENEWAL: Vision[] = [
           g.addColorStop(0, f.ink(d.a * f.env));
           g.addColorStop(1, f.ink(0.01 * f.env));
           ctx.fillStyle = g;
-          ctx.beginPath();
-          ctx.moveTo(0, h);
-          for (let x = 0; x <= w + 12; x += 12) ctx.lineTo(x, d.y(x));
-          ctx.lineTo(w, h);
+          rangePath(ctx, d.y, w, h);
           ctx.fill();
         }
         // The stream, breaking out and running towards us through the sand.
@@ -420,7 +431,7 @@ export const RENEWAL: Vision[] = [
       const { x, scale } = room.place(S0 * 3);
       const S = S0 * scale,
         y = h * 0.7;
-      const drips = Array.from({ length: 8 }, () => ({ u: Math.random(), x: rnd(-0.25, 0.25), s: rnd(0.4, 0.7) }));
+      const drips = Array.from({ length: 8 }, () => ({ u: random(), x: rnd(-0.25, 0.25), s: rnd(0.4, 0.7) }));
       const layer = layering();
       return (f) => {
         const { ctx } = f;
@@ -557,7 +568,7 @@ export const RENEWAL: Vision[] = [
         if (by < -0.1) glow(ctx, x, y + by * S, S * 0.4, f.ink(0.3 * f.env * draw, true), f.ink(0, true));
         const dot = f.dot(true);
         for (const d of drips) {
-          const u = (d.u + f.t * d.s) % 1;
+          const u = drift(d, f.t);
           const dy = y + by * S + S * 0.34 + u * u * S * 0.6;
           if (dy > y - S * 0.05) continue; // not where the well's wall would hide them
           ctx.globalAlpha = 0.7 * f.env * draw * (1 - u);
@@ -588,20 +599,9 @@ export const RENEWAL: Vision[] = [
       "pour",
       "jars",
     ],
-    make: (w, h, room) => {
-      const W0 = Math.min(w, h) * 0.45;
-      const { x, scale } = room.place(W0);
-      const W = W0 * scale,
-        y = h * 0.5;
-      // Living water: an ancient terracotta water jar on its stand (pictures/water-jar-bitmap.ts), in
-      // the artwork's colour.
-      const pic = bitmap(WATER_JAR_BITMAP, 0.1, "photo");
-      return (f) => {
-        const come = smooth(f.k * 2.4);
-        glow(f.ctx, x, y, W * 0.5, f.ink(0.08 * f.env * come * (0.92 + 0.08 * f.beat)), f.ink(0));
-        pic.draw(f, x, y + (1 - come) * 14, W, f.env * come, 1 + 0.004 * Math.sin(f.t * 1.1));
-      };
-    },
+    // Living water: an ancient terracotta water jar on its stand (pictures/water-jar-bitmap.ts), in
+    // the artwork's colour.
+    make: photo(WATER_JAR_BITMAP, 0.45),
   },
   {
     name: "garden",
@@ -639,7 +639,7 @@ export const RENEWAL: Vision[] = [
         kind: i % 3,
         petals: 5 + Math.floor(rnd(0, 3)),
         p: rnd(0, TAU),
-        cool: Math.random() < 0.35,
+        cool: random() < 0.35,
       }));
       return (f) => {
         const { ctx } = f;
@@ -894,7 +894,7 @@ export const RENEWAL: Vision[] = [
       const { x, scale } = room.place(S0 * 3.4);
       const S = S0 * scale,
         y = h * 0.68;
-      const drops = Array.from({ length: 8 }, () => ({ u: Math.random(), x: rnd(-1, 1), s: rnd(0.3, 0.5) }));
+      const drops = Array.from({ length: 8 }, () => ({ u: random(), x: rnd(-1, 1), s: rnd(0.3, 0.5) }));
       const layer = layering();
       // The cup's bowl, in its own units: its half-width at height `yy`, from the stem (-0.3)
       // up to the rim (-1.0), used for the bowl, the wine within it and the wine running over.
@@ -1017,7 +1017,7 @@ export const RENEWAL: Vision[] = [
           beam(f, sx, sy, tx, ty, 1, 0.18 * a);
           const dot = f.dot(true);
           for (const d of drops) {
-            const u = (d.u + f.t * d.s) % 1;
+            const u = drift(d, f.t);
             ctx.globalAlpha = a * Math.sin(Math.PI * u);
             ctx.drawImage(dot, tx + d.x * S * 0.3 * u - 2, ty - S * 0.08 + u * u * S * 0.2 - 2, 4, 4);
           }
@@ -1133,7 +1133,7 @@ export const RENEWAL: Vision[] = [
         dy: rnd(-0.2, 0.25),
         bend: rnd(-0.15, 0.15),
       }));
-      const motes = Array.from({ length: 30 }, () => ({ u: Math.random(), x: rnd(-1, 1), s: rnd(0.02, 0.05), p: rnd(0, TAU) }));
+      const motes = Array.from({ length: 30 }, () => ({ u: random(), x: rnd(-1, 1), s: rnd(0.02, 0.05), p: rnd(0, TAU) }));
       const layer = layering();
       return (f) => {
         const { ctx } = f;
@@ -1263,7 +1263,7 @@ export const RENEWAL: Vision[] = [
         glow(ctx, x, ground + armY * R, R * 0.4, f.ink(0.5 * f.env * shine), f.ink(0));
         const dot = f.dot();
         for (const m of motes) {
-          const u = (m.u + f.t * m.s) % 1;
+          const u = drift(m, f.t);
           ctx.globalAlpha = 0.5 * f.env * shine * Math.sin(Math.PI * u);
           ctx.drawImage(dot, x + m.x * R * (0.1 + 0.6 * (1 - u)) + Math.sin(f.t + m.p) * 4 - 2, ground - u * R * 1.3 - 2, 4, 4);
         }
@@ -1308,9 +1308,9 @@ export const RENEWAL: Vision[] = [
         s: rnd(0.1, 0.16),
         a: rnd(-0.7, 0.7),
         p: rnd(0, TAU),
-        flip: Math.random() < 0.5,
+        flip: random() < 0.5,
       }));
-      const drips = Array.from({ length: 16 }, () => ({ u: Math.random(), x: rnd(-1, 1), s: rnd(0.4, 0.8) }));
+      const drips = Array.from({ length: 16 }, () => ({ u: random(), x: rnd(-1, 1), s: rnd(0.4, 0.8) }));
       const layer = layering();
       // The bag of the net, in its own units: its half-width at depth v (0 at the rim, 1 at the
       // bottom), swelling with the catch and gathered in below.
@@ -1474,7 +1474,7 @@ export const RENEWAL: Vision[] = [
         // Water streaming off the net as it comes up, and the shine of the fish.
         const dot = f.dot(true);
         for (const d of drips) {
-          const u = (d.u + f.t * d.s) % 1;
+          const u = drift(d, f.t);
           const dy = sea - lift + S * 1.8 + u * u * (lift + 10);
           if (dy > sea) continue;
           ctx.globalAlpha = 0.7 * f.env * haul * (1 - u);
@@ -1515,7 +1515,7 @@ export const RENEWAL: Vision[] = [
       const ground = h * 0.9;
       const flakes = Array.from({ length: 60 }, () => ({
         x: rnd(0, w),
-        o: Math.random(),
+        o: random(),
         v: rnd(0.04, 0.08),
         r: rnd(3, 6),
         p: rnd(0, TAU),

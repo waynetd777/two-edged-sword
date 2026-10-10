@@ -13,7 +13,7 @@ use serde::Serialize;
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex};
 
 #[derive(Default)]
 pub struct Index {
@@ -23,6 +23,10 @@ pub struct Index {
     pub building: AtomicBool,
     pub done: AtomicUsize,
     pub total: AtomicUsize,
+    /// The library to index next: one asked for while a build runs is done when it finishes.
+    next: Mutex<Option<Arc<Library>>>,
+    /// The connection searches read through, opened on the first.
+    reader: Mutex<Option<Connection>>,
 }
 
 #[derive(Serialize)]
@@ -37,10 +41,8 @@ pub fn key(kind: Kind, id: &str) -> String {
 }
 
 fn stamp(path: &Path) -> String {
-    let m = std::fs::metadata(path).ok();
-    let len = m.as_ref().map(|m| m.len()).unwrap_or(0);
-    let mtime =
-        m.and_then(|m| m.modified().ok()).and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok()).map(|d| d.as_secs()).unwrap_or(0);
+    let (len, mtime) = crate::store::file_stamp(path);
+    let mtime = mtime.as_secs();
     // The version changes when what goes in the index does (2: hyphens inside words taken out), so
     // every module is indexed again.
     format!("2-{len}-{mtime}")
@@ -87,14 +89,24 @@ impl Index {
         }
     }
 
-    /// Brings the index up to date with the library. Runs on a background thread.
-    pub fn update(&self, lib: &Library) -> Result<(), String> {
-        if self.building.swap(true, Ordering::SeqCst) {
-            return Ok(());
+    /// Brings the index up to date with the library. Runs on a background thread. While a build
+    /// is running this returns at once, and that build goes on to index `lib` when it is done.
+    pub fn update(&self, lib: Arc<Library>) -> Result<(), String> {
+        *self.next.lock().unwrap_or_else(|e| e.into_inner()) = Some(lib);
+        let mut r = Ok(());
+        loop {
+            if self.building.swap(true, Ordering::SeqCst) {
+                return r;
+            }
+            while let Some(lib) = self.next.lock().unwrap_or_else(|e| e.into_inner()).take() {
+                r = self.update_inner(&lib);
+            }
+            self.building.store(false, Ordering::SeqCst);
+            // One asked for between the last look and here would otherwise wait for the next update.
+            if self.next.lock().unwrap_or_else(|e| e.into_inner()).is_none() {
+                return r;
+            }
         }
-        let r = self.update_inner(lib);
-        self.building.store(false, Ordering::SeqCst);
-        r
     }
 
     fn update_inner(&self, lib: &Library) -> Result<(), String> {
@@ -141,7 +153,11 @@ impl Index {
     /// Source rowids in the module whose text contains the words (candidates only: the caller
     /// applies the exact phrase and whole-word rules to the text).
     pub fn candidates(&self, kind: Kind, id: &str, fts_query: &str) -> Result<Vec<i64>, String> {
-        let c = open(&self.path).map_err(|e| e.to_string())?;
+        let mut reader = self.reader.lock().unwrap_or_else(|e| e.into_inner());
+        let c = match reader.as_mut() {
+            Some(c) => c,
+            None => reader.insert(open(&self.path).map_err(|e| e.to_string())?),
+        };
         let mut st = c
             .prepare_cached("SELECT map.src FROM docs JOIN map ON map.rowid = docs.rowid WHERE docs MATCH ?1 AND map.key = ?2")
             .map_err(|e| e.to_string())?;
@@ -167,22 +183,22 @@ fn build_one(c: &mut Connection, lib: &Library, kind: Kind, id: &str, path: &Pat
         Kind::Commentary => "SELECT rowid, Comments FROM VerseCommentary",
         _ => "SELECT rowid, Topic || ' ' || Definition FROM Dictionary",
     };
-    let rows: Vec<(i64, String)> = lib.with(kind, id, |src| {
-        let mut st = src.prepare(sql)?;
-        let r = st.query_map([], |r| Ok((r.get::<_, i64>(0)?, r.get::<_, Option<String>>(1)?.unwrap_or_default())))?;
-        r.collect()
-    })?;
     let tx = c.transaction().map_err(|e| e.to_string())?;
-    {
-        let mut map = tx.prepare("INSERT INTO map(key, src) VALUES (?1, ?2)").map_err(|e| e.to_string())?;
-        let mut doc = tx.prepare("INSERT INTO docs(rowid, body) VALUES (?1, ?2)").map_err(|e| e.to_string())?;
-        for (src, html) in rows {
-            map.execute(params![k, src]).map_err(|e| e.to_string())?;
+    // A row at a time, straight from the module: a big dictionary is never held whole.
+    lib.with(kind, id, |src| {
+        let mut st = src.prepare(sql)?;
+        let mut rows = st.query([])?;
+        let mut map = tx.prepare("INSERT INTO map(key, src) VALUES (?1, ?2)")?;
+        let mut doc = tx.prepare("INSERT INTO docs(rowid, body) VALUES (?1, ?2)")?;
+        while let Some(r) = rows.next()? {
+            let (src, html) = (r.get::<_, i64>(0)?, r.get::<_, Option<String>>(1)?.unwrap_or_default());
+            map.execute(params![k, src])?;
             let rowid = tx.last_insert_rowid();
             // Without the hyphens inside words, as search takes them out of the query.
-            doc.execute(params![rowid, crate::search::unhyphen(&plain(&html)).0]).map_err(|e| e.to_string())?;
+            doc.execute(params![rowid, crate::search::unhyphen(&plain(&html)).0])?;
         }
-    }
+        Ok(())
+    })?;
     tx.execute("INSERT OR REPLACE INTO modules(key, stamp) VALUES (?1, ?2)", params![k, stamp(path)]).map_err(|e| e.to_string())?;
     tx.commit().map_err(|e| e.to_string())
 }

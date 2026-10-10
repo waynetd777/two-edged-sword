@@ -13,9 +13,12 @@ mod codex;
 mod copilot;
 
 use serde::Serialize;
+use std::io::{BufRead, BufReader};
 use std::path::PathBuf;
 use std::process::{Child, ChildStdout, Command, Stdio};
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex};
+use std::time::Duration;
+use tauri::{AppHandle, Emitter};
 
 const SYSTEM: &str = "You are a careful Bible study assistant inside a personal study app. \
 The user's message includes the passage they are reading and, sometimes, excerpts from classic commentaries in their library. \
@@ -104,9 +107,12 @@ struct Status {
     text: String,
 }
 
-fn emit_status(app: &tauri::AppHandle, chat_id: &str, text: String) {
-    use tauri::Emitter;
-    let _ = app.emit("ask-status", Status { chat_id: chat_id.to_string(), text });
+/// What the CLI is doing, from a tool it calls: reading a file, searching, or listing files.
+const SEARCHING: &str = "Searching the library";
+const LOOKING: &str = "Looking through the library";
+
+fn reading(path: Option<&str>) -> Option<String> {
+    path.and_then(stem).map(|f| format!("Reading {f}"))
 }
 
 /// A file the model opens, named as the user would: "Matthew Henry's Commentary on the Whole Bible".
@@ -192,6 +198,78 @@ fn finish(mut child: Child, running: &Running) -> bool {
     ok
 }
 
+/// An answer as it streams in: its text, sent to the window as it grows; the session to resume
+/// it by; and the error, if it failed.
+struct Answer {
+    app: AppHandle,
+    chat_id: String,
+    text: String,
+    session_id: Option<String>,
+    error: Option<String>,
+}
+
+impl Answer {
+    fn send(&self, t: &str) {
+        let _ = self.app.emit("ask-chunk", Chunk { chat_id: self.chat_id.clone(), text: t.to_string() });
+    }
+    /// Text that follows on.
+    fn push(&mut self, t: &str) {
+        self.text.push_str(t);
+        self.send(t);
+    }
+    /// A new block of text, written after a search: without a break it runs on from the text
+    /// before it ("…notes on John 1:1.Across the commentaries…").
+    fn new_block(&mut self) {
+        if !self.text.is_empty() && !self.text.ends_with("\n\n") {
+            let sep = if self.text.ends_with('\n') { "\n" } else { "\n\n" };
+            self.push(sep);
+        }
+    }
+    /// What it is doing, shown in place of "Thinking…".
+    fn status(&self, text: Option<String>) {
+        if let Some(text) = text {
+            let _ = self.app.emit("ask-status", Status { chat_id: self.chat_id.clone(), text });
+        }
+    }
+}
+
+/// The CLI's lines read as JSON on a thread of their own, each handed to `on`, then ask-done sent.
+/// `name` is the CLI as the user knows it. With `forgive`, an error only counts when no answer
+/// came (Codex and Copilot also report trouble they recover from); and an answer that ends with
+/// neither text nor an error says it stopped, with what the CLI said if it failed.
+fn stream(
+    app: AppHandle,
+    running: Arc<Running>,
+    chat_id: String,
+    name: &'static str,
+    forgive: bool,
+    (child, stdout, stderr): (Child, ChildStdout, std::thread::JoinHandle<String>),
+    mut on: impl FnMut(&mut Answer, serde_json::Value) + Send + 'static,
+) {
+    std::thread::spawn(move || {
+        let mut a = Answer { app, chat_id, text: String::new(), session_id: None, error: None };
+        for line in BufReader::new(stdout).lines().map_while(Result::ok) {
+            let Ok(v) = serde_json::from_str::<serde_json::Value>(&line) else { continue };
+            on(&mut a, v);
+        }
+        if forgive && !a.text.trim().is_empty() {
+            a.error = None;
+        }
+        let ok = finish(child, &running);
+        if a.error.is_none() && a.text.trim().is_empty() {
+            let msg = stderr.join().unwrap_or_default();
+            a.error = Some(if ok || msg.trim().is_empty() { format!("{name} stopped without answering") } else { msg.trim().to_string() });
+        }
+        let Answer { app, chat_id, text, session_id, error } = a;
+        let _ = app.emit("ask-done", Done { chat_id, session_id, text, error });
+    });
+}
+
+/// The CLI's path, or what to tell the user when it isn't there.
+fn installed(bin: Option<PathBuf>, what: &str) -> Result<PathBuf, String> {
+    bin.ok_or_else(|| format!("{what} isn't installed, or couldn't be found. Install it and sign in, then try again."))
+}
+
 #[derive(Serialize)]
 pub struct Model {
     id: String,
@@ -214,26 +292,41 @@ pub struct CliStatus {
     copilot: Cli,
 }
 
+/// How long asking a login shell, or a CLI its version or models, may take: a profile that hangs
+/// mustn't hold Ask up for ever.
+const ASK_SHELL: Duration = Duration::from_secs(10);
+
 /// A GUI app does not get the login shell's PATH, so look where installers put `name`, then
-/// fall back to asking a login shell.
+/// fall back to asking a login shell. What is found is remembered (while it is still there), so
+/// the shell isn't asked again on every question; what isn't is looked for again next time.
 fn find(name: &str, extra: &[&str]) -> Option<PathBuf> {
-    let home = std::env::var("HOME").unwrap_or_default();
-    let mut places: Vec<String> = vec![format!("{home}/.local/bin/{name}")];
-    places.extend(extra.iter().map(|p| format!("{home}/{p}")));
-    places.extend([format!("/opt/homebrew/bin/{name}"), format!("/usr/local/bin/{name}")]);
-    for p in places {
-        let p = PathBuf::from(p);
-        if p.is_file() {
-            return Some(p);
-        }
+    static FOUND: Mutex<Vec<(String, PathBuf)>> = Mutex::new(Vec::new());
+    let known = FOUND.lock().unwrap_or_else(|e| e.into_inner()).iter().find(|(n, _)| n == name).map(|(_, p)| p.clone());
+    if let Some(p) = known.filter(|p| p.is_file()) {
+        return Some(p);
     }
-    let out = Command::new("/bin/zsh").args(["-lc", &format!("command -v {name}")]).output().ok()?;
+    let found = look_for(name, extra)?;
+    let mut f = FOUND.lock().unwrap_or_else(|e| e.into_inner());
+    f.retain(|(n, _)| n != name);
+    f.push((name.to_string(), found.clone()));
+    Some(found)
+}
+
+fn look_for(name: &str, extra: &[&str]) -> Option<PathBuf> {
+    let home = crate::store::home();
+    let mut places = vec![home.join(".local/bin").join(name)];
+    places.extend(extra.iter().map(|p| home.join(p)));
+    places.extend([PathBuf::from("/opt/homebrew/bin").join(name), PathBuf::from("/usr/local/bin").join(name)]);
+    if let Some(p) = places.into_iter().find(|p| p.is_file()) {
+        return Some(p);
+    }
+    let out = crate::process::output_within(Command::new("/bin/zsh").args(["-lc", &format!("command -v {name}")]), ASK_SHELL).ok()?;
     let s = String::from_utf8_lossy(&out.stdout).trim().to_string();
     (!s.is_empty() && PathBuf::from(&s).is_file()).then(|| PathBuf::from(s))
 }
 
 fn version(bin: &PathBuf) -> Option<String> {
-    let out = Command::new(bin).arg("--version").output().ok()?;
+    let out = crate::process::output_within(Command::new(bin).arg("--version"), ASK_SHELL).ok()?;
     // The first line only: Copilot adds "Run 'copilot update' to check for updates."
     String::from_utf8_lossy(&out.stdout).lines().map(str::trim).find(|l| !l.is_empty()).map(|l| l.trim_end_matches('.').to_string())
 }
@@ -256,8 +349,8 @@ pub fn status() -> CliStatus {
 /// its sessions by working directory, so Claude's stays "claude").
 #[allow(clippy::too_many_arguments)]
 pub fn ask(
-    app: tauri::AppHandle,
-    running: std::sync::Arc<Running>,
+    app: AppHandle,
+    running: Arc<Running>,
     data: &std::path::Path,
     folder: Folder,
     chat_id: String,
@@ -270,7 +363,7 @@ pub fn ask(
         "agy"
     } else if model.starts_with(copilot::PREFIX) {
         "copilot"
-    } else if model.starts_with("claude") {
+    } else if model.starts_with(claude::PREFIX) || model.starts_with("claude-") {
         "claude"
     } else {
         "codex"

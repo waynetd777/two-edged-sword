@@ -20,6 +20,8 @@ export interface Frame {
   dark: boolean;
   /** A colour of the theme's: warm light (gold on paper), or cool (blue). */
   ink: (a: number, cool?: boolean) => string;
+  /** The same colour as numbers. */
+  rgb: (cool?: boolean) => RGB;
   /** A soft round dot of the warm (or cool) colour, 64px, to draw scaled. */
   dot: (cool?: boolean) => HTMLCanvasElement;
 }
@@ -49,7 +51,21 @@ export interface Vision {
 }
 
 export const TAU = Math.PI * 2;
-export const rnd = (a: number, b: number) => a + Math.random() * (b - a);
+/** Math.random, unless a scene (screenshot mode) has seeded it, so its pictures come out the same each time. */
+let rand = Math.random;
+export const random = () => rand();
+/** From now on, the same numbers from `random` each time for the same `seed` (mulberry32). */
+export function seedRandom(seed: number) {
+  let s = seed >>> 0;
+  rand = () => {
+    s = (s + 0x6d2b79f5) >>> 0;
+    let t = s;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+export const rnd = (a: number, b: number) => a + random() * (b - a);
 export const smooth = (x: number) => {
   const c = Math.min(1, Math.max(0, x));
   return c * c * (3 - 2 * c);
@@ -63,6 +79,27 @@ export function glow(ctx: CanvasRenderingContext2D, x: number, y: number, r: num
   ctx.fillStyle = g;
   ctx.fillRect(x - r, y - r, r * 2, r * 2);
 }
+
+/** A glow squashed or stretched (as light thrown on the ground): `sx` as wide and `sy` as high as a round one `r` across. */
+export function flatGlow(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  r: number,
+  sx: number,
+  sy: number,
+  inner: string,
+  outer: string,
+) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(sx, sy);
+  glow(ctx, 0, 0, r, inner, outer);
+  ctx.restore();
+}
+
+/** How far (0–1, round and round) something drifting is: it began `p.u` along, and goes `p.s` a second. */
+export const drift = (p: { u: number; s: number }, t: number) => (p.u + t * p.s) % 1;
 
 /** A beam of light from (x1, y1) to (x2, y2), fading at both ends, with a wide faint halo. */
 export function beam(f: Frame, x1: number, y1: number, x2: number, y2: number, width: number, a: number) {
@@ -93,6 +130,14 @@ export function beam(f: Frame, x1: number, y1: number, x2: number, y2: number, w
 export function ridge(base: number, amp: number) {
   const ws = [0, 1, 2].map(() => ({ f: rnd(0.002, 0.009), p: rnd(0, TAU), a: rnd(0.4, 1) }));
   return (x: number) => base - amp * ws.reduce((s, q) => s + q.a * Math.sin(x * q.f + q.p), 0) * 0.5;
+}
+
+/** The path of a range along `y` (a `ridge`) across a page `w` wide, down to its foot at `h`, in steps of `step`; `off` slides it along. */
+export function rangePath(ctx: CanvasRenderingContext2D, y: (x: number) => number, w: number, h: number, off = 0, step = 12) {
+  ctx.beginPath();
+  ctx.moveTo(0, h);
+  for (let x = 0; x <= w + step; x += step) ctx.lineTo(x, y(x + off));
+  ctx.lineTo(w, h);
 }
 
 export const displayFont = () => getComputedStyle(document.documentElement).getPropertyValue("--display") || "Georgia, serif";
@@ -136,7 +181,7 @@ export interface Branch {
 export function grow(len: number, ang: number, depth: number, max: number, spread: number): Branch {
   const kids: Branch[] = [];
   if (depth < max) {
-    const n = Math.random() < 0.35 ? 3 : 2;
+    const n = random() < 0.35 ? 3 : 2;
     for (let i = 0; i < n; i++) {
       const a = ang + (i - (n - 1) / 2) * spread * rnd(0.7, 1.3) + rnd(-0.1, 0.1);
       kids.push(grow(len * rnd(0.68, 0.8), a, depth + 1, max, spread));
@@ -146,10 +191,7 @@ export function grow(len: number, ang: number, depth: number, max: number, sprea
 }
 
 /** The page's own colour (as in styles.css), which solid shapes are mixed from. */
-export const pageRGB = (dark: boolean): RGB => (dark ? [13, 17, 23] : [246, 248, 250]);
-
-/** The ink's colour as numbers. */
-export const inkRGB = (f: Frame, cool = false): RGB => f.ink(1, cool).slice(5).split(",").slice(0, 3).map(Number) as RGB;
+const pageRGB = (dark: boolean): RGB => (dark ? [13, 17, 23] : [246, 248, 250]);
 
 /**
  * Solid colours mixed from the page's own and the ink: `k` 0 is the page, 1 the ink. For shapes
@@ -157,7 +199,7 @@ export const inkRGB = (f: Frame, cool = false): RGB => f.ink(1, cool).slice(5).s
  * what's behind them is hidden.
  */
 export function tones(f: Frame, cool = false) {
-  const ink = inkRGB(f, cool),
+  const ink = f.rgb(cool),
     page = pageRGB(f.dark);
   return (k: number) => `rgb(${page.map((p, i) => Math.round(p + (ink[i] - p) * Math.min(1, Math.max(0, k)))).join(",")})`;
 }
@@ -193,7 +235,7 @@ export function layering() {
  * (which draw their layers at a third to a half) do, while keeping fine lines such as a wall's
  * bricks.
  */
-export const LAID = 0.8;
+const LAID = 0.8;
 
 /** How faintly the bitmaps sit: fainter than `LAID`, as a photo's shading is denser than a drawing's. */
 const PHOTO = 0.62;
@@ -235,6 +277,8 @@ export function ripples(f: Frame, x: number, y: number, q: number, rx: number, a
   }
 }
 
+/** Each bitmap, made once (when its picture is first shown) and kept, tinted, for the next time. */
+const bitmaps = new Map<string, ReturnType<typeof loadBitmap>>();
 /**
  * A picture from a small grey bitmap (made by tools/bitmap.py, its edges already faded): shown
  * in the ink's colour, tinted once per colour and kept. On the dark page its lights are the
@@ -245,7 +289,14 @@ export function ripples(f: Frame, x: number, y: number, q: number, rx: number, a
  * light as the paper, its background kept so the pale subject stands against it.
  */
 export function bitmap(uri: string, floor = 0.3, light: "inverted" | "photo" = "inverted") {
+  const key = `${floor}|${light}|${uri}`;
+  let b = bitmaps.get(key);
+  if (!b) bitmaps.set(key, (b = loadBitmap(uri, floor, light)));
+  return b;
+}
+function loadBitmap(uri: string, floor: number, light: "inverted" | "photo") {
   const img = new Image();
+  img.onerror = () => console.error("picture bitmap failed to load");
   img.src = uri;
   let tinted: { key: string; canvas: HTMLCanvasElement } | null = null;
   const tint = (f: Frame) => {
@@ -255,7 +306,7 @@ export function bitmap(uri: string, floor = 0.3, light: "inverted" | "photo" = "
     const g = c.getContext("2d")!;
     g.drawImage(img, 0, 0);
     const d = g.getImageData(0, 0, c.width, c.height);
-    const [r, gr, bl] = inkRGB(f);
+    const [r, gr, bl] = f.rgb();
     for (let i = 0; i < d.data.length; i += 4) {
       const lum = d.data[i] / 255;
       const above = Math.max(0, (lum - floor) / (1 - floor)); // how far above the background
@@ -273,7 +324,7 @@ export function bitmap(uri: string, floor = 0.3, light: "inverted" | "photo" = "
     draw(f: Frame, x: number, y: number, width: number, a: number, k = 1) {
       a *= PHOTO;
       if (!img.complete || !img.naturalWidth) return;
-      const key = `${f.ink(1)}|${f.dark}`;
+      const key = `${f.rgb().join(",")}|${f.dark}`;
       if (!tinted || tinted.key !== key) tinted = { key, canvas: tint(f) };
       const h = (width * img.naturalHeight) / img.naturalWidth;
       const { ctx } = f;
@@ -286,5 +337,27 @@ export function bitmap(uri: string, floor = 0.3, light: "inverted" | "photo" = "
       ctx.drawImage(tinted.canvas, -width / 2, -h / 2, width, h);
       ctx.restore();
     },
+  };
+}
+
+/**
+ * A picture from a bitmap (an engraving or photograph, or with `painting` a detail of a painting),
+ * `size` of the page's shorter side wide, in the middle of the page beside the words: rising a
+ * little into place in a soft glow that swells on the beat, and breathing; a painting comes up
+ * more slowly and breathes less.
+ */
+export function photo(uri: string, size: number, painting = false): Vision["make"] {
+  const [rate, rise, sway, breath] = painting ? [2.2, 12, 0.003, 0.9] : [2.4, 14, 0.004, 1.1];
+  return (w, h, room) => {
+    const W0 = Math.min(w, h) * size;
+    const { x, scale } = room.place(W0);
+    const W = W0 * scale,
+      y = h * 0.5;
+    const pic = bitmap(uri, 0.1, "photo");
+    return (f) => {
+      const come = smooth(f.k * rate);
+      glow(f.ctx, x, y, W * 0.5, f.ink(0.08 * f.env * come * (0.92 + 0.08 * f.beat)), f.ink(0));
+      pic.draw(f, x, y + (1 - come) * rise, W, f.env * come, 1 + sway * Math.sin(f.t * breath));
+    };
   };
 }

@@ -16,8 +16,6 @@
 //! top of `setup` is what makes this usable at all: the decision lands before anything shows a
 //! window, so a login launch never puts one on screen to take away again.
 
-#![cfg(target_os = "macos")]
-
 use objc2::msg_send;
 use objc2::runtime::{AnyClass, AnyObject};
 /// Four-char codes, as the Apple Event Manager spells them.

@@ -28,7 +28,6 @@ struct Event {
     len: usize,
 }
 
-#[cfg(target_os = "macos")]
 mod mac {
     use super::{Event, Voice};
     use objc2::rc::Retained;
@@ -172,32 +171,20 @@ mod mac {
 
 #[tauri::command]
 pub fn tts_voices() -> Vec<Voice> {
-    #[cfg(target_os = "macos")]
-    return mac::voices();
-    #[cfg(not(target_os = "macos"))]
-    Vec::new()
+    mac::voices()
 }
 
 #[tauri::command]
 pub fn tts_speak(app: AppHandle, id: u64, text: String, voice: Option<String>, rate: f32) {
-    #[cfg(target_os = "macos")]
     mac::speak(&app, id, text, voice, rate);
-    #[cfg(not(target_os = "macos"))]
-    let _ = (app, id, text, voice, rate);
 }
 
 #[tauri::command]
 pub fn tts_pause(app: AppHandle, on: bool) {
-    #[cfg(target_os = "macos")]
     mac::pause(&app, on);
-    #[cfg(not(target_os = "macos"))]
-    let _ = (app, on);
 }
 
 #[tauri::command]
 pub fn tts_stop(app: AppHandle) {
-    #[cfg(target_os = "macos")]
     mac::stop(&app);
-    #[cfg(not(target_os = "macos"))]
-    let _ = app;
 }

@@ -4,7 +4,7 @@
 // Breakthrough and freedom: chains broken, the veil torn, Jericho, the Red Sea, the fiery
 // furnace, the dry bones, the prison doors, five smooth stones, the storm stilled, the shield.
 
-import { beam, bitmap, flame, glow, lay, layering, ridge, rnd, smooth, TAU, tones, Vision } from "./kit";
+import { beam, drift, flame, flatGlow, glow, lay, layering, photo, random, rangePath, ridge, rnd, smooth, TAU, tones, Vision } from "./kit";
 import { KEY_BITMAP } from "./key-bitmap";
 import { BREASTPLATE_BITMAP } from "./breastplate-bitmap";
 import { HELMET_BITMAP } from "./helmet-bitmap";
@@ -350,8 +350,7 @@ export const DELIVERANCE: Vision[] = [
           const fall = Math.min(1, q);
           const dy = fall * fall * (ground + S * 0.1 - b.y - b.h) * (1 + b.d * 0.2);
           const dx = b.vx * fall * S * 0.1 * Math.sign(b.x - x + 0.01) * (0.5 + Math.abs(b.x - x) / S);
-          if (fall >= 1 && Math.random() < 0.02 && dust.length < 60)
-            dust.push({ x: b.x + dx, y: ground + S * 0.1, t: f.t, r: rnd(10, 22) });
+          if (fall >= 1 && random() < 0.02 && dust.length < 60) dust.push({ x: b.x + dx, y: ground + S * 0.1, t: f.t, r: rnd(10, 22) });
           L.save();
           L.translate(b.x + dx + b.w / 2, b.y + dy + b.h / 2);
           L.rotate(b.spin * fall * 0.6);
@@ -418,9 +417,9 @@ export const DELIVERANCE: Vision[] = [
       const cx = room.place(w * 0.3).x,
         hz = h * 0.5;
       const spray = Array.from({ length: 50 }, () => ({
-        u: Math.random(),
-        side: Math.random() < 0.5 ? -1 : 1,
-        v: Math.random(),
+        u: random(),
+        side: random() < 0.5 ? -1 : 1,
+        v: random(),
         s: rnd(0.1, 0.25),
         p: rnd(0, TAU),
       }));
@@ -508,7 +507,7 @@ export const DELIVERANCE: Vision[] = [
         // Spray blown off the crests.
         const dot = f.dot(true);
         for (const sp of spray) {
-          const u = (sp.u + f.t * sp.s) % 1;
+          const u = drift(sp, f.t);
           const y = hz + sp.v * (h - hz);
           const top = y - crest(y);
           ctx.globalAlpha = 0.5 * f.env * part * Math.sin(Math.PI * u);
@@ -549,7 +548,7 @@ export const DELIVERANCE: Vision[] = [
       const S = S0 * scale,
         floor = h * 0.84;
       const tongues = Array.from({ length: 16 }, () => ({ x: rnd(-0.95, 0.95), s: rnd(0.35, 0.7), p: rnd(0, TAU) }));
-      const sparks = Array.from({ length: 30 }, () => ({ u: Math.random(), x: rnd(-1, 1), s: rnd(0.12, 0.25), p: rnd(0, TAU) }));
+      const sparks = Array.from({ length: 30 }, () => ({ u: random(), x: rnd(-1, 1), s: rnd(0.12, 0.25), p: rnd(0, TAU) }));
       const layer = layering();
       return (f) => {
         const { ctx } = f;
@@ -557,11 +556,7 @@ export const DELIVERANCE: Vision[] = [
         const four = smooth(f.k * 3 - 0.6); // and the fourth is seen among them, like the Son of God
         // The heat and light of it, out over the floor.
         glow(ctx, x, floor - S * 0.6, S * 1.8, f.ink(0.26 * f.env * roar), f.ink(0));
-        ctx.save();
-        ctx.translate(x, floor);
-        ctx.scale(2.6, 0.4);
-        glow(ctx, 0, 0, S * 1.1, f.ink(0.3 * f.env * roar), f.ink(0));
-        ctx.restore();
+        flatGlow(ctx, x, floor, S * 1.1, 2.6, 0.4, f.ink(0.3 * f.env * roar), f.ink(0));
         // The furnace mouth, a great arch of brick, dark; within it the fire, solid and bright, and
         // the four walking in the midst of it: three dark against the flame, and one shining.
         const { L, canvas } = layer(f);
@@ -634,7 +629,7 @@ export const DELIVERANCE: Vision[] = [
         for (let i = 0; i < 6; i++) flame(f, x + (i - 2.5) * S * 0.36, floor + 2, S * (0.3 + (i % 3) * 0.12), i * 2.1, 0.5 * roar);
         const dot = f.dot();
         for (const s of sparks) {
-          const u = (s.u + f.t * s.s) % 1;
+          const u = drift(s, f.t);
           ctx.globalAlpha = f.env * (1 - u) * 0.8;
           ctx.drawImage(dot, x + s.x * S * (1 + u * 0.5) + Math.sin(f.t * 2 + s.p) * 6 - 2, floor - S * 1.2 - u * h * 0.35 - 2, 4, 4);
         }
@@ -711,7 +706,7 @@ export const DELIVERANCE: Vision[] = [
           x: rnd(0.04, 0.96) * w,
           y,
           len: (26 + near * 30) * rnd(0.85, 1.15),
-          a: rnd(-0.45, 0.45) + (Math.random() < 0.3 ? 1.2 : 0) * rnd(0.5, 1),
+          a: rnd(-0.45, 0.45) + (random() < 0.3 ? 1.2 : 0) * rnd(0.5, 1),
           d: rnd(0, 1),
           p: rnd(0, TAU),
         };
@@ -755,7 +750,7 @@ export const DELIVERANCE: Vision[] = [
         y: rnd(0.3, 0.9) * h,
         len: rnd(0.15, 0.35) * w,
         o: rnd(0, 1),
-        from: Math.random() < 0.5 ? 1 : -1,
+        from: random() < 0.5 ? 1 : -1,
       }));
       const layer = layering();
       return (f) => {
@@ -767,10 +762,7 @@ export const DELIVERANCE: Vision[] = [
         vg.addColorStop(0, f.ink(0.07 * f.env, true));
         vg.addColorStop(1, f.ink(0.01 * f.env, true));
         ctx.fillStyle = vg;
-        ctx.beginPath();
-        ctx.moveTo(0, floor + 20);
-        for (let x = 0; x <= w + 12; x += 12) ctx.lineTo(x, valley(x));
-        ctx.lineTo(w, floor + 20);
+        rangePath(ctx, valley, w, floor + 20);
         ctx.fill();
         // The breath, from the four winds: wisps sweeping in from both sides and over the floor.
         if (breath > 0) {
@@ -974,19 +966,8 @@ export const DELIVERANCE: Vision[] = [
       "bind",
       "chains",
     ],
-    make: (w, h, room) => {
-      const W0 = Math.min(w, h) * 0.55;
-      const { x, scale } = room.place(W0);
-      const W = W0 * scale,
-        y = h * 0.5;
-      // The keys of the kingdom: an old iron key (pictures/key-bitmap.ts), in the artwork's colour.
-      const pic = bitmap(KEY_BITMAP, 0.1, "photo");
-      return (f) => {
-        const come = smooth(f.k * 2.4);
-        glow(f.ctx, x, y, W * 0.5, f.ink(0.08 * f.env * come * (0.92 + 0.08 * f.beat)), f.ink(0));
-        pic.draw(f, x, y + (1 - come) * 14, W, f.env * come, 1 + 0.004 * Math.sin(f.t * 1.1));
-      };
-    },
+    // The keys of the kingdom: an old iron key (pictures/key-bitmap.ts), in the artwork's colour.
+    make: photo(KEY_BITMAP, 0.55),
   },
   {
     name: "five smooth stones",
@@ -1166,10 +1147,7 @@ export const DELIVERANCE: Vision[] = [
           g.addColorStop(0, f.ink((0.12 + i * 0.03) * f.env, true));
           g.addColorStop(1, f.ink(0.01 * f.env, true));
           ctx.fillStyle = g;
-          ctx.beginPath();
-          ctx.moveTo(0, h + 10);
-          for (let x = 0; x <= w + 10; x += 10) ctx.lineTo(x, y0 + wave(x, i, f.t) * (0.5 + i * 0.15));
-          ctx.lineTo(w, h + 10);
+          rangePath(ctx, (x) => y0 + wave(x, i, f.t) * (0.5 + i * 0.15), w, h + 10, 0, 10);
           ctx.fill();
         }
         const dot = f.dot(true);
@@ -1333,19 +1311,8 @@ export const DELIVERANCE: Vision[] = [
       "victory",
       "the full armour",
     ],
-    make: (w, h, room) => {
-      const W0 = Math.min(w, h) * 0.5;
-      const { x, scale } = room.place(W0);
-      const W = W0 * scale,
-        y = h * 0.5;
-      // The helmet of salvation: a close-helmet (pictures/helmet-bitmap.ts), in the artwork's colour.
-      const pic = bitmap(HELMET_BITMAP, 0.1, "photo");
-      return (f) => {
-        const come = smooth(f.k * 2.4);
-        glow(f.ctx, x, y, W * 0.5, f.ink(0.08 * f.env * come * (0.92 + 0.08 * f.beat)), f.ink(0));
-        pic.draw(f, x, y + (1 - come) * 14, W, f.env * come, 1 + 0.004 * Math.sin(f.t * 1.1));
-      };
-    },
+    // The helmet of salvation: a close-helmet (pictures/helmet-bitmap.ts), in the artwork's colour.
+    make: photo(HELMET_BITMAP, 0.5),
   },
   {
     name: "breastplate",
@@ -1368,19 +1335,8 @@ export const DELIVERANCE: Vision[] = [
       "stand firm",
       "the full armour",
     ],
-    make: (w, h, room) => {
-      const W0 = Math.min(w, h) * 0.5;
-      const { x, scale } = room.place(W0);
-      const W = W0 * scale,
-        y = h * 0.5;
-      // The breastplate of righteousness: a steel breastplate etched with a star
-      // (pictures/breastplate-bitmap.ts), in the artwork's colour.
-      const pic = bitmap(BREASTPLATE_BITMAP, 0.1, "photo");
-      return (f) => {
-        const come = smooth(f.k * 2.4);
-        glow(f.ctx, x, y, W * 0.5, f.ink(0.08 * f.env * come * (0.92 + 0.08 * f.beat)), f.ink(0));
-        pic.draw(f, x, y + (1 - come) * 14, W, f.env * come, 1 + 0.004 * Math.sin(f.t * 1.1));
-      };
-    },
+    // The breastplate of righteousness: a steel breastplate etched with a star
+    // (pictures/breastplate-bitmap.ts), in the artwork's colour.
+    make: photo(BREASTPLATE_BITMAP, 0.5),
   },
 ];

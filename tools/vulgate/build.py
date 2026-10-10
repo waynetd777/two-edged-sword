@@ -27,16 +27,15 @@ Daniel 13–14 keep their own numbers, as do Tobit, Judith, Wisdom, Sirach, Baru
 Letter of Jeremiah) and 1–2 Maccabees, numbered 67–73 as in latin.bbli. Chapters that still
 differ from the KJV are printed.
 
-Downloads are cached in ~/Library/Caches/Two-edged Sword/vulgate.
+The text is the project's at a fixed commit. Downloads are cached in ~/Library/Caches/Two-edged Sword/vulgate.
 """
-import io, os, re, sqlite3, sys, urllib.request, zipfile
+import io, re, sys, zipfile
 from pathlib import Path
 
-HOME = Path(os.environ.get("HOME", ""))
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from modules import LIBRARY, find  # noqa: E402
-CACHE = HOME / "Library/Caches/Two-edged Sword/vulgate"
-SOURCE = "https://bitbucket.org/clementinetextproject/text/get/master.zip"
+from modules import CACHES, LIBRARY, chapter_lengths, fetch, module  # noqa: E402
+CACHE = CACHES / "vulgate"
+SOURCE = "https://bitbucket.org/clementinetextproject/text/get/edc85da058be630183d26e4deb6714ade80e600c.zip"
 
 # The project's file names, in e-Sword's book order: 1–66, then the deuterocanon as latin.bbli numbers it.
 BOOKS = ["Gn", "Ex", "Lv", "Nm", "Dt", "Jos", "Jdc", "Rt", "1Rg", "2Rg", "3Rg", "4Rg", "1Par", "2Par", "Esr", "Neh", "Est", "Job", "Ps",
@@ -93,12 +92,7 @@ PSALM_RULES = ["2:13 +", "4:10 +", "15:10 / Notas mihi", "43:22 / Quoniam propte
 
 
 def get(url, name):
-    p = CACHE / name
-    if not p.exists():
-        p.parent.mkdir(parents=True, exist_ok=True)
-        with urllib.request.urlopen(url, timeout=120) as r:
-            p.write_bytes(r.read())
-    return p.read_bytes()
+    return fetch(url, CACHE / name).read_bytes()
 
 
 def source():
@@ -203,14 +197,9 @@ def move(rows, rules, kjv, b):
     return [(c, v, t) for (c, v), t in sorted(out.items())]
 
 
-def chapter_lengths(module):
-    c = sqlite3.connect(f"file:{find(module + '.bbli')}?immutable=1", uri=True)
-    return {(b, ch): n for b, ch, n in c.execute("SELECT Book, Chapter, MAX(Verse) FROM Bible GROUP BY Book, Chapter")}
-
-
 def main():
     LIBRARY.mkdir(parents=True, exist_ok=True)
-    kjv = chapter_lengths("kjv")
+    kjv = chapter_lengths("kjv.bbli")
     src = source()
     verses = []
     for b, name in enumerate(BOOKS, 1):
@@ -244,19 +233,9 @@ def main():
             "entered 2002–2005 from a later printing of the Clementine and checked against older ones. Verses are numbered as in the "
             "KJV: the Psalms by the Hebrew numbering, their titles part of verse 1. Built by Two-edged Sword's tools/vulgate.</p>"
             "<p>Public domain.</p>")
-    p = LIBRARY / "clementine.bbli"
-    tmp = p.with_suffix(".tmp")
-    tmp.unlink(missing_ok=True)
-    c = sqlite3.connect(tmp)
-    c.executescript("""CREATE TABLE Details (Title NVARCHAR(100), Abbreviation NVARCHAR(50), Information TEXT, Version INT, OldTestament BOOL, NewTestament BOOL, Apocrypha BOOL, Strongs BOOL, RightToLeft BOOL);
-        CREATE TABLE Bible (Book INT, Chapter INT, Verse INT, Scripture TEXT);
-        CREATE INDEX BookChapterVerseIndex ON Bible (Book, Chapter, Verse);""")
-    c.execute("INSERT INTO Details VALUES (?,?,?,1,1,1,1,0,0)", ("Latin Vulgate (Clementine)", "Vulg-C", info))
-    c.executemany("INSERT INTO Bible VALUES (?,?,?,?)", verses)
-    c.commit()
-    c.close()
-    tmp.replace(p)
-    print(f"{p.name}: {len(verses)} verses")
+    with module("clementine.bbli", "Latin Vulgate (Clementine)", "Vulg-C", info, apocrypha=True) as c:
+        c.executemany("INSERT INTO Bible VALUES (?,?,?,?)", verses)
+    print(f"clementine.bbli: {len(verses)} verses")
 
 
 if __name__ == "__main__":

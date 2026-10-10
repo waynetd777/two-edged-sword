@@ -7,6 +7,7 @@
 
 use serde::Serialize;
 use std::process::Command;
+use std::time::Duration;
 
 /// The app's own playlist, remade each time songs are played. Nothing else in the library is touched.
 const PLAYLIST: &str = "Two-edged Sword";
@@ -39,9 +40,16 @@ pub struct State {
     pub bpm: f64,
 }
 
+/// How long a quick question to Music may take before it is given up (a hung Music would otherwise
+/// pile up a script per poll), and one that lists or queues the library, or waits on the
+/// permission prompt the first time.
+const QUICK: Duration = Duration::from_secs(15);
+const SLOW: Duration = Duration::from_secs(180);
+
 /// Runs a JXA script with one argument (read as `argv[0]`) and returns what it printed.
-fn jxa(script: &str, arg: &str) -> Result<String, String> {
-    let out = Command::new("/usr/bin/osascript").args(["-l", "JavaScript", "-e", script, arg]).output().map_err(|e| e.to_string())?;
+fn jxa(script: &str, arg: &str, limit: Duration) -> Result<String, String> {
+    let out = crate::process::output_within(Command::new("/usr/bin/osascript").args(["-l", "JavaScript", "-e", script, arg]), limit)
+        .map_err(|e| format!("Music didn't answer: {e}"))?;
     if out.status.success() {
         return Ok(String::from_utf8_lossy(&out.stdout).trim().to_string());
     }
@@ -61,7 +69,7 @@ pub fn tracks() -> Result<Vec<Track>, String> {
         for (let i = 0; i < ids.length; i++) if (kinds[i] === "song") out.push([ids[i], names[i], artists[i] || "", genres[i] || ""]);
         return JSON.stringify(out);
     }"#;
-    let rows: Vec<(String, String, String, String)> = serde_json::from_str(&jxa(js, "")?).map_err(|e| e.to_string())?;
+    let rows: Vec<(String, String, String, String)> = serde_json::from_str(&jxa(js, "", SLOW)?).map_err(|e| e.to_string())?;
     Ok(rows.into_iter().map(|(id, name, artist, genre)| Track { id, name, artist, genre }).collect())
 }
 
@@ -81,7 +89,7 @@ pub fn play(ids: &[String]) -> Result<usize, String> {
         return String(n);
     }"#;
     let arg = serde_json::to_string(&(PLAYLIST, OLD_PLAYLIST, ids)).map_err(|e| e.to_string())?;
-    jxa(js, &arg)?.parse().map_err(|_| "Music didn't say what it queued".to_string())
+    jxa(js, &arg, SLOW)?.parse().map_err(|_| "Music didn't say what it queued".to_string())
 }
 
 pub fn state() -> Result<State, String> {
@@ -98,7 +106,7 @@ pub fn state() -> Result<State, String> {
         return JSON.stringify([state, name, artist, ours, album, position, duration, lyrics, bpm]);
     }"#;
     let (state, name, artist, ours, album, position, duration, lyrics, bpm): (String, String, String, bool, String, f64, f64, String, f64) =
-        serde_json::from_str(&jxa(js, PLAYLIST)?).map_err(|e| e.to_string())?;
+        serde_json::from_str(&jxa(js, PLAYLIST, QUICK)?).map_err(|e| e.to_string())?;
     Ok(State { state, name, artist, ours, album, position, duration, lyrics, bpm })
 }
 
@@ -107,10 +115,10 @@ pub fn state() -> Result<State, String> {
 /// Music has gone on to play after it (AutoPlay's similar songs) as well. "show" brings Music to the front.
 pub fn control(cmd: &str) -> Result<(), String> {
     if cmd == "show" {
-        return jxa(r#"function run(argv) { Application("Music").activate(); return ""; }"#, "").map(|_| ());
+        return jxa(r#"function run(argv) { Application("Music").activate(); return ""; }"#, "", QUICK).map(|_| ());
     }
     if cmd == "stop" {
-        return jxa(r#"function run(argv) { const m = Application("Music"); if (m.running() && m.playerState() !== "stopped") m.stop(); return ""; }"#, "").map(|_| ());
+        return jxa(r#"function run(argv) { const m = Application("Music"); if (m.running() && m.playerState() !== "stopped") m.stop(); return ""; }"#, "", QUICK).map(|_| ());
     }
     if !["pause", "play", "next"].contains(&cmd) {
         return Err(format!("unknown command {cmd}"));
@@ -125,7 +133,7 @@ pub fn control(cmd: &str) -> Result<(), String> {
         if (cmd === "pause") m.pause(); else if (cmd === "play") m.play(); else m.nextTrack();
         return "";
     }"#;
-    jxa(js, &serde_json::to_string(&(cmd, PLAYLIST)).map_err(|e| e.to_string())?).map(|_| ())
+    jxa(js, &serde_json::to_string(&(cmd, PLAYLIST)).map_err(|e| e.to_string())?, QUICK).map(|_| ())
 }
 
 /// The playing song's artwork, as the image file's bytes (JPEG or PNG), or none. AppleScript, not
@@ -146,9 +154,17 @@ pub fn artwork() -> Result<Vec<u8>, String> {
   close access fh
   return "ok"
 end run"#;
-    let path = std::env::temp_dir().join(format!("tes-artwork-{}", std::process::id()));
-    let out = Command::new("/usr/bin/osascript").args(["-e", script, &path.to_string_lossy()]).output().map_err(|e| e.to_string())?;
+    // A file of its own each time: two asks at once mustn't read or remove each other's.
+    static N: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
+    let n = N.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+    let path = std::env::temp_dir().join(format!("tes-artwork-{}-{n}", std::process::id()));
+    let out = crate::process::output_within(Command::new("/usr/bin/osascript").args(["-e", script, &path.to_string_lossy()]), QUICK);
+    let Ok(out) = out else {
+        let _ = std::fs::remove_file(&path);
+        return Ok(Vec::new());
+    };
     if !out.status.success() || String::from_utf8_lossy(&out.stdout).trim() != "ok" {
+        let _ = std::fs::remove_file(&path);
         return Ok(Vec::new());
     }
     let bytes = std::fs::read(&path).map_err(|e| e.to_string());

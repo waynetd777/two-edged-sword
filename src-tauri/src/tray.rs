@@ -151,10 +151,7 @@ pub struct TrayInfo {
 /// What the menu window shows.
 #[tauri::command]
 pub fn tray_info(tray: tauri::State<'_, Tray>) -> TrayInfo {
-    #[cfg(target_os = "macos")]
     let (login_available, login) = (crate::login_item::available(), crate::login_item::status().is_on());
-    #[cfg(not(target_os = "macos"))]
-    let (login_available, login) = (false, false);
     TrayInfo { state: tray.0.lock().unwrap_or_else(|p| p.into_inner()).clone(), login_available, login }
 }
 
@@ -183,12 +180,9 @@ pub fn tray_do(app: AppHandle, id: String) {
 
 /// Flips Open at Login. If macOS wants the user to approve it, System Settings opens at Login Items.
 fn toggle_login() {
-    #[cfg(target_os = "macos")]
-    {
-        use crate::login_item::{self, Status};
-        if login_item::set(!login_item::status().is_on()) == Status::RequiresApproval {
-            login_item::open_settings();
-        }
+    use crate::login_item::{self, Status};
+    if login_item::set(!login_item::status().is_on()) == Status::RequiresApproval {
+        login_item::open_settings();
     }
 }
 
@@ -229,6 +223,8 @@ fn due(s: &TrayState, date: &str, minute: i64, fired: Option<&str>) -> bool {
 /// Checks twice a minute whether the reminder is due. The date it last fired is kept in the store,
 /// so relaunching the app doesn't remind twice on one day.
 pub fn start_reminders(app: AppHandle) {
+    // Also kept here, so a store that can't be written doesn't remind every 30 seconds.
+    let mut fired_here: Option<String> = None;
     std::thread::spawn(move || loop {
         std::thread::sleep(std::time::Duration::from_secs(30));
         let Some(s) = app.state::<Tray>().0.lock().unwrap_or_else(|p| p.into_inner()).clone() else { continue };
@@ -237,6 +233,7 @@ pub fn start_reminders(app: AppHandle) {
         let minute = (now.hour() * 60 + now.minute()) as i64;
         let dir = store::data_dir();
         let fired = store::read(&dir, "reminder").ok().and_then(|v| v.get("fired").and_then(|f| f.as_str()).map(str::to_string));
+        let fired = if fired_here.as_deref() == Some(date.as_str()) { fired_here.clone() } else { fired };
         if !due(&s, &date, minute, fired.as_deref()) {
             continue;
         }
@@ -244,7 +241,10 @@ pub fn start_reminders(app: AppHandle) {
         if let Err(e) = app.notification().builder().title("Quiet Time").body(body).show() {
             eprintln!("reminder: {e}");
         }
-        let _ = store::write(&dir, "reminder", &serde_json::json!({ "fired": date }));
+        if let Err(e) = store::write(&dir, "reminder", &serde_json::json!({ "fired": date })) {
+            eprintln!("reminder: {e}");
+        }
+        fired_here = Some(date);
     });
 }
 

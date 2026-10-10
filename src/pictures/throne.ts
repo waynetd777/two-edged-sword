@@ -4,7 +4,7 @@
 // The throne room: the throne, the Lamb, the Lion of Judah, the sea of glass, crowns cast down,
 // the seraph's six wings, lightnings, the scroll, the trumpet, the heavenly host.
 
-import { beam, bitmap, glow, lay, layering, rnd, smooth, TAU, tones, Vision } from "./kit";
+import { beam, bitmap, glow, lay, layering, photo, random, rnd, smooth, TAU, tones, Vision } from "./kit";
 import { ANDES_CROWN_BITMAP } from "./andes-crown-bitmap";
 import { LAMB_BITMAP } from "./lamb-bitmap";
 import { LION_BITMAP } from "./lion-bitmap";
@@ -296,20 +296,9 @@ export const THRONE: Vision[] = [
       "splendour",
       "enthroned",
     ],
-    make: (w, h, room) => {
-      const W0 = Math.min(w, h) * 0.55;
-      const { x, scale } = room.place(W0);
-      const W = W0 * scale,
-        y = h * 0.5;
-      // Crown him with many crowns: the Crown of the Andes, gold and emeralds
-      // (pictures/andes-crown-bitmap.ts), in the artwork's colour.
-      const pic = bitmap(ANDES_CROWN_BITMAP, 0.1, "photo");
-      return (f) => {
-        const come = smooth(f.k * 2.4);
-        glow(f.ctx, x, y, W * 0.5, f.ink(0.08 * f.env * come * (0.92 + 0.08 * f.beat)), f.ink(0));
-        pic.draw(f, x, y + (1 - come) * 14, W, f.env * come, 1 + 0.004 * Math.sin(f.t * 1.1));
-      };
-    },
+    // Crown him with many crowns: the Crown of the Andes, gold and emeralds
+    // (pictures/andes-crown-bitmap.ts), in the artwork's colour.
+    make: photo(ANDES_CROWN_BITMAP, 0.55),
   },
   {
     name: "sea of glass",
@@ -336,11 +325,11 @@ export const THRONE: Vision[] = [
       const hz = h * 0.42,
         cx = w * rnd(0.4, 0.6);
       const glints = Array.from({ length: 90 }, () => ({
-        u: Math.random() ** 1.5,
+        u: random() ** 1.5,
         x: rnd(-1, 1),
         p: rnd(0, TAU),
         l: rnd(8, 30),
-        fire: Math.random() < 0.3,
+        fire: random() < 0.3,
       }));
       return (f) => {
         const { ctx } = f;
@@ -609,9 +598,9 @@ export const THRONE: Vision[] = [
           const nx = px + rnd(-0.04, 0.04) * w,
             ny = py + h * rnd(0.04, 0.07);
           main.push([nx, ny]);
-          if (i > 1 && i < 9 && Math.random() < 0.4) {
+          if (i > 1 && i < 9 && random() < 0.4) {
             const br: [number, number][] = [[nx, ny]];
-            const d = Math.random() < 0.5 ? 1 : -1;
+            const d = random() < 0.5 ? 1 : -1;
             for (let j = 0; j < 4; j++) {
               const [bx, by] = br[br.length - 1];
               br.push([bx + d * rnd(0.01, 0.035) * w, by + h * rnd(0.02, 0.05)]);

@@ -31,11 +31,10 @@ tauri-plugin-opener = "2"
 tauri-plugin-notification = "2"
 # Ask ends a CLI and everything it started by signalling its process group.
 libc = "0.2"
-objc2-media-player = { version = "0.3", default-features = false, features = ["std", "block2", "MPRemoteCommandCenter", "MPRemoteCommand", "MPRemoteCommandEvent", "MPNowPlayingInfoCenter", "MPMediaItem"] }
-block2 = "0.6"
-
-[target.'cfg(target_os = "macos")'.dependencies]
+# AppKit and the rest: the app is macOS only (lib.rs refuses to build anywhere else).
 objc2 = "0.6"
+block2 = "0.6"
+objc2-media-player = { version = "0.3", default-features = false, features = ["std", "block2", "MPRemoteCommandCenter", "MPRemoteCommand", "MPRemoteCommandEvent", "MPNowPlayingInfoCenter", "MPMediaItem"] }
 objc2-foundation = { version = "0.3", default-features = false, features = ["std", "NSProcessInfo", "NSString", "NSValue", "NSArray", "NSRange", "NSDictionary", "NSURL"] }
 objc2-app-kit = { version = "0.3", default-features = false, features = ["std", "NSColor", "NSSpellChecker", "NSWindow", "NSResponder", "NSAppearance"] }
 objc2-avf-audio = { version = "0.3", default-features = false, features = ["std", "AVSpeechSynthesis"] }

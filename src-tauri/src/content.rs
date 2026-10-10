@@ -72,20 +72,36 @@ pub struct Commentary {
     pub book: Option<String>,
 }
 
-const COVERS: &str = "Book = ?1 AND (ChapterBegin < ?2 OR (ChapterBegin = ?2 AND VerseBegin <= ?3)) \
+/// Commentary entries whose range overlaps verses ?3–?4 of book ?1, chapter ?2 (VerseEnd 0 runs
+/// to the end of its chapter); for one verse, ?3 and ?4 are the same.
+pub const OVERLAPS: &str = "Book = ?1 AND (ChapterBegin < ?2 OR (ChapterBegin = ?2 AND VerseBegin <= ?4)) \
      AND (ChapterEnd > ?2 OR (ChapterEnd = ?2 AND (VerseEnd >= ?3 OR VerseEnd = 0)))";
+
+/// The LIKE pattern for verses tagged with a Strong's number.
+pub fn num_like(number: &str) -> String {
+    format!("%<num>{number}</num>%")
+}
+
+/// A chapter's or book's introduction, None where the module has none (or no table for them).
+fn intro(r: rusqlite::Result<Option<Option<String>>>) -> rusqlite::Result<Option<String>> {
+    match r {
+        Ok(v) => Ok(v.flatten()),
+        Err(e) if e.to_string().contains("no such table") => Ok(None),
+        Err(e) => Err(e),
+    }
+}
 
 pub fn commentary(lib: &Library, module: &str, book: i64, chapter: i64, verse: i64) -> Result<Commentary, String> {
     lib.with(Kind::Commentary, module, |c| {
-        let sql = format!("SELECT ChapterBegin, VerseBegin, ChapterEnd, VerseEnd, Comments FROM VerseCommentary WHERE {COVERS} ORDER BY ChapterBegin, VerseBegin");
+        let sql = format!("SELECT ChapterBegin, VerseBegin, ChapterEnd, VerseEnd, Comments FROM VerseCommentary WHERE {OVERLAPS} ORDER BY ChapterBegin, VerseBegin");
         let mut st = c.prepare_cached(&sql)?;
         let verse = st
-            .query_map(params![book, chapter, verse], |r| {
+            .query_map(params![book, chapter, verse, verse], |r| {
                 Ok(CommentEntry { chapter_begin: r.get(0)?, verse_begin: r.get(1)?, chapter_end: r.get(2)?, verse_end: r.get(3)?, html: r.get::<_, Option<String>>(4)?.unwrap_or_default() })
             })?
             .collect::<rusqlite::Result<Vec<_>>>()?;
-        let chapter_c = c.query_row("SELECT Comments FROM ChapterCommentary WHERE Book = ?1 AND Chapter = ?2", params![book, chapter], |r| r.get::<_, Option<String>>(0)).optional().unwrap_or(None).flatten();
-        let book_c = c.query_row("SELECT Comments FROM BookCommentary WHERE Book = ?1", params![book], |r| r.get::<_, Option<String>>(0)).optional().unwrap_or(None).flatten();
+        let chapter_c = intro(c.query_row("SELECT Comments FROM ChapterCommentary WHERE Book = ?1 AND Chapter = ?2", params![book, chapter], |r| r.get::<_, Option<String>>(0)).optional())?;
+        let book_c = intro(c.query_row("SELECT Comments FROM BookCommentary WHERE Book = ?1", params![book], |r| r.get::<_, Option<String>>(0)).optional())?;
         Ok(Commentary { verse, chapter: chapter_c, book: book_c })
     })
 }
@@ -130,8 +146,9 @@ pub fn coverage(lib: &Library, book: i64, chapter: i64, verse: i64) -> Vec<Cover
         .map(|m| {
             let range = lib
                 .with(Kind::Commentary, &m.id, |c| {
-                    let sql = format!("SELECT ChapterBegin, VerseBegin, ChapterEnd, VerseEnd FROM VerseCommentary WHERE {COVERS} LIMIT 1");
-                    c.query_row(&sql, params![book, chapter, verse], |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?, r.get(3)?))).optional()
+                    let sql =
+                        format!("SELECT ChapterBegin, VerseBegin, ChapterEnd, VerseEnd FROM VerseCommentary WHERE {OVERLAPS} LIMIT 1");
+                    c.query_row(&sql, params![book, chapter, verse, verse], |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?, r.get(3)?))).optional()
                 })
                 .ok()
                 .flatten();
@@ -229,7 +246,7 @@ pub fn reference_titles(lib: &Library, module: &str) -> Result<Vec<String>, Stri
 pub fn strongs_by_book(lib: &Library, bible: &str, number: &str) -> Result<Vec<(i64, i64)>, String> {
     lib.with(Kind::Bible, bible, |c| {
         let mut st = c.prepare("SELECT Book, count(*) FROM Bible WHERE Scripture LIKE ?1 GROUP BY Book ORDER BY Book")?;
-        let rows = st.query_map(params![format!("%<num>{number}</num>%")], |r| Ok((r.get(0)?, r.get(1)?)))?;
+        let rows = st.query_map(params![num_like(number)], |r| Ok((r.get(0)?, r.get(1)?)))?;
         rows.collect()
     })
 }
@@ -245,7 +262,7 @@ pub struct VerseHit {
 pub fn strongs_verses(lib: &Library, bible: &str, number: &str, book: Option<i64>, limit: usize) -> Result<Vec<VerseHit>, String> {
     lib.with(Kind::Bible, bible, |c| {
         let mut st = c.prepare("SELECT Book, Chapter, Verse, Scripture FROM Bible WHERE Scripture LIKE ?1 AND (?2 IS NULL OR Book = ?2) ORDER BY Book, Chapter, Verse LIMIT ?3")?;
-        let rows = st.query_map(params![format!("%<num>{number}</num>%"), book, limit as i64], |r| Ok(VerseHit { book: r.get(0)?, chapter: r.get(1)?, verse: r.get(2)?, text: r.get::<_, Option<String>>(3)?.unwrap_or_default() }))?;
+        let rows = st.query_map(params![num_like(number), book, limit as i64], |r| Ok(VerseHit { book: r.get(0)?, chapter: r.get(1)?, verse: r.get(2)?, text: r.get::<_, Option<String>>(3)?.unwrap_or_default() }))?;
         rows.collect()
     })
 }
@@ -534,7 +551,7 @@ mod library_tests {
 
     #[test]
     fn searches_the_real_modules() {
-        let Some(lib) = lib() else { return };
+        let Some(lib) = lib().map(std::sync::Arc::new) else { return };
         let q = search::Query {
             text: "born again".into(),
             mode: search::Mode::Phrase,
@@ -549,7 +566,7 @@ mod library_tests {
         assert!(r.commentaries.iter().any(|m| m.module == "gill" && m.count > 50));
         // The same through a freshly built index.
         let ix = crate::index::Index::new(std::env::temp_dir().join(format!("tes-index-{}.sqlite", std::process::id())));
-        ix.update(&lib).unwrap();
+        ix.update(lib.clone()).unwrap();
         let r2 = search::run(&lib, Some(&ix), &q).unwrap();
         assert_eq!(r2.bible.count, 3);
         // With the index, totals are the index's matches, which also take a phrase across

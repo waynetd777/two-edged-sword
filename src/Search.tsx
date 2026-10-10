@@ -45,16 +45,16 @@ const RANGES: { name: string; from: number; to: number }[] = [
   ...SECTIONS.filter((s) => ["Gospels", "Letters", "Prophets", "Wisdom"].includes(s.name)),
 ];
 
-/** Text with every search term marked. */
 /** Finds any of `terms`, ignoring case; with `whole`, only as whole words ("light", not "delight";
  *  an apostrophe is part of a word, as in search.rs, so "God" isn't "God's"). */
-export function termsRe(terms: string[], whole = false, flags = "giu"): RegExp | null {
+function termsRe(terms: string[], whole = false, flags = "giu"): RegExp | null {
   const ts = terms.filter(Boolean).map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
   if (!ts.length) return null;
   return new RegExp(whole ? `(?<![\\p{L}\\p{N}'])(${ts.join("|")})(?![\\p{L}\\p{N}'])` : `(${ts.join("|")})`, flags);
 }
 
-export function mark(text: string, terms: string[], whole = false): ReactNode {
+/** Text with every search term marked. */
+function mark(text: string, terms: string[], whole = false): ReactNode {
   const re = termsRe(terms, whole);
   if (!re) return text;
   return text.split(re).map((p, i) => (i % 2 ? <mark key={i}>{p}</mark> : <Fragment key={i}>{p}</Fragment>));
@@ -108,10 +108,24 @@ export function SearchScreen() {
     setPick(null);
     scrollTop.current = 0;
   };
+  // How the library's index is coming on, while it is being built.
   useEffect(() => {
-    const t = window.setInterval(() => api.indexProgress().then(setIx), 1500);
-    api.indexProgress().then(setIx);
-    return () => window.clearInterval(t);
+    let live = true;
+    let t: number | undefined;
+    const poll = () =>
+      api
+        .indexProgress()
+        .then((p) => {
+          if (!live) return;
+          setIx(p);
+          if (p.building) t = window.setTimeout(poll, 1500);
+        })
+        .catch(console.error);
+    poll();
+    return () => {
+      live = false;
+      window.clearTimeout(t);
+    };
   }, []);
 
   const runId = useRef(0);

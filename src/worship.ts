@@ -10,7 +10,7 @@
 
 import { api, MusicTrack } from "./api";
 import { askOnce } from "./Ask";
-import { assistantModels, pickModel } from "./assistant";
+import { assistantModels, assistantReady, pickModel } from "./assistant";
 import { today, ymd } from "./plans";
 
 /** Genres that hold worship music, as the Music app and the stores name them. */
@@ -60,22 +60,41 @@ function playedSongs(): Promise<Played[]> {
   return history;
 }
 
-/** Records that Quiet time is playing these songs today. */
+/** The reading day REST_DAYS before today: songs played since then rest. */
+const restSince = () => {
+  const d = today();
+  d.setDate(d.getDate() - REST_DAYS);
+  return ymd(d);
+};
+
+/** Records that Quiet time is playing these songs today (the reading day). Only the songs still
+ *  resting are kept: older ones are never asked about. */
 export async function markPlayed(songs: Song[]) {
-  const date = ymd(new Date());
+  const date = ymd(today());
   const all = await playedSongs();
   const fresh = songs.filter((s) => !all.some((p) => p.id === s.id && p.date === date));
   if (!fresh.length) return;
-  all.push(...fresh.map(({ id, name, artist }) => ({ id, name, artist, date })));
+  const since = restSince();
+  const kept = all.filter((p) => p.date > since);
+  kept.push(...fresh.map(({ id, name, artist }) => ({ id, name, artist, date })));
+  all.splice(0, all.length, ...kept);
   await api.storeWrite(HISTORY, all);
 }
 
 /** The songs played in the last REST_DAYS days, by id and by title and artist. */
 async function recentlyPlayed(): Promise<Set<string>> {
-  const d = new Date();
-  d.setDate(d.getDate() - REST_DAYS);
-  const since = ymd(d);
+  const since = restSince();
   return new Set((await playedSongs()).filter((p) => p.date > since).flatMap((p) => [p.id, songKey(p)]));
+}
+
+/** In a random order (Fisher–Yates: every order as likely). */
+function shuffled<T>(xs: T[]): T[] {
+  const out = [...xs];
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
 }
 
 export interface Song {
@@ -154,7 +173,8 @@ async function choose(n: number, ask: string, it: [string, string], model: strin
   const rested = library.filter((t) => !recent.has(t.id) && !recent.has(songKey(t)));
   const all = rested.length >= n ? rested : library;
   const take = (xs: MusicTrack[]) => xs.slice(0, n).map(({ id, name, artist }) => ({ id, name, artist }));
-  const random = (note: string): Picked => ({ songs: take([...all].sort(() => Math.random() - 0.5)), note });
+  const random = (note: string): Picked => ({ songs: take(shuffled(all)), note });
+  await assistantReady();
   const models = assistantModels();
   if (!models.length) return random("Chosen at random: no AI assistant is set up.");
   const list = all.map((t, i) => `${i + 1}. ${t.name} — ${t.artist}`).join("\n");

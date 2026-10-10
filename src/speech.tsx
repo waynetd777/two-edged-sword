@@ -10,10 +10,11 @@ import { createContext, ReactNode, useCallback, useContext, useEffect, useRef, u
 import { listen } from "@tauri-apps/api/event";
 import { api, TtsEvent, Verse, Voice } from "./api";
 import { useKeepAwake } from "./awake";
-import { book, Ref, stepChapter } from "./bible";
+import { book, psalmLabel, Ref, stepChapter } from "./bible";
+import { BLOCKS, escHtml } from "./dom";
 import { docSegments, plainText, tokenize } from "./esword";
 import { findRefs, mdToHtml } from "./md";
-import { bibleSizes } from "./ui";
+import { bibleSizes } from "./sizes";
 import { useApp } from "./state";
 import { Icon } from "./icons";
 
@@ -39,7 +40,7 @@ export interface PlayerState {
 }
 
 /** For a guided session (Quiet time): stop at `toVerse`, and call `onEnd` when the reading finishes by itself. */
-export interface PlayOpts {
+interface PlayOpts {
   toVerse?: number;
   onEnd?: () => void;
   /** The journal entry being read (module "journal"). */ id?: string;
@@ -92,10 +93,8 @@ export function useListenKey(start: () => void) {
  * quote) each, in order: the editor's own, so the highlight finds the words on the page.
  */
 export function speechBlocks(root: Element): HTMLElement[] {
-  const sel = "p, li, h1, h2, h3, h4, blockquote, div";
-  return [...root.querySelectorAll<HTMLElement>(sel)].filter((b) => !b.querySelector(sel) && (b.textContent || "").trim());
+  return [...root.querySelectorAll<HTMLElement>(BLOCKS)].filter((b) => !b.querySelector(BLOCKS) && (b.textContent || "").trim());
 }
-const escHtml = (t: string) => t.replace(/&/g, "&amp;").replace(/</g, "&lt;");
 /** An entry's paragraphs to read (speakFrom reads a book's paragraphs as HTML). */
 export function journalParas(body: string): string[] {
   const d = document.createElement("div");
@@ -109,7 +108,7 @@ export const usePlayer = () => {
 };
 
 /** How a chapter is announced: "Psalm 23", "First Samuel, chapter 3", "John, chapter 3, from verse 16". */
-export function spokenChapter(b: number, c: number, fromVerse?: number): string {
+function spokenChapter(b: number, c: number, fromVerse?: number): string {
   const name = book(b).name.replace(/^1 /, "First ").replace(/^2 /, "Second ").replace(/^3 /, "Third ");
   const ch = b === 19 ? `Psalm ${c}` : book(b).chapters === 1 ? name : `${name}, chapter ${c}`;
   return fromVerse && fromVerse > 1 ? `${ch}, from verse ${fromVerse}` : ch;
@@ -117,34 +116,31 @@ export function spokenChapter(b: number, c: number, fromVerse?: number): string 
 
 /** A reference as it should be heard: "Exo 31:18" is "Exodus 31 18", "1 Cor 13" "First Corinthians 13". */
 function sayRef(r: Ref): string {
-  const name = book(r.book)
-    .name.replace(/^Psalms$/, "Psalm")
-    .replace(/^1 /, "First ")
-    .replace(/^2 /, "Second ")
-    .replace(/^3 /, "Third ");
+  const name = psalmLabel(book(r.book).name).replace(/^1 /, "First ").replace(/^2 /, "Second ").replace(/^3 /, "Third ");
   if (!r.verse) return `${name} ${r.chapter}`;
   if (book(r.book).chapters === 1) return `${name} ${r.verse}${r.to && r.to !== r.verse ? ` to ${r.to}` : ""}`;
   if (r.toChapter && r.toChapter !== r.chapter) return `${name} ${r.chapter} ${r.verse} to ${r.toChapter} ${r.to}`;
   return `${name} ${r.chapter} ${r.verse}${r.to && r.to !== r.verse ? ` to ${r.to}` : ""}`;
 }
 
-/**
- * The text to speak, with its references said in full, and for each character of it the
- * character of `text` it stands for, so the word highlight still lands on the page's words.
- */
 // Apple's character voices, in every language: last when Automatic picks one.
 const NOVELTY =
   /^(Eddy|Flo|Grandma|Grandpa|Reed|Rocko|Sandy|Shelley|Bahh|Bells|Boing|Bubbles|Cellos|Jester|Organ|Trinoids|Whisper|Zarvox|Wobble|Bad News|Good News|Superstar|Albert|Fred|Junior|Kathy|Ralph)\b/;
 
 /** Voices best first: Premium, then Enhanced, then the rest, character voices last. */
-export const rankVoices = (vs: Voice[]) =>
+const rankVoices = (vs: Voice[]) =>
   [...vs].sort((a, b) => Number(NOVELTY.test(a.name)) - Number(NOVELTY.test(b.name)) || b.quality - a.quality);
 
+/** The voices for Hebrew, Greek or Latin, best first. Latin has none of its own: an Italian voice
+ *  says Church Latin as it's said. */
+export const voicesFor = (all: Voice[], lang: "he" | "el" | "la") =>
+  rankVoices(all.filter((v) => v.lang.startsWith(lang === "la" ? "it" : lang) || (lang === "la" && v.lang.startsWith("la"))));
+
 /** A Latin Bible: the Vulgates (Latin, Latin+, Vulg-C, Vulg-C+). */
-export const isLatin = (m?: { title: string; abbrev: string }) => !!m && /\b(latin|vulg)/i.test(`${m.title} ${m.abbrev}`);
+const isLatin = (m?: { title: string; abbrev: string }) => !!m && /\b(latin|vulg)/i.test(`${m.title} ${m.abbrev}`);
 
 /** "he" for a text mostly in Hebrew letters, "el" for Greek, else null. */
-export function scriptOf(text: string): "he" | "el" | null {
+function scriptOf(text: string): "he" | "el" | null {
   const he = (text.match(/[\u0590-\u05FF]/g) ?? []).length,
     el = (text.match(/[\u0370-\u03FF\u1F00-\u1FFF]/g) ?? []).length;
   const en = (text.match(/[A-Za-z]/g) ?? []).length;
@@ -159,13 +155,17 @@ export function scriptOf(text: string): "he" | "el" | null {
  * character positions match the tokens' for the highlight. Another edition's reading (⟨ ⟩) is
  * blanked out, the same length.
  */
-export function speechText(html: string): string {
+function speechText(html: string): string {
   return tokenize(html)
     .map((t) => (t.variant ? " ".repeat(t.text.length) : t.text))
     .join("");
 }
 
-export function speakable(text: string): { spoken: string; at: number[] } {
+/**
+ * The text to speak, with its references said in full, and for each character of it the
+ * character of `text` it stands for, so the word highlight still lands on the page's words.
+ */
+function speakable(text: string): { spoken: string; at: number[] } {
   // e-Sword writes references "Psa_82:1"; the same length with a space, so positions hold.
   const t = text.replace(/([A-Za-z])_(\d)/g, "$1 $2");
   let spoken = "",
@@ -223,11 +223,11 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   settings.current = app.settings;
   const appRef = useRef(app);
   appRef.current = app;
-  const gen = useRef(0);
-  const opts = useRef<PlayOpts>({});
+  const gen = useRef(0); // bumps on every restart, so stale utterance callbacks do nothing
+  const opts = useRef<PlayOpts>({}); // this reading's stopping point and what to do after it
   const held = useRef(false); // paused mid-utterance, so play carries on with it
-  const resumeAt = useRef<number | null>(null); // paused as a verse ended: play starts the next // this reading's stopping point and what to do after it
-  const announce = useRef<string | null>(null); // said before the next verse: the chapter just begun // bumps on every restart, so stale utterance callbacks do nothing
+  const resumeAt = useRef<number | null>(null); // paused as a verse ended: play starts the next
+  const announce = useRef<string | null>(null); // said before the next verse: the chapter just begun
 
   // Reloaded when the window regains focus, so voices downloaded in System Settings appear.
   useEffect(() => {
@@ -266,32 +266,34 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   // Greek voice from Settings, or the best installed; with none installed, in the reading voice.
   // A Latin Bible (told by its name: Latin looks like any text) is read in the Latin voice, an
   // Italian one unless Settings says otherwise.
-  const voiceFor = useCallback((text = "", latin = false) => {
-    const lang = latin ? "la" : scriptOf(text);
-    if (lang) {
-      const s = settings.current;
-      const want = lang === "he" ? s.voiceHebrew : lang === "el" ? s.voiceGreek : s.voiceLatin;
-      const mine = voicesRef.current.filter(
-        (v) => v.lang.startsWith(lang === "la" ? "it" : lang) || (lang === "la" && v.lang.startsWith("la")),
-      );
-      const v = mine.find((x) => x.id === want) ?? rankVoices(mine)[0];
-      if (v) return v.id;
-    }
-    const all = voicesRef.current.filter((v) => v.lang.startsWith("en")),
-      want = settings.current.voice;
-    return (
-      all.find((v) => v.id === want) ??
-      voicesRef.current.find((v) => v.id === want) ??
-      all.find((v) => v.name === want) ??
-      all.find((v) => v.default) ??
-      all[0]
-    )?.id;
+  const langVoice = useCallback((lang: "he" | "el" | "la") => {
+    const s = settings.current;
+    const want = lang === "he" ? s.voiceHebrew : lang === "el" ? s.voiceGreek : s.voiceLatin;
+    const mine = voicesFor(voicesRef.current, lang);
+    return (mine.find((x) => x.id === want) ?? mine[0])?.id;
   }, []);
+  const voiceFor = useCallback(
+    (text = "", latin = false) => {
+      const lang = latin ? "la" : scriptOf(text);
+      const v = lang && langVoice(lang);
+      if (v) return v;
+      const all = voicesRef.current.filter((v) => v.lang.startsWith("en")),
+        want = settings.current.voice;
+      return (
+        all.find((v) => v.id === want) ??
+        voicesRef.current.find((v) => v.id === want) ??
+        all.find((v) => v.name === want) ??
+        all.find((v) => v.default) ??
+        all[0]
+      )?.id;
+    },
+    [langVoice],
+  );
 
   const stop = useCallback(() => {
     opts.current = {};
     gen.current++;
-    api.ttsStop();
+    api.ttsStop().catch(() => {});
     setState(IDLE);
   }, []);
 
@@ -345,7 +347,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       held.current = false;
       resumeAt.current = null;
       const g = ++gen.current;
-      api.ttsStop();
+      api.ttsStop().catch(() => {});
       const vs = verses.current;
       const s = st.current;
       if (s.sleepAt && Date.now() > s.sleepAt) {
@@ -523,7 +525,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       setState((p) => ({ ...p, paused: false }));
       if (held.current && utt.current?.id === gen.current) {
         held.current = false;
-        api.ttsPause(false);
+        api.ttsPause(false).catch(() => {});
       } else
         speakFrom(
           resumeAt.current ??
@@ -536,10 +538,10 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       st.current = { ...s, paused: true };
       if (utt.current?.id === gen.current) {
         held.current = true;
-        api.ttsPause(true);
+        api.ttsPause(true).catch(() => {});
       } else {
         gen.current++;
-        api.ttsStop();
+        api.ttsStop().catch(() => {});
       } // between verses, or a chapter still loading
       setState((p) => ({ ...p, paused: true }));
     }
@@ -570,7 +572,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       if (s.doc) {
         if (s.doc.kind === "devotional") return;
         const g = ++gen.current;
-        api.ttsStop();
+        api.ttsStop().catch(() => {});
         turnDoc(d, g, 0);
         return;
       }
@@ -681,14 +683,14 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
   useEffect(
     () => () => {
-      api.ttsStop();
+      api.ttsStop().catch(() => {});
     },
     [],
   );
 
-  // In a Greek or Hebrew voice when one is installed (macOS has Melina and Carmit; both speak the
-  // modern language), otherwise Strong's pronunciation guide ("ag-ah'-pay") in the reading voice.
-  // Utterance id 0 is never a reading's, so its events are ignored.
+  // In the Greek or Hebrew voice (Settings', else the best installed: macOS has Melina and Carmit,
+  // both speaking the modern language), otherwise Strong's pronunciation guide ("ag-ah'-pay") in
+  // the reading voice. Utterance id 0 is never a reading's, so its events are ignored.
   const say = useCallback(
     async (word: string, num: string, pron?: string) => {
       const s = st.current;
@@ -698,12 +700,13 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
         setState((p) => ({ ...p, paused: true }));
       }
       held.current = false;
-      const lang = num.startsWith("H") ? "he" : "el";
-      const v = (await api.ttsVoices().catch(() => [])).filter((x) => x.lang.startsWith(lang)).sort((a, b) => b.quality - a.quality)[0];
-      if (v) api.ttsSpeak(0, word, v.id, 0.8);
-      else if (pron) api.ttsSpeak(0, pron.replace(/[-'ʼ]/g, " "), voiceFor(), 0.9);
+      // Voices downloaded since the window last came to the front count too.
+      voicesRef.current = await api.ttsVoices().catch(() => voicesRef.current);
+      const v = langVoice(num.startsWith("H") ? "he" : "el");
+      const said = v ? api.ttsSpeak(0, word, v, 0.8) : pron ? api.ttsSpeak(0, pron.replace(/[-'ʼ]/g, " "), voiceFor(), 0.9) : null;
+      said?.catch(() => {});
     },
-    [voiceFor],
+    [voiceFor, langVoice],
   );
 
   const still = useCallback((s: Partial<PlayerState>) => {

@@ -3,7 +3,7 @@
 
 // Living things passing over, and what the wind carries.
 
-import { bitmap, glow, rnd, smooth, TAU, Vision } from "./kit";
+import { bitmap, glow, layering, random, rnd, smooth, TAU, tones, Vision } from "./kit";
 import { EAGLE_BITMAP } from "./eagle-bitmap";
 
 export const CREATURES: Vision[] = [
@@ -14,11 +14,11 @@ export const CREATURES: Vision[] = [
     dur: [11, 16],
     moving: true,
     make: (w, h) => {
-      const dir = Math.random() < 0.5 ? 1 : -1;
+      const dir = random() < 0.5 ? 1 : -1;
       const y0 = h * rnd(0.15, 0.3),
         y1 = h * rnd(0.3, 0.5);
       const s = Math.min(w, h) * rnd(0.05, 0.07);
-      let layer: HTMLCanvasElement | null = null;
+      const layer = layering();
       const trail: { x: number; y: number; t: number }[] = [];
       return (f) => {
         const { ctx } = f;
@@ -41,15 +41,7 @@ export const CREATURES: Vision[] = [
         while (trail.length && f.t - trail[0].t > 1.6) trail.shift();
         glow(ctx, x, y, s * 3.2, f.ink(0.12 * f.env), f.ink(0));
         // Drawn solid on a layer, so the near wing covers the body rather than adding to its light.
-        const dpr = ctx.getTransform().a || 1;
-        if (!layer || layer.width !== Math.round(w * dpr) || layer.height !== Math.round(h * dpr)) {
-          layer = document.createElement("canvas");
-          layer.width = Math.round(w * dpr);
-          layer.height = Math.round(h * dpr);
-        }
-        const L = layer.getContext("2d")!;
-        L.setTransform(1, 0, 0, 1, 0, 0);
-        L.clearRect(0, 0, layer.width, layer.height);
+        const { L, canvas, dpr } = layer(f);
         L.setTransform(dpr, 0, 0, dpr, 0, 0);
         L.translate(x, y);
         L.scale(dir * s * 0.92, s); // a little short of its drawn length
@@ -130,7 +122,7 @@ export const CREATURES: Vision[] = [
         ctx.globalAlpha = 0.5 * f.env;
         ctx.shadowColor = f.ink(0.5 * f.env);
         ctx.shadowBlur = s * 0.35;
-        ctx.drawImage(layer, 0, 0, w, h);
+        ctx.drawImage(canvas, 0, 0, f.w, f.h);
         ctx.restore();
       };
     },
@@ -163,9 +155,9 @@ export const CREATURES: Vision[] = [
     dur: [10, 15],
     moving: true,
     make: (w, h) => {
-      const dir = Math.random() < 0.5 ? 1 : -1;
+      const dir = random() < 0.5 ? 1 : -1;
       const y0 = h * rnd(0.2, 0.45);
-      let layer: HTMLCanvasElement | null = null;
+      const layer = layering();
       const birds = Array.from({ length: 24 }, () => ({
         dx: rnd(-1, 1) * 120,
         dy: rnd(-1, 1) * 50,
@@ -181,15 +173,7 @@ export const CREATURES: Vision[] = [
         // Little birds, side on, drawn solid on a layer (so where they cross they don't brighten):
         // a round body, a small head and short beak, a notched tail, and short round wings that
         // beat in quick bursts and then fold, as sparrows fly.
-        const dpr = ctx.getTransform().a || 1;
-        if (!layer || layer.width !== Math.round(w * dpr) || layer.height !== Math.round(h * dpr)) {
-          layer = document.createElement("canvas");
-          layer.width = Math.round(w * dpr);
-          layer.height = Math.round(h * dpr);
-        }
-        const L = layer.getContext("2d")!;
-        L.setTransform(1, 0, 0, 1, 0, 0);
-        L.clearRect(0, 0, layer.width, layer.height);
+        const { L, canvas, dpr } = layer(f);
         L.fillStyle = f.ink(1);
         for (const b of birds) {
           // The flock folds and stretches as it goes.
@@ -228,7 +212,7 @@ export const CREATURES: Vision[] = [
         }
         ctx.save();
         ctx.globalAlpha = 0.42 * f.env;
-        ctx.drawImage(layer, 0, 0, w, h);
+        ctx.drawImage(canvas, 0, 0, f.w, f.h);
         ctx.restore();
       };
     },
@@ -240,7 +224,7 @@ export const CREATURES: Vision[] = [
     dur: [12, 18],
     moving: true,
     make: (w, h) => {
-      const dir = Math.random() < 0.5 ? 1 : -1;
+      const dir = random() < 0.5 ? 1 : -1;
       const y0 = h * rnd(0.3, 0.7),
         p = rnd(0, TAU),
         s = rnd(18, 25);
@@ -282,7 +266,7 @@ export const CREATURES: Vision[] = [
         [0.6, 0.52, 0.035],
         [0.42, 0.63, 0.03],
       ];
-      let layer: HTMLCanvasElement | null = null;
+      const layer = layering();
       return (f) => {
         const { ctx } = f;
         const q = f.t / f.dur;
@@ -295,20 +279,10 @@ export const CREATURES: Vision[] = [
         glow(ctx, x, y, s * 3, f.ink(0.08 * f.env), f.ink(0));
         // Solid colours on a layer: the wings dark at their borders, lighter within, with pale spots
         // along the border and fine veins; then the body over them.
-        const dpr = ctx.getTransform().a || 1;
-        if (!layer || layer.width !== Math.round(w * dpr) || layer.height !== Math.round(h * dpr)) {
-          layer = document.createElement("canvas");
-          layer.width = Math.round(w * dpr);
-          layer.height = Math.round(h * dpr);
-        }
-        const L = layer.getContext("2d")!;
-        L.setTransform(1, 0, 0, 1, 0, 0);
-        L.clearRect(0, 0, layer.width, layer.height);
+        const { L, canvas, dpr } = layer(f);
         L.setTransform(dpr * s, 0, 0, dpr * s, x * dpr, y * dpr);
         L.rotate(dir * 0.35 + Math.sin(f.t * 1.4) * 0.15);
-        const ink = f.ink(1).slice(5).split(",").slice(0, 3).map(Number);
-        const page = f.dark ? [13, 17, 23] : [246, 248, 250];
-        const tone = (k: number) => `rgb(${page.map((c, i) => Math.round(c + (ink[i] - c) * k)).join(",")})`;
+        const tone = tones(f);
         for (const side of [-1, 1]) {
           L.save();
           L.scale(side * open, 1);
@@ -368,7 +342,7 @@ export const CREATURES: Vision[] = [
         ctx.save();
         ctx.globalAlpha = 0.6 * f.env;
         ctx.globalCompositeOperation = "source-over";
-        ctx.drawImage(layer, 0, 0, w, h);
+        ctx.drawImage(canvas, 0, 0, f.w, f.h);
         ctx.restore();
       };
     },
@@ -417,7 +391,7 @@ export const CREATURES: Vision[] = [
     dur: [12, 18],
     moving: true,
     make: (w, h) => {
-      const dir = Math.random() < 0.5 ? 1 : -1;
+      const dir = random() < 0.5 ? 1 : -1;
       // Single leaves blowing past, and a few sprigs: a twig with its leaves in pairs and an olive or two.
       const ls = Array.from({ length: 13 }, (_, i) => ({
         x: rnd(-0.6, 0) * w,
@@ -427,21 +401,11 @@ export const CREATURES: Vision[] = [
         s: rnd(34, 46),
         sprig: i < 3,
       }));
-      let layer: HTMLCanvasElement | null = null;
+      const layer = layering();
       return (f) => {
         const { ctx } = f;
-        const dpr = ctx.getTransform().a || 1;
-        if (!layer || layer.width !== Math.round(w * dpr) || layer.height !== Math.round(h * dpr)) {
-          layer = document.createElement("canvas");
-          layer.width = Math.round(w * dpr);
-          layer.height = Math.round(h * dpr);
-        }
-        const L = layer.getContext("2d")!;
-        L.setTransform(1, 0, 0, 1, 0, 0);
-        L.clearRect(0, 0, layer.width, layer.height);
-        const ink = f.ink(1, true).slice(5).split(",").slice(0, 3).map(Number);
-        const page = f.dark ? [13, 17, 23] : [246, 248, 250];
-        const tone = (k: number) => `rgb(${page.map((c, i) => Math.round(c + (ink[i] - c) * k)).join(",")})`;
+        const { L, canvas, dpr } = layer(f);
+        const tone = tones(f, true);
         // An olive leaf, `len` long, from its stalk: long and narrow, pointed, with its midrib.
         // Its top is darker; turned over (`flip` below 0), its underside shows silvery.
         const leaf = (len: number, flip: number) => {
@@ -504,7 +468,7 @@ export const CREATURES: Vision[] = [
         ctx.save();
         ctx.globalAlpha = 0.75 * f.env;
         ctx.globalCompositeOperation = "source-over";
-        ctx.drawImage(layer, 0, 0, w, h);
+        ctx.drawImage(canvas, 0, 0, f.w, f.h);
         ctx.restore();
       };
     },
@@ -516,7 +480,7 @@ export const CREATURES: Vision[] = [
     dur: [12, 20],
     moving: true,
     make: (w, h) => {
-      const dir = Math.random() < 0.5 ? 1 : -1;
+      const dir = random() < 0.5 ? 1 : -1;
       const seeds = Array.from({ length: 18 }, () => ({
         x: rnd(-0.5, 0.4) * w,
         y: rnd(0.15, 0.8) * h,
@@ -568,8 +532,8 @@ export const CREATURES: Vision[] = [
     moving: true,
     make: (w, h) => {
       const flakes = Array.from({ length: 130 }, () => {
-        const z = Math.random();
-        return { x: rnd(0, w), o: Math.random(), z, p: rnd(0, TAU), crystal: z > 0.9 };
+        const z = random();
+        return { x: rnd(0, w), o: random(), z, p: rnd(0, TAU), crystal: z > 0.9 };
       });
       return (f) => {
         const { ctx } = f;
@@ -627,7 +591,7 @@ export const CREATURES: Vision[] = [
     dur: [10, 16],
     moving: true,
     make: (w, h) => {
-      const drops = Array.from({ length: 160 }, () => ({ x: rnd(-0.1, 1.1) * w, o: Math.random(), v: rnd(0.6, 1), l: rnd(14, 30) }));
+      const drops = Array.from({ length: 160 }, () => ({ x: rnd(-0.1, 1.1) * w, o: random(), v: rnd(0.6, 1), l: rnd(14, 30) }));
       const splashes: { x: number; t: number }[] = [];
       let last = 0;
       return (f) => {
@@ -668,7 +632,7 @@ export const CREATURES: Vision[] = [
     dur: [10, 15],
     moving: true,
     make: (w, h) => {
-      const dir = Math.random() < 0.5 ? 1 : -1;
+      const dir = random() < 0.5 ? 1 : -1;
       // The air's flow: one gentle ripple across the page, which everything in it follows.
       const flow = (x: number, y: number, t: number) => Math.sin(x * 0.005 + y * 0.002 + t * 0.7) * 22 + Math.sin(x * 0.011 - t * 1.1) * 7;
       // Wisps of air, tapering at both ends, coming in gusts; a few curl into a fading swirl.
@@ -677,7 +641,7 @@ export const CREATURES: Vision[] = [
         len: rnd(0.18, 0.4) * w,
         v: rnd(0.9, 1.4) * w * 0.32,
         o: rnd(0, 2),
-        curl: Math.random() < 0.2,
+        curl: random() < 0.2,
       }));
       // Dust and specks swept along, and a couple of leaves tumbling.
       const specks = Array.from({ length: 45 }, () => ({

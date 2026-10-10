@@ -4,25 +4,17 @@
 import { useEffect, useRef, useState } from "react";
 import { api, Coverage, TopicHit } from "./api";
 import { fmtRef, Ref } from "./bible";
-import { concordanceRenderings, headwords, lexiconParts, plainText, renderHtml } from "./esword";
+import { headwords, plainText, renderHtml } from "./esword";
+import { Lex, loadLex } from "./lexicon";
 import { Icon } from "./icons";
 import { WordPick } from "./Read";
 import { useApp } from "./state";
-import { orderModules, short } from "./StudyPane";
+import { orderModules, rangeLabel, short } from "./StudyPane";
 import { Popover } from "./ui";
 import { useAssistant } from "./assistant";
 import { SayButton } from "./speech";
 
-interface Lex {
-  num: string;
-  word: string;
-  translit: string;
-  pron: string;
-  rest: string;
-  renderings: [string, number][];
-}
-
-export function useLexicon(nums: string[]) {
+function useLexicon(nums: string[]) {
   const app = useApp();
   const [lex, setLex] = useState<Lex[]>([]);
   const key = nums.join(",");
@@ -33,12 +25,18 @@ export function useLexicon(nums: string[]) {
       return;
     }
     Promise.all(
-      nums.map(async (num) => {
-        const a = await api.article("lexicon", app.lexicon!, num);
-        const c = app.concordance ? await api.article("lexicon", app.concordance, num).catch(() => null) : null;
-        const parts = a ? lexiconParts(a.html) : { word: "", translit: "", pron: "", rest: "" };
-        return { num, ...parts, renderings: c ? concordanceRenderings(c.html) : [] };
-      }),
+      nums.map(
+        async (num) =>
+          (await loadLex(app.lexicon, app.concordance, num)) ?? {
+            num,
+            word: "",
+            translit: "",
+            pron: "",
+            rest: "",
+            html: "",
+            renderings: [],
+          },
+      ),
     ).then((x) => !dead && setLex(x));
     return () => {
       dead = true;
@@ -109,7 +107,7 @@ export function WordLookup({
     let dead = false;
     (async () => {
       for (const h of headwords(word)) {
-        const t = await api.findTopics(h);
+        const t = await api.findTopics(h).catch(() => []);
         if (t.length) {
           if (!dead) setHead(h);
           if (!dead)
@@ -128,26 +126,29 @@ export function WordLookup({
       }
     })();
     if (vref?.verse && onCommentary)
-      api.coverage(vref.book, vref.chapter, vref.verse).then(
-        (c) =>
-          !dead &&
-          setCov(
-            orderModules(
-              c.filter((x) => x.range && x.id !== app.tsk),
-              app.settings.commentaryOrder,
+      api
+        .coverage(vref.book, vref.chapter, vref.verse)
+        .then(
+          (c) =>
+            !dead &&
+            setCov(
+              orderModules(
+                c.filter((x) => x.range && x.id !== app.tsk),
+                app.settings.commentaryOrder,
+              ),
             ),
-          ),
-      );
+        )
+        .catch(() => !dead && setCov([]));
     else setCov([]);
     return () => {
       dead = true;
     };
   }, [word, vref?.book, vref?.chapter, vref?.verse, app.tsk, app.settings.dictionaryOrder, app.settings.commentaryOrder]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const range = (c: Coverage) =>
-    c.range && (c.range[1] !== c.range[3] || c.range[0] !== c.range[2])
-      ? ` ${c.range[0]}:${c.range[1]}–${c.range[2] !== c.range[0] ? c.range[2] + ":" : ""}${c.range[3]}`
-      : "";
+  const range = (c: Coverage) => {
+    const l = c.range && vref ? rangeLabel(c.range, vref.chapter) : "";
+    return l ? ` ${l}` : "";
+  };
   const lang = (n: string) => (n.startsWith("H") ? "Hebrew" : "Greek");
   return (
     <Popover anchor={pick.rect} onClose={onClose} width={420}>
@@ -330,27 +331,9 @@ export function StrongsHover() {
   const app = useApp();
   const [show, setShow] = useState<{ num: string; rect: DOMRect; lex: Lex | null } | null>(null);
   const timer = useRef<number | undefined>(undefined);
-  const cache = useRef(new Map<string, Promise<Lex | null>>());
   const gen = useRef(0); // bumped on every hover change, so a lookup that lands after the mouse left is dropped
   useEffect(() => {
-    cache.current.clear(); // entries from the previous lexicon or concordance
-    const load = (num: string) => {
-      let p = cache.current.get(num);
-      if (!p) {
-        p = (async () => {
-          if (!app.lexicon) return null;
-          const a = await api.article("lexicon", app.lexicon, num);
-          if (!a) return null;
-          const c = app.concordance ? await api.article("lexicon", app.concordance, num).catch(() => null) : null;
-          return { num, ...lexiconParts(a.html), renderings: c ? concordanceRenderings(c.html) : [] };
-        })().catch(() => null);
-        cache.current.set(num, p);
-        p.then((l) => {
-          if (!l && cache.current.get(num) === p) cache.current.delete(num);
-        }); // a miss may be a failure: retry next time
-      }
-      return p;
-    };
+    const load = (num: string) => loadLex(app.lexicon, app.concordance, num);
     const over = (e: MouseEvent) => {
       const el = (e.target as HTMLElement).closest?.(".strongs") as HTMLElement | null;
       if (!el || el.contains(e.relatedTarget as Node)) return;
@@ -384,6 +367,7 @@ export function StrongsHover() {
     document.addEventListener("scroll", hide, true);
     document.addEventListener("mousedown", hide);
     return () => {
+      window.clearTimeout(timer.current);
       document.removeEventListener("mouseover", over);
       document.removeEventListener("mouseout", out);
       document.removeEventListener("scroll", hide, true);

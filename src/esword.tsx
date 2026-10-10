@@ -9,11 +9,12 @@
 import { Fragment, ReactNode } from "react";
 import { findBook, parseRef, Ref } from "./bible";
 import { api } from "./api";
+import { escHtml } from "./dom";
 
 const parser = new DOMParser();
 const parse = (html: string) => parser.parseFromString(`<body>${html}</body>`, "text/html").body;
 
-export interface RenderOpts {
+interface RenderOpts {
   onRef?: (r: Ref, text: string) => void;
   onStrongs?: (num: string) => void;
   /** Hover on a reference (for previews); receives the element for positioning. */
@@ -51,7 +52,7 @@ function leadingTopic(s: string, topic: (n: string) => string | undefined): { te
 }
 
 /** "Joh 3:16", "Joh 3:16-18", "2Co 5:19-21", or a bare "3:16" after a book in the same list. */
-export function parseEswordRef(text: string, lastBook?: number): Ref | undefined {
+function parseEswordRef(text: string, lastBook?: number): Ref | undefined {
   const t = text.trim().replace(/[.;,]$/, "");
   const r = parseRef(t);
   if (r) return r;
@@ -347,14 +348,13 @@ export function docSegments(html: string): string[] {
     } else if (n.nodeType === Node.TEXT_NODE) {
       const t = n.textContent || "";
       if (t.trim()) brs = 0;
-      run.push(t.replace(/&/g, "&amp;").replace(/</g, "&lt;"));
+      run.push(escHtml(t));
     }
   }
   flush();
   return out;
 }
 
-/** Plain text of e-Sword HTML (Strong's numbers dropped). */
 /**
  * The word at `char` in `el`'s text as plainText would give it (what the voice is reading),
  * as a Range over the rendered page: Strong's numbers and bracket superscripts are skipped, and
@@ -393,6 +393,7 @@ export function wordRangeAt(el: Element, char: number): Range | null {
   return r;
 }
 
+/** Plain text of e-Sword HTML (Strong's numbers dropped). */
 export function plainText(html: string): string {
   const body = parse(html);
   body.querySelectorAll("num").forEach((n) => n.remove());

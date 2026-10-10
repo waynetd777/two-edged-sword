@@ -20,9 +20,9 @@ export default tseslint.config(
     plugins: { "react-hooks": reactHooks },
     rules: { "react-hooks/rules-of-hooks": "error", "react-hooks/exhaustive-deps": "warn" },
   },
-  // Plain browser scripts, run in the pages the app shows.
+  // Plain browser scripts, run in the pages the app shows, and the product page's (site/).
   {
-    files: ["src-tauri/src/*.js"],
+    files: ["src-tauri/src/*.js", "site/*.js"],
     extends: [js.configs.recommended, prettier],
     languageOptions: { globals: globals.browser, sourceType: "script" },
   },

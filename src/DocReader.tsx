@@ -1,22 +1,23 @@
 // Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
 // SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { api, Article } from "./api";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { api, Article, JournalEntry } from "./api";
 import { fmtRef } from "./bible";
 import { docSegments, plainText, renderHtml, wordRangeAt } from "./esword";
 import { SongsButton } from "./ChapterSongs";
 import { Icon } from "./icons";
 import { useListenKey, usePlayer } from "./speech";
 import { AskPanel, withheld } from "./Ask";
-import { HighlightsButton, HL, HL_DOT, hlLabel, TextSizeButton, textToken, WordPick } from "./Read";
+import { HighlightsButton, TextSizeButton, textToken, WordPick } from "./Read";
+import { FocusHints, HighlightDots, useCopySelection } from "./ReaderTools";
 import { docHlKey, docLabel, parseDocLabel } from "./docref";
 import { WordLookup } from "./WordLookup";
 import { SearchField, Topbar } from "./Shell";
 import { HlColor, hlName, useApp } from "./state";
 import { DictionaryTab, useRefPreview } from "./StudyPane";
-import { ClearButton, Popover, scrollToThird, SearchList, SideNav, wordAt, wordHover } from "./ui";
-import { dayTitle } from "./plans";
+import { ClearButton, copyText, Popover, scrollToThird, SearchList, SideNav, wordAt, wordHover } from "./ui";
+import { dayTitle, today as readingDay } from "./plans";
 import { useAssistant } from "./assistant";
 
 /**
@@ -51,6 +52,27 @@ export function DocReader({ focus, setFocus, openPalette }: { focus: boolean; se
   const [image, setImage] = useState<string | null>(null);
   const segs = useMemo(() => (art ? docSegments(art.html) : []), [art]);
   const images = useMemo(() => segs.flatMap((h) => Array.from(h.matchAll(/<img[^>]+src="(data:image\/[^"]+)"/gi), (m) => m[1])), [segs]);
+  // The paragraphs are rendered once per chapter, not on every word read aloud; their links call
+  // the handlers of the latest render.
+  const handlers = useRef({ app, hide, onRefHover });
+  useLayoutEffect(() => {
+    handlers.current = { app, hide, onRefHover };
+  });
+  const rendered = useMemo(
+    () =>
+      segs.map((h) =>
+        renderHtml(h, {
+          onRef: (r) => {
+            handlers.current.hide();
+            handlers.current.app.open({ book: r.book, chapter: r.chapter, verse: r.verse, to: r.to }, "read");
+          },
+          onRefHover: (r, el) => handlers.current.onRefHover(r, el),
+          onStrongs: (n) => handlers.current.app.studyWord(n),
+          onImage: setImage,
+        }),
+      ),
+    [segs],
+  );
   const ps = player.state;
   const reading = ps.on && ps.doc?.module === doc.module && ps.doc.title === doc.title;
   const listen = (from = 0) => player.playDoc(doc.module, doc.title, segs, from, kind);
@@ -109,38 +131,14 @@ export function DocReader({ focus, setFocus, openPalette }: { focus: boolean; se
     if (asking !== null) lines.push(`\nThe question is about paragraph ${asking + 1}:\n${paras[asking]}`);
     return lines.join("\n");
   };
-  // Only offer what fits: a chart question when there is a chart, the wider book when there is one.
-  const para = asking !== null ? (segs[asking] ?? "") : "";
-  const multi = titles.length > 1;
-  const chapterRefs = segs.reduce((n, h) => n + (h.match(/<ref>/gi)?.length ?? 0), 0);
-  const suggestions = (
-    asking === null && devo
-      ? [
-          "Summarise today's reading",
-          "What is the key verse here, and why?",
-          "How can I put this into practice today?",
-          "Give me a short prayer drawn from this",
-          chapterRefs >= 2 ? "Read me the verses it quotes" : "",
-        ]
-      : asking === null
-        ? [
-            "Summarise this chapter",
-            images.length === 1 ? "Explain the chart in this chapter" : images.length > 1 ? "Explain the main chart in this chapter" : "",
-            chapterRefs >= 5 ? "Which Scriptures does this chapter lean on most?" : "",
-            multi && i > 0 ? "How does this build on the previous chapter?" : "",
-            multi ? "How does this chapter fit the book's overall scheme?" : "",
-            "How do other interpretive traditions see this?",
-          ]
-        : [
-            /<img/i.test(para) ? "Explain this chart" : "Explain this paragraph",
-            plainText(para).split(/\s+/).length > 80 ? "Put this in simpler words" : "",
-            /<ref>/i.test(para) ? "How do the verses cited here support this?" : "What Scriptures support this?",
-            multi ? (devo ? "Where else does this devotional touch on this?" : "Where else does the book discuss this?") : "",
-            "What would someone who disagrees say?",
-          ]
-  )
-    .filter(Boolean)
-    .slice(0, 5);
+  const suggestions = docSuggestions({
+    devo,
+    para: asking !== null ? (segs[asking] ?? "") : null,
+    charts: images.length,
+    refs: segs.reduce((n, h) => n + (h.match(/<ref>/gi)?.length ?? 0), 0),
+    multi: titles.length > 1,
+    first: i <= 0,
+  });
   const marked = (k: number) =>
     app.bookmarks.some((b) => b.doc?.module === doc.module && b.doc.title === doc.title && b.doc.para === k + 1);
   const askAbout = (k: number) => {
@@ -173,24 +171,15 @@ export function DocReader({ focus, setFocus, openPalette }: { focus: boolean; se
   const curHl = sel && hlOf(sel.from) ? hlName(hlOf(sel.from)) : undefined;
   const copySel = () => {
     const t = selText();
-    if (!t) return;
-    navigator.clipboard.writeText(`${t}\n— ${selLabel}`);
-    app.toast(`Copied ${sel!.from === sel!.to ? "paragraph" : "paragraphs"} ${sel!.from}${sel!.to !== sel!.from ? `–${sel!.to}` : ""}`);
+    if (!t || !sel) return;
+    copyText(
+      `${t}\n— ${selLabel}`,
+      `Copied ${sel.from === sel.to ? "paragraph" : "paragraphs"} ${sel.from}${sel.to !== sel.from ? `–${sel.to}` : ""}`,
+      app.toast,
+    );
   };
   // ⌘C copies the selected paragraphs, unless text is selected with the mouse or a field has focus.
-  useEffect(() => {
-    const onCopy = (e: ClipboardEvent) => {
-      if (!sel || (document.activeElement as HTMLElement | null)?.closest("input, textarea, [contenteditable='true']")) return;
-      const s = window.getSelection();
-      if (s && !s.isCollapsed && s.toString().trim()) return;
-      if (!e.clipboardData) return;
-      e.preventDefault();
-      e.clipboardData.setData("text/plain", `${selText()}\n— ${selLabel}`);
-      app.toast("Copied");
-    };
-    document.addEventListener("copy", onCopy);
-    return () => document.removeEventListener("copy", onCopy);
-  });
+  useCopySelection(() => (sel ? { text: `${selText()}\n— ${selLabel}`, label: "Copied" } : null), app.toast);
   const noteOnSel = () => {
     if (!sel) return;
     const quote = selText()
@@ -212,27 +201,7 @@ export function DocReader({ focus, setFocus, openPalette }: { focus: boolean; se
       style={{ top: -44, left: 44 }}
       onClick={(e) => e.stopPropagation()}
     >
-      <div style={{ display: "flex", gap: 6, padding: "0 6px 0 4px" }}>
-        {HL.map((c) => (
-          <button
-            key={c}
-            type="button"
-            className="dot"
-            aria-label={`Highlight: ${hlLabel(c, app.settings.hlNames)}`}
-            title={hlLabel(c, app.settings.hlNames)}
-            aria-pressed={curHl === c}
-            style={{ background: HL_DOT[c], outline: curHl === c ? "2px solid var(--vt-ring)" : undefined }}
-            onClick={() => setHl(curHl === c ? null : c)}
-          />
-        ))}
-        {curHl && app.settings.hlNames?.[curHl]?.trim() && (
-          <span
-            style={{ fontSize: 12, alignSelf: "center", whiteSpace: "nowrap", maxWidth: 160, overflow: "hidden", textOverflow: "ellipsis" }}
-          >
-            {hlLabel(curHl, app.settings.hlNames)}
-          </span>
-        )}
-      </div>
+      <HighlightDots current={curHl} names={app.settings.hlNames} onPick={setHl} />
       <span className="sep" />
       {/* Labels show when the column has room, and fold to icons when it doesn't (.lbl, styles.css). */}
       <button
@@ -268,12 +237,26 @@ export function DocReader({ focus, setFocus, openPalette }: { focus: boolean; se
   );
 
   // Journal entries linked to this chapter (any of its paragraphs), for the Notes tab.
-  const notes = app.journal.filter((e) =>
-    e.verses.some((v) => {
-      const l = parseDocLabel(v);
-      return l && l.book === bookTitle && l.chapter === doc.title;
-    }),
+  const notes = useMemo(
+    () =>
+      app.journal.filter((e) =>
+        e.verses.some((v) => {
+          const l = parseDocLabel(v);
+          return l && l.book === bookTitle && l.chapter === doc.title;
+        }),
+      ),
+    [app.journal, bookTitle, doc.title],
   );
+  // The paragraphs those entries are on.
+  const notedParas = useMemo(() => {
+    const on = new Set<number>();
+    for (const e of notes)
+      for (const v of e.verses) {
+        const l = parseDocLabel(v);
+        if (l && l.book === bookTitle && l.chapter === doc.title && l.from) for (let n = l.from; n <= (l.to ?? l.from); n++) on.add(n);
+      }
+    return on;
+  }, [notes, bookTitle, doc.title]);
 
   // Opened from a bookmark: bring its paragraph into view and flash it, once the chapter is in.
   const [flash, setFlash] = useState<number | null>(null);
@@ -283,9 +266,13 @@ export function DocReader({ focus, setFocus, openPalette }: { focus: boolean; se
     app.clearDocPara();
     window.requestAnimationFrame(() => scroller.current?.querySelector(`[data-seg="${t.para}"]`)?.scrollIntoView({ block: "center" }));
     setFlash(t.para);
+  }, [app.docPara, segs, doc.module, doc.title]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Its own effect: clearing docPara above re-runs that one, whose cleanup would cancel this.
+  useEffect(() => {
+    if (flash === null) return;
     const id = window.setTimeout(() => setFlash(null), 1600);
     return () => window.clearTimeout(id);
-  }, [app.docPara, segs, doc.module, doc.title]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [flash]);
 
   // The word being read, highlighted as in the Bible reader: boxes in its style drawn behind the
   // word (where it wraps, one per line), so the book's own markup is left alone.
@@ -337,7 +324,7 @@ export function DocReader({ focus, setFocus, openPalette }: { focus: boolean; se
   // No chapter yet: a book starts at its first, a devotional at today's reading.
   useEffect(() => {
     if (doc.title || !titles.length) return;
-    const today = dayTitle(new Date());
+    const today = dayTitle(readingDay());
     app.openDoc(doc.module, devo ? (titles.includes(today) ? today : titles[0]) : titles[0], kind);
   }, [doc.title, doc.module, titles, app, devo, kind]);
 
@@ -652,12 +639,7 @@ export function DocReader({ focus, setFocus, openPalette }: { focus: boolean; se
                     // A paragraph that is one <p> is shown inline, so its highlight follows the lines.
                     const onePara =
                       /^\s*<p[\s>]/i.test(h) && (h.match(/<p[\s>]/gi)?.length ?? 0) === 1 && !/<(img|table|div|ul|ol)/i.test(h);
-                    const noted = notes.some((e) =>
-                      e.verses.some((v) => {
-                        const l = parseDocLabel(v);
-                        return !!l && l.book === bookTitle && l.chapter === doc.title && !!l.from && l.from <= n && n <= (l.to ?? l.from);
-                      }),
-                    );
+                    const noted = notedParas.has(n);
                     return (
                       <div
                         key={k}
@@ -671,17 +653,7 @@ export function DocReader({ focus, setFocus, openPalette }: { focus: boolean; se
                         </div>
                         <div className={`dsegtext ${onePara ? "inl" : ""}`}>
                           {reading && ps.verse === n && wordBoxes.map((b, j) => <span key={j} className="speakbox" style={b} />)}
-                          <span className={hl ? `hl-${hlName(hl)}` : undefined}>
-                            {renderHtml(h, {
-                              onRef: (r) => {
-                                hide();
-                                app.open({ book: r.book, chapter: r.chapter, verse: r.verse, to: r.to }, "read");
-                              },
-                              onRefHover,
-                              onStrongs: app.studyWord,
-                              onImage: setImage,
-                            })}
-                          </span>
+                          <span className={hl ? `hl-${hlName(hl)}` : undefined}>{rendered[k]}</span>
                         </div>
                         <div className="gut">
                           {marked(k) && <Icon name="bookmark" style={{ fill: "var(--accent)" }} />}
@@ -742,61 +714,14 @@ export function DocReader({ focus, setFocus, openPalette }: { focus: boolean; se
               ))}
             </div>
             {tab === "notes" && (
-              <div className="scroll" style={{ flexGrow: 1, padding: "14px 18px", display: "flex", flexDirection: "column", gap: 10 }}>
-                <button
-                  className="btn"
-                  type="button"
-                  style={{ alignSelf: "flex-start" }}
-                  onClick={() => (sel ? noteOnSel() : app.startEntry({ verses: [docLabel(bookTitle, doc.title)], title: doc.title }))}
-                >
-                  <Icon name="plus" size={13} />
-                  {sel ? `New note on ¶${sel.from}${sel.to !== sel.from ? `–${sel.to}` : ""}` : `New note on this ${unit}`}
-                </button>
-                {notes.length === 0 && (
-                  <div className="hint">No journal entries on this {unit} yet. Select a paragraph and choose Note, or start one here.</div>
-                )}
-                {notes.map((e) => {
-                  const where = e.verses
-                    .map(parseDocLabel)
-                    .filter((l) => l && l.book === bookTitle && l.chapter === doc.title)
-                    .map((l) => (l!.from ? `¶${l!.from}${l!.to !== l!.from ? `–${l!.to}` : ""}` : `whole ${unit}`))
-                    .join(", ");
-                  return (
-                    <button
-                      key={e.id}
-                      type="button"
-                      className="card"
-                      style={{
-                        textAlign: "left",
-                        padding: "10px 12px",
-                        cursor: "pointer",
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: 4,
-                      }}
-                      title="Open in the journal"
-                      onClick={() => app.startEntry({ openId: e.id })}
-                    >
-                      <b style={{ fontSize: 13 }}>{e.title || "Untitled"}</b>
-                      <span className="n">
-                        {where} · {e.updated.slice(0, 10)}
-                      </span>
-                      <span
-                        style={{
-                          fontSize: 12.5,
-                          color: "var(--muted)",
-                          display: "-webkit-box",
-                          WebkitLineClamp: 3,
-                          WebkitBoxOrient: "vertical",
-                          overflow: "hidden",
-                        }}
-                      >
-                        {e.body.replace(/^>\s?/gm, "").replace(/[#*_]/g, "").trim()}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
+              <DocNotes
+                notes={notes}
+                bookTitle={bookTitle}
+                title={doc.title}
+                unit={unit}
+                sel={sel}
+                onNew={() => (sel ? noteOnSel() : app.startEntry({ verses: [docLabel(bookTitle, doc.title)], title: doc.title }))}
+              />
             )}
             {tab === "dictionary" && (
               <DictionaryTab
@@ -871,32 +796,7 @@ export function DocReader({ focus, setFocus, openPalette }: { focus: boolean; se
           }}
         />
       )}
-      {focus && (
-        <div
-          style={{
-            position: "fixed",
-            bottom: 18,
-            left: 0,
-            right: 0,
-            display: "flex",
-            justifyContent: "center",
-            gap: 18,
-            color: "var(--muted)",
-            fontSize: 12,
-            pointerEvents: "none",
-          }}
-        >
-          <span>Click an image to see it full screen</span>
-          <span>·</span>
-          <span>
-            <span className="kbd">space</span> listen
-          </span>
-          <span>·</span>
-          <span>
-            <span className="kbd">←</span> <span className="kbd">→</span> chapters
-          </span>
-        </div>
-      )}
+      {focus && <FocusHints click="Click an image to see it full screen" />}
       {image && (
         <ImageViewer images={images.length ? images : [image]} start={Math.max(0, images.indexOf(image))} onClose={() => setImage(null)} />
       )}
@@ -904,8 +804,113 @@ export function DocReader({ focus, setFocus, openPalette }: { focus: boolean; se
   );
 }
 
+/** What to offer to ask about a book's chapter (or, with `para`, one paragraph of it). Only what
+ *  fits: a chart question when there is a chart, the wider book when there is one. */
+function docSuggestions(o: { devo: boolean; para: string | null; charts: number; refs: number; multi: boolean; first: boolean }): string[] {
+  const { devo, para, multi } = o;
+  return (
+    para === null && devo
+      ? [
+          "Summarise today's reading",
+          "What is the key verse here, and why?",
+          "How can I put this into practice today?",
+          "Give me a short prayer drawn from this",
+          o.refs >= 2 ? "Read me the verses it quotes" : "",
+        ]
+      : para === null
+        ? [
+            "Summarise this chapter",
+            o.charts === 1 ? "Explain the chart in this chapter" : o.charts > 1 ? "Explain the main chart in this chapter" : "",
+            o.refs >= 5 ? "Which Scriptures does this chapter lean on most?" : "",
+            multi && !o.first ? "How does this build on the previous chapter?" : "",
+            multi ? "How does this chapter fit the book's overall scheme?" : "",
+            "How do other interpretive traditions see this?",
+          ]
+        : [
+            /<img/i.test(para) ? "Explain this chart" : "Explain this paragraph",
+            plainText(para).split(/\s+/).length > 80 ? "Put this in simpler words" : "",
+            /<ref>/i.test(para) ? "How do the verses cited here support this?" : "What Scriptures support this?",
+            multi ? (devo ? "Where else does this devotional touch on this?" : "Where else does the book discuss this?") : "",
+            "What would someone who disagrees say?",
+          ]
+  )
+    .filter(Boolean)
+    .slice(0, 5);
+}
+
+/** The Notes tab beside a book: the journal entries on this chapter, and a button for a new one. */
+function DocNotes({
+  notes,
+  bookTitle,
+  title,
+  unit,
+  sel,
+  onNew,
+}: {
+  notes: JournalEntry[];
+  bookTitle: string;
+  title: string;
+  unit: string;
+  sel: { from: number; to: number } | null;
+  onNew: () => void;
+}) {
+  const app = useApp();
+  return (
+    <div className="scroll" style={{ flexGrow: 1, padding: "14px 18px", display: "flex", flexDirection: "column", gap: 10 }}>
+      <button className="btn" type="button" style={{ alignSelf: "flex-start" }} onClick={onNew}>
+        <Icon name="plus" size={13} />
+        {sel ? `New note on ¶${sel.from}${sel.to !== sel.from ? `–${sel.to}` : ""}` : `New note on this ${unit}`}
+      </button>
+      {notes.length === 0 && (
+        <div className="hint">No journal entries on this {unit} yet. Select a paragraph and choose Note, or start one here.</div>
+      )}
+      {notes.map((e) => {
+        const where = e.verses
+          .map(parseDocLabel)
+          .filter((l) => l && l.book === bookTitle && l.chapter === title)
+          .map((l) => (l!.from ? `¶${l!.from}${l!.to !== l!.from ? `–${l!.to}` : ""}` : `whole ${unit}`))
+          .join(", ");
+        return (
+          <button
+            key={e.id}
+            type="button"
+            className="card"
+            style={{
+              textAlign: "left",
+              padding: "10px 12px",
+              cursor: "pointer",
+              display: "flex",
+              flexDirection: "column",
+              gap: 4,
+            }}
+            title="Open in the journal"
+            onClick={() => app.startEntry({ openId: e.id })}
+          >
+            <b style={{ fontSize: 13 }}>{e.title || "Untitled"}</b>
+            <span className="n">
+              {where} · {e.updated.slice(0, 10)}
+            </span>
+            <span
+              style={{
+                fontSize: 12.5,
+                color: "var(--muted)",
+                display: "-webkit-box",
+                WebkitLineClamp: 3,
+                WebkitBoxOrient: "vertical",
+                overflow: "hidden",
+              }}
+            >
+              {e.body.replace(/^>\s?/gm, "").replace(/[#*_]/g, "").trim()}
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 /** An image over the whole window: fitted, or at full size when clicked. ← → step through the chapter's images. */
-export function ImageViewer({ images, start, onClose }: { images: string[]; start: number; onClose: () => void }) {
+function ImageViewer({ images, start, onClose }: { images: string[]; start: number; onClose: () => void }) {
   const [i, setI] = useState(start);
   const [full, setFull] = useState(false);
   useEffect(() => {
@@ -1024,7 +1029,7 @@ export function BooksButton() {
             onPick={(k) => {
               setA(null);
               const [kind, id] = [k.slice(0, 1), k.slice(2)];
-              if (kind === "d") app.openDoc(id, dayTitle(new Date()), "devotional");
+              if (kind === "d") app.openDoc(id, dayTitle(readingDay()), "devotional");
               else app.openDoc(id);
             }}
             items={[

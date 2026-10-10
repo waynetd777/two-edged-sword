@@ -7,10 +7,10 @@
 
 import { Fragment, useEffect, useRef, useState } from "react";
 import { api, MusicState } from "./api";
-import { fmtRef } from "./bible";
 import { Icon, Pause, Play } from "./icons";
 import { artworkFor, Lyrics, lyricsFor, sceneSong } from "./lyrics";
-import { Topbar } from "./Shell";
+import { useMusicState } from "./music";
+import { ReadingColumnTopbar, useEscExitsFocus } from "./ReadingColumn";
 import { useApp } from "./state";
 import { Flames } from "./Flames";
 import { Visions } from "./Visions";
@@ -31,53 +31,50 @@ export function LyricsPage({ focus, setFocus }: { focus: boolean; setFocus: (f: 
   // Always dark, whatever the theme (styles.css, .lyrics-body).
   const dark = true;
   const [now, setNow] = useState<MusicState | null>(null);
-  const [error, setError] = useState<string | null>(null);
   // Music's position when last asked, and when that was, so the time runs on between asks.
   const heard = useRef({ pos: 0, t: 0, playing: false });
   const [t, setT] = useState(0);
+  // What Music is playing (asked every second, shared with Quiet time's bar); in screenshot mode
+  // the scene's song instead, playing on from its position as Music's would.
+  const music = useMusicState(!sceneSong);
+  const [scene, setScene] = useState<MusicState | null>(null);
   useEffect(() => {
-    let dead = false;
-    // Screenshot mode: the scene's song plays on from its position, as Music's would.
     const began = performance.now();
-    const check = async () => {
+    // Looked for at each tick, as Music would be asked.
+    const at = () => {
       const sc = sceneSong;
-      const scene: MusicState | null = sc
-        ? {
-            state: "playing",
-            ours: false,
-            album: "",
-            lyrics: "",
-            bpm: 0,
-            ...sc,
-            position: sc.position + (performance.now() - began) / 1000,
-          }
-        : null;
-      const st =
-        scene ??
-        (await api.musicState().catch((e) => {
-          if (!dead) setError(String(e));
-          return null;
-        }));
-      if (dead || !st) return;
-      setError(null);
-      heard.current = { pos: st.position, t: performance.now(), playing: st.state === "playing" };
-      setNow((n) =>
-        n && n.name === st.name && n.artist === st.artist && n.state === st.state && n.lyrics === st.lyrics
-          ? { ...n, position: st.position }
-          : st,
-      );
+      if (sc)
+        setScene({
+          state: "playing",
+          ours: false,
+          album: "",
+          lyrics: "",
+          bpm: 0,
+          ...sc,
+          position: sc.position + (performance.now() - began) / 1000,
+        });
     };
-    check();
-    const poll = window.setInterval(check, 1000);
+    at();
+    const poll = window.setInterval(at, 1000);
+    return () => window.clearInterval(poll);
+  }, []);
+  const st = scene ?? music.now;
+  const error = scene ? null : music.error;
+  useEffect(() => {
+    if (!st) return;
+    heard.current = { pos: st.position, t: performance.now(), playing: st.state === "playing" };
+    setNow((n) =>
+      n && n.name === st.name && n.artist === st.artist && n.state === st.state && n.lyrics === st.lyrics
+        ? { ...n, position: st.position }
+        : st,
+    );
+  }, [st]);
+  useEffect(() => {
     const tick = window.setInterval(() => {
       const h = heard.current;
       setT(h.playing ? h.pos + (performance.now() - h.t) / 1000 : h.pos);
     }, 200);
-    return () => {
-      dead = true;
-      window.clearInterval(poll);
-      window.clearInterval(tick);
-    };
+    return () => window.clearInterval(tick);
   }, []);
 
   const name = now?.name ?? "";
@@ -137,13 +134,7 @@ export function LyricsPage({ focus, setFocus }: { focus: boolean; setFocus: (f: 
   }, [target, lit]);
   useEffect(() => scroller.current?.scrollTo({ top: 0 }), [key]);
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && focus) setFocus(false);
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [focus, setFocus]);
+  useEscExitsFocus(focus, setFocus);
 
   // Why the song was chosen: by Quiet time, while it plays in the Worship part, or for a chapter.
   const s = app.session;
@@ -239,14 +230,7 @@ export function LyricsPage({ focus, setFocus }: { focus: boolean; setFocus: (f: 
   return (
     <div className="main lyrics-page" style={{ minHeight: 0 }}>
       {/* The top bar keeps the app's theme, except in focus mode, where it is part of the dark page. */}
-      {!focus && (
-        <Topbar right={tools}>
-          <button className="btn" type="button" title="Back to the Bible" onClick={app.closeDoc}>
-            <Icon name="read" />
-            {fmtRef(app.loc)}
-          </button>
-        </Topbar>
-      )}
+      {!focus && <ReadingColumnTopbar focus={false} setFocus={setFocus} tools={tools} />}
       <div className="lyrics-body">
         {/* The artwork, large and blurred, behind everything: as Music's full-screen view. */}
         {artUrl && (
@@ -274,15 +258,7 @@ export function LyricsPage({ focus, setFocus }: { focus: boolean; setFocus: (f: 
             />
           </div>
         )}
-        {focus && (
-          <header className="topbar drag" style={{ borderBottom: 0, paddingLeft: 84 }}>
-            <div className="spacer" />
-            {tools}
-            <button className="btn" type="button" onClick={() => setFocus(false)}>
-              Exit focus<span className="kbd">esc</span>
-            </button>
-          </header>
-        )}
+        {focus && <ReadingColumnTopbar focus setFocus={setFocus} tools={tools} />}
         {/* The song's heading stays put while its words scroll under it. */}
         <div style={{ flexShrink: 0, padding: focus ? "18px 10% 14px" : "18px 40px 14px 36px", textAlign: focus ? "center" : undefined }}>
           <div style={{ display: "flex", alignItems: "center", gap: 16, justifyContent: focus ? "center" : undefined }}>

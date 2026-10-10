@@ -3,7 +3,7 @@
 
 // The land and water: hills, fields, trees, rivers, the sea.
 
-import { beam, bitmap, glow, ridge, rnd, smooth, TAU, Vision } from "./kit";
+import { beam, drift, glow, layering, photo, random, rangePath, ridge, rnd, smooth, TAU, Vision } from "./kit";
 import { ROSE_BITMAP } from "./rose-bitmap";
 
 export const LAND: Vision[] = [
@@ -33,10 +33,7 @@ export const LAND: Vision[] = [
           g.addColorStop(0, f.ink(r.a * f.env, true));
           g.addColorStop(1, f.ink(0, true));
           ctx.fillStyle = g;
-          ctx.beginPath();
-          ctx.moveTo(0, h);
-          for (let x = 0; x <= w + 12; x += 12) ctx.lineTo(x, r.y(x + off));
-          ctx.lineTo(w, h);
+          rangePath(ctx, r.y, w, h, off);
           ctx.fill();
         }
       };
@@ -88,7 +85,7 @@ export const LAND: Vision[] = [
     themes: ["tree", "root", "roots", "branch", "planted", "grow", "fruit", "life", "leaves", "rooted", "like a tree"],
     lane: "back",
     dur: [24, 40],
-    make: (w, h, room) => {
+    make: (_w, h, room) => {
       const { x: x0, scale } = room.place(h * 0.85);
       const max = 6;
       const W0 = h * 0.034 * scale; // the trunk's width at its foot
@@ -104,7 +101,7 @@ export const LAND: Vision[] = [
       const limb = (len: number, ang: number, depth: number): Limb => {
         const kids: Limb[] = [];
         if (depth < max) {
-          const n = depth === 0 || Math.random() < 0.4 ? 3 : 2;
+          const n = depth === 0 || random() < 0.4 ? 3 : 2;
           for (let i = 0; i < n; i++) {
             let a = ang + (i - (n - 1) / 2) * (depth === 0 ? 0.62 : 0.48) * rnd(0.7, 1.3) + rnd(-0.12, 0.12);
             a += (a + Math.PI / 2) * 0.1; // reaching outwards, as a broad tree does
@@ -130,19 +127,11 @@ export const LAND: Vision[] = [
       const twigs = (b: Limb): number => (b.depth === max ? 1 : b.kids.reduce((n, k) => n + twigs(k), 0));
       const nTwigs = twigs(tree);
       while (fruitAt.size < Math.min(12, nTwigs)) fruitAt.add(Math.floor(rnd(0, nTwigs)));
-      let layer: HTMLCanvasElement | null = null;
+      const layer = layering();
       return (f) => {
         const { ctx } = f;
-        const dpr = ctx.getTransform().a || 1;
-        if (!layer || layer.width !== Math.round(w * dpr) || layer.height !== Math.round(h * dpr)) {
-          layer = document.createElement("canvas");
-          layer.width = Math.round(w * dpr);
-          layer.height = Math.round(h * dpr);
-        }
         // Drawn solid on a layer, so the branches don't brighten where they join, then laid on faintly.
-        const L = layer.getContext("2d")!;
-        L.setTransform(1, 0, 0, 1, 0, 0);
-        L.clearRect(0, 0, layer.width, layer.height);
+        const { L, canvas, dpr } = layer(f);
         L.setTransform(dpr, 0, 0, dpr, 0, 0);
         const wood = f.ink(1);
         const leafy = smooth(f.k * 3.2 - 1.4);
@@ -204,7 +193,7 @@ export const LAND: Vision[] = [
         }
         const fruit = smooth(f.k * 4 - 2.3);
         ctx.globalAlpha = (f.dark ? 0.34 : 0.42) * f.env;
-        ctx.drawImage(layer, 0, 0, w, h);
+        ctx.drawImage(canvas, 0, 0, f.w, f.h);
         ctx.globalAlpha = 1;
         if (fruit > 0)
           for (const [x, y, b, i] of clusters) {
@@ -233,7 +222,7 @@ export const LAND: Vision[] = [
       const p = rnd(0, TAU);
       const mid = (y: number) => cx + Math.sin(y * 0.012 + p) * w * 0.12 * ((y - top) / (h - top));
       const half = (y: number) => 3 + ((y - top) / (h - top)) ** 1.6 * w * 0.16;
-      const glints = Array.from({ length: 70 }, () => ({ u: Math.random(), o: rnd(-0.85, 0.85), s: rnd(0.03, 0.06), p: rnd(0, TAU) }));
+      const glints = Array.from({ length: 70 }, () => ({ u: random(), o: rnd(-0.85, 0.85), s: rnd(0.03, 0.06), p: rnd(0, TAU) }));
       return (f) => {
         const { ctx } = f;
         const g = ctx.createLinearGradient(0, top, 0, h);
@@ -248,7 +237,7 @@ export const LAND: Vision[] = [
         glow(ctx, mid(top), top, h * 0.14, f.ink(0.22 * f.env), f.ink(0));
         const dot = f.dot();
         for (const q of glints) {
-          const u = (q.u + f.t * q.s) % 1;
+          const u = drift(q, f.t);
           const y = top + (h - top) * u ** 1.3;
           const r = 1.2 + u * 3.5;
           ctx.globalAlpha = f.env * 0.7 * Math.sin(Math.PI * u) * (0.3 + 0.7 * Math.sin(f.t * 2.5 + q.p) ** 2);
@@ -281,12 +270,12 @@ export const LAND: Vision[] = [
       const sheep: { x: number; d: number; s: number; dir: number; p: number; graze: number; step: number }[] = [];
       for (let i = 0; i < 10; i++) {
         const d = rnd(0, 1);
-        sheep.push({ x: rnd(0.06, 0.94) * w, d, s: 8 + d * 9, dir: Math.random() < 0.5 ? 1 : -1, p: rnd(0, TAU), graze: 1, step: 0 });
+        sheep.push({ x: rnd(0.06, 0.94) * w, d, s: 8 + d * 9, dir: random() < 0.5 ? 1 : -1, p: rnd(0, TAU), graze: 1, step: 0 });
         if (i < 2) sheep.push({ ...sheep[i * 2], x: sheep[i * 2].x + rnd(20, 34), s: sheep[i * 2].s * 0.62, p: rnd(0, TAU) });
       }
       sheep.sort((a, b) => a.d - b.d);
       // Each sheep is drawn solid on a layer, then the layer faintly, so their parts don't add up where they overlap.
-      let layer: HTMLCanvasElement | null = null;
+      const layer = layering();
       return (f) => {
         const { ctx } = f;
         const g = ctx.createLinearGradient(0, h * 0.7, 0, h);
@@ -299,15 +288,7 @@ export const LAND: Vision[] = [
         ctx.lineTo(w, h);
         ctx.fill();
 
-        const dpr = ctx.getTransform().a || 1;
-        if (!layer || layer.width !== Math.round(w * dpr) || layer.height !== Math.round(h * dpr)) {
-          layer = document.createElement("canvas");
-          layer.width = Math.round(w * dpr);
-          layer.height = Math.round(h * dpr);
-        }
-        const L = layer.getContext("2d")!;
-        L.setTransform(1, 0, 0, 1, 0, 0);
-        L.clearRect(0, 0, layer.width, layer.height);
+        const { L, canvas, dpr } = layer(f);
         L.setTransform(dpr, 0, 0, dpr, 0, 0);
         const ink = (a: number) => f.ink(a);
         for (const sh of sheep) {
@@ -392,7 +373,7 @@ export const LAND: Vision[] = [
         }
         for (const sh of sheep) glow(ctx, sh.x, hill(sh.x) + sh.d * h * 0.09 - sh.s, sh.s * 2.6, f.ink(0.05 * f.env), f.ink(0));
         ctx.globalAlpha = (f.dark ? 0.32 : 0.42) * f.env;
-        ctx.drawImage(layer, 0, 0, w, h);
+        ctx.drawImage(canvas, 0, 0, f.w, f.h);
         ctx.globalAlpha = 1;
       };
     },
@@ -437,7 +418,7 @@ export const LAND: Vision[] = [
     lane: "back",
     dur: [22, 36],
     make: (w, h) => {
-      const fromLeft = Math.random() < 0.5;
+      const fromLeft = random() < 0.5;
       const pts = Array.from({ length: 80 }, (_, i) => {
         const u = i / 79;
         return [fromLeft ? u * w : w - u * w, h * 0.86 + Math.sin(u * 9) * h * 0.04 + Math.sin(u * 23) * h * 0.01] as const;
@@ -445,7 +426,7 @@ export const LAND: Vision[] = [
       const nodes = Array.from({ length: 12 }, (_, i) => ({
         i: 5 + i * 6 + Math.floor(rnd(0, 3)),
         up: i % 2 === 0,
-        grapes: Math.random() < 0.55,
+        grapes: random() < 0.55,
       }));
       return (f) => {
         const { ctx } = f;
@@ -522,7 +503,7 @@ export const LAND: Vision[] = [
       const s = s0 * scale;
       const glints = Array.from({ length: 40 }, () => ({ x: rnd(-0.08, 0.08), y: rnd(0, 1), p: rnd(0, TAU), l: rnd(6, 18) }));
       const wave = (x: number, t: number, k: number) => Math.sin(x * 0.012 + t * 0.9 + k) * 4 + Math.sin(x * 0.031 - t * 1.3 + k * 2) * 1.6;
-      let layer: HTMLCanvasElement | null = null;
+      const layer = layering();
       return (f) => {
         const { ctx } = f;
         // The light's path on the water, behind the boat.
@@ -542,15 +523,7 @@ export const LAND: Vision[] = [
         }
         // The boat, rocking on them, with its sail: drawn in soft fills on a layer (no outlines),
         // laid on with a soft edge, and faintly mirrored in the water.
-        const dpr = ctx.getTransform().a || 1;
-        if (!layer || layer.width !== Math.round(w * dpr) || layer.height !== Math.round(h * dpr)) {
-          layer = document.createElement("canvas");
-          layer.width = Math.round(w * dpr);
-          layer.height = Math.round(h * dpr);
-        }
-        const L = layer.getContext("2d")!;
-        L.setTransform(1, 0, 0, 1, 0, 0);
-        L.clearRect(0, 0, layer.width, layer.height);
+        const { L, canvas, dpr } = layer(f);
         L.setTransform(dpr, 0, 0, dpr, 0, 0);
         const y = sea + wave(bx, f.t, 0) - 2;
         L.translate(bx, y);
@@ -587,13 +560,13 @@ export const LAND: Vision[] = [
         ctx.globalAlpha = 0.4 * f.env;
         ctx.shadowColor = f.ink(0.5 * f.env);
         ctx.shadowBlur = s * 0.35;
-        ctx.drawImage(layer, 0, 0, w, h);
+        ctx.drawImage(canvas, 0, 0, f.w, f.h);
         ctx.restore();
         ctx.save();
         ctx.globalAlpha = 0.05 * f.env;
         ctx.translate(0, y * 2 + s * 0.3);
         ctx.scale(1, -1);
-        ctx.drawImage(layer, 0, 0, w, h);
+        ctx.drawImage(canvas, 0, 0, f.w, f.h);
         ctx.restore();
       };
     },
@@ -742,19 +715,8 @@ export const LAND: Vision[] = [
       "fragrance",
       "bride",
     ],
-    make: (w, h, room) => {
-      const W0 = Math.min(w, h) * 0.5;
-      const { x, scale } = room.place(W0);
-      const W = W0 * scale,
-        y = h * 0.5;
-      // The rose of Sharon: Redouté's Provence rose (pictures/rose-bitmap.ts), in the artwork's
-      // colour, the paper it is printed on kept about it.
-      const pic = bitmap(ROSE_BITMAP, 0.1, "photo");
-      return (f) => {
-        const come = smooth(f.k * 2.4);
-        glow(f.ctx, x, y, W * 0.5, f.ink(0.08 * f.env * come * (0.92 + 0.08 * f.beat)), f.ink(0));
-        pic.draw(f, x, y + (1 - come) * 14, W, f.env * come, 1 + 0.004 * Math.sin(f.t * 1.1));
-      };
-    },
+    // The rose of Sharon: Redouté's Provence rose (pictures/rose-bitmap.ts), in the artwork's
+    // colour, the paper it is printed on kept about it.
+    make: photo(ROSE_BITMAP, 0.5),
   },
 ];

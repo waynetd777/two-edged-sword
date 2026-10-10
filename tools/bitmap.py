@@ -14,7 +14,7 @@ the fade clears a subject that fills its photo; `--channel r` (or g or b) takes 
 place of grey, for a subject its ground's grey would hide (a tan horn on grey-blue). Keep a dark
 subject's ground: without it, it shows as light on the dark page, like a negative.
 """
-import argparse, base64, io, pathlib, sys
+import argparse, base64, io, pathlib
 from PIL import Image, ImageFilter, ImageOps
 
 ap = argparse.ArgumentParser()

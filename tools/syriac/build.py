@@ -25,30 +25,24 @@ counterpart in syrnt is left as it is, without a gloss.
 The markup is INT+'s (see tokenize in src/esword.tsx): each word a
 <div><grk>word</grk><tvm>grammar</tvm><grk>lexeme</grk><gra>meaning</gra></div>.
 
-Downloads are cached in ~/Library/Caches/Two-edged Sword/syriac (SEDRA's answers in sedra/).
+syrnt is taken at a fixed commit. Downloads are cached in ~/Library/Caches/Two-edged Sword/syriac
+(SEDRA's answers in sedra/).
 """
-import html, json, os, re, sqlite3, sys, time, unicodedata, urllib.parse, urllib.request
+import html, json, re, sqlite3, sys, time, unicodedata, urllib.error, urllib.parse
 from concurrent.futures import ThreadPoolExecutor
 from difflib import SequenceMatcher
 from pathlib import Path
 
-HOME = Path(os.environ.get("HOME", ""))
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from modules import LIBRARY, find  # noqa: E402
-CACHE = HOME / "Library/Caches/Two-edged Sword/syriac"
-TF = "https://raw.githubusercontent.com/ETCBC/syrnt/master/tf/0.1/{}.tf"
+from modules import CACHES, fetch, find, module, write_whole  # noqa: E402
+CACHE = CACHES / "syriac"
+TF = "https://raw.githubusercontent.com/ETCBC/syrnt/dae3eb6ff62b9b272fb503646796c25d248175ce/tf/0.1/{}.tf"
 SEDRA = "https://sedra.bethmardutho.org/api/word/{}.json"
 FEATURES = ["otype", "oslots", "book", "chapter", "verse", "word", "lexeme", "root", "prefix", "suffix", "sp", "st", "gn", "nu", "ps", "vs", "vt", "sfps", "sfgn", "sfnu"]
 
 
 def get(url, path):
-    if not path.exists() or not path.stat().st_size:
-        path.parent.mkdir(parents=True, exist_ok=True)
-        req = urllib.request.Request(url, headers={"User-Agent": "Two-edged Sword (tools/syriac)"})
-        with urllib.request.urlopen(req, timeout=120) as r:
-            data = r.read()
-        path.write_bytes(data)
-    return path.read_bytes()
+    return fetch(url, path, ua="Two-edged Sword (tools/syriac)").read_bytes()
 
 
 def tf(name):
@@ -148,19 +142,27 @@ def pick(glosses):
 
 
 def sedra(lexeme):
-    """SEDRA's entries for a lexeme, cached."""
+    """SEDRA's entries for a lexeme, cached. A word SEDRA hasn't (a 404, or an answer that isn't
+    JSON) is cached as none; an error page (HTML, from a busy server) is asked again, never cached."""
     p = CACHE / "sedra" / f"{consonants(lexeme)}.json"
     for attempt in range(4):
         try:
-            return json.loads(get(SEDRA.format(urllib.parse.quote(lexeme)), p))
-        except json.JSONDecodeError:
-            p.write_text("[]")
-            return []
-        except Exception as e:
-            if getattr(e, "code", None) == 404:
-                p.write_text("[]")
+            data = get(SEDRA.format(urllib.parse.quote(lexeme)), p)
+        except urllib.error.HTTPError as e:
+            if e.code == 404:
+                write_whole(p, "[]")
                 return []
-            time.sleep(2 * (attempt + 1))
+        except Exception:
+            pass
+        else:
+            try:
+                return json.loads(data)
+            except json.JSONDecodeError:
+                if not data.lstrip().startswith(b"<"):
+                    write_whole(p, "[]")
+                    return []
+                p.unlink(missing_ok=True)
+        time.sleep(2 * (attempt + 1))
     print(f"  SEDRA: no answer for {lexeme}")
     return []
 
@@ -262,8 +264,9 @@ def main():
     ws = words()
     lexemes = sorted({(w["lexeme"], w["sp"]) for w in ws if w["lexeme"]})
     print(f"  {len(ws)} words, {len({l for l, _ in lexemes})} lexemes; SEDRA glosses")
+    lex = sorted({l for l, _ in lexemes})
     with ThreadPoolExecutor(6) as pool:
-        entries = dict(zip({l for l, _ in lexemes}, pool.map(sedra, {l for l, _ in lexemes})))
+        entries = dict(zip(lex, pool.map(sedra, lex), strict=True))
     means = {(l, sp): meaning(entries[l], sp, l) for l, sp in lexemes}
     print(f"  {sum(bool(m) for m in means.values())} of {len(means)} lexeme/part-of-speech pairs have English")
 
@@ -313,19 +316,9 @@ def main():
              "SEDRA IV (Beth Mardutho, the Syriac Institute). Meanings are of the dictionary word, not translations in context. "
              f"{tagged / total:.0%} of the words are matched; the rest, where SEDRA's text differs, are left as they are. "
              "Built by Two-edged Sword's tools/syriac.</p>")
-    p = LIBRARY / "peshitta+.bbli"
-    tmp = p.with_suffix(".tmp")
-    tmp.unlink(missing_ok=True)
-    db = sqlite3.connect(tmp)
-    db.executescript("""CREATE TABLE Details (Title NVARCHAR(100), Abbreviation NVARCHAR(50), Information TEXT, Version INT, OldTestament BOOL, NewTestament BOOL, Apocrypha BOOL, Strongs BOOL, RightToLeft BOOL);
-        CREATE TABLE Bible (Book INT, Chapter INT, Verse INT, Scripture TEXT);
-        CREATE INDEX BookChapterVerseIndex ON Bible (Book, Chapter, Verse);""")
-    db.execute("INSERT INTO Details VALUES (?,?,?,1,0,1,0,0,1)", ("Syriac Peshitta w/ glosses", "Peshitta+", about))
-    db.executemany("INSERT INTO Bible VALUES (?,?,?,?)", out)
-    db.commit()
-    db.close()
-    tmp.replace(p)
-    print(f"{p.name}: {len(out)} verses")
+    with module("peshitta+.bbli", "Syriac Peshitta w/ glosses", "Peshitta+", about, ot=False, rtl=True) as db:
+        db.executemany("INSERT INTO Bible VALUES (?,?,?,?)", out)
+    print(f"peshitta+.bbli: {len(out)} verses")
 
 
 if __name__ == "__main__":

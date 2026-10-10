@@ -5,9 +5,8 @@
 // music, so they swell on each beat of the song's tempo as Music knows it, or of a slow worship
 // tempo when it doesn't; paused, they die down to embers.
 
-import { useEffect, useRef } from "react";
+import { beatAt, useCanvasLoop } from "./canvasLoop";
 
-const DEFAULT_BPM = 72;
 /** Flame colours, hot to cool: white-gold, gold, orange, red, deep red. */
 const STOPS: [number, number, number][] = [
   [255, 244, 214],
@@ -55,29 +54,10 @@ interface P {
 }
 
 export function Flames({ bpm, playing, time, dark }: { bpm: number; playing: boolean; time: () => number; dark: boolean }) {
-  const canvas = useRef<HTMLCanvasElement>(null);
-  const live = useRef({ bpm, playing, time, dark });
-  live.current = { bpm, playing, time, dark };
-
-  useEffect(() => {
-    const c = canvas.current!;
-    const ctx = c.getContext("2d")!;
+  const canvas = useCanvasLoop({ bpm, playing, time, dark }, ({ canvas: c, ctx, live, still }) => {
     const shades = sprites();
-    const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const ps: P[] = [];
-    let raf = 0,
-      last = performance.now(),
-      heat = live.current.playing ? 1 : 0.15; // then eases towards 1 playing, 0.15 paused
-    const fit = () => {
-      const r = c.getBoundingClientRect();
-      const d = window.devicePixelRatio || 1;
-      c.width = Math.max(1, Math.round(r.width * d));
-      c.height = Math.max(1, Math.round(r.height * d));
-      ctx.setTransform(d, 0, 0, d, 0, 0);
-    };
-    fit();
-    const ro = new ResizeObserver(fit);
-    ro.observe(c);
+    let heat = live.current.playing ? 1 : 0.15; // then eases towards 1 playing, 0.15 paused
 
     // One step of the fire, drawn or (warming up) not.
     const step = (now: number, dt: number, draw: boolean) => {
@@ -86,8 +66,7 @@ export function Flames({ bpm, playing, time, dark }: { bpm: number; playing: boo
         h = c.clientHeight;
       heat += ((playing ? 1 : 0.15) - heat) * Math.min(1, dt * 1.5);
       // A swell on each beat, dying away before the next.
-      const phase = (time() * (bpm || DEFAULT_BPM)) / 60;
-      const beat = playing && !still ? Math.exp(-(phase % 1) * 4) : 0;
+      const beat = beatAt(time(), bpm, playing && !still);
       const surge = heat * (0.75 + 0.45 * beat);
       const t = now / 1000;
 
@@ -139,18 +118,10 @@ export function Flames({ bpm, playing, time, dark }: { bpm: number; playing: boo
       ctx.globalAlpha = 1;
     };
     // Already burning when it appears: a few seconds of fire run through first.
-    for (let i = 180; i > 0; i--) step(last - i * 16.7, 1 / 60, false);
-    const frame = (now: number) => {
-      step(now, Math.min(0.05, (now - last) / 1000), true);
-      last = now;
-      raf = requestAnimationFrame(frame);
-    };
-    raf = requestAnimationFrame(frame);
-    return () => {
-      cancelAnimationFrame(raf);
-      ro.disconnect();
-    };
-  }, []);
+    const t0 = performance.now();
+    for (let i = 180; i > 0; i--) step(t0 - i * 16.7, 1 / 60, false);
+    return (now, dt) => step(now, dt, true);
+  });
 
   return <canvas ref={canvas} style={{ width: "100%", height: "100%", display: "block" }} />;
 }

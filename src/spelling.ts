@@ -11,10 +11,7 @@
 
 import { RefObject, useEffect, useRef, useState } from "react";
 import { api } from "./api";
-
-type Highlights = { set: (k: string, v: unknown) => void; delete: (k: string) => void };
-const highlights = () => (CSS as unknown as { highlights?: Highlights }).highlights;
-const HighlightOf = () => (window as unknown as { Highlight?: new (...r: Range[]) => unknown }).Highlight;
+import { BLOCKS, paintHighlight, textRange } from "./dom";
 
 const SKIP = "blockquote.verse, cite, a.ref, code";
 
@@ -36,26 +33,10 @@ function blocks(nodes: Text[]) {
   const close = () => {
     if (!cur.length) return;
     const [ns, ss, t] = [cur, starts, text];
-    const at = (i: number): [Text, number] => {
-      let k = ss.length - 1;
-      while (k > 0 && ss[k] > i) k--;
-      return [ns[k], Math.min(i - ss[k], ns[k].data.length)];
-    };
-    out.push({
-      text: t,
-      range: (a, len) => {
-        if (len <= 0) return null;
-        const r = document.createRange();
-        r.setStart(...at(a));
-        // The end from its last character, so it isn't placed at the start of the next node.
-        const [n, off] = at(a + len - 1);
-        r.setEnd(n, off + 1);
-        return r;
-      },
-    });
+    out.push({ text: t, range: (a, len) => textRange(ns, ss, a, len) });
   };
   for (const n of nodes) {
-    const b = n.parentElement?.closest("p, li, h1, h2, h3, h4, blockquote, div") ?? null;
+    const b = n.parentElement?.closest(BLOCKS) ?? null;
     if (b !== block) {
       close();
       cur = [];
@@ -104,7 +85,7 @@ function holds(r: Range, node: Node, offset: number): boolean {
   }
 }
 
-export interface SpellMenu {
+interface SpellMenu {
   rect: DOMRect;
   word: string;
   range: Range;
@@ -125,13 +106,11 @@ export function useSpelling(ed: RefObject<HTMLDivElement | null>, key: string, o
   const [menu, setMenu] = useState<SpellMenu | null>(null);
 
   const paint = () => {
-    const hs = highlights(),
-      H = HighlightOf();
-    if (!hs || !H) return;
-    if (bad.current.length) hs.set("spelling", new H(...bad.current));
-    else hs.delete("spelling");
-    if (gram.current.length) hs.set("grammar", new H(...gram.current.map((g) => g.range)));
-    else hs.delete("grammar");
+    paintHighlight("spelling", bad.current);
+    paintHighlight(
+      "grammar",
+      gram.current.map((g) => g.range),
+    );
   };
 
   const check = async () => {
@@ -209,8 +188,8 @@ export function useSpelling(ed: RefObject<HTMLDivElement | null>, key: string, o
     recheck(50);
     return () => {
       window.clearTimeout(timer.current);
-      highlights()?.delete("spelling");
-      highlights()?.delete("grammar");
+      paintHighlight("spelling", []);
+      paintHighlight("grammar", []);
     };
   }, [key]); // eslint-disable-line react-hooks/exhaustive-deps
   // Turning grammar off in Settings takes its underlines away; on, checks again.

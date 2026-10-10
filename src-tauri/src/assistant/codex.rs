@@ -5,12 +5,11 @@
 //! The user's own Codex config (MCP servers, hooks, rules) is left out; sign-in still comes from
 //! ~/.codex. Runs in the read-only sandbox.
 
-use super::{emit_status, finish, spawn, stem, Done, Folder, Model, Running, SYSTEM};
-use std::io::{BufRead, BufReader};
+use super::{installed, reading, spawn, stream, Folder, Model, Running, SEARCHING, SYSTEM};
 use std::path::PathBuf;
 use std::process::Command;
 use std::sync::Arc;
-use tauri::{AppHandle, Emitter};
+use tauri::AppHandle;
 
 const TOOLS: &str = "Search with rg and print only the relevant lines, covering several files in one command where you can; do not read whole files unless the question needs it. Read nothing outside the folders named here.";
 
@@ -21,8 +20,7 @@ pub fn find() -> Option<PathBuf> {
 /// The models the Codex CLI would offer in its picker, from the list it caches for the
 /// signed-in account. Empty if Codex has never run, so the app shows nothing to choose.
 pub fn models() -> Vec<Model> {
-    let home = std::env::var("HOME").unwrap_or_default();
-    let Ok(s) = std::fs::read_to_string(format!("{home}/.codex/models_cache.json")) else { return Vec::new() };
+    let Ok(s) = std::fs::read_to_string(crate::store::home().join(".codex/models_cache.json")) else { return Vec::new() };
     let Ok(v) = serde_json::from_str::<serde_json::Value>(&s) else { return Vec::new() };
     let mut ms: Vec<(i64, Model)> = v["models"]
         .as_array()
@@ -50,7 +48,7 @@ pub fn ask(
     session: Option<String>,
     folder: Folder,
 ) -> Result<(), String> {
-    let bin = find().ok_or("Codex isn't installed, or couldn't be found. Install it and sign in, then try again.")?;
+    let bin = installed(find(), "Codex")?;
     let instructions = format!("{SYSTEM}\n\n{} {TOOLS}", folder.prompt());
     // -c values are TOML; a JSON string is a valid TOML basic string.
     let instructions = format!("developer_instructions={}", serde_json::to_string(&instructions).map_err(|e| e.to_string())?);
@@ -66,49 +64,29 @@ pub fn ask(
         cmd.arg(s);
     }
     cmd.arg(&prompt);
-    let (child, stdout, stderr) = spawn(&mut cmd, &running, &chat_id, "codex")?;
-
-    std::thread::spawn(move || {
-        let mut text = String::new();
-        let mut session_id = None;
-        let mut error = None;
-        for line in BufReader::new(stdout).lines().map_while(Result::ok) {
-            let Ok(v) = serde_json::from_str::<serde_json::Value>(&line) else { continue };
-            match v["type"].as_str() {
-                Some("thread.started") => {
-                    if let Some(s) = v["thread_id"].as_str() {
-                        session_id = Some(s.to_string());
-                    }
-                }
-                // A shell command it runs to search: name the file it reads, if one is named.
-                Some("item.started") if v["item"]["type"] == "command_execution" => {
-                    let cmd = v["item"]["command"].as_str().unwrap_or("");
-                    let file = cmd.split(['\'', '"']).find(|p| p.ends_with(".txt")).and_then(stem);
-                    emit_status(&app, &chat_id, file.map(|f| format!("Reading {f}")).unwrap_or_else(|| "Searching the library".into()));
-                }
-                // When it searches first, earlier messages are progress notes ("I'll read index.txt…");
-                // the answer is the last one, sent with ask-done.
-                Some("item.completed") if v["item"]["type"] == "agent_message" => {
-                    if let Some(t) = v["item"]["text"].as_str() {
-                        text = t.to_string();
-                    }
-                }
-                Some("turn.failed") => error = Some(v["error"]["message"].as_str().unwrap_or("Codex returned an error").to_string()),
-                Some("error") => error = Some(v["message"].as_str().unwrap_or("Codex returned an error").to_string()),
-                _ => {}
+    let run = spawn(&mut cmd, &running, &chat_id, "codex")?;
+    stream(app, running, chat_id, "Codex", true, run, |a, v| match v["type"].as_str() {
+        Some("thread.started") => {
+            if let Some(s) = v["thread_id"].as_str() {
+                a.session_id = Some(s.to_string());
             }
         }
-        // Codex also reports transient trouble (a dropped stream it then reconnects) as errors,
-        // so one only counts when no answer came.
-        if !text.is_empty() {
-            error = None;
+        // A shell command it runs to search: name the file it reads, if one is named.
+        Some("item.started") if v["item"]["type"] == "command_execution" => {
+            let cmd = v["item"]["command"].as_str().unwrap_or("");
+            let file = cmd.split(['\'', '"']).find(|p| p.ends_with(".txt"));
+            a.status(reading(file).or_else(|| Some(SEARCHING.into())));
         }
-        let ok = finish(child, &running);
-        if error.is_none() && !ok && text.is_empty() {
-            let msg = stderr.join().unwrap_or_default();
-            error = Some(if msg.trim().is_empty() { "Codex stopped without answering".into() } else { msg.trim().to_string() });
+        // When it searches first, earlier messages are progress notes ("I'll read index.txt…");
+        // the answer is the last one, sent with ask-done.
+        Some("item.completed") if v["item"]["type"] == "agent_message" => {
+            if let Some(t) = v["item"]["text"].as_str() {
+                a.text = t.to_string();
+            }
         }
-        let _ = app.emit("ask-done", Done { chat_id, session_id, text, error });
+        Some("turn.failed") => a.error = Some(v["error"]["message"].as_str().unwrap_or("Codex returned an error").to_string()),
+        Some("error") => a.error = Some(v["message"].as_str().unwrap_or("Codex returned an error").to_string()),
+        _ => {}
     });
     Ok(())
 }

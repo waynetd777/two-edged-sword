@@ -8,7 +8,7 @@ an arrow to Applications on the right, on a background with the wordmark and a h
 
 Finder lays out the window, so the first run asks to let the terminal control Finder.
 """
-import base64, json, os, shutil, subprocess, sys, tempfile, time
+import base64, os, shutil, subprocess, sys, tempfile, time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]

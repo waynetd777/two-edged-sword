@@ -54,10 +54,12 @@ export function SettingsScreen() {
   useEffect(() => {
     refreshAssistant();
   }, []);
-  const chooseDir = async () => {
-    const d = await openDialog({ directory: true, defaultPath: app.journalDir });
-    if (typeof d === "string") app.set({ journalDir: d });
-  };
+  const chooseDir = () =>
+    openDialog({ directory: true, defaultPath: app.journalDir })
+      .then((d) => {
+        if (typeof d === "string") app.set({ journalDir: d });
+      })
+      .catch((e) => app.toast(String(e)));
   return (
     <div className="main">
       <Topbar />

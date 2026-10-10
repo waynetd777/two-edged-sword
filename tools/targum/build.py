@@ -24,23 +24,21 @@ has it (github.com/UniquePixels/jastrow, CC BY-NC): its prefixes, suffixes and v
 taken off in turn until a headword matches, and the English is the headword's first gloss. The
 tooltip says which: "Hebrew בָּרָא" or "Jastrow אַרְעָא".
 
-Downloads are cached in ~/Library/Caches/Two-edged Sword/targum.
+Jastrow is taken at a fixed commit. Downloads are cached in ~/Library/Caches/Two-edged Sword/targum.
 """
-import html, json, os, re, sqlite3, sys, unicodedata, urllib.request
+import html, json, re, sqlite3, sys
 from pathlib import Path
 
-HOME = Path(os.environ.get("HOME", ""))
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from modules import LIBRARY, find  # noqa: E402
-CACHE = HOME / "Library/Caches/Two-edged Sword/targum"
-JASTROW = "https://raw.githubusercontent.com/UniquePixels/jastrow/main/data/jastrow-part{}.jsonl"
+from modules import CACHES, FINAL, fetch, find, hebrew_consonants as consonants, module  # noqa: E402
+CACHE = CACHES / "targum"
+JASTROW = "https://raw.githubusercontent.com/UniquePixels/jastrow/05c8a79bbf2408f3909151d08d71a6f3e33e9ead/data/jastrow-part{}.jsonl"
 MODULES = {
     "targum_aramaic": dict(title="Targum (Aramaic) w/ glosses", abbrev="Targum+"),
     "pseudojonathan_aramaic": dict(title="Targum Pseudo-Jonathan (Aramaic) w/ glosses", abbrev="Ps-Jon+"),
 }
-FINAL = str.maketrans("ךםןףץ", "כמנפצ")
 # Aramaic letters that stand for Hebrew ones in cognate words, and the first letters of each pair.
-SAME = {("ד", "ז"), ("ת", "ש"), ("ט", "צ"), ("ע", "צ"), ("א", "ה"), ("ש", "ש"), ("ס", "ש"), ("ס", "ש")}
+SAME = {("ד", "ז"), ("ת", "ש"), ("ט", "צ"), ("ע", "צ"), ("א", "ה"), ("ש", "ש"), ("ס", "ש")}
 PREFIX = {"ו": "and", "ד": "of", "ב": "in", "ל": "to", "מ": "from", "כ": "as"}
 # Aramaic words and the Hebrew they stand for, where the two aren't cognate.
 EQUIV = {"ית": "את", "יי": ("יהוה", "אלהימ", "אדני"), "ארי": "כי", "דין": "זה", "הא": "הנה", "כען": "עתה", "לות": "אל", "קדם": "לפני", "ארום": "כי",
@@ -49,11 +47,7 @@ EQUIV = {"ית": "את", "יי": ("יהוה", "אלהימ", "אדני"), "ארי
 
 
 # The commonest words, whose first gloss in Jastrow is some other word's (אמר: "join" for "say").
-COMMON = {"מן": "from", "קדם": "before", "על": "on", "אמר": "say", "די": "which", "לא": "not", "ישראל": "Israel", "ליה": "to him", "ית": "[obj.]", "ארום": "for", "להון": "to them", "מלכא": "the king", "בני": "sons of", "כל": "all", "הוה": "was", "בית": "house of", "הוא": "he", "בר": "son", "עם": "with", "הדין": "this", "אנא": "I", "כד": "when", "עד": "until", "ארעא": "the land", "יתיה": "him", "לכון": "to you", "עמא": "the people", "קדמי": "before me", "למימר": "saying", "יתהון": "them", "לך": "to you", "עממיא": "the nations", "משה": "Moses", "קרבא": "battle", "לי": "to me", "דין": "this", "מקדשא": "the sanctuary", "יהי": "let be", "בהון": "in them", "חד": "one", "בתר": "after", "ביה": "in him", "כדנן": "thus", "כן": "so", "הא": "behold", "לית": "there is not", "סחור": "around", "רבא": "great", "בכן": "then", "מטול": "because", "גברא": "the man", "עבד": "do", "עלמא": "the world", "עמיה": "his people", "אף": "also", "יהודה": "Judah", "אין": "if", "היך": "how", "מימרא": "the Word", "מימרי": "my Word", "מימריה": "his Word", "שמיא": "heaven", "דוד": "David", "זמנא": "time", "לה": "to her", "למעבד": "to do", "כען": "now", "יתי": "me", "כהנא": "the priest", "כהניא": "the priests", "מליל": "speak", "יתכון": "you", "לחדא": "very", "תמן": "there", "חדא": "one", "ברם": "but", "מנהון": "from them", "עמי": "my people", "פתגמא": "the word", "פתגם": "word", "פתגמי": "words of", "פתגמיא": "the words", "אתון": "you", "מניה": "from him", "הדא": "this", "אלין": "these", "האלין": "these", "מה": "what", "יתה": "her", "קדמך": "before you", "מצרים": "Egypt", "היא": "she", "קדמוהי": "before him", "קדמוי": "before him", "בדיל": "because of", "דינא": "judgment", "קרתא": "the city", "נביא": "prophet", "נביאה": "the prophet", "קרא": "call", "למהוי": "to be", "אינון": "they", "עליהון": "upon them", "נבואה": "prophecy", "חזור": "around", "אוריתא": "the Law", "אלהא": "God", "אלהי": "God of", "אלהכון": "your God", "אלהך": "your God", "יומא": "day", "יומין": "days", "ארי": "for", "בגו": "inside", "עלי": "upon me", "שנין": "years", "שנא": "year", "ימא": "sea", "עמך": "with you", "אזל": "go", "בגין": "because of", "אתא": "come", "לחוד": "only", "קים": "covenant", "כנשתא": "congregation", "ההוא": "that", "ההיא": "that", "כדון": "now", "ירושלם": "Jerusalem", "היכמא": "as", "כמא": "as", "כי": "for", "הוו": "were", "הלא": "is not", "כדין": "so", "אחד": "one", "מאה": "hundred", "משכן": "tabernacle", "משכנא": "the tabernacle", "נסיב": "take", "יהב": "give", "גבר": "man", "מדבחא": "the altar", "חילא": "might", "רב": "great", "קודשיא": "holy things", "קודשא": "holiness", "אתיב": "answer", "עלוהי": "upon him", "עלוי": "upon him", "כחדא": "together", "מני": "from me", "נפק": "go out", "יעקב": "Jacob", "קם": "arise", "אנון": "they", "הינון": "they", "בנוי": "his sons", "ביתא": "the house", "מלכותא": "the kingdom", "פקיד": "command", "נטלו": "set out", "תחות": "under", "מסאב": "unclean", "צבאות": "hosts", "תרין": "two", "או": "or", "בישתא": "evil", "עוד": "again", "בגלל": "because of", "הות": "was", "יקרא": "glory", "קביל": "receive", "שבטא": "tribe", "שבטיא": "the tribes", "נשא": "women", "תקיף": "strong", "פרעה": "Pharaoh", "מלך": "king", "טב": "good", "יהון": "be", "אנשא": "mankind", "אנש": "man", "יד": "hand", "עדנא": "time", "ביני": "between", "בין": "between", "דהבא": "gold", "שבע": "seven", "חלף": "instead of", "מתמן": "from there", "רבוני": "my lord", "אבהתהון": "their fathers", "אבוהי": "his father", "אבא": "father", "יוסף": "Joseph", "אלהן": "except", "בנין": "sons", "עלך": "upon you", "עליה": "upon him", "עלה": "upon her", "בנך": "your son", "בריה": "his son", "אמיה": "his mother", "אחוהי": "his brother", "אתתא": "the woman", "אתתיה": "his wife", "ארחא": "the way", "אורח": "way", "טורא": "the mountain", "מיא": "water", "נורא": "fire", "רוחא": "spirit", "קודשא": "holy", "צלותא": "prayer", "חובא": "sin", "חובין": "sins", "זכו": "merit", "שלמא": "peace", "רחמין": "mercy", "מלאכא": "the angel", "מלאכיא": "the angels", "עבדא": "servant", "עבדך": "your servant", "עבדוהי": "his servants", "כולא": "all", "כולהון": "all of them", "כלהון": "all of them", "לות": "to", "ואזלו": "and went", "אזלו": "went", "אמרו": "said", "ואמרו": "and said", "אמרת": "said", "אמרית": "I said", "שמע": "hear", "שמעו": "hear", "חזא": "see", "חזו": "see", "ידע": "know", "ידעון": "know", "אתו": "came", "יתיב": "dwell", "שרא": "dwell", "מית": "die", "מיתו": "died", "חיי": "life", "חיין": "life", "נפשא": "soul", "נפשיה": "his soul", "לבא": "heart", "ליבא": "heart", "ליביה": "his heart", "אנפי": "face of", "אפי": "face of", "אפיה": "his face", "עינוהי": "his eyes", "עיני": "eyes of", "קל": "voice", "קלא": "the voice", "שום": "name", "שמיה": "his name", "שמא": "the name", "דא": "this", "דנא": "this", "כדנא": "thus", "ארבע": "four", "תלת": "three", "חמש": "five", "עסר": "ten", "אלף": "thousand", "רבו": "myriad", "חויא": "serpent", "אילן": "tree", "אילנא": "the tree", "בעיר": "cattle", "בעירא": "the cattle", "אלהים": "God", "נש": "man", "גינתא": "the garden", "גנתא": "the garden", "חיות": "beasts of", "חיותא": "the beast"}
-
-
-def consonants(w):
-    return "".join(ch for ch in unicodedata.normalize("NFD", w) if "א" <= ch <= "ת").translate(FINAL)
+COMMON = {"מן": "from", "קדם": "before", "על": "on", "אמר": "say", "די": "which", "לא": "not", "ישראל": "Israel", "ליה": "to him", "ית": "[obj.]", "ארום": "for", "להון": "to them", "מלכא": "the king", "בני": "sons of", "כל": "all", "הוה": "was", "בית": "house of", "הוא": "he", "בר": "son", "עם": "with", "הדין": "this", "אנא": "I", "כד": "when", "עד": "until", "ארעא": "the land", "יתיה": "him", "לכון": "to you", "עמא": "the people", "קדמי": "before me", "למימר": "saying", "יתהון": "them", "לך": "to you", "עממיא": "the nations", "משה": "Moses", "קרבא": "battle", "לי": "to me", "דין": "this", "מקדשא": "the sanctuary", "יהי": "let be", "בהון": "in them", "חד": "one", "בתר": "after", "ביה": "in him", "כדנן": "thus", "כן": "so", "הא": "behold", "לית": "there is not", "סחור": "around", "רבא": "great", "בכן": "then", "מטול": "because", "גברא": "the man", "עבד": "do", "עלמא": "the world", "עמיה": "his people", "אף": "also", "יהודה": "Judah", "אין": "if", "היך": "how", "מימרא": "the Word", "מימרי": "my Word", "מימריה": "his Word", "שמיא": "heaven", "דוד": "David", "זמנא": "time", "לה": "to her", "למעבד": "to do", "כען": "now", "יתי": "me", "כהנא": "the priest", "כהניא": "the priests", "מליל": "speak", "יתכון": "you", "לחדא": "very", "תמן": "there", "חדא": "one", "ברם": "but", "מנהון": "from them", "עמי": "my people", "פתגמא": "the word", "פתגם": "word", "פתגמי": "words of", "פתגמיא": "the words", "אתון": "you", "מניה": "from him", "הדא": "this", "אלין": "these", "האלין": "these", "מה": "what", "יתה": "her", "קדמך": "before you", "מצרים": "Egypt", "היא": "she", "קדמוהי": "before him", "קדמוי": "before him", "בדיל": "because of", "דינא": "judgment", "קרתא": "the city", "נביא": "prophet", "נביאה": "the prophet", "קרא": "call", "למהוי": "to be", "אינון": "they", "עליהון": "upon them", "נבואה": "prophecy", "חזור": "around", "אוריתא": "the Law", "אלהא": "God", "אלהי": "God of", "אלהכון": "your God", "אלהך": "your God", "יומא": "day", "יומין": "days", "ארי": "for", "בגו": "inside", "עלי": "upon me", "שנין": "years", "שנא": "year", "ימא": "sea", "עמך": "with you", "אזל": "go", "בגין": "because of", "אתא": "come", "לחוד": "only", "קים": "covenant", "כנשתא": "congregation", "ההוא": "that", "ההיא": "that", "כדון": "now", "ירושלם": "Jerusalem", "היכמא": "as", "כמא": "as", "כי": "for", "הוו": "were", "הלא": "is not", "כדין": "so", "אחד": "one", "מאה": "hundred", "משכן": "tabernacle", "משכנא": "the tabernacle", "נסיב": "take", "יהב": "give", "גבר": "man", "מדבחא": "the altar", "חילא": "might", "רב": "great", "קודשיא": "holy things", "אתיב": "answer", "עלוהי": "upon him", "עלוי": "upon him", "כחדא": "together", "מני": "from me", "נפק": "go out", "יעקב": "Jacob", "קם": "arise", "אנון": "they", "הינון": "they", "בנוי": "his sons", "ביתא": "the house", "מלכותא": "the kingdom", "פקיד": "command", "נטלו": "set out", "תחות": "under", "מסאב": "unclean", "צבאות": "hosts", "תרין": "two", "או": "or", "בישתא": "evil", "עוד": "again", "בגלל": "because of", "הות": "was", "יקרא": "glory", "קביל": "receive", "שבטא": "tribe", "שבטיא": "the tribes", "נשא": "women", "תקיף": "strong", "פרעה": "Pharaoh", "מלך": "king", "טב": "good", "יהון": "be", "אנשא": "mankind", "אנש": "man", "יד": "hand", "עדנא": "time", "ביני": "between", "בין": "between", "דהבא": "gold", "שבע": "seven", "חלף": "instead of", "מתמן": "from there", "רבוני": "my lord", "אבהתהון": "their fathers", "אבוהי": "his father", "אבא": "father", "יוסף": "Joseph", "אלהן": "except", "בנין": "sons", "עלך": "upon you", "עליה": "upon him", "עלה": "upon her", "בנך": "your son", "בריה": "his son", "אמיה": "his mother", "אחוהי": "his brother", "אתתא": "the woman", "אתתיה": "his wife", "ארחא": "the way", "אורח": "way", "טורא": "the mountain", "מיא": "water", "נורא": "fire", "רוחא": "spirit", "קודשא": "holy", "צלותא": "prayer", "חובא": "sin", "חובין": "sins", "זכו": "merit", "שלמא": "peace", "רחמין": "mercy", "מלאכא": "the angel", "מלאכיא": "the angels", "עבדא": "servant", "עבדך": "your servant", "עבדוהי": "his servants", "כולא": "all", "כולהון": "all of them", "כלהון": "all of them", "לות": "to", "ואזלו": "and went", "אזלו": "went", "אמרו": "said", "ואמרו": "and said", "אמרת": "said", "אמרית": "I said", "שמע": "hear", "שמעו": "hear", "חזא": "see", "חזו": "see", "ידע": "know", "ידעון": "know", "אתו": "came", "יתיב": "dwell", "שרא": "dwell", "מית": "die", "מיתו": "died", "חיי": "life", "חיין": "life", "נפשא": "soul", "נפשיה": "his soul", "לבא": "heart", "ליבא": "heart", "ליביה": "his heart", "אנפי": "face of", "אפי": "face of", "אפיה": "his face", "עינוהי": "his eyes", "עיני": "eyes of", "קל": "voice", "קלא": "the voice", "שום": "name", "שמיה": "his name", "שמא": "the name", "דא": "this", "דנא": "this", "כדנא": "thus", "ארבע": "four", "תלת": "three", "חמש": "five", "עסר": "ten", "אלף": "thousand", "רבו": "myriad", "חויא": "serpent", "אילן": "tree", "אילנא": "the tree", "בעיר": "cattle", "בעירא": "the cattle", "אלהים": "God", "נש": "man", "גינתא": "the garden", "גנתא": "the garden", "חיות": "beasts of", "חיותא": "the beast"}
 
 
 # The tables are written with final letters; words are compared without them.
@@ -66,12 +60,8 @@ def jastrow():
     "ch.") is preferred; an entry that only points to another ("v. הוי") takes that one's gloss."""
     entries, by_id = [], {}
     for part in (1, 2):
-        p = CACHE / f"jastrow-part{part}.jsonl"
-        if not p.exists() or not p.stat().st_size:
-            p.parent.mkdir(parents=True, exist_ok=True)
-            with urllib.request.urlopen(JASTROW.format(part), timeout=300) as r:
-                p.write_bytes(r.read())
-        for line in p.read_text().splitlines():
+        p = fetch(JASTROW.format(part), CACHE / f"jastrow-part{part}.jsonl", timeout=300)
+        for line in p.read_text(encoding="utf-8").splitlines():
             e = json.loads(line)
             entries.append(e)
             by_id[e.get("id")] = e
@@ -285,19 +275,9 @@ def build(name, heb, jas):
              "the headword it seems to be in Jastrow's Dictionary of the Targumim (1903; Sefaria's digitisation, CC BY-NC). "
              f"{paired / total:.0%} of the words are paired and {looked / total:.0%} from Jastrow. The pairing and the "
              "look-ups are a program's, so some are wrong; the tooltip says which each is. Built by Two-edged Sword's tools/targum.</p>")
-    p = LIBRARY / f"{name}+.bbli"
-    tmp = p.with_suffix(".tmp")
-    tmp.unlink(missing_ok=True)
-    db = sqlite3.connect(tmp)
-    db.executescript("""CREATE TABLE Details (Title NVARCHAR(100), Abbreviation NVARCHAR(50), Information TEXT, Version INT, OldTestament BOOL, NewTestament BOOL, Apocrypha BOOL, Strongs BOOL, RightToLeft BOOL);
-        CREATE TABLE Bible (Book INT, Chapter INT, Verse INT, Scripture TEXT);
-        CREATE INDEX BookChapterVerseIndex ON Bible (Book, Chapter, Verse);""")
-    db.execute("INSERT INTO Details VALUES (?,?,?,1,1,0,0,1,1)", (m["title"], m["abbrev"], about))
-    db.executemany("INSERT INTO Bible VALUES (?,?,?,?)", out)
-    db.commit()
-    db.close()
-    tmp.replace(p)
-    print(f"{p.name}: {len(out)} verses")
+    with module(f"{name}+.bbli", m["title"], m["abbrev"], about, nt=False, strongs=True, rtl=True) as db:
+        db.executemany("INSERT INTO Bible VALUES (?,?,?,?)", out)
+    print(f"{name}+.bbli: {len(out)} verses")
 
 
 def main():

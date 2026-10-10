@@ -3,15 +3,16 @@
 
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api, Verse, Voice } from "./api";
-import { apocryphaName, book, BookSizes, fmtRef, isApocrypha, parseRef, Ref, sectionOf, stepChapter, testament } from "./bible";
+import { apocryphaName, book, BookSizes, fmtRef, isApocrypha, mentionsPassage, Ref, sectionOf, stepChapter, testament } from "./bible";
 import { alignStrongs, EDITIONS, isOriginal, kjvGloss, plainText, Token, tokenize, variantSource } from "./esword";
 import { SongsButton } from "./ChapterSongs";
 import { Icon, Pause, Play } from "./icons";
 import { BibleSelect, RefButton, SearchField, Topbar } from "./Shell";
-import { rankVoices, useListenKey, usePlayer } from "./speech";
+import { useListenKey, usePlayer, voicesFor } from "./speech";
 import { DictAt, HL_COLOURS, HlColor, hlName, useApp, vkey } from "./state";
 import { StudyPane, StudyTab } from "./StudyPane";
-import { ApoPill, Popover, RefPicker, scrollToThird, Seg, SideNav, useBibleBooks, useBibleSizes, useDrag } from "./ui";
+import { ApoPill, copyText, Popover, RefPicker, scrollToThird, Seg, SideNav, useBibleBooks, useBibleSizes, useDrag } from "./ui";
+import { FocusHints, HighlightDots, useCopySelection } from "./ReaderTools";
 import { WordLookup } from "./WordLookup";
 import { BooksButton } from "./DocReader";
 import { useAssistant } from "./assistant";
@@ -27,38 +28,15 @@ export interface WordPick {
 export const textToken = (text: string): Token => ({ text, word: true, red: false, italic: false, strongs: [], at: 0, wi: -1 });
 
 export const HL: HlColor[] = HL_COLOURS;
-export const HL_DOT: Record<HlColor, string> = {
-  red: "#e59a92",
-  orange: "#efb97e",
-  yellow: "#e9d271",
-  green: "#a9cf9f",
-  teal: "#8fcfc6",
-  blue: "#9fc0e6",
-  purple: "#c1a9e3",
-  grey: "#aab3bf",
-};
-/** A highlight colour's name in the pickers: the user's name for it (Settings › Highlights), or the colour. */
-export const hlLabel = (c: HlColor, names: Partial<Record<HlColor, string>> | undefined) =>
-  names?.[c]?.trim() || c[0].toUpperCase() + c.slice(1);
+export { HL_DOT, hlLabel } from "./ReaderTools";
 
-/** Journal entries that mention a verse, by "b.c.v". */
-export function useNotesByVerse() {
+/** The verses of a chapter that journal entries mention. */
+function useNotedVerses(b: number, chapter: number, verses: Verse[]) {
   const { journal } = useApp();
   return useMemo(() => {
-    const m = new Map<string, string[]>();
-    for (const e of journal)
-      for (const v of e.verses) {
-        const r = parseRef(v);
-        if (!r) continue;
-        const from = r.verse ?? 1,
-          to = r.to ?? r.verse ?? 200;
-        for (let i = from; i <= Math.min(to, 200); i++) {
-          const k = vkey(r.book, r.chapter, i);
-          m.set(k, [...(m.get(k) ?? []), e.id]);
-        }
-      }
-    return m;
-  }, [journal]);
+    const on = journal.filter((e) => mentionsPassage(e, { book: b, chapter }));
+    return new Set(verses.filter((v) => on.some((e) => mentionsPassage(e, { book: b, chapter, verse: v.v }))).map((v) => v.v));
+  }, [journal, b, chapter, verses]);
 }
 
 export function VerseText({
@@ -235,10 +213,13 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
   const setDict = (d: DictAt | null) => app.set({ studyDict: d });
   const setCommentary = (m: string | null) => app.set({ studyCommentary: m });
   const setFollow = (f: boolean) => app.set({ studyFollow: f });
+  const showPane = () => {
+    if (!settings.studyPane) app.set({ studyPane: true });
+  };
   const [askSeed, setAskSeed] = useState<string | null>(null);
   const [studyVerse, setStudyVerse] = useState<number>(loc.verse ?? 1);
   const scroller = useRef<HTMLDivElement>(null);
-  const notes = useNotesByVerse();
+  const notes = useNotedVerses(loc.book, loc.chapter, verses);
   const variances = useVariances(bible, loc.book, loc.chapter);
   const [varPick, setVarPick] = useState<{ v: Variance; rect: DOMRect } | null>(null);
 
@@ -258,7 +239,7 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
       setAskSeed(x.ask || null);
       setTab("ask");
     }
-    if (!settings.studyPane) app.set({ studyPane: true });
+    showPane();
     app.setPending(null);
   }, [app.pending]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -438,14 +419,8 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
     return () => window.removeEventListener("keydown", k);
   }, [go, focus, setFocus, selRef, app, player, bible, loc.book, loc.chapter, sel]);
 
-  const copy = () => {
-    const c = copyText();
-    if (!c) return;
-    navigator.clipboard.writeText(c.text);
-    app.toast(c.label);
-  };
-
-  const copyText = useCallback(() => {
+  // The selected verses as they are copied, and what the toast says.
+  const selectionCopy = () => {
     if (!sel) return null;
     const vs = verses.filter((v) => v.v >= sel.from && v.v <= sel.to);
     const nums = settings.copyNumbers;
@@ -454,25 +429,12 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
       text: `${vs.map((v) => (nums ? `${v.v} ` : "") + plainText(v.text)).join(" ")}\n${fmtRef(r)} ${bmod?.abbrev ?? ""}`.trim(),
       label: `Copied ${fmtRef(r)}${nums ? " with verse numbers" : ""}`,
     };
-  }, [sel, verses, settings.copyNumbers, loc.book, loc.chapter, bmod]);
-
-  // ⌘C (which the Edit menu turns into a copy event) copies the selected verses, unless some
-  // text has been selected with the mouse or the focus is in a text field.
-  useEffect(() => {
-    const onCopy = (e: ClipboardEvent) => {
-      const t = document.activeElement as HTMLElement | null;
-      if (t?.closest("input, textarea, [contenteditable='true']")) return;
-      const s = window.getSelection();
-      if (s && !s.isCollapsed && s.toString().trim()) return;
-      const c = copyText();
-      if (!c || !e.clipboardData) return;
-      e.preventDefault();
-      e.clipboardData.setData("text/plain", c.text);
-      app.toast(c.label);
-    };
-    document.addEventListener("copy", onCopy);
-    return () => document.removeEventListener("copy", onCopy);
-  }, [copyText, app]);
+  };
+  const copy = () => {
+    const c = selectionCopy();
+    if (c) copyText(c.text, c.label, app.toast);
+  };
+  useCopySelection(selectionCopy, app.toast);
 
   const isBookmarked = (v: number) =>
     app.bookmarks.some(
@@ -495,110 +457,25 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
     if (follow) setStudyVerse(v);
   };
 
-  const toolbar = sel && (
-    <div
-      className="vtool fold-bible"
-      dir="ltr"
-      role="toolbar"
-      aria-label="Verse actions"
-      style={{ top: -44, left: 44 }}
-      onClick={(e) => e.stopPropagation()}
-    >
-      <div style={{ display: "flex", gap: 6, padding: "0 6px 0 4px" }}>
-        {HL.map((c) => (
-          <button
-            key={c}
-            type="button"
-            className="dot"
-            aria-label={`Highlight: ${hlLabel(c, settings.hlNames)}`}
-            title={hlLabel(c, settings.hlNames)}
-            aria-pressed={curHl === c}
-            style={{ background: HL_DOT[c], outline: curHl === c ? "2px solid var(--vt-ring)" : undefined }}
-            onClick={() => setHl(curHl === c ? null : c)}
-          />
-        ))}
-        {curHl && settings.hlNames?.[curHl]?.trim() && (
-          <span
-            style={{ fontSize: 12, alignSelf: "center", whiteSpace: "nowrap", maxWidth: 160, overflow: "hidden", textOverflow: "ellipsis" }}
-          >
-            {hlLabel(curHl, settings.hlNames)}
-          </span>
-        )}
-      </div>
-      <span className="sep" />
-      <button
-        type="button"
-        className="tb"
-        title={selBookmarked ? "Remove the bookmark" : "Bookmark these verses"}
-        onClick={() => app.toggleBookmark(selRef!, bible)}
-      >
-        <Icon name="bookmark" style={{ fill: selBookmarked ? "currentColor" : "none" }} />
-        <span className="lbl">{selBookmarked ? "Bookmarked" : "Bookmark"}</span>
-      </button>
-      <button
-        type="button"
-        className="tb"
-        title="Note: a journal entry on these verses (N)"
-        onClick={() => app.startEntry({ verses: [fmtRef(selRef!)] })}
-      >
-        <Icon name="note" />
-        <span className="lbl">
-          Note<span style={{ opacity: 0.6 }}> N</span>
-        </span>
-      </button>
-      <button
-        type="button"
-        className="tb"
-        title="Compare these verses in other translations"
-        onClick={() => app.open({ ...loc, verse: sel.from, to: sel.to }, "compare")}
-      >
-        <Icon name="compare" />
-        <span className="lbl">Compare</span>
-      </button>
-      <button type="button" className="tb" title="Listen from here" onClick={() => player.play(bible, loc.book, loc.chapter, sel.from)}>
-        <Icon name="speaker" />
-        <span className="lbl">Listen from here</span>
-      </button>
-      {canAsk && (
-        <button
-          type="button"
-          className="tb"
-          title="Ask about these verses"
-          onClick={() => {
-            setTab("ask");
-            setAskSeed(null);
-          }}
-        >
-          <Icon name="chat" />
-          <span className="lbl">Ask</span>
-        </button>
-      )}
-      <button
-        type="button"
-        className="tb"
-        title={settings.copyNumbers ? "Copy with verse numbers (⌘C)" : "Copy without verse numbers (⌘C)"}
-        onClick={copy}
-      >
-        <Icon name="copy" />
-        <span className="lbl">
-          Copy<span style={{ opacity: 0.6 }}> ⌘C</span>
-        </span>
-      </button>
-      <button
-        type="button"
-        className="tb"
-        aria-pressed={settings.copyNumbers}
-        title="Include verse numbers when copying"
-        onClick={() => app.set({ copyNumbers: !settings.copyNumbers })}
-        style={{
-          padding: "0 7px",
-          opacity: settings.copyNumbers ? 1 : 0.5,
-          textDecoration: settings.copyNumbers ? undefined : "line-through",
-        }}
-      >
-        #
-      </button>
-    </div>
+  const toolbar = sel && selRef && (
+    <VerseToolbar
+      current={curHl}
+      onHighlight={setHl}
+      bookmarked={selBookmarked}
+      onBookmark={() => app.toggleBookmark(selRef, bible)}
+      onNote={() => app.startEntry({ verses: [fmtRef(selRef)] })}
+      onCompare={() => app.open({ ...loc, verse: sel.from, to: sel.to }, "compare")}
+      onListen={() => player.play(bible, loc.book, loc.chapter, sel.from)}
+      onAsk={
+        canAsk
+          ? () => {
+              setTab("ask");
+              setAskSeed(null);
+            }
+          : undefined
+      }
+      onCopy={copy}
+    />
   );
 
   const favs = (settings.favBibles ?? []).map((id) => app.mod("bible", id)).filter((m): m is NonNullable<typeof m> => !!m);
@@ -740,7 +617,7 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
         const k = vkey(loc.book, loc.chapter, v.v);
         const isSel = !!sel && v.v >= sel.from && v.v <= sel.to;
         const hl = app.highlights[k];
-        const hasNote = settings.showNotes && notes.has(k);
+        const hasNote = settings.showNotes && notes.has(v.v);
         return (
           <div
             key={v.v}
@@ -981,21 +858,21 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
             setDict({ module, topic, search });
             setTab("dictionary");
             setWord(null);
-            if (!settings.studyPane) app.set({ studyPane: true });
+            showPane();
           }}
           onCommentary={(m) => {
             setCommentary(m);
             setTab("commentary");
             setStudyVerse(word.verse);
             setWord(null);
-            if (!settings.studyPane) app.set({ studyPane: true });
+            showPane();
           }}
           onAsk={(q) => {
             setAskSeed(q);
             setTab("ask");
             setWord(null);
             if (focus) setFocus(false);
-            if (!settings.studyPane) app.set({ studyPane: true });
+            showPane();
           }}
         />
       )}
@@ -1021,32 +898,7 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
           }}
         />
       )}
-      {focus && (
-        <div
-          style={{
-            position: "fixed",
-            bottom: 18,
-            left: 0,
-            right: 0,
-            display: "flex",
-            justifyContent: "center",
-            gap: 18,
-            color: "var(--muted)",
-            fontSize: 12,
-            pointerEvents: "none",
-          }}
-        >
-          <span>Click any word to look it up</span>
-          <span>·</span>
-          <span>
-            <span className="kbd">space</span> listen
-          </span>
-          <span>·</span>
-          <span>
-            <span className="kbd">←</span> <span className="kbd">→</span> chapters
-          </span>
-        </div>
-      )}
+      {focus && <FocusHints click="Click any word to look it up" />}
     </div>
   );
 }
@@ -1061,6 +913,84 @@ function ChapterNav({ onGo, sizes }: { onGo: (d: 1 | -1) => void; sizes: BookSiz
       prev={p && { label: `Previous chapter: ${book(p[0]).name} ${p[1]} (←)`, go: () => onGo(-1) }}
       next={n && { label: `Next chapter: ${book(n[0]).name} ${n[1]} (→)`, go: () => onGo(1) }}
     />
+  );
+}
+
+/** The toolbar over the selected verses: highlight, bookmark, note, compare, listen, ask and copy. */
+function VerseToolbar(p: {
+  current: HlColor | undefined;
+  onHighlight: (c: HlColor | null) => void;
+  bookmarked: boolean;
+  onBookmark: () => void;
+  onNote: () => void;
+  onCompare: () => void;
+  onListen: () => void;
+  /** Absent when no assistant is installed. */ onAsk?: () => void;
+  onCopy: () => void;
+}) {
+  const app = useApp();
+  const { settings } = app;
+  return (
+    <div
+      className="vtool fold-bible"
+      dir="ltr"
+      role="toolbar"
+      aria-label="Verse actions"
+      style={{ top: -44, left: 44 }}
+      onClick={(e) => e.stopPropagation()}
+    >
+      <HighlightDots current={p.current} names={settings.hlNames} onPick={p.onHighlight} />
+      <span className="sep" />
+      <button type="button" className="tb" title={p.bookmarked ? "Remove the bookmark" : "Bookmark these verses"} onClick={p.onBookmark}>
+        <Icon name="bookmark" style={{ fill: p.bookmarked ? "currentColor" : "none" }} />
+        <span className="lbl">{p.bookmarked ? "Bookmarked" : "Bookmark"}</span>
+      </button>
+      <button type="button" className="tb" title="Note: a journal entry on these verses (N)" onClick={p.onNote}>
+        <Icon name="note" />
+        <span className="lbl">
+          Note<span style={{ opacity: 0.6 }}> N</span>
+        </span>
+      </button>
+      <button type="button" className="tb" title="Compare these verses in other translations" onClick={p.onCompare}>
+        <Icon name="compare" />
+        <span className="lbl">Compare</span>
+      </button>
+      <button type="button" className="tb" title="Listen from here" onClick={p.onListen}>
+        <Icon name="speaker" />
+        <span className="lbl">Listen from here</span>
+      </button>
+      {p.onAsk && (
+        <button type="button" className="tb" title="Ask about these verses" onClick={p.onAsk}>
+          <Icon name="chat" />
+          <span className="lbl">Ask</span>
+        </button>
+      )}
+      <button
+        type="button"
+        className="tb"
+        title={settings.copyNumbers ? "Copy with verse numbers (⌘C)" : "Copy without verse numbers (⌘C)"}
+        onClick={p.onCopy}
+      >
+        <Icon name="copy" />
+        <span className="lbl">
+          Copy<span style={{ opacity: 0.6 }}> ⌘C</span>
+        </span>
+      </button>
+      <button
+        type="button"
+        className="tb"
+        aria-pressed={settings.copyNumbers}
+        title="Include verse numbers when copying"
+        onClick={() => app.set({ copyNumbers: !settings.copyNumbers })}
+        style={{
+          padding: "0 7px",
+          opacity: settings.copyNumbers ? 1 : 0.5,
+          textDecoration: settings.copyNumbers ? undefined : "line-through",
+        }}
+      >
+        #
+      </button>
+    </div>
   );
 }
 
@@ -1466,10 +1396,7 @@ export function VoiceSelect({ lang }: { lang?: "he" | "el" | "la" } = {}) {
   const app = useApp();
   const { voices: english, allVoices } = usePlayer();
   const key = lang === "he" ? "voiceHebrew" : lang === "el" ? "voiceGreek" : lang === "la" ? "voiceLatin" : "voice";
-  // Latin has no voices of its own: an Italian one says Church Latin as it's said.
-  const voices = lang
-    ? rankVoices(allVoices.filter((v) => v.lang.startsWith(lang === "la" ? "it" : lang) || (lang === "la" && v.lang.startsWith("la"))))
-    : english;
+  const voices = lang ? voicesFor(allVoices, lang) : english;
   const want = app.settings[key];
   const label = (v: Voice) =>
     `${v.name} · ${new Intl.DisplayNames(["en"], { type: "language" }).of(v.lang) ?? v.lang}${v.quality > 1 && !v.name.includes("(") ? (v.quality > 2 ? " (Premium)" : " (Enhanced)") : ""}`;

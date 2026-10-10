@@ -15,16 +15,23 @@ A word the editions write as one but tag as two (κἀγώ, "and I") takes its f
 TAGNT gives every form of ἐγώ, σύ and εἰμί their headword's number (μου G3165, ἐστιν G1510), where
 Strong's and the KJV's concordance number the forms (μου G3450, ἐστιν G2076): those take the form's
 number, from TAGNT's Alt Strongs column.
+lexicon("TBESG") and lexicon("TBESH") are STEPBible's brief Greek and Hebrew lexicons, as text.
+
 STEPBible asks that the data itself is passed on only from their repository: build from it, don't
-redistribute the downloaded files. Downloads are cached in ~/Library/Caches/Two-edged Sword/stepbible.
+redistribute the downloaded files. The files are the repository's at a fixed commit. Downloads are
+cached in ~/Library/Caches/Two-edged Sword/stepbible.
 """
-import re, urllib.parse, urllib.request
+import re, urllib.parse
 from dataclasses import dataclass
 from functools import lru_cache
-from pathlib import Path
 
-CACHE = Path.home() / "Library/Caches/Two-edged Sword/stepbible"
-BASE = "https://raw.githubusercontent.com/STEPBible/STEPBible-Data/master/Translators%20Amalgamated%20OT%2BNT/"
+from modules import CACHES, fetch as fetch_to
+
+CACHE = CACHES / "stepbible"
+REPO = "https://raw.githubusercontent.com/STEPBible/STEPBible-Data/aca7d691414e00b0d669157d98bfd68195e64e1e/"
+BASE = REPO + "Translators%20Amalgamated%20OT%2BNT/"
+LEXICONS = {"TBESG": "Lexicons/TBESG - Translators Brief lexicon of Extended Strongs for Greek - STEPBible.org CC BY.txt",
+            "TBESH": "Lexicons/TBESH - Translators Brief lexicon of Extended Strongs for Hebrew - STEPBible.org CC BY.txt"}
 FILES = ["TAGNT Mat-Jhn - Translators Amalgamated Greek NT - STEPBible.org CC-BY.txt",
          "TAGNT Act-Rev - Translators Amalgamated Greek NT - STEPBible.org CC-BY.txt"]
 BOOKS = ["Mat", "Mrk", "Luk", "Jhn", "Act", "Rom", "1Co", "2Co", "Gal", "Eph", "Php", "Col", "1Th", "2Th", "1Ti", "2Ti",
@@ -50,13 +57,13 @@ def has(w: Word, edition: str) -> bool:
 
 
 def fetch(file):
-    p = CACHE / file
-    if not p.exists() or not p.stat().st_size:
-        p.parent.mkdir(parents=True, exist_ok=True)
-        print(f"downloading {file}")
-        with urllib.request.urlopen(BASE + urllib.parse.quote(file), timeout=300) as r:
-            p.write_bytes(r.read())
-    return p.read_text(encoding="utf-8-sig")
+    return fetch_to(BASE + urllib.parse.quote(file), CACHE / file, log=True, timeout=300).read_text(encoding="utf-8-sig")
+
+
+@lru_cache(maxsize=2)
+def lexicon(name) -> str:
+    """STEPBible's TBESG or TBESH, as text."""
+    return fetch_to(REPO + urllib.parse.quote(LEXICONS[name]), CACHE / f"{name}.txt", log=True, timeout=300).read_text(encoding="utf-8-sig")
 
 
 @lru_cache(maxsize=1)
@@ -83,3 +90,78 @@ def tagnt() -> dict:
                 number = f"G{alt[-1]}"
             out.setdefault(key, []).append(Word(greek, number, code.strip(), eds))
     return out
+
+
+# ---------- Robinson's grammar codes ----------
+
+POS = {"N": "noun", "V": "verb", "A": "adjective", "T": "article", "P": "pronoun", "R": "relative pronoun", "C": "reciprocal pronoun",
+       "D": "demonstrative pronoun", "K": "correlative pronoun", "I": "interrogative pronoun", "X": "indefinite pronoun",
+       "Q": "correlative pronoun", "F": "reflexive pronoun", "S": "possessive pronoun", "RI": "relative pronoun", "M": "numeral"}
+WORDS = {"PREP": "preposition", "CONJ": "conjunction", "ADV": "adverb", "PRT": "particle", "INJ": "interjection", "COND": "conjunction",
+         "HEB": "Hebrew word", "ARAM": "Aramaic word", "PRT-N": "particle · negative", "CONJ-N": "conjunction · negative",
+         "ADV-N": "adverb · negative", "ADV-I": "adverb · interrogative", "ADV-C": "adverb · comparative", "ADV-S": "adverb · superlative",
+         "ADV-K": "adverb · correlative", "PRT-I": "particle · interrogative", "COND-K": "conjunction · correlative"}
+CASE = {"N": "nom.", "G": "gen.", "D": "dat.", "A": "acc.", "V": "voc."}
+NUMBER = {"S": "sing.", "P": "plur."}
+GENDER = {"M": "masc.", "F": "fem.", "N": "neut."}
+TENSE = {"P": "present", "I": "imperfect", "F": "future", "A": "aorist", "R": "perfect", "L": "pluperfect", "X": ""}
+VOICE = {"A": "active", "M": "middle", "P": "passive", "E": "middle or passive", "D": "middle", "O": "passive", "N": "middle or passive",
+         "Q": "active", "X": ""}
+MOOD = {"I": "indicative", "S": "subjunctive", "O": "optative", "M": "imperative", "N": "infinitive", "P": "participle", "R": "imperative"}
+# What a code's last part adds: "A-NSM-C", "ADV-ATT".
+SUFFIX = {"C": "comparative", "S": "superlative", "N": "negative", "I": "interrogative", "K": "with crasis", "ATT": "Attic", "ABB": "abbreviated"}
+
+
+def cng(s):
+    """"NSM" -> "nom. masc. sing."; a person first for pronouns ("1GS" -> "1 gen. sing.")."""
+    person = ""
+    if s[:1] in "123":
+        person, s = s[0], s[1:]
+    parts = [CASE.get(s[:1], ""), GENDER.get(s[2:3], ""), NUMBER.get(s[1:2], "")]
+    return " ".join(x for x in [person] + parts if x)
+
+
+def robinson(code, unknown=None):
+    """A Robinson code as words, in the order the other interlinears give them: "V-AAI-3S" -> "verb ·
+    aorist active indicative · 3 sing.", "N-NSM" -> "noun · nom. masc. sing.". A code it can't
+    read is given as it is, and counted in `unknown` (a Counter) if there is one."""
+    if not code:
+        return ""
+    c = re.sub(r"[\]\s]+", "-", code.strip()).strip("-")  # "V] PAPGP", "VF FAI3P"
+    c = re.sub(r"^(VF?-[A-Z2]{3})(\d[SP])$", r"\1-\2", c)  # "V-FAI3P"
+    c = re.sub(r"^(V-[A-Z2]{3})([NGDAV][SP][MFN])$", r"\1-\2", c)  # "V-PAPGP…"
+    if c in WORDS:
+        return WORDS[c]
+    head, *rest = c.split("-")
+    if head in WORDS and rest and all(r in SUFFIX for r in rest):
+        return " · ".join([WORDS[head], *(SUFFIX[r] for r in rest)])
+    if head == "N" and rest and rest[0] in ("PRI", "LI", "OI"):
+        return {"PRI": "name", "LI": "letter", "OI": "noun"}[rest[0]]
+    if head == "A" and rest and rest[0] == "NUI":
+        return "numeral"
+    if head in ("V", "VF"):
+        if not rest:
+            return "verb"
+        tvm = rest[0]
+        second = tvm.startswith("2")
+        tvm = tvm.lstrip("2")
+        t, v, m = (tvm + "   ")[:3]
+        desc = " ".join(x for x in [("second " if second else "") + TENSE.get(t, ""), VOICE.get(v, ""), MOOD.get(m, "")] if x.strip())
+        out = ["verb", desc]
+        if len(rest) > 1:
+            out.append(cng(rest[1]) if m == "P" else " ".join(x for x in [rest[1][:1] if rest[1][:1] in "123" else "", NUMBER.get(rest[1][-1:], "")] if x))
+        out += [SUFFIX[r] for r in rest[2:] if r in SUFFIX]
+        return " · ".join(x for x in out if x)
+    if head in POS:
+        out = [POS[head]]
+        if rest:
+            r = rest[0]
+            if re.fullmatch(r"[123][SP][NGDAV][SP][MFN]", r):  # a possessive: its owner, then the word ("S-1SNSM")
+                out += [f"{r[0]} {NUMBER[r[1]]}", cng(r[2:])]
+            else:
+                out.append(cng(r))
+        out += [SUFFIX[r] for r in rest[1:] if r in SUFFIX]
+        return " · ".join(x for x in out if x)
+    if unknown is not None:
+        unknown[c] += 1
+    return c

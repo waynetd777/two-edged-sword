@@ -9,9 +9,10 @@ to the app's data folder, where the reading pane picks it up. It merges: a verse
 takes its reviewed record (or loses its old one if the review dropped it); every other record in
 the existing file is kept, so the Old Testament, or a list of disputed verses, can be added later.
 """
-import argparse, datetime, json, re, sys
+import argparse, datetime, json, sys
 from pathlib import Path
-from candidates import DATA
+from candidates import DATA, store_name
+from modules import write_whole  # (candidates puts tools/ on the path)
 
 KINDS = {"omission", "deity", "atonement", "trinity", "salvation", "judgment", "prophecy", "virgin-birth", "other"}
 
@@ -33,10 +34,6 @@ def check(r, where):
     return [f"{where} {r.get('book')}.{r.get('chapter')}.{r.get('verse')}: {e}" for e in errs]
 
 
-def store_name(module):
-    return "variances-" + re.sub(r"[^A-Za-z0-9_-]", "_", module)
-
-
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("module")
@@ -56,9 +53,12 @@ def main():
         picked_all |= picked
         out = json.loads(reviewed[b.name].read_text())
         for r in out["records"]:
-            errs += check(r, b.name)
+            bad = check(r, b.name)
+            errs += bad
             if (r.get("book"), r.get("chapter"), r.get("verse")) not in picked:
                 errs.append(f"{b.name} {r.get('book')}.{r.get('chapter')}.{r.get('verse')}: not a candidate in this batch")
+            if bad:
+                continue  # reported below; a record missing a field can't be kept
             records[(r["book"], r["chapter"], r["verse"])] = {k: r[k].strip() if isinstance(r[k], str) else r[k] for k in ("book", "chapter", "verse", "kind", "weight", "change", "note")}
     if errs:
         sys.exit("\n".join(errs))
@@ -68,7 +68,7 @@ def main():
             if (r["book"], r["chapter"], r["verse"]) not in picked_all:
                 records.setdefault((r["book"], r["chapter"], r["verse"]), r)
     doc = {"module": a.module, "base": base, "updated": datetime.date.today().isoformat(), "records": [records[k] for k in sorted(records)]}
-    target.write_text(json.dumps(doc, indent=1, ensure_ascii=False))
+    write_whole(target, json.dumps(doc, indent=1, ensure_ascii=False))
     major = sum(r["weight"] == "major" for r in doc["records"])
     print(f"{len(doc['records'])} records ({major} major) → {target}")
 

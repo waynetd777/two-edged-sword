@@ -8,12 +8,9 @@
 import { RefObject, useEffect, useRef, useState } from "react";
 import { Icon } from "./icons";
 import { ClearButton } from "./ui";
+import { BLOCKS, paintHighlight, textRange } from "./dom";
 
-type Highlights = { set: (k: string, v: unknown) => void; delete: (k: string) => void };
-const highlights = () => (CSS as unknown as { highlights?: Highlights }).highlights;
-const HighlightOf = () => (window as unknown as { Highlight?: new (...r: Range[]) => unknown }).Highlight;
-
-const BLOCK = "p, li, h1, h2, h3, h4, blockquote, div, cite";
+const BLOCK = `${BLOCKS}, cite`;
 
 /** Every match of `q` in `root`, in order. A match can run across bold or a link, not across lines. */
 function matches(root: HTMLElement, q: string, caseSensitive: boolean): Range[] {
@@ -33,19 +30,10 @@ function matches(root: HTMLElement, q: string, caseSensitive: boolean): Range[] 
   }
   const hay = caseSensitive ? text : text.toLowerCase(),
     needle = caseSensitive ? q : q.toLowerCase();
-  const at = (i: number): [Text, number] => {
-    let k = starts.length - 1;
-    while (k > 0 && starts[k] > i) k--;
-    return [nodes[k], i - starts[k]];
-  };
   const out: Range[] = [];
   for (let i = hay.indexOf(needle); i >= 0; i = hay.indexOf(needle, i + needle.length)) {
-    const r = document.createRange();
-    r.setStart(...at(i));
-    // The end is found from its last character, so it isn't placed at the start of the next node.
-    const [n, off] = at(i + needle.length - 1);
-    r.setEnd(n, off + 1);
-    out.push(r);
+    const r = textRange(nodes, starts, i, needle.length);
+    if (r) out.push(r);
   }
   return out;
 }
@@ -62,14 +50,11 @@ export function useFind(ed: RefObject<HTMLDivElement | null>, onEdit: () => void
   const repInput = useRef<HTMLInputElement>(null);
 
   const paint = (rs: Range[], i: number) => {
-    const hs = highlights(),
-      H = HighlightOf();
-    if (!hs || !H) return;
-    const others = rs.filter((_, k) => k !== i);
-    if (others.length) hs.set("find", new H(...others));
-    else hs.delete("find");
-    if (rs[i]) hs.set("find-current", new H(rs[i]));
-    else hs.delete("find-current");
+    paintHighlight(
+      "find",
+      rs.filter((_, k) => k !== i),
+    );
+    paintHighlight("find-current", rs[i] ? [rs[i]] : []);
   };
   const show = (r: Range | undefined) => {
     const el = r?.startContainer.parentElement;

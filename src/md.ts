@@ -6,8 +6,8 @@
 // numbered lists, and paragraphs. Verse references anywhere in the text become links.
 
 import { book, findBook, Ref } from "./bible";
-
-const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+import { escHtml as esc } from "./dom";
+import { HL_COLOURS } from "./state";
 
 // "John 3:16", "1 John 4:9-10", "Joh 3:16", "Num 21:8–9", "Ps 23:1"; as spoken, "1 John 5, verse 4"
 // and "Job 19, verses 25 to 27", "Genesis chapter 3:1 - 5"; a whole chapter, "Hebrews 11"; and a
@@ -82,9 +82,10 @@ function linkRefs(text: string): string {
 // my_notes_file stays as it is; and highlights: ==yellow== (Obsidian's own) and
 // <mark class="hl-green">the other colours</mark>; and <sup>superscript</sup> and <sub>subscript</sub>
 // ("17<sup>th</sup>"), as Obsidian shows them.
-const HL_COLOURS = ["red", "orange", "yellow", "green", "teal", "blue", "purple", "grey"];
-const INLINE_RE =
-  /\\[\\*_=]|<(sup|sub)>.+?<\/\1>|<mark class="hl-(?:red|orange|yellow|green|teal|blue|purple|grey)">.+?<\/mark>|==(?=\S)(?:\\.|[^\\])+?==|\*\*\*(?=\S)(?:\\.|[^\\])+?\*\*\*|\*\*(?=\S)(?:\\.|[^\\])+?\*\*|\*(?=[^\s*])(?:\\.|[^*\\])+\*|(?<![\p{L}\p{N}_\\])_(?=[^\s_])(?:\\.|[^_\\])+_(?![\p{L}\p{N}_])/gu;
+const INLINE_RE = new RegExp(
+  String.raw`\\[\\*_=]|<(sup|sub)>.+?<\/\1>|<mark class="hl-(?:${HL_COLOURS.join("|")})">.+?<\/mark>|==(?=\S)(?:\\.|[^\\])+?==|\*\*\*(?=\S)(?:\\.|[^\\])+?\*\*\*|\*\*(?=\S)(?:\\.|[^\\])+?\*\*|\*(?=[^\s*])(?:\\.|[^*\\])+\*|(?<![\p{L}\p{N}_\\])_(?=[^\s_])(?:\\.|[^_\\])+_(?![\p{L}\p{N}_])`,
+  "gu",
+);
 
 function inline(s: string, links: boolean): string {
   // Split on the marks first, then escape and link the plain parts.
@@ -240,7 +241,7 @@ function hlOf(n: Node, root: HTMLElement): string | null {
     const painted = e.style?.backgroundColor ? PAINTED.get(e.style.backgroundColor) : undefined;
     if (painted) return painted === "none" ? null : painted;
     const m = e.tagName === "MARK" && e.className.match(/\bhl-(\w+)/);
-    if (m && HL_COLOURS.includes(m[1])) return m[1];
+    if (m && (HL_COLOURS as string[]).includes(m[1])) return m[1];
   }
   return null;
 }

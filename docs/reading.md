@@ -98,7 +98,7 @@ The app uses the voices installed on your Mac. The **Premium** ones sound far mo
 3. Choose it in the player's voice menu or in Settings › Listening.
 
 Hebrew, Greek and Latin Bibles are read in a Hebrew, Greek or Italian voice. Better ones download
-the same way.
+the same way. The speaker beside a Hebrew or Greek word uses the voice chosen for that language in Settings › Listening.
 
 ## Songs for the chapter
 

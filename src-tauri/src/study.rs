@@ -71,12 +71,17 @@ pub fn dictionaries_dir(root: &Path) -> PathBuf {
     root.join("dictionaries")
 }
 
-pub fn export(lib: &Library, root: &Path, chat_id: &str, req: &Request) -> Result<PathBuf, String> {
+/// A chat's id as its folder's name: letters, digits and hyphens only.
+fn chat_folder(chat_id: &str) -> Result<String, String> {
     let id: String = chat_id.chars().filter(|c| c.is_ascii_alphanumeric() || *c == '-').take(64).collect();
     if id.is_empty() {
         return Err("bad chat id".into());
     }
-    let dest = studies_root(root).join(id);
+    Ok(id)
+}
+
+pub fn export(lib: &Library, root: &Path, chat_id: &str, req: &Request) -> Result<PathBuf, String> {
+    let dest = studies_root(root).join(chat_folder(chat_id)?);
     // Built aside and swapped in whole, one export of a chat at a time.
     let lock = crate::store::dir_lock(&dest);
     let _held = lock.lock().unwrap_or_else(|e| e.into_inner());
@@ -373,11 +378,7 @@ pub fn journal_root(root: &Path) -> PathBuf {
 /// The user's journal entries written out for a chat that asks about them; returns the folder.
 /// `label` says what they are: "the whole journal", "entries tagged #prayer".
 pub fn export_journal(root: &Path, chat_id: &str, label: &str, notes: &[JournalNote]) -> Result<PathBuf, String> {
-    let id: String = chat_id.chars().filter(|c| c.is_ascii_alphanumeric() || *c == '-').take(64).collect();
-    if id.is_empty() {
-        return Err("bad chat id".into());
-    }
-    let dest = journal_root(root).join(id);
+    let dest = journal_root(root).join(chat_folder(chat_id)?);
     let lock = crate::store::dir_lock(&dest);
     let _held = lock.lock().unwrap_or_else(|e| e.into_inner());
     crate::store::replace_dir(&dest, |dir| {
@@ -402,27 +403,19 @@ fn text(html: &str) -> String {
 }
 
 fn verses(lib: &Library, bible: &str, book: i64, chapter: i64, from: i64, to: i64) -> Result<Vec<(i64, String)>, String> {
-    lib.with(Kind::Bible, bible, |c| {
-        let mut st = c.prepare_cached(
-            "SELECT Verse, Scripture FROM Bible WHERE Book = ?1 AND Chapter = ?2 AND Verse BETWEEN ?3 AND ?4 ORDER BY Verse",
-        )?;
-        let rows = st.query_map(params![book, chapter, from, to], |r| {
-            Ok((r.get::<_, i64>(0)?, text(&r.get::<_, Option<String>>(1)?.unwrap_or_default()).replace("\n\n", " ")))
-        })?;
-        rows.collect()
-    })
+    let range = crate::content::Range { book, chapter, from, to };
+    let passage = crate::content::passages(lib, bible, &[range])?.pop().map(|p| p.verses).unwrap_or_default();
+    Ok(passage.into_iter().map(|v| (v.v, text(&v.text).replace("\n\n", " "))).collect())
 }
 
-/// Entries whose range overlaps chapter:from–to (VerseEnd 0 runs to the end of its chapter),
-/// then the chapter's and the book's introductions.
+/// Entries whose range overlaps chapter:from–to, then the chapter's and the book's introductions.
 fn commentary(lib: &Library, module: &str, book: i64, chapter: i64, from: i64, to: i64) -> Result<String, String> {
     lib.with(Kind::Commentary, module, |c| {
         let mut out = String::new();
-        let mut st = c.prepare_cached(
-            "SELECT ChapterBegin, VerseBegin, ChapterEnd, VerseEnd, Comments FROM VerseCommentary WHERE Book = ?1 \
-             AND (ChapterBegin < ?2 OR (ChapterBegin = ?2 AND VerseBegin <= ?4)) \
-             AND (ChapterEnd > ?2 OR (ChapterEnd = ?2 AND (VerseEnd >= ?3 OR VerseEnd = 0))) ORDER BY ChapterBegin, VerseBegin",
-        )?;
+        let mut st = c.prepare_cached(&format!(
+            "SELECT ChapterBegin, VerseBegin, ChapterEnd, VerseEnd, Comments FROM VerseCommentary WHERE {} ORDER BY ChapterBegin, VerseBegin",
+            crate::content::OVERLAPS
+        ))?;
         let rows = st.query_map(params![book, chapter, from, to], |r| {
             Ok((
                 r.get::<_, i64>(0)?,
@@ -473,7 +466,7 @@ fn strongs(lib: &Library, bible: &str, book: i64, chapter: i64, from: i64, to: i
     for s in raw {
         for part in s.split("<num>").skip(1) {
             let n = part.split("</num>").next().unwrap_or("").trim();
-            if n.len() > 1 && (n.starts_with('G') || n.starts_with('H')) && n[1..].chars().all(|c| c.is_ascii_digit()) {
+            if crate::search::is_strongs(n) {
                 out.insert(n.to_string());
             }
         }
@@ -499,11 +492,8 @@ fn lexicon(lib: &Library, module: &str, numbers: &BTreeSet<String>) -> Result<St
 
 /// A marker beside each export: the version and the module file's size and modified time.
 fn dict_stamp(m: &crate::library::ModuleInfo) -> String {
-    let meta = std::fs::metadata(&m.path).ok();
-    let len = meta.as_ref().map(|x| x.len()).unwrap_or(0);
-    let mtime =
-        meta.and_then(|x| x.modified().ok()).and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok()).map(|d| d.as_secs()).unwrap_or(0);
-    format!("{DICT_VERSION} {len} {mtime}")
+    let (len, mtime) = crate::store::file_stamp(&m.path);
+    format!("{DICT_VERSION} {len} {}", mtime.as_secs())
 }
 
 fn dict_current(dir: &Path, m: &crate::library::ModuleInfo) -> bool {
@@ -511,12 +501,15 @@ fn dict_current(dir: &Path, m: &crate::library::ModuleInfo) -> bool {
 }
 
 /// Writes out every dictionary that isn't already, whole. Slow the first time (tens of MB of
-/// text), so it runs in the background at start and after a rescan.
+/// text), so it runs in the background at start and after a rescan; one run at a time. Each file
+/// is replaced rather than rewritten, so the chats' hard links to it keep the copy they had.
 pub fn export_dictionaries(lib: &Library, root: &Path) {
     let dir = dictionaries_dir(root);
     if std::fs::create_dir_all(&dir).is_err() {
         return;
     }
+    let lock = crate::store::dir_lock(&dir);
+    let _held = lock.lock().unwrap_or_else(|e| e.into_inner());
     for m in lib.of_kind(Kind::Dictionary) {
         if dict_current(&dir, m) {
             continue;
@@ -533,11 +526,12 @@ pub fn export_dictionaries(lib: &Library, root: &Path) {
             Ok(out)
         });
         match body {
-            Ok(b) => {
-                if std::fs::write(dir.join(format!("{name}.txt")), b).is_ok() {
+            Ok(b) => match crate::store::write_text_atomic(&dir.join(format!("{name}.txt")), &b) {
+                Ok(()) => {
                     let _ = std::fs::write(dir.join(format!(".{name}.done")), dict_stamp(m));
                 }
-            }
+                Err(e) => eprintln!("dictionary export {}: {e}", m.id),
+            },
             Err(e) => eprintln!("dictionary export {}: {e}", m.id),
         }
     }
@@ -555,15 +549,7 @@ pub fn prune(root: &Path) {
 }
 
 fn file_name(s: &str) -> String {
-    let t: String = s.chars().map(|c| if c.is_alphanumeric() || " -_',.()&+".contains(c) { c } else { ' ' }).collect();
-    let t = t.split_whitespace().collect::<Vec<_>>().join(" ");
-    let t: String = t.chars().take(80).collect();
-    let t = t.trim_matches(|c: char| c == '.' || c == ' ').to_string();
-    if t.is_empty() {
-        "untitled".into()
-    } else {
-        t
-    }
+    crate::store::file_name(s, 80, " -_',.()&+")
 }
 
 #[cfg(test)]

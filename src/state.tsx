@@ -12,7 +12,8 @@ import { listen } from "@tauri-apps/api/event";
 import { api, JournalEntry, LibraryInfo, ModuleInfo } from "./api";
 import { claudeAlias } from "./assistant";
 import { Ref } from "./bible";
-import { Plan, WebDevotional } from "./plans";
+import { Plan, WebDevotional, ymd } from "./plans";
+import { forgetSizes } from "./sizes";
 import type { StudyTab } from "./StudyPane";
 
 export type Theme = "auto" | "light" | "dark";
@@ -160,7 +161,7 @@ export interface Bookmark {
   doc?: DocSpot;
 }
 /** A paragraph in a book: its chapter, and the paragraph's number there (from 1). */
-export interface DocSpot {
+interface DocSpot {
   module: string;
   title: string;
   kind?: DocKind;
@@ -169,7 +170,7 @@ export interface DocSpot {
 export type HlColor = "red" | "orange" | "yellow" | "green" | "teal" | "blue" | "purple" | "grey";
 export const HL_COLOURS: HlColor[] = ["red", "orange", "yellow", "green", "teal", "blue", "purple", "grey"];
 /** A theme's journal tag: its name as a tag, "Grace and the cross" → grace-and-the-cross. */
-export const themeTag = (name: string) =>
+const themeTag = (name: string) =>
   name
     .toLowerCase()
     .replace(/[^\p{L}\p{N}]+/gu, "-")
@@ -184,7 +185,7 @@ export const themesOf = (names: Partial<Record<HlColor, string>> | undefined): H
 /** Highlights saved before there were six colours. */
 export const hlName = (c: string): HlColor => (c === "gold" ? "yellow" : c === "rose" ? "red" : (c as HlColor));
 
-export interface ChatMsg {
+interface ChatMsg {
   role: "user" | "assistant";
   text: string;
   error?: boolean;
@@ -212,7 +213,7 @@ export interface Chat {
   journaled?: boolean;
 }
 
-export interface JournalSeed {
+interface JournalSeed {
   verses?: string[];
   title?: string;
   body?: string;
@@ -234,8 +235,7 @@ export interface Pending {
 
 export type Screen = "read" | "compare" | "search" | "word" | "journal" | "plans" | "library" | "history" | "settings";
 
-/** A chapter read lately: of the Bible, or (with `doc`) of a reference book or devotional. */
-/** A passage or book chapter opened. `verse`/`to` are the verses it was opened at, if any; one entry per chapter, the latest open. */
+/** A passage or book chapter opened lately: of the Bible, or (with `doc`) of a reference book or devotional. `verse`/`to` are the verses it was opened at, if any; one entry per chapter, the latest open. */
 export interface Recent {
   book: number;
   chapter: number;
@@ -282,43 +282,44 @@ function topVerse(): { v: string; off: number } | null {
   const el = Array.from(col.querySelectorAll<HTMLElement>("[data-v]")).find((e) => e.getBoundingClientRect().bottom > top);
   return el ? { v: el.dataset.v!, off: el.getBoundingClientRect().top - col.getBoundingClientRect().top } : null;
 }
-/** Scrolls the reading column so verse `at.v` is where it was, once the new translation has loaded. */
-function keepVerse(at: { v: string; off: number }) {
+/**
+ * Runs `step` every 60ms for a couple of seconds, while the page fills in as its text loads,
+ * until it says it is done (returns true) or the user scrolls, types or clicks. `step` is given
+ * how many times it has run before.
+ */
+function whileUntouched(step: (tries: number) => boolean | void) {
+  const EVENTS = ["wheel", "keydown", "mousedown", "touchstart"];
   let tries = 0,
     stopped = false;
   const stop = () => {
     stopped = true;
-    ["wheel", "keydown", "mousedown", "touchstart"].forEach((e) => window.removeEventListener(e, stop, true));
+    EVENTS.forEach((e) => window.removeEventListener(e, stop, true));
   };
-  ["wheel", "keydown", "mousedown", "touchstart"].forEach((e) => window.addEventListener(e, stop, true));
-  const apply = () => {
+  EVENTS.forEach((e) => window.addEventListener(e, stop, true));
+  const run = () => {
     if (stopped) return;
+    if (step(tries) === true) stop();
+    else if (++tries < 30) window.setTimeout(run, 60);
+    else stop();
+  };
+  window.setTimeout(run, 30);
+}
+
+/** Scrolls the reading column so verse `at.v` is where it was, once the new translation has loaded. */
+function keepVerse(at: { v: string; off: number }) {
+  whileUntouched(() => {
     const col = document.querySelector<HTMLElement>(".readcol");
     const el = col?.querySelector<HTMLElement>(`[data-v="${at.v}"]`);
     if (col && el) {
       const d = el.getBoundingClientRect().top - col.getBoundingClientRect().top - at.off;
       if (Math.abs(d) > 2) col.scrollTop += d;
     }
-    if (++tries < 30) window.setTimeout(apply, 60);
-    else stop();
-  };
-  window.setTimeout(apply, 30);
+  });
 }
 
-/**
- * Puts the scrolling areas back where a history step left them. The page fills in as its text
- * loads, so it tries again for a moment, and gives up once the user scrolls, types or clicks.
- */
+/** Puts the scrolling areas back where a history step left them. */
 function restoreScrolls(want: number[]) {
-  let tries = 0,
-    stopped = false;
-  const stop = () => {
-    stopped = true;
-    ["wheel", "keydown", "mousedown", "touchstart"].forEach((e) => window.removeEventListener(e, stop, true));
-  };
-  ["wheel", "keydown", "mousedown", "touchstart"].forEach((e) => window.addEventListener(e, stop, true));
-  const apply = () => {
-    if (stopped) return;
+  whileUntouched((tries) => {
     const els = Array.from(document.querySelectorAll<HTMLElement>(".scroll"));
     let done = els.length === want.length;
     if (done)
@@ -328,18 +329,12 @@ function restoreScrolls(want: number[]) {
           if (Math.abs(el.scrollTop - want[k]) > 2) done = false;
         }
       });
-    if (done && tries > 6) {
-      stop();
-      return;
-    } // settled, and past the page's own first scroll
-    if (++tries < 30) window.setTimeout(apply, 60);
-    else stop();
-  };
-  window.setTimeout(apply, 30);
+    return done && tries > 6; // settled, and past the page's own first scroll
+  });
 }
 /** A reference book open in the reading column, and the chapter being read. With `url`, an online
  *  devotional's page instead (WebPage): `module` is its id and `title` its name. */
-export interface Doc {
+interface Doc {
   module: string;
   title: string;
   kind?: DocKind;
@@ -347,7 +342,7 @@ export interface Doc {
   /** "lyrics": the words of the song playing in Music (LyricsPage) instead. */
   view?: "lyrics";
 }
-export type DocKind = "reference" | "devotional";
+type DocKind = "reference" | "devotional";
 
 /** One part of a Quiet time: a chapter (or part of one), a devotional's reading, or an online devotional. */
 export type QuietStep = { key: string; label: string } & (
@@ -571,7 +566,7 @@ export const uid = () => Date.now().toString(36) + Math.random().toString(36).sl
 export const nowLocal = () => {
   const d = new Date();
   const p = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+  return `${ymd(d)}T${p(d.getHours())}:${p(d.getMinutes())}`;
 };
 export const vkey = (b: number, c: number, v: number) => `${b}.${c}.${v}`;
 
@@ -813,7 +808,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     concordance,
     tsk,
     rescan: async (esword) => {
-      setLib(await api.rescan(typeof esword === "boolean" ? esword : settings.readEsword));
+      const l = await api.rescan(typeof esword === "boolean" ? esword : settings.readEsword);
+      forgetSizes(); // a Bible's chapters are read again: it may be another copy now
+      setLib(l);
     },
     settings: view,
     set: ({ bible, ...rest }) => {

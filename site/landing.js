@@ -1,4 +1,4 @@
-// Two-edged Sword: the product page's motion (docs/index.html). Plain JS, no build step.
+// Two-edged Sword: the product page's motion (site/index.html). Plain JS, no build step.
 (function () {
   "use strict";
   var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;

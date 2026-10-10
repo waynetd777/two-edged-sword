@@ -3,7 +3,7 @@
 
 // Signs and symbols, drawn as if by hand, and music.
 
-import { bitmap, displayFont, flame, glow, rnd, smooth, TAU, Vision } from "./kit";
+import { bitmap, displayFont, drift, flame, glow, layering, random, rnd, smooth, TAU, tones, Vision } from "./kit";
 import { THORNS_BITMAP } from "./thorns-bitmap";
 
 export const SIGNS: Vision[] = [
@@ -17,7 +17,7 @@ export const SIGNS: Vision[] = [
       const { x, scale } = room.place(S0 * 2.3);
       const S = S0 * scale,
         y = h * rnd(0.3, 0.6);
-      const font = getComputedStyle(document.documentElement).getPropertyValue("--display") || "Georgia, serif";
+      const font = displayFont();
       return (f) => {
         const { ctx } = f;
         const p = smooth(f.k * 2.4);
@@ -72,7 +72,7 @@ export const SIGNS: Vision[] = [
       const size0 = Math.min(h * 0.32, w * 0.2);
       const { x: cx, scale } = room.place(size0 * 2.8);
       const size = Math.round(size0 * scale);
-      const font = getComputedStyle(document.documentElement).getPropertyValue("--display") || "Georgia, serif";
+      const font = displayFont();
       const y = h * rnd(0.4, 0.55);
       return (f) => {
         const { ctx } = f;
@@ -102,7 +102,8 @@ export const SIGNS: Vision[] = [
       const { x, scale } = room.place(S0 * 4);
       const y = h * rnd(0.35, 0.55),
         S = S0 * scale;
-      let layer: HTMLCanvasElement | null = null;
+      const layer = layering();
+      const font = displayFont();
       return (f) => {
         const { ctx } = f;
         const p = smooth(f.k * 2.4);
@@ -111,15 +112,7 @@ export const SIGNS: Vision[] = [
         // An admiralty anchor, solid iron: the ring, a shank thickening to the crown, the stock across
         // it with knobbed ends, and the curved arms ending in spade-shaped flukes. Drawn on a layer
         // in one piece, shaded as lit from above left, and fading into view whole.
-        const dpr = ctx.getTransform().a || 1;
-        if (!layer || layer.width !== Math.round(w * dpr) || layer.height !== Math.round(h * dpr)) {
-          layer = document.createElement("canvas");
-          layer.width = Math.round(w * dpr);
-          layer.height = Math.round(h * dpr);
-        }
-        const L = layer.getContext("2d")!;
-        L.setTransform(1, 0, 0, 1, 0, 0);
-        L.clearRect(0, 0, layer.width, layer.height);
+        const { L, canvas, dpr } = layer(f);
         L.setTransform(dpr, 0, 0, dpr, x * dpr, ay * dpr);
         L.rotate(tilt);
         L.scale(S, S);
@@ -186,12 +179,12 @@ export const SIGNS: Vision[] = [
         ctx.globalAlpha = 0.5 * f.env * p;
         ctx.shadowColor = f.ink(0.6 * f.env);
         ctx.shadowBlur = 10;
-        ctx.drawImage(layer, 0, 0, w, h);
+        ctx.drawImage(canvas, 0, 0, f.w, f.h);
         ctx.restore();
         ctx.save();
         ctx.translate(x, ay);
         ctx.rotate(tilt);
-        ctx.font = `italic 400 ${Math.round(S * 0.17)}px ${displayFont()}`;
+        ctx.font = `italic 400 ${Math.round(S * 0.17)}px ${font}`;
         ctx.textAlign = "center";
         ctx.fillStyle = f.ink(0.35 * f.env * smooth(f.k * 3 - 1.6));
         ctx.fillText("an anchor of the soul, both sure and stedfast", 0, S * 1.45);
@@ -228,29 +221,16 @@ export const SIGNS: Vision[] = [
       };
       const front = [0.1, 0.3, 0.5, 0.7, 0.9].map((k) => k * Math.PI),
         back = [0.2, 0.4, 0.6, 0.8].map((k) => Math.PI + k * Math.PI);
-      let layer: HTMLCanvasElement | null = null;
+      const layer = layering();
       return (f) => {
         const { ctx } = f;
         const cy = y + Math.sin(f.t * 0.7) * 5;
         glow(ctx, x, cy, S * 2.2, f.ink(0.1 * f.env), f.ink(0));
-        const dpr = ctx.getTransform().a || 1;
-        if (!layer || layer.width !== Math.round(w * dpr) || layer.height !== Math.round(h * dpr)) {
-          layer = document.createElement("canvas");
-          layer.width = Math.round(w * dpr);
-          layer.height = Math.round(h * dpr);
-        }
-        const L = layer.getContext("2d")!;
-        L.setTransform(1, 0, 0, 1, 0, 0);
-        L.clearRect(0, 0, layer.width, layer.height);
+        const { L, canvas, dpr } = layer(f);
         L.setTransform(dpr * S, 0, 0, dpr * S, x * dpr, cy * dpr);
         // Solid colours, mixed from the page's own and the ink (warm gold, or cool for gems).
-        const mix = (cool: boolean) => {
-          const ink = f.ink(1, cool).slice(5).split(",").slice(0, 3).map(Number);
-          const page = f.dark ? [13, 17, 23] : [246, 248, 250];
-          return (k: number) => `rgb(${page.map((p, i) => Math.round(p + (ink[i] - p) * Math.min(1, k))).join(",")})`;
-        };
-        const gold = mix(false),
-          gem = mix(true);
+        const gold = tones(f),
+          gem = tones(f, true);
         // Gold shaded as a curved surface: dark at the sides, brightest a little left of the middle.
         const curved = (k: number) => {
           const g = L.createLinearGradient(-1.05, 0, 1.05, 0);
@@ -330,7 +310,7 @@ export const SIGNS: Vision[] = [
         ctx.globalCompositeOperation = "source-over";
         ctx.shadowColor = f.ink(0.4 * f.env);
         ctx.shadowBlur = 12;
-        ctx.drawImage(layer, 0, 0, w, h);
+        ctx.drawImage(canvas, 0, 0, f.w, f.h);
         ctx.restore();
       };
     },
@@ -403,25 +383,15 @@ export const SIGNS: Vision[] = [
         const [, by] = box(u);
         return { sx, top: neckY(sx) + 0.035, bottom: by - ny * half(u) * k };
       });
-      let layer: HTMLCanvasElement | null = null;
+      const layer = layering();
       return (f) => {
         const { ctx } = f;
         const rise = (1 - smooth(f.env)) * 20;
         const flip = left ? 1 : -1;
-        const dpr = ctx.getTransform().a || 1;
-        if (!layer || layer.width !== Math.round(w * dpr) || layer.height !== Math.round(h * dpr)) {
-          layer = document.createElement("canvas");
-          layer.width = Math.round(w * dpr);
-          layer.height = Math.round(h * dpr);
-        }
-        const L = layer.getContext("2d")!;
-        L.setTransform(1, 0, 0, 1, 0, 0);
-        L.clearRect(0, 0, layer.width, layer.height);
+        const { L, canvas, dpr } = layer(f);
         L.setTransform(dpr * H * flip, 0, 0, dpr * H, x * dpr, (y + rise) * dpr);
         // Solid wood, in colours mixed from the page's own and the ink.
-        const ink = f.ink(1).slice(5).split(",").slice(0, 3).map(Number);
-        const page = f.dark ? [13, 17, 23] : [246, 248, 250];
-        const wood = (k: number) => `rgb(${page.map((p, i) => Math.round(p + (ink[i] - p) * k)).join(",")})`;
+        const wood = tones(f);
         // The soundbox: lit on its face, towards the strings, darker at its back.
         const bg = L.createLinearGradient(0.04 - nx * 0.08, 0.08 - ny * 0.08, 0.04 + nx * 0.08, 0.08 + ny * 0.08);
         bg.addColorStop(0, wood(0.6));
@@ -507,7 +477,7 @@ export const SIGNS: Vision[] = [
         ctx.globalCompositeOperation = "source-over";
         ctx.shadowColor = f.ink(0.4 * f.env);
         ctx.shadowBlur = 10;
-        ctx.drawImage(layer, 0, 0, w, h);
+        ctx.drawImage(canvas, 0, 0, f.w, f.h);
         ctx.restore();
         // The strings, plucked in turn, each trembling and lit as it sounds.
         ctx.save();
@@ -540,6 +510,7 @@ export const SIGNS: Vision[] = [
         p = rnd(0, TAU);
       const glyphs = ["♪", "♫", "♩", "♬"];
       const notes = Array.from({ length: 14 }, (_, i) => ({ u: i / 14, line: Math.floor(rnd(0, 5)), g: glyphs[i % 4], s: rnd(18, 28) }));
+      const font = displayFont();
       return (f) => {
         const { ctx } = f;
         const staff = (x: number, i: number) => y0 + (i - 2) * 9 + Math.sin(x * 0.006 + f.t * 0.5 + p) * h * 0.06;
@@ -561,7 +532,7 @@ export const SIGNS: Vision[] = [
           const u = (n.u + f.t * 0.04) % 1;
           const x = u * w;
           const lift = Math.max(0, u - 0.6) * 160;
-          ctx.font = `${n.s}px "Apple Symbols", ${displayFont()}`;
+          ctx.font = `${n.s}px "Apple Symbols", ${font}`;
           ctx.fillStyle = f.ink(0.5 * f.env * Math.sin(Math.PI * u));
           ctx.fillText(n.g, x, staff(x, n.line) - 4 - lift);
         }
@@ -614,7 +585,7 @@ export const SIGNS: Vision[] = [
     make: (w, h) => {
       const x0 = w * rnd(0.1, 0.5);
       const motes = Array.from({ length: 70 }, () => ({
-        u: Math.random(),
+        u: random(),
         v: rnd(-1, 1),
         s: rnd(0.01, 0.04),
         r: rnd(1.5, 4),
@@ -638,7 +609,7 @@ export const SIGNS: Vision[] = [
         ctx.fill();
         const dot = f.dot();
         for (const m of motes) {
-          const u = (m.u + f.t * m.s) % 1;
+          const u = drift(m, f.t);
           const x = ax + (bx - ax) * (1 - u) + m.v * wd * (0.4 + 0.6 * (1 - u)) + Math.sin(f.t * 0.7 + m.p) * 8;
           const y = h * (1 - u);
           ctx.globalAlpha = f.env * 0.7 * (0.4 + 0.6 * Math.sin(f.t * 1.7 + m.p) ** 2) * Math.sin(Math.PI * u);

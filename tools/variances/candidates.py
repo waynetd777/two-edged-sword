@@ -8,14 +8,20 @@
 Reads both modules from the library (tools/modules.py finds them) and writes batches of candidates, with both texts,
 to a work folder outside the repo (the translation's text is copyrighted; it is never committed).
 Each candidate says why it was picked. The review (see review.md) decides which are real.
+A new set of batches replaces the old ones and their reviews, so it stops if there are reviews that
+build.py hasn't yet merged (--discard-reviews to drop them).
 """
-import argparse, json, os, re, sqlite3, sys
+import argparse, json, re, sqlite3, sys
 from pathlib import Path
 
-HOME = Path(os.environ.get("HOME", ""))
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from modules import LIBRARY, find  # noqa: E402
+from modules import HOME, LIBRARY, find  # noqa: E402
 DATA = HOME / "Library/Application Support/Two-edged Sword"
+
+
+def store_name(module):
+    """The variance file's name (without .json) in DATA, which the reading pane reads."""
+    return "variances-" + re.sub(r"[^A-Za-z0-9_-]", "_", module)
 
 # A term the base uses more often than the translation does (after its modern equivalents are
 # counted) is a sign that something was dropped or changed.
@@ -85,7 +91,14 @@ def main():
     ap.add_argument("--refs", type=Path, help="review exactly these verses: a file of 'book chapter verse' lines (e-Sword book numbers), # comments")
     ap.add_argument("--no-shorter", action="store_true", help="don't pick verses only for being much shorter (for the Old Testament, where both follow the Masoretic text and a shorter verse is idiom, not omission)")
     ap.add_argument("--out", type=Path, help="work folder (default: variances-work/<module> in the app's data folder)")
+    ap.add_argument("--discard-reviews", action="store_true", help="replace reviews build.py hasn't merged yet")
     a = ap.parse_args()
+    out = a.out or DATA / "variances-work" / a.module
+    target = DATA / f"{store_name(a.module)}.json"
+    built = target.stat().st_mtime if target.exists() else 0
+    unmerged = sorted(p.name for p in (out / "reviewed").glob("*.json") if p.stat().st_mtime > built)
+    if unmerged and not a.discard_reviews:
+        sys.exit(f"reviews not yet merged: {', '.join(unmerged)} in {out / 'reviewed'}; run build.py {a.module} first, or pass --discard-reviews")
     lo, hi = (int(x) for x in (a.books.split("-") + [a.books])[:2])
     base, mod = load(a.base), load(a.module)
     only = None
@@ -107,7 +120,6 @@ def main():
             why = ["often disputed"]
         if why:
             found.append({"book": ref[0], "chapter": ref[1], "verse": ref[2], "why": why, "base": base[ref], "text": mod.get(ref, "")})
-    out = a.out or DATA / "variances-work" / a.module
     (out / "batches").mkdir(parents=True, exist_ok=True)
     (out / "reviewed").mkdir(exist_ok=True)
     # A new set of batches: reviews of the old ones no longer match (build.py has already kept their records).

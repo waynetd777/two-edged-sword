@@ -5,7 +5,7 @@
 // from a start date. The "ppo" plan (a Psalm, a Proverb and one more) has no end: Proverbs
 // follows the date, while the Psalm and the other chapter move on each time a day is read.
 
-import { book, BOOKS, isApocrypha, Ref } from "./bible";
+import { book, BOOKS, isApocrypha, psalmLabel, Ref } from "./bible";
 
 /** One passage: whole chapters (c..c2), or a verse range when v is set. */
 export interface Part {
@@ -25,7 +25,8 @@ export interface SequencePlan {
   weekdaysOnly: boolean;
   days: Part[][];
   done: number[];
-  /** Dates a day was finished, YYYY-MM-DD, for streaks. Recorded from September 2026 on. */
+  /** The date each day was finished on, YYYY-MM-DD, for streaks: a date twice when two days were
+   *  finished on it (catching up). Recorded from September 2026 on. */
   readDates?: string[];
   skipped: number[];
   /** Days the rest of the plan has been moved later by. */
@@ -46,7 +47,7 @@ export interface SequencePlan {
 }
 
 /** Which day `done` belongs to, and the parts of it read: "43.3" for a chapter, a devotional's id. */
-export interface Progress {
+interface Progress {
   key: string;
   done: string[];
 }
@@ -106,10 +107,10 @@ export const addDays = (d: Date, n: number) => {
 };
 const isWeekend = (d: Date) => d.getDay() === 0 || d.getDay() === 6;
 /** A reading day starts at 4am, not midnight: a late-night Quiet time counts for the day before. */
-export const DAY_STARTS_AT = 4;
-/** Midnight of the reading day it is now. */
-export const today = () => {
-  const d = new Date(Date.now() - DAY_STARTS_AT * 3_600_000);
+const DAY_STARTS_AT = 4;
+/** Midnight of the reading day it is now (or was at `at`, a time in milliseconds). */
+export const today = (at = Date.now()) => {
+  const d = new Date(at - DAY_STARTS_AT * 3_600_000);
   d.setHours(0, 0, 0, 0);
   return d;
 };
@@ -164,7 +165,7 @@ export function partRef(x: Part): Ref {
       book: x.b,
       chapter: x.c,
       verse: x.v,
-      to: x.c2 && x.c2 !== x.c ? x.v2 : x.v2,
+      to: x.v2,
       toChapter: x.c2 && x.c2 !== x.c ? x.c2 : undefined,
     };
   return { book: x.b, chapter: x.c };
@@ -187,7 +188,7 @@ export const refPart = (r: Ref): Part =>
     : { b: r.book, c: r.chapter };
 
 /** Whole chapters as parts, merging runs in the same book: Genesis 1, 2, 3 → Genesis 1–3. */
-export function chaptersToParts(chs: [number, number][]): Part[] {
+function chaptersToParts(chs: [number, number][]): Part[] {
   const out: Part[] = [];
   for (const [b, c] of chs) {
     const last = out[out.length - 1];
@@ -242,18 +243,18 @@ export const chaptersOf = (sizes: Sizes, books: number[]) => sizes.filter((s) =>
 const daysInMonth = (d: Date) => new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
 
 /** Proverbs chapters for a date: the day of the month, plus the leftovers on the last day of a short month. */
-export function proverbsFor(d: Date, shortMonths: "last" | "skip"): [number, number] {
+function proverbsFor(d: Date, shortMonths: "last" | "skip"): [number, number] {
   const day = d.getDate();
   const dim = daysInMonth(d);
   if (shortMonths === "last" && day === dim && dim < 31) return [day, 31];
   return [day, day];
 }
 
-export function otherBooks(from: PpoPlan["otherFrom"]): number[] {
+function otherBooks(from: PpoPlan["otherFrom"]): number[] {
   return BOOKS.map((b) => b.n).filter((n) => n !== 19 && n !== 20 && (from === "all" || (from === "ot" ? n <= 39 : n >= 40)));
 }
 
-export function nextOtherAfter(cur: [number, number], from: PpoPlan["otherFrom"]): [number, number] {
+function nextOtherAfter(cur: [number, number], from: PpoPlan["otherFrom"]): [number, number] {
   const bs = otherBooks(from);
   const [b, c] = cur;
   if (c < book(b).chapters) return [b, c + 1];
@@ -262,7 +263,7 @@ export function nextOtherAfter(cur: [number, number], from: PpoPlan["otherFrom"]
 }
 
 /** The chapter before `cur` in the "other" reading order: the inverse of nextOtherAfter. */
-export function prevOtherBefore(cur: [number, number], from: PpoPlan["otherFrom"]): [number, number] {
+function prevOtherBefore(cur: [number, number], from: PpoPlan["otherFrom"]): [number, number] {
   const bs = otherBooks(from);
   const [b, c] = cur;
   if (c > 1) return [b, c - 1];
@@ -271,7 +272,7 @@ export function prevOtherBefore(cur: [number, number], from: PpoPlan["otherFrom"
   return [pb, book(pb).chapters];
 }
 
-export function ppoReading(p: PpoPlan, d: Date): Part[] {
+function ppoReading(p: PpoPlan, d: Date): Part[] {
   const [p1, p2] = proverbsFor(d, p.shortMonths);
   return [{ b: 19, c: p.nextPsalm }, p1 === p2 ? { b: 20, c: p1 } : { b: 20, c: p1, c2: p2 }, { b: p.nextOther[0], c: p.nextOther[1] }];
 }
@@ -305,8 +306,7 @@ export function ppoPreview(p: PpoPlan, from: Date, n: number): { date: Date; par
   return out;
 }
 
-/** The days after `today`. Until today is marked read the plan has not moved on, so skip today's chapters. */
-const MONTH_NAMES = [
+export const MONTH_NAMES = [
   "January",
   "February",
   "March",
@@ -402,8 +402,7 @@ export function markDayRead(p: Plan, d: Date): Plan {
   if (p.kind === "ppo") return markPpoRead(p, d);
   const i = firstUndone(p);
   if (i < 0 || p.done.includes(i)) return p;
-  const k = ymd(d);
-  return { ...p, done: [...p.done, i], readDates: p.readDates?.includes(k) ? p.readDates : [...(p.readDates ?? []), k] };
+  return { ...p, done: [...p.done, i], readDates: [...(p.readDates ?? []), ymd(d)] };
 }
 
 /** Undoes today's "mark as read": the date comes off, the plan steps back to where it was, and the
@@ -425,7 +424,9 @@ export function unmarkDayRead(p: Plan, d: Date): Plan {
     };
   }
   if (!p.readDates?.includes(k) || !p.done.length) return p;
-  return { ...p, done: p.done.slice(0, -1), readDates: p.readDates.filter((x) => x !== k), progress };
+  // One of the date's entries comes off: another day finished today still counts it.
+  const at = p.readDates.lastIndexOf(k);
+  return { ...p, done: p.done.slice(0, -1), readDates: [...p.readDates.slice(0, at), ...p.readDates.slice(at + 1)], progress };
 }
 
 /** Whether today was marked read (a sequence plan only knows this for days marked since dates were recorded). */
@@ -489,6 +490,7 @@ export function tickPart(p: Plan, key: string, part: string, bibleParts: string[
   return next;
 }
 
+/** The days after `today`. Until today is marked read the plan has not moved on, so skip today's chapters. */
 export function ppoUpcoming(p: PpoPlan, today: Date, n: number): { date: Date; parts: Part[] }[] {
   return p.doneDates.includes(ymd(today)) ? ppoPreview(p, addDays(today, 1), n) : ppoPreview(p, today, n + 1).slice(1);
 }
@@ -529,7 +531,7 @@ export function todayFor(p: Plan): Today {
       pos += book(b).chapters;
     }
     return {
-      label: parts.map((x) => partLabel(x).replace("Psalms", "Psalm")).join(" · "),
+      label: parts.map((x) => psalmLabel(partLabel(x))).join(" · "),
       progress: done ? "read today" : `day ${p.doneDates.length + 1}`,
       pct: Math.round((pos / total) * 100),
       parts,
@@ -549,4 +551,9 @@ export function todayFor(p: Plan): Today {
 export function todayReading(app: { plans: Plan[] }): Today | null {
   const p = current(app.plans);
   return p ? todayFor(p) : null;
+}
+
+/** Today's reading in a plan, or null without a plan or once a sequence plan is finished. */
+export function todayIfOngoing(p: Plan | undefined): Today | null {
+  return p && !(p.kind === "sequence" && firstUndone(p) < 0) ? todayFor(p) : null;
 }

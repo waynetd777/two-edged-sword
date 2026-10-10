@@ -9,17 +9,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import { api } from "./api";
-import { fmtRef } from "./bible";
+import { isDark } from "./dom";
 import { Icon } from "./icons";
 import { onlineDevotionals } from "./plans";
-import { Topbar } from "./Shell";
+import { ReadingColumnTopbar, useEscExitsFocus } from "./ReadingColumn";
 import { useListenKey, usePlayer } from "./speech";
 import { Settings, useApp } from "./state";
-
-const isDark = () => {
-  const t = document.documentElement.getAttribute("data-theme");
-  return t ? t === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
-};
 
 /** Quiet time with audio: the online devotional to read aloud by itself once its page is ready
  *  (where it starts is known: OnlineDevotional.start), and what to do when it's read. */
@@ -88,7 +83,7 @@ export function InvertButton({ id }: { id: string }) {
 }
 
 /** Whether the app is showing its dark theme, kept up to date. */
-export function useDark(): boolean {
+function useDark(): boolean {
   const [dark, setDark] = useState(isDark);
   useEffect(() => {
     const check = () => setDark(isDark());
@@ -178,15 +173,12 @@ export function WebPage({ focus, setFocus }: { focus: boolean; setFocus: (f: boo
     return () => window.removeEventListener("message", onMsg);
   }, [picking, doc.module, doc.title, url, player]);
   useEffect(() => setPicking(false), [url]);
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return;
-      if (picking) setPicking(false);
-      else if (focus) setFocus(false);
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [focus, setFocus, picking]);
+  // Esc lets go of Listen first, then leaves focus mode.
+  useEscExitsFocus(focus, setFocus, () => {
+    if (!picking) return false;
+    setPicking(false);
+    return true;
+  });
 
   const openWindow = () => api.openWeb(doc.module, url, doc.title, inverts(app.settings, doc.module)).catch((e) => app.toast(String(e)));
   const tools = (
@@ -224,22 +216,7 @@ export function WebPage({ focus, setFocus }: { focus: boolean; setFocus: (f: boo
 
   return (
     <div className="main" style={{ minHeight: 0 }}>
-      {focus ? (
-        <header className="topbar drag" style={{ borderBottom: 0, paddingLeft: 84 }}>
-          <div className="spacer" />
-          {tools}
-          <button className="btn" type="button" onClick={() => setFocus(false)}>
-            Exit focus<span className="kbd">esc</span>
-          </button>
-        </header>
-      ) : (
-        <Topbar right={tools}>
-          <button className="btn" type="button" title="Back to the Bible" onClick={app.closeDoc}>
-            <Icon name="read" />
-            {fmtRef(app.loc)}
-          </button>
-        </Topbar>
-      )}
+      <ReadingColumnTopbar focus={focus} setFocus={setFocus} tools={tools} />
       <div
         style={{ display: "flex", flexDirection: "column", flex: "1 1 auto", minHeight: 0, padding: focus ? "0 10% 0" : "0 40px 0 36px" }}
       >

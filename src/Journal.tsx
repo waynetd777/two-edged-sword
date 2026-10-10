@@ -2,30 +2,29 @@
 // SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import { memo, useEffect, useMemo, useRef, useState } from "react";
-import { save as saveDialog } from "@tauri-apps/plugin-dialog";
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
 import { api, JournalEntry } from "./api";
-import { AskPanel, useAskOpener } from "./Ask";
+import { useAskOpener } from "./Ask";
 import { fmtRef, parseRef, Ref } from "./bible";
 import { plainText, wordRangeAt } from "./esword";
+import { escHtml } from "./dom";
 import { Icon } from "./icons";
 import { HL_PAINT, htmlToMd, mdPlain, mdToHtml } from "./md";
-import { HighlightsButton, HL, HL_DOT, hlLabel } from "./Read";
+import { HighlightsButton, HL_DOT, hlLabel } from "./Read";
 import { SearchField, Topbar } from "./Shell";
 import { HlColor, HlTheme, nowLocal, onFlush, themesOf, uid, useApp } from "./state";
-import { ClearButton, confirmDelete, Dialog, Popover, scrollToThird, Seg } from "./ui";
+import { ClearButton, confirmDelete, scrollToThird } from "./ui";
 import { useAssistant } from "./assistant";
 import { docModule, parseDocLabel } from "./docref";
 import { useRefPreview } from "./StudyPane";
 import { useSpelling } from "./spelling";
 import { useFind } from "./find";
 import { journalParas, speechBlocks, useListenKey, usePlayer } from "./speech";
-
-const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-const longDate = (s: string) => {
-  const d = new Date(s);
-  return `${d.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" })} · ${d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}`;
-};
+import { MONTH_NAMES } from "./plans";
+import { ExportDialog, longDate } from "./JournalExport";
+import { JournalAsk } from "./JournalAsk";
+import { HighlightPicker, RefPrompt, SpellMenu, tagOptions, TagPicker } from "./JournalPickers";
+import { useEscExitsFocus } from "./ReadingColumn";
 
 // Worked out once per entry (the objects are kept until an entry changes): with thousands of
 // entries, doing it on every keystroke made typing slow.
@@ -88,12 +87,12 @@ const EntryRow = memo(function EntryRow({ e, selected, onSelect }: { e: JournalE
 
 export function JournalScreen({
   openPalette,
-  focus = false,
-  setFocus = () => {},
+  focus,
+  setFocus,
 }: {
   openPalette: () => void;
-  focus?: boolean;
-  setFocus?: (f: boolean) => void;
+  focus: boolean;
+  setFocus: (f: boolean) => void;
 }) {
   const player = usePlayer();
   const app = useApp();
@@ -106,6 +105,11 @@ export function JournalScreen({
   const [exporting, setExporting] = useState(false);
   const saveTimer = useRef<number | undefined>(undefined);
   const pendingSave = useRef<{ id: string; run: () => void } | null>(null);
+  // The save being written now, which a delete waits for (or the save would bring the entry back).
+  const saving = useRef<Promise<void> | null>(null);
+  // The copy last saved from here: the journal holding it is this screen's own save coming back,
+  // not a change made elsewhere, so the copy being typed stays (its title as typed, not trimmed).
+  const lastSaved = useRef<JournalEntry | null>(null);
   // An unsaved edit is written on leaving the screen, and on hiding or quitting like the store's saves.
   useEffect(() => {
     const off = onFlush(() => pendingSave.current?.run());
@@ -137,10 +141,11 @@ export function JournalScreen({
     setSelId(e.id);
   }, [app.journalSeed]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Once the journal (reloaded after a save, or after a change in the vault) has this entry and no
-  // save is waiting, show the file's copy, so a change made elsewhere appears.
+  // Once the journal has a copy of this entry that wasn't saved from here (a change in the vault)
+  // and no save is waiting, show the file's copy, so a change made elsewhere appears.
   useEffect(() => {
-    if (draft && !pendingSave.current && app.journal.some((e) => e.id === draft.id)) setDraft(null);
+    const j = draft && app.journal.find((e) => e.id === draft.id);
+    if (j && !pendingSave.current && j !== lastSaved.current) setDraft(null);
   }, [app.journal]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const entries = useMemo(() => {
@@ -148,12 +153,17 @@ export function JournalScreen({
     const f = filter.toLowerCase();
     return all.filter((e) => (!tag || e.tags.includes(tag)) && (!f || hay(e).includes(f)));
   }, [app.journal, draft, filter, tag]);
-  // The filter's tags, most used first; past the first five they wait behind "more" (the chosen one always shows).
-  const tags = useMemo(() => {
+  // How often each tag is used: the filter's tags, most used first (past the first five they wait
+  // behind "more"; the chosen one always shows), and the editor's tag suggestions.
+  const tagCounts = useMemo(() => {
     const m = new Map<string, number>();
     for (const e of app.journal) for (const t of e.tags) m.set(t, (m.get(t) ?? 0) + 1);
-    return [...m.keys()].sort((a, b) => m.get(b)! - m.get(a)! || a.localeCompare(b));
+    return m;
   }, [app.journal]);
+  const tags = useMemo(
+    () => [...tagCounts.keys()].sort((a, b) => tagCounts.get(b)! - tagCounts.get(a)! || a.localeCompare(b)),
+    [tagCounts],
+  );
   const [allTags, setAllTags] = useState(false);
   const shownTags = allTags ? tags : tags.slice(0, 5).concat(tag && tags.indexOf(tag) >= 5 ? [tag] : []);
   const cur = (draft && draft.id === selId ? draft : app.journal.find((e) => e.id === selId)) ?? null;
@@ -167,14 +177,23 @@ export function JournalScreen({
       window.clearTimeout(saveTimer.current);
       pendingSave.current = null;
       if (!e.title.trim() && !e.body.trim()) return; // nothing to keep yet
+      const copy = { ...e, title: e.title.trim() || "Untitled" };
+      lastSaved.current = copy;
+      const p = app.saveEntry(copy);
+      saving.current = p;
       try {
-        await app.saveEntry({ ...e, title: e.title.trim() || "Untitled" });
+        await p;
         setSaved(
           `Saved to Me. Journal - ${e.created.slice(0, 7)}.md · ${new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}`,
         );
         setErr(null);
       } catch (x) {
         setErr(String(x));
+        // Still waiting to be saved: kept, so a reload doesn't replace it with the file's copy, and
+        // tried again on the next flush or edit.
+        pendingSave.current ??= { id: e.id, run };
+      } finally {
+        if (saving.current === p) saving.current = null;
       }
     };
     pendingSave.current = { id: e.id, run };
@@ -195,7 +214,13 @@ export function JournalScreen({
       window.clearTimeout(saveTimer.current);
       pendingSave.current = null;
     }
-    if (app.journal.some((e) => e.id === cur.id)) await app.deleteEntry(cur.id);
+    await saving.current?.catch(() => {});
+    try {
+      if (app.journal.some((e) => e.id === cur.id) || lastSaved.current?.id === cur.id) await app.deleteEntry(cur.id);
+    } catch (x) {
+      setErr(String(x));
+      return;
+    }
     setDraft(null);
     setSelId(app.journal.find((e) => e.id !== cur.id)?.id ?? null);
   };
@@ -212,13 +237,7 @@ export function JournalScreen({
   });
 
   // Esc leaves focus mode (after anything open in the editor has had it).
-  useEffect(() => {
-    const k = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && focus && !e.defaultPrevented) setFocus(false);
-    };
-    window.addEventListener("keydown", k);
-    return () => window.removeEventListener("keydown", k);
-  }, [focus, setFocus]);
+  useEscExitsFocus(focus, setFocus);
 
   // Listen: the entry read aloud, its title and then each paragraph, in the reading voice.
   const listening = player.state.on && player.state.doc?.module === "journal" && player.state.doc.id === cur?.id;
@@ -340,7 +359,7 @@ export function JournalScreen({
             )}
             {entries.map((e) => {
               const d = new Date(e.created);
-              const m = `${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+              const m = `${MONTH_NAMES[d.getMonth()]} ${d.getFullYear()}`;
               const head =
                 m !== lastMonth ? (
                   <div className="label" style={{ padding: "10px 12px 4px" }}>
@@ -367,6 +386,7 @@ export function JournalScreen({
             onDelete={remove}
             onExport={() => setExporting(true)}
             listed={entries}
+            tagCounts={tagCounts}
             listedLabel={tag ? `entries tagged #${tag}` : filter.trim() ? `entries matching “${filter.trim()}”` : "your whole journal"}
           />
         ) : (
@@ -388,6 +408,7 @@ function Editor({
   onExport,
   listed,
   listedLabel,
+  tagCounts,
 }: {
   entry: JournalEntry;
   onChange: (p: Partial<JournalEntry>) => void;
@@ -397,6 +418,8 @@ function Editor({
   onExport: () => void;
   listed: JournalEntry[];
   listedLabel: string;
+  /** How often each tag is used in the journal, for the tags offered. */
+  tagCounts: Map<string, number>;
 }) {
   const app = useApp();
   const canAsk = useAssistant().available;
@@ -409,10 +432,6 @@ function Editor({
   // Text selected in the entry, which an Ask about the entry is then about. Kept while the
   // selection moves to the Ask panel's box; cleared by a caret in the entry or its ×.
   const [picked, setPicked] = useState("");
-  // An Ask about the entry gets its first Bible reference as its passage (with the library's
-  // material on it) and the rest of the journal to search.
-  const passage = useMemo(() => entry.verses.map((v) => parseRef(v)).find((r): r is Ref => !!r) ?? null, [entry.verses]);
-  const others = useMemo(() => app.journal.filter((e) => e.id !== entry.id), [app.journal, entry.id]);
   const ed = useRef<HTMLDivElement>(null);
   // What the editor holds. A body arriving that isn't it was changed elsewhere (in the vault):
   // show it. While typing, the entry shown is the unsaved copy, so this never replaces an edit.
@@ -423,16 +442,7 @@ function Editor({
   const [hlAt, setHlAt] = useState<DOMRect | null>(null);
   const [tagQ, setTagQ] = useState("");
   const [tagIdx, setTagIdx] = useState(0);
-  // Typing # in the entry offers tags; the one picked joins the entry's tags and the #text goes.
-  const [hash, setHash] = useState<{ rect: DOMRect; node: Text; start: number; q: string } | null>(null);
-  const dismissed = useRef<{ node: Node; start: number } | null>(null);
   const themes = useMemo(() => themesOf(app.settings.hlNames), [app.settings.hlNames]);
-  const tagCounts = useMemo(() => {
-    const m = new Map<string, number>();
-    for (const e of app.journal) for (const t of e.tags) m.set(t, (m.get(t) ?? 0) + 1);
-    return m;
-  }, [app.journal]);
-  const hashOptions = useMemo(() => (hash ? tagOptions(hash.q, themes, tagCounts, entry.tags) : []), [hash, themes, tagCounts, entry.tags]);
   const addTag = (t: string) => {
     if (!entry.tags.includes(t)) onChange({ tags: [...entry.tags, t] });
   };
@@ -483,7 +493,6 @@ function Editor({
   /** Highlights the selection in a reader colour (null takes highlighting off); ⌘Z undoes it. */
   const hlLast = app.settings.journalHighlight ?? "yellow";
   const names = app.settings.hlNames;
-  const named = HL.some((c) => names?.[c]?.trim());
   const highlight = (c: HlColor | null, picking = false) => {
     const s = window.getSelection();
     ed.current?.focus();
@@ -510,8 +519,7 @@ function Editor({
     const [p] = await api.passages(bible, [{ book: r.book, chapter: r.chapter, from: r.verse ?? 1, to: r.to ?? r.verse ?? 999 }]);
     if (!p.verses.length) return false;
     const txt = p.verses.map((v) => plainText(v.text)).join(" ");
-    const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
-    const html = `<blockquote class="verse" dir="auto">${esc(txt)}<cite>${esc(fmtRef(r))} ${esc(app.mod("bible", bible)?.abbrev ?? "")}</cite></blockquote><p><br></p>`;
+    const html = `<blockquote class="verse" dir="auto">${escHtml(txt)}<cite>${escHtml(fmtRef(r))} ${escHtml(app.mod("bible", bible)?.abbrev ?? "")}</cite></blockquote><p><br></p>`;
     ed.current?.focus();
     if (saved_range.current) {
       const s = window.getSelection();
@@ -553,16 +561,7 @@ function Editor({
   // The webview has no Format menu, so ⌘B and ⌘I are handled here; and Markdown habits work:
   // "- ", "1. ", "> " and "### " at the start of a line become a list, quote or heading.
   const keys = (e: React.KeyboardEvent) => {
-    if (hash && hashOptions.length && (e.key === "ArrowDown" || e.key === "ArrowUp")) {
-      e.preventDefault();
-      setTagIdx((tagIdx + (e.key === "ArrowDown" ? 1 : -1) + hashOptions.length) % hashOptions.length);
-      return;
-    }
-    if (hash && (e.key === "Enter" || e.key === "Tab") && hashOptions[tagIdx]) {
-      e.preventDefault();
-      pickHash(hashOptions[tagIdx].tag);
-      return;
-    }
+    if (hashTag.onKey(e)) return;
     if (e.metaKey && (e.key === "b" || e.key === "i")) {
       e.preventDefault();
       cmd(e.key === "b" ? "bold" : "italic");
@@ -608,271 +607,38 @@ function Editor({
     for (let i = 0; i < before.length; i++) document.execCommand("delete");
     sync();
   };
-  /** After typing: a # at the start of a word, with the caret still in that word, opens the tag list. */
-  const checkHash = () => {
-    const s = window.getSelection();
-    const n = s?.anchorNode;
-    if (!s || !s.isCollapsed || !n || n.nodeType !== Node.TEXT_NODE || !ed.current?.contains(n)) {
-      if (hash) setHash(null);
-      return;
-    }
-    const m = (n.textContent || "").slice(0, s.anchorOffset).match(/(?:^|\s)#([\p{L}\p{N}-]*)$/u);
-    if (!m) {
-      if (hash) setHash(null);
-      dismissed.current = null;
-      return;
-    }
-    const start = s.anchorOffset - m[1].length - 1;
-    if (dismissed.current?.node === n && dismissed.current.start === start) return;
-    const r = document.createRange();
-    r.setStart(n, start);
-    r.setEnd(n, start + 1);
-    if (!hash || hash.node !== n || hash.start !== start) setTagIdx(0);
-    setHash({ rect: r.getBoundingClientRect(), node: n as Text, start, q: m[1] });
-  };
-  const pickHash = (t: string) => {
-    if (!hash) return;
-    const s = window.getSelection();
-    const end = s?.anchorNode === hash.node ? s.anchorOffset : hash.start + 1 + hash.q.length;
-    const r = document.createRange();
-    r.setStart(hash.node, hash.start);
-    r.setEnd(hash.node, Math.min(end, hash.node.length));
-    ed.current?.focus();
-    s?.removeAllRanges();
-    s?.addRange(r);
-    document.execCommand("delete");
-    setHash(null);
-    const body = ed.current ? htmlToMd(ed.current) : entry.body;
+  // Typing # in the entry offers tags; the one picked joins the entry's tags and the #text goes.
+  const hashTag = useHashTag(ed, entry, themes, tagCounts, tagIdx, setTagIdx, (body, tags) => {
     shown.current = body;
-    onChange({ body, tags: entry.tags.includes(t) ? entry.tags : [...entry.tags, t] });
-  };
+    onChange({ body, tags });
+  });
   const words = mdPlain(entry.body).split(/\s+/).filter(Boolean).length;
 
-  // While the entry is being read aloud (or paused), it can't be edited, and the word being read
-  // is highlighted as in the readers: boxes drawn behind it, so the editor's markup is left alone.
-  const player = usePlayer();
-  const ps = player.state;
-  const reading = ps.on && ps.doc?.module === "journal" && ps.doc.id === entry.id;
-  const wrap = useRef<HTMLDivElement>(null);
-  const [boxes, setBoxes] = useState<{ cls: string; left: number; top: number; width: number; height: number }[]>([]);
-  useEffect(() => {
-    const place = () => {
-      const block = reading && ed.current ? speechBlocks(ed.current)[ps.verse - 1] : undefined;
-      const o = wrap.current?.getBoundingClientRect();
-      if (!block || !o) {
-        setBoxes((b) => (b.length ? [] : b));
-        return;
-      }
-      const rel = (x: DOMRect) => ({ left: x.left - o.left, top: x.top - o.top, width: x.width, height: x.height });
-      if (!app.settings.highlightWords) {
-        setBoxes([{ cls: "speaktint", ...rel(block.getBoundingClientRect()) }]);
-        return;
-      }
-      const r = ps.char >= 0 ? wordRangeAt(block, ps.char) : null;
-      setBoxes(r ? [...r.getClientRects()].filter((x) => x.width > 0).map((x) => ({ cls: "speakbox", ...rel(x) })) : []);
-    };
-    place();
-    window.addEventListener("resize", place);
-    return () => window.removeEventListener("resize", place);
-  }, [reading, ps.verse, ps.char, app.settings.highlightWords]);
-  // Keep the paragraph being read in view.
-  useEffect(() => {
-    if (reading && !ps.paused && ed.current) scrollToThird(speechBlocks(ed.current)[ps.verse - 1]);
-  }, [reading, ps.verse, ps.paused]);
-  // Reading starts: whatever is typed is saved, and the caret leaves the entry.
-  useEffect(() => {
-    if (reading) {
-      sync();
-      (document.activeElement as HTMLElement | null)?.blur();
-    }
-  }, [reading]); // eslint-disable-line react-hooks/exhaustive-deps
-  // Nothing can be typed while it's read, so Space plays and pauses, as in the readers.
-  useEffect(() => {
-    if (!reading) return;
-    const k = (e: KeyboardEvent) => {
-      if (
-        e.key !== " " ||
-        e.metaKey ||
-        e.ctrlKey ||
-        e.altKey ||
-        (e.target as HTMLElement).closest("input:not([readonly]), textarea, select, [contenteditable='true']")
-      )
-        return;
-      e.preventDefault();
-      player.toggle();
-    };
-    window.addEventListener("keydown", k);
-    return () => window.removeEventListener("keydown", k);
-  }, [reading, player]);
+  const { reading, wrap, boxes } = useReadAloud(ed, entry.id, sync);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", minWidth: 0, minHeight: 0, background: "var(--panel)", position: "relative" }}>
-      <div
-        role="toolbar"
-        aria-label="Formatting"
-        aria-disabled={reading}
-        title={reading ? "Being read aloud: stop or close the player to edit" : undefined}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 2,
-          padding: "8px 20px",
-          borderBottom: "1px solid var(--border)",
-          ...(reading ? { opacity: 0.45, pointerEvents: "none" } : {}),
+      <Toolbar
+        reading={reading}
+        cmd={cmd}
+        highlight={highlight}
+        remember={remember}
+        hlLast={hlLast}
+        names={names}
+        setHlAt={setHlAt}
+        setVerseAt={setVerseAt}
+        setLinkAt={setLinkAt}
+        onTag={(r) => {
+          setTagIdx(0);
+          setTagAt(r);
         }}
-        onMouseDown={(e) => {
-          if ((e.target as HTMLElement).closest("button")) e.preventDefault();
-        }}
-      >
-        <button
-          className="ibtn"
-          type="button"
-          aria-label="Heading"
-          title="Heading"
-          style={{ font: "600 14px var(--display)", color: "var(--text)" }}
-          onClick={() => cmd("formatBlock", "h3")}
-        >
-          H
-        </button>
-        <button
-          className="ibtn"
-          type="button"
-          aria-label="Bold"
-          title="Bold ⌘B"
-          style={{ fontWeight: 700, color: "var(--text)" }}
-          onClick={() => cmd("bold")}
-        >
-          B
-        </button>
-        <button
-          className="ibtn"
-          type="button"
-          aria-label="Italic"
-          title="Italic ⌘I"
-          style={{ fontStyle: "italic", fontFamily: "var(--serif)", color: "var(--text)" }}
-          onClick={() => cmd("italic")}
-        >
-          I
-        </button>
-        <button
-          className="ibtn"
-          type="button"
-          aria-label={`Highlight: ${hlLabel(hlLast, names)}`}
-          title={`Highlight (${hlLabel(hlLast, names)})`}
-          style={{ flexDirection: "column", gap: 1, color: "var(--text)" }}
-          onClick={() => highlight(hlLast)}
-        >
-          <Icon name="highlight" />
-          <span style={{ width: 14, height: 3, borderRadius: 2, background: HL_DOT[hlLast] }} />
-        </button>
-        <button
-          className="ibtn"
-          type="button"
-          aria-label="Highlight colour"
-          title="Highlight colour"
-          style={{ width: 16, marginLeft: -2 }}
-          onClick={(e) => {
-            remember();
-            setHlAt(e.currentTarget.getBoundingClientRect());
-          }}
-        >
-          <Icon name="down" size={11} />
-        </button>
-        <HighlightsButton />
-        <span style={{ width: 1, height: 18, background: "var(--border)", margin: "0 4px" }} />
-        <button className="ibtn" type="button" aria-label="Bulleted list" onClick={() => cmd("insertUnorderedList")}>
-          <Icon name="list" />
-        </button>
-        <button className="ibtn" type="button" aria-label="Numbered list" onClick={() => cmd("insertOrderedList")}>
-          <Icon name="olist" />
-        </button>
-        <button className="ibtn" type="button" aria-label="Quote" onClick={() => cmd("formatBlock", "blockquote")}>
-          <Icon name="quote" />
-        </button>
-        <button
-          className="ibtn"
-          type="button"
-          aria-label="Plain paragraph"
-          title="Plain paragraph"
-          onClick={() => cmd("formatBlock", "p")}
-          style={{ fontSize: 12, color: "var(--text)" }}
-        >
-          ¶
-        </button>
-        <span style={{ width: 1, height: 18, background: "var(--border)", margin: "0 4px" }} />
-        <button
-          className="btn small"
-          type="button"
-          style={{ border: 0 }}
-          onClick={(e) => {
-            remember();
-            setVerseAt(e.currentTarget.getBoundingClientRect());
-          }}
-        >
-          <Icon name="read" />
-          Insert verse
-        </button>
-        <button
-          className="btn small"
-          type="button"
-          style={{ border: 0 }}
-          onClick={(e) => setLinkAt(e.currentTarget.getBoundingClientRect())}
-        >
-          <Icon name="link" />
-          Link verse
-        </button>
-        <button
-          className="btn small"
-          type="button"
-          style={{ border: 0 }}
-          onClick={(e) => {
-            setTagIdx(0);
-            setTagAt(e.currentTarget.getBoundingClientRect());
-          }}
-        >
-          <Icon name="plus" />
-          Tag
-        </button>
-        <span style={{ width: 1, height: 18, background: "var(--border)", margin: "0 4px" }} />
-        <button
-          className="ibtn"
-          type="button"
-          aria-label="Find and replace"
-          title="Find ⌘F · Replace ⌥⌘F"
-          onClick={() => find.start("find")}
-        >
-          <Icon name="search" />
-        </button>
-        <div
-          style={{
-            marginLeft: "auto",
-            display: "flex",
-            alignItems: "center",
-            gap: 6,
-            color: err ? "var(--bad)" : "var(--muted)",
-            fontSize: 12,
-            minWidth: 0,
-          }}
-        >
-          {err
-            ? err
-            : saved && (
-                <>
-                  <Icon name="check" style={{ color: "var(--good)" }} />
-                  {saved}
-                </>
-              )}
-        </div>
-        {canAsk && (
-          <>
-            <span style={{ width: 1, height: 18, background: "var(--border)", margin: "0 4px 0 10px" }} />
-            <button className={`btn small ${ask ? "on" : ""}`} type="button" onClick={() => setAsk(!ask)}>
-              <Icon name="chat" />
-              Ask
-            </button>
-          </>
-        )}
-      </div>
+        onFind={() => find.start("find")}
+        saved={saved}
+        err={err}
+        canAsk={canAsk}
+        ask={ask}
+        setAsk={setAsk}
+      />
       {!reading && find.bar}
       <div className="scroll" style={{ flexGrow: 1, padding: "28px 0 40px" }}>
         <article
@@ -962,7 +728,7 @@ function Editor({
                 sync();
                 spell.recheck();
                 find.refresh();
-                checkHash();
+                hashTag.check();
               }}
               onBlur={() => {
                 remember();
@@ -1019,45 +785,7 @@ function Editor({
           )}
         </article>
         {preview}
-        {spell.menu && (
-          <Popover anchor={spell.menu.rect} onClose={spell.closeMenu} width={spell.menu.grammar !== undefined ? 280 : 220}>
-            <div style={{ padding: 6, display: "flex", flexDirection: "column" }}>
-              {spell.menu.grammar !== undefined && (
-                <span className="n" style={{ padding: "6px 10px", lineHeight: 1.4 }}>
-                  {spell.menu.grammar || "Possible grammar problem"}
-                </span>
-              )}
-              {spell.menu.was && (
-                <button className="opt" type="button" onClick={() => spell.choose(spell.menu!.was!)}>
-                  Change back to “{spell.menu.was}”
-                </button>
-              )}
-              {spell.menu.guesses.map((g) => (
-                <button key={g} className="opt" type="button" style={{ fontWeight: 600 }} onClick={() => spell.choose(g)}>
-                  {g}
-                </button>
-              ))}
-              {!spell.menu.was && !spell.menu.guesses.length && spell.menu.grammar === undefined && (
-                <span className="n" style={{ padding: "6px 10px" }}>
-                  No suggestions
-                </span>
-              )}
-              {!spell.menu.was && (
-                <>
-                  <div style={{ height: 1, background: "var(--border)", margin: "4px 0" }} />
-                  {spell.menu.grammar === undefined && (
-                    <button className="opt" type="button" onClick={spell.learn}>
-                      Add “{spell.menu.word}” to dictionary
-                    </button>
-                  )}
-                  <button className="opt" type="button" onClick={spell.ignore}>
-                    Ignore
-                  </button>
-                </>
-              )}
-            </div>
-          </Popover>
-        )}
+        {spell.menu && <SpellMenu spell={spell} />}
       </div>
       <div
         style={{
@@ -1101,128 +829,17 @@ function Editor({
         </button>
       </div>
       {ask && (
-        <div
-          className="card"
-          style={{
-            position: "absolute",
-            right: 20,
-            bottom: 60,
-            width: 380,
-            zIndex: 20,
-            boxShadow: "0 14px 40px var(--shadow)",
-            borderRadius: 12,
-            padding: 0,
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "12px 16px 0", flexWrap: "wrap" }}>
-            <Seg
-              value={scope}
-              options={[
-                ["entry", "This entry"],
-                ["journal", "Whole journal"],
-              ]}
-              onChange={setScope}
-            />
-            <button
-              className="ibtn"
-              type="button"
-              aria-label="Close"
-              title="Close"
-              style={{ marginLeft: "auto" }}
-              onClick={() => setAsk(false)}
-            >
-              <Icon name="x" />
-            </button>
-            {scope === "entry" && picked && (
-              <span className="chip" style={{ maxWidth: "100%", cursor: "default" }} title={picked}>
-                <span className="t" style={{ minWidth: 0 }}>
-                  On “{picked}”
-                </span>
-                <button
-                  className="ibtn"
-                  type="button"
-                  aria-label="Ask about the whole entry"
-                  title="Ask about the whole entry"
-                  style={{ width: 16, height: 16 }}
-                  onClick={() => setPicked("")}
-                >
-                  <Icon name="x" size={11} />
-                </button>
-              </span>
-            )}
-            {scope === "journal" && (
-              <span className="n" style={{ flexBasis: "100%" }}>
-                Searches {listedLabel} ({listed.length} {listed.length === 1 ? "entry" : "entries"}).
-              </span>
-            )}
-          </div>
-          {scope === "entry" ? (
-            <AskPanel
-              key={`entry|${entry.id}`}
-              source="Journal"
-              opened={{ entry: entry.id }}
-              label={entry.title || "this entry"}
-              style={{ border: 0, background: "transparent", boxShadow: "none" }}
-              passage={passage}
-              journal={others}
-              journalDir={(id) =>
-                api.journalExport(
-                  id,
-                  "the whole journal",
-                  app.journal.map((e) => (e.id === entry.id ? entry : e)),
-                )
-              }
-              context={() =>
-                [
-                  `The user's journal entry, “${entry.title}”${entry.verses.length ? ` (on ${entry.verses.join(", ")})` : ""}${entry.tags.length ? ` #${entry.tags.join(" #")}` : ""}:\n${entry.body || "(nothing written yet)"}`,
-                  picked && `They have selected this part of it and are asking about it:\n“${picked}”`,
-                ]
-                  .filter(Boolean)
-                  .join("\n\n")
-              }
-              suggestions={
-                picked
-                  ? ["Explain this", "Suggest verses that speak to this", "Help me say this more clearly"]
-                  : !entry.body.trim()
-                    ? [
-                        `Give me a few prompts to start writing${entry.verses.length ? ` on ${entry.verses.join(", ")}` : ""}`,
-                        ...(entry.verses.length ? [] : ["Suggest a verse to reflect on today"]),
-                        "Give me questions to reflect on",
-                      ]
-                    : [
-                        "Suggest cross-references I haven't linked",
-                        "Give me questions to reflect on",
-                        ...(others.length ? ["What else in my journal connects with this?"] : []),
-                      ]
-              }
-              onInsert={insertAnswer}
-            />
-          ) : (
-            <AskPanel
-              key={`journal|${listedLabel}`}
-              source="Journal"
-              label={listedLabel}
-              style={{ border: 0, background: "transparent", boxShadow: "none" }}
-              journalDir={(id) =>
-                api.journalExport(
-                  id,
-                  listedLabel,
-                  listed.map((e) => (e.id === entry.id ? entry : e)),
-                )
-              }
-              context={() => `The entry they have open is “${entry.title || "Untitled"}” (${entry.created.slice(0, 10)}).`}
-              suggestions={[
-                "What themes keep coming back in my journal?",
-                "Which verses do I return to most, and what have I said about them?",
-                "How has my thinking changed over time?",
-                "What have I been praying about lately?",
-              ]}
-              onInsert={insertAnswer}
-            />
-          )}
-        </div>
+        <JournalAsk
+          entry={entry}
+          scope={scope}
+          setScope={setScope}
+          picked={picked}
+          setPicked={setPicked}
+          listed={listed}
+          listedLabel={listedLabel}
+          onInsert={insertAnswer}
+          onClose={() => setAsk(false)}
+        />
       )}
       {verseAt && (
         <RefPrompt
@@ -1230,7 +847,10 @@ function Editor({
           label="Insert a verse"
           onClose={() => setVerseAt(null)}
           onSubmit={async (t) => {
-            const ok = await insertVerse(t);
+            const ok = await insertVerse(t).catch((e) => {
+              app.toast(`Couldn't insert the verse: ${e}`);
+              return null;
+            });
             if (ok) setVerseAt(null);
             return ok;
           }}
@@ -1252,70 +872,17 @@ function Editor({
         />
       )}
       {hlAt && (
-        <Popover anchor={hlAt} onClose={() => setHlAt(null)} width={named ? 260 : 290}>
-          {/* With names for the colours (Settings › Highlights), a list; without, a row of dots. */}
-          <div
-            className="hlpick"
-            style={{
-              padding: 8,
-              display: "flex",
-              flexDirection: named ? "column" : "row",
-              alignItems: named ? "stretch" : "center",
-              gap: named ? 2 : 8,
-            }}
-            onMouseDown={(e) => e.preventDefault()}
-          >
-            {HL.map((c) => {
-              const pick = () => {
-                setHlAt(null);
-                app.set({ journalHighlight: c });
-                highlight(c, true);
-              };
-              const dot = (
-                <span
-                  className="dot"
-                  style={{ background: HL_DOT[c], outline: c === hlLast ? "2px solid var(--text)" : undefined, flexShrink: 0 }}
-                />
-              );
-              return named ? (
-                <button
-                  key={c}
-                  type="button"
-                  className="opt"
-                  aria-label={`Highlight: ${hlLabel(c, names)}`}
-                  title={hlLabel(c, names)}
-                  style={{ background: "none", border: 0, color: "var(--text)", padding: "2px 4px", textAlign: "left" }}
-                  onClick={pick}
-                >
-                  {dot}
-                  {hlLabel(c, names)}
-                </button>
-              ) : (
-                <button
-                  key={c}
-                  type="button"
-                  className="dot"
-                  aria-label={`Highlight ${c}`}
-                  title={hlLabel(c, names)}
-                  style={{ background: HL_DOT[c], outline: c === hlLast ? "2px solid var(--text)" : undefined }}
-                  onClick={pick}
-                />
-              );
-            })}
-            <button
-              className="btn small"
-              type="button"
-              style={named ? { marginTop: 4, alignSelf: "flex-start" } : { marginLeft: "auto" }}
-              title="Take highlighting off the selection"
-              onClick={() => {
-                setHlAt(null);
-                highlight(null);
-              }}
-            >
-              None
-            </button>
-          </div>
-        </Popover>
+        <HighlightPicker
+          anchor={hlAt}
+          last={hlLast}
+          names={names}
+          onClose={() => setHlAt(null)}
+          onPick={(c) => {
+            setHlAt(null);
+            if (c) app.set({ journalHighlight: c });
+            highlight(c, !!c);
+          }}
+        />
       )}
       {tagAt && (
         <TagPicker
@@ -1336,344 +903,338 @@ function Editor({
           }}
         />
       )}
-      {hash && (
-        <TagPicker
-          anchor={hash.rect}
-          options={hashOptions}
-          index={tagIdx}
-          onIndex={setTagIdx}
-          onClose={() => {
-            dismissed.current = { node: hash.node, start: hash.start };
-            setHash(null);
-          }}
-          onPick={pickHash}
-        />
+      {hashTag.picker}
+    </div>
+  );
+}
+
+/** The editor's toolbar: formatting, highlighting, verses and tags, find, how the save went, and Ask.
+ *  Its buttons keep the selection in the entry, so what they do acts on it. */
+function Toolbar({
+  reading,
+  cmd,
+  highlight,
+  remember,
+  hlLast,
+  names,
+  setHlAt,
+  setVerseAt,
+  setLinkAt,
+  onTag,
+  onFind,
+  saved,
+  err,
+  canAsk,
+  ask,
+  setAsk,
+}: {
+  reading: boolean;
+  cmd: (c: string, v?: string) => void;
+  highlight: (c: HlColor) => void;
+  /** Keeps the selection, for a popover that takes the focus. */
+  remember: () => void;
+  hlLast: HlColor;
+  names: Partial<Record<HlColor, string>> | undefined;
+  setHlAt: (r: DOMRect) => void;
+  setVerseAt: (r: DOMRect) => void;
+  setLinkAt: (r: DOMRect) => void;
+  onTag: (r: DOMRect) => void;
+  onFind: () => void;
+  saved: string;
+  err: string | null;
+  canAsk: boolean;
+  ask: boolean;
+  setAsk: (a: boolean) => void;
+}) {
+  return (
+    <div
+      role="toolbar"
+      aria-label="Formatting"
+      aria-disabled={reading}
+      title={reading ? "Being read aloud: stop or close the player to edit" : undefined}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 2,
+        padding: "8px 20px",
+        borderBottom: "1px solid var(--border)",
+        ...(reading ? { opacity: 0.45, pointerEvents: "none" } : {}),
+      }}
+      onMouseDown={(e) => {
+        if ((e.target as HTMLElement).closest("button")) e.preventDefault();
+      }}
+    >
+      <button
+        className="ibtn"
+        type="button"
+        aria-label="Heading"
+        title="Heading"
+        style={{ font: "600 14px var(--display)", color: "var(--text)" }}
+        onClick={() => cmd("formatBlock", "h3")}
+      >
+        H
+      </button>
+      <button
+        className="ibtn"
+        type="button"
+        aria-label="Bold"
+        title="Bold ⌘B"
+        style={{ fontWeight: 700, color: "var(--text)" }}
+        onClick={() => cmd("bold")}
+      >
+        B
+      </button>
+      <button
+        className="ibtn"
+        type="button"
+        aria-label="Italic"
+        title="Italic ⌘I"
+        style={{ fontStyle: "italic", fontFamily: "var(--serif)", color: "var(--text)" }}
+        onClick={() => cmd("italic")}
+      >
+        I
+      </button>
+      <button
+        className="ibtn"
+        type="button"
+        aria-label={`Highlight: ${hlLabel(hlLast, names)}`}
+        title={`Highlight (${hlLabel(hlLast, names)})`}
+        style={{ flexDirection: "column", gap: 1, color: "var(--text)" }}
+        onClick={() => highlight(hlLast)}
+      >
+        <Icon name="highlight" />
+        <span style={{ width: 14, height: 3, borderRadius: 2, background: HL_DOT[hlLast] }} />
+      </button>
+      <button
+        className="ibtn"
+        type="button"
+        aria-label="Highlight colour"
+        title="Highlight colour"
+        style={{ width: 16, marginLeft: -2 }}
+        onClick={(e) => {
+          remember();
+          setHlAt(e.currentTarget.getBoundingClientRect());
+        }}
+      >
+        <Icon name="down" size={11} />
+      </button>
+      <HighlightsButton />
+      <span style={{ width: 1, height: 18, background: "var(--border)", margin: "0 4px" }} />
+      <button className="ibtn" type="button" aria-label="Bulleted list" onClick={() => cmd("insertUnorderedList")}>
+        <Icon name="list" />
+      </button>
+      <button className="ibtn" type="button" aria-label="Numbered list" onClick={() => cmd("insertOrderedList")}>
+        <Icon name="olist" />
+      </button>
+      <button className="ibtn" type="button" aria-label="Quote" onClick={() => cmd("formatBlock", "blockquote")}>
+        <Icon name="quote" />
+      </button>
+      <button
+        className="ibtn"
+        type="button"
+        aria-label="Plain paragraph"
+        title="Plain paragraph"
+        onClick={() => cmd("formatBlock", "p")}
+        style={{ fontSize: 12, color: "var(--text)" }}
+      >
+        ¶
+      </button>
+      <span style={{ width: 1, height: 18, background: "var(--border)", margin: "0 4px" }} />
+      <button
+        className="btn small"
+        type="button"
+        style={{ border: 0 }}
+        onClick={(e) => {
+          remember();
+          setVerseAt(e.currentTarget.getBoundingClientRect());
+        }}
+      >
+        <Icon name="read" />
+        Insert verse
+      </button>
+      <button className="btn small" type="button" style={{ border: 0 }} onClick={(e) => setLinkAt(e.currentTarget.getBoundingClientRect())}>
+        <Icon name="link" />
+        Link verse
+      </button>
+      <button className="btn small" type="button" style={{ border: 0 }} onClick={(e) => onTag(e.currentTarget.getBoundingClientRect())}>
+        <Icon name="plus" />
+        Tag
+      </button>
+      <span style={{ width: 1, height: 18, background: "var(--border)", margin: "0 4px" }} />
+      <button className="ibtn" type="button" aria-label="Find and replace" title="Find ⌘F · Replace ⌥⌘F" onClick={onFind}>
+        <Icon name="search" />
+      </button>
+      <div
+        style={{
+          marginLeft: "auto",
+          display: "flex",
+          alignItems: "center",
+          gap: 6,
+          color: err ? "var(--bad)" : "var(--muted)",
+          fontSize: 12,
+          minWidth: 0,
+        }}
+      >
+        {err
+          ? err
+          : saved && (
+              <>
+                <Icon name="check" style={{ color: "var(--good)" }} />
+                {saved}
+              </>
+            )}
+      </div>
+      {canAsk && (
+        <>
+          <span style={{ width: 1, height: 18, background: "var(--border)", margin: "0 4px 0 10px" }} />
+          <button className={`btn small ${ask ? "on" : ""}`} type="button" onClick={() => setAsk(!ask)}>
+            <Icon name="chat" />
+            Ask
+          </button>
+        </>
       )}
     </div>
   );
 }
 
-type TagOption = { tag: string; name?: string; colour?: HlColor; add?: boolean };
-/** Tags to offer for what has been typed: the highlight themes first, then the journal's own tags,
- *  most used first, leaving out those the entry has; and a new tag when nothing matches exactly. */
-function tagOptions(q: string, themes: HlTheme[], counts: Map<string, number>, has: string[]): TagOption[] {
-  const x = q.trim().replace(/^#/, "").toLowerCase().replace(/\s+/g, "-");
-  const fits = (t: string, name = "") => !x || t.includes(x) || name.toLowerCase().includes(x.replace(/-/g, " "));
-  const themed = themes
-    .filter((t) => !has.includes(t.tag) && fits(t.tag, t.name))
-    .map((t) => ({ tag: t.tag, name: t.name, colour: t.colour }));
-  const own = [...counts.entries()]
-    .filter(([t]) => !has.includes(t) && !themes.some((h) => h.tag === t) && fits(t))
-    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
-    .map(([tag]) => ({ tag }));
-  const all: TagOption[] = [...themed, ...own].slice(0, 12);
-  if (x && !all.some((o) => o.tag === x) && !has.includes(x)) all.push({ tag: x, add: true });
-  return all;
-}
-
-/** The list of tags to pick from: under the caret after # in the entry, or with its own box (the Tag button). */
-function TagPicker({
-  anchor,
-  options,
-  index,
-  onIndex,
-  onPick,
-  onClose,
-  query,
-  onQuery,
-}: {
-  anchor: DOMRect;
-  options: TagOption[];
-  index: number;
-  onIndex: (i: number) => void;
-  onPick: (tag: string) => void;
-  onClose: () => void;
-  query?: string;
-  onQuery?: (q: string) => void;
-}) {
-  const box = onQuery !== undefined;
-  const keys = (e: React.KeyboardEvent) => {
-    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
-      e.preventDefault();
-      onIndex((index + (e.key === "ArrowDown" ? 1 : -1) + options.length) % Math.max(1, options.length));
-    } else if (e.key === "Enter" && options[index]) {
-      e.preventDefault();
-      onPick(options[index].tag);
-    }
-  };
-  return (
-    <Popover anchor={anchor} onClose={onClose} width={260}>
-      <div
-        style={{ padding: 6, display: "flex", flexDirection: "column", gap: 1 }}
-        onMouseDown={(e) => {
-          if (!box) e.preventDefault();
-        }}
-      >
-        {box && (
-          <label className="field" style={{ margin: "2px 2px 6px" }}>
-            <input
-              autoFocus
-              value={query}
-              onChange={(e) => {
-                onQuery!(e.target.value);
-                onIndex(0);
-              }}
-              onKeyDown={keys}
-              placeholder="Tag, e.g. new-birth"
-              aria-label="Add a tag"
-            />
-          </label>
-        )}
-        {options.length === 0 && (
-          <span className="hint" style={{ padding: "4px 6px" }}>
-            Type a tag
-          </span>
-        )}
-        {options.map((o, i) => (
-          <button
-            key={o.tag}
-            type="button"
-            className="opt"
-            title={o.name ? `#${o.tag}` : undefined}
-            aria-selected={i === index}
-            onMouseEnter={() => onIndex(i)}
-            onClick={() => onPick(o.tag)}
-            style={{
-              background: i === index ? "var(--accentsoft)" : "none",
-              border: 0,
-              borderRadius: 6,
-              color: "var(--text)",
-              padding: "3px 6px",
-              textAlign: "left",
-            }}
-          >
-            {o.colour ? (
-              <span style={{ width: 10, height: 10, borderRadius: "50%", background: HL_DOT[o.colour], flexShrink: 0 }} />
-            ) : (
-              <span style={{ width: 10, flexShrink: 0, color: "var(--muted)", textAlign: "center" }}>#</span>
-            )}
-            <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-              {o.add ? (
-                <>
-                  Add <b>#{o.tag}</b>
-                </>
-              ) : (
-                (o.name ?? o.tag)
-              )}
-            </span>
-          </button>
-        ))}
-      </div>
-    </Popover>
-  );
-}
-
-function RefPrompt({
-  anchor,
-  label,
-  placeholder = "e.g. jn 3 8 or Rom 8:28-30",
-  onClose,
-  onSubmit,
-}: {
-  anchor: DOMRect;
-  label: string;
-  placeholder?: string;
-  onClose: () => void;
-  onSubmit: (t: string) => Promise<boolean>;
-}) {
-  const [t, setT] = useState("");
-  const [bad, setBad] = useState(false);
-  return (
-    <Popover anchor={anchor} onClose={onClose} width={300}>
-      <form
-        style={{ padding: 12, display: "flex", flexDirection: "column", gap: 8 }}
-        onSubmit={async (e) => {
-          e.preventDefault();
-          setBad(!(await onSubmit(t)));
-        }}
-      >
-        <span className="label">{label}</span>
-        <label className="field">
-          <input
-            autoFocus
-            value={t}
-            onChange={(e) => {
-              setT(e.target.value);
-              setBad(false);
-            }}
-            placeholder={placeholder}
-            aria-label={label}
-          />
-        </label>
-        {bad && (
-          <span className="err" style={{ fontSize: 12 }}>
-            That isn't a reference I recognise.
-          </span>
-        )}
-      </form>
-    </Popover>
-  );
-}
-
-function ExportDialog({ current, onClose }: { current: JournalEntry | null; onClose: () => void }) {
+/** While the entry is being read aloud (or paused), it can't be edited, and the word being read
+ *  is highlighted as in the readers: `boxes` drawn behind it (in `wrap`), so the editor's markup is
+ *  left alone. `sync` saves what's typed as the reading starts. */
+function useReadAloud(ed: React.RefObject<HTMLDivElement | null>, entryId: string, sync: () => void) {
   const app = useApp();
-  const [what, setWhat] = useState<"one" | "month" | "tag" | "all">(current ? "one" : "all");
-  const [fmt, setFmt] = useState<"pdf" | "md">("pdf");
-  const [withVerses, setWithVerses] = useState(true);
-  const [perPage, setPerPage] = useState(false);
-  const [tag, setTag] = useState(current?.tags[0] ?? "");
-  const month = current?.created.slice(0, 7) ?? new Date().toISOString().slice(0, 7);
-  const list = (
-    what === "one" && current
-      ? [current]
-      : what === "month"
-        ? app.journal.filter((e) => e.created.startsWith(month))
-        : what === "tag"
-          ? app.journal.filter((e) => e.tags.includes(tag))
-          : app.journal
-  )
-    .slice()
-    .sort((a, b) => a.created.localeCompare(b.created));
-  const tags = Array.from(new Set(app.journal.flatMap((e) => e.tags)));
-
-  const verseTexts = async (e: JournalEntry) => {
-    if (!withVerses) return "";
-    const out: string[] = [];
-    for (const v of e.verses) {
-      const r = parseRef(v);
-      if (!r) continue;
-      const [p] = await api.passages(app.settings.bible, [
-        { book: r.book, chapter: r.chapter, from: r.verse ?? 1, to: r.to ?? r.verse ?? 999 },
-      ]);
-      out.push(`> ${p.verses.map((x) => plainText(x.text)).join(" ")}\n> — ${v} ${app.mod("bible", app.settings.bible)?.abbrev ?? ""}`);
+  const player = usePlayer();
+  const ps = player.state;
+  const reading = ps.on && ps.doc?.module === "journal" && ps.doc.id === entryId;
+  const wrap = useRef<HTMLDivElement>(null);
+  const [boxes, setBoxes] = useState<{ cls: string; left: number; top: number; width: number; height: number }[]>([]);
+  useEffect(() => {
+    const place = () => {
+      const block = reading && ed.current ? speechBlocks(ed.current)[ps.verse - 1] : undefined;
+      const o = wrap.current?.getBoundingClientRect();
+      if (!block || !o) {
+        setBoxes((b) => (b.length ? [] : b));
+        return;
+      }
+      const rel = (x: DOMRect) => ({ left: x.left - o.left, top: x.top - o.top, width: x.width, height: x.height });
+      if (!app.settings.highlightWords) {
+        setBoxes([{ cls: "speaktint", ...rel(block.getBoundingClientRect()) }]);
+        return;
+      }
+      const r = ps.char >= 0 ? wordRangeAt(block, ps.char) : null;
+      setBoxes(r ? [...r.getClientRects()].filter((x) => x.width > 0).map((x) => ({ cls: "speakbox", ...rel(x) })) : []);
+    };
+    place();
+    window.addEventListener("resize", place);
+    return () => window.removeEventListener("resize", place);
+  }, [reading, ps.verse, ps.char, app.settings.highlightWords, ed]);
+  // Keep the paragraph being read in view.
+  useEffect(() => {
+    if (reading && !ps.paused && ed.current) scrollToThird(speechBlocks(ed.current)[ps.verse - 1]);
+  }, [reading, ps.verse, ps.paused, ed]);
+  // Reading starts: whatever is typed is saved, and the caret leaves the entry.
+  useEffect(() => {
+    if (reading) {
+      sync();
+      (document.activeElement as HTMLElement | null)?.blur();
     }
-    return out.join("\n\n");
-  };
-  const go = async () => {
-    const parts: { e: JournalEntry; verses: string }[] = [];
-    for (const e of list) parts.push({ e, verses: await verseTexts(e) });
-    if (fmt === "md") {
-      const text = parts
-        .map(
-          ({ e, verses }) =>
-            `## ${e.title}\n*${longDate(e.created)}*${e.tags.length ? " · " + e.tags.map((t) => "#" + t).join(" ") : ""}\n\n${verses ? verses + "\n\n" : ""}${e.body}`,
-        )
-        .join("\n\n---\n\n");
-      const path = await saveDialog({
-        defaultPath: `Journal ${what === "one" ? (current?.title ?? "") : what === "month" ? month : what === "tag" ? "#" + tag : "export"}.md`,
-        filters: [{ name: "Markdown", extensions: ["md"] }],
-      });
-      if (!path) return;
-      await api.writeTextFile(path, text + "\n");
-      app.toast("Exported");
-      onClose();
+  }, [reading]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Nothing can be typed while it's read, so Space plays and pauses, as in the readers.
+  useEffect(() => {
+    if (!reading) return;
+    const k = (e: KeyboardEvent) => {
+      if (
+        e.key !== " " ||
+        e.metaKey ||
+        e.ctrlKey ||
+        e.altKey ||
+        (e.target as HTMLElement).closest("input:not([readonly]), textarea, select, [contenteditable='true']")
+      )
+        return;
+      e.preventDefault();
+      player.toggle();
+    };
+    window.addEventListener("keydown", k);
+    return () => window.removeEventListener("keydown", k);
+  }, [reading, player]);
+  return { reading, wrap, boxes };
+}
+
+/** Typing # in the entry: the tags to offer for what follows it, under the caret, and the keys that
+ *  choose one there. The one picked replaces the #text and joins the entry's tags (`onPicked`). */
+function useHashTag(
+  ed: React.RefObject<HTMLDivElement | null>,
+  entry: JournalEntry,
+  themes: HlTheme[],
+  tagCounts: Map<string, number>,
+  index: number,
+  setIndex: (i: number) => void,
+  onPicked: (body: string, tags: string[]) => void,
+) {
+  const [hash, setHash] = useState<{ rect: DOMRect; node: Text; start: number; q: string } | null>(null);
+  const dismissed = useRef<{ node: Node; start: number } | null>(null);
+  const options = useMemo(() => (hash ? tagOptions(hash.q, themes, tagCounts, entry.tags) : []), [hash, themes, tagCounts, entry.tags]);
+  /** After typing: a # at the start of a word, with the caret still in that word, opens the tag list. */
+  const check = () => {
+    const s = window.getSelection();
+    const n = s?.anchorNode;
+    if (!s || !s.isCollapsed || !n || n.nodeType !== Node.TEXT_NODE || !ed.current?.contains(n)) {
+      if (hash) setHash(null);
       return;
     }
-    // PDF: lay the entries out in a print-only container and open the print dialog, which saves PDFs.
-    const root = document.createElement("div");
-    root.id = "print-root";
-    const esc = (t: string) => t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-    root.innerHTML = parts
-      .map(
-        ({ e, verses }) =>
-          `<section class="${perPage ? "pp" : ""}"><div class="pd">${esc(longDate(e.created))}${e.verses.length ? " · " + esc(e.verses.join(", ")) : ""}</div><h1>${esc(e.title)}</h1>${verses ? mdToHtml(verses, false) : ""}${mdToHtml(e.body, false)}</section>`,
-      )
-      .join("");
-    document.body.appendChild(root);
-    onClose();
-    await new Promise((r) => setTimeout(r, 60));
-    try {
-      await api.print();
-    } finally {
-      setTimeout(() => root.remove(), 1500);
+    const m = (n.textContent || "").slice(0, s.anchorOffset).match(/(?:^|\s)#([\p{L}\p{N}-]*)$/u);
+    if (!m) {
+      if (hash) setHash(null);
+      dismissed.current = null;
+      return;
     }
+    const start = s.anchorOffset - m[1].length - 1;
+    if (dismissed.current?.node === n && dismissed.current.start === start) return;
+    const r = document.createRange();
+    r.setStart(n, start);
+    r.setEnd(n, start + 1);
+    if (!hash || hash.node !== n || hash.start !== start) setIndex(0);
+    setHash({ rect: r.getBoundingClientRect(), node: n as Text, start, q: m[1] });
   };
-  return (
-    <Dialog onClose={onClose} width={560} label="Export journal">
-      <div style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: 16 }}>
-        <div style={{ font: "500 26px/1.15 var(--display)" }}>Export journal</div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          <span className="label" style={{ paddingBottom: 4 }}>
-            What
-          </span>
-          {current && (
-            <label className="opt">
-              <input type="radio" name="w" checked={what === "one"} onChange={() => setWhat("one")} />
-              This entry · {current.title || "Untitled"}
-            </label>
-          )}
-          <label className="opt">
-            <input type="radio" name="w" checked={what === "month"} onChange={() => setWhat("month")} />
-            Entries from {MONTHS[+month.slice(5, 7) - 1]} {month.slice(0, 4)}
-          </label>
-          {tags.length > 0 && (
-            <label className="opt">
-              <input type="radio" name="w" checked={what === "tag"} onChange={() => setWhat("tag")} />
-              Entries tagged{" "}
-              <select
-                value={tag}
-                onChange={(e) => {
-                  setTag(e.target.value);
-                  setWhat("tag");
-                }}
-                className="btn small"
-              >
-                {tags.map((t) => (
-                  <option key={t} value={t}>
-                    #{t}
-                  </option>
-                ))}
-              </select>
-            </label>
-          )}
-          <label className="opt">
-            <input type="radio" name="w" checked={what === "all"} onChange={() => setWhat("all")} />
-            Everything
-          </label>
-        </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-          <span className="label">Format</span>
-          <Seg
-            value={fmt}
-            options={[
-              ["pdf", "PDF"],
-              ["md", "Markdown"],
-            ]}
-            onChange={setFmt}
-          />
-          <span className="hint">
-            {fmt === "pdf"
-              ? "Opens the print dialog: choose Save as PDF. It uses the app's reading fonts."
-              : "One Markdown file. Your journal is already Markdown in its folder, so Obsidian sees it without exporting."}
-          </span>
-        </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          <span className="label" style={{ paddingBottom: 4 }}>
-            Include
-          </span>
-          <label className="opt">
-            <input type="checkbox" checked={withVerses} onChange={(e) => setWithVerses(e.target.checked)} />
-            Verse text for linked verses
-          </label>
-          {fmt === "pdf" && (
-            <label className="opt">
-              <input type="checkbox" checked={perPage} onChange={(e) => setPerPage(e.target.checked)} />
-              One entry per page
-            </label>
-          )}
-        </div>
-      </div>
-      <div className="foot">
-        <span className="hint">
-          {list.length} entr{list.length === 1 ? "y" : "ies"}
-        </span>
-        <button className="btn" type="button" style={{ marginLeft: "auto" }} onClick={onClose}>
-          Cancel
-        </button>
-        <button className="btn primary" type="button" disabled={!list.length} onClick={go}>
-          Export…
-        </button>
-      </div>
-    </Dialog>
+  const pick = (t: string) => {
+    if (!hash) return;
+    const s = window.getSelection();
+    const end = s?.anchorNode === hash.node ? s.anchorOffset : hash.start + 1 + hash.q.length;
+    const r = document.createRange();
+    r.setStart(hash.node, hash.start);
+    r.setEnd(hash.node, Math.min(end, hash.node.length));
+    ed.current?.focus();
+    s?.removeAllRanges();
+    s?.addRange(r);
+    document.execCommand("delete");
+    setHash(null);
+    onPicked(ed.current ? htmlToMd(ed.current) : entry.body, entry.tags.includes(t) ? entry.tags : [...entry.tags, t]);
+  };
+  /** The list's keys, while it's open: true when the key was its. */
+  const onKey = (e: React.KeyboardEvent) => {
+    if (hash && options.length && (e.key === "ArrowDown" || e.key === "ArrowUp")) {
+      e.preventDefault();
+      setIndex((index + (e.key === "ArrowDown" ? 1 : -1) + options.length) % options.length);
+      return true;
+    }
+    if (hash && (e.key === "Enter" || e.key === "Tab") && options[index]) {
+      e.preventDefault();
+      pick(options[index].tag);
+      return true;
+    }
+    return false;
+  };
+  const picker = hash && (
+    <TagPicker
+      anchor={hash.rect}
+      options={options}
+      index={index}
+      onIndex={setIndex}
+      onClose={() => {
+        dismissed.current = { node: hash.node, start: hash.start };
+        setHash(null);
+      }}
+      onPick={pick}
+    />
   );
+  return { check, onKey, picker };
 }

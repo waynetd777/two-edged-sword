@@ -3,7 +3,7 @@
 
 // Places and holy things: the cross, Calvary, the tomb, the city, the lampstand.
 
-import { beam, bitmap, Branch, flame, glow, grow, rnd, smooth, TAU, Vision } from "./kit";
+import { beam, Branch, drift, flame, flatGlow, glow, grow, layering, photo, random, rnd, smooth, TAU, tones, Vision } from "./kit";
 import { ALABASTER_BITMAP } from "./alabaster-bitmap";
 
 export const PLACES: Vision[] = [
@@ -75,11 +75,7 @@ export const PLACES: Vision[] = [
       return (f) => {
         const { ctx } = f;
         const dawn = f.env * smooth(f.k * 2.5);
-        ctx.save();
-        ctx.translate(x0, top);
-        ctx.scale(1.8, 1);
-        glow(ctx, 0, 0, h * 0.5, f.ink(0.3 * dawn), f.ink(0));
-        ctx.restore();
+        flatGlow(ctx, x0, top, h * 0.5, 1.8, 1, f.ink(0.3 * dawn), f.ink(0));
         // The hill and its crosses, cut out of the light.
         ctx.globalCompositeOperation = "destination-out";
         ctx.fillStyle = `rgba(0,0,0,${0.95 * f.env})`;
@@ -125,12 +121,6 @@ export const PLACES: Vision[] = [
         [[60, 160, 105], true],
         [[135, 85, 195], true],
       ];
-      const rgbOf = (ink: string) =>
-        ink
-          .slice(ink.indexOf("(") + 1)
-          .split(",")
-          .slice(0, 3)
-          .map(Number);
       let tint = ["", "", "", "", ""];
       // The light falls slanting down towards the middle of the page, as sunlight through a real
       // window: only through the glass (the stone between the lancets leaves a darker gap), its
@@ -287,14 +277,14 @@ export const PLACES: Vision[] = [
         p: rnd(0, TAU),
         vel: rnd(0.003, 0.008),
       }));
-      let layer: HTMLCanvasElement | null = null;
+      const layer = layering();
       let lightOf: { key: string; canvas: HTMLCanvasElement } | null = null;
       return (f) => {
         const { ctx } = f;
         const a = f.env;
         const lit = smooth(f.k * 4 - 0.4); // the sun comes through once the window is there
-        const warm = rgbOf(f.ink(1)),
-          cool = rgbOf(f.ink(1, true));
+        const warm = f.rgb(),
+          cool = f.rgb(true);
         tint = HUES.map(([c, isCool]) => c.map((v, i) => Math.round((isCool ? cool : warm)[i] * 0.86 + v * 0.14)).join(","));
         const dpr = ctx.getTransform().a || 1;
         const key = `${tint.join("|")}/${dpr}`;
@@ -315,14 +305,7 @@ export const PLACES: Vision[] = [
         ctx.globalAlpha = 1;
 
         // The window: drawn solid on a layer, so the leading shows as dark lines between the panes.
-        if (!layer || layer.width !== Math.round(w * dpr) || layer.height !== Math.round(h * dpr)) {
-          layer = document.createElement("canvas");
-          layer.width = Math.round(w * dpr);
-          layer.height = Math.round(h * dpr);
-        }
-        const L = layer.getContext("2d")!;
-        L.setTransform(1, 0, 0, 1, 0, 0);
-        L.clearRect(0, 0, layer.width, layer.height);
+        const { L, canvas } = layer(f);
         L.setTransform(dpr * R, 0, 0, dpr * R, x * dpr, y * dpr);
         // The stone of the frame, then the glass.
         L.fillStyle = f.ink(0.22);
@@ -336,7 +319,7 @@ export const PLACES: Vision[] = [
         ctx.globalAlpha = (f.dark ? 0.32 : 0.4) * a;
         ctx.shadowColor = f.ink(0.4 * a);
         ctx.shadowBlur = R * 0.1;
-        ctx.drawImage(layer, 0, 0, w, h);
+        ctx.drawImage(canvas, 0, 0, f.w, f.h);
         ctx.restore();
         glow(ctx, x, y - R * 0.3, R * 0.6, f.ink(0.12 * a * lit), f.ink(0));
       };
@@ -413,7 +396,7 @@ export const PLACES: Vision[] = [
     ],
     lane: "back",
     dur: [20, 34],
-    make: (w, h, room) => {
+    make: (_w, h, room) => {
       const { x, scale } = room.place(h * 0.34 * 0.46 * 2.4);
       const dh = h * 0.34 * scale,
         dw = dh * 0.46,
@@ -456,7 +439,7 @@ export const PLACES: Vision[] = [
         return pts;
       };
       const panels = [panel(0.2, 0.8, spring - dw * 0.05, foot - dh * 0.5), panel(0.2, 0.8, foot - dh * 0.42, foot - dh * 0.08)];
-      let layer: HTMLCanvasElement | null = null;
+      const layer = layering();
       return (f) => {
         const { ctx } = f;
         const open = smooth(f.k * 2.2 - 0.2);
@@ -482,15 +465,7 @@ export const PLACES: Vision[] = [
 
         // On a layer: the light beyond the doorway and its frame, then the door in front of them,
         // cut out of them and drawn dim (its face is towards us, away from the light).
-        const dpr = ctx.getTransform().a || 1;
-        if (!layer || layer.width !== Math.round(w * dpr) || layer.height !== Math.round(h * dpr)) {
-          layer = document.createElement("canvas");
-          layer.width = Math.round(w * dpr);
-          layer.height = Math.round(h * dpr);
-        }
-        const L = layer.getContext("2d")!;
-        L.setTransform(1, 0, 0, 1, 0, 0);
-        L.clearRect(0, 0, layer.width, layer.height);
+        const { L, canvas, dpr } = layer(f);
         L.setTransform(dpr, 0, 0, dpr, 0, 0);
         const g = L.createLinearGradient(0, foot - dh, 0, foot);
         g.addColorStop(0, f.ink(0.55 * open));
@@ -534,7 +509,7 @@ export const PLACES: Vision[] = [
         ctx.globalAlpha = 0.5 * f.env;
         ctx.shadowColor = f.ink(0.4 * f.env * open);
         ctx.shadowBlur = dw * 0.25;
-        ctx.drawImage(layer, 0, 0, w, h);
+        ctx.drawImage(canvas, 0, 0, f.w, f.h);
         ctx.restore();
       };
     },
@@ -575,7 +550,7 @@ export const PLACES: Vision[] = [
       );
       const marks = Array.from({ length: 14 }, () => ({ a: rnd(0, TAU), r: rnd(0.15, 0.7), l: rnd(-0.4, 0.4), d: rnd(-0.12, 0.12) }));
       const rays = Array.from({ length: 9 }, () => rnd(4, 4.4));
-      let layer: HTMLCanvasElement | null = null;
+      const layer = layering();
       return (f) => {
         const { ctx } = f;
         const dawn = f.env * smooth(f.k * 2);
@@ -598,15 +573,7 @@ export const PLACES: Vision[] = [
         const turn = (dir * (r * 2.4 * roll)) / rs;
         const shine = dawn * smooth(roll * 1.6 - 0.1);
         // Drawn on a layer, so the stone hides the light behind it.
-        const dpr = ctx.getTransform().a || 1;
-        if (!layer || layer.width !== Math.round(w * dpr) || layer.height !== Math.round(h * dpr)) {
-          layer = document.createElement("canvas");
-          layer.width = Math.round(w * dpr);
-          layer.height = Math.round(h * dpr);
-        }
-        const L = layer.getContext("2d")!;
-        L.setTransform(1, 0, 0, 1, 0, 0);
-        L.clearRect(0, 0, layer.width, layer.height);
+        const { L, canvas, dpr } = layer(f);
         L.setTransform(dpr, 0, 0, dpr, 0, 0);
         L.globalCompositeOperation = "lighter";
         // The way in, open, and light from inside.
@@ -656,9 +623,7 @@ export const PLACES: Vision[] = [
         L.fillStyle = "#000";
         L.fill();
         L.globalCompositeOperation = "source-over";
-        const ink = f.ink(1).slice(5).split(",").slice(0, 3).map(Number);
-        const page = f.dark ? [13, 17, 23] : [246, 248, 250];
-        const solid = (k: number) => `rgb(${page.map((p, i) => Math.round(p + (ink[i] - p) * k)).join(",")})`;
+        const solid = tones(f);
         // Lit across from the tomb's side: brightest at the edge towards the light, into shadow on the far side.
         const sg = L.createLinearGradient(-dir * rs, -rs * 0.25, dir * rs, rs * 0.25);
         sg.addColorStop(0, solid(0.22 + 0.2 * shine));
@@ -681,7 +646,7 @@ export const PLACES: Vision[] = [
         ctx.save();
         ctx.globalAlpha = f.env;
         ctx.globalCompositeOperation = "source-over"; // so the stone hides what's behind it
-        ctx.drawImage(layer, 0, 0, w, h);
+        ctx.drawImage(canvas, 0, 0, f.w, f.h);
         ctx.restore();
       };
     },
@@ -783,7 +748,7 @@ export const PLACES: Vision[] = [
       for (let x = cx - span / 2; x < cx + span / 2;) {
         const tw = rnd(18, 46);
         const mid = 1 - Math.abs(x + tw / 2 - cx) / (span / 2);
-        towers.push({ x, w: tw, h: h * (0.06 + mid * 0.18 * rnd(0.6, 1.2)), dome: Math.random() < 0.3 });
+        towers.push({ x, w: tw, h: h * (0.06 + mid * 0.18 * rnd(0.6, 1.2)), dome: random() < 0.3 });
         x += tw + rnd(2, 10);
       }
       const windows = towers.flatMap((t) =>
@@ -793,7 +758,7 @@ export const PLACES: Vision[] = [
           p: rnd(0, TAU),
         })),
       );
-      let layer: HTMLCanvasElement | null = null;
+      const layer = layering();
       return (f) => {
         const { ctx } = f;
         // Coming down out of heaven: settling into place as it appears.
@@ -803,15 +768,7 @@ export const PLACES: Vision[] = [
         glow(ctx, cx, ground - h * 0.1, span * 0.8, f.ink(0.14 * f.env), f.ink(0));
         // The towers, solid and without outlines on a layer (so they don't brighten where they
         // touch), fading into mist at their feet, laid on faintly with a soft edge.
-        const dpr = ctx.getTransform().a || 1;
-        if (!layer || layer.width !== Math.round(w * dpr) || layer.height !== Math.round(h * dpr)) {
-          layer = document.createElement("canvas");
-          layer.width = Math.round(w * dpr);
-          layer.height = Math.round(h * dpr);
-        }
-        const L = layer.getContext("2d")!;
-        L.setTransform(1, 0, 0, 1, 0, 0);
-        L.clearRect(0, 0, layer.width, layer.height);
+        const { L, canvas, dpr } = layer(f);
         L.setTransform(dpr, 0, 0, dpr, 0, dpr * dy);
         const g = L.createLinearGradient(0, ground - h * 0.25, 0, ground);
         g.addColorStop(0, f.ink(0.9));
@@ -834,7 +791,7 @@ export const PLACES: Vision[] = [
         ctx.globalAlpha = 0.24 * f.env;
         ctx.shadowColor = f.ink(0.5 * f.env);
         ctx.shadowBlur = 10;
-        ctx.drawImage(layer, 0, 0, w, h);
+        ctx.drawImage(canvas, 0, 0, f.w, f.h);
         ctx.restore();
         // The gates, open and full of light.
         for (const k of [-0.28, 0, 0.28]) {
@@ -874,7 +831,7 @@ export const PLACES: Vision[] = [
       const x0 = room.place(h * 0.4).x,
         y0 = h + 4;
       const bush = grow(h * 0.08, -Math.PI / 2, 0, 5, 0.6);
-      const embers = Array.from({ length: 30 }, () => ({ u: Math.random(), x: rnd(-1, 1), s: rnd(0.08, 0.16), p: rnd(0, TAU) }));
+      const embers = Array.from({ length: 30 }, () => ({ u: random(), x: rnd(-1, 1), s: rnd(0.08, 0.16), p: rnd(0, TAU) }));
       return (f) => {
         const { ctx } = f;
         const tips: [number, number][] = [];
@@ -899,7 +856,7 @@ export const PLACES: Vision[] = [
         });
         const dot = f.dot();
         for (const e of embers) {
-          const u = (e.u + f.t * e.s) % 1;
+          const u = drift(e, f.t);
           ctx.globalAlpha = 0.7 * f.env * (1 - u);
           const x = x0 + e.x * h * 0.18 + Math.sin(f.t + e.p) * 10,
             y = y0 - h * 0.15 - u * h * 0.35;
@@ -919,33 +876,19 @@ export const PLACES: Vision[] = [
       const { x, scale } = room.place(S0 * 6);
       const y = h * rnd(0.6, 0.72),
         S = S0 * scale;
-      let layer: HTMLCanvasElement | null = null;
+      const layer = layering();
       return (f) => {
         const { ctx } = f;
         const fx = x + S * 1.47,
           fy = y + S * 0.02; // the wick, at the spout's tip
         // A lamp unto my feet: the light it throws on the ground about it.
-        ctx.save();
-        ctx.translate(x + S * 0.6, y + S * 0.8);
-        ctx.scale(2.6, 0.45);
-        glow(ctx, 0, 0, S * 3, f.ink(0.22 * f.env), f.ink(0));
-        ctx.restore();
+        flatGlow(ctx, x + S * 0.6, y + S * 0.8, S * 3, 2.6, 0.45, f.ink(0.22 * f.env), f.ink(0));
         // The clay lamp, side on: a squat round body on a little foot, a shallow dished top with
         // its filling hole, a long spout with the wick at its tip, and a loop handle behind. Solid,
         // in colours mixed from the page's own and the ink, lit warm by its flame from the spout side.
-        const dpr = ctx.getTransform().a || 1;
-        if (!layer || layer.width !== Math.round(w * dpr) || layer.height !== Math.round(h * dpr)) {
-          layer = document.createElement("canvas");
-          layer.width = Math.round(w * dpr);
-          layer.height = Math.round(h * dpr);
-        }
-        const L = layer.getContext("2d")!;
-        L.setTransform(1, 0, 0, 1, 0, 0);
-        L.clearRect(0, 0, layer.width, layer.height);
+        const { L, canvas, dpr } = layer(f);
         L.setTransform(dpr * S, 0, 0, dpr * S, x * dpr, y * dpr);
-        const ink = f.ink(1).slice(5).split(",").slice(0, 3).map(Number);
-        const page = f.dark ? [13, 17, 23] : [246, 248, 250];
-        const clay = (k: number) => `rgb(${page.map((p, i) => Math.round(p + (ink[i] - p) * k)).join(",")})`;
+        const clay = tones(f);
         const lit = L.createLinearGradient(1.4, -0.1, -1, 0.8);
         lit.addColorStop(0, clay(0.5));
         lit.addColorStop(0.45, clay(0.3));
@@ -994,7 +937,7 @@ export const PLACES: Vision[] = [
         ctx.save();
         ctx.globalAlpha = 0.85 * f.env;
         ctx.globalCompositeOperation = "source-over";
-        ctx.drawImage(layer, 0, 0, w, h);
+        ctx.drawImage(canvas, 0, 0, f.w, f.h);
         ctx.restore();
         // The flame's warmth on the spout and the air about it, then the flame.
         glow(ctx, fx, fy - S * 0.2, S * 1.4, f.ink(0.22 * f.env), f.ink(0));
@@ -1023,19 +966,8 @@ export const PLACES: Vision[] = [
       "sweet aroma",
       "offering",
     ],
-    make: (w, h, room) => {
-      const W0 = Math.min(w, h) * 0.42;
-      const { x, scale } = room.place(W0);
-      const W = W0 * scale,
-        y = h * 0.5;
-      // Poured out at his feet: an alabaster jar (pictures/alabaster-bitmap.ts), in the artwork's
-      // colour.
-      const pic = bitmap(ALABASTER_BITMAP, 0.1, "photo");
-      return (f) => {
-        const come = smooth(f.k * 2.4);
-        glow(f.ctx, x, y, W * 0.5, f.ink(0.08 * f.env * come * (0.92 + 0.08 * f.beat)), f.ink(0));
-        pic.draw(f, x, y + (1 - come) * 14, W, f.env * come, 1 + 0.004 * Math.sin(f.t * 1.1));
-      };
-    },
+    // Poured out at his feet: an alabaster jar (pictures/alabaster-bitmap.ts), in the artwork's
+    // colour.
+    make: photo(ALABASTER_BITMAP, 0.42),
   },
 ];

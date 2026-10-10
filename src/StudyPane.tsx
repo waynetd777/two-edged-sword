@@ -3,7 +3,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { api, Article, Commentary, Coverage, ModuleInfo, Verse } from "./api";
-import { book, fmtRef, parseRef, Ref } from "./bible";
+import { book, fmtRef, mentionsPassage, Ref } from "./bible";
 import { AskPanel } from "./Ask";
 import { plainText, renderHtml, docSegments } from "./esword";
 import { Icon } from "./icons";
@@ -40,6 +40,14 @@ export function useRefPreview(bible: string, side: "below" | "right" = "below") 
   const timer = useRef<number | undefined>(undefined);
   // Bumped by every hover change and hide, so a fetch still in flight when the mouse left is dropped.
   const gen = useRef(0);
+  // Nothing lands after the screen has gone.
+  useEffect(
+    () => () => {
+      window.clearTimeout(timer.current);
+      gen.current++;
+    },
+    [],
+  );
   const onRefHover = (r: Ref | null, el: HTMLElement | null, from = bible) => {
     window.clearTimeout(timer.current);
     const g = ++gen.current;
@@ -154,7 +162,7 @@ export function useTopics(module: string | undefined, self?: string) {
 }
 
 /** Questions that suit the passage: its kind of writing, who is speaking, whether a verse or a chapter is in view. */
-export function bibleSuggestions(r: Ref, verses: Verse[]): string[] {
+function bibleSuggestions(r: Ref, verses: Verse[]): string[] {
   const b = r.book,
     name = book(b).name;
   const inView = r.verse ? verses.filter((v) => v.v >= r.verse! && v.v <= (r.to ?? r.verse!)) : verses;
@@ -184,7 +192,8 @@ export function short(c: { abbrev: string; title: string }): string {
   return a.length > 18 ? a.split(/[\s-]/)[0] : a;
 }
 
-function rangeLabel(r: [number, number, number, number], ch: number) {
+/** A commentary note's span, as a chip shows it: "3–5", or "2:3–5" outside chapter `ch`; nothing for one verse. */
+export function rangeLabel(r: [number, number, number, number], ch: number) {
   const [cb, vb, ce, ve] = r;
   if (cb === ce && vb === ve) return "";
   if (cb === ce) return `${cb === ch ? "" : cb + ":"}${vb}–${ve}`;
@@ -217,12 +226,7 @@ export function StudyPane(p: Props) {
     ask: "Ask about the verse or chapter, answered from your library",
   };
   const vref: Ref = { book: p.book, chapter: p.chapter, verse: p.verse };
-  const noteCount = app.journal.filter((e) =>
-    e.verses.some((v) => {
-      const r = parseRef(v);
-      return r && r.book === p.book && r.chapter === p.chapter && (!r.verse || (r.verse <= p.verse && p.verse <= (r.to ?? r.verse)));
-    }),
-  ).length;
+  const noteCount = app.journal.filter((e) => mentionsPassage(e, vref)).length;
   return (
     <aside className="study" aria-label="Study pane">
       <div className="tabs">
@@ -352,7 +356,7 @@ function CommentaryTab(p: Props & { vref: Ref }) {
               setIntro("verse");
             }}
           >
-            {c.abbrev.replace(/^(Albert|Adam|John|Matthew) /, "")}
+            {short(c)}
             {c.range && rangeLabel(c.range, at.chapter) && <span className="n">{rangeLabel(c.range, at.chapter)}</span>}
           </button>
         ))}
@@ -572,12 +576,15 @@ export function DictionaryTab({
   };
   // Only the article asked for last is shown: an earlier one can arrive after it.
   const artSeq = useRef(0);
+  /** The entry on show, "module/topic", so asking for it again (switchTo below) doesn't fetch it twice. */
+  const showing = useRef("");
   const loadArt = (m: string, topic: string, then?: (a: Article | null) => void) => {
     const n = ++artSeq.current;
     api
       .article("dictionary", m, topic)
       .then((a) => {
         if (n === artSeq.current) {
+          showing.current = a ? `${m}/${a.topic}` : "";
           setArt(a);
           then?.(a);
         }
@@ -585,7 +592,8 @@ export function DictionaryTab({
       .catch(console.error);
   };
   useEffect(() => {
-    if (module && dict && !dict.search && dict.module === module) loadArt(module, dict.topic);
+    if (module && dict && !dict.search && dict.module === module && showing.current !== `${module}/${dict.topic}`)
+      loadArt(module, dict.topic);
   }, [dict, module]);
   useEffect(() => {
     if (!module || !q.trim()) {
@@ -762,18 +770,8 @@ export function DictionaryTab({
 
 function NotesTab({ vref, selRef }: { vref: Ref; selRef: Ref | null }) {
   const app = useApp();
-  const hits = app.journal.filter((e) =>
-    e.verses.some((v) => {
-      const r = parseRef(v);
-      return r && r.book === vref.book && r.chapter === vref.chapter;
-    }),
-  );
-  const onVerse = hits.filter((e) =>
-    e.verses.some((v) => {
-      const r = parseRef(v);
-      return r && (!r.verse || (r.verse <= vref.verse! && vref.verse! <= (r.to ?? r.verse)));
-    }),
-  );
+  const hits = app.journal.filter((e) => mentionsPassage(e, { book: vref.book, chapter: vref.chapter }));
+  const onVerse = hits.filter((e) => mentionsPassage(e, vref));
   const rest = hits.filter((e) => !onVerse.includes(e));
   const target = selRef ?? vref;
   const item = (e: (typeof hits)[number]) => (
@@ -855,6 +853,7 @@ function MapsTab({ bookN }: { bookN: number }) {
   const [zoom, setZoom] = useState(1);
   const [showAll, setShowAll] = useState<DOMRect | null>(null);
   useEffect(() => {
+    let dead = false;
     Promise.all(
       refs.map((m) =>
         api
@@ -862,7 +861,12 @@ function MapsTab({ bookN }: { bookN: number }) {
           .then((ts) => ts.map((title) => ({ module: m, title })))
           .catch(() => []),
       ),
-    ).then((x) => setAll(x.flat()));
+    ).then((x) => {
+      if (!dead) setAll(x.flat());
+    });
+    return () => {
+      dead = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [app.lib]);
   const hint = mapHint(bookN);
@@ -880,7 +884,10 @@ function MapsTab({ bookN }: { bookN: number }) {
       .then((a) => {
         if (!dead) setArt(a);
       })
-      .catch(console.error);
+      .catch((e) => {
+        console.error(e);
+        if (!dead) setArt(null);
+      });
     return () => {
       dead = true;
     };

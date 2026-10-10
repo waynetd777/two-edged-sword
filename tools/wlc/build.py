@@ -26,40 +26,33 @@ or paseq goes in the word before it.
 Where the margin corrects the written text (ketiv and qere), the reading (qere) is given. Notes,
 and the paragraph markers pe and samekh, are left out.
 
-Downloads are cached in ~/Library/Caches/Two-edged Sword/wlc.
+morphhb is taken at a fixed commit. Downloads are cached in ~/Library/Caches/Two-edged Sword/wlc
+(STEPBible's, in tools/stepbible's cache).
 """
-import os, re, sqlite3, sys, urllib.parse, urllib.request
+import re, sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
-HOME = Path(os.environ.get("HOME", ""))
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from modules import LIBRARY, find  # noqa: E402
-CACHE = HOME / "Library/Caches/Two-edged Sword/wlc"
-SRC = "https://raw.githubusercontent.com/openscriptures/morphhb/master/wlc/{}.xml"
+from books import OSIS  # noqa: E402
+from modules import CACHES, fetch, module  # noqa: E402
+from stepbible import lexicon  # noqa: E402
+CACHE = CACHES / "wlc"
+SRC = "https://raw.githubusercontent.com/openscriptures/morphhb/3d15126fb1ef74867fc1434be1942e837932691f/wlc/{}.xml"
 NS = "{http://www.bibletechnologies.net/2003/OSIS/namespace}"
-BOOKS = ["Gen", "Exod", "Lev", "Num", "Deut", "Josh", "Judg", "Ruth", "1Sam", "2Sam", "1Kgs", "2Kgs", "1Chr", "2Chr", "Ezra", "Neh",
-         "Esth", "Job", "Ps", "Prov", "Eccl", "Song", "Isa", "Jer", "Lam", "Ezek", "Dan", "Hos", "Joel", "Amos", "Obad", "Jonah", "Mic",
-         "Nah", "Hab", "Zeph", "Hag", "Zech", "Mal"]
+BOOKS = OSIS[:39]
 SEGS = {"x-maqqef", "x-sof-pasuq", "x-paseq"}
-TBESH = ("https://raw.githubusercontent.com/STEPBible/STEPBible-Data/master/Lexicons/"
-         + urllib.parse.quote("TBESH - Translators Brief lexicon of Extended Strongs for Hebrew - STEPBible.org CC BY.txt"))
 
 
-def get(name, url=None, file=None):
-    p = CACHE / (file or f"{name}.xml")
-    if not p.exists() or not p.stat().st_size:
-        p.parent.mkdir(parents=True, exist_ok=True)
-        with urllib.request.urlopen(url or SRC.format(name), timeout=120) as r:
-            p.write_bytes(r.read())
-    return p
+def get(name):
+    return fetch(SRC.format(name), CACHE / f"{name}.xml")
 
 
 def glosses():
     """{"H1254a": "create", "H0430": "God", …}: TBESH's gloss for each Strong's number, from its first
     entry (the others are the word as part of a name, or its other senses)."""
     out = {}
-    for line in get("TBESH", TBESH, "TBESH.txt").read_text(encoding="utf-8-sig").split("\n"):
+    for line in lexicon("TBESH").split("\n"):
         f = line.split("\t")
         if len(f) > 6 and re.match(r"H\d{4}[a-z]?$", f[0]) and f[0] not in out:
             g = f[6].split(":")[-1].strip()  # "first: beginning" is the sense "beginning" of "first"
@@ -221,11 +214,10 @@ def verse(v):
 
 
 def main():
-    LIBRARY.mkdir(parents=True, exist_ok=True)
     GLOSS.update(glosses())
     moves = verse_map()
     verses = {}
-    for n, b in enumerate(BOOKS, 1):
+    for b in BOOKS:
         root = ET.parse(get(b)).getroot()
         for v in root.iter(f"{NS}verse"):
             k, _ = ref(v.get("osisID"))
@@ -246,19 +238,9 @@ def main():
             "(Tyndale House), CC BY 4.0, https://github.com/STEPBible/STEPBible-Data. The English is the dictionary sense, "
             "not a translation in context. Verses are numbered as in the KJV (psalm titles are part of verse 1); "
             "where the margin corrects the text (ketiv/qere), the reading is given. Built by Two-edged Sword's tools/wlc.</p>")
-    p = LIBRARY / "wlc+.bbli"
-    tmp = p.with_suffix(".tmp")
-    tmp.unlink(missing_ok=True)
-    db = sqlite3.connect(tmp)
-    db.executescript("""CREATE TABLE Details (Title NVARCHAR(100), Abbreviation NVARCHAR(50), Information TEXT, Version INT, OldTestament BOOL, NewTestament BOOL, Apocrypha BOOL, Strongs BOOL, RightToLeft BOOL);
-        CREATE TABLE Bible (Book INT, Chapter INT, Verse INT, Scripture TEXT);
-        CREATE INDEX BookChapterVerseIndex ON Bible (Book, Chapter, Verse);""")
-    db.execute("INSERT INTO Details VALUES (?,?,?,1,1,0,0,1,1)", ("Westminster Leningrad Codex w/ Strong's", "WLC+", info))
-    db.executemany("INSERT INTO Bible VALUES (?,?,?,?)", rows)
-    db.commit()
-    db.close()
-    tmp.replace(p)
-    print(f"{p.name}: {len(rows)} verses")
+    with module("wlc+.bbli", "Westminster Leningrad Codex w/ Strong's", "WLC+", info, nt=False, strongs=True, rtl=True) as db:
+        db.executemany("INSERT INTO Bible VALUES (?,?,?,?)", rows)
+    print(f"wlc+.bbli: {len(rows)} verses")
 
 
 if __name__ == "__main__":

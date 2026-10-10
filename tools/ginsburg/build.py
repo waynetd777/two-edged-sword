@@ -28,27 +28,22 @@ Where the margin corrects the written text, the file has "//כתיב// written /
 Ginsburg numbers the verses as in the Hebrew, mostly as the WLC does, but divides a few otherwise
 (see renumber), so his words are first lined up with the WLC's and put in its verses; then they are
 moved to the KJV's numbering with the same map as WLC+ (morphhb's VerseMap.xml, through tools/wlc): a psalm's title joins verse 1, and a
-verse the KJV divides is split at its main pause (the atnach). Downloads are cached in
-~/Library/Caches/Two-edged Sword/ginsburg.
+verse the KJV divides is split at its main pause (the atnach). The repositories are taken at a
+fixed commit. Downloads are cached in ~/Library/Caches/Two-edged Sword/ginsburg.
 """
-import importlib.util, os, re, sqlite3, subprocess, sys, unicodedata
+import re, shutil, subprocess, sys, unicodedata
 import xml.etree.ElementTree as ET
 from difflib import SequenceMatcher
 from pathlib import Path
 
-HOME = Path(os.environ.get("HOME", ""))
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from modules import LIBRARY, find  # noqa: E402
-CACHE = HOME / "Library/Caches/Two-edged Sword/ginsburg"
-REPO = "https://github.com/ahembd/Ginsburg_Hebrew_Bible"
-REPO_RAFE = "https://github.com/ahembd/Ginsburg_Hebrew_Bible_w_rafe"
+import wlc.build as wlc  # noqa: E402  (the WLC -> KJV verse map)
+from modules import CACHES, LIBRARY, hebrew_consonants, module  # noqa: E402
+CACHE = CACHES / "ginsburg"
+REPO = ("https://github.com/ahembd/Ginsburg_Hebrew_Bible", "8fccfa9c0a9bd98fc4f9431e838b84e67eff2b6d")
+REPO_RAFE = ("https://github.com/ahembd/Ginsburg_Hebrew_Bible_w_rafe", "0d024bd3683c3592299e44920562bad1373f29c1")
 # The names of the Sabbath readings' sections, before a verse's number: left out.
 ALIYAH = re.compile(r"\[\u200f?(?:שני|שלישי|רביעי|חמישי|ששי|שביעי|מפטיר)\]\s*")
-
-# tools/wlc/build.py, for the WLC -> KJV verse map.
-_spec = importlib.util.spec_from_file_location("wlc", Path(__file__).resolve().parent.parent / "wlc" / "build.py")
-wlc = importlib.util.module_from_spec(_spec)
-_spec.loader.exec_module(wlc)
 
 # The files' names, in e-Sword's book order.
 FILES = ["Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy", "Joshua", "Judges", "Ruth", "1Samuel", "2Samuel", "1Kings", "2Kings",
@@ -65,11 +60,17 @@ def number(s):
     return sum(LETTERS[c] for c in s if c in LETTERS)
 
 
-def repo(url=REPO, name="repo"):
+def repo(source=REPO, name="repo"):
+    """The repository's files at its commit, cloned once (into a .part folder, renamed when whole)."""
+    url, commit = source
     d = CACHE / name
     if not d.exists():
-        d.parent.mkdir(parents=True, exist_ok=True)
-        subprocess.run(["git", "clone", "-q", "--depth", "1", url, str(d)], check=True)
+        tmp = CACHE / f"{name}.part"
+        shutil.rmtree(tmp, ignore_errors=True)
+        tmp.mkdir(parents=True)
+        for cmd in (["git", "init", "-q"], ["git", "fetch", "-q", "--depth", "1", url, commit], ["git", "checkout", "-q", "FETCH_HEAD"]):
+            subprocess.run(cmd, cwd=tmp, check=True)
+        tmp.rename(d)
     return {re.sub(r"^\d+\)|\.txt$", "", p.name): p for p in d.glob("*.txt")}
 
 
@@ -157,7 +158,7 @@ FILLED = []
 
 
 def consonants(w):
-    return "".join(ch for ch in unicodedata.normalize("NFD", w) if "\u05d0" <= ch <= "\u05ea")
+    return hebrew_consonants(w, finals=True)
 
 
 def leningrad(n):
@@ -243,21 +244,11 @@ def main():
             "Verses are numbered as in the KJV (psalm titles are part of verse 1); where the margin corrects the text "
             "(ketiv/qere), the reading is given. 1 Kings 22:52–53, Job 42:17 and Micah 7:20 are missing from the source files; "
             "Nehemiah 7:68 is not in the Masoretic text. Built by Two-edged Sword's tools/ginsburg.</p>")
-    p = LIBRARY / "ginsburg.bbli"
-    tmp = p.with_suffix(".tmp")
-    tmp.unlink(missing_ok=True)
-    db = sqlite3.connect(tmp)
-    db.executescript("""CREATE TABLE Details (Title NVARCHAR(100), Abbreviation NVARCHAR(50), Information TEXT, Version INT, OldTestament BOOL, NewTestament BOOL, Apocrypha BOOL, Strongs BOOL, RightToLeft BOOL);
-        CREATE TABLE Bible (Book INT, Chapter INT, Verse INT, Scripture TEXT);
-        CREATE INDEX BookChapterVerseIndex ON Bible (Book, Chapter, Verse);""")
-    db.execute("INSERT INTO Details VALUES (?,?,?,1,1,0,0,0,1)", ("Hebrew Bible (Ginsburg 1894, Ben Chayyim)", "Ginsburg", info))
-    db.executemany("INSERT INTO Bible VALUES (?,?,?,?)", rows)
-    db.commit()
-    db.close()
-    tmp.replace(p)
+    with module("ginsburg.bbli", "Hebrew Bible (Ginsburg 1894, Ben Chayyim)", "Ginsburg", info, nt=False, rtl=True) as db:
+        db.executemany("INSERT INTO Bible VALUES (?,?,?,?)", rows)
     matched = sum(m for _, m, _ in SHARE) / max(sum(t for _, _, t in SHARE), 1)
     print(f"{len(FILLED)} verses from the edition with the rafe; {matched:.1%} of the words match the WLC's")
-    print(f"{p.name}: {len(rows)} verses")
+    print(f"ginsburg.bbli: {len(rows)} verses")
 
 
 if __name__ == "__main__":

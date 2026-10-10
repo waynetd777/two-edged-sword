@@ -23,20 +23,17 @@ pub fn open(app: &AppHandle) {
     }
 }
 
-/// Adds "Two-edged Sword Website" to the Help menu, after the help item, and on macOS puts the
-/// app's own About item in place of the platform's, so its panel can carry the link. Main thread,
-/// as setup is.
+/// Adds "Two-edged Sword Website" to the Help menu, after the help item, and puts the app's own
+/// About item in place of the platform's, so its panel can carry the link. Main thread, as setup is.
 pub fn add_to_menu(app: &AppHandle) -> tauri::Result<()> {
     let Some(menu) = app.menu() else { return Ok(()) };
     if let Some(help) = menu.get(HELP_SUBMENU_ID).and_then(|i| i.as_submenu().cloned()) {
         help.append(&MenuItem::with_id(app, MENU_ID, "Two-edged Sword Website", true, None::<&str>)?)?;
     }
-    if cfg!(target_os = "macos") {
-        if let Some(MenuItemKind::Submenu(app_menu)) = menu.items()?.into_iter().next() {
-            if app_menu.get(ABOUT_ID).is_none() {
-                app_menu.remove_at(0)?;
-                app_menu.insert(&MenuItem::with_id(app, ABOUT_ID, "About Two-edged Sword", true, None::<&str>)?, 0)?;
-            }
+    if let Some(MenuItemKind::Submenu(app_menu)) = menu.items()?.into_iter().next() {
+        if app_menu.get(ABOUT_ID).is_none() {
+            app_menu.remove_at(0)?;
+            app_menu.insert(&MenuItem::with_id(app, ABOUT_ID, "About Two-edged Sword", true, None::<&str>)?, 0)?;
         }
     }
     Ok(())

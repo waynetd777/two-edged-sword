@@ -8,7 +8,7 @@
 
 import { ModuleInfo } from "./api";
 
-export interface DocLink {
+interface DocLink {
   book: string;
   chapter: string;
   from?: number;

@@ -31,14 +31,8 @@ pub fn export(lib: &Library, root: &Path, module: &str, kind: Kind) -> Result<Ex
     let lock = crate::store::dir_lock(&dir);
     let _held = lock.lock().unwrap_or_else(|e| e.into_inner());
     // The module file's size and date too, so a book e-Sword has updated is exported again.
-    let meta = std::fs::metadata(&lib.module(kind, module)?.path).ok();
-    let mtime = meta
-        .as_ref()
-        .and_then(|m| m.modified().ok())
-        .and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok())
-        .map(|d| d.as_secs())
-        .unwrap_or(0);
-    let stamp = format!("{VERSION} {} {mtime}", meta.map(|m| m.len()).unwrap_or(0));
+    let (len, mtime) = crate::store::file_stamp(&lib.module(kind, module)?.path);
+    let stamp = format!("{VERSION} {len} {}", mtime.as_secs());
     if std::fs::read_to_string(dir.join(".complete")).ok() == Some(stamp.clone()) {
         return Ok(Export { dir: dir.to_string_lossy().into(), files });
     }
@@ -153,15 +147,7 @@ fn base64(s: &str) -> Option<Vec<u8>> {
 
 /// A title as a file name: no path separators or control characters, not too long.
 fn sanitize(s: &str, max: usize) -> String {
-    let t: String = s.chars().map(|c| if c.is_alphanumeric() || " -_',.()&".contains(c) { c } else { ' ' }).collect();
-    let t = t.split_whitespace().collect::<Vec<_>>().join(" ");
-    let t: String = t.chars().take(max).collect();
-    let t = t.trim_matches(|c: char| c == '.' || c == ' ').to_string();
-    if t.is_empty() {
-        "untitled".into()
-    } else {
-        t
-    }
+    crate::store::file_name(s, max, " -_',.()&")
 }
 
 pub fn root(data: &Path) -> PathBuf {

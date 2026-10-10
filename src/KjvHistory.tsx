@@ -297,7 +297,7 @@ const status = (s: Source, bibles: ModuleInfo[]) => {
 };
 
 /** The history, summarised for Ask: every source, what it drew on, and whether the user has it. */
-export function historySummary(bibles: ModuleInfo[]): string {
+function historySummary(bibles: ModuleInfo[]): string {
   const name = (id: string) => ALL.find((s) => s.id === id)?.name ?? id;
   const line = (s: Source) =>
     `- ${s.name} (${s.date}): ${s.note}${s.from ? ` Drew on: ${s.from.map(name).join(", ")}.` : ""} ${status(s, bibles)[0].toUpperCase()}${status(s, bibles).slice(1)}.`;
@@ -309,6 +309,12 @@ export function historySummary(bibles: ModuleInfo[]): string {
   );
 }
 
+/** The diagram's lines: each source to what drew on it, and the printed editions and English Bibles to the KJV. */
+const EDGES: [string, string][] = [
+  ...ALL.flatMap((s) => (s.from ?? []).map((f) => [f, s.id] as [string, string])),
+  ...TIERS.slice(1).flatMap((t) => t.items.map((s) => [s.id, "kjv"] as [string, string])),
+];
+
 export function KjvHistoryScreen() {
   const app = useApp();
   const bibles = app.bibles;
@@ -318,18 +324,13 @@ export function KjvHistoryScreen() {
   const [lines, setLines] = useState<{ a: string; b: string; d: string }[]>([]);
   const [hover, setHover] = useState<string | null>(null);
 
-  const edges: [string, string][] = [
-    ...ALL.flatMap((s) => (s.from ?? []).map((f) => [f, s.id] as [string, string])),
-    ...TIERS.slice(1).flatMap((t) => t.items.map((s) => [s.id, "kjv"] as [string, string])),
-  ];
-
   useLayoutEffect(() => {
     const el = box.current;
     if (!el) return;
     const draw = () => {
       const o = el.getBoundingClientRect();
       setLines(
-        edges.flatMap(([a, b]) => {
+        EDGES.flatMap(([a, b]) => {
           const ea = cards.current.get(a),
             eb = cards.current.get(b);
           if (!ea || !eb) return [];
@@ -350,10 +351,12 @@ export function KjvHistoryScreen() {
       );
     };
     draw();
+    // Drawn again when the diagram or any card changes size: a card widening (its chips, the
+    // Apocrypha's A, arriving) moves the others in its row.
     const ro = new ResizeObserver(draw);
     ro.observe(el);
+    cards.current.forEach((c) => ro.observe(c));
     return () => ro.disconnect();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // The hovered card's ancestors and descendants.
@@ -363,13 +366,13 @@ export function KjvHistoryScreen() {
       if (lit.has(id + "^")) return;
       lit.add(id + "^");
       lit.add(id);
-      edges.filter(([, b]) => b === id).forEach(([a]) => up(a));
+      EDGES.filter(([, b]) => b === id).forEach(([a]) => up(a));
     };
     const down = (id: string) => {
       if (lit.has(id + "v")) return;
       lit.add(id + "v");
       lit.add(id);
-      edges.filter(([a]) => a === id).forEach(([, b]) => down(b));
+      EDGES.filter(([a]) => a === id).forEach(([, b]) => down(b));
     };
     up(hover);
     down(hover);
@@ -386,11 +389,14 @@ export function KjvHistoryScreen() {
   const [apo, setApo] = useState<Record<string, string[]>>({});
   useEffect(() => {
     let live = true;
-    Promise.all(bibles.map((b) => bibleSizes(b.id).then((sz) => [b.id, sz] as const))).then((r) => {
-      if (!live) return;
-      setCov(Object.fromEntries(r.map(([id, sz]) => [id, coverageOf(new Set(sz.keys()))])));
-      setApo(Object.fromEntries(r.map(([id, sz]) => [id, apocryphaIn(sz)]).filter(([, l]) => l.length)));
-    });
+    Promise.all(bibles.map((b) => bibleSizes(b.id).then((sz) => [b.id, sz] as const)))
+      .then((r) => {
+        if (!live) return;
+        setCov(Object.fromEntries(r.map(([id, sz]) => [id, coverageOf(new Set(sz.keys()))])));
+        setApo(Object.fromEntries(r.map(([id, sz]) => [id, apocryphaIn(sz)]).filter(([, l]) => l.length)));
+      })
+      // Without them the chips just lack their bars and the A.
+      .catch((e) => console.error("kjv-history", e));
     return () => {
       live = false;
     };

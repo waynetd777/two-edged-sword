@@ -91,9 +91,12 @@
     `.tes-w { position: absolute; pointer-events: none; z-index: 2147483647; border-radius: 3px; background: ${c.word};` +
     ` box-shadow: 0 2px 0 ${c.line}; mix-blend-mode: ${c.blend || "multiply"}; }`;
   style.textContent = css({ para: "#ddf4ff", word: "#d8e6f5", line: "#0969da" });
+  // Put in once (and again if the page drops it): moving it would count as a change to the page,
+  // and in the dark theme each change has the whole page looked through for pictures.
+  const attach = () => style.isConnected || (document.head || document.documentElement).appendChild(style);
   const pick = (on) => {
     picking = on;
-    (document.head || document.documentElement).appendChild(style);
+    attach();
     document.documentElement.classList.toggle("tes-pick", on);
   };
   // The word's box, drawn as the reader draws it, on a layer of its own over the page: the page's
@@ -178,7 +181,7 @@
   let dark = false;
   const darken = (on) => {
     dark = on;
-    (document.head || document.documentElement).appendChild(style);
+    attach();
     document.documentElement.classList.toggle("tes-dark", on);
     if (on) pictures();
   };
@@ -230,7 +233,7 @@
         again.text = b.text;
         b = read[m.para] = again;
       }
-      (document.head || document.documentElement).appendChild(style);
+      attach();
       if (m.para !== shown) {
         clear();
         third(b);

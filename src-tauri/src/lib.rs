@@ -1,6 +1,9 @@
 // Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
 // SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
+#[cfg(not(target_os = "macos"))]
+compile_error!("Two-edged Sword is a macOS app: it is built on AppKit throughout.");
+
 mod assistant;
 mod books;
 mod content;
@@ -8,13 +11,13 @@ mod help;
 mod index;
 mod journal;
 mod library;
-#[cfg(target_os = "macos")]
 mod login_item;
-#[cfg(target_os = "macos")]
 mod login_launch;
 mod media;
 mod music;
 mod platform;
+mod process;
+mod screenshot;
 mod search;
 mod spell;
 mod store;
@@ -94,7 +97,9 @@ async fn rescan_library(st: State<'_, AppState>, esword: Option<bool>) -> Result
     *st.lib_cell.write().map_err(|e| e.to_string())? = fresh.clone();
     let (lib, index, ask_root) = (fresh.clone(), st.index.clone(), study::root(&st.data));
     std::thread::spawn(move || {
-        let _ = index.update(&lib);
+        if let Err(e) = index.update(lib.clone()) {
+            eprintln!("search index: {e}");
+        }
         study::export_dictionaries(&lib, &ask_root);
     });
     Ok(LibraryInfo::of(&fresh))
@@ -213,17 +218,36 @@ fn app_version(app: AppHandle) -> (String, String) {
 /// The journal's folder unless Settings names another.
 #[tauri::command]
 fn journal_default_dir() -> String {
-    let home = PathBuf::from(std::env::var("HOME").unwrap_or_default());
-    home.join("Documents/Two-edged Sword").to_string_lossy().to_string()
+    store::home().join("Documents/Two-edged Sword").to_string_lossy().to_string()
 }
 
-/// A folder the user chose: an absolute path with no `..` in it.
+/// A folder the user chose: an absolute path with no `..` in it, and not in the app's own data
+/// folder (settings, chats, the search index), which only the app writes.
 fn chosen_dir(dir: &str) -> Result<PathBuf, String> {
     let p = PathBuf::from(dir);
-    if !p.is_absolute() || p.components().any(|c| c == std::path::Component::ParentDir) {
+    if !p.is_absolute() || p.components().any(|c| c == std::path::Component::ParentDir) || in_app_data(&p) {
         return Err(format!("not a usable folder: {dir}"));
     }
     Ok(p)
+}
+
+/// Whether `p` is in the app's data folder, followed through links and ignoring case, as the disk does.
+fn in_app_data(p: &std::path::Path) -> bool {
+    let real = |p: &std::path::Path| {
+        // The deepest part that exists, resolved, with the rest after it.
+        let mut base = p.to_path_buf();
+        let mut rest = Vec::new();
+        while !base.exists() {
+            let Some(name) = base.file_name().map(|n| n.to_os_string()) else { break };
+            rest.push(name);
+            base.pop();
+        }
+        let mut r = std::fs::canonicalize(&base).unwrap_or(base);
+        r.extend(rest.iter().rev());
+        r.to_string_lossy().to_lowercase()
+    };
+    let (p, data) = (real(p), real(&store::data_dir()));
+    p == data || p.starts_with(&format!("{data}/"))
 }
 
 // The journal and file commands run off the main thread: the folder may be on a cloud drive
@@ -289,22 +313,32 @@ fn keep_awake(on: bool) -> Result<(), String> {
     Ok(())
 }
 
-// Spelling (spell.rs): not async, so they run on the main thread, as AppKit wants.
-#[tauri::command]
-fn spell_check(st: State<AppState>, text: String) -> Vec<(usize, usize)> {
+// Spelling (spell.rs). A check waits off the main thread for the KJV's words, then asks AppKit
+// on the main thread, as it wants; the rest aren't async, so they run there anyway.
+#[tauri::command(async)]
+fn spell_check(app: AppHandle, st: State<AppState>, text: String) -> Vec<(usize, usize)> {
     kjv_words(&st);
-    spell::check(&text)
+    on_main(&app, move || spell::check(&text)).unwrap_or_default()
 }
-#[tauri::command]
-fn spell_grammar(st: State<AppState>, text: String) -> Vec<spell::GrammarIssue> {
+#[tauri::command(async)]
+fn spell_grammar(app: AppHandle, st: State<AppState>, text: String) -> Vec<spell::GrammarIssue> {
     kjv_words(&st);
-    spell::grammar(&text)
+    on_main(&app, move || spell::grammar(&text)).unwrap_or_default()
 }
-/// The KJV's words, read here if a check comes before the start-up read has finished.
+/// The KJV's words, read here if a check comes before the start-up read (or waiting for it).
 fn kjv_words(st: &AppState) {
     if !spell::kjv_ready() {
         spell::load_kjv(&st.lib());
     }
+}
+/// Runs `f` on the main thread and waits for its answer. Never call it from the main thread.
+fn on_main<T: Send + 'static>(app: &AppHandle, f: impl FnOnce() -> T + Send + 'static) -> Option<T> {
+    let (tx, rx) = std::sync::mpsc::channel();
+    app.run_on_main_thread(move || {
+        let _ = tx.send(f());
+    })
+    .ok()?;
+    rx.recv().ok()
 }
 #[tauri::command]
 fn spell_guesses(word: String) -> Vec<String> {
@@ -334,13 +368,17 @@ fn journal_delete(dir: String, id: String) -> Result<(), String> {
 }
 
 #[tauri::command(async)]
-/// An export the user saved from a dialog: only a document of a known kind, never a dotfile.
+/// An export the user saved from a dialog: only a document of a known kind, in a folder that is
+/// already there (as the dialog's always is), never in a hidden folder or as a dotfile.
 fn write_text_file(path: String, text: String) -> Result<(), String> {
     let p = chosen_dir(&path)?;
     let name = p.file_name().and_then(|n| n.to_str()).unwrap_or("");
     let ext = p.extension().and_then(|e| e.to_str()).unwrap_or("").to_ascii_lowercase();
-    if name.starts_with('.') || !["md", "txt", "html", "json"].contains(&ext.as_str()) {
+    if !["md", "txt", "html", "json"].contains(&ext.as_str()) {
         return Err(format!("won't write {name}: only .md, .txt, .html or .json files"));
+    }
+    if p.components().any(|c| c.as_os_str().to_string_lossy().starts_with('.')) || !p.parent().is_some_and(|d| d.is_dir()) {
+        return Err(format!("won't write {}: not a folder for documents", p.display()));
     }
     store::write_text_atomic(&p, &text)
 }
@@ -460,13 +498,19 @@ fn web_frameable(url: String) -> Result<bool, String> {
     if !out.status.success() {
         return Err("couldn't reach that address".into());
     }
-    let text = String::from_utf8_lossy(&out.stdout).to_lowercase();
-    // After redirects, the last response's headers.
-    let last = text.rsplit("http/").next().unwrap_or("");
-    Ok(!last.lines().any(|l| {
+    Ok(frameable(&String::from_utf8_lossy(&out.stdout)))
+}
+
+/// Whether response headers as curl prints them (`-D -`, every response after a redirect)
+/// allow framing: the last response's, which starts at the last status line.
+fn frameable(headers: &str) -> bool {
+    let text = headers.to_lowercase();
+    let lines: Vec<&str> = text.lines().map(str::trim).collect();
+    let start = lines.iter().rposition(|l| l.starts_with("http/")).unwrap_or(0);
+    !lines[start..].iter().any(|l| {
         l.starts_with("x-frame-options:")
             || (l.starts_with("content-security-policy:") && l.contains("frame-ancestors") && !l.contains("frame-ancestors *"))
-    }))
+    })
 }
 
 #[tauri::command]
@@ -531,7 +575,6 @@ fn open_web(app: AppHandle, key: String, url: String, title: String, dark: bool,
 /// drew some sites' title bars white. A transparent title bar over the window's own dark
 /// background always comes out dark, with dark appearance for light title text.
 fn title_bar(w: &tauri::WebviewWindow, dark: bool) {
-    #[cfg(target_os = "macos")]
     unsafe {
         use objc2_app_kit::{NSAppearance, NSAppearanceCustomization, NSAppearanceNameAqua, NSAppearanceNameDarkAqua, NSColor, NSWindow};
         let Ok(ptr) = w.ns_window() else { return };
@@ -542,8 +585,6 @@ fn title_bar(w: &tauri::WebviewWindow, dark: bool) {
             win.setBackgroundColor(Some(&NSColor::colorWithSRGBRed_green_blue_alpha(18.0 / 255.0, 18.0 / 255.0, 20.0 / 255.0, 1.0)));
         }
     }
-    #[cfg(not(target_os = "macos"))]
-    let _ = (w, dark);
 }
 
 #[tauri::command]
@@ -551,11 +592,10 @@ fn ask_cancel(st: State<AppState>, chat_id: String) {
     assistant::cancel(&st.running, &chat_id)
 }
 
-/// Screenshot mode (tools/screenshots.py): the scene to set up, as JSON, from TES_SCENE. The
-/// page then saves nothing, so the user's settings, chats and place are left as they were.
+/// Screenshot mode (screenshot.rs): the scene to set up, as JSON.
 #[tauri::command]
 fn scene() -> Option<String> {
-    std::env::var("TES_SCENE").ok().filter(|s| !s.is_empty())
+    screenshot::scene()
 }
 
 #[tauri::command]
@@ -565,88 +605,9 @@ fn print_page(window: tauri::WebviewWindow) -> Result<(), String> {
 
 /// In the Dock while the window is open, only in the menu bar while it is closed. Runs on the main
 /// thread, as every caller does: the tray's menu handler, the window's events and Reopen.
-#[cfg(target_os = "macos")]
 fn set_in_dock(app: &AppHandle, shown: bool) {
     let _ = app.set_activation_policy(if shown { tauri::ActivationPolicy::Regular } else { tauri::ActivationPolicy::Accessory });
 }
-
-#[cfg(not(target_os = "macos"))]
-fn set_in_dock(_app: &AppHandle, _shown: bool) {}
-
-/// Makes a window invisible and click-through while it still draws, for screenshots
-/// (tools/screenshots.py saves its webview's snapshot): nothing flashes on screen. macOS only.
-fn make_unseen(w: &tauri::WebviewWindow) {
-    #[cfg(target_os = "macos")]
-    if let Ok(ns) = w.ns_window() {
-        // Tauri's own NSWindow, alive as long as the window is; setup runs on the main thread.
-        let window = unsafe { &*(ns as *const objc2_app_kit::NSWindow) };
-        window.setAlphaValue(0.0);
-        window.setIgnoresMouseEvents(true);
-    }
-    #[cfg(not(target_os = "macos"))]
-    let _ = w;
-}
-
-/// Saves what the window's webview shows to `dest` as a TIFF, for screenshots taken unseen
-/// (make_unseen: an invisible window's own capture is blank, its webview's snapshot isn't). The file
-/// appears when WebKit has drawn it. macOS only.
-fn snapshot(w: &tauri::WebviewWindow, dest: &std::path::Path) -> Result<(), String> {
-    #[cfg(target_os = "macos")]
-    {
-        let dest = dest.to_path_buf();
-        w.with_webview(move |wv| unsafe {
-            use objc2::runtime::AnyObject;
-            let webview = wv.inner() as *mut AnyObject;
-            let done = block2::RcBlock::new(move |image: *mut AnyObject, _error: *mut AnyObject| {
-                if image.is_null() {
-                    return;
-                }
-                let tiff: *mut AnyObject = objc2::msg_send![image, TIFFRepresentation];
-                if !tiff.is_null() {
-                    let path = objc2_foundation::NSString::from_str(&dest.to_string_lossy());
-                    let _: bool = objc2::msg_send![tiff, writeToFile: &*path, atomically: true];
-                }
-            });
-            // TES_SNAPSHOT_WIDTH: the snapshot this many points wide, which is quicker to take
-            // (an animated screenshot's frames); otherwise the window's full size.
-            let width = std::env::var("TES_SNAPSHOT_WIDTH").ok().and_then(|s| s.parse::<f64>().ok());
-            let config: *mut AnyObject =
-                match (objc2::runtime::AnyClass::get(c"WKSnapshotConfiguration"), objc2::runtime::AnyClass::get(c"NSNumber"), width) {
-                    (Some(cls), Some(num), Some(width)) => {
-                        let c: *mut AnyObject = objc2::msg_send![cls, new];
-                        let n: *mut AnyObject = objc2::msg_send![num, numberWithDouble: width];
-                        let _: () = objc2::msg_send![c, setSnapshotWidth: n];
-                        c
-                    }
-                    _ => std::ptr::null_mut(),
-                };
-            let _: () = objc2::msg_send![webview, takeSnapshotWithConfiguration: config, completionHandler: &*done];
-        })
-        .map_err(|e| e.to_string())
-    }
-    #[cfg(not(target_os = "macos"))]
-    {
-        let _ = (w, dest);
-        Err("Snapshots are macOS only.".into())
-    }
-}
-
-/// Brings the app to the front: after coming back from Accessory, `set_focus()` alone can leave
-/// the window behind whatever the user was working in.
-#[cfg(target_os = "macos")]
-fn activate() {
-    use objc2::runtime::{AnyClass, AnyObject};
-    let Some(cls) = AnyClass::get(c"NSApplication") else { return };
-    unsafe {
-        let nsapp: *mut AnyObject = objc2::msg_send![cls, sharedApplication];
-        if !nsapp.is_null() {
-            let _: () = objc2::msg_send![nsapp, activateIgnoringOtherApps: true];
-        }
-    }
-}
-
-#[cfg(not(target_os = "macos"))]
-fn activate() {}
 
 /// Shrinks the main window to fit its screen when the size it was left at comes back larger. With
 /// a second screen at a different scale (an AirPlay display at 1x beside a Retina one), the saved
@@ -683,12 +644,11 @@ pub(crate) fn show_main(app: &AppHandle) {
     if let Some(w) = app.get_webview_window("main") {
         let _ = w.show();
         let _ = w.unminimize();
-        activate();
+        platform::activate();
         let _ = w.set_focus();
     }
 }
 
-#[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let data = store::data_dir();
     // Made up front, so Show in Finder has somewhere to go before anything is built into it.
@@ -703,7 +663,7 @@ pub fn run() {
     {
         let (lib, index, ask_root) = (lib.clone(), index.clone(), study::root(&data));
         std::thread::spawn(move || {
-            if let Err(e) = index.update(&lib) {
+            if let Err(e) = index.update(lib.clone()) {
                 eprintln!("search index: {e}");
             }
             // Then the dictionaries Ask searches, written out once (slow only the first time).
@@ -806,14 +766,10 @@ pub fn run() {
             }
             // Did Login Items start this, rather than someone opening the app? Asked first: the
             // answer is in the launch AppleEvent AppKit is dispatching now, and it has to be known
-            // before anything shows the window. A login launch stays in the menu bar.
-            // A scene with "tray": true shows the menu-bar window alone, for its screenshot; the
-            // main window runs hidden to send it what to show.
-            let tray_scene = scene().and_then(|sc| serde_json::from_str::<serde_json::Value>(&sc).ok()).is_some_and(|v| v["tray"] == true);
-            #[cfg(target_os = "macos")]
+            // before anything shows the window. A login launch stays in the menu bar, as does the
+            // main window of a tray scene (screenshot.rs).
+            let tray_scene = screenshot::tray_scene();
             let quiet = (login_launch::probe() && scene().is_none()) || tray_scene;
-            #[cfg(not(target_os = "macos"))]
-            let quiet = tray_scene;
             if quiet {
                 set_in_dock(app.handle(), false);
             }
@@ -823,60 +779,14 @@ pub fn run() {
             // reading, that window has its choices without the details.
             tray::build(app.handle())?;
             if tray_scene {
-                if let Some(t) = app.get_webview_window("tray") {
-                    let _ = t.set_position(tauri::LogicalPosition::new(200.0, 120.0));
-                    make_unseen(&t);
-                    let _ = t.show();
-                }
+                screenshot::show_tray(app.handle());
             }
             tray::start_reminders(app.handle().clone());
-            // tools/screenshots.py: the scene's snapshot to TES_SNAPSHOT, once it has settled.
-            if let (Some(_), Some(out)) = (scene(), std::env::var_os("TES_SNAPSHOT")) {
-                let label = if tray_scene { "tray" } else { "main" };
-                let num = |k: &str, d: f64| std::env::var(k).ok().and_then(|s| s.parse().ok()).unwrap_or(d);
-                let after = num("TES_SNAPSHOT_AFTER", 6.0);
-                // An animated screenshot: TES_SNAPSHOT_FRAMES of them, at least TES_SNAPSHOT_EVERY
-                // seconds apart, each to TES_SNAPSHOT with its number before the extension
-                // (shot-007.tiff). Each waits for the one before: asked for faster than WebKit draws
-                // them, they all come back the same. When each was taken goes in shot-times.txt.
-                let frames = num("TES_SNAPSHOT_FRAMES", 1.0).max(1.0) as usize;
-                let every = num("TES_SNAPSHOT_EVERY", 0.1);
-                let app = app.handle().clone();
-                std::thread::spawn(move || {
-                    std::thread::sleep(std::time::Duration::from_secs_f64(after));
-                    let out = std::path::PathBuf::from(out);
-                    let start = std::time::Instant::now();
-                    let stem = out.file_stem().unwrap_or_default().to_string_lossy().into_owned();
-                    let ext = out.extension().unwrap_or_default().to_string_lossy().into_owned();
-                    let mut times = String::new();
-                    for i in 0..frames {
-                        let dest = if frames == 1 { out.clone() } else { out.with_file_name(format!("{stem}-{i:03}.{ext}")) };
-                        let at = start.elapsed();
-                        if let Some(w) = app.get_webview_window(label) {
-                            let _ = snapshot(&w, &dest);
-                        }
-                        let given_up = std::time::Instant::now() + std::time::Duration::from_secs(5);
-                        while !dest.exists() && std::time::Instant::now() < given_up {
-                            std::thread::sleep(std::time::Duration::from_millis(5));
-                        }
-                        times.push_str(&format!("{:.3}\n", at.as_secs_f64()));
-                        let next = at + std::time::Duration::from_secs_f64(every);
-                        std::thread::sleep(next.saturating_sub(start.elapsed()));
-                    }
-                    if frames > 1 {
-                        let _ = std::fs::write(out.with_file_name(format!("{stem}-times.txt")), times);
-                    }
-                });
-            }
+            screenshot::start_snapshots(app.handle(), tray_scene);
 
             if let Some(w) = app.get_webview_window("main") {
-                // Screenshots are taken at one size, whatever size the window was left at.
-                // They're taken unseen and out of the Dock, without taking the focus.
                 if scene().is_some() {
-                    let _ = w.set_size(tauri::LogicalSize::new(1440.0, 900.0));
-                    let _ = w.center();
-                    make_unseen(&w);
-                    set_in_dock(app.handle(), false);
+                    screenshot::prepare_main(&w);
                 } else {
                     // The window-state plugin puts the saved size back after this, so the window
                     // is checked whenever its size changes too.
@@ -893,7 +803,6 @@ pub fn run() {
                 let dark = matches!(w.theme(), Ok(tauri::Theme::Dark));
                 let (r, g, b) = if dark { (13u8, 17u8, 23u8) } else { (246u8, 248u8, 250u8) };
                 let _ = w.set_background_color(Some(tauri::window::Color(r, g, b, 255)));
-                #[cfg(target_os = "macos")]
                 {
                     let w_show = w.clone();
                     let _ = w.with_webview(move |wv| {
@@ -928,10 +837,6 @@ pub fn run() {
                         });
                     }
                 }
-                #[cfg(not(target_os = "macos"))]
-                if !quiet {
-                    let _ = w.show();
-                }
                 // Closing the window hides it; the app stays in the menu bar.
                 let w2 = w.clone();
                 w.on_window_event(move |ev| {
@@ -954,9 +859,36 @@ pub fn run() {
             if let tauri::RunEvent::Exit = ev {
                 app.state::<AppState>().running.kill_all();
             }
-            #[cfg(target_os = "macos")]
             if let tauri::RunEvent::Reopen { .. } = ev {
                 show_main(app);
             }
         });
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn frame_headers_are_the_last_responses() {
+        // A redirect that forbade framing, then the page itself, which allows it.
+        let redirected =
+            "HTTP/1.1 301 Moved\r\nX-Frame-Options: DENY\r\nLocation: https://b/\r\n\r\nHTTP/2 200\r\ncontent-type: text/html\r\n\r\n";
+        assert!(frameable(redirected));
+        // "HTTP/" inside a header isn't where a response starts.
+        let via = "HTTP/2 200\r\nx-frame-options: SAMEORIGIN\r\nvia: HTTP/1.1 proxy\r\n\r\n";
+        assert!(!frameable(via));
+        assert!(!frameable("HTTP/2 200\r\ncontent-security-policy: frame-ancestors 'self'\r\n"));
+        assert!(frameable("HTTP/2 200\r\ncontent-security-policy: frame-ancestors *\r\n"));
+    }
+
+    #[test]
+    fn user_folders_are_not_the_apps_own() {
+        assert!(chosen_dir(&store::data_dir().join("chats").to_string_lossy()).is_err());
+        assert!(chosen_dir(&store::data_dir().to_string_lossy().to_uppercase()).is_err());
+        assert!(chosen_dir("/tmp/../etc").is_err() && chosen_dir("relative").is_err());
+        assert!(chosen_dir(&store::home().join("Documents/Two-edged Sword").to_string_lossy()).is_ok());
+        assert!(write_text_file(store::home().join(".ssh/notes.md").to_string_lossy().into(), "x".into()).is_err());
+        assert!(write_text_file("/no/such/folder/notes.md".into(), "x".into()).is_err());
+    }
 }

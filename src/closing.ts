@@ -6,11 +6,11 @@
 // Bible being read, so it can only open a passage that is there; without an assistant, or if its
 // answer can't be used, the Aaronic blessing (Numbers 6:24–26) closes instead.
 
-import { api } from "./api";
 import { askOnce } from "./Ask";
-import { assistantModels, pickModel } from "./assistant";
+import { assistantModels, assistantReady, pickModel } from "./assistant";
 import { book, fmtRef, parseRef } from "./bible";
 import { today } from "./plans";
+import { chapterSizes } from "./sizes";
 
 export interface Closing {
   b: number;
@@ -56,6 +56,7 @@ const withLabel = (x: Omit<Closing, "label">): Closing => ({
 
 async function choose(about: string[], bible: string, model: string, except?: string): Promise<Closing> {
   const blessing = (note: string) => withLabel({ ...BLESSING, note });
+  await assistantReady();
   const models = assistantModels();
   if (!models.length) return blessing("The blessing closes: no AI assistant is set up to choose a verse.");
   const prompt = `Someone has just finished their quiet time with God. Today they read: ${about.join("; ")}.
@@ -70,7 +71,7 @@ Speak to the reader as "you", warmly and plainly; name passages, not verse numbe
     if (!r?.verse || (r.toChapter && r.toChapter !== r.chapter))
       return blessing("The blessing closes: the assistant's choice couldn't be read.");
     // Only verses this Bible has, and a short passage at most.
-    const sizes = await api.chapterSizes(bible).catch(() => []);
+    const sizes = await chapterSizes(bible).catch(() => []);
     const n = sizes.find(([b, c]) => b === r.book && c === r.chapter)?.[2];
     if (!n || r.verse > n) return blessing(`The blessing closes: ${book(r.book).name} ${r.chapter}:${r.verse} isn't in this Bible.`);
     const to = r.to && r.to > r.verse ? Math.min(r.to, n, r.verse + MAX_VERSES - 1) : undefined;

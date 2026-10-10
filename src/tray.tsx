@@ -6,11 +6,12 @@
 // (src/TrayWindow.tsx). The reminder itself is timed on the
 // Rust side, which keeps running while the window is closed.
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { listen } from "@tauri-apps/api/event";
 import { api } from "./api";
 import { book } from "./bible";
-import { behind, current, firstUndone, streak, todayFor, ymd, today as startOfToday } from "./plans";
+import { behind, current, parseYmd, readOn, streak, todayIfOngoing } from "./plans";
+import { useReadingDay } from "./readingDay";
 import { useStartQuietTime } from "./QuietTime";
 import { useApp } from "./state";
 
@@ -20,15 +21,11 @@ export function useTray() {
   const app = useApp();
   const startQuiet = useStartQuietTime();
   // The date, so today's reading moves on at midnight without anything else changing.
-  const [day, setDay] = useState(() => ymd(startOfToday()));
-  useEffect(() => {
-    const t = window.setInterval(() => setDay(ymd(startOfToday())), 60_000);
-    return () => window.clearInterval(t);
-  }, []);
+  const day = useReadingDay();
 
   const plan = current(app.plans);
-  const t = plan && !(plan.kind === "sequence" && firstUndone(plan) < 0) ? todayFor(plan) : null;
-  const done = !!plan && (plan.kind === "ppo" ? plan.doneDates : (plan.readDates ?? [])).includes(day);
+  const t = todayIfOngoing(plan);
+  const done = !!plan && readOn(plan, parseYmd(day));
   const reading = app.doc ? app.doc.title : `${book(app.loc.book).name} ${app.loc.chapter}`;
   const { reminder, reminderTime } = app.settings;
   const st = plan ? streak(plan) : null;

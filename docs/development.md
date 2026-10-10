@@ -153,6 +153,7 @@ python3 tools/variances/build.py esv --work "$W/esv-nt"   # check them and merge
 22:19, John 7:53–8:11), for `--refs`; drop any the other batches already hold. `build.py` merges
 verse by verse, so folders and books can be added one at a time. Candidates ignore note markers,
 count "Jehovah" as "LORD", and don't call a verse missing when GNB joins it to the one before.
+`candidates.py` stops if a folder holds reviews `build.py` hasn't merged yet; `--discard-reviews` drops them.
 To ship a list, copy `variances-<module>.json` into `src-tauri/variances/`.
 
 ## Building modules
@@ -179,6 +180,7 @@ then press **Rescan**.
 | `tools/rheims/build.py` | The Rheims New Testament (1582) | crosswire | Bible Support file 11077, in ~/Downloads |
 
 Run each with `python3`. Downloads are cached in `~/Library/Caches/Two-edged Sword/`.
+Sources on GitHub, Bitbucket and SWORD's svn are pinned to a commit or revision, so a rebuild gives the same text; move the pin on purpose.
 
 All are public domain or openly licensed, except some Sefaria translations, SEDRA's glosses and
 Jastrow, which are for non-commercial use. That's fine for personal study.
@@ -196,6 +198,11 @@ Scripts in `tools/` share `tools/modules.py`:
   modules, in the order the app reads them.
 - `module(file, title, abbrev, info)`: a writer for any of the six formats. It yields the new
   module's connection and replaces the old file only when the block finishes.
+- `fetch(url, path, sha256=…)`: a cached download, retried, checked against its hash when one is given, written whole or not at all.
+- `chapter_lengths(name)`: verses per chapter of a module, found with `find`.
+- `hebrew_consonants`, `greek_key`, `similar`: the comparison keys the word-by-word builders match words with.
+
+`tools/books.py` holds the 66 books' names in each source's spelling.
 
 `tools/core/build.py` builds the built-in modules from public-domain sources only (its docstring
 lists them), under the ids the app looks for first: `kjv`, `kjv+`, `strong`, `kjc` and `tsk`.
@@ -206,7 +213,7 @@ modules on. Two scripts read e-Sword modules, so what they build is for your own
 
 `tools/stepbible.py` reads STEPBible's TAGNT: every Greek NT edition's words with Strong's numbers
 and grammar, numbered as the KJV. It gives ἐγώ, σύ and εἰμί their forms' numbers (μου G3450), as
-Strong's and the KJV+ do.
+Strong's and the KJV+ do. It also loads STEPBible's Greek and Hebrew lexicons and decodes Robinson's grammar codes, for the builders that need them.
 
 ## Reference book format
 
@@ -224,6 +231,9 @@ reference, and images inline as `data:` URLs.
 | Where | What |
 |---|---|
 | `src/` | The screens (`Read.tsx`, `Compare.tsx`, `WordStudy.tsx`, `QuietTime.tsx`, `Journal.tsx`…), shared state (`state.tsx`), the Rust calls (`api.ts`), e-Sword markup rendering (`esword.tsx`) |
+| `src/dom.ts`, `src/sizes.ts`, `src/readingDay.ts` | HTML escaping, dark mode and text highlights; each Bible's chapter sizes (cleared on rescan); the reading day, which turns at 4am |
+| `src/ReaderTools.tsx`, `src/ReadingColumn.tsx` | Pieces Read, the book reader, Lyrics, the web devotional and Journal share: highlight dots, copy, focus-mode hints and top bar |
+| `src/lexicon.ts` | Cached lexicon and concordance lookups for Word Study and the word popover |
 | `src/speech.tsx` | Reading aloud: word highlighting, sleep timer |
 | `src/awake.ts`, `keep_awake` in `lib.rs` | Keeping the screen awake (a `caffeinate`) while reading aloud, in Quiet time, or on Read or Compare in front |
 | `src/Ask.tsx`, `src/assistant.ts` | The Ask panels, and which AI tools and models are available |
@@ -231,20 +241,22 @@ reference, and images inline as `data:` URLs.
 | `src-tauri/src/search.rs`, `index.rs` | Search and its index |
 | `src-tauri/src/journal.rs` | The journal's monthly Markdown files |
 | `src-tauri/src/store.rs` | The JSON files in Application Support |
+| `src/music.ts` | One shared poll of what Music is playing, for Quiet time and Lyrics |
 | `src-tauri/src/music.rs` | Worship songs played through Music, for Quiet time and for a chapter (`src/ChapterSongs.tsx`) |
 | `src/LyricsPage.tsx`, `src/lyrics.ts`, `src/Flames.tsx` | The playing song's words (LRCLIB), artwork (Music, else the iTunes search API) and the flames shown when it has none |
 | `tools/bitmap.py`, `src/pictures/*-bitmap.ts` | Turns a public-domain picture into a small faded grey bitmap in a TypeScript module, shown in the artwork's colour by `bitmap` in `pictures/kit.ts`: the lion of Judah (Rosa Bonheur's lion), the lamb (a lamb in the grass, Unsplash), the open Bible (a Bible open on a table, Unsplash), the eagle, the shofar, the crown of thorns, Dürer's praying hands, objects from the Met's open-access photographs (the cup, a lyre, the Crown of the Andes, an alabaster jar, a helmet, a breastplate, a censer, a key, a water jar) Redouté's rose, the temple's furnishings from old engravings and the Arch of Titus, and the details of Renaissance paintings are made this way. `--pad` carries the background out round a photo so the faded oval clears the subject, and `--channel r` uses one colour where grey would lose the subject (the tan shofar on grey-blue). A dark subject (the eagle, the thorns) keeps its pale ground, shown as "photo", or it would look like a negative on the dark page. Only public-domain or CC0 pictures go in |
-| `src/Visions.tsx`, `src/pictures/` | The hundred and twenty-five pictures behind a playing song's words, by subject (`sky`, `land`, `places`, `signs`, `creatures`, and for Pentecostal worship `spirit`, `worship`, `throne`, `temple`, `deliverance`, `renewal`, and `paintings`, details of Renaissance paintings), drawn with `pictures/kit.ts`, in the artwork's colours. Each has `themes`, the words a song about it would use: one whose themes are in the song's title or words is chosen more often (`suits` in Visions.tsx), a theme counting for less the more pictures share it, so common worship words don't crowd the choice. A scene's `song.vision` shows one |
+| `src/Visions.tsx`, `src/pictures/` | The hundred and twenty-five pictures behind a playing song's words, by subject (`sky`, `land`, `places`, `signs`, `creatures`, and for Pentecostal worship `spirit`, `worship`, `throne`, `temple`, `deliverance`, `renewal`, and `paintings`, details of Renaissance paintings), drawn with `pictures/kit.ts` (layers, tones, glows, drifting specks, photo pictures, and a random that screenshot mode seeds), in the artwork's colours. `src/canvasLoop.ts` runs their canvas and the flames'. Each has `themes`, the words a song about it would use: one whose themes are in the song's title or words is chosen more often (`suits` in Visions.tsx), a theme counting for less the more pictures share it, so common worship words don't crowd the choice. A scene's `song.vision` shows one |
 | `src/closing.ts` | Quiet time's closing verse, chosen by the assistant |
 | `src/WebPage.tsx` | An online devotional framed in the reading column; `open_web` in `lib.rs` is its own window, and `web_frameable` checks (with curl) whether a site added by the user can be framed |
 | `src/tray.tsx`, `src/TrayWindow.tsx`, `src-tauri/src/tray.rs` | The menu-bar window (what it shows comes from the main window) and the daily reminder |
 | `src-tauri/src/login_item.rs`, `login_launch.rs` | Open at Login |
 | `src-tauri/src/tts.rs` | Speech through AVSpeechSynthesizer (WebKit's speech API hides downloaded voices) |
 | `src/Help.tsx`, `src/guides.ts`, `src-tauri/src/help.rs`, `tools/helpcheck.py` | The help drawer, the guides it shows, and the Help menu |
-| `src-tauri/src/assistant/` | Running Claude Code, Codex, Antigravity or Copilot for Ask |
+| `src-tauri/src/assistant/` | Running Claude Code, Codex, Antigravity or Copilot for Ask; `mod.rs` holds the streaming they share |
+| `src-tauri/src/process.rs` | Running a command with a time limit (Music, the login shell, the assistants' `--version`) |
 | `src-tauri/src/study.rs`, `books.rs` | Writing library material out as files for Ask to search |
 | `index.html` | The splash screen, painted before React starts |
-| `src/scene.ts`, `tools/screenshots.py` | Screenshot mode and the script that drives it |
+| `src/scene.ts`, `src-tauri/src/screenshot.rs`, `tools/screenshots.py` | Screenshot mode and the script that drives it |
 | `src/variances.tsx`, `src/KjvHistory.tsx` | The ≠ marks and their popup, and the KJV History page |
 | `tools/variances/` | Building each translation's differences from the KJV |
 | `tools/sefaria/`, `tools/vulgate/`, `tools/crosswire/` and the rest | Building modules from free sources ([Building modules](#building-modules)) |

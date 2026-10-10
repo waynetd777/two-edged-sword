@@ -39,30 +39,45 @@ deuterocanonical books are numbered 67–73 as in latin.bbli. Where a module joi
 verse number left in the text divides them, or a rule here gives the phrase to divide at.
 Chapters that still differ from the KJV are printed.
 
-Downloads are cached in ~/Library/Caches/Two-edged Sword/crosswire. The Douay-Rheims also reads
-the Clementine Vulgate through tools/vulgate, for which verses of the Psalms are titles.
+Downloads are cached in ~/Library/Caches/Two-edged Sword/crosswire. SWORD's versification tables
+are taken at a fixed revision of its repository and checked against their sha256; CrossWire's
+module zips have no fixed version to take, so they aren't. The Douay-Rheims also reads the
+Clementine Vulgate through tools/vulgate, for which verses of the Psalms are titles.
 """
-import html, importlib.util, io, os, re, sqlite3, struct, sys, urllib.request, zipfile, zlib
+import html, io, re, struct, sys, zipfile, zlib
 from pathlib import Path
 
-# tools/vulgate/build.py, for its rules and the Clementine's text.
-_spec = importlib.util.spec_from_file_location("vulgate", Path(__file__).resolve().parent.parent / "vulgate" / "build.py")
-vulgate = importlib.util.module_from_spec(_spec)
-_spec.loader.exec_module(vulgate)
-
-HOME = Path(os.environ.get("HOME", ""))
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from modules import LIBRARY, find  # noqa: E402
-CACHE = HOME / "Library/Caches/Two-edged Sword/crosswire"
+import vulgate.build as vulgate  # noqa: E402  (its rules and the Clementine's text)
+from books import OSIS as BOOKS66  # noqa: E402
+from modules import CACHES, LIBRARY, chapter_lengths, fetch, module  # noqa: E402
+CACHE = CACHES / "crosswire"
 RAWZIP = "https://www.crosswire.org/ftpmirror/pub/sword/packages/rawzip/{}.zip"
-CANON = "https://crosswire.org/svn/sword/trunk/include/{}"
+CANON = "https://crosswire.org/svn/sword/trunk/include/{}?p=3915"
+# sha256 of each canon header at that revision.
+CANON_SHA256 = {
+    "canon.h": "782e7a603cdfb45ddfd6eed9d31a639929fb928b47c7042d83c8ee9b76af078a",
+    "canon_calvin.h": "ccc6ba6cfd9d6db134aeb876d4a865a9602be60f22248d6de2d3d5a0c80ed5f1",
+    "canon_catholic.h": "7cd99701a9ef979c70953b8253e0bdadb0b1876c1a4971e73b97754cb6d2f313",
+    "canon_darbyfr.h": "628fc24ebc8280299a9df052657c7a655f6e400be7b83d0d8fe14b526d5e404a",
+    "canon_german.h": "b4533dca19f2a3399aac80aaa4f395bea640f1bee62256edf719f41fc94eab45",
+    "canon_kjva.h": "5c822e1f7ce8aa924d04d98453405006e795163cadae1a6c684a159dbca2e2aa",
+    "canon_leningrad.h": "a62f05f367c5ac3bac701b63edcbf49def203ddef537ee3d9767aeaaa8cf8f65",
+    "canon_luther.h": "ed0bf7605f9cc11fc1f0d9a8c1eac1dac028bb93ed40f9668e8d0fdd9959d5df",
+    "canon_lxx.h": "19f4708d0fa99f8b979a58bb3b0288eea75931096d86af59611e6bb21e22839f",
+    "canon_mt.h": "11755df348bfb7be7d29d325575667665bf96b25163b5023569db4f2b946954f",
+    "canon_nrsv.h": "fc7c83f32eca7d82ae248845f484349c8ef2114fb641fda791f1bbfac4ed5038",
+    "canon_nrsva.h": "a90134910aa20eacf0d7fa9cd17b000e787ef61b77b490664f729a546e995d9e",
+    "canon_null.h": "f2156bf06c6cefd908de8ea0f818787feb1c1b9668de307ea802b35e72b48ac3",
+    "canon_orthodox.h": "c0620f042fcf06c3dd798ad0a0df06197fae4d9485b020caf6176c35eba66789",
+    "canon_segond.h": "cd232348a14742a8aa4d32f64ffb7885976ea903b6ff9ac9710942687dbbecf7",
+    "canon_synodal.h": "764a58654f10014de830fd9d1ac38026e2b03cf8a60e4879a319f916a3e99b99",
+    "canon_synodalprot.h": "236fc2a5b9cbb3ebdaca5a7daac76fcf61eac14288967264ab011a543b681108",
+    "canon_vulg.h": "8a3f6d059f460b8e424fdba0d6cbbfc6ba927951ee429bd3c8660bf8012c41f7",
+}
 
 # SWORD's book names in e-Sword's order: 1–66, then the deuterocanon as latin.bbli numbers it.
-OSIS = ["Gen", "Exod", "Lev", "Num", "Deut", "Josh", "Judg", "Ruth", "1Sam", "2Sam", "1Kgs", "2Kgs", "1Chr", "2Chr", "Ezra", "Neh",
-        "Esth", "Job", "Ps", "Prov", "Eccl", "Song", "Isa", "Jer", "Lam", "Ezek", "Dan", "Hos", "Joel", "Amos", "Obad", "Jonah", "Mic",
-        "Nah", "Hab", "Zeph", "Hag", "Zech", "Mal", "Matt", "Mark", "Luke", "John", "Acts", "Rom", "1Cor", "2Cor", "Gal", "Eph", "Phil",
-        "Col", "1Thess", "2Thess", "1Tim", "2Tim", "Titus", "Phlm", "Heb", "Jas", "1Pet", "2Pet", "1John", "2John", "3John", "Jude", "Rev",
-        "Tob", "Jdt", "Wis", "Sir", "Bar", "1Macc", "2Macc"]
+OSIS = BOOKS66 + ["Tob", "Jdt", "Wis", "Sir", "Bar", "1Macc", "2Macc"]
 
 MODULES = {
     "Peshitta": dict(file="peshitta", title="Syriac Peshitta", abbrev="Peshitta", rtl=True,
@@ -111,19 +126,15 @@ RULES = {
 }
 
 
-def get(url, name):
-    p = CACHE / name
-    if not p.exists():
-        p.parent.mkdir(parents=True, exist_ok=True)
-        with urllib.request.urlopen(url, timeout=120) as r:
-            p.write_bytes(r.read())
-    return p.read_bytes()
+def get(url, name, sha256=None):
+    return fetch(url, CACHE / name, sha256=sha256).read_bytes()
 
 
 def canon(system):
     """{"ot": [(book, [verses in each chapter])], "nt": …} for a SWORD versification, from its canon header."""
-    kjv = get(CANON.format("canon.h"), "canon.h").decode()
-    t = kjv if system == "KJV" else get(CANON.format(f"canon_{system.lower()}.h"), f"canon_{system.lower()}.h").decode()
+    kjv = get(CANON.format("canon.h"), "canon.h", CANON_SHA256["canon.h"]).decode()
+    f = f"canon_{system.lower()}.h"
+    t = kjv if system == "KJV" else get(CANON.format(f), f, CANON_SHA256.get(f)).decode()
     suffix = "" if system == "KJV" else "_" + system.lower()
 
     def books(src, name):
@@ -273,11 +284,6 @@ def trim(rows, rules, all_empty=False):
     return out, rules + anchors
 
 
-def chapter_lengths(module):
-    c = sqlite3.connect(f"file:{find(module + '.bbli')}?immutable=1", uri=True)
-    return {(b, ch): n for b, ch, n in c.execute("SELECT Book, Chapter, MAX(Verse) FROM Bible GROUP BY Book, Chapter")}
-
-
 def drc_rules():
     """tools/vulgate's rules, by SWORD book name, with the Douay-Rheims' words to divide verses at."""
     rules = {OSIS[i]: list(vulgate.RULES.get(n, [])) for i, n in enumerate(vulgate.BOOKS[:66])}
@@ -322,7 +328,7 @@ DRC_RULES = {
 
 def build(name):
     m = MODULES[name]
-    kjv = chapter_lengths("kjv")
+    kjv = chapter_lengths("kjv.bbli")
     c, books, prologue = read(name)
     source = c.get("SourceType", "Plain")
     rules = dict(RULES[name])
@@ -370,19 +376,9 @@ def build(name):
             + (f"; text from {html.escape(c['TextSource'])}" if c.get("TextSource") else "")
             + f". Verses are numbered as in the KJV. Built by Two-edged Sword's tools/crosswire.</p>"
             f"<p>{about}</p><p>{html.escape(c.get('DistributionLicense', 'Public domain'))}.</p>")
-    p = LIBRARY / f"{m['file']}.bbli"
-    tmp = p.with_suffix(".tmp")
-    tmp.unlink(missing_ok=True)
-    db = sqlite3.connect(tmp)
-    db.executescript("""CREATE TABLE Details (Title NVARCHAR(100), Abbreviation NVARCHAR(50), Information TEXT, Version INT, OldTestament BOOL, NewTestament BOOL, Apocrypha BOOL, Strongs BOOL, RightToLeft BOOL);
-        CREATE TABLE Bible (Book INT, Chapter INT, Verse INT, Scripture TEXT);
-        CREATE INDEX BookChapterVerseIndex ON Bible (Book, Chapter, Verse);""")
-    db.execute("INSERT INTO Details VALUES (?,?,?,1,?,?,?,0,?)", (m["title"], m["abbrev"], info, ot, nt, apoc, int(m.get("rtl", False))))
-    db.executemany("INSERT INTO Bible VALUES (?,?,?,?)", sorted(verses))
-    db.commit()
-    db.close()
-    tmp.replace(p)
-    print(f"{p.name}: {len(verses)} verses")
+    with module(f"{m['file']}.bbli", m["title"], m["abbrev"], info, ot=ot, nt=nt, apocrypha=apoc, rtl=int(m.get("rtl", False))) as db:
+        db.executemany("INSERT INTO Bible VALUES (?,?,?,?)", sorted(verses))
+    print(f"{m['file']}.bbli: {len(verses)} verses")
 
 
 def main():

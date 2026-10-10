@@ -3,7 +3,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { api } from "./api";
-import { book, BOOKS, fmtRef, parseRef, SECTIONS, SHORT } from "./bible";
+import { book, BOOKS, fmtRef, parseRef, psalmLabel, SECTIONS, SHORT } from "./bible";
 import { Icon, Play } from "./icons";
 import {
   addDays,
@@ -43,40 +43,36 @@ import {
   Sizes,
   today,
   todayFor,
+  todayIfOngoing,
   ymd,
   worshipCounts,
 } from "./plans";
 import { BibleSelect, SearchField, Topbar } from "./Shell";
 import { uid, useApp } from "./state";
+import { useReadingDay } from "./readingDay";
 import { InvertButton, inverts } from "./WebPage";
 import { confirmDelete, Dialog, Popover, Seg, Switch } from "./ui";
 import { useStartQuietTime } from "./QuietTime";
 import { useAssistant } from "./assistant";
+import { chapterSizes } from "./sizes";
 
-const sizesCache: Record<string, Sizes> = {};
-async function sizes(bible: string): Promise<Sizes> {
-  if (!sizesCache[bible]) sizesCache[bible] = await api.chapterSizes(bible);
-  return sizesCache[bible];
+/** A plan is read in the Bible it was set up with, when that Bible is still in the library. */
+function readInPlanBible(app: ReturnType<typeof useApp>, plan: Plan) {
+  if (app.mod("bible", plan.bible) && app.settings.bible !== plan.bible) app.set({ bible: plan.bible });
 }
 
 export function PlansScreen({ openPalette }: { openPalette: () => void }) {
   const app = useApp();
-  const canAsk = useAssistant().available;
   const plan = app.plans.find((p) => p.active) ?? app.plans[0];
   const [picker, setPicker] = useState(false);
   const [builder, setBuilder] = useState(false);
   const [behindOpen, setBehindOpen] = useState(false);
   /** After the current plan is deleted, with others left: which to carry on with. */
   const [nextOpen, setNextOpen] = useState(false);
-  const [month, setMonth] = useState(() => {
-    const d = today();
-    d.setDate(1);
-    return d;
-  });
 
+  // Drawn again when the reading day changes (at 4am), so a screen left open moves on to it.
+  useReadingDay();
   const update = (p: Plan) => app.setPlans((ps) => ps.map((x) => (x.id === p.id ? p : x)));
-  const startQuiet = useStartQuietTime();
-  const partsDone = plan ? doneToday(plan, progressKey(plan, today())) : [];
   const t = plan ? todayFor(plan) : null;
   const late = plan?.kind === "sequence" ? behind(plan) : 0;
 
@@ -95,51 +91,6 @@ export function PlansScreen({ openPalette }: { openPalette: () => void }) {
         ],
       });
   }, [plan?.id, late]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const markRead = () => {
-    if (!plan) return;
-    if (plan.kind === "ppo") update(markPpoRead(plan, today()));
-    else update(markDayRead(plan, today()));
-    app.toast("Marked as read");
-  };
-  const unmarkRead = () => {
-    if (!plan) return;
-    update(unmarkDayRead(plan, today()));
-    app.toast("Marked as unread");
-  };
-  // A plan is read in the Bible it was set up with, when that Bible is still in the library.
-  const toPlanBible = () => {
-    if (app.mod("bible", plan.bible) && app.settings.bible !== plan.bible) app.set({ bible: plan.bible });
-  };
-  const openPart = (i = 0) => {
-    const x = t?.parts[i];
-    if (x) {
-      toPlanBible();
-      app.open({ book: x.b, chapter: x.c, verse: x.v, to: x.v2 }, "read");
-    }
-  };
-
-  // Days to mark on the calendar.
-  const doneDays = useMemo(() => {
-    const s = new Set<string>();
-    if (!plan) return s;
-    if (plan.kind === "ppo") plan.doneDates.forEach((d) => s.add(d));
-    else plan.done.forEach((i) => s.add(ymd(dateOf(plan, i))));
-    return s;
-  }, [plan]);
-  // What a Psalm-and-Proverb plan read on each day it was read, for the calendar's tooltips.
-  const ppoRead = useMemo(() => (plan?.kind === "ppo" ? ppoHistory(plan) : null), [plan]);
-  const upcoming = useMemo(() => {
-    if (!plan) return [];
-    if (plan.kind === "ppo")
-      return ppoUpcoming(plan, today(), 6).map((x) => ({
-        date: x.date,
-        label: x.parts.map((p) => fmtRef(partRef(p)).replace("Psalms", "Psalm")).join(" · "),
-      }));
-    const i = firstUndone(plan);
-    if (i < 0) return [];
-    return plan.days.slice(i + 1, i + 7).map((d, k) => ({ date: dateOf(plan, i + 1 + k), label: dayLabel(d) }));
-  }, [plan]);
 
   if (!plan) {
     return (
@@ -179,19 +130,6 @@ export function PlansScreen({ openPalette }: { openPalette: () => void }) {
 
   const seq = plan.kind === "sequence" ? plan : null;
   const finish = seq ? dateOf(seq, seq.days.length - 1) : null;
-  const first = new Date(month);
-  const lead = (first.getDay() + 6) % 7;
-  const dim = new Date(first.getFullYear(), first.getMonth() + 1, 0).getDate();
-  const cells: (Date | null)[] = [
-    ...Array(lead).fill(null),
-    ...Array.from({ length: dim }, (_, i) => new Date(first.getFullYear(), first.getMonth(), i + 1)),
-  ];
-  const tk = ymd(today());
-  const readingFor = (d: Date) => {
-    if (plan.kind === "ppo") return null;
-    const i = indexOn(plan, d);
-    return i >= 0 && i < plan.days.length && ymd(dateOf(plan, i)) === ymd(d) ? plan.days[i] : null;
-  };
 
   return (
     <div className="main">
@@ -326,136 +264,7 @@ export function PlansScreen({ openPalette }: { openPalette: () => void }) {
               </button>
             </div>
           </div>
-          <div
-            className="card"
-            style={{
-              padding: "22px 24px",
-              display: "flex",
-              flexDirection: "column",
-              gap: 12,
-              background: "var(--accentsoft)",
-              borderColor: "var(--ring)",
-            }}
-          >
-            <div className="label" style={{ color: "var(--accent)" }}>
-              {plan.kind === "ppo"
-                ? `Today · ${fmtLong(today())}`
-                : t?.label === "Finished"
-                  ? "Finished"
-                  : `Next · day ${firstUndone(seq!) + 1}`}
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-              {t?.parts.map((x, i) => {
-                const read = Array.from({ length: (x.c2 ?? x.c) - x.c + 1 }, (_, k) => `${x.b}.${x.c + k}`).every((k) =>
-                  partsDone.includes(k),
-                );
-                return (
-                  <button
-                    key={i}
-                    type="button"
-                    className="partlink"
-                    title={`Open ${fmtRef(partRef(x)).replace("Psalms", "Psalm")} in the ${app.mod("bible", plan.bible)?.abbrev ?? "plan's Bible"}`}
-                    onClick={() => openPart(i)}
-                    style={{
-                      alignSelf: "flex-start",
-                      border: 0,
-                      padding: "2px 8px",
-                      margin: "0 -8px",
-                      borderRadius: 8,
-                      textAlign: "left",
-                      cursor: "pointer",
-                      font: `500 ${t.parts.length > 1 ? 30 : 44}px/1.1 var(--display)`,
-                      color: read ? "var(--muted)" : "var(--text)",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 10,
-                    }}
-                  >
-                    {fmtRef(partRef(x)).replace("Psalms", "Psalm")}
-                    {read && <Icon name="check" size={20} style={{ color: "var(--good)" }} />}
-                  </button>
-                );
-              })}
-            </div>
-            {plan.kind === "ppo" && plan.doneDates.includes(tk) && (
-              <div style={{ color: "var(--good)", display: "flex", gap: 6, alignItems: "center" }}>
-                <Icon name="check" />
-                Read today
-              </div>
-            )}
-            <div style={{ display: "flex", gap: 8, marginTop: "auto", flexWrap: "wrap" }}>
-              <button
-                className="btn primary"
-                type="button"
-                style={{ height: 34, padding: "0 16px" }}
-                title="Step through today's readings and devotionals"
-                onClick={() => t && startQuiet(plan, t.parts, false)}
-              >
-                <Icon name="read" />
-                Read
-              </button>
-              <button
-                className="btn"
-                type="button"
-                style={{ height: 34 }}
-                title="Read today's readings and devotionals aloud, one after another"
-                onClick={() => t && startQuiet(plan, t.parts, true)}
-              >
-                <Play size={12} />
-                Read with audio
-              </button>
-              {/* Once today is marked, the button undoes it. A sequence plan can still mark another
-                  day read (catching up), so it keeps both. */}
-              {readOn(plan, today()) && (
-                <button
-                  className="btn"
-                  type="button"
-                  style={{ height: 34, marginLeft: "auto" }}
-                  title="Undo today's mark: the plan goes back to where it was"
-                  onClick={unmarkRead}
-                >
-                  <Icon name="x" />
-                  Mark as unread
-                </button>
-              )}
-              {!(plan.kind === "ppo" && plan.doneDates.includes(tk)) && (
-                <button
-                  className="btn"
-                  type="button"
-                  style={{ height: 34, marginLeft: readOn(plan, today()) ? undefined : "auto" }}
-                  onClick={markRead}
-                >
-                  <Icon name="check" />
-                  Mark as read
-                </button>
-              )}
-            </div>
-            {canAsk && t?.parts[0] && (
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center" }}>
-                <span style={{ color: "var(--accent)", display: "inline-flex" }}>
-                  <Icon name="chat" />
-                </span>
-                {[
-                  `Background before I read ${fmtRef(partRef(t.parts[t.parts.length - 1]))}`,
-                  `What to look for in ${fmtRef(partRef(t.parts[t.parts.length - 1]))}`,
-                ].map((s) => (
-                  <button
-                    key={s}
-                    type="button"
-                    className="chip"
-                    onClick={() => {
-                      const x = t.parts[t.parts.length - 1];
-                      toPlanBible();
-                      app.open({ book: x.b, chapter: x.c });
-                      app.setPending({ ask: s });
-                    }}
-                  >
-                    {s.replace(/ (Psalms?|Proverbs) .*$/, "")}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+          <TodayCard plan={plan} update={update} />
         </div>
         {/* Side by side, three across on a wide window, fewer as it narrows. */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 16, alignItems: "stretch" }}>
@@ -465,103 +274,8 @@ export function PlansScreen({ openPalette }: { openPalette: () => void }) {
         </div>
         <TryQuietTime plan={plan} />
         <div style={{ display: "grid", gridTemplateColumns: "420px minmax(0,1fr)", gap: 16 }}>
-          <div className="card" style={{ padding: "16px 18px" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
-              <b>{month.toLocaleDateString("en-GB", { month: "long", year: "numeric" })}</b>
-              <button
-                className="ibtn"
-                type="button"
-                aria-label="Previous month"
-                style={{ marginLeft: "auto" }}
-                onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() - 1, 1))}
-              >
-                <Icon name="back" />
-              </button>
-              <button
-                className="ibtn"
-                type="button"
-                aria-label="Next month"
-                onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() + 1, 1))}
-              >
-                <Icon name="fwd" />
-              </button>
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(7, minmax(0,1fr))", gap: 4 }}>
-              {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d) => (
-                <span key={d} style={{ fontSize: 11, color: "var(--muted)", textAlign: "center" }}>
-                  {d}
-                </span>
-              ))}
-              {cells.map((d, k) => {
-                if (!d) return <span key={k} />;
-                const key = ymd(d),
-                  done = doneDays.has(key),
-                  isToday = key === tk;
-                const r = readingFor(d) ?? ppoRead?.get(key) ?? null;
-                return (
-                  <button
-                    key={k}
-                    type="button"
-                    title={r ? `${done ? "Read: " : ""}${dayLabel(r)}` : undefined}
-                    disabled={!r && plan.kind !== "ppo"}
-                    onClick={() => {
-                      if (r) {
-                        toPlanBible();
-                        app.open({ book: r[0].b, chapter: r[0].c }, "read");
-                      }
-                    }}
-                    style={{
-                      height: 38,
-                      borderRadius: 8,
-                      border: 0,
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: 2,
-                      fontSize: 12,
-                      fontVariantNumeric: "tabular-nums",
-                      cursor: r ? "pointer" : "default",
-                      color: isToday ? "var(--accent)" : done ? "var(--text)" : "var(--muted)",
-                      fontWeight: isToday ? 700 : 400,
-                      background: isToday ? "var(--accentsoft)" : "transparent",
-                      boxShadow: isToday ? "inset 0 0 0 1.5px var(--accent)" : undefined,
-                    }}
-                  >
-                    {d.getDate()}
-                    <span style={{ width: 5, height: 5, borderRadius: "50%", background: done ? "var(--accent)" : "transparent" }} />
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-          <div className="card" style={{ padding: "12px 18px" }}>
-            <div className="label" style={{ padding: "4px 4px 6px" }}>
-              Coming up
-            </div>
-            {upcoming.map((u) => (
-              <div
-                key={u.date.toISOString()}
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "120px minmax(0,1fr)",
-                  gap: 12,
-                  alignItems: "center",
-                  minHeight: 40,
-                  padding: "0 4px",
-                  borderBottom: "1px solid var(--border)",
-                }}
-              >
-                <span style={{ color: "var(--muted)" }}>{fmtDay(u.date)}</span>
-                <b style={{ font: "600 16px var(--display)" }}>{u.label}</b>
-              </div>
-            ))}
-            {!upcoming.length && (
-              <div className="n" style={{ padding: 4 }}>
-                Nothing more: the plan is finished.
-              </div>
-            )}
-          </div>
+          <PlanCalendar plan={plan} />
+          <ComingUp plan={plan} />
         </div>
       </div>
       {picker && (
@@ -654,7 +368,7 @@ function PlanPicker({ onClose, onBuild }: { onClose: () => void; onBuild: () => 
         doneDates: [],
         active: true,
       };
-    const s = await sizes(bible);
+    const s = await chapterSizes(bible);
     const base = { id, kind: "sequence" as const, start, bible, weekdaysOnly: weekdays, done: [], skipped: [], shift: 0, active: true };
     if (choice === "year") return { ...base, name: "The whole Bible in a year", days: balanced(s, 365) };
     if (choice === "nt90")
@@ -692,7 +406,7 @@ function PlanPicker({ onClose, onBuild }: { onClose: () => void; onBuild: () => 
           setPreview(
             ppoPreview(p, parseYmd(start), 8).map((x) => ({
               date: fmtDay(x.date),
-              label: x.parts.map((q) => fmtRef(partRef(q)).replace("Psalms", "Psalm")).join(" · "),
+              label: x.parts.map((q) => psalmLabel(fmtRef(partRef(q)))).join(" · "),
             })),
           );
         else setPreview(p.days.slice(0, 7).map((d, i) => ({ date: fmtDay(dateOf(p, i)), label: dayLabel(d) })));
@@ -741,39 +455,7 @@ function PlanPicker({ onClose, onBuild }: { onClose: () => void; onBuild: () => 
             return (
               <div key={o.id}>
                 {head}
-                <button
-                  type="button"
-                  onClick={() => setChoice(o.id)}
-                  aria-pressed={choice === o.id}
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "18px minmax(0,1fr)",
-                    gap: 10,
-                    padding: "10px 12px",
-                    borderRadius: 9,
-                    border: `1px solid ${choice === o.id ? "var(--ring)" : "transparent"}`,
-                    background: choice === o.id ? "var(--accentsoft)" : "transparent",
-                    cursor: "pointer",
-                    textAlign: "left",
-                    width: "100%",
-                  }}
-                >
-                  <span
-                    style={{
-                      width: 14,
-                      height: 14,
-                      borderRadius: "50%",
-                      border: choice === o.id ? "4px solid var(--accent)" : "1.5px solid var(--track)",
-                      marginTop: 2,
-                    }}
-                  />
-                  <span style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                    <b style={{ fontSize: 13 }}>{o.name}</b>
-                    <span className="hint" style={{ fontSize: 12 }}>
-                      {o.meta}
-                    </span>
-                  </span>
-                </button>
+                <ChoiceCard on={choice === o.id} title={o.name} meta={o.meta} onClick={() => setChoice(o.id)} />
               </div>
             );
           })}
@@ -904,8 +586,14 @@ function PlanBuilder({ onClose }: { onClose: () => void }) {
   const [start, setStart] = useState(ymd(today()));
   const [s, setS] = useState<Sizes>([]);
   useEffect(() => {
-    sizes(app.settings.bible).then(setS);
-  }, [app.settings.bible]);
+    let live = true;
+    chapterSizes(app.settings.bible)
+      .then((x) => live && setS(x))
+      .catch((e) => app.toast(`Couldn't read the Bible's chapters: ${e}`));
+    return () => {
+      live = false;
+    };
+  }, [app.settings.bible]); // eslint-disable-line react-hooks/exhaustive-deps
   const chs = chaptersOf(s, books);
   const verses = chs.reduce((a, c) => a + c[2], 0);
   const daysUntil = Math.max(1, Math.round((parseYmd(finishBy).getTime() - parseYmd(start).getTime()) / 86400000) + 1);
@@ -1148,39 +836,7 @@ function BehindDialog({ plan, onClose, onApply }: { plan: SequencePlan; onClose:
       </div>
       <div style={{ padding: "8px 18px", display: "flex", flexDirection: "column", gap: 6 }}>
         {opts.map(([id, t, m]) => (
-          <button
-            key={id}
-            type="button"
-            onClick={() => setChoice(id)}
-            aria-pressed={choice === id}
-            style={{
-              display: "grid",
-              gridTemplateColumns: "18px minmax(0,1fr)",
-              gap: 10,
-              padding: "10px 12px",
-              borderRadius: 9,
-              border: `1px solid ${choice === id ? "var(--ring)" : "transparent"}`,
-              background: choice === id ? "var(--accentsoft)" : "transparent",
-              cursor: "pointer",
-              textAlign: "left",
-            }}
-          >
-            <span
-              style={{
-                width: 14,
-                height: 14,
-                borderRadius: "50%",
-                border: choice === id ? "4px solid var(--accent)" : "1.5px solid var(--track)",
-                marginTop: 2,
-              }}
-            />
-            <span style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-              <b style={{ fontSize: 13 }}>{t}</b>
-              <span className="hint" style={{ fontSize: 12 }}>
-                {m}
-              </span>
-            </span>
-          </button>
+          <ChoiceCard key={id} on={choice === id} title={t} meta={m} onClick={() => setChoice(id)} />
         ))}
       </div>
       <div
@@ -1422,7 +1078,7 @@ function AddWebsite({ onAdd }: { onAdd: (w: WebDevotional) => void }) {
     try {
       // Checked with today's date in, as it will be opened.
       const frameable = await api.webFrameable(fillDate(address, today()));
-      onAdd({ id: `web:${Date.now().toString(36)}`, title: title.trim(), url: address, ...(frameable ? {} : { window: true }) });
+      onAdd({ id: `web:${uid()}`, title: title.trim(), url: address, ...(frameable ? {} : { window: true }) });
       setOpen(false);
       setTitle("");
       setUrl("");
@@ -1548,7 +1204,7 @@ function FinaleSetting({ plan, update }: { plan: Plan; update: (p: Plan) => void
       <span className="label">Every day</span>
       {plan.finale ? (
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <b>{partLabel(plan.finale).replace("Psalms", "Psalm")}</b>
+          <b>{psalmLabel(partLabel(plan.finale))}</b>
           <button
             className="btn small"
             type="button"
@@ -1585,7 +1241,7 @@ function FinaleSetting({ plan, update }: { plan: Plan; update: (p: Plan) => void
 /** Under the worship and closing verse settings: today's Quiet time run through with them, to try. */
 function TryQuietTime({ plan }: { plan: Plan }) {
   const startQuiet = useStartQuietTime();
-  const t = !(plan.kind === "sequence" && firstUndone(plan) < 0) ? todayFor(plan) : null;
+  const t = todayIfOngoing(plan);
   if (!plan.worship && !plan.closing) return null;
   return (
     <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 10, marginTop: -4 }}>
@@ -1634,5 +1290,354 @@ function StreakLine({ plan }: { plan: Plan }) {
         <b style={{ color: "var(--text)" }}>{st.week}</b> of the last 7 {unit}s
       </span>
     </div>
+  );
+}
+
+/** Today's reading: its parts to open, Read and Read with audio, marking it read, and questions to ask before reading. */
+function TodayCard({ plan, update }: { plan: Plan; update: (p: Plan) => void }) {
+  const app = useApp();
+  const canAsk = useAssistant().available;
+  const startQuiet = useStartQuietTime();
+  const partsDone = doneToday(plan, progressKey(plan, today()));
+  const t = todayFor(plan);
+  const seq = plan.kind === "sequence" ? plan : null;
+  const tk = ymd(today());
+  // Today as it is when clicked; said only when it changed something.
+  const markRead = () => {
+    if (!plan) return;
+    const p = plan.kind === "ppo" ? markPpoRead(plan, today()) : markDayRead(plan, today());
+    if (p === plan) return;
+    update(p);
+    app.toast("Marked as read");
+  };
+  const unmarkRead = () => {
+    if (!plan) return;
+    const p = unmarkDayRead(plan, today());
+    if (p === plan) return;
+    update(p);
+    app.toast("Marked as unread");
+  };
+  const toPlanBible = () => readInPlanBible(app, plan);
+  const openPart = (i = 0) => {
+    const x = t.parts[i];
+    if (x) {
+      toPlanBible();
+      app.open({ book: x.b, chapter: x.c, verse: x.v, to: x.v2 }, "read");
+    }
+  };
+  return (
+    <div
+      className="card"
+      style={{
+        padding: "22px 24px",
+        display: "flex",
+        flexDirection: "column",
+        gap: 12,
+        background: "var(--accentsoft)",
+        borderColor: "var(--ring)",
+      }}
+    >
+      <div className="label" style={{ color: "var(--accent)" }}>
+        {plan.kind === "ppo" ? `Today · ${fmtLong(today())}` : t?.label === "Finished" ? "Finished" : `Next · day ${firstUndone(seq!) + 1}`}
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+        {t?.parts.map((x, i) => {
+          const read = Array.from({ length: (x.c2 ?? x.c) - x.c + 1 }, (_, k) => `${x.b}.${x.c + k}`).every((k) => partsDone.includes(k));
+          return (
+            <button
+              key={i}
+              type="button"
+              className="partlink"
+              title={`Open ${psalmLabel(fmtRef(partRef(x)))} in the ${app.mod("bible", plan.bible)?.abbrev ?? "plan's Bible"}`}
+              onClick={() => openPart(i)}
+              style={{
+                alignSelf: "flex-start",
+                border: 0,
+                padding: "2px 8px",
+                margin: "0 -8px",
+                borderRadius: 8,
+                textAlign: "left",
+                cursor: "pointer",
+                font: `500 ${t.parts.length > 1 ? 30 : 44}px/1.1 var(--display)`,
+                color: read ? "var(--muted)" : "var(--text)",
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+              }}
+            >
+              {psalmLabel(fmtRef(partRef(x)))}
+              {read && <Icon name="check" size={20} style={{ color: "var(--good)" }} />}
+            </button>
+          );
+        })}
+      </div>
+      {plan.kind === "ppo" && plan.doneDates.includes(tk) && (
+        <div style={{ color: "var(--good)", display: "flex", gap: 6, alignItems: "center" }}>
+          <Icon name="check" />
+          Read today
+        </div>
+      )}
+      <div style={{ display: "flex", gap: 8, marginTop: "auto", flexWrap: "wrap" }}>
+        <button
+          className="btn primary"
+          type="button"
+          style={{ height: 34, padding: "0 16px" }}
+          title="Step through today's readings and devotionals"
+          onClick={() => t && startQuiet(plan, t.parts, false)}
+        >
+          <Icon name="read" />
+          Read
+        </button>
+        <button
+          className="btn"
+          type="button"
+          style={{ height: 34 }}
+          title="Read today's readings and devotionals aloud, one after another"
+          onClick={() => t && startQuiet(plan, t.parts, true)}
+        >
+          <Play size={12} />
+          Read with audio
+        </button>
+        {/* Once today is marked, the button undoes it. A sequence plan can still mark another
+            day read (catching up), so it keeps both. */}
+        {readOn(plan, today()) && (
+          <button
+            className="btn"
+            type="button"
+            style={{ height: 34, marginLeft: "auto" }}
+            title="Undo today's mark: the plan goes back to where it was"
+            onClick={unmarkRead}
+          >
+            <Icon name="x" />
+            Mark as unread
+          </button>
+        )}
+        {!(plan.kind === "ppo" && plan.doneDates.includes(tk)) && (
+          <button
+            className="btn"
+            type="button"
+            style={{ height: 34, marginLeft: readOn(plan, today()) ? undefined : "auto" }}
+            onClick={markRead}
+          >
+            <Icon name="check" />
+            Mark as read
+          </button>
+        )}
+      </div>
+      {canAsk && t?.parts[0] && (
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center" }}>
+          <span style={{ color: "var(--accent)", display: "inline-flex" }}>
+            <Icon name="chat" />
+          </span>
+          {[
+            `Background before I read ${fmtRef(partRef(t.parts[t.parts.length - 1]))}`,
+            `What to look for in ${fmtRef(partRef(t.parts[t.parts.length - 1]))}`,
+          ].map((s) => (
+            <button
+              key={s}
+              type="button"
+              className="chip"
+              onClick={() => {
+                const x = t.parts[t.parts.length - 1];
+                toPlanBible();
+                app.open({ book: x.b, chapter: x.c });
+                app.setPending({ ask: s });
+              }}
+            >
+              {s.replace(/ (Psalms?|Proverbs) .*$/, "")}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** A month of the plan: the days read marked, each day's reading in its tooltip, opened by a click. */
+function PlanCalendar({ plan }: { plan: Plan }) {
+  const app = useApp();
+  const [month, setMonth] = useState(() => {
+    const d = today();
+    d.setDate(1);
+    return d;
+  });
+  const toPlanBible = () => readInPlanBible(app, plan);
+  // Days to mark on the calendar.
+  const doneDays = useMemo(() => {
+    const s = new Set<string>();
+    if (plan.kind === "ppo") plan.doneDates.forEach((d) => s.add(d));
+    else plan.done.forEach((i) => s.add(ymd(dateOf(plan, i))));
+    return s;
+  }, [plan]);
+  // What a Psalm-and-Proverb plan read on each day it was read, for the calendar's tooltips.
+  const ppoRead = useMemo(() => (plan.kind === "ppo" ? ppoHistory(plan) : null), [plan]);
+  const first = new Date(month);
+  const lead = (first.getDay() + 6) % 7;
+  const dim = new Date(first.getFullYear(), first.getMonth() + 1, 0).getDate();
+  const cells: (Date | null)[] = [
+    ...Array(lead).fill(null),
+    ...Array.from({ length: dim }, (_, i) => new Date(first.getFullYear(), first.getMonth(), i + 1)),
+  ];
+  const tk = ymd(today());
+  const readingFor = (d: Date) => {
+    if (plan.kind === "ppo") return null;
+    const i = indexOn(plan, d);
+    return i >= 0 && i < plan.days.length && ymd(dateOf(plan, i)) === ymd(d) ? plan.days[i] : null;
+  };
+  return (
+    <div className="card" style={{ padding: "16px 18px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
+        <b>{month.toLocaleDateString("en-GB", { month: "long", year: "numeric" })}</b>
+        <button
+          className="ibtn"
+          type="button"
+          aria-label="Previous month"
+          style={{ marginLeft: "auto" }}
+          onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() - 1, 1))}
+        >
+          <Icon name="back" />
+        </button>
+        <button
+          className="ibtn"
+          type="button"
+          aria-label="Next month"
+          onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() + 1, 1))}
+        >
+          <Icon name="fwd" />
+        </button>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(7, minmax(0,1fr))", gap: 4 }}>
+        {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d) => (
+          <span key={d} style={{ fontSize: 11, color: "var(--muted)", textAlign: "center" }}>
+            {d}
+          </span>
+        ))}
+        {cells.map((d, k) => {
+          if (!d) return <span key={k} />;
+          const key = ymd(d),
+            done = doneDays.has(key),
+            isToday = key === tk;
+          const r = readingFor(d) ?? ppoRead?.get(key) ?? null;
+          return (
+            <button
+              key={k}
+              type="button"
+              title={r ? `${done ? "Read: " : ""}${dayLabel(r)}` : undefined}
+              disabled={!r && plan.kind !== "ppo"}
+              onClick={() => {
+                if (r) {
+                  toPlanBible();
+                  app.open({ book: r[0].b, chapter: r[0].c }, "read");
+                }
+              }}
+              style={{
+                height: 38,
+                borderRadius: 8,
+                border: 0,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 2,
+                fontSize: 12,
+                fontVariantNumeric: "tabular-nums",
+                cursor: r ? "pointer" : "default",
+                color: isToday ? "var(--accent)" : done ? "var(--text)" : "var(--muted)",
+                fontWeight: isToday ? 700 : 400,
+                background: isToday ? "var(--accentsoft)" : "transparent",
+                boxShadow: isToday ? "inset 0 0 0 1.5px var(--accent)" : undefined,
+              }}
+            >
+              {d.getDate()}
+              <span style={{ width: 5, height: 5, borderRadius: "50%", background: done ? "var(--accent)" : "transparent" }} />
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/** The next week's readings. */
+function ComingUp({ plan }: { plan: Plan }) {
+  // From the reading day it is now, so a screen left open moves on with it.
+  const day = useReadingDay();
+  const upcoming = useMemo(() => {
+    if (plan.kind === "ppo")
+      return ppoUpcoming(plan, parseYmd(day), 6).map((x) => ({
+        date: x.date,
+        label: x.parts.map((p) => psalmLabel(fmtRef(partRef(p)))).join(" · "),
+      }));
+    const i = firstUndone(plan);
+    if (i < 0) return [];
+    return plan.days.slice(i + 1, i + 7).map((d, k) => ({ date: dateOf(plan, i + 1 + k), label: dayLabel(d) }));
+  }, [plan, day]);
+  return (
+    <div className="card" style={{ padding: "12px 18px" }}>
+      <div className="label" style={{ padding: "4px 4px 6px" }}>
+        Coming up
+      </div>
+      {upcoming.map((u) => (
+        <div
+          key={u.date.toISOString()}
+          style={{
+            display: "grid",
+            gridTemplateColumns: "120px minmax(0,1fr)",
+            gap: 12,
+            alignItems: "center",
+            minHeight: 40,
+            padding: "0 4px",
+            borderBottom: "1px solid var(--border)",
+          }}
+        >
+          <span style={{ color: "var(--muted)" }}>{fmtDay(u.date)}</span>
+          <b style={{ font: "600 16px var(--display)" }}>{u.label}</b>
+        </div>
+      ))}
+      {!upcoming.length && (
+        <div className="n" style={{ padding: 4 }}>
+          Nothing more: the plan is finished.
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** One of a few choices, as a radio button with its name and what it means. */
+function ChoiceCard({ on, title, meta, onClick }: { on: boolean; title: string; meta: string; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={on}
+      style={{
+        display: "grid",
+        gridTemplateColumns: "18px minmax(0,1fr)",
+        gap: 10,
+        padding: "10px 12px",
+        borderRadius: 9,
+        border: `1px solid ${on ? "var(--ring)" : "transparent"}`,
+        background: on ? "var(--accentsoft)" : "transparent",
+        cursor: "pointer",
+        textAlign: "left",
+        width: "100%",
+      }}
+    >
+      <span
+        style={{
+          width: 14,
+          height: 14,
+          borderRadius: "50%",
+          border: on ? "4px solid var(--accent)" : "1.5px solid var(--track)",
+          marginTop: 2,
+        }}
+      />
+      <span style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        <b style={{ fontSize: 13 }}>{title}</b>
+        <span className="hint" style={{ fontSize: 12 }}>
+          {meta}
+        </span>
+      </span>
+    </button>
   );
 }

@@ -2,16 +2,16 @@
 // SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import { listen } from "@tauri-apps/api/event";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { api, JournalEntry, ModuleInfo, Verse } from "./api";
-import { fmtRef, parseRef, Ref } from "./bible";
+import { fmtRef, mentionsPassage, Ref } from "./bible";
 import { plainText } from "./esword";
 import { Icon } from "./icons";
 import { mdToHtml } from "./md";
 import { modelGroups, modelName, pickModel, providerOf, PROVIDER_NAME, useAssistant } from "./assistant";
 import { Chat, Model, nowLocal, Opened, Place, HlTheme, themesOf, uid, useApp } from "./state";
 import { useRefPreview } from "./StudyPane";
-import { ClearButton, confirmDelete, Popover } from "./ui";
+import { ClearButton, confirmDelete, copyText, Popover } from "./ui";
 
 /** A module whose description carries a copyright notice is licensed, not public domain. */
 const PUBLIC_DOMAIN = /^(KJV\+?|KJVA|ASV|YLT|WEB|DRB|DRA|Darby|BBE|RV|ERV|Webster|Geneva|GNV|Bishops|Tyndale|Wycliffe|LXX|TR|WH|Byz)$/i;
@@ -30,21 +30,47 @@ type Sub = {
   status: (t: string) => void;
   done: (d: { sessionId: string | null; text: string; error: string | null }) => void;
 };
-const g = globalThis as { __askSubs?: Map<string, Sub>; __askListening?: boolean };
+const g = globalThis as { __askSubs?: Map<string, Sub>; __askListening?: Promise<unknown>; __askLive?: Map<string, string | null> };
 const subs = (g.__askSubs ??= new Map<string, Sub>());
-function ensureListening() {
-  if (g.__askListening) return;
-  g.__askListening = true;
-  listen<{ chatId: string; text: string }>("ask-chunk", (e) => subs.get(e.payload.chatId)?.chunk(e.payload.text));
-  listen<{ chatId: string; text: string }>("ask-status", (e) => subs.get(e.payload.chatId)?.status(e.payload.text));
-  listen<{ chatId: string; sessionId: string | null; text: string; error: string | null }>("ask-done", (e) =>
-    subs.get(e.payload.chatId)?.done(e.payload),
-  );
+/** Resolves once the listeners are in place, so a question is only asked when its answer can be heard.
+ *  A failure is tried again next time. */
+function ensureListening(): Promise<unknown> {
+  g.__askListening ??= Promise.all([
+    listen<{ chatId: string; text: string }>("ask-chunk", (e) => subs.get(e.payload.chatId)?.chunk(e.payload.text)),
+    listen<{ chatId: string; text: string }>("ask-status", (e) => subs.get(e.payload.chatId)?.status(e.payload.text)),
+    listen<{ chatId: string; sessionId: string | null; text: string; error: string | null }>("ask-done", (e) =>
+      subs.get(e.payload.chatId)?.done(e.payload),
+    ),
+  ]).catch((e) => {
+    g.__askListening = undefined;
+    throw e;
+  });
+  return g.__askListening;
 }
 
+// The chats being answered, each with what it is doing ("Reading Matthew Henry's Commentary"; null
+// while it thinks). Kept here rather than in a panel, so a panel that goes (its tab switched) and
+// comes back finds the chat still answering, offers Stop, and can't send into it meanwhile.
+const live = (g.__askLive ??= new Map<string, string | null>());
+const liveSubs = new Set<() => void>();
+let liveVer = 0;
+/** `undefined` takes the chat off the list. */
+function setLive(id: string, status: string | null | undefined) {
+  if (status === undefined) live.delete(id);
+  else live.set(id, status);
+  liveVer++;
+  liveSubs.forEach((f) => f());
+}
+const subscribeLive = (f: () => void) => {
+  liveSubs.add(f);
+  return () => {
+    liveSubs.delete(f);
+  };
+};
+
 /** One question with no chat around it (worship.ts's song choosing): the answer's text. */
-export function askOnce(prompt: string, model: string): Promise<string> {
-  ensureListening();
+export async function askOnce(prompt: string, model: string): Promise<string> {
+  await ensureListening();
   const id = "once-" + uid();
   let text = "";
   return new Promise((resolve, reject) => {
@@ -68,7 +94,7 @@ export function askOnce(prompt: string, model: string): Promise<string> {
 
 /** The question asked for a suggested next one: what the chat is about and its last three
  *  exchanges, each cut short, newest last. */
-export function nextPrompt(about: string, turns: [string, string][]): string {
+function nextPrompt(about: string, turns: [string, string][]): string {
   const cut = (t: string, n: number) => (t.length > n ? t.slice(0, n) + "…" : t);
   return (
     `You suggest the user's next question in a Bible study chat about ${about}. ` +
@@ -84,7 +110,7 @@ export function nextPrompt(about: string, turns: [string, string][]): string {
 
 /** The suggestion in a reply: its first line, without quotes, a label or a list marker. Null when
  *  there's nothing usable (empty, or too long to be one message). */
-export function parseNext(reply: string): string | null {
+function parseNext(reply: string): string | null {
   let line = reply
     .split("\n")
     .map((l) => l.trim())
@@ -162,7 +188,7 @@ export function Working({ text }: { text: string }) {
 }
 
 /** Answer text with verse references as links. */
-export function Answer({
+function Answer({
   text,
   onRef,
   onRefHover,
@@ -229,7 +255,6 @@ export interface AskProps {
   style?: React.CSSProperties;
 }
 
-/** Journal entries linked to any verse of the passage (or, for a chapter, to anything in it). */
 /** Tells the model the user's highlight themes, and asks it to name the ones each answer is about. */
 function themeNote(themes: HlTheme[]): string {
   if (!themes.length) return "";
@@ -241,7 +266,7 @@ function themeNote(themes: HlTheme[]): string {
 }
 
 /** An answer without its closing "Themes:" line, and the theme tags that line named. */
-export function splitThemes(text: string, themes: HlTheme[]): { body: string; tags: string[] } {
+function splitThemes(text: string, themes: HlTheme[]): { body: string; tags: string[] } {
   const m = text.match(/\n?[ \t]*\**Themes?:?\**[^\n]*$/i);
   if (!m || !/^\s*\**Themes?/i.test(m[0].trimStart()) || m.index === undefined) return { body: text, tags: [] };
   const known = new Set(themes.map((t) => t.tag));
@@ -249,22 +274,8 @@ export function splitThemes(text: string, themes: HlTheme[]): { body: string; ta
   return { body: text.slice(0, m.index).trimEnd(), tags: [...new Set(tags)] };
 }
 
-function journalOn(journal: JournalEntry[], r: Ref): JournalEntry[] {
-  const from = r.verse ?? 1,
-    to = r.verse ? (r.to ?? r.verse) : 999;
-  return journal.filter((e) =>
-    e.verses.some((v) => {
-      const x = parseRef(v);
-      if (!x || x.book !== r.book) return false;
-      const last = x.toChapter ?? x.chapter;
-      if (r.chapter < x.chapter || r.chapter > last) return false;
-      // Only the part of the entry's range that falls in this chapter.
-      const a = r.chapter === x.chapter ? (x.verse ?? 1) : 1;
-      const b = r.chapter === last ? (x.toChapter ? (x.to ?? 999) : (x.to ?? x.verse ?? 999)) : 999;
-      return a <= to && b >= from;
-    }),
-  );
-}
+/** Journal entries linked to any verse of the passage (or, for a chapter, to anything in it). */
+const journalOn = (journal: JournalEntry[], r: Ref) => journal.filter((e) => mentionsPassage(e, r));
 
 export function AskPanel(p: AskProps) {
   const app = useApp();
@@ -279,9 +290,6 @@ export function AskPanel(p: AskProps) {
     return () => window.removeEventListener("tes-show-chat", show);
   }, []);
   const [q, setQ] = useState("");
-  const [busy, setBusy] = useState(false);
-  /** What it is doing while it searches the library: "Reading Matthew Henry's Commentary". */
-  const [status, setStatus] = useState<string | null>(null);
   const [scope, setScope] = useState<"passage" | "chapter">("passage");
   const [recent, setRecent] = useState<DOMRect | null>(null);
   const [modelMenu, setModelMenu] = useState<DOMRect | null>(null);
@@ -290,16 +298,18 @@ export function AskPanel(p: AskProps) {
   // Every passage chat gets the library to search; the model decides whether a question needs it.
   const withLibrary = app.settings.includeCommentaries;
   const endRef = useRef<HTMLDivElement>(null);
-  /** The chat being answered, which Stop cancels even once another chat is on screen. */
-  const running = useRef<string | null>(null);
   const chat = app.chats.find((c) => c.id === chatId) ?? null;
+  // Whether the chat on screen is being answered, and what it is doing while it searches the library.
+  useSyncExternalStore(subscribeLive, () => liveVer);
+  const busy = !!chatId && live.has(chatId);
+  const status = chatId ? (live.get(chatId) ?? null) : null;
   const asst = useAssistant();
   const model: Model = chat?.model ?? pickModel(app.settings.model, asst.models);
   const passage = p.passage ? (scope === "chapter" ? { book: p.passage.book, chapter: p.passage.chapter } : p.passage) : null;
   const about = p.label ?? (passage ? fmtRef(passage) : (p.about ?? p.source));
 
   useEffect(() => {
-    ensureListening();
+    ensureListening().catch(console.error);
   }, []);
   useEffect(() => {
     if (p.seed) {
@@ -341,127 +351,141 @@ export function AskPanel(p: AskProps) {
     return parts.join("\n\n");
   };
 
-  const send = async (text: string) => {
-    const question = text.trim();
-    if (!question || busy) return;
-    setQ("");
-    setNext(null);
-    setBusy(true);
-    let id = chat?.id;
-    let prompt = question;
-    let bookDir = chat?.bookDir;
-    let studyDir = chat?.studyDir;
-    if (!chat) {
-      id = uid();
-      if (p.bookDir) {
-        try {
-          bookDir = await p.bookDir();
-        } catch (e) {
-          console.error(e);
-        }
-      }
+  /** For a new chat, the folders the model may search: the book's, the library's material on the
+   *  passage, or the journal entries written out. */
+  const exportFolders = async (id: string): Promise<{ bookDir?: string; studyDir?: string }> => {
+    try {
+      if (p.bookDir) return { bookDir: await p.bookDir() };
       // A passage chat gets the library's material on it to search: the commentaries, the other
       // Bibles (public-domain ones only, unless licensed text may be sent) and the lexicons.
-      else if (passage && withLibrary) {
+      if (passage && withLibrary) {
         const bibles = app.bibles.filter((b) => !withheld(app.settings.allowLicensed, b)).map((b) => b.id);
         const exclude = (app.lib?.modules ?? []).filter((m) => withheld(app.settings.allowLicensed, m)).map((m) => m.id);
         const journal = p.journal ?? (app.settings.askJournal ? journalOn(app.journal, passage) : []);
-        try {
-          studyDir = await api.studyExport(id, {
-            book: passage.book,
-            chapter: passage.chapter,
-            from: passage.verse ?? null,
-            to: passage.verse ? (passage.to ?? passage.verse) : null,
-            bibles,
-            strongsBible: app.strongsBible,
-            label: fmtRef(passage),
-            journal,
-            exclude,
-          });
-        } catch (e) {
-          console.error(e);
-        }
-      } else if (p.journalDir) {
-        try {
-          studyDir = await p.journalDir(id);
-        } catch (e) {
-          console.error(e);
-        }
-      }
-      const c: Chat = {
-        id,
-        title: question.length > 80 ? question.slice(0, 77) + "…" : question,
-        about,
-        source: p.source,
-        created: new Date().toISOString(),
-        updated: new Date().toISOString(),
-        model,
-        bookDir,
-        studyDir,
-        verses: passage ? [fmtRef(passage)] : [],
-        opened: { ...app.here(), ...p.opened },
-        messages: [],
-      };
-      app.setChats((cs) => [c, ...cs]);
-      setChatId(id);
-      try {
-        const ctx = await buildContext();
-        if (ctx) prompt = `${ctx}\n\nQuestion: ${question}`;
-      } catch (e) {
-        console.error(e);
-      }
-      const note = themeNote(themes);
-      if (note) prompt = `${note}\n\n${prompt}`;
-    }
-    const cid = id!;
-    running.current = cid;
-    update(cid, (c) => ({
-      ...c,
-      updated: new Date().toISOString(),
-      messages: [...c.messages, { role: "user", text: question }, { role: "assistant", text: "" }],
-    }));
-    setStatus(null);
-    const before = chat?.messages ?? [];
-    let answer = "";
-    subs.set(cid, {
-      status: (t) => setStatus(t),
-      chunk: (t) => {
-        answer += t;
-        update(cid, (c) => {
-          const m = [...c.messages];
-          m[m.length - 1] = { ...m[m.length - 1], text: m[m.length - 1].text + t };
-          return { ...c, messages: m };
+        const studyDir = await api.studyExport(id, {
+          book: passage.book,
+          chapter: passage.chapter,
+          from: passage.verse ?? null,
+          to: passage.verse ? (passage.to ?? passage.verse) : null,
+          bibles,
+          strongsBible: app.strongsBible,
+          label: fmtRef(passage),
+          journal,
+          exclude,
         });
-      },
-      done: (d) => {
-        update(cid, (c) => {
-          const m = [...c.messages];
-          const last = m[m.length - 1];
-          m[m.length - 1] = d.error ? { role: "assistant", text: d.error, error: true } : { ...last, text: last.text || d.text };
-          return { ...c, session: d.sessionId ?? c.session, messages: m, updated: new Date().toISOString() };
-        });
-        subs.delete(cid);
-        running.current = null;
-        setBusy(false);
-        setStatus(null);
-        if (!d.error && app.settings.askSuggest) {
-          const turns = exchanges([...before, { role: "user", text: question }, { role: "assistant", text: answer || d.text }], themes);
-          const at = before.length + 2;
-          askOnce(nextPrompt(about, turns), model)
-            .then(parseNext)
-            .then((text) => text && setNext({ chat: cid, at, text }))
-            .catch(() => {});
-        }
-      },
-    });
-    try {
-      await api.ask(cid, prompt, model, chat?.session ?? null, bookDir ?? null, studyDir ?? null);
+        return { studyDir };
+      }
+      if (p.journalDir) return { studyDir: await p.journalDir(id) };
     } catch (e) {
-      subs.get(cid)?.done({ sessionId: null, text: "", error: String(e) });
+      console.error(e);
+    }
+    return {};
+  };
+
+  /** Asks `text` in the chat on screen, or a new one. With `retry`, it replaces the chat's last
+   *  question and answer, asked afresh: a new session, with the earlier exchanges in the prompt. */
+  const send = async (text: string, retry = false) => {
+    const question = text.trim();
+    if (!question || busy || (retry && !chat)) return;
+    const cid = chat?.id ?? uid();
+    if (live.has(cid)) return;
+    setLive(cid, null);
+    setQ("");
+    setNext(null);
+    if (!chat) setChatId(cid);
+    const before = retry ? chat!.messages.slice(0, -2) : (chat?.messages ?? []);
+    let answer = "";
+    try {
+      let prompt = question;
+      let { bookDir, studyDir } = chat ?? {};
+      if (!chat) {
+        ({ bookDir, studyDir } = await exportFolders(cid));
+        const c: Chat = {
+          id: cid,
+          title: question.length > 80 ? question.slice(0, 77) + "…" : question,
+          about,
+          source: p.source,
+          created: new Date().toISOString(),
+          updated: new Date().toISOString(),
+          model,
+          bookDir,
+          studyDir,
+          verses: passage ? [fmtRef(passage)] : [],
+          opened: { ...app.here(), ...p.opened },
+          messages: [],
+        };
+        app.setChats((cs) => [c, ...cs]);
+      }
+      // A first question carries what it is about; one asked again, also the exchanges before it.
+      if (!chat || retry) {
+        let ctx = "";
+        // Only when the chat is about what is on screen: the context is built from that.
+        if (!chat || chat.about === about) {
+          try {
+            ctx = await buildContext();
+          } catch (e) {
+            console.error(e);
+          }
+        }
+        const history = exchanges(before, themes)
+          .map(([q, a]) => `User: ${q}\n\nAssistant: ${a}`)
+          .join("\n\n");
+        const parts = [ctx, history && `The conversation so far:\n\n${history}`].filter(Boolean);
+        if (parts.length) prompt = `${parts.join("\n\n")}\n\nQuestion: ${question}`;
+        const note = themeNote(themes);
+        if (note) prompt = `${note}\n\n${prompt}`;
+      }
+      update(cid, (c) => ({
+        ...c,
+        updated: new Date().toISOString(),
+        messages: [...(retry ? c.messages.slice(0, -2) : c.messages), { role: "user", text: question }, { role: "assistant", text: "" }],
+      }));
+      subs.set(cid, {
+        status: (t) => setLive(cid, t),
+        chunk: (t) => {
+          answer += t;
+          update(cid, (c) => {
+            const m = [...c.messages];
+            m[m.length - 1] = { ...m[m.length - 1], text: m[m.length - 1].text + t };
+            return { ...c, messages: m };
+          });
+        },
+        done: (d) => {
+          update(cid, (c) => {
+            const m = [...c.messages];
+            const last = m[m.length - 1];
+            m[m.length - 1] = d.error ? { role: "assistant", text: d.error, error: true } : { ...last, text: last.text || d.text };
+            return { ...c, session: d.sessionId ?? c.session, messages: m, updated: new Date().toISOString() };
+          });
+          subs.delete(cid);
+          setLive(cid, undefined);
+          if (!d.error && app.settings.askSuggest) {
+            const turns = exchanges([...before, { role: "user", text: question }, { role: "assistant", text: answer || d.text }], themes);
+            const at = before.length + 2;
+            askOnce(nextPrompt(about, turns), model)
+              .then(parseNext)
+              .then((text) => text && setNext({ chat: cid, at, text }))
+              .catch(() => {});
+          }
+        },
+      });
+      await ensureListening();
+      await api.ask(cid, prompt, model, chat && !retry ? (chat.session ?? null) : null, bookDir ?? null, studyDir ?? null);
+    } catch (e) {
+      const sub = subs.get(cid);
+      if (sub) sub.done({ sessionId: null, text: "", error: String(e) });
+      else setLive(cid, undefined);
     }
   };
 
   const addToJournal = async (c: Chat, i: number) => {
+    try {
+      await journalAnswer(c, i);
+    } catch (e) {
+      app.toast(`Couldn't add it to your journal: ${e}`);
+    }
+  };
+  const journalAnswer = async (c: Chat, i: number) => {
     const qm = c.messages[i - 1]?.text ?? c.title;
     const { body: a, tags } = splitThemes(c.messages[i].text, themes);
     // Chats from before they kept their passage: the one on screen, only if it's what they were about.
@@ -605,10 +629,7 @@ export function AskPanel(p: AskProps) {
                   className="ibtn"
                   type="button"
                   aria-label="Copy"
-                  onClick={() => {
-                    navigator.clipboard.writeText(splitThemes(m.text, themes).body);
-                    app.toast("Copied");
-                  }}
+                  onClick={() => copyText(splitThemes(m.text, themes).body, "Copied", app.toast)}
                 >
                   <Icon name="copy" />
                 </button>
@@ -620,8 +641,7 @@ export function AskPanel(p: AskProps) {
                     title="Ask again"
                     onClick={() => {
                       const qm = messages[i - 1]?.text;
-                      update(chat!.id, (c) => ({ ...c, messages: c.messages.slice(0, -2) }));
-                      if (qm) send(qm);
+                      if (qm) send(qm, true);
                     }}
                   >
                     <Icon name="refresh" />
@@ -638,7 +658,7 @@ export function AskPanel(p: AskProps) {
           type="button"
           style={{ alignSelf: "flex-start" }}
           onClick={() => {
-            if (running.current) api.askCancel(running.current);
+            if (chatId) api.askCancel(chatId).catch(console.error);
           }}
         >
           <Icon name="stop" size={12} />
@@ -742,35 +762,16 @@ export function AskPanel(p: AskProps) {
         />
       )}
       {modelMenu && (
-        <Popover anchor={modelMenu} onClose={() => setModelMenu(null)} width={250}>
-          <div style={{ padding: 6 }}>
-            {modelGroups(asst.models).map((g, i) => (
-              <div key={g.provider}>
-                <div className="label" style={{ padding: `${i ? 10 : 4}px 10px 4px` }}>
-                  {g.name}
-                </div>
-                {g.models.map((m) => (
-                  <button
-                    key={m.id}
-                    type="button"
-                    className="bm"
-                    onClick={() => {
-                      app.set({ model: m.id });
-                      setModelMenu(null);
-                    }}
-                  >
-                    {m.name}
-                    {m.id === model && (
-                      <span className="r">
-                        <Icon name="check" />
-                      </span>
-                    )}
-                  </button>
-                ))}
-              </div>
-            ))}
-          </div>
-        </Popover>
+        <ModelMenu
+          anchor={modelMenu}
+          models={asst.models}
+          current={model}
+          onPick={(id) => {
+            app.set({ model: id });
+            setModelMenu(null);
+          }}
+          onClose={() => setModelMenu(null)}
+        />
       )}
     </>
   );
@@ -863,6 +864,45 @@ export function AskPanel(p: AskProps) {
       {input}
       {popovers}
     </section>
+  );
+}
+
+/** The models to ask with, by provider. */
+function ModelMenu({
+  anchor,
+  models,
+  current,
+  onPick,
+  onClose,
+}: {
+  anchor: DOMRect;
+  models: Parameters<typeof modelGroups>[0];
+  current: Model;
+  onPick: (id: string) => void;
+  onClose: () => void;
+}) {
+  return (
+    <Popover anchor={anchor} onClose={onClose} width={250}>
+      <div style={{ padding: 6 }}>
+        {modelGroups(models).map((g, i) => (
+          <div key={g.provider}>
+            <div className="label" style={{ padding: `${i ? 10 : 4}px 10px 4px` }}>
+              {g.name}
+            </div>
+            {g.models.map((m) => (
+              <button key={m.id} type="button" className="bm" onClick={() => onPick(m.id)}>
+                {m.name}
+                {m.id === current && (
+                  <span className="r">
+                    <Icon name="check" />
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+        ))}
+      </div>
+    </Popover>
   );
 }
 

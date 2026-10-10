@@ -14,7 +14,7 @@ import { useApp } from "./state";
 import { ClearButton } from "./ui";
 
 /** What the drawer shows: a topic at a section (the screen's when none is named), or a search. */
-export type HelpView = { topic?: string; section?: string; q?: string };
+type HelpView = { topic?: string; section?: string; q?: string };
 
 let view: HelpView | null = null;
 const subs = new Set<() => void>();
@@ -32,7 +32,7 @@ const useView = () =>
   );
 
 export const openHelp = (v: HelpView = {}) => setView(v);
-export const toggleHelp = () => setView(view ? null : {});
+const toggleHelp = () => setView(view ? null : {});
 
 function HelpText({ md, topic }: { md: string; topic: string }) {
   const html = useMemo(() => helpHtml(md), [md]);

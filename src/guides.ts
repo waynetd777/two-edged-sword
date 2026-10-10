@@ -5,6 +5,7 @@
 // the guides are one copy. Each guide is a topic and each `##` a section. Their screenshots and
 // breadcrumbs are left out, and their links become links within the help.
 
+import { escHtml as esc } from "./dom";
 import type { Screen } from "./state";
 
 export interface HelpSection {
@@ -14,7 +15,7 @@ export interface HelpSection {
   body: string;
 }
 
-export interface HelpTopic {
+interface HelpTopic {
   /** The file name without `.md`. */
   id: string;
   title: string;
@@ -50,7 +51,7 @@ export const slug = (heading: string) =>
 const dropped = (l: string) =>
   l.includes("images/") || /^\s*<\/?(sub|table|tr|td)\b/.test(l) || /^\[[^\]]+\]\(#[\w-]+\)( · \[[^\]]+\]\(#[\w-]+\))*$/.test(l.trim());
 
-export function parseGuide(id: string, md: string): HelpTopic {
+function parseGuide(id: string, md: string): HelpTopic {
   let title = id;
   let intro = "";
   const sections: HelpSection[] = [];
@@ -88,7 +89,7 @@ export function sectionAt(topic: string, anchor: string): HelpSection | undefine
   return TOPICS.find((t) => t.id === topic)?.sections.find((s) => s.anchors.includes(anchor));
 }
 
-export interface HelpHit {
+interface HelpHit {
   topic: HelpTopic;
   section: HelpSection;
 }
@@ -107,8 +108,6 @@ export function searchHelp(q: string): HelpHit[] {
     }
   return hits.sort((a, b) => b.score - a.score);
 }
-
-const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
 /** Bold, italic, `code` and links. A link keeps its target in data-href, for the drawer to follow. */
 function inline(text: string): string {

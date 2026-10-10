@@ -13,6 +13,7 @@ Any number of translations side by side, verse by verse.
 - **Add** a translation from the menu.
 - **Highlight differences** marks wording that differs from the first column.
 - **Strong's numbers** shows them for the Bibles that have them.
+- ← and → turn the page.
 
 ## Search
 

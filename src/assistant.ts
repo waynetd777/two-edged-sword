@@ -9,7 +9,7 @@ import { useSyncExternalStore } from "react";
 import { api, AssistantStatus } from "./api";
 
 export type Provider = "claude" | "codex" | "antigravity" | "copilot";
-export interface ModelOpt {
+interface ModelOpt {
   id: string;
   name: string;
   provider: Provider;
@@ -53,16 +53,18 @@ export const modelGroups = (models: ModelOpt[]) =>
     .map((p) => ({ provider: p, name: GROUP_NAME[p], models: models.filter((m) => m.provider === p) }))
     .filter((g) => g.models.length);
 
-export interface Assistant {
+interface Assistant {
   /** null until the first check returns. */
   status: AssistantStatus | null;
   models: ModelOpt[];
-  /** False only once the check has found neither CLI, so nothing flickers away at start. */
+  /** False only once the check has found none of the CLIs, so nothing flickers away at start. */
   available: boolean;
 }
 
 let state: Assistant = { status: null, models: [], available: true };
 const listeners = new Set<() => void>();
+let firstDone: () => void = () => {};
+const first = new Promise<void>((ok) => (firstDone = ok));
 
 export function refreshAssistant() {
   api
@@ -79,12 +81,17 @@ export function refreshAssistant() {
       state = { status, models, available: models.length > 0 };
       listeners.forEach((l) => l());
     })
-    .catch(() => {});
+    .catch(() => {})
+    .finally(firstDone);
 }
 refreshAssistant();
 
 /** Whether the first check has returned (screenshot scenes wait for it before opening the model menu). */
 export const assistantChecked = () => state.status !== null;
+
+/** Once the first check is back (or after `ms`, should it hang): code that picks a model at start
+ *  waits for this, so it doesn't find none only because the check hasn't returned yet. */
+export const assistantReady = (ms = 15000) => Promise.race([first, new Promise<void>((ok) => window.setTimeout(ok, ms))]);
 
 /** The models on offer now, for code outside a component. */
 export const assistantModels = () => state.models;

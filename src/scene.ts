@@ -17,7 +17,7 @@ import { setSceneVision } from "./Visions";
 import { Picked, setSceneChapterSongs } from "./worship";
 import { today as startOfToday, ymd } from "./plans";
 
-export interface Scene {
+interface Scene {
   name: string;
   settings?: Partial<Settings>;
   screen?: Screen;

@@ -34,7 +34,7 @@ export const setSceneVariances = (f: VarianceFile) => {
   sceneVariances = f;
 };
 
-export const varianceStore = (module: string) => "variances-" + module.replace(/[^A-Za-z0-9_-]/g, "_");
+const varianceStore = (module: string) => "variances-" + module.replace(/[^A-Za-z0-9_-]/g, "_");
 
 /** This chapter's variances by verse, and the base Bible they are measured against. */
 export function useVariances(module: string, book: number, chapter: number) {

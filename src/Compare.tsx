@@ -107,6 +107,8 @@ export function CompareScreen({ openPalette }: { openPalette: () => void }) {
   const [diff, setDiff] = useState(true);
   const [nums, setNums] = useState(true);
   const [ask, setAsk] = useState(false);
+  /** A question the word lookup asks, for the Ask panel to take. */
+  const [askSeed, setAskSeed] = useState<string | null>(null);
   useAskOpener(() => setAsk(true));
   const canAsk = useAssistant().available;
   const [word, setWord] = useState<(WordPick & { bible: string }) | null>(null);
@@ -147,6 +149,22 @@ export function CompareScreen({ openPalette }: { openPalette: () => void }) {
     for (const c of cols) m[c] = new Map((data[c] ?? []).map((v) => [v.v, tokenize(v.text)]));
     return m;
   }, [data]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Each column's differences, verse by verse: from the first column, and the first's from the second.
+  const colKey = cols.join(",");
+  const diffs = useMemo(() => {
+    const words = (c: string | undefined, v: number) => (c ? (toks[c]?.get(v) ?? []).filter((t) => t.word).map((t) => norm(t.text)) : []);
+    const m = new Map<string, Set<number>>();
+    if (!diff) return m;
+    for (const v of verseNums) {
+      const base = words(cols[0], v);
+      cols.forEach((c, i) => {
+        if (!toks[c]?.get(v)) return;
+        if (i > 0) m.set(`${c}/${v}`, diffWords(base, words(c, v)));
+        else if (cols.length > 1) m.set(`${c}/${v}`, diffWords(words(cols[1], v), base));
+      });
+    }
+    return m;
+  }, [toks, verseNums, colKey, diff]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const setCols = (next: string[]) => app.set({ compare: next });
   const addable = app.bibles.filter((b) => !cols.includes(b.id));
@@ -169,6 +187,23 @@ export function CompareScreen({ openPalette }: { openPalette: () => void }) {
     const n = d > 0 ? nc : pc;
     if (n) app.open({ book: n[0], chapter: n[1] });
   };
+  // ← and → turn the page, as in the reader.
+  const goKey = useRef(go);
+  useEffect(() => {
+    goKey.current = go;
+  });
+  useEffect(() => {
+    const k = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement;
+      if (t.closest("input, textarea, [contenteditable='true'], select") || e.metaKey || e.ctrlKey || e.altKey || e.defaultPrevented)
+        return;
+      if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+      e.preventDefault();
+      goKey.current(e.key === "ArrowRight" ? 1 : -1);
+    };
+    window.addEventListener("keydown", k);
+    return () => window.removeEventListener("keydown", k);
+  }, []);
   const selRef: Ref | null = sel ? { book: loc.book, chapter: loc.chapter, verse: sel } : null;
   const grid = `40px repeat(${cols.length}, minmax(0, 1fr)) 120px`;
 
@@ -292,7 +327,7 @@ export function CompareScreen({ openPalette }: { openPalette: () => void }) {
       <div className="sidenav-wrap" style={{ flexGrow: 1 }}>
         <div ref={scroller} className="scroll" style={{ flexGrow: 1, background: "var(--panel)", borderTop: "1px solid var(--border)" }}>
           {verseNums.map((v) => {
-            const base = (toks[cols[0]]?.get(v) ?? []).filter((t) => t.word).map((t) => norm(t.text));
+            const baseLength = (toks[cols[0]]?.get(v) ?? []).filter((t) => t.word).length;
             return (
               <div
                 key={v}
@@ -319,17 +354,8 @@ export function CompareScreen({ openPalette }: { openPalette: () => void }) {
                         —
                       </div>
                     );
-                  const words = t.filter((x) => x.word).map((x) => norm(x.text));
-                  const d =
-                    diff && i > 0
-                      ? diffWords(base, words)
-                      : diff && cols.length > 1
-                        ? diffWords(
-                            (toks[cols[1]]?.get(v) ?? []).filter((x) => x.word).map((x) => norm(x.text)),
-                            words,
-                          )
-                        : null;
-                  const same = i > 0 && diff && d && d.size === 0 && words.length === base.length;
+                  const d = diffs.get(`${c}/${v}`) ?? null;
+                  const same = i > 0 && diff && d && d.size === 0 && t.filter((x) => x.word).length === baseLength;
                   return (
                     <div
                       key={c}
@@ -392,6 +418,8 @@ export function CompareScreen({ openPalette }: { openPalette: () => void }) {
                 : []
             }
             hint={selRef ? undefined : "Click a verse to ask about it in these translations, or ask about the whole chapter."}
+            seed={askSeed}
+            clearSeed={() => setAskSeed(null)}
           />
         </div>
       )}
@@ -409,8 +437,9 @@ export function CompareScreen({ openPalette }: { openPalette: () => void }) {
             app.open({ book: loc.book, chapter: loc.chapter, verse: word.verse });
             app.setPending({ commentary: m });
           }}
-          onAsk={() => {
+          onAsk={(q) => {
             setSel(word.verse);
+            setAskSeed(q);
             setAsk(true);
             setWord(null);
           }}

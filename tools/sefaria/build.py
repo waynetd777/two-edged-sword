@@ -19,15 +19,15 @@ the app's modules folder, where the app finds them after Library → Rescan. Eng
 Sefaria's merged text: its best version for each verse, whose sources and licences are listed
 in each module's information. Several are CC-BY-NC: fine for personal study, not for resale.
 """
-import csv, html, io, json, os, re, sqlite3, sys, urllib.parse, urllib.request
+import csv, html, io, itertools, json, re, sys, time, urllib.error, urllib.parse, urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
-HOME = Path(os.environ.get("HOME", ""))
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from modules import LIBRARY, find  # noqa: E402
-CACHE = HOME / "Library/Caches/Two-edged Sword/sefaria"
+from modules import CACHES, LIBRARY, chapter_lengths, fetch, module, write_whole  # noqa: E402
+CACHE = CACHES / "sefaria"
 EXPORT = "https://storage.googleapis.com/sefaria-export/json/"
+LINKS = "https://storage.googleapis.com/sefaria-export/links/links{}.csv"
 
 BOOKS = ["Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy", "Joshua", "Judges", "Ruth", "I Samuel", "II Samuel", "I Kings", "II Kings",
          "I Chronicles", "II Chronicles", "Ezra", "Nehemiah", "Esther", "Job", "Psalms", "Proverbs", "Ecclesiastes", "Song of Songs", "Isaiah",
@@ -36,12 +36,7 @@ BOOKS = ["Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy", "Joshua", "
 
 
 def get(url, name):
-    p = CACHE / name
-    if not p.exists():
-        p.parent.mkdir(parents=True, exist_ok=True)
-        with urllib.request.urlopen(url, timeout=120) as r:
-            p.write_bytes(r.read())
-    return p.read_bytes()
+    return fetch(url, CACHE / name).read_bytes()
 
 
 def toc():
@@ -92,19 +87,9 @@ def sources(docs):
 
 
 def write_bible(file, title, abbrev, info, rtl, verses):
-    p = LIBRARY / f"{file}.bbli"
-    tmp = p.with_suffix(".tmp")
-    tmp.unlink(missing_ok=True)
-    c = sqlite3.connect(tmp)
-    c.executescript("""CREATE TABLE Details (Title NVARCHAR(100), Abbreviation NVARCHAR(50), Information TEXT, Version INT, OldTestament BOOL, NewTestament BOOL, Apocrypha BOOL, Strongs BOOL, RightToLeft BOOL);
-        CREATE TABLE Bible (Book INT, Chapter INT, Verse INT, Scripture TEXT);
-        CREATE INDEX BookChapterVerseIndex ON Bible (Book, Chapter, Verse);""")
-    c.execute("INSERT INTO Details VALUES (?,?,?,1,1,0,0,0,?)", (title, abbrev, info, int(rtl)))
-    c.executemany("INSERT INTO Bible VALUES (?,?,?,?)", verses)
-    c.commit()
-    c.close()
-    tmp.replace(p)
-    print(f"{p.name}: {len(verses)} verses")
+    with module(f"{file}.bbli", title, abbrev, info, nt=False, rtl=int(rtl)) as c:
+        c.executemany("INSERT INTO Bible VALUES (?,?,?,?)", verses)
+    print(f"{file}.bbli: {len(verses)} verses")
 
 
 # Where the Hebrew Bible's chapter and verse numbers differ from the KJV's (Psalm titles apart):
@@ -141,8 +126,7 @@ HEB_TO_KJV = [
 
 
 def kjv_counts():
-    c = sqlite3.connect(f"file:{find('kjv.bbli')}?immutable=1", uri=True)
-    return {(b, ch): n for b, ch, n in c.execute("SELECT Book, Chapter, MAX(Verse) FROM Bible GROUP BY Book, Chapter")}
+    return chapter_lengths("kjv.bbli")
 
 
 def to_kjv(verses, counts):
@@ -222,14 +206,12 @@ def kjv_verse(b, c, v, heb, kjv):
     return b, c, v
 
 
-def talmud_links():
-    """(Talmud segment, verse) pairs from Sefaria's links export (about 680 MB, read as it
-    streams; only these pairs are kept), cached."""
-    p = CACHE / "talmud_links.json"
-    if not p.exists():
-        out = []
-        for n in range(17):
-            with urllib.request.urlopen(f"https://storage.googleapis.com/sefaria-export/links/links{n}.csv", timeout=300) as r:
+def link_pairs(url):
+    """The (Talmud segment, verse) pairs in one part of the links export, read as it streams."""
+    for attempt in range(4):
+        try:
+            out = []
+            with urllib.request.urlopen(url, timeout=300) as r:
                 for row in csv.reader(io.TextIOWrapper(r, encoding="utf-8")):
                     if len(row) < 7:
                         continue
@@ -238,8 +220,36 @@ def talmud_links():
                         out.append((a, b))
                     elif cb == "Talmud" and ca == "Tanakh" and not tb.startswith(("Jerusalem", "Mishnah")):
                         out.append((b, a))
-        p.parent.mkdir(parents=True, exist_ok=True)
-        p.write_text(json.dumps(out))
+            return out
+        except urllib.error.HTTPError as e:
+            if e.code < 500 or attempt == 3:
+                raise
+        except OSError:
+            if attempt == 3:
+                raise
+        time.sleep(3 * (attempt + 1))
+
+
+def talmud_links():
+    """(Talmud segment, verse) pairs from Sefaria's links export (links0.csv, links1.csv, … to the
+    first that isn't there; about 680 MB, read as it streams, and only these pairs kept), cached
+    part by part, so a build stopped half way picks up where it stopped."""
+    p = CACHE / "talmud_links.json"
+    if not p.exists():
+        out = []
+        for n in itertools.count():
+            part = CACHE / "links" / f"links{n}.json"
+            if not part.exists():
+                try:
+                    pairs = link_pairs(LINKS.format(n))
+                except urllib.error.HTTPError as e:
+                    if e.code == 404 and n:
+                        break
+                    raise
+                write_whole(part, json.dumps(pairs))
+                print(f"  links{n}.csv: {len(pairs)} links from the Talmud to the Bible")
+            out += json.loads(part.read_text())
+        write_whole(p, json.dumps(out))
     return json.loads(p.read_text())
 
 
@@ -261,14 +271,6 @@ def links_by_tractate(titles):
         for v in range(int(n[3]), int(n[4] or n[3]) + 1):
             out[m[1]].append((i, lo, hi, (b, c, v)))
     return out
-
-
-def chapter_lengths(module):
-    p = LIBRARY / f"{module}.bbli"
-    if not p.exists():
-        return {}
-    c = sqlite3.connect(f"file:{p}?immutable=1", uri=True)
-    return {(b, ch): n for b, ch, n in c.execute("SELECT Book, Chapter, MAX(Verse) FROM Bible GROUP BY Book, Chapter")}
 
 
 def english_words():
@@ -339,35 +341,26 @@ def tractate(tocmap, title, links, heb, kjv):
     info = (f"<p>Babylonian Talmud, tractate {html.escape(title)} ({html.escape(order)}): each daf in English with the Aramaic beneath each passage.</p>"
             f"<p>From Sefaria (sefaria.org), built by Two-edged Sword's tools/sefaria.</p><p>Sources:</p><ul>{src}</ul>"
             "<p>The William Davidson Talmud (Koren, Rabbi Adin Even-Israel Steinsaltz) is CC-BY-NC: for personal study.</p>")
-    p = LIBRARY / f"talmud_{re.sub(r'[^a-z0-9]+', '_', title.lower()).strip('_')}.refi"
-    tmp = p.with_suffix(".tmp")
-    tmp.unlink(missing_ok=True)
-    c = sqlite3.connect(tmp)
-    c.executescript("""CREATE TABLE Details (Title NVARCHAR(255), Abbreviation NVARCHAR(50), Information TEXT, Version INT, Graphics BOOL);
-        CREATE TABLE Reference (Chapter NVARCHAR(100), Content TEXT);
-        CREATE INDEX ChapterIndex ON Reference (Chapter);""")
-    c.execute("INSERT INTO Details VALUES (?,?,?,1,0)", (f"Talmud: {title}", title, info))
-    c.executemany("INSERT INTO Reference VALUES (?,?)", [(f"{title} {d}", "\n".join(b)) for d, b in sorted(chapters.items())])
-    # The cited segments with one on either side, for context.
-    c.executescript("""CREATE TABLE VerseLinks (Book INT, Chapter INT, Verse INT, Ref TEXT, Segment TEXT, Excerpt TEXT);
-        CREATE INDEX VerseLinksIndex ON VerseLinks (Book, Chapter, Verse);""")
+    file = f"talmud_{re.sub(r'[^a-z0-9]+', '_', title.lower()).strip('_')}.refi"
     rows = set()
-    for i, lo, hi, (b, ch, v) in links:
-        segs = ent[i] if i < len(ent) else []
-        excerpt = " ".join(clean(x) for x in segs[max(0, lo - 2):hi + 1] if isinstance(x, str))
-        if excerpt:
-            daf, side = amud(i)
-            rows.add((*kjv_verse(b, ch, v, heb, kjv), f"{title} {daf}", f"{daf}{side}:{lo}" + (f"-{hi}" if hi > lo else ""), excerpt))
-    c.executemany("INSERT INTO VerseLinks VALUES (?,?,?,?,?,?)", sorted(rows))
-    c.commit()
-    c.close()
-    tmp.replace(p)
-    return f"{p.name}: {len(chapters)} dafs, {len(rows)} verse links"
+    with module(file, f"Talmud: {title}", title, info) as c:
+        c.executemany("INSERT INTO Reference VALUES (?,?)", [(f"{title} {d}", "\n".join(b)) for d, b in sorted(chapters.items())])
+        # The cited segments with one on either side, for context.
+        c.executescript("""CREATE TABLE VerseLinks (Book INT, Chapter INT, Verse INT, Ref TEXT, Segment TEXT, Excerpt TEXT);
+            CREATE INDEX VerseLinksIndex ON VerseLinks (Book, Chapter, Verse);""")
+        for i, lo, hi, (b, ch, v) in links:
+            segs = ent[i] if i < len(ent) else []
+            excerpt = " ".join(clean(x) for x in segs[max(0, lo - 2):hi + 1] if isinstance(x, str))
+            if excerpt:
+                daf, side = amud(i)
+                rows.add((*kjv_verse(b, ch, v, heb, kjv), f"{title} {daf}", f"{daf}{side}:{lo}" + (f"-{hi}" if hi > lo else ""), excerpt))
+        c.executemany("INSERT INTO VerseLinks VALUES (?,?,?,?,?,?)", sorted(rows))
+    return f"{file}: {len(chapters)} dafs, {len(rows)} verse links"
 
 
 def talmud(tocmap):
     titles = [t for t, path in tocmap.items() if path[:2] == ["Talmud", "Bavli"] and len(path) > 2 and path[2].startswith("Seder")]
-    links, heb, kjv = links_by_tractate(titles), chapter_lengths("wlc"), chapter_lengths("kjv")
+    links, heb, kjv = links_by_tractate(titles), chapter_lengths("wlc.bbli", required=False), chapter_lengths("kjv.bbli", required=False)
     with ThreadPoolExecutor(8) as pool:
         for line in pool.map(lambda t: tractate(tocmap, t, links[t], heb, kjv), titles):
             if line:

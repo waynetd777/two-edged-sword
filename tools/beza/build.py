@@ -44,36 +44,26 @@ from it.
 Enclitics (μου, τις) and elided words (δι᾽) are left unaccented. These corrections need TR+ (e-Sword's,
 for personal use); without it the transcription is kept as it is.
 """
-import html, json, os, re, sqlite3, sys, time, unicodedata, urllib.parse, urllib.request
+import html, json, re, sqlite3, sys, time, unicodedata, urllib.parse
 from difflib import SequenceMatcher
 from pathlib import Path
 
-HOME = Path(os.environ.get("HOME", ""))
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from modules import LIBRARY, find  # noqa: E402
-CACHE = HOME / "Library/Caches/Two-edged Sword/beza"
+from books import NAMES  # noqa: E402
+from modules import CACHES, download, fetch as fetch_to, find, module, write_whole  # noqa: E402
+CACHE = CACHES / "beza"
 API = "https://textus-receptus.com/api.php"
-SCRIVENER = "https://raw.githubusercontent.com/byztxt/greektext-scrivener/master/textonly/{}.SCV"
+SCRIVENER = "https://raw.githubusercontent.com/byztxt/greektext-scrivener/6049a43b135ed870f843b83eb6a04764fc796678/textonly/{}.SCV"
 UA = "Two-edged Sword (tools/beza; personal Bible study app)"
 SUFFIX = "Greek NT: Beza's Textus Receptus (1598)"
 
-BOOKS = ["Matthew", "Mark", "Luke", "John", "Acts", "Romans", "1 Corinthians", "2 Corinthians", "Galatians", "Ephesians", "Philippians",
-         "Colossians", "1 Thessalonians", "2 Thessalonians", "1 Timothy", "2 Timothy", "Titus", "Philemon", "Hebrews", "James", "1 Peter",
-         "2 Peter", "1 John", "2 John", "3 John", "Jude", "Revelation"]
+BOOKS = NAMES[39:]
 SCV = ["MT", "MR", "LU", "JOH", "AC", "RO", "1CO", "2CO", "GA", "EPH", "PHP", "COL", "1TH", "2TH", "1TI", "2TI", "TIT", "PHM", "HEB", "JAS",
        "1PE", "2PE", "1JO", "2JO", "3JO", "JUDE", "RE"]
 
 
 def fetch(url):
-    req = urllib.request.Request(url, headers={"User-Agent": UA})
-    for attempt in range(4):
-        try:
-            with urllib.request.urlopen(req, timeout=60) as r:
-                return r.read()
-        except Exception:
-            if attempt == 3:
-                raise
-            time.sleep(3 * (attempt + 1))
+    return download(url, ua=UA, timeout=60)
 
 
 def pages(titles):
@@ -83,7 +73,7 @@ def pages(titles):
     for t in titles:
         p = CACHE / (re.sub(r"[^\w]+", "_", t) + ".wiki")
         if p.exists():
-            out[t] = p.read_text() or None
+            out[t] = p.read_text(encoding="utf-8") or None
         else:
             todo.append(t)
     for k in range(0, len(todo), 50):
@@ -101,7 +91,7 @@ def pages(titles):
         for t in batch:
             w = text.get(where[t])
             out[t] = w
-            (CACHE / (re.sub(r"[^\w]+", "_", t) + ".wiki")).write_text(w or "")
+            write_whole(CACHE / (re.sub(r"[^\w]+", "_", t) + ".wiki"), w or "")
         print(f"  fetched {min(k + 50, len(todo))} of {len(todo)} pages", end="\r", flush=True)
         time.sleep(1.5)
     if todo:
@@ -217,9 +207,7 @@ def greek(word):
 
 def scrivener(book):
     """{(chapter, verse): text} for a book, from Scrivener 1894."""
-    p = CACHE / f"{SCV[book]}.SCV"
-    if not p.exists():
-        p.write_bytes(fetch(SCRIVENER.format(SCV[book])))
+    p = fetch_to(SCRIVENER.format(SCV[book]), CACHE / f"{SCV[book]}.SCV", ua=UA, timeout=60)
     out, cur = {}, None
     for line in p.read_text(encoding="latin-1").splitlines():
         m = re.match(r"\s*(\d+):(\d+)\s*(.*)", line)
@@ -532,19 +520,9 @@ def main():
             "licence for its transcription). Accented; verses numbered as in the KJV."
             + (f" Where the wiki's page is missing or holds another chapter, the chapter is Scrivener's 1894 text, which follows Beza except in some 190 places: {', '.join(from_scrivener)}." if from_scrivener else "")
             + " Built by Two-edged Sword's tools/beza.</p>")
-    p = LIBRARY / "beza1598.bbli"
-    tmp = p.with_suffix(".tmp")
-    tmp.unlink(missing_ok=True)
-    db = sqlite3.connect(tmp)
-    db.executescript("""CREATE TABLE Details (Title NVARCHAR(100), Abbreviation NVARCHAR(50), Information TEXT, Version INT, OldTestament BOOL, NewTestament BOOL, Apocrypha BOOL, Strongs BOOL, RightToLeft BOOL);
-        CREATE TABLE Bible (Book INT, Chapter INT, Verse INT, Scripture TEXT);
-        CREATE INDEX BookChapterVerseIndex ON Bible (Book, Chapter, Verse);""")
-    db.execute("INSERT INTO Details VALUES (?,?,?,1,0,1,0,0,0)", ("Greek NT: Beza (1598)", "Beza 1598", info))
-    db.executemany("INSERT INTO Bible VALUES (?,?,?,?)", rows)
-    db.commit()
-    db.close()
-    tmp.replace(p)
-    print(f"{p.name}: {len(rows)} verses")
+    with module("beza1598.bbli", "Greek NT: Beza (1598)", "Beza 1598", info, ot=False) as db:
+        db.executemany("INSERT INTO Bible VALUES (?,?,?,?)", rows)
+    print(f"beza1598.bbli: {len(rows)} verses")
 
 
 if __name__ == "__main__":

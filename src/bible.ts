@@ -255,7 +255,8 @@ export function findBook(text: string): number | undefined {
   if (!k) return undefined;
   const exact = ALIASES.get(k);
   if (exact) return exact;
-  // A unique prefix of a full name: "gene", "philip" is ambiguous, "phile" is not.
+  // A prefix of a full name: one book's ("gene", "phile"), or, of three letters or more, the first
+  // book it fits ("phi" and "philip" are Philippians, as they come before Philemon).
   const hits = [...BOOKS, ...APOCRYPHA].filter((b) => b.name.toLowerCase().replace(/\s/g, "").startsWith(k));
   return hits.length === 1 ? hits[0].n : hits.length > 1 && k.length >= 3 ? hits[0].n : undefined;
 }
@@ -301,6 +302,31 @@ export function parseRef(text: string): Ref | undefined {
   return r;
 }
 
+/**
+ * Whether reference `r` (one written in a journal entry, say) takes in `at`: the same book, a
+ * chapter it spans, and verses that overlap. Either without a verse is the whole chapter.
+ */
+export function refOverlaps(r: Ref, at: Ref): boolean {
+  if (r.book !== at.book) return false;
+  const last = r.toChapter ?? r.chapter;
+  if (at.chapter < r.chapter || at.chapter > last) return false;
+  if (!r.verse || !at.verse) return true;
+  // Only the part of the range that falls in this chapter.
+  const a = at.chapter === r.chapter ? r.verse : 1;
+  const b = at.chapter === last ? (r.toChapter ? (r.to ?? 999) : (r.to ?? r.verse)) : 999;
+  return a <= (at.to ?? at.verse) && b >= at.verse;
+}
+
+/** Whether a journal entry's passages (its `verses`, as written: "John 3:16–18") take in `at`. */
+export const mentionsPassage = (e: { verses: string[] }, at: Ref) =>
+  e.verses.some((v) => {
+    const r = parseRef(v);
+    return !!r && refOverlaps(r, at);
+  });
+
+/** A label with the Psalms said one at a time: "Psalms 23" → "Psalm 23". */
+export const psalmLabel = (label: string) => label.replace(/^Psalms\b/, "Psalm");
+
 export function fmtRef(r: Ref, style: "long" | "short" | "esword" = "long"): string {
   const b = book(r.book);
   const name =
@@ -313,9 +339,9 @@ export function fmtRef(r: Ref, style: "long" | "short" | "esword" = "long"): str
 }
 
 /** The next and previous chapter in the Protestant canon (Compare, and when a Bible's own chapters aren't known). */
-export const nextChapter = (b: number, c: number): [number, number] | undefined =>
+const nextChapter = (b: number, c: number): [number, number] | undefined =>
   b > 66 ? (c < book(b).chapters ? [b, c + 1] : undefined) : c < book(b).chapters ? [b, c + 1] : b < 66 ? [b + 1, 1] : undefined;
-export const prevChapter = (b: number, c: number): [number, number] | undefined =>
+const prevChapter = (b: number, c: number): [number, number] | undefined =>
   c > 1 ? [b, c - 1] : b > 1 && b <= 66 ? [b - 1, book(b - 1).chapters] : undefined;
 
 /** A Bible's books and how many chapters each has, from its own text (bibleSizes in ui.tsx). */

@@ -35,34 +35,28 @@ Baruch, 72–73 1–2 Maccabees, 74 1 Esdras, 76–77 3–4 Maccabees, 78 the Pr
 their own chapters and verses; Sirach's prologue opens its 1:1. Lamentations' Greek preface opens
 Lamentations 1:1. Where the Septuagint lacks a verse the KJV has, there is none.
 
+SIL's tables are taken at a fixed commit (eBible.org's zip has no fixed version to take).
 Downloads are cached in ~/Library/Caches/Two-edged Sword/lxx.
 """
-import html, io, os, re, sqlite3, sys, urllib.request, zipfile
+import html, io, re, sys, zipfile
+from functools import lru_cache
 from pathlib import Path
 
-HOME = Path(os.environ.get("HOME", ""))
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from modules import LIBRARY, find  # noqa: E402
-CACHE = HOME / "Library/Caches/Two-edged Sword/lxx"
+from books import USFM as BOOK_CODES  # noqa: E402
+from modules import CACHES, LIBRARY, chapter_lengths, fetch, find, module  # noqa: E402
+CACHE = CACHES / "lxx"
 USFM = "https://ebible.org/Scriptures/grcbrent_usfm.zip"
-VRS = "https://raw.githubusercontent.com/sillsdev/libpalaso/master/SIL.Scripture/Resources/{}.vrs.txt"
+VRS = "https://raw.githubusercontent.com/sillsdev/libpalaso/0e913f4b4ee64c9d42b1891254513b83dbb4906c/SIL.Scripture/Resources/{}.vrs.txt"
 
 # The canon's Paratext codes in e-Sword's order (1–39).
-CANON = ["GEN", "EXO", "LEV", "NUM", "DEU", "JOS", "JDG", "RUT", "1SA", "2SA", "1KI", "2KI", "1CH", "2CH", "EZR", "NEH", "EST", "JOB",
-         "PSA", "PRO", "ECC", "SNG", "ISA", "JER", "LAM", "EZK", "DAN", "HOS", "JOL", "AMO", "OBA", "JON", "MIC", "NAM", "HAB", "ZEP",
-         "HAG", "ZEC", "MAL"]
+CANON = BOOK_CODES[:39]
 # The Apocrypha as e-Sword (and the library's Brenton, Latin and Douay-Rheims) numbers them.
 APOCRYPHA = {"TOB": 67, "JDT": 68, "WIS": 69, "SIR": 70, "BAR": 71, "1MA": 72, "2MA": 73, "1ES": 74, "3MA": 76, "4MA": 77, "MAN": 78}
 
 
 def get(url, name):
-    p = CACHE / name
-    if not p.exists() or not p.stat().st_size:
-        p.parent.mkdir(parents=True, exist_ok=True)
-        req = urllib.request.Request(url, headers={"User-Agent": "Two-edged Sword (tools/lxx)"})  # eBible refuses urllib's
-        with urllib.request.urlopen(req, timeout=300) as r:
-            p.write_bytes(r.read())
-    return p.read_bytes()
+    return fetch(url, CACHE / name, timeout=300).read_bytes()
 
 
 def usfm():
@@ -111,13 +105,6 @@ def clean(body):
     return re.sub(r"\s+", " ", s).strip()
 
 
-def ref(s):
-    """"PSA 9:22" -> ("PSA", 9, 22)."""
-    b, cv = s.split()
-    c, v = cv.split(":")
-    return b, int(c), int(v)
-
-
 def expand(left, right):
     """A line of a .vrs file, "EXO 8:1-4 = EXO 7:26-29" or "JER 25:20 = JER 49:34", as verse pairs."""
     lb, lc, lv = left.split()[0], *map(int, re.match(r"(\d+):(\d+)", left.split()[1]).groups())
@@ -152,11 +139,9 @@ def versification(name):
     return maps, lengths
 
 
+@lru_cache(maxsize=1)
 def kjv_lengths():
-    db = sqlite3.connect(f"file:{find('kjv.bbli')}?mode=ro", uri=True)
-    out = {(b, c): n for b, c, n in db.execute("SELECT Book, Chapter, MAX(Verse) FROM Bible GROUP BY Book, Chapter")}
-    db.close()
-    return out
+    return chapter_lengths("kjv.bbli")
 
 
 GREEK_LETTERS = "abcdefghiklmnopqrstuvwxyz"
@@ -248,7 +233,7 @@ def build():
             v = 1  # a Psalm's title opens verse 1
         key = (b, ch, v)
         extra = bool(re.search(r"[a-z]", label)) and how != "rule"  # a lettered verse a rule places isn't an addition
-        homeless = b <= 39 and how != "own" and key not in kjv_verses(kjv)
+        homeless = b <= 39 and how != "own" and key not in kjv_verses()
         if (extra or homeless or (how == "same" and key in claimed)) and last and last[0] == b:
             key = last  # joined to the verse before it
             joined += 1
@@ -263,21 +248,19 @@ def build():
     return rows, about, joined, notes
 
 
-def kjv_verses(kjv, _cache={}):
-    if not _cache:
-        _cache["s"] = {(b, c, v) for (b, c), n in kjv.items() for v in range(1, n + 1)}
-    return _cache["s"]
+@lru_cache(maxsize=1)
+def kjv_verses():
+    return frozenset((b, c, v) for (b, c), n in kjv_lengths().items() for v in range(1, n + 1))
 
 
 def main():
     if not find("kjv.bbli").exists():
         sys.exit(f"no kjv.bbli in {LIBRARY}, e-Sword X's library or the app")
     rows, about, joined, notes = build()
-    kjv = kjv_lengths()
     have = {(b, c, v) for b, c, v, _ in rows}
-    missing = sorted(k for k in kjv_verses(kjv) if k[0] <= 39 and k not in have)
+    missing = sorted(k for k in kjv_verses() if k[0] <= 39 and k not in have)
     print(f"{len(rows)} verses; {joined} Greek verses joined to the verse before them")
-    print(f"  canon: {sum(1 for r in rows if r[0] <= 39)} of the KJV's {sum(1 for k in kjv_verses(kjv) if k[0] <= 39)} Old Testament verses; apocrypha: {sum(1 for r in rows if r[0] > 39)}")
+    print(f"  canon: {sum(1 for r in rows if r[0] <= 39)} of the KJV's {sum(1 for k in kjv_verses() if k[0] <= 39)} Old Testament verses; apocrypha: {sum(1 for r in rows if r[0] > 39)}")
     if missing:
         by = {}
         for b, c, v in missing:
@@ -303,19 +286,9 @@ def main():
             "the Septuagint's added verses, the Greek additions to Esther and Daniel 3) is joined to the verse before it. "
             "Susanna and Bel are Daniel 13–14, the Letter of Jeremiah Baruch 6. Built by Two-edged Sword's tools/lxx.</p>"
             + (f"<p>eBible.org's text of {html.escape(dated.group(1).strip())}.</p>" if dated else ""))
-    p = LIBRARY / "lxx_brenton.bbli"
-    tmp = p.with_suffix(".tmp")
-    tmp.unlink(missing_ok=True)
-    db = sqlite3.connect(tmp)
-    db.executescript("""CREATE TABLE Details (Title NVARCHAR(100), Abbreviation NVARCHAR(50), Information TEXT, Version INT, OldTestament BOOL, NewTestament BOOL, Apocrypha BOOL, Strongs BOOL, RightToLeft BOOL);
-        CREATE TABLE Bible (Book INT, Chapter INT, Verse INT, Scripture TEXT);
-        CREATE INDEX BookChapterVerseIndex ON Bible (Book, Chapter, Verse);""")
-    db.execute("INSERT INTO Details VALUES (?,?,?,1,1,0,1,0,0)", ("Septuagint (Greek, Brenton 1844)", "LXX-Brenton", info))
-    db.executemany("INSERT INTO Bible VALUES (?,?,?,?)", rows)
-    db.commit()
-    db.close()
-    tmp.replace(p)
-    print(f"{p.name}: {len(rows)} verses")
+    with module("lxx_brenton.bbli", "Septuagint (Greek, Brenton 1844)", "LXX-Brenton", info, nt=False, apocrypha=True) as db:
+        db.executemany("INSERT INTO Bible VALUES (?,?,?,?)", rows)
+    print(f"lxx_brenton.bbli: {len(rows)} verses")
 
 
 if __name__ == "__main__":

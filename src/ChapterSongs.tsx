@@ -12,6 +12,7 @@ import { api } from "./api";
 import { Icon, Play } from "./icons";
 import { usePlayer } from "./speech";
 import { useApp } from "./state";
+import { PickedSongs } from "./PickedSongs";
 import { Popover } from "./ui";
 import { Picked, pickChapterSongs, setChapterPlaying } from "./worship";
 
@@ -88,22 +89,7 @@ export function SongsButton({ about, label, text }: { about: string; label?: str
               <Working text="Choosing songs" />
             ) : (
               <>
-                {p.intro && <p style={{ margin: 0, font: "400 15px/1.55 var(--serif)" }}>{p.intro}</p>}
-                {p.note && (
-                  <div className={p.songs.length ? "hint" : "err"} style={{ fontSize: 12.5 }}>
-                    {p.note}
-                  </div>
-                )}
-                {p.songs.length > 0 && (
-                  <ol style={{ margin: 0, paddingLeft: 22, display: "flex", flexDirection: "column", gap: 8 }}>
-                    {p.songs.map((x) => (
-                      <li key={x.id}>
-                        <b style={{ fontWeight: 600 }}>{x.name}</b> <span className="n">— {x.artist}</span>
-                        {x.why && <div style={{ fontSize: 13.5, lineHeight: 1.5, color: "var(--muted)", marginTop: 2 }}>{x.why}</div>}
-                      </li>
-                    ))}
-                  </ol>
-                )}
+                <PickedSongs intro={p.intro} note={p.note} songs={p.songs} />
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   {p.songs.length > 0 && (
                     <button className="btn primary" type="button" title="Play these songs in Music" onClick={() => play(p)}>

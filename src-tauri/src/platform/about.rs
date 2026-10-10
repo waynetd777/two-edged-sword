@@ -53,8 +53,8 @@ pub fn show(name: &str, version: &str, copyright: &str, icon_png: &[u8], link: &
         }
         let okey_refs: Vec<&NSString> = okeys.iter().map(|k| &**k).collect();
         let options = NSDictionary::from_slices(&okey_refs, &ovals);
-        let app: Retained<AnyObject> = msg_send![class!(NSApplication), sharedApplication];
-        let _: () = msg_send![&*app, activateIgnoringOtherApps: true];
+        let Some(app) = super::ns_app() else { return };
+        super::activate();
         let _: () = msg_send![&*app, orderFrontStandardAboutPanelWithOptions: &*options];
     }
 }

@@ -4,7 +4,25 @@
 // The worshippers: hands raised, a banner, dancing lights, the shofar, hallelujah, the holy mountain,
 // the open Word, the bread and cup, lights held high, the Name.
 
-import { bitmap, displayFont, flame, glow, lay, layering, ridge, rnd, smooth, TAU, tones, Vision, wander } from "./kit";
+import {
+  bitmap,
+  displayFont,
+  flame,
+  flatGlow,
+  glow,
+  lay,
+  layering,
+  photo,
+  random,
+  rangePath,
+  ridge,
+  rnd,
+  smooth,
+  TAU,
+  tones,
+  Vision,
+  wander,
+} from "./kit";
 import { CENSER_BITMAP } from "./censer-bitmap";
 import { CHALICE_BITMAP } from "./chalice-bitmap";
 import { LYRE_BITMAP } from "./lyre-bitmap";
@@ -86,7 +104,7 @@ export const WORSHIP: Vision[] = [
       // open hand with its fingers spread to the light. Nearer ones larger and lower; each rises
       // once, in its own time, to its full height and holds there, swaying a little.
       const arms = Array.from({ length: 13 }, (_, i) => {
-        const near = Math.random();
+        const near = random();
         const s = 11 + near * 13; // the palm's width: the hand's unit
         return {
           x: ((i + 0.5) / 13 + rnd(-0.03, 0.03)) * w,
@@ -97,7 +115,7 @@ export const WORSHIP: Vision[] = [
           d: rnd(0, 0.12),
           p: rnd(0, TAU),
           spread: rnd(0.7, 1),
-          left: Math.random() < 0.5, // which hand, so the thumb is on the right side
+          left: random() < 0.5, // which hand, so the thumb is on the right side
         };
       });
       arms.sort((a, b) => a.near - b.near);
@@ -209,20 +227,9 @@ export const WORSHIP: Vision[] = [
       "priest",
       "sacrifice of praise",
     ],
-    make: (w, h, room) => {
-      const W0 = Math.min(w, h) * 0.45;
-      const { x, scale } = room.place(W0);
-      const W = W0 * scale,
-        y = h * 0.5;
-      // Let my prayer rise as incense: a censer on its chains (pictures/censer-bitmap.ts), in the
-      // artwork's colour.
-      const pic = bitmap(CENSER_BITMAP, 0.1, "photo");
-      return (f) => {
-        const come = smooth(f.k * 2.4);
-        glow(f.ctx, x, y, W * 0.5, f.ink(0.08 * f.env * come * (0.92 + 0.08 * f.beat)), f.ink(0));
-        pic.draw(f, x, y + (1 - come) * 14, W, f.env * come, 1 + 0.004 * Math.sin(f.t * 1.1));
-      };
-    },
+    // Let my prayer rise as incense: a censer on its chains (pictures/censer-bitmap.ts), in the
+    // artwork's colour.
+    make: photo(CENSER_BITMAP, 0.45),
   },
   {
     name: "banner",
@@ -503,10 +510,11 @@ export const WORSHIP: Vision[] = [
       const y = h * rnd(0.4, 0.55);
       const word = "Hallelujah";
       let widths: number[] | null = null;
+      const font = displayFont();
       return (f) => {
         const { ctx } = f;
         ctx.save();
-        ctx.font = `italic 400 ${size}px ${displayFont()}`;
+        ctx.font = `italic 400 ${size}px ${font}`;
         ctx.textBaseline = "middle";
         ctx.textAlign = "left";
         if (!widths) widths = [...word].map((c) => ctx.measureText(c).width);
@@ -606,10 +614,7 @@ export const WORSHIP: Vision[] = [
         fg.addColorStop(0, f.ink(0.06 * f.env * come, true));
         fg.addColorStop(1, f.ink(0.01 * f.env * come, true));
         ctx.fillStyle = fg;
-        ctx.beginPath();
-        ctx.moveTo(0, h);
-        for (let x = 0; x <= w + 12; x += 12) ctx.lineTo(x, fore(x));
-        ctx.lineTo(w, h);
+        rangePath(ctx, fore, w, h);
         ctx.fill();
         // Fire on the summit, and now and then lightning in the cloud.
         for (let i = 0; i < 5; i++) flame(f, px + (i - 2) * w * 0.01, peakY + 4, 11 + (i % 3) * 5, i * 2.3, 0.5 * glory);
@@ -726,11 +731,7 @@ export const WORSHIP: Vision[] = [
         const part = smooth(f.k * 3 - 1.2); // the bread is broken
         // Light from above, on the table.
         glow(ctx, x, y - S * 2.5, S * 2.6, f.ink(0.12 * f.env), f.ink(0));
-        ctx.save();
-        ctx.translate(x, y + S * 0.3);
-        ctx.scale(3, 0.4);
-        glow(ctx, 0, 0, S * 1.2, f.ink(0.18 * f.env * come), f.ink(0));
-        ctx.restore();
+        flatGlow(ctx, x, y + S * 0.3, S * 1.2, 3, 0.4, f.ink(0.18 * f.env * come), f.ink(0));
         const { L, canvas } = layer(f);
         const tone = tones(f);
         L.translate(x, y + (1 - come) * 20);
@@ -823,20 +824,9 @@ export const WORSHIP: Vision[] = [
       "runneth over",
       "drink",
     ],
-    make: (w, h, room) => {
-      const W0 = Math.min(w, h) * 0.5;
-      const { x, scale } = room.place(W0);
-      const W = W0 * scale,
-        y = h * 0.5;
-      // The cup of the new covenant: a medieval chalice (pictures/chalice-bitmap.ts), in the artwork's
-      // colour, its museum light kept about it.
-      const pic = bitmap(CHALICE_BITMAP, 0.1, "photo");
-      return (f) => {
-        const come = smooth(f.k * 2.4);
-        glow(f.ctx, x, y, W * 0.5, f.ink(0.08 * f.env * come * (0.92 + 0.08 * f.beat)), f.ink(0));
-        pic.draw(f, x, y + (1 - come) * 14, W, f.env * come, 1 + 0.004 * Math.sin(f.t * 1.1));
-      };
-    },
+    // The cup of the new covenant: a medieval chalice (pictures/chalice-bitmap.ts), in the artwork's
+    // colour, its museum light kept about it.
+    make: photo(CHALICE_BITMAP, 0.5),
   },
   {
     name: "lyre",
@@ -859,19 +849,8 @@ export const WORSHIP: Vision[] = [
       "sing to the lord",
       "make music",
     ],
-    make: (w, h, room) => {
-      const W0 = Math.min(w, h) * 0.45;
-      const { x, scale } = room.place(W0);
-      const W = W0 * scale,
-        y = h * 0.5;
-      // David's harp: an ancient harp-lyre (pictures/lyre-bitmap.ts), in the artwork's colour.
-      const pic = bitmap(LYRE_BITMAP, 0.1, "photo");
-      return (f) => {
-        const come = smooth(f.k * 2.4);
-        glow(f.ctx, x, y, W * 0.5, f.ink(0.08 * f.env * come * (0.92 + 0.08 * f.beat)), f.ink(0));
-        pic.draw(f, x, y + (1 - come) * 14, W, f.env * come, 1 + 0.004 * Math.sin(f.t * 1.1));
-      };
-    },
+    // David's harp: an ancient harp-lyre (pictures/lyre-bitmap.ts), in the artwork's colour.
+    make: photo(LYRE_BITMAP, 0.45),
   },
   {
     name: "lights held high",
@@ -909,7 +888,7 @@ export const WORSHIP: Vision[] = [
             r: 7 - d * 4.5,
             p: rnd(0, TAU),
             s: rnd(0.4, 0.8),
-            cool: Math.random() < 0.2,
+            cool: random() < 0.2,
           });
         }
       }
@@ -975,6 +954,7 @@ export const WORSHIP: Vision[] = [
       const { x: cx, scale } = room.place(size0 * 2.6);
       const size = Math.round(size0 * scale);
       const y = h * rnd(0.4, 0.5);
+      const font = displayFont();
       return (f) => {
         const { ctx } = f;
         const a = f.env * smooth(f.k * 4) * smooth((1 - f.k) * 5);
@@ -1002,10 +982,10 @@ export const WORSHIP: Vision[] = [
         ctx.textBaseline = "middle";
         ctx.shadowColor = f.ink(0.5 * a);
         ctx.shadowBlur = size * 0.35;
-        ctx.font = `500 ${size}px "Times New Roman", ${displayFont()}`;
+        ctx.font = `500 ${size}px "Times New Roman", ${font}`;
         ctx.fillStyle = f.ink(0.3 * a);
         ctx.fillText("ישוע", cx, y - Math.sin(f.t * 0.4) * 4);
-        ctx.font = `italic 400 ${Math.round(size * 0.22)}px ${displayFont()}`;
+        ctx.font = `italic 400 ${Math.round(size * 0.22)}px ${font}`;
         ctx.fillStyle = f.ink(0.3 * a * smooth(f.k * 4 - 1));
         ctx.fillText("Yeshua · Jesus", cx, y + size * 0.72);
         ctx.restore();

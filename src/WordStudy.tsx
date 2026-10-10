@@ -5,22 +5,15 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { api, TopicHit, VerseHit } from "./api";
 import { AskPanel } from "./Ask";
 import { BOOKS, fmtRef, SHORT } from "./bible";
-import { concordanceRenderings, headwords, lexiconParts, plainText, renderHtml, tokenize } from "./esword";
+import { headwords, plainText, renderHtml, tokenize } from "./esword";
+import { Lex, lexEntry, loadLex } from "./lexicon";
 import { Icon } from "./icons";
 import { Topbar } from "./Shell";
 import { useApp } from "./state";
 import { orderModules } from "./StudyPane";
 import { SayButton } from "./speech";
 
-interface Entry {
-  num: string;
-  word: string;
-  translit: string;
-  pron: string;
-  rest: string;
-  total?: number;
-  html: string;
-}
+type Entry = Omit<Lex, "renderings">;
 
 /** An English word (or a transliteration) mapped to the Strong's numbers behind it. */
 interface Lookup {
@@ -96,8 +89,7 @@ export function WordStudyScreen() {
       // Name each number by its Greek or Hebrew word.
       const named = await Promise.all(
         words.slice(0, 24).map(async (w) => {
-          const a = app.lexicon ? await api.article("lexicon", app.lexicon, w.num).catch(() => null) : null;
-          const p = a ? lexiconParts(a.html) : null;
+          const p = app.lexicon ? await lexEntry(app.lexicon, w.num) : null;
           return { ...w, word: p?.word, translit: p?.translit };
         }),
       );
@@ -118,34 +110,31 @@ export function WordStudyScreen() {
   const choose = (n: string) => app.studyWord(n);
   useEffect(() => {
     let dead = false;
-    if (!app.lexicon) return;
-    api.article("lexicon", app.lexicon, num).then(async (a) => {
+    // The last number's findings go at once, so they never show under this one.
+    setRelated([]);
+    setRenderings([]);
+    setDist([]);
+    loadLex(app.lexicon, app.concordance, num).then(async (l) => {
       if (dead) return;
-      if (!a) {
-        setE(null);
-        return;
-      }
-      const parts = lexiconParts(a.html);
-      setE({ num, html: a.html, ...parts });
+      setE(l);
+      setRenderings(l?.renderings ?? []);
+      if (!l || !app.lexicon) return;
       // Related: the numbers the entry itself points to, plus words derived from this one are not indexed, so only those.
       const nums = Array.from(
         new Set(
-          Array.from(a.html.matchAll(/<num>([GH]\d+)<\/num>/g))
+          Array.from(l.html.matchAll(/<num>([GH]\d+)<\/num>/g))
             .map((m) => m[1])
             .filter((n) => n !== num),
         ),
       ).slice(0, 5);
-      const rel = await Promise.all(
-        nums.map(async (n) => {
-          const r = await api.article("lexicon", app.lexicon!, n);
-          return r ? { num: n, html: r.html, ...lexiconParts(r.html) } : null;
-        }),
-      );
-      if (!dead) setRelated(rel.filter(Boolean) as Entry[]);
+      const rel = await Promise.all(nums.map((n) => lexEntry(app.lexicon!, n)));
+      if (!dead) setRelated(rel.filter((r): r is Entry => !!r));
     });
-    if (app.concordance)
-      api.article("lexicon", app.concordance, num).then((c) => !dead && setRenderings(c ? concordanceRenderings(c.html) : []));
-    if (sb) api.strongsByBook(sb, num).then((d) => !dead && setDist(d));
+    if (sb)
+      api
+        .strongsByBook(sb, num)
+        .then((d) => !dead && setDist(d))
+        .catch(console.error);
     return () => {
       dead = true;
     };
@@ -153,9 +142,15 @@ export function WordStudyScreen() {
   useEffect(() => {
     if (!sb) return;
     let dead = false;
-    api.strongsVerses(sb, num, onlyBook, 300).then((v) => {
-      if (!dead) setVerses(v);
-    });
+    api
+      .strongsVerses(sb, num, onlyBook, 300)
+      .then((v) => {
+        if (!dead) setVerses(v);
+      })
+      .catch((e) => {
+        console.error(e);
+        if (!dead) setVerses([]);
+      });
     return () => {
       dead = true;
     };
@@ -167,7 +162,8 @@ export function WordStudyScreen() {
       const words = Array.from(new Set(renderings.slice(0, 3).flatMap(([w]) => headwords(w.split(/[\s(]/)[0]).slice(-1))));
       const found: TopicHit[] = [];
       for (const w of words)
-        for (const t of await api.findTopics(w)) if (!found.some((f) => f.module === t.module && f.topic === t.topic)) found.push(t);
+        for (const t of await api.findTopics(w).catch(() => []))
+          if (!found.some((f) => f.module === t.module && f.topic === t.topic)) found.push(t);
       if (!dead)
         setTopics(
           orderModules(
@@ -181,9 +177,6 @@ export function WordStudyScreen() {
     };
   }, [renderings, app.settings.dictionaryOrder]);
 
-  const books = BOOKS.filter((b) => (greek ? b.n >= 40 : b.n <= 39));
-  const counts = new Map(dist);
-  const max = Math.max(1, ...dist.map((d) => d[1]));
   const verseTotal = dist.reduce((n, d) => n + d[1], 0);
   const kjvTotal = renderings.reduce((n, r) => n + r[1], 0) || e?.total;
 
@@ -312,85 +305,7 @@ export function WordStudyScreen() {
                 )}
               </div>
             </div>
-            {sb && (
-              <div className="card" style={{ padding: "16px 20px 12px" }}>
-                <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
-                  <div className="label">Verses with {num}, by book</div>
-                  <div className="n">{greek ? "New" : "Old"} Testament · click a bar to list its verses</div>
-                </div>
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: `repeat(${books.length}, minmax(0,1fr))`,
-                    gap: greek ? 4 : 2,
-                    alignItems: "end",
-                    height: 150,
-                    marginTop: 14,
-                  }}
-                >
-                  {books.map((b) => {
-                    const n = counts.get(b.n) ?? 0;
-                    const on = onlyBook === b.n;
-                    return (
-                      <button
-                        key={b.n}
-                        type="button"
-                        title={`${b.name}: ${n}`}
-                        disabled={!n}
-                        onClick={() => setOnlyBook(on ? null : b.n)}
-                        style={{
-                          display: "flex",
-                          flexDirection: "column",
-                          alignItems: "center",
-                          justifyContent: "flex-end",
-                          gap: 3,
-                          height: 150,
-                          border: 0,
-                          background: "transparent",
-                          padding: 0,
-                          cursor: n ? "pointer" : "default",
-                        }}
-                      >
-                        {greek && <span style={{ fontSize: 10.5, color: "var(--muted)" }}>{n || ""}</span>}
-                        <span
-                          style={{
-                            width: "100%",
-                            borderRadius: "3px 3px 0 0",
-                            height: n ? Math.max(4, Math.round((n / max) * 118)) : 2,
-                            background: on ? "var(--accent)" : n ? "var(--barsoft)" : "var(--border)",
-                          }}
-                        />
-                      </button>
-                    );
-                  })}
-                </div>
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: `repeat(${books.length}, minmax(0,1fr))`,
-                    gap: greek ? 4 : 2,
-                    marginTop: 6,
-                    borderTop: "1px solid var(--border)",
-                    paddingTop: 5,
-                  }}
-                >
-                  {books.map((b) => (
-                    <span
-                      key={b.n}
-                      style={{
-                        fontSize: greek ? 10 : 8,
-                        color: "var(--muted)",
-                        textAlign: "center",
-                        overflow: "hidden",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {greek || b.n % 3 === 1 ? SHORT[b.n - 1] : ""}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
+            {sb && <BookChart num={num} dist={dist} onlyBook={onlyBook} setOnlyBook={setOnlyBook} />}
             {sb && (
               <div className="card" style={{ padding: "6px 20px 10px" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 0 4px" }}>
@@ -501,6 +416,103 @@ export function WordStudyScreen() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+/** How many verses in each book of its Testament use a number: a bar a book, which lists that book's verses when clicked. */
+function BookChart({
+  num,
+  dist,
+  onlyBook,
+  setOnlyBook,
+}: {
+  num: string;
+  dist: [number, number][];
+  onlyBook: number | null;
+  setOnlyBook: (b: number | null) => void;
+}) {
+  const greek = num.startsWith("G");
+  const books = BOOKS.filter((b) => (greek ? b.n >= 40 : b.n <= 39));
+  const counts = new Map(dist);
+  const max = Math.max(1, ...dist.map((d) => d[1]));
+  return (
+    <div className="card" style={{ padding: "16px 20px 12px" }}>
+      <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
+        <div className="label">Verses with {num}, by book</div>
+        <div className="n">{greek ? "New" : "Old"} Testament · click a bar to list its verses</div>
+      </div>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: `repeat(${books.length}, minmax(0,1fr))`,
+          gap: greek ? 4 : 2,
+          alignItems: "end",
+          height: 150,
+          marginTop: 14,
+        }}
+      >
+        {books.map((b) => {
+          const n = counts.get(b.n) ?? 0;
+          const on = onlyBook === b.n;
+          return (
+            <button
+              key={b.n}
+              type="button"
+              title={`${b.name}: ${n}`}
+              disabled={!n}
+              onClick={() => setOnlyBook(on ? null : b.n)}
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "flex-end",
+                gap: 3,
+                height: 150,
+                border: 0,
+                background: "transparent",
+                padding: 0,
+                cursor: n ? "pointer" : "default",
+              }}
+            >
+              {greek && <span style={{ fontSize: 10.5, color: "var(--muted)" }}>{n || ""}</span>}
+              <span
+                style={{
+                  width: "100%",
+                  borderRadius: "3px 3px 0 0",
+                  height: n ? Math.max(4, Math.round((n / max) * 118)) : 2,
+                  background: on ? "var(--accent)" : n ? "var(--barsoft)" : "var(--border)",
+                }}
+              />
+            </button>
+          );
+        })}
+      </div>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: `repeat(${books.length}, minmax(0,1fr))`,
+          gap: greek ? 4 : 2,
+          marginTop: 6,
+          borderTop: "1px solid var(--border)",
+          paddingTop: 5,
+        }}
+      >
+        {books.map((b) => (
+          <span
+            key={b.n}
+            style={{
+              fontSize: greek ? 10 : 8,
+              color: "var(--muted)",
+              textAlign: "center",
+              overflow: "hidden",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {greek || b.n % 3 === 1 ? SHORT[b.n - 1] : ""}
+          </span>
+        ))}
+      </div>
     </div>
   );
 }

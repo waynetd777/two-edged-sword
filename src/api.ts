@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import { invoke } from "@tauri-apps/api/core";
+import { isDark } from "./dom";
 
 /** Screenshot mode (scene.ts) sets this: nothing the page changes is saved. */
 let readOnly = false;
@@ -16,7 +17,7 @@ export const setSceneJournal = (es: JournalEntry[]) => {
   sceneJournal = es;
 };
 
-export type Kind = "bible" | "commentary" | "dictionary" | "lexicon" | "reference" | "devotional";
+type Kind = "bible" | "commentary" | "dictionary" | "lexicon" | "reference" | "devotional";
 
 export interface ModuleInfo {
   id: string;
@@ -48,7 +49,7 @@ export interface Verse {
   text: string;
 }
 /** An AI CLI on this Mac; `path` is null when it isn't installed. `models` is filled for Codex, Antigravity (ids "agy:…") and Copilot ("copilot:auto"). */
-export interface Cli {
+interface Cli {
   path: string | null;
   version: string | null;
   models: { id: string; name: string }[];
@@ -85,7 +86,7 @@ export interface Passage {
   verses: Verse[];
 }
 
-export interface CommentEntry {
+interface CommentEntry {
   chapterBegin: number;
   verseBegin: number;
   chapterEnd: number;
@@ -122,7 +123,7 @@ export interface VerseHit {
 }
 
 export type SearchMode = "phrase" | "all" | "any";
-export interface SearchQuery {
+interface SearchQuery {
   text: string;
   mode: SearchMode;
   wholeWords: boolean;
@@ -131,7 +132,7 @@ export interface SearchQuery {
   bookTo: number;
   strongsBible?: string | null;
 }
-export interface CommentMatch {
+interface CommentMatch {
   book: number;
   chapterBegin: number;
   verseBegin: number;
@@ -139,7 +140,7 @@ export interface CommentMatch {
   verseEnd: number;
   snippet: string;
 }
-export interface ModuleMatches<T> {
+interface ModuleMatches<T> {
   module: string;
   title: string;
   abbrev: string;
@@ -183,7 +184,7 @@ export interface JournalEntry {
   body: string;
 }
 /** What of an entry goes to Ask (study.rs's JournalNote). */
-export type JournalNote = Pick<JournalEntry, "title" | "created" | "verses" | "tags" | "body">;
+type JournalNote = Pick<JournalEntry, "title" | "created" | "verses" | "tags" | "body">;
 
 /** today: today's reading ("Psalm 23 · John 3"), null without an active plan. */
 export interface TrayState {
@@ -303,12 +304,10 @@ export const api = {
   devotionTitles: (module: string) => invoke<string[]>("devotion_titles", { module }),
   /** The reading for a day, by its title ("September 24"). */
   devotion: (module: string, title: string) => invoke<string | null>("devotion", { module, title }),
-  /** Opens an https page in its own window inside the app; `key` reuses the window. */
-  /** Opens a web page (an online devotional) in its own window, dark when the app is. */
-  /** `invert` false leaves the page as the site made it, even in the dark theme. */
+  /** Opens a web page (an online devotional) in its own window, dark when the app is; `key` reuses
+   *  the window. `invert` false leaves the page as the site made it, even in the dark theme. */
   openWeb: (key: string, url: string, title: string, invert = true) => {
-    const t = document.documentElement.getAttribute("data-theme");
-    const dark = t ? t === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const dark = isDark();
     return invoke<void>("open_web", { key, url, title, dark: dark && invert, darkApp: dark });
   },
   /** Whether a web page lets itself be shown inside the app, rather than in a window of its own. */

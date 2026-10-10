@@ -27,31 +27,25 @@ Sources:
 The Greek shown is Beza's, accented, with its punctuation. The markup is INT+'s (see tokenize in
 src/esword.tsx): each word a <div><grk>word</grk><num>G…</num><tvm>grammar</tvm><gra>gloss</gra></div>.
 
-Downloads are cached in ~/Library/Caches/Two-edged Sword/beza.
+STEPBible's files are cached in ~/Library/Caches/Two-edged Sword/stepbible (tools/stepbible.py).
+The grammar is spelled out as the other interlinears spell it (stepbible.robinson).
 """
-import html, os, re, sqlite3, sys, unicodedata, urllib.parse, urllib.request
+import html, re, sqlite3, sys
 from collections import Counter
 from difflib import SequenceMatcher
 from pathlib import Path
 
-HOME = Path(os.environ.get("HOME", ""))
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from modules import LIBRARY, find  # noqa: E402
-from stepbible import has, tagnt  # noqa: E402
-CACHE = HOME / "Library/Caches/Two-edged Sword/beza"
-TBESG = ("https://raw.githubusercontent.com/STEPBible/STEPBible-Data/master/Lexicons/"
-         + urllib.parse.quote("TBESG - Translators Brief lexicon of Extended Strongs for Greek - STEPBible.org CC BY.txt"))
-BOOKS = ["Matthew", "Mark", "Luke", "John", "Acts", "Romans", "1 Corinthians", "2 Corinthians", "Galatians", "Ephesians", "Philippians",
-         "Colossians", "1 Thessalonians", "2 Thessalonians", "1 Timothy", "2 Timothy", "Titus", "Philemon", "Hebrews", "James",
-         "1 Peter", "2 Peter", "1 John", "2 John", "3 John", "Jude", "Revelation"]
+from books import NAMES  # noqa: E402
+from modules import find, greek_key, module, similar  # noqa: E402
+from stepbible import has, lexicon, robinson, tagnt  # noqa: E402
+BOOKS = NAMES[39:]
 
 
 def key(w):
     """A word for comparing editions: Greek letters only, no accents, no case, σ for ς, and no
     movable ν (Beza's ἐγέννησε is TR+'s εγεννησεν)."""
-    t = unicodedata.normalize("NFD", w.lower())
-    t = "".join(ch for ch in t if not unicodedata.combining(ch)).replace("ς", "σ")
-    return re.sub(r"(ε|ι)ν$", r"\1", "".join(re.findall(r"[α-ω]", t)))
+    return greek_key(w)
 
 
 def rows(name):
@@ -70,19 +64,10 @@ def words(ws, edition=None):
 
 # ---------- English ----------
 
-def get(url, file):
-    p = CACHE / file
-    if not p.exists() or not p.stat().st_size:
-        p.parent.mkdir(parents=True, exist_ok=True)
-        with urllib.request.urlopen(url, timeout=120) as r:
-            p.write_bytes(r.read())
-    return p
-
-
 def glosses():
     """{"G0025": "love", …}: TBESG's gloss for each Strong's number, from its first entry."""
     out = {}
-    for line in get(TBESG, "TBESG.txt").read_text(encoding="utf-8-sig").split("\n"):
+    for line in lexicon("TBESG").split("\n"):
         f = line.split("\t")
         if len(f) > 6 and re.match(r"G\d{4}[a-zA-Z]?$", f[0]) and f[0] not in out:
             g = f[6].split(":")[0].strip()  # "lord: God" is the word lord in its sense God
@@ -143,71 +128,6 @@ def gloss_for(num, code, G):
     return g
 
 
-# ---------- grammar ----------
-
-POS = {"N": "noun", "A": "adjective", "T": "article", "V": "verb", "P": "personal pronoun", "R": "relative pronoun",
-       "C": "reciprocal pronoun", "D": "demonstrative pronoun", "K": "correlative pronoun", "I": "interrogative pronoun",
-       "X": "indefinite pronoun", "Q": "correlative or interrogative pronoun", "F": "reflexive pronoun", "S": "possessive pronoun",
-       "ADV": "adverb", "CONJ": "conjunction", "COND": "conditional", "PRT": "particle", "PREP": "preposition", "INJ": "interjection",
-       "ARAM": "Aramaic word", "HEB": "Hebrew word"}
-CASE = {"N": "nom.", "G": "gen.", "D": "dat.", "A": "acc.", "V": "voc."}
-NUMB = {"S": "sing.", "P": "plur."}
-GEND = {"M": "masc.", "F": "fem.", "N": "neut."}
-TENSE = {"P": "present", "I": "imperfect", "F": "future", "A": "aorist", "R": "perfect", "L": "pluperfect", "X": ""}
-VOICE = {"A": "active", "M": "middle", "P": "passive", "E": "middle or passive", "D": "middle deponent", "O": "passive deponent",
-         "N": "middle or passive deponent", "Q": "impersonal active", "X": ""}
-MOOD = {"I": "indicative", "S": "subjunctive", "O": "optative", "M": "imperative", "N": "infinitive", "P": "participle", "R": "imperative participle"}
-SUFFIX = {"C": "comparative", "S": "superlative", "N": "negative", "I": "interrogative", "K": "with crasis", "ATT": "Attic", "ABB": "abbreviated"}
-PERSON = {"1": "1st", "2": "2nd", "3": "3rd"}
-
-
-def cng(s):
-    return " ".join(x for x in (CASE.get(s[:1]), NUMB.get(s[1:2]), GEND.get(s[2:3])) if x)
-
-
-def grammar(code):
-    """A Robinson code spelled out: V-2AAI-3S "verb · 2nd aorist active indicative · 3rd sing."."""
-    if not code:
-        return ""
-    parts = code.split("-")
-    head, rest = parts[0], parts[1:]
-    out = [POS.get(head, head.lower())]
-    suffix = []
-    if head == "V" and rest:
-        t = rest[0]
-        second = t.startswith("2")
-        t = t.lstrip("2")
-        if len(t) >= 3:
-            out.append(" ".join(x for x in (("2nd " if second else "") + TENSE.get(t[0], ""), VOICE.get(t[1], ""), MOOD.get(t[2], "")) if x.strip()))
-        for r in rest[1:]:
-            if re.fullmatch(r"[123][SP]", r):
-                out.append(f"{PERSON[r[0]]} {NUMB[r[1]]}")
-            elif re.fullmatch(r"[NGDAV][SP][MFN]", r):
-                out.append(cng(r))
-            elif r in SUFFIX:
-                suffix.append(SUFFIX[r])
-    elif head in ("N", "A", "T", "R", "C", "D", "K", "I", "X", "Q", "F", "S", "P") and rest:
-        for r in rest:
-            m = re.fullmatch(r"([123])?([NGDAV][SP][MFN]?)", r)
-            if m:
-                out.append(" ".join(x for x in ((PERSON[m.group(1)] + " person") if m.group(1) else "", cng(m.group(2))) if x))
-            elif r == "PRI":
-                out.append("proper name, indeclinable")
-            elif r in ("NUI", "LI", "OI"):
-                out.append("indeclinable")
-            elif re.fullmatch(r"[123][SP][NGDAV][SP][MFN]", r):  # possessive: owner, then the word
-                out.append(f"{PERSON[r[0]]} {NUMB[r[1]]} · {cng(r[2:])}")
-            elif r in SUFFIX:
-                suffix.append(SUFFIX[r])
-    else:
-        for r in rest:
-            if r in SUFFIX:
-                suffix.append(SUFFIX[r])
-    if suffix:
-        out[0] += " (" + ", ".join(suffix) + ")"
-    return " · ".join(x for x in out if x)
-
-
 # ---------- lining up ----------
 
 def line_up(bk, cand, got):
@@ -257,7 +177,7 @@ def main():
             for op, i1, i2, j1, j2 in SequenceMatcher(None, bk, ck, autojunk=False).get_opcodes():
                 if op == "replace" and i2 - i1 == j2 - j1:
                     for k in range(i2 - i1):
-                        if got[i1 + k] is None and cand[j1 + k][1] and SequenceMatcher(None, bk[i1 + k], ck[j1 + k]).ratio() >= 0.6:
+                        if got[i1 + k] is None and cand[j1 + k][1] and similar(bk[i1 + k], ck[j1 + k]) >= 0.6:
                             got[i1 + k] = (cand[j1 + k][1], cand[j1 + k][2])
         in_verse = sum(x is not None for x in got)
         for i, x in enumerate(got):
@@ -289,7 +209,7 @@ def main():
                 g = g[:1].lower() + g[1:]
             stats["glossed"] += bool(g)
             s.append(f"<div><grk>{html.escape(t)}</grk>" + (f"<num>{num}</num>" if num else "")
-                     + f"<tvm>{html.escape(grammar(code))}</tvm><gra>{html.escape(g) or '—'}</gra></div>")
+                     + f"<tvm>{html.escape(robinson(code))}</tvm><gra>{html.escape(g) or '—'}</gra></div>")
         out.append((b, c, v, "".join(s)))
 
     w = stats["words"]
@@ -304,19 +224,9 @@ def main():
             "STEPBible's TBESG (Tyndale House, CC BY 4.0, https://github.com/STEPBible/STEPBible-Data). The English is the "
             "dictionary sense, not a translation of the verse. The Greek is tools/beza's text of the textus-receptus.com "
             "transcription. Built by Two-edged Sword's tools/beza/plus.py.</p>")
-    p = LIBRARY / "beza1598+.bbli"
-    tmp = p.with_suffix(".tmp")
-    tmp.unlink(missing_ok=True)
-    db = sqlite3.connect(tmp)
-    db.executescript("""CREATE TABLE Details (Title NVARCHAR(100), Abbreviation NVARCHAR(50), Information TEXT, Version INT, OldTestament BOOL, NewTestament BOOL, Apocrypha BOOL, Strongs BOOL, RightToLeft BOOL);
-        CREATE TABLE Bible (Book INT, Chapter INT, Verse INT, Scripture TEXT);
-        CREATE INDEX BookChapterVerseIndex ON Bible (Book, Chapter, Verse);""")
-    db.execute("INSERT INTO Details VALUES (?,?,?,1,0,1,0,1,0)", ("Greek NT: Beza (1598) w/ glosses", "Beza 1598+", info))
-    db.executemany("INSERT INTO Bible VALUES (?,?,?,?)", out)
-    db.commit()
-    db.close()
-    tmp.replace(p)
-    print(f"{p.name}: {len(out)} verses")
+    with module("beza1598+.bbli", "Greek NT: Beza (1598) w/ glosses", "Beza 1598+", info, ot=False, strongs=True) as db:
+        db.executemany("INSERT INTO Bible VALUES (?,?,?,?)", out)
+    print(f"beza1598+.bbli: {len(out)} verses")
 
 
 if __name__ == "__main__":

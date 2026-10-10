@@ -14,32 +14,33 @@
 import { useEffect, useRef, useState } from "react";
 import { Working } from "./Ask";
 import { api, isReadOnly, MusicState } from "./api";
-import { book } from "./bible";
+import { book, psalmLabel } from "./bible";
 import { docSegments, plainText } from "./esword";
 import { Icon, Pause, Play } from "./icons";
 import {
   current,
   dayTitle,
   doneToday,
-  firstUndone,
   ONLINE_DEVOTIONALS,
   OnlineDevotional,
   onlineDevotionals,
   Part,
   Plan,
   progressKey,
+  readOn,
   tickPart,
   today as startOfToday,
-  todayFor,
-  ymd,
+  todayIfOngoing,
   worshipCounts,
   partLabel,
 } from "./plans";
+import { checkMusic, useMusicState } from "./music";
 import { usePlayer } from "./speech";
 import { QuietStep, useApp } from "./state";
 import { useDrag } from "./ui";
 import { markPlayed, Picked, pickSongs, setChapterPlaying } from "./worship";
 import { sceneSong } from "./lyrics";
+import { PickedSongs } from "./PickedSongs";
 import { Closing, pickClosing } from "./closing";
 import { cancelAutoRead, inverts, readWhenReady } from "./WebPage";
 
@@ -49,7 +50,7 @@ const NEXT_DELAY = 2000;
 const readTime = (text: string) => Math.min(40, Math.max(8, Math.round(text.split(/\s+/).filter(Boolean).length / 3) + 3));
 
 /** Today's parts, one chapter at a time, then the chosen devotionals; worship songs first or last. */
-export function quietSteps(
+function quietSteps(
   plan: Plan,
   parts: Part[],
   devotionalIds: string[],
@@ -61,7 +62,7 @@ export function quietSteps(
     const last = p.c2 ?? p.c;
     for (let c = p.c; c <= last; c++) {
       const whole = p.c === last && p.v ? { v: p.v, v2: p.v2 } : {};
-      const label = `${book(p.b).name.replace(/^Psalms$/, "Psalm")} ${c}${whole.v ? `:${whole.v}${whole.v2 ? `–${whole.v2}` : ""}` : ""}`;
+      const label = `${psalmLabel(book(p.b).name)} ${c}${whole.v ? `:${whole.v}${whole.v2 ? `–${whole.v2}` : ""}` : ""}`;
       steps.push({ key: `${p.b}.${c}`, label, kind: "bible", bible: plan.bible, b: p.b, c, ...whole });
     }
   }
@@ -80,7 +81,7 @@ export function quietSteps(
   // A favourite passage, read every day at the very end, after the closing verse.
   const f = plan.finale;
   if (f && steps.length) {
-    const label = partLabel(f).replace(/^Psalms/, "Psalm");
+    const label = psalmLabel(partLabel(f));
     steps.push({
       key: "finale",
       label,
@@ -144,8 +145,8 @@ async function pickWorship(steps: QuietStep[], model: string, put: (key: string,
 export function useWorshipAhead() {
   const app = useApp();
   const plan = current(app.plans);
-  const t = plan && !(plan.kind === "sequence" && firstUndone(plan) < 0) ? todayFor(plan) : null;
-  const done = !!plan && (plan.kind === "ppo" ? plan.doneDates : (plan.readDates ?? [])).includes(ymd(startOfToday()));
+  const t = todayIfOngoing(plan);
+  const done = !!plan && readOn(plan, startOfToday());
   const w = plan?.worship;
   const ready = app.plansReady && !!app.lib;
   const key =
@@ -197,9 +198,10 @@ export function QuietTime({ focus }: { focus: boolean }) {
   const bibleKeys = s ? s.steps.filter((x) => x.kind === "bible").map((x) => x.key) : [];
   const done = plan && s ? doneToday(plan, s.dayKey) : [];
 
+  // Marked on the reading day the session began, though it runs past 4am into the next.
   const tick = (key: string) => {
     if (!s || s.preview) return;
-    app.setPlans((ps) => ps.map((p) => (p.id === s.planId ? tickPart(p, s.dayKey, key, bibleKeys, startOfToday()) : p)));
+    app.setPlans((ps) => ps.map((p) => (p.id === s.planId ? tickPart(p, s.dayKey, key, bibleKeys, startOfToday(s.started)) : p)));
   };
   // Forward ticks off the part being left; going past the last part ends the session.
   const go = (d: number) => {
@@ -262,16 +264,21 @@ export function QuietTime({ focus }: { focus: boolean }) {
   const cur = s?.steps[s.i];
   const closingReady = cur?.kind === "closing" && !!cur.picked;
   const songs = cur?.kind === "worship" ? cur.picked : undefined;
-  const [now, setNow] = useState<MusicState | null>(null);
-  /** Asks Music what's playing now (after pause or skip, so the bar keeps up). */
-  const checkNow = useRef<() => void>(() => {});
+  const [playing, setPlaying] = useState(false);
+  // The songs have been put on in Music (or the scene's song is shown): from then, what Music says
+  // it's playing is the bar's, Music's answers from before then (`stale`) left out.
+  const [launched, setLaunched] = useState(false);
+  const [sceneNow, setSceneNow] = useState<MusicState | null>(null);
+  const music = useMusicState(launched && !sceneSong);
+  const stale = useRef<MusicState | null>(null);
+  const now = sceneNow ?? (launched && music.now !== stale.current ? music.now : null);
+  // Asked again after pause or skip, so the bar keeps up.
   const control = (cmd: "pause" | "play" | "next" | "show") =>
     api
       .musicControl(cmd)
-      .then(() => checkNow.current())
+      .then(() => checkMusic())
       .catch((e) => app.toast(String(e)));
   const nowRef = useRef<MusicState | null>(null);
-  const [playing, setPlaying] = useState(false);
   const [countdown, setCountdown] = useState<number | null>(null);
   // With audio, the closing verse waits long enough to read the card's summary before it's read aloud.
   const [readIn, setReadIn] = useState<number | null>(null);
@@ -322,41 +329,31 @@ export function QuietTime({ focus }: { focus: boolean }) {
     return () => window.removeEventListener("keydown", k, true);
   }, [s?.started, s?.i, !!songs?.length, playing]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const latest = useRef(music.now);
+  latest.current = music.now;
+  // Heard playing yet, and on the last song: for knowing when they've finished.
+  const heard = useRef({ playing: false, onLast: false, done: false });
   useEffect(() => {
-    setNow(null);
+    setLaunched(false);
+    setSceneNow(null);
+    heard.current = { playing: false, onLast: false, done: false };
     // None chosen (the card says why): it waits for Next.
     if (!songs?.length || !playing) return;
-    let dead = false,
-      heard = false,
-      onLast = false,
-      poll: number | undefined;
     // Screenshot mode: the scene's song, as if Music were playing it, and Music left alone.
     if (sceneSong) {
-      setNow({ state: "playing", ours: true, album: "", lyrics: "", bpm: 0, ...sceneSong });
+      setSceneNow({ state: "playing", ours: true, album: "", lyrics: "", bpm: 0, ...sceneSong });
       app.openLyrics();
       return;
     }
-    const last = songs[songs.length - 1].name;
-    const check = async () => {
-      const st = await api.musicState().catch(() => null);
-      if (dead || !st) return;
-      setNow(st);
-      if (st.ours && st.state === "playing") {
-        heard = true;
-        onLast = st.name === last;
-      } else if (heard && (!st.ours || st.state === "stopped")) {
-        window.clearInterval(poll);
-        // Straight on from the last song: Music's AutoPlay carrying on after the playlist, which
-        // is stopped. Anything else (music the user put on instead) is left playing.
-        if (onLast && st.state !== "stopped") api.musicControl("stop").catch(() => {});
-        goRef.current(1);
-      }
-    };
-    checkNow.current = check;
+    let dead = false;
     api
       .musicPlay(songs.map((x) => x.id))
       .then((n) => {
-        if (dead) return;
+        // Left before Music started them: they're paused again, not left playing.
+        if (dead) {
+          if (n) api.musicControl("pause").catch(() => {});
+          return;
+        }
         if (!n) {
           app.toast("Couldn't find the songs in Music");
           return;
@@ -365,20 +362,35 @@ export function QuietTime({ focus }: { focus: boolean }) {
         markPlayed(songs).catch((e) => console.error("worship-history", e));
         // The words in the reading column while the songs play.
         app.openLyrics();
-        // At once, so pause and skip work as soon as it's playing, then every second.
-        check();
-        poll = window.setInterval(check, 1000);
+        // Asked at once, so pause and skip work as soon as it's playing, then every second.
+        stale.current = latest.current;
+        setLaunched(true);
+        checkMusic();
       })
       .catch((e) => {
         if (!dead) app.toast(String(e));
       });
     return () => {
       dead = true;
-      checkNow.current = () => {};
-      window.clearInterval(poll);
       api.musicControl("pause").catch(() => {});
     };
   }, [s?.started, s?.i, !!songs, playing]); // eslint-disable-line react-hooks/exhaustive-deps
+  // The part moves on when the songs finish.
+  useEffect(() => {
+    const st = music.now;
+    if (!launched || sceneSong || !st || st === stale.current || !songs?.length || heard.current.done) return;
+    const h = heard.current;
+    if (st.ours && st.state === "playing") {
+      h.playing = true;
+      h.onLast = st.name === songs[songs.length - 1].name;
+    } else if (h.playing && (!st.ours || st.state === "stopped")) {
+      h.done = true;
+      // Straight on from the last song: Music's AutoPlay carrying on after the playlist, which
+      // is stopped. Anything else (music the user put on instead) is left playing.
+      if (h.onLast && st.state !== "stopped") api.musicControl("stop").catch(() => {});
+      goRef.current(1);
+    }
+  }, [music.now, launched]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // A part read aloud, going on to the next part when it finishes. The last part stays open
   // afterwards, until Finish, when it is the closing verse or the favourite passage.
@@ -400,6 +412,9 @@ export function QuietTime({ focus }: { focus: boolean }) {
       player.play(step.bible, p.b, p.c, p.v, { toVerse: p.v2 ?? p.v, onEnd });
     } else if (step.kind === "devotional") {
       const html = await api.devotion(step.module, step.title).catch(() => null);
+      // Moved on while it was being read from the module: not read over the part now open.
+      const y = sRef.current;
+      if (y?.steps[y.i] !== step) return;
       const segs = html ? docSegments(html) : [];
       if (segs.length) player.playDoc(step.module, step.title, segs, 0, "devotional", { onEnd });
       else onEnd();
@@ -669,7 +684,7 @@ export function QuietTime({ focus }: { focus: boolean }) {
             zIndex: 45,
           }}
         >
-          <WorshipCard key={s.started} step={step} now={now} started={playing} countdown={countdown} onPlay={() => setPlaying(true)} />
+          <WorshipCard key={s.started} step={step} started={playing} countdown={countdown} onPlay={() => setPlaying(true)} />
         </div>
       )}
     </>
@@ -783,13 +798,11 @@ function SongProgress({ now }: { now: MusicState }) {
 /** Under the bar during the Worship part: what today's reading is about, and why each song was chosen. */
 function WorshipCard({
   step,
-  now,
   started,
   countdown,
   onPlay,
 }: {
   step: Extract<QuietStep, { kind: "worship" }>;
-  now: MusicState | null;
   started: boolean;
   countdown: number | null;
   onPlay: () => void;
@@ -798,7 +811,6 @@ function WorshipCard({
   const drag = useDrag(true); // remounted for each Worship part, so it opens in place
   // Once the songs play, the Lyrics page takes over, with each song's reason under its name.
   if (!step.picked || hidden || started) return null;
-  const k = started && now?.ours ? step.picked.findIndex((x) => x.name === now.name) : -1;
   return (
     <div
       className="card"
@@ -832,27 +844,8 @@ function WorshipCard({
           <Icon name="x" />
         </button>
       </div>
-      {step.intro && <p style={{ margin: 0, font: "400 15px/1.55 var(--serif)" }}>{step.intro}</p>}
-      {step.note && (
-        <div className={step.picked.length ? "hint" : "err"} style={{ fontSize: 12.5 }}>
-          {step.note}
-        </div>
-      )}
+      <PickedSongs intro={step.intro} note={step.note} songs={step.picked} />
       {step.picked.length > 0 && (
-        <ol style={{ margin: 0, paddingLeft: 22, display: "flex", flexDirection: "column", gap: 8 }}>
-          {step.picked.map((x, i) => (
-            <li key={x.id} style={{ color: i === k ? "var(--accent)" : undefined }}>
-              <b style={{ fontWeight: 600 }}>{x.name}</b>{" "}
-              <span className="n">
-                — {x.artist}
-                {i === k ? " · playing" : ""}
-              </span>
-              {x.why && <div style={{ fontSize: 13.5, lineHeight: 1.5, color: "var(--muted)", marginTop: 2 }}>{x.why}</div>}
-            </li>
-          ))}
-        </ol>
-      )}
-      {!started && step.picked.length > 0 && (
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <button className="btn primary" type="button" title="Play today's songs in Music" onClick={onPlay}>
             <Play size={12} />

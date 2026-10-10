@@ -215,14 +215,33 @@ fn parse_at(lines: &[&str], i: usize, end: usize) -> Entry {
     e
 }
 
-pub fn parse(text: &str) -> Vec<Entry> {
-    let lines: Vec<&str> = text.lines().collect();
-    let st = starts(&lines);
+/// Each entry with the lines it spans. An id already used in the file gets "-2", "-3" after it,
+/// so two entries never share one: the id made from the meta line when the comment is lost is
+/// only the minute it was written, and a save or delete takes out every entry with its id.
+fn entries(lines: &[&str]) -> Vec<(usize, usize, Entry)> {
+    let st = starts(lines);
+    let mut seen = std::collections::HashSet::new();
     st.iter()
         .enumerate()
-        .map(|(n, &i)| parse_at(&lines, i, st.get(n + 1).copied().unwrap_or(lines.len())))
-        .filter(|e| !e.id.is_empty())
+        .map(|(n, &i)| {
+            let end = st.get(n + 1).copied().unwrap_or(lines.len());
+            let mut e = parse_at(lines, i, end);
+            if !e.id.is_empty() {
+                let base = e.id.clone();
+                let mut k = 1;
+                while !seen.insert(e.id.clone()) {
+                    k += 1;
+                    e.id = format!("{base}-{k}");
+                }
+            }
+            (i, end, e)
+        })
         .collect()
+}
+
+pub fn parse(text: &str) -> Vec<Entry> {
+    let lines: Vec<&str> = text.lines().collect();
+    entries(&lines).into_iter().map(|(_, _, e)| e).filter(|e| !e.id.is_empty()).collect()
 }
 
 /// The month file with entry `id` taken out and, if given, `put` added in date order. Everything
@@ -230,13 +249,11 @@ pub fn parse(text: &str) -> Vec<Entry> {
 /// read), is kept as it was. None when nothing is left, so the file can go.
 fn splice(text: &str, key: &str, id: &str, put: Option<&Entry>) -> Option<String> {
     let lines: Vec<&str> = text.lines().collect();
-    let st = starts(&lines);
-    let head = lines[..st.first().copied().unwrap_or(lines.len())].join("\n").trim_end().to_string();
+    let all = entries(&lines);
+    let head = lines[..all.first().map_or(lines.len(), |(i, _, _)| *i)].join("\n").trim_end().to_string();
     let head = if head.trim().is_empty() { month_heading(key) } else { head };
     let mut chunks: Vec<(String, String)> = Vec::new();
-    for (n, &i) in st.iter().enumerate() {
-        let end = st.get(n + 1).copied().unwrap_or(lines.len());
-        let e = parse_at(&lines, i, end);
+    for (i, end, e) in all {
         if id.is_empty() || e.id != id {
             chunks.push((e.created, lines[i..end].join("\n").trim_end().to_string()));
         }
@@ -284,25 +301,34 @@ pub fn stamp(dir: &Path) -> String {
     month_files(dir)
         .iter()
         .map(|(k, p)| {
-            let m = std::fs::metadata(p).ok();
-            let t = m
-                .as_ref()
-                .and_then(|m| m.modified().ok())
-                .and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok())
-                .map(|d| d.as_nanos())
-                .unwrap_or(0);
-            format!("{k}:{}:{t}", m.map(|m| m.len()).unwrap_or(0))
+            let (len, t) = crate::store::file_stamp(p);
+            format!("{k}:{len}:{}", t.as_nanos())
         })
         .collect::<Vec<_>>()
         .join(" ")
 }
 
+/// Which month file each entry was last seen in, per journal folder, so a save needn't read every
+/// month (on a cloud drive, reading one only in the cloud downloads it). Filled by `list`, which
+/// the app runs again whenever the files change, and kept up by `save` and `delete`.
+type Months = std::collections::HashMap<std::path::PathBuf, std::collections::HashMap<String, String>>;
+static MONTH_OF: std::sync::Mutex<Option<Months>> = std::sync::Mutex::new(None);
+
+fn month_of(dir: &Path, f: impl FnOnce(&mut std::collections::HashMap<String, String>)) {
+    let mut m = MONTH_OF.lock().unwrap_or_else(|e| e.into_inner());
+    f(m.get_or_insert_with(Default::default).entry(dir.to_path_buf()).or_default());
+}
+
 pub fn list(dir: &Path) -> Result<Vec<Entry>, String> {
     let mut all = Vec::new();
-    for (_, p) in month_files(dir) {
+    let mut seen = std::collections::HashMap::new();
+    for (k, p) in month_files(dir) {
         let text = std::fs::read_to_string(&p).map_err(|e| format!("{}: {e}", p.display()))?;
-        all.extend(parse(&text));
+        let es = parse(&text);
+        seen.extend(es.iter().map(|e| (e.id.clone(), k.clone())));
+        all.extend(es);
     }
+    month_of(dir, |m| *m = seen);
     all.sort_by(|a, b| b.created.cmp(&a.created));
     Ok(all)
 }
@@ -347,8 +373,16 @@ pub fn save(dir: &Path, entry: &Entry) -> Result<(), String> {
     let lock = crate::store::dir_lock(dir);
     let _held = lock.lock().unwrap_or_else(|e| e.into_inner());
     write_month(dir, &key, splice(&read_month(dir, &key)?, &key, &entry.id, Some(entry)))?;
-    // Only once it is safely written, out of whichever month held it before (its date may have changed).
-    for (k, _) in month_files(dir).into_iter().filter(|(k, _)| *k != key) {
+    // Only once it is safely written, out of whichever month held it before (its date may have
+    // changed): the one it was last seen in, or every other month for an entry not seen yet.
+    let mut was = None;
+    month_of(dir, |m| was = m.insert(entry.id.clone(), key.clone()));
+    let others: Vec<String> = match was {
+        Some(k) if k == key => vec![],
+        Some(k) => vec![k],
+        None => month_files(dir).into_iter().map(|(k, _)| k).filter(|k| *k != key).collect(),
+    };
+    for k in others {
         let text = read_month(dir, &k)?;
         if parse(&text).iter().any(|e| e.id == entry.id) {
             write_month(dir, &k, splice(&text, &k, &entry.id, None))?;
@@ -369,6 +403,9 @@ pub fn delete(dir: &Path, id: &str) -> Result<(), String> {
             write_month(dir, &k, splice(&text, &k, id, None))?;
         }
     }
+    month_of(dir, |m| {
+        m.remove(id);
+    });
     Ok(())
 }
 
@@ -416,6 +453,23 @@ mod tests {
             ("20260925-0209", vec!["prayer".to_string()], "Abba Father.")
         );
         assert_eq!(from_meta_line("*Saturday 5 September 2026 · 06:00* · #prayer").unwrap().0, "2026-09-05T06:00");
+    }
+
+    #[test]
+    fn entries_without_comments_in_one_minute_stay_apart() {
+        let a = sample();
+        let b = Entry { title: "Another".into(), body: "Second.".into(), ..sample() };
+        let text = render_month("2026-09", &[a, b]);
+        let stripped: String = text.lines().filter(|l| !l.starts_with("<!-- tes ")).map(|l| format!("{l}\n")).collect();
+        let got = parse(&stripped);
+        assert_eq!(got.iter().map(|e| e.id.as_str()).collect::<Vec<_>>(), vec!["20260923-0702", "20260923-0702-2"]);
+        // Deleting one leaves the other.
+        let left = parse(&splice(&stripped, "2026-09", &got[0].id, None).unwrap());
+        assert_eq!((left.len(), left[0].body.as_str()), (1, "Second."));
+        // Saving the second writes it back under its own id, the first untouched.
+        let saved = parse(&splice(&stripped, "2026-09", &got[1].id, Some(&got[1])).unwrap());
+        assert_eq!(saved.len(), 2);
+        assert!(saved.iter().any(|e| e.body.starts_with("Some **bold**")));
     }
 
     #[test]

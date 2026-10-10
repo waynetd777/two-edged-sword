@@ -28,9 +28,11 @@ const NAV: { s: Screen; label: string; icon: string; key: string; tip: string }[
 ];
 export const SCREEN_KEYS = NAV.map((n) => n.s);
 
+/** How long ago, in calendar days: something read late yesterday was "1d" this morning. */
 function ago(iso: string) {
   const d = new Date(iso);
-  const days = Math.floor((Date.now() - d.getTime()) / 86400000);
+  const midnight = (x: Date) => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
+  const days = Math.round((midnight(new Date()) - midnight(d)) / 86400000);
   if (days <= 0) return "today";
   if (days === 1) return "1d";
   if (days < 30) return `${days}d`;

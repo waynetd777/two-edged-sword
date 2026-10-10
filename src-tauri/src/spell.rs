@@ -4,8 +4,8 @@
 //! Spelling for the journal, from macOS's own spell checker (the one TextEdit and Mail use):
 //! the misspelled words in a text, the guesses for one, the automatic correction for one when
 //! the user has "Correct spelling automatically" on, and learning or ignoring a word. Offsets
-//! are UTF-16, as in NSString and in JavaScript strings. Called on the main thread (the
-//! commands aren't async), where AppKit wants it. Every word in the KJV counts as spelled right,
+//! are UTF-16, as in NSString and in JavaScript strings. Called on the main thread, where AppKit
+//! wants it. Every word in the KJV counts as spelled right,
 //! and sentences in KJV English ("he maketh me", "thou art") aren't grammar-checked.
 
 use objc2::runtime::AnyObject;
@@ -30,17 +30,27 @@ fn words(text: &str) -> impl Iterator<Item = String> + '_ {
     text.split(|c: char| !(c.is_alphabetic() || c == '\'' || c == '’')).map(norm).filter(|w| !w.is_empty())
 }
 
-/// Reads the KJV's words from the library (a Bible whose abbreviation is KJV); called once, off
-/// the main thread. Tags (Strong's numbers, notes) are dropped.
+/// Reads the KJV's words from the library (a Bible whose abbreviation is KJV), off the main
+/// thread. One read at a time: a caller arriving during another's waits for it rather than
+/// reading them again. Tags (Strong's numbers, notes) are dropped.
 pub fn load_kjv(lib: &crate::library::Library) {
     use crate::library::Kind;
+    static LOADING: std::sync::Mutex<()> = std::sync::Mutex::new(());
+    let _one = LOADING.lock().unwrap_or_else(|e| e.into_inner());
+    if kjv_ready() {
+        return;
+    }
     let Some(id) = lib.of_kind(Kind::Bible).find(|m| m.abbrev.eq_ignore_ascii_case("KJV")).map(|m| m.id.clone()) else { return };
     let texts = lib.with(Kind::Bible, &id, |c| {
         let mut st = c.prepare("SELECT Scripture FROM Bible")?;
         let rows = st.query_map([], |r| r.get::<_, Option<String>>(0))?;
         rows.map(|r| r.map(|t| t.unwrap_or_default())).collect::<rusqlite::Result<Vec<_>>>()
     });
-    let Ok(texts) = texts else { return };
+    // A KJV that can't be read isn't tried again on every check: spelling goes on without it.
+    let texts = texts.unwrap_or_else(|e| {
+        eprintln!("spelling: the KJV's words: {e}");
+        Vec::new()
+    });
     let mut set = HashSet::new();
     for t in texts {
         let mut plain = String::with_capacity(t.len());

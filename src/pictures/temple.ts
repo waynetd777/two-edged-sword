@@ -4,7 +4,7 @@
 // The tabernacle and the temple: the ark, the table, the altars, the laver, the high priest's
 // breastplate and the menorah, from public-domain engravings and the Arch of Titus.
 
-import { bitmap, glow, smooth, Vision } from "./kit";
+import { photo, Vision } from "./kit";
 import { ARK_BITMAP } from "./ark-bitmap";
 import { SHEWBREAD_BITMAP } from "./shewbread-bitmap";
 import { INCENSE_ALTAR_BITMAP } from "./incense-altar-bitmap";
@@ -35,20 +35,9 @@ export const TEMPLE: Vision[] = [
       "manifest",
       "shekinah",
     ],
-    make: (w, h, room) => {
-      const W0 = Math.min(w, h) * 0.6;
-      const { x, scale } = room.place(W0);
-      const W = W0 * scale,
-        y = h * 0.5;
-      // The ark of the covenant, the cherubim over the mercy seat (pictures/ark-bitmap.ts), an
-      // engraving, in the artwork's colour.
-      const pic = bitmap(ARK_BITMAP, 0.1, "photo");
-      return (f) => {
-        const come = smooth(f.k * 2.4);
-        glow(f.ctx, x, y, W * 0.5, f.ink(0.08 * f.env * come * (0.92 + 0.08 * f.beat)), f.ink(0));
-        pic.draw(f, x, y + (1 - come) * 14, W, f.env * come, 1 + 0.004 * Math.sin(f.t * 1.1));
-      };
-    },
+    // The ark of the covenant, the cherubim over the mercy seat (pictures/ark-bitmap.ts), an
+    // engraving, in the artwork's colour.
+    make: photo(ARK_BITMAP, 0.6),
   },
   {
     name: "table of shewbread",
@@ -71,20 +60,9 @@ export const TEMPLE: Vision[] = [
       "provision",
       "priests",
     ],
-    make: (w, h, room) => {
-      const W0 = Math.min(w, h) * 0.6;
-      const { x, scale } = room.place(W0);
-      const W = W0 * scale,
-        y = h * 0.5;
-      // The table of shewbread, its loaves in two piles (pictures/shewbread-bitmap.ts), an
-      // engraving, in the artwork's colour.
-      const pic = bitmap(SHEWBREAD_BITMAP, 0.1, "photo");
-      return (f) => {
-        const come = smooth(f.k * 2.4);
-        glow(f.ctx, x, y, W * 0.5, f.ink(0.08 * f.env * come * (0.92 + 0.08 * f.beat)), f.ink(0));
-        pic.draw(f, x, y + (1 - come) * 14, W, f.env * come, 1 + 0.004 * Math.sin(f.t * 1.1));
-      };
-    },
+    // The table of shewbread, its loaves in two piles (pictures/shewbread-bitmap.ts), an
+    // engraving, in the artwork's colour.
+    make: photo(SHEWBREAD_BITMAP, 0.6),
   },
   {
     name: "altar of incense",
@@ -106,20 +84,9 @@ export const TEMPLE: Vision[] = [
       "offering",
       "burn",
     ],
-    make: (w, h, room) => {
-      const W0 = Math.min(w, h) * 0.5;
-      const { x, scale } = room.place(W0);
-      const W = W0 * scale,
-        y = h * 0.5;
-      // The golden altar of incense, its smoke rising (pictures/incense-altar-bitmap.ts), an
-      // engraving, in the artwork's colour.
-      const pic = bitmap(INCENSE_ALTAR_BITMAP, 0.1, "photo");
-      return (f) => {
-        const come = smooth(f.k * 2.4);
-        glow(f.ctx, x, y, W * 0.5, f.ink(0.08 * f.env * come * (0.92 + 0.08 * f.beat)), f.ink(0));
-        pic.draw(f, x, y + (1 - come) * 14, W, f.env * come, 1 + 0.004 * Math.sin(f.t * 1.1));
-      };
-    },
+    // The golden altar of incense, its smoke rising (pictures/incense-altar-bitmap.ts), an
+    // engraving, in the artwork's colour.
+    make: photo(INCENSE_ALTAR_BITMAP, 0.5),
   },
   {
     name: "altar of burnt offering",
@@ -142,20 +109,9 @@ export const TEMPLE: Vision[] = [
       "atonement",
       "lamb",
     ],
-    make: (w, h, room) => {
-      const W0 = Math.min(w, h) * 0.55;
-      const { x, scale } = room.place(W0);
-      const W = W0 * scale,
-        y = h * 0.5;
-      // The altar of burnt offering, the sacrifice on its grate (pictures/brazen-altar-bitmap.ts), an
-      // engraving, in the artwork's colour.
-      const pic = bitmap(BRAZEN_ALTAR_BITMAP, 0.1, "photo");
-      return (f) => {
-        const come = smooth(f.k * 2.4);
-        glow(f.ctx, x, y, W * 0.5, f.ink(0.08 * f.env * come * (0.92 + 0.08 * f.beat)), f.ink(0));
-        pic.draw(f, x, y + (1 - come) * 14, W, f.env * come, 1 + 0.004 * Math.sin(f.t * 1.1));
-      };
-    },
+    // The altar of burnt offering, the sacrifice on its grate (pictures/brazen-altar-bitmap.ts), an
+    // engraving, in the artwork's colour.
+    make: photo(BRAZEN_ALTAR_BITMAP, 0.55),
   },
   {
     name: "laver",
@@ -178,20 +134,9 @@ export const TEMPLE: Vision[] = [
       "consecrate",
       "washing",
     ],
-    make: (w, h, room) => {
-      const W0 = Math.min(w, h) * 0.45;
-      const { x, scale } = room.place(W0);
-      const W = W0 * scale,
-        y = h * 0.5;
-      // The bronze laver the priests washed in (pictures/laver-bitmap.ts), an engraving, in the
-      // artwork's colour.
-      const pic = bitmap(LAVER_BITMAP, 0.1, "photo");
-      return (f) => {
-        const come = smooth(f.k * 2.4);
-        glow(f.ctx, x, y, W * 0.5, f.ink(0.08 * f.env * come * (0.92 + 0.08 * f.beat)), f.ink(0));
-        pic.draw(f, x, y + (1 - come) * 14, W, f.env * come, 1 + 0.004 * Math.sin(f.t * 1.1));
-      };
-    },
+    // The bronze laver the priests washed in (pictures/laver-bitmap.ts), an engraving, in the
+    // artwork's colour.
+    make: photo(LAVER_BITMAP, 0.45),
   },
   {
     name: "high priest's breastplate",
@@ -214,20 +159,9 @@ export const TEMPLE: Vision[] = [
       "royal priesthood",
       "priesthood",
     ],
-    make: (w, h, room) => {
-      const W0 = Math.min(w, h) * 0.42;
-      const { x, scale } = room.place(W0);
-      const W = W0 * scale,
-        y = h * 0.5;
-      // The high priest's breastplate, its twelve stones for the tribes, over the ephod
-      // (pictures/priestly-breastplate-bitmap.ts), an engraving, in the artwork's colour.
-      const pic = bitmap(PRIESTLY_BREASTPLATE_BITMAP, 0.1, "photo");
-      return (f) => {
-        const come = smooth(f.k * 2.4);
-        glow(f.ctx, x, y, W * 0.5, f.ink(0.08 * f.env * come * (0.92 + 0.08 * f.beat)), f.ink(0));
-        pic.draw(f, x, y + (1 - come) * 14, W, f.env * come, 1 + 0.004 * Math.sin(f.t * 1.1));
-      };
-    },
+    // The high priest's breastplate, its twelve stones for the tribes, over the ephod
+    // (pictures/priestly-breastplate-bitmap.ts), an engraving, in the artwork's colour.
+    make: photo(PRIESTLY_BREASTPLATE_BITMAP, 0.42),
   },
   {
     name: "menorah of titus",
@@ -250,19 +184,8 @@ export const TEMPLE: Vision[] = [
       "golden lampstand",
       "rebuild",
     ],
-    make: (w, h, room) => {
-      const W0 = Math.min(w, h) * 0.5;
-      const { x, scale } = room.place(W0);
-      const W = W0 * scale,
-        y = h * 0.5;
-      // The temple's menorah carried off from Jerusalem, as carved on the Arch of Titus
-      // (pictures/titus-menorah-bitmap.ts), in the artwork's colour.
-      const pic = bitmap(TITUS_MENORAH_BITMAP, 0.1, "photo");
-      return (f) => {
-        const come = smooth(f.k * 2.4);
-        glow(f.ctx, x, y, W * 0.5, f.ink(0.08 * f.env * come * (0.92 + 0.08 * f.beat)), f.ink(0));
-        pic.draw(f, x, y + (1 - come) * 14, W, f.env * come, 1 + 0.004 * Math.sin(f.t * 1.1));
-      };
-    },
+    // The temple's menorah carried off from Jerusalem, as carved on the Arch of Titus
+    // (pictures/titus-menorah-bitmap.ts), in the artwork's colour.
+    make: photo(TITUS_MENORAH_BITMAP, 0.5),
   },
 ];

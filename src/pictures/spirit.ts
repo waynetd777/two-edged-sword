@@ -4,7 +4,26 @@
 // The Spirit's coming: the upper room, the pillar of fire, the glory cloud, heaven opened, the
 // fountain, the sword of the Spirit, fire on the altar, the beating heart, palm branches, the whirlwind.
 
-import { beam, flame, Frame, glow, lay, layering, ridge, ripples, rnd, smooth, TAU, tones, Vision, wander } from "./kit";
+import {
+  beam,
+  drift,
+  flame,
+  flatGlow,
+  Frame,
+  glow,
+  lay,
+  layering,
+  random,
+  rangePath,
+  ridge,
+  ripples,
+  rnd,
+  smooth,
+  TAU,
+  tones,
+  Vision,
+  wander,
+} from "./kit";
 
 /**
  * A fire's tongues: where each is rooted across the fire's foot (x, -1 to 1), how high it can
@@ -18,14 +37,14 @@ function kindle(n: number) {
     return { x, h: 0.3 + 0.7 * mid * rnd(0.6, 1), s: rnd(0.7, 1.6), p: rnd(0, TAU), a: 0.35 + 0.65 * mid };
   }).sort((p, q) => Math.abs(q.x) - Math.abs(p.x));
   const licks = Array.from({ length: Math.round(n / 2) }, () => ({
-    u: Math.random(),
+    u: random(),
     x: rnd(-1, 1),
     s: rnd(0.08, 0.16),
     p: rnd(0, TAU),
     size: rnd(14, 26),
   }));
   const embers = Array.from({ length: n * 1.5 }, () => ({
-    u: Math.random(),
+    u: random(),
     x: rnd(-1, 1),
     s: rnd(0.06, 0.14),
     p: rnd(0, TAU),
@@ -66,7 +85,7 @@ function burn(f: Frame, fire: ReturnType<typeof kindle>, x0: number, foot: numbe
   }
   ctx.restore();
   for (const l of fire.licks) {
-    const u = (l.u + f.t * l.s) % 1;
+    const u = drift(l, f.t);
     const y = foot - reach * (0.25 + 0.75 * u);
     if (y < -20) continue;
     flame(
@@ -84,7 +103,7 @@ function burn(f: Frame, fire: ReturnType<typeof kindle>, x0: number, foot: numbe
   glow(ctx, x0, foot - reach * 0.3, half * 2.2, f.ink(0.14 * f.env * a * (0.9 + 0.1 * f.beat)), f.ink(0));
   const ember = f.dot();
   for (const e of fire.embers) {
-    const u = (e.u + f.t * e.s) % 1;
+    const u = drift(e, f.t);
     ctx.globalAlpha = 0.8 * f.env * a * (1 - u) * Math.min(1, u * 4);
     ctx.drawImage(
       ember,
@@ -172,7 +191,7 @@ export const SPIRIT: Vision[] = [
         const rush = 0.6 + 0.4 * Math.sin(f.t * 0.8);
         ctx.lineCap = "round";
         for (const q of gusts) {
-          const u = (q.u + f.t * q.s) % 1;
+          const u = drift(q, f.t);
           const px = x + dir * (u * W * 3.4),
             py = top + W * 0.7 + q.v * W * 0.6 + u * u * (h * 0.75 - top) + Math.sin(f.t * 1.4 + q.u * 9) * 6;
           const len = q.len * w * 0.5;
@@ -235,19 +254,12 @@ export const SPIRIT: Vision[] = [
         }
         ctx.globalAlpha = 1;
         // The sand, lit about its foot.
-        ctx.save();
-        ctx.translate(x0, foot);
-        ctx.scale(3, 0.5);
-        glow(ctx, 0, 0, h * 0.28, f.ink(0.26 * f.env * rise), f.ink(0));
-        ctx.restore();
+        flatGlow(ctx, x0, foot, h * 0.28, 3, 0.5, f.ink(0.26 * f.env * rise), f.ink(0));
         const sg = ctx.createLinearGradient(0, ground - h * 0.06, 0, h);
         sg.addColorStop(0, f.ink(0.08 * f.env));
         sg.addColorStop(1, f.ink(0.01 * f.env));
         ctx.fillStyle = sg;
-        ctx.beginPath();
-        ctx.moveTo(0, h);
-        for (let x = 0; x <= w + 12; x += 12) ctx.lineTo(x, dunes(x));
-        ctx.lineTo(w, h);
+        rangePath(ctx, dunes, w, h);
         ctx.fill();
         // The fire: a pillar of flame rooted in the ground, reaching the top of the page as it grows.
         burn(f, fire, x0, foot, w * 0.045, (foot + h * 0.1) * rise, rise);
@@ -331,7 +343,7 @@ export const SPIRIT: Vision[] = [
     ],
     make: (w, h, room) => {
       const cx = room.place(w * 0.34).x;
-      const drops = Array.from({ length: 90 }, () => ({ u: Math.random(), x: rnd(-1, 1), s: rnd(0.25, 0.45), l: rnd(10, 26) }));
+      const drops = Array.from({ length: 90 }, () => ({ u: random(), x: rnd(-1, 1), s: rnd(0.25, 0.45), l: rnd(10, 26) }));
       const rings: { t: number; x: number }[] = [];
       let next = 0;
       return (f) => {
@@ -367,7 +379,7 @@ export const SPIRIT: Vision[] = [
         ctx.lineCap = "round";
         ctx.beginPath();
         for (const d of drops) {
-          const u = (d.u + f.t * d.s) % 1;
+          const u = drift(d, f.t);
           const y = ry + u * (foot - ry);
           const x = cx + d.x * rw * (1 + 0.9 * u);
           ctx.moveTo(x, y);
@@ -375,11 +387,7 @@ export const SPIRIT: Vision[] = [
         }
         ctx.stroke();
         // Where it lands: a pool spreading, ringed with ripples.
-        ctx.save();
-        ctx.translate(cx, foot);
-        ctx.scale(2.6, 0.4);
-        glow(ctx, 0, 0, rw * 1.5, f.ink(0.3 * f.env * open, true), f.ink(0, true));
-        ctx.restore();
+        flatGlow(ctx, cx, foot, rw * 1.5, 2.6, 0.4, f.ink(0.3 * f.env * open, true), f.ink(0, true));
         if (open > 0.3 && f.t >= next) {
           rings.push({ t: f.t, x: cx + rnd(-1.6, 1.6) * rw });
           next = f.t + rnd(0.3, 0.8);
@@ -429,7 +437,7 @@ export const SPIRIT: Vision[] = [
       ]);
       const drops = Array.from({ length: 150 }, (_, i) => ({
         jet: i % jets.length,
-        u: Math.random(),
+        u: random(),
         off: rnd(-1, 1),
         s: rnd(0.45, 0.7),
         r: rnd(1, 2.2),
@@ -496,11 +504,7 @@ export const SPIRIT: Vision[] = [
         L.fill();
         lay(f, canvas, 0.8 * f.env, S * 0.1);
         // The water's sheen in the basin, and the light of the whole.
-        ctx.save();
-        ctx.translate(x, base - S * 0.05);
-        ctx.scale(1, 0.25);
-        glow(ctx, 0, 0, S * 0.8, f.ink(0.25 * f.env, true), f.ink(0, true));
-        ctx.restore();
+        flatGlow(ctx, x, base - S * 0.05, S * 0.8, 1, 0.25, f.ink(0.25 * f.env, true), f.ink(0, true));
         glow(ctx, x, base - S * 0.9, S * 1.2, f.ink(0.1 * f.env * up), f.ink(0));
         // Each jet is an arc of water: up from the bowl, over, and down into the basin, a
         // quadratic curve whose crown wavers a little; stroked wide and faint, then narrow and
@@ -548,7 +552,7 @@ export const SPIRIT: Vision[] = [
         const dot = f.dot(true);
         for (const d of drops) {
           const j = jets[d.jet];
-          const u = (d.u + f.t * d.s) % 1;
+          const u = drift(d, f.t);
           const [px, py] = arc(j).at(u);
           ctx.globalAlpha = f.env * up * 0.8 * (0.4 + 0.6 * Math.sin(f.t * 3 + d.p) ** 2);
           ctx.drawImage(dot, px + d.off * S * 0.03 * u - d.r, py + Math.abs(d.off) * S * 0.04 * u * u - d.r, d.r * 2, d.r * 2);
@@ -943,7 +947,7 @@ export const SPIRIT: Vision[] = [
     make: (w, h) => {
       // Fronds held up from the foot of the page and waved, nearer ones larger and lower.
       const fronds = Array.from({ length: 11 }, (_, i) => {
-        const near = Math.random();
+        const near = random();
         return {
           x: ((i + 0.5) / 11 + rnd(-0.03, 0.03)) * w,
           H: h * (0.3 + near * 0.3),
@@ -952,8 +956,8 @@ export const SPIRIT: Vision[] = [
           lean: rnd(-0.25, 0.25),
           d: rnd(0, 0.3),
           p: rnd(0, TAU),
-          cool: Math.random() < 0.7,
-          flip: Math.random() < 0.5 ? -1 : 1, // which way it arches
+          cool: random() < 0.7,
+          flip: random() < 0.5 ? -1 : 1, // which way it arches
         };
       });
       fronds.sort((a, b) => a.near - b.near);
@@ -1061,12 +1065,12 @@ export const SPIRIT: Vision[] = [
         top = h * 0.12;
       const wisps = Array.from({ length: 110 }, () => ({
         a: rnd(0, TAU),
-        u: Math.random(),
+        u: random(),
         v: rnd(0.5, 0.9),
         len: rnd(0.3, 0.7),
-        cool: Math.random() < 0.7,
+        cool: random() < 0.7,
       }));
-      const specks = Array.from({ length: 30 }, () => ({ a: rnd(0, TAU), u: Math.random(), s: rnd(0.08, 0.16), p: rnd(0, TAU) }));
+      const specks = Array.from({ length: 30 }, () => ({ a: rnd(0, TAU), u: random(), s: rnd(0.08, 0.16), p: rnd(0, TAU) }));
       return (f) => {
         const { ctx } = f;
         const bend = wander(f.t * 0.5, 3) * S * 0.25;
@@ -1101,18 +1105,14 @@ export const SPIRIT: Vision[] = [
         beam(f, x + bend, foot, x, top, 3, 0.25 * f.env);
         const dot = f.dot();
         for (const s of specks) {
-          const u = (s.u + f.t * s.s) % 1;
+          const u = drift(s, f.t);
           const [px, py] = at(u, s.a + f.t * 3 * (1.6 - u));
           ctx.globalAlpha = 0.6 * f.env * Math.sin(Math.PI * u);
           ctx.drawImage(dot, px - 2, py - 2, 4, 4);
         }
         ctx.globalAlpha = 1;
         // Dust kicked up at its foot.
-        ctx.save();
-        ctx.translate(x + bend, foot);
-        ctx.scale(2, 0.4);
-        glow(ctx, 0, 0, S * 0.6, f.ink(0.14 * f.env, true), f.ink(0, true));
-        ctx.restore();
+        flatGlow(ctx, x + bend, foot, S * 0.6, 2, 0.4, f.ink(0.14 * f.env, true), f.ink(0, true));
       };
     },
   },

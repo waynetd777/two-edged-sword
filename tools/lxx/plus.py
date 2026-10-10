@@ -32,32 +32,18 @@ editions), if it occurs there. Greek OT+'s numbers are checked against the Greek
 nearly always and practically never Greek OT+'s, the NTs' is taken (Greek OT+ has γῆ, earth, as
 G1065, γε, throughout). The gloss is TBESG's for the number; a name with no number is transliterated.
 
-Downloads are cached in ~/Library/Caches/Two-edged Sword/lxx.
+STEPBible's files are cached in ~/Library/Caches/Two-edged Sword/stepbible (tools/stepbible.py).
 """
-import html, os, re, sqlite3, sys, unicodedata, urllib.parse, urllib.request
+import html, re, sqlite3, sys, unicodedata
 from collections import Counter, defaultdict
 from difflib import SequenceMatcher
 from pathlib import Path
 
-HOME = Path(os.environ.get("HOME", ""))
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from modules import LIBRARY, find  # noqa: E402
-from stepbible import tagnt  # noqa: E402
-CACHE = HOME / "Library/Caches/Two-edged Sword/lxx"
-TBESG = ("https://raw.githubusercontent.com/STEPBible/STEPBible-Data/master/Lexicons/"
-         + urllib.parse.quote("TBESG - Translators Brief lexicon of Extended Strongs for Greek - STEPBible.org CC BY.txt"))
+from modules import find, greek_key, module, similar as ratio  # noqa: E402
+from stepbible import lexicon, robinson, tagnt  # noqa: E402
 BOOK_NAMES = {67: "Tobit", 68: "Judith", 69: "Wisdom", 70: "Sirach", 71: "Baruch", 72: "1 Maccabees", 73: "2 Maccabees",
               74: "1 Esdras", 76: "3 Maccabees", 77: "4 Maccabees", 78: "Prayer of Manasseh"}
-
-
-def get(url, name):
-    p = CACHE / name
-    if not p.exists() or not p.stat().st_size:
-        p.parent.mkdir(parents=True, exist_ok=True)
-        req = urllib.request.Request(url, headers={"User-Agent": "Two-edged Sword (tools/lxx)"})
-        with urllib.request.urlopen(req, timeout=300) as r:
-            p.write_bytes(r.read())
-    return p
 
 
 HEADWORD = {}  # "G2400": "ιδου", TBESG's headword for each number, as key() has it
@@ -66,7 +52,7 @@ HEADWORD = {}  # "G2400": "ιδου", TBESG's headword for each number, as key()
 def glosses():
     """{"G0746": "beginning", …}: each number's first TBESG entry's gloss, its head word."""
     out = {}
-    for line in get(TBESG, "TBESG.txt").read_text(encoding="utf-8-sig").split("\n"):
+    for line in lexicon("TBESG").split("\n"):
         f = line.split("\t")
         if len(f) > 6 and re.fullmatch(r"G\d{4}", f[0]) and f[0] not in out and f[6].strip():
             HEADWORD[f[0]] = key(f[3])
@@ -78,13 +64,8 @@ def glosses():
 
 def key(w):
     """A word for comparing editions: lower case, no accents or breathings, σ for ς, no closing
-    movable nu (ἐστιν, ἐστι), letters only."""
-    w = unicodedata.normalize("NFD", w.lower())
-    w = "".join(ch for ch in w if not unicodedata.combining(ch)).replace("ς", "σ")
-    w = re.sub(r"[^α-ω]", "", w)
-    if len(w) > 3 and w.endswith("ν") and w[-2] in "ιε":
-        w = w[:-1]
-    return w
+    movable nu (ἐστιν, ἐστι) in a word of four letters or more, letters only."""
+    return greek_key(w, nu_from=4)
 
 
 def num(n):
@@ -122,70 +103,11 @@ def library(name, where=""):
     return rows
 
 
-# Robinson's grammar codes, spelled out.
-POS = {"N": "noun", "V": "verb", "A": "adjective", "T": "article", "P": "pronoun", "R": "relative pronoun", "C": "reciprocal pronoun",
-       "D": "demonstrative pronoun", "K": "correlative pronoun", "I": "interrogative pronoun", "X": "indefinite pronoun",
-       "Q": "correlative pronoun", "F": "reflexive pronoun", "S": "possessive pronoun", "RI": "relative pronoun", "M": "numeral"}
-WORDS = {"PREP": "preposition", "CONJ": "conjunction", "ADV": "adverb", "PRT": "particle", "INJ": "interjection", "COND": "conjunction",
-         "HEB": "Hebrew word", "ARAM": "Aramaic word", "PRT-N": "particle · negative", "CONJ-N": "conjunction · negative",
-         "ADV-N": "adverb · negative", "ADV-I": "adverb · interrogative", "ADV-C": "adverb · comparative", "ADV-S": "adverb · superlative",
-         "ADV-K": "adverb · correlative", "PRT-I": "particle · interrogative", "COND-K": "conjunction · correlative"}
-CASE = {"N": "nom.", "G": "gen.", "D": "dat.", "A": "acc.", "V": "voc."}
-NUMBER = {"S": "sing.", "P": "plur."}
-GENDER = {"M": "masc.", "F": "fem.", "N": "neut."}
-TENSE = {"P": "present", "I": "imperfect", "F": "future", "A": "aorist", "R": "perfect", "L": "pluperfect", "X": ""}
-VOICE = {"A": "active", "M": "middle", "P": "passive", "E": "middle or passive", "D": "middle", "O": "passive", "N": "middle or passive",
-         "Q": "active", "X": ""}
-MOOD = {"I": "indicative", "S": "subjunctive", "O": "optative", "M": "imperative", "N": "infinitive", "P": "participle", "R": "imperative"}
-UNKNOWN = Counter()
+UNKNOWN = Counter()  # Robinson codes robinson() couldn't spell out, for the report
 FIXED = Counter()
 
 
-def cng(s):
-    """"NSM" -> "nom. masc. sing."; a person first for pronouns ("1GS")."""
-    person = ""
-    if s[:1] in "123":
-        person, s = s[0], s[1:]
-    parts = [CASE.get(s[:1], ""), GENDER.get(s[2:3], ""), NUMBER.get(s[1:2], "")]
-    return " ".join(x for x in [person] + parts if x)
-
-
-def grammar(code):
-    """A Robinson code as words: "V-AAI-3S" -> "verb · aorist active indicative · 3 sing."."""
-    if not code:
-        return ""
-    c = re.sub(r"[\]\s]+", "-", code.strip()).strip("-")  # "V] PAPGP", "VF FAI3P"
-    c = re.sub(r"^(VF?-[A-Z2]{3})(\d[SP])$", r"\1-\2", c)  # "V-FAI3P"
-    c = re.sub(r"^(V-[A-Z2]{3})([NGDAV][SP][MFN])$", r"\1-\2", c)  # "V-PAPGP…"
-    if c in WORDS:
-        return WORDS[c]
-    head, *rest = c.split("-")
-    if head == "N" and rest and rest[0] in ("PRI", "LI", "OI"):
-        return {"PRI": "name", "LI": "letter", "OI": "noun"}[rest[0]]
-    if head == "A" and rest and rest[0] == "NUI":
-        return "numeral"
-    if head in ("V", "VF"):
-        if not rest:
-            return "verb"
-        tvm = rest[0]
-        second = tvm.startswith("2")
-        tvm = tvm.lstrip("2")
-        t, v, m = (tvm + "   ")[:3]
-        desc = " ".join(x for x in [("second " if second else "") + TENSE.get(t, ""), VOICE.get(v, ""), MOOD.get(m, "")] if x.strip())
-        out = ["verb", desc]
-        if len(rest) > 1:
-            out.append(cng(rest[1]) if m == "P" else " ".join(x for x in [rest[1][:1] if rest[1][:1] in "123" else "", NUMBER.get(rest[1][-1:], "")] if x))
-        return " · ".join(x for x in out if x)
-    if head in POS:
-        out = [POS[head]]
-        if rest:
-            out.append(cng(rest[0]))
-        return " · ".join(x for x in out if x)
-    UNKNOWN[c] += 1
-    return c
-
-
-TRANSLIT = dict(zip("αβγδεζηθικλμνξοπρστυφχψω", ["a", "b", "g", "d", "e", "z", "ē", "th", "i", "k", "l", "m", "n", "x", "o", "p", "r", "s", "s", "t", "u", "ph", "ch", "ps", "ō"]))
+TRANSLIT = dict(zip("αβγδεζηθικλμνξοπρσςτυφχψω", ["a", "b", "g", "d", "e", "z", "ē", "th", "i", "k", "l", "m", "n", "x", "o", "p", "r", "s", "s", "t", "u", "ph", "ch", "ps", "ō"], strict=True))
 
 
 def translit(w):
@@ -196,7 +118,7 @@ def translit(w):
 
 
 def similar(a, b):
-    return a == b or (min(len(a), len(b)) >= 3 and SequenceMatcher(None, a, b).ratio() >= 0.75)
+    return a == b or (min(len(a), len(b)) >= 3 and ratio(a, b) >= 0.75)
 
 
 GREEK_WORD = re.compile(r"[Ͱ-Ͽἀ-῿᾽᾿᾽’']+")
@@ -336,7 +258,7 @@ def main():
             if n:
                 box += f"<num>{n}</num>"
             if g:
-                box += f"<tvm>{html.escape(grammar(g), quote=False)}</tvm>"
+                box += f"<tvm>{html.escape(robinson(g, UNKNOWN), quote=False)}</tvm>"
             box += f"<gra>{html.escape(en, quote=False) or '—'}</gra></div>"
             parts.append(box)
         out.append((b, c, v, "".join(parts)))
@@ -373,19 +295,9 @@ def main():
             "in places); a word Rahlfs hasn't there, and the Apocrypha, which Greek OT+ lacks, take those most often given to the same "
             "form in Greek OT+ and the Greek New Testaments. The English is STEPBible's TBESG gloss for the number (Tyndale House, "
             f"CC BY 4.0). {total['glossed'] / total['words']:.0%} of the words have English. Built by Two-edged Sword's tools/lxx.</p>")
-    p = LIBRARY / "lxx_brenton+.bbli"
-    tmp = p.with_suffix(".tmp")
-    tmp.unlink(missing_ok=True)
-    db = sqlite3.connect(tmp)
-    db.executescript("""CREATE TABLE Details (Title NVARCHAR(100), Abbreviation NVARCHAR(50), Information TEXT, Version INT, OldTestament BOOL, NewTestament BOOL, Apocrypha BOOL, Strongs BOOL, RightToLeft BOOL);
-        CREATE TABLE Bible (Book INT, Chapter INT, Verse INT, Scripture TEXT);
-        CREATE INDEX BookChapterVerseIndex ON Bible (Book, Chapter, Verse);""")
-    db.execute("INSERT INTO Details VALUES (?,?,?,1,1,0,1,1,0)", ("Septuagint (Greek, Brenton 1844) w/ glosses", "LXX-Brenton+", info))
-    db.executemany("INSERT INTO Bible VALUES (?,?,?,?)", out)
-    db.commit()
-    db.close()
-    tmp.replace(p)
-    print(f"{p.name}: {len(out)} verses")
+    with module("lxx_brenton+.bbli", "Septuagint (Greek, Brenton 1844) w/ glosses", "LXX-Brenton+", info, nt=False, apocrypha=True, strongs=True) as db:
+        db.executemany("INSERT INTO Bible VALUES (?,?,?,?)", out)
+    print(f"lxx_brenton+.bbli: {len(out)} verses")
 
 
 if __name__ == "__main__":

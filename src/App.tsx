@@ -1,7 +1,7 @@
 // Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
 // SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CompareScreen } from "./Compare";
 import { JournalScreen } from "./Journal";
 import { KjvHistoryScreen } from "./KjvHistory";
@@ -47,6 +47,7 @@ function Screens() {
   useKeepAwake("reading", front && (app.screen === "read" || app.screen === "compare"));
   const [focus, setFocus] = useState(false);
   const [palette, setPalette] = useState(false);
+  const [rescanError, setRescanError] = useState<string | null>(null);
 
   const player = usePlayer();
   useEffect(() => {
@@ -58,9 +59,12 @@ function Screens() {
   }, [app.lib]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ⌘1–⌘7 switch screens, ⌘K opens the palette, ⌘, Settings, ⌘. focus mode, ⌘[ ⌘] history,
-  // ⌘+ ⌘− the reading text size (as its slider does).
+  // ⌘+ ⌘− the reading text size (as its slider does). Listened for once, with the app as it is now.
+  const appRef = useRef(app);
+  appRef.current = app;
   useEffect(() => {
     const k = (e: KeyboardEvent) => {
+      const app = appRef.current;
       if (!e.metaKey) return;
       const n = parseInt(e.key, 10);
       if (n >= 1 && n <= SCREEN_KEYS.length) {
@@ -100,7 +104,7 @@ function Screens() {
     };
     window.addEventListener("keydown", k);
     return () => window.removeEventListener("keydown", k);
-  }, [app]);
+  }, []);
 
   if (!app.lib) return null;
   if (!app.bibles.length) {
@@ -118,10 +122,18 @@ function Screens() {
             </code>
           ))}
           <div>
-            <button className="btn primary" type="button" onClick={() => app.rescan()}>
+            <button
+              className="btn primary"
+              type="button"
+              onClick={() => {
+                setRescanError(null);
+                app.rescan().catch((e) => setRescanError(`Couldn't rescan: ${e}`));
+              }}
+            >
               Rescan
             </button>
           </div>
+          {rescanError && <p style={{ margin: 0, color: "var(--muted)" }}>{rescanError}</p>}
         </div>
       </div>
     );

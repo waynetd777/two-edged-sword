@@ -37,9 +37,8 @@ import html, os, re, sqlite3, subprocess, sys, zipfile
 from difflib import SequenceMatcher
 from pathlib import Path
 
-HOME = Path(os.environ.get("HOME", ""))
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from modules import LIBRARY, find  # noqa: E402
+from modules import HOME, find, module, similar  # noqa: E402
 ZIP = HOME / "Downloads/DR_NT_2016_GoogleOCR_HTMLtext.zip"
 RTF = HOME / "Downloads/NT_Text_RAW.rtf"
 
@@ -223,10 +222,6 @@ def verses(ref_verses, ocr, known, counts):
             toks = [fw] + toks[words[0] + 1:]
         out[key] = (clean(toks), hits[vi] / max(len(ws), 1))
     return out
-
-
-def similar(a, b):
-    return SequenceMatcher(None, a, b).ratio()
 
 
 # Letters the reading confuses: "tliat" for that, "yas" for was, "sor" for for, "rn" for m.
@@ -503,19 +498,9 @@ def main():
             f"it up with Challoner's revision. {len(rows)} verses; on average {sum(shares) / len(shares):.0%} of each verse's words "
             "are Challoner's too, so much of the rest is the 1582 wording, but some is misreading, and words lost at the edge of "
             "a column are missing. Built by Two-edged Sword's tools/rheims.</p>")
-    p = LIBRARY / "rheims1582.bbli"
-    tmp = p.with_suffix(".tmp")
-    tmp.unlink(missing_ok=True)
-    db = sqlite3.connect(tmp)
-    db.executescript("""CREATE TABLE Details (Title NVARCHAR(100), Abbreviation NVARCHAR(50), Information TEXT, Version INT, OldTestament BOOL, NewTestament BOOL, Apocrypha BOOL, Strongs BOOL, RightToLeft BOOL);
-        CREATE TABLE Bible (Book INT, Chapter INT, Verse INT, Scripture TEXT);
-        CREATE INDEX BookChapterVerseIndex ON Bible (Book, Chapter, Verse);""")
-    db.execute("INSERT INTO Details VALUES (?,?,?,1,0,1,0,0,0)", ("Rheims New Testament (1582)", "Rheims 1582", info))
-    db.executemany("INSERT INTO Bible VALUES (?,?,?,?)", rows)
-    db.commit()
-    db.close()
-    tmp.replace(p)
-    print(f"{p.name}: {len(rows)} verses")
+    with module("rheims1582.bbli", "Rheims New Testament (1582)", "Rheims 1582", info, ot=False) as db:
+        db.executemany("INSERT INTO Bible VALUES (?,?,?,?)", rows)
+    print(f"rheims1582.bbli: {len(rows)} verses")
 
 
 if __name__ == "__main__":

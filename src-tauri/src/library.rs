@@ -84,8 +84,7 @@ pub struct Library {
 
 /// Where e-Sword X keeps its modules.
 pub fn esword_dir() -> PathBuf {
-    let home = std::env::var("HOME").unwrap_or_default();
-    Path::new(&home).join("Library/Containers/net.e-sword.e-Sword-X/Data/Library/Application Support")
+    crate::store::home().join("Library/Containers/net.e-sword.e-Sword-X/Data/Library/Application Support")
 }
 
 /// The app's own modules folder.
@@ -96,10 +95,7 @@ pub fn app_dir() -> PathBuf {
 /// The modules in the app bundle (Contents/Resources/modules); in a debug build, the ones
 /// `make core` builds into src-tauri/modules.
 pub fn bundled_dir() -> PathBuf {
-    if cfg!(debug_assertions) {
-        return Path::new(env!("CARGO_MANIFEST_DIR")).join("modules");
-    }
-    std::env::current_exe().ok().and_then(|e| Some(e.parent()?.parent()?.join("Resources/modules"))).unwrap_or_default()
+    crate::store::bundled("modules")
 }
 
 /// For tests against the modules on this Mac: every folder, if one of them has `file`.

@@ -27,17 +27,16 @@ looked up with u for v as well) and shown as
 the module has them. -que ("and") is split off for the tagger and put before the word's meaning.
 Words in <i> (the Hebrew letters heading Psalm 119's stanzas) are left as they are, as are the tags.
 
-Downloads are cached in ~/Library/Caches/Two-edged Sword/latin.
+WORDS is taken at a fixed commit. Downloads are cached in ~/Library/Caches/Two-edged Sword/latin.
 """
-import html, os, re, sqlite3, subprocess, sys, urllib.request
+import html, os, re, sqlite3, subprocess, sys
 from pathlib import Path
 
-HOME = Path(os.environ.get("HOME", ""))
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from modules import LIBRARY, find  # noqa: E402
-CACHE = HOME / "Library/Caches/Two-edged Sword/latin"
+from modules import CACHES, fetch, find, module  # noqa: E402
+CACHE = CACHES / "latin"
 VENV = CACHE / "venv"
-DICTLINE = "https://raw.githubusercontent.com/mk270/whitakers-words/master/DICTLINE.GEN"
+DICTLINE = "https://raw.githubusercontent.com/mk270/whitakers-words/1f2f0fb0867a896d7b9284a03d615ed635d6f992/DICTLINE.GEN"
 MODULES = {
     "latin": dict(title="Latin Vulgate w/ glosses", abbrev="Latin+"),
     "clementine": dict(title="Latin Vulgate (Clementine) w/ glosses", abbrev="Vulg-C+"),
@@ -89,7 +88,7 @@ MEANINGS = {
 }
 QUE = {"que"}
 NOT_QUE = {"quoque", "atque", "itaque", "neque", "quisque", "usque", "ubique", "denique", "utique", "undique", "quique", "quaeque",
-           "quodque", "quemque", "quamque", "cuiusque", "cuique", "quoque", "plerique", "uterque", "utraque", "utrumque", "absque",
+           "quodque", "quemque", "quamque", "cuiusque", "cuique", "plerique", "uterque", "utraque", "utrumque", "absque",
            "quacumque", "quicumque", "quaecumque", "quodcumque", "undecumque", "namque", "peraeque", "quinque", "utrobique"}
 
 
@@ -106,11 +105,7 @@ def norm(w):
 
 def whitaker():
     """{normalised lemma: [(pos, frequency rank, first sense)]}, from DICTLINE's stems."""
-    p = CACHE / "DICTLINE.GEN"
-    if not p.exists():
-        p.parent.mkdir(parents=True, exist_ok=True)
-        with urllib.request.urlopen(DICTLINE, timeout=120) as r:
-            p.write_bytes(r.read())
+    p = fetch(DICTLINE, CACHE / "DICTLINE.GEN")
     out = {}
     for line in p.read_text(encoding="latin-1").splitlines():
         stems = [line[i * 19:(i + 1) * 19].strip() for i in range(4)]
@@ -296,20 +291,10 @@ def build(name, nlp, dic):
              "form and grammar are from Stanza's Latin tagger (Stanford NLP, trained on the PROIEL treebank), which reads each "
              "word in its sentence; the English is the first sense in William Whitaker's WORDS dictionary. Both are the "
              "work of a program, so some words will be wrong. Built by Two-edged Sword's tools/latin.</p>")
-    p = LIBRARY / f"{name}+.bbli"
-    tmp = p.with_suffix(".tmp")
-    tmp.unlink(missing_ok=True)
-    db = sqlite3.connect(tmp)
-    db.executescript("""CREATE TABLE Details (Title NVARCHAR(100), Abbreviation NVARCHAR(50), Information TEXT, Version INT, OldTestament BOOL, NewTestament BOOL, Apocrypha BOOL, Strongs BOOL, RightToLeft BOOL);
-        CREATE TABLE Bible (Book INT, Chapter INT, Verse INT, Scripture TEXT);
-        CREATE INDEX BookChapterVerseIndex ON Bible (Book, Chapter, Verse);""")
     ot, nt, apoc = (any(lo <= r[0] <= hi for r in rows) for lo, hi in ((1, 39), (40, 66), (67, 99)))
-    db.execute("INSERT INTO Details VALUES (?,?,?,1,?,?,?,0,0)", (m["title"], m["abbrev"], about, ot, nt, apoc))
-    db.executemany("INSERT INTO Bible VALUES (?,?,?,?)", out)
-    db.commit()
-    db.close()
-    tmp.replace(p)
-    print(f"{p.name}: {len(out)} verses")
+    with module(f"{name}+.bbli", m["title"], m["abbrev"], about, ot=ot, nt=nt, apocrypha=apoc) as db:
+        db.executemany("INSERT INTO Bible VALUES (?,?,?,?)", out)
+    print(f"{name}+.bbli: {len(out)} verses")
 
 
 def main():

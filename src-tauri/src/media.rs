@@ -8,7 +8,6 @@
 
 use tauri::AppHandle;
 
-#[cfg(target_os = "macos")]
 mod mac {
     use block2::RcBlock;
     use objc2::runtime::AnyObject;
@@ -68,8 +67,5 @@ mod mac {
 /// What is being read (`title`; none when nothing is) and whether it is playing or paused.
 #[tauri::command]
 pub fn media_state(app: AppHandle, title: Option<String>, playing: bool) {
-    #[cfg(target_os = "macos")]
     mac::state(&app, title, playing);
-    #[cfg(not(target_os = "macos"))]
-    let _ = (app, title, playing);
 }

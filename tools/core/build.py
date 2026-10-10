@@ -31,9 +31,12 @@ Every source is public domain, and none is e-Sword's (its licence forbids passin
     and misspellings found by comparing with e-Sword's copies are corrected (EASTON_TYPOS).
 The concordance and the dictionaries' occurrence counts are counted from the KJV's Strong's numbers.
 
+The GitHub files are taken at a fixed commit and checked against their sha256, so a rebuild makes
+the same modules; eBible.org's and CrossWire's zips have no fixed version to take, so they aren't.
+
 Downloads are cached in ~/Library/Caches/Two-edged Sword/core.
 """
-import gzip, html as html_, importlib.util, io, re, sqlite3, struct, sys, urllib.request, zipfile, zlib
+import gzip, html as html_, io, re, struct, sys, zipfile, zlib
 import xml.etree.ElementTree as ET
 from collections import Counter, defaultdict
 from pathlib import Path
@@ -44,31 +47,21 @@ class html:
     escape = staticmethod(lambda s: html_.escape(s, quote=False))
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from modules import BUNDLED, module  # noqa: E402
+from books import BOOKS  # noqa: E402
+from modules import BUNDLED, CACHES, chapter_lengths, fetch as fetch_to, module  # noqa: E402
 
-CACHE = Path.home() / "Library/Caches/Two-edged Sword/core"
+CACHE = CACHES / "core"
 KJV_URL = "https://ebible.org/Scriptures/eng-kjv2006_usfm.zip"
-GREEK_URL = "https://raw.githubusercontent.com/openscriptures/strongs/master/greek/StrongsGreekDictionaryXML_1.4.zip"
-HEBREW_URL = "https://raw.githubusercontent.com/openscriptures/strongs/master/hebrew/StrongHebrewG.xml"
-TSK_URL = "https://raw.githubusercontent.com/man4christ/Treasury-of-Scripture-Knowledge/master/data/tsk.imp.gz"
+STRONGS = "https://raw.githubusercontent.com/openscriptures/strongs/0acd2f251c2d35ff8db2dece4e0593979d3ac223/"
+GREEK_URL = STRONGS + "greek/StrongsGreekDictionaryXML_1.4.zip"
+HEBREW_URL = STRONGS + "hebrew/StrongHebrewG.xml"
+TSK_URL = "https://raw.githubusercontent.com/man4christ/Treasury-of-Scripture-Knowledge/ea69f732e1b680db08a8a2c47009ff52d2f077cd/data/tsk.imp.gz"
 CROSSWIRE = "https://www.crosswire.org/ftpmirror/pub/sword/packages/rawzip/{}.zip"
+SHA256 = {GREEK_URL: "fe91d26bf97d9c6d5ccf4384a580543a2dea46ee4383ccd984c612ab78439d1e",
+          HEBREW_URL: "1f9659ea208f4c498843a0280dacb1448627c33ca77712642d8705793ab66061",
+          TSK_URL: "cd8250ee59901ebc6cc3bc13ef4310a80850f77cbb2fe4e99370cbaa9d9c15a2"}
 FILES = ["kjv.bbli", "kjv+.bbli", "strong.lexi", "kjc.lexi", "tsk.cmti", "henry.cmti", "easton.dcti"]
 
-# The 66 books in order: USFM code, OSIS name, e-Sword's abbreviation (as in src/bible.ts), SWORD's name.
-BOOKS = [b.split(":") for b in (
-    "GEN:Gen:Gen:Genesis EXO:Exod:Exo:Exodus LEV:Lev:Lev:Leviticus NUM:Num:Num:Numbers DEU:Deut:Deu:Deuteronomy "
-    "JOS:Josh:Jos:Joshua JDG:Judg:Jdg:Judges RUT:Ruth:Rut:Ruth 1SA:1Sam:1Sa:I_Samuel 2SA:2Sam:2Sa:II_Samuel "
-    "1KI:1Kgs:1Ki:I_Kings 2KI:2Kgs:2Ki:II_Kings 1CH:1Chr:1Ch:I_Chronicles 2CH:2Chr:2Ch:II_Chronicles EZR:Ezra:Ezr:Ezra "
-    "NEH:Neh:Neh:Nehemiah EST:Esth:Est:Esther JOB:Job:Job:Job PSA:Ps:Psa:Psalms PRO:Prov:Pro:Proverbs "
-    "ECC:Eccl:Ecc:Ecclesiastes SNG:Song:Son:Song_of_Solomon ISA:Isa:Isa:Isaiah JER:Jer:Jer:Jeremiah LAM:Lam:Lam:Lamentations "
-    "EZK:Ezek:Eze:Ezekiel DAN:Dan:Dan:Daniel HOS:Hos:Hos:Hosea JOL:Joel:Joe:Joel AMO:Amos:Amo:Amos OBA:Obad:Oba:Obadiah "
-    "JON:Jonah:Jon:Jonah MIC:Mic:Mic:Micah NAM:Nah:Nah:Nahum HAB:Hab:Hab:Habakkuk ZEP:Zeph:Zep:Zephaniah HAG:Hag:Hag:Haggai "
-    "ZEC:Zech:Zec:Zechariah MAL:Mal:Mal:Malachi MAT:Matt:Mat:Matthew MRK:Mark:Mar:Mark LUK:Luke:Luk:Luke JHN:John:Joh:John "
-    "ACT:Acts:Act:Acts ROM:Rom:Rom:Romans 1CO:1Cor:1Co:I_Corinthians 2CO:2Cor:2Co:II_Corinthians GAL:Gal:Gal:Galatians "
-    "EPH:Eph:Eph:Ephesians PHP:Phil:Php:Philippians COL:Col:Col:Colossians 1TH:1Thess:1Th:I_Thessalonians "
-    "2TH:2Thess:2Th:II_Thessalonians 1TI:1Tim:1Ti:I_Timothy 2TI:2Tim:2Ti:II_Timothy TIT:Titus:Tit:Titus PHM:Phlm:Phm:Philemon "
-    "HEB:Heb:Heb:Hebrews JAS:Jas:Jas:James 1PE:1Pet:1Pe:I_Peter 2PE:2Pet:2Pe:II_Peter 1JN:1John:1Jn:I_John "
-    "2JN:2John:2Jn:II_John 3JN:3John:3Jn:III_John JUD:Jude:Jud:Jude REV:Rev:Rev:Revelation_of_John").split()]
 USFM = {b[0]: i + 1 for i, b in enumerate(BOOKS)}
 ABBR = {b[1]: b[2] for b in BOOKS} | {"1Macc": "1Ma", "2Macc": "2Ma"}
 SWORD = {b[3].replace("_", " "): i + 1 for i, b in enumerate(BOOKS)}
@@ -76,15 +69,7 @@ BOOK_ABBR = [b[2] for b in BOOKS]
 
 
 def fetch(url):
-    CACHE.mkdir(parents=True, exist_ok=True)
-    p = CACHE / url.rsplit("/", 1)[1]
-    if not p.exists():
-        print(f"downloading {url}")
-        req = urllib.request.Request(url, headers={"User-Agent": "Two-edged Sword tools/core"})
-        with urllib.request.urlopen(req, timeout=300) as r:
-            data = r.read()
-        p.write_bytes(data)
-    return p.read_bytes()
+    return fetch_to(url, CACHE / url.rsplit("/", 1)[1], sha256=SHA256.get(url), log=True, timeout=300).read_bytes()
 
 
 def num(n):
@@ -424,9 +409,7 @@ OSIS_BOOK = {b[1]: i + 1 for i, b in enumerate(BOOKS)}
 
 def crosswire(name):
     """A CrossWire module's zip, and its versification (from tools/crosswire, which reads SWORD's canon tables)."""
-    spec = importlib.util.spec_from_file_location("crosswire", Path(__file__).resolve().parent.parent / "crosswire/build.py")
-    cw = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(cw)
+    import crosswire.build as cw
     return zipfile.ZipFile(io.BytesIO(fetch(CROSSWIRE.format(name)))), cw.canon
 
 
@@ -646,8 +629,9 @@ _VERSES = {}
 def verse_counts():
     """{book: {chapter: verses}} from the KJV built above, to check a reference points at a real verse."""
     if not _VERSES:
-        db = sqlite3.connect(BUNDLED / "kjv.bbli")
-        for b, c, n in db.execute("SELECT Book, Chapter, MAX(Verse) FROM Bible GROUP BY Book, Chapter"):
+        if not (BUNDLED / "kjv.bbli").is_file():
+            sys.exit("no src-tauri/modules/kjv.bbli: build it first (python3 tools/core/build.py)")
+        for (b, c), n in chapter_lengths(BUNDLED / "kjv.bbli").items():
             _VERSES.setdefault(b, {})[c] = n
     return _VERSES
 
@@ -834,6 +818,8 @@ def main():
         return
     if "--only" in sys.argv:  # --only henry easton: just those
         names = sys.argv[sys.argv.index("--only") + 1:]
+        if not names or set(names) - {"henry", "easton"}:
+            sys.exit(f"--only takes henry and/or easton, not {' '.join(sorted(set(names) - {'henry', 'easton'})) or 'nothing'}")
         if "henry" in names:
             write_henry()
         if "easton" in names:

@@ -4,6 +4,7 @@
 import { ReactNode, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { APOCRYPHA, apocryphaName, BookSizes, BOOKS, book, isApocrypha, SECTIONS } from "./bible";
 import { api, isReadOnly } from "./api";
+import { bibleSizes } from "./sizes";
 import { Icon } from "./icons";
 import { useApp } from "./state";
 import { confirm } from "@tauri-apps/plugin-dialog";
@@ -69,10 +70,6 @@ export function Tooltips() {
   );
 }
 
-/** The word under a click in rendered text (commentary, a book), and where it is, for the same
- *  look-up popup as a Bible word. Found from the click point rather than by wrapping every word in
- *  an element, so long HTML stays as it is. Null for links, numbers, images, a selection being
- *  made, or a click between words. */
 /** Scrolls `el` so it stands a third of the way down the box that scrolls it, where the eye is when
  *  following text being read or sung (centred, the next lines start too far down). */
 export function scrollToThird(el: Element | null | undefined, smooth = true) {
@@ -88,6 +85,10 @@ export function scrollToThird(el: Element | null | undefined, smooth = true) {
   });
 }
 
+/** The word under a click in rendered text (commentary, a book), and where it is, for the same
+ *  look-up popup as a Bible word. Found from the click point rather than by wrapping every word in
+ *  an element, so long HTML stays as it is. Null for links, numbers, images, a selection being
+ *  made, or a click between words. */
 export function wordAt(e: React.MouseEvent): { word: string; rect: DOMRect } | null {
   if (window.getSelection()?.toString()) return null;
   return wordAtPoint(e.clientX, e.clientY, e.target as HTMLElement);
@@ -161,27 +162,47 @@ export function confirmDelete(what: string, detail = "This can't be undone."): P
   return confirm(detail, { title: `Delete ${what}?`, kind: "warning", okLabel: "Delete", cancelLabel: "Cancel" }).catch(() => false);
 }
 
-/** Closes on Escape or a click outside. */
-export function useDismiss(ref: React.RefObject<HTMLElement | null>, onClose: () => void, active = true) {
+/** The popovers and dialogs open, last opened last: Escape closes only the top one. */
+const layers: object[] = [];
+
+/** Closes on Escape (the top one only, when one is open over another) or a click outside. */
+function useDismiss(ref: React.RefObject<HTMLElement | null>, onClose: () => void, active = true) {
+  const close = useRef(onClose);
+  close.current = onClose;
   useEffect(() => {
     if (!active) return;
+    const me = {};
+    layers.push(me);
     const key = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
+      if (e.key === "Escape" && layers[layers.length - 1] === me) {
         e.stopPropagation();
-        onClose();
+        close.current();
       }
     };
     const down = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) onClose();
+      if (ref.current && !ref.current.contains(e.target as Node)) close.current();
     };
     window.addEventListener("keydown", key, true);
     const t = window.setTimeout(() => window.addEventListener("mousedown", down), 0);
     return () => {
+      layers.splice(layers.indexOf(me), 1);
       window.removeEventListener("keydown", key, true);
       window.removeEventListener("mousedown", down);
       window.clearTimeout(t);
     };
-  }, [ref, onClose, active]);
+  }, [ref, active]);
+}
+
+/** Copies text, and says so in a toast once it's on the clipboard; false if it couldn't be. */
+export async function copyText(text: string, toastMsg: string, toast: (msg: string) => void): Promise<boolean> {
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch (e) {
+    console.error("copy", e);
+    return false;
+  }
+  toast(toastMsg);
+  return true;
 }
 
 /** Lets a floating bar be dragged out of the way: spread `bind` on it (or on a handle inside it) and add `style` to it. It can be
@@ -331,27 +352,10 @@ export function Seg<T extends string | number>({
   );
 }
 
-/** Book then chapter, as two grids. */
-/** Book, then chapter, then verse (or the whole chapter). */
-const sizesCache = new Map<string, Promise<BookSizes>>();
-/** The books a Bible has and how many chapters each, from its text (Esther has 16 in the Vulgate). */
-export function bibleSizes(bible: string): Promise<BookSizes> {
-  if (!sizesCache.has(bible))
-    sizesCache.set(
-      bible,
-      api
-        .chapterSizes(bible)
-        .then((s) => {
-          const m: BookSizes = new Map();
-          for (const [b, c] of s) m.set(b, Math.max(m.get(b) ?? 0, c));
-          return m;
-        })
-        .catch(() => new Map()),
-    );
-  return sizesCache.get(bible)!;
-}
+/** The books a Bible has and how many chapters each (sizes.ts). */
+export { bibleSizes };
 /** The books a Bible has, once looked up. */
-export const bibleBooks = (bible: string): Promise<Set<number>> => bibleSizes(bible).then((m) => new Set(m.keys()));
+const bibleBooks = (bible: string): Promise<Set<number>> => bibleSizes(bible).then((m) => new Set(m.keys()));
 /** A Bible's books and chapters, or null until known. */
 export function useBibleSizes(bible: string): BookSizes | null {
   const [got, setGot] = useState<{ bible: string; sizes: BookSizes } | null>(null);
@@ -393,6 +397,7 @@ export function useBibleBooks(bible: string): Set<number> | null {
   return got && got.bible === bible && got.books.size ? got.books : null;
 }
 
+/** Book, then chapter, then verse (or the whole chapter). */
 export function RefPicker({
   anchor,
   onClose,
@@ -413,11 +418,15 @@ export function RefPicker({
   const [count, setCount] = useState(0);
   useEffect(() => {
     if (b === null || c === null) return;
+    let live = true;
     setCount(0);
     api
       .passages(bible, [{ book: b, chapter: c, from: 1, to: 200 }])
-      .then(([p]) => setCount(p?.verses.length ?? 0))
-      .catch(() => onPick(b, c));
+      .then(([p]) => live && setCount(p?.verses.length ?? 0))
+      .catch(() => live && onPick(b, c));
+    return () => {
+      live = false;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [b, c, bible]);
   const pickChapter = (bk: number, ch: number) => {
@@ -578,7 +587,7 @@ export function TrailButtons({ trail, onGo }: { trail: { canBack: boolean; canFo
   );
 }
 
-export function Spinner() {
+function Spinner() {
   return (
     <span className="n" style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
       Loading…
@@ -586,8 +595,7 @@ export function Spinner() {
   );
 }
 
-/** The x at the end of a search box, shown while it has text; clicking it keeps the box focused. */
-export interface ListItem {
+interface ListItem {
   key: string;
   label: string;
   /** Muted, after the label. */ sub?: string;
@@ -693,6 +701,7 @@ export function SearchList({
   );
 }
 
+/** The x at the end of a search box, shown while it has text; clicking it keeps the box focused. */
 export function ClearButton({ show, onClear, label = "Clear" }: { show: boolean; onClear: () => void; label?: string }) {
   if (!show) return null;
   return (

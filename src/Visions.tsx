@@ -13,7 +13,8 @@
 // Settings › Listening turns them off.
 
 import { useEffect, useRef } from "react";
-import { Frame, Lane, RGB, rnd, Room, smooth, Vision } from "./pictures/kit";
+import { beatAt, useCanvasLoop } from "./canvasLoop";
+import { Frame, Lane, random, RGB, rnd, Room, seedRandom, smooth, Vision } from "./pictures/kit";
 import { VISIONS } from "./pictures";
 
 type Pair = { dark: RGB; light: RGB };
@@ -36,7 +37,7 @@ const pairOf = (h: number, s: number): Pair => ({ dark: hsl(h, Math.min(0.7, s),
  * and bright it is; the heaviest bin, and the heaviest one well away from it (or a near neighbour
  * of the first, for a cover of one colour). Null for grey artwork, or one that can't be read.
  */
-export async function artPalette(url: string): Promise<{ warm: Pair; cool: Pair } | null> {
+async function artPalette(url: string): Promise<{ warm: Pair; cool: Pair } | null> {
   const img = new Image();
   img.crossOrigin = "anonymous";
   img.src = url;
@@ -79,8 +80,12 @@ export async function artPalette(url: string): Promise<{ warm: Pair; cool: Pair 
 /** Screenshot mode: one picture shown, this far through, in full. */
 // `loop` (the pictures viewer, visions.html): it fades in and out as when chosen, then begins again.
 let scenePick: { name: string; at: number; loop?: boolean } | null = null;
-export const setSceneVision = (name: string, at = 0.5, loop = false) => (scenePick = { name, at, loop });
-export const VISION_NAMES = VISIONS.map((v) => v.name);
+// A scene (not the viewer, which shows each picture afresh) draws the same picture each time, so
+// screenshots of it don't change from one run to the next.
+export const setSceneVision = (name: string, at = 0.5, loop = false) => {
+  if (!loop) seedRandom(1);
+  scenePick = { name, at, loop };
+};
 
 /** How many pictures share each theme: a theme few pictures have says more about a song than one many have. */
 const sharers = new Map<string, number>();
@@ -93,7 +98,7 @@ for (const v of VISIONS) for (const t of v.themes ?? []) sharers.set(t, (sharers
  * punctuation gone and a space either end; a theme of one word matches that word or a simple
  * form of it (fires, fired, firing), a phrase is looked for as it is.
  */
-export function suits(v: Vision, text: string): number {
+function suits(v: Vision, text: string): number {
   if (!v.themes || !text.trim()) return 0;
   let n = 0;
   for (const t of v.themes) {
@@ -107,7 +112,7 @@ export function suits(v: Vision, text: string): number {
   return n;
 }
 /** A song's title and words as `suits` wants them. */
-export const songText = (song: string) =>
+const songText = (song: string) =>
   ` ${song
     .toLowerCase()
     .replace(/[^a-z0-9' ]+/g, " ")
@@ -116,7 +121,6 @@ export const songText = (song: string) =>
 /** How much more often a picture that suits the song is chosen: once for nothing of it in the song, up to thirteen times for much. */
 const weightOf = (n: number) => 1 + 6 * Math.min(n, 2);
 
-const DEFAULT_BPM = 72;
 /** How strongly all the pictures show, at most: the whole canvas is held at this, so they stay faint behind the words. */
 const FAINT = 0.72;
 /** Seconds a picture takes to fade out when the words move from beside it. */
@@ -132,11 +136,7 @@ const QUIT = 1.2;
  * those is wide enough either, the widest, shrunk to fit (to a third at most); when the words
  * fill the page, anywhere.
  */
-export function roomBeside(
-  w: number,
-  words: { left: number; right: number } | null,
-  taken: [number, number][] = [],
-): Room & { crowded: boolean } {
+function roomBeside(w: number, words: { left: number; right: number } | null, taken: [number, number][] = []): Room & { crowded: boolean } {
   const gap = 32,
     edge = w * 0.03;
   const spans = (
@@ -163,8 +163,8 @@ export function roomBeside(
   const pick = (from: number[][], width: number) => {
     const fits = from.filter(([a, b]) => b - a >= width);
     if (!fits.length) return null;
-    const [a, b] = fits[Math.floor(Math.random() * fits.length)];
-    return { x: a + width / 2 + Math.random() * (b - a - width), scale: 1 };
+    const [a, b] = fits[Math.floor(random() * fits.length)];
+    return { x: a + width / 2 + random() * (b - a - width), scale: 1 };
   };
   const widest = (from: number[][]) => [...from].sort((p, q) => q[1] - q[0] - (p[1] - p[0]))[0];
   const room = {
@@ -204,7 +204,6 @@ export function Visions({
   /** The song's title and its words, as far as they're known, for choosing pictures that suit it. */
   song: string;
 }) {
-  const canvas = useRef<HTMLCanvasElement>(null);
   const colours = useRef({ warm: WARM, cool: COOL });
   useEffect(() => {
     let dead = false;
@@ -215,13 +214,7 @@ export function Visions({
       dead = true;
     };
   }, [art]);
-  const live = useRef({ bpm, playing, time, dark, words, song });
-  live.current = { bpm, playing, time, dark, words, song };
-
-  useEffect(() => {
-    const c = canvas.current!;
-    const ctx = c.getContext("2d")!;
-    const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const canvas = useCanvasLoop({ bpm, playing, time, dark, words, song }, ({ canvas: c, ctx, live, still }) => {
     const dots = new Map<string, HTMLCanvasElement>();
     const dotOf = (rgb: RGB) => {
       const key = rgb.join(",");
@@ -240,16 +233,6 @@ export function Visions({
       }
       return d;
     };
-    const fit = () => {
-      const r = c.getBoundingClientRect();
-      const d = window.devicePixelRatio || 1;
-      c.width = Math.max(1, Math.round(r.width * d));
-      c.height = Math.max(1, Math.round(r.height * d));
-      ctx.setTransform(d, 0, 0, d, 0, 0);
-    };
-    fit();
-    const ro = new ResizeObserver(fit);
-    ro.observe(c);
 
     // `placed`: it was put beside the words, so it fades out early (`quit`) when they move;
     // `span`: the stretch of the page it stands in, which the other lane's picture keeps clear of.
@@ -318,7 +301,7 @@ export function Visions({
     const choose = (choices: Vision[]) => {
       weigh();
       const total = choices.reduce((s, v) => s + (weights.get(v.name) ?? 1), 0);
-      let r = Math.random() * total;
+      let r = random() * total;
       for (const v of choices) {
         r -= weights.get(v.name) ?? 1;
         if (r <= 0) return v;
@@ -334,12 +317,8 @@ export function Visions({
 
     // Time runs only while the song plays; paused, the pictures fade out and hold where they are.
     let clock = 0,
-      shown = live.current.playing ? 1 : 0,
-      raf = 0,
-      last = performance.now();
-    const frame = (now: number) => {
-      const dt = Math.min(0.05, (now - last) / 1000);
-      last = now;
+      shown = live.current.playing ? 1 : 0;
+    return (now, dt) => {
       const { bpm, playing, time, dark } = live.current;
       shown += ((playing ? 1 : 0) - shown) * Math.min(1, dt * 1.2);
       if (playing) clock += dt * (still ? 0.25 : 1);
@@ -347,9 +326,17 @@ export function Visions({
         h = c.clientHeight;
       ctx.clearRect(0, 0, w, h);
       c.style.opacity = String(shown * FAINT);
-      const phase = (time() * (bpm || DEFAULT_BPM)) / 60;
-      const beat = playing && !still ? Math.exp(-(phase % 1) * 4) : 0;
-      const pal = (p: Pair) => (dark ? p.dark : p.light);
+      // Paused and faded away: nothing to draw until the song plays again.
+      if (!playing && shown < 0.01) return;
+      const beat = beatAt(time(), bpm, playing && !still);
+      // The colours of this frame, worked out once for every picture's many calls on them.
+      const warm = dark ? colours.current.warm.dark : colours.current.warm.light,
+        cool = dark ? colours.current.cool.dark : colours.current.cool.light;
+      const warmA = `rgba(${warm.join(",")},`,
+        coolA = `rgba(${cool.join(",")},`;
+      const ink = (al: number, isCool?: boolean) => `${isCool ? coolA : warmA}${al})`;
+      const rgb = (isCool?: boolean) => (isCool ? cool : warm);
+      const dot = (isCool?: boolean) => dotOf(isCool ? cool : warm);
       const light = dark ? 1 : 0.75; // softer on paper
       ctx.globalCompositeOperation = dark ? "lighter" : "source-over";
       // The words moved (focus mode, the lyrics arriving, the window resized): a picture beside
@@ -401,8 +388,9 @@ export function Visions({
           env: env * light,
           beat,
           dark,
-          ink: (al, cool) => `rgba(${pal(cool ? colours.current.cool : colours.current.warm).join(",")},${al})`,
-          dot: (cool) => dotOf(pal(cool ? colours.current.cool : colours.current.warm)),
+          ink,
+          rgb,
+          dot,
         };
         ctx.save();
         try {
@@ -411,18 +399,16 @@ export function Visions({
           // A picture that fails is dropped, and the rest carry on.
           console.error(`picture "${a.v.name}":`, e);
           if (!pick) L.cur = null;
+          // It may have stopped between a save and its restore: undo all it saved, so what it
+          // left (a turn, a fade) doesn't stay on the canvas for the rest. This pops ours too.
+          for (let i = 0; i < 64; i++) ctx.restore();
+          ctx.save();
         }
         ctx.restore();
         ctx.globalCompositeOperation = dark ? "lighter" : "source-over";
       }
-      raf = requestAnimationFrame(frame);
     };
-    raf = requestAnimationFrame(frame);
-    return () => {
-      cancelAnimationFrame(raf);
-      ro.disconnect();
-    };
-  }, []);
+  });
 
   return <canvas ref={canvas} style={{ width: "100%", height: "100%", display: "block" }} />;
 }

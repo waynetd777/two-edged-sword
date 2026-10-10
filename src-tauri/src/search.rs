@@ -280,19 +280,20 @@ fn like_clause(col: &str, terms: &[String], phrase: &str, mode: Mode) -> (String
     (format!("({clause})"), pats)
 }
 
+/// A Strong's number as the modules write it: G or H and digits ("G25", "H7225").
+pub fn is_strongs(n: &str) -> bool {
+    n.len() >= 2 && (n.starts_with('G') || n.starts_with('H')) && n[1..].chars().all(|c| c.is_ascii_digit())
+}
+
 pub fn run(lib: &Library, index: Option<&crate::index::Index>, q: &Query) -> Result<Results, String> {
     let raw = q.text.trim();
-    let strongs_num = {
-        let up = raw.to_ascii_uppercase();
-        let ok = up.len() >= 2 && (up.starts_with('G') || up.starts_with('H')) && up[1..].chars().all(|c| c.is_ascii_digit());
-        ok.then_some(up)
-    };
+    let strongs_num = Some(raw.to_ascii_uppercase()).filter(|up| is_strongs(up));
     if let Some(num) = strongs_num {
         let bible = q.strongs_bible.clone().unwrap_or_else(|| q.bible.clone());
         let m = lib.module(Kind::Bible, &bible)?.clone();
         let hits = lib.with(Kind::Bible, &bible, |c| {
             let mut st = c.prepare("SELECT Book, Chapter, Verse, Scripture FROM Bible WHERE Scripture LIKE ?1 AND Book BETWEEN ?2 AND ?3 ORDER BY Book, Chapter, Verse")?;
-            let rows = st.query_map(rusqlite::params![format!("%<num>{num}</num>%"), q.book_from, q.book_to], |r| Ok(VerseMatch { book: r.get(0)?, chapter: r.get(1)?, verse: r.get(2)?, text: r.get(3)? }))?;
+            let rows = st.query_map(rusqlite::params![crate::content::num_like(&num), q.book_from, q.book_to], |r| Ok(VerseMatch { book: r.get(0)?, chapter: r.get(1)?, verse: r.get(2)?, text: r.get(3)? }))?;
             rows.collect::<rusqlite::Result<Vec<_>>>()
         })?;
         let count = hits.len();
@@ -383,8 +384,10 @@ pub fn run(lib: &Library, index: Option<&crate::index::Index>, q: &Query) -> Res
                 Ok(())
             },
         );
-        if let Ok(Some(n)) = exact {
-            count = n;
+        match exact {
+            Ok(Some(n)) => count = n,
+            Ok(None) => {}
+            Err(e) => eprintln!("search {}: {e}", m.id),
         }
         if count > 0 {
             commentaries.push(ModuleMatches { module: m.id.clone(), title: m.title.clone(), abbrev: m.abbrev.clone(), count, hits });
@@ -422,8 +425,10 @@ pub fn run(lib: &Library, index: Option<&crate::index::Index>, q: &Query) -> Res
                 Ok(())
             },
         );
-        if let Ok(Some(n)) = exact {
-            count = n;
+        match exact {
+            Ok(Some(n)) => count = n,
+            Ok(None) => {}
+            Err(e) => eprintln!("search {}: {e}", m.id),
         }
         if count > 0 {
             dictionaries.push(ModuleMatches {
@@ -461,8 +466,11 @@ fn candidate_rows(
     limit: usize,
     mut f: impl FnMut(&rusqlite::Row) -> rusqlite::Result<()>,
 ) -> Result<Option<usize>, String> {
-    if let Some(ix) = index.filter(|ix| q.whole_words && ix.is_ready(kind, id)) {
-        let ids = ix.candidates(kind, id, &crate::index::fts_query(terms, phrase, q.mode))?;
+    // An index that can't be read (damaged, say) falls back to LIKE, as an unbuilt one does.
+    let ids = index.filter(|ix| q.whole_words && ix.is_ready(kind, id)).and_then(|ix| {
+        ix.candidates(kind, id, &crate::index::fts_query(terms, phrase, q.mode)).inspect_err(|e| eprintln!("index {id}: {e}")).ok()
+    });
+    if let Some(ids) = ids {
         if ids.is_empty() {
             return Ok(Some(0));
         }

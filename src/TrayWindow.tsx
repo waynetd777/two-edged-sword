@@ -17,7 +17,7 @@ import { Switch } from "./ui";
 const WIDTH = 340;
 
 /** The headline and the line under it. */
-export function trayStatus(s: TrayState | null): { headline: string; sub: string } {
+function trayStatus(s: TrayState | null): { headline: string; sub: string } {
   if (!s) return { headline: "Two-edged Sword", sub: "Starting…" };
   if (!s.plan || !s.today) return { headline: "No reading plan", sub: "Choose one in Plans to read a little every day" };
   const where = [s.plan, s.progress].filter(Boolean).join(" · ");
@@ -62,7 +62,14 @@ async function applyTheme() {
 export function TrayWindow() {
   const [info, setInfo] = useState<TrayInfo | null>(null);
   const box = useRef<HTMLDivElement>(null);
-  const refresh = useCallback(() => void api.trayInfo().then(setInfo), []);
+  const refresh = useCallback(
+    () =>
+      void api
+        .trayInfo()
+        .then(setInfo)
+        .catch((e) => console.error("tray", e)),
+    [],
+  );
 
   useEffect(() => {
     void applyTheme();
@@ -190,7 +197,7 @@ export function TrayWindow() {
           <div className="tray-switch">
             <Icon name="power" size={14} />
             <span className="grow">Open at login</span>
-            <Switch on={info.login} onChange={() => void api.trayDo("login").then(refresh)} />
+            <Switch on={info.login} onChange={() => void api.trayDo("login").then(refresh, (e) => console.error("tray", e))} />
           </div>
         )}
       </div>

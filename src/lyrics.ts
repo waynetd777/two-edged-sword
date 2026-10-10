@@ -44,7 +44,7 @@ export const setSceneSong = (s: SceneSong) => (sceneSong = s);
 const cache = new Map<string, Promise<Lyrics | null>>();
 
 /** "[01:02.50] words" lines, a line sung more than once carrying each time. */
-export function parseLrc(lrc: string): Lyrics["lines"] {
+function parseLrc(lrc: string): Lyrics["lines"] {
   const out: Lyrics["lines"] = [];
   for (const raw of lrc.split(/\r?\n/)) {
     const times = [...raw.matchAll(/\[(\d+):(\d+(?:\.\d+)?)\]/g)];
@@ -118,6 +118,20 @@ interface ItunesSong {
   artworkUrl100?: string;
 }
 const art = new Map<string, Promise<string | null>>();
+/** Music's own pictures, as blob addresses by song: the latest few are kept, older ones let go
+ *  (and asked for again if their song comes back). */
+const blobs: { key: string; url: string }[] = [];
+const KEEP_BLOBS = 20;
+const blobOf = (key: string, bytes: ArrayBuffer) => {
+  const url = URL.createObjectURL(new Blob([bytes]));
+  blobs.push({ key, url });
+  while (blobs.length > KEEP_BLOBS) {
+    const old = blobs.shift()!;
+    URL.revokeObjectURL(old.url);
+    art.delete(old.key);
+  }
+  return url;
+};
 
 /** The playing song's artwork, as an address an <img> can show; asked once per song. */
 export function artworkFor(name: string, artist: string, album: string): Promise<string | null> {
@@ -129,7 +143,9 @@ export function artworkFor(name: string, artist: string, album: string): Promise
       .musicArtwork()
       .catch(() => new ArrayBuffer(0))
       .then(async (bytes) => {
-        if (bytes.byteLength) return URL.createObjectURL(new Blob([bytes]));
+        // Music gives the picture of whatever is playing now: only this song's is kept as its own.
+        const now = bytes.byteLength ? await api.musicState().catch(() => null) : null;
+        if (now && now.name === name && now.artist === artist) return blobOf(key, bytes);
         const q = new URLSearchParams({ term: `${bare(name)} ${artist}`, entity: "song", limit: "10" });
         const r = await fetch(`https://itunes.apple.com/search?${q}`);
         if (!r.ok) throw new Error(`iTunes: ${r.status}`);

@@ -3,7 +3,7 @@
 
 // The sky: light from above, stars, the moon, clouds.
 
-import { beam, glow, rnd, smooth, TAU, Vision, RGB } from "./kit";
+import { beam, Frame, glow, layering, random, RGB, rnd, smooth, TAU, Vision } from "./kit";
 
 export const SKY: Vision[] = [
   {
@@ -43,7 +43,7 @@ export const SKY: Vision[] = [
       const stars = Array.from({ length: Math.round((w * h) / 6000) }, () => ({
         x: rnd(0, w),
         y: rnd(0, h * 0.8) ** 1.15 / (h * 0.8) ** 0.15,
-        r: rnd(1.5, 4.5) * (Math.random() < 0.08 ? 1.8 : 1),
+        r: rnd(1.5, 4.5) * (random() < 0.08 ? 1.8 : 1),
         p: rnd(0, TAU),
         s: rnd(0.6, 2),
       }));
@@ -169,7 +169,7 @@ export const SKY: Vision[] = [
         [240, 70, 70],
       ];
       // Drawn on a layer, faded towards the ground there, then laid over the page faintly.
-      let layer: HTMLCanvasElement | null = null;
+      const layer = layering();
       const bow = (L: CanvasRenderingContext2D, r: number, band: number, cols: RGB[], a: number) => {
         const g = L.createRadialGradient(cx, cy, r - band, cx, cy, r);
         g.addColorStop(0, `rgba(${cols[0].join(",")},0)`);
@@ -178,19 +178,10 @@ export const SKY: Vision[] = [
         L.fillStyle = g;
         L.fillRect(0, 0, w, h);
       };
-      return (f) => {
-        const { ctx } = f;
-        const dpr = ctx.getTransform().a || 1;
-        if (!layer || layer.width !== Math.round(w * dpr) || layer.height !== Math.round(h * dpr)) {
-          layer = document.createElement("canvas");
-          layer.width = Math.round(w * dpr);
-          layer.height = Math.round(h * dpr);
-        }
-        const L = layer.getContext("2d")!;
-        L.setTransform(1, 0, 0, 1, 0, 0);
-        L.globalCompositeOperation = "source-over";
-        L.clearRect(0, 0, layer.width, layer.height);
-        L.setTransform(dpr, 0, 0, dpr, 0, 0);
+      // It changes only with the theme (and the page's size), so it's drawn again only then.
+      let drawn: { key: string; canvas: HTMLCanvasElement } | null = null;
+      const paint = (f: Frame) => {
+        const { L, canvas } = layer(f);
         const band = R * 0.17;
         // The sky inside the bow is a little brighter than outside it.
         const glowIn = L.createRadialGradient(cx, cy, R * 0.55, cx, cy, R - band * 0.6);
@@ -208,8 +199,14 @@ export const SKY: Vision[] = [
         fade.addColorStop(1, "rgba(0,0,0,0.05)");
         L.fillStyle = fade;
         L.fillRect(0, 0, w, h);
+        return canvas;
+      };
+      return (f) => {
+        const { ctx } = f;
+        const key = `${f.dark}|${f.w}x${f.h}|${ctx.getTransform().a}`;
+        if (!drawn || drawn.key !== key) drawn = { key, canvas: paint(f) };
         ctx.globalAlpha = (f.dark ? 0.15 : 0.19) * f.env;
-        ctx.drawImage(layer, 0, 0, w, h);
+        ctx.drawImage(drawn.canvas, 0, 0, f.w, f.h);
         ctx.globalAlpha = 1;
       };
     },
@@ -278,12 +275,12 @@ export const SKY: Vision[] = [
         tilt = rnd(-0.5, 0.5);
       const stars = Array.from({ length: 1300 }, (_, i) => {
         const arm = i % 2;
-        const d = Math.random() ** 0.7;
+        const d = random() ** 0.7;
         return {
           d,
           a: arm * Math.PI + d * 5.2 + rnd(-0.45, 0.45) * (1.2 - d),
           r: rnd(0.8, 2.6) * (1.2 - d * 0.6),
-          cool: Math.random() < 0.5,
+          cool: random() < 0.5,
           p: rnd(0, TAU),
         };
       });
@@ -330,10 +327,15 @@ export const SKY: Vision[] = [
         ctx.arc(x, y, r, 0, TAU);
         ctx.fill();
         // The crescent, cut out on a canvas of its own so the cut takes nothing else with it.
-        const d = Math.ceil(r * 2.6);
-        if (moon.width !== d) moon.width = moon.height = d;
+        // In the screen's pixels, so it's as sharp as the rest.
+        const d = Math.max(1, Math.ceil(r * 2.6)),
+          dpr = ctx.getTransform().a || 1,
+          px = Math.max(1, Math.round(d * dpr));
+        if (moon.width !== px) moon.width = moon.height = px;
         const m = moon.getContext("2d")!;
-        m.clearRect(0, 0, d, d);
+        m.setTransform(1, 0, 0, 1, 0, 0);
+        m.clearRect(0, 0, px, px);
+        m.setTransform(px / d, 0, 0, px / d, 0, 0);
         m.globalCompositeOperation = "source-over";
         m.fillStyle = f.ink(0.45 * f.env, true);
         m.beginPath();
@@ -347,7 +349,7 @@ export const SKY: Vision[] = [
         ctx.save();
         ctx.shadowColor = f.ink(0.35 * f.env, true);
         ctx.shadowBlur = r * 0.35;
-        ctx.drawImage(moon, x - d / 2, y - d / 2);
+        ctx.drawImage(moon, x - d / 2, y - d / 2, d, d);
         ctx.restore();
         const dot = f.dot(true);
         for (const s of stars) {
@@ -370,7 +372,7 @@ export const SKY: Vision[] = [
     dur: [10, 16],
     moving: true,
     make: (w, h) => {
-      const dir = Math.random() < 0.5 ? 1 : -1;
+      const dir = random() < 0.5 ? 1 : -1;
       const meteors = Array.from({ length: 7 }, () => ({
         at: rnd(0.08, 0.8),
         x: rnd(0, 0.8) * w,

@@ -24,19 +24,13 @@ match. A word with no counterpart stays as it is, without English.
 The markup is INT+'s, as WLC+'s: <div><grk>word</grk><num>H…</num><tvm>grammar</tvm><gra>English</gra></div>;
 maqaf and sof pasuq stay on the word before them, as in WLC+.
 """
-import html, os, re, sqlite3, sys, unicodedata
+import html, re, sqlite3, sys
 from difflib import SequenceMatcher
 from pathlib import Path
 
-HOME = Path(os.environ.get("HOME", ""))
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from modules import LIBRARY, find  # noqa: E402
-FINAL = str.maketrans("ךםןףץ", "כמנפצ")
+from modules import find, hebrew_consonants as consonants, module, similar  # noqa: E402
 DIV = re.compile(r"<div><grk>(.*?)</grk>((?:<num>.*?</num>)*)<tvm>(.*?)</tvm><gra>(.*?)</gra></div>")
-
-
-def consonants(w):
-    return "".join(ch for ch in unicodedata.normalize("NFD", w) if "א" <= ch <= "ת").translate(FINAL)
 
 
 def words_of(text):
@@ -48,10 +42,6 @@ def words_of(text):
         for part in re.findall(r"[^־]+־?|־", w):
             out.append(part)
     return out
-
-
-def similar(a, b):
-    return SequenceMatcher(None, a, b).ratio()
 
 
 def pair(g, w):
@@ -157,19 +147,9 @@ def main():
             f"TBESH glosses, CC BY 4.0). {(n_exact + n_near) / total:.1%} of the words are glossed; a word where Ben Chayyim's "
             "text differs from the Leningrad Codex's is left without. Text: github.com/ahembd/Ginsburg_Hebrew_Bible (Apache-2.0). "
             "Verses are numbered as in the KJV. Built by Two-edged Sword's tools/ginsburg/plus.py.</p>")
-    p = LIBRARY / "ginsburg+.bbli"
-    tmp = p.with_suffix(".tmp")
-    tmp.unlink(missing_ok=True)
-    db = sqlite3.connect(tmp)
-    db.executescript("""CREATE TABLE Details (Title NVARCHAR(100), Abbreviation NVARCHAR(50), Information TEXT, Version INT, OldTestament BOOL, NewTestament BOOL, Apocrypha BOOL, Strongs BOOL, RightToLeft BOOL);
-        CREATE TABLE Bible (Book INT, Chapter INT, Verse INT, Scripture TEXT);
-        CREATE INDEX BookChapterVerseIndex ON Bible (Book, Chapter, Verse);""")
-    db.execute("INSERT INTO Details VALUES (?,?,?,1,1,0,0,1,1)", ("Hebrew Bible (Ginsburg 1894, Ben Chayyim) w/ glosses", "Ginsburg+", info))
-    db.executemany("INSERT INTO Bible VALUES (?,?,?,?)", out)
-    db.commit()
-    db.close()
-    tmp.replace(p)
-    print(f"{p.name}: {len(out)} verses")
+    with module("ginsburg+.bbli", "Hebrew Bible (Ginsburg 1894, Ben Chayyim) w/ glosses", "Ginsburg+", info, nt=False, strongs=True, rtl=True) as db:
+        db.executemany("INSERT INTO Bible VALUES (?,?,?,?)", out)
+    print(f"ginsburg+.bbli: {len(out)} verses")
 
 
 if __name__ == "__main__":

@@ -8,9 +8,44 @@
 use serde_json::Value;
 use std::path::PathBuf;
 
+/// The user's home folder.
+pub fn home() -> PathBuf {
+    PathBuf::from(std::env::var("HOME").unwrap_or_default())
+}
+
 pub fn data_dir() -> PathBuf {
-    let home = std::env::var("HOME").unwrap_or_default();
-    PathBuf::from(home).join("Library/Application Support/Two-edged Sword")
+    home().join("Library/Application Support/Two-edged Sword")
+}
+
+/// A folder shipped in the app (Contents/Resources/<name>); in a debug build, src-tauri/<name>.
+pub fn bundled(name: &str) -> PathBuf {
+    if cfg!(debug_assertions) {
+        return std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(name);
+    }
+    std::env::current_exe().ok().and_then(|e| Some(e.parent()?.parent()?.join("Resources").join(name))).unwrap_or_default()
+}
+
+/// A file's size and modified time (since the epoch), for telling when it has changed; zeros if
+/// it can't be read.
+pub fn file_stamp(path: &std::path::Path) -> (u64, std::time::Duration) {
+    let m = std::fs::metadata(path).ok();
+    let len = m.as_ref().map(|m| m.len()).unwrap_or(0);
+    let mtime = m.and_then(|m| m.modified().ok()).and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok()).unwrap_or_default();
+    (len, mtime)
+}
+
+/// A title as a file name: letters, digits and the characters in `keep`, the rest as spaces, at
+/// most `max` characters, no leading or trailing dots; "untitled" if nothing is left.
+pub fn file_name(s: &str, max: usize, keep: &str) -> String {
+    let t: String = s.chars().map(|c| if c.is_alphanumeric() || keep.contains(c) { c } else { ' ' }).collect();
+    let t = t.split_whitespace().collect::<Vec<_>>().join(" ");
+    let t: String = t.chars().take(max).collect();
+    let t = t.trim_matches(|c: char| c == '.' || c == ' ').to_string();
+    if t.is_empty() {
+        "untitled".into()
+    } else {
+        t
+    }
 }
 
 fn valid_name(name: &str) -> bool {
@@ -37,30 +72,18 @@ pub fn read(dir: &std::path::Path, name: &str) -> Result<Value, String> {
 /// leave a half-written document.
 pub fn write(dir: &std::path::Path, name: &str, value: &Value) -> Result<(), String> {
     let p = path_for(dir, name)?;
-    std::fs::create_dir_all(dir).map_err(|e| e.to_string())?;
-    let tmp = tmp_beside(&p);
     let text = serde_json::to_string_pretty(value).map_err(|e| e.to_string())?;
-    std::fs::write(&tmp, text).map_err(|e| e.to_string())?;
-    std::fs::rename(&tmp, &p).map_err(|e| e.to_string())
-}
-
-/// The difference lists shipped in the app (Contents/Resources/variances); in a debug build,
-/// src-tauri/variances.
-fn bundled_variances() -> PathBuf {
-    if cfg!(debug_assertions) {
-        return std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("variances");
-    }
-    std::env::current_exe().ok().and_then(|e| Some(e.parent()?.parent()?.join("Resources/variances"))).unwrap_or_default()
+    write_text_atomic(&p, &text)
 }
 
 /// A translation's differences from the KJV (`variances-<module>`): the list built on this Mac
-/// by tools/variances/ if there is one, else the one shipped with the app.
+/// by tools/variances/ if there is one, else the one shipped with the app (Contents/Resources/variances).
 pub fn variances(dir: &std::path::Path, name: &str) -> Result<Value, String> {
     let own = read(dir, name)?;
     if !own.is_null() {
         return Ok(own);
     }
-    read(&bundled_variances(), name)
+    read(&bundled("variances"), name)
 }
 
 /// A hidden temporary name beside `p`, unique to this write, so it can't clobber a file of the
