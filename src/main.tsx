@@ -20,6 +20,15 @@ import App from "./App";
 import { TrayWindow } from "./TrayWindow";
 import "./styles.css";
 
+// WebKit's own right-click menu offers Reload, which throws away the app's state. Keep it only
+// where it's useful — in text fields and on selected text — and leave custom menus to their owners.
+document.addEventListener("contextmenu", (e) => {
+  const t = e.target as HTMLElement | null;
+  if (t?.closest("input, textarea, [contenteditable]:not([contenteditable='false'])")) return;
+  if (window.getSelection()?.toString()) return;
+  e.preventDefault();
+});
+
 // If anything fails before the first screen, say so on the splash rather than leaving it spinning.
 function showStartupError(msg: string) {
   const el = document.querySelector("#splash .what");
