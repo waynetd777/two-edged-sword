@@ -12,9 +12,10 @@ runs the AI tools for Ask. The frontend is everything you see.
 | `make check` | Rust tests (some read the modules on this Mac, and skip without them) and the TypeScript check |
 | `make lint` | rustfmt, clippy, Prettier and ESLint; any warning fails it |
 | `make fmt` | Format the Rust (rustfmt) and TypeScript and CSS (Prettier) |
-| `make app` | Bump the version (1.0.4 → 1.0.5) and build the .app, signed with the identity in `signing.local` if there is one |
+| `make app` | Bump the version (1.0.4 → 1.0.5) once the current one has a release, and build the .app, signed with the identity in `signing.local` if there is one |
 | `make install-app` | Build it and replace the copy in /Applications |
 | `make dmg` | Pack the built app into `Two-edged-Sword.dmg` for a release |
+| `make release NOTES="…"` | Publish a release: bump, build, DMG, commit, push, GitHub release, install (`tools/release.py`) |
 | `make help` | Check the help: every link in the guides, and each screen's section, resolves |
 | `make core` | Build the built-in modules into `src-tauri/modules/` (`make dev` and `make app` build them if they're missing) |
 | `make screenshots` | Retake the screenshots in `docs/images/` |
@@ -29,14 +30,19 @@ runs the AI tools for Ask. The frontend is everything you see.
 - On macOS 27, release builds link with Rust's lld against the macOS 26 SDK, because macOS 27's
   linker sometimes breaks proc-macro builds ("can't find crate"). The Makefile explains.
 
-Every release build gets the next patch version (`tools/bump_version.py`, which keeps
-`tauri.conf.json`, `package.json`, `Cargo.toml` and the lock files in step) and one build number,
-stamped on the app and the binary; Settings shows both. For a minor or major step,
-run `python3 tools/bump_version.py 1.1.0` first: `make app` then builds 1.1.1. Commit the bump with
-the release.
+A release build moves to the next patch version once the current one has been released, that is,
+once `v<version>` is tagged on GitHub (`tools/bump_version.py`, which keeps `tauri.conf.json`,
+`package.json`, `Cargo.toml` and the lock files in step), so local builds between releases share a
+version. Every build gets its own build number, stamped on the app and the binary; Settings shows
+both. For a minor or major step, run `python3 tools/bump_version.py 1.1.0` first.
 
-To publish one: `make install-app`, `make dmg`, commit and push, then
-`gh release create v<version> src-tauri/target/release/bundle/dmg/Two-edged-Sword.dmg src-tauri/target/release/bundle/dmg/Two-edged-Sword.app.tar.gz src-tauri/target/release/bundle/dmg/latest.json`.
+To publish one: `make release NOTES="What's new"` (`tools/release.py`). It refuses to start without
+notes or with uncommitted changes, then bumps and builds the app, makes the DMG and update files
+(the notes go in the update offer), commits the bump as `Two-edged Sword <version>`, pushes,
+creates the GitHub release with `Two-edged-Sword.dmg`, `Two-edged-Sword.app.tar.gz` and
+`latest.json`, and installs the app, opening it again if it was running. `INSTALL=0` skips the
+install and `DRY_RUN=1` prints the steps. After a failure, run it again: the unreleased version is
+kept.
 The README's download link points at the latest release's `Two-edged-Sword.dmg`, so keep that name.
 
 `make dmg` also runs `tools/update_files.py`, which packs the app as `Two-edged-Sword.app.tar.gz`,

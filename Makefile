@@ -11,7 +11,7 @@ SIGN_ID  := $(APPLE_SIGNING_IDENTITY)
 # "-" is an ad-hoc signature: an empty identity makes the bundler fail instead.
 export APPLE_SIGNING_IDENTITY := $(if $(SIGN_ID),$(SIGN_ID),-)
 
-.PHONY: check lint fmt test app install-app dmg dev icons screenshots sign-check help core visions site og
+.PHONY: check lint fmt test app install-app dmg release dev icons screenshots sign-check help core visions site og
 
 ## cargo test + TypeScript type-check.
 check:
@@ -46,11 +46,12 @@ RELEASE_RUSTFLAGS += -Clink-arg=-fuse-ld=lld -Clink-arg=-B$(LLD_DIR)
 RELEASE_ENV := SDKROOT=$(lastword $(OLD_SDK))
 endif
 
-# Each release build bumps the version (tools/bump_version.py: 1.0.4 → 1.0.5) and gets its own build
-# number, the same on the app (CFBundleVersion) and the binary (Settings shows it).
+# Each release build bumps the version once the current one has a release (tools/bump_version.py:
+# 1.0.4 → 1.0.5), and gets its own build number, the same on the app (CFBundleVersion) and the
+# binary (Settings shows it).
 BUILD := $(shell date +%Y%m%d.%H%M%S)
 
-## Bump the version and build the .app, signed with the identity in signing.local when there is one.
+## Bump the version (once the current one has a release) and build the .app, signed with the identity in signing.local when there is one.
 app:
 	@echo "version $$(python3 tools/bump_version.py), build $(BUILD)"
 	TES_BUILD=$(BUILD) $(RELEASE_ENV) RUSTFLAGS="$(RELEASE_RUSTFLAGS)" npm run tauri build -- --config '{"bundle":{"macOS":{"bundleVersion":"$(BUILD)"}}}'
@@ -61,10 +62,15 @@ app:
 	else echo "note: no signing.local, so the app is signed ad hoc"; fi
 
 ## Pack the built app into the release DMG (src-tauri/target/release/bundle/dmg/), laid out like other Mac installers,
-## with the signed update package and latest.json the app's updater reads (tools/update_files.py).
+## with the signed update package and latest.json the app's updater reads (tools/update_files.py; NOTES="…" is what's new).
 dmg:
 	@python3 tools/dmg/make_dmg.py
-	@python3 tools/update_files.py
+	@python3 tools/update_files.py --notes "$$NOTES"
+
+## Publish a release: make release NOTES="What's new" bumps the version, builds the app and the DMG, commits the bump, pushes,
+## creates the GitHub release and installs the app (not with INSTALL=0). DRY_RUN=1 prints the steps (tools/release.py).
+release:
+	@python3 tools/release.py
 
 ## Build and replace /Applications/Two-edged Sword.app.
 install-app: app
