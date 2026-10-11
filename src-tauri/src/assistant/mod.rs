@@ -147,9 +147,11 @@ impl Running {
             ch.retain(|(_, p)| *p != pid);
         }
     }
-    /// Whether any chat is being answered now.
+    /// Whether a chat is being answered now. Questions asked out of sight (Ask.tsx's askOnce, ids
+    /// "once-…": the suggested next question, the closing prayer, the song choosing) don't count:
+    /// nobody is waiting on them and they're asked again.
     pub fn any(&self) -> bool {
-        self.children.lock().is_ok_and(|ch| !ch.is_empty())
+        self.children.lock().is_ok_and(|ch| ch.iter().any(|(id, _)| !id.starts_with("once-")))
     }
     /// On quit: nothing is left running once the app has gone.
     pub fn kill_all(&self) {
