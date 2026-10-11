@@ -87,7 +87,7 @@ scroll:
   top bar is dark as well.
 - ⌘. is focus mode: the song across the whole window, the pictures beside it. Esc leaves it.
 
-<a href="images/index.md#quiet-time"><img alt="A song playing in focus mode: the lit line moves on through the words as a dove passes behind them" src="images/lyrics-focus-dark.webp"></a>
+<a href="images/index.md#quiet-time"><img alt="A song playing in focus mode: the lit line moves on through the words as a dove passes behind them" src="images/lyrics-focus-dark.png"></a>
 
 - **Lyrics** on the bar brings the words back if you've gone elsewhere.
 - **Open Music** (top right) switches to Music.

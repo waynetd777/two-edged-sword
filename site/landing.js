@@ -87,7 +87,7 @@
   // (an animated picture's length) or the tour's data-auto; a click picks one.
   function Tour(root) {
     var img = root.querySelector(".shot:not(.swap) img");
-    var swaps = root.querySelectorAll(".shot.swap img");
+    var swaps = root.querySelectorAll(".shot.swap img, .shot.swap video");
     var steps = Array.prototype.slice.call(root.querySelectorAll(".steps li"));
     var cap = root.querySelector(".tabcap");
     var every = parseInt(root.getAttribute("data-auto"), 10) || 4000;
@@ -142,6 +142,16 @@
         var which = parseInt(li.getAttribute("data-img") || "0", 10);
         swaps.forEach(function (im, k) {
           im.classList.toggle("on", k === which);
+          // A video plays from the start while it's shown (its poster stands in with reduced motion).
+          if (im.tagName === "VIDEO") {
+            if (k === which && !reduced) {
+              im.currentTime = 0;
+              var p = im.play();
+              if (p && p.catch) p.catch(function () {});
+            } else {
+              im.pause();
+            }
+          }
         });
       }
       if (cap && li.hasAttribute("data-caption")) {

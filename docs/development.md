@@ -121,6 +121,11 @@ run side by side (4 by default). It needs Pillow.
   `TES_SNAPSHOT_EVERY`), at half size (`TES_SNAPSHOT_WIDTH`), which is quicker to take; the script
   makes them a looping WebP, each frame shown for as long as it was on screen. About 7 frames a
   second is the most the unseen window gives. `"darkOnly": true` shoots a scene in dark only.
+- With `"step": seconds` in place of `"every"`, the page's clock stands still and is moved on that
+  much before each frame (`src/sceneClock.ts`, `TES_SNAPSHOT_STEP`), so the frames are evenly
+  spaced however slowly they're taken. The script makes them a looping MP4 (needs `ffmpeg`, `brew
+  install ffmpeg`) and saves the middle frame as a PNG for the guides. The song's picture waits for
+  the first frame; `songVisionDur` sets how many seconds it takes. The product page plays the MP4.
 - A scene with `"tray": true` shows the menu-bar window alone (the main window runs hidden to send it what to show), and `width` keeps the image at its own width. `"unread": true` shows today's reading as not yet done, so the menu-bar window shows Start Quiet time.
 
 ## The product page

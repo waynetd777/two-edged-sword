@@ -14,6 +14,7 @@
 
 import { useEffect, useRef } from "react";
 import { beatAt, useCanvasLoop } from "./canvasLoop";
+import { sceneStepping } from "./sceneClock";
 import { Frame, Lane, random, RGB, rnd, Room, seedRandom, smooth, Vision } from "./pictures/kit";
 import { VISIONS } from "./pictures";
 
@@ -77,14 +78,15 @@ async function artPalette(url: string): Promise<{ warm: Pair; cool: Pair } | nul
     cool: far ? pairOf(hue(far), sat(far)) : pairOf((hue(top) + 0.08) % 1, sat(top) * 0.8),
   };
 }
-/** Screenshot mode: one picture shown, this far through, in full. */
+/** Screenshot mode: one picture shown, this far through, in full (over `dur` seconds, if given). */
 // `loop` (the pictures viewer, visions.html): it fades in and out as when chosen, then begins again.
-let scenePick: { name: string; at: number; loop?: boolean } | null = null;
+// `held`: it waits where it is until an animated scene's frames begin (sceneClock.ts).
+let scenePick: { name: string; at: number; loop?: boolean; dur?: number; held?: boolean } | null = null;
 // A scene (not the viewer, which shows each picture afresh) draws the same picture each time, so
 // screenshots of it don't change from one run to the next.
-export const setSceneVision = (name: string, at = 0.5, loop = false) => {
+export const setSceneVision = (name: string, at = 0.5, loop = false, dur?: number, held = false) => {
   if (!loop) seedRandom(1);
-  scenePick = { name, at, loop };
+  scenePick = { name, at, loop, dur, held };
 };
 
 /** How many pictures share each theme: a theme few pictures have says more about a song than one many have. */
@@ -271,7 +273,7 @@ export function Visions({
       return { draw, crowded: room.crowded };
     };
     const begin = (lane: Lane, v: Vision, clock: number, at = 0) => {
-      const dur = rnd(v.dur[0], v.dur[1]);
+      const dur = (scenePick?.name === v.name && scenePick.dur) || rnd(v.dur[0], v.dur[1]);
       const a: Active = { v, lane, draw: () => {}, start: clock - at * dur, dur, placed: false };
       const made = make(a);
       // No room clear of the other lane's picture: none now; another try in a few seconds.
@@ -308,20 +310,28 @@ export function Visions({
       }
       return choices[choices.length - 1];
     };
-    const pick = scenePick ? VISIONS.find((v) => v.name === scenePick!.name) : undefined;
-    const looping = !!pick && !!scenePick!.loop;
-    if (pick) {
-      begin(pick.lane, pick, 0, scenePick!.at);
+    // A scene's picture, begun on the first frame after it is set (the page may already be showing
+    // when the scene is applied).
+    let pick: Vision | undefined,
+      looping = false;
+    const pickUp = () => {
+      if (pick || !scenePick) return;
+      pick = VISIONS.find((v) => v.name === scenePick!.name);
+      if (!pick) return;
+      looping = !!scenePick.loop;
+      for (const L of Object.values(lanes)) L.cur = null;
+      begin(pick.lane, pick, clock, scenePick.at);
       lanes.back.next = lanes.pass.next = Infinity;
-    }
+    };
 
     // Time runs only while the song plays; paused, the pictures fade out and hold where they are.
     let clock = 0,
       shown = live.current.playing ? 1 : 0;
     return (now, dt) => {
       const { bpm, playing, time, dark } = live.current;
+      pickUp();
       shown += ((playing ? 1 : 0) - shown) * Math.min(1, dt * 1.2);
-      if (playing) clock += dt * (still ? 0.25 : 1);
+      if (playing && (!scenePick?.held || sceneStepping())) clock += dt * (still ? 0.25 : 1);
       const w = c.clientWidth,
         h = c.clientHeight;
       ctx.clearRect(0, 0, w, h);
@@ -362,7 +372,7 @@ export function Visions({
         if (!L.cur && clock >= L.next) {
           weigh();
           const fit = (v: Vision) => v.lane === lane && !L.recent.includes(v.name) && !(still && v.moving);
-          let choices = looping ? [pick] : VISIONS.filter((v) => fit(v) && !L.shown.has(v.name));
+          let choices = looping ? [pick!] : VISIONS.filter((v) => fit(v) && !L.shown.has(v.name));
           if (!choices.length && !looping) {
             // Every picture of the lane has been shown this song: begin again.
             L.shown.clear();

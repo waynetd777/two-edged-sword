@@ -167,11 +167,12 @@
     },
     "songFile": "lyrics-song.json",
     "songVision": "dove",
-    "songVisionAt": 0.1,
+    "songVisionAt": 0,
+    "songVisionDur": 5,
     "focus": true,
     "settle": 5,
-    "frames": 90,
-    "every": 0.1
+    "frames": 150,
+    "step": 0.0333333
   },
   {
     "name": "reminder",

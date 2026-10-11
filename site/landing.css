@@ -394,7 +394,8 @@ p {
     background-position: -120% 0;
   }
 }
-.shot img {
+.shot img,
+.shot video {
   display: block;
   width: 100%;
   height: auto;
@@ -402,13 +403,15 @@ p {
 .shot.swap {
   aspect-ratio: 1400 / 875;
 }
-.shot.swap img {
+.shot.swap img,
+.shot.swap video {
   position: absolute;
   inset: 0;
   opacity: 0;
   transition: opacity 0.9s var(--ease);
 }
-.shot.swap img.on {
+.shot.swap img.on,
+.shot.swap video.on {
   opacity: 1;
 }
 .tour .shot:not(.swap) img {
@@ -787,6 +790,7 @@ footer .small {
   }
   .tour .shot:not(.swap) img,
   .shot.swap img,
+  .shot.swap video,
   .spoken span {
     transition: none;
   }

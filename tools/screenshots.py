@@ -84,7 +84,7 @@ def capture(scene, theme):
     (one, or the scene's "frames" of them), or None."""
     # A fixture from a file beside scenes.json: "chatFile" becomes "chat", and so on.
     files = {"chatFile": "chat", "sessionFile": "session", "entriesFile": "entries", "variancesFile": "variances", "songFile": "song", "chapterSongsFile": "chapterSongs"}
-    sc = {k: v for k, v in scene.items() if k not in files and k not in ("crop", "width", "settle", "songVision", "songVisionAt", "frames", "every", "darkOnly")}
+    sc = {k: v for k, v in scene.items() if k not in files and k not in ("crop", "width", "settle", "songVision", "songVisionAt", "songVisionDur", "frames", "every", "step", "darkOnly")}
     for f, k in files.items():
         if f in scene:
             sc[k] = json.loads((HERE / scene[f]).read_text())
@@ -94,6 +94,11 @@ def capture(scene, theme):
         sc["song"] = {**sc["song"], "vision": scene["songVision"]}
         if "songVisionAt" in scene:
             sc["song"]["visionAt"] = scene["songVisionAt"]
+        # "songVisionDur": the seconds it takes, instead of its own.
+        if "songVisionDur" in scene:
+            sc["song"]["visionDur"] = scene["songVisionDur"]
+    if "step" in scene:
+        sc["stepped"] = True  # the song's picture waits for the frames (src/sceneClock.ts)
     # No favourite translations unless the scene names them: the user's own could be licensed Bibles.
     sc["settings"] = {"favBibles": [], **sc.get("settings", {}), "theme": theme}
     with tempfile.TemporaryDirectory() as tmp:
@@ -101,6 +106,10 @@ def capture(scene, theme):
         frames, every = scene.get("frames", 1), scene.get("every", 0.1)
         env = {**os.environ, "TES_SCENE": json.dumps(sc), "TES_SNAPSHOT": str(shot), "TES_SNAPSHOT_AFTER": str(scene.get("settle", SETTLE)),
                "TES_SNAPSHOT_FRAMES": str(frames), "TES_SNAPSHOT_EVERY": str(every)}
+        # "step": the page's clock moved on this many seconds before each frame, in place of "every"
+        # (src/sceneClock.ts): evenly spaced frames, however slowly WebKit draws them.
+        if "step" in scene:
+            env["TES_SNAPSHOT_STEP"] = str(scene["step"])
         if frames > 1:
             # Half the window's 1440 points, 1440px at 2x: a full-size snapshot takes 0.75s, this 0.14s.
             env["TES_SNAPSHOT_WIDTH"] = "720"
@@ -183,7 +192,19 @@ def shoot(scene, theme):
     # Every frame the first one's size (a frame taken mid-resize is dropped).
     ims = [finish(im) for im in ims if im.size == ims[0].size]
     im = ims[0]
-    if scene.get("frames", 1) > 1:
+    if scene.get("frames", 1) > 1 and "step" in scene:
+        # Stepped: a looping MP4, which keeps the dark gradients smooth where a lossy WebP blotches
+        # them, and its middle frame as a PNG for the guides and for a page that doesn't play it.
+        ims[len(ims) // 2].save(OUT / f"{scene['name']}-{theme}.png", optimize=True)
+        out = OUT / f"{scene['name']}-{theme}.mp4"
+        with tempfile.TemporaryDirectory() as tmp:
+            for i, f in enumerate(ims):
+                f.convert("RGB").save(pathlib.Path(tmp) / f"{i:04}.png")
+            subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-framerate", str(round(1 / scene["step"], 3)), "-i", str(pathlib.Path(tmp) / "%04d.png"),
+                            "-vf", "pad=ceil(iw/2)*2:ceil(ih/2)*2",  # H.264 wants an even width and height
+                            "-c:v", "libx264", "-preset", "slow", "-crf", "16", "-tune", "film", "-pix_fmt", "yuv420p",
+                            "-movflags", "+faststart", "-an", str(out)], check=True)
+    elif scene.get("frames", 1) > 1:
         # Animated: a looping WebP, each frame shown for as long as it was on screen.
         out = OUT / f"{scene['name']}-{theme}.webp"
         at = [i.info["at"] for i in ims]

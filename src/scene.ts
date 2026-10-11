@@ -14,6 +14,7 @@ import type { PlayerState } from "./speech";
 import { setSceneVariances, VarianceFile } from "./variances";
 import { SceneSong, setSceneSong } from "./lyrics";
 import { setSceneVision } from "./Visions";
+import { installSceneClock } from "./sceneClock";
 import { Picked, setSceneChapterSongs } from "./worship";
 import { today as startOfToday, ymd } from "./plans";
 
@@ -64,6 +65,8 @@ interface Scene {
   unread?: boolean;
   /** Focus mode, as ⌘. turns it on, once the page has settled. */
   focus?: boolean;
+  /** Its frames are taken on a stepped clock (sceneClock.ts): the song's picture waits for them. */
+  stepped?: boolean;
 }
 
 let started = false;
@@ -78,6 +81,7 @@ export function runScene(app: ReturnType<typeof useApp>, still: (s: Partial<Play
       if (!json) return;
       const sc: Scene = JSON.parse(json);
       setReadOnly(true);
+      installSceneClock();
       if (sc.entries) setSceneJournal(sc.entries);
       if (sc.variances) setSceneVariances(sc.variances);
       if (sc.chapterSongs) setSceneChapterSongs(sc.chapterSongs);
@@ -186,7 +190,7 @@ export function runScene(app: ReturnType<typeof useApp>, still: (s: Partial<Play
         if (sc.player) still(sc.player);
         if (sc.song) {
           setSceneSong(sc.song);
-          if (sc.song.vision) setSceneVision(sc.song.vision, sc.song.visionAt);
+          if (sc.song.vision) setSceneVision(sc.song.vision, sc.song.visionAt, false, sc.song.visionDur, !!sc.stepped);
           app.openLyrics();
         }
         if (sc.focus) window.setTimeout(() => window.dispatchEvent(new KeyboardEvent("keydown", { key: ".", metaKey: true })), 1500);

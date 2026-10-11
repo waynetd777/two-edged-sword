@@ -38,6 +38,8 @@ export interface SceneSong {
   /** One of the pictures behind the words (Visions), shown this far through (0–1). */
   vision?: string;
   visionAt?: number;
+  /** How many seconds it takes, instead of its own (a quicker pass for an animated screenshot). */
+  visionDur?: number;
 }
 export let sceneSong: SceneSong | null = null;
 export const setSceneSong = (s: SceneSong) => (sceneSong = s);

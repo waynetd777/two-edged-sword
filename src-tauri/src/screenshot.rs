@@ -92,8 +92,12 @@ pub fn start_snapshots(app: &AppHandle, tray_scene: bool) {
     // seconds apart, each to TES_SNAPSHOT with its number before the extension
     // (shot-007.tiff). Each waits for the one before: asked for faster than WebKit draws
     // them, they all come back the same. When each was taken goes in shot-times.txt.
+    // TES_SNAPSHOT_STEP: instead, the page's clock stands still and is moved on this many seconds
+    // before each frame (src/sceneClock.ts), so the frames are evenly spaced however slowly
+    // WebKit draws them.
     let frames = num("TES_SNAPSHOT_FRAMES", 1.0).max(1.0) as usize;
     let every = num("TES_SNAPSHOT_EVERY", 0.1);
+    let step = num("TES_SNAPSHOT_STEP", 0.0);
     let app = app.clone();
     std::thread::spawn(move || {
         std::thread::sleep(std::time::Duration::from_secs_f64(after));
@@ -104,8 +108,13 @@ pub fn start_snapshots(app: &AppHandle, tray_scene: bool) {
         let mut times = String::new();
         for i in 0..frames {
             let dest = if frames == 1 { out.clone() } else { out.with_file_name(format!("{stem}-{i:03}.{ext}")) };
-            let at = start.elapsed();
+            let at = if step > 0.0 { std::time::Duration::from_secs_f64(i as f64 * step) } else { start.elapsed() };
             if let Some(w) = app.get_webview_window(label) {
+                if step > 0.0 {
+                    let _ = w.eval(format!("window.__tesStep && window.__tesStep({})", step * 1000.0));
+                    // Time for React to show what the step changed before WebKit draws it.
+                    std::thread::sleep(std::time::Duration::from_millis(40));
+                }
                 let _ = snapshot(&w, &dest);
             }
             let given_up = std::time::Instant::now() + std::time::Duration::from_secs(5);
@@ -113,8 +122,10 @@ pub fn start_snapshots(app: &AppHandle, tray_scene: bool) {
                 std::thread::sleep(std::time::Duration::from_millis(5));
             }
             times.push_str(&format!("{:.3}\n", at.as_secs_f64()));
-            let next = at + std::time::Duration::from_secs_f64(every);
-            std::thread::sleep(next.saturating_sub(start.elapsed()));
+            if step == 0.0 {
+                let next = at + std::time::Duration::from_secs_f64(every);
+                std::thread::sleep(next.saturating_sub(start.elapsed()));
+            }
         }
         if frames > 1 {
             let _ = std::fs::write(out.with_file_name(format!("{stem}-times.txt")), times);

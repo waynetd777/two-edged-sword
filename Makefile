@@ -86,6 +86,7 @@ screenshots:
 site:
 	@for f in docs/images/*-dark.png; do cwebp -quiet -q 80 -m 6 "$$f" -o "site/img/$$(basename "$$f" -dark.png).webp"; done
 	@for f in docs/images/*-dark.webp; do cp "$$f" "site/img/$$(basename "$$f" -dark.webp).webp"; done
+	@for f in docs/images/*-dark.mp4; do cp "$$f" "site/img/$$(basename "$$f" -dark.mp4).mp4"; done
 	@cp src-tauri/icons/128x128@2x.png site/img/icon.png
 	@sips -Z 180 src-tauri/icons/128x128@2x.png --out site/img/icon-180.png >/dev/null
 
