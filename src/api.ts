@@ -3,6 +3,7 @@
 
 import { invoke } from "@tauri-apps/api/core";
 import { isDark } from "./dom";
+import type { UpdateShown } from "./Update";
 
 /** Screenshot mode (scene.ts) sets this: nothing the page changes is saved. */
 let readOnly = false;
@@ -245,6 +246,8 @@ export const api = {
   appVersion: () => invoke<[string, string]>("app_version"),
   /** The answer to an update's offer (updates.rs); installing restarts the app. */
   updateAnswer: (answer: "install" | "later" | "skip") => invoke<void>("update_answer", { answer }),
+  /** The update offer showing, with its download's progress, for a page that has just loaded. */
+  updateOffered: () => invoke<UpdateShown | null>("update_offered"),
   journalList: (dir: string) => (sceneJournal ? Promise.resolve(sceneJournal) : invoke<JournalEntry[]>("journal_list", { dir })),
   // With a scene's entries the stamp changes every time, so the journal is sure to reload onto them.
   journalStamp: (dir: string) => (sceneJournal ? Promise.resolve(`scene:${Date.now()}`) : invoke<string>("journal_stamp", { dir })),

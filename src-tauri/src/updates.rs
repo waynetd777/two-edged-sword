@@ -14,7 +14,8 @@
 //!
 //! The offer, the download's progress and what it has to say are shown in the main window
 //! (src/Update.tsx: the update-offer, update-progress and update-message events), which answers
-//! with update_answer. Native dialogs are left for when there is no main window.
+//! with update_answer. A window that loads while an offer or its download is showing (a reload)
+//! picks it up with update_offered. Native dialogs are left for when there is no main window.
 //!
 //! Before restarting it does what quitting does (crate::before_quit) and has the main window write
 //! its waiting saves, since AppHandle::restart doesn't go through Quit.
@@ -49,6 +50,8 @@ pub struct Updates {
     pending: Mutex<Option<Update>>,
     /// Offered in the main window, waiting for its answer.
     offered: Mutex<Option<Update>>,
+    /// What the main window's dialog shows of it, for a window that loads after it was sent.
+    showing: Mutex<Option<Shown>>,
     /// An offer is showing or an update is installing: no second offer meanwhile.
     asking: AtomicBool,
     busy: Busy,
@@ -64,6 +67,14 @@ struct Offer {
     notes: Option<String>,
     /// RFC 3339, from latest.json's pub_date.
     date: Option<String>,
+}
+
+/// The offer and, once it's being installed, the download's progress (update_offered).
+#[derive(Serialize, Clone)]
+pub struct Shown {
+    offer: Offer,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    progress: Option<Progress>,
 }
 
 /// The download's progress (update-progress): "downloading", then "installing", then "restarting".
@@ -137,7 +148,13 @@ pub fn add_to_menu(app: &AppHandle) -> tauri::Result<()> {
 
 /// Starts the background checks. Call once from setup, in the windowed app only.
 pub fn start(app: &AppHandle, busy: Busy) {
-    app.manage(Updates { pending: Mutex::new(None), offered: Mutex::new(None), asking: AtomicBool::new(false), busy });
+    app.manage(Updates {
+        pending: Mutex::new(None),
+        offered: Mutex::new(None),
+        showing: Mutex::new(None),
+        asking: AtomicBool::new(false),
+        busy,
+    });
     if cfg!(debug_assertions) {
         return;
     }
@@ -219,6 +236,8 @@ fn main_window(app: &AppHandle) -> Option<tauri::WebviewWindow> {
 async fn offer(app: &AppHandle, update: Update) {
     let Some(state) = app.try_state::<Updates>() else { return };
     if state.asking.swap(true, Ordering::SeqCst) {
+        // Already offered, or installing: the window that shows it is brought forward.
+        main_window(app);
         return;
     }
     let shown = Offer {
@@ -229,8 +248,12 @@ async fn offer(app: &AppHandle, update: Update) {
         date: update.raw_json["pub_date"].as_str().map(String::from),
     };
     *state.offered.lock().unwrap() = Some(update);
-    if main_window(app).is_some() && app.emit_to("main", "update-offer", &shown).is_ok() {
-        return;
+    if main_window(app).is_some() {
+        *state.showing.lock().unwrap() = Some(Shown { offer: shown.clone(), progress: None });
+        if app.emit_to("main", "update-offer", &shown).is_ok() {
+            return;
+        }
+        *state.showing.lock().unwrap() = None;
     }
     // No window to show it in: a native dialog instead.
     let Some(update) = state.offered.lock().unwrap().take() else { return };
@@ -259,6 +282,13 @@ async fn ask_natively(app: &AppHandle, shown: &Offer) -> Answer {
     }
 }
 
+/// The offer the main window's dialog shows, and its download's progress, for a window that has
+/// just loaded: one sent before it loaded is still waiting for an answer.
+#[tauri::command]
+pub fn update_offered(app: AppHandle) -> Option<Shown> {
+    app.try_state::<Updates>()?.showing.lock().unwrap().clone()
+}
+
 /// The main window's answer to update-offer; Esc or closing the dialog is Later.
 #[tauri::command]
 pub async fn update_answer(app: AppHandle, answer: Answer) {
@@ -278,7 +308,9 @@ async fn answered(app: &AppHandle, update: Update, answer: Answer) {
         Answer::Later => {}
     }
     // Here unless it restarted.
-    app.state::<Updates>().asking.store(false, Ordering::SeqCst);
+    let state = app.state::<Updates>();
+    *state.showing.lock().unwrap() = None;
+    state.asking.store(false, Ordering::SeqCst);
 }
 
 async fn install(app: &AppHandle, update: Update) {
@@ -291,8 +323,13 @@ async fn install(app: &AppHandle, update: Update) {
     // in, for anything typed while it downloaded.
     let _ = app.emit_to("main", "flush", ());
     let progress = |stage, got, total| {
-        let _ = app.emit_to("main", "update-progress", Progress { stage, got, total });
+        let p = Progress { stage, got, total };
+        if let Some(shown) = state.showing.lock().unwrap().as_mut() {
+            shown.progress = Some(p.clone());
+        }
+        let _ = app.emit_to("main", "update-progress", p);
     };
+    progress("downloading", 0, None);
     // A few times a second is enough for the bar.
     let (mut got, mut last) = (0u64, None::<Instant>);
     let done = update

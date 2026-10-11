@@ -768,7 +768,8 @@ pub fn run() {
             tray::set_tray,
             tray::tray_info,
             tray::tray_do,
-            updates::update_answer
+            updates::update_answer,
+            updates::update_offered
         ])
         .on_menu_event(|app, ev| {
             if ev.id() == help::MENU_ID {

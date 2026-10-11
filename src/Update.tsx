@@ -4,7 +4,8 @@
 // The update prompt (src-tauri/src/updates.rs sends it here): a new version with its notes, and
 // Install and Restart, Later or Skip This Version; then the download's progress until the app
 // restarts. Esc or a click outside is Later. The update check's other news (up to date, couldn't
-// check, the update will wait) shows in the same dialog with OK.
+// check, the update will wait) shows in the same dialog with OK. A page that loads while an offer
+// is up (a reload) asks for it again (update_offered).
 
 import { listen } from "@tauri-apps/api/event";
 import { useEffect, useState } from "react";
@@ -82,6 +83,11 @@ export function UpdateDialog() {
   const [shown, setShown] = useState<UpdateShown | null>(null);
   useEffect(() => {
     show = setShown;
+    // One sent before this page loaded is still waiting for an answer.
+    api
+      .updateOffered()
+      .then((u) => u && setShown((cur) => cur ?? u))
+      .catch(() => {});
     const offs = [
       listen<UpdateOffer>("update-offer", (e) => setShown({ offer: e.payload })),
       listen<UpdateProgress>("update-progress", (e) => setShown((s) => (s && "offer" in s ? { ...s, progress: e.payload } : s))),
