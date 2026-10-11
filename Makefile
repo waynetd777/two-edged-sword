@@ -60,9 +60,11 @@ app:
 	    || { echo "WARNING: app is not signed with $(SIGN_ID)"; exit 1; }; \
 	else echo "note: no signing.local, so the app is signed ad hoc"; fi
 
-## Pack the built app into the release DMG (src-tauri/target/release/bundle/dmg/), laid out like other Mac installers.
+## Pack the built app into the release DMG (src-tauri/target/release/bundle/dmg/), laid out like other Mac installers,
+## with the signed update package and latest.json the app's updater reads (tools/update_files.py).
 dmg:
 	@python3 tools/dmg/make_dmg.py
+	@python3 tools/update_files.py
 
 ## Build and replace /Applications/Two-edged Sword.app.
 install-app: app

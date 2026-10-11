@@ -19,6 +19,8 @@ For a Mac with Apple silicon (M1 or later) and macOS 13 or later.
 
 It opens normally after that. The first time you use some features, macOS asks for permission: see [First run](docs/features.md#first-run).
 
+The app checks for updates once a day and offers to install them; **Check for Updates…** in the app menu checks now.
+
 <a href="docs/images/index.md#the-readme"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/read-dark.png"><img alt="Reading 1 John 1 with the study pane open on the commentaries" src="docs/images/read-light.png"></picture></a>
 
 ## What it does

@@ -36,8 +36,15 @@ run `python3 tools/bump_version.py 1.1.0` first: `make app` then builds 1.1.1. C
 the release.
 
 To publish one: `make install-app`, `make dmg`, commit and push, then
-`gh release create v<version> src-tauri/target/release/bundle/dmg/Two-edged-Sword.dmg`. The README's
-download link points at the latest release's `Two-edged-Sword.dmg`, so keep that name.
+`gh release create v<version> src-tauri/target/release/bundle/dmg/Two-edged-Sword.dmg src-tauri/target/release/bundle/dmg/Two-edged-Sword.app.tar.gz src-tauri/target/release/bundle/dmg/latest.json`.
+The README's download link points at the latest release's `Two-edged-Sword.dmg`, so keep that name.
+
+`make dmg` also runs `tools/update_files.py`, which packs the app as `Two-edged-Sword.app.tar.gz`,
+signs it and writes `latest.json`. Installed copies read
+`releases/latest/download/latest.json` (`src-tauri/src/updates.rs`, `plugins.updater` in
+`tauri.conf.json`) and only install a package signed with the key in
+`~/.tauri/waynetd777-updater.key`. Keep that key backed up: without it no installed copy will
+accept another update. Updates are checked in release builds only, never in screenshot mode.
 `tools/dmg/make_dmg.py` draws the window's background from `tools/dmg/background.html` (the app's
 wordmark and fonts, rendered by WebKit) and has Finder lay out the icons, so the first run asks to
 let the terminal control Finder.
@@ -255,6 +262,7 @@ reference, and images inline as `data:` URLs.
 | `src/WebPage.tsx` | An online devotional framed in the reading column; `open_web` in `lib.rs` is its own window, and `web_frameable` checks (with curl) whether a site added by the user can be framed |
 | `src/tray.tsx`, `src/TrayWindow.tsx`, `src-tauri/src/tray.rs` | The menu-bar window (what it shows comes from the main window) and the daily reminder |
 | `src-tauri/src/login_item.rs`, `login_launch.rs` | Open at Login |
+| `src-tauri/src/updates.rs`, `tools/update_files.py` | Checking GitHub for a new release and installing it; the release's signed update files |
 | `src-tauri/src/tts.rs` | Speech through AVSpeechSynthesizer (WebKit's speech API hides downloaded voices) |
 | `src/Help.tsx`, `src/guides.ts`, `src-tauri/src/help.rs`, `tools/helpcheck.py` | The help drawer, the guides it shows, and the Help menu |
 | `src-tauri/src/assistant/` | Running Claude Code, Codex, Antigravity or Copilot for Ask; `mod.rs` holds the streaming they share |

@@ -472,7 +472,8 @@ export const useApp = () => {
 };
 
 // Saves waiting on their debounce, written at once when the window hides, loses focus or unloads
-// (closing only hides it, and Quit exits without warning the page).
+// (closing only hides it, and Quit exits without warning the page), or before the app restarts
+// into an update (the "flush" event, from updates.rs).
 const flushers = new Set<() => void>();
 const flushAll = () => flushers.forEach((f) => f());
 /** Adds a pending save to those written at once; returns its removal. */
@@ -487,6 +488,7 @@ window.addEventListener("blur", flushAll);
 document.addEventListener("visibilitychange", () => {
   if (document.visibilityState === "hidden") flushAll();
 });
+void listen("flush", flushAll);
 
 /** A JSON document in the store, loaded once and written back (debounced) on change. Nothing is
  *  written until the read has succeeded, so a failed read never overwrites the file with defaults;

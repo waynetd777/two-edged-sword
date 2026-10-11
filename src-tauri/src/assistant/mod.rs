@@ -147,6 +147,10 @@ impl Running {
             ch.retain(|(_, p)| *p != pid);
         }
     }
+    /// Whether any chat is being answered now.
+    pub fn any(&self) -> bool {
+        self.children.lock().is_ok_and(|ch| !ch.is_empty())
+    }
     /// On quit: nothing is left running once the app has gone.
     pub fn kill_all(&self) {
         if let Ok(ch) = self.children.lock() {

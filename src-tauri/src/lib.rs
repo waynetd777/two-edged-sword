@@ -24,6 +24,7 @@ mod store;
 mod study;
 mod tray;
 mod tts;
+mod updates;
 mod website;
 
 use library::{Kind, Library, ModuleInfo};
@@ -633,8 +634,28 @@ fn fit_on_screen(w: &tauri::WebviewWindow) {
 
 /// Quits from the menu bar, keeping the main window's size and place.
 fn quit(app: &AppHandle) {
-    let _ = app.save_window_state(STATE_FLAGS);
+    before_quit(app);
     app.exit(0)
+}
+
+/// What quitting does, which restarting into an update (updates.rs) skips: the main window's size
+/// and place kept, and no Ask left running. ⌘Q comes through RunEvent::Exit for the second.
+pub(crate) fn before_quit(app: &AppHandle) {
+    let _ = app.save_window_state(STATE_FLAGS);
+    app.state::<AppState>().running.kill_all();
+}
+
+/// Why an update can't be installed now (updates.rs): a restart would cut off an answer from Ask,
+/// or the search index's build, which starts over on the next launch.
+fn update_busy(app: &AppHandle) -> Option<String> {
+    let st = app.state::<AppState>();
+    if st.running.any() {
+        Some("Ask is still answering.".into())
+    } else if st.index.building.load(std::sync::atomic::Ordering::SeqCst) {
+        Some("The search index is still being built.".into())
+    } else {
+        None
+    }
 }
 
 pub(crate) fn show_main(app: &AppHandle) {
@@ -683,6 +704,7 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_notification::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .manage(state)
         .manage(tray::Tray::default())
         .invoke_handler(tauri::generate_handler![
@@ -754,6 +776,8 @@ pub fn run() {
                 website::open(app);
             } else if ev.id() == website::ABOUT_ID {
                 website::about(app);
+            } else if ev.id() == updates::MENU_ID {
+                updates::check_now(app);
             }
         })
         .setup(|app| {
@@ -775,6 +799,10 @@ pub fn run() {
             }
             help::add_to_menu(app.handle())?;
             website::add_to_menu(app.handle())?;
+            updates::add_to_menu(app.handle())?;
+            if scene().is_none() {
+                updates::start(app.handle(), update_busy);
+            }
             // The menu-bar icon and the window it opens; until the main window sends today's
             // reading, that window has its choices without the details.
             tray::build(app.handle())?;
@@ -837,9 +865,13 @@ pub fn run() {
                         });
                     }
                 }
-                // Closing the window hides it; the app stays in the menu bar.
+                // Closing the window hides it; the app stays in the menu bar. An update found in the
+                // background is offered when the window is next in front.
                 let w2 = w.clone();
                 w.on_window_event(move |ev| {
+                    if let tauri::WindowEvent::Focused(true) = ev {
+                        updates::focused(w2.app_handle());
+                    }
                     if let tauri::WindowEvent::CloseRequested { api, .. } = ev {
                         api.prevent_close();
                         let _ = w2.app_handle().save_window_state(STATE_FLAGS);

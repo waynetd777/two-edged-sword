@@ -29,6 +29,7 @@ tauri-plugin-window-state = "2"
 tauri-plugin-dialog = "2"
 tauri-plugin-opener = "2"
 tauri-plugin-notification = "2"
+tauri-plugin-updater = "2"
 # Ask ends a CLI and everything it started by signalling its process group.
 libc = "0.2"
 # AppKit and the rest: the app is macOS only (lib.rs refuses to build anywhere else).
