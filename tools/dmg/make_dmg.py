@@ -2,13 +2,14 @@
 # Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
 # SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 """Packs the release build into a DMG laid out like other Mac installers: the app on the left,
-an arrow to Applications on the right, on a background with the wordmark and a hint.
+an arrow to Applications on the right, on a background in the product page's look: its icon, name
+and a hint.
 
     python3 tools/dmg/make_dmg.py        # after make app; writes the DMG next to the .app bundle
 
 Finder lays out the window, so the first run asks to let the terminal control Finder.
 """
-import base64, os, shutil, subprocess, sys, tempfile, time
+import os, shutil, subprocess, sys, tempfile, time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -17,10 +18,6 @@ APP = ROOT / "src-tauri/target/release/bundle/macos/Two-edged Sword.app"
 OUT = ROOT / "src-tauri/target/release/bundle/dmg/Two-edged-Sword.dmg"
 VOLUME = "Two-edged Sword"
 W, H = 660, 400
-FONTS = [("Cinzel Decorative", 700, "@fontsource/cinzel-decorative/files/cinzel-decorative-latin-700-normal.woff2"),
-         ("Cinzel Decorative", 900, "@fontsource/cinzel-decorative/files/cinzel-decorative-latin-900-normal.woff2"),
-         ("EB Garamond", 400, "@fontsource/eb-garamond/files/eb-garamond-latin-400-normal.woff2"),
-         ("EB Garamond", 500, "@fontsource/eb-garamond/files/eb-garamond-latin-500-normal.woff2")]
 
 
 def run(*cmd, **kw):
@@ -29,13 +26,12 @@ def run(*cmd, **kw):
 
 def background(tmp: Path) -> Path:
     """background.tiff, at 1x and 2x so it's sharp on Retina screens."""
-    faces = "".join(f'@font-face {{ font-family: "{fam}"; font-weight: {wt}; src: url(data:font/woff2;base64,'
-                    f'{base64.b64encode((ROOT / "node_modules" / f).read_bytes()).decode()}) format("woff2"); }}\n'
-                    for fam, wt, f in FONTS)
-    wordmark = run("node", str(HERE / "wordmark.mjs"), cwd=ROOT)
-    html = (HERE / "background.html").read_text().replace("/*FONTS*/", faces).replace("<!--WORDMARK-->", wordmark)
     page = tmp / "background.html"
-    page.write_text(html)
+    shutil.copy(HERE / "background.html", page)
+    # The page uses the site's fonts and icon, at the same paths as in site/.
+    shutil.copytree(ROOT / "site/fonts", tmp / "fonts")
+    (tmp / "img").mkdir()
+    shutil.copy(ROOT / "site/img/icon-180.png", tmp / "img")
     pngs = []
     for scale in (1, 2):
         png = tmp / f"background@{scale}x.png"

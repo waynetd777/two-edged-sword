@@ -45,9 +45,9 @@ signs it and writes `latest.json`. Installed copies read
 `tauri.conf.json`) and only install a package signed with the key in
 `~/.tauri/waynetd777-updater.key`. Keep that key backed up: without it no installed copy will
 accept another update. Updates are checked in release builds only, never in screenshot mode.
-`tools/dmg/make_dmg.py` draws the window's background from `tools/dmg/background.html` (the app's
-wordmark and fonts, rendered by WebKit) and has Finder lay out the icons, so the first run asks to
-let the terminal control Finder.
+`tools/dmg/make_dmg.py` draws the window's background from `tools/dmg/background.html` (in the
+product page's look, with `site/`'s fonts and icon, rendered by WebKit) and has Finder lay out
+the icons, so the first run asks to let the terminal control Finder.
 
 ## Where things live
 

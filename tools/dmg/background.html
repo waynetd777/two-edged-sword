@@ -1,24 +1,48 @@
 <!doctype html>
-<!-- The DMG window's background, 660×400. make_dmg.py fills in the fonts and wordmark, and puts
-     the icons on it: the app centred at (165, 230), Applications at (495, 230). -->
+<!-- The DMG window's background, 660×400, in the product page's look (site/): its dark hero at the
+     top, with Hebrews 4:12 word by word and the icon and name, lightening to a mid blue-grey behind
+     the icons' names, which Finder writes dark or light with the system's appearance, so both read.
+     make_dmg.py copies the site's fonts and icon next to it and puts the icons on it: the app centred
+     at (165, 230), Applications at (495, 230). -->
 <meta charset="utf-8">
 <style>
-  /*FONTS*/
+  @font-face { font-family: "Atkinson Hyperlegible Next"; font-weight: 200 800; src: url(fonts/atkinson-hyperlegible-next.woff2) format("woff2"); }
+  @font-face { font-family: "EB Garamond"; src: url(fonts/eb-garamond-greek.woff2) format("woff2"); unicode-range: U+0370-03FF; }
+  @font-face { font-family: "EB Garamond"; src: url(fonts/eb-garamond-greek-ext.woff2) format("woff2"); unicode-range: U+1F00-1FFF; }
   html, body { margin: 0; width: 660px; height: 400px; overflow: hidden; }
-  body { background: linear-gradient(#fbf9f4, #efe9dd); color: #0b1f3a; font-family: "EB Garamond", Georgia, serif; position: relative; }
-  .wordmark { position: absolute; left: 50%; top: 26px; width: 216px; transform: translateX(-50%); overflow: visible;
-    --wm-bg: #0b1f3a; --wm-disc: #26354a; --wm-1: #fff6d8; --wm-2: #efcb76; --wm-3: #8f631c; --wm-4: #f7dc95; --wm-5: #b5832b; --wm-edge: #6b4a17; --wm-shadow: rgba(0, 0, 0, 0.7); }
-  .wordmark .medal { --sw-light: #efd9a4; --sw-dark: #c6974a; --sw-fuller: #8a6630; --sw-gold: #d8b160; --sw-grip: #6e4526; --sw-wrap: #8e5d35; --sw-pin: #b48a3e; }
-  .tag { position: absolute; top: 107px; width: 100%; text-align: center; font-size: 16px; color: #3d4a5c; }
-  .arrow { position: absolute; left: 250px; top: 206px; width: 160px; height: 48px; }
-  .hint { position: absolute; top: 334px; width: 100%; text-align: center; font-size: 16px; color: #3d4a5c; }
-  .hint b { font-weight: 500; color: #0b1f3a; }
+  body { position: relative; background: radial-gradient(ellipse 50% 30% at 50% 100%, rgba(255, 255, 255, 0.12), transparent),
+    linear-gradient(#07090c 140px, #1c2840 205px, #4f6079 260px, #74849b 300px, #8e9db1 345px, #a3b0c1);
+    color: #0d1520;
+    font-family: "Atkinson Hyperlegible Next", -apple-system, sans-serif; -webkit-font-smoothing: antialiased; }
+  .hero { position: absolute; inset: 0 0 auto; height: 158px; background:
+      radial-gradient(ellipse 40% 60% at 50% 30%, rgba(198, 151, 74, 0.1), transparent 70%); text-align: center; color: #e6edf3; }
+  .ref { margin-top: 16px; font-size: 10px; letter-spacing: 0.06em; color: #5b6470; }
+  .interlinear { display: flex; justify-content: center; gap: 18px; margin-top: 9px; }
+  .interlinear span { display: flex; flex-direction: column; align-items: center; line-height: 1; }
+  .interlinear b { font: 400 21px "EB Garamond", Georgia, serif; }
+  .interlinear i { font-style: normal; font-size: 9.5px; color: #9aa4af; margin-top: 5px; letter-spacing: 0.02em; }
+  .interlinear .gold b, .interlinear .gold i { color: #c6974a; }
+  .name { display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 17px;
+    font-size: 36px; line-height: 1; letter-spacing: -0.035em; }
+  .name img { width: 38px; height: 38px; border-radius: 9px; }
+  .arrow { position: absolute; left: 262px; top: 210px; width: 136px; height: 40px; }
+  .hint { position: absolute; top: 340px; width: 100%; text-align: center; font-size: 14.5px; color: #1c2635; }
+  .hint b { font-weight: 700; color: #0d1520; }
 </style>
 <body>
-  <!--WORDMARK-->
-  <div class="tag">A Bible study app for reading Scripture beside commentaries, dictionaries and your own notes</div>
-  <svg class="arrow" viewBox="0 0 160 48" fill="none" stroke="#b5832b" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M8 24 H146" /><path d="M126 8 L148 24 L126 40" />
+  <div class="hero">
+    <div class="ref">HEBREWS 4:12</div>
+    <div class="interlinear">
+      <span><b>τομώτερος</b><i>sharper</i></span>
+      <span><b>ὑπὲρ</b><i>than</i></span>
+      <span><b>πᾶσαν</b><i>any</i></span>
+      <span><b>μάχαιραν</b><i>sword</i></span>
+      <span class="gold"><b>δίστομον</b><i>two-edged</i></span>
+    </div>
+    <div class="name"><img src="img/icon-180.png" alt="">Two-edged Sword</div>
+  </div>
+  <svg class="arrow" viewBox="0 0 136 40" fill="none" stroke="#efcb76" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M6 20 H126" /><path d="M110 7 L128 20 L110 33" />
   </svg>
   <div class="hint">Drag <b>Two-edged Sword</b> onto <b>Applications</b> to install it</div>
 </body>
