@@ -37,8 +37,9 @@ Something refused by mistake can be allowed in System Settings › Privacy & Sec
 ## Updates
 
 - The app checks for a new version once a day, and soon after it opens.
-- When there is one, it asks the next time its window is in front: **Install and Restart**,
-  **Later** (asked again the next day) or **Skip This Version**.
+- When there is one, it asks the next time its window is in front, with what's new in it:
+  **Install and Restart**, **Later** (asked again the next day) or **Skip This Version**. Esc is Later.
+- Installing shows the download's progress, saves your work and restarts the app.
 - **Check for Updates…**, in the app menu, checks now.
 - An update waits while Ask is answering or the search index is being built.
 

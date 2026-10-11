@@ -767,7 +767,8 @@ pub fn run() {
             tts::tts_pause,
             tray::set_tray,
             tray::tray_info,
-            tray::tray_do
+            tray::tray_do,
+            updates::update_answer
         ])
         .on_menu_event(|app, ev| {
             if ev.id() == help::MENU_ID {

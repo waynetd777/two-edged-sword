@@ -305,15 +305,18 @@ export function Dialog({
   width,
   height,
   label,
+  dismiss = true,
 }: {
   onClose: () => void;
   children: ReactNode;
   width: number;
   height?: number;
   label: string;
+  /** False while it mustn't close (an update installing): Esc and clicks outside do nothing. */
+  dismiss?: boolean;
 }) {
   const ref = useRef<HTMLDivElement>(null);
-  useDismiss(ref, onClose);
+  useDismiss(ref, onClose, dismiss);
   return (
     <div className="scrim">
       <div ref={ref} role="dialog" aria-label={label} className="dialog" style={{ width, height }}>
@@ -350,6 +353,15 @@ export function Seg<T extends string | number>({
       ))}
     </div>
   );
+}
+
+/** A file size the way Finder shows it (decimal units). */
+export function fmtSize(b: number) {
+  return b >= 1e9
+    ? `${(b / 1e9).toFixed(1)} GB`
+    : b >= 1e6
+      ? `${(b / 1e6).toFixed(b >= 1e8 ? 0 : 1)} MB`
+      : `${Math.max(1, Math.round(b / 1e3))} KB`;
 }
 
 /** The books a Bible has and how many chapters each (sizes.ts). */

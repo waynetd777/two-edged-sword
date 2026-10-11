@@ -10,16 +10,8 @@ import { Icon } from "./icons";
 import { BibleSelect, Topbar } from "./Shell";
 import { useApp } from "./state";
 import { orderModules } from "./StudyPane";
-import { ClearButton, Popover, Switch } from "./ui";
+import { ClearButton, fmtSize, Popover, Switch } from "./ui";
 
-/** A file size the way Finder shows it (decimal units). */
-function fmtSize(b: number) {
-  return b >= 1e9
-    ? `${(b / 1e9).toFixed(1)} GB`
-    : b >= 1e6
-      ? `${(b / 1e6).toFixed(b >= 1e8 ? 0 : 1)} MB`
-      : `${Math.max(1, Math.round(b / 1e3))} KB`;
-}
 const total = (ms: ModuleInfo[]) => fmtSize(ms.reduce((t, m) => t + (m.size ?? 0), 0));
 
 /** Whether a module matches the library filter: every word typed is in its title, abbreviation or file name. */

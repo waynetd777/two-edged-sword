@@ -243,6 +243,8 @@ export const api = {
   journalDefaultDir: () => invoke<string>("journal_default_dir"),
   /** [version, build number]: "1.0.3", "20260927.142514" ("dev" outside a release build). */
   appVersion: () => invoke<[string, string]>("app_version"),
+  /** The answer to an update's offer (updates.rs); installing restarts the app. */
+  updateAnswer: (answer: "install" | "later" | "skip") => invoke<void>("update_answer", { answer }),
   journalList: (dir: string) => (sceneJournal ? Promise.resolve(sceneJournal) : invoke<JournalEntry[]>("journal_list", { dir })),
   // With a scene's entries the stamp changes every time, so the journal is sure to reload onto them.
   journalStamp: (dir: string) => (sceneJournal ? Promise.resolve(`scene:${Date.now()}`) : invoke<string>("journal_stamp", { dir })),

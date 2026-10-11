@@ -16,6 +16,7 @@ import { SceneSong, setSceneSong } from "./lyrics";
 import { setSceneVision } from "./Visions";
 import { installSceneClock } from "./sceneClock";
 import { Picked, setSceneChapterSongs } from "./worship";
+import { setSceneUpdate, UpdateShown } from "./Update";
 import { today as startOfToday, ymd } from "./plans";
 
 interface Scene {
@@ -65,6 +66,8 @@ interface Scene {
   unread?: boolean;
   /** Focus mode, as ⌘. turns it on, once the page has settled. */
   focus?: boolean;
+  /** The update prompt, with this offer (and download progress) or message, instead of a real update. */
+  update?: UpdateShown;
   /** Its frames are taken on a stepped clock (sceneClock.ts): the song's picture waits for them. */
   stepped?: boolean;
 }
@@ -194,6 +197,10 @@ export function runScene(app: ReturnType<typeof useApp>, still: (s: Partial<Play
           app.openLyrics();
         }
         if (sc.focus) window.setTimeout(() => window.dispatchEvent(new KeyboardEvent("keydown", { key: ".", metaKey: true })), 1500);
+        if (sc.update) {
+          const u = sc.update;
+          window.setTimeout(() => setSceneUpdate(u), 1500);
+        }
         if (sc.pending) {
           const x = sc.pending;
           window.setTimeout(() => app.setPending(x), 1500);

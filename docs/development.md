@@ -262,7 +262,7 @@ reference, and images inline as `data:` URLs.
 | `src/WebPage.tsx` | An online devotional framed in the reading column; `open_web` in `lib.rs` is its own window, and `web_frameable` checks (with curl) whether a site added by the user can be framed |
 | `src/tray.tsx`, `src/TrayWindow.tsx`, `src-tauri/src/tray.rs` | The menu-bar window (what it shows comes from the main window) and the daily reminder |
 | `src-tauri/src/login_item.rs`, `login_launch.rs` | Open at Login |
-| `src-tauri/src/updates.rs`, `tools/update_files.py` | Checking GitHub for a new release and installing it; the release's signed update files |
+| `src-tauri/src/updates.rs`, `src/Update.tsx`, `tools/update_files.py` | Checking GitHub for a new release and installing it; the prompt for it in the main window; the release's signed update files |
 | `src-tauri/src/tts.rs` | Speech through AVSpeechSynthesizer (WebKit's speech API hides downloaded voices) |
 | `src/Help.tsx`, `src/guides.ts`, `src-tauri/src/help.rs`, `tools/helpcheck.py` | The help drawer, the guides it shows, and the Help menu |
 | `src-tauri/src/assistant/` | Running Claude Code, Codex, Antigravity or Copilot for Ask; `mod.rs` holds the streaming they share |

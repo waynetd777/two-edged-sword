@@ -12,13 +12,17 @@
 //! never pops up over another app. It offers Install and Restart, Later (asked again at the next
 //! day's check) or Skip This Version. Release builds only, and never in screenshot mode.
 //!
+//! The offer, the download's progress and what it has to say are shown in the main window
+//! (src/Update.tsx: the update-offer, update-progress and update-message events), which answers
+//! with update_answer. Native dialogs are left for when there is no main window.
+//!
 //! Before restarting it does what quitting does (crate::before_quit) and has the main window write
 //! its waiting saves, since AppHandle::restart doesn't go through Quit.
 
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Mutex;
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 use serde::{Deserialize, Serialize};
 use tauri::menu::{MenuItem, MenuItemKind};
@@ -41,9 +45,47 @@ const SKIP: &str = "Skip This Version";
 pub type Busy = fn(&AppHandle) -> Option<String>;
 
 pub struct Updates {
+    /// Found in the background, waiting for the main window to be in front.
     pending: Mutex<Option<Update>>,
+    /// Offered in the main window, waiting for its answer.
+    offered: Mutex<Option<Update>>,
+    /// An offer is showing or an update is installing: no second offer meanwhile.
     asking: AtomicBool,
     busy: Busy,
+}
+
+/// What the main window shows of an update (update-offer).
+#[derive(Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
+struct Offer {
+    name: String,
+    version: String,
+    current: String,
+    notes: Option<String>,
+    /// RFC 3339, from latest.json's pub_date.
+    date: Option<String>,
+}
+
+/// The download's progress (update-progress): "downloading", then "installing", then "restarting".
+#[derive(Serialize, Clone)]
+struct Progress {
+    stage: &'static str,
+    got: u64,
+    total: Option<u64>,
+}
+
+#[derive(Serialize, Clone)]
+struct Message<'a> {
+    title: &'a str,
+    text: &'a str,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum Answer {
+    Install,
+    Later,
+    Skip,
 }
 
 #[derive(Default, Serialize, Deserialize)]
@@ -95,7 +137,7 @@ pub fn add_to_menu(app: &AppHandle) -> tauri::Result<()> {
 
 /// Starts the background checks. Call once from setup, in the windowed app only.
 pub fn start(app: &AppHandle, busy: Busy) {
-    app.manage(Updates { pending: Mutex::new(None), asking: AtomicBool::new(false), busy });
+    app.manage(Updates { pending: Mutex::new(None), offered: Mutex::new(None), asking: AtomicBool::new(false), busy });
     if cfg!(debug_assertions) {
         return;
     }
@@ -164,35 +206,79 @@ async fn check(app: &AppHandle, asked: bool) {
     }
 }
 
+/// The main window, brought in front if it isn't, or None when there is none to show things in.
+fn main_window(app: &AppHandle) -> Option<tauri::WebviewWindow> {
+    let w = app.get_webview_window("main")?;
+    if !w.is_focused().unwrap_or(false) {
+        let app = app.clone();
+        let _ = app.clone().run_on_main_thread(move || crate::show_main(&app));
+    }
+    Some(w)
+}
+
 async fn offer(app: &AppHandle, update: Update) {
     let Some(state) = app.try_state::<Updates>() else { return };
     if state.asking.swap(true, Ordering::SeqCst) {
         return;
     }
-    let name = app_name(app);
-    let mut text = format!("{name} {} is available. You have {}.", update.version, update.current_version);
-    if let Some(notes) = update.body.as_deref().map(str::trim).filter(|n| !n.is_empty()) {
+    let shown = Offer {
+        name: app_name(app),
+        version: update.version.clone(),
+        current: update.current_version.clone(),
+        notes: update.body.as_deref().map(str::trim).filter(|n| !n.is_empty()).map(String::from),
+        date: update.raw_json["pub_date"].as_str().map(String::from),
+    };
+    *state.offered.lock().unwrap() = Some(update);
+    if main_window(app).is_some() && app.emit_to("main", "update-offer", &shown).is_ok() {
+        return;
+    }
+    // No window to show it in: a native dialog instead.
+    let Some(update) = state.offered.lock().unwrap().take() else { return };
+    let answer = ask_natively(app, &shown).await;
+    answered(app, update, answer).await
+}
+
+async fn ask_natively(app: &AppHandle, shown: &Offer) -> Answer {
+    let mut text = format!("{} {} is available. You have {}.", shown.name, shown.version, shown.current);
+    if let Some(notes) = &shown.notes {
         text.push_str("\n\n");
         text.push_str(notes);
     }
     let dialog = app
         .dialog()
         .message(text)
-        .title(format!("A new version of {name} is available"))
+        .title(format!("A new version of {} is available", shown.name))
         .buttons(MessageDialogButtons::YesNoCancelCustom(INSTALL.into(), LATER.into(), SKIP.into()));
     let choice =
         tauri::async_runtime::spawn_blocking(move || dialog.blocking_show_with_result()).await.unwrap_or(MessageDialogResult::Cancel);
-    state.asking.store(false, Ordering::SeqCst);
     // Custom buttons come back as their labels; anything else (Esc, closed) is Later.
     match choice {
-        MessageDialogResult::Custom(c) if c == INSTALL => install(app, update).await,
-        MessageDialogResult::Custom(c) if c == SKIP => {
+        MessageDialogResult::Custom(c) if c == INSTALL => Answer::Install,
+        MessageDialogResult::Custom(c) if c == SKIP => Answer::Skip,
+        _ => Answer::Later,
+    }
+}
+
+/// The main window's answer to update-offer; Esc or closing the dialog is Later.
+#[tauri::command]
+pub async fn update_answer(app: AppHandle, answer: Answer) {
+    let Some(state) = app.try_state::<Updates>() else { return };
+    let Some(update) = state.offered.lock().unwrap().take() else { return };
+    answered(&app, update, answer).await;
+}
+
+async fn answered(app: &AppHandle, update: Update, answer: Answer) {
+    match answer {
+        Answer::Install => install(app, update).await,
+        Answer::Skip => {
             let mut saved = load();
             saved.skipped = Some(update.version.clone());
             save(&saved);
         }
-        _ => {}
+        Answer::Later => {}
     }
+    // Here unless it restarted.
+    app.state::<Updates>().asking.store(false, Ordering::SeqCst);
 }
 
 async fn install(app: &AppHandle, update: Update) {
@@ -204,8 +290,26 @@ async fn install(app: &AppHandle, update: Update) {
     // Saves the page is holding back are written now (src/state.tsx), and again once the update is
     // in, for anything typed while it downloaded.
     let _ = app.emit_to("main", "flush", ());
-    match update.download_and_install(|_, _| {}, || {}).await {
+    let progress = |stage, got, total| {
+        let _ = app.emit_to("main", "update-progress", Progress { stage, got, total });
+    };
+    // A few times a second is enough for the bar.
+    let (mut got, mut last) = (0u64, None::<Instant>);
+    let done = update
+        .download_and_install(
+            |n, total| {
+                got += n as u64;
+                if last.is_none_or(|t| t.elapsed() >= Duration::from_millis(100)) || Some(got) == total {
+                    last = Some(Instant::now());
+                    progress("downloading", got, total);
+                }
+            },
+            || progress("installing", 0, None),
+        )
+        .await;
+    match done {
         Ok(()) => {
+            progress("restarting", 0, None);
             let _ = app.emit_to("main", "flush", ());
             crate::before_quit(app);
             std::thread::sleep(Duration::from_millis(500));
@@ -216,6 +320,9 @@ async fn install(app: &AppHandle, update: Update) {
 }
 
 async fn tell(app: &AppHandle, title: &str, text: &str) {
+    if main_window(app).is_some() && app.emit_to("main", "update-message", Message { title, text }).is_ok() {
+        return;
+    }
     let dialog = app.dialog().message(text).title(title).kind(MessageDialogKind::Info);
     let _ = tauri::async_runtime::spawn_blocking(move || dialog.blocking_show()).await;
 }

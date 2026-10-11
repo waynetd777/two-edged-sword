@@ -26,6 +26,7 @@ import { useKeepAwake } from "./awake";
 import { hideSplash } from "./splash";
 import { useTray } from "./tray";
 import { Tooltips, WordHoverBox } from "./ui";
+import { UpdateDialog } from "./Update";
 
 function Screens() {
   const app = useApp();
@@ -176,6 +177,7 @@ function Screens() {
       <Tooltips />
       <WordHoverBox />
       <QuietTime focus={focus && screen === "read"} />
+      <UpdateDialog />
     </div>
   );
 }
