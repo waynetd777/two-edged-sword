@@ -724,9 +724,12 @@ footer {
   color: var(--faint);
   font-size: 14px;
   line-height: 1.6;
+  text-align: center;
 }
 footer p {
   max-width: 720px;
+  margin-left: auto;
+  margin-right: auto;
 }
 footer a {
   color: var(--muted);
@@ -738,6 +741,7 @@ footer .links {
   display: flex;
   gap: 22px;
   flex-wrap: wrap;
+  justify-content: center;
   margin-top: 22px;
 }
 footer .small {
