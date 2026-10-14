@@ -133,6 +133,7 @@ export function LyricsPage({ focus, setFocus }: { focus: boolean; setFocus: (f: 
   }
   const lit = rest?.after === cur ? -1 : cur;
   const scroller = useRef<HTMLElement>(null);
+  const heading = useRef<HTMLDivElement>(null);
   const target = rest ? `[data-rest]` : lit >= 0 ? `[data-line="${lit}"]` : null;
   useEffect(() => {
     if (target) scrollToThird(scroller.current?.querySelector(target));
@@ -262,12 +263,16 @@ export function LyricsPage({ focus, setFocus }: { focus: boolean; setFocus: (f: 
               song={[name, ...(lyrics?.lines.map((l) => l.text) ?? [])].join("\n")}
               verses={verses}
               flames={lyrics === null}
+              ceiling={() => {
+                const el = heading.current;
+                return el ? el.getBoundingClientRect().bottom - el.parentElement!.getBoundingClientRect().top : 0;
+              }}
             />
           </div>
         )}
         {focus && <ReadingColumnTopbar focus setFocus={setFocus} tools={tools} />}
         {/* The song's heading stays put while its words scroll under it. */}
-        <div style={{ flexShrink: 0, padding: focus ? "18px 10% 14px" : "18px 40px 14px 36px", textAlign: focus ? "center" : undefined }}>
+        <div ref={heading} style={{ flexShrink: 0, padding: focus ? "18px 10% 14px" : "18px 40px 14px 36px", textAlign: focus ? "center" : undefined }}>
           <div style={{ display: "flex", alignItems: "center", gap: 16, justifyContent: focus ? "center" : undefined }}>
             {artUrl && <img className="lyrics-cover" src={artUrl} alt="" />}
             <div>

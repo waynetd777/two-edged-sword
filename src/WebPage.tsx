@@ -236,7 +236,7 @@ export function WebPage({ focus, setFocus }: { focus: boolean; setFocus: (f: boo
             title={doc.title}
             onLoad={() => {
               setLoaded(`${url}#${reload}`);
-              post({ zoom, pick: picking, colors: readingColors(invert, dark), invert, follow, start: start() });
+              post({ zoom, pick: picking, colors: readingColors(invert, dark), invert, follow, start: start(), still: !!site?.still });
             }}
             style={{
               flex: "1 1 auto",

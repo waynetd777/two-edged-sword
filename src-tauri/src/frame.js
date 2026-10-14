@@ -30,12 +30,16 @@
   };
   const seen = (el) =>
     el.checkVisibility ? el.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true }) : el.getClientRects().length > 0;
+  // A button that is only a Bible reference ("Romans 15:5-13", opening the passage) is read, as a
+  // reference link is: it's the day's scripture, not a control.
+  const REF = /^(\d\s*)?\p{L}[\p{L}. ]*\s\d+([:.]\d+)?([-–]\d+([:.]\d+)?)?$/u;
+  const isRef = (el) => el.tagName === "BUTTON" && REF.test((el.textContent || "").trim());
   // A paragraph: the box holding it and its text nodes, in order.
   const paras = (root) => {
     const out = [];
     let cur = null;
     const walk = document.createTreeWalker(root, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT, {
-      acceptNode: (n) => (n.nodeType === 1 && n.matches(SKIP) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT),
+      acceptNode: (n) => (n.nodeType === 1 && n.matches(SKIP) && !isRef(n) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT),
     });
     for (let n = walk.nextNode(); n; n = walk.nextNode()) {
       if (n.nodeType === 1) {
@@ -55,6 +59,8 @@
     return out.filter((p) => {
       const t = words(p);
       if (!/\p{L}{2}/u.test(t)) return false;
+      // The label of the site's own audio ("Listen to Today's Devotion"): not said while reading aloud.
+      if (/^listen\b/i.test(t) && t.length < 60) return false;
       const linked = p.nodes.filter((n) => n.parentElement.closest("a")).reduce((k, n) => k + n.data.trim().length, 0);
       // A Bible reference under a verse is a link, but is read.
       return linked < t.replace(/\s/g, "").length * 0.6 || t.length > 120 || /\d+[:.]\d+/.test(t);
@@ -208,12 +214,24 @@
     return true;
   };
   let shown = -1;
+  // A site whose opening fades as the page scrolls (OnlineDevotional.still): while the paragraphs
+  // read are wholly in view, from where reading began, the page is left where it is.
+  let still = false,
+    holding = false;
+  const inView = (p) => {
+    const g = document.createRange();
+    g.setStartBefore(p.nodes[0]);
+    g.setEndAfter(p.nodes[p.nodes.length - 1]);
+    const r = g.getBoundingClientRect();
+    return r.top >= 0 && r.bottom <= innerHeight;
+  };
   window.addEventListener("message", (e) => {
     const m = e.data;
     if (e.source !== window.parent || !APP.includes(e.origin) || !m || m.tes !== true) return;
     app = e.origin;
     if (m.zoom) document.documentElement.style.zoom = String(m.zoom);
     if (m.colors) style.textContent = css(m.colors);
+    if ("still" in m) still = !!m.still;
     if ("invert" in m) darken(!!m.invert);
     // Following a link to the day's page comes first; reading starts there.
     if (!(m.follow && go(m.follow)) && m.start) startAt(m.start);
@@ -236,7 +254,10 @@
       attach();
       if (m.para !== shown) {
         clear();
-        third(b);
+        if (!(holding && inView(b))) {
+          holding = false;
+          third(b);
+        }
         shown = m.para;
       }
       // As in the reader: the paragraph is tinted only when words aren't highlighted.
@@ -275,15 +296,17 @@
     const stop = all.findIndex((p, k) => k > i && outside(p.el.closest(STOP)));
     read = all.slice(i, stop < 0 ? undefined : stop).filter((p) => inPart(p) && !outside(p.el.closest(SKIP_AD)));
     shown = -1;
+    holding = still;
     const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
     for (const p of read) p.text = words(p);
     tell({ picked: read.map((p) => esc(p.text)), auto });
   };
-  // A page the app knows: reading starts by itself at `start`, once the page has made it.
+  // A page the app knows: reading starts by itself at `start`, once the page has made it. Not while
+  // the page is still arriving: its heading would be there, but not the text after it.
   const startAt = (sel) => {
     const until = Date.now() + 15000;
     const look = () => {
-      const el = document.querySelector(sel);
+      const el = document.readyState !== "loading" && document.querySelector(sel);
       if (el && (el.textContent || "").trim()) readFrom(el, true);
       else if (Date.now() < until) setTimeout(look, 250);
       else tell({ cancel: true, auto: true });

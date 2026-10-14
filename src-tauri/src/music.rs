@@ -60,13 +60,18 @@ fn jxa(script: &str, arg: &str, limit: Duration) -> Result<String, String> {
     Err(format!("Music: {}", err.trim()))
 }
 
-/// Every song in the library (not videos, podcasts or audiobooks).
+/// Every song in the library that Music can play (not videos, podcasts or audiobooks; not a song
+/// Apple Music no longer has, or one unticked, which Music skips).
 pub fn tracks() -> Result<Vec<Track>, String> {
     let js = r#"function run(argv) {
         const t = Application("Music").libraryPlaylists[0].tracks;
-        const [ids, names, artists, genres, kinds] = [t.persistentID(), t.name(), t.artist(), t.genre(), t.mediaKind()];
+        const [ids, names, artists, genres, kinds, on] = [t.persistentID(), t.name(), t.artist(), t.genre(), t.mediaKind(), t.enabled()];
+        let cloud = [];
+        try { cloud = t.cloudStatus(); } catch (e) {}
+        const gone = (c) => c === "no longer available" || c === "removed";
         const out = [];
-        for (let i = 0; i < ids.length; i++) if (kinds[i] === "song") out.push([ids[i], names[i], artists[i] || "", genres[i] || ""]);
+        for (let i = 0; i < ids.length; i++)
+            if (kinds[i] === "song" && on[i] && !gone(cloud[i])) out.push([ids[i], names[i], artists[i] || "", genres[i] || ""]);
         return JSON.stringify(out);
     }"#;
     let rows: Vec<(String, String, String, String)> = serde_json::from_str(&jxa(js, "", SLOW)?).map_err(|e| e.to_string())?;

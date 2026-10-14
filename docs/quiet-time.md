@@ -27,6 +27,7 @@ library, or Our Daily Bread and Heartlight online.
   its page is inverted to look dark, with its pictures as they should be. **Open in window** shows
   it in a window of its own.
 - Our Daily Bread opens at today's devotion: the app follows the link to it from the site's list.
+  Its page stays still while its opening verse is read, then scrolls with the reading.
 - With audio, Our Daily Bread and Heartlight are read aloud by themselves once their page has
   loaded, from the top of the day's reading, as the Bible is. Other online devotionals wait for
   you to click **Listen**.
@@ -60,6 +61,7 @@ start by themselves after a countdown that leaves time to read the card.
   their own number of songs.
 - With both on, different songs play after the reading.
 - A song Quiet time has played isn't chosen again for 14 days.
+- Songs Music can't play aren't chosen: ones Apple Music no longer has, and ones unticked in Music.
 
 While the songs play, their words show in the reading column, and the Quiet time bar moves up
 into the top bar. The song's name, cover and why it was chosen stay at the top while the words

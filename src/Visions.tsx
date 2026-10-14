@@ -203,6 +203,7 @@ export function Visions({
   song,
   verses,
   flames,
+  ceiling,
 }: {
   bpm: number;
   playing: boolean;
@@ -217,6 +218,8 @@ export function Visions({
   verses?: Map<string, Verse>;
   /** Flames along the foot of the page (a song without words): verses keep above them. */
   flames?: boolean;
+  /** How far down the page what's at its top reaches (the song's heading): verses keep below it. */
+  ceiling?: () => number;
 }) {
   const colours = useRef({ warm: WARM, cool: COOL });
   useEffect(() => {
@@ -228,7 +231,7 @@ export function Visions({
       dead = true;
     };
   }, [art]);
-  const canvas = useCanvasLoop({ bpm, playing, time, dark, words, song, verses, flames }, ({ canvas: c, ctx, live, still }) => {
+  const canvas = useCanvasLoop({ bpm, playing, time, dark, words, song, verses, flames, ceiling }, ({ canvas: c, ctx, live, still }) => {
     const dots = new Map<string, HTMLCanvasElement>();
     const dotOf = (rgb: RGB) => {
       const key = rgb.join(",");
@@ -421,6 +424,7 @@ export function Visions({
           verse: verses?.get(a.v.name),
           span: a.span,
           floor: flames ? h - FLAME_HEIGHT : h - 16,
+          ceiling: (live.current.ceiling?.() ?? 0) + 16,
         };
         ctx.save();
         try {

@@ -28,6 +28,8 @@ export interface Frame {
   verse?: Verse;
   /** How far down a verse may come: the page's foot, or above the flames when there are no words. */
   floor: number;
+  /** How high a verse may go: below the song's heading at the top of the page. */
+  ceiling: number;
   /** The stretch of the page the picture stands in (its first `room.place`), which its verse keeps within. */
   span?: [number, number];
 }
@@ -205,7 +207,7 @@ export function verse(f: Frame, b: Box) {
   let x = Math.max(s0 + wide / 2, Math.min(s1 - wide / 2, b.x)),
     top: number;
   if (b.bottom + gap + high <= f.floor) top = b.bottom + gap;
-  else if (b.top - gap - high >= 16) top = b.top - gap - high;
+  else if (b.top - gap - high >= f.ceiling) top = b.top - gap - high;
   else {
     // Beside it, on the side with more room, low on the page; or, with no room there either, as
     // low as it can go.
@@ -215,8 +217,8 @@ export function verse(f: Frame, b: Box) {
     if (room >= size * 8) {
       ({ lines, wide, high } = lay(Math.min(verseWidth(f.w, f.h), room)));
       x = left > right ? b.x - b.width / 2 - gap - wide / 2 : b.x + b.width / 2 + gap + wide / 2;
-      top = Math.min(f.h * 0.6, f.floor - high);
-    } else top = Math.max(16, Math.min(b.bottom + gap, f.floor - high));
+      top = Math.max(f.ceiling, Math.min(f.h * 0.6, f.floor - high));
+    } else top = Math.max(f.ceiling, Math.min(b.bottom + gap, f.floor - high));
   }
   ctx.textAlign = "center";
   ctx.textBaseline = "top";

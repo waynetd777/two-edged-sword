@@ -336,6 +336,9 @@ export interface OnlineDevotional {
   /** Where on the day's page its reading starts (a CSS selector): known, so a Quiet time with
    *  audio reads it aloud by itself, as it does the Bible. */
   start?: string;
+  /** The page isn't scrolled while what was in view when reading began is read: for a page whose
+   *  opening fades as it scrolls (Our Daily Bread's verse, over its picture). */
+  still?: boolean;
   /** Added by the user (a WebDevotional). */
   own?: boolean;
 }
@@ -380,6 +383,7 @@ export const ONLINE_DEVOTIONALS: OnlineDevotional[] = [
     // Its list, newest first: today's is the first link to one.
     follow: "/en/devotionals/devotional-category/[a-z0-9-]+/?$",
     start: "h1",
+    still: true,
   },
   {
     id: "online:heartlight",
