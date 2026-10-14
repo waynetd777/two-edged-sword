@@ -154,16 +154,19 @@
   {
     "name": "lyrics",
     "settings": {
-      "studyPane": false
+      "studyPane": false,
+      "songVerseBible": "kjv"
     },
     "songFile": "lyrics-song.json",
-    "songVision": "cross"
+    "songVision": "cross",
+    "songVisionAt": 0.75
   },
   {
     "name": "lyrics-focus",
     "darkOnly": true,
     "settings": {
-      "studyPane": false
+      "studyPane": false,
+      "songVerseBible": "kjv"
     },
     "songFile": "lyrics-song.json",
     "songVision": "dove",

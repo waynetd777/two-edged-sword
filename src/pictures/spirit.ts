@@ -13,6 +13,7 @@ import {
   glow,
   lay,
   layering,
+  placeBeside,
   random,
   rangePath,
   ridge,
@@ -21,6 +22,8 @@ import {
   smooth,
   TAU,
   tones,
+  verse,
+  verseWidth,
   Vision,
   wander,
 } from "./kit";
@@ -119,6 +122,7 @@ function burn(f: Frame, fire: ReturnType<typeof kindle>, x0: number, foot: numbe
 export const SPIRIT: Vision[] = [
   {
     name: "upper room",
+    verse: "Acts 2:4",
     lane: "back",
     dur: [22, 36],
     themes: [
@@ -215,11 +219,13 @@ export const SPIRIT: Vision[] = [
           const y = t.y - (1 - q) * h * 0.25 + Math.sin(f.t * 0.9 + t.p) * 4;
           flame(f, t.x + Math.sin(f.t * 0.6 + t.p) * 5, y, t.s, t.p, 0.7 * q);
         }
+        verse(f, { x, top: top - W * 0.12, bottom: sill + W * 0.08, width: W * 2.4 });
       };
     },
   },
   {
     name: "pillar of fire",
+    verse: "Psalm 78:14",
     lane: "back",
     dur: [22, 36],
     themes: [
@@ -238,7 +244,7 @@ export const SPIRIT: Vision[] = [
       "by night",
     ],
     make: (w, h, room) => {
-      const x0 = room.place(w * 0.22).x,
+      const { x: x0, scale } = placeBeside(room, w, h, w * 0.22),
         ground = h * 0.82;
       const dunes = ridge(ground, h * 0.035);
       const foot = dunes(x0) + h * 0.006; // the sand where it stands, a little into it so no gap shows
@@ -263,11 +269,14 @@ export const SPIRIT: Vision[] = [
         ctx.fill();
         // The fire: a pillar of flame rooted in the ground, reaching the top of the page as it grows.
         burn(f, fire, x0, foot, w * 0.045, (foot + h * 0.1) * rise, rise);
+        // The pillar fills the page's height: beneath its foot, or as low as it will go.
+        verse(f, { x: x0, top: 0, bottom: foot, width: w * 0.22 * scale });
       };
     },
   },
   {
     name: "shekinah",
+    verse: "Exodus 40:34",
     lane: "back",
     dur: [24, 40],
     themes: [
@@ -287,7 +296,8 @@ export const SPIRIT: Vision[] = [
       "shekinah",
       "come down",
     ],
-    make: (w, h) => {
+    make: (w, h, room) => {
+      const { x: vx, scale: vk } = room.verse ? room.place(verseWidth(w, h)) : { x: 0, scale: 0 };
       const puffs = Array.from({ length: 34 }, () => ({
         x: rnd(-0.1, 1.1) * w,
         y: rnd(-0.1, 0.32) * h,
@@ -314,11 +324,13 @@ export const SPIRIT: Vision[] = [
           ctx.drawImage(dot, x - p.r, y - p.r * 0.6, p.r * 2, p.r * 1.2);
         }
         ctx.globalAlpha = 1;
+        verse(f, { x: vx, top: h * 0.6, bottom: h * 0.6, width: verseWidth(w, h) * vk });
       };
     },
   },
   {
     name: "open heaven",
+    verse: "Acts 7:56",
     lane: "back",
     dur: [22, 36],
     themes: [
@@ -342,7 +354,7 @@ export const SPIRIT: Vision[] = [
       "fall down",
     ],
     make: (w, h, room) => {
-      const cx = room.place(w * 0.34).x;
+      const { x: cx, scale } = placeBeside(room, w, h, w * 0.34);
       const drops = Array.from({ length: 90 }, () => ({ u: random(), x: rnd(-1, 1), s: rnd(0.25, 0.45), l: rnd(10, 26) }));
       const rings: { t: number; x: number }[] = [];
       let next = 0;
@@ -397,11 +409,14 @@ export const SPIRIT: Vision[] = [
           if (q >= 1) rings.splice(i, 1);
           else ripples(f, rings[i].x, foot + 4, q, 70, 0.3);
         }
+        // The ray fills the page's height: beneath the pool, or as low as it will go.
+        verse(f, { x: cx, top: 0, bottom: foot + 10, width: w * 0.34 * scale });
       };
     },
   },
   {
     name: "fountain",
+    verse: "Psalm 36:9",
     lane: "back",
     dur: [22, 36],
     themes: [
@@ -577,11 +592,13 @@ export const SPIRIT: Vision[] = [
           ctx.fillStyle = og;
           ctx.fillRect(x - S * 0.8, base - S * 0.02, S * 1.6, S * 0.28);
         }
+        verse(f, { x, top: base - S * 1.7, bottom: base + S * 0.42, width: S * 2 });
       };
     },
   },
   {
     name: "sword of the spirit",
+    verse: "Ephesians 6:17",
     lane: "pass",
     dur: [13, 20],
     themes: [
@@ -692,11 +709,13 @@ export const SPIRIT: Vision[] = [
           ctx.stroke();
         }
         glow(ctx, x, y + dy + H * 0.62, H * 0.1, f.ink(0.3 * f.env * come * (0.7 + 0.3 * f.beat)), f.ink(0));
+        verse(f, { x, top: y + dy - H * 0.52, bottom: y + dy + H * 0.7, width: H * 0.5 });
       };
     },
   },
   {
     name: "fire from heaven",
+    verse: "1 Kings 18:39",
     lane: "back",
     dur: [22, 36],
     themes: [
@@ -830,11 +849,14 @@ export const SPIRIT: Vision[] = [
         }
         // The altar ablaze: the fire burning up from the wood on its top, to the top of the page.
         burn(f, fire, x + D * 0.25, top - D * 0.25, W * 0.42, (top + h * 0.1) * blaze, blaze);
+        // The fire reaches the page's top: beneath the altar, or as low as it will go.
+        verse(f, { x, top: 0, bottom: ground, width: S * 3.6 });
       };
     },
   },
   {
     name: "beating heart",
+    verse: "Psalm 73:26",
     lane: "pass",
     dur: [13, 20],
     themes: [
@@ -916,11 +938,13 @@ export const SPIRIT: Vision[] = [
           ctx.ellipse(x, y, S * (1.3 + q * 2.2), S * (1.3 + q * 2.2) * 0.95, 0, 0, TAU);
           ctx.stroke();
         }
+        verse(f, { x, top: y - S * size * 0.95, bottom: y + S * size, width: S * 3 });
       };
     },
   },
   {
     name: "palm branches",
+    verse: "John 12:13",
     lane: "pass",
     dur: [13, 20],
     themes: [
@@ -944,7 +968,8 @@ export const SPIRIT: Vision[] = [
       "rejoice",
       "hail",
     ],
-    make: (w, h) => {
+    make: (w, h, room) => {
+      const { x: vx, scale: vk } = room.verse ? room.place(verseWidth(w, h)) : { x: 0, scale: 0 };
       // Fronds held up from the foot of the page and waved, nearer ones larger and lower.
       const fronds = Array.from({ length: 11 }, (_, i) => {
         const near = random();
@@ -1031,11 +1056,14 @@ export const SPIRIT: Vision[] = [
             ty = h + 10 + Math.sin(fr.lean + wave) * ex + Math.cos(fr.lean + wave) * ey;
           glow(ctx, tx, ty, H * 0.2, f.ink(0.1 * f.env * up * (0.9 + 0.1 * f.beat)), f.ink(0));
         }
+        // Above the fronds, whose tips come no higher than 0.4 of the way down.
+        verse(f, { x: vx, top: h * 0.12, bottom: h * 0.12, width: verseWidth(w, h) * vk });
       };
     },
   },
   {
     name: "whirlwind",
+    verse: "Psalm 104:3",
     lane: "pass",
     dur: [12, 18],
     moving: true,
@@ -1059,7 +1087,7 @@ export const SPIRIT: Vision[] = [
     ],
     make: (w, h, room) => {
       const S0 = Math.min(w, h) * 0.2;
-      const { x, scale } = room.place(S0 * 2.6);
+      const { x, scale } = placeBeside(room, w, h, S0 * 2.6);
       const S = S0 * scale,
         foot = h * 0.9,
         top = h * 0.12;
@@ -1113,6 +1141,7 @@ export const SPIRIT: Vision[] = [
         ctx.globalAlpha = 1;
         // Dust kicked up at its foot.
         flatGlow(ctx, x + bend, foot, S * 0.6, 2, 0.4, f.ink(0.14 * f.env, true), f.ink(0, true));
+        verse(f, { x, top: top - S * 0.3, bottom: foot + S * 0.35, width: S * 2.6 });
       };
     },
   },

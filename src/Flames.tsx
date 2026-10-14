@@ -7,6 +7,9 @@
 
 import { beatAt, useCanvasLoop } from "./canvasLoop";
 
+/** How high above the page's foot the flames reach, near enough (a few embers go higher). */
+export const FLAME_HEIGHT = 280;
+
 /** Flame colours, hot to cool: white-gold, gold, orange, red, deep red. */
 const STOPS: [number, number, number][] = [
   [255, 244, 214],

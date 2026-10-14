@@ -15,6 +15,7 @@ import { MYSTIC_LAMB_BITMAP } from "./mystic-lamb-bitmap";
 export const PAINTINGS: Vision[] = [
   {
     name: "creation of adam",
+    verse: "Psalm 139:14",
     lane: "pass",
     dur: [14, 22],
     themes: [
@@ -40,6 +41,7 @@ export const PAINTINGS: Vision[] = [
   },
   {
     name: "gethsemane",
+    verse: "Luke 22:42",
     lane: "pass",
     dur: [14, 22],
     themes: [
@@ -65,6 +67,7 @@ export const PAINTINGS: Vision[] = [
   },
   {
     name: "last supper",
+    verse: "Luke 22:19",
     lane: "pass",
     dur: [14, 22],
     themes: [
@@ -90,6 +93,7 @@ export const PAINTINGS: Vision[] = [
   },
   {
     name: "resurrection",
+    verse: "John 11:25",
     lane: "pass",
     dur: [14, 22],
     themes: [
@@ -115,6 +119,7 @@ export const PAINTINGS: Vision[] = [
   },
   {
     name: "transfiguration",
+    verse: "Matthew 17:2",
     lane: "pass",
     dur: [14, 22],
     themes: [
@@ -140,6 +145,7 @@ export const PAINTINGS: Vision[] = [
   },
   {
     name: "mystic lamb",
+    verse: "Revelation 5:12",
     lane: "pass",
     dur: [14, 22],
     themes: [

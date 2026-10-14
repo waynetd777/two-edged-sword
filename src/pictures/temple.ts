@@ -16,6 +16,7 @@ import { TITUS_MENORAH_BITMAP } from "./titus-menorah-bitmap";
 export const TEMPLE: Vision[] = [
   {
     name: "ark of the covenant",
+    verse: "Psalm 132:8",
     lane: "pass",
     dur: [13, 20],
     themes: [
@@ -41,6 +42,7 @@ export const TEMPLE: Vision[] = [
   },
   {
     name: "table of shewbread",
+    verse: "John 6:35",
     lane: "pass",
     dur: [13, 20],
     themes: [
@@ -66,6 +68,7 @@ export const TEMPLE: Vision[] = [
   },
   {
     name: "altar of incense",
+    verse: "Psalm 141:2",
     lane: "pass",
     dur: [13, 20],
     themes: [
@@ -90,6 +93,7 @@ export const TEMPLE: Vision[] = [
   },
   {
     name: "altar of burnt offering",
+    verse: "Romans 12:1",
     lane: "pass",
     dur: [13, 20],
     themes: [
@@ -115,6 +119,7 @@ export const TEMPLE: Vision[] = [
   },
   {
     name: "laver",
+    verse: "Hebrews 10:22",
     lane: "pass",
     dur: [13, 20],
     themes: [
@@ -140,6 +145,7 @@ export const TEMPLE: Vision[] = [
   },
   {
     name: "high priest's breastplate",
+    verse: "Hebrews 7:25",
     lane: "pass",
     dur: [13, 20],
     themes: [
@@ -165,6 +171,7 @@ export const TEMPLE: Vision[] = [
   },
   {
     name: "menorah of titus",
+    verse: "Psalm 18:28",
     lane: "pass",
     dur: [13, 20],
     themes: [

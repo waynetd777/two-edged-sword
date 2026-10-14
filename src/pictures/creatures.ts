@@ -3,21 +3,24 @@
 
 // Living things passing over, and what the wind carries.
 
-import { bitmap, glow, layering, random, rnd, smooth, TAU, tones, Vision } from "./kit";
+import { bitmap, glow, layering, random, rnd, smooth, TAU, tones, verse, verseWidth, Vision } from "./kit";
 import { EAGLE_BITMAP } from "./eagle-bitmap";
 
 export const CREATURES: Vision[] = [
   {
     name: "dove",
+    verse: "John 1:32",
     themes: ["dove", "spirit", "holy spirit", "peace", "descend", "holy ghost", "comforter", "rest on me", "gentle", "come down"],
     lane: "pass",
     dur: [11, 16],
     moving: true,
-    make: (w, h) => {
+    make: (w, h, room) => {
       const dir = random() < 0.5 ? 1 : -1;
       const y0 = h * rnd(0.15, 0.3),
         y1 = h * rnd(0.3, 0.5);
       const s = Math.min(w, h) * rnd(0.05, 0.07);
+      // Its verse stays where it is, under the way it flies, beside the words.
+      const { x: vx, scale: vk } = room.verse ? room.place(verseWidth(w, h)) : { x: 0, scale: 0 };
       const layer = layering();
       const trail: { x: number; y: number; t: number }[] = [];
       return (f) => {
@@ -124,11 +127,13 @@ export const CREATURES: Vision[] = [
         ctx.shadowBlur = s * 0.35;
         ctx.drawImage(canvas, 0, 0, f.w, f.h);
         ctx.restore();
+        verse(f, { x: vx, top: y1, bottom: y1 + s * 1.2, width: verseWidth(w, h) * vk });
       };
     },
   },
   {
     name: "eagle",
+    verse: "Isaiah 40:31",
     themes: ["eagle", "eagles", "wings", "soar", "rise", "mount up", "fly", "high", "renew", "strength", "above the storm", "on wings"],
     lane: "pass",
     dur: [12, 18],
@@ -144,19 +149,25 @@ export const CREATURES: Vision[] = [
         const come = smooth(f.k * 2.4),
           q = f.t / f.dur;
         glow(f.ctx, x, y, W * 0.6, f.ink(0.08 * f.env * come), f.ink(0));
-        pic.draw(f, x + (0.5 - q) * W * 0.25, y + (0.5 - q) * W * 0.06 + Math.sin(f.t * 0.5) * W * 0.01, W, f.env * come);
+        const py = y + (0.5 - q) * W * 0.06 + Math.sin(f.t * 0.5) * W * 0.01;
+        const ph = pic.draw(f, x + (0.5 - q) * W * 0.25, py, W, f.env * come);
+        if (ph) verse(f, { x, top: py - ph * 0.4, bottom: py + ph * 0.4, width: W0 * scale });
       };
     },
   },
   {
     name: "sparrows",
+    verse: "Matthew 10:31",
     themes: ["sparrow", "sparrows", "bird", "birds", "his eye is on", "care", "fly", "watches", "worry", "little"],
     lane: "pass",
     dur: [10, 15],
     moving: true,
-    make: (w, h) => {
+    make: (w, h, room) => {
       const dir = random() < 0.5 ? 1 : -1;
       const y0 = h * rnd(0.2, 0.45);
+      // Its verse stays where it is, under the way the flock flies, beside the words.
+      const { x: vx, scale: vk } = room.verse ? room.place(verseWidth(w, h)) : { x: 0, scale: 0 };
+
       const layer = layering();
       const birds = Array.from({ length: 24 }, () => ({
         dx: rnd(-1, 1) * 120,
@@ -214,20 +225,25 @@ export const CREATURES: Vision[] = [
         ctx.globalAlpha = 0.42 * f.env;
         ctx.drawImage(canvas, 0, 0, f.w, f.h);
         ctx.restore();
+        verse(f, { x: vx, top: y0 - h * 0.08 - 90, bottom: y0 + h * 0.08 + 90, width: verseWidth(w, h) * vk });
       };
     },
   },
   {
     name: "butterfly",
+    verse: "2 Corinthians 5:17",
     themes: ["new", "new creation", "change", "transform", "transformed", "wings", "free", "old has gone", "born again", "made new"],
     lane: "pass",
     dur: [12, 18],
     moving: true,
-    make: (w, h) => {
+    make: (w, h, room) => {
       const dir = random() < 0.5 ? 1 : -1;
       const y0 = h * rnd(0.3, 0.7),
         p = rnd(0, TAU),
         s = rnd(18, 25);
+      // Its verse stays where it is, under (or over) the way it flies, beside the words.
+      const { x: vx, scale: vk } = room.verse ? room.place(verseWidth(w, h)) : { x: 0, scale: 0 };
+
       // One side's wings, from above, in its own units: the forewing pointed at its tip, the
       // hindwing rounded with a scalloped edge.
       const fore = (G: CanvasRenderingContext2D, k: number) => {
@@ -344,16 +360,19 @@ export const CREATURES: Vision[] = [
         ctx.globalCompositeOperation = "source-over";
         ctx.drawImage(canvas, 0, 0, f.w, f.h);
         ctx.restore();
+        verse(f, { x: vx, top: y0 - h * 0.12 - 8 - s, bottom: y0 + h * 0.12 + 8 + s, width: verseWidth(w, h) * vk });
       };
     },
   },
   {
     name: "petals",
+    verse: "Isaiah 40:8",
     themes: ["flower", "flowers", "petal", "petals", "bloom", "beauty", "garden", "rose", "blossom", "fragrance"],
     lane: "pass",
     dur: [12, 20],
     moving: true,
-    make: (w, h) => {
+    make: (w, h, room) => {
+      const { x: vx, scale: vk } = room.verse ? room.place(verseWidth(w, h)) : { x: 0, scale: 0 };
       const ps = Array.from({ length: 26 }, () => ({
         x: rnd(0, w),
         y: rnd(-h, 0),
@@ -381,16 +400,19 @@ export const CREATURES: Vision[] = [
           ctx.fill();
           ctx.restore();
         }
+        verse(f, { x: vx, top: h * 0.65, bottom: h * 0.65, width: verseWidth(w, h) * vk });
       };
     },
   },
   {
     name: "olive leaves",
+    verse: "Psalm 52:8",
     themes: ["olive", "peace", "dove", "branch", "gethsemane", "oil", "garden", "anoint"],
     lane: "pass",
     dur: [12, 18],
     moving: true,
-    make: (w, h) => {
+    make: (w, h, room) => {
+      const { x: vx, scale: vk } = room.verse ? room.place(verseWidth(w, h)) : { x: 0, scale: 0 };
       const dir = random() < 0.5 ? 1 : -1;
       // Single leaves blowing past, and a few sprigs: a twig with its leaves in pairs and an olive or two.
       const ls = Array.from({ length: 13 }, (_, i) => ({
@@ -470,16 +492,19 @@ export const CREATURES: Vision[] = [
         ctx.globalCompositeOperation = "source-over";
         ctx.drawImage(canvas, 0, 0, f.w, f.h);
         ctx.restore();
+        verse(f, { x: vx, top: h * 0.65, bottom: h * 0.65, width: verseWidth(w, h) * vk });
       };
     },
   },
   {
     name: "seeds",
+    verse: "Luke 8:11",
     themes: ["seed", "seeds", "sow", "plant", "grow", "faith", "mustard", "scattered", "harvest", "small"],
     lane: "pass",
     dur: [12, 20],
     moving: true,
-    make: (w, h) => {
+    make: (w, h, room) => {
+      const { x: vx, scale: vk } = room.verse ? room.place(verseWidth(w, h)) : { x: 0, scale: 0 };
       const dir = random() < 0.5 ? 1 : -1;
       const seeds = Array.from({ length: 18 }, () => ({
         x: rnd(-0.5, 0.4) * w,
@@ -521,16 +546,19 @@ export const CREATURES: Vision[] = [
           }
           ctx.restore();
         }
+        verse(f, { x: vx, top: h * 0.65, bottom: h * 0.65, width: verseWidth(w, h) * vk });
       };
     },
   },
   {
     name: "snow",
+    verse: "Psalm 51:7",
     themes: ["snow", "white", "whiter than snow", "wash", "clean", "pure", "winter", "spotless", "washed", "cleanse"],
     lane: "pass",
     dur: [12, 20],
     moving: true,
-    make: (w, h) => {
+    make: (w, h, room) => {
+      const { x: vx, scale: vk } = room.verse ? room.place(verseWidth(w, h)) : { x: 0, scale: 0 };
       const flakes = Array.from({ length: 130 }, () => {
         const z = random();
         return { x: rnd(0, w), o: random(), z, p: rnd(0, TAU), crystal: z > 0.9 };
@@ -568,11 +596,13 @@ export const CREATURES: Vision[] = [
             ctx.globalAlpha = 1;
           }
         }
+        verse(f, { x: vx, top: h * 0.7, bottom: h * 0.7, width: verseWidth(w, h) * vk });
       };
     },
   },
   {
     name: "rain",
+    verse: "Psalm 72:6",
     themes: [
       "rain",
       "pour",
@@ -590,7 +620,8 @@ export const CREATURES: Vision[] = [
     lane: "pass",
     dur: [10, 16],
     moving: true,
-    make: (w, h) => {
+    make: (w, h, room) => {
+      const { x: vx, scale: vk } = room.verse ? room.place(verseWidth(w, h)) : { x: 0, scale: 0 };
       const drops = Array.from({ length: 160 }, () => ({ x: rnd(-0.1, 1.1) * w, o: random(), v: rnd(0.6, 1), l: rnd(14, 30) }));
       const splashes: { x: number; t: number }[] = [];
       let last = 0;
@@ -622,16 +653,19 @@ export const CREATURES: Vision[] = [
           ctx.ellipse(splashes[i].x, h - 14, q * 22, q * 5, 0, 0, TAU);
           ctx.stroke();
         }
+        verse(f, { x: vx, top: h * 0.7, bottom: h * 0.7, width: verseWidth(w, h) * vk });
       };
     },
   },
   {
     name: "wind",
+    verse: "Acts 2:2",
     themes: ["wind", "breath", "breathe", "blow", "spirit", "fresh wind", "mighty wind", "rushing", "breath of god", "winds"],
     lane: "pass",
     dur: [10, 15],
     moving: true,
-    make: (w, h) => {
+    make: (w, h, room) => {
+      const { x: vx, scale: vk } = room.verse ? room.place(verseWidth(w, h)) : { x: 0, scale: 0 };
       const dir = random() < 0.5 ? 1 : -1;
       // The air's flow: one gentle ripple across the page, which everything in it follows.
       const flow = (x: number, y: number, t: number) => Math.sin(x * 0.005 + y * 0.002 + t * 0.7) * 22 + Math.sin(x * 0.011 - t * 1.1) * 7;
@@ -718,6 +752,7 @@ export const CREATURES: Vision[] = [
           ctx.fill();
           ctx.restore();
         }
+        verse(f, { x: vx, top: h * 0.7, bottom: h * 0.7, width: verseWidth(w, h) * vk });
       };
     },
   },

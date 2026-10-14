@@ -20,6 +20,8 @@ import {
   smooth,
   TAU,
   tones,
+  verse,
+  verseWidth,
   Vision,
   wander,
 } from "./kit";
@@ -77,6 +79,7 @@ function hand(G: CanvasRenderingContext2D, spread: number, left: boolean) {
 export const WORSHIP: Vision[] = [
   {
     name: "raised hands",
+    verse: "Psalm 134:2",
     lane: "back",
     dur: [22, 36],
     themes: [
@@ -99,7 +102,8 @@ export const WORSHIP: Vision[] = [
       "raise my",
       "hands up",
     ],
-    make: (w, h) => {
+    make: (w, h, room) => {
+      const { x: vx, scale: vk } = room.verse ? room.place(verseWidth(w, h)) : { x: 0, scale: 0 };
       // Arms raised from the foot of the page, seen from behind the crowd: the forearm, and the
       // open hand with its fingers spread to the light. Nearer ones larger and lower; each rises
       // once, in its own time, to its full height and holds there, swaying a little.
@@ -168,11 +172,14 @@ export const WORSHIP: Vision[] = [
             ty = foot - Math.cos(a.lean + sway) * (H + a.s);
           glow(ctx, tx, ty, a.s * 2.2, f.ink(0.1 * f.env * up * (0.9 + 0.1 * f.beat)), f.ink(0));
         }
+        // Over the hands, in the middle of the page.
+        verse(f, { x: vx, top: h * 0.45, bottom: h * 0.45, width: verseWidth(w, h) * vk });
       };
     },
   },
   {
     name: "praying hands",
+    verse: "Philippians 4:6",
     lane: "pass",
     dur: [13, 20],
     themes: [
@@ -203,12 +210,14 @@ export const WORSHIP: Vision[] = [
       return (f) => {
         const come = smooth(f.k * 2.2);
         glow(f.ctx, x, y - W * 0.2, W * 0.6, f.ink(0.1 * f.env * come * (0.92 + 0.08 * f.beat)), f.ink(0));
-        pic.draw(f, x, y + (1 - come) * 14, W, f.env * come);
+        const ph = pic.draw(f, x, y + (1 - come) * 14, W, f.env * come);
+        if (ph) verse(f, { x, top: y - ph * 0.4, bottom: y + ph * 0.4, width: W });
       };
     },
   },
   {
     name: "censer",
+    verse: "Revelation 8:4",
     lane: "pass",
     dur: [13, 20],
     themes: [
@@ -233,6 +242,7 @@ export const WORSHIP: Vision[] = [
   },
   {
     name: "banner",
+    verse: "Song of Solomon 2:4",
     lane: "pass",
     dur: [12, 18],
     themes: [
@@ -351,11 +361,14 @@ export const WORSHIP: Vision[] = [
         }
         lay(f, canvas, 0.5 * f.env, H * 0.03);
         glow(ctx, x + dir * len * 0.42, ty + depth * 0.55, H * 0.4, f.ink(0.06 * f.env * up * (0.9 + 0.1 * f.beat)), f.ink(0));
+        // Pole and cloth together, from the finial to the pole's foot.
+        verse(f, { x: mid, top: ty - H * 0.04, bottom: foot + 10, width: H * 1.1 });
       };
     },
   },
   {
     name: "dancing lights",
+    verse: "Psalm 30:11",
     lane: "pass",
     dur: [12, 18],
     moving: true,
@@ -441,11 +454,14 @@ export const WORSHIP: Vision[] = [
           }
           ctx.globalAlpha = 1;
         }
+        // The rings, leaping on the beat, and the sparks flung out from them.
+        verse(f, { x, top: y - R * 0.9, bottom: y + R * 0.9, width: R * 2.4 });
       };
     },
   },
   {
     name: "shofar",
+    verse: "Psalm 89:15",
     lane: "pass",
     dur: [12, 18],
     themes: [
@@ -479,12 +495,14 @@ export const WORSHIP: Vision[] = [
       return (f) => {
         const come = smooth(f.k * 2.4);
         glow(f.ctx, x + W * 0.28, y - W * 0.04, W * 0.15, f.ink(0.14 * f.env * come * (0.6 + 0.4 * f.beat)), f.ink(0));
-        pic.draw(f, x, y + (1 - come) * 12, W, f.env * come);
+        const ph = pic.draw(f, x, y + (1 - come) * 12, W, f.env * come);
+        if (ph) verse(f, { x, top: y - ph * 0.4, bottom: y + ph * 0.4, width: W });
       };
     },
   },
   {
     name: "hallelujah",
+    verse: "Psalm 150:6",
     lane: "pass",
     dur: [12, 18],
     themes: [
@@ -531,11 +549,14 @@ export const WORSHIP: Vision[] = [
         });
         ctx.restore();
         glow(ctx, cx, y, size * 3, f.ink(0.08 * f.env * (0.9 + 0.1 * f.beat)), f.ink(0));
+        // The word itself, its capitals and descender with their glow.
+        verse(f, { x: cx, top: y - size * 0.75, bottom: y + size * 0.65, width: size * 5.4 });
       };
     },
   },
   {
     name: "holy mountain",
+    verse: "Psalm 99:9",
     lane: "back",
     dur: [24, 40],
     themes: [
@@ -560,7 +581,7 @@ export const WORSHIP: Vision[] = [
       "summit",
     ],
     make: (w, h, room) => {
-      const px = room.place(w * 0.5).x,
+      const { x: px, scale: pk } = room.place(w * 0.5),
         base = h + 10,
         peakY = h * 0.22;
       // The mountain: a great peak, its sides falling in long rough slopes to the foot of the
@@ -640,11 +661,14 @@ export const WORSHIP: Vision[] = [
         }
         ctx.globalAlpha = 1;
         if (flash > 0) glow(ctx, px + w * 0.04, peakY - h * 0.03, w * 0.14, f.ink(0.18 * f.env * flash, true), f.ink(0, true));
+        // On the lower slopes, below the cloud and the glory.
+        verse(f, { x: px, top: h * 0.62, bottom: h * 0.62, width: w * 0.5 * pk });
       };
     },
   },
   {
     name: "open bible",
+    verse: "Psalm 119:89",
     lane: "pass",
     dur: [13, 20],
     themes: [
@@ -691,12 +715,14 @@ export const WORSHIP: Vision[] = [
         ctx.lineTo(x + W * 0.7, y - H * 1.1);
         ctx.lineTo(x - W * 0.7, y - H * 1.1);
         ctx.fill();
-        pic.draw(f, x, y + (1 - come) * 16, W, f.env * come);
+        const ph = pic.draw(f, x, y + (1 - come) * 16, W, f.env * come);
+        if (ph) verse(f, { x, top: y - ph * 0.4, bottom: y + ph * 0.4, width: W });
       };
     },
   },
   {
     name: "communion",
+    verse: "1 Corinthians 11:26",
     lane: "pass",
     dur: [13, 20],
     themes: [
@@ -800,11 +826,14 @@ export const WORSHIP: Vision[] = [
         lay(f, canvas, 0.85 * f.env, S * 0.12);
         // The wine's gleam.
         glow(ctx, x + S * 0.9, y - S * 1.0, S * 0.4, f.ink(0.3 * f.env * come, true), f.ink(0, true));
+        // The cup's rim to the light on the table.
+        verse(f, { x, top: y - S * 1.2, bottom: y + S * 0.8 + (1 - come) * 20, width: S * 3.6 });
       };
     },
   },
   {
     name: "the cup",
+    verse: "Matthew 26:28",
     lane: "pass",
     dur: [13, 20],
     themes: [
@@ -830,6 +859,7 @@ export const WORSHIP: Vision[] = [
   },
   {
     name: "lyre",
+    verse: "Psalm 57:8",
     lane: "pass",
     dur: [13, 20],
     themes: [
@@ -854,6 +884,7 @@ export const WORSHIP: Vision[] = [
   },
   {
     name: "lights held high",
+    verse: "Matthew 5:14",
     lane: "back",
     dur: [22, 36],
     themes: [
@@ -875,7 +906,8 @@ export const WORSHIP: Vision[] = [
       "stand together",
       "shine on",
     ],
-    make: (w, h) => {
+    make: (w, h, room) => {
+      const { x: vx, scale: vk } = room.verse ? room.place(verseWidth(w, h)) : { x: 0, scale: 0 };
       // A crowd's lights, held up and swaying: rows further up the page smaller and closer.
       const lights: { x: number; y: number; r: number; p: number; s: number; cool: boolean }[] = [];
       for (let row = 0; row < 9; row++) {
@@ -923,11 +955,14 @@ export const WORSHIP: Vision[] = [
           ctx.stroke();
         }
         ctx.globalAlpha = 1;
+        // Above the crowd, under the brightness over the stage.
+        verse(f, { x: vx, top: h * 0.2, bottom: h * 0.2, width: verseWidth(w, h) * vk });
       };
     },
   },
   {
     name: "yeshua",
+    verse: "Matthew 1:21",
     lane: "pass",
     dur: [13, 20],
     themes: [
@@ -989,6 +1024,8 @@ export const WORSHIP: Vision[] = [
         ctx.fillStyle = f.ink(0.3 * a * smooth(f.k * 4 - 1));
         ctx.fillText("Yeshua · Jesus", cx, y + size * 0.72);
         ctx.restore();
+        // The Name, bobbing, and the words beneath it.
+        verse(f, { x: cx, top: y - size * 0.55 - 4, bottom: y + size * 0.85, width: size * 2.6 });
       };
     },
   },

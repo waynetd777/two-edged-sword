@@ -93,8 +93,8 @@ screenshots:
 ## Remake the product page's pictures (site/img/*.webp) from the dark screenshots. Needs cwebp (brew install webp).
 site:
 	@for f in docs/images/*-dark.png; do cwebp -quiet -q 80 -m 6 "$$f" -o "site/img/$$(basename "$$f" -dark.png).webp"; done
-	@for f in docs/images/*-dark.webp; do cp "$$f" "site/img/$$(basename "$$f" -dark.webp).webp"; done
-	@for f in docs/images/*-dark.mp4; do cp "$$f" "site/img/$$(basename "$$f" -dark.mp4).mp4"; done
+	@for f in docs/images/*-dark.webp; do [ -e "$$f" ] || continue; cp "$$f" "site/img/$$(basename "$$f" -dark.webp).webp"; done
+	@for f in docs/images/*-dark.mp4; do [ -e "$$f" ] || continue; cp "$$f" "site/img/$$(basename "$$f" -dark.mp4).mp4"; done
 	@cp src-tauri/icons/128x128@2x.png site/img/icon.png
 	@sips -Z 180 src-tauri/icons/128x128@2x.png --out site/img/icon-180.png >/dev/null
 
@@ -108,6 +108,7 @@ sign-check:
 
 ## The pictures behind a song's words, one at a time, in Safari (visions.html); uses the dev server if it's running.
 visions:
+	@python3 tools/visions_verses.py >/dev/null
 	@lsof -ti :1430 >/dev/null || (npx vite >/dev/null 2>&1 &) ; for i in $$(seq 60); do curl -sf -o /dev/null http://localhost:1430/ && break; sleep 0.25; done; open -a Safari "http://localhost:1430/visions.html$(if $(v),?v=$(v))"
 
 ## Check the help: every link in the user guides, and each screen's section, points at a section that exists.

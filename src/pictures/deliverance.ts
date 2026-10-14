@@ -4,7 +4,27 @@
 // Breakthrough and freedom: chains broken, the veil torn, Jericho, the Red Sea, the fiery
 // furnace, the dry bones, the prison doors, five smooth stones, the storm stilled, the shield.
 
-import { beam, drift, flame, flatGlow, glow, lay, layering, photo, random, rangePath, ridge, rnd, smooth, TAU, tones, Vision } from "./kit";
+import {
+  beam,
+  drift,
+  flame,
+  flatGlow,
+  glow,
+  lay,
+  layering,
+  photo,
+  placeBeside,
+  random,
+  rangePath,
+  ridge,
+  rnd,
+  smooth,
+  TAU,
+  tones,
+  verse,
+  verseWidth,
+  Vision,
+} from "./kit";
 import { KEY_BITMAP } from "./key-bitmap";
 import { BREASTPLATE_BITMAP } from "./breastplate-bitmap";
 import { HELMET_BITMAP } from "./helmet-bitmap";
@@ -12,6 +32,7 @@ import { HELMET_BITMAP } from "./helmet-bitmap";
 export const DELIVERANCE: Vision[] = [
   {
     name: "broken chains",
+    verse: "Psalm 107:14",
     lane: "pass",
     dur: [12, 18],
     themes: [
@@ -157,11 +178,15 @@ export const DELIVERANCE: Vision[] = [
         }
         L.restore();
         lay(f, canvas, 0.85 * f.env * come);
+        // Where the chain, at its slope, leaves the stretch placed for it.
+        // Below the break and to the side the chain rises to, under the chain's slope.
+        verse(f, { x: x + flip * S * 2, top: y + S * 2.2, bottom: y + S * 2.2, width: S0 * 6.2 * scale });
       };
     },
   },
   {
     name: "torn veil",
+    verse: "Mark 15:38",
     lane: "back",
     dur: [22, 36],
     themes: [
@@ -186,7 +211,7 @@ export const DELIVERANCE: Vision[] = [
       "wall between",
     ],
     make: (w, h, room) => {
-      const cx = room.place(w * 0.3).x,
+      const { x: cx, scale } = placeBeside(room, w, h, w * 0.3),
         foot = h * 0.9;
       const folds = Array.from({ length: Math.round(w / 36) }, (_, i) => ({ x: i * 36 + rnd(-6, 6), k: rnd(0.15, 0.4) }));
       const rip = Array.from({ length: 24 }, () => rnd(-1, 1) * 10);
@@ -252,11 +277,14 @@ export const DELIVERANCE: Vision[] = [
         if (tear > 0.2) {
           glow(ctx, cx, foot * tear, gap * 2, f.ink(0.1 * f.env), f.ink(0));
         }
+        // The veil fills the page: under its foot, or on it just above.
+        verse(f, { x: cx, top: 0, bottom: foot, width: w * 0.3 * scale });
       };
     },
   },
   {
     name: "jericho",
+    verse: "Hebrews 11:30",
     lane: "back",
     dur: [24, 40],
     themes: [
@@ -385,11 +413,14 @@ export const DELIVERANCE: Vision[] = [
             f.ink(0.22 * f.env * Math.sin(Math.PI * Math.min(1, shout * 1.3)) * (0.8 + 0.2 * f.beat)),
             f.ink(0),
           );
+        // Up to the trumpets' rings over the wall; down to where the stones land.
+        verse(f, { x, top: ground - S * 0.6, bottom: ground + S * 0.25, width: S });
       };
     },
   },
   {
     name: "red sea",
+    verse: "Exodus 15:11",
     lane: "back",
     dur: [24, 40],
     themes: [
@@ -414,7 +445,7 @@ export const DELIVERANCE: Vision[] = [
       "stand back",
     ],
     make: (w, h, room) => {
-      const cx = room.place(w * 0.3).x,
+      const { x: cx, scale } = room.place(w * 0.3),
         hz = h * 0.5;
       const spray = Array.from({ length: 50 }, () => ({
         u: random(),
@@ -514,11 +545,14 @@ export const DELIVERANCE: Vision[] = [
           ctx.drawImage(dot, cx + sp.side * (half(y) + 4 + u * 24) - 2, top - u * 30 - 2, 4, 4);
         }
         ctx.globalAlpha = 1;
+        // Above the light on the far shore and the walls' crests.
+        verse(f, { x: cx, top: hz - h * 0.15, bottom: h, width: w * 0.3 * scale });
       };
     },
   },
   {
     name: "fiery furnace",
+    verse: "Daniel 3:17",
     lane: "back",
     dur: [22, 36],
     themes: [
@@ -664,11 +698,13 @@ export const DELIVERANCE: Vision[] = [
             beam(f, fx, floor - S * 0.5, fx + Math.cos(a) * S * 0.9, floor - S * 0.5 + Math.sin(a) * S * 0.9, 1.5, 0.12 * f.env * four);
           }
         }
+        verse(f, { x, top: floor - S * 2.6, bottom: floor + S * 0.3, width: S0 * 2.2 * scale });
       };
     },
   },
   {
     name: "dry bones",
+    verse: "Ezekiel 37:5",
     lane: "back",
     dur: [24, 40],
     themes: [
@@ -693,7 +729,8 @@ export const DELIVERANCE: Vision[] = [
       "resurrection power",
       "dead things",
     ],
-    make: (w, h) => {
+    make: (w, h, room) => {
+      const { x: vx, scale: vk } = room.verse ? room.place(verseWidth(w, h)) : { x: 0, scale: 0 };
       const floor = h * 0.8;
       const valley = ridge(h * 0.62, h * 0.1);
       // The bones, scattered over the valley floor: long bones most of them, with broken ribcages
@@ -824,11 +861,13 @@ export const DELIVERANCE: Vision[] = [
           beam(f, b.x, b.y - b.len * 1.2, b.x, b.y + 4, 2.5, 0.35 * f.env * a);
         }
         if (alive > 0) glow(ctx, w / 2, h * 0.3, w * 0.5, f.ink(0.1 * f.env * alive), f.ink(0));
+        verse(f, { x: vx, top: h * 0.3, bottom: h * 0.3, width: verseWidth(w, h) * vk });
       };
     },
   },
   {
     name: "prison doors",
+    verse: "Acts 16:25",
     lane: "back",
     dur: [22, 36],
     themes: [
@@ -942,11 +981,13 @@ export const DELIVERANCE: Vision[] = [
         lay(f, canvas, 0.4 * f.env, 3);
         // Midnight: a little light before the song, much after it.
         glow(ctx, x, foot - H * 1.3, H * 0.4, f.ink(0.04 * f.env), f.ink(0));
+        verse(f, { x, top: foot - H * 1.25, bottom: foot, width: H0 * 1.3 * scale });
       };
     },
   },
   {
     name: "key",
+    verse: "Revelation 1:18",
     lane: "pass",
     dur: [13, 20],
     themes: [
@@ -971,6 +1012,7 @@ export const DELIVERANCE: Vision[] = [
   },
   {
     name: "five smooth stones",
+    verse: "1 Samuel 17:47",
     lane: "pass",
     dur: [12, 18],
     themes: [
@@ -1077,11 +1119,14 @@ export const DELIVERANCE: Vision[] = [
           const s = stones[chosen];
           glow(ctx, x + s.x, y + s.y - take * S * 2.2, S * 1.8, f.ink(0.3 * f.env * take * (0.9 + 0.1 * f.beat)), f.ink(0));
         }
+        // Up to the stone taken up and its light.
+        verse(f, { x, top: y - S * 3.2, bottom: y + S, width: S0 * 8 * scale });
       };
     },
   },
   {
     name: "peace be still",
+    verse: "Mark 4:39",
     lane: "back",
     dur: [24, 40],
     themes: [
@@ -1108,7 +1153,8 @@ export const DELIVERANCE: Vision[] = [
       "hush",
       "silence",
     ],
-    make: (w, h) => {
+    make: (w, h, room) => {
+      const { x: vx, scale: vk } = room.verse ? room.place(verseWidth(w, h)) : { x: 0, scale: 0 };
       const sea = h * 0.6;
       const spray = Array.from({ length: 40 }, () => ({ x: rnd(0, 1), p: rnd(0, TAU), s: rnd(0.5, 1) }));
       return (f) => {
@@ -1187,11 +1233,13 @@ export const DELIVERANCE: Vision[] = [
             );
           }
         }
+        verse(f, { x: vx, top: h * 0.25, bottom: h * 0.25, width: verseWidth(w, h) * vk });
       };
     },
   },
   {
     name: "shield of faith",
+    verse: "Ephesians 6:16",
     lane: "pass",
     dur: [13, 20],
     themes: [
@@ -1287,11 +1335,14 @@ export const DELIVERANCE: Vision[] = [
             glow(ctx, x + side * S * 1.0, dy, S * 0.6 * (1 + qq), f.ink(0.5 * f.env * (1 - qq) ** 2), f.ink(0));
           }
         }
+        const sy = y + (1 - up) * 30;
+        verse(f, { x, top: sy - S * 1.05, bottom: sy + S * 1.45, width: S0 * 2.6 * scale });
       };
     },
   },
   {
     name: "helmet",
+    verse: "1 Thessalonians 5:8",
     lane: "pass",
     dur: [13, 20],
     themes: [
@@ -1316,6 +1367,7 @@ export const DELIVERANCE: Vision[] = [
   },
   {
     name: "breastplate",
+    verse: "Ephesians 6:14",
     lane: "pass",
     dur: [13, 20],
     themes: [

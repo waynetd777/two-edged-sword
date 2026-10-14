@@ -82,6 +82,10 @@ scroll:
   fire gets fire, and none comes twice in a song. The larger ones keep beside the words, in
   focus mode too. One that has no room clear of the other waits, or comes smaller.
   Settings › Listening › **While a song plays** turns them off.
+- Each picture has a verse beneath it, faint, in the Bible chosen in Settings › Listening ›
+  **Verses from** (the default translation until you choose one). A verse keeps beside the
+  words and clear of the other picture, and above the flames. A picture whose verse isn't in
+  that Bible comes without one. **Show a verse beneath each picture** turns them off.
 - The bar shows how far through the song Music is, with the time gone and the time left.
 - The Lyrics page is always dark below its top bar, in the light theme too. In focus mode the
   top bar is dark as well.

@@ -9,13 +9,15 @@
 // aren't known gets them all alike. They swell a little on the beat, as the flames do; paused,
 // they fade away and wait. A picture placed beside the words keeps clear of the other lane's
 // picture too, so a passing picture doesn't land on a backdrop's. Their colours are the
-// artwork's (the page's background), lightened in the dark theme and deepened on paper.
-// Settings › Listening turns them off.
+// artwork's (the page's background), lightened in the dark theme and deepened on paper. Each
+// has its verse beneath it (`verses`, from the Bible chosen in Settings), kept within the stretch
+// the picture stands in and above the flames. Settings › Listening turns them off, or the verses.
 
 import { useEffect, useRef } from "react";
 import { beatAt, useCanvasLoop } from "./canvasLoop";
+import { FLAME_HEIGHT } from "./Flames";
 import { sceneStepping } from "./sceneClock";
-import { Frame, Lane, random, RGB, rnd, Room, seedRandom, smooth, Vision } from "./pictures/kit";
+import { Frame, Lane, random, RGB, rnd, Room, seedRandom, smooth, Verse, verseWidth, Vision } from "./pictures/kit";
 import { VISIONS } from "./pictures";
 
 type Pair = { dark: RGB; light: RGB };
@@ -138,7 +140,11 @@ const QUIT = 1.2;
  * those is wide enough either, the widest, shrunk to fit (to a third at most); when the words
  * fill the page, anywhere.
  */
-function roomBeside(w: number, words: { left: number; right: number } | null, taken: [number, number][] = []): Room & { crowded: boolean } {
+function roomBeside(
+  w: number,
+  words: { left: number; right: number } | null,
+  taken: [number, number][] = [],
+): Omit<Room, "verse"> & { crowded: boolean } {
   const gap = 32,
     edge = w * 0.03;
   const spans = (
@@ -195,6 +201,8 @@ export function Visions({
   art,
   words,
   song,
+  verses,
+  flames,
 }: {
   bpm: number;
   playing: boolean;
@@ -205,6 +213,10 @@ export function Visions({
   words: () => { left: number; right: number } | null;
   /** The song's title and its words, as far as they're known, for choosing pictures that suit it. */
   song: string;
+  /** Each picture's verse, in the Bible chosen in Settings; absent when verses are off. */
+  verses?: Map<string, Verse>;
+  /** Flames along the foot of the page (a song without words): verses keep above them. */
+  flames?: boolean;
 }) {
   const colours = useRef({ warm: WARM, cool: COOL });
   useEffect(() => {
@@ -216,7 +228,7 @@ export function Visions({
       dead = true;
     };
   }, [art]);
-  const canvas = useCanvasLoop({ bpm, playing, time, dark, words, song }, ({ canvas: c, ctx, live, still }) => {
+  const canvas = useCanvasLoop({ bpm, playing, time, dark, words, song, verses, flames }, ({ canvas: c, ctx, live, still }) => {
     const dots = new Map<string, HTMLCanvasElement>();
     const dotOf = (rgb: RGB) => {
       const key = rgb.join(",");
@@ -261,13 +273,18 @@ export function Visions({
       const other = lanes[a.lane === "back" ? "pass" : "back"].cur;
       const room = roomBeside(c.clientWidth, words, other?.span ? [other.span] : []);
       a.span = undefined;
+      const verse = !!live.current.verses?.has(a.v.name);
       const draw = a.v.make(c.clientWidth, c.clientHeight, {
+        verse,
         place: (width) => {
           a.placed = true;
-          const at = room.place(width);
-          // The first placing is the picture's own; later ones are parts of it, within that.
-          if (!a.span) a.span = [at.x - (width * at.scale) / 2, at.x + (width * at.scale) / 2];
-          return at;
+          // The first placing is the picture's own; later ones are parts of it, within that. One
+          // with a verse takes a stretch wide enough for it to read well, the picture as it was.
+          const first = !a.span;
+          const want = first && verse ? Math.max(width, verseWidth(c.clientWidth, c.clientHeight) * 0.8) : width;
+          const at = room.place(want);
+          if (first) a.span = [at.x - (want * at.scale) / 2, at.x + (want * at.scale) / 2];
+          return { x: at.x, scale: Math.min(1, (want * at.scale) / width) };
         },
       });
       return { draw, crowded: room.crowded };
@@ -328,7 +345,7 @@ export function Visions({
     let clock = 0,
       shown = live.current.playing ? 1 : 0;
     return (now, dt) => {
-      const { bpm, playing, time, dark } = live.current;
+      const { bpm, playing, time, dark, verses, flames } = live.current;
       pickUp();
       shown += ((playing ? 1 : 0) - shown) * Math.min(1, dt * 1.2);
       if (playing && (!scenePick?.held || sceneStepping())) clock += dt * (still ? 0.25 : 1);
@@ -401,6 +418,9 @@ export function Visions({
           ink,
           rgb,
           dot,
+          verse: verses?.get(a.v.name),
+          span: a.span,
+          floor: flames ? h - FLAME_HEIGHT : h - 16,
         };
         ctx.save();
         try {

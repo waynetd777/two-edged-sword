@@ -222,7 +222,20 @@ export function SettingsScreen() {
               <Switch on={s.songVisions} onChange={(v) => app.set({ songVisions: v })}>
                 Show pictures: a cross, a dove, stars and more
               </Switch>
+              <Switch on={s.songVerses} onChange={(v) => app.set({ songVerses: v })}>
+                Show a verse beneath each picture
+              </Switch>
             </Row>
+            {s.songVisions && s.songVerses && (
+              <Row label="Verses from" hint="A picture whose verse isn't in this Bible is shown without one.">
+                <BibleSelect
+                  titled
+                  value={s.songVerseBible || app.defaultBible}
+                  onChange={(id) => app.set({ songVerseBible: id })}
+                  style={{ maxWidth: "min(360px, 100%)" }}
+                />
+              </Row>
+            )}
           </Section>
           <Section title="Journal">
             <Row

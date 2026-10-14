@@ -3,12 +3,13 @@
 
 // The land and water: hills, fields, trees, rivers, the sea.
 
-import { beam, drift, glow, layering, photo, random, rangePath, ridge, rnd, smooth, TAU, Vision } from "./kit";
+import { beam, drift, glow, layering, photo, random, rangePath, ridge, rnd, smooth, TAU, verse, verseWidth, Vision } from "./kit";
 import { ROSE_BITMAP } from "./rose-bitmap";
 
 export const LAND: Vision[] = [
   {
     name: "hills",
+    verse: "Psalm 121:2",
     themes: [
       "hill",
       "hills",
@@ -23,7 +24,8 @@ export const LAND: Vision[] = [
     ],
     lane: "back",
     dur: [24, 40],
-    make: (w, h) => {
+    make: (w, h, room) => {
+      const { x: vx, scale: vk } = room.verse ? room.place(verseWidth(w, h)) : { x: 0, scale: 0 };
       const ranges = [0.62, 0.72, 0.82].map((b, i) => ({ y: ridge(h * b, h * (0.12 - i * 0.025)), v: 2 + i * 3, a: 0.09 + i * 0.03 }));
       return (f) => {
         const { ctx } = f;
@@ -36,15 +38,18 @@ export const LAND: Vision[] = [
           rangePath(ctx, r.y, w, h, off);
           ctx.fill();
         }
+        verse(f, { x: vx, top: h * 0.35, bottom: h * 0.35, width: verseWidth(w, h) * vk });
       };
     },
   },
   {
     name: "still waters",
+    verse: "Psalm 23:2",
     themes: ["still", "peace", "quiet", "rest", "waters", "shepherd", "still waters", "restores my soul", "be still", "calm"],
     lane: "back",
     dur: [20, 34],
-    make: (w, h) => {
+    make: (w, h, room) => {
+      const { x: vx, scale: vk } = room.verse ? room.place(verseWidth(w, h)) : { x: 0, scale: 0 };
       const rings: { x: number; y: number; t: number; m: number }[] = [];
       let next = 0;
       return (f) => {
@@ -77,11 +82,13 @@ export const LAND: Vision[] = [
             ctx.stroke();
           }
         }
+        verse(f, { x: vx, top: h * 0.35, bottom: h * 0.35, width: verseWidth(w, h) * vk });
       };
     },
   },
   {
     name: "tree of life",
+    verse: "Revelation 22:14",
     themes: ["tree", "root", "roots", "branch", "planted", "grow", "fruit", "life", "leaves", "rooted", "like a tree"],
     lane: "back",
     dur: [24, 40],
@@ -138,7 +145,8 @@ export const LAND: Vision[] = [
         // It starts as a slim shoot: the wood thickens and the roots spread as it grows.
         const girth = 0.25 + 0.75 * smooth(f.k * 2.2);
         const clusters: [number, number, Limb, number][] = [];
-        let twig = 0;
+        let twig = 0,
+          crown = h; // the top of the highest limb, for the verse
         const draw = (b: Limb, x: number, y: number) => {
           const g = smooth(f.k * 3.2 - b.depth * 0.2);
           if (g <= 0) return;
@@ -146,6 +154,7 @@ export const LAND: Vision[] = [
           const len = b.len * g;
           const x2 = x + Math.cos(a) * len,
             y2 = y + Math.sin(a) * len;
+          crown = Math.min(crown, y2);
           // A tapered limb, bowed a little.
           const wa = (width(b.depth) / 2) * girth,
             wb = ((b.kids.length ? width(b.depth + 1) : width(b.depth) * 0.4) / 2) * girth;
@@ -208,16 +217,18 @@ export const LAND: Vision[] = [
             ctx.arc(fx, fy, r, 0, TAU);
             ctx.fill();
           }
+        verse(f, { x: x0, top: crown - lc * leafy, bottom: h, width: h * 0.85 * scale });
       };
     },
   },
   {
     name: "river of life",
+    verse: "Revelation 22:1",
     themes: ["river", "stream", "flow", "living water", "rivers", "flowing", "water of life", "flows"],
     lane: "back",
     dur: [22, 36],
     make: (w, h, room) => {
-      const cx = room.place(w * 0.3).x,
+      const { x: cx, scale } = room.place(w * 0.3),
         top = h * 0.38;
       const p = rnd(0, TAU);
       const mid = (y: number) => cx + Math.sin(y * 0.012 + p) * w * 0.12 * ((y - top) / (h - top));
@@ -244,11 +255,13 @@ export const LAND: Vision[] = [
           ctx.drawImage(dot, mid(y) + q.o * half(y) - r * 2, y - r, r * 4, r * 2);
         }
         ctx.globalAlpha = 1;
+        verse(f, { x: cx, top: top - h * 0.05, bottom: h, width: w * 0.3 * scale });
       };
     },
   },
   {
     name: "flock",
+    verse: "John 10:11",
     themes: [
       "sheep",
       "shepherd",
@@ -264,7 +277,8 @@ export const LAND: Vision[] = [
     ],
     lane: "back",
     dur: [22, 36],
-    make: (w, h) => {
+    make: (w, h, room) => {
+      const { x: vx, scale: vk } = room.verse ? room.place(verseWidth(w, h)) : { x: 0, scale: 0 };
       const hill = (x: number) => h * 0.8 - Math.sin((x / w) * Math.PI) * h * 0.08 - Math.sin(x * 0.006) * h * 0.02;
       // Sheep further off (`d` near 0) stand higher up the hill and smaller; a lamb or two keeps by its mother.
       const sheep: { x: number; d: number; s: number; dir: number; p: number; graze: number; step: number }[] = [];
@@ -375,17 +389,19 @@ export const LAND: Vision[] = [
         ctx.globalAlpha = (f.dark ? 0.32 : 0.42) * f.env;
         ctx.drawImage(canvas, 0, 0, f.w, f.h);
         ctx.globalAlpha = 1;
+        verse(f, { x: vx, top: h * 0.4, bottom: h * 0.4, width: verseWidth(w, h) * vk });
       };
     },
   },
   {
     name: "narrow path",
+    verse: "Matthew 7:14",
     themes: ["path", "way", "road", "walk", "follow", "journey", "lead", "narrow", "guide me", "lead me", "footsteps", "walk with"],
     lane: "back",
     dur: [22, 36],
     make: (w, h, room) => {
       const hz = h * 0.56,
-        vx = room.place(w * 0.25).x,
+        { x: vx, scale } = room.place(w * 0.25),
         p = rnd(0, TAU);
       const mid = (u: number) => vx + Math.sin(u * 5 + p) * w * 0.1 * u + u * u * w * 0.1 * Math.sin(p);
       return (f) => {
@@ -409,15 +425,19 @@ export const LAND: Vision[] = [
           ctx.drawImage(dot, mid(u) - r, hz + u * (h - hz) - r / 2, r * 2, r);
         }
         ctx.globalAlpha = 1;
+        // Above the light on the horizon.
+        verse(f, { x: vx, top: hz - h * 0.15, bottom: h, width: w * 0.25 * scale });
       };
     },
   },
   {
     name: "vine",
+    verse: "John 15:5",
     themes: ["vine", "branch", "branches", "fruit", "abide", "harvest", "vineyard", "bear fruit", "remain in me", "grapes"],
     lane: "back",
     dur: [22, 36],
-    make: (w, h) => {
+    make: (w, h, room) => {
+      const { x: vx, scale: vk } = room.verse ? room.place(verseWidth(w, h)) : { x: 0, scale: 0 };
       const fromLeft = random() < 0.5;
       const pts = Array.from({ length: 80 }, (_, i) => {
         const u = i / 79;
@@ -474,11 +494,13 @@ export const LAND: Vision[] = [
               }
           }
         }
+        verse(f, { x: vx, top: h * 0.45, bottom: h * 0.45, width: verseWidth(w, h) * vk });
       };
     },
   },
   {
     name: "boat on galilee",
+    verse: "Matthew 14:27",
     themes: [
       "boat",
       "sea",
@@ -568,15 +590,19 @@ export const LAND: Vision[] = [
         ctx.scale(1, -1);
         ctx.drawImage(canvas, 0, 0, f.w, f.h);
         ctx.restore();
+        // Over the mast: the light's path runs down the water under the boat to the page's foot.
+        verse(f, { x: bx, top: y - s * 2.2, bottom: h, width: s0 * 4 * scale });
       };
     },
   },
   {
     name: "wheat",
+    verse: "John 12:24",
     themes: ["harvest", "field", "fields", "wheat", "bread", "seed", "reap", "sow", "white unto harvest", "grain", "labourers", "laborers"],
     lane: "pass",
     dur: [14, 22],
-    make: (w, h) => {
+    make: (w, h, room) => {
+      const { x: vx, scale: vk } = room.verse ? room.place(verseWidth(w, h)) : { x: 0, scale: 0 };
       const stalks = Array.from({ length: Math.round(w / 22) }, (_, i) => ({
         x: (i + rnd(-0.4, 0.4)) * 22,
         H: h * rnd(0.12, 0.24),
@@ -623,11 +649,13 @@ export const LAND: Vision[] = [
           }
           ctx.restore();
         }
+        verse(f, { x: vx, top: h * 0.5, bottom: h * 0.5, width: verseWidth(w, h) * vk });
       };
     },
   },
   {
     name: "lily",
+    verse: "Matthew 6:28",
     themes: ["lily", "lilies", "flower", "bloom", "consider the lilies", "garden", "beauty", "rose of sharon", "lily of the valley"],
     lane: "pass",
     dur: [12, 18],
@@ -692,11 +720,13 @@ export const LAND: Vision[] = [
           ctx.fill();
         }
         ctx.restore();
+        verse(f, { x, top: fy - S * 1.4, bottom: base, width: S0 * 3 * scale });
       };
     },
   },
   {
     name: "rose of sharon",
+    verse: "Song of Solomon 2:1",
     lane: "pass",
     dur: [13, 20],
     themes: [

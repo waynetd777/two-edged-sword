@@ -3,12 +3,31 @@
 
 // Places and holy things: the cross, Calvary, the tomb, the city, the lampstand.
 
-import { beam, Branch, drift, flame, flatGlow, glow, grow, layering, photo, random, rnd, smooth, TAU, tones, Vision } from "./kit";
+import {
+  beam,
+  Branch,
+  drift,
+  flame,
+  flatGlow,
+  glow,
+  grow,
+  layering,
+  photo,
+  placeBeside,
+  random,
+  rnd,
+  smooth,
+  TAU,
+  tones,
+  verse,
+  Vision,
+} from "./kit";
 import { ALABASTER_BITMAP } from "./alabaster-bitmap";
 
 export const PLACES: Vision[] = [
   {
     name: "cross",
+    verse: "1 Corinthians 1:18",
     themes: [
       "cross",
       "calvary",
@@ -55,17 +74,19 @@ export const PLACES: Vision[] = [
         f.ctx.restore();
         beam(f, x, y - H * 0.5, x, y + H * 0.5, H * 0.03, 0.2 * a);
         beam(f, x - H * 0.3, cy, x + H * 0.3, cy, H * 0.03, 0.2 * a);
+        verse(f, { x, top: y - H * 0.5, bottom: y + H * 0.5, width: H * 0.8 });
       };
     },
   },
   {
     name: "calvary",
+    verse: "Isaiah 53:5",
     themes: ["calvary", "cross", "golgotha", "hill", "crucified", "died", "it is finished", "the hill", "three crosses", "paid"],
     lane: "back",
     dur: [22, 36],
     make: (w, h, room) => {
-      const x0 = room.place(w * 0.3).x,
-        top = h * 0.8;
+      const { x: x0, scale } = room.place(w * 0.3);
+      const top = h * 0.8;
       const hill = (x: number) => top + ((x - x0) / (w * 0.55)) ** 2 * h * 0.18;
       const crosses = [
         { x: x0, s: 1 },
@@ -92,11 +113,14 @@ export const PLACES: Vision[] = [
           ctx.fillRect(c.x - H * 0.3, base - H * 0.75, H * 0.6, bw);
         }
         ctx.globalCompositeOperation = f.dark ? "lighter" : "source-over";
+        // From the tallest cross's top down the hill to the page's foot.
+        verse(f, { x: x0, top: top - h * 0.2, bottom: h, width: w * 0.3 * scale });
       };
     },
   },
   {
     name: "rose window",
+    verse: "Psalm 96:9",
     themes: ["church", "cathedral", "holy", "sanctuary", "worship", "light", "glass", "house of the lord", "gather", "congregation"],
     lane: "back",
     dur: [24, 40],
@@ -322,11 +346,13 @@ export const PLACES: Vision[] = [
         ctx.drawImage(canvas, 0, 0, f.w, f.h);
         ctx.restore();
         glow(ctx, x, y - R * 0.3, R * 0.6, f.ink(0.12 * a * lit), f.ink(0));
+        verse(f, { x, top: y - R * 1.42, bottom: y + R * 1.1, width: R * 1.7 });
       };
     },
   },
   {
     name: "menorah",
+    verse: "John 8:12",
     themes: ["lamp", "light", "seven", "israel", "candlestick", "lampstand", "zion", "jerusalem", "temple", "lights"],
     lane: "back",
     dur: [22, 36],
@@ -373,11 +399,13 @@ export const PLACES: Vision[] = [
           ctx.fillStyle = f.ink(0.35 * f.env);
           ctx.fillRect(x + o * H * 0.13 - H * 0.025, top - 1, H * 0.05, 3);
         });
+        verse(f, { x, top: top - H * 0.1, bottom: base, width: H * 0.95 });
       };
     },
   },
   {
     name: "open door",
+    verse: "John 10:9",
     themes: [
       "door",
       "doors",
@@ -511,11 +539,14 @@ export const PLACES: Vision[] = [
         ctx.shadowBlur = dw * 0.25;
         ctx.drawImage(canvas, 0, 0, f.w, f.h);
         ctx.restore();
+        // The door swung open stands taller than the doorway, above and below.
+        verse(f, { x, top: foot - dh * 1.22, bottom: foot + dh * 0.18, width: dw * 2.4 });
       };
     },
   },
   {
     name: "empty tomb",
+    verse: "Matthew 28:6",
     themes: [
       "tomb",
       "grave",
@@ -648,17 +679,19 @@ export const PLACES: Vision[] = [
         ctx.globalCompositeOperation = "source-over"; // so the stone hides what's behind it
         ctx.drawImage(canvas, 0, 0, f.w, f.h);
         ctx.restore();
+        verse(f, { x: ox, top: oy - r * 2.2, bottom: oy + r * 0.65, width: r * 7 });
       };
     },
   },
   {
     name: "jacob's ladder",
+    verse: "Genesis 28:16",
     themes: ["ladder", "angel", "angels", "heaven", "dream", "bethel", "climb", "ascend", "higher", "gate of heaven", "stairway"],
     lane: "back",
     dur: [22, 36],
     make: (w, h, room) => {
-      const bx = room.place(w * 0.16).x,
-        tx = bx + w * rnd(-0.04, 0.04),
+      const { x: bx, scale } = placeBeside(room, w, h, w * 0.16);
+      const tx = bx + w * rnd(-0.04, 0.04),
         ty = h * 0.04;
       const lights = Array.from({ length: 14 }, (_, i) => ({ u: i / 14, up: i % 2 === 0, s: rnd(0.04, 0.07) }));
       return (f) => {
@@ -716,11 +749,13 @@ export const PLACES: Vision[] = [
           ctx.drawImage(dot, x - r, y - r, r * 2, r * 2);
         }
         ctx.globalAlpha = 1;
+        verse(f, { x: bx, top: ty, bottom: h, width: w * 0.16 * scale });
       };
     },
   },
   {
     name: "new jerusalem",
+    verse: "Revelation 21:2",
     themes: [
       "jerusalem",
       "city",
@@ -758,6 +793,7 @@ export const PLACES: Vision[] = [
           p: rnd(0, TAU),
         })),
       );
+      const peak = Math.max(...towers.map((t) => t.h + t.w * 0.5));
       const layer = layering();
       return (f) => {
         const { ctx } = f;
@@ -819,17 +855,19 @@ export const PLACES: Vision[] = [
         }
         ctx.globalAlpha = 1;
         ctx.restore();
+        verse(f, { x: cx, top: ground + dy - peak, bottom: ground + dy, width: span });
       };
     },
   },
   {
     name: "burning bush",
+    verse: "Exodus 3:14",
     themes: ["burn", "burning", "bush", "holy ground", "moses", "i am", "consume", "fire", "take off", "barefoot", "great i am"],
     lane: "back",
     dur: [20, 32],
     make: (_w, h, room) => {
-      const x0 = room.place(h * 0.4).x,
-        y0 = h + 4;
+      const { x: x0, scale } = room.place(h * 0.4);
+      const y0 = h + 4;
       const bush = grow(h * 0.08, -Math.PI / 2, 0, 5, 0.6);
       const embers = Array.from({ length: 30 }, () => ({ u: random(), x: rnd(-1, 1), s: rnd(0.08, 0.16), p: rnd(0, TAU) }));
       return (f) => {
@@ -863,11 +901,14 @@ export const PLACES: Vision[] = [
           ctx.drawImage(dot, x - 2.5, y - 2.5, 5, 5);
         }
         ctx.globalAlpha = 1;
+        // Up from the page's foot: the bush, its flames, and the embers while they're still bright.
+        verse(f, { x: x0, top: y0 - h * 0.42, bottom: y0, width: h * 0.4 * scale });
       };
     },
   },
   {
     name: "lamp",
+    verse: "Psalm 119:105",
     themes: ["lamp", "light", "lamp unto my feet", "word", "path", "shine", "oil", "candle", "light my way", "guide"],
     lane: "pass",
     dur: [12, 18],
@@ -942,11 +983,13 @@ export const PLACES: Vision[] = [
         // The flame's warmth on the spout and the air about it, then the flame.
         glow(ctx, fx, fy - S * 0.2, S * 1.4, f.ink(0.22 * f.env), f.ink(0));
         flame(f, fx, fy, S * 0.9, 1.3);
+        verse(f, { x, top: y - S * 1.2, bottom: y + S * 0.9, width: S * 6 });
       };
     },
   },
   {
     name: "alabaster jar",
+    verse: "Mark 14:8",
     lane: "pass",
     dur: [13, 20],
     themes: [

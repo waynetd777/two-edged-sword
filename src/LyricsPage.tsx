@@ -7,6 +7,8 @@
 
 import { Fragment, useEffect, useRef, useState } from "react";
 import { api, MusicState } from "./api";
+import { fmtRef, parseRef } from "./bible";
+import { plainText } from "./esword";
 import { Icon, Pause, Play } from "./icons";
 import { artworkFor, Lyrics, lyricsFor, sceneSong } from "./lyrics";
 import { useMusicState } from "./music";
@@ -14,6 +16,8 @@ import { ReadingColumnTopbar, useEscExitsFocus } from "./ReadingColumn";
 import { useApp } from "./state";
 import { Flames } from "./Flames";
 import { Visions } from "./Visions";
+import { VISIONS } from "./pictures";
+import type { Verse } from "./pictures/kit";
 import { scrollToThird } from "./ui";
 import { chapterPlaying } from "./worship";
 
@@ -28,6 +32,7 @@ const LIT = 1.32;
 
 export function LyricsPage({ focus, setFocus }: { focus: boolean; setFocus: (f: boolean) => void }) {
   const app = useApp();
+  const verses = usePictureVerses(app.settings.songVisions && app.settings.songVerses, app.settings.songVerseBible || app.defaultBible);
   // Always dark, whatever the theme (styles.css, .lyrics-body).
   const dark = true;
   const [now, setNow] = useState<MusicState | null>(null);
@@ -255,6 +260,8 @@ export function LyricsPage({ focus, setFocus }: { focus: boolean; setFocus: (f: 
               art={artUrl}
               words={wordsAt}
               song={[name, ...(lyrics?.lines.map((l) => l.text) ?? [])].join("\n")}
+              verses={verses}
+              flames={lyrics === null}
             />
           </div>
         )}
@@ -350,4 +357,40 @@ function Rest({ from, to, t, focus }: { from: number; to: number; t: number; foc
       ))}
     </div>
   );
+}
+
+/**
+ * Each picture's verse in `bible`, by the picture's name, for Visions to show beneath it; a verse
+ * the Bible hasn't (a New Testament only, say) is left out. Undefined while off or being read.
+ */
+function usePictureVerses(on: boolean, bible: string) {
+  const [verses, setVerses] = useState<Map<string, Verse>>();
+  useEffect(() => {
+    setVerses(undefined);
+    if (!on || !bible) return;
+    let dead = false;
+    const refs = VISIONS.flatMap((v) => {
+      const r = v.verse ? parseRef(v.verse) : undefined;
+      return r?.verse ? [{ name: v.name, r }] : [];
+    });
+    api
+      .passages(
+        bible,
+        refs.map(({ r }) => ({ book: r.book, chapter: r.chapter, from: r.verse!, to: r.verse! })),
+      )
+      .then((ps) => {
+        if (dead) return;
+        const m = new Map<string, Verse>();
+        refs.forEach(({ name, r }, i) => {
+          const text = ps[i]?.verses.map((v) => plainText(v.text)).join(" ");
+          if (text) m.set(name, [text, fmtRef(r)]);
+        });
+        setVerses(m);
+      })
+      .catch((e) => console.error("picture verses:", e));
+    return () => {
+      dead = true;
+    };
+  }, [on, bible]);
+  return verses;
 }

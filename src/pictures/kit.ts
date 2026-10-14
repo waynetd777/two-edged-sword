@@ -24,6 +24,12 @@ export interface Frame {
   rgb: (cool?: boolean) => RGB;
   /** A soft round dot of the warm (or cool) colour, 64px, to draw scaled. */
   dot: (cool?: boolean) => HTMLCanvasElement;
+  /** The picture's verse, to show with `verse`; absent when verses are off or the Bible hasn't it. */
+  verse?: Verse;
+  /** How far down a verse may come: the page's foot, or above the flames when there are no words. */
+  floor: number;
+  /** The stretch of the page the picture stands in (its first `room.place`), which its verse keeps within. */
+  span?: [number, number];
 }
 
 /**
@@ -33,6 +39,8 @@ export interface Frame {
  */
 export interface Room {
   place: (width: number) => { x: number; scale: number };
+  /** Its verse will be shown: a picture that fills the page places a stretch for it only then. */
+  verse: boolean;
 }
 
 export type Lane = "back" | "pass";
@@ -47,6 +55,8 @@ export interface Vision {
    * themes are in the song's title or words is chosen more often while it plays (Visions.tsx).
    */
   themes?: string[];
+  /** A verse for the picture ("Psalm 23:2"), shown beneath it in the Bible chosen in Settings: a whole verse, so it reads right in any. */
+  verse?: string;
   make: (w: number, h: number, room: Room) => (f: Frame) => void;
 }
 
@@ -141,6 +151,96 @@ export function rangePath(ctx: CanvasRenderingContext2D, y: (x: number) => numbe
 }
 
 export const displayFont = () => getComputedStyle(document.documentElement).getPropertyValue("--display") || "Georgia, serif";
+
+/** A picture's verse as it is shown: its words, from the Bible chosen in Settings, and where they're from. */
+export type Verse = [words: string, ref: string];
+/**
+ * Where a picture stands, for its verse to keep clear of it: its middle across (`x`), its top and
+ * its foot, and `width`, the stretch it was placed in (`room.place`), which its verse keeps within.
+ * A picture that fills the page gives a stretch it placed for the verse alone, and where in it.
+ */
+export interface Box {
+  x: number;
+  top: number;
+  bottom: number;
+  width: number;
+}
+let verseFont = "";
+/** How high a verse's words are: a little under 2% of the page's shorter side. */
+export const verseSize = (w: number, h: number) => Math.max(13, Math.min(w, h) * 0.019);
+/** How wide a verse is at most, and so the stretch a picture that fills the page places for it. */
+export const verseWidth = (w: number, h: number) => verseSize(w, h) * 17;
+/**
+ * The picture's verse, if it has one and verses are on: its words in a faint italic, wrapped, with
+ * the reference smaller beneath. Under the picture (`b`), or over it when there isn't room under
+ * it above `f.floor` (the page's foot, or the flames'), or failing both (a picture as tall as the
+ * page, `placeBeside`) beside it; always within the stretch the picture was placed in, so it never
+ * runs onto the words or the other picture beside them. It comes in once the picture is well in
+ * view, and goes with it.
+ */
+export function verse(f: Frame, b: Box) {
+  if (!f.verse) return;
+  const [words, ref] = f.verse;
+  const { ctx } = f;
+  const a = 0.35 * f.env * smooth(f.k * 3 - 1);
+  if (a <= 0.002) return;
+  const size = verseSize(f.w, f.h),
+    gap = size;
+  verseFont ||= displayFont();
+  ctx.save();
+  ctx.globalAlpha = 1; // whatever the picture left it at
+  ctx.font = `italic 400 ${Math.round(size)}px ${verseFont}`;
+  // The words in lines no wider than `most`, and how wide and high they come out.
+  const lay = (most: number) => {
+    const lines: string[] = [];
+    for (const word of words.split(" ")) {
+      const last = lines[lines.length - 1];
+      if (last && ctx.measureText(`${last} ${word}`).width <= most) lines[lines.length - 1] = `${last} ${word}`;
+      else lines.push(word);
+    }
+    return { lines, wide: Math.max(...lines.map((l) => ctx.measureText(l).width)), high: lines.length * size * 1.3 + size * 1.1 };
+  };
+  const [s0, s1] = f.span ?? [b.x - b.width / 2, b.x + b.width / 2];
+  let { lines, wide, high } = lay(Math.min(verseWidth(f.w, f.h), s1 - s0));
+  let x = Math.max(s0 + wide / 2, Math.min(s1 - wide / 2, b.x)),
+    top: number;
+  if (b.bottom + gap + high <= f.floor) top = b.bottom + gap;
+  else if (b.top - gap - high >= 16) top = b.top - gap - high;
+  else {
+    // Beside it, on the side with more room, low on the page; or, with no room there either, as
+    // low as it can go.
+    const left = b.x - b.width / 2 - gap - s0,
+      right = s1 - (b.x + b.width / 2 + gap);
+    const room = Math.max(left, right);
+    if (room >= size * 8) {
+      ({ lines, wide, high } = lay(Math.min(verseWidth(f.w, f.h), room)));
+      x = left > right ? b.x - b.width / 2 - gap - wide / 2 : b.x + b.width / 2 + gap + wide / 2;
+      top = Math.min(f.h * 0.6, f.floor - high);
+    } else top = Math.max(16, Math.min(b.bottom + gap, f.floor - high));
+  }
+  ctx.textAlign = "center";
+  ctx.textBaseline = "top";
+  ctx.fillStyle = f.ink(a);
+  lines.forEach((l, i) => ctx.fillText(l, x, top + i * size * 1.3));
+  ctx.font = `400 ${Math.round(size * 0.78)}px ${verseFont}`;
+  ctx.fillStyle = f.ink(a * 0.8);
+  ctx.fillText(ref, x, top + lines.length * size * 1.3 + size * 0.25);
+  ctx.restore();
+}
+
+/**
+ * `room.place` for a picture as tall as the page, which leaves its verse no room above or below
+ * it: when the verse will be shown, a stretch with room for it beside the picture too, the picture
+ * to one side of it. Where the picture goes, and its scale, as `place` gives them.
+ */
+export function placeBeside(room: Room, w: number, h: number, width: number) {
+  if (!room.verse) return room.place(width);
+  const vw = verseWidth(w, h) + verseSize(w, h);
+  const at = room.place(width + vw);
+  const k = Math.min(1, at.scale * (1 + vw / width)) * width; // the picture's width, as it fits
+  const side = random() < 0.5 ? -1 : 1;
+  return { x: at.x + (side * ((width + vw) * at.scale - k)) / 2, scale: k / width };
+}
 
 /** A small flame, flickering, its foot at (x, y), `s` high (a lamp's, the menorah's, Pentecost's). */
 export function flame(f: Frame, x: number, y: number, s: number, seed: number, a = 1) {
@@ -320,7 +420,7 @@ function loadBitmap(uri: string, floor: number, light: "inverted" | "photo") {
     return c;
   };
   return {
-    /** Draw it centred at (x, y), `width` wide, `a` strong, scaled by `k` about its middle. */
+    /** Draw it centred at (x, y), `width` wide, `a` strong, scaled by `k` about its middle; how high it is (unscaled), once loaded. */
     draw(f: Frame, x: number, y: number, width: number, a: number, k = 1) {
       a *= PHOTO;
       if (!img.complete || !img.naturalWidth) return;
@@ -336,6 +436,7 @@ function loadBitmap(uri: string, floor: number, light: "inverted" | "photo") {
       ctx.imageSmoothingQuality = "high";
       ctx.drawImage(tinted.canvas, -width / 2, -h / 2, width, h);
       ctx.restore();
+      return h;
     },
   };
 }
@@ -344,7 +445,7 @@ function loadBitmap(uri: string, floor: number, light: "inverted" | "photo") {
  * A picture from a bitmap (an engraving or photograph, or with `painting` a detail of a painting),
  * `size` of the page's shorter side wide, in the middle of the page beside the words: rising a
  * little into place in a soft glow that swells on the beat, and breathing; a painting comes up
- * more slowly and breathes less.
+ * more slowly and breathes less; its verse beneath it.
  */
 export function photo(uri: string, size: number, painting = false): Vision["make"] {
   const [rate, rise, sway, breath] = painting ? [2.2, 12, 0.003, 0.9] : [2.4, 14, 0.004, 1.1];
@@ -357,7 +458,9 @@ export function photo(uri: string, size: number, painting = false): Vision["make
     return (f) => {
       const come = smooth(f.k * rate);
       glow(f.ctx, x, y, W * 0.5, f.ink(0.08 * f.env * come * (0.92 + 0.08 * f.beat)), f.ink(0));
-      pic.draw(f, x, y + (1 - come) * rise, W, f.env * come, 1 + sway * Math.sin(f.t * breath));
+      const ph = pic.draw(f, x, y + (1 - come) * rise, W, f.env * come, 1 + sway * Math.sin(f.t * breath));
+      // The bitmap's faded edge, round the picture, is left out.
+      if (ph) verse(f, { x, top: y - ph * 0.4, bottom: y + ph * 0.4, width: W });
     };
   };
 }

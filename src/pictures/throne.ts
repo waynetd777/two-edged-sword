@@ -4,7 +4,7 @@
 // The throne room: the throne, the Lamb, the Lion of Judah, the sea of glass, crowns cast down,
 // the seraph's six wings, lightnings, the scroll, the trumpet, the heavenly host.
 
-import { beam, bitmap, glow, lay, layering, photo, random, rnd, smooth, TAU, tones, Vision } from "./kit";
+import { beam, bitmap, glow, lay, layering, photo, random, rnd, smooth, TAU, tones, verse, verseWidth, Vision } from "./kit";
 import { ANDES_CROWN_BITMAP } from "./andes-crown-bitmap";
 import { LAMB_BITMAP } from "./lamb-bitmap";
 import { LION_BITMAP } from "./lion-bitmap";
@@ -80,6 +80,7 @@ function crownPath(G: CanvasRenderingContext2D, s: number) {
 export const THRONE: Vision[] = [
   {
     name: "throne",
+    verse: "Isaiah 6:1",
     lane: "back",
     dur: [24, 40],
     themes: [
@@ -201,11 +202,14 @@ export const THRONE: Vision[] = [
           bolts[i].pts.forEach(([px, py], j) => (j ? ctx.lineTo(px, py) : ctx.moveTo(px, py)));
           ctx.stroke();
         }
+        // From the top of the rainbow to the foot of the steps.
+        verse(f, { x, top: top - S * 0.65, bottom: floor, width: S * 2.2 });
       };
     },
   },
   {
     name: "lamb",
+    verse: "John 1:29",
     lane: "pass",
     dur: [13, 20],
     themes: [
@@ -235,12 +239,14 @@ export const THRONE: Vision[] = [
       return (f) => {
         const come = smooth(f.k * 2.4);
         glow(f.ctx, x, y - W * 0.05, W * 0.6, f.ink(0.12 * f.env * come * (0.92 + 0.08 * f.beat)), f.ink(0));
-        pic.draw(f, x, y + (1 - come) * 16, W, f.env * come, 1 + 0.005 * Math.sin(f.t * 1.2));
+        const ph = pic.draw(f, x, y + (1 - come) * 16, W, f.env * come, 1 + 0.005 * Math.sin(f.t * 1.2));
+        if (ph) verse(f, { x, top: y - ph * 0.4, bottom: y + ph * 0.4, width: W });
       };
     },
   },
   {
     name: "lion of judah",
+    verse: "Revelation 5:5",
     lane: "pass",
     dur: [13, 20],
     themes: [
@@ -271,12 +277,14 @@ export const THRONE: Vision[] = [
       return (f) => {
         const come = smooth(f.k * 2.4);
         glow(f.ctx, x, y, W * 0.7, f.ink(0.1 * f.env * come * (0.92 + 0.08 * f.beat)), f.ink(0));
-        pic.draw(f, x, y + (1 - come) * 16, W, f.env * come, 1 + 0.006 * Math.sin(f.t * 1.4));
+        const ph = pic.draw(f, x, y + (1 - come) * 16, W, f.env * come, 1 + 0.006 * Math.sin(f.t * 1.4));
+        if (ph) verse(f, { x, top: y - ph * 0.4, bottom: y + ph * 0.4, width: W });
       };
     },
   },
   {
     name: "crown of glory",
+    verse: "1 Peter 5:4",
     lane: "pass",
     dur: [13, 20],
     themes: [
@@ -302,6 +310,7 @@ export const THRONE: Vision[] = [
   },
   {
     name: "sea of glass",
+    verse: "Psalm 93:4",
     lane: "back",
     dur: [24, 40],
     themes: [
@@ -321,7 +330,9 @@ export const THRONE: Vision[] = [
       "endless",
       "eternity",
     ],
-    make: (w, h) => {
+    make: (w, h, room) => {
+      // Its verse on the glass, beside the words.
+      const { x: vx, scale: vk } = room.verse ? room.place(verseWidth(w, h)) : { x: 0, scale: 0 };
       const hz = h * 0.42,
         cx = w * rnd(0.4, 0.6);
       const glints = Array.from({ length: 90 }, () => ({
@@ -380,11 +391,13 @@ export const THRONE: Vision[] = [
           beam(f, x - g.l * g.u, y, x + g.l * g.u, y, 1, a);
           if (g.fire) glow(ctx, x, y, 6 + g.u * 14, f.ink(0.4 * a), f.ink(0));
         }
+        verse(f, { x: vx, top: h * 0.66, bottom: h * 0.66, width: verseWidth(w, h) * vk });
       };
     },
   },
   {
     name: "crowns cast down",
+    verse: "Revelation 4:11",
     lane: "pass",
     dur: [13, 20],
     themes: [
@@ -466,11 +479,14 @@ export const THRONE: Vision[] = [
           if (q < 1) continue;
           glow(ctx, c.x1, floor - S * 0.5, c.s * 1.6, f.ink(0.12 * f.env * (0.6 + 0.4 * Math.sin(f.t * 1.3 + c.x1))), f.ink(0));
         }
+        // The crowns where they lie, and the line of light beneath them.
+        verse(f, { x, top: floor - S * 1.2, bottom: floor + S * 0.5, width: S * 7 });
       };
     },
   },
   {
     name: "six wings",
+    verse: "Isaiah 6:3",
     lane: "back",
     dur: [22, 36],
     themes: [
@@ -555,11 +571,13 @@ export const THRONE: Vision[] = [
         L.fillStyle = cut;
         L.fillRect(-S, -S, S * 2, S * 2);
         lay(f, canvas, 0.55 * f.env * come, S * 0.1);
+        verse(f, { x, top: y - S * 1.5 - 4, bottom: y + S * 1.5 + 4, width: S * 3.8 });
       };
     },
   },
   {
     name: "lightnings",
+    verse: "Psalm 97:4",
     lane: "back",
     dur: [18, 30],
     moving: true,
@@ -580,7 +598,8 @@ export const THRONE: Vision[] = [
       "the heavens declare",
       "thunders",
     ],
-    make: (w, h) => {
+    make: (w, h, room) => {
+      const { x: vx, scale: vk } = room.verse ? room.place(verseWidth(w, h)) : { x: 0, scale: 0 };
       const puffs = Array.from({ length: 22 }, () => ({
         x: rnd(-0.1, 1.1) * w,
         y: rnd(-0.05, 0.22) * h,
@@ -650,11 +669,14 @@ export const THRONE: Vision[] = [
           ctx.drawImage(dot, x - p.r, p.y - p.r * 0.6 + Math.sin(f.t * 0.3 + p.p) * 5, p.r * 2, p.r * 1.2);
         }
         ctx.globalAlpha = 1;
+        // Low down, where the bolts have mostly spent themselves.
+        verse(f, { x: vx, top: h * 0.8, bottom: h * 0.8, width: verseWidth(w, h) * vk });
       };
     },
   },
   {
     name: "scroll",
+    verse: "Hebrews 10:7",
     lane: "pass",
     dur: [13, 20],
     themes: [
@@ -750,11 +772,13 @@ export const THRONE: Vision[] = [
           const a = smooth((open - 0.5) * 2);
           glow(ctx, x, y, half * 0.8, f.ink(0.08 * f.env * a), f.ink(0));
         }
+        verse(f, { x, top: y - S * 0.82, bottom: y + S * 0.82, width: S * 2.6 });
       };
     },
   },
   {
     name: "trumpet",
+    verse: "Psalm 98:6",
     lane: "pass",
     dur: [13, 20],
     themes: [
@@ -855,11 +879,14 @@ export const THRONE: Vision[] = [
           ctx.arc(bx, by, r, mid - 0.9, mid + 0.9);
           ctx.stroke();
         }
+        // From the glow at the bell down to the mouthpiece.
+        verse(f, { x, top: y - S * 1.2, bottom: y + S * 0.6 + (1 - raise) * 30, width: S * 2.4 });
       };
     },
   },
   {
     name: "heavenly host",
+    verse: "Luke 2:14",
     lane: "back",
     dur: [24, 40],
     themes: [
@@ -884,7 +911,7 @@ export const THRONE: Vision[] = [
       "every tongue",
     ],
     make: (w, h, room) => {
-      const cx = room.place(w * 0.5).x,
+      const { x: cx, scale: ck } = room.place(w * 0.5),
         cy = h * 0.18;
       const rings = Array.from({ length: 9 }, (_, i) => ({
         r: h * (0.16 + i * 0.1),
@@ -918,6 +945,8 @@ export const THRONE: Vision[] = [
           }
         });
         ctx.globalAlpha = 1;
+        // Below the nearest of them, away from the light.
+        verse(f, { x: cx, top: h * 0.74, bottom: h * 0.74, width: w * 0.5 * ck });
       };
     },
   },

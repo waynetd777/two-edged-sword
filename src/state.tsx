@@ -51,6 +51,9 @@ export interface Settings {
   highlightWords: boolean;
   /** Faint pictures (a cross, a dove, stars…) behind a playing song's words (Visions). */
   songVisions: boolean;
+  /** A verse beneath each of those pictures, from `songVerseBible` ("" for the default translation). */
+  songVerses: boolean;
+  songVerseBible: string;
   journalDir: string;
   showNotes: boolean;
   /** The journal highlighter's colour, kept until another is picked. */
@@ -121,6 +124,8 @@ const DEFAULTS: Settings = {
   readNumbers: false,
   highlightWords: true,
   songVisions: true,
+  songVerses: true,
+  songVerseBible: "",
   journalDir: "",
   showNotes: true,
   journalHighlight: "yellow",

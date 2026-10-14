@@ -3,12 +3,13 @@
 
 // Signs and symbols, drawn as if by hand, and music.
 
-import { bitmap, displayFont, drift, flame, glow, layering, random, rnd, smooth, TAU, tones, Vision } from "./kit";
+import { bitmap, displayFont, drift, flame, glow, layering, random, rnd, smooth, TAU, tones, verse, verseWidth, Vision } from "./kit";
 import { THORNS_BITMAP } from "./thorns-bitmap";
 
 export const SIGNS: Vision[] = [
   {
     name: "ichthys",
+    verse: "Matthew 4:19",
     themes: ["fish", "fisher", "fishers of men", "follow", "disciples", "follow me", "christian"],
     lane: "pass",
     dur: [10, 15],
@@ -48,11 +49,13 @@ export const SIGNS: Vision[] = [
         ctx.fillStyle = f.ink(0.35 * f.env * smooth(f.k * 3 - 1.6));
         ctx.fillText("Ι Χ Θ Υ Σ", 0, S * 0.85);
         ctx.restore();
+        verse(f, { x, top: y - S * 0.6, bottom: y + S * 0.95, width: S * 2.3 });
       };
     },
   },
   {
     name: "alpha and omega",
+    verse: "Revelation 22:13",
     themes: [
       "alpha",
       "omega",
@@ -89,11 +92,13 @@ export const SIGNS: Vision[] = [
         ctx.fillStyle = f.ink(0.07 * o);
         ctx.fillText("Ω", cx + size * 0.85, y + Math.sin(f.t * 0.4) * 6);
         ctx.restore();
+        verse(f, { x: cx, top: y - size * 0.5 - 6, bottom: y + size * 0.5 + 6, width: size * 2.8 });
       };
     },
   },
   {
     name: "anchor",
+    verse: "Hebrews 6:19",
     themes: ["anchor", "hope", "steadfast", "hold", "sure", "secure", "anchored", "holds", "my hope", "unshaken", "storm"],
     lane: "pass",
     dur: [11, 16],
@@ -103,7 +108,6 @@ export const SIGNS: Vision[] = [
       const y = h * rnd(0.35, 0.55),
         S = S0 * scale;
       const layer = layering();
-      const font = displayFont();
       return (f) => {
         const { ctx } = f;
         const p = smooth(f.k * 2.4);
@@ -181,19 +185,13 @@ export const SIGNS: Vision[] = [
         ctx.shadowBlur = 10;
         ctx.drawImage(canvas, 0, 0, f.w, f.h);
         ctx.restore();
-        ctx.save();
-        ctx.translate(x, ay);
-        ctx.rotate(tilt);
-        ctx.font = `italic 400 ${Math.round(S * 0.17)}px ${font}`;
-        ctx.textAlign = "center";
-        ctx.fillStyle = f.ink(0.35 * f.env * smooth(f.k * 3 - 1.6));
-        ctx.fillText("an anchor of the soul, both sure and stedfast", 0, S * 1.45);
-        ctx.restore();
+        verse(f, { x, top: ay - S * 1.3, bottom: ay + S * 1.2, width: S * 4 });
       };
     },
   },
   {
     name: "crown",
+    verse: "Revelation 19:16",
     themes: ["crown", "king", "king of kings", "reign", "throne", "majesty", "royal", "crowned", "glory", "exalted"],
     lane: "pass",
     dur: [11, 16],
@@ -312,11 +310,13 @@ export const SIGNS: Vision[] = [
         ctx.shadowBlur = 12;
         ctx.drawImage(canvas, 0, 0, f.w, f.h);
         ctx.restore();
+        verse(f, { x, top: cy - S * 0.72, bottom: cy + S * 0.66, width: S * 2.6 });
       };
     },
   },
   {
     name: "crown of thorns",
+    verse: "Hebrews 2:9",
     lane: "pass",
     dur: [13, 20],
     themes: [
@@ -347,12 +347,14 @@ export const SIGNS: Vision[] = [
       return (f) => {
         const come = smooth(f.k * 2.4);
         glow(f.ctx, x, y, W * 0.45, f.ink(0.1 * f.env * come * (0.92 + 0.08 * f.beat)), f.ink(0));
-        pic.draw(f, x, y + (1 - come) * 14, W, f.env * come, 1 + 0.005 * Math.sin(f.t * 0.9));
+        const ph = pic.draw(f, x, y + (1 - come) * 14, W, f.env * come, 1 + 0.005 * Math.sin(f.t * 0.9));
+        if (ph) verse(f, { x, top: y - ph * 0.4, bottom: y + ph * 0.4, width: W });
       };
     },
   },
   {
     name: "harp",
+    verse: "Psalm 33:2",
     themes: ["harp", "sing", "song", "praise", "music", "melody", "play", "psalm", "strings", "instrument", "make music"],
     lane: "pass",
     dur: [12, 18],
@@ -496,16 +498,19 @@ export const SIGNS: Vision[] = [
           if (ring > 0.1) glow(ctx, st.sx, (st.top + st.bottom) / 2, 30 / H, f.ink(0.1 * ring * f.env), f.ink(0));
         });
         ctx.restore();
+        verse(f, { x, top: y + rise - H * 0.6, bottom: y + rise + H * 0.54, width: H * 0.8 });
       };
     },
   },
   {
     name: "music",
+    verse: "Psalm 96:1",
     themes: ["sing", "song", "music", "melody", "voice", "praise", "shout", "new song", "rejoice", "joyful noise", "singing", "choir"],
     lane: "pass",
     dur: [12, 18],
     moving: true,
-    make: (w, h) => {
+    make: (w, h, room) => {
+      const { x: vx, scale: vk } = room.verse ? room.place(verseWidth(w, h)) : { x: 0, scale: 0 };
       const y0 = h * rnd(0.3, 0.6),
         p = rnd(0, TAU);
       const glyphs = ["♪", "♫", "♩", "♬"];
@@ -536,11 +541,14 @@ export const SIGNS: Vision[] = [
           ctx.fillStyle = f.ink(0.5 * f.env * Math.sin(Math.PI * u));
           ctx.fillText(n.g, x, staff(x, n.line) - 4 - lift);
         }
+        // Clear of the staff's swell, and of the notes rising off it.
+        verse(f, { x: vx, top: y0 - h * 0.06 - 90, bottom: y0 + h * 0.06 + 30, width: verseWidth(w, h) * vk });
       };
     },
   },
   {
     name: "tongues of fire",
+    verse: "Acts 2:3",
     themes: [
       "fire",
       "pentecost",
@@ -557,7 +565,8 @@ export const SIGNS: Vision[] = [
     ],
     lane: "pass",
     dur: [12, 18],
-    make: (w, h) => {
+    make: (w, h, room) => {
+      const { x: vx, scale: vk } = room.verse ? room.place(verseWidth(w, h)) : { x: 0, scale: 0 };
       const tongues = Array.from({ length: 12 }, () => ({
         x: rnd(0.08, 0.92) * w,
         y: rnd(0.2, 0.55) * h,
@@ -573,16 +582,19 @@ export const SIGNS: Vision[] = [
           const y = t.y - (1 - q) * h * 0.3 + Math.sin(f.t * 0.8 + t.p) * 5;
           flame(f, t.x + Math.sin(f.t * 0.5 + t.p) * 6, y, t.s, t.p, 0.75 * q);
         }
+        verse(f, { x: vx, top: h * 0.65, bottom: h * 0.65, width: verseWidth(w, h) * vk });
       };
     },
   },
   {
     name: "motes",
+    verse: "James 1:17",
     themes: ["light", "shine", "dust", "quiet", "sanctuary", "still", "holy", "presence", "sacred"],
     lane: "pass",
     dur: [12, 20],
     moving: true,
-    make: (w, h) => {
+    make: (w, h, room) => {
+      const { x: vx, scale: vk } = room.verse ? room.place(verseWidth(w, h)) : { x: 0, scale: 0 };
       const x0 = w * rnd(0.1, 0.5);
       const motes = Array.from({ length: 70 }, () => ({
         u: random(),
@@ -616,16 +628,19 @@ export const SIGNS: Vision[] = [
           ctx.drawImage(dot, x - m.r, y - m.r, m.r * 2, m.r * 2);
         }
         ctx.globalAlpha = 1;
+        verse(f, { x: vx, top: h * 0.65, bottom: h * 0.65, width: verseWidth(w, h) * vk });
       };
     },
   },
   {
     name: "lanterns",
+    verse: "Matthew 5:16",
     themes: ["light", "lamp", "night", "hope", "lantern", "shine", "lift", "darkness", "carry"],
     lane: "pass",
     dur: [14, 22],
     moving: true,
-    make: (w, h) => {
+    make: (w, h, room) => {
+      const { x: vx, scale: vk } = room.verse ? room.place(verseWidth(w, h)) : { x: 0, scale: 0 };
       const ls = Array.from({ length: 12 }, () => ({
         x: rnd(0.08, 0.92) * w,
         v: rnd(18, 34),
@@ -657,16 +672,19 @@ export const SIGNS: Vision[] = [
           ctx.fill();
           ctx.restore();
         }
+        verse(f, { x: vx, top: h * 0.65, bottom: h * 0.65, width: verseWidth(w, h) * vk });
       };
     },
   },
   {
     name: "fireflies",
+    verse: "John 1:5",
     themes: ["light", "night", "little", "shine", "dark", "wonder", "glow", "lights"],
     lane: "pass",
     dur: [14, 22],
     moving: true,
-    make: (w, h) => {
+    make: (w, h, room) => {
+      const { x: vx, scale: vk } = room.verse ? room.place(verseWidth(w, h)) : { x: 0, scale: 0 };
       const flies = Array.from({ length: 34 }, () => ({
         x: rnd(0.05, 0.95) * w,
         y: rnd(0.45, 0.95) * h,
@@ -688,6 +706,8 @@ export const SIGNS: Vision[] = [
           ctx.drawImage(dot, x - 3, y - 3, 6, 6);
         }
         ctx.globalAlpha = 1;
+        // Above the fireflies, who keep to the lower half.
+        verse(f, { x: vx, top: h * 0.3, bottom: h * 0.3, width: verseWidth(w, h) * vk });
       };
     },
   },

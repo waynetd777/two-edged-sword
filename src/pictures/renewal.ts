@@ -21,6 +21,8 @@ import {
   smooth,
   TAU,
   tones,
+  verse,
+  verseWidth,
   Vision,
 } from "./kit";
 import { WATER_JAR_BITMAP } from "./water-jar-bitmap";
@@ -28,6 +30,7 @@ import { WATER_JAR_BITMAP } from "./water-jar-bitmap";
 export const RENEWAL: Vision[] = [
   {
     name: "waterfall",
+    verse: "Ezekiel 43:2",
     lane: "back",
     dur: [24, 40],
     themes: [
@@ -128,11 +131,13 @@ export const RENEWAL: Vision[] = [
           if (q >= 1) rings.splice(i, 1);
           else ripples(f, rings[i].x, pool + 8, q, S * 0.8, 0.3);
         }
+        verse(f, { x, top: lip - 10, bottom: pool + S * 0.45, width: S * 2 });
       };
     },
   },
   {
     name: "potter's wheel",
+    verse: "Isaiah 64:8",
     lane: "pass",
     dur: [14, 22],
     themes: [
@@ -251,11 +256,14 @@ export const RENEWAL: Vision[] = [
         // A gleam on the wet clay, going round with the wheel.
         const ga = 0.5 + 0.5 * Math.sin(spin);
         glow(ctx, x - S * 0.3, y - S * H * 0.5, S * 0.5, f.ink(0.12 * f.env * ga), f.ink(0));
+        // Up to the finished vase's lip, so the verse stays put while the clay rises.
+        verse(f, { x, top: y - S * 2.3, bottom: y + S * 0.42, width: S * 3 });
       };
     },
   },
   {
     name: "desert blooms",
+    verse: "Isaiah 35:1",
     lane: "back",
     dur: [24, 40],
     themes: [
@@ -280,8 +288,8 @@ export const RENEWAL: Vision[] = [
       "rose of sharon",
     ],
     make: (w, h, room) => {
-      const cx = room.place(w * 0.3).x,
-        hz = h * 0.56;
+      const { x: cx, scale } = room.place(w * 0.3);
+      const hz = h * 0.56;
       const dunes = [0.6, 0.72, 0.85].map((b, i) => ({ y: ridge(h * b, h * (0.06 - i * 0.01)), a: 0.1 + i * 0.03 }));
       const p = rnd(0, TAU);
       const mid = (y: number) => cx + Math.sin(y * 0.014 + p) * w * 0.1 * ((y - hz) / (h - hz));
@@ -399,11 +407,14 @@ export const RENEWAL: Vision[] = [
           }
           ctx.restore();
         }
+        // From the farthest dunes down to the page's foot.
+        verse(f, { x: cx, top: h * 0.52, bottom: h, width: w * 0.3 * scale });
       };
     },
   },
   {
     name: "well",
+    verse: "Isaiah 12:3",
     lane: "pass",
     dur: [14, 22],
     themes: [
@@ -575,11 +586,13 @@ export const RENEWAL: Vision[] = [
           ctx.drawImage(dot, x + d.x * S - 2, dy - 2, 4, 4);
         }
         ctx.globalAlpha = 1;
+        verse(f, { x, top: y - S * 1.85, bottom: y + S * 0.85, width: S * 3 });
       };
     },
   },
   {
     name: "water jar",
+    verse: "John 2:7",
     lane: "pass",
     dur: [13, 20],
     themes: [
@@ -605,6 +618,7 @@ export const RENEWAL: Vision[] = [
   },
   {
     name: "garden",
+    verse: "Isaiah 58:11",
     lane: "back",
     dur: [24, 40],
     themes: [
@@ -629,7 +643,8 @@ export const RENEWAL: Vision[] = [
       "new creation",
       "alive again",
     ],
-    make: (w, h) => {
+    make: (w, h, room) => {
+      const { x: vx, scale: vk } = room.verse ? room.place(verseWidth(w, h)) : { x: 0, scale: 0 };
       const ground = h * 0.9;
       const flowers = Array.from({ length: Math.round(w / 26) }, (_, i) => ({
         x: (i + rnd(0.2, 0.8)) * 26,
@@ -720,11 +735,14 @@ export const RENEWAL: Vision[] = [
           ctx.restore();
           glow(ctx, tx, ty, s * 1.4, f.ink(0.12 * f.env * open * (0.85 + 0.15 * Math.sin(f.t * 1.3 + fl.p))), f.ink(0));
         }
+        // In the clear air above the tallest flowers.
+        verse(f, { x: vx, top: h * 0.36, bottom: h * 0.36, width: verseWidth(w, h) * vk });
       };
     },
   },
   {
     name: "banquet table",
+    verse: "Psalm 23:5",
     lane: "back",
     dur: [24, 40],
     themes: [
@@ -861,11 +879,14 @@ export const RENEWAL: Vision[] = [
           if (it.kind === 2) flame(f, px, py - s * 1.35, s * 1.0, it.u * 20, come);
           else if (it.kind === 0) glow(ctx, px, py - s * 1.2, s * 1.2, f.ink(0.25 * f.env * come, true), f.ink(0, true));
         }
+        // From the lamps' flames on the far side down to the foot of the legs.
+        verse(f, { x, top: y - S * 0.65, bottom: y + S * 0.5, width: S * 2.6 });
       };
     },
   },
   {
     name: "new wine",
+    verse: "John 2:11",
     lane: "pass",
     dur: [13, 20],
     themes: [
@@ -1024,11 +1045,14 @@ export const RENEWAL: Vision[] = [
           ctx.globalAlpha = 1;
         }
         glow(ctx, x, y + lv * S, S * 0.5, f.ink(0.16 * f.env * level, true), f.ink(0, true));
+        // From the jar held above down to the cup's foot.
+        verse(f, { x, top: y - S * 2.6, bottom: y + S * 0.32, width: S * 3.4 });
       };
     },
   },
   {
     name: "rock of ages",
+    verse: "Psalm 62:2",
     lane: "back",
     dur: [24, 40],
     themes: [
@@ -1268,11 +1292,13 @@ export const RENEWAL: Vision[] = [
           ctx.drawImage(dot, x + m.x * R * (0.1 + 0.6 * (1 - u)) + Math.sin(f.t + m.p) * 4 - 2, ground - u * R * 1.3 - 2, 4, 4);
         }
         ctx.globalAlpha = 1;
+        verse(f, { x, top: ground - R * 1.5, bottom: ground + R * 0.1, width: R * 2.4 });
       };
     },
   },
   {
     name: "the catch",
+    verse: "Luke 5:6",
     lane: "pass",
     dur: [13, 20],
     themes: [
@@ -1482,11 +1508,14 @@ export const RENEWAL: Vision[] = [
         }
         ctx.globalAlpha = 1;
         glow(ctx, x + shift, sea - lift + S * 0.9, S * 1.3, f.ink(0.14 * f.env * haul), f.ink(0));
+        // The net hauled up, from where its ropes gather down to the water, which the verse sits in.
+        verse(f, { x, top: sea - S * 3.5, bottom: sea, width: S * 2.6 });
       };
     },
   },
   {
     name: "manna",
+    verse: "Psalm 78:24",
     lane: "pass",
     dur: [13, 20],
     moving: true,
@@ -1511,8 +1540,9 @@ export const RENEWAL: Vision[] = [
       "supply",
       "all i need",
     ],
-    make: (w, h) => {
+    make: (w, h, room) => {
       const ground = h * 0.9;
+      const { x: vx, scale: vk } = room.verse ? room.place(verseWidth(w, h)) : { x: 0, scale: 0 };
       const flakes = Array.from({ length: 60 }, () => ({
         x: rnd(0, w),
         o: random(),
@@ -1559,6 +1589,7 @@ export const RENEWAL: Vision[] = [
         gg.addColorStop(1, f.ink(0, true));
         ctx.fillStyle = gg;
         ctx.fillRect(0, ground - 10, w, h - ground + 10);
+        verse(f, { x: vx, top: h * 0.6, bottom: h * 0.6, width: verseWidth(w, h) * vk });
       };
     },
   },

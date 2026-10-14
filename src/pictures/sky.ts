@@ -3,15 +3,17 @@
 
 // The sky: light from above, stars, the moon, clouds.
 
-import { beam, Frame, glow, layering, random, RGB, rnd, smooth, TAU, Vision } from "./kit";
+import { beam, Frame, glow, layering, random, RGB, rnd, smooth, TAU, verse, verseWidth, Vision } from "./kit";
 
 export const SKY: Vision[] = [
   {
     name: "rays",
+    verse: "Psalm 84:11",
     themes: ["light", "shine", "glory", "heaven", "radiance", "sun", "light of the world", "shine on", "brighter", "glorious light"],
     lane: "back",
     dur: [20, 36],
-    make: (w, h) => {
+    make: (w, h, room) => {
+      const { x: vx, scale: vk } = room.verse ? room.place(verseWidth(w, h)) : { x: 0, scale: 0 };
       const sx = w * rnd(0.15, 0.85),
         sy = -h * 0.3;
       const rays = Array.from({ length: 9 }, (_, i) => ({ a: (i - 4) * 0.13 + rnd(-0.04, 0.04), wd: rnd(0.02, 0.06), p: rnd(0, TAU) }));
@@ -31,15 +33,17 @@ export const SKY: Vision[] = [
           f.ctx.lineTo(sx + Math.cos(ang + wd) * L, sy + Math.sin(ang + wd) * L);
           f.ctx.fill();
         }
+        verse(f, { x: vx, top: h * 0.65, bottom: h * 0.65, width: verseWidth(w, h) * vk });
       };
     },
   },
   {
     name: "stars",
+    verse: "Psalm 147:4",
     themes: ["star", "stars", "night", "sky", "heavens", "universe", "shining", "bright morning star", "constellation"],
     lane: "back",
     dur: [24, 40],
-    make: (w, h) => {
+    make: (w, h, room) => {
       const stars = Array.from({ length: Math.round((w * h) / 6000) }, () => ({
         x: rnd(0, w),
         y: rnd(0, h * 0.8) ** 1.15 / (h * 0.8) ** 0.15,
@@ -47,7 +51,8 @@ export const SKY: Vision[] = [
         p: rnd(0, TAU),
         s: rnd(0.6, 2),
       }));
-      const bx = w * rnd(0.25, 0.75),
+      // The bright star, with its verse beneath it beside the words (when it has one).
+      const { x: bx, scale: vk } = room.verse ? room.place(verseWidth(w, h)) : { x: w * rnd(0.25, 0.75), scale: 1 },
         by = h * rnd(0.15, 0.3);
       const shoot = { at: rnd(0.3, 0.7), x: rnd(0.1, 0.6) * w, y: rnd(0.05, 0.3) * h, d: rnd(0.3, 0.5) };
       return (f) => {
@@ -79,15 +84,18 @@ export const SKY: Vision[] = [
           ctx.lineTo(x, y);
           ctx.stroke();
         }
+        verse(f, { x: bx, top: by - 70, bottom: by + 70, width: verseWidth(w, h) * vk });
       };
     },
   },
   {
     name: "glory",
+    verse: "Psalm 57:5",
     themes: ["glory", "glorious", "heaven", "splendour", "splendor", "majesty", "radiant", "shine", "unveiled"],
     lane: "back",
     dur: [24, 40],
-    make: (w, h) => {
+    make: (w, h, room) => {
+      const { x: vx, scale: vk } = room.verse ? room.place(verseWidth(w, h)) : { x: 0, scale: 0 };
       const bands = [
         { cool: false, y: 0.16, p: rnd(0, TAU) },
         { cool: true, y: 0.24, p: rnd(0, TAU) },
@@ -110,11 +118,13 @@ export const SKY: Vision[] = [
           for (let x = w + 16; x >= 0; x -= 16) ctx.lineTo(x, top(x) + th * (0.7 + 0.3 * Math.sin(x * 0.006 + f.t * 0.3)));
           ctx.fill();
         }
+        verse(f, { x: vx, top: h * 0.65, bottom: h * 0.65, width: verseWidth(w, h) * vk });
       };
     },
   },
   {
     name: "sunrise",
+    verse: "Lamentations 3:23",
     themes: [
       "morning",
       "sunrise",
@@ -131,7 +141,7 @@ export const SKY: Vision[] = [
     lane: "back",
     dur: [24, 40],
     make: (w, h, room) => {
-      const x = room.place(h * 0.6).x;
+      const { x, scale } = room.place(h * 0.6);
       const strata = Array.from({ length: 5 }, () => ({ y: rnd(0.6, 0.85), l: rnd(0.2, 0.5), x: rnd(0, 1), s: rnd(3, 9) }));
       return (f) => {
         const { ctx } = f;
@@ -146,15 +156,19 @@ export const SKY: Vision[] = [
           const sx = ((s.x * w + f.t * s.s) % (w * 1.4)) - w * 0.2;
           beam(f, sx, h * s.y, sx + w * s.l, h * s.y, 2, 0.12 * f.env);
         }
+        // The sun's bright middle, rising from below the page's foot: the verse goes over it.
+        verse(f, { x, top: y - h * 0.16, bottom: Math.min(h, y + h * 0.16), width: h * 0.6 * scale });
       };
     },
   },
   {
     name: "rainbow",
+    verse: "Genesis 9:13",
     themes: ["rainbow", "promise", "covenant", "storm", "after the rain", "faithful", "promises"],
     lane: "back",
     dur: [18, 30],
-    make: (w, h) => {
+    make: (w, h, room) => {
+      const { x: vx, scale: vk } = room.verse ? room.place(verseWidth(w, h)) : { x: 0, scale: 0 };
       const cx = w * rnd(0.35, 0.65),
         cy = h * 1.08,
         R = Math.max(w * 0.5, h * 0.75);
@@ -208,15 +222,18 @@ export const SKY: Vision[] = [
         ctx.globalAlpha = (f.dark ? 0.15 : 0.19) * f.env;
         ctx.drawImage(drawn.canvas, 0, 0, f.w, f.h);
         ctx.globalAlpha = 1;
+        verse(f, { x: vx, top: h * 0.65, bottom: h * 0.65, width: verseWidth(w, h) * vk });
       };
     },
   },
   {
     name: "clouds",
+    verse: "Psalm 36:5",
     themes: ["cloud", "clouds", "sky", "heaven", "above", "carried", "on the clouds"],
     lane: "back",
     dur: [24, 40],
-    make: (w, h) => {
+    make: (w, h, room) => {
+      const { x: vx, scale: vk } = room.verse ? room.place(verseWidth(w, h)) : { x: 0, scale: 0 };
       const clouds = Array.from({ length: 6 }, () => {
         const cw = rnd(160, 320);
         return {
@@ -234,11 +251,13 @@ export const SKY: Vision[] = [
           for (const p of c.puffs) f.ctx.drawImage(dot, x + p.dx - p.r, c.y + p.dy - p.r * 0.7, p.r * 2, p.r * 1.4);
         }
         f.ctx.globalAlpha = 1;
+        verse(f, { x: vx, top: h * 0.7, bottom: h * 0.7, width: verseWidth(w, h) * vk });
       };
     },
   },
   {
     name: "twelve stars",
+    verse: "Psalm 148:3",
     themes: ["star", "stars", "crown", "twelve", "israel", "heavens"],
     lane: "back",
     dur: [20, 34],
@@ -259,11 +278,13 @@ export const SKY: Vision[] = [
           beam(f, sx, sy - 13, sx, sy + 13, 1.2, 0.4 * b);
           beam(f, sx - 9, sy, sx + 9, sy, 1.2, 0.35 * b);
         }
+        verse(f, { x, top: y - R * 0.92 - 16, bottom: y + R * 0.92 + 16, width: R0 * 2.4 * scale });
       };
     },
   },
   {
     name: "galaxy",
+    verse: "Psalm 33:6",
     themes: ["galaxy", "galaxies", "universe", "stars", "heavens", "creation", "stars in the sky", "spoke", "cosmos", "planets", "formed"],
     lane: "back",
     dur: [24, 40],
@@ -303,17 +324,21 @@ export const SKY: Vision[] = [
         }
         ctx.restore();
         ctx.globalAlpha = 1;
+        // How high its tilted, flattened disc reaches.
+        const hy = R * Math.hypot(Math.sin(tilt), 0.56 * Math.cos(tilt));
+        verse(f, { x, top: y - hy, bottom: y + hy, width: R0 * 2.1 * scale });
       };
     },
   },
   {
     name: "moon",
+    verse: "Psalm 136:9",
     themes: ["moon", "night", "silent", "still", "sleep", "watch", "midnight", "quiet"],
     lane: "back",
     dur: [24, 40],
     make: (w, h, room) => {
       const r = Math.min(w, h) * 0.06;
-      const { x } = room.place(r * 6);
+      const { x, scale } = room.place(r * 6);
       const y = h * rnd(0.18, 0.3);
       const stars = Array.from({ length: 40 }, () => ({ x: rnd(0, w), y: rnd(0, h * 0.6), r: rnd(1.2, 3), p: rnd(0, TAU) }));
       const cloud = Array.from({ length: 7 }, () => ({ dx: rnd(-1.6, 1.6) * r, dy: rnd(-0.3, 0.3) * r, s: rnd(0.6, 1.1) * r }));
@@ -362,16 +387,19 @@ export const SKY: Vision[] = [
         const puff = f.dot();
         for (const c of cloud) ctx.drawImage(puff, cx + c.dx - c.s * 1.6, y + r * 0.5 + c.dy - c.s * 0.5, c.s * 3.2, c.s);
         ctx.globalAlpha = 1;
+        verse(f, { x, top: y - r, bottom: y + r * 1.4, width: r * 6 * scale });
       };
     },
   },
   {
     name: "shooting stars",
+    verse: "Daniel 12:3",
     themes: ["star", "stars", "night", "sky", "heavens", "falling"],
     lane: "pass",
     dur: [10, 16],
     moving: true,
-    make: (w, h) => {
+    make: (w, h, room) => {
+      const { x: vx, scale: vk } = room.verse ? room.place(verseWidth(w, h)) : { x: 0, scale: 0 };
       const dir = random() < 0.5 ? 1 : -1;
       const meteors = Array.from({ length: 7 }, () => ({
         at: rnd(0.08, 0.8),
@@ -411,6 +439,7 @@ export const SKY: Vision[] = [
           ctx.stroke();
           glow(ctx, hx, hy, 10, f.ink(0.6 * a, true), f.ink(0, true));
         }
+        verse(f, { x: vx, top: h * 0.65, bottom: h * 0.65, width: verseWidth(w, h) * vk });
       };
     },
   },

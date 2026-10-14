@@ -3,13 +3,20 @@
 
 // The pictures viewer (visions.html, `make visions`): each of the pictures behind a song's words,
 // one at a time, drawn by Visions as on the Lyrics page, fading in and out and beginning again.
-// ← and → step through them; the keys below change the theme, the words, the colours and so on.
+// ← and → step through them; the keys below change the theme, the words (the flames without them),
+// the verses, the colours and so on. The verses are the KJV's (pictures/kjv-verses.ts).
 // For working on the pictures only: not part of the app.
 
 import { useEffect, useMemo, useState } from "react";
 import ReactDOM from "react-dom/client";
 import { setSceneVision, Visions } from "./Visions";
+import { Flames } from "./Flames";
 import { VISIONS } from "./pictures";
+import { KJV_VERSES } from "./pictures/kjv-verses";
+import type { Verse } from "./pictures/kit";
+
+/** Each picture's verse in the KJV (the app uses the Bible chosen in Settings). */
+const VERSES = new Map<string, Verse>(VISIONS.filter((v) => v.verse).map((v) => [v.name, [KJV_VERSES[v.verse!] ?? "", v.verse!]]));
 
 /** Artwork to take the colours from: none (warm gold and soft blue), or a made-up cover of two. */
 const ARTS: { name: string; colours: [string, string] | null }[] = [
@@ -54,6 +61,7 @@ function Viewer() {
   const [playing, setPlaying] = useState(true);
   const [art, setArt] = useState(0);
   const [bpm, setBpm] = useState(72);
+  const [verses, setVerses] = useState(true);
   const v = VISIONS[i];
   const artUrl = useMemo(() => (ARTS[art].colours ? cover(ARTS[art].colours!) : null), [art]);
 
@@ -75,6 +83,7 @@ function Viewer() {
       else if (e.key === "c") setArt((a) => (a + 1) % ARTS.length);
       else if (e.key === "r") setRun((r) => r + 1);
       else if (e.key === "b") setBpm((b) => (b === 72 ? 120 : b === 120 ? 0 : 72));
+      else if (e.key === "v") setVerses((x) => !x);
       else return;
       e.preventDefault();
     };
@@ -103,9 +112,15 @@ function Viewer() {
           <img key={artUrl} src={artUrl} alt="" />
         </div>
       )}
+      {/* Without the words, the flames, as on the Lyrics page. */}
+      {!words && (
+        <div className="lyrics-art" aria-hidden style={{ opacity: 0.85 }}>
+          <Flames bpm={bpm} playing={playing} time={time} dark={dark} />
+        </div>
+      )}
       <div className="lyrics-art" aria-hidden>
         <Visions
-          key={`${v.name}/${run}/${words}`}
+          key={`${v.name}/${run}/${words}/${verses}`}
           bpm={bpm}
           playing={playing}
           time={time}
@@ -113,6 +128,8 @@ function Viewer() {
           art={artUrl}
           words={wordsAt}
           song={LINES.join("\n")}
+          verses={verses ? VERSES : undefined}
+          flames={!words}
         />
       </div>
       {words && (
@@ -154,7 +171,9 @@ function Viewer() {
           {playing ? "" : " · paused"}
         </span>
         {v.themes && <span style={{ opacity: 0.6 }}>themes: {v.themes.join(", ")}</span>}
-        <span className="keys">← → pictures · space pause · t theme · w words · c colours · b beat · r restart</span>
+        <span className="keys">
+          ← → pictures · space pause · t theme · w words (flames without) · v verses · c colours · b beat · r restart
+        </span>
       </div>
     </div>
   );
