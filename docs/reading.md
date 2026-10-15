@@ -46,7 +46,7 @@ The highlighter in the top bar hides and shows all highlights.
 
 - ← and → turn the page. The passage picker goes book, chapter, verse.
 - Hover a reference or Strong's number for a preview.
-- ⌘. is focus mode: the text across most of the window. Esc leaves it.
+- ⌘. is focus mode: the text across most of the window, justified. The pointer hides when the mouse is still for a few seconds and comes back when it moves. Esc leaves it.
 - ⌘+ and ⌘− make the text bigger or smaller, as the **Aa** slider does, in focus mode too.
 
 ### Choose a translation

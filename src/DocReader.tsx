@@ -615,7 +615,7 @@ export function DocReader({ focus, setFocus, openPalette }: { focus: boolean; se
               )}
               {art ? (
                 <div
-                  className="es prose selectable docbody clickwords"
+                  className={`es prose selectable docbody clickwords ${focus ? "focusjust" : ""}`}
                   {...wordHover}
                   onClick={(e) => {
                     e.stopPropagation();

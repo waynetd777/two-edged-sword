@@ -97,7 +97,7 @@ export interface Settings {
 const DEFAULTS: Settings = {
   theme: "auto",
   readSize: 19,
-  readFont: "literata",
+  readFont: "atkinson",
   studyTab: "commentary",
   docTab: "ask",
   studyCommentary: null,
@@ -624,7 +624,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     else document.documentElement.setAttribute("data-theme", t);
     document.documentElement.style.setProperty("--read-size", `${settings.readSize}px`);
     // Headings (--display) follow the reading font too, so the whole app changes with it.
-    const stack = READ_FONTS[settings.readFont]?.stack ?? READ_FONTS.literata.stack;
+    const stack = READ_FONTS[settings.readFont]?.stack ?? READ_FONTS.atkinson.stack;
     document.documentElement.style.setProperty("--serif", stack);
     document.documentElement.style.setProperty("--display", stack);
   }, [settings.theme, settings.readSize, settings.readFont]);

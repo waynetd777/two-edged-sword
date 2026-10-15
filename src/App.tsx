@@ -23,6 +23,7 @@ import { PlayerProvider, usePlayer } from "./speech";
 import { runScene } from "./scene";
 import { AppProvider, useApp } from "./state";
 import { useKeepAwake } from "./awake";
+import { useIdlePointer } from "./pointer";
 import { hideSplash } from "./splash";
 import { useTray } from "./tray";
 import { Tooltips, WordHoverBox } from "./ui";
@@ -47,6 +48,10 @@ function Screens() {
   useKeepAwake("Quiet time", !!app.session);
   useKeepAwake("reading", front && (app.screen === "read" || app.screen === "compare"));
   const [focus, setFocus] = useState(false);
+  // In focus mode on Read (a chapter, a book), and on the Lyrics page always, the pointer goes when
+  // the mouse is still. Not over an online devotional: its page is a frame, whose mouse moves
+  // aren't heard here.
+  useIdlePointer(app.screen === "read" && !app.doc?.url && (focus || app.doc?.view === "lyrics"));
   const [palette, setPalette] = useState(false);
   const [rescanError, setRescanError] = useState<string | null>(null);
 

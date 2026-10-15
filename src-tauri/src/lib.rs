@@ -194,6 +194,13 @@ fn index_progress(st: State<AppState>) -> index::Progress {
     st.index.progress()
 }
 
+/// Hides the mouse pointer until it next moves, as video players do. macOS keeps it hidden through
+/// the page scrolling or changing under it, which a CSS cursor and the window's own setting don't.
+#[tauri::command]
+fn hide_pointer(app: AppHandle) {
+    let _ = app.run_on_main_thread(|| objc2_app_kit::NSCursor::setHiddenUntilMouseMoves(true));
+}
+
 #[tauri::command]
 fn store_read(st: State<AppState>, name: String) -> Result<serde_json::Value, String> {
     store::read(&st.data, &name)
@@ -763,6 +770,7 @@ pub fn run() {
             search,
             index_progress,
             store_read,
+            hide_pointer,
             variances_read,
             store_write,
             journal_default_dir,

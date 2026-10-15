@@ -1255,6 +1255,11 @@ i.added {
   font: 400 var(--read-size)/1.8 var(--serif);
   text-wrap: pretty;
 }
+/* Focus mode's text runs from margin to margin. */
+.focusjust {
+  text-align: justify;
+  hyphens: auto;
+}
 .para .pv {
   cursor: pointer;
   border-radius: 4px;

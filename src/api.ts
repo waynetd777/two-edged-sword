@@ -237,6 +237,7 @@ export const api = {
     invoke<VerseHit[]>("strongs_verses", { bible, number, book, limit }),
   search: (query: SearchQuery) => invoke<SearchResults>("search", { query }),
   indexProgress: () => invoke<{ building: boolean; done: number; total: number }>("index_progress"),
+  hidePointer: () => invoke<void>("hide_pointer"),
   storeRead: <T>(name: string) => invoke<T | null>("store_read", { name }),
   /** A translation's differences from the KJV: the list built on this Mac, else the app's. */
   variancesRead: <T>(name: string) => invoke<T | null>("variances_read", { name }),

@@ -91,6 +91,7 @@ scroll:
 - The bar shows how far through the song Music is, with the time gone and the time left.
 - The Lyrics page is always dark below its top bar, in the light theme too. In focus mode the
   top bar is dark as well.
+- The pointer hides when the mouse is still for a few seconds, and comes back when it moves.
 - ⌘. is focus mode: the song across the whole window, the pictures beside it. Esc leaves it.
 
 <a href="images/index.md#quiet-time"><img alt="A song playing in focus mode: the lit line moves on through the words as a dove passes behind them" src="images/lyrics-focus-dark.png"></a>

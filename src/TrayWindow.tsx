@@ -54,7 +54,7 @@ async function applyTheme() {
   const t = s?.theme ?? "auto";
   if (t === "auto") document.documentElement.removeAttribute("data-theme");
   else document.documentElement.setAttribute("data-theme", t);
-  const stack = READ_FONTS[s?.readFont as ReadFont]?.stack ?? READ_FONTS.literata.stack;
+  const stack = READ_FONTS[s?.readFont as ReadFont]?.stack ?? READ_FONTS.atkinson.stack;
   document.documentElement.style.setProperty("--serif", stack);
   document.documentElement.style.setProperty("--display", stack);
 }

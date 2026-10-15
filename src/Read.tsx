@@ -677,7 +677,7 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
         </div>
       )}
       <p
-        className="para selectable"
+        className={`para selectable ${focus ? "focusjust" : ""}`}
         dir={dir}
         style={{ margin: 0, fontSize: focus ? "calc(var(--read-size) + 2px)" : undefined, lineHeight: focus ? 1.85 : undefined }}
       >
