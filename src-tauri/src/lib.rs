@@ -475,40 +475,70 @@ const DARK_PAGE: &str = include_str!("dark_page.js");
 
 /// Whether a web page lets itself be shown inside another page (an online devotional added by the
 /// user, framed in the reading column), from its headers: X-Frame-Options, or a
-/// Content-Security-Policy with frame-ancestors, says no. Fetched with the system's curl.
+/// Content-Security-Policy with frame-ancestors, says no. Fetched with the system's curl. A site
+/// that is busy (429, 5xx) is asked twice more, after the wait it asks for: its error page's
+/// headers say nothing about the page itself, so it is an error rather than a guess.
 #[tauri::command(async)]
 fn web_frameable(url: String) -> Result<bool, String> {
     if !url.starts_with("https://") {
         return Err("only https pages can be opened".into());
     }
-    let out = std::process::Command::new("/usr/bin/curl")
-        .args([
-            "-sL",
-            "--max-time",
-            "15",
-            "-o",
-            "/dev/null",
-            "-D",
-            "-",
-            "-A",
-            "Mozilla/5.0 (Macintosh) AppleWebKit/605.1.15 Safari/605.1.15",
-            &url,
-        ])
-        .output()
-        .map_err(|e| e.to_string())?;
-    if !out.status.success() {
-        return Err("couldn't reach that address".into());
+    let mut tries = 0;
+    loop {
+        let out = std::process::Command::new("/usr/bin/curl")
+            .args([
+                "-sL",
+                "--max-time",
+                "15",
+                "-o",
+                "/dev/null",
+                "-D",
+                "-",
+                "-A",
+                "Mozilla/5.0 (Macintosh) AppleWebKit/605.1.15 Safari/605.1.15",
+                &url,
+            ])
+            .output()
+            .map_err(|e| e.to_string())?;
+        if !out.status.success() {
+            return Err("couldn't reach that address".into());
+        }
+        let headers = String::from_utf8_lossy(&out.stdout);
+        match busy(&headers) {
+            None => return Ok(frameable(&headers)),
+            Some(_) if tries == 2 => return Err("that site isn't answering just now; try again in a moment".into()),
+            Some(wait) => {
+                tries += 1;
+                std::thread::sleep(std::time::Duration::from_secs(wait * tries));
+            }
+        }
     }
-    Ok(frameable(&String::from_utf8_lossy(&out.stdout)))
+}
+
+/// The last response's lines of headers as curl prints them (`-D -`, every response after a
+/// redirect): from the last status line on, lowercased.
+fn last_response(headers: &str) -> Vec<String> {
+    let lines: Vec<String> = headers.to_lowercase().lines().map(|l| l.trim().to_string()).collect();
+    let start = lines.iter().rposition(|l| l.starts_with("http/")).unwrap_or(0);
+    lines[start..].to_vec()
+}
+
+/// When the last response says the site is busy (429, 5xx): how many seconds it asks to be left
+/// (Retry-After, 1 to 5).
+fn busy(headers: &str) -> Option<u64> {
+    let lines = last_response(headers);
+    let status: u16 = lines.first()?.split_whitespace().nth(1)?.parse().ok()?;
+    if status != 429 && status < 500 {
+        return None;
+    }
+    let wait = lines.iter().find_map(|l| l.strip_prefix("retry-after:")?.trim().parse::<u64>().ok());
+    Some(wait.unwrap_or(1).clamp(1, 5))
 }
 
 /// Whether response headers as curl prints them (`-D -`, every response after a redirect)
 /// allow framing: the last response's, which starts at the last status line.
 fn frameable(headers: &str) -> bool {
-    let text = headers.to_lowercase();
-    let lines: Vec<&str> = text.lines().map(str::trim).collect();
-    let start = lines.iter().rposition(|l| l.starts_with("http/")).unwrap_or(0);
-    !lines[start..].iter().any(|l| {
+    !last_response(headers).iter().any(|l| {
         l.starts_with("x-frame-options:")
             || (l.starts_with("content-security-policy:") && l.contains("frame-ancestors") && !l.contains("frame-ancestors *"))
     })
@@ -914,6 +944,17 @@ mod tests {
         assert!(!frameable(via));
         assert!(!frameable("HTTP/2 200\r\ncontent-security-policy: frame-ancestors 'self'\r\n"));
         assert!(frameable("HTTP/2 200\r\ncontent-security-policy: frame-ancestors *\r\n"));
+    }
+
+    #[test]
+    fn a_busy_site_is_asked_again() {
+        assert_eq!(busy("HTTP/2 200\r\n\r\n"), None);
+        assert_eq!(busy("HTTP/2 404\r\n\r\n"), None);
+        assert_eq!(busy("HTTP/2 503\r\nretry-after: 3\r\n\r\n"), Some(3));
+        assert_eq!(busy("HTTP/1.1 429 Too Many\r\nRetry-After: 120\r\n\r\n"), Some(5));
+        // A redirect to a busy page is busy; a busy redirect to a page that answered isn't.
+        assert_eq!(busy("HTTP/1.1 301 Moved\r\nLocation: https://b/\r\n\r\nHTTP/2 502\r\n\r\n"), Some(1));
+        assert_eq!(busy("HTTP/2 503\r\n\r\nHTTP/2 200\r\n\r\n"), None);
     }
 
     #[test]
