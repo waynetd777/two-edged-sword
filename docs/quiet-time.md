@@ -100,7 +100,8 @@ scroll:
 
 Lyrics come from LRCLIB (lrclib.net), a free public lyrics database: the song's name, artist,
 album and length are sent to it. If it has none, lyrics you've saved with the song in Music are
-shown, not timed.
+shown, not timed. LRCLIB is sometimes busy: the app tries again for a few seconds, then says so.
+Open the song's Lyrics again later to retry.
 
 **Try it now**, under the Closing verse card, runs today's Quiet time with its songs and closing
 verse without marking anything read. **Try it with audio** does the same, read aloud.

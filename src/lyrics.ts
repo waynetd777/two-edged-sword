@@ -59,11 +59,19 @@ function parseLrc(lrc: string): Lyrics["lines"] {
 
 const plain = (text: string): Lyrics["lines"] => text.split(/\r?\n/).map((l) => ({ text: l.trim() }));
 
+/** LRCLIB answered but turned the request away (too many requests, or overloaded), as against
+ *  not being reached at all. */
+export class LrclibBusy extends Error {}
+
 async function get(path: string): Promise<unknown> {
   let r = await fetch(`${API}/${path}`);
-  // It is sometimes briefly unavailable: once more, a moment later.
-  if (r.status >= 500) r = await new Promise((ok) => setTimeout(ok, 800)).then(() => fetch(`${API}/${path}`));
+  // It is often briefly busy (429) or unavailable (5xx): twice more, after the wait it asks for.
+  for (let tries = 0; (r.status === 429 || r.status >= 500) && tries < 2; tries++) {
+    const wait = Math.min(Math.max(+(r.headers.get("retry-after") ?? 0) || 0.8, 0.8), 5) * 1000;
+    r = await new Promise((ok) => setTimeout(ok, wait * (tries + 1))).then(() => fetch(`${API}/${path}`));
+  }
   if (r.status === 404) return null;
+  if (r.status === 429 || r.status >= 500) throw new LrclibBusy(`LRCLIB: ${r.status}`);
   if (!r.ok) throw new Error(`LRCLIB: ${r.status}`);
   return r.json();
 }
@@ -84,15 +92,28 @@ const bare = (name: string) =>
 
 async function lookup(name: string, artist: string, album: string, duration: number): Promise<Found | null> {
   const q = (o: Record<string, string>) => new URLSearchParams(o).toString();
-  const exact = (await get(
+  // A request that fails doesn't lose what the others found; only when none found anything does
+  // the lookup fail.
+  let failed: unknown = null;
+  const ask = async <T>(path: string): Promise<T | null> => {
+    try {
+      return (await get(path)) as T | null;
+    } catch (e) {
+      failed ??= e;
+      return null;
+    }
+  };
+  const exact = await ask<Found>(
     `get?${q({ track_name: name, artist_name: artist, album_name: album, duration: String(Math.round(duration)) })}`,
-  ).catch(() => null)) as Found | null;
+  );
   if (exact?.syncedLyrics) return exact;
-  let found = ((await get(`search?${q({ track_name: name, artist_name: artist })}`)) as Found[] | null) ?? [];
+  let found = (await ask<Found[]>(`search?${q({ track_name: name, artist_name: artist })}`)) ?? [];
   if (!found.some((f) => f.syncedLyrics) && bare(name) !== name)
-    found = found.concat(((await get(`search?${q({ track_name: bare(name), artist_name: artist })}`)) as Found[] | null) ?? []);
-  if (!found.length) found = ((await get(`search?${q({ q: `${bare(name)} ${artist}` })}`)) as Found[] | null) ?? [];
-  return best(exact ? [exact, ...found] : found, duration);
+    found = found.concat((await ask<Found[]>(`search?${q({ track_name: bare(name), artist_name: artist })}`)) ?? []);
+  if (!found.length) found = (await ask<Found[]>(`search?${q({ q: `${bare(name)} ${artist}` })}`)) ?? [];
+  const f = best(exact ? [exact, ...found] : found, duration);
+  if (!f && failed) throw failed;
+  return f;
 }
 
 /** The words for a song, or null when none are found. Asked once per song while the app runs. */

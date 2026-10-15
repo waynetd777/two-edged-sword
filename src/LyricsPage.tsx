@@ -10,7 +10,7 @@ import { api, MusicState } from "./api";
 import { fmtRef, parseRef } from "./bible";
 import { plainText } from "./esword";
 import { Icon, Pause, Play } from "./icons";
-import { artworkFor, Lyrics, lyricsFor, sceneSong } from "./lyrics";
+import { artworkFor, LrclibBusy, Lyrics, lyricsFor, sceneSong } from "./lyrics";
 import { useMusicState } from "./music";
 import { ReadingColumnTopbar, useEscExitsFocus } from "./ReadingColumn";
 import { useApp } from "./state";
@@ -84,7 +84,7 @@ export function LyricsPage({ focus, setFocus }: { focus: boolean; setFocus: (f: 
 
   const name = now?.name ?? "";
   const artist = now?.artist ?? "";
-  const [words, setWords] = useState<{ key: string; lyrics: Lyrics | null; offline?: boolean } | null>(null);
+  const [words, setWords] = useState<{ key: string; lyrics: Lyrics | null; failed?: "offline" | "busy" } | null>(null);
   const key = `${name}\u0000${artist}`;
   useEffect(() => {
     if (!name) return;
@@ -92,7 +92,10 @@ export function LyricsPage({ focus, setFocus }: { focus: boolean; setFocus: (f: 
     const saved = now?.lyrics ?? "";
     lyricsFor(name, artist, now?.album ?? "", now?.duration ?? 0, saved)
       .then((lyrics) => !dead && setWords({ key, lyrics }))
-      .catch(() => !dead && setWords({ key, lyrics: saved.trim() ? plainLines(saved) : null, offline: true }));
+      .catch(
+        (e) =>
+          !dead && setWords({ key, lyrics: saved.trim() ? plainLines(saved) : null, failed: e instanceof LrclibBusy ? "busy" : "offline" }),
+      );
     return () => {
       dead = true;
     };
@@ -272,7 +275,10 @@ export function LyricsPage({ focus, setFocus }: { focus: boolean; setFocus: (f: 
         )}
         {focus && <ReadingColumnTopbar focus setFocus={setFocus} tools={tools} />}
         {/* The song's heading stays put while its words scroll under it. */}
-        <div ref={heading} style={{ flexShrink: 0, padding: focus ? "18px 10% 14px" : "18px 40px 14px 36px", textAlign: focus ? "center" : undefined }}>
+        <div
+          ref={heading}
+          style={{ flexShrink: 0, padding: focus ? "18px 10% 14px" : "18px 40px 14px 36px", textAlign: focus ? "center" : undefined }}
+        >
           <div style={{ display: "flex", alignItems: "center", gap: 16, justifyContent: focus ? "center" : undefined }}>
             {artUrl && <img className="lyrics-cover" src={artUrl} alt="" />}
             <div>
@@ -296,7 +302,10 @@ export function LyricsPage({ focus, setFocus }: { focus: boolean; setFocus: (f: 
           ) : lyrics === undefined ? (
             <p className="n">Finding the words…</p>
           ) : !lyrics ? (
-            <p className="n">No lyrics found for this song{words?.offline ? " (couldn't reach LRCLIB)" : ""}.</p>
+            <p className="n">
+              No lyrics found for this song
+              {words?.failed === "busy" ? " (LRCLIB is busy; try again in a moment)" : words?.failed ? " (couldn't reach LRCLIB)" : ""}.
+            </p>
           ) : (
             <div
               style={{
