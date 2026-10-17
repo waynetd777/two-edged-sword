@@ -718,6 +718,15 @@ p {
 .firstrun li::marker {
   color: var(--gold);
 }
+.firstrun-os {
+  max-width: 560px;
+  margin: 44px auto 0;
+  text-align: left;
+  font-size: 17px;
+}
+.firstrun-os + .firstrun {
+  margin-top: 4px;
+}
 
 footer {
   padding: 48px 0 56px;

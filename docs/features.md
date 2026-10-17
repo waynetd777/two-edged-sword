@@ -1,10 +1,10 @@
 # Features
 
-A Bible study app for macOS, for reading Bibles, commentaries, dictionaries and books beside your own
-notes. It comes with the KJV, Strong's dictionaries, the Treasury of Scripture Knowledge, four
-commentaries (Matthew Henry, JFB, Clarke, Barnes) and four dictionaries (Easton's, Smith's, Nave's,
-the ISBE), and reads
-more modules in e-Sword X's formats: your own, and e-Sword X's library if you have it.
+A Bible study app for macOS and Windows, for reading Bibles, commentaries, dictionaries and books
+beside your own notes. It comes with the KJV and five more public-domain Bibles, Strong's
+dictionaries, the Treasury of Scripture Knowledge, four commentaries (Matthew Henry, JFB, Clarke,
+Barnes) and four dictionaries (Easton's, Smith's, Nave's, the ISBE), and reads more modules in
+e-Sword X's formats: your own, and on a Mac e-Sword X's library if you have it.
 It only reads them, and keeps your journal, highlights and plans separately.
 
 | Page | What's in it |
@@ -35,14 +35,36 @@ After that, macOS asks once for each thing the app uses:
 
 Something refused by mistake can be allowed in System Settings › Privacy & Security.
 
+On Windows, if Windows says it protected your PC when you run the installer, click **More info**,
+then **Run anyway**: the app isn't code-signed. It installs for you alone, with no administrator
+password, and asks for nothing more.
+
 ## Updates
 
 - The app checks for a new version once a day, and soon after it opens.
 - When there is one, it asks the next time its window is in front, with what's new in it:
   **Install and Restart**, **Later** (asked again the next day) or **Skip This Version**. Esc is Later.
 - Installing shows the download's progress, saves your work and restarts the app.
-- **Check for Updates…**, in the app menu, checks now.
+- **Check for Updates…** checks now: in the app menu on a Mac, and in the notification-area menu
+  or at the foot of Settings on Windows. On Windows an update installs with a progress window and
+  reopens the app.
 - An update waits while Ask is answering or the search index is being built.
+
+
+## On Windows
+
+The app works the same on Windows, with these differences:
+
+| | On Windows |
+|---|---|
+| Shortcuts | Ctrl in place of ⌘, as the menus and the help show them |
+| e-Sword | e-Sword for Windows' modules can't be read: their text is encrypted. Modules in e-Sword X's formats work, in the [modules folder](library.md) |
+| Your data | In `%APPDATA%\Two-edged Sword` |
+| Voices | Windows' own: add more, Hebrew and Greek included, as [Better voices](reading.md#better-voices) says |
+| Spelling and grammar | Windows' spell checker, and grammar by Harper, on the PC |
+| Worship songs | The music files in your Music folder, played by the app ([Worship music](quiet-time.md#worship-music)) |
+| The menu bar icon | In the notification area, by the clock, with Help and Check for Updates… |
+| Ask | Each AI tool is installed in your Windows account ([Ask](ask.md#claude-code-codex-antigravity-or-copilot)) |
 
 ## Getting around
 

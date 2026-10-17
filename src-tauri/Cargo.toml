@@ -1,14 +1,14 @@
 [package]
 name = "two-edged-sword"
 version = "1.0.32"
-description = "A Bible study app for macOS that reads modules in e-Sword X's formats"
+description = "A Bible study app for macOS and Windows that reads modules in e-Sword X's formats"
 authors = ["Wayne Davies"]
 license = "GPL-3.0-or-later"
 edition = "2021"
 
 [lib]
 name = "two_edged_sword_lib"
-# rlib only: this app is macOS-only, and each extra crate type is another full LTO link.
+# rlib only: each extra crate type is another full LTO link.
 crate-type = ["rlib"]
 
 # The binary name is what the Dock and Activity Monitor show in `tauri dev`.

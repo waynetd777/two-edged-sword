@@ -1,14 +1,17 @@
 # Two-edged Sword
 
-A Bible study app for macOS, for reading Bibles, commentaries, dictionaries and books beside your own
-notes. It comes with the KJV, Strong's dictionaries, the Treasury of Scripture Knowledge, Matthew Henry's
-commentary and Easton's Bible Dictionary, and reads
-more modules in e-Sword X's formats: your own, and e-Sword X's library if you have it.
+A Bible study app for macOS and Windows, for reading Bibles, commentaries, dictionaries and books
+beside your own notes. It comes with the KJV and five more public-domain Bibles, Strong's
+dictionaries, the Treasury of Scripture Knowledge, four commentaries (Matthew Henry, JFB, Clarke,
+Barnes) and four dictionaries (Easton's, Smith's, Nave's, the ISBE), and reads more modules in
+e-Sword X's formats: your own, and on a Mac e-Sword X's library if you have it.
 It only reads them, and keeps your journal, highlights and plans separately.
 
 See it on the [Two-edged Sword website](https://two-edged-sword.davies.co.za/).
 
 ## Download
+
+### Mac
 
 For a Mac with Apple silicon (M1 or later) and macOS 13 or later.
 
@@ -19,7 +22,18 @@ For a Mac with Apple silicon (M1 or later) and macOS 13 or later.
 
 It opens normally after that. The first time you use some features, macOS asks for permission: see [First run](docs/features.md#first-run).
 
-The app checks for updates once a day and offers to install them; **Check for Updates…** in the app menu checks now.
+### Windows
+
+For Windows 10 or 11, 64-bit.
+
+1. Download [Two-edged-Sword_x64-setup.exe](https://github.com/waynetd777/two-edged-sword/releases/latest/download/Two-edged-Sword_x64-setup.exe) from the [latest release](https://github.com/waynetd777/two-edged-sword/releases/latest).
+2. Run it. It installs for you alone, with no administrator password.
+3. If Windows says it protected your PC, click **More info**, then **Run anyway**: the app isn't code-signed.
+4. Open Two-edged Sword from the Start menu.
+
+A few things differ on Windows: see [On Windows](docs/features.md#on-windows).
+
+The app checks for updates once a day and offers to install them. **Check for Updates…** checks now: in the app menu on a Mac, and in the notification-area menu or Settings on Windows.
 
 <a href="docs/images/index.md#the-readme"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/read-dark.png"><img alt="Reading 1 John 1 with the study pane open on the commentaries" src="docs/images/read-light.png"></picture></a>
 
@@ -78,6 +92,10 @@ make dev                                  # the app with hot reload
 cp signing.local.example signing.local    # then name your signing certificate in it
 make install-app                          # build it and put it in /Applications
 ```
+
+On Windows (10 or 11) it needs Rust, Node, Python and Visual Studio Build Tools with the C++
+workload: `npx tauri build --debug --no-bundle` builds the app and `npx tauri build` the installer
+(see [Development](docs/development.md#commands)).
 
 Without a signing certificate, macOS asks for access to e-Sword's data after every build, if you have e-Sword X
 ([Signing and Full Disk Access](docs/development.md#signing-and-full-disk-access)).

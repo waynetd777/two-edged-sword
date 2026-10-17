@@ -92,7 +92,7 @@ The keyboard's media keys and headphone buttons work too.
 
 ### Better voices
 
-The app uses the voices installed on your Mac. The **Premium** ones sound far more natural:
+On a Mac the app uses the voices installed on it. The **Premium** ones sound far more natural:
 
 1. Open System Settings › Accessibility › Spoken Content › System voice › Manage Voices.
 2. Under English, download a voice marked (Premium), such as Zoe or Ava (US), or Jamie (UK).

@@ -65,7 +65,8 @@ The app reads e-Sword X's Mac formats:
 | `.devi` | Devotionals |
 
 It doesn't read the Windows formats (`.bblx`, `.cmtx` and so on), EPUB or SWORD modules. Where a
-module comes in both, take the Mac one.
+module comes in both, take the Mac one. That holds on Windows too: e-Sword for Windows encrypts its
+modules' text.
 
 ## Adding modules
 

@@ -6,7 +6,7 @@ Ask answers questions about whatever you're looking at: a passage, a word, searc
 journal entry or a book. It answers from your own commentaries, lexicons and dictionaries, and
 names its sources.
 
-- Chats stay on this Mac. Find them under **Recent** on any Ask panel.
+- Chats stay on your computer. Find them under **Recent** on any Ask panel.
 - Opening an old chat takes you back to where it started.
 - An answer can be added to your journal in one click.
 - After each answer the box offers a next question in grey; → or Tab types it in. Settings › AI assistant › **Suggest a next question** turns it off.
