@@ -2,16 +2,19 @@
 # SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 """Builds the modules built into the app, so it works with nothing else installed: the KJV, the
 KJV with Strong's numbers, Strong's Hebrew and Greek dictionaries, a King James concordance, the
-Treasury of Scripture Knowledge, Matthew Henry's commentary and Easton's Bible Dictionary.
+Treasury of Scripture Knowledge, four commentaries (Matthew Henry, JFB, Clarke, Barnes) and four
+dictionaries (Easton's, Smith's, Nave's, the ISBE).
 
-    python3 tools/core/build.py [--if-missing] [--only henry easton]
+    python3 tools/core/build.py [--if-missing] [--only henry easton jfb clarke barnes smith nave isbe]
 
-Writes kjv.bbli, kjv+.bbli, strong.lexi, kjc.lexi, tsk.cmti, henry.cmti and easton.dcti to
-src-tauri/modules/, which the app bundle carries in Contents/Resources/modules/ (and a debug build
-reads in place). With --if-missing, does nothing when all are there (the release build runs it that
-way); --only builds just the ones named (after the KJV, which they check references against). The ids
-are the ones the app looks for first, so Word Study, the glosses and the cross-references find them,
-and e-Sword's henry.cmti and easton.dcti, where there are, take the place of these.
+Writes kjv.bbli, kjv+.bbli, strong.lexi, kjc.lexi, tsk.cmti, henry.cmti, jfb.cmti, clarke.cmti,
+barnes.cmti, easton.dcti, smith.dcti, nave.dcti and isbe.dcti to src-tauri/modules/, which the app
+bundle carries in Contents/Resources/modules/ (and a debug build reads in place). With --if-missing,
+builds only the commentaries and dictionaries not there yet, or everything if the KJV and the
+others aren't (the release build runs it that way); --only builds just the ones named (after the
+KJV, which they check references against). The ids are the ones the app looks for first, so Word
+Study, the glosses and the cross-references find them, and e-Sword's own copies of the commentaries
+and dictionaries, where there are, take the place of these.
 
 Every source is public domain, and none is e-Sword's (its licence forbids passing its modules on):
   eBible.org's eng-kjv2006, https://ebible.org/Scriptures/eng-kjv2006_usfm.zip: the 1769 KJV with
@@ -29,6 +32,16 @@ Every source is public domain, and none is e-Sword's (its licence forbids passin
     Classics Ethereal Library, https://www.crosswire.org/ftpmirror/pub/sword/packages/rawzip/.
     Their references are checked against the KJV's verses and repaired where CCEL's are wrong,
     and misspellings found by comparing with e-Sword's copies are corrected (EASTON_TYPOS).
+  More of CrossWire's modules, each "DistributionLicense=Public Domain" in its .conf, from the same
+    rawzip folder: Jamieson, Fausset & Brown (JFB 3.0, zCom4, OSIS from CCEL), Adam Clarke (Clarke
+    2.0, zCom, OSIS from Wikisource), Barnes' Notes on the New Testament (Barnes 1.1, zCom, ThML;
+    CrossWire has no Old Testament), Smith's Bible Dictionary (Smith 1.3, RawLD, ThML), Nave's
+    Topical Bible (Nave 3.0, zLD, TEI from CCEL) and the International Standard Bible Encyclopedia
+    (ISBE 2.2, zLD, TEI). Every reference is checked against the KJV's verses: one CCEL linked to the
+    wrong book ("Re 1:1, 4, 9", 4 and 9 linked to 1 Corinthians) is read from what it shows, and one
+    that is still no real verse is left as text. Barnes' notes are placed by their own labels
+    ("Verses 22, 23."), as CrossWire's module has the books' prefaces in their first verses' slots.
+    Gill's Exposition isn't here: CrossWire has no module of it.
 The concordance and the dictionaries' occurrence counts are counted from the KJV's Strong's numbers.
 
 The GitHub files are taken at a fixed commit and checked against their sha256, so a rebuild makes
@@ -436,6 +449,8 @@ def osis_part(p, book, last):
     """One "Book.C.V" of an osisRef as (book, chapter, verse); a part with no book, or one the
     source misspells ("Ge.17.20"), takes the book cited before it."""
     bits = p.split(".")
+    if not all(x.isdigit() for x in bits[1:]):  # "John.1Jo.2" (JFB)
+        return None
     if bits[0] in OSIS_BOOK:
         return OSIS_BOOK[bits[0]], *map(int, (bits[1:] + ["0", "0"])[:2])
     if bits[0].isdigit() and last:
@@ -607,8 +622,9 @@ def write_henry():
 def zld(z):
     """[(key, entry)] from a zLD dictionary: .idx points into .dat, which holds each key and where
     its entry is in the zlib blocks of .zdt (indexed by .zdx)."""
-    def f(ext):
-        return z.read(next(n for n in z.namelist() if n.endswith(f".{ext}") and "/dict." not in n))
+    def f(ext):  # the module's own files, or dict.* where those are its name (Nave's)
+        names = [n for n in z.namelist() if n.endswith(f".{ext}")]
+        return z.read(next((n for n in names if "/dict." not in n), names[0]))
     idx, dat, zdx, zdt = f("idx"), f("dat"), f("zdx"), f("zdt")
     blocks, out = {}, []
     for i in range(len(idx) // 8):
@@ -786,6 +802,8 @@ HENRY_TYPOS = {"concecrate": "consecrate", "tallents": "talents"}
 def correct(s, typos):
     """Whole-word corrections, keeping a capital letter; and "æ" and "œ" as e-Sword writes them, so a search for "Caesar" finds them."""
     s = s.replace("æ", "ae").replace("Æ", "Ae").replace("œ", "oe").replace("Œ", "Oe")
+    if not typos:
+        return s
     pat = re.compile(r"\b(" + "|".join(map(re.escape, typos)) + r")\b", re.I)
     def fix(m):
         w = typos.get(m[0]) or typos.get(m[0].lower()) or typos.get(m[0][0].upper() + m[0][1:].lower())
@@ -813,17 +831,462 @@ def write_easton():
     print(f"easton.dcti: {len(rows)} topics")
 
 
+# ---- More of CrossWire's commentaries and dictionaries ------------------------------------------
+
+def zcom(z, test):
+    """Every slot of a zCom testament, as zcom4 gives them: the same format with a 2-byte size in
+    the verse index. A module blocked by chapter (Barnes) names its files .czs, .czv and .czz."""
+    def f(ext):
+        return z.read(next(n for n in z.namelist() if re.search(rf"/{test}\.[bcv]{ext}$", n)))
+    bzs, bzv, bzz = f("zs"), f("zv"), f("zz")
+    blocks, out = {}, []
+    for i in range(len(bzv) // 10):
+        block, offset, size = struct.unpack_from("<IIH", bzv, i * 10)
+        if not size:
+            out.append((None, ""))
+            continue
+        if block not in blocks:
+            start, length, _ = struct.unpack_from("<III", bzs, block * 12)
+            blocks[block] = zlib.decompress(bzz[start:start + length])
+        out.append(((block, offset), blocks[block][offset:offset + size].decode("utf-8", "replace")))
+    return out
+
+
+def sword_chapters(z, canon, reader):
+    """Each chapter of a SWORD commentary in the KJV's versification, as (book, chapter, verses,
+    heading, entries): the heading is the chapter's slot (and, for chapter 1, the book's), and
+    entries are [first verse, last verse, text], verses linked to one entry being one."""
+    for test, bs in canon("KJV").items():
+        try:
+            slots = reader(z, test)
+        except StopIteration:  # a module of one testament (Barnes)
+            continue
+        i = 2  # the module's heading, the testament's
+        for osis, lengths in bs:
+            book_head = slots[i][1]
+            i += 1
+            for c, n in enumerate(lengths, 1):
+                head = (book_head if c == 1 else "") + slots[i][1]
+                i += 1
+                entries = []
+                for v, (where, text) in enumerate(slots[i:i + n], 1):
+                    if entries and where and where == entries[-1][0]:
+                        entries[-1][2] = v
+                    elif text.strip():
+                        entries.append([where, v, v, text])
+                i += n
+                yield OSIS_BOOK[osis], c, n, head, [e[1:] for e in entries]
+        if i != len(slots):
+            sys.exit(f"{test}: {len(slots)} slots, the versification has {i}")
+
+
+# Book names and abbreviations the sources use where a reference isn't OSIS ("Mt 3:3", "1Timm 2:5",
+# "nu 26:59", osisRef "1Jn.3.1"): each name's books, the likeliest first; a reference takes the first
+# with the verse it names.
+ABBREVS = {
+    "ge": "Gen", "ex": "Exod", "le": "Lev", "nu": "Num", "de": "Deut", "jos": "Josh", "jdg": "Judg", "ju": "Judg",
+    "jud": "Judg Jude", "ru": "Ruth", "es": "Esth", "est": "Esth", "ne": "Neh", "ps": "Ps", "pss": "Ps", "pr": "Prov",
+    "ec": "Eccl", "so": "Song", "song": "Song", "cant": "Song", "is": "Isa", "je": "Jer", "la": "Lam", "eze": "Ezek",
+    "ezk": "Ezek", "ez": "Ezek", "da": "Dan", "ho": "Hos", "joe": "Joel", "am": "Amos", "ob": "Obad", "jon": "Jonah",
+    "mi": "Mic", "na": "Nah", "zep": "Zeph", "ze": "Zech", "mt": "Matt", "mk": "Mark", "mr": "Mark", "lk": "Luke",
+    "lu": "Luke", "jn": "John", "jno": "John", "joh": "John", "ac": "Acts", "ro": "Rom", "rm": "Rom", "ga": "Gal",
+    "ep": "Eph", "ph": "Phil Phlm", "phi": "Phil Phlm", "php": "Phil", "co": "Col", "phm": "Phlm", "philem": "Phlm",
+    "he": "Heb", "jas": "Jas", "jam": "Jas", "re": "Rev", "1jo": "1John", "2jo": "2John", "3jo": "3John",
+    "1jn": "1John", "2jn": "2John", "3jn": "3John", "1joh": "1John", "2joh": "2John", "3joh": "3John",
+}
+BOOK_KEYS = [(i + 1, [x.lower() for x in (b[1], b[2], n.replace(" ", ""))]) for i, (b, n) in enumerate(zip(BOOKS, BOOK_NAMES))]
+
+
+def books_named(name):
+    """The books a name or abbreviation may be ("Jud": Judges, Jude), the likeliest first; a name the
+    source misspelt ("1Timm", "Actst") is read as the longest start of it that names one."""
+    k = re.sub(r"[\s.]", "", name).lower()
+    k = re.sub(r"^(i{1,3})(?=co|th|ti|pe|jn|jo|ki|kg|sa|ch)", lambda m: str(len(m[1])), k)  # "II Kings", "I Cor"
+    for n in range(len(k), 1, -1):
+        p = k[:n]
+        if p in ABBREVS:
+            return [OSIS_BOOK[x] for x in ABBREVS[p].split()]
+        found = [b for b, keys in BOOK_KEYS if any(x == p for x in keys)] or [b for b, keys in BOOK_KEYS if any(x.startswith(p) for x in keys)]
+        if found:
+            return found
+    return []
+
+
+def fix_osis_books(s):
+    """osisRefs with a book that isn't OSIS's ("1Jn.3.1" in Clarke) given the book it means."""
+    def one(m):
+        def part(p):
+            bits = p.split(".")
+            if bits[0] in OSIS_BOOK or not re.match(r"[1-3]?[A-Za-z]", bits[0]):
+                return p
+            for b in books_named(bits[0]):
+                q = [b] + [int(x) for x in bits[1:3] if x.isdigit()]
+                if len(q) == 1 or real(tuple((q + [0, 0])[:3])):
+                    return ".".join([BOOKS[b - 1][1]] + bits[1:])
+            return p
+        return f'osisRef="{" ".join("-".join(part(x) for x in r.split("-")) for r in m[1].split())}"'
+    return re.sub(r'osisRef="([^"]*)"', one, s)
+
+
+PASSAGE = re.compile(r"\s*((?:[1-3]|I{1,3})?\s*[A-Za-z][A-Za-z.]*)?\.?\s*(\d+)(?:\s*[:.]\s*(\d+))?(?:\s*[-–]\s*(\d+)(?:\s*[:.]\s*(\d+))?)?\s*$")
+
+
+def passage_refs(p, book=None, chapter=None):
+    """A passage ("Lev 4:3, 6:20, Ex 28:41", "ge 12:10-20", "4, 9" after Rev 1:1) as e-Sword's <ref>s,
+    each checked against the KJV, with the book and chapter it ends in (a part with no book is in the
+    one before); None if any part isn't a real verse."""
+    out = []
+    for part in re.split(r"[;,]", p.replace("&amp;", ",").replace(" and ", ",")):
+        if not part.strip():
+            continue
+        m = PASSAGE.match(part)
+        if not m:
+            return None
+        name, n1, n2, n3, n4 = m[1], int(m[2]), m[3] and int(m[3]), m[4] and int(m[4]), m[5] and int(m[5])
+        candidates = books_named(name) if name else [book]
+        if not candidates or candidates == [None]:
+            return None
+        for b in candidates:
+            if n2:  # c:v, c:v-v2, c:v-c2:v2
+                a, z = (b, n1, n2), (b, n3, n4) if n4 else (b, n1, n3) if n3 else None
+            elif name or chapter is None:  # a chapter, or chapters
+                a, z = (b, n1, 0), (b, n3, 0) if n3 else None
+            else:  # a verse, or verses, of the chapter before
+                a, z = (b, chapter, n1), (b, chapter, n3) if n3 else None
+            if real(a, z):
+                break
+        else:
+            return None
+        book, chapter = b, (z or a)[1] if a[2] else None
+        out.append(f"<ref>{esword_ref(a, z)}</ref>")
+    return ("; ".join(out), book, chapter) if out else None
+
+
+def thml_refs(s):
+    """ThML's <scripRef passage="…">shown</scripRef> as <ref>s, from the passage or else from what
+    it shows; a passage with no book takes the one cited before it. One that is no real verse is
+    left as text."""
+    last = [None, None]
+
+    def one(m):
+        passage, shown = m[1], m[2]
+        for p in (passage, re.sub(r"<[^>]+>", "", shown)):
+            r = p and passage_refs(html_.unescape(p), *last)
+            if r:
+                last[:] = r[1:]
+                return r[0]
+        return shown
+    return re.sub(r'<scripRef\b[^>]*?(?:passage="([^"]*)")?[^>]*>(.*?)</scripRef>', one, s, flags=re.S)
+
+
+def tidy(s):
+    """Spacing and paragraphs, as the other builders leave them."""
+    s = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f]", "", s)
+    s = re.sub(r"\s+", " ", s)
+    s = re.sub(r"\s+([,.;:?!)\]])", r"\1", s)
+    paras = (re.sub(r"^(<br>|\s)+|(<br>|\s)+$", "", x) for x in re.split(r"</?p>", s))
+    return "".join(f"<p>{x}</p>" for x in paras if re.sub(r"<[^>]+>|\s", "", x))
+
+
+def has_text(s):
+    return bool(re.sub(r"<[^>]+>|&\w+;|\W", "", s))
+
+
+# The commentaries' labels for the verses a note is on: Clarke's "<hi type="bold">Verse 2</hi>",
+# JFB's "<hi type="bold">14-16. And as Moses--</hi>", Barnes' "Verses 22, 23." at a paragraph's start.
+CLARKE_LABEL = re.compile(r'<hi type="bold">\s*Verses?\s+(\d+)')
+JFB_LABEL = re.compile(r'<hi type="bold">\s*(\d+)(?:[-,]\s*\d+)?\.')
+# The start of a chapter's own introduction, in the text before its first note.
+CHAPTER_START = re.compile(r'<title[^>]*>\s*CHAPTER\s+[\dIVXLC]+\b|<title type="x-s">Introduction</title>\s*<div\b[^>]*\bsID="[^"]*"[^>]*type="introduction"', re.I)
+
+
+def shown_refs(s, book, chapter):
+    """CCEL's links are often wrong where a reference shows no book ("Re 1:1, 4, 9" links 4, 9 to
+    1 Corinthians 4:9): those are read from what they show, in the book and chapter cited before
+    (or the passage in hand), unless the link is to a real verse of that book. The rest are left for
+    henry_refs."""
+    last = [book, chapter]
+
+    def one(m):
+        osis, shown = m[1], m[2]
+        text = re.sub(r"<[^>]+>", "", shown)
+        p = osis_part(osis.split()[0].split("-")[0], book, last[0]) if osis else None
+        named = re.match(r"\s*(?:[1-3]\s*)?[A-Za-z]{2}", text)
+        if not named and p and p[0] == last[0] and real(p):
+            last[:] = [p[0], p[1]]
+            return m[0]
+        r = passage_refs(html_.unescape(text), *last)
+        if r:
+            last[:] = r[1:]
+            return r[0]
+        if p:
+            last[:] = [p[0], p[1]]
+        return m[0]
+    return re.sub(r'<reference osisRef="([^"]*)">(.*?)</reference>', one, s, flags=re.S)
+
+
+def commentary_html(s, book, chapter, typos):
+    return correct(henry_html(shown_refs(fix_osis_books(s), book, chapter), book, chapter), typos)
+
+
+def osis_commentary(name, typos, label):
+    """A CrossWire OSIS commentary (JFB's zCom4, Clarke's zCom) as e-Sword's three tables. The text
+    before a chapter's first note is its introduction (and, in chapter 1, the book's before that);
+    references are repaired as in Matthew Henry's."""
+    z, canon = crosswire(name)
+    from crosswire.build import conf
+    reader = zcom4 if conf(z)["ModDrv"] == "zCom4" else zcom
+    books, chapters, verses = [], [], []
+    for b, c, n, head, entries in sword_chapters(z, canon, reader):
+        if not entries:
+            if has_text(commentary_html(head, b, c, typos)):
+                chapters.append((b, c, commentary_html(head, b, c, typos)))
+            continue
+        first = head + entries[0][2]
+        m = label.search(first)
+        end = m.start() if m else len(first)
+        if c == 1:  # the book's introduction, up to the chapter's heading or its first note
+            starts = list(CHAPTER_START.finditer(first, 0, end))
+            cut = starts[-1].start() if starts else end if m else 0
+            intro = commentary_html(first[:cut], b, c, typos)
+            if has_text(intro):
+                books.append((b, intro))
+            first, end = first[cut:], end - cut
+        pre, entries[0][2] = (first[:end], first[end:]) if m else ("", first)
+        # A chapter's introduction is its own entry; headings alone stay with the first note.
+        plain = re.sub(r"<[^>]+>|\s+", " ", re.sub(r"<title\b.*?</title>", "", pre, flags=re.S)).strip()
+        if 'type="introduction"' in pre or len(plain) > 300:
+            chapters.append((b, c, commentary_html(pre, b, c, typos)))
+        else:
+            entries[0][2] = pre + entries[0][2]
+        covered, pending = 0, ""
+        for v1, v2, text in entries:
+            # An entry filed a verse late starts where its label says.
+            m = label.search(text)
+            if m and covered < int(m[1]) < v1:
+                v1 = int(m[1])
+            covered = v2
+            body = pending + commentary_html(text, b, c, typos)
+            if has_text(re.sub(r"<p><b>.*?</b></p>", "", body)):
+                verses.append((b, c, v1, c, v2, body))
+                pending = ""
+            else:  # headings with no note: with the next note
+                pending = body
+        if pending and verses and verses[-1][:2] == (b, c):
+            verses[-1] = (*verses[-1][:4], n, verses[-1][5] + pending)
+    return books, chapters, verses
+
+
+def write_commentary(file, title, abbrev, info, tables):
+    books, chapters, verses = tables
+    with module(file, title, abbrev, info, into=BUNDLED) as db:
+        db.executemany("INSERT INTO BookCommentary VALUES (?,?)", books)
+        db.executemany("INSERT INTO ChapterCommentary VALUES (?,?,?)", chapters)
+        db.executemany("INSERT INTO VerseCommentary VALUES (?,?,?,?,?,?)", verses)
+    print(f"{file}: {len(verses)} notes, {len(chapters)} chapters, {len(books)} books, {(BUNDLED / file).stat().st_size / 1e6:.1f} MB")
+
+
+def write_jfb():
+    info = ("<p>A Commentary, Critical and Explanatory, on the Old and New Testaments, by Robert Jamieson, A. R. Fausset "
+            "and David Brown (1871).</p>"
+            "<p>Public domain. CrossWire's JFB module (3.0), from the Christian Classics Ethereal Library's text (ccel.org). "
+            "Built by Two-edged Sword's tools/core.</p>")
+    write_commentary("jfb.cmti", "Jamieson, Fausset & Brown Commentary", "JFB", info, osis_commentary("JFB", {}, JFB_LABEL))
+
+
+def write_clarke():
+    info = ("<p>Adam Clarke's Commentary and Critical Notes on the Holy Bible (1810–1826).</p>"
+            "<p>Public domain. CrossWire's Clarke module (2.0), from Wikisource's text. Built by Two-edged Sword's tools/core.</p>")
+    write_commentary("clarke.cmti", "Adam Clarke's Commentary on the Bible", "Clarke", info, osis_commentary("Clarke", {}, CLARKE_LABEL))
+
+
+BARNES_LABEL = re.compile(r"(?:^|<br\s*/?>|<blockquote>)\s*(?:(?:[1-3]\s?)?[A-Z][A-Za-z]+\s+)?(?:Verses?|Ver)\.?\s*(\d+)(?:\s*(?:[-–,]|and)\s*(\d+))*\b[.:]?")
+BARNES_NONE = re.compile(r"No (?:specific Barnes text on|entry from BARNES for) this verse\.?\s*(?:<scripRef[^>]*>[^<]*</scripRef>\.?)?", re.I)
+
+
+def barnes_html(s):
+    """Barnes' ThML as e-Sword's HTML: a blank line or a block quotation is a paragraph."""
+    s = thml_refs(BARNES_NONE.sub("", s))
+    s = re.sub(r"(?:<br\s*/?>\s*){2,}|</?blockquote>", "</p><p>", s)
+    s = re.sub(r"<br\s*/?>", "<br>", s)
+    s = re.sub(r"<(?!/?(p|b|i|br|ref)>)[^>]*>", " ", s)
+    return tidy(s.replace("&nbsp;", " "))
+
+
+def write_barnes():
+    """Barnes' notes, placed by their labels ("Verse 16.", "Verses 22, 23."): CrossWire's module has
+    the books' prefaces in the first verses' slots, and notes a slot or two from their verses."""
+    z, canon = crosswire("Barnes")
+    books, chapters, verses = [], [], []
+    for b, c, n, head, entries in sword_chapters(z, canon, zcom):
+        # A chapter's own slot holds a stray copy of a note from the chapter before, so it's left out.
+        text = "<br /><br />".join(t for _, _, t in entries)
+        marks = [m for m in BARNES_LABEL.finditer(text) if 1 <= int(m[1]) <= n]
+        pre = text[:marks[0].start()] if marks else text
+        pre = re.sub(r"^\s*(?:[A-Z]+\s+)*CHAPTER\s+[\w.]+\.?", "", pre.strip(), flags=re.I)
+        pre = re.sub(r"^\s*(?:<br\s*/?>\s*)*INTRO:", "", pre)
+        intro = re.sub(r"<p>(?:[A-Z]+\s+)*CHAPTER\s+[\w.]+\.?</p>", "", barnes_html(pre), flags=re.I)  # the heading alone
+        if has_text(intro):
+            (books.append((b, intro)) if c == 1 else chapters.append((b, c, intro)))
+        for k, m in enumerate(marks):
+            body = text[m.start():marks[k + 1].start() if k + 1 < len(marks) else len(text)]
+            v1 = int(m[1])
+            v2 = max(int(x) for x in re.findall(r"\d+", m[0][m.start(1) - m.start():]))
+            v2 = v2 if v1 <= v2 <= n else v1
+            html = barnes_html(body)
+            if not has_text(re.sub(r"^<p>[^<]*?(Verses?|Ver)\.?\s*[\d\s,–-]*\.?", "", html)):
+                continue
+            if verses and verses[-1][:3] == (b, c, v1):  # the same verse again: one note
+                verses[-1] = (b, c, v1, c, max(v2, verses[-1][4]), verses[-1][5] + html)
+            else:
+                verses.append((b, c, v1, c, v2, html))
+    info = ("<p>Albert Barnes' Notes on the New Testament, Explanatory and Practical (1832–1851).</p>"
+            "<p>Public domain. CrossWire's Barnes module (1.1); only the New Testament. Built by Two-edged Sword's tools/core.</p>")
+    write_commentary("barnes.cmti", "Barnes' Notes on the New Testament", "Barnes", info, (books, chapters, verses))
+
+
+def rawld(z):
+    """[(key, entry)] from a RawLD dictionary: .idx gives each entry's place and size in .dat, which
+    holds its key, a line break and the entry. Old modules are in Latin-1 (Windows-1252)."""
+    def f(ext):
+        return z.read(next(n for n in z.namelist() if n.endswith(f".{ext}")))
+    idx, dat = f("idx"), f("dat")
+    out = []
+    for i in range(len(idx) // 6):
+        off, size = struct.unpack_from("<IH", idx, i * 6)
+        key, _, body = dat[off:off + size].partition(b"\n")
+        def dec(x):
+            try:
+                return x.decode("utf-8")
+            except UnicodeDecodeError:
+                return x.decode("cp1252", "replace")
+        out.append((dec(key.rstrip(b"\r")), dec(body)))
+    return out
+
+
+SMALL = {"a", "an", "and", "as", "at", "by", "for", "from", "in", "into", "of", "on", "or", "the", "to", "with"}
+
+
+def topic_case(key):
+    """"LOVE, BROTHERLY" → "Love, Brotherly"; "AARON'S ROD" → "Aaron's Rod"; "JOHN, GOSPEL OF" →
+    "John, Gospel of", as e-Sword's dictionaries have them."""
+    words = re.split(r"(\W+)", key.strip().lower())
+    out = []
+    for k, w in enumerate(words):
+        prev = "".join(words[:k])
+        if w and w[0].isalpha() and not (w in SMALL and prev.strip()) and not prev.endswith("'"):
+            w = w[0].upper() + w[1:]
+        out.append(w)
+    s = "".join(out)
+    return re.sub(r"\b([IVX][ivx]*)\b(?=\s*(?:\)|,|$))", lambda m: m[1].upper(), s)  # "Herod Ii" → "Herod II"
+
+
+def osis_dict_refs(s):
+    """TEI <ref osisRef> → <ref>, each checked against the KJV, and "See <ref target>NAME</ref>" →
+    the name, which the app links. One to no real verse is left as text."""
+    s = re.sub(r'<ref osisRef="(?:Bible:)?([^".]+)\.1\.1">([^<]*)</ref>:(\d+)', r'<ref osisRef="\1.1.\3">\2:\3</ref>', s)  # "2Jo 1</ref>:6"
+    s = fix_osis_books(s)
+
+    def one(m):
+        refs = []
+        for part in m[1].split():
+            a, _, b = part.partition("-")
+            pa = osis_part(a, None, None)
+            pb = osis_part(b, None, pa[0]) if b and pa else None
+            if not pa or not real(pa, pb):
+                return m[2]
+            refs.append(f"<ref>{esword_ref(pa, pb)}</ref>")
+        return "; ".join(refs)
+    s = re.sub(r'<ref osisRef="(?:Bible:)?([^"]+)">(.*?)</ref>', one, s, flags=re.S)
+    s = re.sub(r"<ref\s[^>]*>(.*?)</ref>", r"\1", s, flags=re.S)
+    return s.replace("</ref>,<ref>", "</ref>, <ref>")
+
+
+def tei_html(s):
+    """A TEI dictionary entry (Nave's, ISBE) as e-Sword's HTML: lines (<lb/>) and list items are paragraphs."""
+    s = re.sub(r"</?entryFree\b[^>]*>|</?def>|</?list>", "", s)
+    s = osis_dict_refs(s)
+    s = re.sub(r'<hi rend="(bold|italic|underline)">(.*?)</hi>', lambda m: f"<{m[1][0]}>{m[2]}</{m[1][0]}>", s, flags=re.S)
+    s = re.sub(r"<lb\s*/>|</?item>", "</p><p>", s)
+    s = re.sub(r"<(?!/?(p|b|i|u|ref)>)[^>]*>", "", s)
+    return tidy(s)
+
+
+def thml_dict_html(s):
+    """Smith's ThML: scripture references, italics, and numbered lists as numbered paragraphs."""
+    s = thml_refs(s)
+    k = [0]
+
+    def item(m):
+        k[0] += 1
+        return f"</p><p>{k[0]}. "
+    s = re.sub(r"<ol\b[^>]*>", lambda m: (k.__setitem__(0, 0), "</p>")[1], s)
+    s = re.sub(r"<li\b[^>]*>", item, s)
+    s = re.sub(r"</li>|</ol>", "</p><p>", s)
+    s = re.sub(r"<br\s*/?>", "</p><p>", s)
+    s = re.sub(r"<(?!/?(p|b|i|ref)>)[^>]*>", "", s)
+    return tidy(s)
+
+
+def write_dictionary(file, title, abbrev, info, entries, to_html):
+    """Entries under the same topic are joined, in the source's order."""
+    rows = {}
+    for key, entry in entries:
+        name = re.search(r'<entryFree n="([^"]+)"', entry)
+        topic = topic_case(html_.unescape(name[1] if name else key))
+        body = correct(to_html(entry), {})
+        if body:
+            rows[topic] = rows.get(topic, "") + body
+    with module(file, title, abbrev, info, into=BUNDLED) as db:
+        db.executemany("INSERT INTO Dictionary VALUES (?,?)", sorted(rows.items(), key=lambda r: r[0].lower()))
+    print(f"{file}: {len(rows)} topics, {(BUNDLED / file).stat().st_size / 1e6:.1f} MB")
+
+
+def write_smith():
+    z, _ = crosswire("Smith")
+    info = ("<p>Smith's Bible Dictionary, by William Smith (1884 edition).</p>"
+            "<p>Public domain. CrossWire's Smith module (1.3). Built by Two-edged Sword's tools/core.</p>")
+    write_dictionary("smith.dcti", "Smith's Bible Dictionary", "Smith", info, rawld(z), thml_dict_html)
+
+
+def write_nave():
+    z, _ = crosswire("Nave")
+    info = ("<p>Nave's Topical Bible: some 20,000 topics and subtopics with the verses on each, by Orville J. Nave (1896).</p>"
+            "<p>Public domain. CrossWire's Nave module (3.0), from the Christian Classics Ethereal Library. "
+            "Built by Two-edged Sword's tools/core.</p>")
+    write_dictionary("nave.dcti", "Nave's Topical Bible", "Nave", info, zld(z), tei_html)
+
+
+def write_isbe():
+    z, _ = crosswire("ISBE")
+    info = ("<p>The International Standard Bible Encyclopedia, edited by James Orr (1915).</p>"
+            "<p>Public domain. CrossWire's ISBE module (2.2). Built by Two-edged Sword's tools/core.</p>")
+    write_dictionary("isbe.dcti", "International Standard Bible Encyclopedia", "ISBE", info, zld(z), tei_html)
+
+
+# The commentaries and dictionaries beyond Matthew Henry and Easton: id → (file, builder).
+MORE = {"jfb": ("jfb.cmti", write_jfb), "clarke": ("clarke.cmti", write_clarke), "barnes": ("barnes.cmti", write_barnes),
+        "smith": ("smith.dcti", write_smith), "nave": ("nave.dcti", write_nave), "isbe": ("isbe.dcti", write_isbe)}
+
+
 def main():
     if "--if-missing" in sys.argv and all((BUNDLED / f).exists() for f in FILES):
+        for file, build in MORE.values():  # only the ones not built yet
+            if not (BUNDLED / file).exists():
+                build()
         return
     if "--only" in sys.argv:  # --only henry easton: just those
         names = sys.argv[sys.argv.index("--only") + 1:]
-        if not names or set(names) - {"henry", "easton"}:
-            sys.exit(f"--only takes henry and/or easton, not {' '.join(sorted(set(names) - {'henry', 'easton'})) or 'nothing'}")
+        known = {"henry", "easton", *MORE}
+        if not names or set(names) - known:
+            sys.exit(f"--only takes {', '.join(sorted(known))}, not {' '.join(sorted(set(names) - known)) or 'nothing'}")
         if "henry" in names:
             write_henry()
         if "easton" in names:
             write_easton()
+        for name in names:
+            if name in MORE:
+                MORE[name][1]()
         return
     verses, words = kjv()
     write_kjv(verses)
@@ -834,6 +1297,8 @@ def main():
     write_tsk()
     write_henry()
     write_easton()
+    for _, build in MORE.values():
+        build()
 
 
 if __name__ == "__main__":
