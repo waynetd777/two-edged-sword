@@ -82,6 +82,15 @@ accept another update. Updates are checked in release builds only, never in scre
 product page's look, with `site/`'s fonts and icon, rendered by WebKit) and has Finder lay out
 the icons, so the first run asks to let the terminal control Finder.
 
+The Windows installer is added to each release by `.github/workflows/windows-release.yml`, which
+runs when the release is published: it builds the installer from the release's commit, and
+`tools/update_windows.py` signs it, uploads it as `Two-edged-Sword_x64-setup.exe` with its `.sig`,
+and adds `windows-x86_64` to the release's `latest.json`. The job signs with the repository
+secret `TAURI_SIGNING_PRIVATE_KEY` (the updater key's contents; `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`
+if it has one). For a release made before the job, run it by hand (Actions › Windows release ›
+Run workflow, with the tag). Windows copies install an update quietly, with a progress window
+(`plugins.updater.windows.installMode` in `tauri.windows.conf.json`).
+
 ## Where things live
 
 | What | Where |

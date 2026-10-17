@@ -347,7 +347,17 @@ async fn install(app: &AppHandle, update: Update) {
                     progress("downloading", got, total);
                 }
             },
-            || progress("installing", 0, None),
+            || {
+                progress("installing", 0, None);
+                // Windows' installer closes the app as it starts, so this is the last word: what
+                // quitting does is done now, as the restart below won't be reached there.
+                #[cfg(windows)]
+                {
+                    let _ = app.emit_to("main", "flush", ());
+                    std::thread::sleep(Duration::from_millis(500));
+                    crate::before_quit(app);
+                }
+            },
         )
         .await;
     match done {

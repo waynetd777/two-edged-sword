@@ -10,5 +10,12 @@
         "installerIcon": "icons/icon.ico"
       }
     }
+  },
+  "plugins": {
+    "updater": {
+      "windows": {
+        "installMode": "passive"
+      }
+    }
   }
 }
