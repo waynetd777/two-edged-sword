@@ -497,15 +497,19 @@ html:not(.mac) .sidebar {
   padding: 0 16px;
   border-bottom: 1px solid var(--border);
 }
-.drag {
+/* Where the window can be dragged, as macOS's title bar sits over the page. Not on Windows, which
+   has a title bar of its own and treats a drag area as part of it: nothing there scrolls. */
+.mac .drag {
   -webkit-app-region: drag;
 }
-.topbar > * {
+.mac .topbar > * {
   -webkit-app-region: no-drag;
 }
 .topbar .spacer {
   flex-grow: 1;
   align-self: stretch;
+}
+.mac .topbar .spacer {
   -webkit-app-region: drag;
 }
 
