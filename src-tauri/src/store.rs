@@ -8,9 +8,9 @@
 use serde_json::Value;
 use std::path::PathBuf;
 
-/// The user's home folder.
+/// The user's home folder (USERPROFILE where there is no HOME, as on Windows, for the tests).
 pub fn home() -> PathBuf {
-    PathBuf::from(std::env::var("HOME").unwrap_or_default())
+    PathBuf::from(std::env::var_os("HOME").or_else(|| std::env::var_os("USERPROFILE")).unwrap_or_default())
 }
 
 pub fn data_dir() -> PathBuf {

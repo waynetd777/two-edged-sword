@@ -27,6 +27,12 @@ runs the AI tools for Ask. The frontend is everything you see.
 
 - If hot reload leaves a screen broken after an edit, reload the window (⌘R) or restart
   `make dev` before treating it as a bug.
+- The Rust tests also run on Windows: `cargo test --lib` in `src-tauri` (needs Rust and Visual
+  Studio Build Tools with the C++ workload). Only the tests build there; the AppKit code is
+  `#[cfg(target_os = "macos")]` and left out, and with it the spelling tests. Anything else that
+  calls AppKit, or a macOS-only Tauri API, needs the same `cfg`.
+  `.github/workflows/windows-tests.yml` runs them, and the TypeScript check, on every push to
+  `main` that changes the code.
 - On macOS 27, release builds link with Rust's lld against the macOS 26 SDK, because macOS 27's
   linker sometimes breaks proc-macro builds ("can't find crate"). The Makefile explains.
 

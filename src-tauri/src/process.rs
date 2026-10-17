@@ -44,10 +44,20 @@ mod tests {
 
     #[test]
     fn returns_output_or_kills_when_too_slow() {
-        let out = output_within(Command::new("/bin/echo").arg("hi"), Duration::from_secs(5)).unwrap();
+        let (echo, sleep): (&[&str], &[&str]) = if cfg!(windows) {
+            (&["cmd", "/C", "echo hi"], &["ping", "-n", "10", "127.0.0.1"])
+        } else {
+            (&["/bin/echo", "hi"], &["/bin/sleep", "10"])
+        };
+        let cmd = |argv: &[&str]| {
+            let mut c = Command::new(argv[0]);
+            c.args(&argv[1..]);
+            c
+        };
+        let out = output_within(&mut cmd(echo), Duration::from_secs(5)).unwrap();
         assert_eq!(String::from_utf8_lossy(&out.stdout).trim(), "hi");
         let t = Instant::now();
-        assert!(output_within(Command::new("/bin/sleep").arg("10"), Duration::from_millis(200)).is_err());
+        assert!(output_within(&mut cmd(sleep), Duration::from_millis(200)).is_err());
         assert!(t.elapsed() < Duration::from_secs(5));
     }
 }

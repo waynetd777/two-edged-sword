@@ -14,11 +14,13 @@ pub const MENU_ID: &str = "help";
 pub fn add_to_menu(app: &AppHandle) -> tauri::Result<()> {
     let Some(help) = app.menu().and_then(|m| m.get(HELP_SUBMENU_ID)).and_then(|i| i.as_submenu().cloned()) else { return Ok(()) };
     help.append(&MenuItem::with_id(app, MENU_ID, "Two-edged Sword Help", true, None::<&str>)?)?;
+    #[cfg(target_os = "macos")]
     set_shortcut();
     Ok(())
 }
 
 /// ⌘?, which the menu's accelerators can't spell (they'd give ⇧⌘/): set on the AppKit item itself.
+#[cfg(target_os = "macos")]
 fn set_shortcut() {
     use objc2::runtime::AnyObject;
     use objc2_foundation::NSString;

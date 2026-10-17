@@ -164,6 +164,7 @@ impl Running {
 }
 
 fn kill_group(pid: u32) {
+    #[cfg(unix)]
     // SAFETY: kill(2) takes no pointers; a negative pid addresses the process group.
     unsafe {
         libc::kill(-(pid as libc::pid_t), libc::SIGTERM);
@@ -178,8 +179,9 @@ fn spawn(
     chat_id: &str,
     name: &str,
 ) -> Result<(Child, ChildStdout, std::thread::JoinHandle<String>), String> {
-    use std::os::unix::process::CommandExt;
-    cmd.stdin(Stdio::null()).stdout(Stdio::piped()).stderr(Stdio::piped()).process_group(0);
+    cmd.stdin(Stdio::null()).stdout(Stdio::piped()).stderr(Stdio::piped());
+    #[cfg(unix)]
+    std::os::unix::process::CommandExt::process_group(cmd, 0);
     let mut child = cmd.spawn().map_err(|e| format!("couldn't start {name}: {e}"))?;
     let stdout = child.stdout.take().ok_or("no stdout")?;
     let stderr = child.stderr.take();

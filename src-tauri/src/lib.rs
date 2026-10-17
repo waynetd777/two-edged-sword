@@ -1,7 +1,9 @@
 // Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
 // SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
-#[cfg(not(target_os = "macos"))]
+// Elsewhere only the tests are built (`cargo test --lib`), without the AppKit parts.
+#![cfg_attr(not(target_os = "macos"), allow(dead_code, unused_imports, unused_variables))]
+#[cfg(all(not(target_os = "macos"), not(test)))]
 compile_error!("Two-edged Sword is a macOS app: it is built on AppKit throughout.");
 
 mod assistant;
@@ -11,18 +13,25 @@ mod help;
 mod index;
 mod journal;
 mod library;
+#[cfg(target_os = "macos")]
 mod login_item;
+#[cfg(target_os = "macos")]
 mod login_launch;
+#[cfg(target_os = "macos")]
 mod media;
 mod music;
+#[cfg(target_os = "macos")]
 mod platform;
 mod process;
+#[cfg(target_os = "macos")]
 mod screenshot;
 mod search;
+#[cfg(target_os = "macos")]
 mod spell;
 mod store;
 mod study;
 mod tray;
+#[cfg(target_os = "macos")]
 mod tts;
 mod updates;
 mod website;
@@ -196,6 +205,7 @@ fn index_progress(st: State<AppState>) -> index::Progress {
 
 /// Hides the mouse pointer until it next moves, as video players do. macOS keeps it hidden through
 /// the page scrolling or changing under it, which a CSS cursor and the window's own setting don't.
+#[cfg(target_os = "macos")]
 #[tauri::command]
 fn hide_pointer(app: AppHandle) {
     let _ = app.run_on_main_thread(|| objc2_app_kit::NSCursor::setHiddenUntilMouseMoves(true));
@@ -252,10 +262,10 @@ fn in_app_data(p: &std::path::Path) -> bool {
         }
         let mut r = std::fs::canonicalize(&base).unwrap_or(base);
         r.extend(rest.iter().rev());
-        r.to_string_lossy().to_lowercase()
+        PathBuf::from(r.to_string_lossy().to_lowercase())
     };
-    let (p, data) = (real(p), real(&store::data_dir()));
-    p == data || p.starts_with(&format!("{data}/"))
+    // Path's starts_with goes part by part, whatever the separator.
+    real(p).starts_with(real(&store::data_dir()))
 }
 
 // The journal and file commands run off the main thread: the folder may be on a cloud drive
@@ -323,17 +333,20 @@ fn keep_awake(on: bool) -> Result<(), String> {
 
 // Spelling (spell.rs). A check waits off the main thread for the KJV's words, then asks AppKit
 // on the main thread, as it wants; the rest aren't async, so they run there anyway.
+#[cfg(target_os = "macos")]
 #[tauri::command(async)]
 fn spell_check(app: AppHandle, st: State<AppState>, text: String) -> Vec<(usize, usize)> {
     kjv_words(&st);
     on_main(&app, move || spell::check(&text)).unwrap_or_default()
 }
+#[cfg(target_os = "macos")]
 #[tauri::command(async)]
 fn spell_grammar(app: AppHandle, st: State<AppState>, text: String) -> Vec<spell::GrammarIssue> {
     kjv_words(&st);
     on_main(&app, move || spell::grammar(&text)).unwrap_or_default()
 }
 /// The KJV's words, read here if a check comes before the start-up read (or waiting for it).
+#[cfg(target_os = "macos")]
 fn kjv_words(st: &AppState) {
     if !spell::kjv_ready() {
         spell::load_kjv(&st.lib());
@@ -348,18 +361,22 @@ fn on_main<T: Send + 'static>(app: &AppHandle, f: impl FnOnce() -> T + Send + 's
     .ok()?;
     rx.recv().ok()
 }
+#[cfg(target_os = "macos")]
 #[tauri::command]
 fn spell_guesses(word: String) -> Vec<String> {
     spell::guesses(&word)
 }
+#[cfg(target_os = "macos")]
 #[tauri::command]
 fn spell_correction(word: String) -> Option<String> {
     spell::correction(&word)
 }
+#[cfg(target_os = "macos")]
 #[tauri::command]
 fn spell_learn(word: String) {
     spell::learn(&word)
 }
+#[cfg(target_os = "macos")]
 #[tauri::command]
 fn spell_ignore(word: String) {
     spell::ignore(&word)
@@ -613,6 +630,7 @@ fn open_web(app: AppHandle, key: String, url: String, title: String, dark: bool,
 /// drew some sites' title bars white. A transparent title bar over the window's own dark
 /// background always comes out dark, with dark appearance for light title text.
 fn title_bar(w: &tauri::WebviewWindow, dark: bool) {
+    #[cfg(target_os = "macos")]
     unsafe {
         use objc2_app_kit::{NSAppearance, NSAppearanceCustomization, NSAppearanceNameAqua, NSAppearanceNameDarkAqua, NSColor, NSWindow};
         let Ok(ptr) = w.ns_window() else { return };
@@ -631,6 +649,7 @@ fn ask_cancel(st: State<AppState>, chat_id: String) {
 }
 
 /// Screenshot mode (screenshot.rs): the scene to set up, as JSON.
+#[cfg(target_os = "macos")]
 #[tauri::command]
 fn scene() -> Option<String> {
     screenshot::scene()
@@ -644,6 +663,7 @@ fn print_page(window: tauri::WebviewWindow) -> Result<(), String> {
 /// In the Dock while the window is open, only in the menu bar while it is closed. Runs on the main
 /// thread, as every caller does: the tray's menu handler, the window's events and Reopen.
 fn set_in_dock(app: &AppHandle, shown: bool) {
+    #[cfg(target_os = "macos")]
     let _ = app.set_activation_policy(if shown { tauri::ActivationPolicy::Regular } else { tauri::ActivationPolicy::Accessory });
 }
 
@@ -702,11 +722,13 @@ pub(crate) fn show_main(app: &AppHandle) {
     if let Some(w) = app.get_webview_window("main") {
         let _ = w.show();
         let _ = w.unminimize();
+        #[cfg(target_os = "macos")]
         platform::activate();
         let _ = w.set_focus();
     }
 }
 
+#[cfg(target_os = "macos")]
 pub fn run() {
     let data = store::data_dir();
     // Made up front, so Show in Finder has somewhere to go before anything is built into it.
