@@ -830,7 +830,15 @@ pub fn run() {
     }
     let state = AppState { lib_cell: std::sync::RwLock::new(lib), data, running: Arc::new(assistant::Running::default()), index };
 
-    tauri::Builder::default()
+    let mut builder = tauri::Builder::default();
+    // Started again (on Windows, or with open -n on macOS, which otherwise opens an app only once),
+    // the app brings the open copy's window to the front rather than running twice over the same
+    // data. First, as it must be. Not in a debug build: make dev and screenshot mode's copies run
+    // beside the installed app.
+    if !cfg!(debug_assertions) {
+        builder = builder.plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| show_main(app)));
+    }
+    builder
         .plugin(
             tauri_plugin_window_state::Builder::default()
                 .with_state_flags(STATE_FLAGS)

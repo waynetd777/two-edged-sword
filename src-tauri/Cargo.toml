@@ -30,6 +30,8 @@ tauri-plugin-dialog = "2"
 tauri-plugin-opener = "2"
 tauri-plugin-notification = "2"
 tauri-plugin-updater = "2"
+# One copy of the app at a time (lib.rs).
+tauri-plugin-single-instance = "2"
 # Ask ends a CLI and everything it started by signalling its process group.
 [target.'cfg(unix)'.dependencies]
 libc = "0.2"
