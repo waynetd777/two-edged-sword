@@ -15,7 +15,7 @@ import { useEffect, useRef, useState } from "react";
 import { Working } from "./Ask";
 import { api, isReadOnly, MusicState } from "./api";
 import { book, psalmLabel } from "./bible";
-import { docSegments, plainText } from "./esword";
+import { docSegments } from "./esword";
 import { Icon, Pause, Play } from "./icons";
 import {
   current,
@@ -425,7 +425,11 @@ export function QuietTime({ focus }: { focus: boolean }) {
   useEffect(() => {
     if (!s) return;
     const me = {
-      step: (d: 1 | -1) => goRef.current(d),
+      // Pressed: what's being read stops now, rather than after the pause before the next part.
+      step: (d: 1 | -1) => {
+        player.stop();
+        goRef.current(d);
+      },
       start: () => {
         const x = sRef.current;
         if (x) {
@@ -669,7 +673,7 @@ export function QuietTime({ focus }: { focus: boolean }) {
             zIndex: 45,
           }}
         >
-          <ClosingCard key={s.started} picked={step.picked} bible={step.bible} readIn={readIn} onReadNow={() => setReadIn(0)} />
+          <ClosingCard key={s.started} picked={step.picked} readIn={readIn} onReadNow={() => setReadIn(0)} />
         </div>
       )}
       {step.kind === "worship" && (
@@ -864,33 +868,20 @@ function WorshipCard({
   );
 }
 
-/** Under the bar during the closing verse: the passage's words, what the day's readings came to,
- *  and how the passage sums it up. The chapter is open behind it, the passage lit. */
+/** Under the bar during the closing verse: what the day's readings came to, and how the passage
+ *  sums it up. The passage itself is lit in the chapter open behind it, so it isn't repeated here. */
 function ClosingCard({
   picked,
-  bible,
   readIn,
   onReadNow,
 }: {
   picked: Closing;
-  bible: string;
   /** Seconds until it's read aloud, with audio. */
   readIn: number | null;
   onReadNow: () => void;
 }) {
   const [hidden, setHidden] = useState(false);
   const drag = useDrag(true);
-  const [words, setWords] = useState("");
-  useEffect(() => {
-    let dead = false;
-    api
-      .passages(bible, [{ book: picked.b, chapter: picked.c, from: picked.v, to: picked.v2 ?? picked.v }])
-      .then(([p]) => !dead && setWords(p.verses.map((x) => plainText(x.text)).join(" ")))
-      .catch(() => {});
-    return () => {
-      dead = true;
-    };
-  }, [bible, picked.b, picked.c, picked.v, picked.v2]);
   if (hidden) return null;
   return (
     <div
@@ -924,7 +915,6 @@ function ClosingCard({
           <Icon name="x" />
         </button>
       </div>
-      {words && <p style={{ margin: 0, font: "400 20px/1.5 var(--serif)" }}>{words}</p>}
       {picked.why && <p style={{ margin: 0, font: "400 14.5px/1.55 var(--serif)", color: "var(--muted)" }}>{picked.why}</p>}
       {picked.note && (
         <div className="hint" style={{ fontSize: 12.5 }}>

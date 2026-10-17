@@ -7,6 +7,7 @@
 
 import { invoke } from "@tauri-apps/api/core";
 import type { MusicState, MusicTrack } from "./api";
+import { isMac } from "./keys";
 
 interface FileTrack extends MusicTrack {
   album: string;
@@ -57,9 +58,38 @@ async function start(i: number) {
       if (queue[at] === t) extra = x;
     })
     .catch(() => {});
+  shown(t);
   await audio.play();
 }
 audio.addEventListener("ended", () => void start(at + 1).catch(() => stop()));
+
+// Windows' media controls (the keys, the panel by the volume) show the page's own session while a
+// song plays: it says which song, with its artwork, and takes next and previous as Music would.
+// Never on macOS, where media.rs has the keys and the songs play in Music.
+const session = !isMac && "mediaSession" in navigator ? navigator.mediaSession : null;
+let cover = "";
+function shown(t: FileTrack) {
+  if (!session) return;
+  session.metadata = new MediaMetadata({ title: t.name, artist: t.artist, album: t.album });
+  invoke<ArrayBuffer>("music_file_artwork", { path: t.id })
+    .then((bytes) => {
+      if (queue[at] !== t || !bytes.byteLength || !session.metadata) return;
+      URL.revokeObjectURL(cover);
+      cover = URL.createObjectURL(new Blob([bytes]));
+      session.metadata.artwork = [{ src: cover }];
+    })
+    .catch(() => {});
+}
+/** Back to the start of the song, or, near its start, the song before. */
+const previous = () => {
+  if (audio.currentTime > 3 || at <= 0) audio.currentTime = 0;
+  else void start(at - 1).catch(() => stop());
+};
+session?.setActionHandler("play", () => void fileControl("play"));
+session?.setActionHandler("pause", () => void fileControl("pause"));
+session?.setActionHandler("nexttrack", () => void fileControl("next"));
+session?.setActionHandler("previoustrack", previous);
+session?.setActionHandler("stop", () => void fileControl("stop"));
 
 function stop() {
   queue = [];
@@ -69,6 +99,7 @@ function stop() {
   audio.load();
   URL.revokeObjectURL(url);
   url = "";
+  if (session) session.metadata = null;
 }
 
 /** Plays these songs in this order, once through; returns how many were found. */

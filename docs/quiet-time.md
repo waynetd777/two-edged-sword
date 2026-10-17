@@ -46,7 +46,7 @@ open the first.
 
 | Keys | Does |
 |---|---|
-| F7 and F9 | Previous or next part |
+| F7 and F9 | Previous or next part: what is being read stops at once |
 | F8 or ⌘P | Pause and resume reading aloud |
 
 ## Worship music
@@ -119,8 +119,8 @@ The first time, macOS asks whether the app may control Music.
 Turn it on in a plan's page. Quiet time then ends with a verse or short passage, chosen by the AI
 assistant to gather up what the day's reading taught.
 
-- The passage opens in the Bible reader, lit, with a card showing its words and a few sentences
-  on how it sums up the day.
+- The passage opens in the Bible reader, lit, with a card saying in a few sentences how it sums
+  up the day.
 - With audio, it is read aloud after a countdown that leaves time to read the card. **Read now**
   skips the wait.
 - It stays open when it's done. **Finish** ends Quiet time. With a favourite passage, that is read after it instead.
