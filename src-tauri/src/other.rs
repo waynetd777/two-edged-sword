@@ -1,7 +1,7 @@
 // Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
 // SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
-//! Off macOS (Windows): the AppKit modules' places, with nothing behind them yet. Each has what
+//! Off macOS (Windows): the AppKit modules' places that have no Windows version, each with what
 //! lib.rs and the page call, doing nothing or saying there's nothing, so the rest of the app runs.
 
 /// Reading aloud (tts.rs): no voices, so the page reads nothing.
@@ -22,14 +22,6 @@ pub mod tts {
     pub fn tts_pause(_app: AppHandle, _on: bool) {}
     #[tauri::command]
     pub fn tts_stop(_app: AppHandle) {}
-}
-
-/// The media keys and Now Playing (media.rs).
-pub mod media {
-    use tauri::AppHandle;
-
-    #[tauri::command]
-    pub fn media_state(_app: AppHandle, _title: Option<String>, _playing: bool) {}
 }
 
 /// AppKit pieces (platform/).
@@ -53,34 +45,9 @@ pub mod screenshot {
     pub fn start_snapshots(_app: &AppHandle, _tray_scene: bool) {}
 }
 
-/// Open at Login (login_item.rs, login_launch.rs): not offered.
-pub mod login_item {
-    #[derive(PartialEq, Clone, Copy, Debug)]
-    pub enum Status {
-        NotFound,
-        RequiresApproval,
-    }
-
-    impl Status {
-        pub fn is_on(self) -> bool {
-            false
-        }
-    }
-
-    pub fn available() -> bool {
-        false
-    }
-    pub fn status() -> Status {
-        Status::NotFound
-    }
-    pub fn set(_on: bool) -> Status {
-        Status::NotFound
-    }
-    pub fn open_settings() {}
-}
-
+/// Whether the Run key started the app (login_win.rs), so it stays in the notification area.
 pub mod login_launch {
     pub fn probe() -> bool {
-        false
+        std::env::args().any(|a| a == crate::login_item::ARG)
     }
 }

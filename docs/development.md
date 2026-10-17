@@ -27,8 +27,8 @@ runs the AI tools for Ask. The frontend is everything you see.
 
 - If hot reload leaves a screen broken after an edit, reload the window (⌘R) or restart
   `make dev` before treating it as a bug.
-- The app also builds on Windows, so far without the media keys,
-  Open at Login, screenshot mode or updates: `npx tauri build --debug --no-bundle` (needs Rust,
+- The app also builds on Windows, so far without screenshot mode or updates (the media
+  controls are `media_win.rs`, Open at Login the Run key in `login_win.rs`): `npx tauri build --debug --no-bundle` (needs Rust,
   Node, Python and Visual Studio Build Tools with the C++ workload) makes
   `src-tauri/target/debug/TwoEdgedSword.exe`. The AppKit modules are
   `#[cfg(target_os = "macos")]`, and `src-tauri/src/other.rs` stands in for them elsewhere; any

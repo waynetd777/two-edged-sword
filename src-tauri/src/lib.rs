@@ -16,9 +16,15 @@ mod kjv_words;
 mod library;
 #[cfg(target_os = "macos")]
 mod login_item;
+#[cfg(windows)]
+#[path = "login_win.rs"]
+mod login_item;
 #[cfg(target_os = "macos")]
 mod login_launch;
 #[cfg(target_os = "macos")]
+mod media;
+#[cfg(windows)]
+#[path = "media_win.rs"]
 mod media;
 mod music;
 #[cfg(windows)]
@@ -45,7 +51,7 @@ mod website;
 #[cfg(not(target_os = "macos"))]
 mod other;
 #[cfg(not(target_os = "macos"))]
-use other::{login_item, login_launch, media, platform, screenshot, tts};
+use other::{login_launch, platform, screenshot, tts};
 
 use library::{Kind, Library, ModuleInfo};
 use serde::Serialize;
@@ -339,12 +345,23 @@ fn music_artwork() -> Result<tauri::ipc::Response, String> {
 
 /// While reading aloud, in Quiet time or on a reading screen (awake.ts), the display is kept from
 /// sleeping (so the screensaver and lock don't come on) by a `caffeinate`, which ends when they do,
-/// or with the app (-w) if it quits first. Not yet on Windows.
+/// or with the app (-w) if it quits first. On Windows the main thread, which this runs on, asks
+/// Windows to keep the display on until it says otherwise.
 #[tauri::command]
 fn keep_awake(on: bool) -> Result<(), String> {
-    if cfg!(windows) {
-        return Ok(());
+    #[cfg(windows)]
+    {
+        use windows::Win32::System::Power::{SetThreadExecutionState, ES_CONTINUOUS, ES_DISPLAY_REQUIRED, ES_SYSTEM_REQUIRED};
+        let state = if on { ES_CONTINUOUS | ES_DISPLAY_REQUIRED | ES_SYSTEM_REQUIRED } else { ES_CONTINUOUS };
+        unsafe { SetThreadExecutionState(state) };
+        Ok(())
     }
+    #[cfg(not(windows))]
+    caffeinate(on)
+}
+
+#[cfg(not(windows))]
+fn caffeinate(on: bool) -> Result<(), String> {
     use std::sync::Mutex;
     static CHILD: Mutex<Option<std::process::Child>> = Mutex::new(None);
     let mut c = CHILD.lock().unwrap_or_else(|e| e.into_inner());

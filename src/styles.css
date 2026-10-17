@@ -1259,6 +1259,11 @@ i.added {
   font: 400 var(--read-size)/1.8 var(--serif);
   text-wrap: pretty;
 }
+/* The mouse pointer while it's still in focus mode, on Windows (pointer.ts). */
+html.nopointer,
+html.nopointer * {
+  cursor: none !important;
+}
 /* Focus mode's text, and a chapter read by paragraph, runs from margin to margin. */
 .focusjust {
   text-align: justify;
