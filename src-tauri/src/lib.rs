@@ -12,6 +12,7 @@ mod content;
 mod help;
 mod index;
 mod journal;
+mod kjv_words;
 mod library;
 #[cfg(target_os = "macos")]
 mod login_item;
@@ -30,6 +31,9 @@ mod screenshot;
 mod search;
 #[cfg(target_os = "macos")]
 mod spell;
+#[cfg(windows)]
+#[path = "spell_win.rs"]
+mod spell;
 mod store;
 mod study;
 mod tray;
@@ -41,7 +45,7 @@ mod website;
 #[cfg(not(target_os = "macos"))]
 mod other;
 #[cfg(not(target_os = "macos"))]
-use other::{login_item, login_launch, media, platform, screenshot, spell, tts};
+use other::{login_item, login_launch, media, platform, screenshot, tts};
 
 use library::{Kind, Library, ModuleInfo};
 use serde::Serialize;
@@ -368,11 +372,18 @@ fn keep_awake(on: bool) -> Result<(), String> {
 #[tauri::command(async)]
 fn spell_check(app: AppHandle, st: State<AppState>, text: String) -> Vec<(usize, usize)> {
     kjv_words(&st);
+    // Windows' checker and Harper work on any thread.
+    #[cfg(not(target_os = "macos"))]
+    return spell::check(&text);
+    #[cfg(target_os = "macos")]
     on_main(&app, move || spell::check(&text)).unwrap_or_default()
 }
 #[tauri::command(async)]
 fn spell_grammar(app: AppHandle, st: State<AppState>, text: String) -> Vec<spell::GrammarIssue> {
     kjv_words(&st);
+    #[cfg(not(target_os = "macos"))]
+    return spell::grammar(&text);
+    #[cfg(target_os = "macos")]
     on_main(&app, move || spell::grammar(&text)).unwrap_or_default()
 }
 /// The KJV's words, read here if a check comes before the start-up read (or waiting for it).
@@ -762,6 +773,18 @@ pub(crate) fn show_main(app: &AppHandle) {
 
 pub fn run() {
     let data = store::data_dir();
+    // Windows' app has no console for a panic's message: it goes to crash.log instead.
+    #[cfg(windows)]
+    {
+        let log = data.join("crash.log");
+        std::panic::set_hook(Box::new(move |p| {
+            let bt = std::backtrace::Backtrace::force_capture();
+            let _ = std::fs::OpenOptions::new().create(true).append(true).open(&log).and_then(|mut f| {
+                use std::io::Write;
+                writeln!(f, "{}: {p}\n{bt}\n", chrono::Local::now().format("%Y-%m-%d %H:%M:%S"))
+            });
+        }));
+    }
     // Made up front, so Show in Finder has somewhere to go before anything is built into it.
     let _ = std::fs::create_dir_all(library::app_dir());
     let lib = Arc::new(Library::scan(library::dirs(read_esword(&data))));

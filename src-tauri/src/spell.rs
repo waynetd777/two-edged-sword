@@ -8,78 +8,15 @@
 //! wants it. Every word in the KJV counts as spelled right,
 //! and sentences in KJV English ("he maketh me", "thou art") aren't grammar-checked.
 
+#[cfg(test)]
+use crate::kjv_words::KJV;
+use crate::kjv_words::{in_kjv, words, KJV_MARKERS};
+pub use crate::kjv_words::{kjv_ready, load_kjv};
 use objc2::runtime::AnyObject;
 use objc2_app_kit::NSSpellChecker;
 use objc2_foundation::{NSArray, NSDictionary, NSRange, NSString, NSValue};
 use serde::Serialize;
-use std::collections::HashSet;
 use std::sync::OnceLock;
-
-/// Every word in the user's KJV, lowercase; read once at start, in the background.
-static KJV: OnceLock<HashSet<String>> = OnceLock::new();
-
-/// Words that mark a sentence as KJV English even though macOS knows them.
-const KJV_MARKERS: &[&str] =
-    &["thee", "thou", "thy", "thine", "ye", "hast", "hath", "dost", "doth", "shalt", "wast", "wert", "canst", "saith", "unto", "spake"];
-
-fn norm(w: &str) -> String {
-    w.trim_matches(|c: char| c == '\'' || c == '’').replace('’', "'").to_lowercase()
-}
-
-fn words(text: &str) -> impl Iterator<Item = String> + '_ {
-    text.split(|c: char| !(c.is_alphabetic() || c == '\'' || c == '’')).map(norm).filter(|w| !w.is_empty())
-}
-
-/// Reads the KJV's words from the library (a Bible whose abbreviation is KJV), off the main
-/// thread. One read at a time: a caller arriving during another's waits for it rather than
-/// reading them again. Tags (Strong's numbers, notes) are dropped.
-pub fn load_kjv(lib: &crate::library::Library) {
-    use crate::library::Kind;
-    static LOADING: std::sync::Mutex<()> = std::sync::Mutex::new(());
-    let _one = LOADING.lock().unwrap_or_else(|e| e.into_inner());
-    if kjv_ready() {
-        return;
-    }
-    let Some(id) = lib.of_kind(Kind::Bible).find(|m| m.abbrev.eq_ignore_ascii_case("KJV")).map(|m| m.id.clone()) else { return };
-    let texts = lib.with(Kind::Bible, &id, |c| {
-        let mut st = c.prepare("SELECT Scripture FROM Bible")?;
-        let rows = st.query_map([], |r| r.get::<_, Option<String>>(0))?;
-        rows.map(|r| r.map(|t| t.unwrap_or_default())).collect::<rusqlite::Result<Vec<_>>>()
-    });
-    // A KJV that can't be read isn't tried again on every check: spelling goes on without it.
-    let texts = texts.unwrap_or_else(|e| {
-        eprintln!("spelling: the KJV's words: {e}");
-        Vec::new()
-    });
-    let mut set = HashSet::new();
-    for t in texts {
-        let mut plain = String::with_capacity(t.len());
-        let mut tag = false;
-        for c in t.chars() {
-            match c {
-                '<' => tag = true,
-                '>' => {
-                    tag = false;
-                    plain.push(' ')
-                }
-                _ if !tag => plain.push(c),
-                _ => {}
-            }
-        }
-        set.extend(words(&plain));
-    }
-    let _ = KJV.set(set);
-}
-
-/// Whether the KJV's words have been read (the journal's first check waits for them, since what
-/// it finds is kept for each paragraph).
-pub fn kjv_ready() -> bool {
-    KJV.get().is_some()
-}
-
-fn in_kjv(word: &str) -> bool {
-    KJV.get().is_some_and(|k| k.contains(&norm(word)))
-}
 
 /// Whether a sentence is in KJV English: it has thee, thou, hath… or a KJV word macOS doesn't know.
 fn kjv_sentence(sc: &NSSpellChecker, sentence: &str) -> bool {

@@ -53,6 +53,8 @@ An answer from Ask anywhere in the app can be added to the journal in one click.
 macOS checks spelling (red underline) and grammar (blue underline). Click an underlined word for
 suggestions. Words and phrases from the KJV, such as "maketh" and "thou art", aren't marked.
 
+On Windows, spelling is Windows' own spell checker, and grammar is checked by Harper, which runs on the PC: nothing you write is sent anywhere.
+
 Grammar checking can be turned off in Settings › Journal.
 
 ## Where it's kept

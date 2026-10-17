@@ -1756,44 +1756,45 @@ mark {
 }
 
 /* A misspelled word in the journal (spelling.ts). */
-/* The journal highlighter's paint (HL_PAINT in md.ts), shown in the theme's colours; saved as marks. */
-.editor span[style*="rgb(250, 1, 1)"] {
+/* The journal highlighter's paint (HL_PAINT in md.ts), shown in the theme's colours; saved as marks.
+   Safari's engine paints a span; Edge's (Windows) paints a highlight's own mark when all of it is chosen. */
+.editor [style*="rgb(250, 1, 1)"] {
   background-color: var(--hl-red) !important;
   border-radius: 3px;
 }
-.editor span[style*="rgb(250, 1, 2)"] {
+.editor [style*="rgb(250, 1, 2)"] {
   background-color: var(--hl-orange) !important;
   border-radius: 3px;
 }
-.editor span[style*="rgb(250, 1, 3)"] {
+.editor [style*="rgb(250, 1, 3)"] {
   background-color: var(--hl-yellow) !important;
   border-radius: 3px;
 }
-.editor span[style*="rgb(250, 1, 4)"] {
+.editor [style*="rgb(250, 1, 4)"] {
   background-color: var(--hl-green) !important;
   border-radius: 3px;
 }
-.editor span[style*="rgb(250, 1, 5)"] {
+.editor [style*="rgb(250, 1, 5)"] {
   background-color: var(--hl-blue) !important;
   border-radius: 3px;
 }
-.editor span[style*="rgb(250, 1, 6)"] {
+.editor [style*="rgb(250, 1, 6)"] {
   background-color: var(--hl-purple) !important;
   border-radius: 3px;
 }
-.editor span[style*="rgb(250, 1, 8)"] {
+.editor [style*="rgb(250, 1, 8)"] {
   background-color: var(--hl-teal) !important;
   border-radius: 3px;
 }
-.editor span[style*="rgb(250, 1, 9)"] {
+.editor [style*="rgb(250, 1, 9)"] {
   background-color: var(--hl-grey) !important;
   border-radius: 3px;
 }
 /* "No highlight" inside a highlight: painted in the background it sits on. */
-.editor span[style*="rgb(250, 1, 7)"] {
+.editor [style*="rgb(250, 1, 7)"] {
   background-color: var(--panel) !important;
 }
-.editor blockquote span[style*="rgb(250, 1, 7)"] {
+.editor blockquote [style*="rgb(250, 1, 7)"] {
   background-color: var(--panel2) !important;
 }
 .md mark[class^="hl-"] {
@@ -1890,7 +1891,7 @@ mark {
 /* Highlights hidden (the Show highlights button): the readers' verse and paragraph colours, the journal's marks, and what its highlighter has just painted. */
 .hide-hl [class^="hl-"],
 .hide-hl [class*=" hl-"],
-.hide-hl .editor span[style*="rgb(250, 1,"] {
+.hide-hl .editor [style*="rgb(250, 1,"] {
   background: none !important;
   background-color: transparent !important;
 }

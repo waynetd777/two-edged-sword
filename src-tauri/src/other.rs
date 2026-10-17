@@ -4,38 +4,6 @@
 //! Off macOS (Windows): the AppKit modules' places, with nothing behind them yet. Each has what
 //! lib.rs and the page call, doing nothing or saying there's nothing, so the rest of the app runs.
 
-/// Spelling and grammar (spell.rs): nothing is flagged.
-pub mod spell {
-    use serde::Serialize;
-
-    #[derive(Serialize)]
-    pub struct GrammarIssue {
-        pub start: usize,
-        pub len: usize,
-        pub description: String,
-        pub corrections: Vec<String>,
-    }
-
-    pub fn load_kjv(_lib: &crate::library::Library) {}
-    pub fn kjv_ready() -> bool {
-        true
-    }
-    pub fn check(_text: &str) -> Vec<(usize, usize)> {
-        Vec::new()
-    }
-    pub fn grammar(_text: &str) -> Vec<GrammarIssue> {
-        Vec::new()
-    }
-    pub fn guesses(_word: &str) -> Vec<String> {
-        Vec::new()
-    }
-    pub fn correction(_word: &str) -> Option<String> {
-        None
-    }
-    pub fn learn(_word: &str) {}
-    pub fn ignore(_word: &str) {}
-}
-
 /// Reading aloud (tts.rs): no voices, so the page reads nothing.
 pub mod tts {
     use serde::Serialize;
