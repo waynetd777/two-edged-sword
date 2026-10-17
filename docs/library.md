@@ -37,6 +37,12 @@ The app comes with these, so it works with nothing else installed. All are publi
 | Treasury of Scripture Knowledge (TSK), the cross-references | CrossWire |
 | Matthew Henry's Commentary on the Whole Bible | CrossWire, from the Christian Classics Ethereal Library |
 | Easton's Bible Dictionary | CrossWire, from the Christian Classics Ethereal Library |
+| Jamieson, Fausset & Brown Commentary (JFB) | CrossWire, from the Christian Classics Ethereal Library |
+| Adam Clarke's Commentary on the Bible | CrossWire, from Wikisource |
+| Barnes' Notes on the New Testament | CrossWire |
+| Smith's Bible Dictionary | CrossWire |
+| Nave's Topical Bible | CrossWire, from the Christian Classics Ethereal Library |
+| International Standard Bible Encyclopedia (ISBE) | CrossWire |
 
 If you have e-Sword X, its copies of these are used instead while **Read e-Sword X** is on.
 
