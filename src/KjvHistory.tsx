@@ -239,7 +239,8 @@ const KJV: Source = {
   name: "King James Version",
   date: "1611 (text of 1769)",
   note: "Made by about 47 scholars in six companies, 1604–1611, from the editions above.",
-  have: /^King James Version$/i,
+  // With the KJV+ beside it, as its "+".
+  have: /^King James Version( w\/ Strong's Numbers)?$/i,
 };
 
 /** The library's Bibles that are this text, and the others that come closest or are related. */
