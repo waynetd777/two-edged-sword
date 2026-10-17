@@ -25,7 +25,7 @@ import { ExportDialog, longDate } from "./JournalExport";
 import { JournalAsk } from "./JournalAsk";
 import { HighlightPicker, RefPrompt, SpellMenu, tagOptions, TagPicker } from "./JournalPickers";
 import { useEscExitsFocus } from "./ReadingColumn";
-import { cmdKey, shortcut } from "./keys";
+import { cmdKey, FILES_APP, shortcut } from "./keys";
 
 // Worked out once per entry (the objects are kept until an entry changes): with thousands of
 // entries, doing it on every keystroke made typing slow.
@@ -819,7 +819,7 @@ function Editor({
           }
         >
           <Icon name="finder" />
-          Show in Finder
+          Show in {FILES_APP}
         </button>
         <button className="btn" type="button" onClick={onExport}>
           <Icon name="export" />

@@ -12,7 +12,7 @@ import { modelGroups, PROVIDER_NAME, pickModel, refreshAssistant, useAssistant }
 import { READ_FONTS, ReadFont, useApp } from "./state";
 import { confirmDelete, Popover, SearchList, Seg, Switch } from "./ui";
 import { WEBSITE } from "./website";
-import { shortcut } from "./keys";
+import { isMac, MACHINE, OS, shortcut } from "./keys";
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -72,7 +72,7 @@ export function SettingsScreen() {
               <Seg
                 value={(s.theme as string) === "midnight" ? "dark" : s.theme}
                 options={[
-                  ["auto", "Match macOS"],
+                  ["auto", `Match ${OS}`],
                   ["light", "Light"],
                   ["dark", "Dark"],
                 ]}
@@ -155,7 +155,10 @@ export function SettingsScreen() {
               </div>
             </Row>
             <Row label="Library" hint="Checked for new modules each time the app opens, or press Rescan on the Library screen.">
-              <span style={{ fontSize: 12.5 }}>e-Sword X · {app.lib?.modules.length} modules · read-only</span>
+              <span style={{ fontSize: 12.5 }}>
+                {isMac ? "e-Sword X · " : ""}
+                {app.lib?.modules.length} modules · read-only
+              </span>
             </Row>
           </Section>
           <Section title="Highlights">
@@ -167,27 +170,37 @@ export function SettingsScreen() {
             </Row>
           </Section>
           <Section title="Listening">
-            <Row label="Voice" hint="More voices: System Settings › Accessibility › Spoken Content › System Voice › Manage Voices.">
+            <Row
+              label="Voice"
+              hint={
+                isMac
+                  ? "More voices: System Settings › Accessibility › Spoken Content › System Voice › Manage Voices."
+                  : "More voices: Windows Settings › Time & language › Speech › Add voices."
+              }
+            >
               <div style={{ width: 320 }}>
                 <VoiceSelect />
               </div>
             </Row>
             <Row
               label="Hebrew voice"
-              hint="For the Hebrew Bibles and the Targums. macOS's Hebrew voices (Carmit) speak the modern pronunciation."
+              hint={`For the Hebrew Bibles and the Targums. ${isMac ? "macOS's Hebrew voices (Carmit) speak" : "Windows' Hebrew voice (Asaf) speaks"} the modern pronunciation.`}
             >
               <div style={{ width: 320 }}>
                 <VoiceSelect lang="he" />
               </div>
             </Row>
-            <Row label="Greek voice" hint="For the Greek Bibles. macOS's Greek voices (Melina) speak the modern pronunciation.">
+            <Row
+              label="Greek voice"
+              hint={`For the Greek Bibles. ${isMac ? "macOS's Greek voices (Melina) speak" : "Windows' Greek voice (Stefanos) speaks"} the modern pronunciation.`}
+            >
               <div style={{ width: 320 }}>
                 <VoiceSelect lang="el" />
               </div>
             </Row>
             <Row
               label="Latin voice"
-              hint="For the Latin Vulgates. An Italian voice (Alice, Luca, Federica) says Church Latin the way it is said."
+              hint={`For the Latin Vulgates. An Italian voice (${isMac ? "Alice, Luca, Federica" : "Elsa, Cosimo"}) says Church Latin the way it is said.`}
             >
               <div style={{ width: 320 }}>
                 <VoiceSelect lang="la" />
@@ -261,7 +274,10 @@ export function SettingsScreen() {
             <Row label="Show notes beside verses">
               <Switch on={s.showNotes} onChange={(v) => app.set({ showNotes: v })} />
             </Row>
-            <Row label="Check grammar" hint="With spelling, by macOS: a blue underline, and a click explains it.">
+            <Row
+              label="Check grammar"
+              hint={`With spelling, by ${isMac ? "macOS" : "Harper, on this PC"}: a blue underline, and a click explains it.`}
+            >
               <Switch on={s.journalGrammar ?? true} onChange={(v) => app.set({ journalGrammar: v })} />
             </Row>
           </Section>
@@ -336,7 +352,7 @@ export function SettingsScreen() {
                 Allow their text to be sent
               </Switch>
             </Row>
-            <Row label="Chats" hint="Kept on this Mac. Delete one from the Recent menu on any Ask card.">
+            <Row label="Chats" hint={`Kept on this ${MACHINE}. Delete one from the Recent menu on any Ask card.`}>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <span style={{ fontSize: 12.5 }}>
                   {app.chats.length} chat{app.chats.length === 1 ? "" : "s"}
@@ -358,7 +374,7 @@ export function SettingsScreen() {
           <Section title="Quiet time">
             <Row
               label="Daily reminder"
-              hint="A notification at this time if today's reading isn't done. The app keeps running in the menu bar after its window is closed; it can't remind you once you quit it."
+              hint={`A notification at this time if today's reading isn't done. The app keeps running in the ${isMac ? "menu bar" : "notification area"} after its window is closed; it can't remind you once you quit it.`}
             >
               <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
                 <Switch on={s.reminder} onChange={(v) => app.set({ reminder: v })}>

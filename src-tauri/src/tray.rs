@@ -49,10 +49,14 @@ pub struct TrayState {
 pub struct Tray(Mutex<Option<TrayState>>);
 
 pub fn build(app: &AppHandle) -> tauri::Result<()> {
+    // macOS draws the black template in the menu bar's colour; Windows' tray shows the app's icon.
+    #[cfg(target_os = "macos")]
     let icon = tauri::image::Image::from_bytes(include_bytes!("../icons/tray@2x.png"))?;
+    #[cfg(not(target_os = "macos"))]
+    let icon = tauri::image::Image::from_bytes(include_bytes!("../icons/64x64.png"))?;
     TrayIconBuilder::with_id(ID)
         .icon(icon)
-        .icon_as_template(true)
+        .icon_as_template(cfg!(target_os = "macos"))
         .tooltip("Two-edged Sword")
         .on_tray_icon_event(|tray, ev| {
             if let TrayIconEvent::Click { button_state: MouseButtonState::Up, rect, .. } = ev {
@@ -63,6 +67,12 @@ pub fn build(app: &AppHandle) -> tauri::Result<()> {
     if let Some(t) = app.get_webview_window("tray") {
         let t2 = t.clone();
         t.on_window_event(move |ev| {
+            // Above the icon, the menu grows upwards as the page sizes it.
+            if let tauri::WindowEvent::Resized(size) = ev {
+                if let (Some((left, bottom)), Ok(k)) = (*ABOVE.lock().unwrap(), t2.scale_factor()) {
+                    let _ = t2.set_position(tauri::LogicalPosition::new(left, bottom - size.height as f64 / k));
+                }
+            }
             if let tauri::WindowEvent::Focused(false) = ev {
                 if t2.is_visible().unwrap_or(false) {
                     *TRAY_BLURRED_AT.lock().unwrap() = Some(std::time::Instant::now());
@@ -85,13 +95,17 @@ const CLICK_AFTER_BLUR: std::time::Duration = std::time::Duration::from_millis(4
 /// icon, and a click on the other screen's takes the focus too: that one opens the menu there.
 static OPENED_UNDER: std::sync::Mutex<Option<(f64, f64)>> = std::sync::Mutex::new(None);
 
+/// With the taskbar at the bottom of the screen, as Windows' usually is, the menu opens above the
+/// icon: its left edge and where its bottom goes, in points.
+static ABOVE: std::sync::Mutex<Option<(f64, f64)>> = std::sync::Mutex::new(None);
+
 /// The icon's place as the click gives it, to tell one screen's icon from another's.
 fn icon_place(rect: &tauri::Rect) -> (f64, f64) {
     let p = rect.position.to_physical::<f64>(1.0);
     (p.x, p.y)
 }
 
-/// Opens the menu window under the icon, or closes it.
+/// Opens the menu window under the icon (above it, from a taskbar at the screen's foot), or closes it.
 fn toggle(app: &AppHandle, rect: tauri::Rect) {
     let Some(w) = app.get_webview_window("tray") else { return };
     if w.is_visible().unwrap_or(false) {
@@ -121,16 +135,19 @@ fn toggle(app: &AppHandle, rect: tauri::Rect) {
         let (left, top) = (p.x as f64 / k, p.y as f64 / k);
         let (x, y, slack) = (icon.x / k, icon.y / k, icon_size.height / k);
         let inside = x >= left && x < left + sz.width as f64 / k && y >= top - slack && y < top + sz.height as f64 / k;
-        inside.then_some((k, left, left + sz.width as f64 / k))
+        inside.then_some((k, left, left + sz.width as f64 / k, top + sz.height as f64 / 2.0 / k))
     };
     let screen = monitors.iter().find_map(in_points);
     let k = screen.map_or_else(|| w.scale_factor().unwrap_or(2.0), |s| s.0);
     let (x, y, iw, ih) = (icon.x / k, icon.y / k, icon_size.width / k, icon_size.height / k);
     let mut left = x + iw / 2.0 - WIDTH / 2.0;
-    if let Some((_, screen_left, screen_right)) = screen {
+    if let Some((_, screen_left, screen_right, _)) = screen {
         left = left.min(screen_right - WIDTH - 8.0).max(screen_left + 8.0);
     }
-    let place = tauri::LogicalPosition::new(left, y + ih + 6.0);
+    let below = screen.is_none_or(|s| y < s.3);
+    *ABOVE.lock().unwrap() = (!below).then_some((left, y - 6.0));
+    let h = w.outer_size().map_or(0.0, |s| s.height as f64 / w.scale_factor().unwrap_or(k));
+    let place = tauri::LogicalPosition::new(left, if below { y + ih + 6.0 } else { y - 6.0 - h });
     let _ = w.set_position(place);
     let _ = w.show();
     // Once on that screen, place it again, in case macOS moved it while showing it.

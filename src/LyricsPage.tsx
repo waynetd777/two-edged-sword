@@ -305,7 +305,11 @@ export function LyricsPage({ focus, setFocus }: { focus: boolean; setFocus: (f: 
           {error ? (
             <p className="err">{error}</p>
           ) : stopped ? (
-            <p className="n">Play a song in Music and its words show here.</p>
+            <p className="n">
+              {isMac
+                ? "Play a song in Music and its words show here."
+                : "Play songs from Quiet time or Songs for the chapter, and their words show here."}
+            </p>
           ) : lyrics === undefined ? (
             <p className="n">Finding the words…</p>
           ) : !lyrics ? (
@@ -351,7 +355,11 @@ export function LyricsPage({ focus, setFocus }: { focus: boolean; setFocus: (f: 
                 </Fragment>
               ))}
               <p className="n" style={{ marginTop: 28, fontSize: 12 }}>
-                {lyrics.source === "lrclib" ? "Lyrics from LRCLIB" : "Lyrics saved with the song in Music"}
+                {lyrics.source === "lrclib"
+                  ? "Lyrics from LRCLIB"
+                  : isMac
+                    ? "Lyrics saved with the song in Music"
+                    : "Lyrics saved with the song"}
                 {lyrics.timed ? "" : " · not timed"}
               </p>
             </div>

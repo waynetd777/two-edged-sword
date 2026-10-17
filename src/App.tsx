@@ -28,7 +28,7 @@ import { hideSplash } from "./splash";
 import { useTray } from "./tray";
 import { Tooltips, WordHoverBox } from "./ui";
 import { UpdateDialog } from "./Update";
-import { cmdKey } from "./keys";
+import { cmdKey, isMac } from "./keys";
 
 function Screens() {
   const app = useApp();
@@ -120,8 +120,8 @@ function Screens() {
         <div className="card" style={{ maxWidth: 520, padding: 28, display: "flex", flexDirection: "column", gap: 10 }}>
           <h1 style={{ margin: 0, font: "500 28px var(--display)" }}>No Bibles found</h1>
           <p style={{ margin: 0, color: "var(--muted)" }}>
-            Two-edged Sword reads Bibles and books from these folders. Copy a module into the first, or download one in e-Sword X, then
-            press Rescan.
+            Two-edged Sword reads Bibles and books from these folders. Copy a module into the first
+            {isMac ? ", or download one in e-Sword X," : ""} then press Rescan.
           </p>
           {app.lib.dirs.map((d) => (
             <code key={d.source} style={{ fontSize: 12, color: "var(--muted)" }}>

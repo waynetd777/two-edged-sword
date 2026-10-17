@@ -15,6 +15,7 @@ import { useApp } from "./state";
 import { PickedSongs } from "./PickedSongs";
 import { Popover } from "./ui";
 import { Picked, pickChapterSongs, setChapterPlaying } from "./worship";
+import { isMac } from "./keys";
 
 const COUNTS = [1, 2, 3, 4, 5, 6, 8];
 let lastCount = 4; // what was asked for last, this session
@@ -42,7 +43,7 @@ export function SongsButton({ about, label, text }: { about: string; label?: str
     api
       .musicPlay(p.songs.map((x) => x.id))
       .then((found) => {
-        if (!found) return app.toast("Couldn't find the songs in Music");
+        if (!found) return app.toast(isMac ? "Couldn't find the songs in Music" : "Couldn't find the songs in your Music folder");
         setChapterPlaying(p.songs);
         // The songs, not the chapter read aloud: its player stops and closes.
         player.stop();
@@ -92,7 +93,12 @@ export function SongsButton({ about, label, text }: { about: string; label?: str
                 <PickedSongs intro={p.intro} note={p.note} songs={p.songs} />
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   {p.songs.length > 0 && (
-                    <button className="btn primary" type="button" title="Play these songs in Music" onClick={() => play(p)}>
+                    <button
+                      className="btn primary"
+                      type="button"
+                      title={isMac ? "Play these songs in Music" : "Play these songs"}
+                      onClick={() => play(p)}
+                    >
                       <Play size={12} />
                       Play songs
                     </button>

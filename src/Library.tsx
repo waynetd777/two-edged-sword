@@ -11,6 +11,7 @@ import { BibleSelect, Topbar } from "./Shell";
 import { useApp } from "./state";
 import { orderModules } from "./StudyPane";
 import { ClearButton, fmtSize, Popover, Switch } from "./ui";
+import { FILES_APP, isMac } from "./keys";
 
 const total = (ms: ModuleInfo[]) => fmtSize(ms.reduce((t, m) => t + (m.size ?? 0), 0));
 
@@ -197,19 +198,23 @@ export function LibraryScreen() {
               Reading {n("bible")} Bibles and {ms.length - n("bible")} books
             </b>
             <span className="hint" style={{ fontSize: 12.5 }}>
-              {fromSources(ms)} Read-only: nothing is copied or changed. Modules added to your folder or in e-Sword appear after a rescan.
+              {fromSources(ms)} Read-only: nothing is copied or changed. Modules added to your folder{isMac ? " or in e-Sword" : ""} appear
+              after a rescan.
             </span>
           </div>
           <span style={{ whiteSpace: "nowrap", flexShrink: 0 }}>
-            <Switch
-              on={app.settings.readEsword}
-              onChange={(v) => {
-                app.set({ readEsword: v });
-                rescan(v);
-              }}
-            >
-              Read e-Sword X
-            </Switch>
+            {/* e-Sword for Windows' modules are encrypted: there is no e-Sword X library to read there. */}
+            {isMac && (
+              <Switch
+                on={app.settings.readEsword}
+                onChange={(v) => {
+                  app.set({ readEsword: v });
+                  rescan(v);
+                }}
+              >
+                Read e-Sword X
+              </Switch>
+            )}
           </span>
           <button
             className="btn"
@@ -220,7 +225,7 @@ export function LibraryScreen() {
             }}
           >
             <Icon name="finder" />
-            Show in Finder
+            Show in {FILES_APP}
           </button>
           <button
             className="btn"

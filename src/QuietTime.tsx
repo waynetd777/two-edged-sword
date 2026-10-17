@@ -43,6 +43,7 @@ import { sceneSong } from "./lyrics";
 import { PickedSongs } from "./PickedSongs";
 import { Closing, pickClosing } from "./closing";
 import { cancelAutoRead, inverts, readWhenReady } from "./WebPage";
+import { isMac } from "./keys";
 
 const FIRST_DELAY = 900; // let the first part's screen open before reading starts
 const NEXT_DELAY = 2000;
@@ -355,7 +356,7 @@ export function QuietTime({ focus }: { focus: boolean }) {
           return;
         }
         if (!n) {
-          app.toast("Couldn't find the songs in Music");
+          app.toast(isMac ? "Couldn't find the songs in Music" : "Couldn't find the songs in your Music folder");
           return;
         }
         setChapterPlaying([]); // the playlist is Quiet time's now
@@ -716,7 +717,7 @@ function WorshipNow({
   if (!step.picked.length) return null; // the card says why
   if (!started)
     return (
-      <button className="btn small" type="button" title="Play today's songs in Music" onClick={onPlay}>
+      <button className="btn small" type="button" title={isMac ? "Play today's songs in Music" : "Play today's songs"} onClick={onPlay}>
         <Play size={11} />
         Play songs
       </button>
@@ -847,7 +848,12 @@ function WorshipCard({
       <PickedSongs intro={step.intro} note={step.note} songs={step.picked} />
       {step.picked.length > 0 && (
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <button className="btn primary" type="button" title="Play today's songs in Music" onClick={onPlay}>
+          <button
+            className="btn primary"
+            type="button"
+            title={isMac ? "Play today's songs in Music" : "Play today's songs"}
+            onClick={onPlay}
+          >
             <Play size={12} />
             Play songs
           </button>

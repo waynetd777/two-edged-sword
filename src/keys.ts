@@ -22,3 +22,8 @@ export function shortcut(s: string): string {
     })
     .replace(/[↩⏎]/g, "Enter");
 }
+
+/** What the app's words call the computer and its parts, on macOS and on Windows. */
+export const OS = isMac ? "macOS" : "Windows";
+export const MACHINE = isMac ? "Mac" : "PC";
+export const FILES_APP = isMac ? "Finder" : "File Explorer";

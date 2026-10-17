@@ -12,7 +12,7 @@ import { modelGroups, modelName, pickModel, providerOf, PROVIDER_NAME, useAssist
 import { Chat, Model, nowLocal, Opened, Place, HlTheme, themesOf, uid, useApp } from "./state";
 import { useRefPreview } from "./StudyPane";
 import { ClearButton, confirmDelete, copyText, Popover } from "./ui";
-import { cmdKey, shortcut } from "./keys";
+import { cmdKey, MACHINE, shortcut } from "./keys";
 
 /** A module whose description carries a copyright notice is licensed, not public domain. */
 const PUBLIC_DOMAIN = /^(KJV\+?|KJVA|ASV|YLT|WEB|DRB|DRA|Darby|BBE|RV|ERV|Webster|Geneva|GNV|Bishops|Tyndale|Wycliffe|LXX|TR|WH|Byz)$/i;
@@ -829,7 +829,7 @@ export function AskPanel(p: AskProps) {
           {input}
           <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11.5, color: "var(--muted)" }}>
             <Icon name="check" size={13} style={{ color: "var(--good)" }} />
-            Runs {PROVIDER_NAME[providerOf(model)]} on this Mac
+            Runs {PROVIDER_NAME[providerOf(model)]} on this {MACHINE}
             <span style={{ marginLeft: "auto" }}>
               <span className="kbd">{shortcut("⏎")}</span> send · <span className="kbd">{shortcut("⇧⏎")}</span> new line
             </span>
@@ -1043,7 +1043,7 @@ function RecentChats({
           </div>
         )}
         <div className="hint" style={{ padding: "8px 10px 4px", borderTop: "1px solid var(--border)", marginTop: 4 }}>
-          Kept on this Mac
+          Kept on this {MACHINE}
         </div>
       </div>
     </Popover>
