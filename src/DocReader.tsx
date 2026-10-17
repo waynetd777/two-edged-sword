@@ -19,6 +19,7 @@ import { DictionaryTab, useRefPreview } from "./StudyPane";
 import { ClearButton, copyText, Popover, scrollToThird, SearchList, SideNav, wordAt, wordHover } from "./ui";
 import { dayTitle, today as readingDay } from "./plans";
 import { useAssistant } from "./assistant";
+import { shortcut } from "./keys";
 
 /**
  * A reference book or a devotional in the reading column: its chapters (a devotional's days) down
@@ -227,10 +228,10 @@ export function DocReader({ focus, setFocus, openPalette }: { focus: boolean; se
           <span className="lbl">Ask</span>
         </button>
       )}
-      <button type="button" className="tb" title="Copy, with where it's from (⌘C)" onClick={copySel}>
+      <button type="button" className="tb" title={shortcut("Copy, with where it's from (⌘C)")} onClick={copySel}>
         <Icon name="copy" />
         <span className="lbl">
-          Copy<span style={{ opacity: 0.6 }}> ⌘C</span>
+          Copy<span style={{ opacity: 0.6 }}> {shortcut("⌘C")}</span>
         </span>
       </button>
     </div>
@@ -416,7 +417,7 @@ export function DocReader({ focus, setFocus, openPalette }: { focus: boolean; se
             className={`ibtn ${reading ? "on" : ""}`}
             type="button"
             aria-label="Listen"
-            title="Listen (Space · ⌘P)"
+            title={shortcut("Listen (Space · ⌘P)")}
             disabled={!segs.length}
             onClick={() => (reading ? player.toggle() : listen())}
           >
@@ -446,7 +447,7 @@ export function DocReader({ focus, setFocus, openPalette }: { focus: boolean; se
                 className={`ibtn ${reading ? "on" : ""}`}
                 type="button"
                 aria-label="Listen"
-                title="Listen (Space · ⌘P)"
+                title={shortcut("Listen (Space · ⌘P)")}
                 disabled={!segs.length}
                 onClick={() => (reading ? player.toggle() : listen())}
               >
@@ -465,14 +466,20 @@ export function DocReader({ focus, setFocus, openPalette }: { focus: boolean; se
               )}
               <HighlightsButton />
               <TextSizeButton />
-              <button className="ibtn" type="button" aria-label="Focus mode" title="Focus mode (⌘.)" onClick={() => setFocus(true)}>
+              <button
+                className="ibtn"
+                type="button"
+                aria-label="Focus mode"
+                title={shortcut("Focus mode (⌘.)")}
+                onClick={() => setFocus(true)}
+              >
                 <Icon name="focus" />
               </button>
               <button
                 className={`ibtn ${app.settings.studyPane ? "on" : ""}`}
                 type="button"
                 aria-label="Study pane"
-                title="Study pane: notes, dictionaries and Ask (⌘\)"
+                title={shortcut("Study pane: notes, dictionaries and Ask (⌘\\)")}
                 onClick={() => app.set({ studyPane: !app.settings.studyPane })}
               >
                 <Icon name="pane" />
@@ -649,7 +656,7 @@ export function DocReader({ focus, setFocus, openPalette }: { focus: boolean; se
                       >
                         {isSel && sel!.from === n && toolbar}
                         <div className="vn dsegn">
-                          <span title="Click the paragraph (not a word) to select it · ⇧-click for a range">{n}</span>
+                          <span title={shortcut("Click the paragraph (not a word) to select it · ⇧-click for a range")}>{n}</span>
                         </div>
                         <div className={`dsegtext ${onePara ? "inl" : ""}`}>
                           {reading && ps.verse === n && wordBoxes.map((b, j) => <span key={j} className="speakbox" style={b} />)}

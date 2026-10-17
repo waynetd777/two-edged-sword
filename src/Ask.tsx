@@ -12,7 +12,7 @@ import { modelGroups, modelName, pickModel, providerOf, PROVIDER_NAME, useAssist
 import { Chat, Model, nowLocal, Opened, Place, HlTheme, themesOf, uid, useApp } from "./state";
 import { useRefPreview } from "./StudyPane";
 import { ClearButton, confirmDelete, copyText, Popover } from "./ui";
-import { cmdKey } from "./keys";
+import { cmdKey, shortcut } from "./keys";
 
 /** A module whose description carries a copyright notice is licensed, not public domain. */
 const PUBLIC_DOMAIN = /^(KJV\+?|KJVA|ASV|YLT|WEB|DRB|DRA|Darby|BBE|RV|ERV|Webster|Geneva|GNV|Bishops|Tyndale|Wycliffe|LXX|TR|WH|Byz)$/i;
@@ -831,7 +831,7 @@ export function AskPanel(p: AskProps) {
             <Icon name="check" size={13} style={{ color: "var(--good)" }} />
             Runs {PROVIDER_NAME[providerOf(model)]} on this Mac
             <span style={{ marginLeft: "auto" }}>
-              <span className="kbd">⏎</span> send · <span className="kbd">⇧⏎</span> new line
+              <span className="kbd">{shortcut("⏎")}</span> send · <span className="kbd">{shortcut("⇧⏎")}</span> new line
             </span>
           </div>
         </div>

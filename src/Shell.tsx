@@ -9,6 +9,7 @@ import { Screen, useApp } from "./state";
 import { todayReading } from "./plans";
 import { useRefPreview } from "./StudyPane";
 import { confirmDelete, Popover, SearchList } from "./ui";
+import { shortcut } from "./keys";
 
 const NAV: { s: Screen; label: string; icon: string; key: string; tip: string }[] = [
   { s: "read", label: "Read", icon: "read", key: "1", tip: "Read the Bible beside the study pane" },
@@ -88,7 +89,7 @@ export function Sidebar() {
           <button key={n.s} type="button" className={`nav ${app.screen === n.s ? "on" : ""}`} title={n.tip} onClick={() => app.go(n.s)}>
             <Icon name={n.icon} />
             {n.label}
-            <span className="k">⌘{n.key}</span>
+            <span className="k">{shortcut(`⌘${n.key}`)}</span>
           </button>
         ))}
       </nav>
@@ -228,7 +229,7 @@ export function Sidebar() {
           onClick={() => app.go("settings")}
         >
           <Icon name="settings" />
-          Settings<span className="k">⌘,</span>
+          Settings<span className="k">{shortcut("⌘,")}</span>
         </button>
       </div>
       {preview}
@@ -241,10 +242,17 @@ export function Topbar({ children, right }: { children?: ReactNode; right?: Reac
   const app = useApp();
   return (
     <header className="topbar drag">
-      <button className="ibtn" type="button" aria-label="Back" title="Back (⌘[)" disabled={!app.canBack} onClick={app.back}>
+      <button className="ibtn" type="button" aria-label="Back" title={shortcut("Back (⌘[)")} disabled={!app.canBack} onClick={app.back}>
         <Icon name="back" />
       </button>
-      <button className="ibtn" type="button" aria-label="Forward" title="Forward (⌘])" disabled={!app.canForward} onClick={app.forward}>
+      <button
+        className="ibtn"
+        type="button"
+        aria-label="Forward"
+        title={shortcut("Forward (⌘])")}
+        disabled={!app.canForward}
+        onClick={app.forward}
+      >
         <Icon name="fwd" />
       </button>
       {children}
@@ -338,7 +346,7 @@ export function SearchField({ onOpen }: { onOpen: () => void }) {
     >
       <Icon name="search" />
       <span style={{ flexGrow: 1, color: "var(--muted)" }}>Search, or type a reference like rom 8 28</span>
-      <span className="kbd">⌘K</span>
+      <span className="kbd">{shortcut("⌘K")}</span>
     </button>
   );
 }

@@ -25,7 +25,7 @@ import { ExportDialog, longDate } from "./JournalExport";
 import { JournalAsk } from "./JournalAsk";
 import { HighlightPicker, RefPrompt, SpellMenu, tagOptions, TagPicker } from "./JournalPickers";
 import { useEscExitsFocus } from "./ReadingColumn";
-import { cmdKey } from "./keys";
+import { cmdKey, shortcut } from "./keys";
 
 // Worked out once per entry (the objects are kept until an entry changes): with thousands of
 // entries, doing it on every keystroke made typing slow.
@@ -272,7 +272,7 @@ export function JournalScreen({
               className={`ibtn ${listening && !player.state.paused ? "on" : ""}`}
               type="button"
               aria-label="Listen"
-              title={listening ? `${player.state.paused ? "Play" : "Pause"} (Space · ⌘P)` : "Listen to this entry (⌘P)"}
+              title={shortcut(listening ? `${player.state.paused ? "Play" : "Pause"} (Space · ⌘P)` : "Listen to this entry (⌘P)")}
               disabled={!cur?.body.trim()}
               onClick={listen}
             >
@@ -282,7 +282,7 @@ export function JournalScreen({
               className={`ibtn ${focus ? "on" : ""}`}
               type="button"
               aria-label="Focus mode"
-              title={focus ? "Leave focus mode (Esc)" : "Focus mode (⌘.)"}
+              title={focus ? "Leave focus mode (Esc)" : shortcut("Focus mode (⌘.)")}
               onClick={() => setFocus(!focus)}
             >
               <Icon name="focus" />
@@ -315,7 +315,7 @@ export function JournalScreen({
             <h1 style={{ margin: 0, font: "500 26px/1.2 var(--display)" }}>Journal</h1>
             <button className="btn primary" type="button" style={{ marginLeft: "auto" }} onClick={create}>
               <Icon name="plus" />
-              New entry<span style={{ opacity: 0.75 }}>⌘N</span>
+              New entry<span style={{ opacity: 0.75 }}>{shortcut("⌘N")}</span>
             </button>
           </div>
           <label className="field" style={{ margin: "0 4px" }}>
@@ -979,7 +979,7 @@ function Toolbar({
         className="ibtn"
         type="button"
         aria-label="Bold"
-        title="Bold ⌘B"
+        title={shortcut("Bold ⌘B")}
         style={{ fontWeight: 700, color: "var(--text)" }}
         onClick={() => cmd("bold")}
       >
@@ -989,7 +989,7 @@ function Toolbar({
         className="ibtn"
         type="button"
         aria-label="Italic"
-        title="Italic ⌘I"
+        title={shortcut("Italic ⌘I")}
         style={{ fontStyle: "italic", fontFamily: "var(--serif)", color: "var(--text)" }}
         onClick={() => cmd("italic")}
       >
@@ -1062,7 +1062,7 @@ function Toolbar({
         Tag
       </button>
       <span style={{ width: 1, height: 18, background: "var(--border)", margin: "0 4px" }} />
-      <button className="ibtn" type="button" aria-label="Find and replace" title="Find ⌘F · Replace ⌥⌘F" onClick={onFind}>
+      <button className="ibtn" type="button" aria-label="Find and replace" title={shortcut("Find ⌘F · Replace ⌥⌘F")} onClick={onFind}>
         <Icon name="search" />
       </button>
       <div

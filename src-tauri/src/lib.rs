@@ -674,13 +674,20 @@ fn set_in_dock(app: &AppHandle, shown: bool) {
 /// size, kept in pixels, can be read back as points, so it doubled on every quit and relaunch
 /// until the window was far wider than any screen and drew only in parts.
 fn fit_on_screen(w: &tauri::WebviewWindow) {
+    // Maximised, a window on Windows reaches past the screen by its invisible resizing border.
+    if w.is_maximized().unwrap_or(false) || w.is_fullscreen().unwrap_or(false) {
+        return;
+    }
     let Some(m) = w.current_monitor().ok().flatten().or_else(|| w.primary_monitor().ok().flatten()) else { return };
     let scale = m.scale_factor();
     // The whole screen, not its work area: a full-screen window is as big as the screen.
     let screen = m.size().to_logical::<f64>(scale);
     let Ok(size) = w.outer_size() else { return };
     let size = size.to_logical::<f64>(w.scale_factor().unwrap_or(scale));
-    if size.width <= screen.width + 1.0 && size.height <= screen.height + 1.0 {
+    // That border, about 8 points a side, is in the outer size too: a window dragged as wide as
+    // the screen is a little wider than it.
+    let slack = if cfg!(windows) { 32.0 } else { 1.0 };
+    if size.width <= screen.width + slack && size.height <= screen.height + slack {
         return;
     }
     // The window's first size (tauri.conf.json), or the screen's if that is smaller.

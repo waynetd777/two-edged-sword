@@ -3,6 +3,8 @@
 
 import { invoke } from "@tauri-apps/api/core";
 import { isDark } from "./dom";
+import { isMac } from "./keys";
+import { webPause, webSpeak, webStop, webVoices } from "./webSpeech";
 import type { UpdateShown } from "./Update";
 
 /** Screenshot mode (scene.ts) sets this: nothing the page changes is saved. */
@@ -322,12 +324,13 @@ export const api = {
   print: () => invoke<void>("print_page"),
   /** The screenshot scene the app was launched with (TES_SCENE), as JSON, or null. */
   scene: () => invoke<string | null>("scene"),
-  ttsVoices: () => invoke<Voice[]>("tts_voices"),
-  ttsSpeak: (id: number, text: string, voice: string | undefined, rate: number) =>
-    invoke<void>("tts_speak", { id, text, voice: voice ?? null, rate }),
-  ttsStop: () => invoke<void>("tts_stop"),
+  // Reading aloud: macOS's synthesiser (tts.rs), or the web view's speech on Windows (webSpeech.ts).
+  ttsVoices: () => (isMac ? invoke<Voice[]>("tts_voices") : webVoices()),
+  ttsSpeak: async (id: number, text: string, voice: string | undefined, rate: number) =>
+    isMac ? invoke<void>("tts_speak", { id, text, voice: voice ?? null, rate }) : webSpeak(id, text, voice, rate),
+  ttsStop: async () => (isMac ? invoke<void>("tts_stop") : webStop()),
   /** Pauses (true) the utterance being spoken, or carries on with it (false). */
-  ttsPause: (on: boolean) => invoke<void>("tts_pause", { on }),
+  ttsPause: async (on: boolean) => (isMac ? invoke<void>("tts_pause", { on }) : webPause(on)),
   mediaState: (title: string | null, playing: boolean) => invoke<void>("media_state", { title, playing }),
   /** What the menu-bar menu shows and when the daily reminder fires; the menu's clicks come back as "tray" events. */
   setTray: (state: TrayState) => invoke<void>("set_tray", { state }),

@@ -20,6 +20,7 @@ import { VISIONS } from "./pictures";
 import type { Verse } from "./pictures/kit";
 import { scrollToThird } from "./ui";
 import { chapterPlaying } from "./worship";
+import { shortcut } from "./keys";
 
 const plainLines = (text: string): Lyrics => ({
   lines: text.split(/\r?\n/).map((l) => ({ text: l.trim() })),
@@ -186,7 +187,7 @@ export function LyricsPage({ focus, setFocus }: { focus: boolean; setFocus: (f: 
         <Icon name="export" />
       </button>
       {!focus && (
-        <button className="ibtn" type="button" aria-label="Focus mode" title="Focus mode (⌘.)" onClick={() => setFocus(true)}>
+        <button className="ibtn" type="button" aria-label="Focus mode" title={shortcut("Focus mode (⌘.)")} onClick={() => setFocus(true)}>
           <Icon name="focus" />
         </button>
       )}

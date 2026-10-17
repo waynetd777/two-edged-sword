@@ -17,6 +17,7 @@ import { WordLookup } from "./WordLookup";
 import { BooksButton } from "./DocReader";
 import { useAssistant } from "./assistant";
 import { useVariances, Variance, VariancePopover } from "./variances";
+import { shortcut } from "./keys";
 
 export interface WordPick {
   token: Token;
@@ -628,7 +629,7 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
           >
             {isSel && sel!.from === v.v && toolbar}
             <div className="vn">
-              <span title="Click the verse (not a word) to select it · ⇧-click for a range">{v.v}</span>
+              <span title={shortcut("Click the verse (not a word) to select it · ⇧-click for a range")}>{v.v}</span>
             </div>
             <div className="vt selectable">
               <span className={hl ? `hl-${hlName(hl)}` : undefined}>
@@ -722,7 +723,7 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
             className={`ibtn ${player.state.on ? "on" : ""}`}
             type="button"
             aria-label="Listen"
-            title="Listen (Space · ⌘P)"
+            title={shortcut("Listen (Space · ⌘P)")}
             onClick={() => (player.state.on ? player.toggle() : player.play(bible, loc.book, loc.chapter))}
           >
             <Icon name="speaker" />
@@ -744,7 +745,7 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
                 className={`ibtn ${player.state.on ? "on" : ""}`}
                 type="button"
                 aria-label="Listen"
-                title="Listen (Space · ⌘P)"
+                title={shortcut("Listen (Space · ⌘P)")}
                 onClick={() => (player.state.on ? player.toggle() : player.play(bible, loc.book, loc.chapter, sel?.from))}
               >
                 <Icon name="speaker" />
@@ -752,14 +753,20 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
               <SongsButton about={fmtRef({ book: loc.book, chapter: loc.chapter })} />
               <HighlightsButton />
               <TextSizeButton />
-              <button className="ibtn" type="button" aria-label="Focus mode" title="Focus mode (⌘.)" onClick={() => setFocus(true)}>
+              <button
+                className="ibtn"
+                type="button"
+                aria-label="Focus mode"
+                title={shortcut("Focus mode (⌘.)")}
+                onClick={() => setFocus(true)}
+              >
                 <Icon name="focus" />
               </button>
               <button
                 className={`ibtn ${settings.studyPane ? "on" : ""}`}
                 type="button"
                 aria-label="Study pane"
-                title="Study pane (⌘\\)"
+                title={shortcut("Study pane (⌘\\)")}
                 onClick={() => app.set({ studyPane: !settings.studyPane })}
               >
                 <Icon name="pane" />
@@ -968,12 +975,12 @@ function VerseToolbar(p: {
       <button
         type="button"
         className="tb"
-        title={settings.copyNumbers ? "Copy with verse numbers (⌘C)" : "Copy without verse numbers (⌘C)"}
+        title={shortcut(settings.copyNumbers ? "Copy with verse numbers (⌘C)" : "Copy without verse numbers (⌘C)")}
         onClick={p.onCopy}
       >
         <Icon name="copy" />
         <span className="lbl">
-          Copy<span style={{ opacity: 0.6 }}> ⌘C</span>
+          Copy<span style={{ opacity: 0.6 }}> {shortcut("⌘C")}</span>
         </span>
       </button>
       <button
@@ -1141,7 +1148,7 @@ export function PlayerBar({ focus = false }: { focus?: boolean }) {
           <button
             type="button"
             aria-label={s.paused ? "Play" : "Pause"}
-            title={`${s.paused ? "Play" : "Pause"} (${space ? "Space · " : ""}⌘P)`}
+            title={shortcut(`${s.paused ? "Play" : "Pause"} (${space ? "Space · " : ""}⌘P)`)}
             onClick={p.toggle}
             style={{
               width: 40,

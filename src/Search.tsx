@@ -12,6 +12,7 @@ import { BibleSelect, Topbar } from "./Shell";
 import { useApp } from "./state";
 import { short, useRefPreview, useTopics } from "./StudyPane";
 import { ApoPill, TrailButtons, useTrail } from "./ui";
+import { shortcut } from "./keys";
 
 type Scope = "all" | "bible" | "commentary" | "dictionary" | "journal";
 
@@ -685,7 +686,7 @@ function Preview({ pick, bible, terms, whole }: { pick: Pick | null; bible: stri
               Compare
             </button>
             <button className="btn primary" type="button" onClick={() => app.open(target, "read")}>
-              Open<span style={{ opacity: 0.75 }}>⏎</span>
+              Open<span style={{ opacity: 0.75 }}>{shortcut("⏎")}</span>
             </button>
           </div>
         )}

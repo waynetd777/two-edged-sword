@@ -13,7 +13,7 @@ import { api, TrayInfo, TrayState } from "./api";
 import { Icon, Sword } from "./icons";
 import { READ_FONTS, ReadFont } from "./state";
 import { Switch } from "./ui";
-import { cmdKey } from "./keys";
+import { cmdKey, shortcut } from "./keys";
 
 const WIDTH = 340;
 
@@ -164,13 +164,13 @@ export function TrayWindow() {
             <button type="button" className="btn primary tray-go" onClick={() => act("quiet")}>
               <Icon name="plans" size={14} />
               Start Quiet time
-              <span className="kbd">↩</span>
+              <span className="kbd">{shortcut("↩")}</span>
             </button>
             <button
               type="button"
               className="btn primary tray-go tray-audio"
               aria-label="Start Quiet time read with audio"
-              title="Start Quiet time read with audio (⌥↩)"
+              title={shortcut("Start Quiet time read with audio (⌥↩)")}
               onClick={() => act("quiet-audio")}
             >
               <Icon name="speaker" size={14} />
@@ -184,9 +184,9 @@ export function TrayWindow() {
         )}
       </div>
       <div className="tray-sec tray-list">
-        <Item icon="read" label={s?.reading ? `Continue reading ${s.reading}` : "Continue reading"} keys="⌘R" id="continue" />
-        <Item icon="journal" label="New journal entry" keys="⌘J" id="journal" />
-        <Item icon="search" label="Search the Bible" keys="⌘F" id="search" />
+        <Item icon="read" label={s?.reading ? `Continue reading ${s.reading}` : "Continue reading"} keys={shortcut("⌘R")} id="continue" />
+        <Item icon="journal" label="New journal entry" keys={shortcut("⌘J")} id="journal" />
+        <Item icon="search" label="Search the Bible" keys={shortcut("⌘F")} id="search" />
       </div>
       <div className="tray-sec tray-switches">
         <div className="tray-switch">
@@ -203,9 +203,9 @@ export function TrayWindow() {
         )}
       </div>
       <div className="tray-sec tray-list">
-        <Item icon="bible" label="Open Two-edged Sword" keys="⌘O" strong id="open" />
-        <Item icon="settings" label="Settings…" keys="⌘," id="settings" />
-        <Item icon="x" label="Quit" keys="⌘Q" id="quit" />
+        <Item icon="bible" label="Open Two-edged Sword" keys={shortcut("⌘O")} strong id="open" />
+        <Item icon="settings" label="Settings…" keys={shortcut("⌘,")} id="settings" />
+        <Item icon="x" label="Quit" keys={shortcut("⌘Q")} id="quit" />
       </div>
     </div>
   );

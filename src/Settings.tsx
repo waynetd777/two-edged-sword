@@ -12,6 +12,7 @@ import { modelGroups, PROVIDER_NAME, pickModel, refreshAssistant, useAssistant }
 import { READ_FONTS, ReadFont, useApp } from "./state";
 import { confirmDelete, Popover, SearchList, Seg, Switch } from "./ui";
 import { WEBSITE } from "./website";
+import { shortcut } from "./keys";
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -115,7 +116,10 @@ export function SettingsScreen() {
                 English under each word
               </Switch>
             </Row>
-            <Row label="Copying verses" hint="⌘C or Copy on the verse toolbar. The reference and translation always go on the last line.">
+            <Row
+              label="Copying verses"
+              hint={shortcut("⌘C or Copy on the verse toolbar. The reference and translation always go on the last line.")}
+            >
               <Switch on={s.copyNumbers} onChange={(v) => app.set({ copyNumbers: v })}>
                 Include verse numbers
               </Switch>

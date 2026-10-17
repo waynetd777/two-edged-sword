@@ -9,7 +9,7 @@ import { RefObject, useEffect, useRef, useState } from "react";
 import { Icon } from "./icons";
 import { ClearButton } from "./ui";
 import { BLOCKS, paintHighlight, textRange } from "./dom";
-import { cmdKey } from "./keys";
+import { cmdKey, shortcut } from "./keys";
 
 const BLOCK = `${BLOCKS}, cite`;
 
@@ -201,13 +201,20 @@ export function useFind(ed: RefObject<HTMLDivElement | null>, onEdit: () => void
           className="ibtn"
           type="button"
           aria-label="Previous match"
-          title="Previous ⇧⌘G"
+          title={shortcut("Previous ⇧⌘G")}
           disabled={!found.length}
           onClick={() => step(-1)}
         >
           <Icon name="up" />
         </button>
-        <button className="ibtn" type="button" aria-label="Next match" title="Next ⌘G" disabled={!found.length} onClick={() => step(1)}>
+        <button
+          className="ibtn"
+          type="button"
+          aria-label="Next match"
+          title={shortcut("Next ⌘G")}
+          disabled={!found.length}
+          onClick={() => step(1)}
+        >
           <Icon name="down" />
         </button>
         <button

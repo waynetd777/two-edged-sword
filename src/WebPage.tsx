@@ -15,6 +15,7 @@ import { onlineDevotionals } from "./plans";
 import { ReadingColumnTopbar, useEscExitsFocus } from "./ReadingColumn";
 import { useListenKey, usePlayer } from "./speech";
 import { Settings, useApp } from "./state";
+import { shortcut } from "./keys";
 
 /** Quiet time with audio: the online devotional to read aloud by itself once its page is ready
  *  (where it starts is known: OnlineDevotional.start), and what to do when it's read. */
@@ -188,13 +189,13 @@ export function WebPage({ focus, setFocus }: { focus: boolean; setFocus: (f: boo
         type="button"
         aria-label="Listen"
         aria-pressed={picking || reading}
-        title={
+        title={shortcut(
           reading
             ? "Pause or carry on reading (Space · ⌘P)"
             : picking
               ? "Click the page where reading should start · esc to cancel"
-              : "Listen: then click the page where reading should start (⌘P)"
-        }
+              : "Listen: then click the page where reading should start (⌘P)",
+        )}
         onClick={listen}
       >
         <Icon name="speaker" />
@@ -207,7 +208,7 @@ export function WebPage({ focus, setFocus }: { focus: boolean; setFocus: (f: boo
         <Icon name="export" />
       </button>
       {!focus && (
-        <button className="ibtn" type="button" aria-label="Focus mode" title="Focus mode (⌘.)" onClick={() => setFocus(true)}>
+        <button className="ibtn" type="button" aria-label="Focus mode" title={shortcut("Focus mode (⌘.)")} onClick={() => setFocus(true)}>
           <Icon name="focus" />
         </button>
       )}

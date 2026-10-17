@@ -1,8 +1,8 @@
 // Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
 // SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
-// A release build on Windows opens no console window beside the app.
-#![cfg_attr(all(windows, not(debug_assertions)), windows_subsystem = "windows")]
+// No console window beside the app on Windows, in a debug build too.
+#![cfg_attr(windows, windows_subsystem = "windows")]
 
 /// The app menu labels an unbundled process by its executable name ("TwoEdgedSword" in
 /// `tauri dev`); set the real name before AppKit starts. The bundled .app takes its name from

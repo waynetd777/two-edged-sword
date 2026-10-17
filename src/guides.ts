@@ -6,6 +6,7 @@
 // breadcrumbs are left out, and their links become links within the help.
 
 import { escHtml as esc } from "./dom";
+import { shortcut } from "./keys";
 import type { Screen } from "./state";
 
 export interface HelpSection {
@@ -74,7 +75,8 @@ function parseGuide(id: string, md: string): HelpTopic {
 
 const FILES = import.meta.glob<string>("../docs/*.md", { query: "?raw", import: "default", eager: true });
 
-export const TOPICS: HelpTopic[] = PAGES.map((p) => parseGuide(p, FILES[`../docs/${p}.md`] ?? ""));
+// The guides are written with macOS's keys; Windows reads its own.
+export const TOPICS: HelpTopic[] = PAGES.map((p) => parseGuide(p, shortcut(FILES[`../docs/${p}.md`] ?? "")));
 
 /** Where a screen's help is: its topic and the section to open. Read shows a book's or a song's when one is open. */
 export function helpFor(screen: Screen, doc?: { view?: string } | null): { topic: string; section: string } {

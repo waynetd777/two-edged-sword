@@ -10,6 +10,7 @@ import { openUrl } from "@tauri-apps/plugin-opener";
 import { ReactNode, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { helpFor, helpHtml, HelpSection, searchHelp, sectionAt, TOPICS } from "./guides";
 import { Icon } from "./icons";
+import { isMac } from "./keys";
 import { useApp } from "./state";
 import { ClearButton } from "./ui";
 
@@ -105,6 +106,12 @@ export function HelpDrawer() {
     const k = (e: KeyboardEvent) => {
       if (e.key === "Escape" && view && !document.querySelector(".scrim, [role=dialog]")) {
         setView(null);
+        return;
+      }
+      // Windows has no Help menu: Ctrl+? opens it as ⌘? does there, from a text box too.
+      if (!isMac && e.ctrlKey && !e.altKey && (e.key === "?" || (e.shiftKey && e.code === "Slash"))) {
+        openHelp({});
+        e.preventDefault();
         return;
       }
       if (e.key !== "?" || e.metaKey || e.ctrlKey || e.altKey) return;

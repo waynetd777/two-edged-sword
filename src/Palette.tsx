@@ -10,6 +10,7 @@ import { mdPlain } from "./md";
 import { Screen, useApp } from "./state";
 import { useAssistant } from "./assistant";
 import { ClearButton } from "./ui";
+import { shortcut } from "./keys";
 
 interface Item {
   id: string;
@@ -254,7 +255,7 @@ export function Palette({ onClose, onAsk }: { onClose: () => void; onAsk: (ref: 
                       </span>
                     )}
                   </span>
-                  {it.kbd && <span className="kbd">{it.kbd}</span>}
+                  {it.kbd && <span className="kbd">{shortcut(it.kbd)}</span>}
                 </button>
               </div>
             );
