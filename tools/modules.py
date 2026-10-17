@@ -19,8 +19,11 @@ from difflib import SequenceMatcher
 from pathlib import Path
 
 HOME = Path.home()
-CACHES = HOME / "Library/Caches/Two-edged Sword"
-LIBRARY = Path(os.environ.get("TES_LIBRARY") or os.environ.get("ESWORD_LIBRARY") or HOME / "Library/Application Support/Two-edged Sword/Modules")
+# Windows keeps an app's caches and data under %LOCALAPPDATA% and %APPDATA% (store.rs), macOS under ~/Library.
+WINDOWS = sys.platform == "win32"
+CACHES = Path(os.environ["LOCALAPPDATA"]) / "Two-edged Sword/Caches" if WINDOWS else HOME / "Library/Caches/Two-edged Sword"
+APP_DATA = Path(os.environ["APPDATA"]) / "Two-edged Sword" if WINDOWS else HOME / "Library/Application Support/Two-edged Sword"
+LIBRARY = Path(os.environ.get("TES_LIBRARY") or os.environ.get("ESWORD_LIBRARY") or APP_DATA / "Modules")
 ESWORD = HOME / "Library/Containers/net.e-sword.e-Sword-X/Data/Library/Application Support"
 BUNDLED = Path(__file__).resolve().parent.parent / "src-tauri/modules"
 LIBRARY.mkdir(parents=True, exist_ok=True)

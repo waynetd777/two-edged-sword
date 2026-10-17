@@ -30,7 +30,10 @@ runs the AI tools for Ask. The frontend is everything you see.
 - The app also builds on Windows, so far without screenshot mode or updates (the media
   controls are `media_win.rs`, Open at Login the Run key in `login_win.rs`): `npx tauri build --debug --no-bundle` (needs Rust,
   Node, Python and Visual Studio Build Tools with the C++ workload) makes
-  `src-tauri/target/debug/TwoEdgedSword.exe`. The AppKit modules are
+  `src-tauri/target/debug/TwoEdgedSword.exe`; `npx tauri build` makes the installer,
+  `src-tauri/target/release/bundle/nsis/Two-edged Sword_<version>_x64-setup.exe` (per user, no
+  admin; the built-in modules beside the .exe). The module tools keep their downloads in
+  `%LOCALAPPDATA%\Two-edged Sword\Caches` there. The AppKit modules are
   `#[cfg(target_os = "macos")]`, and `src-tauri/src/other.rs` stands in for them elsewhere; any
   new AppKit call, or macOS-only Tauri API, needs the same `cfg`. `tauri.windows.conf.json` holds
   Windows' build settings. Data goes in `%APPDATA%\Two-edged Sword`; e-Sword for Windows'
