@@ -25,6 +25,7 @@ import { ExportDialog, longDate } from "./JournalExport";
 import { JournalAsk } from "./JournalAsk";
 import { HighlightPicker, RefPrompt, SpellMenu, tagOptions, TagPicker } from "./JournalPickers";
 import { useEscExitsFocus } from "./ReadingColumn";
+import { cmdKey } from "./keys";
 
 // Worked out once per entry (the objects are kept until an entry changes): with thousands of
 // entries, doing it on every keystroke made typing slow.
@@ -227,7 +228,7 @@ export function JournalScreen({
 
   useEffect(() => {
     const k = (e: KeyboardEvent) => {
-      if (e.metaKey && e.key === "n") {
+      if (cmdKey(e) && e.key === "n") {
         create();
         e.preventDefault();
       }
@@ -562,7 +563,7 @@ function Editor({
   // "- ", "1. ", "> " and "### " at the start of a line become a list, quote or heading.
   const keys = (e: React.KeyboardEvent) => {
     if (hashTag.onKey(e)) return;
-    if (e.metaKey && (e.key === "b" || e.key === "i")) {
+    if (cmdKey(e) && (e.key === "b" || e.key === "i")) {
       e.preventDefault();
       cmd(e.key === "b" ? "bold" : "italic");
       return;

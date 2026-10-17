@@ -1,0 +1,8 @@
+{
+  "build": {
+    "beforeBuildCommand": "python tools/core/build.py --if-missing && npm run build"
+  },
+  "bundle": {
+    "targets": ["nsis"]
+  }
+}

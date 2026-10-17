@@ -224,7 +224,7 @@ textarea,
   grid-template-columns: minmax(0, 1fr);
 }
 /* Without the sidebar the window's traffic lights sit over the top bar: leave them room. */
-.shell.nosidebar .topbar {
+.mac .shell.nosidebar .topbar {
   padding-left: 84px;
 }
 .main {
@@ -241,6 +241,10 @@ textarea,
   flex-direction: column;
   gap: 20px;
   overflow-y: auto;
+}
+/* Windows draws its own title bar above the page, so there are no traffic lights to clear. */
+html:not(.mac) .sidebar {
+  padding-top: 14px;
 }
 .brand {
   display: flex;

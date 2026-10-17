@@ -28,6 +28,7 @@ import { hideSplash } from "./splash";
 import { useTray } from "./tray";
 import { Tooltips, WordHoverBox } from "./ui";
 import { UpdateDialog } from "./Update";
+import { cmdKey } from "./keys";
 
 function Screens() {
   const app = useApp();
@@ -71,7 +72,7 @@ function Screens() {
   useEffect(() => {
     const k = (e: KeyboardEvent) => {
       const app = appRef.current;
-      if (!e.metaKey) return;
+      if (!cmdKey(e)) return;
       const n = parseInt(e.key, 10);
       if (n >= 1 && n <= SCREEN_KEYS.length) {
         app.go(SCREEN_KEYS[n - 1]);

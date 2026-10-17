@@ -27,10 +27,16 @@ runs the AI tools for Ask. The frontend is everything you see.
 
 - If hot reload leaves a screen broken after an edit, reload the window (⌘R) or restart
   `make dev` before treating it as a bug.
-- The Rust tests also run on Windows: `cargo test --lib` in `src-tauri` (needs Rust and Visual
-  Studio Build Tools with the C++ workload). Only the tests build there; the AppKit code is
-  `#[cfg(target_os = "macos")]` and left out, and with it the spelling tests. Anything else that
-  calls AppKit, or a macOS-only Tauri API, needs the same `cfg`.
+- The app also builds on Windows, so far without spelling, reading aloud, the media keys, Music,
+  Open at Login, screenshot mode or updates: `npx tauri build --debug --no-bundle` (needs Rust,
+  Node, Python and Visual Studio Build Tools with the C++ workload) makes
+  `src-tauri/target/debug/TwoEdgedSword.exe`. The AppKit modules are
+  `#[cfg(target_os = "macos")]`, and `src-tauri/src/other.rs` stands in for them elsewhere; any
+  new AppKit call, or macOS-only Tauri API, needs the same `cfg`. `tauri.windows.conf.json` holds
+  Windows' build settings. Data goes in `%APPDATA%\Two-edged Sword`; e-Sword for Windows'
+  modules can't be read (their text is encrypted), but e-Sword X's work in its `Modules` folder.
+  Shortcuts are ⌘ on macOS and Ctrl on Windows (`src/keys.ts`, `cmdKey`).
+- `cargo test --lib` in `src-tauri` runs the Rust tests on Windows, except the spelling ones.
   `.github/workflows/windows-tests.yml` runs them, and the TypeScript check, on every push to
   `main` that changes the code.
 - On macOS 27, release builds link with Rust's lld against the macOS 26 SDK, because macOS 27's

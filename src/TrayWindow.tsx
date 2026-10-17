@@ -13,6 +13,7 @@ import { api, TrayInfo, TrayState } from "./api";
 import { Icon, Sword } from "./icons";
 import { READ_FONTS, ReadFont } from "./state";
 import { Switch } from "./ui";
+import { cmdKey } from "./keys";
 
 const WIDTH = 340;
 
@@ -89,8 +90,8 @@ export function TrayWindow() {
   useEffect(() => {
     const k = (e: KeyboardEvent) => {
       if (e.key === "Escape") return hide();
-      if (e.key === "Enter" && !e.metaKey) return act(e.altKey ? "quiet-audio" : "quiet");
-      if (!e.metaKey) return;
+      if (e.key === "Enter" && !cmdKey(e)) return act(e.altKey ? "quiet-audio" : "quiet");
+      if (!cmdKey(e)) return;
       const id = (
         { o: "open", r: "continue", j: "journal", f: "search", p: "plans", ",": "settings", q: "quit" } as Record<string, string>
       )[e.key.toLowerCase()];

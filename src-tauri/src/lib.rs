@@ -1,10 +1,10 @@
 // Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
 // SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
-// Elsewhere only the tests are built (`cargo test --lib`), without the AppKit parts.
+// Windows has the app without the AppKit parts, which other.rs stands in for.
 #![cfg_attr(not(target_os = "macos"), allow(dead_code, unused_imports, unused_variables))]
-#[cfg(all(not(target_os = "macos"), not(test)))]
-compile_error!("Two-edged Sword is a macOS app: it is built on AppKit throughout.");
+#[cfg(not(any(target_os = "macos", windows, test)))]
+compile_error!("Two-edged Sword runs on macOS and Windows.");
 
 mod assistant;
 mod books;
@@ -35,6 +35,11 @@ mod tray;
 mod tts;
 mod updates;
 mod website;
+
+#[cfg(not(target_os = "macos"))]
+mod other;
+#[cfg(not(target_os = "macos"))]
+use other::{login_item, login_launch, media, platform, screenshot, spell, tts};
 
 use library::{Kind, Library, ModuleInfo};
 use serde::Serialize;
@@ -205,9 +210,9 @@ fn index_progress(st: State<AppState>) -> index::Progress {
 
 /// Hides the mouse pointer until it next moves, as video players do. macOS keeps it hidden through
 /// the page scrolling or changing under it, which a CSS cursor and the window's own setting don't.
-#[cfg(target_os = "macos")]
 #[tauri::command]
 fn hide_pointer(app: AppHandle) {
+    #[cfg(target_os = "macos")]
     let _ = app.run_on_main_thread(|| objc2_app_kit::NSCursor::setHiddenUntilMouseMoves(true));
 }
 
@@ -306,9 +311,12 @@ fn music_artwork() -> Result<tauri::ipc::Response, String> {
 
 /// While reading aloud, in Quiet time or on a reading screen (awake.ts), the display is kept from
 /// sleeping (so the screensaver and lock don't come on) by a `caffeinate`, which ends when they do,
-/// or with the app (-w) if it quits first.
+/// or with the app (-w) if it quits first. Not yet on Windows.
 #[tauri::command]
 fn keep_awake(on: bool) -> Result<(), String> {
+    if cfg!(windows) {
+        return Ok(());
+    }
     use std::sync::Mutex;
     static CHILD: Mutex<Option<std::process::Child>> = Mutex::new(None);
     let mut c = CHILD.lock().unwrap_or_else(|e| e.into_inner());
@@ -333,20 +341,17 @@ fn keep_awake(on: bool) -> Result<(), String> {
 
 // Spelling (spell.rs). A check waits off the main thread for the KJV's words, then asks AppKit
 // on the main thread, as it wants; the rest aren't async, so they run there anyway.
-#[cfg(target_os = "macos")]
 #[tauri::command(async)]
 fn spell_check(app: AppHandle, st: State<AppState>, text: String) -> Vec<(usize, usize)> {
     kjv_words(&st);
     on_main(&app, move || spell::check(&text)).unwrap_or_default()
 }
-#[cfg(target_os = "macos")]
 #[tauri::command(async)]
 fn spell_grammar(app: AppHandle, st: State<AppState>, text: String) -> Vec<spell::GrammarIssue> {
     kjv_words(&st);
     on_main(&app, move || spell::grammar(&text)).unwrap_or_default()
 }
 /// The KJV's words, read here if a check comes before the start-up read (or waiting for it).
-#[cfg(target_os = "macos")]
 fn kjv_words(st: &AppState) {
     if !spell::kjv_ready() {
         spell::load_kjv(&st.lib());
@@ -361,22 +366,18 @@ fn on_main<T: Send + 'static>(app: &AppHandle, f: impl FnOnce() -> T + Send + 's
     .ok()?;
     rx.recv().ok()
 }
-#[cfg(target_os = "macos")]
 #[tauri::command]
 fn spell_guesses(word: String) -> Vec<String> {
     spell::guesses(&word)
 }
-#[cfg(target_os = "macos")]
 #[tauri::command]
 fn spell_correction(word: String) -> Option<String> {
     spell::correction(&word)
 }
-#[cfg(target_os = "macos")]
 #[tauri::command]
 fn spell_learn(word: String) {
     spell::learn(&word)
 }
-#[cfg(target_os = "macos")]
 #[tauri::command]
 fn spell_ignore(word: String) {
     spell::ignore(&word)
@@ -509,13 +510,15 @@ fn web_frameable(url: String) -> Result<bool, String> {
     }
     let mut tries = 0;
     loop {
-        let out = std::process::Command::new("/usr/bin/curl")
+        // Windows has its own curl too.
+        let (curl, null) = if cfg!(windows) { ("curl.exe", "NUL") } else { ("/usr/bin/curl", "/dev/null") };
+        let out = std::process::Command::new(curl)
             .args([
                 "-sL",
                 "--max-time",
                 "15",
                 "-o",
-                "/dev/null",
+                null,
                 "-D",
                 "-",
                 "-A",
@@ -649,7 +652,6 @@ fn ask_cancel(st: State<AppState>, chat_id: String) {
 }
 
 /// Screenshot mode (screenshot.rs): the scene to set up, as JSON.
-#[cfg(target_os = "macos")]
 #[tauri::command]
 fn scene() -> Option<String> {
     screenshot::scene()
@@ -722,13 +724,11 @@ pub(crate) fn show_main(app: &AppHandle) {
     if let Some(w) = app.get_webview_window("main") {
         let _ = w.show();
         let _ = w.unminimize();
-        #[cfg(target_os = "macos")]
         platform::activate();
         let _ = w.set_focus();
     }
 }
 
-#[cfg(target_os = "macos")]
 pub fn run() {
     let data = store::data_dir();
     // Made up front, so Show in Finder has somewhere to go before anything is built into it.
@@ -896,6 +896,7 @@ pub fn run() {
                 {
                     let w_show = w.clone();
                     let _ = w.with_webview(move |wv| {
+                        #[cfg(target_os = "macos")]
                         unsafe {
                             use objc2::runtime::AnyObject;
                             let webview: *mut AnyObject = wv.inner() as *mut AnyObject;
@@ -953,6 +954,7 @@ pub fn run() {
             if let tauri::RunEvent::Exit = ev {
                 app.state::<AppState>().running.kill_all();
             }
+            #[cfg(target_os = "macos")]
             if let tauri::RunEvent::Reopen { .. } = ev {
                 show_main(app);
             }

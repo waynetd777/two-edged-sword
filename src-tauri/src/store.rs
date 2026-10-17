@@ -14,6 +14,11 @@ pub fn home() -> PathBuf {
 }
 
 pub fn data_dir() -> PathBuf {
+    // %APPDATA% on Windows; the home folder's in a test without it.
+    #[cfg(windows)]
+    if let Some(d) = std::env::var_os("APPDATA").filter(|_| !cfg!(test)) {
+        return PathBuf::from(d).join("Two-edged Sword");
+    }
     home().join("Library/Application Support/Two-edged Sword")
 }
 
@@ -22,7 +27,15 @@ pub fn bundled(name: &str) -> PathBuf {
     if cfg!(debug_assertions) {
         return std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(name);
     }
-    std::env::current_exe().ok().and_then(|e| Some(e.parent()?.parent()?.join("Resources").join(name))).unwrap_or_default()
+    // On Windows the resources sit beside the .exe.
+    let res = |e: &std::path::Path| {
+        if cfg!(windows) {
+            e.parent().map(|d| d.to_path_buf())
+        } else {
+            Some(e.parent()?.parent()?.join("Resources"))
+        }
+    };
+    std::env::current_exe().ok().and_then(|e| Some(res(&e)?.join(name))).unwrap_or_default()
 }
 
 /// A file's size and modified time (since the epoch), for telling when it has changed; zeros if

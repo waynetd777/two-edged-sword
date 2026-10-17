@@ -12,6 +12,7 @@ import { modelGroups, modelName, pickModel, providerOf, PROVIDER_NAME, useAssist
 import { Chat, Model, nowLocal, Opened, Place, HlTheme, themesOf, uid, useApp } from "./state";
 import { useRefPreview } from "./StudyPane";
 import { ClearButton, confirmDelete, copyText, Popover } from "./ui";
+import { cmdKey } from "./keys";
 
 /** A module whose description carries a copyright notice is licensed, not public domain. */
 const PUBLIC_DOMAIN = /^(KJV\+?|KJVA|ASV|YLT|WEB|DRB|DRA|Darby|BBE|RV|ERV|Webster|Geneva|GNV|Bishops|Tyndale|Wycliffe|LXX|TR|WH|Byz)$/i;
@@ -695,7 +696,7 @@ export function AskPanel(p: AskProps) {
             setQ(hint);
             return;
           }
-          if (e.key === "Enter" && (e.metaKey || !e.shiftKey)) {
+          if (e.key === "Enter" && (cmdKey(e) || !e.shiftKey)) {
             e.preventDefault();
             send(toSend);
           }

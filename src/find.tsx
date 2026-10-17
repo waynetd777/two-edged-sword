@@ -9,6 +9,7 @@ import { RefObject, useEffect, useRef, useState } from "react";
 import { Icon } from "./icons";
 import { ClearButton } from "./ui";
 import { BLOCKS, paintHighlight, textRange } from "./dom";
+import { cmdKey } from "./keys";
 
 const BLOCK = `${BLOCKS}, cite`;
 
@@ -142,7 +143,7 @@ export function useFind(ed: RefObject<HTMLDivElement | null>, onEdit: () => void
   }, [open, q, caseSensitive]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     const k = (e: KeyboardEvent) => {
-      if (!e.metaKey) return;
+      if (!cmdKey(e)) return;
       if (e.key === "f" || e.key === "ƒ") {
         e.preventDefault();
         start(e.altKey ? "replace" : "find");

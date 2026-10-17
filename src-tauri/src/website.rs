@@ -42,7 +42,6 @@ pub fn add_to_menu(app: &AppHandle) -> tauri::Result<()> {
 /// Shows the About panel: name, version, copyright, icon, and the website under them as a link.
 pub fn about(app: &AppHandle) {
     let version = app.package_info().version.to_string();
-    #[cfg(target_os = "macos")]
     let _ = app.run_on_main_thread(move || {
         crate::platform::about_panel(
             "Two-edged Sword",

@@ -151,10 +151,7 @@ pub struct TrayInfo {
 /// What the menu window shows.
 #[tauri::command]
 pub fn tray_info(tray: tauri::State<'_, Tray>) -> TrayInfo {
-    #[cfg(target_os = "macos")]
     let (login_available, login) = (crate::login_item::available(), crate::login_item::status().is_on());
-    #[cfg(not(target_os = "macos"))]
-    let (login_available, login) = (false, false);
     TrayInfo { state: tray.0.lock().unwrap_or_else(|p| p.into_inner()).clone(), login_available, login }
 }
 
@@ -165,7 +162,6 @@ pub fn tray_do(app: AppHandle, id: String) {
     match id.as_str() {
         "open" => crate::show_main(&app),
         "quit" => crate::quit(&app),
-        #[cfg(target_os = "macos")]
         "login" => toggle_login(),
         "quiet" | "quiet-audio" | "continue" | "journal" | "search" | "plans" | "settings" | "reminder" => {
             if id != "reminder" {
@@ -183,7 +179,6 @@ pub fn tray_do(app: AppHandle, id: String) {
 }
 
 /// Flips Open at Login. If macOS wants the user to approve it, System Settings opens at Login Items.
-#[cfg(target_os = "macos")]
 fn toggle_login() {
     use crate::login_item::{self, Status};
     if login_item::set(!login_item::status().is_on()) == Status::RequiresApproval {

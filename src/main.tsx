@@ -19,6 +19,7 @@ import "@fontsource-variable/atkinson-hyperlegible-next/wght-italic.css";
 import App from "./App";
 import { TrayWindow } from "./TrayWindow";
 import "./styles.css";
+import { isMac } from "./keys";
 
 // WebKit's own right-click menu offers Reload, which throws away the app's state. Keep it only
 // where it's useful — in text fields and on selected text — and leave custom menus to their owners.
@@ -41,6 +42,9 @@ function showStartupError(msg: string) {
 }
 window.addEventListener("error", (e) => showStartupError(`${e.message}\n${e.error?.stack ?? ""}`.slice(0, 1200)));
 window.addEventListener("unhandledrejection", (e) => showStartupError(String(e.reason).slice(0, 1200)));
+
+// macOS's traffic lights sit over the page (styles.css); Windows has its own title bar.
+document.documentElement.classList.toggle("mac", isMac);
 
 // The menu-bar window (src-tauri/src/tray.rs) runs the same page with ?view=tray.
 const tray = new URLSearchParams(location.search).get("view") === "tray";

@@ -17,6 +17,7 @@ import { findRefs, mdToHtml } from "./md";
 import { bibleSizes } from "./sizes";
 import { useApp } from "./state";
 import { Icon } from "./icons";
+import { cmdKey } from "./keys";
 
 export interface PlayerState {
   on: boolean;
@@ -611,7 +612,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const k = (e: KeyboardEvent) => {
       if (/^F[789]$/.test(e.key) && worship()) return;
-      if ((e.metaKey && !e.shiftKey && !e.altKey && !e.ctrlKey && e.key.toLowerCase() === "p") || e.key === "F8") {
+      if ((cmdKey(e) && !e.shiftKey && !e.altKey && !(e.metaKey && e.ctrlKey) && e.key.toLowerCase() === "p") || e.key === "F8") {
         e.preventDefault();
         playPause();
       } else if ((e.key === "F7" || e.key === "F9") && (st.current.on || quiet.current)) {
