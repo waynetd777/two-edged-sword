@@ -45,8 +45,8 @@ password, and asks for nothing more.
 - When there is one, it asks the next time its window is in front, with what's new in it:
   **Install and Restart**, **Later** (asked again the next day) or **Skip This Version**. Esc is Later.
 - Installing shows the download's progress, saves your work and restarts the app.
-- **Check for Updates…** checks now: in the app menu on a Mac, and in the notification-area menu
-  or at the foot of Settings on Windows. On Windows an update installs with a progress window and
+- **Check for Updates…** checks now: at the foot of Settings, and in the app menu on a Mac or the
+  notification-area menu on Windows. On Windows an update installs with a progress window and
   reopens the app.
 - An update waits while Ask is answering or the search index is being built.
 

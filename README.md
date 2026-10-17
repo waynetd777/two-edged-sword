@@ -33,7 +33,7 @@ For Windows 10 or 11, 64-bit.
 
 A few things differ on Windows: see [On Windows](docs/features.md#on-windows).
 
-The app checks for updates once a day and offers to install them. **Check for Updates…** checks now: in the app menu on a Mac, and in the notification-area menu or Settings on Windows.
+The app checks for updates once a day and offers to install them. **Check for Updates…** checks now: at the foot of Settings, and in the app menu on a Mac or the notification-area menu on Windows.
 
 <a href="docs/images/index.md#the-readme"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/read-dark.png"><img alt="Reading 1 John 1 with the study pane open on the commentaries" src="docs/images/read-light.png"></picture></a>
 

@@ -453,12 +453,9 @@ function AppVersion() {
         <button className="btn" title="Open the Two-edged Sword website" onClick={() => void openUrl(WEBSITE)}>
           <Icon name="globe" size={14} /> Website
         </button>
-        {/* On macOS it's in the app menu; Windows' app has none. */}
-        {!isMac && (
-          <button className="btn" style={{ marginLeft: 6 }} onClick={() => void api.checkForUpdates()}>
-            <Icon name="refresh" size={14} /> Check for Updates…
-          </button>
-        )}
+        <button className="btn" style={{ marginLeft: 6 }} onClick={() => void api.checkForUpdates()}>
+          <Icon name="refresh" size={14} /> Check for Updates…
+        </button>
       </span>
     </div>
   );

@@ -162,4 +162,4 @@ Closing the window leaves the app in the menu bar. Click its icon for a small wi
 - **Daily reminder**, to turn it on or off.
 - **Open at login**, to start the app in the menu bar when you log in.
 - **Open Two-edged Sword** (⌘O), **Settings…** (⌘,) and **Quit** (⌘Q).
-- On Windows, where the icon is in the notification area, also **Help** (⌘?) and **Check for Updates…**. Settings has Check for Updates… too, under its last section.
+- On Windows, where the icon is in the notification area, also **Help** (⌘?) and **Check for Updates…**.

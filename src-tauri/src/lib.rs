@@ -709,7 +709,7 @@ fn scene() -> Option<String> {
     screenshot::scene()
 }
 
-/// Check for Updates… where there's no app menu to hold it (Settings, on Windows).
+/// Check for Updates… at the foot of Settings (and, on Windows, which has no app menu, in the tray menu).
 #[tauri::command]
 fn check_for_updates(app: AppHandle) {
     updates::check_now(&app);
