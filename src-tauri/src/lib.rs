@@ -20,6 +20,8 @@ mod login_launch;
 #[cfg(target_os = "macos")]
 mod media;
 mod music;
+#[cfg(windows)]
+mod music_files;
 #[cfg(target_os = "macos")]
 mod platform;
 mod process;
@@ -285,6 +287,28 @@ fn journal_save(dir: String, entry: journal::Entry) -> Result<(), String> {
     journal::save(&chosen_dir(&dir)?, &entry)
 }
 
+// Songs on Windows (music_files.rs): the Music folder's files, played by the page.
+#[cfg(windows)]
+#[tauri::command(async)]
+fn music_files() -> Result<Vec<music_files::FileTrack>, String> {
+    music_files::tracks()
+}
+#[cfg(windows)]
+#[tauri::command(async)]
+fn music_file(path: String) -> Result<tauri::ipc::Response, String> {
+    music_files::bytes(&path).map(tauri::ipc::Response::new)
+}
+#[cfg(windows)]
+#[tauri::command(async)]
+fn music_file_extra(path: String) -> Result<music_files::Extra, String> {
+    music_files::extra(&path)
+}
+#[cfg(windows)]
+#[tauri::command(async)]
+fn music_file_artwork(path: String) -> Result<tauri::ipc::Response, String> {
+    music_files::artwork(&path).map(tauri::ipc::Response::new)
+}
+
 // Music: each runs osascript, which can take a moment (and, the first time, waits on the
 // permission prompt), so off the main thread.
 #[tauri::command(async)]
@@ -512,7 +536,7 @@ fn web_frameable(url: String) -> Result<bool, String> {
     loop {
         // Windows has its own curl too.
         let (curl, null) = if cfg!(windows) { ("curl.exe", "NUL") } else { ("/usr/bin/curl", "/dev/null") };
-        let out = std::process::Command::new(curl)
+        let out = process::no_window(&mut std::process::Command::new(curl))
             .args([
                 "-sL",
                 "--max-time",
@@ -817,6 +841,14 @@ pub fn run() {
             spell_ignore,
             keep_awake,
             music_tracks,
+            #[cfg(windows)]
+            music_files,
+            #[cfg(windows)]
+            music_file,
+            #[cfg(windows)]
+            music_file_extra,
+            #[cfg(windows)]
+            music_file_artwork,
             music_play,
             music_state,
             music_control,

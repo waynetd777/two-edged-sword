@@ -12,6 +12,7 @@ import { api, MusicTrack } from "./api";
 import { askOnce } from "./Ask";
 import { assistantModels, assistantReady, pickModel } from "./assistant";
 import { today, ymd } from "./plans";
+import { isMac } from "./keys";
 
 /** Genres that hold worship music, as the Music app and the stores name them. */
 const WORSHIP = /christian|gospel|worship|praise|religious|inspirational|ccm|messianic/i;
@@ -167,7 +168,8 @@ export const setChapterPlaying = (s: Song[]) => (chapterPlaying = s);
  *  fit it and as the intro describes it. With `rest`, songs played lately are left out. */
 async function choose(n: number, ask: string, it: [string, string], model: string, avoid: Set<string>, rest: boolean): Promise<Picked> {
   const library = (await worshipSongs()).filter((t) => !avoid.has(t.id));
-  if (!library.length) throw new Error("No worship songs in your Music library (Christian, gospel or worship genres).");
+  if (!library.length)
+    throw new Error(`No worship songs in your Music ${isMac ? "library" : "folder"} (Christian, gospel or worship genres).`);
   // Leaving out what was played lately, unless that leaves too few.
   const recent = rest ? await recentlyPlayed() : new Set<string>();
   const rested = library.filter((t) => !recent.has(t.id) && !recent.has(songKey(t)));

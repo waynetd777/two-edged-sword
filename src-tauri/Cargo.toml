@@ -34,6 +34,10 @@ tauri-plugin-updater = "2"
 [target.'cfg(unix)'.dependencies]
 libc = "0.2"
 
+# Songs on Windows: the music files' tags (music_files.rs).
+[target.'cfg(windows)'.dependencies]
+lofty = "0.25"
+
 # AppKit and the rest: the app is macOS only. Elsewhere only the tests are built (lib.rs).
 [target.'cfg(target_os = "macos")'.dependencies]
 objc2 = "0.6"

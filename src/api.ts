@@ -4,6 +4,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import { isDark } from "./dom";
 import { isMac } from "./keys";
+import { fileArtwork, fileControl, filePlay, fileState, fileTracks } from "./localMusic";
 import { webPause, webSpeak, webStop, webVoices } from "./webSpeech";
 import type { UpdateShown } from "./Update";
 
@@ -254,13 +255,14 @@ export const api = {
   journalList: (dir: string) => (sceneJournal ? Promise.resolve(sceneJournal) : invoke<JournalEntry[]>("journal_list", { dir })),
   // With a scene's entries the stamp changes every time, so the journal is sure to reload onto them.
   journalStamp: (dir: string) => (sceneJournal ? Promise.resolve(`scene:${Date.now()}`) : invoke<string>("journal_stamp", { dir })),
+  // Songs: the Music app on macOS (music.rs), the Music folder's files on Windows (localMusic.ts).
   /** The songs in the Music app's library (music.rs). */
-  musicTracks: () => invoke<MusicTrack[]>("music_tracks"),
+  musicTracks: () => (isMac ? invoke<MusicTrack[]>("music_tracks") : fileTracks()),
   /** Queues these songs as the app's playlist and plays it; returns how many were found. */
-  musicPlay: (ids: string[]) => (readOnly ? Promise.resolve(0) : invoke<number>("music_play", { ids })),
-  musicState: () => invoke<MusicState>("music_state"),
+  musicPlay: (ids: string[]) => (readOnly ? Promise.resolve(0) : isMac ? invoke<number>("music_play", { ids }) : filePlay(ids)),
+  musicState: async () => (isMac ? invoke<MusicState>("music_state") : fileState()),
   /** The playing song's artwork as image bytes; empty when it has none. */
-  musicArtwork: () => invoke<ArrayBuffer>("music_artwork"),
+  musicArtwork: () => (isMac ? invoke<ArrayBuffer>("music_artwork") : fileArtwork()),
   /** macOS's spell checker (spell.rs): misspelled words as [start, length] in UTF-16, as JS strings count. */
   spellCheck: (text: string) => invoke<[number, number][]>("spell_check", { text }),
   /** Grammar problems, with macOS's explanation and fixes; offsets as for spellCheck. */
@@ -275,7 +277,7 @@ export const api = {
   keepAwake: (on: boolean) => invoke<void>("keep_awake", { on }),
   /** Pauses, resumes or skips, but only while the app's playlist is what's playing; "show" brings Music to the front. */
   musicControl: (cmd: "pause" | "play" | "next" | "stop" | "show") =>
-    readOnly ? Promise.resolve() : invoke<void>("music_control", { cmd }),
+    readOnly ? Promise.resolve() : isMac ? invoke<void>("music_control", { cmd }) : fileControl(cmd),
   journalSave: (dir: string, entry: JournalEntry) => (readOnly ? Promise.resolve() : invoke<void>("journal_save", { dir, entry })),
   journalDelete: (dir: string, id: string) => (readOnly ? Promise.resolve() : invoke<void>("journal_delete", { dir, id })),
   writeTextFile: (path: string, text: string) => invoke<void>("write_text_file", { path, text }),

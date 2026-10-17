@@ -1028,7 +1028,7 @@ export function TextSizeButton() {
         className="ibtn"
         type="button"
         aria-label="Text size"
-        title="Reading font and text size"
+        title={shortcut("Reading font and text size (⌘+ bigger, ⌘− smaller)")}
         onClick={(e) => setA(e.currentTarget.getBoundingClientRect())}
       >
         <Icon name="textsize" />

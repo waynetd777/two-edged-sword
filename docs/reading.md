@@ -133,3 +133,4 @@ suit the chapter you're reading, in the Bible or in a book or devotional.
 - These songs don't count as played for Quiet time, which leaves out songs it played in the last
   14 days.
 - Without an assistant set up, songs are picked at random.
+- On Windows the songs come from your Music folder: see [Worship music](quiet-time.md#worship-music).

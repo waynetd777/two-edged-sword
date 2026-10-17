@@ -20,7 +20,7 @@ import { VISIONS } from "./pictures";
 import type { Verse } from "./pictures/kit";
 import { scrollToThird } from "./ui";
 import { chapterPlaying } from "./worship";
-import { shortcut } from "./keys";
+import { isMac, shortcut } from "./keys";
 
 const plainLines = (text: string): Lyrics => ({
   lines: text.split(/\r?\n/).map((l) => ({ text: l.trim() })),
@@ -142,7 +142,11 @@ export function LyricsPage({ focus, setFocus }: { focus: boolean; setFocus: (f: 
   useEffect(() => {
     if (target) scrollToThird(scroller.current?.querySelector(target));
   }, [target, lit]);
-  useEffect(() => scroller.current?.scrollTo({ top: 0 }), [key]);
+  // In braces: Edge's engine (Windows) has scrollTo return a promise, which React would take for
+  // the effect's clean-up and call.
+  useEffect(() => {
+    scroller.current?.scrollTo({ top: 0 });
+  }, [key]);
 
   useEscExitsFocus(focus, setFocus);
 
@@ -177,15 +181,17 @@ export function LyricsPage({ focus, setFocus }: { focus: boolean; setFocus: (f: 
           </button>
         </>
       )}
-      <button
-        className="ibtn"
-        type="button"
-        aria-label="Open Music"
-        title="Open Music"
-        onClick={() => api.musicControl("show").catch((e) => app.toast(String(e)))}
-      >
-        <Icon name="export" />
-      </button>
+      {isMac && (
+        <button
+          className="ibtn"
+          type="button"
+          aria-label="Open Music"
+          title="Open Music"
+          onClick={() => api.musicControl("show").catch((e) => app.toast(String(e)))}
+        >
+          <Icon name="export" />
+        </button>
+      )}
       {!focus && (
         <button className="ibtn" type="button" aria-label="Focus mode" title={shortcut("Focus mode (⌘.)")} onClick={() => setFocus(true)}>
           <Icon name="focus" />

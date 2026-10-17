@@ -8,9 +8,17 @@ use std::io::Read;
 use std::process::{Command, Output, Stdio};
 use std::time::{Duration, Instant};
 
+/// On Windows, runs a console program without opening a console window for it (the app has none
+/// of its own to share); elsewhere, nothing.
+pub fn no_window(cmd: &mut Command) -> &mut Command {
+    #[cfg(windows)]
+    std::os::windows::process::CommandExt::creation_flags(cmd, 0x0800_0000); // CREATE_NO_WINDOW
+    cmd
+}
+
 /// Like `Command::output`, but kills the command if it hasn't finished within `limit`.
 pub fn output_within(cmd: &mut Command, limit: Duration) -> Result<Output, String> {
-    let mut child = cmd.stdin(Stdio::null()).stdout(Stdio::piped()).stderr(Stdio::piped()).spawn().map_err(|e| e.to_string())?;
+    let mut child = no_window(cmd).stdin(Stdio::null()).stdout(Stdio::piped()).stderr(Stdio::piped()).spawn().map_err(|e| e.to_string())?;
     // Read as it runs, so a full pipe never stalls it.
     let drain = |p: Option<Box<dyn Read + Send>>| {
         std::thread::spawn(move || {

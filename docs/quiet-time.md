@@ -62,6 +62,9 @@ start by themselves after a countdown that leaves time to read the card.
 - With both on, different songs play after the reading.
 - A song Quiet time has played isn't chosen again for 14 days.
 - Songs Music can't play aren't chosen: ones Apple Music no longer has, and ones unticked in Music.
+- On Windows the songs are the music files in your Music folder (MP3, M4A, FLAC and others), and
+  the app plays them itself. Only songs whose genre is Christian, Gospel or Worship are chosen:
+  set it in a file's Properties › Details if it isn't.
 
 While the songs play, their words show in the reading column, and the Quiet time bar moves up
 into the top bar. The song's name, cover and why it was chosen stay at the top while the words

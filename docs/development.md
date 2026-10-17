@@ -27,7 +27,7 @@ runs the AI tools for Ask. The frontend is everything you see.
 
 - If hot reload leaves a screen broken after an edit, reload the window (⌘R) or restart
   `make dev` before treating it as a bug.
-- The app also builds on Windows, so far without spelling, the media keys, Music,
+- The app also builds on Windows, so far without spelling, the media keys,
   Open at Login, screenshot mode or updates: `npx tauri build --debug --no-bundle` (needs Rust,
   Node, Python and Visual Studio Build Tools with the C++ workload) makes
   `src-tauri/target/debug/TwoEdgedSword.exe`. The AppKit modules are
@@ -38,6 +38,11 @@ runs the AI tools for Ask. The frontend is everything you see.
   Shortcuts are ⌘ on macOS and Ctrl on Windows (`src/keys.ts`, `cmdKey`), and `shortcut()`
   writes their hints, the help's included, in Windows' words there. Reading aloud uses the web
   view's speech on Windows (`src/webSpeech.ts`), which sends the same "tts" events as `tts.rs`.
+  Songs there are the Music folder's files (`music_files.rs`), played in the page
+  (`src/localMusic.ts`), which answers as `music.rs` does. Ask finds the CLIs with `where`, runs
+  them with no console window (`process::no_window`) and ends them with `taskkill /T`.
+  Edge's engine, not WebKit, draws the page there: its `scrollTo` returns a promise, so an effect
+  must never return a call's result.
 - `cargo test --lib` in `src-tauri` runs the Rust tests on Windows, except the spelling ones.
   `.github/workflows/windows-tests.yml` runs them, and the TypeScript check, on every push to
   `main` that changes the code.

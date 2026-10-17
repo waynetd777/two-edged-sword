@@ -169,6 +169,13 @@ fn kill_group(pid: u32) {
     unsafe {
         libc::kill(-(pid as libc::pid_t), libc::SIGTERM);
     }
+    // Windows has no process groups: taskkill ends the CLI and everything it started (/T).
+    #[cfg(windows)]
+    {
+        let mut kill = Command::new("taskkill");
+        kill.args(["/T", "/F", "/PID", &pid.to_string()]);
+        let _ = crate::process::no_window(&mut kill).status();
+    }
 }
 
 /// Starts the CLI in its own process group and registers it. Its stderr is read on a thread
@@ -182,6 +189,7 @@ fn spawn(
     cmd.stdin(Stdio::null()).stdout(Stdio::piped()).stderr(Stdio::piped());
     #[cfg(unix)]
     std::os::unix::process::CommandExt::process_group(cmd, 0);
+    crate::process::no_window(cmd);
     let mut child = cmd.spawn().map_err(|e| format!("couldn't start {name}: {e}"))?;
     let stdout = child.stdout.take().ok_or("no stdout")?;
     let stderr = child.stderr.take();
@@ -320,6 +328,22 @@ fn find(name: &str, extra: &[&str]) -> Option<PathBuf> {
     Some(found)
 }
 
+#[cfg(windows)]
+fn look_for(name: &str, _extra: &[&str]) -> Option<PathBuf> {
+    // The native installers' place (Claude Code's), then whatever is on the PATH. An npm .cmd
+    // shim comes last: a prompt's newlines can't be passed through one.
+    let home = crate::store::home();
+    if let Some(p) = [home.join(".local/bin").join(format!("{name}.exe"))].into_iter().find(|p| p.is_file()) {
+        return Some(p);
+    }
+    let out = crate::process::output_within(Command::new("where").arg(name), ASK_SHELL).ok()?;
+    let found: Vec<PathBuf> =
+        String::from_utf8_lossy(&out.stdout).lines().map(|l| PathBuf::from(l.trim())).filter(|p| p.is_file()).collect();
+    let ext = |p: &PathBuf, e: &str| p.extension().is_some_and(|x| x.eq_ignore_ascii_case(e));
+    found.iter().find(|p| ext(p, "exe")).or_else(|| found.iter().find(|p| ext(p, "cmd"))).cloned()
+}
+
+#[cfg(not(windows))]
 fn look_for(name: &str, extra: &[&str]) -> Option<PathBuf> {
     let home = crate::store::home();
     let mut places = vec![home.join(".local/bin").join(name)];
