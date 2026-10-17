@@ -191,13 +191,14 @@
     document.documentElement.classList.toggle("tes-dark", on);
     if (on) pictures();
   };
-  // Pictures that arrive later (a page that loads them as it's read).
+  // Pictures that arrive later (a page that loads them as it's read). The document is watched, not
+  // its root: WebView2 (Windows) runs this before the root element exists.
   new MutationObserver((ms) => {
     if (dark && ms.some((m) => m.target !== layer)) {
       clearTimeout(darken.t);
       darken.t = setTimeout(pictures, 300);
     }
-  }).observe(document.documentElement, { childList: true, subtree: true });
+  }).observe(document, { childList: true, subtree: true });
   // A site whose address can't say the day: on the page the app opened (not the one it leads to),
   // the first link to a day's reading is followed, once the page has made its links.
   const go = ({ from, href }) => {
