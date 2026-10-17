@@ -42,6 +42,9 @@ The app comes with these, so it works with nothing else installed. All are publi
 | Young's Literal Translation (YLT) | eBible.org |
 | Darby Translation (1890) | eBible.org |
 | Webster's Bible (1833) | eBible.org |
+| Webster's Bible with Strong's numbers (Webster+) | eBible.org; the numbers carried over from the KJV+ |
+| Berean Standard Bible (BSB), with the words of Christ in red | berean.bible |
+| Berean Standard Bible with Strong's numbers (BSB+) | berean.bible, from its translation tables |
 | Jamieson, Fausset & Brown Commentary (JFB) | CrossWire, from the Christian Classics Ethereal Library |
 | Adam Clarke's Commentary on the Bible | CrossWire, from Wikisource |
 | Barnes' Notes on the New Testament | CrossWire |
