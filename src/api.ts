@@ -339,4 +339,6 @@ export const api = {
   trayInfo: () => invoke<TrayInfo>("tray_info"),
   /** A choice in the menu-bar window, carried out by Rust or the main window (tray.rs). */
   trayDo: (id: string) => invoke<void>("tray_do", { id }),
+  /** Check for Updates… (updates.rs), for Windows, which has no app menu to hold it. */
+  checkForUpdates: () => invoke<void>("check_for_updates"),
 };

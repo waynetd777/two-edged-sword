@@ -180,6 +180,9 @@ pub fn tray_do(app: AppHandle, id: String) {
         "open" => crate::show_main(&app),
         "quit" => crate::quit(&app),
         "login" => toggle_login(),
+        // Windows has no app menu for these: the menu window offers them.
+        "help" => crate::help::show(&app),
+        "updates" => crate::updates::check_now(&app),
         "quiet" | "quiet-audio" | "continue" | "journal" | "search" | "plans" | "settings" | "reminder" => {
             if id != "reminder" {
                 crate::show_main(&app);

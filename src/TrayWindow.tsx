@@ -13,7 +13,7 @@ import { api, TrayInfo, TrayState } from "./api";
 import { Icon, Sword } from "./icons";
 import { READ_FONTS, ReadFont } from "./state";
 import { Switch } from "./ui";
-import { cmdKey, shortcut } from "./keys";
+import { cmdKey, isMac, shortcut } from "./keys";
 
 const WIDTH = 340;
 
@@ -93,7 +93,16 @@ export function TrayWindow() {
       if (e.key === "Enter" && !cmdKey(e)) return act(e.altKey ? "quiet-audio" : "quiet");
       if (!cmdKey(e)) return;
       const id = (
-        { o: "open", r: "continue", j: "journal", f: "search", p: "plans", ",": "settings", q: "quit" } as Record<string, string>
+        {
+          o: "open",
+          r: "continue",
+          j: "journal",
+          f: "search",
+          p: "plans",
+          ",": "settings",
+          q: "quit",
+          ...(isMac ? {} : { "?": "help" }),
+        } as Record<string, string>
       )[e.key.toLowerCase()];
       if (id) {
         e.preventDefault();
@@ -205,6 +214,9 @@ export function TrayWindow() {
       <div className="tray-sec tray-list">
         <Item icon="bible" label="Open Two-edged Sword" keys={shortcut("⌘O")} strong id="open" />
         <Item icon="settings" label="Settings…" keys={shortcut("⌘,")} id="settings" />
+        {/* macOS has these in its menus; Windows' app has none. */}
+        {!isMac && <Item icon="help" label="Help" keys={shortcut("⌘?")} id="help" />}
+        {!isMac && <Item icon="refresh" label="Check for Updates…" id="updates" />}
         <Item icon="x" label="Quit" keys={shortcut("⌘Q")} id="quit" />
       </div>
     </div>

@@ -217,7 +217,13 @@ async fn check(app: &AppHandle, asked: bool) {
             // A failed background check is tried again within the hour.
             eprintln!("update check failed: {e}");
             if asked {
-                tell(app, "Couldn't check for updates", &e.to_string()).await;
+                // The release has no package for this system (Windows, until one is published).
+                let why = if e.to_string().contains("platform") {
+                    "Updates for this system aren't published yet.".to_string()
+                } else {
+                    e.to_string()
+                };
+                tell(app, "Couldn't check for updates", &why).await;
             }
         }
     }

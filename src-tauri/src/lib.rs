@@ -709,6 +709,12 @@ fn scene() -> Option<String> {
     screenshot::scene()
 }
 
+/// Check for Updates… where there's no app menu to hold it (Settings, on Windows).
+#[tauri::command]
+fn check_for_updates(app: AppHandle) {
+    updates::check_now(&app);
+}
+
 #[tauri::command]
 fn print_page(window: tauri::WebviewWindow) -> Result<(), String> {
     window.print().map_err(|e| e.to_string())
@@ -898,6 +904,7 @@ pub fn run() {
             ask,
             ask_cancel,
             print_page,
+            check_for_updates,
             scene,
             media::media_state,
             tts::tts_voices,
