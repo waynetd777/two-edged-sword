@@ -546,6 +546,14 @@ mod library_tests {
         let bethel = search::run(&lib, None, &q("Bethel")).unwrap().bible.count;
         assert!(bethel >= 55, "{bethel}"); // 59: its 66 in 59 verses
         assert_eq!(search::run(&lib, None, &q("beth-el")).unwrap().bible.count, bethel);
+        // The BSB+ and Webster+ (when built) are Strong's Bibles like the KJV+: numbers after the words.
+        for (id, loved) in [("bsb+", "loved<num>G25</num> the<num>G3588</num> world<num>G2889</num>"), ("webster+", "so<num>G3779</num> loved<num>G25</num>")] {
+            let Ok(m) = lib.module(Kind::Bible, id) else { continue };
+            assert!(m.strongs, "{id}");
+            assert!(chapter(&lib, id, 43, 3).unwrap()[15].text.contains(loved), "{id}");
+            assert!(strongs_for_word(&lib, id, "love").unwrap().iter().take(6).any(|w| w.num == "G25"), "{id}");
+            assert!(strongs_by_book(&lib, id, "H7225").unwrap().iter().any(|(b, n)| *b == 1 && *n > 0), "{id}");
+        }
         assert!(lib.modules.iter().all(|m| m.source == crate::library::Source::Bundled && !m.info.contains("Meyers")));
     }
 

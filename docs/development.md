@@ -262,7 +262,8 @@ Scripts in `tools/` share `tools/modules.py`:
 lists them), under the ids the app looks for first: `kjv`, `kjv+`, `strong`, `kjc` and `tsk`; the
 other Bibles (`asv`, `web`, `ylt`, `darby`, `webster`), commentaries and dictionaries (`henry`, `jfb`,
 `clarke`, `barnes`, `easton`, `smith`, `nave`, `isbe`) take e-Sword's ids, so e-Sword X's copies,
-where there are, are read instead. `--only jfb asv` builds just those; `--if-missing` builds only
+where there are, are read instead; so do the Berean Standard Bible (`bsb`) and the Strong's
+editions `bsb+` and `webster+`. `--only jfb asv` builds just those; `--if-missing` builds only
 what isn't there.
 
 Nothing from e-Sword X goes into a module that could be shipped: its licence forbids passing its

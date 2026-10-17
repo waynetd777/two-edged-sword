@@ -3,14 +3,15 @@
 """Builds the modules built into the app, so it works with nothing else installed: the KJV, the
 KJV with Strong's numbers, Strong's Hebrew and Greek dictionaries, a King James concordance, the
 Treasury of Scripture Knowledge, four commentaries (Matthew Henry, JFB, Clarke, Barnes), four
-dictionaries (Easton's, Smith's, Nave's, the ISBE), and five more public-domain English Bibles: the
-ASV, the WEB, Young's, Darby's and Webster's.
+dictionaries (Easton's, Smith's, Nave's, the ISBE), six more public-domain English Bibles (the ASV,
+the WEB, Young's, Darby's, Webster's and the Berean Standard Bible), and the BSB and Webster's with
+Strong's numbers.
 
-    python3 tools/core/build.py [--if-missing] [--only henry easton jfb clarke barnes smith nave isbe asv web ylt darby webster]
+    python3 tools/core/build.py [--if-missing] [--only henry easton jfb clarke barnes smith nave isbe asv web ylt darby webster bsb bsb+ webster+]
 
 Writes kjv.bbli, kjv+.bbli, strong.lexi, kjc.lexi, tsk.cmti, henry.cmti, jfb.cmti, clarke.cmti,
 barnes.cmti, easton.dcti, smith.dcti, nave.dcti, isbe.dcti, asv.bbli, web.bbli, ylt.bbli,
-darby.bbli and webster.bbli to src-tauri/modules/, which the app bundle carries in
+darby.bbli, webster.bbli, bsb.bbli, bsb+.bbli and webster+.bbli to src-tauri/modules/, which the app bundle carries in
 Contents/Resources/modules/ (and a debug build reads in place). With --if-missing, builds only the
 commentaries, dictionaries and Bibles not there yet, or everything if the KJV and what's built from
 it aren't (the release build runs it that way); --only builds just the ones named (after the KJV,
@@ -60,17 +61,50 @@ Every source is public domain, and none is e-Sword's (its licence forbids passin
     where the Majority Text has it) are moved to 16:25-27 (MOVES); Darby has no Mat 23:14, Act 8:37
     or Act 15:34, as his Greek text hasn't. The Douay-Rheims isn't here: it is numbered as the Vulgate
     and has the deuterocanon, and tools/crosswire builds it (drc.bbli) for the modules folder.
+  The Berean Standard Bible (bsb), the Berean Bible's own USFM, https://bereanbible.com/bsb_usfm.zip,
+    "officially dedicated to the public domain as of April 30, 2023. All uses are freely permitted"
+    (https://berean.bible/terms.htm, which asks that a text varying from theirs not bear the Berean
+    name: the words here are theirs unchanged; notes and headings are left out, as for the others).
+    Its psalm titles (\\d \\v 1 ...) are <b>. It hasn't the 16 verses the KJV has and its Greek text
+    doesn't (Mat 17:21, Joh 5:4, Act 8:37, ...), nor the subscription to Hab 3:19.
+  Strong's numbers (bsb+, webster+), in the KJV+'s form ("loved<num>G25</num>", a number after the
+    words it translates). Each edition's text is its plain one's unchanged, with only the numbers put in.
+      bsb+      The BSB's translation tables, https://bereanbible.com/bsb_tables.tsv (public domain with
+                the text), which give every Hebrew and Greek word with its Strong's number and the
+                English that translates it, in the English order: each phrase is found in the verse and
+                its numbers put after it (bsb_tables). All but 6 of its 386,065 phrases are found. The
+                numbers are Strong's but for a word's dictionary form throughout (G1510 for every form
+                of "to be", where Strong's and the KJV+ have G2258, G2071 and so on), and the article
+                (G3588) and the Hebrew object marker (H853) are numbered where they are translated
+                ("the", "who", "them"), as the KJV+ mostly doesn't.
+      webster+  The KJV+'s numbers carried onto Webster's words (carry_numbers): Webster's is the KJV
+                with words updated, so its words are lined up with the KJV's and a number goes after
+                the word in Webster's place of the one it follows in the KJV+; 98.6% are carried, the
+                rest (where Webster reworded a phrase) left out.
+    Checked against the KJV+ on 163 verses (Gen 1, Exo 20:1-17, Ps 23, Isa 53, Mat 5:1-12, John 1:1-18,
+    3:16, Rom 8, Heb 11:1-6, Rev 22), the share of words that are content words and have the same
+    number as the KJV+'s same word is 92% for the BSB+ (its differences are mostly the KJV+'s: numbers
+    for a phrase on its last word, "every living creature<num>H2416</num>", where the BSB+ numbers
+    "every" too) and 99% for Webster+. Not here: eBible.org's ASV, WEB and Darby have Strong's numbers,
+    but matched by machine and often wrong ("the<num>H1254</num>", "And<num>H1961</num>", God unnumbered
+    in Gen 1:3; "should<num>G2316</num>" in John 3:16): 72%, 72% and 81% of their content words agree
+    with the KJV+, and 36-38%, 25% of their numbered function words don't. CrossWire's ASV is the
+    same text and numbers (TextSource eBible). Carrying the KJV+'s numbers onto the ASV, WEB, Young's
+    or Darby's as onto Webster's puts some on the wrong words where they reorder a phrase (the ASV's
+    Rom 8:28, "to them that<num>G25</num>"), and Young's has no tagged source.
 The concordance and the dictionaries' occurrence counts are counted from the KJV's Strong's numbers.
 
 The GitHub files are taken at a fixed commit and checked against their sha256, so a rebuild makes
-the same modules; eBible.org's and CrossWire's zips have no fixed version to take, so they aren't
-(a rebuild from the same zips makes the same modules).
+the same modules; eBible.org's, CrossWire's and the Berean Bible's files have no fixed version to
+take, so they aren't (a rebuild from the same files makes the same modules; if the BSB's tables and
+text drift apart, the phrases not found are printed).
 
 Downloads are cached in ~/Library/Caches/Two-edged Sword/core.
 """
 import gzip, html as html_, io, re, struct, sys, zipfile, zlib
 import xml.etree.ElementTree as ET
 from collections import Counter, defaultdict
+from difflib import SequenceMatcher
 from pathlib import Path
 
 
@@ -1344,10 +1378,10 @@ def pd_inline(s):
     return re.sub(r"\s+", " ", t).strip()
 
 
-def pd_bible(ebible_id):
-    """{(book, chapter, verse): text} of one of eBible.org's USFM Bibles."""
+def pd_bible(ebible_id, url=None):
+    """{(book, chapter, verse): text} of one of eBible.org's USFM Bibles (or the USFM zip at `url`)."""
     verses = {}
-    z = zipfile.ZipFile(io.BytesIO(fetch(EBIBLE.format(ebible_id))))
+    z = zipfile.ZipFile(io.BytesIO(fetch(url or EBIBLE.format(ebible_id))))
     for name in sorted(z.namelist()):
         if not name.endswith(".usfm"):
             continue
@@ -1355,19 +1389,23 @@ def pd_bible(ebible_id):
         book = USFM.get(re.search(r"\\id (\w+)", text)[1])
         if not book or book > 66:
             continue
-        chapter, title, last = 0, "", None
+        chapter, title, last, titled = 0, "", None, False
         for m in re.finditer(rf"\\({PARA})\b ?(.*?)(?=\\{PARA}\b(?![a-z*])|\Z)", text, re.S):
             tag, body = m[1], m[2]
             if tag == "c":
                 chapter, title, last = int(body.split()[0]), "", None
             elif tag == "d" and chapter:
                 title = pd_inline(body)  # a psalm's title: <b> at the start of verse 1, as in the KJV
+                titled = not body.strip()  # the BSB's "\d \v 1 A Psalm of David.": the title is verse 1's first line
             elif tag == "v" and chapter:
                 vn, _, rest = body.strip().partition(" ")
                 last = (book, chapter, int(re.match(r"\d+", vn)[0]))
                 t = pd_inline(rest)
                 if title:
                     t, title = f"<b>{title}</b> {t}".strip(), ""
+                elif titled and t:
+                    t = f"<b>{t}</b>"
+                titled = False
                 verses[last] = f"{verses[last]} {t}".strip() if last in verses else t
             elif CONTINUES.match(tag) and last and body.strip():
                 verses[last] = f"{verses[last]} {pd_inline(body)}".strip()
@@ -1387,6 +1425,14 @@ def write_bible(bid):
     for (b, c, v0, v1), (c2, v2) in MOVES.get(bid, []):
         for v in range(v0, v1 + 1):
             verses[(b, c2, v2 + v - v0)] = verses.pop((b, c, v))
+    info = (f"<p>{html.escape(about)}</p>"
+            f"<p>Public domain. From eBible.org's {ebible_id} (https://ebible.org/{ebible_id}/), courtesy of eBible.org. "
+            "Built by Two-edged Sword's tools/core.</p>")
+    write_verses(bid, title, abbrev, info, verses)
+
+
+def write_verses(bid, title, abbrev, info, verses, strongs=False):
+    """Writes `bid`.bbli and prints how its verses differ from the KJV's."""
     vc = verse_counts()
     kjv_refs = {(b, c, v) for b, chs in vc.items() for c, n in chs.items() for v in range(1, n + 1)}
     extra, missing = sorted(set(verses) - kjv_refs), sorted(kjv_refs - set(verses))
@@ -1394,12 +1440,164 @@ def write_bible(bid):
     for what, refs in (("not in the KJV", extra), ("missing", missing), ("empty", empty)):
         if refs:
             print(f"  {bid}: {len(refs)} verses {what}: " + ", ".join(f"{BOOK_ABBR[b - 1]} {c}:{v}" for b, c, v in refs[:12]))
-    info = (f"<p>{html.escape(about)}</p>"
-            f"<p>Public domain. From eBible.org's {ebible_id} (https://ebible.org/{ebible_id}/), courtesy of eBible.org. "
-            "Built by Two-edged Sword's tools/core.</p>")
-    with module(f"{bid}.bbli", title, abbrev, info, into=BUNDLED) as db:
+    with module(f"{bid}.bbli", title, abbrev, info, strongs=strongs, into=BUNDLED) as db:
         db.executemany("INSERT INTO Bible VALUES (?,?,?,?)", [(b, c, v, t) for (b, c, v), t in sorted(verses.items())])
     print(f"{bid}.bbli: {len(verses)} verses")
+
+
+# ---- the Berean Standard Bible, and Strong's numbers for it and for Webster's -----------------------
+
+BSB_URL = "https://bereanbible.com/bsb_usfm.zip"
+BSB_TABLES_URL = "https://bereanbible.com/bsb_tables.tsv"
+BSB_ABOUT = ("The Berean Standard Bible (2023, third printing), a modern English translation from the Hebrew, Aramaic "
+             "and Greek, with the words of Christ in red.")
+BSB_INFO = ("<p>Public domain: the Berean Bible texts were dedicated to the public domain on April 30, 2023 "
+            "(https://berean.bible/terms.htm). The Holy Bible, Berean Standard Bible, BSB is produced in cooperation "
+            "with Bible Hub, Discovery Bible, OpenBible.com, and the Berean Bible Translation Committee. "
+            "From https://berean.bible/downloads.htm. Built by Two-edged Sword's tools/core.</p>")
+WORD = re.compile(r"[A-Za-z0-9]+(?:['’][A-Za-z]+)*")
+
+
+def words_at(t):
+    """[(word, where it ends)] of e-Sword text's words, its tags and numbers skipped."""
+    return [(m[0].lower().replace("’", "'"), m.end()) for m in re.finditer(r"<num>[^<]*</num>|<[^>]+>|" + WORD.pattern, t)
+            if not m[0].startswith("<")]
+
+
+def put_numbers(t, at):
+    """`t` with each {where: [numbers]} of `at` put in as <num>s."""
+    out, last = [], 0
+    for pos in sorted(at):
+        out += [t[last:pos], "".join(f"<num>{n}</num>" for n in dict.fromkeys(at[pos]))]
+        last = pos
+    return "".join(out) + t[last:]
+
+
+def bsb_tables():
+    """{(book, chapter, verse): [(words, how many of them the numbers follow, numbers)]} from the BSB's
+    translation tables: each Hebrew or Greek word, its Strong's number, and the English it is
+    translated by, in the English order. A word marked "vvv" is translated with the next one, so its
+    number goes there; one translated as "-" (not at all) or ". . ." (with a word elsewhere) is left out.
+    Bracketed words ([His], supplied) count as the phrase's; words in braces moved after it ("the stars
+    {as well}") come after the number, which is the phrase's before them."""
+    names = BOOK_NAMES | {"Psalm": 19, "Song of Songs": 22, "Revelation": 66}
+    out, ref, carry = {}, None, []
+    rows = fetch(BSB_TABLES_URL).decode("utf-8-sig").split("\n")
+    head = rows[0].split("\t")
+    col = {k: head.index(k) for k in ("Str Heb", "Str Grk", "VerseId")} | {"eng": [h.strip() for h in head].index("BSB version")}
+    for line in rows[1:]:
+        row = line.split("\t")
+        if len(row) <= col["eng"]:
+            continue
+        if row[col["VerseId"]].strip():
+            m = re.match(r"(.+) (\d+):(\d+)$", row[col["VerseId"]].strip())
+            ref, carry = (names[m[1]], int(m[2]), int(m[3])), []
+            out[ref] = []
+        heb, grk = row[col["Str Heb"]].strip(), row[col["Str Grk"]].strip()
+        n = f"H{int(heb)}" if heb else f"G{int(grk)}" if grk else None
+        eng = re.sub(r"<[^>]*>", " ", row[col["eng"]]).strip()
+        if eng == "vvv":
+            carry += [n] if n else []
+            continue
+        tail = re.search(r"\{[^{}]*\}\s*$", eng)
+        ws = [w.lower().replace("’", "'") for w in WORD.findall(re.sub(r"[\[\]{}]", "", eng))]
+        if not ws:
+            continue
+        upto = len(ws) - len(WORD.findall(tail[0])) if tail and len(WORD.findall(tail[0])) < len(ws) else len(ws)
+        out[ref].append((ws, upto, carry + ([n] if n else [])))
+        carry = []
+    return out
+
+
+def tag_bsb(text, phrases):
+    """The verse with the tables' numbers after the words they translate, and how many phrases
+    weren't found in it: each phrase is looked for a few words on from the last one found."""
+    words, at, i, missed = words_at(text), {}, 0, 0
+    for ws, upto, nums in phrases:
+        k = len(ws)
+        j = next((j for j in range(i, min(i + 8, len(words) - k + 1)) if [w for w, _ in words[j:j + k]] == ws), None)
+        if j is None:
+            missed += 1
+            continue
+        if nums:
+            at.setdefault(words[j + upto - 1][1], []).extend(nums)
+        i = j + k
+    return put_numbers(text, at), missed
+
+
+def write_bsb():
+    write_verses("bsb", "Berean Standard Bible", "BSB", f"<p>{BSB_ABOUT}</p>{BSB_INFO}", pd_bible(None, BSB_URL))
+
+
+def write_bsb_plus():
+    tables, missed = bsb_tables(), Counter()
+    verses = {}
+    for k, t in pd_bible(None, BSB_URL).items():
+        verses[k], missed[k] = tag_bsb(t, tables.get(k, []))
+    phrases = sum(len(p) for k, p in tables.items() if k in verses)
+    print(f"  bsb+: {sum(missed.values())} of {phrases} phrases of the tables not found in the text: "
+          + ", ".join(f"{BOOK_ABBR[b - 1]} {c}:{v}" for (b, c, v), n in sorted(missed.items()) if n))
+    info = (f"<p>{BSB_ABOUT} With Strong's numbers for looking up the Hebrew or Greek behind each word, from the "
+            "Berean Bible's translation tables (bsb_tables), which give each Hebrew and Greek word with the English it is "
+            "translated by.</p>" + BSB_INFO)
+    write_verses("bsb+", "Berean Standard Bible w/ Strong's Numbers", "BSB+", info, verses, strongs=True)
+
+
+def kjv_groups(tagged):
+    """The KJV+ verse's words, which run of numbers each is under (the words since the run before),
+    and {run: (its last word, the numbers)}."""
+    words, under, runs = [], [], {}
+    for m in re.finditer(r"((?:<num>[^<]*</num>)+)|<[^>]+>|" + WORD.pattern, tagged):
+        if m[1]:
+            if words and under and under[-1] == len(runs):
+                runs[len(runs)] = (len(words) - 1, m[1])
+            else:
+                runs[len(runs)] = (None, m[1])  # a run with no words before it
+        elif not m[0].startswith("<"):
+            words.append(m[0].lower().replace("’", "'"))
+            under.append(len(runs))
+    return words, under, {r: v for r, v in runs.items() if v[0] is not None}
+
+
+def carry_numbers(tagged, text):
+    """The KJV+'s numbers carried onto Webster's words: the two texts' words are lined up (difflib),
+    a word kept or replaced one for one ("unto" → "to", "Holy Ghost" → "Holy Spirit") gets the KJV
+    word's place, and each run of numbers goes after its last word's counterpart. A run whose last
+    word has none, or would go out of order, is left out, and counted."""
+    kw, under, runs = kjv_groups(tagged)
+    words = words_at(text)
+    to = {}
+    for op, i1, i2, j1, j2 in SequenceMatcher(None, kw, [w for w, _ in words], autojunk=False).get_opcodes():
+        if op == "equal" or (op == "replace" and i2 - i1 == j2 - j1):
+            to.update({i1 + d: j1 + d for d in range(i2 - i1)})
+    at, last, left = {}, -1, 0
+    for r, (i, nums) in sorted(runs.items()):
+        j = to.get(i)
+        if j is None or j <= last:
+            left += 1
+            continue
+        at.setdefault(words[j][1], []).extend(re.findall(r"<num>([^<]*)</num>", nums))
+        last = j
+    return put_numbers(text, at), left, len(runs)
+
+
+def write_webster_plus():
+    tagged = {k: t for k, (_, t) in kjv()[0].items()}
+    verses, left, runs = {}, 0, 0
+    for k, t in pd_bible(BIBLES["webster"][0]).items():
+        verses[k], l, n = carry_numbers(tagged[k], t) if k in tagged else (t, 0, 0)
+        left, runs = left + l, runs + n
+    print(f"  webster+: {runs - left} of the KJV+'s {runs} runs of Strong's numbers carried over, {left} left out")
+    info = (f"<p>{html.escape(BIBLES['webster'][3])} With the KJV+'s Strong's numbers, carried over to the words Webster "
+            "kept or changed one for one; where he reworded a phrase, its numbers are left out.</p>"
+            "<p>Public domain. Text from eBible.org's engwebster (https://ebible.org/engwebster/), courtesy of eBible.org; "
+            "Strong's numbers from the KJV+ (eBible.org's eng-kjv2006, courtesy of the CrossWire Bible Society and eBible.org). "
+            "Built by Two-edged Sword's tools/core.</p>")
+    write_verses("webster+", "Webster's Bible w/ Strong's Numbers", "Webster+", info, verses, strongs=True)
+
+
+# Bibles built one at a time, beyond BIBLES: id → (file, builder).
+MORE |= {"bsb": ("bsb.bbli", write_bsb), "bsb+": ("bsb+.bbli", write_bsb_plus), "webster+": ("webster+.bbli", write_webster_plus)}
 
 
 def main():
