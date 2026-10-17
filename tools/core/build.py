@@ -2,16 +2,18 @@
 # SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 """Builds the modules built into the app, so it works with nothing else installed: the KJV, the
 KJV with Strong's numbers, Strong's Hebrew and Greek dictionaries, a King James concordance, the
-Treasury of Scripture Knowledge, Matthew Henry's commentary and Easton's Bible Dictionary.
+Treasury of Scripture Knowledge, Matthew Henry's commentary, Easton's Bible Dictionary, and five
+more public-domain English Bibles: the ASV, the WEB, Young's, Darby's and Webster's.
 
-    python3 tools/core/build.py [--if-missing] [--only henry easton]
+    python3 tools/core/build.py [--if-missing] [--only henry easton asv web ylt darby webster]
 
-Writes kjv.bbli, kjv+.bbli, strong.lexi, kjc.lexi, tsk.cmti, henry.cmti and easton.dcti to
-src-tauri/modules/, which the app bundle carries in Contents/Resources/modules/ (and a debug build
-reads in place). With --if-missing, does nothing when all are there (the release build runs it that
-way); --only builds just the ones named (after the KJV, which they check references against). The ids
-are the ones the app looks for first, so Word Study, the glosses and the cross-references find them,
-and e-Sword's henry.cmti and easton.dcti, where there are, take the place of these.
+Writes kjv.bbli, kjv+.bbli, strong.lexi, kjc.lexi, tsk.cmti, henry.cmti, easton.dcti, asv.bbli,
+web.bbli, ylt.bbli, darby.bbli and webster.bbli to src-tauri/modules/, which the app bundle carries
+in Contents/Resources/modules/ (and a debug build reads in place). With --if-missing, does nothing when all are there (the release build runs it that
+way); --only builds just the ones named (after the KJV, which they check references against, built
+first if it isn't there). The ids are the ones the app looks for first, so Word Study, the glosses
+and the cross-references find them, and e-Sword's copies (henry.cmti, asv.bbli and so on), where
+there are, take the place of these.
 
 Every source is public domain, and none is e-Sword's (its licence forbids passing its modules on):
   eBible.org's eng-kjv2006, https://ebible.org/Scriptures/eng-kjv2006_usfm.zip: the 1769 KJV with
@@ -29,10 +31,27 @@ Every source is public domain, and none is e-Sword's (its licence forbids passin
     Classics Ethereal Library, https://www.crosswire.org/ftpmirror/pub/sword/packages/rawzip/.
     Their references are checked against the KJV's verses and repaired where CCEL's are wrong,
     and misspellings found by comparing with e-Sword's copies are corrected (EASTON_TYPOS).
+  The other Bibles, from eBible.org's USFM zips (https://ebible.org/Scriptures/<id>_usfm.zip), each
+    marked public domain in its copr.htm and in eBible's catalogue (translations.csv):
+      asv      eng-asv      American Standard Version (1901)
+      web      engwebp      World English Bible, the 66-book edition (dedicated to the public domain;
+                            "World English Bible" is eBible's trademark, kept only for its unchanged text)
+      ylt      engylt       Young's Literal Translation (1898)
+      darby    engDBY       Darby Translation (1890)
+      webster  engwebster   Noah Webster's revision of the KJV (1833)
+    Words of Christ (\\wj, the WEB's) become <red>, supplied words (\\add, Webster's and the ASV's)
+    <i>, Darby's emphasis (\\bd) <b>, psalm titles (\\d) <b> at the start of verse 1. Notes,
+    cross-references, headings and their Strong's numbers (which eBible matched by machine) are left
+    out; a verse that is only a note (the ASV's Mat 17:21, "Many authorities ... insert v. 21") keeps
+    it, in brackets. All are numbered as the KJV but the WEB, whose Romans 14:24-26 (the doxology,
+    where the Majority Text has it) are moved to 16:25-27 (MOVES); Darby has no Mat 23:14, Act 8:37
+    or Act 15:34, as his Greek text hasn't. The Douay-Rheims isn't here: it is numbered as the Vulgate
+    and has the deuterocanon, and tools/crosswire builds it (drc.bbli) for the modules folder.
 The concordance and the dictionaries' occurrence counts are counted from the KJV's Strong's numbers.
 
 The GitHub files are taken at a fixed commit and checked against their sha256, so a rebuild makes
-the same modules; eBible.org's and CrossWire's zips have no fixed version to take, so they aren't.
+the same modules; eBible.org's and CrossWire's zips have no fixed version to take, so they aren't
+(a rebuild from the same zips makes the same modules).
 
 Downloads are cached in ~/Library/Caches/Two-edged Sword/core.
 """
@@ -813,17 +832,137 @@ def write_easton():
     print(f"easton.dcti: {len(rows)} topics")
 
 
+# ---- other public-domain English Bibles, from eBible.org ------------------------------------------
+
+EBIBLE = "https://ebible.org/Scriptures/{}_usfm.zip"
+# id: (eBible's id, title, abbreviation, what it is). The ids are e-Sword's, so its copies take their place.
+BIBLES = {
+    "asv": ("eng-asv", "American Standard Version", "ASV",
+            "The American Standard Version of 1901, the American edition of the Revised Version."),
+    "web": ("engwebp", "World English Bible", "WEB",
+            "The World English Bible, a modern English update of the American Standard Version, with the words of Christ in red. "
+            "This edition has the 66 books of the Old and New Testaments, without the Deuterocanon."),
+    "ylt": ("engylt", "Young's Literal Translation", "YLT",
+            "Robert Young's Literal Translation of the Holy Bible (revised edition, 1898), translated word for word from the Hebrew and Greek."),
+    "darby": ("engDBY", "Darby Translation", "Darby",
+              "The Holy Scriptures, a New Translation from the Original Languages, by J. N. Darby (1890). "
+              "Words in bold are emphasised in the original, words in brackets were supplied by the translator."),
+    "webster": ("engwebster", "Webster's Bible", "Webster",
+                "The Holy Bible in the Common Version, with Amendments of the Language, by Noah Webster (1833): "
+                "the King James Version with its archaic words and spellings updated, the translators' supplied words in italics."),
+}
+# Paragraph-level markers: what follows one up to the next. Text after a paragraph marker carries on
+# the verse before it; headings, speakers' names, introductions and the like are left out.
+PARA = r"(?:c|v|d|p|m|nb|b|pi\d?|pmo|pm|q\d?|qc|qr|qa|qm\d?|li\d?|s\d?|ms\d?|mt\d?|mr|sp|cl|h|toc\d|id|ide|ip|ipi|is\d?|ib|imt\d?|io\d?|iot|rem|r|cp|sr|periph)"
+FILES += [f"{bid}.bbli" for bid in BIBLES]
+CONTINUES = re.compile(r"(?:p|m|nb|b|pi\d?|pmo|pm|q\d?|qc|qr|qm\d?|li\d?)$")
+
+
+def pd_inline(s):
+    """USFM character markup → e-Sword's, for a Bible without Strong's numbers: the words of Christ
+    (\\wj) <red>, supplied words (\\add) <i>, emphasis (\\bd) <b>; notes and cross-references left out.
+    A verse that is only a note ("Many authorities ... insert v. 21") keeps the note, in brackets."""
+    notes = [re.sub(r"\\f[rk] [^\\]*", "", n) for n in re.findall(r"\\fe? \S+ (.*?)\\fe?\*", s, re.S)]  # without the caller (+)
+    t = re.sub(r"\\(fe?|x) .*?\\(fe?|x)\*", "", s, flags=re.S)
+    t = re.sub(r"\\\+?w ([^|\\]*)(?:\|[^\\]*)?\\\+?w\*", r"\1", t)
+    t = re.sub(r"\\\+?wj\*", "</red>", t)
+    t = re.sub(r"\\\+?wj ", "<red>", t)
+    t = re.sub(r"\\\+?add ", "<i>", t)
+    t = re.sub(r"\\\+?add\*", "</i>", t)
+    t = re.sub(r"\\\+?bd ", "<b>", t)
+    t = re.sub(r"\\\+?bd\*", "</b>", t)
+    t = re.sub(r"\\[^\s\\*]+\*", "", t)  # any other closing markers,
+    t = re.sub(r"\\[^\s\\]+ ?", "", t)    # then opening ones
+    if not re.sub(r"<[^>]+>", "", t).strip() and notes:
+        t = "[" + re.sub(r"\\[^\s\\]+ ?", "", " ".join(notes)).strip() + "]"
+    # e-Sword's spellings and plain quotes, so a search for "Caesar" or "God's" finds them.
+    t = t.replace("æ", "ae").replace("Æ", "Ae").replace("œ", "oe").replace("Œ", "Oe")
+    t = t.replace("’", "'").replace("‘", "'").replace("“", '"').replace("”", '"')
+    t = html.escape(t).replace("&lt;", "<").replace("&gt;", ">")  # the text's & only; the tags made above stay
+    t = re.sub(r"\s+", " ", t).strip()
+    t = re.sub(r"<(red|i|b)>\s+", r" <\1>", t)
+    t = re.sub(r"\s+</(red|i|b)>", r"</\1> ", t)
+    t = re.sub(r"\s+([,.;:?!)])", r"\1", t)
+    t = re.sub(r"<(red|i|b)></\1>", "", t)
+    t = re.sub(r"</(red|i|b)>(\s*)<\1>", r"\2", t)  # one run of red, not one per sentence
+    return re.sub(r"\s+", " ", t).strip()
+
+
+def pd_bible(ebible_id):
+    """{(book, chapter, verse): text} of one of eBible.org's USFM Bibles."""
+    verses = {}
+    z = zipfile.ZipFile(io.BytesIO(fetch(EBIBLE.format(ebible_id))))
+    for name in sorted(z.namelist()):
+        if not name.endswith(".usfm"):
+            continue
+        text = z.read(name).decode("utf-8-sig")
+        book = USFM.get(re.search(r"\\id (\w+)", text)[1])
+        if not book or book > 66:
+            continue
+        chapter, title, last = 0, "", None
+        for m in re.finditer(rf"\\({PARA})\b ?(.*?)(?=\\{PARA}\b(?![a-z*])|\Z)", text, re.S):
+            tag, body = m[1], m[2]
+            if tag == "c":
+                chapter, title, last = int(body.split()[0]), "", None
+            elif tag == "d" and chapter:
+                title = pd_inline(body)  # a psalm's title: <b> at the start of verse 1, as in the KJV
+            elif tag == "v" and chapter:
+                vn, _, rest = body.strip().partition(" ")
+                last = (book, chapter, int(re.match(r"\d+", vn)[0]))
+                t = pd_inline(rest)
+                if title:
+                    t, title = f"<b>{title}</b> {t}".strip(), ""
+                verses[last] = f"{verses[last]} {t}".strip() if last in verses else t
+            elif CONTINUES.match(tag) and last and body.strip():
+                verses[last] = f"{verses[last]} {pd_inline(body)}".strip()
+    # A verse's lines joined: one run of red over them, not one per line.
+    return {k: re.sub(r"</(red|i|b)>(\s*)<\1>", r"\2", t) for k, t in verses.items()}
+
+
+# Verses numbered differently from the KJV, moved to the KJV's numbers: (book, chapter, first verse, last), to (chapter, first verse).
+# The WEB has Romans' closing doxology at the end of chapter 14, where the Majority Text puts it, and a note in 16:25.
+MOVES = {"web": [((45, 14, 24, 26), (16, 25))]}
+
+
+def write_bible(bid):
+    """Builds `bid`.bbli (one of BIBLES) and prints how its verses differ from the KJV's."""
+    ebible_id, title, abbrev, about = BIBLES[bid]
+    verses = pd_bible(ebible_id)
+    for (b, c, v0, v1), (c2, v2) in MOVES.get(bid, []):
+        for v in range(v0, v1 + 1):
+            verses[(b, c2, v2 + v - v0)] = verses.pop((b, c, v))
+    vc = verse_counts()
+    kjv_refs = {(b, c, v) for b, chs in vc.items() for c, n in chs.items() for v in range(1, n + 1)}
+    extra, missing = sorted(set(verses) - kjv_refs), sorted(kjv_refs - set(verses))
+    empty = sorted(k for k, t in verses.items() if not t)
+    for what, refs in (("not in the KJV", extra), ("missing", missing), ("empty", empty)):
+        if refs:
+            print(f"  {bid}: {len(refs)} verses {what}: " + ", ".join(f"{BOOK_ABBR[b - 1]} {c}:{v}" for b, c, v in refs[:12]))
+    info = (f"<p>{html.escape(about)}</p>"
+            f"<p>Public domain. From eBible.org's {ebible_id} (https://ebible.org/{ebible_id}/), courtesy of eBible.org. "
+            "Built by Two-edged Sword's tools/core.</p>")
+    with module(f"{bid}.bbli", title, abbrev, info, into=BUNDLED) as db:
+        db.executemany("INSERT INTO Bible VALUES (?,?,?,?)", [(b, c, v, t) for (b, c, v), t in sorted(verses.items())])
+    print(f"{bid}.bbli: {len(verses)} verses")
+
+
 def main():
     if "--if-missing" in sys.argv and all((BUNDLED / f).exists() for f in FILES):
         return
-    if "--only" in sys.argv:  # --only henry easton: just those
+    if "--only" in sys.argv:  # --only henry easton asv: just those
         names = sys.argv[sys.argv.index("--only") + 1:]
-        if not names or set(names) - {"henry", "easton"}:
-            sys.exit(f"--only takes henry and/or easton, not {' '.join(sorted(set(names) - {'henry', 'easton'})) or 'nothing'}")
+        known = {"henry", "easton"} | set(BIBLES)
+        if not names or set(names) - known:
+            sys.exit(f"--only takes {', '.join(sorted(known))}, not {' '.join(sorted(set(names) - known)) or 'nothing'}")
+        if set(names) & set(BIBLES) and not (BUNDLED / "kjv.bbli").is_file():
+            write_kjv(kjv()[0])  # the Bibles are checked against its verses
         if "henry" in names:
             write_henry()
         if "easton" in names:
             write_easton()
+        for bid in BIBLES:
+            if bid in names:
+                write_bible(bid)
         return
     verses, words = kjv()
     write_kjv(verses)
@@ -834,6 +973,8 @@ def main():
     write_tsk()
     write_henry()
     write_easton()
+    for bid in BIBLES:
+        write_bible(bid)
 
 
 if __name__ == "__main__":

@@ -223,7 +223,9 @@ Scripts in `tools/` share `tools/modules.py`:
 `tools/books.py` holds the 66 books' names in each source's spelling.
 
 `tools/core/build.py` builds the built-in modules from public-domain sources only (its docstring
-lists them), under the ids the app looks for first: `kjv`, `kjv+`, `strong`, `kjc` and `tsk`.
+lists them), under the ids the app looks for first: `kjv`, `kjv+`, `strong`, `kjc` and `tsk`. The other
+Bibles (`asv`, `web`, `ylt`, `darby`, `webster`) take e-Sword's ids, so e-Sword's copies are used in
+their place; `--only <id>` builds one.
 
 Nothing from e-Sword X goes into a module that could be shipped: its licence forbids passing its
 modules on. Two scripts read e-Sword modules, so what they build is for your own library only:
