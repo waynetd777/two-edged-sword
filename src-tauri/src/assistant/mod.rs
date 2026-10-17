@@ -330,10 +330,13 @@ fn find(name: &str, extra: &[&str]) -> Option<PathBuf> {
 
 #[cfg(windows)]
 fn look_for(name: &str, _extra: &[&str]) -> Option<PathBuf> {
-    // The native installers' place (Claude Code's), then whatever is on the PATH. An npm .cmd
-    // shim comes last: a prompt's newlines can't be passed through one.
+    // The native installers' places (Claude Code's, Antigravity's), then whatever is on the PATH,
+    // which an app started before the install doesn't have yet. An npm .cmd shim comes last: a
+    // prompt's newlines can't be passed through one.
     let home = crate::store::home();
-    if let Some(p) = [home.join(".local/bin").join(format!("{name}.exe"))].into_iter().find(|p| p.is_file()) {
+    let local = std::env::var_os("LOCALAPPDATA").map(PathBuf::from).unwrap_or_else(|| home.join("AppData/Local"));
+    let exe = format!("{name}.exe");
+    if let Some(p) = [home.join(".local/bin").join(&exe), local.join(name).join("bin").join(&exe)].into_iter().find(|p| p.is_file()) {
         return Some(p);
     }
     let out = crate::process::output_within(Command::new("where").arg(name), ASK_SHELL).ok()?;
