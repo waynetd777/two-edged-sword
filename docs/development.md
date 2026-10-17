@@ -39,7 +39,9 @@ runs the AI tools for Ask. The frontend is everything you see.
   writes their hints, the help's included, in Windows' words there. Reading aloud uses the web
   view's speech on Windows (`src/webSpeech.ts`), which sends the same "tts" events as `tts.rs`.
   Songs there are the Music folder's files (`music_files.rs`), played in the page
-  (`src/localMusic.ts`), which answers as `music.rs` does. Ask finds the CLIs with `where`, runs
+  (`src/localMusic.ts`), which answers as `music.rs` does. Ask finds the CLIs in their
+  installers' folders (`.local\bin`, `%LOCALAPPDATA%\<name>\bin`), in npm's packages (the
+  program itself, as an npm `.cmd` shim can't pass a prompt's newlines) and with `where`, runs
   them with no console window (`process::no_window`) and ends them with `taskkill /T`.
   Spelling there is Windows' spell checker and grammar is Harper (`spell_win.rs`, sharing
   `kjv_words.rs` with `spell.rs`). A panic goes to `crash.log` in the data folder, as the app

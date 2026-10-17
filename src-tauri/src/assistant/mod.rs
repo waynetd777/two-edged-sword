@@ -339,11 +339,56 @@ fn look_for(name: &str, _extra: &[&str]) -> Option<PathBuf> {
     if let Some(p) = [home.join(".local/bin").join(&exe), local.join(name).join("bin").join(&exe)].into_iter().find(|p| p.is_file()) {
         return Some(p);
     }
+    // npm's own folder, which isn't on the PATH when Node was installed by another account.
+    if let Some(npm) = std::env::var_os("APPDATA").map(|a| PathBuf::from(a).join("npm")) {
+        if npm.join(format!("{name}.cmd")).is_file() {
+            if let Some(p) = in_npm_package(&npm.join("node_modules"), name) {
+                return Some(p);
+            }
+        }
+    }
     let out = crate::process::output_within(Command::new("where").arg(name), ASK_SHELL).ok()?;
     let found: Vec<PathBuf> =
         String::from_utf8_lossy(&out.stdout).lines().map(|l| PathBuf::from(l.trim())).filter(|p| p.is_file()).collect();
     let ext = |p: &PathBuf, e: &str| p.extension().is_some_and(|x| x.eq_ignore_ascii_case(e));
-    found.iter().find(|p| ext(p, "exe")).or_else(|| found.iter().find(|p| ext(p, "cmd"))).cloned()
+    if let Some(p) = found.iter().find(|p| ext(p, "exe")) {
+        return Some(p.clone());
+    }
+    let shim = found.iter().find(|p| ext(p, "cmd"))?;
+    shim.parent().and_then(|d| in_npm_package(&d.join("node_modules"), name)).or_else(|| Some(shim.clone()))
+}
+
+/// The program itself inside an npm install of `name` (Codex's and Copilot's packages carry it,
+/// as codex-win32-x64\…\codex.exe), to run in place of npm's .cmd shim.
+#[cfg(windows)]
+fn in_npm_package(modules: &std::path::Path, name: &str) -> Option<PathBuf> {
+    fn walk(d: &std::path::Path, exe: &str, depth: u8) -> Option<PathBuf> {
+        let mut dirs = Vec::new();
+        for e in std::fs::read_dir(d).ok()?.flatten() {
+            let p = e.path();
+            if p.is_dir() {
+                dirs.push(p);
+            } else if p.file_name().is_some_and(|f| f.eq_ignore_ascii_case(exe)) {
+                return Some(p);
+            }
+        }
+        if depth == 0 {
+            return None;
+        }
+        dirs.into_iter().find_map(|p| walk(&p, exe, depth - 1))
+    }
+    let exe = format!("{name}.exe");
+    // The package is `name` or `@scope/name`.
+    let mut roots = vec![modules.join(name)];
+    roots.extend(
+        std::fs::read_dir(modules)
+            .ok()?
+            .flatten()
+            .map(|e| e.path())
+            .filter(|p| p.file_name().is_some_and(|f| f.to_string_lossy().starts_with('@')))
+            .map(|p| p.join(name)),
+    );
+    roots.into_iter().filter(|r| r.is_dir()).find_map(|r| walk(&r, &exe, 6))
 }
 
 #[cfg(not(windows))]

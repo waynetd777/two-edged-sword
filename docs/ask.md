@@ -15,8 +15,8 @@ names its sources.
 
 ## Claude Code, Codex, Antigravity or Copilot
 
-Ask runs an AI tool you already have installed and signed in on this Mac, so it uses your own
-account:
+Ask runs an AI tool you already have installed and signed in on this computer, so it uses your
+own account:
 
 - **Claude Code**: Claude Opus, Sonnet and Haiku, each the newest of its kind (a new Sonnet shows up without an app update).
 - **Codex**: the models your Codex account offers.
@@ -30,6 +30,19 @@ shows which tools were found.
 
 **If no tool is installed, Ask is hidden.** Install one and sign in (run Codex or Antigravity
 once in Terminal), then open Settings, and Ask appears.
+
+On Windows, install each tool in the Windows account you use the app in: a tool and its sign-in
+belong to one account.
+
+| Tool | Install it with |
+|---|---|
+| Claude Code | `irm https://claude.ai/install.ps1 \| iex` in PowerShell |
+| Antigravity | `irm https://antigravity.google/cli/install.ps1 \| iex` in PowerShell |
+| Codex | `npm install -g @openai/codex` |
+| GitHub Copilot | `npm install -g @github/copilot` |
+
+Then sign in: `claude`, `agy`, `codex login` or `copilot` (type `/login`). A terminal opened before
+the install may not find the tool: sign out of Windows and back in.
 
 ## Answers from your library
 
