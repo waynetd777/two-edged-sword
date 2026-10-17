@@ -37,13 +37,14 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: "3.x"
-      # The built-in modules, and the downloads they're built from, kept between releases.
+      # The built-in modules, and the downloads they're built from, from modules-cache.yml's run on
+      # main (a cache this tag saved would be seen by no other release).
       - uses: actions/cache@v5
         with:
           path: |
             src-tauri/modules
             ~\AppData\Local\Two-edged Sword\Caches
-          key: modules-${{ hashFiles('tools/core/build.py', 'tools/modules.py') }}
+          key: modules-${{ hashFiles('tools/core/build.py', 'tools/modules.py', 'tools/books.py') }}
       - run: npm ci --no-audit --no-fund
       - run: npx tauri build
       - run: python tools/update_windows.py "$env:TAG"
