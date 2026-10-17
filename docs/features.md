@@ -94,7 +94,7 @@ The Bibles and books keep their own terms:
 
 | What | Terms |
 |---|---|
-| The built-in modules | Public domain: eBible.org and the CrossWire Bible Society (the KJV, the TSK), Open Scriptures (Strong's), CrossWire, the Christian Classics Ethereal Library and Wikisource (the commentaries and dictionaries) |
+| The built-in modules | Public domain: eBible.org and the CrossWire Bible Society (the KJV, the TSK), eBible.org (the ASV, WEB, YLT, Darby and Webster), Open Scriptures (Strong's), CrossWire, the Christian Classics Ethereal Library and Wikisource (the commentaries and dictionaries) |
 | Modules built from the source code's scripts | As each script says: most public domain or CC BY (STEPBible, Open Scriptures), a few for personal study |
 | e-Sword X's modules | e-Sword's licence: read where e-Sword keeps them, never copied |
 

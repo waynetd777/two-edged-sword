@@ -37,6 +37,11 @@ The app comes with these, so it works with nothing else installed. All are publi
 | Treasury of Scripture Knowledge (TSK), the cross-references | CrossWire |
 | Matthew Henry's Commentary on the Whole Bible | CrossWire, from the Christian Classics Ethereal Library |
 | Easton's Bible Dictionary | CrossWire, from the Christian Classics Ethereal Library |
+| American Standard Version (ASV, 1901) | eBible.org |
+| World English Bible (WEB), with the words of Christ in red | eBible.org |
+| Young's Literal Translation (YLT) | eBible.org |
+| Darby Translation (1890) | eBible.org |
+| Webster's Bible (1833) | eBible.org |
 | Jamieson, Fausset & Brown Commentary (JFB) | CrossWire, from the Christian Classics Ethereal Library |
 | Adam Clarke's Commentary on the Bible | CrossWire, from Wikisource |
 | Barnes' Notes on the New Testament | CrossWire |
@@ -100,14 +105,12 @@ on [Bible Support](https://www.biblesupport.com) (free sign-in).
 
 **Bibles**
 
-- Young's Literal Translation (e-Sword): very literal, a good second column beside the KJV.
 - Brenton's English Septuagint (e-Sword): the Greek Old Testament the apostles quoted.
 - Greek NT INT+ (e-Sword): the best single tool for the Greek behind the KJV and modern versions.
 - Greek NT TR+, BYZ+ and WH+ (e-Sword): three Greek texts with Strong's numbers and grammar.
 - Greek OT+ and Hebrew OT+ (e-Sword): the Old Testament in Greek and Hebrew, with Strong's
   numbers.
-- Darby, Webster, Weymouth, the Revised Version, the World English Bible and the Berean Standard
-  Bible (e-Sword).
+- Weymouth, the Revised Version and the Berean Standard Bible (e-Sword).
 
 **Commentaries**
 

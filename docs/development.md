@@ -246,9 +246,10 @@ Scripts in `tools/` share `tools/modules.py`:
 
 `tools/core/build.py` builds the built-in modules from public-domain sources only (its docstring
 lists them), under the ids the app looks for first: `kjv`, `kjv+`, `strong`, `kjc` and `tsk`; the
-commentaries and dictionaries take e-Sword's ids (`henry`, `jfb`, `clarke`, `barnes`, `easton`,
-`smith`, `nave`, `isbe`), so e-Sword X's copies, where there are, are read instead.
-`--only jfb nave` builds just those; `--if-missing` builds only what isn't there.
+other Bibles (`asv`, `web`, `ylt`, `darby`, `webster`), commentaries and dictionaries (`henry`, `jfb`,
+`clarke`, `barnes`, `easton`, `smith`, `nave`, `isbe`) take e-Sword's ids, so e-Sword X's copies,
+where there are, are read instead. `--only jfb asv` builds just those; `--if-missing` builds only
+what isn't there.
 
 Nothing from e-Sword X goes into a module that could be shipped: its licence forbids passing its
 modules on. Two scripts read e-Sword modules, so what they build is for your own library only:
