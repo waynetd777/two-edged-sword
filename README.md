@@ -1,8 +1,8 @@
 # Two-edged Sword
 
 A Bible study app for macOS and Windows, for reading Bibles, commentaries, dictionaries and books
-beside your own notes. It comes with the KJV and five more public-domain Bibles, Strong's
-dictionaries, the Treasury of Scripture Knowledge, four commentaries (Matthew Henry, JFB, Clarke,
+beside your own notes. It comes with the KJV and six more public-domain Bibles (among them the
+Berean Standard Bible, and Strong's editions of it and of Webster's), Strong's dictionaries, the Treasury of Scripture Knowledge, four commentaries (Matthew Henry, JFB, Clarke,
 Barnes) and four dictionaries (Easton's, Smith's, Nave's, the ISBE), and reads more modules in
 e-Sword X's formats: your own, and on a Mac e-Sword X's library if you have it.
 It only reads them, and keeps your journal, highlights and plans separately.

@@ -114,7 +114,7 @@ on [Bible Support](https://www.biblesupport.com) (free sign-in).
 - Greek NT TR+, BYZ+ and WH+ (e-Sword): three Greek texts with Strong's numbers and grammar.
 - Greek OT+ and Hebrew OT+ (e-Sword): the Old Testament in Greek and Hebrew, with Strong's
   numbers.
-- Weymouth, the Revised Version and the Berean Standard Bible (e-Sword).
+- Weymouth and the Revised Version (e-Sword).
 
 **Commentaries**
 
