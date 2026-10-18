@@ -19,7 +19,9 @@ export function useEscExitsFocus(focus: boolean, setFocus: (f: boolean) => void,
     const k = (e: KeyboardEvent) => {
       if (e.key !== "Escape" || e.defaultPrevented) return;
       if (before.current?.()) return;
-      if (focus) setFocus(false);
+      if (!focus) return;
+      setFocus(false);
+      e.preventDefault();
     };
     window.addEventListener("keydown", k);
     return () => window.removeEventListener("keydown", k);

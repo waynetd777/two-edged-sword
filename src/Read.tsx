@@ -431,8 +431,10 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
       } else if (e.key === "ArrowLeft") {
         go(-1);
         e.preventDefault();
-      } else if (e.key === "Escape" && focus) setFocus(false);
-      else if (e.key.toLowerCase() === "n" && selRef) {
+      } else if (e.key === "Escape" && focus) {
+        setFocus(false);
+        e.preventDefault();
+      } else if (e.key.toLowerCase() === "n" && selRef) {
         app.startEntry({ verses: [fmtRef(selRef)] });
         e.preventDefault();
       } else if (e.key === " ") {
