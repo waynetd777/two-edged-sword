@@ -10,16 +10,16 @@
 
 The chapter shows beside a study pane that follows the verse you select.
 
-While Read or Compare is in front, and all through Quiet time, the screen doesn't sleep, so the
+While [Read](app:read) or [Compare](app:compare) is in front, and all through Quiet time, the screen doesn't sleep, so the
 screensaver and lock don't come on.
 
 ### The study pane
 
-- **Commentary**: every commentary on the verse, in your order, with cross-references from the
+- **Commentary**: every commentary on the verse, in the order you set in the [Library](app:library#commentaries), with cross-references from the
   Treasury of Scripture Knowledge.
 - **Dictionary**: type a word to look it up in all your dictionaries.
 - **Notes**: your journal entries on the verse.
-- **Maps** for the book.
+- **Maps** for the book. Click a map to see it enlarged, to zoom into and move around.
 - **Ask**: questions about the verse or chapter ([Ask](ask.md)).
 
 ⌘\ shows or hides the pane.
@@ -85,7 +85,7 @@ The study pane has your notes on the chapter, the dictionaries and Ask.
 
 In the dark theme, a drawing with no background of its own is shown on a light card so its ink stays visible.
 
-Click a picture or chart to see it over the whole window. There:
+Click a picture or chart to see it enlarged. There:
 
 - Scroll, or use two fingers on a trackpad, to zoom in and out.
 - Drag to move it around.

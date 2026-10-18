@@ -89,7 +89,11 @@ function Ordered({
   const shown = ms.map((m, i) => ({ m, i })).filter(({ m }) => !q || matches(m, q));
   if (q && !shown.length) return null;
   return (
-    <div className="card" style={{ padding: "14px 16px", display: "flex", flexDirection: "column", gap: 4 }}>
+    <div
+      className="card"
+      data-help={kind === "commentary" ? "commentaries" : "dictionaries"}
+      style={{ padding: "14px 16px", display: "flex", flexDirection: "column", gap: 4 }}
+    >
       <div style={{ display: "flex", justifyContent: "space-between", paddingBottom: 4 }}>
         <span className="label">{title}</span>
         <span className="n">

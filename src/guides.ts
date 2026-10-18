@@ -48,9 +48,11 @@ export const slug = (heading: string) =>
     .replace(/[^\w\s-]/g, "")
     .replace(/\s/g, "-");
 
-// Screenshots (and the HTML tables that lay them out), breadcrumbs, and a guide's row of links to its own sections.
+// Screenshots (and the HTML tables that lay them out), breadcrumbs, and a guide's row of links to its own sections (a line of it, if it wraps).
 const dropped = (l: string) =>
-  l.includes("images/") || /^\s*<\/?(sub|table|tr|td)\b/.test(l) || /^\[[^\]]+\]\(#[\w-]+\)( · \[[^\]]+\]\(#[\w-]+\))*$/.test(l.trim());
+  l.includes("images/") ||
+  /^\s*<\/?(sub|table|tr|td)\b/.test(l) ||
+  /^\[[^\]]+\]\(#[\w-]+\)( · \[[^\]]+\]\(#[\w-]+\))*( ·)?$/.test(l.trim());
 
 function parseGuide(id: string, md: string): HelpTopic {
   let title = id;
@@ -149,9 +151,62 @@ export function searchHelp(q: string): HelpHit[] {
   return hits.sort((a, b) => b.score - a.score);
 }
 
+// The places the guides name, made links to them: a Settings section ("Settings › Appearance", but
+// not macOS's System Settings or Windows Settings), Settings, and the screens with names no button
+// shares. Read, Search and Compare are also buttons' names, so the guides link those by hand.
+const PLACES =
+  /(?<!System |Windows )\bSettings › (Appearance|Bibles|Highlights|Listening|Journal|Quiet time|AI assistant)\b|(?<!System |Windows )\bSettings\b(?! ›)|\bKJV History\b|\bWord Study\b|\b(?<=the )Library\b(?! guide)|\bLibrary screen\b|\bQuiet time\b|\bJournal\b/g;
+const SCREEN_OF: Record<string, string> = {
+  "KJV History": "history",
+  "Word Study": "word",
+  Library: "library",
+  "Library screen": "library",
+  "Quiet time": "plans",
+  Journal: "journal",
+  Settings: "settings",
+};
+
+/** A link to more help's tooltip: the guide and section it opens in the help. */
+function helpTip(href: string): string {
+  const m = /^(?:([\w-]+)\.md)?(?:#([\w-]+))?$/.exec(href);
+  const topic = m?.[1] ? TOPICS.find((t) => t.id === m[1]) : undefined;
+  const section = m?.[2] && m[1] ? sectionAt(m[1], m[2])?.title : undefined;
+  const where = [topic?.title, section].filter(Boolean).join(" › ");
+  return where ? `Read “${esc(where)}” in the help` : "Read about this in the help";
+}
+
+/** An app: link labelled with just a screen's name has "Open <name>" for its tooltip; others say what they do. */
+const PLACE_NAMES = new Set(["Read", "Compare", "Search", "Word Study", "Journal", "Quiet time", "Library", "KJV History", "Settings"]);
+
+/** Links the places a passage of help names (PLACES), outside its links, buttons, code and bold
+ *  (which names a button or setting more often than a screen). */
+function autoLink(html: string): string {
+  return html
+    .split(/(<a [^>]*>.*?<\/a>|<button [^>]*>.*?<\/button>|<strong>.*?<\/strong>|<[^>]+>)/)
+    .map((part, i) =>
+      i % 2
+        ? part
+        : part.replace(PLACES, (m: string, section?: string) => {
+            const href = section ? `app:settings#${slug(section)}` : `app:${SCREEN_OF[m]}`;
+            return `<a href="#" class="help-place" data-href="${href}" title="Open ${m}">${m}</a>`;
+          }),
+    )
+    .join("");
+}
+
+/** A guide button's tooltip: what it will do, as the rest of the app's buttons say. */
+function actionTip(action: string, label: string): string {
+  const [what] = action.split(/[/#]/);
+  if (what === "palette") return shortcut("Open the ⌘K box: go to a passage, a word or a command");
+  if (what === "modules") return "Show your modules folder";
+  if (what === "rescan") return "Look for modules added to the folders since the app started";
+  if (what === "open") return `${label} in Read`;
+  return action.includes("#") ? `${label}: show it on the screen` : `${label} (the help stays open)`;
+}
+
 /** Bold, italic, `code` and links. A link keeps its target in data-href, for the drawer to follow;
- *  an `app:` one (app:library, app:open/john-3) is a button that does it (Help.tsx runAction). */
-function inline(text: string): string {
+ *  an `app:` one (app:library, app:open/john-3) does it in the app (Help.tsx runAction) and has a ↗. */
+function inline(text: string, auto = true): string {
   const codes: string[] = [];
   let t = text.replace(/`([^`]+)`/g, (_, c: string) => `\u0000${codes.push(c) - 1}\u0000`);
   t = esc(t)
@@ -159,11 +214,14 @@ function inline(text: string): string {
       href.startsWith("images/")
         ? label
         : href.startsWith("app:")
-          ? `<button type="button" class="btn small help-act" data-href="${href}">${label}</button>`
-          : `<a href="#" data-href="${href}">${label}</a>`,
+          ? `<a href="#" class="help-place" data-href="${href}" title="${PLACE_NAMES.has(label) ? `Open ${label}` : actionTip(href.slice(4), label)}">${label}</a>`
+          : /^https?:/.test(href)
+            ? `<a href="#" class="help-out" data-href="${href}" title="Open ${esc(href)} in your browser">${label}</a>`
+            : `<a href="#" data-href="${href}" title="${helpTip(href)}">${label}</a>`,
     )
     .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
     .replace(/(^|[^\w*])[*_](\S(?:.*?\S)?)[*_](?![\w*])/g, "$1<em>$2</em>");
+  if (auto) t = autoLink(t);
   // eslint-disable-next-line no-control-regex
   return t.replace(/\u0000(\d+)\u0000/g, (_, i: string) => `<code>${esc(codes[Number(i)])}</code>`);
 }
@@ -187,7 +245,7 @@ export function helpHtml(md: string): string {
     if (!l.trim()) {
       i++;
     } else if (/^### /.test(l)) {
-      out.push(`<h4>${inline(l.slice(4))}</h4>`);
+      out.push(`<h4>${inline(l.slice(4), false)}</h4>`);
       i++;
     } else if (l.startsWith("|")) {
       const rows: string[] = [];

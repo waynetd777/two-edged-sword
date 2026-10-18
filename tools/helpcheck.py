@@ -14,12 +14,22 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 DOCS = ROOT / "docs"
 GUIDES_TS = (ROOT / "src/guides.ts").read_text()
-APP_ACTIONS = {"read", "compare", "search", "word", "journal", "plans", "library", "history", "settings", "open", "palette", "modules", "rescan"}
-
-
 def slug(heading: str) -> str:
     """GitHub's anchor for a heading, as src/guides.ts makes it."""
     return re.sub(r"\s", "-", re.sub(r"[^\w\s-]", "", heading.strip().lower()))
+
+
+# What app:screen#target buttons can point at: the words on src/ lines that set data-help.
+HELP_TARGETS = {
+    w
+    for f in (ROOT / "src").glob("*.tsx")
+    for line in f.read_text().splitlines()
+    if "data-help=" in line
+    for w in re.findall(r'"([\w-]+)"', line.split("data-help=", 1)[1])
+}
+# Settings marks each section with the slug of its title (src/Settings.tsx Section).
+HELP_TARGETS |= {slug(t) for t in re.findall(r'<Section title="([^"]+)"', (ROOT / "src/Settings.tsx").read_text())}
+APP_ACTIONS = {"read", "compare", "search", "word", "journal", "plans", "library", "history", "settings", "open", "palette", "modules", "rescan"}
 
 
 def main() -> int:
@@ -52,10 +62,13 @@ def main() -> int:
             if re.match(r"https?:|images/|mailto:", href):
                 continue
             if href.startswith("app:"):
-                # A Getting started button (src/Help.tsx runAction): a screen, a passage, ⌘K, the modules folder or Rescan.
-                what = href[4:].split("/")[0]
+                # An app: link (src/Help.tsx runAction): a screen, a passage, ⌘K, the modules folder or Rescan.
+                what = href[4:].split("#")[0].split("/")[0]
                 if what not in APP_ACTIONS:
-                    errors.append(f"docs/{page}.md has a button for {href}, which src/Help.tsx can't do")
+                    errors.append(f"docs/{page}.md has a link to {href}, which src/Help.tsx can't do")
+                target = href.partition("#")[2]
+                if target and target not in HELP_TARGETS:
+                    errors.append(f"docs/{page}.md has a link to {href}, but nothing in src/ is marked data-help=\"{target}\"")
                 continue
             m = re.fullmatch(r"(?:([\w-]+)\.md)?(?:#([\w-]+))?", href)
             to, anchor = (m[1] or page, m[2]) if m else (None, None)

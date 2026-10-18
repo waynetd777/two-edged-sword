@@ -39,6 +39,9 @@ export function WelcomeDialog() {
           <div style={{ color: "var(--muted)", marginTop: 2 }}>
             Getting started walks you through the app a step at a time, beginning with how to find your way around.
           </div>
+          <div style={{ color: "var(--muted)", marginTop: 8, fontSize: 13 }}>
+            To come back to it, open the help (press ? or click ? at the top right) and click Getting started at the top.
+          </div>
         </div>
       </div>
       <div className="foot">

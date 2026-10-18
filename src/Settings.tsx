@@ -12,11 +12,12 @@ import { modelGroups, PROVIDER_NAME, pickModel, refreshAssistant, useAssistant }
 import { READ_FONTS, ReadFont, useApp } from "./state";
 import { confirmDelete, Popover, SearchList, Seg, Switch } from "./ui";
 import { WEBSITE } from "./website";
+import { slug } from "./guides";
 import { isMac, MACHINE, OS, shortcut } from "./keys";
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+    <div data-help={slug(title)} style={{ display: "flex", flexDirection: "column", gap: 6 }}>
       <span className="label" style={{ paddingLeft: 4 }}>
         {title}
       </span>

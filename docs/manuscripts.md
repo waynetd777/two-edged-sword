@@ -2,8 +2,7 @@
 
 <sub>[Features](features.md) › Translations and manuscripts</sub>
 
-[Differences from the KJV](#differences-from-the-kjv) · [Greek and Hebrew](#greek-and-hebrew) ·
-[KJV History](#kjv-history) · [Targums and Talmud](#targums-and-talmud)
+[Differences from the KJV](#differences-from-the-kjv) · [Greek and Hebrew](#greek-and-hebrew) · [KJV History](#kjv-history) · [Targums and Talmud](#targums-and-talmud)
 
 ## Differences from the KJV
 
@@ -61,7 +60,7 @@ Webster's and the Revised Version to the ESV, and the Bibles translated afresh s
 
 ## Targums and Talmud
 
-Once you've built them from Sefaria ([Library](library.md#building-modules)):
+Once you've built them from Sefaria ([Building modules](library.md#building-modules)):
 
 - The **Targums** read and compare beside the KJV, verse for verse.
 - The **Talmud** is a book per tractate, a chapter per page (daf), in English with the Aramaic.

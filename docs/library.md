@@ -19,7 +19,7 @@ The app reads Bibles and books from three places, and never changes them:
 - Every module, with its size and features. The ⓘ beside one shows its description and which
   folder it came from.
 - **In picker** chooses which Bibles appear in the Bible menu.
-- Set the default Bible, and the order of commentaries and dictionaries.
+- Set the default Bible, and the order of [commentaries](app:library#commentaries) and [dictionaries](app:library#dictionaries).
 - **Rescan** picks up modules added since the app started.
 - **Show in <!-- mac -->Finder<!-- /mac --><!-- github --> (Mac) or <!-- /github --><!-- windows -->File Explorer<!-- /windows --><!-- github --> (Windows)<!-- /github -->** opens your modules folder.
 - **Read e-Sword X** turns e-Sword X's library on or off.

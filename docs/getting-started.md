@@ -2,9 +2,9 @@
 
 <sub>[Features](features.md) › Getting started</sub>
 
-Walk-throughs of everything the app does, a step at a time. In the app, the buttons in a step do what it says, and the help stays open beside the screen while you try it.
+Walk-throughs of everything the app does, a step at a time. In the app, a link marked ↗ takes you to what it names, and the help stays open beside it while you try it.
 
-The app offers these when it opens until you tick **Don't ask me again**. They're always in the help (?), under Getting started.
+The app offers these when it opens until you tick **Don't ask me again**. They're always in the help (?): click **Getting started** at the top.
 
 ## Start here
 
@@ -42,8 +42,6 @@ Nothing to allow: the app is installed for you alone and asks for no permissions
 
 Settings › Bibles sets the translation the app opens with, up to three favourites that get a button each in the top bar, and the Bibles Compare starts with.
 
-[Open Settings](app:settings)
-
 The Bible menu in the top bar changes translation for now; your default comes back next time.
 
 ### Move between screens
@@ -52,14 +50,14 @@ The sidebar has the eight screens:
 
 | Keys | Screen |
 |---|---|
-| ⌘1 | Read |
-| ⌘2 | Compare |
-| ⌘3 | Search |
-| ⌘4 | Word Study |
-| ⌘5 | Journal |
-| ⌘6 | Quiet time |
-| ⌘7 | Library |
-| ⌘8 | KJV History |
+| ⌘1 | [Read](app:read) |
+| ⌘2 | [Compare](app:compare) |
+| ⌘3 | [Search](app:search) |
+| ⌘4 | [Word Study](app:word) |
+| ⌘5 | [Journal](app:journal) |
+| ⌘6 | [Quiet time](app:plans) |
+| ⌘7 | [Library](app:library) |
+| ⌘8 | [KJV History](app:history) |
 
 Under them are your bookmarks and recent chapters. Hover one for a preview; × removes it.
 
@@ -74,6 +72,7 @@ Press ⌘K and type a reference ("rom 8 28"), a word, a Strong's number ("G26") 
 ### Get help anywhere
 
 - Press ? on any screen, or click **?** at the top right, for the help on that screen. Type in it to search all the help.
+- Under the search box, **Getting started** brings back these walk-throughs and **All topics** lists every guide.
 - Hover any button to see what it does.
 - **Ask about Two-edged Sword**, at the foot of the help, asks the AI assistant how to do something.
 <!-- mac -->
@@ -129,7 +128,7 @@ Click a verse (not a word) to select it. ⇧-click selects a range. The study pa
 
 The **Commentary** tab has every commentary on the verse, one after another, and the cross-references from the Treasury of Scripture Knowledge below them.
 
-- Choose which commentaries come first in the Library.
+- Choose which come first in the [Library](app:library#commentaries).
 - Hover a reference for the verse; click it to go there.
 
 ### Dictionaries
@@ -139,7 +138,7 @@ The **Dictionary** tab looks a word up in every dictionary you have at once.
 ### Your notes and maps
 
 - **Notes**: your journal entries on the verse.
-- **Maps**: maps that suit the book you're in, from your map books, with **Zoom in** and **Zoom out**.
+- **Maps**: maps that suit the book you're in, from your map books. Click a map to see it enlarged.
 
 ### Ask about it
 
@@ -183,7 +182,7 @@ Several translations side by side, verse by verse.
 
 [Open Compare](app:compare)
 
-It opens at the passage you're reading, in the Bibles chosen in Settings › Bibles. With verses selected in Read, the compare button on their toolbar opens just those.
+It opens at the passage you're reading, in the Bibles chosen in Settings › Bibles. With verses selected in [Read](app:read), the compare button on their toolbar opens just those.
 
 ### Choose the columns
 
@@ -193,7 +192,7 @@ It opens at the passage you're reading, in the Bibles chosen in Settings › Bib
 
 **Highlight differences** marks the wording that differs from the first column. **Strong's numbers** shows them in the Bibles that have them.
 
-← and → turn the page, as in Read.
+← and → turn the page, as in [Read](app:read).
 
 ## Search
 
@@ -290,7 +289,7 @@ Click a paragraph to highlight, bookmark, note, listen to, ask about or copy it,
 
 ### Pictures and charts
 
-Click a picture or chart to see it over the whole window:
+Click a picture or chart to see it enlarged:
 
 - Scroll, or use two fingers on a trackpad, to zoom in and out.
 - Drag to move it around.
@@ -298,7 +297,7 @@ Click a picture or chart to see it over the whole window:
 
 ### Maps
 
-Map books open from **Books** like any other. The study pane's **Maps** tab picks maps that suit the book you're reading.
+Map books open from **Books** like any other. The study pane's **Maps** tab picks maps that suit the book you're reading; click one to zoom into it full screen, as with pictures.
 
 ## Keep a journal
 
@@ -308,7 +307,7 @@ Your notes on Scripture, linked to the verses they're about.
 
 [Open the Journal](app:journal)
 
-⌘N starts a dated entry. A note on a verse in Read (N) starts one linked to that verse.
+⌘N starts a dated entry. A note on a verse in [Read](app:read) (N) starts one linked to that verse.
 
 ### Write
 
@@ -320,7 +319,7 @@ The toolbar has headings, bold, italic, lists and quotes, and can highlight, ins
 
 ### Find your entries
 
-The box above the list filters by words, tags or verses; the tags above it filter with a click. In Read, each entry shows beside its verses, in the study pane's Notes tab.
+The box above the list filters by words, tags or verses; the tags above it filter with a click. In [Read](app:read), each entry shows beside its verses, in the study pane's Notes tab.
 
 ### Listen, focus and ask
 
@@ -357,8 +356,6 @@ F7 and F9 move between parts; F8 or ⌘P pauses.
 ### The daily reminder
 
 Settings › Quiet time sends a notification at a time you choose, with the day's readings, if you haven't read yet.
-
-[Open Settings](app:settings)
 
 <!-- mac -->
 Turning it on sends one straight away, so macOS can ask to allow them. It comes while the app runs, in the menu bar too: turn on **Open at login** in the menu-bar window so it always is.
@@ -435,8 +432,6 @@ A terminal opened before the install may not find the tool: sign out of Windows 
 
 Then open Settings, and Ask appears. Settings › AI assistant shows which tools were found.
 
-[Open Settings](app:settings)
-
 ### Ask about a passage
 
 [Open 1 John 1](app:open/1-john-1)
@@ -497,9 +492,9 @@ Every module, with its size and features. The ⓘ beside one shows its descripti
 
 The app reads e-Sword X's Mac formats: `.bbli` Bibles, `.cmti` commentaries, `.dcti` dictionaries, `.lexi` lexicons, `.refi` books and `.devi` devotionals.
 
-1. Open your modules folder: [Open the modules folder](app:modules)
+1. [Open your modules folder](app:modules).
 2. Copy the module files into it, not into a folder inside it.
-3. Rescan, and they appear in the Library and the menus: [Rescan](app:rescan)
+3. [Rescan](app:rescan), and they appear in the Library and the menus.
 
 <!-- mac -->
 ### e-Sword X's library
@@ -518,7 +513,7 @@ The Library guide lists [free modules worth having](library.md#free-modules-wort
 
 ### Order and defaults
 
-In the Library, set the default Bible, and the order commentaries and dictionaries appear in the study pane.
+In the Library, set the default Bible, and the order [commentaries](app:library#commentaries) and [dictionaries](app:library#dictionaries) appear in the study pane.
 
 ## Make it yours
 
@@ -526,15 +521,15 @@ Settings, and keeping the app up to date.
 
 ### Settings
 
-[Open Settings](app:settings) (⌘,)
+Settings (⌘,) has a section for each part of the app:
 
-- **Appearance**: theme, font and size, words of Jesus in red, verse or paragraph layout.
-- **Bibles**: the default, favourites and the Compare columns.
-- **Highlights**: a name for each colour.
-- **Listening**: voices, speed, word highlighting, and the pictures behind songs.
-- **Journal**: its folder, notes beside verses, and grammar checking.
-- **Quiet time**: the reminder, and what to do when you fall behind.
-- **AI assistant**: the tools found, the default model, and what Ask may read and send.
+- **[Appearance](app:settings#appearance)**: theme, font and size, words of Jesus in red, verse or paragraph layout.
+- **[Bibles](app:settings#bibles)**: the default, favourites and the Compare columns.
+- **[Highlights](app:settings#highlights)**: a name for each colour.
+- **[Listening](app:settings#listening)**: voices, speed, word highlighting, and the pictures behind songs.
+- **[Journal](app:settings#journal)**: its folder, notes beside verses, and grammar checking.
+- **[Quiet time](app:settings#quiet-time)**: the reminder, and what to do when you fall behind.
+- **[AI assistant](app:settings#ai-assistant)**: the tools found, the default model, and what Ask may read and send.
 
 ### Updates
 

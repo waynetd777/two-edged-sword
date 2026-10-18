@@ -2,15 +2,14 @@
 
 <sub>[Features](features.md) › Journal</sub>
 
-[Write](#write) · [Listen and focus](#listen-and-focus) · [Ask about your journal](#ask-about-your-journal) ·
-[Spelling and grammar](#spelling-and-grammar) · [Where it's kept](#where-its-kept)
+[Write](#write) · [Listen and focus](#listen-and-focus) · [Ask about your journal](#ask-about-your-journal) · [Spelling and grammar](#spelling-and-grammar) · [Where it's kept](#where-its-kept)
 
 ## Write
 
 <a href="images/index.md#journal"><picture><source media="(prefers-color-scheme: dark)" srcset="images/journal-dark.png"><img alt="A journal entry with its verse references as links" src="images/journal-light.png"></picture></a>
 
 ⌘N starts a dated entry. Each entry is linked to the verses it's about, and shows beside them in
-Read.
+[Read](app:read).
 
 The toolbar has headings, bold, italic, lists and quotes, and can:
 

@@ -2482,6 +2482,34 @@ html.tray-view #root {
 .help-sec[open] > summary .help-chev {
   transform: rotate(90deg);
 }
+/* In the help, a link that takes you to a place in the app (or out to the web) carries a ↗; one that
+   opens more help doesn't (guides.ts inline). */
+.help-text a.help-place::after,
+.help-text a.help-out::after {
+  content: "↗";
+  font-size: 0.75em;
+  margin-left: 1px;
+  vertical-align: super;
+  line-height: 0;
+}
+/* What a help button pointed at (Help.tsx showTarget): a ring that fades. */
+.help-flash {
+  animation: help-flash 1.6s ease-out;
+}
+@keyframes help-flash {
+  0%,
+  40% {
+    box-shadow: 0 0 0 3px var(--accent);
+  }
+  100% {
+    box-shadow: 0 0 0 3px transparent;
+  }
+}
+/* Under the help's search: Getting started and a menu of every topic, one click from any page. */
+.help-nav {
+  display: flex;
+  gap: 6px;
+}
 .help-guides {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -2547,16 +2575,6 @@ html.tray-view #root {
 }
 .help-dots i.on {
   background: var(--accent);
-}
-/* A guide's app: link: a button that does what the step says (Help.tsx runAction). */
-.help-text .help-act {
-  margin: 2px 2px;
-  vertical-align: baseline;
-}
-.help-topics {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
 }
 .help-hit-topic {
   border: 0;

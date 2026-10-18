@@ -10,10 +10,11 @@ import { openUrl, revealItemInDir } from "@tauri-apps/plugin-opener";
 import { ReactNode, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { parseRef } from "./bible";
 import { helpFor, helpHtml, HelpSection, searchHelp, sectionAt, TOPICS, Walkthrough, WALKTHROUGHS } from "./guides";
+import { useAssistant } from "./assistant";
 import { Icon } from "./icons";
 import { isMac } from "./keys";
 import { Screen, useApp } from "./state";
-import { ClearButton } from "./ui";
+import { ClearButton, Popover, SearchList } from "./ui";
 
 /** What the drawer shows: a topic at a section (the screen's when none is named), a Getting started
  *  walk-through at a step, or a search. */
@@ -34,18 +35,58 @@ const useView = () =>
     () => view,
   );
 
-export const openHelp = (v: HelpView = {}) => setView(v);
-const toggleHelp = () => setView(view ? null : {});
+// The drawer's own back and forward: the pages it showed since it opened (topics, sections a link
+// opened, a walk-through's steps). Opening it afresh starts a new history.
+let past: HelpView[] = [];
+let future: HelpView[] = [];
+const same = (a: HelpView, b: HelpView) => JSON.stringify(a) === JSON.stringify(b);
+
+export const openHelp = (v: HelpView = {}) => {
+  if (!view) past = [];
+  else if (!same(view, v)) past.push(view);
+  future = [];
+  setView(v);
+};
+const toggleHelp = () => (view ? setView(null) : openHelp({}));
+/** Back to the last page; from the first one that isn't the screen's own, back to the screen's. */
+const canBack = (v: HelpView) => past.length > 0 || !!(v.topic || v.guide);
+const helpBack = () => {
+  if (!view) return;
+  future.push(view);
+  setView(past.pop() ?? {});
+};
+const helpForward = () => {
+  const next = future.pop();
+  if (!next || !view) return;
+  past.push(view);
+  setView(next);
+};
+
+/** Scrolls to and flashes [data-help=target] once the screen it's on has drawn. */
+function showTarget(target: string, tries = 20) {
+  const el = document.querySelector<HTMLElement>(`[data-help="${target}"]`);
+  if (!el) {
+    if (tries) window.setTimeout(() => showTarget(target, tries - 1), 50);
+    return;
+  }
+  el.scrollIntoView({ block: "center", behavior: "smooth" });
+  el.classList.remove("help-flash");
+  void el.offsetWidth; // restart the animation
+  el.classList.add("help-flash");
+}
 
 const SCREENS: Screen[] = ["read", "compare", "search", "word", "journal", "plans", "library", "history", "settings"];
 
-/** What a guide's `app:` button does: app:library (any screen), app:open/john-3 (a passage),
- *  app:palette (⌘K), app:modules (the modules folder) or app:rescan. The drawer stays open. */
+/** What a guide's `app:` button does: app:library (any screen; app:library#commentaries also brings
+ *  the element marked data-help="commentaries" into view and flashes it), app:open/john-3 (a
+ *  passage), app:palette (⌘K), app:modules (the modules folder) or app:rescan. The drawer stays open. */
 function runAction(app: ReturnType<typeof useApp>, action: string) {
-  const [what, arg = ""] = action.split("/");
+  const [path, target] = action.split("#");
+  const [what, arg = ""] = path.split("/");
   if ((SCREENS as string[]).includes(what)) {
     if (app.doc && what === "read") app.closeDoc();
     app.go(what as Screen);
+    if (target) showTarget(target);
   } else if (what === "open") {
     const r = parseRef(arg.replace(/-/g, " "));
     if (r) app.open({ book: r.book, chapter: r.chapter, verse: r.verse }, "read");
@@ -91,7 +132,18 @@ function Section({ s, topic, open, scroll }: { s: HelpSection; topic: string; op
     if (scroll) ref.current?.scrollIntoView({ block: "start" });
   }, [scroll]);
   return (
-    <details ref={ref} className="help-sec" open={open}>
+    <details
+      ref={ref}
+      className="help-sec"
+      open={open}
+      // One section open at a time: opening one closes the others and brings it to the top of the drawer.
+      onToggle={(e) => {
+        const me = e.currentTarget;
+        if (!me.open) return;
+        me.parentElement?.querySelectorAll<HTMLDetailsElement>("details.help-sec[open]").forEach((d) => d !== me && (d.open = false));
+        requestAnimationFrame(() => me.scrollIntoView({ block: "start", behavior: "smooth" }));
+      }}
+    >
       <summary>
         <Icon name="fwd" size={12} className="help-chev" />
         {s.title}
@@ -148,9 +200,12 @@ function GuideSteps({ g, step }: { g: Walkthrough; step: number }) {
       <h3 className="help-steptitle">{s.title}</h3>
       <HelpText md={s.body} topic="getting-started" />
       <div className="help-steps">
-        <button type="button" className="btn" disabled={at === 0} onClick={() => openHelp({ guide: g.id, step: at - 1 })}>
-          Back
-        </button>
+        {/* A disabled button shows no tooltip, so the span carries it. */}
+        <span title={at === 0 ? "This is the first step" : "Go back a step"}>
+          <button type="button" className="btn" disabled={at === 0} onClick={() => openHelp({ guide: g.id, step: at - 1 })}>
+            Back
+          </button>
+        </span>
         <span className="help-dots" aria-hidden="true">
           {g.steps.map((x, i) => (
             <i key={x.title} className={i === at ? "on" : i < at ? "past" : ""} />
@@ -159,6 +214,7 @@ function GuideSteps({ g, step }: { g: Walkthrough; step: number }) {
         <button
           type="button"
           className="btn primary"
+          title={last ? "Finish this walk-through and mark it done" : "Go to the next step"}
           onClick={() => {
             if (!last) return openHelp({ guide: g.id, step: at + 1 });
             app.set({ guidesDone: { ...app.settings.guidesDone, [g.id]: true } });
@@ -198,11 +254,15 @@ export function HelpDrawer() {
   const app = useApp();
   const v = useView();
   const [q, setQ] = useState("");
+  const [topics, setTopics] = useState<DOMRect | null>(null);
+  const canAsk = useAssistant().available;
 
   // `?` outside a text box opens and closes it; Esc closes it. Help › Two-edged Sword Help (⌘?) opens it.
   useEffect(() => {
     const k = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && view && !document.querySelector(".scrim, [role=dialog]")) {
+      // An Esc something else has used (the ⌘K palette, a search box, focus mode) isn't for the help.
+      if (e.key === "Escape" && view && !e.defaultPrevented && !document.querySelector(".scrim, [role=dialog]")) {
+        e.preventDefault();
         setView(null);
         return;
       }
@@ -253,33 +313,22 @@ export function HelpDrawer() {
           ))}
         </div>
         <GuideList />
-        <section className="help-block">
-          <span className="lab">All topics</span>
-          <div className="help-topics">
-            {TOPICS.filter((t) => t.id !== topic.id).map((t) => (
-              <button key={t.id} type="button" className="chip" onClick={() => openHelp({ topic: t.id })}>
-                {t.title}
-              </button>
-            ))}
-          </div>
-        </section>
       </>
     );
 
   return (
     <aside className="help-drawer" role="complementary" aria-label="Help">
       <div className="help-head">
-        {(v.topic || v.guide) && (
-          <button
-            type="button"
-            className="ibtn"
-            aria-label="Back to this screen's help"
-            title="Back to this screen's help"
-            onClick={() => openHelp({})}
-          >
+        <span title={canBack(v) ? "Back to the help page you were on" : "Nothing to go back to"}>
+          <button type="button" className="ibtn" aria-label="Back" disabled={!canBack(v)} onClick={helpBack}>
             <Icon name="back" />
           </button>
-        )}
+        </span>
+        <span title={future.length ? "Forward to the help page you went back from" : "Nothing to go forward to"}>
+          <button type="button" className="ibtn" aria-label="Forward" disabled={!future.length} onClick={helpForward}>
+            <Icon name="fwd" />
+          </button>
+        </span>
         <h2>
           {guide ? guide.title : topic.title}
           <span className="help-sub"> — {guide ? "getting started" : "help"}</span>
@@ -293,23 +342,58 @@ export function HelpDrawer() {
         <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search the help" aria-label="Search the help" />
         <ClearButton show={!!q} onClear={() => setQ("")} />
       </label>
-      <div className="help-body">{body}</div>
-      <div className="help-foot">
+      <div className="help-nav">
         <button
           type="button"
-          className="btn"
-          title="Ask the assistant how something in Two-edged Sword works"
-          onClick={() => {
-            if (app.doc) app.closeDoc();
-            if (app.screen !== "read") app.go("read");
-            app.setPending({ ask: query ? `How do I ${query} in Two-edged Sword?` : "How do I " });
-            setView(null);
-          }}
+          className="btn small"
+          title="Step-by-step walk-throughs of everything the app does"
+          onClick={() => openHelp({ topic: "getting-started" })}
         >
-          <Icon name="chat" />
-          Ask about Two-edged Sword
+          Getting started
+        </button>
+        <button
+          type="button"
+          className="btn small"
+          title="Choose a guide to read"
+          onClick={(e) => setTopics(e.currentTarget.getBoundingClientRect())}
+        >
+          All topics
+          <Icon name="down" size={12} />
         </button>
       </div>
+      {topics && (
+        <Popover anchor={topics} onClose={() => setTopics(null)} width={280} style={{ padding: 0, overflow: "hidden" }}>
+          <SearchList
+            placeholder="Find a topic"
+            current={guide ? "getting-started" : topic.id}
+            onClose={() => setTopics(null)}
+            onPick={(id) => {
+              setTopics(null);
+              openHelp({ topic: id });
+            }}
+            items={TOPICS.map((t) => ({ key: t.id, label: t.title }))}
+          />
+        </Popover>
+      )}
+      <div className="help-body">{body}</div>
+      {canAsk && (
+        <div className="help-foot">
+          <button
+            type="button"
+            className="btn"
+            title="Ask the assistant how something in Two-edged Sword works"
+            onClick={() => {
+              if (app.doc) app.closeDoc();
+              if (app.screen !== "read") app.go("read");
+              app.setPending({ ask: query ? `How do I ${query} in Two-edged Sword?` : "How do I " });
+              setView(null);
+            }}
+          >
+            <Icon name="chat" />
+            Ask about Two-edged Sword
+          </button>
+        </div>
+      )}
     </aside>
   );
 }

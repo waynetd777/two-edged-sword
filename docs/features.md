@@ -62,7 +62,7 @@ The app works the same on Windows, with these differences:
 | | On Windows |
 |---|---|
 | Shortcuts | Ctrl in place of ⌘, as the menus and the help show them |
-| e-Sword | e-Sword for Windows' modules can't be read: their text is encrypted. Modules in e-Sword X's formats work, in the [modules folder](library.md) |
+| e-Sword | e-Sword for Windows' modules can't be read: their text is encrypted. Modules in e-Sword X's formats work, in your modules folder ([Adding modules](library.md#adding-modules)) |
 | Your data | In `%APPDATA%\Two-edged Sword`. Uninstalling with **Delete the application data** ticked removes it; your journal in Documents stays |
 | Voices | Windows' own: add more, Hebrew and Greek included, as [Better voices](reading.md#better-voices) says |
 | Spelling and grammar | Windows' spell checker, and grammar by Harper, on the PC |
@@ -89,21 +89,22 @@ The app works the same on Windows, with these differences:
 - The **Help** menu has this help (⌘?) and **Two-edged Sword Website**. **About Two-edged Sword**, in the
   app menu, shows the version, with the website under it.
 - The **?** at the top right opens the help beside the screen, at the part of the guides for that
-  screen. Type to search every page; **Ask about Two-edged Sword** asks the assistant instead.
+  screen. Type to search every page; **Getting started** and **All topics**, under the search box,
+  open the walk-throughs and the other guides; **Ask about Two-edged Sword** asks the assistant instead.
   Esc closes it.
 
 <a href="images/index.md#features"><picture><source media="(prefers-color-scheme: dark)" srcset="images/help-dark.png"><img alt="The help beside Read, open at the Read section of the Reading guide" src="images/help-light.png"></picture></a>
 
 ## Settings
 
-- **Appearance**: theme, font and size, words of Jesus in red, verse or paragraph layout.
-- **Bibles**: the default translation, up to three favourites, and the Compare columns.
-- **Highlights**: a name for each of the eight colours, such as a theme.
-- **Listening**: voices, speed, whether to highlight each word and read on, and the pictures
+- **[Appearance](app:settings#appearance)**: theme, font and size, words of Jesus in red, verse or paragraph layout.
+- **[Bibles](app:settings#bibles)**: the default translation, up to three favourites, and the [Compare](app:compare) columns.
+- **[Highlights](app:settings#highlights)**: a name for each of the eight colours, such as a theme.
+- **[Listening](app:settings#listening)**: voices, speed, whether to highlight each word and read on, and the pictures
   shown while a song plays, with a verse beneath each and the Bible it's from.
-- **Journal**: its folder, notes beside verses, and grammar checking.
-- **Quiet time**: the daily reminder, and what to do when you fall behind.
-- **AI assistant**: which tools are installed, the default model, what Ask may read and send, and
+- **[Journal](app:settings#journal)**: its folder, notes beside verses, and grammar checking.
+- **[Quiet time](app:settings#quiet-time)**: the daily reminder, and what to do when you fall behind.
+- **[AI assistant](app:settings#ai-assistant)**: which tools are installed, the default model, what Ask may read and send, and
   whether it suggests a next question ([Ask](ask.md)).
 - At the bottom: the app's version and build number, its licence, and **Website**, which opens
   [two-edged-sword.davies.co.za](https://two-edged-sword.davies.co.za/).
@@ -129,4 +130,4 @@ The app is built with Tauri, React and SQLite (MIT, Apache 2.0 and public domain
 fonts (Literata, Source Serif 4, EB Garamond, Inter, Atkinson Hyperlegible Next and Cinzel
 Decorative) are under the SIL Open Font License.
 
-Thanks to Rick Meyers for e-Sword ([Library](library.md#thanks-to-e-sword)).
+Thanks to Rick Meyers for e-Sword ([Thanks to e-Sword](library.md#thanks-to-e-sword)).
