@@ -87,9 +87,9 @@ runs when the release is published: it builds the installer from the release's c
 `tools/update_windows.py` signs it, uploads it as `Two-edged-Sword_x64-setup.exe` with its `.sig`,
 and adds `windows-x86_64` to the release's `latest.json`. The job signs with the repository
 secret `TAURI_SIGNING_PRIVATE_KEY` (the updater key's contents; `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`
-if it has one). It takes the built-in modules from the cache `.github/workflows/modules-cache.yml`
-fills on `main` whenever what builds them changes (a cache saved on a release's tag would be
-seen by that tag alone). For a release made before the job, run it by hand (Actions › Windows release ›
+if it has one). It starts from the compiled crates and built-in modules that
+`.github/workflows/windows-cache.yml` saves when it does the same build on `main` after a push
+that changes the code (a cache saved on a release's tag would be seen by that tag alone). For a release made before the job, run it by hand (Actions › Windows release ›
 Run workflow, with the tag). Windows copies install an update quietly, with a progress window
 (`plugins.updater.windows.installMode` in `tauri.windows.conf.json`).
 
