@@ -128,9 +128,10 @@ function inline(text: string): string {
 const cells = (row: string) =>
   row
     .trim()
-    .replace(/^\||\|$/g, "")
-    .split("|")
-    .map((c) => c.trim());
+    .replace(/^\||(?<!\\)\|$/g, "")
+    // An escaped pipe (`irm … \| iex`) is part of the cell, as on GitHub.
+    .split(/(?<!\\)\|/)
+    .map((c) => c.trim().replace(/\\\|/g, "|"));
 
 /** The guides' Markdown as HTML: paragraphs, `###` headings, lists, tables and quotes. */
 export function helpHtml(md: string): string {
