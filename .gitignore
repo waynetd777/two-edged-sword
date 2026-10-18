@@ -25,6 +25,9 @@ src-tauri/gen/schemas
 *.refx
 *.topx
 
+# Your own files that never go in the repo, such as the tools for your modules' installers
+/local/
+
 # sift: derived state and private notes
 _sift/.cache/
 _sift/local/
