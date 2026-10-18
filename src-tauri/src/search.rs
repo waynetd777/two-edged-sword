@@ -452,8 +452,8 @@ pub fn run(lib: &Library, index: Option<&crate::index::Index>, q: &Query) -> Res
     Ok(Results { bible, commentaries, dictionaries, strongs: false })
 }
 
-/// Feeds `f` the rows of the module that could match. With the index (a whole-word search on an
-/// indexed module) its matches are already exact, so they are counted in SQL and only the first
+/// Feeds `f` the rows of the module that could match. With the index (an indexed module) its
+/// matches are already exact, so they are counted in SQL and only the first
 /// `limit` rows, the ones shown, are loaded and passed on; the count is returned. Without it, `f`
 /// gets every row LIKE finds and does its own counting, and None is returned.
 #[allow(clippy::too_many_arguments)]
@@ -474,8 +474,12 @@ fn candidate_rows(
     mut f: impl FnMut(&rusqlite::Row) -> rusqlite::Result<()>,
 ) -> Result<Option<usize>, String> {
     // An index that can't be read (damaged, say) falls back to LIKE, as an unbuilt one does.
-    let ids = index.filter(|ix| q.whole_words && ix.is_ready(kind, id)).and_then(|ix| {
-        ix.candidates(kind, id, &crate::index::fts_query(terms, phrase, q.mode)).inspect_err(|e| eprintln!("index {id}: {e}")).ok()
+    // A part-word search ("tithe" in "tithes") asks the index for words beginning with the terms:
+    // one inside a word ("untithed") isn't found, but the slow read of every row is avoided.
+    let ids = index.filter(|ix| ix.is_ready(kind, id)).and_then(|ix| {
+        ix.candidates(kind, id, &crate::index::fts_query(terms, phrase, q.mode, !q.whole_words))
+            .inspect_err(|e| eprintln!("index {id}: {e}"))
+            .ok()
     });
     if let Some(ids) = ids {
         if ids.is_empty() {

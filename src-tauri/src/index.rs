@@ -203,9 +203,11 @@ fn build_one(c: &mut Connection, lib: &Library, kind: Kind, id: &str, path: &Pat
     tx.commit().map_err(|e| e.to_string())
 }
 
-/// FTS5 query for the words: a quoted phrase, or quoted terms joined with AND / OR.
-pub fn fts_query(terms: &[String], phrase: &str, mode: crate::search::Mode) -> String {
-    let q = |t: &str| format!("\"{}\"", t.replace('"', "\"\""));
+/// FTS5 query for the words: a quoted phrase, or quoted terms joined with AND / OR. With `prefix`
+/// (a search for part words), each term, or the phrase's last word, also matches words it begins.
+pub fn fts_query(terms: &[String], phrase: &str, mode: crate::search::Mode, prefix: bool) -> String {
+    let star = if prefix { " *" } else { "" };
+    let q = |t: &str| format!("\"{}\"{star}", t.replace('"', "\"\""));
     match mode {
         crate::search::Mode::Phrase => q(phrase),
         crate::search::Mode::All => terms.iter().map(|t| q(t)).collect::<Vec<_>>().join(" AND "),
@@ -221,8 +223,10 @@ mod tests {
     #[test]
     fn builds_queries() {
         let t = vec!["born".to_string(), "again".to_string()];
-        assert_eq!(fts_query(&t, "born again", Mode::Phrase), "\"born again\"");
-        assert_eq!(fts_query(&t, "", Mode::All), "\"born\" AND \"again\"");
-        assert_eq!(fts_query(&t, "", Mode::Any), "\"born\" OR \"again\"");
+        assert_eq!(fts_query(&t, "born again", Mode::Phrase, false), "\"born again\"");
+        assert_eq!(fts_query(&t, "", Mode::All, false), "\"born\" AND \"again\"");
+        assert_eq!(fts_query(&t, "", Mode::Any, false), "\"born\" OR \"again\"");
+        assert_eq!(fts_query(&t, "born again", Mode::Phrase, true), "\"born again\" *");
+        assert_eq!(fts_query(&t, "", Mode::All, true), "\"born\" * AND \"again\" *");
     }
 }

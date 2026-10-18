@@ -23,6 +23,7 @@ Searches a Bible, every commentary and dictionary, and your journal at once.
 
 - Narrow it to part of the Bible, such as the Gospels or the Letters.
 - Match the exact phrase, all or any of the words, or whole words only.
+- Without whole words only, a word also finds words it begins: "tithe" finds "tithes" and "tithed". In the commentaries and dictionaries it doesn't find words that only contain it ("antithesis").
 - Hyphens inside words don't matter: "Bethel" finds the KJV's "Beth-el", and "Beth-el" finds
   "Bethel".
 - Search for a Strong's number such as `G509` to find every verse that uses that word, however
