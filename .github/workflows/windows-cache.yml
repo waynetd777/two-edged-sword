@@ -28,6 +28,9 @@ concurrency:
 
 jobs:
   build:
+    # Not for a push that is only make release's version bump ("Two-edged Sword 1.0.37"): the
+    # release builds that itself, and nothing the cache holds has changed.
+    if: github.event_name != 'push' || github.event.commits[1] != null || !startsWith(github.event.head_commit.message, 'Two-edged Sword 1.')
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v5
