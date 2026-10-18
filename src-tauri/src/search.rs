@@ -74,16 +74,23 @@ const MAX_VERSES: usize = 500;
 const MAX_COMMENT_HITS: usize = 50;
 const MAX_TOPICS: usize = 60;
 
-/// Plain text: tags removed, Strong's numbers dropped, common entities decoded. Case is kept;
+/// Plain text: tags removed, Strong's numbers and note markers dropped, common entities decoded. Case is kept;
 /// matching lower-cases with `lower`.
 pub fn plain(html: &str) -> String {
     let mut out = String::with_capacity(html.len());
     let mut chars = html.char_indices().peekable();
     while let Some((i, ch)) = chars.next() {
         if ch == '<' {
-            // Skip a <num>…</num> run entirely: the number is not part of the text.
-            if html[i..].starts_with("<num>") {
-                if let Some(end) = html[i..].find("</num>") {
+            // Skip a <num>…</num> or <not>…</not> run entirely: a Strong's number or a note's marker is not part of the text.
+            let close = if html[i..].starts_with("<num>") {
+                Some("</num>")
+            } else if html[i..].starts_with("<not>") {
+                Some("</not>")
+            } else {
+                None
+            };
+            if let Some(close) = close {
+                if let Some(end) = html[i..].find(close) {
                     let stop = i + end + 6;
                     while let Some(&(j, _)) = chars.peek() {
                         if j >= stop {
@@ -507,6 +514,12 @@ mod tests {
     fn plain_strips_markup_and_numbers() {
         let s = "<red>For</red><num>G1063</num> <red>God</red><num>G2316</num> so &#147;loved&#148;<p>x</p>";
         assert_eq!(plain(s), "For God so \"loved\" x ");
+    }
+
+    #[test]
+    fn plain_drops_note_markers() {
+        assert_eq!(plain("For <not>R8</not>God so loved the world,<not>N1</not> that"), "For God so loved the world, that");
+        assert_eq!(crate::content::drop_note_marks("<red>For <not>R8</not>God</red><not>N1</not>"), "<red>For God</red>");
     }
 
     #[test]

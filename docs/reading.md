@@ -58,6 +58,15 @@ back. Favourite translations get one-click buttons in the top bar.
 A ≠ beside a verse marks where the translation differs from the KJV
 ([Translations and manuscripts](manuscripts.md)).
 
+### A Bible's own notes
+
+Some Bibles carry their own notes (the ESV+ does). Small marks in the text show where:
+
+- Letters (a, b, …) are cross-references. Click one for the list; each reference opens the verse.
+- Numbers are footnotes: other readings, the original wording, manuscript differences.
+
+The marks are hidden in focus mode.
+
 ### The Apocrypha
 
 Bibles that have them (the Douay-Rheims, the Vulgates, the Bishops' Bible and the Septuagints) show

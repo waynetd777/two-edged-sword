@@ -399,7 +399,7 @@ fn write(path: &Path, s: &str) -> Result<(), String> {
 /// Paragraphs on their own lines, and Strong's numbers shown as "[G25]" so they survive
 /// being turned into plain text.
 fn text(html: &str) -> String {
-    crate::books::paragraphs(&html.replace("<num>", " [").replace("</num>", "]"))
+    crate::books::paragraphs(&crate::content::drop_note_marks(html).replace("<num>", " [").replace("</num>", "]"))
 }
 
 fn verses(lib: &Library, bible: &str, book: i64, chapter: i64, from: i64, to: i64) -> Result<Vec<(i64, String)>, String> {

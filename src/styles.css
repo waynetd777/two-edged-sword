@@ -1126,6 +1126,21 @@ input[type="range"] {
 .viewer .ibtn {
   color: #eee;
 }
+/* A Bible's note markers (the ESV+'s): footnotes numbered, cross-references lettered. */
+.bnote-mark {
+  font: 600 11px var(--ui);
+  color: var(--accent);
+  margin: 0 3px 0 2px;
+  cursor: pointer;
+  user-select: none;
+}
+.bnote-mark:hover {
+  text-decoration: underline;
+}
+.bnote p {
+  margin: 0;
+  font: 400 14px/1.5 var(--serif);
+}
 .viewer-hint {
   position: absolute;
   top: 14px;

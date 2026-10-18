@@ -76,9 +76,12 @@ function cls(el: Element): string | undefined {
 const CP1252 = "€\0‚ƒ„…†‡ˆ‰Š‹Œ\0Ž\0\0‘’“”•–—˜™š›œ\0žŸ";
 const fixC1 = (t: string) => t.replace(/[\x80-\x9f]/g, (c) => CP1252[c.charCodeAt(0) - 0x80].replace("\0", ""));
 
+/** A Bible's note marker in a verse (<not>R8</not>): not part of the text. */
+const NOTE_MARK = /<not>[^<]*<\/not>/gi;
+
 /** A module's HTML as plain text, its whitespace collapsed. */
 export const htmlText = (html: string) =>
-  fixC1(parse(html.replace(/<(?:br|\/p|\/h\d|\/div)\b[^>]*>/gi, "$& ")).textContent || "")
+  fixC1(parse(html.replace(NOTE_MARK, "").replace(/<(?:br|\/p|\/h\d|\/div)\b[^>]*>/gi, "$& ")).textContent || "")
     .replace(/\s+/g, " ")
     .trim();
 
@@ -96,6 +99,8 @@ export function renderHtml(html: string, opts: RenderOpts = {}): ReactNode {
     const kids = () => Array.from(el.childNodes).map((c) => <Fragment key={key++}>{walk(c)}</Fragment>);
     const tag = el.tagName.toLowerCase();
     switch (tag) {
+      case "not":
+        return null;
       case "p": {
         const center = (el.getAttribute("align") || "").toLowerCase() === "center";
         return (
@@ -199,7 +204,8 @@ export function renderHtml(html: string, opts: RenderOpts = {}): ReactNode {
       }
       case "ref": {
         const text = el.textContent || "";
-        const r = parseEswordRef(text, lastBook);
+        // v="Joh 19:39": the whole reference, when the text shows only part of it ("19:39").
+        const r = parseEswordRef(el.getAttribute("v") || text, lastBook);
         if (r) lastBook = r.book;
         if (!r || !opts.onRef) return <span>{text}</span>;
         if (opts.onNote) {
@@ -396,7 +402,7 @@ export function wordRangeAt(el: Element, char: number): Range | null {
 /** Plain text of e-Sword HTML (Strong's numbers dropped). */
 export function plainText(html: string): string {
   const body = parse(html);
-  body.querySelectorAll("num").forEach((n) => n.remove());
+  body.querySelectorAll("num, not").forEach((n) => n.remove());
   body.querySelectorAll("sup").forEach((n) => {
     if (/^[()]$/.test(n.textContent || "")) n.remove();
   });
@@ -429,6 +435,8 @@ export interface Token {
   editions?: string;
   /** Part of another edition's reading (Greek NT TR+ and WH+ mark them | base | other |), or its brackets. */
   variant?: boolean;
+  /** A Bible's note marker (no text): the note's id, R… a cross-reference, N… a footnote. */
+  note?: string;
 }
 
 /** Which edition a Greek NT module's | base | other | readings come from, from its description. */
@@ -549,6 +557,10 @@ export function tokenize(html: string): Token[] {
       const lastWord = words[words.length - 1];
       if (lastWord) (lastWord.showNums ??= []).push(n);
       groupStart = out.length;
+      return;
+    }
+    if (tag === "not") {
+      out.push({ text: "", word: false, red, italic, strongs: [], at, wi: -1, note: (el.textContent || "").trim() });
       return;
     }
     if (tag === "sup" && /^[()]$/.test((el.textContent || "").trim())) return;

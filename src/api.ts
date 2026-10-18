@@ -52,6 +52,13 @@ export interface Verse {
   v: number;
   text: string;
 }
+
+/** A Bible's own note on a verse (the ESV+'s): `id` is its marker in the verse (<not>R8</not>), R a cross-reference, N a footnote. */
+export interface BibleNote {
+  v: number;
+  id: string;
+  html: string;
+}
 /** An AI CLI on this Mac; `path` is null when it isn't installed. `models` is filled for Codex, Antigravity (ids "agy:…") and Copilot ("copilot:auto"). */
 interface Cli {
   path: string | null;
@@ -219,6 +226,7 @@ export const api = {
   library: () => invoke<LibraryInfo>("library_info"),
   rescan: (esword?: boolean) => invoke<LibraryInfo>("rescan_library", { esword }),
   chapter: (bible: string, book: number, chapter: number) => invoke<Verse[]>("get_chapter", { bible, book, chapter }),
+  bibleNotes: (bible: string, book: number, chapter: number) => invoke<BibleNote[]>("bible_notes", { bible, book, chapter }),
   passages: (bible: string, ranges: Range[]) => invoke<Passage[]>("get_passages", { bible, ranges }),
   chapterSizes: (bible: string) => invoke<[number, number, number][]>("chapter_sizes", { bible }),
   commentaryRanges: (module: string) => invoke<[number, number, number, number, number][]>("commentary_ranges", { module }),

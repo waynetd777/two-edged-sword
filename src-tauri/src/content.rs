@@ -23,6 +23,45 @@ pub fn chapter(lib: &Library, bible: &str, book: i64, chapter: i64) -> Result<Ve
     })
 }
 
+/// A Bible's own note on a verse (the ESV+'s cross-references and footnotes): `id` is the marker in
+/// the verse's text (<not>R8</not>, <not>N1</not>), `html` the note.
+#[derive(Serialize)]
+pub struct BibleNote {
+    pub v: i64,
+    pub id: String,
+    pub html: String,
+}
+
+/// Verse text without its note markers (<not>R8</not>), which aren't part of the text.
+pub fn drop_note_marks(html: &str) -> String {
+    let mut out = String::with_capacity(html.len());
+    let mut rest = html;
+    while let Some(i) = rest.find("<not>") {
+        out.push_str(&rest[..i]);
+        rest = rest[i..].find("</not>").map(|e| &rest[i + e + 6..]).unwrap_or("");
+    }
+    out.push_str(rest);
+    out
+}
+
+/// The chapter's notes, from the Bible's Notes table; none when it has no such table.
+pub fn bible_notes(lib: &Library, bible: &str, book: i64, chapter: i64) -> Result<Vec<BibleNote>, String> {
+    lib.with(Kind::Bible, bible, |c| {
+        if c.query_row("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'Notes'", [], |_| Ok(())).optional()?.is_none() {
+            return Ok(Vec::new());
+        }
+        let mut st = c.prepare_cached("SELECT Verse, ID, Note FROM Notes WHERE Book = ?1 AND Chapter = ?2")?;
+        let rows = st.query_map(params![book, chapter], |r| {
+            Ok(BibleNote {
+                v: r.get(0)?,
+                id: r.get::<_, Option<String>>(1)?.unwrap_or_default(),
+                html: r.get::<_, Option<String>>(2)?.unwrap_or_default(),
+            })
+        })?;
+        rows.collect()
+    })
+}
+
 #[derive(Deserialize, Serialize, Clone, Copy)]
 pub struct Range {
     pub book: i64,

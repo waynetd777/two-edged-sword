@@ -18,6 +18,7 @@ import { BooksButton } from "./DocReader";
 import { useAssistant } from "./assistant";
 import { useVariances, Variance, VariancePopover } from "./variances";
 import { shortcut } from "./keys";
+import { BibleNotePopover, noteLabels, useBibleNotes } from "./BibleNotes";
 
 export interface WordPick {
   token: Token;
@@ -48,6 +49,7 @@ export function VerseText({
   activeWi,
   showNums,
   variantFrom = "another edition",
+  onNote,
 }: {
   tokens: Token[];
   red: boolean;
@@ -56,6 +58,8 @@ export function VerseText({
   activeWi?: number;
   showNums: boolean;
   /** Whose readings a Greek NT's ⟨variants⟩ are. */ variantFrom?: string;
+  /** A click on one of the Bible's note markers; without it, they aren't shown. */
+  onNote?: (id: string, el: HTMLElement) => void;
 }) {
   const vtitle = `${variantFrom} reads`;
   const tip = (t: Token) =>
@@ -120,9 +124,25 @@ export function VerseText({
       </>
     );
   }
+  const labels = onNote ? noteLabels(tokens.flatMap((t) => (t.note ? [t.note] : []))) : null;
   return (
     <>
       {tokens.map((t, i) => {
+        if (t.note !== undefined)
+          return labels ? (
+            <sup
+              key={i}
+              className={`bnote-mark ${/^R/i.test(t.note) ? "xref" : ""}`}
+              role="button"
+              title={/^R/i.test(t.note) ? "Cross-references" : "Footnote"}
+              onClick={(e) => {
+                e.stopPropagation();
+                onNote!(t.note!, e.currentTarget);
+              }}
+            >
+              {labels.get(t.note)}
+            </sup>
+          ) : null;
         const cls = [t.red && red ? "red" : "", t.variant ? "var" : ""].join(" ").trim();
         const inner = t.italic ? <i className="added">{t.text}</i> : t.text;
         if (!t.word)
@@ -223,6 +243,11 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
   const notes = useNotedVerses(loc.book, loc.chapter, verses);
   const variances = useVariances(bible, loc.book, loc.chapter);
   const [varPick, setVarPick] = useState<{ v: Variance; rect: DOMRect } | null>(null);
+  const [notePick, setNotePick] = useState<{ v: number; id: string; rect: DOMRect } | null>(null);
+  // The Bible's own notes (the ESV+'s): markers in the text open them; none in focus mode.
+  const bnotes = useBibleNotes(bible, !!bmod?.features.includes("Notes"), loc.book, loc.chapter);
+  const onNote = (v: number) =>
+    bnotes.size && !focus ? (id: string, el: HTMLElement) => setNotePick({ v, id, rect: el.getBoundingClientRect() }) : undefined;
 
   // Another screen asked for a dictionary article, a commentary or a question here.
   useEffect(() => {
@@ -641,6 +666,7 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
                   activeWi={word?.verse === v.v ? word.token.wi : undefined}
                   showNums={!!bmod?.strongs}
                   variantFrom={variantSource(bmod?.info ?? "")}
+                  onNote={onNote(v.v)}
                 />
               </span>
             </div>
@@ -698,6 +724,7 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
                   activeWi={word?.verse === v.v ? word.token.wi : undefined}
                   showNums={!!bmod?.strongs && !focus}
                   variantFrom={variantSource(bmod?.info ?? "")}
+                  onNote={onNote(v.v)}
                 />
               </span>{" "}
             </span>
@@ -892,6 +919,17 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
           moduleTitle={bmod?.title ?? bible}
           text={verses.find((x) => x.v === varPick.v.verse)?.text ?? null}
           onClose={() => setVarPick(null)}
+        />
+      )}
+      {notePick && bnotes.get(notePick.v)?.get(notePick.id) && (
+        <BibleNotePopover
+          book={loc.book}
+          chapter={loc.chapter}
+          verse={notePick.v}
+          id={notePick.id}
+          html={bnotes.get(notePick.v)!.get(notePick.id)!}
+          anchor={notePick.rect}
+          onClose={() => setNotePick(null)}
         />
       )}
       {picker && (

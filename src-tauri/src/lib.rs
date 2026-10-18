@@ -138,6 +138,11 @@ fn get_chapter(st: State<AppState>, bible: String, book: i64, chapter: i64) -> R
 }
 
 #[tauri::command]
+fn bible_notes(st: State<AppState>, bible: String, book: i64, chapter: i64) -> Result<Vec<content::BibleNote>, String> {
+    content::bible_notes(&st.lib(), &bible, book, chapter)
+}
+
+#[tauri::command]
 fn get_passages(st: State<AppState>, bible: String, ranges: Vec<content::Range>) -> Result<Vec<content::Passage>, String> {
     content::passages(&st.lib(), &bible, &ranges)
 }
@@ -855,6 +860,7 @@ pub fn run() {
             library_info,
             rescan_library,
             get_chapter,
+            bible_notes,
             get_passages,
             get_commentary,
             chapter_sizes,
