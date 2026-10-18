@@ -96,8 +96,9 @@ export function runScene(app: ReturnType<typeof useApp>, still: (s: Partial<Play
           setSceneChat(chat.id);
         }
         // The KJV unless the scene says otherwise: never the user's own choice, which may be licensed.
-        // Nor the user's highlight names, plans' Bibles or Recent list, which are theirs.
-        app.set({ bible: "kjv", hlNames: {}, ...sc.settings });
+        // Nor the user's highlight names, plans' Bibles or Recent list, which are theirs. Highlights
+        // shown and the text at its default size, whatever the user has, so the pictures stay alike.
+        app.set({ bible: "kjv", hlNames: {}, showHighlights: true, readSize: 19, ...sc.settings });
         const today = ymd(startOfToday());
         const unread = (d?: string[]) => (sc.unread && d ? d.filter((x) => x !== today) : d);
         app.setPlans((ps) =>
