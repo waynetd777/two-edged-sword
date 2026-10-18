@@ -7,6 +7,7 @@ import { book, fmtRef, mentionsPassage, Ref } from "./bible";
 import { AskPanel } from "./Ask";
 import { plainText, renderHtml, docSegments } from "./esword";
 import { Icon } from "./icons";
+import { ImageViewer } from "./ImageViewer";
 import { DictAt, useApp } from "./state";
 import { ClearButton, Popover, TrailButtons, useTrail, wordAt, wordHover } from "./ui";
 import { useAssistant } from "./assistant";
@@ -850,7 +851,8 @@ function MapsTab({ bookN }: { bookN: number }) {
   const [all, setAll] = useState<{ module: ModuleInfo; title: string }[]>([]);
   const [cur, setCur] = useState<{ module: string; title: string } | null>(null);
   const [art, setArt] = useState<Article | null>(null);
-  const [zoom, setZoom] = useState(1);
+  // The map shown over the whole window, to zoom into and move around.
+  const [full, setFull] = useState<string | null>(null);
   const [showAll, setShowAll] = useState<DOMRect | null>(null);
   useEffect(() => {
     let dead = false;
@@ -877,7 +879,6 @@ function MapsTab({ bookN }: { bookN: number }) {
       setArt(null);
       return;
     }
-    setZoom(1);
     let dead = false;
     api
       .article("reference", chosen.module, chosen.title)
@@ -892,6 +893,8 @@ function MapsTab({ bookN }: { bookN: number }) {
       dead = true;
     };
   }, [chosen?.module, chosen?.title]); // eslint-disable-line react-hooks/exhaustive-deps
+  // The map's pictures, for the viewer's ← and → when a map has more than one.
+  const mapImages = art ? Array.from(art.html.matchAll(/<img[^>]+src="(data:image\/[^"]+)"/gi), (m) => m[1]) : [];
   if (!refs.length) return <div className="empty">No maps in your library.</div>;
   return (
     <div style={{ display: "flex", flexDirection: "column", minHeight: 0, flexGrow: 1 }}>
@@ -930,26 +933,19 @@ function MapsTab({ bookN }: { bookN: number }) {
         }}
       >
         {art ? (
-          <div className="es" style={{ width: `${zoom * 100}%`, padding: 8 }}>
-            {renderHtml(art.html)}
+          <div className="es" style={{ padding: 8 }}>
+            {renderHtml(art.html, { onImage: setFull })}
           </div>
         ) : (
           <div className="empty">Choose a map.</div>
         )}
       </div>
       <div style={{ display: "flex", gap: 6, padding: "0 18px 14px" }}>
-        <button className="btn small" type="button" onClick={() => setZoom((z) => Math.min(4, z * 1.25))}>
-          <Icon name="plus" size={13} />
-          Zoom in
-        </button>
-        <button className="btn small" type="button" onClick={() => setZoom((z) => Math.max(1, z / 1.25))}>
-          <Icon name="minus" size={13} />
-          Zoom out
-        </button>
         <span className="n" style={{ alignSelf: "center", marginLeft: "auto" }}>
           {chosen?.title}
         </span>
       </div>
+      {full && art && <ImageViewer images={mapImages} start={Math.max(0, mapImages.indexOf(full))} onClose={() => setFull(null)} />}
       {showAll && (
         <Popover anchor={showAll} onClose={() => setShowAll(null)} width={360}>
           <div style={{ padding: 6 }}>
