@@ -32,7 +32,7 @@ runs the AI tools for Ask. The frontend is everything you see.
   Node, Python and Visual Studio Build Tools with the C++ workload) makes
   `src-tauri/target/debug/TwoEdgedSword.exe`; `npx tauri build` makes the installer,
   `src-tauri/target/release/bundle/nsis/Two-edged Sword_<version>_x64-setup.exe` (per user, no
-  admin; the built-in modules beside the .exe). The module tools keep their downloads in
+  admin; the built-in modules beside the .exe; `src-tauri/windows/hooks.nsh` makes its uninstaller's Delete the application data clear `%APPDATA%\Two-edged Sword`, which Tauri's own step misses). The module tools keep their downloads in
   `%LOCALAPPDATA%\Two-edged Sword\Caches` there. The AppKit modules are
   `#[cfg(target_os = "macos")]`, and `src-tauri/src/other.rs` stands in for them elsewhere; any
   new AppKit call, or macOS-only Tauri API, needs the same `cfg`. `tauri.windows.conf.json` holds

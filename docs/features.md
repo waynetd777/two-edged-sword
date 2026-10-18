@@ -59,7 +59,7 @@ The app works the same on Windows, with these differences:
 |---|---|
 | Shortcuts | Ctrl in place of ⌘, as the menus and the help show them |
 | e-Sword | e-Sword for Windows' modules can't be read: their text is encrypted. Modules in e-Sword X's formats work, in the [modules folder](library.md) |
-| Your data | In `%APPDATA%\Two-edged Sword` |
+| Your data | In `%APPDATA%\Two-edged Sword`. Uninstalling with **Delete the application data** ticked removes it; your journal in Documents stays |
 | Voices | Windows' own: add more, Hebrew and Greek included, as [Better voices](reading.md#better-voices) says |
 | Spelling and grammar | Windows' spell checker, and grammar by Harper, on the PC |
 | Worship songs | The music files in your Music folder, played by the app ([Worship music](quiet-time.md#worship-music)) |
