@@ -497,12 +497,17 @@ mod library_tests {
         let nums: Vec<&str> = love.iter().take(6).map(|w| w.num.as_str()).collect();
         assert!(nums.contains(&"G25") && nums.contains(&"G26") && nums.contains(&"H157"), "{nums:?}");
         assert!(love.iter().find(|w| w.num == "G25").unwrap().forms.iter().any(|(f, _)| f == "loved"));
-        let days = devotion_titles(&lib, "gordon").unwrap();
-        assert_eq!(days.first().map(String::as_str), Some("January 1"));
-        assert!(days.contains(&"December 3".to_string()) && days.len() == 365, "{}", days.len());
-        assert!(devotion(&lib, "gordon", "December 3").unwrap().unwrap().contains("NEVER FAILS"));
-        assert!(devotion(&lib, "gordon", "February 29").unwrap().is_some());
-        assert!(devotion(&lib, "spurgeon", "September 24").unwrap().unwrap().contains("Ezr 8:22"));
+        // The devotionals aren't built in: checked where the library has them.
+        if lib.module(Kind::Devotional, "gordon").is_ok() {
+            let days = devotion_titles(&lib, "gordon").unwrap();
+            assert_eq!(days.first().map(String::as_str), Some("January 1"));
+            assert!(days.contains(&"December 3".to_string()) && days.len() == 365, "{}", days.len());
+            assert!(devotion(&lib, "gordon", "December 3").unwrap().unwrap().contains("NEVER FAILS"));
+            assert!(devotion(&lib, "gordon", "February 29").unwrap().is_some());
+        }
+        if lib.module(Kind::Devotional, "spurgeon").is_ok() {
+            assert!(devotion(&lib, "spurgeon", "September 24").unwrap().unwrap().contains("Ezr 8:22"));
+        }
         let agape = translit_search(&lib, "strong", "agape", 10).unwrap();
         assert!(agape.iter().any(|h| h.num == "G26"), "{agape:?}");
     }
@@ -547,7 +552,10 @@ mod library_tests {
         assert!(bethel >= 55, "{bethel}"); // 59: its 66 in 59 verses
         assert_eq!(search::run(&lib, None, &q("beth-el")).unwrap().bible.count, bethel);
         // The BSB+ and Webster+ (when built) are Strong's Bibles like the KJV+: numbers after the words.
-        for (id, loved) in [("bsb+", "loved<num>G25</num> the<num>G3588</num> world<num>G2889</num>"), ("webster+", "so<num>G3779</num> loved<num>G25</num>")] {
+        for (id, loved) in [
+            ("bsb+", "loved<num>G25</num> the<num>G3588</num> world<num>G2889</num>"),
+            ("webster+", "so<num>G3779</num> loved<num>G25</num>"),
+        ] {
             let Ok(m) = lib.module(Kind::Bible, id) else { continue };
             assert!(m.strongs, "{id}");
             assert!(chapter(&lib, id, 43, 3).unwrap()[15].text.contains(loved), "{id}");
@@ -571,7 +579,11 @@ mod library_tests {
         };
         let r = search::run(&lib, None, &q).unwrap();
         assert_eq!(r.bible.count, 3);
-        assert!(r.commentaries.iter().any(|m| m.module == "gill" && m.count > 50));
+        // Gill isn't built in: checked where the library has it; Henry always is.
+        if lib.module(Kind::Commentary, "gill").is_ok() {
+            assert!(r.commentaries.iter().any(|m| m.module == "gill" && m.count > 50));
+        }
+        assert!(r.commentaries.iter().any(|m| m.module == "henry" && m.count > 0));
         // The same through a freshly built index.
         let ix = crate::index::Index::new(std::env::temp_dir().join(format!("tes-index-{}.sqlite", std::process::id())));
         ix.update(lib.clone()).unwrap();

@@ -197,7 +197,22 @@ def kjv():
                     for w, n in re.findall(r"\\\+?w ([^|\\]+)\|strong=\"([^\"]+)\"", body):
                         words.append((*last, w, num(n)))
         subscription(verses, book, chapter, heading)
+    # Strong's numbers the source leaves off a word that renders two Greek or Hebrew words, as
+    # e-Sword's KJV+ has them: the word's last occurrence in the verse gets the second number.
+    for key, word, has, add in KJV_ADDED_STRONGS:
+        plain, tagged = verses[key]
+        old = f"{word}<num>{has}</num>"
+        at = tagged.rfind(old)
+        assert at >= 0, f"KJV_ADDED_STRONGS: no {old} in {key}"
+        verses[key] = (plain, f"{tagged[:at]}{old}<num>{add}</num>{tagged[at + len(old):]}")
+        words.append((*key, word, add))
     return verses, words
+
+
+# (book, chapter, verse), the word, the number it has, the number it lacks.
+KJV_ADDED_STRONGS = [
+    ((48, 4, 9), "again", "G3825", "G509"),  # "ye desire again": πάλιν ἄνωθεν
+]
 
 
 def subscription(verses, book, chapter, heading):
