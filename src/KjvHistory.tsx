@@ -4,6 +4,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { ModuleInfo } from "./api";
 import { AskPanel } from "./Ask";
+import { useAssistant } from "./assistant";
 import { Icon } from "./icons";
 import { Topbar } from "./Shell";
 import { useApp } from "./state";
@@ -512,6 +513,8 @@ export function KjvHistoryScreen() {
   const app = useApp();
   const bibles = app.bibles;
   const [asking, setAsking] = useState(false);
+  // Ask only with an AI tool installed (its button and panel go otherwise).
+  const canAsk = useAssistant().available;
   const box = useRef<HTMLDivElement>(null);
   const cards = useRef(new Map<string, HTMLElement>());
   const [lines, setLines] = useState<{ a: string; b: string; d: string }[]>([]);
@@ -705,18 +708,27 @@ export function KjvHistoryScreen() {
     <div className="main">
       <Topbar
         right={
-          <button
-            className={`btn ${asking ? "on" : ""}`}
-            type="button"
-            title="Ask about the KJV's history and sources"
-            onClick={() => setAsking(!asking)}
-          >
-            <Icon name="chat" />
-            Ask
-          </button>
+          canAsk && (
+            <button
+              className={`btn ${asking ? "on" : ""}`}
+              type="button"
+              title="Ask about the KJV's history and sources"
+              onClick={() => setAsking(!asking)}
+            >
+              <Icon name="chat" />
+              Ask
+            </button>
+          )
         }
       />
-      <div style={{ flexGrow: 1, minHeight: 0, display: "grid", gridTemplateColumns: asking ? "minmax(0,1fr) 440px" : "minmax(0,1fr)" }}>
+      <div
+        style={{
+          flexGrow: 1,
+          minHeight: 0,
+          display: "grid",
+          gridTemplateColumns: asking && canAsk ? "minmax(0,1fr) 440px" : "minmax(0,1fr)",
+        }}
+      >
         <div className="scroll" style={{ overflow: "auto" }}>
           <div style={{ display: "flex", alignItems: "flex-end", gap: 12, padding: "20px 28px 0", flexWrap: "wrap" }}>
             <div style={{ flexGrow: 1, minWidth: 320 }}>
@@ -767,7 +779,7 @@ export function KjvHistoryScreen() {
             {AFTER.map(tier)}
           </div>
         </div>
-        {asking && (
+        {asking && canAsk && (
           <aside
             aria-label="Ask"
             style={{
