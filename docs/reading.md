@@ -74,6 +74,12 @@ down the side; a devotional opens on today's reading.
 Paragraphs work like verses: click one to highlight, bookmark, note, listen, ask about or copy it.
 The study pane has your notes on the chapter, the dictionaries and Ask.
 
+Click a picture or chart to see it over the whole window. There:
+
+- Scroll, or use two fingers on a trackpad, to zoom in and out.
+- Drag to move it around.
+- Double-click to fit it again; ← → go to the chapter's other pictures; Esc closes.
+
 ## Listen
 
 <a href="images/index.md#reading"><picture><source media="(prefers-color-scheme: dark)" srcset="images/listen-dark.png"><img alt="Listening to 1 John 1, the word being spoken highlighted" src="images/listen-light.png"></picture></a>

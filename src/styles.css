@@ -1120,9 +1120,27 @@ input[type="range"] {
   inset: 0;
   z-index: 80;
   background: rgba(12, 12, 14, 0.94);
+  -webkit-user-select: none;
+  user-select: none;
 }
 .viewer .ibtn {
   color: #eee;
+}
+.viewer-hint {
+  position: absolute;
+  top: 14px;
+  left: 16px;
+  padding: 5px 10px;
+  border-radius: 6px;
+  background: rgba(12, 12, 14, 0.72);
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 12px;
+  pointer-events: none;
+  user-select: none;
+}
+/* Clear of the window's traffic lights. */
+.mac .viewer-hint {
+  left: 84px;
 }
 .viewer .ibtn:hover {
   background: rgba(255, 255, 255, 0.12);
