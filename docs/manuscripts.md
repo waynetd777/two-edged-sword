@@ -48,10 +48,12 @@ Word-by-word Bibles show each original word over its English and its Strong's nu
 <a href="images/index.md#translations-and-manuscripts"><picture><source media="(prefers-color-scheme: dark)" srcset="images/kjv-history-dark.png"><img alt="The KJV's family tree: manuscript traditions, printed editions, earlier English Bibles, and which are in the library" src="images/kjv-history-light.png"></picture></a>
 
 **KJV History** (⌘8) is the KJV's family tree: the manuscripts, the printed editions the
-translators used, and the English Bibles before it.
+translators used, and the English Bibles before it. Below the KJV come its revisions, from
+Webster's and the Revised Version to the ESV, and the Bibles translated afresh since.
 
 - The chips on each card show what you have: green is the text itself, amber the closest
-  stand-in, blue a related module. Click one to read it.
+  stand-in, blue a related module. Click one to read it. A **+** beside one opens its edition
+  with Strong's numbers, glosses or notes.
 - A yellow **A** means that Bible has the Apocrypha.
 - Hover a card to light up what it came from and what came from it.
 - **Ask** opens a panel for questions about the history.
