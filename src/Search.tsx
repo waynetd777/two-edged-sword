@@ -268,7 +268,12 @@ export function SearchScreen() {
             <div className="label">Range</div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
               {RANGES.map((r) => (
-                <button key={r.name} type="button" className={`chip ${range.name === r.name ? "on" : ""}`} onClick={() => setRange(r)}>
+                <button
+                  key={r.name}
+                  type="button"
+                  className={`chip ${range.name === r.name ? "on" : ""}`}
+                  onClick={() => setRange(range.name === r.name ? RANGES[0] : r)}
+                >
                   {r.name}
                 </button>
               ))}
