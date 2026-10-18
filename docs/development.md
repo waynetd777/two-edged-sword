@@ -93,6 +93,15 @@ that changes the code (a cache saved on a release's tag would be seen by that ta
 Run workflow, with the tag). Windows copies install an update quietly, with a progress window
 (`plugins.updater.windows.installMode` in `tauri.windows.conf.json`).
 
+## Security checks
+
+On GitHub: Dependabot alerts, with pull requests that fix a vulnerable dependency; Dependabot
+version updates once a month, one grouped pull request each for npm, Cargo and Actions
+(`.github/dependabot.yml`); secret scanning with push protection; private vulnerability reporting;
+and CodeQL (`.github/workflows/codeql.yml`) on the Rust, TypeScript, Python and workflows, on each
+push and weekly. GitHub's default CodeQL setup can't scan Rust, so it's off and the workflow
+replaces it. Alerts are under the repository's Security tab.
+
 ## Where things live
 
 | What | Where |
