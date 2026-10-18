@@ -215,7 +215,7 @@ def align(aram, heb, floor=0.6):
     return out
 
 
-DIV = re.compile(r"<div><grk>(.*?)</grk>((?:<num>.*?</num>)*)<tvm>.*?</tvm><gra>(.*?)</gra></div>")
+DIV = re.compile(r"<div><grk>(.*?)</grk>((?:<num>[^<]*</num>)*)<tvm>.*?</tvm><gra>(.*?)</gra></div>")
 WORD = re.compile(r"[א-ת][֑-ׇא-ת]*")
 
 

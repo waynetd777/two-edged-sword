@@ -30,7 +30,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from modules import find, hebrew_consonants as consonants, module, similar  # noqa: E402
-DIV = re.compile(r"<div><grk>(.*?)</grk>((?:<num>.*?</num>)*)<tvm>(.*?)</tvm><gra>(.*?)</gra></div>")
+DIV = re.compile(r"<div><grk>(.*?)</grk>((?:<num>[^<]*</num>)*)<tvm>(.*?)</tvm><gra>(.*?)</gra></div>")
 
 
 def words_of(text):

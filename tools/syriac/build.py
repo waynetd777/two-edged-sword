@@ -237,7 +237,7 @@ def na_ps(w):
     return w["sfps"] not in ("", "NA")
 
 
-WORD = re.compile(r"[ܐ-ݏ܀-܏ܰ-݊]+")
+WORD = re.compile(r"[܀-ݏ]+")  # U+0700–074F: Syriac punctuation, letters and points
 SYRIAC_LETTERS = re.compile(r"[ܐ-ܯݍ-ݏ]")
 
 
