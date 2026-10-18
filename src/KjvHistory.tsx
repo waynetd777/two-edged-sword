@@ -530,9 +530,10 @@ export function KjvHistoryScreen() {
   }
   const on = (id: string) => !hover || lit.has(id);
 
+  // Closes a book open in Read, which would otherwise stay in front of the Bible (back returns to it).
   const open = (m: ModuleInfo) => {
     app.set({ bible: m.id });
-    app.go("read");
+    app.open(app.loc, "read");
   };
   // Which parts of the Bible each module covers, for the bars on the chips.
   const [cov, setCov] = useState<Record<string, Coverage>>({});
