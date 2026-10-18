@@ -61,6 +61,7 @@
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
+    --plate: #fafafa;
     --bg: #0d1117;
     --panel: #161b22;
     --panel2: #11161d;
@@ -109,6 +110,7 @@
 }
 :root[data-theme="dark"],
 .lyrics-body {
+  --plate: #fafafa;
   --bg: #0d1117;
   --panel: #161b22;
   --panel2: #11161d;
@@ -1073,6 +1075,17 @@ input[type="range"] {
 .es img.zoomable {
   cursor: zoom-in;
 }
+/* A drawing on a see-through background (dark ink, as in Dispensational Truth) would vanish on the dark
+   theme: it gets a near-white plate there (--plate), and in the image viewer, which is always dark. */
+.es img.clear {
+  padding: 8px;
+  background: var(--plate, transparent);
+}
+.viewer img.clear {
+  padding: 12px;
+  border-radius: 6px;
+  background: #fafafa;
+}
 /* A book's paragraph is a verse row (.v): number, text and markers; these are the differences. */
 .dseg {
   transition: background 0.2s;
@@ -1152,6 +1165,21 @@ input[type="range"] {
   font-size: 12px;
   pointer-events: none;
   user-select: none;
+}
+/* The counter, arrows and ✕, on the same dark panel as the hint so a zoomed picture behind them doesn't hide them. */
+.viewer-ctrls {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px;
+  border-radius: 8px;
+  background: rgba(12, 12, 14, 0.72);
+}
+.viewer-ctrls > span {
+  padding-left: 6px;
 }
 /* Clear of the window's traffic lights. */
 .mac .viewer-hint {

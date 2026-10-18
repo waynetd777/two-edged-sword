@@ -83,6 +83,8 @@ down the side; a devotional opens on today's reading.
 Paragraphs work like verses: click one to highlight, bookmark, note, listen, ask about or copy it.
 The study pane has your notes on the chapter, the dictionaries and Ask.
 
+In the dark theme, a drawing with no background of its own is shown on a light card so its ink stays visible.
+
 Click a picture or chart to see it over the whole window. There:
 
 - Scroll, or use two fingers on a trackpad, to zoom in and out.

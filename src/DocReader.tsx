@@ -4,7 +4,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { api, Article, JournalEntry } from "./api";
 import { fmtRef } from "./bible";
-import { docSegments, plainText, renderHtml, wordRangeAt } from "./esword";
+import { docSegments, markClear, plainText, renderHtml, wordRangeAt } from "./esword";
 import { SongsButton } from "./ChapterSongs";
 import { Icon } from "./icons";
 import { useListenKey, usePlayer } from "./speech";
@@ -1003,6 +1003,7 @@ function ImageViewer({ images, start, onClose }: { images: string[]; start: numb
         <img
           ref={img}
           src={images[i]}
+          onLoad={markClear}
           alt=""
           draggable={false}
           style={{
@@ -1015,7 +1016,7 @@ function ImageViewer({ images, start, onClose }: { images: string[]; start: numb
         />
       </div>
       <div className="viewer-hint">Scroll to zoom · drag to pan · double-click to fit · Esc to close</div>
-      <div style={{ position: "absolute", top: 14, right: 16, display: "flex", alignItems: "center", gap: 8 }}>
+      <div className="viewer-ctrls">
         {images.length > 1 && (
           <span style={{ color: "#ccc", fontSize: 12, fontVariantNumeric: "tabular-nums" }}>
             {i + 1} of {images.length}

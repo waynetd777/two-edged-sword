@@ -85,6 +85,20 @@ export const htmlText = (html: string) =>
     .replace(/\s+/g, " ")
     .trim();
 
+/** Marks a picture `clear` when much of it is see-through, so the dark theme can put a plate behind it (styles.css). */
+export function markClear(e: { currentTarget: HTMLImageElement }) {
+  const img = e.currentTarget;
+  const c = document.createElement("canvas");
+  c.width = c.height = 32;
+  const g = c.getContext("2d", { willReadFrequently: true });
+  if (!g || !img.naturalWidth) return;
+  g.drawImage(img, 0, 0, 32, 32);
+  const px = g.getImageData(0, 0, 32, 32).data;
+  let clear = 0;
+  for (let i = 3; i < px.length; i += 4) if (px[i] < 16) clear++;
+  img.classList.toggle("clear", clear > 32 * 32 * 0.2);
+}
+
 export function renderHtml(html: string, opts: RenderOpts = {}): ReactNode {
   let lastBook: number | undefined;
   let noteChain = false; // "see notes on A; B": B is a note too
@@ -164,13 +178,14 @@ export function renderHtml(html: string, opts: RenderOpts = {}): ReactNode {
             alt=""
             draggable={false}
             className="zoomable"
+            onLoad={markClear}
             onClick={(e) => {
               e.stopPropagation();
               onImage(src);
             }}
           />
         ) : (
-          <img src={src} alt="" draggable={false} />
+          <img src={src} alt="" draggable={false} onLoad={markClear} />
         );
       }
       case "num": {
