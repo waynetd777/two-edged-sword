@@ -131,6 +131,22 @@ build time, drops their screenshots and breadcrumbs, and splits each into its `#
 `SCREEN_HELP` says which section each screen opens on. Links between guides stay in the drawer.
 `make help` (`tools/helpcheck.py`) checks every link and screen points at a heading that exists.
 
+- **Getting started** (`docs/getting-started.md`) is walk-throughs: each `##` a walk-through, each
+  `###` under it a step, shown one at a time with Back, Next and Done (`settings.guidesDone`). The
+  welcome dialog (`src/Welcome.tsx`) offers it when the app opens, until `settings.offerGuide` is off.
+- **Mac or Windows only**: a guide marks parts with `<!-- mac -->…<!-- /mac -->` and
+  `<!-- windows -->…<!-- /windows -->`; the help drops the other platform's (`forPlatform`). Words
+  that join the two for GitHub, which shows both, go in `<!-- github -->…<!-- /github -->`, which
+  the help never shows.
+- **Links into the app**: `[label](app:library)` opens a screen with the help still open, and
+  `app:library#commentaries` also scrolls to the element marked `data-help="commentaries"` and
+  flashes it (Settings marks each section with its title's slug). `app:open/john-3`, `app:palette`,
+  `app:modules` and `app:rescan` do what they say (`runAction` in `src/Help.tsx`). Such links carry
+  a ↗; plain links open more help. Mentions of a Settings section ("Settings › Listening"),
+  Settings, the Library, Quiet time, the Journal, Word Study and KJV History are linked without
+  markup (`PLACES` in `src/guides.ts`), except in bold, headings, links and code.
+- The drawer has its own back and forward, and one section open at a time.
+
 Ask gets the same guides: `src-tauri/src/help.rs` builds them into the app, and before each
 question writes them to `help/` in the chat's folder, where the assistant searches them when a
 question is about the app.
@@ -147,6 +163,10 @@ Keep them short:
 - Lists and tables rather than paragraphs; no edge cases, internals or history.
 - Developer detail goes here, not in the user guides, and the guides don't link here: the help
   hasn't this page, so `make help` stops on a link to it.
+- Write for both platforms, and mark what only one has (`<!-- mac -->`, `<!-- windows -->`, under
+  [Help](#help)). Name a place in the app plainly ("Settings › Bibles", "the Library") and the help
+  links it; use an `app:` link for a step's action ("[Open John 3](app:open/john-3)").
+- A new feature gets a step in its Getting started walk-through too.
 
 Run `make help` to check the result.
 
@@ -313,7 +333,8 @@ reference, and images inline as `data:` URLs.
 | `src-tauri/src/login_item.rs`, `login_launch.rs` | Open at Login |
 | `src-tauri/src/updates.rs`, `src/Update.tsx`, `tools/update_files.py` | Checking GitHub for a new release and installing it; the prompt for it in the main window; the release's signed update files |
 | `src-tauri/src/tts.rs` | Speech through AVSpeechSynthesizer (WebKit's speech API hides downloaded voices) |
-| `src/Help.tsx`, `src/guides.ts`, `src-tauri/src/help.rs`, `tools/helpcheck.py` | The help drawer, the guides it shows, and the Help menu |
+| `src/Help.tsx`, `src/guides.ts`, `src/Welcome.tsx`, `src-tauri/src/help.rs`, `tools/helpcheck.py` | The help drawer, the guides it shows, the Getting started offer, and the Help menu |
+| `src/ImageViewer.tsx` | A book's or a map's picture full screen, to zoom and pan |
 | `src-tauri/src/assistant/` | Running Claude Code, Codex, Antigravity or Copilot for Ask; `mod.rs` holds the streaming they share |
 | `src-tauri/src/process.rs` | Running a command with a time limit (Music, the login shell, the assistants' `--version`) |
 | `src-tauri/src/study.rs`, `books.rs` | Writing library material out as files for Ask to search |
