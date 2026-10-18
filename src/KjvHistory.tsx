@@ -573,13 +573,13 @@ export function KjvHistoryScreen() {
           if (e) cards.current.set(s.id, e);
           else cards.current.delete(s.id);
         }}
-        className={`ks-card ks-${status}`}
+        className={`ks-card ks-${status} ${wide ? "ks-main" : ""}`}
         style={{ minWidth: wide ? 300 : 168, width: "max-content", maxWidth: 340, opacity: on(s.id) ? 1 : 0.35 }}
         onMouseEnter={() => setHover(s.id)}
         onMouseLeave={() => setHover(null)}
         title={[s.note, near.length ? s.nearNote : ""].filter(Boolean).join("\n\n")}
       >
-        <b style={{ font: "600 13px/1.25 var(--ui)" }}>{s.name}</b>
+        <b style={{ font: wide ? "500 19px/1.2 var(--display)" : "600 13px/1.25 var(--ui)" }}>{s.name}</b>
         <span className="n" style={{ fontSize: 11.5 }}>
           {s.date}
         </span>

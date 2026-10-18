@@ -1298,6 +1298,15 @@ html.nopointer * {
 .ks-card.ks-have {
   border-color: var(--good);
 }
+/* The KJV itself, the tree's centre: everything above leads to it, everything below comes from it. */
+.ks-card.ks-main {
+  padding: 14px 18px;
+  border: 2px solid var(--accent);
+  background: var(--accentsoft);
+  box-shadow:
+    0 0 0 5px color-mix(in srgb, var(--accent) 16%, transparent),
+    0 10px 28px var(--shadow);
+}
 .ks-card.ks-near {
   border-color: var(--pufg);
   border-style: dashed;
