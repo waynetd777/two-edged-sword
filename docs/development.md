@@ -91,7 +91,9 @@ if it has one). It starts from the compiled crates and built-in modules that
 `.github/workflows/windows-cache.yml` saves when it does the same build on `main` after a push
 that changes the code (a cache saved on a release's tag would be seen by that tag alone). For a release made before the job, run it by hand (Actions › Windows release ›
 Run workflow, with the tag). Windows copies install an update quietly, with a progress window
-(`plugins.updater.windows.installMode` in `tauri.windows.conf.json`).
+(`plugins.updater.windows.installMode` in `tauri.windows.conf.json`). The updater leaves each installer
+in a `Two-edged Sword-<version>-updater-…` folder in Temp; the app removes those when it starts
+(`remove_old_installers` in `updates.rs`).
 
 ## Security checks
 

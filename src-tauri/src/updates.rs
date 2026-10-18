@@ -155,6 +155,8 @@ pub fn start(app: &AppHandle, busy: Busy) {
         asking: AtomicBool::new(false),
         busy,
     });
+    #[cfg(windows)]
+    remove_old_installers(&app_name(app));
     if cfg!(debug_assertions) {
         return;
     }
@@ -168,6 +170,21 @@ pub fn start(app: &AppHandle, busy: Busy) {
             std::thread::sleep(TICK);
         }
     });
+}
+
+/// On Windows the updater downloads each update's installer to a folder in Temp
+/// ("Two-edged Sword-1.1.0-updater-Zu7DmM") and leaves it there after installing. By the time the
+/// app starts again that installer has done its work, so the folders go.
+#[cfg(windows)]
+fn remove_old_installers(name: &str) {
+    let Ok(dir) = std::fs::read_dir(std::env::temp_dir()) else { return };
+    let prefix = format!("{name}-");
+    for e in dir.flatten() {
+        let n = e.file_name().to_string_lossy().into_owned();
+        if n.starts_with(&prefix) && n.contains("-updater-") && e.path().is_dir() {
+            let _ = std::fs::remove_dir_all(e.path());
+        }
+    }
 }
 
 /// Check for Updates…: says what it found, even when there's nothing new.
