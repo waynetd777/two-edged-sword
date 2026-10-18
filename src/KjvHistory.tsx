@@ -8,7 +8,7 @@ import { Icon } from "./icons";
 import { Topbar } from "./Shell";
 import { useApp } from "./state";
 import { APOCRYPHA, BookSizes } from "./bible";
-import { bibleSizes } from "./ui";
+import { bibleSizes, Popover } from "./ui";
 
 /** Where the King James Version came from: the manuscript traditions, the printed editions the
  * translators worked from (1604–1611), the English Bibles before it, and which of them, or what
@@ -19,6 +19,8 @@ interface Source {
   name: string;
   date: string;
   note: string;
+  /** Its place in the KJV's story: what the KJV took from it, or how it stands to the KJV. */
+  kjv: string;
   /** What it drew on (ids of other sources). */
   from?: string[];
   /** Library Bibles that are this text, and ones that come closest, by title or abbreviation. */
@@ -37,6 +39,7 @@ const TIERS: { name: string; hint: string; items: Source[] }[] = [
         name: "Masoretic Hebrew",
         date: "copies c. 900–1500",
         note: "The Hebrew Old Testament as the Masoretes fixed its letters, vowels and accents. The KJV's Old Testament follows it.",
+        kjv: "The KJV's Old Testament is translated from it, through the printed Rabbinic Bible. Where the KJV's Old Testament differs from the Septuagint or the Vulgate, it is usually following the Masoretic text.",
         have: /Westminster Leningrad|Hebrew Old Testament \(Tanach\)/i,
       },
       {
@@ -44,6 +47,7 @@ const TIERS: { name: string; hint: string; items: Source[] }[] = [
         name: "Byzantine Greek",
         date: "copies c. 400–1500",
         note: "The Greek New Testament as most surviving manuscripts give it. The printed Greek editions of the 1500s were made from a handful of late Byzantine copies.",
+        kjv: "The KJV's New Testament rests on it at one remove: the Textus Receptus was printed from a few Byzantine copies. Most places where the KJV differs from modern versions are Byzantine readings.",
         have: /Byzantine/i,
       },
       {
@@ -51,6 +55,7 @@ const TIERS: { name: string; hint: string; items: Source[] }[] = [
         name: "Latin Vulgate",
         date: "Jerome, c. 382–405",
         note: "The Latin Bible of the Western church for a thousand years; the translators consulted it throughout.",
+        kjv: "The translators read it beside the Hebrew and Greek, and many of its words reached the KJV through earlier English Bibles. Erasmus used it to fill gaps in his Greek, so a few Vulgate readings (the last verses of Revelation) are in the KJV.",
         have: /Clementine/i,
         near: /Latin Vulgate/i,
         nearNote:
@@ -61,6 +66,7 @@ const TIERS: { name: string; hint: string; items: Source[] }[] = [
         name: "Septuagint",
         date: "Greek, c. 250–100 BC",
         note: "The Greek Old Testament, quoted by the apostles. Consulted for hard Hebrew passages.",
+        kjv: "A second witness to the Old Testament: the translators checked it where the Hebrew was obscure. The New Testament often quotes the Old in its wording, so the KJV's quotations sometimes differ from its own Old Testament.",
         have: /Greek Old Testament \(Septuagint\)|Septuagint LXX Greek/i,
         near: /Brenton/i,
         nearNote: "Brenton's English translation (1844).",
@@ -70,6 +76,7 @@ const TIERS: { name: string; hint: string; items: Source[] }[] = [
         name: "Aramaic Targums",
         date: "c. 100–700",
         note: "Aramaic paraphrases of the Hebrew read in the synagogue; printed in the Rabbinic Bibles and polyglots the translators used.",
+        kjv: "Helped the translators with rare Hebrew words and the Jewish reading of hard passages; they had it in the Rabbinic Bible and the polyglots.",
         have: /^Targum/i,
       },
       {
@@ -77,6 +84,7 @@ const TIERS: { name: string; hint: string; items: Source[] }[] = [
         name: "Syriac Peshitta",
         date: "c. 150–450",
         note: "An early Syriac translation; its New Testament was printed in the Antwerp Polyglot and by Tremellius (1569).",
+        kjv: "A minor witness for the New Testament, which the translators could read in Latin in Tremellius' edition.",
         have: /Peshitta|Syriac/i,
       },
     ],
@@ -90,6 +98,7 @@ const TIERS: { name: string; hint: string; items: Source[] }[] = [
         name: "Rabbinic Bible",
         date: "Bomberg, 1524–25",
         note: "Jacob ben Chayyim's edition of the Masoretic text with the Targums: the standard Hebrew Bible of the day.",
+        kjv: "The Hebrew text the translators worked from: the KJV's Old Testament is a translation of this edition or a reprint of it.",
         from: ["mt", "tg"],
         have: /^Hebrew Bible \(Ginsburg/i,
         near: /Westminster Leningrad|Hebrew Old Testament \(Tanach\)/i,
@@ -100,6 +109,7 @@ const TIERS: { name: string; hint: string; items: Source[] }[] = [
         name: "Complutensian Polyglot",
         date: "Alcalá, 1514–17",
         note: "Hebrew, Greek, Latin and Aramaic in parallel columns; the first printed Greek New Testament.",
+        kjv: "One of the reference editions on the translators' desks: its parallel columns let them compare the Hebrew, Greek and Latin readings of a passage.",
         from: ["mt", "lxx", "vul", "tg", "byz"],
       },
       {
@@ -107,6 +117,7 @@ const TIERS: { name: string; hint: string; items: Source[] }[] = [
         name: "Antwerp Polyglot",
         date: "Plantin, 1569–72",
         note: "Hebrew, Greek, Latin, the Targums and the Syriac New Testament.",
+        kjv: "Gave the translators the Syriac New Testament and the Targums beside the Hebrew and Greek, with a word-for-word Latin that helped with the sense.",
         from: ["mt", "lxx", "vul", "tg", "syr"],
       },
       {
@@ -114,6 +125,7 @@ const TIERS: { name: string; hint: string; items: Source[] }[] = [
         name: "Erasmus' Greek NT",
         date: "1516–1535",
         note: "The first published Greek New Testament, from about seven late Byzantine manuscripts; the root of the Textus Receptus.",
+        kjv: "The start of the Greek text the KJV's New Testament follows; readings such as Acts 8:37 and the last verses of Revelation reached the KJV through him.",
         from: ["byz", "vul"],
         near: /Textus Receptus/i,
         nearNote: "Stephanus' 1550 text, built on Erasmus'.",
@@ -123,6 +135,7 @@ const TIERS: { name: string; hint: string; items: Source[] }[] = [
         name: "Stephanus' Greek NT",
         date: "1550",
         note: "Robert Estienne's edition of Erasmus' text with readings from other manuscripts: the Textus Receptus.",
+        kjv: "His 1550 edition is the form of the Textus Receptus the KJV is most often compared with, and his 1551 edition gave the New Testament the verse numbers the KJV uses.",
         from: ["byz"],
         have: /Textus Receptus/i,
       },
@@ -131,6 +144,7 @@ const TIERS: { name: string; hint: string; items: Source[] }[] = [
         name: "Beza's Greek NT",
         date: "1588–89, 1598",
         note: "Theodore Beza's revisions of the Textus Receptus, the translators' main Greek text.",
+        kjv: "The Greek text the KJV follows most closely: where Beza differs from Stephanus, the KJV usually goes with Beza.",
         from: ["byz"],
         have: /^Greek NT: Beza \(1598\)( w\/ glosses)?$/i,
         near: /Textus Receptus|\(Interlinear\)/i,
@@ -142,6 +156,7 @@ const TIERS: { name: string; hint: string; items: Source[] }[] = [
         name: "Tremellius–Junius Latin",
         date: "1575–79",
         note: "A Protestant Latin translation from the Hebrew, with Tremellius' Latin of the Syriac New Testament.",
+        kjv: "Consulted for the Old Testament, especially its Latin of difficult Hebrew; some KJV wording follows its sense.",
         from: ["mt", "syr"],
       },
       {
@@ -149,6 +164,7 @@ const TIERS: { name: string; hint: string; items: Source[] }[] = [
         name: "Sixtine Septuagint",
         date: "Rome, 1587",
         note: "The Septuagint printed from Codex Vaticanus.",
+        kjv: "The standard printed Septuagint of the day, used to compare the Greek Old Testament with the Hebrew.",
         from: ["lxx"],
         have: /^Septuagint \(Greek, Brenton/i,
         near: /Brenton|Greek Old Testament \(Septuagint\)/i,
@@ -160,6 +176,7 @@ const TIERS: { name: string; hint: string; items: Source[] }[] = [
         name: "Clementine Vulgate",
         date: "1592",
         note: "The Vulgate as revised under Pope Clement VIII.",
+        kjv: "The Vulgate as the translators knew it (1592), and the Latin behind the Rheims New Testament they also consulted.",
         from: ["vul"],
         have: /Clementine/i,
         near: /Latin Vulgate/i,
@@ -176,6 +193,7 @@ const TIERS: { name: string; hint: string; items: Source[] }[] = [
         name: "Tyndale",
         date: "NT 1526, Pentateuch 1530",
         note: "The first English New Testament from the Greek; much of the KJV's wording is his.",
+        kjv: "The KJV's chief English source: by common estimates over 80% of its New Testament wording is Tyndale's, and much of its Pentateuch.",
         from: ["erasmus", "mt"],
         have: /Tyndale/i,
       },
@@ -184,6 +202,7 @@ const TIERS: { name: string; hint: string; items: Source[] }[] = [
         name: "Coverdale",
         date: "1535",
         note: "The first complete printed English Bible, largely from Tyndale, the Latin and Luther.",
+        kjv: "Gave the KJV many phrases, and finished the Old Testament books Tyndale didn't live to translate.",
         from: ["tyndale", "vul"],
         have: /Coverdale/i,
       },
@@ -192,6 +211,7 @@ const TIERS: { name: string; hint: string; items: Source[] }[] = [
         name: "Matthew's Bible",
         date: "1537",
         note: "Tyndale's work completed with Coverdale's, by John Rogers.",
+        kjv: "Carried Tyndale's Old Testament books (Genesis to 2 Chronicles) into the line of English Bibles that leads to the KJV.",
         from: ["tyndale", "coverdale"],
         have: /Matthew'?s Bible/i,
       },
@@ -200,6 +220,7 @@ const TIERS: { name: string; hint: string; items: Source[] }[] = [
         name: "Great Bible",
         date: "1539",
         note: "The first English Bible authorised for the churches.",
+        kjv: "Begins the line of official church Bibles that the Bishops' Bible and then the KJV continued.",
         from: ["matthew"],
         have: /Great Bible/i,
       },
@@ -208,6 +229,7 @@ const TIERS: { name: string; hint: string; items: Source[] }[] = [
         name: "Geneva Bible",
         date: "1560",
         note: "The Reformers' Bible, with notes; from the Hebrew and Beza's Greek. Shakespeare's and the Pilgrims' Bible.",
+        kjv: "The KJV was meant partly to replace it. The translators drew heavily on its scholarship and wording, but left out its notes.",
         from: ["great", "beza", "bomberg"],
         have: /Geneva/i,
       },
@@ -216,6 +238,7 @@ const TIERS: { name: string; hint: string; items: Source[] }[] = [
         name: "Bishops' Bible",
         date: "1568; 1602 edition",
         note: "The official English Bible; the 1602 printing was the base text the translators revised.",
+        kjv: "The KJV is formally a revision of it: the translators' rules told them to follow it and change it only where the original required.",
         from: ["great", "geneva"],
         have: /Bishops/i,
       },
@@ -224,6 +247,7 @@ const TIERS: { name: string; hint: string; items: Source[] }[] = [
         name: "Rheims New Testament",
         date: "1582",
         note: "The Catholic English New Testament from the Vulgate; the translators borrowed some of its words.",
+        kjv: "A Catholic rival, yet the translators consulted it and took some of its Latin-derived words.",
         from: ["vul"],
         have: /^Rheims New Testament \(1582\)$/i,
         near: /Douay|Rheims/i,
@@ -239,6 +263,7 @@ const KJV: Source = {
   name: "King James Version",
   date: "1611 (text of 1769)",
   note: "Made by about 47 scholars in six companies, 1604–1611, from the editions above.",
+  kjv: "The Authorised Version of the Church of England. The text read today is Benjamin Blayney's Oxford edition of 1769, which modernised the 1611's spelling and corrected its printing errors.",
   // With the KJV+ beside it, as its "+".
   have: /^King James Version( w\/ Strong's Numbers)?$/i,
 };
@@ -255,6 +280,7 @@ const AFTER: { name: string; hint: string; items: Source[] }[] = [
         name: "Webster's Bible",
         date: "1833",
         note: "Noah Webster's light revision of the KJV, putting words that had changed their meaning into the English of his day.",
+        kjv: "Keeps the KJV's text, changing only the words that had become obscure or misleading.",
         from: ["kjv"],
         have: /^Webster's Bible/i,
       },
@@ -263,6 +289,7 @@ const AFTER: { name: string; hint: string; items: Source[] }[] = [
         name: "Revised Version",
         date: "1881–85",
         note: "The official British revision of the KJV, from older Greek manuscripts (Westcott and Hort's text).",
+        kjv: "The first official revision of the KJV. Its New Testament changed many readings to follow older manuscripts, so it departs from the Textus Receptus.",
         from: ["kjv"],
         have: /^(English )?Revised Version/i,
       },
@@ -271,6 +298,7 @@ const AFTER: { name: string; hint: string; items: Source[] }[] = [
         name: "American Standard Version",
         date: "1901",
         note: "The Revised Version's American edition, as literal as English allows.",
+        kjv: "Carries the KJV's revision into American usage, and is the ancestor of the RSV, NASB and WEB.",
         from: ["rv"],
         have: /American Standard Version/i,
       },
@@ -279,6 +307,7 @@ const AFTER: { name: string; hint: string; items: Source[] }[] = [
         name: "Revised Standard Version",
         date: "1952",
         note: "The ASV revised into modern English.",
+        kjv: "Continues the KJV's line of revisions in modern English, through the ASV and the RV.",
         from: ["asv"],
         have: /Revised Standard Version/i,
       },
@@ -287,6 +316,7 @@ const AFTER: { name: string; hint: string; items: Source[] }[] = [
         name: "Modern King James Version",
         date: "1962–98",
         note: "Jay P. Green's KJV in modern English, from the same Hebrew and Greek.",
+        kjv: "Keeps the KJV's underlying texts (the Textus Receptus and the Masoretic) while modernising its English.",
         from: ["kjv"],
         have: /Modern King James/i,
       },
@@ -295,6 +325,7 @@ const AFTER: { name: string; hint: string; items: Source[] }[] = [
         name: "New American Standard Bible",
         date: "1971",
         note: "The ASV revised, keeping its word-for-word method.",
+        kjv: "In the KJV's line through the ASV, but translated from the modern critical Greek text rather than the Textus Receptus.",
         from: ["asv"],
         have: /New American Standard/i,
       },
@@ -303,6 +334,7 @@ const AFTER: { name: string; hint: string; items: Source[] }[] = [
         name: "New King James Version",
         date: "1982",
         note: "The KJV in modern English, from the same Hebrew and Greek.",
+        kjv: "A revision of the KJV itself: same Hebrew and Greek, same structure, with other texts' readings noted in the margin.",
         from: ["kjv"],
         have: /New King James/i,
       },
@@ -311,6 +343,7 @@ const AFTER: { name: string; hint: string; items: Source[] }[] = [
         name: "World English Bible",
         date: "2000",
         note: "The ASV revised into modern English and put into the public domain.",
+        kjv: "A modern descendant of the KJV through the ASV, and free to copy as the KJV is.",
         from: ["asv"],
         have: /World English Bible/i,
       },
@@ -319,6 +352,7 @@ const AFTER: { name: string; hint: string; items: Source[] }[] = [
         name: "English Standard Version",
         date: "2001",
         note: "The RSV revised, in a literal tradition reaching back through the ASV and the RV to the KJV.",
+        kjv: "The latest step in the KJV's line of revisions: KJV, RV, ASV, RSV, ESV.",
         from: ["rsv"],
         have: /English Standard Version/i,
       },
@@ -333,6 +367,7 @@ const AFTER: { name: string; hint: string; items: Source[] }[] = [
         name: "Young's Literal Translation",
         date: "1862; 1898",
         note: "Robert Young's word-for-word translation, keeping the Hebrew and Greek tenses.",
+        kjv: "Not a revision of the KJV but a fresh literal translation, mostly from the Textus Receptus; often used to check the KJV's tenses.",
         have: /Young's Literal/i,
       },
       {
@@ -340,6 +375,7 @@ const AFTER: { name: string; hint: string; items: Source[] }[] = [
         name: "Darby Translation",
         date: "1890",
         note: "John Nelson Darby's literal translation from the best texts of his day.",
+        kjv: "A fresh translation, independent of the KJV, from the critical Greek texts of the 1800s.",
         have: /^Darby/i,
       },
       {
@@ -347,6 +383,7 @@ const AFTER: { name: string; hint: string; items: Source[] }[] = [
         name: "Good News Bible",
         date: "1976",
         note: "A meaning-for-meaning translation in plain, everyday English.",
+        kjv: "Breaks with the KJV tradition, translating the meaning of each passage rather than word for word.",
         have: /Good News/i,
       },
       {
@@ -354,6 +391,7 @@ const AFTER: { name: string; hint: string; items: Source[] }[] = [
         name: "New International Version",
         date: "1978",
         note: "A translation balancing word and meaning, made by an international team.",
+        kjv: "A new translation outside the KJV's line, from the modern critical texts; the most widely read alternative to the KJV.",
         have: /^New International Version/i,
       },
       {
@@ -361,6 +399,7 @@ const AFTER: { name: string; hint: string; items: Source[] }[] = [
         name: "Contemporary English Version",
         date: "1995",
         note: "Plain English written to be read aloud and understood at a first hearing.",
+        kjv: "Outside the KJV's line; written to be heard and understood rather than for word-for-word study.",
         have: /Contemporary English/i,
       },
       {
@@ -368,6 +407,7 @@ const AFTER: { name: string; hint: string; items: Source[] }[] = [
         name: "New International Reader's Version",
         date: "1996",
         note: "The NIV in simpler words, for young and new readers.",
+        kjv: "Simplified from the NIV, so outside the KJV's line.",
         from: ["niv"],
         have: /New International Reader/i,
       },
@@ -376,6 +416,7 @@ const AFTER: { name: string; hint: string; items: Source[] }[] = [
         name: "International Standard Version",
         date: "2011",
         note: "A new translation using recent manuscript finds.",
+        kjv: "A new translation outside the KJV's line, from the modern critical texts.",
         have: /^International Standard Version/i,
       },
       {
@@ -383,6 +424,7 @@ const AFTER: { name: string; hint: string; items: Source[] }[] = [
         name: "Berean Standard Bible",
         date: "2016–2023",
         note: "A translation of the original languages, put into the public domain in 2023.",
+        kjv: "A new translation outside the KJV's line; its Greek is close to the modern critical text.",
         have: /^Berean Standard Bible/i,
       },
     ],
@@ -448,7 +490,7 @@ const status = (s: Source, bibles: ModuleInfo[]) => {
 function historySummary(bibles: ModuleInfo[]): string {
   const name = (id: string) => [...ALL, KJV, ...LATER].find((s) => s.id === id)?.name ?? id;
   const line = (s: Source) =>
-    `- ${s.name} (${s.date}): ${s.note}${s.from ? ` Drew on: ${s.from.map(name).join(", ")}.` : ""} ${status(s, bibles)[0].toUpperCase()}${status(s, bibles).slice(1)}.`;
+    `- ${s.name} (${s.date}): ${s.note} ${s.kjv}${s.from ? ` Drew on: ${s.from.map(name).join(", ")}.` : ""} ${status(s, bibles)[0].toUpperCase()}${status(s, bibles).slice(1)}.`;
   return (
     "The user is looking at a diagram of where the King James Version came from, and which of its sources are in their library. " +
     "The translators (about 47 scholars in six companies, 1604–1611) worked from printed editions, each resting on manuscript traditions, and revised the English Bibles before them.\n\n" +
@@ -474,6 +516,7 @@ export function KjvHistoryScreen() {
   const cards = useRef(new Map<string, HTMLElement>());
   const [lines, setLines] = useState<{ a: string; b: string; d: string }[]>([]);
   const [hover, setHover] = useState<string | null>(null);
+  const [about, setAbout] = useState<{ s: Source; near: boolean; rect: DOMRect } | null>(null);
 
   useLayoutEffect(() => {
     const el = box.current;
@@ -578,9 +621,23 @@ export function KjvHistoryScreen() {
         style={{ minWidth: wide ? 300 : 168, width: "max-content", maxWidth: 340, opacity: on(s.id) ? 1 : 0.35 }}
         onMouseEnter={() => setHover(s.id)}
         onMouseLeave={() => setHover(null)}
-        title={[s.note, near.length ? s.nearNote : ""].filter(Boolean).join("\n\n")}
       >
-        <b style={{ font: wide ? "500 19px/1.2 var(--display)" : "600 13px/1.25 var(--ui)" }}>{s.name}</b>
+        <div style={{ display: "flex", alignItems: "flex-start", gap: 4 }}>
+          <b style={{ font: wide ? "500 19px/1.2 var(--display)" : "600 13px/1.25 var(--ui)", flexGrow: 1 }}>{s.name}</b>
+          <button
+            className="ibtn"
+            type="button"
+            aria-label={`About ${s.name}`}
+            title="About"
+            style={{ width: 20, height: 20, flexShrink: 0, margin: "-2px -6px 0 0" }}
+            onClick={(e) => {
+              e.stopPropagation();
+              setAbout({ s, near: near.length > 0, rect: e.currentTarget.getBoundingClientRect() });
+            }}
+          >
+            <Icon name="info" size={13} />
+          </button>
+        </div>
         <span className="n" style={{ fontSize: 11.5 }}>
           {s.date}
         </span>
@@ -737,6 +794,26 @@ export function KjvHistoryScreen() {
           </aside>
         )}
       </div>
+      {about && (
+        <Popover anchor={about.rect} onClose={() => setAbout(null)} width={360}>
+          <div style={{ padding: "12px 14px", display: "flex", flexDirection: "column", gap: 6 }}>
+            <div>
+              <b style={{ font: "500 18px/1.2 var(--display)" }}>{about.s.name}</b>
+              <div className="n" style={{ fontSize: 12 }}>
+                {about.s.date}
+              </div>
+            </div>
+            <p style={{ margin: 0, fontSize: 13.5, lineHeight: 1.5 }}>{about.s.note}</p>
+            <span className="label" style={{ marginTop: 4 }}>
+              {about.s.id === "kjv" ? "The text" : "For the KJV"}
+            </span>
+            <p style={{ margin: 0, fontSize: 13.5, lineHeight: 1.5 }}>{about.s.kjv}</p>
+            {about.near && about.s.nearNote && (
+              <p style={{ margin: 0, fontSize: 12.5, lineHeight: 1.5, color: "var(--muted)" }}>{about.s.nearNote}</p>
+            )}
+          </div>
+        </Popover>
+      )}
     </div>
   );
 }

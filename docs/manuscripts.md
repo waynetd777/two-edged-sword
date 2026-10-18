@@ -56,6 +56,7 @@ Webster's and the Revised Version to the ESV, and the Bibles translated afresh s
   with Strong's numbers, glosses or notes.
 - A yellow **A** means that Bible has the Apocrypha.
 - Hover a card to light up what it came from and what came from it.
+- The **ⓘ** on a card says what it is and what it means for the KJV.
 - **Ask** opens a panel for questions about the history.
 
 ## Targums and Talmud
