@@ -23,6 +23,9 @@ export const setSceneJournal = (es: JournalEntry[]) => {
 
 type Kind = "bible" | "commentary" | "dictionary" | "lexicon" | "reference" | "devotional";
 
+/** A reference book of maps or timelines (e-Sword's starred picture books, or "… Maps", "… Atlas"). */
+export const isMapBook = (m: ModuleInfo) => m.kind === "reference" && m.features.includes("Maps");
+
 export interface ModuleInfo {
   id: string;
   kind: Kind;
@@ -32,7 +35,7 @@ export interface ModuleInfo {
   strongs: boolean;
   /** Bibles only: the text reads right to left (Hebrew, Arabic, …). */
   rtl: boolean;
-  /** Bibles only: what it has beyond plain text ("Strong's numbers", "Glosses", "Notes", …). */
+  /** Bibles: what it has beyond plain text ("Strong's numbers", "Glosses", "Notes", …). Reference books: "Maps" for maps or timelines. */
   features: string[];
   /** The file's size in bytes. */
   size: number;

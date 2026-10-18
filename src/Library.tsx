@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
-import { LibrarySource, ModuleInfo } from "./api";
+import { isMapBook, LibrarySource, ModuleInfo } from "./api";
 import { isLicensed } from "./Ask";
 import { htmlText, renderHtml } from "./esword";
 import { Icon } from "./icons";
@@ -138,6 +138,9 @@ function Ordered({
   );
 }
 
+/** A tractate of the Talmud (tools/sefaria builds them as "Talmud: Berakhot"). */
+const isTalmud = (m: ModuleInfo) => m.kind === "reference" && m.title.startsWith("Talmud:");
+
 export function LibraryScreen() {
   const app = useApp();
   const [q, setQ] = useState("");
@@ -146,6 +149,14 @@ export function LibraryScreen() {
   const [info, setInfo] = useState<{ m: ModuleInfo; rect: DOMRect } | null>(null);
   const ms = app.lib?.modules ?? [];
   const n = (k: ModuleInfo["kind"]) => ms.filter((m) => m.kind === k).length;
+  // The cards after the dictionaries, study helps before books to read: maps, reference books and the Talmud apart, though all are reference books.
+  const groups: { key: string; label: string; of: (m: ModuleInfo) => boolean }[] = [
+    { key: "lexicon", label: "Lexicons", of: (m) => m.kind === "lexicon" },
+    { key: "maps", label: "Maps and timelines", of: isMapBook },
+    { key: "reference", label: "Reference books", of: (m) => m.kind === "reference" && !isMapBook(m) && !isTalmud(m) },
+    { key: "devotional", label: "Devotionals", of: (m) => m.kind === "devotional" },
+    { key: "talmud", label: "Talmud", of: isTalmud },
+  ];
   const hidden = app.settings.hiddenBibles;
   const showInfo: ShowInfo = (m, rect) => setInfo({ m, rect });
   // A rescan that fails says why, and the buttons come back.
@@ -188,7 +199,8 @@ export function LibraryScreen() {
           <h1 style={{ margin: 0, font: "500 30px/1 var(--display)" }}>Library</h1>
           <span style={{ color: "var(--muted)" }}>
             {ms.length} modules, {total(ms)} · {n("bible")} Bibles, {n("commentary")} commentaries, {n("dictionary")} dictionaries,{" "}
-            {n("lexicon")} lexicons, {n("reference")} reference books, {n("devotional")} devotionals
+            {n("lexicon")} lexicons, {ms.filter((m) => m.kind === "reference" && !isMapBook(m) && !isTalmud(m)).length} reference books,{" "}
+            {ms.filter(isMapBook).length} map books, {ms.filter(isTalmud).length} Talmud tractates, {n("devotional")} devotionals
           </span>
         </div>
         <div className="card" style={{ padding: "14px 16px", display: "flex", alignItems: "center", gap: 14 }}>
@@ -347,30 +359,6 @@ export function LibraryScreen() {
         )}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 12 }}>
           <Ordered kind="commentary" title="Commentaries" orderKey="commentaryOrder" q={q} onInfo={showInfo} />
-          <Ordered kind="dictionary" title="Dictionaries" orderKey="dictionaryOrder" q={q} onInfo={showInfo} />
-          {(["lexicon", "reference", "devotional"] as const)
-            .filter((k) => !q || ms.some((m) => m.kind === k && matches(m, q)))
-            .map((k) => (
-              <div key={k} className="card" style={{ padding: "14px 16px", display: "flex", flexDirection: "column", gap: 4 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", paddingBottom: 4 }}>
-                  <span className="label">{k === "lexicon" ? "Lexicons" : k === "devotional" ? "Devotionals" : "Reference and maps"}</span>
-                  <span className="n">
-                    {q ? `${ms.filter((m) => m.kind === k && matches(m, q)).length} of ${n(k)}` : n(k)} ·{" "}
-                    {total(ms.filter((m) => m.kind === k))}
-                  </span>
-                </div>
-                {ms
-                  .filter((m) => m.kind === k && (!q || matches(m, q)))
-                  .map((m) => (
-                    <div key={m.id} style={{ fontSize: 12.5, minHeight: 24, display: "flex", alignItems: "center", gap: 4 }}>
-                      <span style={{ flexGrow: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={blurb(m)}>
-                        {m.title}
-                      </span>
-                      <InfoButton m={m} onInfo={showInfo} />
-                    </div>
-                  ))}
-              </div>
-            ))}
           {app.tsk && !q && (
             <div className="card" style={{ padding: "14px 16px" }}>
               <span style={{ display: "flex", justifyContent: "space-between" }}>
@@ -395,6 +383,30 @@ export function LibraryScreen() {
               </div>
             </div>
           )}
+          <Ordered kind="dictionary" title="Dictionaries" orderKey="dictionaryOrder" q={q} onInfo={showInfo} />
+          {groups
+            .filter((g) => ms.some((m) => g.of(m) && (!q || matches(m, q))))
+            .map((g) => (
+              <div key={g.key} className="card" style={{ padding: "14px 16px", display: "flex", flexDirection: "column", gap: 4 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", paddingBottom: 4 }}>
+                  <span className="label">{g.label}</span>
+                  <span className="n">
+                    {q ? `${ms.filter((m) => g.of(m) && matches(m, q)).length} of ${ms.filter(g.of).length}` : ms.filter(g.of).length} ·{" "}
+                    {total(ms.filter(g.of))}
+                  </span>
+                </div>
+                {ms
+                  .filter((m) => g.of(m) && (!q || matches(m, q)))
+                  .map((m) => (
+                    <div key={m.id} style={{ fontSize: 12.5, minHeight: 24, display: "flex", alignItems: "center", gap: 4 }}>
+                      <span style={{ flexGrow: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={blurb(m)}>
+                        {m.title}
+                      </span>
+                      <InfoButton m={m} onInfo={showInfo} />
+                    </div>
+                  ))}
+              </div>
+            ))}
         </div>
       </div>
       {info && (

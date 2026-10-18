@@ -51,7 +51,8 @@ pub struct ModuleInfo {
     pub strongs: bool,
     /// Bibles only: the text reads right to left (Hebrew, Arabic, …).
     pub rtl: bool,
-    /// Bibles only: what it has beyond plain text, for the library ("Strong's numbers", "Glosses", …).
+    /// Bibles: what it has beyond plain text, for the library ("Strong's numbers", "Glosses", …).
+    /// Reference books: "Maps" for a book of maps or timelines.
     pub features: Vec<&'static str>,
     /// The file's size in bytes.
     pub size: u64,
@@ -206,6 +207,12 @@ impl Library {
     }
 }
 
+/// A book of maps by its title ("English Standard Version Maps", "Smith Bible Atlas"), for one e-Sword hasn't starred.
+fn is_maps_title(title: &str) -> bool {
+    let t = title.to_lowercase();
+    t.split(|c: char| !c.is_alphanumeric()).any(|w| matches!(w, "map" | "maps" | "atlas"))
+}
+
 /// (title, abbreviation, information, has Strong's numbers, right to left, features).
 type Details = (String, String, String, bool, bool, Vec<&'static str>);
 
@@ -220,6 +227,7 @@ fn read_details(path: &Path, kind: Kind) -> rusqlite::Result<Details> {
             ))
         })?;
     // e-Sword's graphical books are titled "* Classic Bible Maps" so they sort first there.
+    let starred = title.trim_start().starts_with('*');
     let title = title.trim_start_matches(|c: char| c == '*' || c.is_whitespace()).to_string();
     let strongs = kind == Kind::Bible
         && c.query_row("SELECT 1 FROM Bible WHERE ((Book = 43 AND Chapter = 3) OR (Book = 1 AND Chapter = 1)) AND (Scripture LIKE '%<num>%' OR Scripture GLOB '*<tvm>[0-9]*') LIMIT 1", [], |_| Ok(())).optional()?.is_some();
@@ -230,7 +238,11 @@ fn read_details(path: &Path, kind: Kind) -> rusqlite::Result<Details> {
                 .optional()?
                 .flatten()
                 .is_some_and(|t| is_rtl_text(&t)));
-    let features = if kind == Kind::Bible { bible_features(&c, strongs)? } else { Vec::new() };
+    let features = match kind {
+        Kind::Bible => bible_features(&c, strongs)?,
+        Kind::Reference if starred || is_maps_title(&title) => vec!["Maps"],
+        _ => Vec::new(),
+    };
     Ok((title, abbrev, info, strongs, rtl, features))
 }
 
@@ -296,6 +308,14 @@ mod tests {
     fn escapes_uri_characters() {
         assert_eq!(url_escape("/a b/kjv+.bbli"), "/a%20b/kjv%2b.bbli");
         assert_eq!(url_escape("/x?y#z%"), "/x%3fy%23z%25");
+    }
+
+    #[test]
+    fn maps_titles() {
+        assert!(is_maps_title("English Standard Version Maps"));
+        assert!(is_maps_title("Smith Bible Atlas"));
+        assert!(!is_maps_title("Dispensational Truth Charts (Clarence Larkin)"));
+        assert!(!is_maps_title("Mapping the Mind"));
     }
 
     #[test]

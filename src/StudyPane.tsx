@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { api, Article, Commentary, Coverage, ModuleInfo, Verse } from "./api";
+import { api, Article, Commentary, Coverage, isMapBook, ModuleInfo, Verse } from "./api";
 import { book, fmtRef, mentionsPassage, Ref } from "./bible";
 import { AskPanel } from "./Ask";
 import { plainText, renderHtml, docSegments } from "./esword";
@@ -846,7 +846,7 @@ function mapHint(b: number): RegExp {
 
 function MapsTab({ bookN }: { bookN: number }) {
   const app = useApp();
-  const refs = (app.lib?.modules ?? []).filter((m) => m.kind === "reference" && /map|chart/i.test(m.title));
+  const refs = (app.lib?.modules ?? []).filter(isMapBook);
   const [all, setAll] = useState<{ module: ModuleInfo; title: string }[]>([]);
   const [cur, setCur] = useState<{ module: string; title: string } | null>(null);
   const [art, setArt] = useState<Article | null>(null);
@@ -870,7 +870,7 @@ function MapsTab({ bookN }: { bookN: number }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [app.lib]);
   const hint = mapHint(bookN);
-  const suggested = all.filter((x) => /map/i.test(x.module.title) && hint.test(x.title));
+  const suggested = all.filter((x) => /map|atlas/i.test(x.module.title) && hint.test(x.title));
   const chosen = cur ?? (suggested[0] ? { module: suggested[0].module.id, title: suggested[0].title } : null);
   useEffect(() => {
     if (!chosen) {

@@ -64,8 +64,10 @@ The app reads e-Sword X's Mac formats:
 | `.cmti` | Commentaries |
 | `.dcti` | Dictionaries |
 | `.lexi` | Lexicons |
-| `.refi` | Reference books |
+| `.refi` | Reference books, and maps and timelines |
 | `.devi` | Devotionals |
+
+The Library lists maps and timelines on a card of their own: e-Sword's picture books (starred there) and books titled Maps or Atlas. The Talmud's tractates have their own card too.
 
 It doesn't read the Windows formats (`.bblx`, `.cmtx` and so on), EPUB or SWORD modules. Where a
 module comes in both, take the Mac one. That holds on Windows too: e-Sword for Windows encrypts its
