@@ -25,6 +25,15 @@ INSTALLED = f"/Applications/{NAME}.app"
 # What tools/bump_version.py changes, and all the release commits.
 BUMPED = ["src-tauri/tauri.conf.json", "package.json", "package-lock.json", "src-tauri/Cargo.toml", "src-tauri/Cargo.lock"]
 DRY_RUN = os.environ.get("DRY_RUN", "") not in ("", "0")
+# Under each release's notes, for someone downloading it: the first-run warnings and how past them
+# (docs/features.md › First run). Not in the update offer, which only people already past them see.
+FIRST_RUN = """
+### Installing
+
+**Mac** (Apple silicon, macOS 13 or later): open `Two-edged-Sword.dmg` and drag the app onto Applications. The first time you open it, macOS says it can't check the app, as it isn't notarised by Apple: click **Done**, then in System Settings › Privacy & Security click **Open Anyway**.
+
+**Windows** (10 or 11, 64-bit): run `Two-edged-Sword_x64-setup.exe`. If Windows says it protected your PC, click **More info**, then **Run anyway**: the app isn't code-signed. It installs for you alone, with no administrator password.
+"""
 
 
 def run(*cmd):
@@ -68,7 +77,7 @@ def main():
     head = "HEAD" if DRY_RUN else output("git", "rev-parse", "HEAD").strip()
     dash = NAME.replace(" ", "-")
     files = [f"{OUT}/{dash}.dmg", f"{OUT}/{dash}.app.tar.gz", f"{OUT}/latest.json"]
-    run("gh", "release", "create", f"v{v}", *files, "--target", head, "--title", title, "--notes", notes)
+    run("gh", "release", "create", f"v{v}", *files, "--target", head, "--title", title, "--notes", notes + "\n" + FIRST_RUN)
     if os.environ.get("INSTALL", "1") != "0":
         was_running = running()
         run("make", "--no-print-directory", "-o", "app", "install-app")
