@@ -6,16 +6,18 @@
 // within the help. It stays open while you use the screen beside it; Esc or × closes it.
 
 import { listen } from "@tauri-apps/api/event";
-import { openUrl } from "@tauri-apps/plugin-opener";
+import { openUrl, revealItemInDir } from "@tauri-apps/plugin-opener";
 import { ReactNode, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import { helpFor, helpHtml, HelpSection, searchHelp, sectionAt, TOPICS } from "./guides";
+import { parseRef } from "./bible";
+import { helpFor, helpHtml, HelpSection, searchHelp, sectionAt, TOPICS, Walkthrough, WALKTHROUGHS } from "./guides";
 import { Icon } from "./icons";
 import { isMac } from "./keys";
-import { useApp } from "./state";
+import { Screen, useApp } from "./state";
 import { ClearButton } from "./ui";
 
-/** What the drawer shows: a topic at a section (the screen's when none is named), or a search. */
-type HelpView = { topic?: string; section?: string; q?: string };
+/** What the drawer shows: a topic at a section (the screen's when none is named), a Getting started
+ *  walk-through at a step, or a search. */
+type HelpView = { topic?: string; section?: string; guide?: string; step?: number; q?: string };
 
 let view: HelpView | null = null;
 const subs = new Set<() => void>();
@@ -35,17 +37,42 @@ const useView = () =>
 export const openHelp = (v: HelpView = {}) => setView(v);
 const toggleHelp = () => setView(view ? null : {});
 
+const SCREENS: Screen[] = ["read", "compare", "search", "word", "journal", "plans", "library", "history", "settings"];
+
+/** What a guide's `app:` button does: app:library (any screen), app:open/john-3 (a passage),
+ *  app:palette (⌘K), app:modules (the modules folder) or app:rescan. The drawer stays open. */
+function runAction(app: ReturnType<typeof useApp>, action: string) {
+  const [what, arg = ""] = action.split("/");
+  if ((SCREENS as string[]).includes(what)) {
+    if (app.doc && what === "read") app.closeDoc();
+    app.go(what as Screen);
+  } else if (what === "open") {
+    const r = parseRef(arg.replace(/-/g, " "));
+    if (r) app.open({ book: r.book, chapter: r.chapter, verse: r.verse }, "read");
+  } else if (what === "palette") window.dispatchEvent(new Event("open-palette"));
+  else if (what === "modules") {
+    const d = app.lib?.dirs.find((x) => x.source === "app");
+    if (d) revealItemInDir(d.path).catch((e) => app.toast(String(e)));
+  } else if (what === "rescan")
+    app
+      .rescan()
+      .then(() => app.toast("Library rescanned"))
+      .catch((e) => app.toast(`Couldn't rescan the library: ${e}`));
+}
+
 function HelpText({ md, topic }: { md: string; topic: string }) {
+  const app = useApp();
   const html = useMemo(() => helpHtml(md), [md]);
   return (
     <div
       className="help-text"
       onClick={(e) => {
-        const a = (e.target as HTMLElement).closest("a[data-href]") as HTMLElement | null;
+        const a = (e.target as HTMLElement).closest("[data-href]") as HTMLElement | null;
         if (!a) return;
         e.preventDefault();
         const href = a.dataset.href ?? "";
         if (/^https?:/.test(href)) return void openUrl(href);
+        if (href.startsWith("app:")) return runAction(app, href.slice(4));
         // "guide.md#anchor", "guide.md" or "#anchor" in this guide.
         const m = /^(?:([\w-]+)\.md)?(?:#([\w-]+))?$/.exec(href);
         if (!m) return;
@@ -71,6 +98,77 @@ function Section({ s, topic, open, scroll }: { s: HelpSection; topic: string; op
       </summary>
       <HelpText md={s.body} topic={topic} />
     </details>
+  );
+}
+
+/** The Getting started walk-throughs, each with its number of steps or a Done mark. */
+function GuideList() {
+  const app = useApp();
+  return (
+    <section className="help-block">
+      <span className="lab">Getting started</span>
+      <div className="help-guides">
+        {WALKTHROUGHS.map((g) => (
+          <button
+            key={g.id}
+            type="button"
+            className="help-guide"
+            title={`Walk through “${g.title}”, a step at a time`}
+            onClick={() => openHelp({ guide: g.id, step: 0 })}
+          >
+            <span className="help-guide-t">{g.title}</span>
+            {app.settings.guidesDone[g.id] ? (
+              <span className="help-done">
+                <Icon name="check" size={12} />
+                Done
+              </span>
+            ) : (
+              <span className="n">{g.steps.length} steps</span>
+            )}
+          </button>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/** A walk-through, one step at a time: Back, Next, and Done on the last, which marks it finished. */
+function GuideSteps({ g, step }: { g: Walkthrough; step: number }) {
+  const app = useApp();
+  const n = g.steps.length;
+  const at = Math.min(Math.max(step, 0), n - 1);
+  const s = g.steps[at];
+  const last = at === n - 1;
+  return (
+    <div className="help-guidebox">
+      {at === 0 && g.summary && <HelpText md={g.summary} topic="getting-started" />}
+      <span className="n">
+        Step {at + 1} of {n}
+      </span>
+      <h3 className="help-steptitle">{s.title}</h3>
+      <HelpText md={s.body} topic="getting-started" />
+      <div className="help-steps">
+        <button type="button" className="btn" disabled={at === 0} onClick={() => openHelp({ guide: g.id, step: at - 1 })}>
+          Back
+        </button>
+        <span className="help-dots" aria-hidden="true">
+          {g.steps.map((x, i) => (
+            <i key={x.title} className={i === at ? "on" : i < at ? "past" : ""} />
+          ))}
+        </span>
+        <button
+          type="button"
+          className="btn primary"
+          onClick={() => {
+            if (!last) return openHelp({ guide: g.id, step: at + 1 });
+            app.set({ guidesDone: { ...app.settings.guidesDone, [g.id]: true } });
+            openHelp({ topic: "getting-started" });
+          }}
+        >
+          {last ? "Done" : "Next"}
+        </button>
+      </div>
+    </div>
   );
 }
 
@@ -126,16 +224,25 @@ export function HelpDrawer() {
       void un.then((f) => f());
     };
   }, []);
-  useEffect(() => setQ(v?.q ?? ""), [v?.topic, v?.section, v?.q]);
+  useEffect(() => setQ(v?.q ?? ""), [v?.topic, v?.section, v?.guide, v?.step, v?.q]);
 
   if (!v) return null;
   const here = helpFor(app.screen, app.doc);
+  const guide = v.guide ? WALKTHROUGHS.find((g) => g.id === v.guide) : undefined;
   const topic = TOPICS.find((t) => t.id === (v.topic ?? here.topic)) ?? TOPICS[0];
   const first = v.topic ? v.section : here.section;
   const query = q.trim();
 
   let body: ReactNode;
   if (query) body = <Results q={query} />;
+  else if (guide) body = <GuideSteps g={guide} step={v.step ?? 0} />;
+  else if (topic.id === "getting-started")
+    body = (
+      <>
+        {topic.intro && <HelpText md={topic.intro} topic={topic.id} />}
+        <GuideList />
+      </>
+    );
   else
     body = (
       <>
@@ -145,6 +252,7 @@ export function HelpDrawer() {
             <Section key={`${topic.id}:${s.title}`} s={s} topic={topic.id} open={s.title === first} scroll={s.title === first} />
           ))}
         </div>
+        <GuideList />
         <section className="help-block">
           <span className="lab">All topics</span>
           <div className="help-topics">
@@ -161,7 +269,7 @@ export function HelpDrawer() {
   return (
     <aside className="help-drawer" role="complementary" aria-label="Help">
       <div className="help-head">
-        {v.topic && (
+        {(v.topic || v.guide) && (
           <button
             type="button"
             className="ibtn"
@@ -173,8 +281,8 @@ export function HelpDrawer() {
           </button>
         )}
         <h2>
-          {topic.title}
-          <span className="help-sub"> — help</span>
+          {guide ? guide.title : topic.title}
+          <span className="help-sub"> — {guide ? "getting started" : "help"}</span>
         </h2>
         <button type="button" className="ibtn" aria-label="Close help" title="Close help (Esc)" onClick={() => setView(null)}>
           <Icon name="x" />

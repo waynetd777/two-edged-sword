@@ -6,7 +6,7 @@
 // breadcrumbs are left out, and their links become links within the help.
 
 import { escHtml as esc } from "./dom";
-import { shortcut } from "./keys";
+import { isMac, shortcut } from "./keys";
 import type { Screen } from "./state";
 
 export interface HelpSection {
@@ -25,7 +25,7 @@ interface HelpTopic {
 }
 
 /** The guides in the order the help lists them; Features first, as the front page. */
-const PAGES = ["features", "reading", "study", "manuscripts", "journal", "quiet-time", "ask", "library"];
+const PAGES = ["features", "getting-started", "reading", "study", "manuscripts", "journal", "quiet-time", "ask", "library"];
 
 /** Each screen's section, as `guide#anchor`. tools/helpcheck.py checks they exist. */
 const SCREEN_HELP: Record<Screen, string> = {
@@ -75,8 +75,46 @@ function parseGuide(id: string, md: string): HelpTopic {
 
 const FILES = import.meta.glob<string>("../docs/*.md", { query: "?raw", import: "default", eager: true });
 
+/** Mac-only and Windows-only parts of a guide, between `<!-- mac -->` and `<!-- /mac -->` or
+ *  `<!-- windows -->` and `<!-- /windows -->`: the help shows only this computer's. Words that join
+ *  the two for GitHub, which shows both ("app menu<!-- github --> or the <!-- /github -->notification-area
+ *  menu"), go between `<!-- github -->` and `<!-- /github -->`, which the help never shows. */
+export const forPlatform = (md: string) =>
+  md
+    .replace(/<!-- github -->[\s\S]*?<!-- \/github -->/g, "")
+    .replace(isMac ? /<!-- windows -->[\s\S]*?<!-- \/windows -->/g : /<!-- mac -->[\s\S]*?<!-- \/mac -->/g, "")
+    .replace(/<!-- \/?(?:mac|windows) -->/g, "")
+    .replace(/\n{3,}/g, "\n\n");
+
 // The guides are written with macOS's keys; Windows reads its own.
-export const TOPICS: HelpTopic[] = PAGES.map((p) => parseGuide(p, shortcut(FILES[`../docs/${p}.md`] ?? "")));
+export const TOPICS: HelpTopic[] = PAGES.map((p) => parseGuide(p, shortcut(forPlatform(FILES[`../docs/${p}.md`] ?? ""))));
+
+export interface GuideStep {
+  title: string;
+  body: string;
+}
+
+/** A Getting started walk-through: a `##` of getting-started.md, each `###` under it a step. */
+export interface Walkthrough {
+  id: string;
+  title: string;
+  /** What it covers: the text before its first step. */
+  summary: string;
+  steps: GuideStep[];
+}
+
+export const WALKTHROUGHS: Walkthrough[] = (TOPICS.find((t) => t.id === "getting-started")?.sections ?? []).map((s) => {
+  const [summary, ...steps] = s.body.split(/^### /m);
+  return {
+    id: s.anchors[0],
+    title: s.title,
+    summary: summary.trim(),
+    steps: steps.map((x) => {
+      const nl = x.indexOf("\n");
+      return { title: (nl < 0 ? x : x.slice(0, nl)).trim(), body: nl < 0 ? "" : x.slice(nl + 1).trim() };
+    }),
+  };
+});
 
 /** Where a screen's help is: its topic and the section to open. Read shows a book's or a song's when one is open. */
 export function helpFor(screen: Screen, doc?: { view?: string } | null): { topic: string; section: string } {
@@ -111,13 +149,18 @@ export function searchHelp(q: string): HelpHit[] {
   return hits.sort((a, b) => b.score - a.score);
 }
 
-/** Bold, italic, `code` and links. A link keeps its target in data-href, for the drawer to follow. */
+/** Bold, italic, `code` and links. A link keeps its target in data-href, for the drawer to follow;
+ *  an `app:` one (app:library, app:open/john-3) is a button that does it (Help.tsx runAction). */
 function inline(text: string): string {
   const codes: string[] = [];
   let t = text.replace(/`([^`]+)`/g, (_, c: string) => `\u0000${codes.push(c) - 1}\u0000`);
   t = esc(t)
     .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (_, label: string, href: string) =>
-      href.startsWith("images/") ? label : `<a href="#" data-href="${href}">${label}</a>`,
+      href.startsWith("images/")
+        ? label
+        : href.startsWith("app:")
+          ? `<button type="button" class="btn small help-act" data-href="${href}">${label}</button>`
+          : `<a href="#" data-href="${href}">${label}</a>`,
     )
     .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
     .replace(/(^|[^\w*])[*_](\S(?:.*?\S)?)[*_](?![\w*])/g, "$1<em>$2</em>");

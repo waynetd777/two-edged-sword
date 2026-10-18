@@ -50,10 +50,12 @@ An answer from Ask anywhere in the app can be added to the journal in one click.
 
 ## Spelling and grammar
 
-macOS checks spelling (red underline) and grammar (blue underline). Click an underlined word for
+<!-- mac -->macOS checks<!-- /mac --><!-- github --> On a Mac, macOS checks; <!-- /github --><!-- windows -->The app checks<!-- /windows --> spelling (red underline) and grammar (blue underline). Click an underlined word for
 suggestions. Words and phrases from the KJV, such as "maketh" and "thou art", aren't marked.
 
+<!-- windows -->
 On Windows, spelling is Windows' own spell checker, and grammar is checked by Harper, which runs on the PC: nothing you write is sent anywhere.
+<!-- /windows -->
 
 Grammar checking can be turned off in Settings › Journal.
 

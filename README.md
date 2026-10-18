@@ -120,6 +120,7 @@ domain ([Library](docs/library.md#built-in-modules)), and so on for the rest
 
 The same guides are in the app, under Help (⌘?).
 
+- [Getting started](docs/getting-started.md): step-by-step walk-throughs of everything the app does
 - [Features](docs/features.md): getting around and Settings, then [Reading](docs/reading.md),
   [Study](docs/study.md), [Translations and manuscripts](docs/manuscripts.md),
   [Journal](docs/journal.md) and [Quiet time](docs/quiet-time.md)

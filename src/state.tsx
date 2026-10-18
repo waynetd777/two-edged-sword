@@ -71,6 +71,10 @@ export interface Settings {
   /** After each answer, a second call suggests the next question, offered in the empty box. */
   askSuggest: boolean;
   allowLicensed: boolean;
+  /** When the app opens, offer the Getting started guide (Welcome.tsx); "Don't ask me again" turns it off. */
+  offerGuide: boolean;
+  /** Getting started walk-throughs finished, by id (Help.tsx). */
+  guidesDone: Record<string, boolean>;
   reminder: boolean;
   reminderTime: string;
   whenBehind: "ask" | "move" | "catchup" | "skip";
@@ -136,6 +140,8 @@ const DEFAULTS: Settings = {
   includeCommentaries: true,
   askJournal: false,
   askSuggest: true,
+  offerGuide: true,
+  guidesDone: {},
   allowLicensed: true,
   reminder: false,
   reminderTime: "06:30",

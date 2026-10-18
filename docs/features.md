@@ -9,6 +9,7 @@ It only reads them, and keeps your journal, highlights and plans separately.
 
 | Page | What's in it |
 |---|---|
+| [Getting started](getting-started.md) | Step-by-step walk-throughs of everything the app does |
 | [Reading](reading.md) | Read with the study pane, books and devotionals, Listen, songs for the chapter |
 | [Study](study.md) | Compare translations, Search, Word Study |
 | [Translations and manuscripts](manuscripts.md) | Differences from the KJV, Greek and Hebrew, KJV History, the Targums and Talmud |
@@ -19,6 +20,7 @@ It only reads them, and keeps your journal, highlights and plans separately.
 
 ## First run
 
+<!-- mac -->
 The app isn't notarised by Apple, so macOS blocks it the first time it's opened. To open it:
 
 1. Open it once and close the warning.
@@ -34,10 +36,13 @@ After that, macOS asks once for each thing the app uses:
 | Control Music | First worship song | [Worship music](quiet-time.md#worship-music) |
 
 Something refused by mistake can be allowed in System Settings › Privacy & Security.
+<!-- /mac -->
 
+<!-- windows -->
 On Windows, if Windows says it protected your PC when you run the installer, click **More info**,
 then **Run anyway**: the app isn't code-signed. It installs for you alone, with no administrator
 password, and asks for nothing more.
+<!-- /windows -->
 
 ## Updates
 
@@ -45,12 +50,11 @@ password, and asks for nothing more.
 - When there is one, it asks the next time its window is in front, with what's new in it:
   **Install and Restart**, **Later** (asked again the next day) or **Skip This Version**. Esc is Later.
 - Installing shows the download's progress, saves your work and restarts the app.
-- **Check for Updates…** checks now: at the foot of Settings, and in the app menu on a Mac or the
-  notification-area menu on Windows. On Windows an update installs with a progress window and
-  reopens the app.
+- **Check for Updates…** checks now: at the foot of Settings, and in the <!-- mac -->app menu<!-- /mac --><!-- github --> on a Mac or the <!-- /github --><!-- windows -->notification-area menu<!-- /windows --><!-- github --> on Windows<!-- /github -->.<!-- windows --> An update installs with a progress window and reopens the app.<!-- /windows -->
 - An update waits while Ask is answering or the search index is being built.
 
 
+<!-- windows -->
 ## On Windows
 
 The app works the same on Windows, with these differences:
@@ -65,6 +69,7 @@ The app works the same on Windows, with these differences:
 | Worship songs | The music files in your Music folder, played by the app ([Worship music](quiet-time.md#worship-music)) |
 | The menu bar icon | In the notification area, by the clock, with Help and Check for Updates… |
 | Ask | Each AI tool is installed in your Windows account ([Ask](ask.md#claude-code-codex-antigravity-or-copilot)) |
+<!-- /windows -->
 
 ## Getting around
 

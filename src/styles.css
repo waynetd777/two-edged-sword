@@ -2482,6 +2482,77 @@ html.tray-view #root {
 .help-sec[open] > summary .help-chev {
   transform: rotate(90deg);
 }
+.help-guides {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.help-guide {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--text);
+  font: inherit;
+  font-size: 12.5px;
+  text-align: left;
+  cursor: pointer;
+}
+.help-guide:hover {
+  border-color: var(--accent);
+}
+.help-guide-t {
+  flex: 1;
+  font-weight: 500;
+}
+.help-done {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  color: var(--good);
+}
+.help-guidebox {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.help-steptitle {
+  margin: 0;
+  font: 500 18px/1.25 var(--display);
+}
+.help-steps {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+}
+.help-dots {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+.help-dots i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--border);
+}
+.help-dots i.past {
+  background: var(--muted);
+}
+.help-dots i.on {
+  background: var(--accent);
+}
+/* A guide's app: link: a button that does what the step says (Help.tsx runAction). */
+.help-text .help-act {
+  margin: 2px 2px;
+  vertical-align: baseline;
+}
 .help-topics {
   display: flex;
   flex-wrap: wrap;

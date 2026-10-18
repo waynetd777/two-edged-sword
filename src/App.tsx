@@ -28,6 +28,7 @@ import { hideSplash } from "./splash";
 import { useTray } from "./tray";
 import { Tooltips, WordHoverBox } from "./ui";
 import { UpdateDialog } from "./Update";
+import { WelcomeDialog } from "./Welcome";
 import { cmdKey, isMac } from "./keys";
 
 function Screens() {
@@ -112,6 +113,12 @@ function Screens() {
     window.addEventListener("keydown", k);
     return () => window.removeEventListener("keydown", k);
   }, []);
+  // A Getting started step's ⌘K button (Help.tsx runAction).
+  useEffect(() => {
+    const open = () => setPalette(true);
+    window.addEventListener("open-palette", open);
+    return () => window.removeEventListener("open-palette", open);
+  }, []);
 
   if (!app.lib) return null;
   if (!app.bibles.length) {
@@ -184,6 +191,7 @@ function Screens() {
       <WordHoverBox />
       <QuietTime focus={focus && screen === "read"} />
       <UpdateDialog />
+      <WelcomeDialog />
     </div>
   );
 }

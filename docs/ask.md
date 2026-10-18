@@ -28,9 +28,10 @@ own account:
 Choose a model from the menu on any Ask panel; it becomes the default. Settings › AI assistant
 shows which tools were found.
 
-**If no tool is installed, Ask is hidden.** Install one and sign in (run Codex or Antigravity
-once in Terminal), then open Settings, and Ask appears.
+**If no tool is installed, Ask is hidden.** Install one and sign in<!-- mac --> (run Codex or Antigravity
+once in Terminal)<!-- /mac -->, then open Settings, and Ask appears.
 
+<!-- windows -->
 On Windows, install each tool in the Windows account you use the app in: a tool and its sign-in
 belong to one account.
 
@@ -43,6 +44,7 @@ belong to one account.
 
 Then sign in: `claude`, `agy`, `codex login` or `copilot` (type `/login`). A terminal opened before
 the install may not find the tool: sign out of Windows and back in.
+<!-- /windows -->
 
 ## Answers from your library
 

@@ -61,10 +61,14 @@ start by themselves after a countdown that leaves time to read the card.
   their own number of songs.
 - With both on, different songs play after the reading.
 - A song Quiet time has played isn't chosen again for 14 days.
+<!-- mac -->
 - Songs Music can't play aren't chosen: ones Apple Music no longer has, and ones unticked in Music.
+<!-- /mac -->
+<!-- windows -->
 - On Windows the songs are the music files in your Music folder (MP3, M4A, FLAC and others), and
   the app plays them itself. Only songs whose genre is Christian, Gospel or Worship are chosen:
   set it in a file's Properties › Details if it isn't.
+<!-- /windows -->
 
 While the songs play, their words show in the reading column, and the Quiet time bar moves up
 into the top bar. The song's name, cover and why it was chosen stay at the top while the words
@@ -110,7 +114,9 @@ Open the song's Lyrics again later to retry.
 **Try it now**, under the Closing verse card, runs today's Quiet time with its songs and closing
 verse without marking anything read. **Try it with audio** does the same, read aloud.
 
+<!-- mac -->
 The first time, macOS asks whether the app may control Music.
+<!-- /mac -->
 
 ## Closing verse
 
@@ -143,15 +149,17 @@ A passage of your own, such as Proverbs 3:5–6, read every day at the very end 
 Settings › Quiet time sends a notification at the time you choose, with the day's readings, if
 you haven't read yet.
 
+<!-- mac -->
 Turning it on sends one notification straight away, so macOS can ask to allow them. If none
 arrive, allow Two-edged Sword in System Settings › Notifications.
+<!-- /mac -->
 
-The reminder comes while the app runs, including in the menu bar with its window closed. Turn on
+The reminder comes while the app runs, including in the <!-- mac -->menu bar<!-- /mac --><!-- github --> (Mac) or <!-- /github --><!-- windows -->notification area<!-- /windows --><!-- github --> (Windows)<!-- /github --> with its window closed. Turn on
 **Open at Login** (below) so it's always running.
 
 ## Menu bar
 
-Closing the window leaves the app in the menu bar. Click its icon for a small window; click elsewhere or press Esc to close it.
+Closing the window leaves the app in the <!-- mac -->menu bar<!-- /mac --><!-- github --> (Mac) or <!-- /github --><!-- windows -->notification area, by the clock<!-- /windows --><!-- github --> (Windows)<!-- /github -->. Click its icon for a small window; click elsewhere or press Esc to close it.
 
 <a href="images/index.md#quiet-time"><picture><source media="(prefers-color-scheme: dark)" srcset="images/tray-dark.png"><img alt="The menu-bar window: today's reading, the streak and Start Quiet time" src="images/tray-light.png" width="340"></picture></a>
 
@@ -162,4 +170,6 @@ Closing the window leaves the app in the menu bar. Click its icon for a small wi
 - **Daily reminder**, to turn it on or off.
 - **Open at login**, to start the app in the menu bar when you log in.
 - **Open Two-edged Sword** (⌘O), **Settings…** (⌘,) and **Quit** (⌘Q).
+<!-- windows -->
 - On Windows, where the icon is in the notification area, also **Help** (⌘?) and **Check for Updates…**.
+<!-- /windows -->

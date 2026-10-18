@@ -109,6 +109,7 @@ The keyboard's media keys and headphone buttons work too.
 
 ### Better voices
 
+<!-- mac -->
 On a Mac the app uses the voices installed on it. The **Premium** ones sound far more natural:
 
 1. Open System Settings › Accessibility › Spoken Content › System voice › Manage Voices.
@@ -116,8 +117,10 @@ On a Mac the app uses the voices installed on it. The **Premium** ones sound far
 3. Choose it in the player's voice menu or in Settings › Listening.
 
 Hebrew, Greek and Latin Bibles are read in a Hebrew, Greek or Italian voice. Better ones download
-the same way. The speaker beside a Hebrew or Greek word uses the voice chosen for that language in Settings › Listening.
+the same way.
+<!-- /mac -->
 
+<!-- windows -->
 On Windows the app uses Windows' voices. To add more, including Hebrew, Greek and Italian ones:
 
 1. Open Windows Settings › Time & language › Speech, and click **Add voices**.
@@ -133,6 +136,9 @@ On Windows the app uses Windows' voices. To add more, including Hebrew, Greek an
 3. Restart the app, then choose them in Settings › Listening.
 
 Windows' "natural" voices are only for Narrator, so the app can't use them.
+<!-- /windows -->
+
+The speaker beside a Hebrew or Greek word uses the voice chosen for that language in Settings › Listening.
 
 ## Songs for the chapter
 
@@ -151,4 +157,6 @@ suit the chapter you're reading, in the Bible or in a book or devotional.
 - These songs don't count as played for Quiet time, which leaves out songs it played in the last
   14 days.
 - Without an assistant set up, songs are picked at random.
+<!-- windows -->
 - On Windows the songs come from your Music folder: see [Worship music](quiet-time.md#worship-music).
+<!-- /windows -->
