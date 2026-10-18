@@ -65,6 +65,10 @@ pub fn build(app: &AppHandle) -> tauri::Result<()> {
         })
         .build(app)?;
     if let Some(t) = app.get_webview_window("tray") {
+        // macOS draws the config's shadow softly; Windows draws it on a window without a title bar
+        // as a 1px rectangle around the menu's rounded card, so it goes there.
+        #[cfg(windows)]
+        let _ = t.set_shadow(false);
         let t2 = t.clone();
         t.on_window_event(move |ev| {
             // Above the icon, the menu grows upwards as the page sizes it.
