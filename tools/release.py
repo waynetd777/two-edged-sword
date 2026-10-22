@@ -2,8 +2,9 @@
 # SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 """Publishes a release in one go: bumps the version (tools/bump_version.py, once the current one
 has a release), builds the app and the DMG with the update files, commits the bump as
-"<Name> <version>", pushes, creates the GitHub release with the DMG and the update files, then
-installs the app in /Applications and opens it again if it was running.
+"<Name> <version>", pushes, creates the GitHub release with the DMG, the update files and the
+built-in modules zipped (<Name>-modules.zip, which the Windows installer's job builds from, so both
+ship the same modules), then installs the app in /Applications and opens it again if it was running.
 
     make release NOTES="What's new"                 # shown in the app's update offer and on the release
     make release NOTES="…" INSTALL=0                # without installing it here
@@ -13,7 +14,7 @@ Refuses to start without NOTES, or while the working tree has changes other than
 earlier try, so what's released is what's committed. After a failure, run it again: a version with
 no release yet is kept, so it carries on with the same one.
 """
-import json, os, shlex, subprocess, sys
+import json, os, shlex, subprocess, sys, zipfile
 from pathlib import Path
 
 from bump_version import released
@@ -33,6 +34,8 @@ FIRST_RUN = """
 **Mac** (Apple silicon, macOS 13 or later): open `Two-edged-Sword.dmg` and drag the app onto Applications. The first time you open it, macOS says it can't check the app, as it isn't notarised by Apple: click **Done**, then in System Settings › Privacy & Security click **Open Anyway**.
 
 **Windows** (10 or 11, 64-bit): run `Two-edged-Sword_x64-setup.exe`. If Windows says it protected your PC, click **More info**, then **Run anyway**: the app isn't code-signed. It installs for you alone, with no administrator password.
+
+`Two-edged-Sword-modules.zip` holds the built-in modules the Windows installer is built with; you don't need it.
 """
 
 
@@ -52,6 +55,18 @@ def version():
         return old
     major, minor, patch = old.split(".")  # what make app's bump would make it
     return f"{major}.{minor}.{int(patch) + 1}" if released(old) else old
+
+
+def pack_modules(dest):
+    """The built-in modules (what make app built into src-tauri/modules), zipped flat for the Windows job."""
+    print(f"+ zip src-tauri/modules → {dest}", flush=True)
+    if DRY_RUN:
+        return
+    src = ROOT / "src-tauri/modules"
+    with zipfile.ZipFile(ROOT / dest, "w", zipfile.ZIP_DEFLATED, compresslevel=6) as z:
+        for f in sorted(src.iterdir()):
+            if f.is_file() and f.name != "README.md":
+                z.write(f, f.name)
 
 
 def running():
@@ -76,7 +91,8 @@ def main():
     run("git", "push", "-q", "origin", "HEAD")
     head = "HEAD" if DRY_RUN else output("git", "rev-parse", "HEAD").strip()
     dash = NAME.replace(" ", "-")
-    files = [f"{OUT}/{dash}.dmg", f"{OUT}/{dash}.app.tar.gz", f"{OUT}/latest.json"]
+    pack_modules(f"{OUT}/{dash}-modules.zip")
+    files = [f"{OUT}/{dash}.dmg", f"{OUT}/{dash}.app.tar.gz", f"{OUT}/latest.json", f"{OUT}/{dash}-modules.zip"]
     run("gh", "release", "create", f"v{v}", *files, "--target", head, "--title", title, "--notes", notes + "\n" + FIRST_RUN)
     if os.environ.get("INSTALL", "1") != "0":
         was_running = running()

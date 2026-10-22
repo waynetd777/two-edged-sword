@@ -1,10 +1,10 @@
 # Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
 # SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
-# The Windows release build done on main, so windows-release.yml starts with its crates compiled
-# and the built-in modules built. A cache saved on a release's tag is seen only by that tag, so each
-# release would otherwise build everything again; one saved on main is seen by every tag. The
-# caches' paths, keys and shared-key must stay exactly as windows-release.yml has them.
+# The Windows release build done on main, so windows-release.yml starts with its crates compiled. A
+# cache saved on a release's tag is seen only by that tag, so each release would otherwise compile
+# everything again; one saved on main is seen by every tag. The shared-key must stay as
+# windows-release.yml has it. The built-in modules aren't built here: the release takes the Mac's.
 name: Windows release cache
 on:
   push:
@@ -13,7 +13,6 @@ on:
       - "src-tauri/**"
       - "src/**"
       - "package*.json"
-      - "tools/**"
       - ".github/workflows/windows-cache.yml"
   workflow_dispatch:
 
@@ -41,27 +40,7 @@ jobs:
         with:
           node-version: lts/*
           cache: npm
-      - uses: actions/setup-python@v7
-        with:
-          python-version: "3.x"
-      # The map builder's (tools/maps): the rest of the module builders need only Python itself.
-      - run: python -m pip install --disable-pip-version-check numpy pillow
-      - uses: actions/cache@v6
-        with:
-          path: |
-            src-tauri/modules
-            ~\AppData\Local\Two-edged Sword\Caches
-            !src-tauri/modules/maps.refi
-            !~\AppData\Local\Two-edged Sword\Caches\maps
-          key: modules-${{ hashFiles('tools/**/*.py', '!tools/maps/**') }}
-      # The map book on its own, with the terrain it's drawn from: redrawn only when its builder changes,
-      # not with every other module (core's --if-missing skips it when it's here).
-      - uses: actions/cache@v6
-        with:
-          path: |
-            src-tauri/modules/maps.refi
-            ~\AppData\Local\Two-edged Sword\Caches\maps
-          key: maps-${{ hashFiles('tools/maps/**') }}
       - run: npm ci --no-audit --no-fund
-      # The release's build, without the installer.
-      - run: npx tauri build --no-bundle
+      # The release's build, without the installer, and without the built-in modules: the release takes
+      # those from the Mac's build (make release attaches them), so only the crates are cached here.
+      - run: npx tauri build --no-bundle --config src-tauri/tauri.no-modules.conf.json

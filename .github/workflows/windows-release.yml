@@ -40,30 +40,13 @@ jobs:
       - uses: actions/setup-python@v7
         with:
           python-version: "3.x"
-      # The map builder's (tools/maps): the rest of the module builders need only Python itself.
-      - run: python -m pip install --disable-pip-version-check numpy pillow
-      # The built-in modules, and the downloads they're built from, from windows-cache.yml's run on
-      # main (a cache this tag saved would be seen by no other release).
-      - uses: actions/cache/restore@v6
-        with:
-          path: |
-            src-tauri/modules
-            ~\AppData\Local\Two-edged Sword\Caches
-            !src-tauri/modules/maps.refi
-            !~\AppData\Local\Two-edged Sword\Caches\maps
-          key: modules-${{ hashFiles('tools/**/*.py', '!tools/maps/**') }}
-          # Else main's latest: a release made before a change to the builders still finds them built.
-          restore-keys: modules-
-      # The map book on its own, with the terrain it's drawn from: redrawn only when its builder changes,
-      # not with every other module (core's --if-missing skips it when it's here).
-      - uses: actions/cache/restore@v6
-        with:
-          path: |
-            src-tauri/modules/maps.refi
-            ~\AppData\Local\Two-edged Sword\Caches\maps
-          key: maps-${{ hashFiles('tools/maps/**') }}
-          # Else main's latest: a release made before a change to the builders still finds them built.
-          restore-keys: maps-
+      # The built-in modules, built on the Mac by make release and attached to the release: the same files the
+      # Mac's app has, and nothing to build here (core's --if-missing then finds them all and only checks).
+      - run: |
+          gh release download "$env:TAG" -p Two-edged-Sword-modules.zip -D "$env:RUNNER_TEMP"
+          tar -xf "$env:RUNNER_TEMP\Two-edged-Sword-modules.zip" -C src-tauri/modules
+        env:
+          GH_TOKEN: ${{ github.token }}
       - run: npm ci --no-audit --no-fund
       - run: npx tauri build
       - run: python tools/update_windows.py "$env:TAG"
