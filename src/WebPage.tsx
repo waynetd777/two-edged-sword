@@ -143,6 +143,16 @@ export function WebPage({ focus, setFocus }: { focus: boolean; setFocus: (f: boo
     setPicking(!picking);
   };
   useListenKey(listen);
+  // Space plays and pauses, as in the other readers (the page sends it here when it has the keyboard).
+  useEffect(() => {
+    const k = (e: KeyboardEvent) => {
+      if (e.key !== " " || e.metaKey || e.ctrlKey || e.altKey || (e.target as HTMLElement)?.closest?.("input, textarea, select, [contenteditable]")) return;
+      e.preventDefault();
+      listen();
+    };
+    window.addEventListener("keydown", k);
+    return () => window.removeEventListener("keydown", k);
+  });
   useEffect(() => post({ pick: picking }), [picking]);
   useEffect(() => post({ zoom }), [zoom]);
   useEffect(() => post({ colors: readingColors(invert, dark), invert }), [invert, dark]);

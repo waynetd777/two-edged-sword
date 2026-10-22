@@ -332,7 +332,10 @@
   addEventListener(
     "keydown",
     (e) => {
-      if (!app || !(e.metaKey || e.key === "Escape")) return;
+      // Space too, as in the app's readers it plays and pauses the reading (not while typing in the page).
+      const space = e.key === " " && !e.ctrlKey && !e.altKey && !e.target.closest?.("input, textarea, select, [contenteditable]");
+      if (!app || !(e.metaKey || e.key === "Escape" || space)) return;
+      if (space) e.preventDefault();
       if (e.key === "Escape" && picking) pick(false);
       if (e.metaKey && ["=", "+", "-", "0"].includes(e.key)) e.preventDefault();
       tell({ key: { key: e.key, metaKey: e.metaKey, shiftKey: e.shiftKey, altKey: e.altKey, ctrlKey: e.ctrlKey } });
