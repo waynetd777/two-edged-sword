@@ -54,6 +54,9 @@ The app comes with these, so it works with nothing else installed. All are publi
 | Syriac Peshitta New Testament (1905) | CrossWire |
 | Murdock's and Etheridge's English translations of the Peshitta New Testament | CrossWire |
 | Ginsburg's Hebrew Bible (1894), and Ginsburg+ word by word | Ginsburg Hebrew Bible project (Apache-2.0 and GPL-3.0); Ginsburg+'s English from WLC+ |
+| LXX-Brenton+: the Greek Septuagint word by word, with the Apocrypha, Strong's numbers and English | GLAUx (CC BY-SA), STEPBible (CC BY) |
+| Vulg-C+: the Clementine Vulgate word by word, with Strong's numbers and English | Collatinus (GPL), the UD Latin treebanks (CC BY-SA), Whitaker's WORDS; numbers from WLC+, Byz+ and LXX-Brenton+ |
+| Peshitta+: the Syriac Peshitta word by word, its English and Strong's numbers from the Greek | Byz+ and STEPBible (CC BY), Murdock's and Etheridge's translations |
 | Greek NT: Byzantine Majority Text (Byz, 2018) | Robinson and Pierpont |
 | Byz+: the Byzantine Greek NT word by word | Robinson and Pierpont; English from STEPBible (CC BY) |
 | WLC+: the Hebrew Old Testament word by word | Open Scriptures and STEPBible (CC BY) |
@@ -117,10 +120,9 @@ show after **Rescan**. They're numbered like the KJV, so they compare beside it.
 |---|---|
 | Targum, Targum Pseudo-Jonathan, the Babylonian Talmud | Sefaria |
 | Beza's Greek New Testament (1598), and Beza 1598+ word by word | textus-receptus.com, STEPBible |
-| LXX-Brenton+, the Greek Septuagint word by word (needs e-Sword X's Greek OT+) | STEPBible |
-| Latin+ and Vulg-C+, word by word | Stanza, Whitaker's WORDS |
+| Latin+, Jerome's Vulgate word by word (needs e-Sword's Latin Vulgate) | Stanza, Whitaker's WORDS |
 | Targum+ and Ps-Jon+, word by word | Sefaria, Jastrow |
-| Peshitta+, word by word | ETCBC, SEDRA |
+| Peshitta SEDRA: the Peshitta word by word, with SEDRA's Syriac glosses and grammar | ETCBC, SEDRA |
 | The Rheims New Testament (1582) | Bible Support |
 
 All are public domain or openly licensed, except some Sefaria translations, SEDRA's glosses and

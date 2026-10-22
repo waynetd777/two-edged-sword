@@ -151,10 +151,10 @@ The concordance and the dictionaries' occurrence counts are counted from the KJV
 
 The other tools' Bibles built in (their docstrings say how each is made), each run inside
 modules.shipping(), so it reads only the built-in modules (the KJV's verses, the RV, WLC+), never the
-user's library or e-Sword X's. Not built in: what reads an e-Sword module (lxx/plus.py's Greek OT+,
-beza's TR+ and Beza 1598+ with it; rheims, from a file on Bible Support's e-Sword downloads); what has
-a non-commercial source (sefaria's Talmud and Targum translations, targum's Jastrow, syriac's SEDRA);
-latin, whose Latin+ is from e-Sword's latin.bbli and whose tagger's PROIEL model is CC BY-NC-SA.
+user's library or e-Sword X's. Not built in: what reads an e-Sword module (beza's TR+ and Beza 1598+
+with it; latin/build.py's Latin+, from e-Sword's latin.bbli; rheims, from a file on Bible Support's
+e-Sword downloads); what has a non-commercial source (sefaria's Talmud and Targum translations,
+targum's Jastrow, syriac/sedra.py's SEDRA).
   peshitta, murdock, etheridge, tyndale, geneva1599, drc  CrossWire's modules of those names, each
             "DistributionLicense=Public Domain" (tools/crosswire); the Douay-Rheims also reads the
             Clementine Vulgate Project's text.
@@ -165,6 +165,13 @@ latin, whose Latin+ is from e-Sword's latin.bbli and whose tagger's PROIEL model
   ginsburg, ginsburg+  github.com/ahembd/Ginsburg_Hebrew_Bible (Apache-2.0), a few verses from its
             sister repository (GPL-3.0), so both are shared under the GPL, version 3, as the app is;
             Ginsburg+'s English, Strong's numbers and grammar are WLC+'s (CC BY 4.0) (tools/ginsburg).
+  lxx+      LXX-Brenton+: the Greek Brenton word by word, its words' forms and grammar from GLAUx (CC BY-SA 4.0,
+            so the module is shared under it), Strong's numbers and English from STEPBible (CC BY 4.0) (tools/lxx/plus.py).
+  peshitta+  The Peshitta word by word, its English and Strong's numbers from the Greek of Byz+ (lined up word by
+            word; STEPBible's, CC BY 4.0), or from Murdock's and Etheridge's translations (tools/syriac/build.py).
+  clementine+  Vulg-C+: the Clementine word by word, its forms from Collatinus (GPL) chosen by taggers trained on the
+            UD Latin LLCT and CIRCSE treebanks (CC BY-SA 4.0), English from Whitaker's WORDS and Collatinus, and
+            Strong's numbers from WLC+, Byz+ and LXX+ lined up with it (tools/latin/clementine.py).
 
 The GitHub files are taken at a fixed commit and checked against their sha256, so a rebuild makes
 the same modules; eBible.org's, CrossWire's and the Berean Bible's files have no fixed version to
@@ -2665,6 +2672,11 @@ MORE |= {"wesley": ("wesley.cmti", write_wesley), "torrey": ("torrey.dcti", writ
          "weymouth": ("weymouth.bbli", write_weymouth), "wlc+": ("wlc+.bbli", write_wlc_plus),
          "openbible": ("openbible_xref.cmti", write_openbible_xref), "places": ("places.dcti", write_places)}
 MORE |= {"ginsburg": ("ginsburg.bbli", lambda: write_tool("ginsburg.build")), "ginsburg+": ("ginsburg+.bbli", lambda: write_tool("ginsburg.plus"))}
+# The word-by-word Septuagint, Vulgate and Peshitta, from open sources only: after what each reads (LXX+ the Greek
+# Brenton; Peshitta+ the Peshitta, Byz+, Murdock and Etheridge; Vulg-C+ the Clementine, WLC+, Byz+ and LXX+).
+MORE |= {"lxx+": ("lxx_brenton+.bbli", lambda: write_tool("lxx.plus")),
+         "peshitta+": ("peshitta+.bbli", lambda: write_tool("syriac.build")),
+         "clementine+": ("clementine+.bbli", lambda: write_tool("latin.clementine"))}
 
 
 def main():

@@ -260,20 +260,24 @@ then press **Rescan**.
 | `tools/beza/build.py` | Beza's Greek New Testament (1598) | | textus-receptus.com; e-Sword's TR+ if you have it |
 | `tools/beza/plus.py` | Beza 1598+, word by word | beza | STEPBible |
 | `tools/lxx/build.py` | Brenton's Greek Septuagint, with the Apocrypha | | eBible.org |
-| `tools/lxx/plus.py` | LXX-Brenton+, word by word | lxx | e-Sword's Greek OT+, STEPBible |
-| `tools/latin/build.py` | Latin+ and Vulg-C+, word by word (downloads about 1 GB) | | Stanza, Whitaker's WORDS |
+| `tools/lxx/plus.py` | LXX-Brenton+, word by word | lxx | GLAUx, STEPBible |
+| `tools/latin/clementine.py` | Vulg-C+, word by word | vulgate, wlc, lxx/plus.py | Collatinus, UD Latin LLCT and CIRCSE, Whitaker's WORDS |
+| `tools/latin/build.py` | Latin+, word by word (downloads about 1 GB) | | e-Sword's Latin Vulgate, Stanza, Whitaker's WORDS |
 | `tools/targum/build.py` | Targum+ and Ps-Jon+, word by word | sefaria, wlc | WLC+, Jastrow |
-| `tools/syriac/build.py` | Peshitta+, word by word | crosswire | ETCBC, SEDRA |
+| `tools/syriac/build.py` | Peshitta+, word by word, from the Greek | crosswire | Byz+, STEPBible, Murdock, Etheridge |
+| `tools/syriac/sedra.py` | Peshitta SEDRA, word by word | crosswire | ETCBC, SEDRA |
 | `tools/rheims/build.py` | The Rheims New Testament (1582) | crosswire | Bible Support file 11077, in ~/Downloads |
 
 Run each with `python3`. Downloads are cached in `~/Library/Caches/Two-edged Sword/`.
-`tools/core` builds the ones from `crosswire`, `vulgate`, `lxx/build.py`, `ginsburg/build.py` and `ginsburg/plus.py` into the app as well (see below).
+`tools/core` builds the ones from `crosswire`, `vulgate`, `lxx`, `ginsburg`, `latin/clementine.py` and `syriac/build.py` into the app as well (see below).
 Sources on GitHub, Bitbucket and SWORD's svn are pinned to a commit or revision, so a rebuild gives the same text; move the pin on purpose.
 
 All are public domain or openly licensed, except some Sefaria translations, SEDRA's glosses and
 Jastrow, which are for non-commercial use. That's fine for personal study.
 
-- `lxx/plus.py` needs e-Sword X's Greek OT+. No openly licensed tagged Septuagint exists.
+- LXX-Brenton+'s word forms are GLAUx's, tagged by a model trained partly on non-commercial treebanks; GLAUx
+  publishes its results under CC BY-SA 4.0, so LXX-Brenton+ is shared under it.
+- Peshitta+'s English and numbers come from the Greek it's lined up with, so Word Study opens the Greek word.
 - `beza/build.py` uses e-Sword X's Greek NT TR+, if you have it, to correct the transcription. Without
   it, the transcription is kept as it is.
 
@@ -300,18 +304,19 @@ the Library screen (Settings › `eswordCopies`). `--only jfb asv` builds just t
 builds only what isn't there. It also builds other tools' public-domain and openly licensed Bibles into the
 bundle: the Peshitta, Murdock, Etheridge, Tyndale, Geneva 1599 and Douay-Rheims (`tools/crosswire`), the
 Clementine Vulgate (`tools/vulgate`), the Greek Brenton (`tools/lxx/build.py`), Ginsburg and Ginsburg+
-(`tools/ginsburg`, shared under the GPL as the app is, since a few verses come from a GPL-3.0 source) and
-WLC+ (`tools/wlc`). Each runs inside `shipping()`, so it reads only the built-in modules. And the map book,
+(`tools/ginsburg`, shared under the GPL as the app is, since a few verses come from a GPL-3.0 source),
+WLC+ (`tools/wlc`), and the word-by-word LXX-Brenton+, Vulg-C+ and Peshitta+ (`tools/lxx/plus.py`,
+`tools/latin/clementine.py`, `tools/syriac/build.py`), from open sources only. Each runs inside `shipping()`, so it reads only the built-in modules. And the map book,
 `maps.refi`, with `tools/maps/build.py`: maps drawn from OpenBible.info's places, NASA and USGS terrain
 (Mapzen's Terrain Tiles) and Natural Earth's coasts, at 3,600 pixels wide. Its first run downloads
 some thousands of terrain tiles (cached); `--only jesus --pictures DIR` draws one map to look at.
 
 Nothing from e-Sword X goes into a module that could be shipped: its licence forbids passing its
-modules on. Two scripts read e-Sword modules, so what they build is for your own library only:
-`lxx/plus.py` (Greek OT+) and `beza/build.py` (TR+, if it's there), and `beza/plus.py` with it.
-These aren't built in either: `rheims` (its source is a file from Bible Support's e-Sword downloads),
-`latin` (Latin+ is from e-Sword's `latin.bbli`; the tagger's PROIEL model is CC BY-NC-SA), and
-`sefaria`, `targum` and `syriac` (non-commercial sources).
+modules on. Scripts that read e-Sword modules build for your own library only: `beza/build.py`
+(TR+, if it's there), `beza/plus.py` with it, and `latin/build.py` (Latin+, from e-Sword's `latin.bbli`;
+its tagger's PROIEL model is CC BY-NC-SA too). These aren't built in either: `rheims` (its source is a
+file from Bible Support's e-Sword downloads), and `sefaria`, `targum` and `syriac/sedra.py`
+(non-commercial sources).
 
 `tools/stepbible.py` reads STEPBible's TAGNT: every Greek NT edition's words with Strong's numbers
 and grammar, numbered as the KJV. It gives ἐγώ, σύ and εἰμί their forms' numbers (μου G3450), as
