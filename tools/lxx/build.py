@@ -31,7 +31,7 @@ the KJV does (Deuteronomy 28–29), the verses keep their numbers.
 Where the Septuagint orders a passage otherwise and no table moves it, PLACES puts each verse at the
 KJV verse it translates, worked out verse by verse against the KJV: Exodus 36–39 (the making of the
 tabernacle in another order), Numbers 10:34–36, 21:20–22, 26:15–47 (the tribes in another order) and
-27:4–8, Joshua 24:29–31, 1 Kings 7 (Solomon's house after the temple's furnishings), Proverbs 31:26–27,
+27:4–8, Joshua 24:29–31, 1 Kings 6:1a–d and 7 (Solomon's house after the temple's furnishings), Proverbs 31:26–27,
 Ezekiel 7:3–9.
 
 In Leviticus 8, Sirach 30–36 and the additions to Esther each verse is placed by its words: eBible's
@@ -140,6 +140,8 @@ PLACES = [
     ("NUM", 27, "4-7", 27, 5), ("NUM", 27, "8", 27, 8),
     # Joshua's people serving the Lord before his death and burial, and the knives buried with him.
     ("JOS", 24, "29", 24, 31), ("JOS", 24, "30-31", 24, 29), ("JOS", 24, "31a", 24, 30),
+    # 3 Kingdoms 6:1a-d: the foundation stones (the KJV's 5:17-18) and the years of the building (6:37-38).
+    ("1KI", 6, "1a", 5, 17), ("1KI", 6, "1b", 5, 18), ("1KI", 6, "1c", 6, 37), ("1KI", 6, "1d", 6, 38),
     # 3 Kingdoms 7: Hiram and the temple's furnishings (the KJV's 7:13-51) before Solomon's house (7:1-12).
     ("1KI", 7, "1-2", 7, 13), ("1KI", 7, "3-6", 7, 15), ("1KI", 7, "7", 7, 21), ("1KI", 7, "8", 7, 19),
     ("1KI", 7, "9", 7, 20), ("1KI", 7, "10-11", 7, 23), ("1KI", 7, "12", 7, 26), ("1KI", 7, "13", 7, 25), ("1KI", 7, "14-17", 7, 27),
@@ -394,8 +396,18 @@ def build(url=USFM):
             order.append(key)
         out[key].append(text)
         last = key
-    rows = [(b, c, v, " ".join(t for t in out[(b, c, v)] if t)) for b, c, v in sorted(out)]
+    rows = [(b, c, v, joined_text(out[(b, c, v)])) for b, c, v in sorted(out)]
     return rows, about, joined, notes
+
+
+def joined_text(parts):
+    """The verses joined into one, a verse that follows a full stop with a capital ("…thirteen years. And Solomon")."""
+    out = ""
+    for t in (t for t in parts if t):
+        if re.search(r"[.!?][\]\)'’\"”]*$", out):
+            t = re.sub(r"^([^\w]*)(\w)", lambda m: m[1] + m[2].upper(), t, count=1)
+        out = f"{out} {t}" if out else t
+    return out
 
 
 @lru_cache(maxsize=1)
