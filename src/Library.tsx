@@ -11,6 +11,16 @@ import { BibleSelect, Topbar } from "./Shell";
 import { useApp } from "./state";
 import { orderModules } from "./StudyPane";
 import { ClearButton, fmtSize, Popover, Seg, Switch } from "./ui";
+
+/** A Bible's terms, as its About text gives them: copyrighted ones are for personal use; one under a
+ *  non-commercial licence (Vulg-C+'s CC BY-NC-SA) mustn't be sold; CC BY, CC BY-SA, CC0, GPL or Apache
+ *  is an open licence (credit owed); the rest are public domain. */
+function licenceOf(b: ModuleInfo): "Personal use" | "Non-commercial" | "Open licence" | "Public domain" {
+  if (isLicensed(b)) return "Personal use";
+  if (/\bCC[ -]?BY-NC|NonCommercial/i.test(b.info)) return "Non-commercial"; // a licence named, not a source's note
+  if (/\bCC[ -]?BY\b|\bCC0\b|\bGPL\b|Apache[ -]2/i.test(b.info)) return "Open licence";
+  return "Public domain";
+}
 import { FILES_APP, isMac } from "./keys";
 
 const total = (ms: ModuleInfo[]) => fmtSize(ms.reduce((t, m) => t + (m.size ?? 0), 0));
@@ -359,7 +369,8 @@ export function LibraryScreen() {
               </thead>
               <tbody>
                 {bibles.map((b) => {
-                  const lic = isLicensed(b);
+                  const terms = licenceOf(b);
+                  const lic = terms !== "Public domain" && terms !== "Open licence";
                   return (
                     <tr key={b.id}>
                       <td style={{ padding: "8px 14px", borderBottom: "1px solid var(--border)" }}>
@@ -386,7 +397,7 @@ export function LibraryScreen() {
                             color: lic ? "var(--pufg)" : "var(--pdfg)",
                           }}
                         >
-                          {lic ? "Personal use" : "Public domain"}
+                          {terms}
                         </span>
                       </td>
                       <td style={{ padding: "8px 14px", borderBottom: "1px solid var(--border)", textAlign: "right" }}>
