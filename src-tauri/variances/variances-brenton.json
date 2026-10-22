@@ -1,0 +1,4237 @@
+{
+ "module": "brenton",
+ "base": "kjv",
+ "updated": "2026-10-22",
+ "records": [
+  {
+   "book": 1,
+   "chapter": 2,
+   "verse": 2,
+   "kind": "other",
+   "weight": "minor",
+   "change": "God finished his works \"on the sixth day\", not the seventh",
+   "note": "The Septuagint, the Samaritan Pentateuch and the Syriac read \"sixth\", so that no work is done on the seventh; the Hebrew and the KJV read \"seventh\"."
+  },
+  {
+   "book": 1,
+   "chapter": 3,
+   "verse": 15,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"he shall watch against thy head\" for \"it shall bruise\"",
+   "note": "The Septuagint renders the Hebrew verb as \"watch for\" and uses a masculine \"he\" where \"seed\" is neuter, which early Christian writers read of one descendant, the Messiah. The KJV follows the Hebrew; both keep the enmity and the head and heel."
+  },
+  {
+   "book": 1,
+   "chapter": 4,
+   "verse": 8,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Adds Cain's words \"Let us go out into the plain\"",
+   "note": "The Septuagint, with the Samaritan Pentateuch, the Syriac and the Vulgate, supplies what Cain said; the Masoretic text reads \"Cain said unto Abel\" with no words, which the KJV renders \"talked with\"."
+  },
+  {
+   "book": 1,
+   "chapter": 5,
+   "verse": 3,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Adam begets Seth at 230, not 130",
+   "note": "The Septuagint gives most of the Genesis 5 fathers a hundred years more before their sons' birth (fewer after), lengthening the time from creation to the flood; the Hebrew and the KJV have the shorter figures."
+  },
+  {
+   "book": 1,
+   "chapter": 5,
+   "verse": 4,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Adam lives 700 years after Seth, not 800",
+   "note": "The Septuagint adds a hundred years to most of the Genesis 5 fathers' ages at their sons' birth and takes them from the years after, so totals mostly agree but the time from creation to the flood is longer. The Hebrew and the KJV have the shorter figures."
+  },
+  {
+   "book": 1,
+   "chapter": 5,
+   "verse": 6,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Seth begets Enos at 205, not 105",
+   "note": "The Septuagint gives most of the Genesis 5 fathers a hundred years more before their sons' birth (fewer after), lengthening the time from creation to the flood; the Hebrew and the KJV have the shorter figures."
+  },
+  {
+   "book": 1,
+   "chapter": 5,
+   "verse": 9,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Enos begets Cainan at 190, not 90",
+   "note": "The Septuagint gives most of the Genesis 5 fathers a hundred years more before their sons' birth (fewer after), lengthening the time from creation to the flood; the Hebrew and the KJV have the shorter figures."
+  },
+  {
+   "book": 1,
+   "chapter": 5,
+   "verse": 12,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Cainan begets Mahalaleel at 170, not 70",
+   "note": "The Septuagint gives most of the Genesis 5 fathers a hundred years more before their sons' birth (fewer after), lengthening the time from creation to the flood; the Hebrew and the KJV have the shorter figures."
+  },
+  {
+   "book": 1,
+   "chapter": 5,
+   "verse": 15,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Mahalaleel begets Jared at 165, not 65",
+   "note": "The Septuagint gives most of the Genesis 5 fathers a hundred years more before their sons' birth (fewer after), lengthening the time from creation to the flood; the Hebrew and the KJV have the shorter figures."
+  },
+  {
+   "book": 1,
+   "chapter": 5,
+   "verse": 21,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Enoch begets Methuselah at 165, not 65",
+   "note": "The Septuagint gives most of the Genesis 5 fathers a hundred years more before their sons' birth (fewer after), lengthening the time from creation to the flood; the Hebrew and the KJV have the shorter figures."
+  },
+  {
+   "book": 1,
+   "chapter": 5,
+   "verse": 25,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Methuselah begets Lamech at 167, not 187",
+   "note": "The Septuagint's figure here is lower than the Hebrew's; on it Methuselah outlives the flood by some years, a difficulty some Greek copies remove by reading 187 as the Hebrew does."
+  },
+  {
+   "book": 1,
+   "chapter": 5,
+   "verse": 28,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Lamech begets Noah at 188, not 182",
+   "note": "The Septuagint's Genesis 5 figures differ from the Hebrew; here, and in Lamech's total of 753 years (5:31), the KJV follows the Hebrew."
+  },
+  {
+   "book": 1,
+   "chapter": 5,
+   "verse": 31,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Lamech's years 753, not 777",
+   "note": "As at 5:28, the Septuagint's figures for Lamech differ from the Hebrew, which the KJV follows."
+  },
+  {
+   "book": 1,
+   "chapter": 6,
+   "verse": 6,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"God laid it to heart\" for \"it repented the LORD\"",
+   "note": "The Septuagint renders the Hebrew \"repented\" as \"took it to heart\", avoiding saying that God repented; the Hebrew and the KJV say he did. A translator's choice in the Greek."
+  },
+  {
+   "book": 1,
+   "chapter": 11,
+   "verse": 12,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Arphaxad begets \"Cainan\" at 135, not Salah at 35",
+   "note": "The Septuagint adds a hundred years and a generation, Cainan, between Arphaxad and Salah; Luke 3:36 names Cainan. The Hebrew and the KJV have Salah born to Arphaxad at 35."
+  },
+  {
+   "book": 1,
+   "chapter": 11,
+   "verse": 13,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Adds Cainan between Arphaxad and Salah",
+   "note": "The Septuagint has an extra generation, Cainan son of Arphaxad (also 10:24, 11:12), whom Luke 3:36 names in Jesus' genealogy; the Hebrew and the KJV of Genesis lack him, as 1 Chronicles 1:18 does."
+  },
+  {
+   "book": 1,
+   "chapter": 22,
+   "verse": 2,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"thy beloved son\" for \"thine only son\"; \"high land\" for Moriah",
+   "note": "The Septuagint renders the Hebrew yachid (\"only\") as agapētos (\"beloved\"), here and at 22:12 and 22:16, and does not name Moriah. Hebrews 11:17 calls Isaac Abraham's \"only begotten\", as the Hebrew does."
+  },
+  {
+   "book": 1,
+   "chapter": 22,
+   "verse": 12,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"thy beloved son\" for \"thine only son\"",
+   "note": "As at 22:2, the Septuagint has \"beloved\" for the Hebrew \"only\"; Isaac's being the only son of promise is less marked."
+  },
+  {
+   "book": 1,
+   "chapter": 22,
+   "verse": 16,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"thy beloved son\" for \"thine only son\"",
+   "note": "As at 22:2: the Septuagint's \"beloved\" for the Hebrew \"only\"."
+  },
+  {
+   "book": 1,
+   "chapter": 24,
+   "verse": 43,
+   "kind": "virgin-birth",
+   "weight": "minor",
+   "change": "\"the virgin\" becomes \"the damsel\"",
+   "note": "The Hebrew is 'almah, the word in Isaiah 7:14; the Septuagint renders it neanis (\"young woman\") here but parthenos (\"virgin\") in Isaiah 7:14, and calls Rebekah parthenos in 24:16. It bears on how 'almah is read."
+  },
+  {
+   "book": 1,
+   "chapter": 37,
+   "verse": 5,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"they hated him yet the more\"",
+   "note": "The clause is not in the Septuagint here; it is in the Hebrew. Their hatred is still stated in 37:4 and 37:8."
+  },
+  {
+   "book": 1,
+   "chapter": 46,
+   "verse": 27,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"seventy-five souls\" for \"threescore and ten\"",
+   "note": "The Septuagint counts nine sons of Joseph and seventy-five in all, as Stephen does in Acts 7:14; the Hebrew and the KJV count seventy, as Deuteronomy 10:22 does."
+  },
+  {
+   "book": 1,
+   "chapter": 47,
+   "verse": 31,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"leaning on the top of his staff\" for \"upon the bed's head\"",
+   "note": "The Hebrew consonants mth can be read mittah (\"bed\") or matteh (\"staff\"); the Septuagint reads \"staff\", the form Hebrews 11:21 quotes, the Masoretic pointing and the KJV \"bed\"."
+  },
+  {
+   "book": 1,
+   "chapter": 49,
+   "verse": 6,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"they houghed a bull\" for \"they digged down a wall\"",
+   "note": "The consonants can be read shor (\"ox\") or shur (\"wall\"); the Septuagint and the Masoretic pointing read \"ox\", the KJV \"wall\". Only the detail of Simeon and Levi's violence differs."
+  },
+  {
+   "book": 1,
+   "chapter": 49,
+   "verse": 10,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"until there come the things stored up for him\"; no \"Shiloh\"",
+   "note": "The Septuagint reads shiloh as shello (\"that which is his\") and adds \"he is the expectation of nations\"; the KJV keeps \"until Shiloh come\". Both were read of the Messiah."
+  },
+  {
+   "book": 2,
+   "chapter": 1,
+   "verse": 5,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"seventy-five\" souls for \"seventy\"",
+   "note": "The Septuagint and a Dead Sea Scroll (4QExod-b) have seventy-five, the number in Acts 7:14; the Masoretic text and the KJV have seventy."
+  },
+  {
+   "book": 2,
+   "chapter": 3,
+   "verse": 14,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"I am THE BEING\" for \"I AM THAT I AM\"",
+   "note": "The Septuagint renders ehyeh asher ehyeh as ego eimi ho on, \"I am he who is\"; the Hebrew and the KJV have \"I AM THAT I AM\". Jesus' \"I am\" sayings (John 8:58) echo both."
+  },
+  {
+   "book": 2,
+   "chapter": 4,
+   "verse": 22,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"Israel is my first-born\" omits \"my son\"",
+   "note": "The Septuagint has \"my firstborn son\" in some copies and \"my firstborn\" in Brenton's; in 4:23 it has \"my people\" for \"my son\". The Hebrew calls Israel God's son here, the sonship Hosea 11:1 recalls."
+  },
+  {
+   "book": 2,
+   "chapter": 4,
+   "verse": 23,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"Send away my people\" for \"Let my son go\"",
+   "note": "The Septuagint has \"my people\" where the Hebrew has \"my son\"; God's calling Israel his son is not in Brenton's text of 4:22-23."
+  },
+  {
+   "book": 2,
+   "chapter": 12,
+   "verse": 40,
+   "kind": "other",
+   "weight": "minor",
+   "change": "430 years \"in Egypt and the land of Chanaan\"",
+   "note": "The Septuagint and the Samaritan Pentateuch count the 430 years from Abraham in Canaan, as Galatians 3:17 seems to; the Hebrew and the KJV count them in Egypt alone."
+  },
+  {
+   "book": 2,
+   "chapter": 17,
+   "verse": 16,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"with a secret hand\" for \"the LORD hath sworn\"",
+   "note": "The Hebrew is obscure (\"a hand upon the throne of the LORD\"); the Septuagint reads \"with a hidden hand the Lord wages war\", the KJV takes it as an oath. Either way the LORD wars with Amalek for ever."
+  },
+  {
+   "book": 2,
+   "chapter": 21,
+   "verse": 22,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"her child be born imperfectly formed\" for \"her fruit depart\"",
+   "note": "The Septuagint makes 21:22-23 turn on whether the unborn child was formed (a fine) or fully formed (life for life); the Hebrew and the KJV speak of the woman's fruit coming forth, with harm (\"mischief\") judged in 21:23."
+  },
+  {
+   "book": 2,
+   "chapter": 28,
+   "verse": 23,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint has no 28:23-28, the rings and chains fastening the breastpiece to the ephod; part is summarised in its 28:29. The Hebrew and the KJV have them; the same work is told in 39:16-21."
+  },
+  {
+   "book": 2,
+   "chapter": 28,
+   "verse": 24,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint has no 28:23-28, the rings and chains fastening the breastpiece to the ephod; part is summarised in its 28:29. The Hebrew and the KJV have them; the same work is told in 39:16-21."
+  },
+  {
+   "book": 2,
+   "chapter": 28,
+   "verse": 25,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint has no 28:23-28, the rings and chains fastening the breastpiece to the ephod; part is summarised in its 28:29. The Hebrew and the KJV have them; the same work is told in 39:16-21."
+  },
+  {
+   "book": 2,
+   "chapter": 28,
+   "verse": 26,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint has no 28:23-28, the rings and chains fastening the breastpiece to the ephod; part is summarised in its 28:29. The Hebrew and the KJV have them; the same work is told in 39:16-21."
+  },
+  {
+   "book": 2,
+   "chapter": 28,
+   "verse": 27,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint has no 28:23-28, the rings and chains fastening the breastpiece to the ephod; part is summarised in its 28:29. The Hebrew and the KJV have them; the same work is told in 39:16-21."
+  },
+  {
+   "book": 2,
+   "chapter": 28,
+   "verse": 28,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint has no 28:23-28, the rings and chains fastening the breastpiece to the ephod; part is summarised in its 28:29. The Hebrew and the KJV have them; the same work is told in 39:16-21."
+  },
+  {
+   "book": 2,
+   "chapter": 32,
+   "verse": 9,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint lacks God's words \"I have seen this people, and, behold, it is a stiffnecked people\"; the Hebrew has them. The same charge is made in 33:3, 33:5 and 34:9."
+  },
+  {
+   "book": 2,
+   "chapter": 32,
+   "verse": 14,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"was prevailed upon to preserve\" for \"repented of the evil\"",
+   "note": "The Septuagint avoids saying God repented, as at Genesis 6:6; the Hebrew and the KJV say the LORD repented of the evil. The outcome, Israel spared, is the same."
+  },
+  {
+   "book": 2,
+   "chapter": 36,
+   "verse": 10,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint's account of making the tabernacle (chapters 35-40) is shorter and differently ordered, and has nothing for the coupling of the curtains, the goats' hair tent or the boards (36:10-33). The Hebrew and the KJV have them; they repeat the commands of chapter 26."
+  },
+  {
+   "book": 2,
+   "chapter": 36,
+   "verse": 11,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint's account of making the tabernacle (chapters 35-40) is shorter and differently ordered, and has nothing for the coupling of the curtains, the goats' hair tent or the boards (36:10-33). The Hebrew and the KJV have them; they repeat the commands of chapter 26."
+  },
+  {
+   "book": 2,
+   "chapter": 36,
+   "verse": 12,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint's account of making the tabernacle (chapters 35-40) is shorter and differently ordered, and has nothing for the coupling of the curtains, the goats' hair tent or the boards (36:10-33). The Hebrew and the KJV have them; they repeat the commands of chapter 26."
+  },
+  {
+   "book": 2,
+   "chapter": 36,
+   "verse": 13,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint's account of making the tabernacle (chapters 35-40) is shorter and differently ordered, and has nothing for the coupling of the curtains, the goats' hair tent or the boards (36:10-33). The Hebrew and the KJV have them; they repeat the commands of chapter 26."
+  },
+  {
+   "book": 2,
+   "chapter": 36,
+   "verse": 15,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint's account of making the tabernacle (chapters 35-40) is shorter and differently ordered, and has nothing for the coupling of the curtains, the goats' hair tent or the boards (36:10-33). The Hebrew and the KJV have them; they repeat the commands of chapter 26."
+  },
+  {
+   "book": 2,
+   "chapter": 36,
+   "verse": 16,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint's account of making the tabernacle (chapters 35-40) is shorter and differently ordered, and has nothing for the coupling of the curtains, the goats' hair tent or the boards (36:10-33). The Hebrew and the KJV have them; they repeat the commands of chapter 26."
+  },
+  {
+   "book": 2,
+   "chapter": 36,
+   "verse": 17,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint's account of making the tabernacle (chapters 35-40) is shorter and differently ordered, and has nothing for the coupling of the curtains, the goats' hair tent or the boards (36:10-33). The Hebrew and the KJV have them; they repeat the commands of chapter 26."
+  },
+  {
+   "book": 2,
+   "chapter": 36,
+   "verse": 18,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint's account of making the tabernacle (chapters 35-40) is shorter and differently ordered, and has nothing for the coupling of the curtains, the goats' hair tent or the boards (36:10-33). The Hebrew and the KJV have them; they repeat the commands of chapter 26."
+  },
+  {
+   "book": 2,
+   "chapter": 36,
+   "verse": 19,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint's account of making the tabernacle (chapters 35-40) is shorter and differently ordered, and has nothing for the coupling of the curtains, the goats' hair tent or the boards (36:10-33). The Hebrew and the KJV have them; they repeat the commands of chapter 26."
+  },
+  {
+   "book": 2,
+   "chapter": 36,
+   "verse": 20,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint's account of making the tabernacle (chapters 35-40) is shorter and differently ordered, and has nothing for the coupling of the curtains, the goats' hair tent or the boards (36:10-33). The Hebrew and the KJV have them; they repeat the commands of chapter 26."
+  },
+  {
+   "book": 2,
+   "chapter": 36,
+   "verse": 21,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint's account of making the tabernacle (chapters 35-40) is shorter and differently ordered, and has nothing for the coupling of the curtains, the goats' hair tent or the boards (36:10-33). The Hebrew and the KJV have them; they repeat the commands of chapter 26."
+  },
+  {
+   "book": 2,
+   "chapter": 36,
+   "verse": 22,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint's account of making the tabernacle (chapters 35-40) is shorter and differently ordered, and has nothing for the coupling of the curtains, the goats' hair tent or the boards (36:10-33). The Hebrew and the KJV have them; they repeat the commands of chapter 26."
+  },
+  {
+   "book": 2,
+   "chapter": 36,
+   "verse": 23,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint's account of making the tabernacle (chapters 35-40) is shorter and differently ordered, and has nothing for the coupling of the curtains, the goats' hair tent or the boards (36:10-33). The Hebrew and the KJV have them; they repeat the commands of chapter 26."
+  },
+  {
+   "book": 2,
+   "chapter": 36,
+   "verse": 24,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint's account of making the tabernacle (chapters 35-40) is shorter and differently ordered, and has nothing for the coupling of the curtains, the goats' hair tent or the boards (36:10-33). The Hebrew and the KJV have them; they repeat the commands of chapter 26."
+  },
+  {
+   "book": 2,
+   "chapter": 36,
+   "verse": 25,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint's account of making the tabernacle (chapters 35-40) is shorter and differently ordered, and has nothing for the coupling of the curtains, the goats' hair tent or the boards (36:10-33). The Hebrew and the KJV have them; they repeat the commands of chapter 26."
+  },
+  {
+   "book": 2,
+   "chapter": 36,
+   "verse": 26,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint's account of making the tabernacle (chapters 35-40) is shorter and differently ordered, and has nothing for the coupling of the curtains, the goats' hair tent or the boards (36:10-33). The Hebrew and the KJV have them; they repeat the commands of chapter 26."
+  },
+  {
+   "book": 2,
+   "chapter": 36,
+   "verse": 27,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint's account of making the tabernacle (chapters 35-40) is shorter and differently ordered, and has nothing for the coupling of the curtains, the goats' hair tent or the boards (36:10-33). The Hebrew and the KJV have them; they repeat the commands of chapter 26."
+  },
+  {
+   "book": 2,
+   "chapter": 36,
+   "verse": 28,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint's account of making the tabernacle (chapters 35-40) is shorter and differently ordered, and has nothing for the coupling of the curtains, the goats' hair tent or the boards (36:10-33). The Hebrew and the KJV have them; they repeat the commands of chapter 26."
+  },
+  {
+   "book": 2,
+   "chapter": 36,
+   "verse": 29,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint's account of making the tabernacle (chapters 35-40) is shorter and differently ordered, and has nothing for the coupling of the curtains, the goats' hair tent or the boards (36:10-33). The Hebrew and the KJV have them; they repeat the commands of chapter 26."
+  },
+  {
+   "book": 2,
+   "chapter": 36,
+   "verse": 30,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint's account of making the tabernacle (chapters 35-40) is shorter and differently ordered, and has nothing for the coupling of the curtains, the goats' hair tent or the boards (36:10-33). The Hebrew and the KJV have them; they repeat the commands of chapter 26."
+  },
+  {
+   "book": 2,
+   "chapter": 36,
+   "verse": 31,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint's account of making the tabernacle (chapters 35-40) is shorter and differently ordered, and has nothing for the coupling of the curtains, the goats' hair tent or the boards (36:10-33). The Hebrew and the KJV have them; they repeat the commands of chapter 26."
+  },
+  {
+   "book": 2,
+   "chapter": 36,
+   "verse": 32,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint's account of making the tabernacle (chapters 35-40) is shorter and differently ordered, and has nothing for the coupling of the curtains, the goats' hair tent or the boards (36:10-33). The Hebrew and the KJV have them; they repeat the commands of chapter 26."
+  },
+  {
+   "book": 2,
+   "chapter": 36,
+   "verse": 33,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint's account of making the tabernacle (chapters 35-40) is shorter and differently ordered, and has nothing for the coupling of the curtains, the goats' hair tent or the boards (36:10-33). The Hebrew and the KJV have them; they repeat the commands of chapter 26."
+  },
+  {
+   "book": 2,
+   "chapter": 37,
+   "verse": 25,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint's account of the making (chapters 35-40) does not tell of the incense altar being made (37:25-28); the Hebrew and the KJV do. Its making is commanded in 30:1-5 and it is set in place in 40:26."
+  },
+  {
+   "book": 2,
+   "chapter": 37,
+   "verse": 26,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint's account of the making (chapters 35-40) does not tell of the incense altar being made (37:25-28); the Hebrew and the KJV do. Its making is commanded in 30:1-5 and it is set in place in 40:26."
+  },
+  {
+   "book": 2,
+   "chapter": 37,
+   "verse": 27,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint's account of the making (chapters 35-40) does not tell of the incense altar being made (37:25-28); the Hebrew and the KJV do. Its making is commanded in 30:1-5 and it is set in place in 40:26."
+  },
+  {
+   "book": 2,
+   "chapter": 37,
+   "verse": 28,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint's account of the making (chapters 35-40) does not tell of the incense altar being made (37:25-28); the Hebrew and the KJV do. Its making is commanded in 30:1-5 and it is set in place in 40:26."
+  },
+  {
+   "book": 2,
+   "chapter": 40,
+   "verse": 7,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint's chapter 40 has no verses on the laver (40:7, 40:11, 40:30-32); the Hebrew and the KJV have them. The laver is commanded in 30:17-21."
+  },
+  {
+   "book": 2,
+   "chapter": 40,
+   "verse": 11,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint's chapter 40 has no verses on the laver (40:7, 40:11, 40:30-32); the Hebrew and the KJV have them. The laver is commanded in 30:17-21."
+  },
+  {
+   "book": 2,
+   "chapter": 40,
+   "verse": 30,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint's chapter 40 has no verses on the laver (40:7, 40:11, 40:30-32); the Hebrew and the KJV have them. The laver is commanded in 30:17-21."
+  },
+  {
+   "book": 2,
+   "chapter": 40,
+   "verse": 31,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint's chapter 40 has no verses on the laver (40:7, 40:11, 40:30-32); the Hebrew and the KJV have them. The laver is commanded in 30:17-21."
+  },
+  {
+   "book": 3,
+   "chapter": 18,
+   "verse": 21,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"serve a ruler\" for \"pass through the fire to Molech\"",
+   "note": "The Septuagint reads the Hebrew molech as melech, \"king\" or \"ruler\", and has no fire; the Hebrew forbids giving children to the god Molech. Leviticus 20:2-5 in the Septuagint keeps the sense of idolatry."
+  },
+  {
+   "book": 3,
+   "chapter": 19,
+   "verse": 26,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"Eat not on the mountains\" for \"with the blood\"",
+   "note": "The Septuagint reads the Hebrew 'al-haddam (\"with the blood\") as 'al-heharim (\"on the mountains\"), a ban on hill-shrine feasts. The ban on eating blood is still in 17:10-14."
+  },
+  {
+   "book": 5,
+   "chapter": 23,
+   "verse": 2,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "\"One born of a harlot\"; omits \"even to his tenth generation\"",
+   "note": "The Septuagint renders mamzer as \"born of a harlot\" and has no \"to his tenth generation\"; the Hebrew and the KJV bar him for ten generations. The ban itself stands."
+  },
+  {
+   "book": 5,
+   "chapter": 30,
+   "verse": 3,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"heal thine iniquities\" for \"turn thy captivity\"",
+   "note": "The Septuagint reads the Hebrew shuv shevut as healing of sins rather than restoring the captives; the Hebrew and the KJV promise return from captivity, which the rest of the verse also gives."
+  },
+  {
+   "book": 5,
+   "chapter": 30,
+   "verse": 6,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"purge thy heart\" for \"circumcise thine heart\"",
+   "note": "The Septuagint renders the Hebrew \"circumcise\" as \"purge\"; the Hebrew's circumcision of the heart, taken up in Romans 2:29, is not in the Greek here. Deuteronomy 10:16 keeps it in both."
+  },
+  {
+   "book": 5,
+   "chapter": 32,
+   "verse": 8,
+   "kind": "other",
+   "weight": "major",
+   "change": "\"the angels of God\" for \"the children of Israel\"",
+   "note": "The Septuagint has \"angels of God\"; a Dead Sea Scroll (4QDeut-j) reads \"sons of God\", the Masoretic text and the KJV \"children of Israel\". The nations are set under heavenly beings rather than numbered by Israel."
+  },
+  {
+   "book": 5,
+   "chapter": 32,
+   "verse": 43,
+   "kind": "deity",
+   "weight": "major",
+   "change": "Adds \"let all the angels of God worship him\" and more",
+   "note": "The Septuagint's Song of Moses ends with a longer verse; a Dead Sea Scroll (4QDeut-q) also has a longer text (\"bow down to him, all ye gods\"). Hebrews 1:6 quotes \"let all the angels of God worship him\" of Christ. The Masoretic text and the KJV have the shorter verse."
+  },
+  {
+   "book": 5,
+   "chapter": 33,
+   "verse": 2,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"on his right hand were his angels\" for \"a fiery law\"",
+   "note": "The Septuagint reads the hard Hebrew 'eshdath as angels at God's right hand; the KJV has \"a fiery law\". The giving of the law by angels is spoken of in Acts 7:53, Galatians 3:19 and Hebrews 2:2."
+  },
+  {
+   "book": 6,
+   "chapter": 5,
+   "verse": 5,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Israel wanders forty-two years, not forty",
+   "note": "The Septuagint's 5:4-6 differs from the Hebrew: it speaks of forty-two years in the wilderness and of most of the fighting men from Egypt being uncircumcised. The Hebrew and the KJV have forty years (also 5:6)."
+  },
+  {
+   "book": 6,
+   "chapter": 5,
+   "verse": 14,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"and did worship\" before the captain of the LORD's host",
+   "note": "The Septuagint says only that Joshua fell on his face; the Hebrew says he worshipped, which is often read as worship accepted by a divine visitor. He is still told the place is holy (5:15)."
+  },
+  {
+   "book": 6,
+   "chapter": 6,
+   "verse": 4,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint lacks 6:4, the seven priests with trumpets and the seven circuits on the seventh day; the Hebrew and the KJV have it. The seven circuits are still told in 6:15."
+  },
+  {
+   "book": 6,
+   "chapter": 8,
+   "verse": 13,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint lacks 8:13, Joshua setting the ambush and going into the valley; the Hebrew and the KJV have it. A narrative detail."
+  },
+  {
+   "book": 6,
+   "chapter": 8,
+   "verse": 26,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint lacks 8:26, Joshua not drawing back the spear until Ai was destroyed; the Hebrew and the KJV have it."
+  },
+  {
+   "book": 6,
+   "chapter": 8,
+   "verse": 30,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: the Septuagint has 8:30-35 after 9:2",
+   "note": "The altar on mount Ebal and the reading of the law (8:30-35) come after 9:2 in the Septuagint, where Brenton's text has them; the Hebrew and the KJV have them here. Nothing is lost, only moved."
+  },
+  {
+   "book": 6,
+   "chapter": 8,
+   "verse": 31,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: the Septuagint has 8:30-35 after 9:2",
+   "note": "The altar on mount Ebal and the reading of the law (8:30-35) come after 9:2 in the Septuagint, where Brenton's text has them; the Hebrew and the KJV have them here. Nothing is lost, only moved."
+  },
+  {
+   "book": 6,
+   "chapter": 8,
+   "verse": 32,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: the Septuagint has 8:30-35 after 9:2",
+   "note": "The altar on mount Ebal and the reading of the law (8:30-35) come after 9:2 in the Septuagint, where Brenton's text has them; the Hebrew and the KJV have them here. Nothing is lost, only moved."
+  },
+  {
+   "book": 6,
+   "chapter": 8,
+   "verse": 33,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: the Septuagint has 8:30-35 after 9:2",
+   "note": "The altar on mount Ebal and the reading of the law (8:30-35) come after 9:2 in the Septuagint, where Brenton's text has them; the Hebrew and the KJV have them here. Nothing is lost, only moved."
+  },
+  {
+   "book": 6,
+   "chapter": 8,
+   "verse": 34,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: the Septuagint has 8:30-35 after 9:2",
+   "note": "The altar on mount Ebal and the reading of the law (8:30-35) come after 9:2 in the Septuagint, where Brenton's text has them; the Hebrew and the KJV have them here. Nothing is lost, only moved."
+  },
+  {
+   "book": 6,
+   "chapter": 8,
+   "verse": 35,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: the Septuagint has 8:30-35 after 9:2",
+   "note": "The altar on mount Ebal and the reading of the law (8:30-35) come after 9:2 in the Septuagint, where Brenton's text has them; the Hebrew and the KJV have them here. Nothing is lost, only moved."
+  },
+  {
+   "book": 6,
+   "chapter": 10,
+   "verse": 15,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint lacks 10:15, Joshua's return to the camp at Gilgal, and its repeat at 10:43; in the Hebrew it sits oddly before the pursuit of 10:16-21. A narrative detail."
+  },
+  {
+   "book": 6,
+   "chapter": 10,
+   "verse": 43,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "As 10:15: the Septuagint lacks Joshua's return to Gilgal; the Hebrew and the KJV have it."
+  },
+  {
+   "book": 6,
+   "chapter": 13,
+   "verse": 33,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint lacks 13:33, that the LORD was Levi's inheritance; the Hebrew and the KJV have it. The same is said in 13:14 and 18:7."
+  },
+  {
+   "book": 6,
+   "chapter": 20,
+   "verse": 4,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint lacks 20:4-6, how the elders receive the manslayer and that he returns home at the high priest's death; the Hebrew and the KJV have them. The same law is in Numbers 35:12-28."
+  },
+  {
+   "book": 6,
+   "chapter": 20,
+   "verse": 5,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "Part of 20:4-6, not in the Septuagint: the city does not give the manslayer up to the avenger. The law stands in Numbers 35."
+  },
+  {
+   "book": 6,
+   "chapter": 20,
+   "verse": 6,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "Part of 20:4-6, not in the Septuagint: the manslayer's release at the high priest's death, which Numbers 35:25-28 still gives."
+  },
+  {
+   "book": 6,
+   "chapter": 23,
+   "verse": 16,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the LORD's anger and perishing quickly from the land",
+   "note": "The Septuagint ends the verse at bowing to other gods; the Hebrew goes on to the LORD's anger and Israel perishing from the land, as 23:13 and 23:15 also warn."
+  },
+  {
+   "book": 9,
+   "chapter": 2,
+   "verse": 8,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"the pillars of the earth are the LORD's\"",
+   "note": "The Septuagint ends 2:8 at \"the throne of glory\" and has another line in 2:9; the Hebrew and the KJV close with God founding the world on its pillars. God as creator is not in Hannah's song in the Greek."
+  },
+  {
+   "book": 9,
+   "chapter": 2,
+   "verse": 22,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the sons lying with the women at the door",
+   "note": "The Septuagint and a Dead Sea Scroll of Samuel (4QSam-a) lack the clause about Eli's sons and the women who served at the tabernacle door; the Masoretic text and the KJV have it. Their sin is still told in 2:12-17."
+  },
+  {
+   "book": 9,
+   "chapter": 2,
+   "verse": 32,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"thou shalt see an enemy in my habitation\"",
+   "note": "The Septuagint keeps only \"there shall not be an old man in thine house for ever\"; the Hebrew foretells distress in God's dwelling as well. The judgment on Eli's house stands."
+  },
+  {
+   "book": 9,
+   "chapter": 3,
+   "verse": 13,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"his sons spoke evil against God\" for \"made themselves vile\"",
+   "note": "Jewish tradition lists this verse among the scribes' corrections: the Hebrew \"cursed themselves\" (lahem) is held to replace \"cursed God\" (elohim), which the Septuagint reads. The KJV follows the Masoretic text."
+  },
+  {
+   "book": 9,
+   "chapter": 12,
+   "verse": 11,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"Barac\" for \"Bedan\" among the judges",
+   "note": "The Septuagint and the Syriac read Barak, a judge named in Judges 4 and Hebrews 11:32; the Hebrew has Bedan, a name found nowhere else among the judges."
+  },
+  {
+   "book": 9,
+   "chapter": 13,
+   "verse": 1,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "Most Septuagint manuscripts lack 13:1, Saul's age and years of reign; the Hebrew has it with numbers that seem incomplete (\"a year old\", \"two years\"). The KJV renders the Hebrew as best it can."
+  },
+  {
+   "book": 9,
+   "chapter": 14,
+   "verse": 18,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"Bring the ephod\" for \"Bring hither the ark of God\"",
+   "note": "The Septuagint has Saul call for the ephod, worn by the priest, where the Hebrew has the ark; the ark was then at Kirjath-jearim (7:1-2), so many think the Greek original. Either way he seeks God's counsel."
+  },
+  {
+   "book": 9,
+   "chapter": 14,
+   "verse": 41,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Saul's longer prayer for \"clear manifestations\" by lot",
+   "note": "The Septuagint has a longer prayer, thought by many to name the Urim and Thummim (\"if the guilt be in me or Jonathan, give Urim; if in thy people, give Thummim\"); the Masoretic text and the KJV have \"Give a perfect lot\", which may have lost words between like phrases."
+  },
+  {
+   "book": 9,
+   "chapter": 17,
+   "verse": 4,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Goliath \"four cubits and a span\", not six",
+   "note": "The Septuagint and a Dead Sea Scroll of Samuel (4QSam-a) make Goliath about six and a half feet tall; the Masoretic text and the KJV, about nine and a half."
+  },
+  {
+   "book": 9,
+   "chapter": 17,
+   "verse": 41,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint (Vaticanus) has a shorter story of David and Goliath and lacks 17:41, the Philistine advancing with his shield-bearer. The Hebrew and the KJV have it."
+  },
+  {
+   "book": 9,
+   "chapter": 17,
+   "verse": 50,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint lacks 17:50, that David prevailed with a sling and a stone and had no sword; the Hebrew has it. The stone striking Goliath is still told in 17:49."
+  },
+  {
+   "book": 9,
+   "chapter": 17,
+   "verse": 55,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint (Vaticanus) lacks 17:55-58, Saul asking whose son David is after he has served him (16:21-23); the Hebrew and the KJV have them. Many think the Hebrew joins two accounts here, which the Greek gives only one of."
+  },
+  {
+   "book": 9,
+   "chapter": 17,
+   "verse": 56,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint (Vaticanus) lacks 17:55-58, Saul asking whose son David is after he has served him (16:21-23); the Hebrew and the KJV have them. Many think the Hebrew joins two accounts here, which the Greek gives only one of."
+  },
+  {
+   "book": 9,
+   "chapter": 17,
+   "verse": 57,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint (Vaticanus) lacks 17:55-58, Saul asking whose son David is after he has served him (16:21-23); the Hebrew and the KJV have them. Many think the Hebrew joins two accounts here, which the Greek gives only one of."
+  },
+  {
+   "book": 9,
+   "chapter": 17,
+   "verse": 58,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint (Vaticanus) lacks 17:55-58, Saul asking whose son David is after he has served him (16:21-23); the Hebrew and the KJV have them. Many think the Hebrew joins two accounts here, which the Greek gives only one of."
+  },
+  {
+   "book": 9,
+   "chapter": 18,
+   "verse": 1,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint (Vaticanus) lacks 18:1-5, Jonathan's love for David, their covenant and the gift of his robe and weapons; the Hebrew and the KJV have them. Their covenant is still told in 20:8-17 and 23:18."
+  },
+  {
+   "book": 9,
+   "chapter": 18,
+   "verse": 2,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint (Vaticanus) lacks 18:1-5, Jonathan's love for David, their covenant and the gift of his robe and weapons; the Hebrew and the KJV have them. Their covenant is still told in 20:8-17 and 23:18."
+  },
+  {
+   "book": 9,
+   "chapter": 18,
+   "verse": 3,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint (Vaticanus) lacks 18:1-5, Jonathan's love for David, their covenant and the gift of his robe and weapons; the Hebrew and the KJV have them. Their covenant is still told in 20:8-17 and 23:18."
+  },
+  {
+   "book": 9,
+   "chapter": 18,
+   "verse": 4,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint (Vaticanus) lacks 18:1-5, Jonathan's love for David, their covenant and the gift of his robe and weapons; the Hebrew and the KJV have them. Their covenant is still told in 20:8-17 and 23:18."
+  },
+  {
+   "book": 9,
+   "chapter": 18,
+   "verse": 5,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Verse not in the Septuagint",
+   "note": "Part of 18:1-5, not in the Septuagint (Vaticanus): David's success wherever Saul sent him. The Hebrew and the KJV have it; his success is still told in 18:14-16."
+  },
+  {
+   "book": 9,
+   "chapter": 18,
+   "verse": 9,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint (Vaticanus) lacks 18:9, Saul eyeing David from that day; the Hebrew and the KJV have it. Saul's jealousy is plain from 18:8."
+  },
+  {
+   "book": 9,
+   "chapter": 18,
+   "verse": 10,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint (Vaticanus) lacks 18:10-11, Saul's first javelin cast at David; the Hebrew and the KJV have them. A like attack is told in 19:9-10 in both."
+  },
+  {
+   "book": 9,
+   "chapter": 18,
+   "verse": 11,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "Part of 18:10-11, not in the Septuagint: Saul casts the javelin and David escapes twice. The attack of 19:10 is in both."
+  },
+  {
+   "book": 9,
+   "chapter": 18,
+   "verse": 12,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"because the LORD was with him, and was departed from Saul\"",
+   "note": "The Septuagint has only that Saul feared David; the Hebrew gives the reason. That the LORD was with David is still said in 18:14 and 18:28."
+  },
+  {
+   "book": 9,
+   "chapter": 18,
+   "verse": 17,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint (Vaticanus) lacks 18:17-19, Saul offering David his elder daughter Merab and giving her to another; the Hebrew and the KJV have them. Only the marriage to Michal is told in the Greek."
+  },
+  {
+   "book": 9,
+   "chapter": 18,
+   "verse": 18,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Verse not in the Septuagint",
+   "note": "Part of 18:17-19, the offer of Merab, which the Septuagint (Vaticanus) lacks; the Hebrew and the KJV have it."
+  },
+  {
+   "book": 9,
+   "chapter": 18,
+   "verse": 19,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Verse not in the Septuagint",
+   "note": "Part of 18:17-19: Merab given to Adriel instead of David. Not in the Septuagint (Vaticanus); in the Hebrew and the KJV."
+  },
+  {
+   "book": 9,
+   "chapter": 18,
+   "verse": 21,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"Thou shalt this day be my son in law\"",
+   "note": "The Septuagint, which has no offer of Merab (18:17-19), lacks this reference back to it; the Hebrew and the KJV have it."
+  },
+  {
+   "book": 9,
+   "chapter": 18,
+   "verse": 29,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"Saul became David's enemy continually\"",
+   "note": "The Septuagint (Vaticanus) ends 18:29 at Saul's fear; the Hebrew adds his lasting enmity, which the chapters that follow show in both."
+  },
+  {
+   "book": 9,
+   "chapter": 18,
+   "verse": 30,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint (Vaticanus) lacks 18:30, David's success against the Philistine princes and his fame; the Hebrew and the KJV have it."
+  },
+  {
+   "book": 9,
+   "chapter": 23,
+   "verse": 12,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint lacks 23:12, David's second question and the LORD's answer that Keilah would give him up; the Hebrew and the KJV have it. David still leaves Keilah in 23:13."
+  },
+  {
+   "book": 10,
+   "chapter": 6,
+   "verse": 1,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"seventy thousand\" for \"thirty thousand\"",
+   "note": "The Septuagint numbers the men David gathered at seventy thousand; the Hebrew and the KJV at thirty thousand."
+  },
+  {
+   "book": 10,
+   "chapter": 7,
+   "verse": 26,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"The LORD of hosts is the God over Israel\"",
+   "note": "The Septuagint has only \"Let thy name be magnified for ever\"; the Hebrew goes on to the LORD as Israel's God and David's house established. The house is still prayed for in 7:29."
+  },
+  {
+   "book": 10,
+   "chapter": 21,
+   "verse": 19,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Elhanan \"slew Goliath\"; no \"the brother of\"",
+   "note": "The Septuagint has Elhanan slay Goliath, as the Hebrew of 2 Samuel does; the KJV supplies \"the brother of\" (in italics) from 1 Chronicles 20:5, which names him Lahmi."
+  },
+  {
+   "book": 10,
+   "chapter": 22,
+   "verse": 6,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"the pangs of death\" for \"the sorrows of hell\"",
+   "note": "The Hebrew is she'ol, the grave or place of the dead; the Septuagint has \"death\", as the parallel line does. The KJV renders it \"hell\"."
+  },
+  {
+   "book": 10,
+   "chapter": 23,
+   "verse": 3,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"the fear of the anointed\" for \"ruling in the fear of God\"",
+   "note": "The Septuagint reads the hard Hebrew of 23:3 otherwise: a watchman speaks a parable and asks how men will strengthen the fear of the anointed. The Hebrew and the KJV describe the just ruler in the fear of God."
+  },
+  {
+   "book": 11,
+   "chapter": 3,
+   "verse": 1,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: the Septuagint has it at 2:35 and 4:34",
+   "note": "The Septuagint moves Solomon's marriage to Pharaoh's daughter into its additions after 2:35 and 4:34, where Brenton's text has it; the Hebrew and the KJV have it here. Moved, not lost."
+  },
+  {
+   "book": 11,
+   "chapter": 4,
+   "verse": 20,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: the Septuagint has it in its addition after 2:46",
+   "note": "The Septuagint gathers this account of Solomon's prosperity into a summary after 2:46, where Brenton's text has it; the Hebrew and the KJV have it here. Moved, not lost (the Greek has 40,000 mares there, 4,000 at 10:26)."
+  },
+  {
+   "book": 11,
+   "chapter": 4,
+   "verse": 25,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: the Septuagint has it in its addition after 2:46",
+   "note": "The Septuagint gathers this account of Solomon's prosperity into a summary after 2:46, where Brenton's text has it; the Hebrew and the KJV have it here. Moved, not lost (the Greek has 40,000 mares there, 4,000 at 10:26)."
+  },
+  {
+   "book": 11,
+   "chapter": 4,
+   "verse": 26,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: the Septuagint has it in its addition after 2:46",
+   "note": "The Septuagint gathers this account of Solomon's prosperity into a summary after 2:46, where Brenton's text has it; the Hebrew and the KJV have it here. Moved, not lost (the Greek has 40,000 mares there, 4,000 at 10:26)."
+  },
+  {
+   "book": 11,
+   "chapter": 4,
+   "verse": 27,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: in Brenton's text it is at 4:21",
+   "note": "The Septuagint orders 4:20-5:1 otherwise; the officers' provisioning (4:27-28) stands where the KJV has 4:21. Moved, not lost."
+  },
+  {
+   "book": 11,
+   "chapter": 4,
+   "verse": 28,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: in Brenton's text it is at 4:21",
+   "note": "The Septuagint orders 4:20-5:1 otherwise; the officers' provisioning (4:27-28) stands where the KJV has 4:21. Moved, not lost."
+  },
+  {
+   "book": 11,
+   "chapter": 5,
+   "verse": 17,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: the Septuagint has it in 6:1",
+   "note": "The Septuagint joins the laying of the costly foundation stones to its longer 6:1, where Brenton's text has it; the Hebrew and the KJV have it here."
+  },
+  {
+   "book": 11,
+   "chapter": 6,
+   "verse": 1,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"the four hundred and fortieth year\", not the 480th",
+   "note": "The Septuagint dates the building of the temple 440 years after the exodus; the Hebrew and the KJV 480, a figure often used in dating the exodus."
+  },
+  {
+   "book": 11,
+   "chapter": 6,
+   "verse": 11,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint (Vaticanus) lacks 6:11-14, the LORD's word to Solomon while building: if he keeps the commandments, God will dwell among Israel and not forsake them. The Hebrew and the KJV have it; a like promise is given in 9:3-5."
+  },
+  {
+   "book": 11,
+   "chapter": 6,
+   "verse": 12,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint (Vaticanus) lacks 6:11-14, the LORD's word to Solomon while building: if he keeps the commandments, God will dwell among Israel and not forsake them. The Hebrew and the KJV have it; a like promise is given in 9:3-5."
+  },
+  {
+   "book": 11,
+   "chapter": 6,
+   "verse": 13,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint (Vaticanus) lacks 6:11-14, the LORD's word to Solomon while building: if he keeps the commandments, God will dwell among Israel and not forsake them. The Hebrew and the KJV have it; a like promise is given in 9:3-5."
+  },
+  {
+   "book": 11,
+   "chapter": 6,
+   "verse": 14,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "Part of 6:11-14, not in the Septuagint: \"So Solomon built the house, and finished it\", which 6:9 already says."
+  },
+  {
+   "book": 11,
+   "chapter": 6,
+   "verse": 18,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint lacks 6:18, the carved cedar with no stone seen; the Hebrew and the KJV have it."
+  },
+  {
+   "book": 11,
+   "chapter": 6,
+   "verse": 32,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint describes the temple doors in 6:31-34 otherwise and more briefly; nothing in it answers to this verse. The Hebrew and the KJV have it."
+  },
+  {
+   "book": 11,
+   "chapter": 6,
+   "verse": 33,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint describes the temple doors in 6:31-34 otherwise and more briefly; nothing in it answers to this verse. The Hebrew and the KJV have it."
+  },
+  {
+   "book": 11,
+   "chapter": 6,
+   "verse": 37,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: the Septuagint has it in 6:1",
+   "note": "The dates of founding and finishing the temple (6:37-38) stand in the Septuagint's longer 6:1, where Brenton's text has them; the Hebrew and the KJV have them here."
+  },
+  {
+   "book": 11,
+   "chapter": 6,
+   "verse": 38,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: the Septuagint has it in 6:1",
+   "note": "The dates of founding and finishing the temple (6:37-38) stand in the Septuagint's longer 6:1, where Brenton's text has them; the Hebrew and the KJV have them here."
+  },
+  {
+   "book": 11,
+   "chapter": 8,
+   "verse": 12,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: the Septuagint has it after 8:53",
+   "note": "Solomon's words that the LORD would dwell in thick darkness come after 8:53 in the Septuagint, longer and said to be from \"the book of the song\"; Brenton's text has them there."
+  },
+  {
+   "book": 11,
+   "chapter": 8,
+   "verse": 13,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: the Septuagint has it after 8:53",
+   "note": "Solomon's words that the LORD would dwell in thick darkness come after 8:53 in the Septuagint, longer and said to be from \"the book of the song\"; Brenton's text has them there."
+  },
+  {
+   "book": 11,
+   "chapter": 9,
+   "verse": 15,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: the Septuagint has it in its addition after 10:22",
+   "note": "The Septuagint gives Solomon's levy, his cities and his bondservants (9:15-22) after 10:22, and Pharaoh's taking of Gezer at 4:34; Brenton's text has them there. Moved, not lost."
+  },
+  {
+   "book": 11,
+   "chapter": 9,
+   "verse": 16,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: the Septuagint has it in its addition after 10:22",
+   "note": "The Septuagint gives Solomon's levy, his cities and his bondservants (9:15-22) after 10:22, and Pharaoh's taking of Gezer at 4:34; Brenton's text has them there. Moved, not lost."
+  },
+  {
+   "book": 11,
+   "chapter": 9,
+   "verse": 17,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: the Septuagint has it in its addition after 10:22",
+   "note": "The Septuagint gives Solomon's levy, his cities and his bondservants (9:15-22) after 10:22, and Pharaoh's taking of Gezer at 4:34; Brenton's text has them there. Moved, not lost."
+  },
+  {
+   "book": 11,
+   "chapter": 9,
+   "verse": 18,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: the Septuagint has it in its addition after 10:22",
+   "note": "The Septuagint gives Solomon's levy, his cities and his bondservants (9:15-22) after 10:22, and Pharaoh's taking of Gezer at 4:34; Brenton's text has them there. Moved, not lost."
+  },
+  {
+   "book": 11,
+   "chapter": 9,
+   "verse": 19,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: the Septuagint has it in its addition after 10:22",
+   "note": "The Septuagint gives Solomon's levy, his cities and his bondservants (9:15-22) after 10:22, and Pharaoh's taking of Gezer at 4:34; Brenton's text has them there. Moved, not lost."
+  },
+  {
+   "book": 11,
+   "chapter": 9,
+   "verse": 20,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: the Septuagint has it in its addition after 10:22",
+   "note": "The Septuagint gives Solomon's levy, his cities and his bondservants (9:15-22) after 10:22, and Pharaoh's taking of Gezer at 4:34; Brenton's text has them there. Moved, not lost."
+  },
+  {
+   "book": 11,
+   "chapter": 9,
+   "verse": 21,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: the Septuagint has it in its addition after 10:22",
+   "note": "The Septuagint gives Solomon's levy, his cities and his bondservants (9:15-22) after 10:22, and Pharaoh's taking of Gezer at 4:34; Brenton's text has them there. Moved, not lost."
+  },
+  {
+   "book": 11,
+   "chapter": 9,
+   "verse": 22,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: the Septuagint has it in its addition after 10:22",
+   "note": "The Septuagint gives Solomon's levy, his cities and his bondservants (9:15-22) after 10:22, and Pharaoh's taking of Gezer at 4:34; Brenton's text has them there. Moved, not lost."
+  },
+  {
+   "book": 11,
+   "chapter": 9,
+   "verse": 23,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: the Septuagint has it in its addition after 2:35",
+   "note": "The Septuagint gives Solomon's overseers, Pharaoh's daughter moving to her house, and his three yearly sacrifices (9:23-25) in its summary after 2:35 (and 9:9), where Brenton's text has them. Moved, not lost."
+  },
+  {
+   "book": 11,
+   "chapter": 9,
+   "verse": 24,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: the Septuagint has it in its addition after 2:35",
+   "note": "The Septuagint gives Solomon's overseers, Pharaoh's daughter moving to her house, and his three yearly sacrifices (9:23-25) in its summary after 2:35 (and 9:9), where Brenton's text has them. Moved, not lost."
+  },
+  {
+   "book": 11,
+   "chapter": 9,
+   "verse": 25,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: the Septuagint has it in its addition after 2:35",
+   "note": "The Septuagint gives Solomon's overseers, Pharaoh's daughter moving to her house, and his three yearly sacrifices (9:23-25) in its summary after 2:35 (and 9:9), where Brenton's text has them. Moved, not lost."
+  },
+  {
+   "book": 11,
+   "chapter": 11,
+   "verse": 3,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: the Septuagint has it in 11:1",
+   "note": "The Septuagint orders 11:1-8 otherwise; Solomon's seven hundred wives and three hundred concubines are in its 11:1."
+  },
+  {
+   "book": 11,
+   "chapter": 11,
+   "verse": 23,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: the Septuagint tells of Rezon in 11:14",
+   "note": "The Septuagint joins Rezon (\"Esrom\") and his seizing of Damascus to its account of Hadad in 11:14, where Brenton's text has it; the Hebrew and the KJV tell it here."
+  },
+  {
+   "book": 11,
+   "chapter": 11,
+   "verse": 24,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: the Septuagint tells of Rezon in 11:14",
+   "note": "The Septuagint joins Rezon (\"Esrom\") and his seizing of Damascus to its account of Hadad in 11:14, where Brenton's text has it; the Hebrew and the KJV tell it here."
+  },
+  {
+   "book": 11,
+   "chapter": 11,
+   "verse": 39,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint (Vaticanus) lacks 11:39, that God will afflict David's seed \"but not for ever\"; the Hebrew and the KJV have it. A lamp for David is still promised in 11:36."
+  },
+  {
+   "book": 11,
+   "chapter": 12,
+   "verse": 2,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: the Septuagint has it in 11:43",
+   "note": "The Septuagint tells of Jeroboam hearing of Solomon's death in Egypt at 11:43, where Brenton's text has it; the Hebrew and the KJV have it here."
+  },
+  {
+   "book": 11,
+   "chapter": 12,
+   "verse": 17,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint (Vaticanus) lacks 12:17, that Rehoboam still reigned over the Israelites in Judah's cities; the Hebrew and the KJV have it."
+  },
+  {
+   "book": 11,
+   "chapter": 13,
+   "verse": 27,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint lacks 13:27 and the end of 13:26, the old prophet's words on the lion and his saddling the ass; the Hebrew and the KJV have them."
+  },
+  {
+   "book": 11,
+   "chapter": 14,
+   "verse": 1,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: the Septuagint tells another form after 12:24",
+   "note": "The Septuagint (Vaticanus) has no 14:1-20. It tells the sick child and Ahijah's prophecy in a different form in its long addition after 12:24, where Brenton's text has it; the Hebrew and the KJV tell it here."
+  },
+  {
+   "book": 11,
+   "chapter": 14,
+   "verse": 2,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: the Septuagint tells another form after 12:24",
+   "note": "The Septuagint (Vaticanus) has no 14:1-20. It tells the sick child and Ahijah's prophecy in a different form in its long addition after 12:24, where Brenton's text has it; the Hebrew and the KJV tell it here."
+  },
+  {
+   "book": 11,
+   "chapter": 14,
+   "verse": 3,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: the Septuagint tells another form after 12:24",
+   "note": "The Septuagint (Vaticanus) has no 14:1-20. It tells the sick child and Ahijah's prophecy in a different form in its long addition after 12:24, where Brenton's text has it; the Hebrew and the KJV tell it here."
+  },
+  {
+   "book": 11,
+   "chapter": 14,
+   "verse": 4,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: the Septuagint tells another form after 12:24",
+   "note": "The Septuagint (Vaticanus) has no 14:1-20. It tells the sick child and Ahijah's prophecy in a different form in its long addition after 12:24, where Brenton's text has it; the Hebrew and the KJV tell it here."
+  },
+  {
+   "book": 11,
+   "chapter": 14,
+   "verse": 5,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: the Septuagint tells another form after 12:24",
+   "note": "The Septuagint (Vaticanus) has no 14:1-20. It tells the sick child and Ahijah's prophecy in a different form in its long addition after 12:24, where Brenton's text has it; the Hebrew and the KJV tell it here."
+  },
+  {
+   "book": 11,
+   "chapter": 14,
+   "verse": 6,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: the Septuagint tells another form after 12:24",
+   "note": "The Septuagint (Vaticanus) has no 14:1-20. It tells the sick child and Ahijah's prophecy in a different form in its long addition after 12:24, where Brenton's text has it; the Hebrew and the KJV tell it here."
+  },
+  {
+   "book": 11,
+   "chapter": 14,
+   "verse": 7,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: the Septuagint tells another form after 12:24",
+   "note": "The Septuagint (Vaticanus) has no 14:1-20. It tells the sick child and Ahijah's prophecy in a different form in its long addition after 12:24, where Brenton's text has it; the Hebrew and the KJV tell it here."
+  },
+  {
+   "book": 11,
+   "chapter": 14,
+   "verse": 8,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: the Septuagint tells another form after 12:24",
+   "note": "The Septuagint (Vaticanus) has no 14:1-20. It tells the sick child and Ahijah's prophecy in a different form in its long addition after 12:24, where Brenton's text has it; the Hebrew and the KJV tell it here."
+  },
+  {
+   "book": 11,
+   "chapter": 14,
+   "verse": 9,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: the Septuagint tells another form after 12:24",
+   "note": "The Septuagint (Vaticanus) has no 14:1-20. It tells the sick child and Ahijah's prophecy in a different form in its long addition after 12:24, where Brenton's text has it; the Hebrew and the KJV tell it here."
+  },
+  {
+   "book": 11,
+   "chapter": 14,
+   "verse": 10,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: the Septuagint tells another form after 12:24",
+   "note": "The Septuagint (Vaticanus) has no 14:1-20. It tells the sick child and Ahijah's prophecy in a different form in its long addition after 12:24, where Brenton's text has it; the Hebrew and the KJV tell it here."
+  },
+  {
+   "book": 11,
+   "chapter": 14,
+   "verse": 11,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: the Septuagint tells another form after 12:24",
+   "note": "The Septuagint (Vaticanus) has no 14:1-20. It tells the sick child and Ahijah's prophecy in a different form in its long addition after 12:24, where Brenton's text has it; the Hebrew and the KJV tell it here."
+  },
+  {
+   "book": 11,
+   "chapter": 14,
+   "verse": 12,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: the Septuagint tells another form after 12:24",
+   "note": "The Septuagint (Vaticanus) has no 14:1-20. It tells the sick child and Ahijah's prophecy in a different form in its long addition after 12:24, where Brenton's text has it; the Hebrew and the KJV tell it here."
+  },
+  {
+   "book": 11,
+   "chapter": 14,
+   "verse": 13,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: the Septuagint tells another form after 12:24",
+   "note": "The Septuagint (Vaticanus) has no 14:1-20. It tells the sick child and Ahijah's prophecy in a different form in its long addition after 12:24, where Brenton's text has it; the Hebrew and the KJV tell it here."
+  },
+  {
+   "book": 11,
+   "chapter": 14,
+   "verse": 14,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: the Septuagint tells another form after 12:24",
+   "note": "The Septuagint (Vaticanus) has no 14:1-20. It tells the sick child and Ahijah's prophecy in a different form in its long addition after 12:24, where Brenton's text has it; the Hebrew and the KJV tell it here."
+  },
+  {
+   "book": 11,
+   "chapter": 14,
+   "verse": 15,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: the Septuagint tells another form after 12:24",
+   "note": "The Septuagint (Vaticanus) has no 14:1-20. It tells the sick child and Ahijah's prophecy in a different form in its long addition after 12:24, where Brenton's text has it; the Hebrew and the KJV tell it here."
+  },
+  {
+   "book": 11,
+   "chapter": 14,
+   "verse": 16,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: the Septuagint tells another form after 12:24",
+   "note": "The Septuagint (Vaticanus) has no 14:1-20. It tells the sick child and Ahijah's prophecy in a different form in its long addition after 12:24, where Brenton's text has it; the Hebrew and the KJV tell it here."
+  },
+  {
+   "book": 11,
+   "chapter": 14,
+   "verse": 17,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: the Septuagint tells another form after 12:24",
+   "note": "The Septuagint (Vaticanus) has no 14:1-20. It tells the sick child and Ahijah's prophecy in a different form in its long addition after 12:24, where Brenton's text has it; the Hebrew and the KJV tell it here."
+  },
+  {
+   "book": 11,
+   "chapter": 14,
+   "verse": 18,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: the Septuagint tells another form after 12:24",
+   "note": "The Septuagint (Vaticanus) has no 14:1-20. It tells the sick child and Ahijah's prophecy in a different form in its long addition after 12:24, where Brenton's text has it; the Hebrew and the KJV tell it here."
+  },
+  {
+   "book": 11,
+   "chapter": 14,
+   "verse": 19,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint (Vaticanus) has no 14:1-20 and so lacks the close of Jeroboam's reign (his acts, his twenty-two years, Nadab's succession); the Hebrew and the KJV have it."
+  },
+  {
+   "book": 11,
+   "chapter": 14,
+   "verse": 20,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint (Vaticanus) has no 14:1-20 and so lacks the close of Jeroboam's reign (his acts, his twenty-two years, Nadab's succession); the Hebrew and the KJV have it."
+  },
+  {
+   "book": 11,
+   "chapter": 14,
+   "verse": 24,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"a conspiracy in the land\" for \"sodomites\"",
+   "note": "The Septuagint reads the Hebrew qadesh (a cult prostitute) here as \"conspiracy\"; at 15:12 and 2 Kings 23:7 it keeps the sense the KJV gives."
+  },
+  {
+   "book": 11,
+   "chapter": 15,
+   "verse": 6,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint lacks 15:6, war between Rehoboam and Jeroboam, which 14:30 has already said."
+  },
+  {
+   "book": 11,
+   "chapter": 15,
+   "verse": 32,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint lacks 15:32, war between Asa and Baasha, which 15:16 has already said."
+  },
+  {
+   "book": 11,
+   "chapter": 16,
+   "verse": 29,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Ahab's reign dated by Jehoshaphat, not Asa",
+   "note": "The Septuagint dates the kings of this period by another reckoning: Ahab begins in Jehoshaphat's second year, not Asa's thirty-eighth. The Hebrew and the KJV follow the Masoretic chronology."
+  },
+  {
+   "book": 11,
+   "chapter": 20,
+   "verse": 38,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"bound his eyes with a bandage\" for \"ashes upon his face\"",
+   "note": "The Septuagint reads the rare Hebrew 'apher as a bandage or headband, as most modern versions do; the KJV has ashes. Only the prophet's disguise differs."
+  },
+  {
+   "book": 11,
+   "chapter": 22,
+   "verse": 46,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: the Septuagint has it after 16:28",
+   "note": "The Septuagint gives Jehoshaphat's reign (22:41-50) after 16:28, where Brenton's text has it, with the removal of the cult prostitutes and the deputy in Edom (\"Syria\"). Moved, not lost."
+  },
+  {
+   "book": 11,
+   "chapter": 22,
+   "verse": 47,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: the Septuagint has it after 16:28",
+   "note": "The Septuagint gives Jehoshaphat's reign (22:41-50) after 16:28, where Brenton's text has it, with the removal of the cult prostitutes and the deputy in Edom (\"Syria\"). Moved, not lost."
+  },
+  {
+   "book": 11,
+   "chapter": 22,
+   "verse": 48,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: the Septuagint has it after 16:28",
+   "note": "The Septuagint gives Jehoshaphat's reign, with his ships broken at Ezion-geber, after 16:28, where Brenton's text has it; the Hebrew and the KJV have it here. Moved, not lost."
+  },
+  {
+   "book": 11,
+   "chapter": 22,
+   "verse": 49,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: the Septuagint has it after 16:28",
+   "note": "The Septuagint gives Jehoshaphat's reign, with his ships broken at Ezion-geber, after 16:28, where Brenton's text has it; the Hebrew and the KJV have it here. Moved, not lost."
+  },
+  {
+   "book": 12,
+   "chapter": 17,
+   "verse": 14,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "Omits \"that did not believe in the LORD their God\"",
+   "note": "The Septuagint ends with Israel hardening its neck more than its fathers; the Hebrew adds that the fathers did not believe in the LORD. Unbelief as the root of Israel's fall is not named here in the Greek."
+  },
+  {
+   "book": 12,
+   "chapter": 24,
+   "verse": 17,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Zedekiah made Jehoiachin's \"son\", not his uncle",
+   "note": "The Septuagint (Vaticanus) calls Mattaniah the king's son; the Hebrew and the KJV his father's brother, as 1 Chronicles 3:15 and Jeremiah 37:1 also show."
+  },
+  {
+   "book": 13,
+   "chapter": 1,
+   "verse": 11,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint (Vaticanus) lacks 1:11-16, the sons of Mizraim and Canaan, which repeat Genesis 10:13-18; the Hebrew and the KJV have them."
+  },
+  {
+   "book": 13,
+   "chapter": 1,
+   "verse": 12,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint (Vaticanus) lacks 1:11-16, the sons of Mizraim and Canaan, which repeat Genesis 10:13-18; the Hebrew and the KJV have them."
+  },
+  {
+   "book": 13,
+   "chapter": 1,
+   "verse": 13,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint (Vaticanus) lacks 1:11-16, the sons of Mizraim and Canaan, which repeat Genesis 10:13-18; the Hebrew and the KJV have them."
+  },
+  {
+   "book": 13,
+   "chapter": 1,
+   "verse": 14,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint (Vaticanus) lacks 1:11-16, the sons of Mizraim and Canaan, which repeat Genesis 10:13-18; the Hebrew and the KJV have them."
+  },
+  {
+   "book": 13,
+   "chapter": 1,
+   "verse": 15,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint (Vaticanus) lacks 1:11-16, the sons of Mizraim and Canaan, which repeat Genesis 10:13-18; the Hebrew and the KJV have them."
+  },
+  {
+   "book": 13,
+   "chapter": 1,
+   "verse": 16,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint (Vaticanus) lacks 1:11-16, the sons of Mizraim and Canaan, which repeat Genesis 10:13-18; the Hebrew and the KJV have them."
+  },
+  {
+   "book": 13,
+   "chapter": 1,
+   "verse": 17,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Lists only Elam and Asshur among Shem's sons",
+   "note": "The Septuagint (Vaticanus) breaks off after Asshur and lacks the rest of Shem's line to 1:24, which repeats Genesis 10:22-29 and 11:10-26; the Hebrew and the KJV have it."
+  },
+  {
+   "book": 13,
+   "chapter": 1,
+   "verse": 18,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint (Vaticanus) lacks 1:17b-23, Shem's descendants through Arphaxad, Eber, Peleg and Joktan, which repeat Genesis 10:22-29; the Hebrew and the KJV have them."
+  },
+  {
+   "book": 13,
+   "chapter": 1,
+   "verse": 19,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint (Vaticanus) lacks 1:17b-23, Shem's descendants through Arphaxad, Eber, Peleg and Joktan, which repeat Genesis 10:22-29; the Hebrew and the KJV have them."
+  },
+  {
+   "book": 13,
+   "chapter": 1,
+   "verse": 20,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint (Vaticanus) lacks 1:17b-23, Shem's descendants through Arphaxad, Eber, Peleg and Joktan, which repeat Genesis 10:22-29; the Hebrew and the KJV have them."
+  },
+  {
+   "book": 13,
+   "chapter": 1,
+   "verse": 21,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint (Vaticanus) lacks 1:17b-23, Shem's descendants through Arphaxad, Eber, Peleg and Joktan, which repeat Genesis 10:22-29; the Hebrew and the KJV have them."
+  },
+  {
+   "book": 13,
+   "chapter": 1,
+   "verse": 22,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint (Vaticanus) lacks 1:17b-23, Shem's descendants through Arphaxad, Eber, Peleg and Joktan, which repeat Genesis 10:22-29; the Hebrew and the KJV have them."
+  },
+  {
+   "book": 13,
+   "chapter": 1,
+   "verse": 23,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint (Vaticanus) lacks 1:17b-23, Shem's descendants through Arphaxad, Eber, Peleg and Joktan, which repeat Genesis 10:22-29; the Hebrew and the KJV have them."
+  },
+  {
+   "book": 13,
+   "chapter": 10,
+   "verse": 13,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Adds \"and Samuel the prophet answered him\"",
+   "note": "The Septuagint adds that Samuel answered Saul's enquiry of the medium, as 1 Samuel 28:15-19 tells; the Hebrew and the KJV here say only that Saul sought a familiar spirit."
+  },
+  {
+   "book": 13,
+   "chapter": 29,
+   "verse": 23,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"the throne of his father David\" for \"the throne of the LORD\"",
+   "note": "The Septuagint has David's throne where the Hebrew calls it the LORD's, the king reigning on God's behalf (also 28:5). The Davidic throne as God's is less marked in the Greek."
+  },
+  {
+   "book": 14,
+   "chapter": 3,
+   "verse": 12,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint lacks 3:12, the second cherub's wings, likely lost by the eye skipping between like phrases; the Hebrew and the KJV have it."
+  },
+  {
+   "book": 14,
+   "chapter": 22,
+   "verse": 2,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Ahaziah \"twenty years old\", not \"forty and two\"",
+   "note": "The Septuagint has twenty, near 2 Kings 8:26 (twenty-two); the Hebrew and the KJV have forty-two here, which would make Ahaziah older than his father (21:20)."
+  },
+  {
+   "book": 14,
+   "chapter": 27,
+   "verse": 8,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint lacks 27:8, which repeats Jotham's age and years from 27:1; the Hebrew and the KJV have it."
+  },
+  {
+   "book": 16,
+   "chapter": 4,
+   "verse": 5,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the rest of the prayer against the builders' enemies",
+   "note": "The Septuagint has only \"do not cover their iniquity\"; the Hebrew goes on, \"let not their sin be blotted out... for they have provoked thee\". Nehemiah's imprecation is shorter in the Greek."
+  },
+  {
+   "book": 16,
+   "chapter": 4,
+   "verse": 6,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint lacks 4:6, the wall built to half its height \"for the people had a mind to work\"; the Hebrew and the KJV have it."
+  },
+  {
+   "book": 16,
+   "chapter": 7,
+   "verse": 68,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "Neither the Septuagint nor most Hebrew manuscripts have 7:68, the horses and mules; the KJV has it from the parallel list in Ezra 2:66."
+  },
+  {
+   "book": 16,
+   "chapter": 11,
+   "verse": 16,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint lacks 11:16, Shabbethai and Jozabad over the outward business of the house of God; the Hebrew and the KJV have it."
+  },
+  {
+   "book": 16,
+   "chapter": 11,
+   "verse": 20,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint (Vaticanus) gives Nehemiah's lists of 11-12 in a shorter form and lacks this verse; the Hebrew and the KJV have it."
+  },
+  {
+   "book": 16,
+   "chapter": 11,
+   "verse": 21,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint (Vaticanus) gives Nehemiah's lists of 11-12 in a shorter form and lacks this verse; the Hebrew and the KJV have it."
+  },
+  {
+   "book": 16,
+   "chapter": 11,
+   "verse": 28,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint (Vaticanus) gives Nehemiah's lists of 11-12 in a shorter form and lacks this verse; the Hebrew and the KJV have it."
+  },
+  {
+   "book": 16,
+   "chapter": 11,
+   "verse": 29,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint (Vaticanus) gives Nehemiah's lists of 11-12 in a shorter form and lacks this verse; the Hebrew and the KJV have it."
+  },
+  {
+   "book": 16,
+   "chapter": 11,
+   "verse": 32,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint (Vaticanus) gives Nehemiah's lists of 11-12 in a shorter form and lacks this verse; the Hebrew and the KJV have it."
+  },
+  {
+   "book": 16,
+   "chapter": 11,
+   "verse": 33,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint (Vaticanus) gives Nehemiah's lists of 11-12 in a shorter form and lacks this verse; the Hebrew and the KJV have it."
+  },
+  {
+   "book": 16,
+   "chapter": 11,
+   "verse": 34,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint (Vaticanus) gives Nehemiah's lists of 11-12 in a shorter form and lacks this verse; the Hebrew and the KJV have it."
+  },
+  {
+   "book": 16,
+   "chapter": 11,
+   "verse": 35,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint (Vaticanus) gives Nehemiah's lists of 11-12 in a shorter form and lacks this verse; the Hebrew and the KJV have it."
+  },
+  {
+   "book": 16,
+   "chapter": 12,
+   "verse": 4,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint (Vaticanus) gives Nehemiah's lists of 11-12 in a shorter form and lacks this verse; the Hebrew and the KJV have it."
+  },
+  {
+   "book": 16,
+   "chapter": 12,
+   "verse": 5,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint (Vaticanus) gives Nehemiah's lists of 11-12 in a shorter form and lacks this verse; the Hebrew and the KJV have it."
+  },
+  {
+   "book": 16,
+   "chapter": 12,
+   "verse": 6,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint (Vaticanus) gives Nehemiah's lists of 11-12 in a shorter form and lacks this verse; the Hebrew and the KJV have it."
+  },
+  {
+   "book": 16,
+   "chapter": 12,
+   "verse": 38,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint (Vaticanus) gives Nehemiah's lists of 11-12 in a shorter form and lacks this verse; the Hebrew and the KJV have it."
+  },
+  {
+   "book": 16,
+   "chapter": 12,
+   "verse": 40,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint (Vaticanus) gives Nehemiah's lists of 11-12 in a shorter form and lacks this verse; the Hebrew and the KJV have it."
+  },
+  {
+   "book": 16,
+   "chapter": 12,
+   "verse": 41,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint (Vaticanus) gives Nehemiah's lists of 11-12 in a shorter form and lacks this verse; the Hebrew and the KJV have it."
+  },
+  {
+   "book": 17,
+   "chapter": 1,
+   "verse": 17,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint's Esther is a freer and often shorter rendering of the Hebrew, and has nothing for this verse; the Hebrew and the KJV have it. Memucan's fear that all wives would despise their husbands is implied in 1:18-20."
+  },
+  {
+   "book": 17,
+   "chapter": 2,
+   "verse": 7,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Mordecai raised Esther \"for a wife for himself\"",
+   "note": "The Septuagint says Mordecai brought Esther up to be his wife; the Hebrew and the KJV that he took her for his own daughter."
+  },
+  {
+   "book": 17,
+   "chapter": 4,
+   "verse": 3,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Omits \"fasting\" from the Jews' mourning",
+   "note": "The Septuagint lists crying, lamentation and mourning but not fasting; the Hebrew and the KJV have fasting, which 4:16 still enjoins in both."
+  },
+  {
+   "book": 17,
+   "chapter": 4,
+   "verse": 6,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint's Esther is a freer and often shorter rendering of the Hebrew, and has nothing for this verse; the Hebrew and the KJV have it."
+  },
+  {
+   "book": 17,
+   "chapter": 4,
+   "verse": 8,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Adds \"Do thou call upon the Lord\"",
+   "note": "The Septuagint's Esther names God, here and in its additions; the Hebrew book of Esther never does. Mordecai's charge to Esther is otherwise the same."
+  },
+  {
+   "book": 17,
+   "chapter": 5,
+   "verse": 1,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: the Septuagint tells it in Addition D",
+   "note": "The Septuagint replaces 5:1-2, Esther coming before the king, with its longer account (Addition D), which is printed in the Apocrypha as Esther 15:1-16; the Hebrew and the KJV have the short account here."
+  },
+  {
+   "book": 17,
+   "chapter": 5,
+   "verse": 2,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: the Septuagint tells it in Addition D",
+   "note": "The Septuagint replaces 5:1-2, Esther coming before the king, with its longer account (Addition D), which is printed in the Apocrypha as Esther 15:1-16; the Hebrew and the KJV have the short account here."
+  },
+  {
+   "book": 17,
+   "chapter": 9,
+   "verse": 1,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint's Esther is a freer and often shorter rendering of the Hebrew, and has nothing for this verse; the Hebrew and the KJV have it."
+  },
+  {
+   "book": 17,
+   "chapter": 9,
+   "verse": 5,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint's Esther is a freer and often shorter rendering of the Hebrew, and has nothing for this verse; the Hebrew and the KJV have it."
+  },
+  {
+   "book": 17,
+   "chapter": 9,
+   "verse": 24,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Haman \"the Macedonian\" for \"the Agagite\"",
+   "note": "The Septuagint calls Haman a Macedonian here and in its Addition E, elsewhere a Bougaean; the Hebrew's \"Agagite\" ties him to Agag the Amalekite of 1 Samuel 15."
+  },
+  {
+   "book": 17,
+   "chapter": 9,
+   "verse": 27,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint's Esther is a freer and often shorter rendering of the Hebrew, and has nothing for this verse; the Hebrew and the KJV have it."
+  },
+  {
+   "book": 17,
+   "chapter": 9,
+   "verse": 30,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint's Esther is a freer and often shorter rendering of the Hebrew, and has nothing for this verse; the Hebrew and the KJV have it."
+  },
+  {
+   "book": 18,
+   "chapter": 1,
+   "verse": 6,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"the angels of God\" for \"the sons of God\"",
+   "note": "The Septuagint renders \"sons of God\" as angels and \"the satan\" (the adversary) as \"the devil\"; the Hebrew and the KJV have \"sons of God\" and \"Satan\" (also 2:1)."
+  },
+  {
+   "book": 18,
+   "chapter": 2,
+   "verse": 9,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Adds a long lament of Job's wife",
+   "note": "The Septuagint has Job's wife speak at length of their lost children and her wanderings before \"say some word against the Lord, and die\"; the Hebrew and the KJV have only her short words."
+  },
+  {
+   "book": 18,
+   "chapter": 7,
+   "verse": 20,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"a burden to thee\" for \"a burden to myself\"",
+   "note": "Jewish tradition lists this among the scribes' corrections: the Hebrew \"to myself\" is held to replace \"to thee\", which the Septuagint reads. The KJV follows the Masoretic text."
+  },
+  {
+   "book": 18,
+   "chapter": 19,
+   "verse": 25,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"he is eternal who... deliver me\" for \"my redeemer liveth\"",
+   "note": "The Septuagint reads the Hebrew go'ali chai (\"my redeemer lives\") as an eternal deliverer and lacks his standing at the latter day on the earth. A deliverer is still Job's hope."
+  },
+  {
+   "book": 18,
+   "chapter": 19,
+   "verse": 26,
+   "kind": "judgment",
+   "weight": "major",
+   "change": "\"raise up my skin\"; no \"in my flesh shall I see God\"",
+   "note": "The Septuagint has God raise Job's suffering skin, a hope of restoration or resurrection, but not his seeing God in his flesh; the Hebrew and the KJV have that seeing. The Greek and Hebrew of 19:25-27 differ widely."
+  },
+  {
+   "book": 18,
+   "chapter": 23,
+   "verse": 14,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The oldest Septuagint of Job was about a sixth shorter than the Hebrew; Brenton's text has most of the gaps filled from Theodotion, but not 23:14. The Hebrew and the KJV have it."
+  },
+  {
+   "book": 18,
+   "chapter": 35,
+   "verse": 3,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "One of the places where the Septuagint of Job is shorter than the Hebrew: it lacks 35:3, Job's question what profit there is in being cleansed from sin."
+  },
+  {
+   "book": 18,
+   "chapter": 38,
+   "verse": 7,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"all my angels praised me\" for \"all the sons of God shouted\"",
+   "note": "The Septuagint renders \"sons of God\" as \"my angels\" and has no morning stars singing; the Hebrew and the KJV keep \"sons of God\", taken by most as angels too."
+  },
+  {
+   "book": 18,
+   "chapter": 42,
+   "verse": 6,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "Omits \"repent\": \"I esteem myself dust and ashes\"",
+   "note": "The Septuagint has Job count himself vile and faint, but not repent; the Hebrew and the KJV have \"repent in dust and ashes\"."
+  },
+  {
+   "book": 18,
+   "chapter": 42,
+   "verse": 17,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Adds that Job \"will rise again\" and his lineage",
+   "note": "The Septuagint closes Job with a note that he will rise with those the Lord raises up, and identifies him with Jobab king of Edom (Genesis 36:33); the Hebrew and the KJV end with his death."
+  },
+  {
+   "book": 19,
+   "chapter": 2,
+   "verse": 12,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"Accept correction\" for \"Kiss the Son\"",
+   "note": "The Septuagint reads the Hebrew nashqu bar (\"kiss the son\", bar being Aramaic for son) as \"take hold of instruction\", as do the Targum and the Vulgate; the KJV, with others, reads a call to honour the Son of 2:7."
+  },
+  {
+   "book": 19,
+   "chapter": 7,
+   "verse": 11,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "God \"not inflicting vengeance every day\" for \"angry with the wicked\"",
+   "note": "The Septuagint reads the Hebrew 'el (\"God\") as 'al (\"not\") and makes God patient; the Hebrew and the KJV say he is angry with the wicked every day."
+  },
+  {
+   "book": 19,
+   "chapter": 9,
+   "verse": 17,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"into Hades\" for \"into hell\"",
+   "note": "The Hebrew is she'olah, to the grave or the place of the dead; the Septuagint renders it Hades, the KJV \"hell\". A difference of rendering, not of text."
+  },
+  {
+   "book": 19,
+   "chapter": 12,
+   "verse": 7,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"Thou shalt keep us\" for \"Thou shalt keep them\"",
+   "note": "The Septuagint reads \"us\", as some Hebrew manuscripts do; the Masoretic \"them\" is read either as the poor of 12:5 or as the words of 12:6, a reading some take of God preserving his words."
+  },
+  {
+   "book": 19,
+   "chapter": 14,
+   "verse": 3,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Adds six lines found in Romans 3:13-18",
+   "note": "The Septuagint (Vaticanus and others) adds lines from Psalms 5, 140, 10, 36 and Isaiah 59 that Paul strings together in Romans 3:13-18; the Hebrew and the KJV of Psalm 14 lack them, as the parallel Psalm 53 does."
+  },
+  {
+   "book": 19,
+   "chapter": 18,
+   "verse": 13,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"hail stones and coals of fire\"",
+   "note": "The Septuagint lacks the words, which the Hebrew repeats from 18:12; the parallel in 2 Samuel 22:14 also lacks them."
+  },
+  {
+   "book": 19,
+   "chapter": 19,
+   "verse": 4,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"Their voice\" for \"Their line\"",
+   "note": "The Septuagint has \"sound\" or \"voice\" (reading a Hebrew word for \"line\" as their voice), and Paul quotes this Greek in Romans 10:18; the Hebrew and the KJV have \"line\". The tabernacle for the sun is in its 19:5."
+  },
+  {
+   "book": 19,
+   "chapter": 22,
+   "verse": 1,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"the account of my transgressions\" for \"the words of my roaring\"",
+   "note": "The Septuagint adds \"attend to me\" and reads sha'agati (\"my roaring\") as \"my transgressions\"; the Hebrew and the KJV have the sufferer's roaring, the cry Jesus takes up in Matthew 27:46."
+  },
+  {
+   "book": 19,
+   "chapter": 22,
+   "verse": 29,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"my soul also lives to him\" for the KJV's last clause",
+   "note": "The Septuagint reads the Hebrew otherwise, giving the speaker a life lived to God; the Hebrew and the KJV say \"none can keep alive his own soul\"."
+  },
+  {
+   "book": 19,
+   "chapter": 40,
+   "verse": 6,
+   "kind": "atonement",
+   "weight": "major",
+   "change": "\"a body hast thou prepared me\" for \"mine ears hast thou opened\"",
+   "note": "The Septuagint has \"a body\", the reading Hebrews 10:5-10 quotes of Christ's offering of his body; the Hebrew and the KJV have \"mine ears hast thou opened\" (literally \"dug\"), of obedience."
+  },
+  {
+   "book": 19,
+   "chapter": 45,
+   "verse": 11,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"and worship thou him\" of the king",
+   "note": "The Septuagint ends the verse \"for he is thy Lord\"; in 45:12 the daughter of Tyre adores him. The Hebrew and the KJV bid the bride worship the king, in a psalm Hebrews 1:8-9 applies to Christ."
+  },
+  {
+   "book": 19,
+   "chapter": 55,
+   "verse": 15,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"into Hades\" for \"into hell\"",
+   "note": "The Hebrew is she'ol, the grave or the place of the dead; the Septuagint renders it Hades, the KJV \"hell\"."
+  },
+  {
+   "book": 19,
+   "chapter": 72,
+   "verse": 14,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"their name shall be precious\" for \"their blood\"",
+   "note": "The Septuagint reads \"name\" where the Hebrew has damam, \"their blood\"; the king still values the lives of the poor."
+  },
+  {
+   "book": 19,
+   "chapter": 90,
+   "verse": 13,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"be intreated\" for \"let it repent thee\"",
+   "note": "As often, the Septuagint avoids saying God repents; the Hebrew and the KJV ask the LORD to repent concerning his servants."
+  },
+  {
+   "book": 19,
+   "chapter": 97,
+   "verse": 7,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"worship him, all ye his angels\" for \"all ye gods\"",
+   "note": "The Septuagint renders elohim as \"his angels\", a form close to the words Hebrews 1:6 quotes; the Hebrew and the KJV have \"all ye gods\"."
+  },
+  {
+   "book": 19,
+   "chapter": 102,
+   "verse": 25,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Adds \"O Lord\": \"thou, O Lord, didst lay the foundation\"",
+   "note": "The Septuagint addresses this God as \"Lord\", and Hebrews 1:10 quotes the Greek of 102:25-27 of the Son; the Hebrew and the KJV have no vocative here (God is named in 102:24)."
+  },
+  {
+   "book": 19,
+   "chapter": 105,
+   "verse": 28,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"yet they rebelled against his words\" for \"they rebelled not\"",
+   "note": "The Septuagint lacks the \"not\", making Egypt (or Israel) rebel; the Hebrew and the KJV say they (Moses and Aaron, or the plagues) rebelled not against his word."
+  },
+  {
+   "book": 19,
+   "chapter": 110,
+   "verse": 3,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"I have begotten thee from the womb before the morning\"",
+   "note": "The Septuagint reads yaldutekha (\"thy youth\") as yelidtikha (\"I have begotten thee\"), read by the Church fathers of the Son's eternal begetting; the Hebrew and the KJV have \"thou hast the dew of thy youth\"."
+  },
+  {
+   "book": 19,
+   "chapter": 135,
+   "verse": 14,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"comfort himself\" for \"repent himself\"",
+   "note": "As often, the Septuagint avoids saying God repents; the Hebrew and the KJV say he will repent concerning his servants."
+  },
+  {
+   "book": 19,
+   "chapter": 138,
+   "verse": 2,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"thy holy name above every thing\" for \"thy word above...\"",
+   "note": "The Septuagint has God magnify his holy name above all; the Hebrew and the KJV that he has magnified his word above all his name, a verse often cited for the authority of Scripture."
+  },
+  {
+   "book": 19,
+   "chapter": 145,
+   "verse": 13,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Adds \"The Lord is faithful in his words...\"",
+   "note": "Psalm 145 is an acrostic and the Hebrew lacks the line for the letter nun; the Septuagint, a Dead Sea Psalms scroll (11QPs-a) and one Hebrew manuscript have it. The KJV follows the Masoretic text."
+  },
+  {
+   "book": 20,
+   "chapter": 1,
+   "verse": 16,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint (Vaticanus) lacks 1:16, \"their feet run to evil, and make haste to shed blood\"; the Hebrew has it, and the same words are in Isaiah 59:7, quoted in Romans 3:15."
+  },
+  {
+   "book": 20,
+   "chapter": 3,
+   "verse": 12,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"scourges every son whom he receives\" for \"as a father the son\"",
+   "note": "The Septuagint reads the Hebrew \"and as a father\" (ukh'av) as \"and he scourges\" (yakh'iv); Hebrews 12:6 quotes this Greek. The Hebrew and the KJV compare God to a father delighting in his son."
+  },
+  {
+   "book": 20,
+   "chapter": 4,
+   "verse": 7,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint lacks 4:7, \"Wisdom is the principal thing; therefore get wisdom\"; the Hebrew and the KJV have it."
+  },
+  {
+   "book": 20,
+   "chapter": 5,
+   "verse": 5,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"down to the grave with death\" for \"take hold on hell\"",
+   "note": "The Hebrew she'ol is the grave or place of the dead; the Septuagint renders it Hades, the KJV \"hell\". The Greek also reads the second line otherwise."
+  },
+  {
+   "book": 20,
+   "chapter": 6,
+   "verse": 16,
+   "kind": "other",
+   "weight": "minor",
+   "change": "A different saying: he \"rejoices in all things which God hates\"",
+   "note": "The Septuagint's 6:16 reads otherwise than the Hebrew's \"these six things doth the LORD hate\", and its list that follows is not counted as six and seven."
+  },
+  {
+   "book": 20,
+   "chapter": 8,
+   "verse": 22,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"The Lord made me\" for \"The LORD possessed me\"",
+   "note": "The Septuagint renders the Hebrew qanani as ektise, \"created\", where the KJV has \"possessed\". Since Wisdom here was read of Christ, the Greek was cited in the fourth century by those who held the Son was created, and answered by their opponents."
+  },
+  {
+   "book": 20,
+   "chapter": 8,
+   "verse": 33,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint lacks 8:33, \"Hear instruction, and be wise\"; the Hebrew and the KJV have it."
+  },
+  {
+   "book": 20,
+   "chapter": 11,
+   "verse": 4,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint lacks 11:4, \"righteousness delivereth from death\", which 10:2 already says in both."
+  },
+  {
+   "book": 20,
+   "chapter": 13,
+   "verse": 6,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint lacks 13:6, \"Righteousness keepeth him that is upright in the way\"; the Hebrew and the KJV have it."
+  },
+  {
+   "book": 20,
+   "chapter": 15,
+   "verse": 31,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Proverbs often differs from the Hebrew in wording and order, and lacks some sayings; it has nothing for this verse. The Hebrew and the KJV have it."
+  },
+  {
+   "book": 20,
+   "chapter": 16,
+   "verse": 1,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Proverbs often differs from the Hebrew in wording and order, and lacks some sayings; it has nothing for this verse. The Hebrew and the KJV have it."
+  },
+  {
+   "book": 20,
+   "chapter": 16,
+   "verse": 3,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Proverbs often differs from the Hebrew in wording and order, and lacks some sayings; it has nothing for this verse. The Hebrew and the KJV have it."
+  },
+  {
+   "book": 20,
+   "chapter": 16,
+   "verse": 4,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint lacks \"The LORD hath made all things for himself: yea, even the wicked for the day of evil\"; its 16:2 ends with the ungodly perishing in an evil day. The Hebrew and the KJV have the verse, often cited on God's sovereignty."
+  },
+  {
+   "book": 20,
+   "chapter": 16,
+   "verse": 6,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: the Septuagint has it at 15:27",
+   "note": "The Septuagint gives \"by mercy and truth iniquity is purged\" (as \"by alms and by faithful dealings sins are purged away\") after 15:27, where Brenton's text has it."
+  },
+  {
+   "book": 20,
+   "chapter": 18,
+   "verse": 23,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Proverbs often differs from the Hebrew in wording and order, and lacks some sayings; it has nothing for this verse. The Hebrew and the KJV have it."
+  },
+  {
+   "book": 20,
+   "chapter": 18,
+   "verse": 24,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint lacks 18:23-19:2, including \"there is a friend that sticketh closer than a brother\"; the Hebrew and the KJV have it."
+  },
+  {
+   "book": 20,
+   "chapter": 19,
+   "verse": 1,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Proverbs often differs from the Hebrew in wording and order, and lacks some sayings; it has nothing for this verse. The Hebrew and the KJV have it."
+  },
+  {
+   "book": 20,
+   "chapter": 19,
+   "verse": 2,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Proverbs often differs from the Hebrew in wording and order, and lacks some sayings; it has nothing for this verse. The Hebrew and the KJV have it."
+  },
+  {
+   "book": 20,
+   "chapter": 20,
+   "verse": 14,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Proverbs often differs from the Hebrew in wording and order, and lacks some sayings; it has nothing for this verse. The Hebrew and the KJV have it."
+  },
+  {
+   "book": 20,
+   "chapter": 20,
+   "verse": 15,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Proverbs often differs from the Hebrew in wording and order, and lacks some sayings; it has nothing for this verse. The Hebrew and the KJV have it."
+  },
+  {
+   "book": 20,
+   "chapter": 20,
+   "verse": 16,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Proverbs often differs from the Hebrew in wording and order, and lacks some sayings; it has nothing for this verse. The Hebrew and the KJV have it."
+  },
+  {
+   "book": 20,
+   "chapter": 20,
+   "verse": 17,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Proverbs often differs from the Hebrew in wording and order, and lacks some sayings; it has nothing for this verse. The Hebrew and the KJV have it."
+  },
+  {
+   "book": 20,
+   "chapter": 20,
+   "verse": 18,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Proverbs often differs from the Hebrew in wording and order, and lacks some sayings; it has nothing for this verse. The Hebrew and the KJV have it."
+  },
+  {
+   "book": 20,
+   "chapter": 20,
+   "verse": 19,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Proverbs often differs from the Hebrew in wording and order, and lacks some sayings; it has nothing for this verse. The Hebrew and the KJV have it."
+  },
+  {
+   "book": 20,
+   "chapter": 20,
+   "verse": 20,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: the Septuagint has it at 20:9",
+   "note": "The Septuagint places 20:20-22 (the lamp of him who curses his parents, the hasty inheritance, \"wait on the LORD\") after 20:9, where Brenton's text has them."
+  },
+  {
+   "book": 20,
+   "chapter": 20,
+   "verse": 21,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: the Septuagint has it at 20:9",
+   "note": "The Septuagint places 20:20-22 (the lamp of him who curses his parents, the hasty inheritance, \"wait on the LORD\") after 20:9, where Brenton's text has them."
+  },
+  {
+   "book": 20,
+   "chapter": 20,
+   "verse": 22,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: the Septuagint has it at 20:9",
+   "note": "The Septuagint places 20:20-22 (the lamp of him who curses his parents, the hasty inheritance, \"wait on the LORD\") after 20:9, where Brenton's text has them."
+  },
+  {
+   "book": 20,
+   "chapter": 21,
+   "verse": 5,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Proverbs often differs from the Hebrew in wording and order, and lacks some sayings; it has nothing for this verse. The Hebrew and the KJV have it."
+  },
+  {
+   "book": 20,
+   "chapter": 21,
+   "verse": 30,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"no counsel against the ungodly\" for \"against the LORD\"",
+   "note": "The Septuagint reads \"against the ungodly\" where the Hebrew and the KJV say no wisdom or counsel can stand against the LORD."
+  },
+  {
+   "book": 20,
+   "chapter": 22,
+   "verse": 6,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Proverbs often differs from the Hebrew in wording and order, and lacks some sayings; it has nothing for this verse. The Hebrew and the KJV have it."
+  },
+  {
+   "book": 20,
+   "chapter": 23,
+   "verse": 14,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"deliver his soul from death\" for \"from hell\"",
+   "note": "The Hebrew she'ol is the grave or place of the dead; the Septuagint renders it \"death\", the KJV \"hell\"."
+  },
+  {
+   "book": 20,
+   "chapter": 23,
+   "verse": 23,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Proverbs often differs from the Hebrew in wording and order, and lacks some sayings; it has nothing for this verse. The Hebrew and the KJV have it."
+  },
+  {
+   "book": 20,
+   "chapter": 30,
+   "verse": 4,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the name of his children\" for \"his son's name\"",
+   "note": "The Septuagint's Proverbs 30 opens with sayings the Hebrew lacks, so in Brenton's text Agur's questions stand at 30:6; it asks \"what is the name of his children?\" where the Hebrew and the KJV ask \"what is his son's name?\""
+  },
+  {
+   "book": 23,
+   "chapter": 1,
+   "verse": 9,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"left us a seed\" for \"a very small remnant\"",
+   "note": "The Septuagint has \"seed\", the form Paul quotes in Romans 9:29; the Hebrew and the KJV have \"remnant\". The sense is the same."
+  },
+  {
+   "book": 23,
+   "chapter": 2,
+   "verse": 22,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint lacks 2:22, \"Cease ye from man, whose breath is in his nostrils\"; the Hebrew and the KJV have it."
+  },
+  {
+   "book": 23,
+   "chapter": 3,
+   "verse": 10,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"Let us bind the just, for he is burdensome to us\"",
+   "note": "The Septuagint reads 3:10 as the wicked plotting against the just one, words early Christian writers applied to Christ (compare Wisdom 2:12); the Hebrew and the KJV promise that it shall be well with the righteous."
+  },
+  {
+   "book": 23,
+   "chapter": 4,
+   "verse": 2,
+   "kind": "prophecy",
+   "weight": "major",
+   "change": "\"God shall shine gloriously in counsel\" for \"the branch of the LORD\"",
+   "note": "The Septuagint has no \"branch\" (tsemach), a word Jeremiah 23:5 and Zechariah 3:8 use as a title of the coming king; here the Greek speaks of God shining in counsel. The Hebrew and the KJV have the Branch."
+  },
+  {
+   "book": 23,
+   "chapter": 6,
+   "verse": 10,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"the heart of this people has become gross\" for \"Make... fat\"",
+   "note": "The Septuagint describes the people's dulled heart where the Hebrew bids the prophet make it so; Matthew 13:15 and Acts 28:27 quote the Greek, John 12:40 a form nearer the Hebrew."
+  },
+  {
+   "book": 23,
+   "chapter": 8,
+   "verse": 14,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"ye shall not come against him as against a stumbling-stone\"",
+   "note": "The Septuagint makes the LORD a sanctuary and not a stone of stumbling to those who trust him; the Hebrew and the KJV make him a stumbling-stone to both houses of Israel, as Romans 9:33 and 1 Peter 2:8 apply it."
+  },
+  {
+   "book": 23,
+   "chapter": 9,
+   "verse": 3,
+   "kind": "other",
+   "weight": "minor",
+   "change": "No \"not increased the joy\"",
+   "note": "The Hebrew is written \"not\" (lo) and read \"to it\" (lo); the KJV follows the written \"not\", most modern versions the reading \"increased its joy\". The Septuagint reads the line otherwise again."
+  },
+  {
+   "book": 23,
+   "chapter": 9,
+   "verse": 6,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"the Messenger of great counsel\" for \"Wonderful, Counsellor, The mighty God...\"",
+   "note": "The Septuagint (Vaticanus) renders the names of the child as \"Messenger (Angel) of great counsel\", without \"mighty God\" or \"everlasting Father\"; some Greek copies add the titles. The Hebrew and the KJV give the child divine names."
+  },
+  {
+   "book": 23,
+   "chapter": 10,
+   "verse": 23,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"cut it short in righteousness\" for \"make a consumption, even determined\"",
+   "note": "The Septuagint reads 10:22-23 as God finishing and cutting short the work in righteousness, the form Paul quotes in Romans 9:28. The Hebrew and the KJV speak of a decreed destruction."
+  },
+  {
+   "book": 23,
+   "chapter": 11,
+   "verse": 2,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"knowledge and godliness\" for \"knowledge and of the fear of the LORD\"",
+   "note": "The Septuagint renders the first \"fear of the LORD\" as \"godliness\" and the second (11:3) as \"fear of God\", giving seven spirits, the source of the seven gifts of the Spirit in later teaching. The Hebrew and the KJV have six names."
+  },
+  {
+   "book": 23,
+   "chapter": 11,
+   "verse": 10,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"he that shall arise to rule... in him shall the Gentiles trust\"",
+   "note": "The Septuagint, which Paul quotes in Romans 15:12, has the root of Jesse rise to rule the Gentiles, who trust in him; the Hebrew and the KJV have him stand for an ensign, to which the Gentiles seek."
+  },
+  {
+   "book": 23,
+   "chapter": 19,
+   "verse": 25,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"my people that is in Egypt... among the Assyrians\"",
+   "note": "The Septuagint blesses God's people living in Egypt and Assyria; the Hebrew and the KJV bless Egypt and Assyria themselves, with Israel, as God's people and the work of his hands."
+  },
+  {
+   "book": 23,
+   "chapter": 25,
+   "verse": 8,
+   "kind": "prophecy",
+   "weight": "major",
+   "change": "\"Death has prevailed and swallowed men up\" for God swallowing death",
+   "note": "The Septuagint reads death as the one that swallows; the Hebrew and the KJV have God swallowing up death in victory, the words Paul quotes of the resurrection in 1 Corinthians 15:54 (in a form near the Hebrew and Theodotion)."
+  },
+  {
+   "book": 23,
+   "chapter": 27,
+   "verse": 3,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"I am a strong city... in vain shall I water it\"",
+   "note": "The Septuagint's 27:3 is a lament of a besieged city; the Hebrew and the KJV have the LORD keeping and watering his vineyard night and day."
+  },
+  {
+   "book": 23,
+   "chapter": 28,
+   "verse": 15,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"a covenant with Hades\" for \"with hell\"",
+   "note": "The Hebrew she'ol is the grave or place of the dead; the Septuagint renders it Hades, the KJV \"hell\" (also 28:18)."
+  },
+  {
+   "book": 23,
+   "chapter": 28,
+   "verse": 16,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"he that believes on him shall... not be ashamed\"",
+   "note": "The Septuagint has \"believes on him\" and \"shall not be ashamed\" where the Hebrew has \"believeth\" and \"shall not make haste\"; Romans 9:33, 10:11 and 1 Peter 2:6 quote the Greek of this stone laid in Zion."
+  },
+  {
+   "book": 23,
+   "chapter": 28,
+   "verse": 18,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"your trust in Hades\" for \"your agreement with hell\"",
+   "note": "As in 28:15, the Septuagint renders she'ol as Hades, the KJV as \"hell\"."
+  },
+  {
+   "book": 23,
+   "chapter": 29,
+   "verse": 13,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"in vain do they worship me, teaching... doctrines of men\"",
+   "note": "The Septuagint, which Jesus quotes in Matthew 15:8-9 and Mark 7:6-7, has worship in vain and the doctrines of men; the Hebrew and the KJV have their fear of God taught by the precept of men."
+  },
+  {
+   "book": 23,
+   "chapter": 34,
+   "verse": 10,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "Omits \"for ever\" and \"for ever and ever\"",
+   "note": "The Septuagint says Edom's fire shall not be quenched and its smoke shall go up, but lacks \"for ever\" and \"none shall pass through it for ever and ever\"; Revelation 14:11 and 19:3 echo the Hebrew's lasting smoke."
+  },
+  {
+   "book": 23,
+   "chapter": 34,
+   "verse": 14,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"devils shall meet with satyrs\" for \"the screech owl\"",
+   "note": "The Septuagint has demons and onocentaurs (Brenton \"satyrs\") where the Hebrew has desert creatures and lilith, which the KJV renders \"screech owl\" and others a night demon."
+  },
+  {
+   "book": 23,
+   "chapter": 40,
+   "verse": 7,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"because the spirit of the LORD bloweth upon it\"",
+   "note": "The Septuagint lacks 40:7b and the repeated line of 40:8, as 1 Peter 1:24 does in quoting it; the Dead Sea Isaiah scroll (1QIsa-a) first lacked them too, a later hand adding them. The Masoretic text and the KJV have them."
+  },
+  {
+   "book": 23,
+   "chapter": 40,
+   "verse": 13,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"the mind of the Lord\" for \"the Spirit of the LORD\"",
+   "note": "The Septuagint renders ruach YHWH as \"the mind of the Lord\", the form Paul quotes in Romans 11:34 and 1 Corinthians 2:16. The Hebrew and the KJV have the Spirit of the LORD."
+  },
+  {
+   "book": 23,
+   "chapter": 42,
+   "verse": 4,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"in his name shall the Gentiles trust\" for \"the isles shall wait\"",
+   "note": "The Septuagint, which Matthew 12:21 quotes, has the Gentiles hoping in his name; the Hebrew and the KJV have the isles waiting for his law."
+  },
+  {
+   "book": 23,
+   "chapter": 42,
+   "verse": 19,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"my servants\" for \"my servant\", \"the servants of God\" made blind",
+   "note": "The Septuagint makes the blind servant plural; the Hebrew and the KJV speak of one servant of the LORD, as in the servant songs of chapters 42-53."
+  },
+  {
+   "book": 23,
+   "chapter": 51,
+   "verse": 6,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"my salvation shall be for ever\"",
+   "note": "The Septuagint keeps only \"my righteousness shall not fail\"; the Hebrew and the KJV set God's everlasting salvation against the vanishing heavens (repeated in 51:8)."
+  },
+  {
+   "book": 23,
+   "chapter": 51,
+   "verse": 9,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"Awake, O Jerusalem\" for \"O arm of the LORD\"; no Rahab",
+   "note": "The Septuagint calls Jerusalem to put on the strength of its arm and lacks the cutting of Rahab and the dragon; the Hebrew and the KJV call on the arm of the LORD, who did those deeds of old."
+  },
+  {
+   "book": 23,
+   "chapter": 52,
+   "verse": 5,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"On account of you my name is... blasphemed among the Gentiles\"",
+   "note": "The Septuagint adds \"on account of you\" and \"among the Gentiles\", the form Paul quotes in Romans 2:24; the Hebrew and the KJV say only that God's name is blasphemed continually."
+  },
+  {
+   "book": 23,
+   "chapter": 52,
+   "verse": 15,
+   "kind": "atonement",
+   "weight": "minor",
+   "change": "\"many nations shall wonder at him\" for \"sprinkle many nations\"",
+   "note": "The Septuagint has the nations startled (reading the Hebrew yazzeh so); the KJV has \"sprinkle\", the priestly word for cleansing, which many read of the servant's atoning work."
+  },
+  {
+   "book": 23,
+   "chapter": 53,
+   "verse": 4,
+   "kind": "atonement",
+   "weight": "minor",
+   "change": "\"He bears our sins\" for \"borne our griefs\"",
+   "note": "The Septuagint has \"sins\" where the Hebrew has \"sicknesses\" or \"griefs\"; Matthew 8:17 follows the Hebrew, 1 Peter 2:24 speaks of sins. The Greek lacks \"smitten of God\"."
+  },
+  {
+   "book": 23,
+   "chapter": 53,
+   "verse": 8,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"In his humiliation his judgment was taken away\"",
+   "note": "The Septuagint, which Philip reads with the eunuch in Acts 8:32-33, has \"in his humiliation\" and \"he was led to death\"; the Hebrew and the KJV have him taken from prison and judgment and stricken for his people's transgression."
+  },
+  {
+   "book": 23,
+   "chapter": 53,
+   "verse": 10,
+   "kind": "atonement",
+   "weight": "major",
+   "change": "No \"it pleased the LORD to bruise him\"; \"your soul\" offers",
+   "note": "The Septuagint reads 53:10 as the Lord purging the servant from his stroke, and \"if ye give an offering for sin, your soul shall see a long-lived seed\". The Hebrew and the KJV have the LORD bruising him and his soul made an offering for sin."
+  },
+  {
+   "book": 23,
+   "chapter": 53,
+   "verse": 11,
+   "kind": "atonement",
+   "weight": "major",
+   "change": "\"to shew him light... to justify the just one\"",
+   "note": "The Septuagint and two Dead Sea Isaiah scrolls (1QIsa-a, 4QIsa-d) have the servant see light after his travail; the Greek then has God justify the just one who serves many well. The Hebrew and the KJV have the righteous servant justify many by his knowledge. Both keep \"he shall bear their sins\"."
+  },
+  {
+   "book": 23,
+   "chapter": 53,
+   "verse": 12,
+   "kind": "atonement",
+   "weight": "minor",
+   "change": "\"was delivered because of their iniquities\" for \"made intercession\"",
+   "note": "The Septuagint ends with the servant delivered up for their sins, words echoed in Romans 4:25; the Hebrew and the KJV have him make intercession for the transgressors."
+  },
+  {
+   "book": 23,
+   "chapter": 56,
+   "verse": 12,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint lacks 56:12, the drunkards' \"to morrow shall be as this day\"; the Hebrew and the KJV have it."
+  },
+  {
+   "book": 23,
+   "chapter": 59,
+   "verse": 19,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"the wrath of the Lord... as a mighty river\"",
+   "note": "The Septuagint reads the line as the Lord's wrath coming like a rushing river; the KJV has the enemy coming like a flood and the Spirit of the LORD lifting up a standard against him. The Hebrew allows both."
+  },
+  {
+   "book": 23,
+   "chapter": 59,
+   "verse": 20,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"for Sion's sake... turn away ungodliness from Jacob\"",
+   "note": "The Septuagint has the deliverer come for Zion's sake and turn ungodliness away from Jacob, the form Paul quotes in Romans 11:26. The Hebrew and the KJV have him come to Zion, to those in Jacob who turn from transgression."
+  },
+  {
+   "book": 23,
+   "chapter": 61,
+   "verse": 1,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "Adds \"recovery of sight to the blind\"; no opening of the prison",
+   "note": "The Septuagint has sight for the blind where the Hebrew has the prison opened to the bound; Jesus reads the Greek form in Luke 4:18. The anointing of the Spirit is in both."
+  },
+  {
+   "book": 23,
+   "chapter": 62,
+   "verse": 11,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"thy Saviour has come\" for \"thy salvation cometh\"",
+   "note": "The Septuagint renders yesha' (\"salvation\") as the Saviour himself coming to Zion with his reward; the Hebrew and the KJV have \"thy salvation\", followed by \"his reward is with him\"."
+  },
+  {
+   "book": 23,
+   "chapter": 64,
+   "verse": 1,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: the Septuagint has it in 63:19",
+   "note": "The Septuagint numbers 64:1 with 63:19, where Brenton's text has \"If thou wouldest open the heaven...\"; the Hebrew and the KJV begin chapter 64 with it."
+  },
+  {
+   "book": 23,
+   "chapter": 65,
+   "verse": 1,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"I became manifest to them that asked not for me\"",
+   "note": "The Septuagint, quoted in Romans 10:20, has \"I became manifest\" and a nation \"who called not on my name\"; the Hebrew and the KJV have \"I am sought of them that asked not\" and a nation \"not called by my name\"."
+  },
+  {
+   "book": 23,
+   "chapter": 65,
+   "verse": 2,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"a disobedient and gainsaying people\" for \"a rebellious people\"",
+   "note": "The Septuagint's \"disobedient and gainsaying\" is the form Paul quotes in Romans 10:21; the Hebrew and the KJV have \"rebellious\"."
+  },
+  {
+   "book": 23,
+   "chapter": 65,
+   "verse": 11,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"a table for the devil... the drink-offering to Fortune\"",
+   "note": "The Septuagint renders the Hebrew Gad and Meni, gods of luck, as \"the demon\" and \"Fortune\"; the KJV has \"that troop\" and \"that number\". All read idol-worship."
+  },
+  {
+   "book": 24,
+   "chapter": 2,
+   "verse": 1,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint lacks 2:1 and begins the oracle at 2:2 with \"And he said, Thus saith the Lord\"; the Hebrew and the KJV have the word of the LORD coming to Jeremiah."
+  },
+  {
+   "book": 24,
+   "chapter": 3,
+   "verse": 14,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"I will rule over you\" for \"I am married unto you\"",
+   "note": "The Hebrew ba'alti can mean \"I am husband\" or \"I am lord\"; the Septuagint takes the second, the KJV the first. The marriage picture of God and Israel is less marked in the Greek."
+  },
+  {
+   "book": 24,
+   "chapter": 7,
+   "verse": 1,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Jeremiah is about an eighth shorter than the Hebrew, and some Dead Sea fragments of Jeremiah (4QJer-b, 4QJer-d) support its shorter form; it lacks 7:1 and most of 7:2, beginning \"Hear ye the word of the Lord, all Judea\". The Hebrew and the KJV set the sermon in the temple gate."
+  },
+  {
+   "book": 24,
+   "chapter": 7,
+   "verse": 2,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits standing in the gate of the LORD's house",
+   "note": "The Septuagint of Jeremiah is about an eighth shorter than the Hebrew, and some Dead Sea fragments of Jeremiah (4QJer-b, 4QJer-d) support its shorter form; it has no setting in the temple gate for this sermon. The temple is still its subject (7:4-14)."
+  },
+  {
+   "book": 24,
+   "chapter": 8,
+   "verse": 11,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Jeremiah is about an eighth shorter than the Hebrew, and some Dead Sea fragments of Jeremiah (4QJer-b, 4QJer-d) support its shorter form; it lacks 8:10b-12, which repeat 6:13-15 (\"Peace, peace; when there is no peace\"). The Hebrew and the KJV have them in both places."
+  },
+  {
+   "book": 24,
+   "chapter": 8,
+   "verse": 12,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Jeremiah is about an eighth shorter than the Hebrew, and some Dead Sea fragments of Jeremiah (4QJer-b, 4QJer-d) support its shorter form; it lacks 8:10b-12, which repeat 6:13-15 (\"Peace, peace; when there is no peace\"). The Hebrew and the KJV have them in both places."
+  },
+  {
+   "book": 24,
+   "chapter": 10,
+   "verse": 6,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Jeremiah is about an eighth shorter than the Hebrew, and some Dead Sea fragments of Jeremiah (4QJer-b, 4QJer-d) support its shorter form; it lacks 10:6-8, the praise of the LORD as great and King of nations, as does the Dead Sea fragment 4QJer-b. The Hebrew and the KJV have them."
+  },
+  {
+   "book": 24,
+   "chapter": 10,
+   "verse": 7,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Jeremiah is about an eighth shorter than the Hebrew, and some Dead Sea fragments of Jeremiah (4QJer-b, 4QJer-d) support its shorter form; it lacks 10:6-8, the praise of the LORD as great and King of nations, as does the Dead Sea fragment 4QJer-b. The Hebrew and the KJV have them."
+  },
+  {
+   "book": 24,
+   "chapter": 10,
+   "verse": 8,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Jeremiah is about an eighth shorter than the Hebrew, and some Dead Sea fragments of Jeremiah (4QJer-b, 4QJer-d) support its shorter form; it lacks 10:6-8, the praise of the LORD as great and King of nations, as does the Dead Sea fragment 4QJer-b. The Hebrew and the KJV have them."
+  },
+  {
+   "book": 24,
+   "chapter": 10,
+   "verse": 10,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Jeremiah is about an eighth shorter than the Hebrew, and some Dead Sea fragments of Jeremiah (4QJer-b, 4QJer-d) support its shorter form; it lacks 10:10, \"the LORD is the true God, he is the living God, and an everlasting king\", as does 4QJer-b. Brenton's text has 10:5 here, the Greek ordering 10:5-10 otherwise. The living God is still set against idols in 10:11-16."
+  },
+  {
+   "book": 24,
+   "chapter": 11,
+   "verse": 7,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Jeremiah is about an eighth shorter than the Hebrew, and some Dead Sea fragments of Jeremiah (4QJer-b, 4QJer-d) support its shorter form; it lacks 11:7 and most of 11:8, God's protest to the fathers from the exodus on. The Hebrew and the KJV have them."
+  },
+  {
+   "book": 24,
+   "chapter": 11,
+   "verse": 8,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the fathers' refusal and the curses of the covenant",
+   "note": "The Septuagint of Jeremiah is about an eighth shorter than the Hebrew, and some Dead Sea fragments of Jeremiah (4QJer-b, 4QJer-d) support its shorter form; of 11:8 it keeps only \"but they did them not\". The Hebrew and the KJV have the whole verse."
+  },
+  {
+   "book": 24,
+   "chapter": 17,
+   "verse": 1,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Jeremiah is about an eighth shorter than the Hebrew, and some Dead Sea fragments of Jeremiah (4QJer-b, 4QJer-d) support its shorter form; it lacks 17:1-4, Judah's sin written with a pen of iron, which partly repeat 15:13-14. The Hebrew and the KJV have them."
+  },
+  {
+   "book": 24,
+   "chapter": 17,
+   "verse": 2,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Jeremiah is about an eighth shorter than the Hebrew, and some Dead Sea fragments of Jeremiah (4QJer-b, 4QJer-d) support its shorter form; it lacks 17:1-4, Judah's sin written with a pen of iron, which partly repeat 15:13-14. The Hebrew and the KJV have them."
+  },
+  {
+   "book": 24,
+   "chapter": 17,
+   "verse": 3,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Jeremiah is about an eighth shorter than the Hebrew, and some Dead Sea fragments of Jeremiah (4QJer-b, 4QJer-d) support its shorter form; it lacks 17:1-4, Judah's sin written with a pen of iron, which partly repeat 15:13-14. The Hebrew and the KJV have them."
+  },
+  {
+   "book": 24,
+   "chapter": 17,
+   "verse": 4,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Jeremiah is about an eighth shorter than the Hebrew, and some Dead Sea fragments of Jeremiah (4QJer-b, 4QJer-d) support its shorter form; it lacks 17:1-4, Judah's sin written with a pen of iron, which partly repeat 15:13-14. The Hebrew and the KJV have them."
+  },
+  {
+   "book": 24,
+   "chapter": 22,
+   "verse": 30,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"Write ye this man an outcast\" for \"childless\"",
+   "note": "The Septuagint has \"outcast\" (proscribed) where the Hebrew and the KJV have \"childless\"; both deny Jeconiah's seed the throne of David, a curse often discussed with Matthew 1:12."
+  },
+  {
+   "book": 24,
+   "chapter": 23,
+   "verse": 6,
+   "kind": "prophecy",
+   "weight": "major",
+   "change": "\"Josedec among the prophets\" for \"THE LORD OUR RIGHTEOUSNESS\"",
+   "note": "The Septuagint reads the name YHWH tsidqenu as Iosedek, a man's name, and adds \"among the prophets\"; the Hebrew and the KJV give the coming Branch of David the name \"The LORD our righteousness\"."
+  },
+  {
+   "book": 24,
+   "chapter": 23,
+   "verse": 7,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: the Septuagint has it after 23:40",
+   "note": "The Septuagint places 23:7-8, the new exodus from the north country, at the end of the chapter after 23:40, where Brenton's text has it. Moved, not lost."
+  },
+  {
+   "book": 24,
+   "chapter": 23,
+   "verse": 8,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Not here: the Septuagint has it after 23:40",
+   "note": "The Septuagint places 23:7-8, the new exodus from the north country, at the end of the chapter after 23:40, where Brenton's text has it. Moved, not lost."
+  },
+  {
+   "book": 24,
+   "chapter": 25,
+   "verse": 9,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Omits \"Nebuchadrezzar the king of Babylon, my servant\"",
+   "note": "The Septuagint of Jeremiah is about an eighth shorter than the Hebrew, and some Dead Sea fragments of Jeremiah support its shorter form; here it has only \"a family from the north\", and it nowhere calls Nebuchadnezzar God's servant (also 27:6, 43:10). The Hebrew and the KJV do."
+  },
+  {
+   "book": 24,
+   "chapter": 25,
+   "verse": 14,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Jeremiah is about an eighth shorter than the Hebrew, and some Dead Sea fragments of Jeremiah support its shorter form; it lacks 25:14, the nations who will in turn enslave Babylon. Its oracles against the nations follow 25:13 at this point."
+  },
+  {
+   "book": 24,
+   "chapter": 26,
+   "verse": 3,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"I will cease from the evils\" for \"that I may repent me\"",
+   "note": "As often, the Septuagint avoids saying God repents (also 26:13, 26:19); the Hebrew and the KJV say the LORD will repent of the evil."
+  },
+  {
+   "book": 24,
+   "chapter": 26,
+   "verse": 13,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"the Lord shall cease from the evils\" for \"will repent him\"",
+   "note": "As at 26:3, the Septuagint avoids saying God repents; the Hebrew and the KJV say he will repent of the evil pronounced."
+  },
+  {
+   "book": 24,
+   "chapter": 27,
+   "verse": 1,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Jeremiah is about an eighth shorter than the Hebrew, and some Dead Sea fragments of Jeremiah support its shorter form; it lacks 27:1, the heading dating the oracle to Jehoiakim's reign (the following verses speak of Zedekiah, so many think the Hebrew heading displaced)."
+  },
+  {
+   "book": 24,
+   "chapter": 27,
+   "verse": 7,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Jeremiah is about an eighth shorter than the Hebrew, and some Dead Sea fragments of Jeremiah support its shorter form; it lacks 27:7, that all nations would serve Nebuchadnezzar, his son and his son's son until his land's time came. The Hebrew and the KJV have it."
+  },
+  {
+   "book": 24,
+   "chapter": 27,
+   "verse": 13,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Jeremiah is about an eighth shorter than the Hebrew, and some Dead Sea fragments of Jeremiah support its shorter form; it lacks this verse of 27:12-22, which is much shorter in the Greek. The Hebrew and the KJV have it."
+  },
+  {
+   "book": 24,
+   "chapter": 27,
+   "verse": 17,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Jeremiah is about an eighth shorter than the Hebrew, and some Dead Sea fragments of Jeremiah support its shorter form; it lacks this verse of 27:12-22, which is much shorter in the Greek. The Hebrew and the KJV have it."
+  },
+  {
+   "book": 24,
+   "chapter": 27,
+   "verse": 21,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Jeremiah is about an eighth shorter than the Hebrew, and some Dead Sea fragments of Jeremiah support its shorter form; it lacks this verse of 27:12-22, which is much shorter in the Greek. The Hebrew and the KJV have it."
+  },
+  {
+   "book": 24,
+   "chapter": 27,
+   "verse": 22,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "Omits \"then will I bring them up, and restore them\"",
+   "note": "The Septuagint of Jeremiah is about an eighth shorter than the Hebrew, and some Dead Sea fragments of Jeremiah support its shorter form; it says only that the temple vessels will go to Babylon, without the promise of their return, which Ezra 1:7-11 records. The Hebrew and the KJV have the promise."
+  },
+  {
+   "book": 24,
+   "chapter": 29,
+   "verse": 14,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "Omits the promise to turn the captivity and gather them",
+   "note": "The Septuagint of Jeremiah is about an eighth shorter than the Hebrew, and some Dead Sea fragments of Jeremiah support its shorter form; of 29:14 it keeps only \"I will appear to you\", without the gathering from all nations and return to the land. The Hebrew and the KJV have it; the return is still promised in 29:10."
+  },
+  {
+   "book": 24,
+   "chapter": 29,
+   "verse": 16,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Jeremiah is about an eighth shorter than the Hebrew, and some Dead Sea fragments of Jeremiah support its shorter form; it lacks 29:16-20, the word against the king and people left in Jerusalem (the \"vile figs\"). The Hebrew and the KJV have them."
+  },
+  {
+   "book": 24,
+   "chapter": 29,
+   "verse": 17,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Jeremiah is about an eighth shorter than the Hebrew, and some Dead Sea fragments of Jeremiah support its shorter form; it lacks 29:16-20, the word against the king and people left in Jerusalem (the \"vile figs\"). The Hebrew and the KJV have them."
+  },
+  {
+   "book": 24,
+   "chapter": 29,
+   "verse": 18,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Jeremiah is about an eighth shorter than the Hebrew, and some Dead Sea fragments of Jeremiah support its shorter form; it lacks 29:16-20, the word against the king and people left in Jerusalem (the \"vile figs\"). The Hebrew and the KJV have them."
+  },
+  {
+   "book": 24,
+   "chapter": 29,
+   "verse": 19,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Jeremiah is about an eighth shorter than the Hebrew, and some Dead Sea fragments of Jeremiah support its shorter form; it lacks 29:16-20, the word against the king and people left in Jerusalem (the \"vile figs\"). The Hebrew and the KJV have them."
+  },
+  {
+   "book": 24,
+   "chapter": 29,
+   "verse": 20,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Jeremiah is about an eighth shorter than the Hebrew, and some Dead Sea fragments of Jeremiah support its shorter form; it lacks 29:16-20, the word against the king and people left in Jerusalem (the \"vile figs\"). The Hebrew and the KJV have them."
+  },
+  {
+   "book": 24,
+   "chapter": 30,
+   "verse": 10,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Jeremiah is about an eighth shorter than the Hebrew, and some Dead Sea fragments of Jeremiah support its shorter form; it lacks 30:10-11 here; it has the same words at 46:27-28 (its 26:27-28), as the Hebrew also does."
+  },
+  {
+   "book": 24,
+   "chapter": 30,
+   "verse": 11,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Jeremiah is about an eighth shorter than the Hebrew, and some Dead Sea fragments of Jeremiah support its shorter form; it lacks 30:10-11 here; it has the same words at 46:27-28 (its 26:27-28), as the Hebrew also does."
+  },
+  {
+   "book": 24,
+   "chapter": 30,
+   "verse": 15,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Jeremiah is about an eighth shorter than the Hebrew, and some Dead Sea fragments of Jeremiah support its shorter form; it lacks 30:15, which repeats much of 30:12-14. The Hebrew and the KJV have it."
+  },
+  {
+   "book": 24,
+   "chapter": 30,
+   "verse": 22,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Jeremiah is about an eighth shorter than the Hebrew, and some Dead Sea fragments of Jeremiah support its shorter form; it lacks 30:22, \"ye shall be my people, and I will be your God\"; the same covenant words are in 31:1 and 31:33 in both."
+  },
+  {
+   "book": 24,
+   "chapter": 31,
+   "verse": 22,
+   "kind": "virgin-birth",
+   "weight": "minor",
+   "change": "\"men shall go about in safety\" for \"a woman shall compass\"",
+   "note": "The Septuagint reads the hard Hebrew of 31:22 otherwise; the KJV's \"a woman shall compass a man\" was read by some older Christian writers of the virgin birth."
+  },
+  {
+   "book": 24,
+   "chapter": 31,
+   "verse": 32,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"I disregarded them\" for \"although I was an husband unto them\"",
+   "note": "The Septuagint reads ba'alti (\"I was husband\") as ga'alti (\"I loathed\") and has \"they abode not in my covenant\"; Hebrews 8:9 quotes the Greek. The Hebrew and the KJV have God their husband."
+  },
+  {
+   "book": 24,
+   "chapter": 33,
+   "verse": 14,
+   "kind": "prophecy",
+   "weight": "major",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Jeremiah, about an eighth shorter than the Hebrew, has no 33:14-26. This verse opens the promise of the good word to Israel and Judah; the Hebrew and the KJV have it. Part of it repeats 23:5-6, which the Greek has."
+  },
+  {
+   "book": 24,
+   "chapter": 33,
+   "verse": 15,
+   "kind": "prophecy",
+   "weight": "major",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Jeremiah, about an eighth shorter than the Hebrew, has no 33:14-26. It lacks this promise of the Branch of righteousness growing up to David, though it has the like promise of 23:5. The Hebrew and the KJV have it here."
+  },
+  {
+   "book": 24,
+   "chapter": 33,
+   "verse": 16,
+   "kind": "prophecy",
+   "weight": "major",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Jeremiah, about an eighth shorter than the Hebrew, has no 33:14-26. It lacks this verse, where Jerusalem is called \"The LORD our righteousness\"; 23:6, in the Greek too, gives the name to the coming king."
+  },
+  {
+   "book": 24,
+   "chapter": 33,
+   "verse": 17,
+   "kind": "prophecy",
+   "weight": "major",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Jeremiah, about an eighth shorter than the Hebrew, has no 33:14-26. It lacks the promise that David shall never want a man on his throne nor the Levites a priest, sure as day and night (33:17-22). The Hebrew and the KJV have it."
+  },
+  {
+   "book": 24,
+   "chapter": 33,
+   "verse": 18,
+   "kind": "prophecy",
+   "weight": "major",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Jeremiah, about an eighth shorter than the Hebrew, has no 33:14-26. It lacks the promise that David shall never want a man on his throne nor the Levites a priest, sure as day and night (33:17-22). The Hebrew and the KJV have it."
+  },
+  {
+   "book": 24,
+   "chapter": 33,
+   "verse": 19,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Jeremiah, about an eighth shorter than the Hebrew, has no 33:14-26. This heading (\"the word of the LORD came unto Jeremiah\") belongs to that passage, which the Hebrew and the KJV have."
+  },
+  {
+   "book": 24,
+   "chapter": 33,
+   "verse": 20,
+   "kind": "prophecy",
+   "weight": "major",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Jeremiah, about an eighth shorter than the Hebrew, has no 33:14-26. It lacks the promise that David shall never want a man on his throne nor the Levites a priest, sure as day and night (33:17-22). The Hebrew and the KJV have it."
+  },
+  {
+   "book": 24,
+   "chapter": 33,
+   "verse": 21,
+   "kind": "prophecy",
+   "weight": "major",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Jeremiah, about an eighth shorter than the Hebrew, has no 33:14-26. It lacks the promise that David shall never want a man on his throne nor the Levites a priest, sure as day and night (33:17-22). The Hebrew and the KJV have it."
+  },
+  {
+   "book": 24,
+   "chapter": 33,
+   "verse": 22,
+   "kind": "prophecy",
+   "weight": "major",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Jeremiah, about an eighth shorter than the Hebrew, has no 33:14-26. It lacks the promise that David shall never want a man on his throne nor the Levites a priest, sure as day and night (33:17-22). The Hebrew and the KJV have it."
+  },
+  {
+   "book": 24,
+   "chapter": 33,
+   "verse": 23,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Jeremiah, about an eighth shorter than the Hebrew, has no 33:14-26. This heading (\"the word of the LORD came unto Jeremiah\") belongs to that passage, which the Hebrew and the KJV have."
+  },
+  {
+   "book": 24,
+   "chapter": 33,
+   "verse": 24,
+   "kind": "prophecy",
+   "weight": "major",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Jeremiah, about an eighth shorter than the Hebrew, has no 33:14-26. It lacks God's answer to those who say he has cast off the two families: he will no more cast off Jacob and David's seed than break his covenant with day and night (33:24-26)."
+  },
+  {
+   "book": 24,
+   "chapter": 33,
+   "verse": 25,
+   "kind": "prophecy",
+   "weight": "major",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Jeremiah, about an eighth shorter than the Hebrew, has no 33:14-26. It lacks God's answer to those who say he has cast off the two families: he will no more cast off Jacob and David's seed than break his covenant with day and night (33:24-26)."
+  },
+  {
+   "book": 24,
+   "chapter": 33,
+   "verse": 26,
+   "kind": "prophecy",
+   "weight": "major",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Jeremiah, about an eighth shorter than the Hebrew, has no 33:14-26. It lacks God's answer to those who say he has cast off the two families: he will no more cast off Jacob and David's seed than break his covenant with day and night (33:24-26)."
+  },
+  {
+   "book": 24,
+   "chapter": 36,
+   "verse": 9,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"the eighth year\" for \"the fifth year\" of Jehoiakim",
+   "note": "The Septuagint dates the fast and the reading of the roll to Jehoiakim's eighth year; the Hebrew and the KJV to his fifth."
+  },
+  {
+   "book": 24,
+   "chapter": 36,
+   "verse": 26,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"but they were hidden\" for \"but the LORD hid them\"",
+   "note": "The Septuagint has only that Baruch and Jeremiah were hidden; the Hebrew and the KJV say the LORD hid them."
+  },
+  {
+   "book": 24,
+   "chapter": 37,
+   "verse": 1,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Zedekiah reigns \"instead of Joakim\", not \"Coniah\"",
+   "note": "The Septuagint names Jehoiakim as the king Zedekiah replaced; the Hebrew and the KJV have Coniah (Jehoiachin), as 2 Kings 24:17 also says."
+  },
+  {
+   "book": 24,
+   "chapter": 39,
+   "verse": 4,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint lacks 39:4-13, Zedekiah's flight and blinding, the burning of the city and Nebuchadnezzar's charge concerning Jeremiah; the fall of the city is told in 52:7-16 and 2 Kings 25, which the Greek has."
+  },
+  {
+   "book": 24,
+   "chapter": 39,
+   "verse": 5,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint lacks 39:4-13, Zedekiah's flight and blinding, the burning of the city and Nebuchadnezzar's charge concerning Jeremiah; the fall of the city is told in 52:7-16 and 2 Kings 25, which the Greek has."
+  },
+  {
+   "book": 24,
+   "chapter": 39,
+   "verse": 6,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint lacks 39:4-13, Zedekiah's flight and blinding, the burning of the city and Nebuchadnezzar's charge concerning Jeremiah; the fall of the city is told in 52:7-16 and 2 Kings 25, which the Greek has."
+  },
+  {
+   "book": 24,
+   "chapter": 39,
+   "verse": 7,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint lacks 39:4-13, Zedekiah's flight and blinding, the burning of the city and Nebuchadnezzar's charge concerning Jeremiah; the fall of the city is told in 52:7-16 and 2 Kings 25, which the Greek has."
+  },
+  {
+   "book": 24,
+   "chapter": 39,
+   "verse": 8,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint lacks 39:4-13, Zedekiah's flight and blinding, the burning of the city and Nebuchadnezzar's charge concerning Jeremiah; the fall of the city is told in 52:7-16 and 2 Kings 25, which the Greek has."
+  },
+  {
+   "book": 24,
+   "chapter": 39,
+   "verse": 9,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint lacks 39:4-13, Zedekiah's flight and blinding, the burning of the city and Nebuchadnezzar's charge concerning Jeremiah; the fall of the city is told in 52:7-16 and 2 Kings 25, which the Greek has."
+  },
+  {
+   "book": 24,
+   "chapter": 39,
+   "verse": 10,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint lacks 39:4-13, Zedekiah's flight and blinding, the burning of the city and Nebuchadnezzar's charge concerning Jeremiah; the fall of the city is told in 52:7-16 and 2 Kings 25, which the Greek has."
+  },
+  {
+   "book": 24,
+   "chapter": 39,
+   "verse": 11,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint lacks 39:4-13, Zedekiah's flight and blinding, the burning of the city and Nebuchadnezzar's charge concerning Jeremiah; the fall of the city is told in 52:7-16 and 2 Kings 25, which the Greek has."
+  },
+  {
+   "book": 24,
+   "chapter": 39,
+   "verse": 12,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint lacks 39:4-13, Zedekiah's flight and blinding, the burning of the city and Nebuchadnezzar's charge concerning Jeremiah; the fall of the city is told in 52:7-16 and 2 Kings 25, which the Greek has."
+  },
+  {
+   "book": 24,
+   "chapter": 39,
+   "verse": 13,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint lacks 39:4-13, Zedekiah's flight and blinding, the burning of the city and Nebuchadnezzar's charge concerning Jeremiah; the fall of the city is told in 52:7-16 and 2 Kings 25, which the Greek has."
+  },
+  {
+   "book": 24,
+   "chapter": 42,
+   "verse": 10,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"ceased from the calamities\" for \"repent me of the evil\"",
+   "note": "As often, the Septuagint avoids saying God repents; the Hebrew and the KJV have \"I repent me of the evil\"."
+  },
+  {
+   "book": 24,
+   "chapter": 43,
+   "verse": 10,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Omits \"Nebuchadrezzar... my servant\"",
+   "note": "The Septuagint names Nebuchadnezzar without \"my servant\", as at 25:9 and 27:6; the Hebrew and the KJV call him the LORD's servant."
+  },
+  {
+   "book": 24,
+   "chapter": 46,
+   "verse": 1,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Jeremiah is about an eighth shorter than the Hebrew, and places the oracles against the nations (46-51) after 25:13, in another order; it has no heading here, its own being at 25:13-14. The Hebrew and the KJV have it."
+  },
+  {
+   "book": 24,
+   "chapter": 46,
+   "verse": 26,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Jeremiah is about an eighth shorter than the Hebrew, and places the oracles against the nations (46-51) after 25:13, in another order; it lacks 46:26, Egypt given to Nebuchadnezzar and afterward inhabited again as of old. The Hebrew and the KJV have it."
+  },
+  {
+   "book": 24,
+   "chapter": 48,
+   "verse": 45,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Jeremiah is about an eighth shorter than the Hebrew, and places the oracles against the nations (46-51) after 25:13, in another order; it lacks 48:45-47, which take up Numbers 21:28-29 against Moab. The Hebrew and the KJV have them."
+  },
+  {
+   "book": 24,
+   "chapter": 48,
+   "verse": 46,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Jeremiah is about an eighth shorter than the Hebrew, and places the oracles against the nations (46-51) after 25:13, in another order; it lacks 48:45-47, which take up Numbers 21:28-29 against Moab. The Hebrew and the KJV have them."
+  },
+  {
+   "book": 24,
+   "chapter": 48,
+   "verse": 47,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Jeremiah is about an eighth shorter than the Hebrew, and places the oracles against the nations (46-51) after 25:13, in another order; it lacks 48:47, \"Yet will I bring again the captivity of Moab in the latter days\". The Hebrew and the KJV promise Moab's restoration."
+  },
+  {
+   "book": 24,
+   "chapter": 49,
+   "verse": 6,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Jeremiah is about an eighth shorter than the Hebrew, and places the oracles against the nations (46-51) after 25:13, in another order; it lacks 49:6, the promise to bring again the captivity of Ammon. The Hebrew and the KJV have it."
+  },
+  {
+   "book": 24,
+   "chapter": 51,
+   "verse": 45,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Jeremiah is about an eighth shorter than the Hebrew; it lacks 51:44b-49a, including \"My people, go ye out of the midst of her\" (echoed in Revelation 18:4). The Hebrew and the KJV have them; the call to flee Babylon is also in 51:6."
+  },
+  {
+   "book": 24,
+   "chapter": 51,
+   "verse": 46,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Jeremiah is about an eighth shorter than the Hebrew; it lacks 51:44b-49a, including \"My people, go ye out of the midst of her\" (echoed in Revelation 18:4). The Hebrew and the KJV have them; the call to flee Babylon is also in 51:6."
+  },
+  {
+   "book": 24,
+   "chapter": 51,
+   "verse": 47,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Jeremiah is about an eighth shorter than the Hebrew; it lacks 51:44b-49a, including \"My people, go ye out of the midst of her\" (echoed in Revelation 18:4). The Hebrew and the KJV have them; the call to flee Babylon is also in 51:6."
+  },
+  {
+   "book": 24,
+   "chapter": 51,
+   "verse": 48,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Jeremiah is about an eighth shorter than the Hebrew; it lacks 51:44b-49a, including \"My people, go ye out of the midst of her\" (echoed in Revelation 18:4). The Hebrew and the KJV have them; the call to flee Babylon is also in 51:6."
+  },
+  {
+   "book": 24,
+   "chapter": 52,
+   "verse": 2,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Jeremiah is about an eighth shorter than the Hebrew; it lacks 52:2-3, Zedekiah's evil and his rebellion through the LORD's anger, which 2 Kings 24:19-20 also tells."
+  },
+  {
+   "book": 24,
+   "chapter": 52,
+   "verse": 3,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Jeremiah is about an eighth shorter than the Hebrew; it lacks 52:2-3, Zedekiah's evil and his rebellion through the LORD's anger, which 2 Kings 24:19-20 also tells."
+  },
+  {
+   "book": 24,
+   "chapter": 52,
+   "verse": 15,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Jeremiah is about an eighth shorter than the Hebrew; it lacks 52:15, the captain of the guard carrying away the poor and the rest of the people, which 2 Kings 25:11 also tells."
+  },
+  {
+   "book": 24,
+   "chapter": 52,
+   "verse": 28,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Jeremiah is about an eighth shorter than the Hebrew; it lacks 52:28-30, the numbers of the three deportations (4,600 persons in all), found only here in the Hebrew."
+  },
+  {
+   "book": 24,
+   "chapter": 52,
+   "verse": 29,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Jeremiah is about an eighth shorter than the Hebrew; it lacks 52:28-30, the numbers of the three deportations (4,600 persons in all), found only here in the Hebrew."
+  },
+  {
+   "book": 24,
+   "chapter": 52,
+   "verse": 30,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint of Jeremiah is about an eighth shorter than the Hebrew; it lacks 52:28-30, the numbers of the three deportations (4,600 persons in all), found only here in the Hebrew."
+  },
+  {
+   "book": 25,
+   "chapter": 3,
+   "verse": 29,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint (Vaticanus) lacks 3:29, \"He putteth his mouth in the dust; if so be there may be hope\"; the Hebrew and the KJV have it."
+  },
+  {
+   "book": 26,
+   "chapter": 1,
+   "verse": 14,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint lacks 1:14, the living creatures running and returning like lightning; the Hebrew and the KJV have it."
+  },
+  {
+   "book": 26,
+   "chapter": 10,
+   "verse": 14,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint lacks 10:14, the four faces of each cherub; the Hebrew and the KJV have it, and 1:10 gives the four faces in both."
+  },
+  {
+   "book": 26,
+   "chapter": 11,
+   "verse": 11,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint lacks 11:11 and the start of 11:12; the Hebrew and the KJV have it. The judgment at Israel's border is still in 11:10."
+  },
+  {
+   "book": 26,
+   "chapter": 11,
+   "verse": 12,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint lacks 11:11-12a, with \"ye shall know that I am the LORD\" and the charge of following the heathen; the Hebrew and the KJV have it."
+  },
+  {
+   "book": 26,
+   "chapter": 18,
+   "verse": 32,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "Omits \"wherefore turn yourselves, and live ye\"",
+   "note": "The Septuagint ends 18:32 with God not desiring the death of him that dies; the Hebrew and the KJV add the call to turn and live, as 18:30-31 also urge in both."
+  },
+  {
+   "book": 26,
+   "chapter": 27,
+   "verse": 31,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint lacks 27:31, the mourners making themselves bald for Tyre; the Hebrew and the KJV have it."
+  },
+  {
+   "book": 26,
+   "chapter": 31,
+   "verse": 16,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"down to Hades\" for \"down to hell\"",
+   "note": "The Hebrew she'ol is the grave or place of the dead; the Septuagint renders it Hades, the KJV \"hell\" (also 31:15-17)."
+  },
+  {
+   "book": 26,
+   "chapter": 32,
+   "verse": 27,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"went down to Hades\" for \"gone down to hell\"",
+   "note": "As in 31:16, the Septuagint renders she'ol as Hades, the KJV as \"hell\"."
+  },
+  {
+   "book": 26,
+   "chapter": 33,
+   "verse": 25,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits eating with the blood and shedding blood",
+   "note": "The Septuagint lacks 33:25b-26, the charges against those left in the land (eating with the blood, idols, bloodshed); the Hebrew and the KJV have them."
+  },
+  {
+   "book": 26,
+   "chapter": 33,
+   "verse": 26,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "Part of 33:25-26, not in the Septuagint: \"Ye stand upon your sword... and shall ye possess the land?\" The Hebrew and the KJV have it."
+  },
+  {
+   "book": 26,
+   "chapter": 39,
+   "verse": 29,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"poured out my wrath\" for \"poured out my spirit\"",
+   "note": "The Septuagint has God's wrath where the Hebrew and the KJV promise the outpouring of his Spirit on the house of Israel, as in Joel 2:28."
+  },
+  {
+   "book": 26,
+   "chapter": 40,
+   "verse": 30,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse not in the Septuagint",
+   "note": "The Septuagint lacks 40:30, the arches round about; some Hebrew manuscripts lack it too. The Masoretic text and the KJV have it."
+  },
+  {
+   "book": 27,
+   "chapter": 3,
+   "verse": 23,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Adds the Prayer of Azariah and the Song of the Three",
+   "note": "The Septuagint (in Theodotion's Greek) has a long passage after 3:23, which the KJV prints in the Apocrypha as \"The Song of the Three Holy Children\"; the Hebrew-Aramaic Daniel and the KJV text lack it."
+  },
+  {
+   "book": 27,
+   "chapter": 7,
+   "verse": 9,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"the thrones were set\" for \"were cast down\"",
+   "note": "The Aramaic remiw can mean \"were placed\" or \"were thrown\"; the Greek (Theodotion, which Brenton's Daniel follows) has thrones set for judgment, as most modern versions do. The KJV has \"cast down\"."
+  },
+  {
+   "book": 27,
+   "chapter": 9,
+   "verse": 26,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"there is no judgment in him\" for \"but not for himself\"",
+   "note": "Theodotion's Greek, which Brenton's Daniel follows, has the anointed one destroyed \"and there is no judgment in him\"; the KJV reads \"but not for himself\", others \"and shall have nothing\". The anointed one is cut off in all."
+  },
+  {
+   "book": 27,
+   "chapter": 9,
+   "verse": 27,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"one week shall establish the covenant\"; \"my sacrifice\" taken away",
+   "note": "Theodotion's Greek makes the week itself confirm the covenant and has God's own sacrifice taken away, with the abomination of desolations on the temple; the KJV has \"he shall confirm the covenant\", read by some of the Messiah, by others of an enemy."
+  },
+  {
+   "book": 28,
+   "chapter": 11,
+   "verse": 1,
+   "kind": "prophecy",
+   "weight": "major",
+   "change": "\"out of Egypt have I called his children\" for \"my son\"",
+   "note": "The Septuagint has \"his children\"; the Hebrew and the KJV have \"my son\", the reading Matthew 2:15 quotes of Jesus' return from Egypt."
+  },
+  {
+   "book": 28,
+   "chapter": 11,
+   "verse": 12,
+   "kind": "other",
+   "weight": "minor",
+   "change": "No \"Judah yet ruleth with God\"",
+   "note": "The Septuagint joins Judah to Israel's ungodliness and adds that God knows them and they shall be his holy people; the Hebrew and the KJV set faithful Judah against Ephraim."
+  },
+  {
+   "book": 28,
+   "chapter": 13,
+   "verse": 14,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"where is thy penalty, O death? O Hades, where is thy sting?\"",
+   "note": "The Septuagint makes the lines taunting questions, the form behind 1 Corinthians 15:55; the Hebrew and the KJV have God's threat, \"O death, I will be thy plagues; O grave, I will be thy destruction\"."
+  },
+  {
+   "book": 30,
+   "chapter": 5,
+   "verse": 26,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"the star of your god Raephan\" for \"Chiun your images\"",
+   "note": "The Septuagint names Moloch and the star-god Raephan (Rephan), the form Stephen quotes in Acts 7:43; the Hebrew and the KJV have \"your Moloch and Chiun your images\"."
+  },
+  {
+   "book": 30,
+   "chapter": 9,
+   "verse": 12,
+   "kind": "prophecy",
+   "weight": "major",
+   "change": "\"that the remnant of men... may earnestly seek me\" for \"possess... Edom\"",
+   "note": "The Septuagint reads Edom as adam (\"men\") and \"possess\" as \"seek\", and James quotes this Greek in Acts 15:16-17 for the Gentiles' coming to God; the Hebrew and the KJV have Israel possessing the remnant of Edom and of the nations called by God's name."
+  },
+  {
+   "book": 35,
+   "chapter": 1,
+   "verse": 5,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"Behold, ye despisers... and vanish\" for \"Behold ye among the heathen\"",
+   "note": "The Septuagint reads baggoyim (\"among the nations\") as \"despisers\", the form Paul quotes in Acts 13:41; the Hebrew and the KJV have the nations."
+  },
+  {
+   "book": 35,
+   "chapter": 2,
+   "verse": 3,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"wait for him; for he will surely come\" for \"wait for it\"",
+   "note": "The Septuagint makes the coming one a person (\"he\"), as Hebrews 10:37 reads it of Christ; the Hebrew and the KJV speak of the vision, \"it will surely come\"."
+  },
+  {
+   "book": 35,
+   "chapter": 2,
+   "verse": 4,
+   "kind": "salvation",
+   "weight": "major",
+   "change": "\"the just shall live by my faith\"; \"if he should draw back\"",
+   "note": "The Septuagint reads \"by my faith\" (God's faithfulness) and \"if he draw back, my soul has no pleasure in him\"; Hebrews 10:38 quotes this Greek, Romans 1:17 and Galatians 3:11 the words without a pronoun. The Hebrew and the KJV have \"by his faith\"."
+  },
+  {
+   "book": 37,
+   "chapter": 2,
+   "verse": 7,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"the choice portions of all the nations\" for \"the desire...\"",
+   "note": "The Septuagint has the nations' treasures coming to the temple, a reading the Hebrew's plural verb also suggests; the KJV's \"the desire of all nations shall come\" is often read of the Messiah."
+  },
+  {
+   "book": 38,
+   "chapter": 6,
+   "verse": 13,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"a priest on his right hand\" for \"a priest upon his throne\"",
+   "note": "The Septuagint sets a priest beside the crowned ruler, with counsel between the two; the Hebrew and the KJV have the Branch himself a priest on his throne, joining king and priest in one, as Hebrews takes Christ to be."
+  },
+  {
+   "book": 38,
+   "chapter": 12,
+   "verse": 10,
+   "kind": "prophecy",
+   "weight": "major",
+   "change": "\"because they have mocked me\" for \"whom they have pierced\"",
+   "note": "The Septuagint reads the Hebrew daqaru (\"pierced\") as raqadu (\"danced in mockery\"); the Hebrew and the KJV have \"pierced\", as John 19:37 and Revelation 1:7 quote it. The mourning as for a firstborn is in both."
+  },
+  {
+   "book": 39,
+   "chapter": 2,
+   "verse": 16,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"if thou shouldest hate thy wife and put her away\"",
+   "note": "The Septuagint reads 2:16 as a warning to the man who puts his wife away; the Hebrew and the KJV have God saying he hates putting away."
+  }
+ ]
+}
