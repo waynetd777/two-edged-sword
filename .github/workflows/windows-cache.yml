@@ -13,9 +13,7 @@ on:
       - "src-tauri/**"
       - "src/**"
       - "package*.json"
-      - "tools/core/**"
-      - "tools/modules.py"
-      - "tools/books.py"
+      - "tools/**"
       - ".github/workflows/windows-cache.yml"
   workflow_dispatch:
 
@@ -46,12 +44,14 @@ jobs:
       - uses: actions/setup-python@v7
         with:
           python-version: "3.x"
+      # The map builder's (tools/maps): the rest of the module builders need only Python itself.
+      - run: python -m pip install --disable-pip-version-check numpy pillow
       - uses: actions/cache@v6
         with:
           path: |
             src-tauri/modules
             ~\AppData\Local\Two-edged Sword\Caches
-          key: modules-${{ hashFiles('tools/core/build.py', 'tools/modules.py', 'tools/books.py') }}
+          key: modules-${{ hashFiles('tools/**/*.py') }}  # core runs the other builders too (maps, crosswire, ginsburg, …)
       - run: npm ci --no-audit --no-fund
       # The release's build, without the installer.
       - run: npx tauri build --no-bundle
