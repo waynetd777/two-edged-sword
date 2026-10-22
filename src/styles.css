@@ -1081,6 +1081,49 @@ input[type="range"] {
   padding: 8px;
   background: var(--plate, transparent);
 }
+/* A map's places (MapPlaces.tsx): a target on each dot and name, the dot ringed on hover. The ring is white
+   and accent on any map, light or dark. */
+.map-pic {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+  vertical-align: top;
+  line-height: 0;
+}
+.map-spots {
+  position: absolute;
+  pointer-events: none;
+}
+.map-spot,
+.map-label {
+  position: absolute;
+  pointer-events: auto;
+  cursor: pointer;
+}
+.map-spot {
+  transform: translate(-50%, -50%);
+  aspect-ratio: 1;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  transition:
+    box-shadow 0.12s,
+    background 0.12s;
+}
+.map-spot.on,
+.map-spot:focus-visible {
+  outline: none;
+  background: rgba(255, 255, 255, 0.28);
+  box-shadow:
+    0 0 0 2px #fff,
+    0 0 0 4px var(--accent),
+    0 2px 10px rgba(0, 0, 0, 0.35);
+}
+/* Over the full-screen viewer: the place's card and the verse previews. */
+body:has(.viewer) .popover {
+  z-index: 90;
+}
 .viewer img.clear {
   padding: 12px;
   border-radius: 6px;

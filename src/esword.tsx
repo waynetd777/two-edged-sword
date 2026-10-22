@@ -10,6 +10,7 @@ import { Fragment, ReactNode } from "react";
 import { findBook, parseRef, Ref } from "./bible";
 import { api } from "./api";
 import { escHtml } from "./dom";
+import { imagePlaces, MapPicture, Place } from "./MapPlaces";
 
 const parser = new DOMParser();
 const parse = (html: string) => parser.parseFromString(`<body>${html}</body>`, "text/html").body;
@@ -23,6 +24,10 @@ interface RenderOpts {
   inlineNums?: boolean;
   /** Click on an image (to show it full screen). */
   onImage?: (src: string) => void;
+  /** Click on a place of a map's picture (its image map, tools/maps/build.py), to show its verses; without it, the places aren't shown. */
+  onPlace?: (p: Place, rect: DOMRect) => void;
+  /** The place whose card is open, ringed. */
+  place?: Place | null;
   /** The entry a name refers to in this module ("ASTRONOMY" → "Astronomy"), if it has one; with onTopic, "See X" becomes a link. */
   topic?: (name: string) => string | undefined;
   onTopic?: (topic: string) => void;
@@ -184,6 +189,8 @@ export function renderHtml(html: string, opts: RenderOpts = {}): ReactNode {
         const src = el.getAttribute("src") || "";
         if (!src.startsWith("data:image/")) return null;
         const onImage = opts.onImage;
+        const places = opts.onPlace ? imagePlaces(el) : [];
+        if (places.length) return <MapPicture src={src} places={places} onImage={onImage} onPick={opts.onPlace!} picked={opts.place} />;
         return onImage ? (
           <img
             src={src}

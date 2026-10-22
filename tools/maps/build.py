@@ -29,7 +29,9 @@ Sources, all free to use:
     reconstruction and marked as uncertain.
 
 Each map is a WebP picture inside its chapter (e-Sword's maps are pictures in a reference book too), and
-the app shows the book on the Library's Maps card. Downloads are cached in ~/Library/Caches/Two-edged
+the app shows the book on the Library's Maps card. The picture carries an HTML image map (usemap, <map>, an
+<area> on each place's dot with its name, data-sure, data-label and data-refs, its verses), from which the app
+makes each place clickable, for its verses; e-Sword and other readers just ignore it. Downloads are cached in ~/Library/Caches/Two-edged
 Sword/maps.
 """
 import base64, html, io, json, math, re, sqlite3, sys
@@ -759,7 +761,7 @@ def draw(m, P, layers, out_dir=None):
     for k in order:
         x, y = fr.xy(P[k]["lon"], P[k]["lat"])
         labels.take((x - r, y - r, x + r, y + r))
-    shown, unlabelled = [], []
+    shown, unlabelled, at = [], [], {}
     for k in order:
         p = P[k]
         x, y = fr.xy(p["lon"], p["lat"])
@@ -780,7 +782,9 @@ def draw(m, P, layers, out_dir=None):
                 break
         else:
             unlabelled.append(p["name"])
+            box = None
         shown.append(k)
+        at[k] = (x, y, box)  # for the picture's image map, in the drawing's pixels
     if unlabelled:
         print(f"  {m['id']}: no room to name {len(unlabelled)}: {', '.join(unlabelled[:12])}")
     # Title, key and scale.
@@ -809,7 +813,7 @@ def draw(m, P, layers, out_dir=None):
         img.save(Path(out_dir) / f"{m['id']}.webp", "WEBP", quality=82, method=6)
     buf = io.BytesIO()
     img.save(buf, "WEBP", quality=82, method=6)
-    return buf.getvalue(), shown, z
+    return buf.getvalue(), shown, z, {k: (x / SCALE, y / SCALE, box and [round(c / SCALE) for c in box]) for k, (x, y, box) in at.items()}
 
 
 def own(m, P):
@@ -828,7 +832,26 @@ def osis_ref(o):
     return f"{BOOK_ABBR[OSIS[b] - 1]} {c}:{v}" if b in OSIS and c and v else None
 
 
-def chapter(m, webp, shown, P):
+# A place's hit-target in the image map, a little larger than its dot (5.5 * K * TYPE at the drawing's size).
+HIT = round(5.5 * K * TYPE / SCALE * 1.8)
+
+
+def image_map(m, at, P):
+    """The picture's places as an HTML image map: a circle on each dot, in the saved picture's pixels, with the
+    place's name, whether its site is sure, all its verses (data-refs, "Gen 12:8;Josh 7:2") and the box of its
+    name on the map (data-label, "x0,y0,x1,y1"), for the app to make each place clickable."""
+    areas = []
+    for k, (x, y, box) in at.items():
+        p = P[k]
+        refs = ";".join(r for r in (osis_ref(o) for o in p["refs"]) if r)
+        name = html.escape(p["name"], quote=True)
+        label = f' data-label="{",".join(map(str, box))}"' if box else ""
+        areas.append(f'<area shape="circle" coords="{round(x)},{round(y)},{HIT}" alt="{name}" title="{name}" '
+                     f'data-sure="{1 if p["sure"] else 0}"{label} data-refs="{refs}">')
+    return f'<map name="m-{m["id"]}">' + "".join(areas) + "</map>"
+
+
+def chapter(m, webp, shown, P, at):
     items = []
     for k in sorted(shown, key=lambda k: P[k]["name"]):
         p = P[k]
@@ -836,7 +859,8 @@ def chapter(m, webp, shown, P):
         more = f" and {len(refs) - 3} more" if len(refs) > 3 else ""
         items.append(f"<b>{html.escape(p['name'])}</b>{'' if p['sure'] else ' (site uncertain)'}: "
                      + ", ".join(f"<ref>{r}</ref>" for r in refs[:3]) + more)
-    return (f'<p><img src="data:image/webp;base64,{base64.b64encode(webp).decode()}"></p>'
+    return (f'<p><img src="data:image/webp;base64,{base64.b64encode(webp).decode()}" usemap="#m-{m["id"]}">'
+            f"{image_map(m, at, P)}</p>"
             f"<p>{html.escape(m['note'])}</p><p><b>On this map:</b></p>" + "".join(f"<p>{x}</p>" for x in items))
 
 
@@ -860,8 +884,8 @@ def build(into=BUNDLED, only=None, pictures=None):
         if only and m["id"] not in only:
             continue
         Pm = own(m, P)
-        webp, shown, z = draw(m, Pm, layers, out_dir)
-        rows.append((f"{n}. {m['title']}", chapter(m, webp, shown, Pm)))
+        webp, shown, z, at = draw(m, Pm, layers, out_dir)
+        rows.append((f"{n}. {m['title']}", chapter(m, webp, shown, Pm, at)))
         print(f"  {m['id']}: {len(shown)} places, zoom {z}, {len(webp) / 1e3:.0f} KB")
     if only:
         return

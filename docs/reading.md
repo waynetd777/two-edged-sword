@@ -21,6 +21,7 @@ screensaver and lock don't come on.
 - **Notes**: your journal entries on the verse.
 - **Maps** for the book, from the built-in Bible Maps (fifteen maps, from the patriarchs to the seven churches, with two plans of
   Jerusalem) and any map books of your own. Click a map to see it enlarged, to zoom into and move around.
+  On Bible Maps, click a place's dot or name for its verses: point at one to read it, click it to open it.
 - **Ask**: questions about the verse or chapter ([Ask](ask.md)).
 
 <a href="images/index.md#reading"><picture><source media="(prefers-color-scheme: dark)" srcset="images/maps-dark.png"><img alt="Nehemiah 3 beside the Maps tab, open at Jerusalem in the Old Testament" src="images/maps-light.png"></picture></a>

@@ -297,7 +297,7 @@ Click a picture or chart to see it enlarged:
 
 ### Maps
 
-Bible Maps comes with the app, and other map books open from **Books** like any other. The study pane's **Maps** tab picks maps that suit the book you're reading; click one to zoom into it full screen, as with pictures.
+Bible Maps comes with the app, and other map books open from **Books** like any other. The study pane's **Maps** tab picks maps that suit the book you're reading; click one to zoom into it full screen, as with pictures. On Bible Maps, click a place's dot or name, there or full screen, for its verses: point at one to read it, click it to open it.
 
 ## Keep a journal
 

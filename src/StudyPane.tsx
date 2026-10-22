@@ -1,13 +1,14 @@
 // Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
 // SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api, Article, Commentary, Coverage, isMapBook, ModuleInfo, Verse } from "./api";
 import { book, fmtRef, mentionsPassage, Ref } from "./bible";
 import { AskPanel } from "./Ask";
 import { plainText, renderHtml, docSegments } from "./esword";
 import { Icon } from "./icons";
 import { ImageViewer } from "./ImageViewer";
+import { imagePlaces, Place, PlacePopover } from "./MapPlaces";
 import { DictAt, useApp } from "./state";
 import { ClearButton, Popover, TrailButtons, useTrail, wordAt, wordHover } from "./ui";
 import { useAssistant } from "./assistant";
@@ -893,8 +894,13 @@ function MapsTab({ bookN }: { bookN: number }) {
   const { onRefHover, preview, hide } = useRefPreview(app.settings.bible);
   const openRef = (r: Ref) => {
     hide();
+    setPlace(null);
+    setFull(null);
     app.open({ book: r.book, chapter: r.chapter, verse: r.verse, to: r.to }, "read");
   };
+  // A place clicked on the map (its image map): a card of its verses.
+  const [place, setPlace] = useState<{ place: Place; rect: DOMRect } | null>(null);
+  const onPlace = useCallback((p: Place, rect: DOMRect) => setPlace({ place: p, rect }), []);
   useEffect(() => {
     let dead = false;
     Promise.all(
@@ -924,7 +930,9 @@ function MapsTab({ bookN }: { bookN: number }) {
     api
       .article("reference", chosen.module, chosen.title)
       .then((a) => {
-        if (!dead) setArt(a);
+        if (dead) return;
+        setArt(a);
+        setPlace(null);
       })
       .catch((e) => {
         console.error(e);
@@ -935,7 +943,15 @@ function MapsTab({ bookN }: { bookN: number }) {
     };
   }, [chosen?.module, chosen?.title]); // eslint-disable-line react-hooks/exhaustive-deps
   // The map's pictures, for the viewer's ← and → when a map has more than one.
-  const mapImages = art ? Array.from(art.html.matchAll(/<img[^>]+src="(data:image\/[^"]+)"/gi), (m) => m[1]) : [];
+  const mapImages = useMemo(() => (art ? Array.from(art.html.matchAll(/<img[^>]+src="(data:image\/[^"]+)"/gi), (m) => m[1]) : []), [art]);
+  // Each picture's places, for the full-screen viewer.
+  const mapPlaces = useMemo(() => {
+    if (!art) return [];
+    const doc = new DOMParser().parseFromString(art.html, "text/html");
+    return Array.from(doc.querySelectorAll("img"))
+      .filter((im) => (im.getAttribute("src") || "").startsWith("data:image/"))
+      .map(imagePlaces);
+  }, [art]);
   if (!refs.length) return <div className="empty">No maps in your library.</div>;
   return (
     <div style={{ display: "flex", flexDirection: "column", minHeight: 0, flexGrow: 1 }}>
@@ -975,7 +991,7 @@ function MapsTab({ bookN }: { bookN: number }) {
       >
         {art ? (
           <div className="es" style={{ padding: 8 }}>
-            {renderHtml(art.html, { onImage: setFull, onRef: openRef, onRefHover })}
+            {renderHtml(art.html, { onImage: setFull, onRef: openRef, onRefHover, onPlace, place: full ? null : place?.place })}
           </div>
         ) : (
           <div className="empty">Choose a map.</div>
@@ -986,7 +1002,19 @@ function MapsTab({ bookN }: { bookN: number }) {
           {chosen?.title}
         </span>
       </div>
-      {full && art && <ImageViewer images={mapImages} start={Math.max(0, mapImages.indexOf(full))} onClose={() => setFull(null)} />}
+      {full && art && (
+        <ImageViewer
+          images={mapImages}
+          start={Math.max(0, mapImages.indexOf(full))}
+          onClose={() => setFull(null)}
+          places={mapPlaces}
+          onRef={openRef}
+          onRefHover={onRefHover}
+        />
+      )}
+      {place && !full && (
+        <PlacePopover place={place.place} anchor={place.rect} onClose={() => setPlace(null)} onRef={openRef} onRefHover={onRefHover} />
+      )}
       {showAll && (
         <Popover anchor={showAll} onClose={() => setShowAll(null)} width={360}>
           <div style={{ padding: 6 }}>
