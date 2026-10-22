@@ -1,10 +1,9 @@
 # Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
 # SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 """Builds latin+.bbli ("Latin Vulgate w/ glosses") word by word from e-Sword's latin.bbli, each word
-with its English meaning, dictionary form and grammar, as the Greek interlinears are. For the user's
-own library only: latin.bbli is e-Sword's, and the tagger's PROIEL model is non-commercial (CC BY-NC-SA).
-The Clementine's (clementine+.bbli, which the app ships) is built from open sources by
-tools/latin/clementine.py, which also uses this file's gloss tables, grammar wording and verse splitting.
+with its English meaning, dictionary form and grammar, as the Greek interlinears are, for the user's
+own library (latin.bbli is e-Sword's, so it isn't shipped). The Clementine's, clementine+.bbli, which
+the app ships, is built the same way by tools/latin/clementine.py, with Strong's numbers too.
 
     python3 tools/latin/build.py
 
@@ -37,6 +36,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from modules import CACHES, fetch, find, module  # noqa: E402
 CACHE = CACHES / "latin"
 VENV = CACHE / "venv"
+STANZA = "1.14.0"  # the Stanza the virtual environment gets (its Latin model is its version's)
 DICTLINE = "https://raw.githubusercontent.com/mk270/whitakers-words/1f2f0fb0867a896d7b9284a03d615ed635d6f992/DICTLINE.GEN"
 MODULES = {
     "latin": dict(title="Latin Vulgate w/ glosses", abbrev="Latin+"),
@@ -54,7 +54,7 @@ def venv():
     if not py.exists():
         print("making a virtual environment for Stanza (once)")
         subprocess.run([sys.executable, "-m", "venv", str(VENV)], check=True)
-        subprocess.run([str(py), "-m", "pip", "install", "-q", "stanza"], check=True)
+        subprocess.run([str(py), "-m", "pip", "install", "-q", f"stanza=={STANZA}"], check=True)
     os.execv(str(py), [str(py), *sys.argv])
 
 
@@ -233,16 +233,20 @@ def split_que(w):
     return w, False
 
 
-def build(name, nlp, dic):
+def read(name):
+    """A plain module's verses [(book, chapter, verse, text)] and its About text, wherever find() finds it."""
     src = find(f"{name}.bbli")
     if not src.exists():
-        print(f"  no {src.name}; skipped")
-        return
+        return None, None
     db = sqlite3.connect(f"file:{src}?mode=ro", uri=True)
     rows = db.execute("SELECT Book, Chapter, Verse, Scripture FROM Bible ORDER BY Book, Chapter, Verse").fetchall()
     info = db.execute("SELECT Information FROM Details").fetchone()[0] or ""
     db.close()
+    return rows, info
 
+
+def tag(rows, nlp):
+    """The verses as pieces, and {(verse index, piece index): (lemma, upos, feats, que)} for their words."""
     verses = [pieces(t or "") for *_, t in rows]
     batch, where = [], []
     for vi, ps in enumerate(verses):
@@ -264,7 +268,11 @@ def build(name, nlp, dic):
                 tagged[(vi, pi)] = (w.lemma or w.text, w.upos, w.feats, que)
         print(f"  {min(k + step, len(batch))} verses", end="\r", flush=True)
     print()
+    return verses, tagged
 
+
+def render(rows, verses, tagged, dic, nums=None):
+    """The module's verses in Byz+'s markup; `nums`, {(verse index, piece index): Strong's number}, adds those."""
     out, missing = [], 0
     for (b, c, v, _), (vi, ps) in zip(rows, enumerate(verses)):
         s = []
@@ -279,13 +287,33 @@ def build(name, nlp, dic):
             if que:
                 g = f"and {g}".strip()
             nxt = ps[pi + 1] if pi + 1 < len(ps) else None
-            s.append(f"<div><grk>{html.escape(text)}</grk><tvm>{html.escape(grammar(upos, feats))}</tvm><grk>{html.escape(lemma)}</grk><gra>{html.escape(g) or '—'}</gra></div>")
+            num = (nums or {}).get((vi, pi))
+            s.append(f"<div><grk>{html.escape(text)}</grk>" + (f"<num>{num}</num>" if num else "") +
+                     f"<tvm>{html.escape(grammar(upos, feats))}</tvm><grk>{html.escape(lemma)}</grk><gra>{html.escape(g) or '—'}</gra></div>")
             if nxt and nxt[0] == "text" and not nxt[1].strip():
                 ps[pi + 1] = ("text", "")  # a div brings its own space
         out.append((b, c, v, "".join(s).strip()))
     total = len(tagged)
-    print(f"  {total - missing} of {total} words have English ({(total - missing) / total:.1%})")
+    print(f"  {total - missing} of {total} words have English ({(total - missing) / max(total, 1):.1%})")
+    return out
 
+
+def pipeline():
+    """Stanza's Latin pipeline with its PROIEL model, downloaded once into the cache."""
+    import stanza
+    d = str(CACHE / "stanza")
+    stanza.download("la", model_dir=d, package="proiel", processors="tokenize,pos,lemma", verbose=False)
+    return stanza.Pipeline("la", dir=d, package="proiel", processors="tokenize,pos,lemma", tokenize_pretokenized=True,
+                           download_method=None, verbose=False)
+
+
+def build(name, nlp, dic):
+    rows, info = read(name)
+    if rows is None:
+        print(f"  no {name}.bbli; skipped")
+        return
+    verses, tagged = tag(rows, nlp)
+    out = render(rows, verses, tagged, dic)
     m = MODULES[name]
     about = (info + "<p>This edition shows each word with its English meaning, dictionary form and grammar. The dictionary "
              "form and grammar are from Stanza's Latin tagger (Stanford NLP, trained on the PROIEL treebank), which reads each "
@@ -299,14 +327,11 @@ def build(name, nlp, dic):
 
 def main():
     venv()
-    import stanza
     names = sys.argv[1:] or list(MODULES)
     for n in names:
         if n not in MODULES:
             sys.exit(f"unknown module {n}; one of {', '.join(MODULES)}")
-    os.environ.setdefault("STANZA_RESOURCES_DIR", str(CACHE / "stanza"))
-    stanza.download("la", package="proiel", processors="tokenize,pos,lemma", verbose=False)
-    nlp = stanza.Pipeline("la", package="proiel", processors="tokenize,pos,lemma", tokenize_pretokenized=True, verbose=False)
+    nlp = pipeline()
     dic = whitaker()
     for n in names:
         print(n)
