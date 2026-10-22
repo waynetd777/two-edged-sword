@@ -29,6 +29,11 @@ Word-by-word Bibles show each original word over its English and its Strong's nu
 - Greek and Hebrew Bibles without English of their own get the KJV's commonest rendering of each
   word. Settings › Appearance turns this off.
 - Hebrew and Syriac read right to left.
+- Built in: Byz+ (Greek New Testament), WLC+ and Ginsburg+ (Hebrew), LXX-Brenton+ (the Septuagint, with the
+  Apocrypha), Vulg-C+ (the Latin Vulgate) and Peshitta+ (the Syriac New Testament).
+- In Vulg-C+ and Peshitta+ a word's Strong's number is the Hebrew or Greek word it translates, so it opens
+  that word's entry. Peshitta+'s English is the Greek's, or Murdock's and Etheridge's where the Greek
+  doesn't match; hover a word to see which.
 
 <table>
   <tr>

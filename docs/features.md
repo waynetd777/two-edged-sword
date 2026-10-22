@@ -122,7 +122,7 @@ The Bibles and books keep their own terms:
 
 | What | Terms |
 |---|---|
-| The built-in modules | Public domain, most of them: eBible.org and the CrossWire Bible Society (the KJV, the TSK), eBible.org (the ASV, WEB, YLT, Darby, Webster and Brenton), berean.bible (the BSB), CrossWire (Tyndale, Geneva, Douay-Rheims, the Peshitta), the Clementine Vulgate Project, Open Scriptures (Strong's), CrossWire, the Christian Classics Ethereal Library and Wikisource (the commentaries and dictionaries). Openly licensed: OpenBible.info's places, cross-references and the places on the maps (CC BY), STEPBible's word-by-word English (CC BY), Ginsburg's Hebrew Bible (Apache 2.0 and GPL 3) |
+| The built-in modules | Public domain, most of them: eBible.org and the CrossWire Bible Society (the KJV, the TSK), eBible.org (the ASV, WEB, YLT, Darby, Webster and Brenton), berean.bible (the BSB), CrossWire (Tyndale, Geneva, Douay-Rheims, the Peshitta), the Clementine Vulgate Project, Open Scriptures (Strong's), CrossWire, the Christian Classics Ethereal Library and Wikisource (the commentaries and dictionaries). Openly licensed: OpenBible.info's places, cross-references and the places on the maps (CC BY), STEPBible's word-by-word English (CC BY), GLAUx's Septuagint word forms in LXX-Brenton+ (CC BY-SA), Ginsburg's Hebrew Bible (Apache 2.0 and GPL 3). Non-commercial only: Vulg-C+, whose tagging comes from a model trained on the PROIEL treebank (CC BY-NC-SA); leave it out of any build that's sold |
 | Modules built from the source code's scripts | As each script says: most public domain or CC BY (STEPBible, Open Scriptures), a few for personal study |
 | e-Sword X's modules | e-Sword's licence: read where e-Sword keeps them, never copied |
 

@@ -45,13 +45,13 @@ The app checks for updates once a day and offers to install them. **Check for Up
 - **Books and devotionals** from your library, with the same tools as Scripture.
 - **Listen** to anything read aloud, each word highlighted as it's spoken.
 - **Differences from the KJV**: a mark wherever a translation differs in meaning, and why.
-- **Greek and Hebrew** word by word, each word over its English and Strong's number.
+- **Greek, Hebrew, Latin and Syriac** word by word, each word over its English and Strong's number.
 - **Ask** questions about what you're reading, answered from your own library.
 - **Compare** translations side by side, **Search** the whole library, and **Word Study** a Greek
   or Hebrew word.
 - **Journal** entries linked to their verses, kept in step with Obsidian.
 - **Quiet time** plans, with worship songs chosen for the day and a daily reminder. Songs can be chosen for any chapter too.
-- **Build more modules** from free sources, such as the Targums, the Talmud and the Vulgate.
+- **Build more modules** from free sources, such as the Targums, the Talmud and Beza's Greek New Testament.
 - **KJV History**: the manuscripts and editions behind the KJV, and which you have.
 
 <table>
@@ -115,6 +115,11 @@ later: you may use, share and change it, and anything you pass on must stay free
 licence. The Bible texts and books it reads keep their own terms: the built-in modules are public
 domain or openly licensed ([Library](docs/library.md#built-in-modules)), and so on for the rest
 ([Licence and credits](docs/features.md#licence-and-credits)).
+
+One built-in module is for non-commercial use only: Vulg-C+ (`src-tauri/modules/clementine+.bbli`),
+whose word-by-word tagging comes from a model trained on the PROIEL treebank, is shared under
+[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/). If you sell the app or a
+build of it, leave that module out (`tools/core/build.py` builds it as `clementine+`).
 
 ## Documentation
 

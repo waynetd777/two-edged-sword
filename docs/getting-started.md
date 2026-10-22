@@ -164,7 +164,7 @@ Click **Word study** in that box, or press ⌘4, for everything about one word: 
 
 ### Word-by-word Bibles
 
-Bibles with + in their name, such as KJV+, carry Strong's numbers: hover a number for its entry. Greek and Hebrew Bibles such as Greek NT INT+ or WLC+ show each original word over its English, with its grammar on hover.
+Bibles with + in their name, such as KJV+, carry Strong's numbers: hover a number for its entry. Original-language Bibles such as WLC+, Byz+, LXX-Brenton+ (the Septuagint), Vulg-C+ (the Latin Vulgate) and Peshitta+ (the Syriac) show each word over its English, with its grammar on hover. All of these come with the app.
 
 Settings › Appearance can give original-language Bibles the KJV's commonest English for each word.
 
@@ -509,7 +509,7 @@ e-Sword for Windows' modules (`.bblx` and so on) can't be read: their text is en
 
 ### Find more
 
-The Library guide lists [free modules worth having](library.md#free-modules-worth-having), and how to [build](library.md#building-modules) the Targums, the Talmud, the Vulgate and others from free sources.
+The Library guide lists [free modules worth having](library.md#free-modules-worth-having), and how to [build](library.md#building-modules) the Targums, the Talmud, Beza's Greek New Testament and others from free sources.
 
 ### Order and defaults
 

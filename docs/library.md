@@ -55,7 +55,7 @@ The app comes with these, so it works with nothing else installed. All are publi
 | Murdock's and Etheridge's English translations of the Peshitta New Testament | CrossWire |
 | Ginsburg's Hebrew Bible (1894), and Ginsburg+ word by word | Ginsburg Hebrew Bible project (Apache-2.0 and GPL-3.0); Ginsburg+'s English from WLC+ |
 | LXX-Brenton+: the Greek Septuagint word by word, with the Apocrypha, Strong's numbers and English | GLAUx (CC BY-SA), STEPBible (CC BY) |
-| Vulg-C+: the Clementine Vulgate word by word, with Strong's numbers and English | Collatinus (GPL), the UD Latin treebanks (CC BY-SA), Whitaker's WORDS; numbers from WLC+, Byz+ and LXX-Brenton+ |
+| Vulg-C+: the Clementine Vulgate word by word, with Strong's numbers and English. **Non-commercial use only** (CC BY-NC-SA) | Stanza's tagger, trained on the PROIEL treebank (CC BY-NC-SA); Whitaker's WORDS; numbers from WLC+, Byz+ and LXX-Brenton+ |
 | Peshitta+: the Syriac Peshitta word by word, its English and Strong's numbers from the Greek | Byz+ and STEPBible (CC BY), Murdock's and Etheridge's translations |
 | Greek NT: Byzantine Majority Text (Byz, 2018) | Robinson and Pierpont |
 | Byz+: the Byzantine Greek NT word by word | Robinson and Pierpont; English from STEPBible (CC BY) |
