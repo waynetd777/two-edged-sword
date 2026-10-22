@@ -306,17 +306,17 @@
     "screen": "history"
   },
   {
-    "name": "maps",
+    "name": "maps-place",
     "loc": {
-      "book": 16,
-      "chapter": 3
+      "book": 43,
+      "chapter": 4
     },
     "settings": {
       "bible": "kjv",
       "studyPane": true,
       "studyTab": "maps"
     },
-    "click": "button.chip + button.chip"
+    "click": ".map-spot[aria-label=\"Capernaum\"]"
   },
   {
     "name": "library",

@@ -22,7 +22,7 @@ On [Reading](../reading.md).
 - Foxe's Book of Martyrs with a paragraph selected and highlighted: [light](books-light.png) · [dark](books-dark.png)
 - Listening to 1 John 1, the word being spoken highlighted: [light](listen-light.png) · [dark](listen-dark.png)
 - Songs for Romans 8: what the chapter is about and why each song relates to it: [light](chapter-songs-light.png) · [dark](chapter-songs-dark.png)
-- Nehemiah 3 beside the Maps tab, open at Jerusalem in the Old Testament: [light](maps-light.png) · [dark](maps-dark.png)
+- John 4 beside the Maps tab, Capernaum clicked: its verses in each Gospel: [light](maps-place-light.png) · [dark](maps-place-dark.png)
 
 ## Study
 

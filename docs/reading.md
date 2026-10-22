@@ -24,7 +24,7 @@ screensaver and lock don't come on.
   On Bible Maps, click a place's dot or name for its verses: point at one to read it, click it to open it.
 - **Ask**: questions about the verse or chapter ([Ask](ask.md)).
 
-<a href="images/index.md#reading"><picture><source media="(prefers-color-scheme: dark)" srcset="images/maps-dark.png"><img alt="Nehemiah 3 beside the Maps tab, open at Jerusalem in the Old Testament" src="images/maps-light.png"></picture></a>
+<a href="images/index.md#reading"><picture><source media="(prefers-color-scheme: dark)" srcset="images/maps-place-dark.png"><img alt="John 4 beside the Maps tab, Capernaum clicked: its verses in each Gospel" src="images/maps-place-light.png"></picture></a>
 
 ⌘\ shows or hides the pane.
 
