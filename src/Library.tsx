@@ -76,7 +76,7 @@ function Ordered({
 }) {
   const app = useApp();
   const ms = orderModules(
-    (app.lib?.modules ?? []).filter((m) => m.kind === kind && m.id !== app.tsk),
+    (app.lib?.modules ?? []).filter((m) => m.kind === kind && !app.xrefs.includes(m.id)),
     app.settings[orderKey],
   );
   const move = (i: number, d: number) => {
@@ -176,7 +176,7 @@ export function LibraryScreen() {
       setBusy(false);
     }
   };
-  const none = !!q && !ms.some((m) => m.id !== app.tsk && matches(m, q));
+  const none = !!q && !ms.some((m) => !app.xrefs.includes(m.id) && matches(m, q));
   // Modules the app has and e-Sword X has too: the user picks the copy read, the app's unless they choose e-Sword's.
   const both = ms.filter((m) => m.copies.includes("esword") && m.copies.length > 1 && (!q || matches(m, q)));
   const copyKey = (m: ModuleInfo) => `${m.kind}:${m.id}`;
@@ -404,17 +404,17 @@ export function LibraryScreen() {
         )}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 12 }}>
           <Ordered kind="commentary" title="Commentaries" orderKey="commentaryOrder" q={q} onInfo={showInfo} />
-          {app.tsk && !q && (
+          {app.xrefs.length > 0 && !q && (
             <div className="card" style={{ padding: "14px 16px" }}>
               <span style={{ display: "flex", justifyContent: "space-between" }}>
                 <span className="label">Cross-references</span>
-                <span className="n">{total(ms.filter((m) => m.id === app.tsk && m.kind === "commentary"))}</span>
+                <span className="n">{total(ms.filter((m) => app.xrefs.includes(m.id) && m.kind === "commentary"))}</span>
               </span>
-              {(() => {
-                const t = app.mod("commentary", app.tsk);
+              {app.xrefs.map((id) => {
+                const t = app.mod("commentary", id);
                 return (
                   t && (
-                    <div style={{ fontSize: 12.5, marginTop: 6, display: "flex", alignItems: "center", gap: 4 }}>
+                    <div key={id} style={{ fontSize: 12.5, marginTop: 6, display: "flex", alignItems: "center", gap: 4 }}>
                       <span style={{ flexGrow: 1 }} title={blurb(t)}>
                         {t.title}
                       </span>
@@ -422,9 +422,9 @@ export function LibraryScreen() {
                     </div>
                   )
                 );
-              })()}
+              })}
               <div className="hint" style={{ marginTop: 4 }}>
-                Always shown under the commentary.
+                Shown under the commentary, a pill for each.
               </div>
             </div>
           )}

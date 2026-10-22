@@ -15,8 +15,8 @@ screensaver and lock don't come on.
 
 ### The study pane
 
-- **Commentary**: every commentary on the verse, in the order you set in the [Library](app:library#commentaries), with cross-references from the
-  Treasury of Scripture Knowledge.
+- **Commentary**: every commentary on the verse, in the order you set in the [Library](app:library#commentaries), with its
+  cross-references below: a pill for the Treasury of Scripture Knowledge and one for OpenBible.info's, the links readers voted helpful.
 - **Dictionary**: type a word to look it up in all your dictionaries.
 - **Notes**: your journal entries on the verse.
 - **Maps** for the book, from the built-in Bible Maps (fifteen maps, from the patriarchs to the seven churches, with two plans of

@@ -38,6 +38,8 @@ export interface Settings {
   favBibles: string[];
   hiddenBibles: string[];
   commentaryOrder: string[];
+  /** The cross-references shown under the commentary (a module in `xrefs`): "" for the first. */
+  crossRefs: string;
   dictionaryOrder: string[];
   voice: string;
   /** Voices for Bibles in Hebrew (and Aramaic) and in Greek: "" for the best one installed. */
@@ -120,6 +122,7 @@ const DEFAULTS: Settings = {
   favBibles: [],
   hiddenBibles: [],
   commentaryOrder: ["barnes", "henry", "clarke", "gill", "jfb", "wesley", "darby", "meyer"],
+  crossRefs: "",
   dictionaryOrder: ["isbe", "smith", "nave", "cyclopedia"],
   voice: "",
   voiceHebrew: "",
@@ -389,6 +392,8 @@ interface Ctx {
   lexicon: string | null;
   concordance: string | null;
   tsk: string | null;
+  /** The cross-reference modules, shown under the commentary rather than among the commentaries: the TSK, then OpenBible's. */
+  xrefs: string[];
   /** Looks for modules again; `esword` says whether to read e-Sword X's library (the setting if left out). */
   rescan: (esword?: boolean, eswordCopies?: string[]) => Promise<void>;
 
@@ -696,6 +701,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const lexicon = find("lexicon", ["strong"], (m) => /strong/i.test(m.title));
   const concordance = find("lexicon", ["kjc"], (m) => /concordance/i.test(m.title));
   const tsk = find("commentary", ["tsk"], (m) => /treasury/i.test(m.title));
+  const openbible = find("commentary", ["openbible_xref"], (m) => /cross-ref/i.test(m.title));
+  const xrefs = useMemo(() => [tsk, openbible].filter((x): x is string => !!x), [tsk, openbible]);
 
   // Fall back to the first Bible if the saved one is gone.
   useEffect(() => {
@@ -823,6 +830,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     lexicon,
     concordance,
     tsk,
+    xrefs,
     rescan: async (esword, eswordCopies) => {
       const l = await api.rescan(typeof esword === "boolean" ? esword : settings.readEsword, eswordCopies ?? settings.eswordCopies);
       forgetSizes(); // a Bible's chapters are read again: it may be another copy now

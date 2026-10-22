@@ -320,10 +320,10 @@ function CommentaryTab(p: Props & { vref: Ref }) {
   const list = useMemo(
     () =>
       orderModules(
-        cov.filter((c) => c.id !== app.tsk && c.range),
+        cov.filter((c) => !app.xrefs.includes(c.id) && c.range),
         app.settings.commentaryOrder,
       ),
-    [cov, app.tsk, app.settings.commentaryOrder],
+    [cov, app.xrefs, app.settings.commentaryOrder],
   );
   const current = (p.commentary && list.find((c) => c.id === p.commentary)) || list[0];
   useEffect(() => {
@@ -359,7 +359,7 @@ function CommentaryTab(p: Props & { vref: Ref }) {
     app.open({ book: r.book, chapter: r.chapter, verse: r.verse, to: r.to });
   };
   const html = intro === "chapter" ? data?.chapter : intro === "book" ? data?.book : data?.verse.map((e) => e.html).join("");
-  const others = cov.filter((c) => c.id !== app.tsk && !c.range);
+  const others = cov.filter((c) => !app.xrefs.includes(c.id) && !c.range);
   return (
     <>
       <div style={{ display: "flex", gap: 6, padding: "10px 18px 0", flexWrap: "wrap" }}>
@@ -488,13 +488,16 @@ function CrossRefs({
   onRefHover: (r: Ref | null, el: HTMLElement | null) => void;
 }) {
   const app = useApp();
+  // The TSK and OpenBible's, a pill each as the commentaries have; the one chosen is kept.
+  const mods = app.xrefs.map((id) => app.mod("commentary", id)).filter((m): m is ModuleInfo => !!m);
+  const cur = mods.find((m) => m.id === app.settings.crossRefs) ?? mods[0];
   const [html, setHtml] = useState<string | null>(null);
   const [open, setOpen] = useState(true);
   useEffect(() => {
-    if (!app.tsk) return;
+    if (!cur) return;
     let dead = false;
     api
-      .commentary(app.tsk, vref.book, vref.chapter, vref.verse!)
+      .commentary(cur.id, vref.book, vref.chapter, vref.verse!)
       .then((c) => {
         if (!dead) setHtml(c.verse.map((e) => e.html).join("") || null);
       })
@@ -504,9 +507,9 @@ function CrossRefs({
     return () => {
       dead = true;
     };
-  }, [app.tsk, vref.book, vref.chapter, vref.verse]);
-  if (!app.tsk || !html) return null;
-  const count = (html.match(/<ref>/g) || []).length;
+  }, [cur?.id, vref.book, vref.chapter, vref.verse]); // eslint-disable-line react-hooks/exhaustive-deps
+  if (!cur) return null;
+  const count = (html?.match(/<ref>/g) || []).length;
   return (
     <section
       aria-label="Cross-references"
@@ -522,30 +525,44 @@ function CrossRefs({
         minHeight: 0,
       }}
     >
-      <button
-        type="button"
-        onClick={() => setOpen(!open)}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          border: 0,
-          background: "transparent",
-          padding: 0,
-          cursor: "pointer",
-        }}
-      >
-        <span className="label">Cross-references · Treasury of Scripture Knowledge</span>
-        <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+        <span className="label" style={{ marginRight: 4 }}>
+          Cross-references
+        </span>
+        {mods.length > 1 &&
+          mods.map((m) => (
+            <button
+              key={m.id}
+              type="button"
+              className={`chip ${cur.id === m.id ? "on" : ""}`}
+              title={m.title}
+              onClick={() => {
+                app.set({ crossRefs: m.id });
+                setOpen(true);
+              }}
+            >
+              {short(m)}
+            </button>
+          ))}
+        {mods.length === 1 && <span className="label">· {cur.title}</span>}
+        <button
+          type="button"
+          aria-label={open ? "Hide the cross-references" : "Show the cross-references"}
+          onClick={() => setOpen(!open)}
+          style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 6, border: 0, background: "transparent", padding: 0, cursor: "pointer" }}
+        >
           <span className="n">{count}</span>
           <Icon name={open ? "down" : "up"} className="sm" />
-        </span>
-      </button>
-      {open && (
-        <div className="scroll es tsk" style={{ fontSize: 13, lineHeight: 1.9 }}>
-          {renderHtml(html, { onRef: onOpen, onRefHover })}
-        </div>
-      )}
+        </button>
+      </div>
+      {open &&
+        (html ? (
+          <div className="scroll es tsk" style={{ fontSize: 13, lineHeight: 1.9 }}>
+            {renderHtml(html, { onRef: onOpen, onRefHover })}
+          </div>
+        ) : (
+          <div className="n">None in {cur.title} for this verse.</div>
+        ))}
     </section>
   );
 }

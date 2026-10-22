@@ -133,7 +133,7 @@ export function WordLookup({
             !dead &&
             setCov(
               orderModules(
-                c.filter((x) => x.range && x.id !== app.tsk),
+                c.filter((x) => x.range && !app.xrefs.includes(x.id)),
                 app.settings.commentaryOrder,
               ),
             ),
@@ -143,7 +143,7 @@ export function WordLookup({
     return () => {
       dead = true;
     };
-  }, [word, vref?.book, vref?.chapter, vref?.verse, app.tsk, app.settings.dictionaryOrder, app.settings.commentaryOrder]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [word, vref?.book, vref?.chapter, vref?.verse, app.xrefs, app.settings.dictionaryOrder, app.settings.commentaryOrder]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const range = (c: Coverage) => {
     const l = c.range && vref ? rangeLabel(c.range, vref.chapter) : "";

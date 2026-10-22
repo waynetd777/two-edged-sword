@@ -126,7 +126,7 @@ Click a verse (not a word) to select it. ⇧-click selects a range. The study pa
 
 ### Commentaries and cross-references
 
-The **Commentary** tab has every commentary on the verse, one after another, and the cross-references from the Treasury of Scripture Knowledge below them.
+The **Commentary** tab has every commentary on the verse, one after another, and the cross-references below them: click **TSK** for the Treasury of Scripture Knowledge's or **OpenBible** for OpenBible.info's.
 
 - Choose which come first in the [Library](app:library#commentaries).
 - Hover a reference for the verse; click it to go there.
