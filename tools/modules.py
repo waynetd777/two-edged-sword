@@ -82,6 +82,19 @@ SCHEMA = {
 }
 
 
+def mend_verses(name, verses, fixes):
+    """`verses` ({(book, chapter, verse): text}) with `fixes` made: {(book, chapter, verse): [(old, new)]}, each
+    checked, so the build stops if a source changes and one no longer applies."""
+    for ref, pairs in fixes.items():
+        t = verses.get(ref, "")
+        for old, new in pairs:
+            if old not in t:
+                sys.exit(f"{name}: {ref} no longer has {old!r}")
+            t = t.replace(old, new)
+        verses[ref] = t
+    return verses
+
+
 @contextmanager
 def module(file: str, title: str, abbrev: str, info: str, *, ot=True, nt=True, apocrypha=False, strongs=False, rtl=False, into: Path | None = None):
     """Writes the module `file` ("kjv+.bbli") into LIBRARY (or `into`): yields a connection to a new,

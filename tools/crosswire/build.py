@@ -51,7 +51,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import vulgate.build as vulgate  # noqa: E402  (its rules and the Clementine's text)
 from books import OSIS as BOOKS66  # noqa: E402
-from modules import CACHES, LIBRARY, chapter_lengths, fetch, module  # noqa: E402
+from modules import CACHES, LIBRARY, chapter_lengths, fetch, mend_verses, module  # noqa: E402
 CACHE = CACHES / "crosswire"
 RAWZIP = "https://www.crosswire.org/ftpmirror/pub/sword/packages/rawzip/{}.zip"
 CANON = "https://crosswire.org/svn/sword/trunk/include/{}?p=3915"
@@ -93,6 +93,17 @@ MODULES = {
                        about="The Geneva Bible in its 1599 printing, the English Bible of Shakespeare, the Puritans and the Pilgrims, in its own spelling; the epistles' subscriptions are shown after their last verses. Mark Langley's electronic edition, without the notes and without the Apocrypha."),
     "DRC": dict(file="drc", title="Douay-Rheims (Challoner)", abbrev="DRC",
                 about="The Douay-Rheims Bible, the English Catholic translation from the Latin Vulgate (New Testament Rheims 1582, Old Testament Douay 1609–1610), in Bishop Richard Challoner's revision of 1749–1752. With the deuterocanonical books (Tobit, Judith, Wisdom, Sirach, Baruch with the Letter of Jeremiah as chapter 6, 1–2 Maccabees) and the additions to Esther (10:4–16:24) and Daniel (3:24–90, 13–14)."),
+}
+
+# Brackets the sources left unpaired, mended from the sense (found by checking each Bible's brackets match
+# within a chapter), and a misread letter beside one: by SWORD module name, then (book, chapter, verse).
+MENDS = {
+    "DRC": {(9, 14, 42): [("said: (Cast", "said: Cast")], (9, 20, 2): [("him: (God", "him: God")]},
+    "Geneva1599": {(2, 11, 3): [("And the Lord gaue", "(And the Lord gaue")], (5, 5, 5): [("into the mount, and he said", "into the mount) and he said")]},
+    "Tyndale": {(3, 14, 28): [("righte fote:", "righte fote):")], (46, 1, 5): [("thinges ve are", "thinges ye are")],
+                (46, 1, 6): [("even as", "(even as")], (46, 13, 8): [("shall cease) or", "shall cease or")],
+                (47, 12, 1): [("me (no dout", "me no dout")], (58, 9, 15): [("which chaunsed for", "(which chaunsed for")]},
+    "Murdock": {(66, 18, 17): [("by sea) stood", "by sea, stood")]},
 }
 
 # Rules for moving each module to the KJV's numbering, as tools/vulgate's RULES: by SWORD book name.
@@ -354,6 +365,7 @@ def build(name, into=None):
         if n <= 66 or rs:
             rows = vulgate.move(rows, rs, kjv, n)
         verses += [(n, ch, v, t.strip()) for ch, v, t in rows if t.strip()]
+    verses = sorted((b, ch, v, t) for (b, ch, v), t in mend_verses(name, {(b, ch, v): t for b, ch, v, t in verses}, MENDS.get(name, {})).items())
 
     mine = {}
     for b, ch, v, _ in verses:

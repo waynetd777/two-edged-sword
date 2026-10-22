@@ -186,7 +186,7 @@ class html:
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from books import BOOKS  # noqa: E402
-from modules import BUNDLED, CACHES, chapter_lengths, fetch as fetch_to, greek_key, module, shipping  # noqa: E402
+from modules import BUNDLED, CACHES, chapter_lengths, fetch as fetch_to, greek_key, mend_verses, module, shipping  # noqa: E402
 
 CACHE = CACHES / "core"
 KJV_URL = "https://ebible.org/Scriptures/eng-kjv2006_usfm.zip"
@@ -1315,8 +1315,60 @@ def osis_commentary(name, typos, label):
     return books, chapters, verses
 
 
+# Letters the sources' scans read as brackets, found by checking that each module's brackets match. Each is
+# looked for, and the build stops if one is no longer there, so a changed source is noticed.
+MENDS = {
+    "barnes.cmti": [('"seek)"', '"seek,"'), ("a]tar", "altar"), ("one another]", "one another"), ("on]y", "only"),
+                    ("man)'", "many"), ("o( Jesus", "of Jesus"), ("o( the", "of the"), ("of[ice", "office"),
+                    ("genera]", "general"), ("re]apse", "relapse"), ("the]lying", "the living")],
+    "clarke.cmti": [("on)y", "only")],
+    "wesley.cmti": [("o[ all", "of all"), ("al] for me", "all for me"), ("al] work", "all work")],
+    "webster1828.dcti": [("[coronet[", "[coronet]"), ("MIRTH['FULLY", "MIRTH'FULLY")],
+    "bdb_unabridged.lexi": [("ο[φελον", "ὄφελον")],
+}
+
+
+def mend(file, *tables):
+    """Each of `tables` ((rows, the text's column)) with MENDS[file] made; stops the build if one isn't found."""
+    found = {old: 0 for old, _ in MENDS.get(file, [])}
+    out = []
+    for rows, col in tables:
+        done = []
+        for r in rows:
+            t = r[col]
+            for old, new in MENDS.get(file, []):
+                if old in t:
+                    found[old] += 1
+                    t = t.replace(old, new)
+            done.append(tuple(r[:col]) + (t,) + tuple(r[col + 1:]))
+        out.append(done)
+    gone = [old for old, n in found.items() if not n]
+    if gone:
+        sys.exit(f"{file}: no longer has {gone}; see MENDS")
+    return out
+
+
+def bdb_parens(t):
+    """BDB's Hebrew in parentheses closes with ׅ (U+05C5, the lower dot) where the source lost its ")": a ׅ that
+    closes a "(" opened within the last few words, with no ")" between, is one. Elsewhere it's the dots printed over
+    letters (הַלָּאׅזׅ), and kept."""
+    out, opened = [], None
+    for i, ch in enumerate(t):
+        if ch == "(":
+            opened = i
+        elif ch == ")":
+            opened = None
+        elif ch == "\u05c5" and opened is not None and i - opened <= 40 and "<" not in t[opened:i]:
+            out.append(")")
+            opened = None
+            continue
+        out.append(ch)
+    return "".join(out)
+
+
 def write_commentary(file, title, abbrev, info, tables):
     books, chapters, verses = tables
+    books, chapters, verses = mend(file, (books, 1), (chapters, 2), (verses, 5))
     with module(file, title, abbrev, info, into=BUNDLED) as db:
         db.executemany("INSERT INTO BookCommentary VALUES (?,?)", books)
         db.executemany("INSERT INTO ChapterCommentary VALUES (?,?,?)", chapters)
@@ -1516,7 +1568,7 @@ def write_dictionary(file, title, abbrev, info, entries, to_html, topics=None):
         body = correct(to_html(entry), {})
         if body:
             rows.setdefault(topic, []).append(body)
-    rows = {t: numbered(b) for t, b in rows.items()}
+    rows = dict(mend(file, ([(t, numbered(b)) for t, b in rows.items()], 1))[0])
     with module(file, title, abbrev, info, into=BUNDLED) as db:
         db.executemany("INSERT INTO Dictionary VALUES (?,?)", sorted(rows.items(), key=lambda r: r[0].lower()))
     print(f"{file}: {len(rows)} topics, {(BUNDLED / file).stat().st_size / 1e6:.1f} MB")
@@ -1745,6 +1797,7 @@ def write_bdb():
             "<p>Public domain. Eliran Wong's edition (https://github.com/eliranwong/unabridged-BDB-Hebrew-lexicon), "
             "from Tim Morton's text for Bible Analyzer, with references parsed by Stephen Ku. "
             "Built by Two-edged Sword's tools/core.</p>")
+    rows = dict(mend("bdb_unabridged.lexi", ([(k, bdb_parens(v)) for k, v in rows.items()], 1))[0])
     with module("bdb_unabridged.lexi", "Brown-Driver-Briggs Hebrew Lexicon (unabridged)", "BDB", info, into=BUNDLED) as db:
         db.executemany("INSERT INTO Lexicon VALUES (?,?)", sorted(rows.items(), key=lambda r: (len(r[0]), r[0])))
     print(f"bdb_unabridged.lexi: {len(rows)} numbers{', a root at the end left out' if unplaced else ''}, "
@@ -1938,8 +1991,20 @@ def write_bible(bid):
     write_verses(bid, title, abbrev, info, verses)
 
 
+# Brackets the sources left unpaired, mended from the sense (found by checking each Bible's brackets match
+# within a chapter). The ASV prints "[Selah" (and "[Higgaion. Selah") with no closing bracket, as its 1901 printing
+# did; it reads as plain Selah.
+VERSE_MENDS = {
+    "webster": {(42, 8, 42): [("(But as", "But as")]},
+    "ylt": {(5, 17, 10): [("doth choose;", "doth choose);")]},
+}
+
+
 def write_verses(bid, title, abbrev, info, verses, strongs=False):
     """Writes `bid`.bbli and prints how its verses differ from the KJV's, in the testaments it has."""
+    if bid == "asv":
+        verses = {k: re.sub(r"\[(?=(?:Higgaion\. )?Selah)", "", t) for k, t in verses.items()}
+    verses = mend_verses(bid, verses, VERSE_MENDS.get(bid, {}))
     vc = verse_counts()
     ot, nt = any(b <= 39 for b, _, _ in verses), any(40 <= b <= 66 for b, _, _ in verses)
     apocrypha = any(b > 66 or c > len(vc.get(b, {})) for b, c, _ in verses)
