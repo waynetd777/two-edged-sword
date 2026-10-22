@@ -52,6 +52,8 @@ jobs:
             !src-tauri/modules/maps.refi
             !~\AppData\Local\Two-edged Sword\Caches\maps
           key: modules-${{ hashFiles('tools/**/*.py', '!tools/maps/**') }}
+          # Else main's latest: a release made before a change to the builders still finds them built.
+          restore-keys: modules-
       # The map book on its own, with the terrain it's drawn from: redrawn only when its builder changes,
       # not with every other module (core's --if-missing skips it when it's here).
       - uses: actions/cache/restore@v6
@@ -60,6 +62,8 @@ jobs:
             src-tauri/modules/maps.refi
             ~\AppData\Local\Two-edged Sword\Caches\maps
           key: maps-${{ hashFiles('tools/maps/**') }}
+          # Else main's latest: a release made before a change to the builders still finds them built.
+          restore-keys: maps-
       - run: npm ci --no-audit --no-fund
       - run: npx tauri build
       - run: python tools/update_windows.py "$env:TAG"
