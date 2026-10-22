@@ -8,7 +8,7 @@ import { markClear } from "./esword";
 import { Icon } from "./icons";
 
 /** An image over the whole window, fitted at first. The wheel (or two fingers on a trackpad) zooms about the
- *  pointer without limit, dragging pans, a double-click fits it again, Esc closes it; ← → step through the chapter's images. */
+ *  pointer, to 16 screen pixels a picture pixel, dragging pans, a double-click fits it again, Esc closes it; ← → step through the chapter's images. */
 export function ImageViewer({ images, start, onClose }: { images: string[]; start: number; onClose: () => void }) {
   const [i, setI] = useState(start);
   const [view, setView] = useState({ z: 1, x: 0, y: 0 });
@@ -38,13 +38,17 @@ export function ImageViewer({ images, start, onClose }: { images: string[]; star
     if (!el) return;
     const onWheel = (e: WheelEvent) => {
       e.preventDefault();
-      const r = img.current?.getBoundingClientRect();
-      if (!r) return;
+      const im = img.current;
+      const r = im?.getBoundingClientRect();
+      if (!im || !r) return;
+      // Far enough to see each pixel. Unlimited, WebKit's tiles for a picture scaled thousands of times over
+      // were left on the screen as streaks when it was zoomed out again.
+      const most = Math.max(1, (16 * im.naturalWidth) / Math.max(1, im.offsetWidth));
       const dy = e.deltaMode === 1 ? e.deltaY * 16 : e.deltaY;
       // A trackpad pinch arrives as a wheel with ctrlKey and small steps.
       const f = Math.exp(-dy * (e.ctrlKey && Math.abs(dy) < 50 ? 0.01 : 0.002));
       setView((v) => {
-        const z = Math.min(1e6, Math.max(0.05, v.z * f));
+        const z = Math.min(most, Math.max(0.05, v.z * f));
         const k = 1 - z / v.z;
         return { z, x: v.x + (e.clientX - r.left) * k, y: v.y + (e.clientY - r.top) * k };
       });
@@ -64,6 +68,7 @@ export function ImageViewer({ images, start, onClose }: { images: string[]; star
           alignItems: "center",
           justifyContent: "center",
           overflow: "hidden",
+          contain: "strict",
           padding: "56px 40px 40px",
           cursor: panning ? "grabbing" : "grab",
         }}
