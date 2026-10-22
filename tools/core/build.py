@@ -12,18 +12,21 @@ the Byzantine Greek New Testament (plain and word by word), WLC+ (tools/wlc's, b
 OpenBible.info's cross-references and Bible places; and, each by its own tool, the Syriac Peshitta,
 Murdock's and Etheridge's translations of it, Tyndale, the Geneva Bible of 1599 and the Douay-Rheims
 (tools/crosswire), the Clementine Vulgate (tools/vulgate), Brenton's Greek Septuagint (tools/lxx) and
-Ginsburg's Hebrew Bible, plain and word by word (tools/ginsburg).
+Ginsburg's Hebrew Bible, plain and word by word (tools/ginsburg), and the Aramaic Targum, Targum
+Pseudo-Jonathan and its English (tools/sefaria, from Sefaria's public-domain and CC0 versions only).
 
     python3 tools/core/build.py [--if-missing] [--only henry easton jfb clarke barnes smith nave isbe webster1828 bdb wesley torrey hitchcock abbott sme daily maps
                                        byz byz+ brenton weymouth wlc+ openbible places asv web ylt darby webster rv bsb bsb+ webster+
-                                       peshitta murdock etheridge tyndale geneva1599 drc clementine lxx ginsburg ginsburg+]
+                                       peshitta murdock etheridge tyndale geneva1599 drc clementine lxx ginsburg ginsburg+
+                                       targum_aramaic pseudojonathan_aramaic pseudojonathan_english]
 
 Writes kjv.bbli, kjv+.bbli, strong.lexi, kjc.lexi, tsk.cmti, henry.cmti, jfb.cmti, clarke.cmti,
 barnes.cmti, easton.dcti, smith.dcti, nave.dcti, isbe.dcti, webster1828.dcti, bdb_unabridged.lexi,
 wesley.cmti, torrey.dcti, hitchcock.dcti, abbott.lexi, sme.devi, daily.devi, byz.bbli, byz+.bbli, brenton.bbli,
 weymouth.bbli, wlc+.bbli, openbible_xref.cmti, places.dcti, maps.refi (tools/maps), asv.bbli, web.bbli, ylt.bbli, darby.bbli, webster.bbli, rv.bbli, bsb.bbli, bsb+.bbli, webster+.bbli,
 peshitta.bbli, murdock.bbli, etheridge.bbli, tyndale.bbli, geneva1599.bbli, drc.bbli, clementine.bbli,
-lxx_brenton.bbli, ginsburg.bbli and ginsburg+.bbli to src-tauri/modules/, which the app bundle carries in
+lxx_brenton.bbli, ginsburg.bbli, ginsburg+.bbli, targum_aramaic.bbli, pseudojonathan_aramaic.bbli and
+pseudojonathan_english.bbli to src-tauri/modules/, which the app bundle carries in
 Contents/Resources/modules/ (and a debug build reads in place). With --if-missing, builds only the
 commentaries, dictionaries and Bibles not there yet, or everything if the KJV and what's built from
 it aren't (the release build runs it that way); --only builds just the ones named (after the KJV,
@@ -165,6 +168,13 @@ targum's Jastrow, syriac/sedra.py's SEDRA).
   ginsburg, ginsburg+  github.com/ahembd/Ginsburg_Hebrew_Bible (Apache-2.0), a few verses from its
             sister repository (GPL-3.0), so both are shared under the GPL, version 3, as the app is;
             Ginsburg+'s English, Strong's numbers and grammar are WLC+'s (CC BY 4.0) (tools/ginsburg).
+  targum_aramaic, pseudojonathan_aramaic, pseudojonathan_english  Sefaria's export, named versions only, each
+            checked against the licence Sefaria's API gives it (tools/sefaria's open_targum): Onkelos from Torat Emet
+            ("Onkelos <book>", public domain; not the Sifsei Chachomim Chumash, CC BY-NC), Jonathan on the Prophets and
+            the Writings' Targums from the Mikraot Gedolot (public domain), Chronicles from Wikisource (public domain),
+            Pseudo-Jonathan from Torat Emet (public domain), its English Etheridge's (1862, public domain) with the
+            Sefaria Community Translation (CC0) where Etheridge has no verse. Targum (English), Targum+, Ps-Jon+ and the
+            Talmud aren't built in (CC BY-NC versions).
   lxx+      LXX-Brenton+: the Greek Brenton word by word, its words' forms and grammar from GLAUx (CC BY-SA 4.0,
             so the module is shared under it), Strong's numbers and English from STEPBible (CC BY 4.0) (tools/lxx/plus.py).
   peshitta+  The Peshitta word by word, its English and Strong's numbers from the Greek of Byz+ (lined up word by
@@ -2708,6 +2718,18 @@ MORE |= {"ginsburg": ("ginsburg.bbli", lambda: write_tool("ginsburg.build")), "g
 MORE |= {"lxx+": ("lxx_brenton+.bbli", lambda: write_tool("lxx.plus")),
          "peshitta+": ("peshitta+.bbli", lambda: write_tool("syriac.build")),
          "clementine+": ("clementine+.bbli", lambda: write_tool("latin.clementine"))}
+
+
+def write_targum(name):
+    """A Targum from Sefaria's openly licensed versions only (tools/sefaria's open_targum)."""
+    import sefaria.build as sf
+    with shipping():
+        sf.open_targum(name, into=BUNDLED)
+
+
+# The Targums from public-domain and CC0 versions only (each checked against Sefaria's own licence for it);
+# they read only the KJV's chapter lengths. Targum (English) and the word-by-word Targums are left out (NC versions).
+MORE |= {n: (f"{n}.bbli", lambda n=n: write_targum(n)) for n in ("targum_aramaic", "pseudojonathan_aramaic", "pseudojonathan_english")}
 
 
 def main():

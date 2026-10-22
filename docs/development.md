@@ -259,7 +259,7 @@ then press **Rescan**.
 | Script | Builds | Run first | From |
 |---|---|---|---|
 | `tools/crosswire/build.py` | Syriac Peshitta NT, Murdock, Etheridge, Tyndale, Geneva 1599, Douay-Rheims | | CrossWire |
-| `tools/sefaria/build.py` | Targum, Targum Pseudo-Jonathan, the Babylonian Talmud | | Sefaria |
+| `tools/sefaria/build.py` | Targum, Targum Pseudo-Jonathan, the Babylonian Talmud (Sefaria's merged text, all versions) | | Sefaria |
 | `tools/vulgate/build.py` | Clementine Vulgate (1592) | | Clementine Vulgate Project |
 | `tools/wlc/build.py` | WLC+: the Hebrew Old Testament word by word | | Open Scriptures, STEPBible |
 | `tools/ginsburg/build.py` | Ginsburg's Hebrew Bible (1894) | wlc | ahembd/Ginsburg_Hebrew_Bible |
@@ -276,7 +276,7 @@ then press **Rescan**.
 | `tools/rheims/build.py` | The Rheims New Testament (1582) | crosswire | Bible Support file 11077, in ~/Downloads |
 
 Run each with `python3`. Downloads are cached in `~/Library/Caches/Two-edged Sword/`.
-`tools/core` builds the ones from `crosswire`, `vulgate`, `lxx`, `ginsburg`, `latin/clementine.py` and `syriac/build.py` into the app as well (see below).
+`tools/core` builds the ones from `crosswire`, `vulgate`, `lxx`, `ginsburg`, `latin/clementine.py` and `syriac/build.py` into the app as well, and three of `sefaria`'s Targums from open versions only (see below).
 Sources on GitHub, Bitbucket and SWORD's svn are pinned to a commit or revision, so a rebuild gives the same text; move the pin on purpose.
 
 All are public domain or openly licensed, except some Sefaria translations, SEDRA's glosses and
@@ -313,7 +313,10 @@ bundle: the Peshitta, Murdock, Etheridge, Tyndale, Geneva 1599 and Douay-Rheims 
 Clementine Vulgate (`tools/vulgate`), the Greek Brenton (`tools/lxx/build.py`), Ginsburg and Ginsburg+
 (`tools/ginsburg`, shared under the GPL as the app is, since a few verses come from a GPL-3.0 source),
 WLC+ (`tools/wlc`), and the word-by-word LXX-Brenton+, Vulg-C+ and Peshitta+ (`tools/lxx/plus.py`,
-`tools/latin/clementine.py`, `tools/syriac/build.py`), from open sources only. Each runs inside `shipping()`, so it reads only the built-in modules. And the map book,
+`tools/latin/clementine.py`, `tools/syriac/build.py`), from open sources only, and the Aramaic Targum, Targum Pseudo-Jonathan and its English
+(`targum_aramaic`, `pseudojonathan_aramaic`, `pseudojonathan_english`; `tools/sefaria`'s `open_targum`). These take named Sefaria
+versions only (`open_versions`), each checked against the licence Sefaria's API gives it: a version that isn't public domain, CC0,
+CC BY or CC BY-SA stops the build. Each runs inside `shipping()`, so it reads only the built-in modules. And the map book,
 `maps.refi`, with `tools/maps/build.py`: maps drawn from OpenBible.info's places, NASA and USGS terrain
 (Mapzen's Terrain Tiles) and Natural Earth's coasts, at 3,600 pixels wide. Its first run downloads
 some thousands of terrain tiles (cached); `--only jesus --pictures DIR` draws one map to look at.
@@ -322,7 +325,7 @@ Nothing from e-Sword X goes into a module that could be shipped: its licence for
 modules on. Scripts that read e-Sword modules build for your own library only: `beza/build.py`
 (TR+, if it's there), `beza/plus.py` with it, and `latin/build.py` (Latin+, from e-Sword's `latin.bbli`;
 its tagger's PROIEL model is CC BY-NC-SA too). These aren't built in either: `rheims` (its source is a
-file from Bible Support's e-Sword downloads), and `sefaria`, `targum` and `syriac/sedra.py`
+file from Bible Support's e-Sword downloads), and `sefaria`'s Targum (English) and Talmud, `targum` and `syriac/sedra.py`
 (non-commercial sources).
 
 `tools/stepbible.py` reads STEPBible's TAGNT: every Greek NT edition's words with Strong's numbers

@@ -18,6 +18,10 @@ Downloads are cached in ~/Library/Caches/Two-edged Sword/sefaria. Modules are wr
 the app's modules folder, where the app finds them after Library → Rescan. English is
 Sefaria's merged text: its best version for each verse, whose sources and licences are listed
 in each module's information. Several are CC-BY-NC: fine for personal study, not for resale.
+
+The app's own copies of targum_aramaic, pseudojonathan_aramaic and pseudojonathan_english are built
+by tools/core (open_targum) from named versions only (OPEN_VERSIONS), each checked against the
+licence Sefaria's API gives it (public domain, CC0, CC BY or CC BY-SA, or the build stops).
 """
 import csv, html, io, itertools, json, re, sys, time, urllib.error, urllib.parse, urllib.request
 from concurrent.futures import ThreadPoolExecutor
@@ -86,8 +90,8 @@ def sources(docs):
     return seen
 
 
-def write_bible(file, title, abbrev, info, rtl, verses):
-    with module(f"{file}.bbli", title, abbrev, info, nt=False, rtl=int(rtl)) as c:
+def write_bible(file, title, abbrev, info, rtl, verses, into=None):
+    with module(f"{file}.bbli", title, abbrev, info, nt=False, rtl=int(rtl), into=into) as c:
         c.executemany("INSERT INTO Bible VALUES (?,?,?,?)", verses)
     print(f"{file}.bbli: {len(verses)} verses")
 
@@ -155,9 +159,10 @@ def to_kjv(verses, counts):
     return [(b, c, v, t) for (b, c, v), t in sorted(out.items())]
 
 
-def targum_bible(tocmap, file, title, abbrev, parts, lang, blurb):
-    """parts: (Sefaria title, e-Sword book number)."""
-    docs = {t: text(tocmap, t, lang) for t, _ in parts}
+def targum_bible(tocmap, file, title, abbrev, parts, lang, blurb, *, wanted=None, into=None):
+    """parts: (Sefaria title, e-Sword book number). With `wanted` (Sefaria title → version titles), only
+    those versions (open_text), not the merged text."""
+    docs = {t: open_text(tocmap, t, lang, wanted(t)) if wanted else text(tocmap, t, lang) for t, _ in parts}
     verses = []
     for t, book in parts:
         d = docs[t]
@@ -172,27 +177,119 @@ def targum_bible(tocmap, file, title, abbrev, parts, lang, blurb):
     if off:
         print(f"  {file}: chapters longer than the KJV's: {' '.join(off)}")
     books = sorted({v[0] for v in verses})
-    src = "".join(f"<li>{html.escape(s)}</li>" for s in sources(docs.values()))
-    info = (f"<p>{blurb}</p><p>{'Aramaic' if lang == 'Hebrew' else 'English'} text from Sefaria (sefaria.org), built by Two-edged Sword's tools/sefaria. "
-            f"{len(books)} books, {len(verses)} verses.</p><p>Sources:</p><ul>{src}</ul>"
-            "<p>Licences vary by source (public domain, CC0, CC-BY, CC-BY-NC); see each on Sefaria. For personal study.</p>")
-    write_bible(file, title, abbrev, info, lang == "Hebrew", verses)
+    head = f"<p>{blurb}</p><p>{'Aramaic' if lang == 'Hebrew' else 'English'} text from Sefaria (sefaria.org), built by Two-edged Sword's tools/sefaria. {len(books)} books, {len(verses)} verses.</p>"
+    if wanted:
+        used = {}
+        for t, _ in parts:
+            for vt, lic, where in docs[t]["versions"]:
+                # A version named as its book ("Onkelos Genesis") is one per book: they're listed together.
+                key = (f"The text from {where}" if vt == t else vt, lic)
+                used.setdefault(key, []).append(re.sub(r"^(Onkelos|Targum Jonathan on|Aramaic Targum to|Targum of) ", "", t))
+        src = "".join(f"<li>{html.escape(vt)} ({html.escape(LICENCE_NAMES[lic])}): {html.escape(', '.join(ts))}</li>" for (vt, lic), ts in used.items())
+        info = (head + f"<p>Sources, each Sefaria's version of that name, with its licence:</p><ul>{src}</ul>"
+                "<p>Only these openly licensed versions are used. Thanks to Sefaria, which digitised and published them.</p>")
+    else:
+        src = "".join(f"<li>{html.escape(s)}</li>" for s in sources(docs.values()))
+        info = (head + f"<p>Sources:</p><ul>{src}</ul>"
+                "<p>Licences vary by source (public domain, CC0, CC-BY, CC-BY-NC); see each on Sefaria. For personal study.</p>")
+    write_bible(file, title, abbrev, info, lang == "Hebrew", verses, into)
+
+
+# Licences (as Sefaria's API gives them) that let a version be passed on in a module the app ships.
+LICENCE_NAMES = {"Public Domain": "public domain", "CC0": "CC0", "CC-BY": "CC BY", "CC-BY-SA": "CC BY-SA"}
+
+
+def versions(title):
+    """Sefaria's versions of a text, each with its "license" (its API), cached."""
+    return json.loads(get("https://www.sefaria.org/api/texts/versions/" + urllib.parse.quote(title), f"versions/{title}.json"))
+
+
+def open_text(tocmap, title, lang, wanted):
+    """`title` from the versions named in `wanted` only, verse by verse from the first of them to have
+    it, with the versions used and their licences: {"text": …, "versions": [(title, licence)]}. A
+    version not there is skipped; one whose licence (Sefaria's API's, and the file's own) isn't in
+    LICENCE_NAMES stops the build. Each version used is (title, licence, where Sefaria had it from)."""
+    code = "he" if lang == "Hebrew" else "en"
+    out, used = [], []
+    for want in wanted:
+        meta = [v for v in versions(title) if v["versionTitle"].strip() == want and v.get("language") == code]
+        if not meta:
+            continue
+        vt = meta[0]["versionTitle"]  # as Sefaria spells it (a trailing space and all), which names its file
+        path = "/".join(tocmap[title] + [title, lang, vt + ".json"])
+        doc = json.loads(get(EXPORT + urllib.parse.quote(path), path))
+        for lic in (meta[0].get("license"), doc.get("license")):
+            if (lic or "").strip() not in LICENCE_NAMES:
+                sys.exit(f"{title}: version {want!r} is licensed {lic!r}, not one of {', '.join(LICENCE_NAMES)}; it can't go in a module the app ships")
+        n = 0
+        for ci, ch in enumerate(doc.get("text", [])):
+            while len(out) <= ci:
+                out.append([])
+            for vi, v in enumerate(ch if isinstance(ch, list) else []):
+                while len(out[ci]) <= vi:
+                    out[ci].append("")
+                s = v if isinstance(v, str) else " ".join(x for x in v if isinstance(x, str))
+                if not clean(out[ci][vi]) and clean(s):
+                    out[ci][vi], n = s, n + 1
+        if n:
+            used.append((want, meta[0]["license"].strip(), re.sub(r"^https?://|/$", "", meta[0].get("versionSource") or "sefaria.org")))
+    if not used:
+        sys.exit(f"{title}: none of {', '.join(wanted)} on Sefaria in {lang}")
+    return {"text": out, "versions": used}
 
 
 def targums(tocmap):
+    main, pj = targum_parts(tocmap)
+    blurb = TARGUM_BLURB
+    targum_bible(tocmap, "targum_aramaic", "Targum (Aramaic)", "Targum", main, "Hebrew", blurb)
+    targum_bible(tocmap, "targum_english", "Targum (English)", "Targum-E", main, "English", blurb + " English is missing where Sefaria has no translation.")
+    targum_bible(tocmap, "pseudojonathan_aramaic", "Targum Pseudo-Jonathan (Aramaic)", "Ps-Jon", pj, "Hebrew", PJ_BLURB)
+    targum_bible(tocmap, "pseudojonathan_english", "Targum Pseudo-Jonathan (English)", "Ps-Jon-E", pj, "English", PJ_BLURB)
+
+
+# The versions the app's own Targums are built from (all public domain or CC0, as Sefaria's API gives
+# them). Onkelos is the public-domain "Onkelos <book>" (toratemetfreeware.com: the usual printed text,
+# vocalised as the Sifsei Chachomim's is), not the CC BY-SA Yemenite Taj text (another vocalisation, and
+# a few words differ) or the Sifsei Chachomim Chumash itself (CC BY-NC).
+ETHERIDGE_PJ = "The Targum of Jonathan ben Uzziel, trans. J. W. Etheridge, London, 1862"
+TORAH_PJ = [f"Targum Jonathan on {b}" for b in BOOKS[:5]]
+
+
+def open_versions(name, title):
+    if name == "pseudojonathan_english":
+        return [ETHERIDGE_PJ, "Sefaria Community Translation"]
+    if title.startswith("Onkelos ") or title in TORAH_PJ:
+        return [title]  # the public-domain Aramaic is named as its text is
+    if title.startswith("Targum of "):
+        return ["Wikisource Aramaic Targum to Chronicles"]
+    return ["Mikraot Gedolot"]  # Jonathan on the Prophets, the Writings' Targums
+
+
+def targum_parts(tocmap):
+    """(Sefaria title, e-Sword book) of the Targum (Onkelos, Jonathan on the Prophets, the Writings') and of Pseudo-Jonathan."""
     torah = [(f"Onkelos {b}", i + 1) for i, b in enumerate(BOOKS[:5])]
     writings = {"Psalms": 19, "Proverbs": 20, "Job": 18, "Song of Songs": 22, "Ruth": 8, "Lamentations": 25, "Ecclesiastes": 21, "Esther": 17}
     prophets = [(f"Targum Jonathan on {b}", BOOKS.index(b) + 1) for b in BOOKS if f"Targum Jonathan on {b}" in tocmap and BOOKS.index(b) >= 5]
     main = torah + prophets + [(f"Aramaic Targum to {b}", n) for b, n in writings.items()] + [("Targum of I Chronicles", 13), ("Targum of II Chronicles", 14)]
     main.sort(key=lambda x: x[1])
-    blurb = ("The Targum: the Aramaic paraphrase read in the synagogue beside the Hebrew. Torah: Targum Onkelos; Prophets: Targum Jonathan; "
-             "Writings: the Targums to Psalms, Proverbs, Job, the five scrolls and Chronicles. Ezra, Nehemiah and Daniel have no Targum.")
-    targum_bible(tocmap, "targum_aramaic", "Targum (Aramaic)", "Targum", main, "Hebrew", blurb)
-    targum_bible(tocmap, "targum_english", "Targum (English)", "Targum-E", main, "English", blurb + " English is missing where Sefaria has no translation.")
-    pj = [(f"Targum Jonathan on {b}", i + 1) for i, b in enumerate(BOOKS[:5])]
-    blurb = "Targum Pseudo-Jonathan (also called Targum Yerushalmi I): an expansive Aramaic paraphrase of the Torah, rich in tradition and interpretation."
-    targum_bible(tocmap, "pseudojonathan_aramaic", "Targum Pseudo-Jonathan (Aramaic)", "Ps-Jon", pj, "Hebrew", blurb)
-    targum_bible(tocmap, "pseudojonathan_english", "Targum Pseudo-Jonathan (English)", "Ps-Jon-E", pj, "English", blurb)
+    return main, [(t, i + 1) for i, t in enumerate(TORAH_PJ)]
+
+
+TARGUM_BLURB = ("The Targum: the Aramaic paraphrase read in the synagogue beside the Hebrew. Torah: Targum Onkelos; Prophets: Targum Jonathan; "
+                "Writings: the Targums to Psalms, Proverbs, Job, the five scrolls and Chronicles. Ezra, Nehemiah and Daniel have no Targum.")
+PJ_BLURB = "Targum Pseudo-Jonathan (also called Targum Yerushalmi I): an expansive Aramaic paraphrase of the Torah, rich in tradition and interpretation."
+OPEN_TARGUMS = {"targum_aramaic": ("Targum (Aramaic)", "Targum", "Hebrew"),
+                "pseudojonathan_aramaic": ("Targum Pseudo-Jonathan (Aramaic)", "Ps-Jon", "Hebrew"),
+                "pseudojonathan_english": ("Targum Pseudo-Jonathan (English)", "Ps-Jon-E", "English")}
+
+
+def open_targum(name, into=None):
+    """One of OPEN_TARGUMS from openly licensed versions only (open_versions), for the app to ship."""
+    tocmap = toc()
+    main, pj = targum_parts(tocmap)
+    title, abbrev, lang = OPEN_TARGUMS[name]
+    parts, blurb = (main, TARGUM_BLURB) if name == "targum_aramaic" else (pj, PJ_BLURB)
+    targum_bible(tocmap, name, title, abbrev, parts, lang, blurb, wanted=lambda t: open_versions(name, t), into=into)
 
 
 def kjv_verse(b, c, v, heb, kjv):

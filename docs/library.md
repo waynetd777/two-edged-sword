@@ -54,6 +54,9 @@ The app comes with these, so it works with nothing else installed. All are publi
 | Syriac Peshitta New Testament (1905) | CrossWire |
 | Murdock's and Etheridge's English translations of the Peshitta New Testament | CrossWire |
 | Ginsburg's Hebrew Bible (1894), and Ginsburg+ word by word | Ginsburg Hebrew Bible project (Apache-2.0 and GPL-3.0); Ginsburg+'s English from WLC+ |
+| Targum (Aramaic): Onkelos on the Torah, Jonathan on the Prophets, the Targums of the Writings | Sefaria: Torat Emet's Onkelos, the Mikraot Gedolot, Wikisource's Chronicles |
+| Targum Pseudo-Jonathan (Aramaic) | Sefaria, from Torat Emet |
+| Targum Pseudo-Jonathan (English): Etheridge's translation (1862) | Sefaria; a verse from its Community Translation (CC0) |
 | LXX-Brenton+: the Greek Septuagint word by word, with the Apocrypha, Strong's numbers and English | GLAUx (CC BY-SA), STEPBible (CC BY) |
 | Vulg-C+: the Clementine Vulgate word by word, with Strong's numbers and English. **Non-commercial use only** (CC BY-NC-SA) | Stanza's tagger, trained on the PROIEL treebank (CC BY-NC-SA); Whitaker's WORDS; numbers from WLC+, Byz+ and LXX-Brenton+ |
 | Peshitta+: the Syriac Peshitta word by word, its English and Strong's numbers from the Greek | Byz+ and STEPBible (CC BY), Murdock's and Etheridge's translations |
@@ -118,7 +121,7 @@ show after **Rescan**. They're numbered like the KJV, so they compare beside it.
 
 | Text | From |
 |---|---|
-| Targum, Targum Pseudo-Jonathan, the Babylonian Talmud | Sefaria |
+| Targum (English), the Babylonian Talmud. The Aramaic Targum and Pseudo-Jonathan are built in; building them gives Sefaria's merged text instead | Sefaria |
 | Beza's Greek New Testament (1598), and Beza 1598+ word by word | textus-receptus.com, STEPBible |
 | Latin+, Jerome's Vulgate word by word (needs e-Sword's Latin Vulgate) | Stanza, Whitaker's WORDS |
 | Targum+ and Ps-Jon+, word by word | Sefaria, Jastrow |
