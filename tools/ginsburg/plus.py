@@ -6,7 +6,8 @@ Ginsburg's Hebrew word by word, each word with its English, Strong's number and 
     python3 tools/ginsburg/plus.py
 
 Reads ginsburg.bbli (tools/ginsburg/build.py) and wlc+.bbli (tools/wlc) from the library (tools/modules.py finds them)
-and writes ginsburg+.bbli beside them; the app finds it after Library → Rescan.
+and writes ginsburg+.bbli beside them; the app finds it after Library → Rescan. tools/core builds it
+into the app (src-tauri/modules) from the built-in ginsburg.bbli and wlc+.bbli.
 
 Sources and licences: the text is Ginsburg's 1894 Hebrew Bible (github.com/ahembd/Ginsburg_Hebrew_Bible,
 Apache-2.0; a few gaps from its GPL-3.0 sister repo, see build.py). The English, Strong's numbers
@@ -86,7 +87,8 @@ def pair(g, w):
     return out, exact, joined
 
 
-def main():
+def main(into=None):
+    """Writes ginsburg+.bbli to the app's modules folder, or to `into`."""
     for f in ("ginsburg.bbli", "wlc+.bbli"):
         if not find(f).exists():
             sys.exit(f"no {f}; build it first")
@@ -145,9 +147,10 @@ def main():
             "(1524–25), word by word: each word with its English, Strong's number and grammar, taken from WLC+ by lining the "
             "two texts up by their consonants (the Open Scriptures Hebrew Bible's lemmas and morphology, CC BY 4.0; STEPBible's "
             f"TBESH glosses, CC BY 4.0). {(n_exact + n_near) / total:.1%} of the words are glossed; a word where Ben Chayyim's "
-            "text differs from the Leningrad Codex's is left without. Text: github.com/ahembd/Ginsburg_Hebrew_Bible (Apache-2.0). "
+            "text differs from the Leningrad Codex's is left without. Text: github.com/ahembd/Ginsburg_Hebrew_Bible (Apache-2.0), "
+            "a few verses from github.com/ahembd/Ginsburg_Hebrew_Bible_w_rafe (GPL-3.0); the module is shared under the GNU GPL, version 3. "
             "Verses are numbered as in the KJV. Built by Two-edged Sword's tools/ginsburg/plus.py.</p>")
-    with module("ginsburg+.bbli", "Hebrew Bible (Ginsburg 1894, Ben Chayyim) w/ glosses", "Ginsburg+", info, nt=False, strongs=True, rtl=True) as db:
+    with module("ginsburg+.bbli", "Hebrew Bible (Ginsburg 1894, Ben Chayyim) w/ glosses", "Ginsburg+", info, nt=False, strongs=True, rtl=True, into=into) as db:
         db.executemany("INSERT INTO Bible VALUES (?,?,?,?)", out)
     print(f"ginsburg+.bbli: {len(out)} verses")
 

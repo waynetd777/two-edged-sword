@@ -7,13 +7,14 @@ translators used. It stands in for the Rabbinic Bible on the KJV History page.
 
     python3 tools/ginsburg/build.py
 
-Writes to the app's modules folder, where the app finds it after Library → Rescan.
+Writes to the app's modules folder, where the app finds it after Library → Rescan; tools/core builds it
+into the app (src-tauri/modules).
 
 Source: github.com/ahembd/Ginsburg_Hebrew_Bible (Apache-2.0), one text file per book, with vowels
 and accents (the edition without the rafe mark). Its files have lost some verses (Daniel 11:26 to
 the end, Ezra 8–10, a verse at the end of a few books), which are taken from its sister,
-github.com/ahembd/Ginsburg_Hebrew_Bible_w_rafe (GPL-3.0; the rafe taken off); built here and not
-committed, so the two licences never meet in anything distributed. Four verses are in neither set
+github.com/ahembd/Ginsburg_Hebrew_Bible_w_rafe (GPL-3.0; the rafe taken off). Both licences allow
+the module to be passed on under the GPL, version 3, as the app is: tools/core builds it into the app. Four verses are in neither set
 (the files stop short): 1 Kings 22:52-53, Job 42:17 and Micah 7:20 in the KJV's numbering; they are
 left out rather than filled from another edition. Nehemiah 7:68 is not in the Masoretic text. A chapter starts with a line "פרק א"; a verse with
 its number in Hebrew letters, "[א]" (two slips are mended: "98 פרקs" for Psalm 98's heading, and
@@ -223,7 +224,8 @@ def halves(text):
     return " ".join(words[:cut]), " ".join(words[cut:])
 
 
-def main():
+def main(into=None):
+    """Writes ginsburg.bbli to the app's modules folder, or to `into`."""
     LIBRARY.mkdir(parents=True, exist_ok=True)
     files, rafe = repo(), repo(REPO_RAFE, "rafe")
     moves = wlc.verse_map()
@@ -240,11 +242,13 @@ def main():
     rows = [(b, c, v, f"<heb>{t}</heb>") for (b, c, v), t in sorted(verses.items())]
     info = ("<p>The Hebrew Old Testament as Christian David Ginsburg edited it for the Trinitarian Bible Society (1894), "
             "following Jacob ben Chayyim's text of Daniel Bomberg's second Rabbinic Bible (Venice, 1524–25), the Hebrew the "
-            "KJV's translators used. From github.com/ahembd/Ginsburg_Hebrew_Bible (Apache-2.0), with vowels and accents. "
+            "KJV's translators used. From github.com/ahembd/Ginsburg_Hebrew_Bible (Apache-2.0), with vowels and accents; "
+            "the verses its files lost (Daniel 11:26 to the end, Ezra 8–10 and a few more) are from its sister, "
+            "github.com/ahembd/Ginsburg_Hebrew_Bible_w_rafe (GPL-3.0), so the module is shared under the GNU GPL, version 3. "
             "Verses are numbered as in the KJV (psalm titles are part of verse 1); where the margin corrects the text "
             "(ketiv/qere), the reading is given. 1 Kings 22:52–53, Job 42:17 and Micah 7:20 are missing from the source files; "
             "Nehemiah 7:68 is not in the Masoretic text. Built by Two-edged Sword's tools/ginsburg.</p>")
-    with module("ginsburg.bbli", "Hebrew Bible (Ginsburg 1894, Ben Chayyim)", "Ginsburg", info, nt=False, rtl=True) as db:
+    with module("ginsburg.bbli", "Hebrew Bible (Ginsburg 1894, Ben Chayyim)", "Ginsburg", info, nt=False, rtl=True, into=into) as db:
         db.executemany("INSERT INTO Bible VALUES (?,?,?,?)", rows)
     matched = sum(m for _, m, _ in SHARE) / max(sum(t for _, _, t in SHARE), 1)
     print(f"{len(FILLED)} verses from the edition with the rafe; {matched:.1%} of the words match the WLC's")

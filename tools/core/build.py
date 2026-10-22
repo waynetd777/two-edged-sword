@@ -9,15 +9,21 @@ Darby's, Webster's, the Revised Version and the Berean Standard Bible), and the 
 Strong's numbers; and Wesley's notes, Torrey's and Hitchcock's dictionaries, Abbott-Smith's Greek lexicon,
 Spurgeon's Morning and Evening and Daily Light, Weymouth's New Testament, Brenton's English Septuagint,
 the Byzantine Greek New Testament (plain and word by word), WLC+ (tools/wlc's, bundled), and
-OpenBible.info's cross-references and Bible places.
+OpenBible.info's cross-references and Bible places; and, each by its own tool, the Syriac Peshitta,
+Murdock's and Etheridge's translations of it, Tyndale, the Geneva Bible of 1599 and the Douay-Rheims
+(tools/crosswire), the Clementine Vulgate (tools/vulgate), Brenton's Greek Septuagint (tools/lxx) and
+Ginsburg's Hebrew Bible, plain and word by word (tools/ginsburg).
 
     python3 tools/core/build.py [--if-missing] [--only henry easton jfb clarke barnes smith nave isbe webster1828 bdb wesley torrey hitchcock abbott sme daily maps
-                                       byz byz+ brenton weymouth wlc+ openbible places asv web ylt darby webster rv bsb bsb+ webster+]
+                                       byz byz+ brenton weymouth wlc+ openbible places asv web ylt darby webster rv bsb bsb+ webster+
+                                       peshitta murdock etheridge tyndale geneva1599 drc clementine lxx ginsburg ginsburg+]
 
 Writes kjv.bbli, kjv+.bbli, strong.lexi, kjc.lexi, tsk.cmti, henry.cmti, jfb.cmti, clarke.cmti,
 barnes.cmti, easton.dcti, smith.dcti, nave.dcti, isbe.dcti, webster1828.dcti, bdb_unabridged.lexi,
 wesley.cmti, torrey.dcti, hitchcock.dcti, abbott.lexi, sme.devi, daily.devi, byz.bbli, byz+.bbli, brenton.bbli,
-weymouth.bbli, wlc+.bbli, openbible_xref.cmti, places.dcti, maps.refi (tools/maps), asv.bbli, web.bbli, ylt.bbli, darby.bbli, webster.bbli, rv.bbli, bsb.bbli, bsb+.bbli and webster+.bbli to src-tauri/modules/, which the app bundle carries in
+weymouth.bbli, wlc+.bbli, openbible_xref.cmti, places.dcti, maps.refi (tools/maps), asv.bbli, web.bbli, ylt.bbli, darby.bbli, webster.bbli, rv.bbli, bsb.bbli, bsb+.bbli, webster+.bbli,
+peshitta.bbli, murdock.bbli, etheridge.bbli, tyndale.bbli, geneva1599.bbli, drc.bbli, clementine.bbli,
+lxx_brenton.bbli, ginsburg.bbli and ginsburg+.bbli to src-tauri/modules/, which the app bundle carries in
 Contents/Resources/modules/ (and a debug build reads in place). With --if-missing, builds only the
 commentaries, dictionaries and Bibles not there yet, or everything if the KJV and what's built from
 it aren't (the release build runs it that way); --only builds just the ones named (after the KJV,
@@ -26,7 +32,7 @@ looks for first, so Word Study, the glosses and the cross-references find them, 
 copies (henry.cmti, asv.bbli and so on), where there are, take the place of these.
 
 Every source is public domain but Webster's 1828 (CC BY-SA), STEPBible's and Open Scriptures' data and
-OpenBible.info's (CC BY), each credited in its module, and none is e-Sword's (its licence forbids
+OpenBible.info's (CC BY), and Ginsburg's (Apache-2.0 and GPL-3.0), each credited in its module, and none is e-Sword's (its licence forbids
 passing its modules on):
   eBible.org's eng-kjv2006, https://ebible.org/Scriptures/eng-kjv2006_usfm.zip: the 1769 KJV with
     Strong's numbers (CrossWire's KJV, in USFM). The words of Christ (\\wj) become <red>, the
@@ -143,6 +149,23 @@ passing its modules on):
     Rom 8:28, "to them that<num>G25</num>"), and Young's has no tagged source.
 The concordance and the dictionaries' occurrence counts are counted from the KJV's Strong's numbers.
 
+The other tools' Bibles built in (their docstrings say how each is made), each run inside
+modules.shipping(), so it reads only the built-in modules (the KJV's verses, the RV, WLC+), never the
+user's library or e-Sword X's. Not built in: what reads an e-Sword module (lxx/plus.py's Greek OT+,
+beza's TR+ and Beza 1598+ with it; rheims, from a file on Bible Support's e-Sword downloads); what has
+a non-commercial source (sefaria's Talmud and Targum translations, targum's Jastrow, syriac's SEDRA);
+latin, whose Latin+ is from e-Sword's latin.bbli and whose tagger's PROIEL model is CC BY-NC-SA.
+  peshitta, murdock, etheridge, tyndale, geneva1599, drc  CrossWire's modules of those names, each
+            "DistributionLicense=Public Domain" (tools/crosswire); the Douay-Rheims also reads the
+            Clementine Vulgate Project's text.
+  clementine  The Clementine Vulgate Project's text (public domain; CrossWire's VulgClementine, the
+            same text, is "Public Domain") (tools/vulgate).
+  lxx       eBible.org's grcbrent, Brenton's Greek Septuagint (public domain), with SIL's versification
+            tables (MIT) (tools/lxx).
+  ginsburg, ginsburg+  github.com/ahembd/Ginsburg_Hebrew_Bible (Apache-2.0), a few verses from its
+            sister repository (GPL-3.0), so both are shared under the GPL, version 3, as the app is;
+            Ginsburg+'s English, Strong's numbers and grammar are WLC+'s (CC BY 4.0) (tools/ginsburg).
+
 The GitHub files are taken at a fixed commit and checked against their sha256, so a rebuild makes
 the same modules; eBible.org's, CrossWire's and the Berean Bible's files have no fixed version to
 take, so they aren't (a rebuild from the same files makes the same modules; if the BSB's tables and
@@ -163,7 +186,7 @@ class html:
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from books import BOOKS  # noqa: E402
-from modules import BUNDLED, CACHES, chapter_lengths, fetch as fetch_to, greek_key, module  # noqa: E402
+from modules import BUNDLED, CACHES, chapter_lengths, fetch as fetch_to, greek_key, module, shipping  # noqa: E402
 
 CACHE = CACHES / "core"
 KJV_URL = "https://ebible.org/Scriptures/eng-kjv2006_usfm.zip"
@@ -2418,7 +2441,8 @@ def write_byz_plus():
 def write_brenton():
     """Brenton's English Septuagint, eBible's eng-Brenton, numbered as the KJV with tools/lxx's tables and rules."""
     import lxx.build as lxx
-    rows, _, joined, _ = lxx.build("https://ebible.org/Scriptures/eng-Brenton_usfm.zip")
+    with shipping():  # its tables check against the KJV: the built-in one, never the user's or e-Sword's
+        rows, _, joined, _ = lxx.build("https://ebible.org/Scriptures/eng-Brenton_usfm.zip")
     # e-Sword's spellings and plain quotes, as the other Bibles ("Mardochaeus", so a search finds it in each)
     plain = {(b, c, v): html.escape(t).replace("’", "'").replace("‘", "'").replace("“", '"').replace("”", '"')
              .replace("æ", "ae").replace("Æ", "Ae").replace("œ", "oe") for b, c, v, t in rows}
@@ -2546,12 +2570,36 @@ def write_maps():
 
 
 MORE |= {"maps": ("maps.refi", write_maps)}
+
+
+# ---- the other tools' public-domain and openly licensed Bibles -------------------------------------
+# Each built by its own tool into the bundle, inside shipping(), so it reads only the built-in modules
+# (the KJV's verses, the RV, WLC+, Ginsburg), never the user's library or e-Sword X's.
+
+def write_crosswire(name):
+    import crosswire.build as cw
+    with shipping():
+        cw.build(name, into=BUNDLED)
+
+
+def write_tool(path):
+    """Runs tools/<path>'s main into the bundle: "vulgate.build", "lxx.build", "ginsburg.build", "ginsburg.plus"."""
+    import importlib
+    with shipping():
+        importlib.import_module(path).main(into=BUNDLED)
+
+
+MORE |= {"peshitta": ("peshitta.bbli", lambda: write_crosswire("Peshitta")), "murdock": ("murdock.bbli", lambda: write_crosswire("Murdock")),
+         "etheridge": ("etheridge.bbli", lambda: write_crosswire("Etheridge")), "tyndale": ("tyndale.bbli", lambda: write_crosswire("Tyndale")),
+         "geneva1599": ("geneva1599.bbli", lambda: write_crosswire("Geneva1599")), "drc": ("drc.bbli", lambda: write_crosswire("DRC")),
+         "clementine": ("clementine.bbli", lambda: write_tool("vulgate.build")), "lxx": ("lxx_brenton.bbli", lambda: write_tool("lxx.build"))}
 MORE |= {"wesley": ("wesley.cmti", write_wesley), "torrey": ("torrey.dcti", write_torrey),
          "hitchcock": ("hitchcock.dcti", write_hitchcock), "abbott": ("abbott.lexi", write_abbott),
          "sme": ("sme.devi", write_spurgeon), "daily": ("daily.devi", write_daily_light),
          "byz": ("byz.bbli", write_byz), "byz+": ("byz+.bbli", write_byz_plus), "brenton": ("brenton.bbli", write_brenton),
          "weymouth": ("weymouth.bbli", write_weymouth), "wlc+": ("wlc+.bbli", write_wlc_plus),
          "openbible": ("openbible_xref.cmti", write_openbible_xref), "places": ("places.dcti", write_places)}
+MORE |= {"ginsburg": ("ginsburg.bbli", lambda: write_tool("ginsburg.build")), "ginsburg+": ("ginsburg+.bbli", lambda: write_tool("ginsburg.plus"))}
 
 
 def main():

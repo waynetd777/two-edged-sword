@@ -267,6 +267,7 @@ then press **Rescan**.
 | `tools/rheims/build.py` | The Rheims New Testament (1582) | crosswire | Bible Support file 11077, in ~/Downloads |
 
 Run each with `python3`. Downloads are cached in `~/Library/Caches/Two-edged Sword/`.
+`tools/core` builds the ones from `crosswire`, `vulgate`, `lxx/build.py`, `ginsburg/build.py` and `ginsburg/plus.py` into the app as well (see below).
 Sources on GitHub, Bitbucket and SWORD's svn are pinned to a commit or revision, so a rebuild gives the same text; move the pin on purpose.
 
 All are public domain or openly licensed, except some Sefaria translations, SEDRA's glosses and
@@ -282,7 +283,7 @@ Scripts in `tools/` share `tools/modules.py`:
 
 - `LIBRARY`: the app's modules folder, where every script writes.
 - `find(name)`: an input module from the app's folder, e-Sword X's library or the built-in
-  modules, in the order the app reads them.
+  modules, in the order the app reads them. Inside `with shipping():`, the built-in modules only.
 - `module(file, title, abbrev, info)`: a writer for any of the six formats. It yields the new
   module's connection and replaces the old file only when the block finishes.
 - `fetch(url, path, sha256=…)`: a cached download, retried, checked against its hash when one is given, written whole or not at all.
@@ -296,14 +297,21 @@ docstring lists them and their licences), under the ids the app looks for first:
 `strong`, `kjc` and `tsk`. The others mostly take e-Sword's ids (`asv`, `henry`, `wesley`, …); where
 e-Sword X has a module the app also has, the app's copy is read unless the user chooses e-Sword's on
 the Library screen (Settings › `eswordCopies`). `--only jfb asv` builds just those; `--if-missing`
-builds only what isn't there. It also builds WLC+ (`tools/wlc`) into the bundle, and the map book,
+builds only what isn't there. It also builds other tools' public-domain and openly licensed Bibles into the
+bundle: the Peshitta, Murdock, Etheridge, Tyndale, Geneva 1599 and Douay-Rheims (`tools/crosswire`), the
+Clementine Vulgate (`tools/vulgate`), the Greek Brenton (`tools/lxx/build.py`), Ginsburg and Ginsburg+
+(`tools/ginsburg`, shared under the GPL as the app is, since a few verses come from a GPL-3.0 source) and
+WLC+ (`tools/wlc`). Each runs inside `shipping()`, so it reads only the built-in modules. And the map book,
 `maps.refi`, with `tools/maps/build.py`: maps drawn from OpenBible.info's places, NASA and USGS terrain
 (Mapzen's Terrain Tiles) and Natural Earth's coasts, at 3,600 pixels wide. Its first run downloads
 some thousands of terrain tiles (cached); `--only jesus --pictures DIR` draws one map to look at.
 
 Nothing from e-Sword X goes into a module that could be shipped: its licence forbids passing its
 modules on. Two scripts read e-Sword modules, so what they build is for your own library only:
-`lxx/plus.py` (Greek OT+) and `beza/build.py` (TR+, if it's there).
+`lxx/plus.py` (Greek OT+) and `beza/build.py` (TR+, if it's there), and `beza/plus.py` with it.
+These aren't built in either: `rheims` (its source is a file from Bible Support's e-Sword downloads),
+`latin` (Latin+ is from e-Sword's `latin.bbli`; the tagger's PROIEL model is CC BY-NC-SA), and
+`sefaria`, `targum` and `syriac` (non-commercial sources).
 
 `tools/stepbible.py` reads STEPBible's TAGNT: every Greek NT edition's words with Strong's numbers
 and grammar, numbered as the KJV. It gives ἐγώ, σύ and εἰμί their forms' numbers (μου G3450), as

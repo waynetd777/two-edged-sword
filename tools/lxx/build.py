@@ -6,7 +6,8 @@ Septuagint of 1587 that the KJV's translators used.
 
     python3 tools/lxx/build.py
 
-Writes to the app's modules folder, where the app finds it after Library → Rescan.
+Writes to the app's modules folder, where the app finds it after Library → Rescan; tools/core builds it
+into the app (src-tauri/modules), reading only the built-in KJV and RV.
 
 Source: eBible.org's grcbrent (https://ebible.org/Scriptures/grcbrent_usfm.zip), "The Greek
 Septuagint with Apocrypha, compiled by Sir Lancelot C. L. Brenton", public domain, in USFM. Brenton
@@ -330,7 +331,8 @@ def kjv_verses():
     return frozenset((b, c, v) for (b, c), n in kjv_lengths().items() for v in range(1, n + 1))
 
 
-def main():
+def main(into=None):
+    """Writes lxx_brenton.bbli to the app's modules folder, or to `into`."""
     if not find("kjv.bbli").exists():
         sys.exit(f"no kjv.bbli in {LIBRARY}, e-Sword X's library or the app")
     rows, about, joined, notes = build()
@@ -365,7 +367,7 @@ def main():
             "Esther 10:4–16:24, as in the Vulgate and the Revised Version; Susanna and Bel are Daniel 13–14, the Letter of "
             "Jeremiah Baruch 6. Built by Two-edged Sword's tools/lxx.</p>"
             + (f"<p>eBible.org's text of {html.escape(dated.group(1).strip())}.</p>" if dated else ""))
-    with module("lxx_brenton.bbli", "Septuagint (Greek, Brenton 1844)", "LXX-Brenton", info, nt=False, apocrypha=True) as db:
+    with module("lxx_brenton.bbli", "Septuagint (Greek, Brenton 1844)", "LXX-Brenton", info, nt=False, apocrypha=True, into=into) as db:
         db.executemany("INSERT INTO Bible VALUES (?,?,?,?)", rows)
     print(f"lxx_brenton.bbli: {len(rows)} verses")
 

@@ -9,7 +9,8 @@ Writes peshitta.bbli ("Syriac Peshitta", right to left), murdock.bbli ("Murdock'
 (English)"), etheridge.bbli ("Etheridge's Peshitta (English)"), tyndale.bbli ("Tyndale Bible
 (1525/1530)"), geneva1599.bbli ("Geneva Bible (1599)") and drc.bbli ("Douay-Rheims (Challoner)")
 to the app's modules folder, where the app finds them after Library → Rescan. With
-module names, builds only those.
+module names, builds only those. tools/core builds all six into the app (src-tauri/modules), reading
+only the built-in modules (all six are public domain).
 
 Sources: CrossWire's raw module zips, https://www.crosswire.org/ftpmirror/pub/sword/packages/rawzip/
 <Name>.zip, each a mods.d/<name>.conf and a zText module; and the SWORD library's versification
@@ -326,7 +327,8 @@ DRC_RULES = {
 }
 
 
-def build(name):
+def build(name, into=None):
+    """Writes the module `name` (a key of MODULES) to the app's modules folder, or to `into`."""
     m = MODULES[name]
     kjv = chapter_lengths("kjv.bbli")
     c, books, prologue = read(name)
@@ -376,7 +378,7 @@ def build(name):
             + (f"; text from {html.escape(c['TextSource'])}" if c.get("TextSource") else "")
             + f". Verses are numbered as in the KJV. Built by Two-edged Sword's tools/crosswire.</p>"
             f"<p>{about}</p><p>{html.escape(c.get('DistributionLicense', 'Public domain'))}.</p>")
-    with module(f"{m['file']}.bbli", m["title"], m["abbrev"], info, ot=ot, nt=nt, apocrypha=apoc, rtl=int(m.get("rtl", False))) as db:
+    with module(f"{m['file']}.bbli", m["title"], m["abbrev"], info, ot=ot, nt=nt, apocrypha=apoc, rtl=int(m.get("rtl", False)), into=into) as db:
         db.executemany("INSERT INTO Bible VALUES (?,?,?,?)", sorted(verses))
     print(f"{m['file']}.bbli: {len(verses)} verses")
 

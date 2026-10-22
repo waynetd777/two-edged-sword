@@ -9,7 +9,10 @@ small text helpers the builders share.
 
 LIBRARY is the app's own modules folder (TES_LIBRARY, or the older ESWORD_LIBRARY, overrides it).
 find(name) looks there, then in e-Sword X's library, then among the modules built into the app,
-so a script can read an input from wherever the app would. Output always goes to LIBRARY.
+so a script can read an input from wherever the app would. Output goes to LIBRARY unless a builder is
+given another folder (tools/core gives BUNDLED). Inside `with shipping():` find() and chapter_lengths()
+read only the built-in modules, so nothing from the user's library or e-Sword X's goes into a module
+the app ships.
 fetch(url, path) is a cached download: written whole or not at all, retried, and checked against
 a sha256 when one is given. CACHES / "<tool>" is where each tool keeps its downloads.
 """
@@ -29,12 +32,28 @@ BUNDLED = Path(__file__).resolve().parent.parent / "src-tauri/modules"
 LIBRARY.mkdir(parents=True, exist_ok=True)
 
 
+SEARCH = (LIBRARY, ESWORD, BUNDLED)
+
+
 def find(name: str) -> Path:
-    """The first of LIBRARY, e-Sword's library and the bundled modules to have `name`; else LIBRARY / name."""
-    for d in (LIBRARY, ESWORD, BUNDLED):
+    """The first of LIBRARY, e-Sword's library and the bundled modules to have `name`; else LIBRARY / name.
+    Inside shipping(), the bundled modules only (else BUNDLED / name)."""
+    for d in SEARCH:
         if (d / name).is_file():
             return d / name
-    return LIBRARY / name
+    return SEARCH[0] / name
+
+
+@contextmanager
+def shipping():
+    """While a module the app ships is built: find() looks only among the built-in modules, never in the
+    user's library or e-Sword X's (whose licence forbids passing its modules on, even their verse counts)."""
+    global SEARCH
+    old, SEARCH = SEARCH, (BUNDLED,)
+    try:
+        yield
+    finally:
+        SEARCH = old
 
 
 SCHEMA = {

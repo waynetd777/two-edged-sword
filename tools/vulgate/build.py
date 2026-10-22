@@ -6,8 +6,8 @@ Clementine Vulgate Project's text.
     python3 tools/vulgate/build.py
 
 Writes clementine.bbli ("Latin Vulgate (Clementine)", Vulg-C) to the app's modules folder, where the
-app finds it after Library → Rescan. Unlike latin.bbli (the modern critical
-Stuttgart/Weber text) the Clementine has the Comma Johanneum (1 John 5:7), Acts 8:37, and the
+app finds it after Library → Rescan; tools/core builds it into the app (src-tauri/modules). Unlike
+latin.bbli (the modern critical Stuttgart/Weber text) the Clementine has the Comma Johanneum (1 John 5:7), Acts 8:37, and the
 Vulgate's spelling of the Sixto-Clementine edition (cælum, ejus, Jesus).
 
 Source: the Clementine Vulgate Project's source files (one .lat file per book, "chapter:verse
@@ -197,7 +197,8 @@ def move(rows, rules, kjv, b):
     return [(c, v, t) for (c, v), t in sorted(out.items())]
 
 
-def main():
+def main(into=None):
+    """Writes clementine.bbli to the app's modules folder, or to `into`."""
     LIBRARY.mkdir(parents=True, exist_ok=True)
     kjv = chapter_lengths("kjv.bbli")
     src = source()
@@ -233,7 +234,7 @@ def main():
             "entered 2002–2005 from a later printing of the Clementine and checked against older ones. Verses are numbered as in the "
             "KJV: the Psalms by the Hebrew numbering, their titles part of verse 1. Built by Two-edged Sword's tools/vulgate.</p>"
             "<p>Public domain.</p>")
-    with module("clementine.bbli", "Latin Vulgate (Clementine)", "Vulg-C", info, apocrypha=True) as c:
+    with module("clementine.bbli", "Latin Vulgate (Clementine)", "Vulg-C", info, apocrypha=True, into=into) as c:
         c.executemany("INSERT INTO Bible VALUES (?,?,?,?)", verses)
     print(f"clementine.bbli: {len(verses)} verses")
 
