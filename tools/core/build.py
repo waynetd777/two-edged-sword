@@ -2032,6 +2032,7 @@ def write_bible(bid):
 # did; it reads as plain Selah.
 VERSE_MENDS = {
     "webster": {(42, 8, 42): [("(But as", "But as")]},
+    "rv": {(11, 11, 39): [("not for over", "not for ever")], (27, 12, 7): [("liveth fear ever", "liveth for ever")]},  # typing errors
     "ylt": {(5, 17, 10): [("doth choose;", "doth choose);")]},
 }
 
