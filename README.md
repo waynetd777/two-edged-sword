@@ -1,9 +1,9 @@
 # Two-edged Sword
 
 A Bible study app for macOS and Windows, for reading Bibles, commentaries, dictionaries and books
-beside your own notes. It comes with the KJV and six more public-domain Bibles (among them the
-Berean Standard Bible, and Strong's editions of it and of Webster's), Strong's dictionaries, the Treasury of Scripture Knowledge, four commentaries (Matthew Henry, JFB, Clarke,
-Barnes) and four dictionaries (Easton's, Smith's, Nave's, the ISBE), and reads more modules in
+beside your own notes. It comes with 48 modules: the KJV and some twenty more Bibles (among them the
+Berean Standard Bible, Tyndale, the Geneva, the Douay-Rheims, the Vulgate, the Septuagint and the Peshitta, and Strong's and word-by-word editions), Strong's dictionaries, BDB and Abbott-Smith, the Treasury of Scripture Knowledge, five commentaries (Matthew Henry, JFB, Clarke,
+Barnes, Wesley), dictionaries from Easton's to the ISBE, and a book of fifteen Bible maps; and it reads more modules in
 e-Sword X's formats: your own, and on a Mac e-Sword X's library if you have it.
 It only reads them, and keeps your journal, highlights and plans separately.
 
@@ -113,7 +113,7 @@ app reads e-Sword X's formats and library, and owes that to his work
 Two-edged Sword is free software under the [GNU General Public License](LICENSE), version 3 or
 later: you may use, share and change it, and anything you pass on must stay free under the same
 licence. The Bible texts and books it reads keep their own terms: the built-in modules are public
-domain ([Library](docs/library.md#built-in-modules)), and so on for the rest
+domain or openly licensed ([Library](docs/library.md#built-in-modules)), and so on for the rest
 ([Licence and credits](docs/features.md#licence-and-credits)).
 
 ## Documentation

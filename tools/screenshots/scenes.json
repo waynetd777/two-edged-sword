@@ -306,6 +306,19 @@
     "screen": "history"
   },
   {
+    "name": "maps",
+    "loc": {
+      "book": 16,
+      "chapter": 3
+    },
+    "settings": {
+      "bible": "kjv",
+      "studyPane": true,
+      "studyTab": "maps"
+    },
+    "click": "button.chip + button.chip"
+  },
+  {
     "name": "library",
     "screen": "library",
     "type": [

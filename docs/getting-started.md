@@ -14,7 +14,7 @@ Two minutes to find your way around.
 
 Two-edged Sword is for reading the Bible with everything written about it beside the text: commentaries, dictionaries, the Greek and Hebrew, other translations, and your own notes.
 
-It comes with the KJV and six more Bibles, Strong's Hebrew and Greek dictionaries, the Treasury of Scripture Knowledge, four commentaries and four dictionaries, so it works with nothing else installed.
+It comes with the KJV and some twenty more Bibles, Strong's Hebrew and Greek dictionaries and two lexicons, the Treasury of Scripture Knowledge, five commentaries, a shelf of dictionaries and fifteen Bible maps, so it works with nothing else installed.
 
 <!-- mac -->
 If you have e-Sword X, the app reads its library too, so everything you've downloaded there is here as well. Nothing in it is copied or changed.
@@ -138,7 +138,7 @@ The **Dictionary** tab looks a word up in every dictionary you have at once.
 ### Your notes and maps
 
 - **Notes**: your journal entries on the verse.
-- **Maps**: maps that suit the book you're in, from your map books. Click a map to see it enlarged.
+- **Maps**: maps that suit the book you're in, from the built-in Bible Maps and your own map books. Click a map to see it enlarged.
 
 ### Ask about it
 
@@ -297,7 +297,7 @@ Click a picture or chart to see it enlarged:
 
 ### Maps
 
-Map books open from **Books** like any other. The study pane's **Maps** tab picks maps that suit the book you're reading; click one to zoom into it full screen, as with pictures.
+Bible Maps comes with the app, and other map books open from **Books** like any other. The study pane's **Maps** tab picks maps that suit the book you're reading; click one to zoom into it full screen, as with pictures.
 
 ## Keep a journal
 

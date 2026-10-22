@@ -19,8 +19,11 @@ screensaver and lock don't come on.
   Treasury of Scripture Knowledge.
 - **Dictionary**: type a word to look it up in all your dictionaries.
 - **Notes**: your journal entries on the verse.
-- **Maps** for the book. Click a map to see it enlarged, to zoom into and move around.
+- **Maps** for the book, from the built-in Bible Maps (fifteen maps, from the patriarchs to the seven churches, with two plans of
+  Jerusalem) and any map books of your own. Click a map to see it enlarged, to zoom into and move around.
 - **Ask**: questions about the verse or chapter ([Ask](ask.md)).
+
+<a href="images/index.md#reading"><picture><source media="(prefers-color-scheme: dark)" srcset="images/maps-dark.png"><img alt="Nehemiah 3 beside the Maps tab, open at Jerusalem in the Old Testament" src="images/maps-light.png"></picture></a>
 
 ⌘\ shows or hides the pane.
 

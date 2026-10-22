@@ -1,9 +1,9 @@
 # Features
 
 A Bible study app for macOS and Windows, for reading Bibles, commentaries, dictionaries and books
-beside your own notes. It comes with the KJV and six more public-domain Bibles (among them the
-Berean Standard Bible, and Strong's editions of it and of Webster's), Strong's dictionaries, the Treasury of Scripture Knowledge, four commentaries (Matthew Henry, JFB, Clarke,
-Barnes) and four dictionaries (Easton's, Smith's, Nave's, the ISBE), and reads more modules in
+beside your own notes. It comes with 48 modules: the KJV and some twenty more Bibles (among them the
+Berean Standard Bible, Tyndale, the Geneva, the Douay-Rheims, the Vulgate, the Septuagint and the Peshitta, and Strong's and word-by-word editions), Strong's dictionaries, BDB and Abbott-Smith, the Treasury of Scripture Knowledge, five commentaries (Matthew Henry, JFB, Clarke,
+Barnes, Wesley), dictionaries from Easton's to the ISBE, and a book of fifteen Bible maps; and it reads more modules in
 e-Sword X's formats: your own, and on a Mac e-Sword X's library if you have it.
 It only reads them, and keeps your journal, highlights and plans separately.
 
@@ -122,7 +122,7 @@ The Bibles and books keep their own terms:
 
 | What | Terms |
 |---|---|
-| The built-in modules | Public domain: eBible.org and the CrossWire Bible Society (the KJV, the TSK), eBible.org (the ASV, WEB, YLT, Darby and Webster), berean.bible (the BSB), Open Scriptures (Strong's), CrossWire, the Christian Classics Ethereal Library and Wikisource (the commentaries and dictionaries) |
+| The built-in modules | Public domain, most of them: eBible.org and the CrossWire Bible Society (the KJV, the TSK), eBible.org (the ASV, WEB, YLT, Darby, Webster and Brenton), berean.bible (the BSB), CrossWire (Tyndale, Geneva, Douay-Rheims, the Peshitta), the Clementine Vulgate Project, Open Scriptures (Strong's), CrossWire, the Christian Classics Ethereal Library and Wikisource (the commentaries and dictionaries). Openly licensed: OpenBible.info's places, cross-references and the places on the maps (CC BY), STEPBible's word-by-word English (CC BY), Ginsburg's Hebrew Bible (Apache 2.0 and GPL 3) |
 | Modules built from the source code's scripts | As each script says: most public domain or CC BY (STEPBible, Open Scriptures), a few for personal study |
 | e-Sword X's modules | e-Sword's licence: read where e-Sword keeps them, never copied |
 
