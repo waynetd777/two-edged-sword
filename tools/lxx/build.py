@@ -24,13 +24,18 @@ Joel 2–3, the Psalms' titles, and the rest). Rules here cover what the tables 
 with Elijah before "Remember the law of Moses", the KJV's 4:4; 2 Esdras 17 (Nehemiah 7) has no verse 68,
 as the KJV's numbering hasn't, so from 69 its verses keep their numbers; eBible's English Brenton has
 Nehemiah as a book of its own too, numbered as the KJV, which is read instead of 2 Esdras 11–23; its
-Proverbs has the Hebrew 30:1–14 as 24:22a–t (spread over the KJV's fourteen verses in order),
-30:15–33 and 31:1–9 as 24:35–62, and no chapter 30; and in a chapter eBible already numbers as the
-KJV does (Deuteronomy 28–29), the verses keep their numbers.
+Proverbs has the Hebrew 30:1–14 as 24:22f–t (after five verses of its own, 24:22a–e, which stay with
+24:22), 30:15–33 and 31:1–9 as 24:35–62, and no chapter 30; and in a chapter eBible already numbers as
+the KJV does (Deuteronomy 28–29), the verses keep their numbers.
 
-Where the Septuagint orders a passage so otherwise that no table moves it (Exodus 35–40, Leviticus 8,
-Sirach 30–36, the additions to Esther), each verse is placed by its words: eBible's English Brenton
-matched with the KJV, or with the RV's Apocrypha, which numbers the additions Esther 10:4–16:24 as the
+Where the Septuagint orders a passage otherwise and no table moves it, PLACES puts each verse at the
+KJV verse it translates, worked out verse by verse against the KJV: Exodus 36–39 (the making of the
+tabernacle in another order), Numbers 10:34–36, 21:20–22, 26:15–47 (the tribes in another order) and
+27:4–8, Joshua 24:29–31, 1 Kings 7 (Solomon's house after the temple's furnishings), Proverbs 31:26–27,
+Ezekiel 7:3–9.
+
+In Leviticus 8, Sirach 30–36 and the additions to Esther each verse is placed by its words: eBible's
+English Brenton matched with the KJV, or with the RV's Apocrypha, which numbers the additions Esther 10:4–16:24 as the
 Vulgate does (aligned; the Greek numbers its verses as the English). Lettered verses that fill a gap in
 the numbering take its numbers (Tobit 4:7a–l are 4:8–18).
 
@@ -105,12 +110,69 @@ def usfm(url=USFM):
 
 
 ENG = "https://ebible.org/Scriptures/eng-Brenton_usfm.zip"
-# Where the Septuagint orders or numbers a passage so differently that no table moves it, its verses are placed
-# by their words: Brenton's English matched with the KJV's (Exodus 35-40, the making of the tabernacle in another
-# order; Leviticus 8) or with the RV's Apocrypha (Sirach 30-36, where the Greek has two sections the other way
-# round; Esther's additions, at Esther 10:4-16:24, as the Vulgate and the RV number them). The Greek numbers its
-# verses as the English does, so the same places serve it.
-ALIGN = [("EXO", range(35, 41), "kjv.bbli", 2, range(35, 41)), ("LEV", range(8, 9), "kjv.bbli", 3, range(8, 9)),
+# Where the Septuagint orders a passage otherwise and no table moves it, the KJV verse each of its verses translates,
+# worked out verse by verse: (book, chapter, its verses, the KJV's chapter, verse). "9-38" go to consecutive verses
+# from there, "18,19,20" all to the one verse (joined, in order), as do the verses of several entries that name one.
+# A verse the Septuagint lacks is left empty (Exodus 36:10-33, the curtains' loops and the boards; 1 Kings 7:31). The Greek numbers its
+# verses as the English, so the same places serve both.
+PLACES = [
+    # Exodus 36-39: the priests' garments first (36:8-38, the KJV's 39:1-31), then the tabernacle and its court
+    # (37), the ark, table, candlestick and altars (38), the metals and the finished work (39).
+    ("EXO", 36, "8", 39, 1), ("EXO", 36, "9-38", 39, 2),
+    ("EXO", 37, "1-2", 36, 8), ("EXO", 37, "3-6", 36, 35), ("EXO", 37, "7-21", 38, 9),
+    ("EXO", 38, "1-3", 37, 1), ("EXO", 38, "4", 37, 5), ("EXO", 38, "5-9", 37, 6), ("EXO", 38, "10", 37, 13),
+    ("EXO", 38, "11-12", 37, 15), ("EXO", 38, "13-16", 37, 17), ("EXO", 38, "17", 37, 23),
+    ("EXO", 38, "18,19,20", 36, 34),  # the posts gilded, and rings and chapiters the Hebrew hasn't
+    ("EXO", 38, "21", 38, 20), ("EXO", 38, "22", 38, 1), ("EXO", 38, "23", 38, 3), ("EXO", 38, "24", 38, 4),
+    ("EXO", 38, "25", 37, 29), ("EXO", 38, "26,27", 38, 8),  # the laver, and what it was for
+    ("EXO", 39, "1-4", 38, 24), ("EXO", 39, "5", 38, 27), ("EXO", 39, "6-9", 38, 28), ("EXO", 39, "10", 38, 30),
+    ("EXO", 39, "11", 39, 32), ("EXO", 39, "12,13", 39, 1),  # the gold and the blue that were left
+    ("EXO", 39, "14", 39, 33), ("EXO", 39, "15", 39, 35), ("EXO", 39, "16", 39, 38), ("EXO", 39, "17", 39, 37),
+    ("EXO", 39, "18", 39, 36), ("EXO", 39, "19", 39, 41), ("EXO", 39, "20", 39, 40), ("EXO", 39, "21", 39, 34),
+    ("EXO", 39, "22-23", 39, 42),
+    # Numbers: the ark's setting out before the cloud; the stations to Pisgah in one verse; the tribes counted in
+    # another order (Judah, Issachar and Zebulun before Gad, Asher before Manasseh); the daughters' plea in one verse.
+    ("NUM", 10, "34-35", 10, 35), ("NUM", 10, "36", 10, 34),
+    ("NUM", 21, "20-21", 21, 21), ("NUM", 21, "22", 21, 22),
+    ("NUM", 26, "15-18", 26, 19), ("NUM", 26, "19-21", 26, 23), ("NUM", 26, "22-23", 26, 26), ("NUM", 26, "24-27", 26, 15),
+    ("NUM", 26, "28-31", 26, 44), ("NUM", 26, "32-38", 26, 28), ("NUM", 26, "39-41", 26, 35), ("NUM", 26, "42-45", 26, 38),
+    ("NUM", 26, "46-47", 26, 42),
+    ("NUM", 27, "4-7", 27, 5), ("NUM", 27, "8", 27, 8),
+    # Joshua's people serving the Lord before his death and burial, and the knives buried with him.
+    ("JOS", 24, "29", 24, 31), ("JOS", 24, "30-31", 24, 29), ("JOS", 24, "31a", 24, 30),
+    # 3 Kingdoms 7: Hiram and the temple's furnishings (the KJV's 7:13-51) before Solomon's house (7:1-12).
+    ("1KI", 7, "1-2", 7, 13), ("1KI", 7, "3-6", 7, 15), ("1KI", 7, "7", 7, 21), ("1KI", 7, "8", 7, 19),
+    ("1KI", 7, "9", 7, 20), ("1KI", 7, "10-11", 7, 23), ("1KI", 7, "12", 7, 26), ("1KI", 7, "13", 7, 25), ("1KI", 7, "14-17", 7, 27),
+    ("1KI", 7, "18-31", 7, 32), ("1KI", 7, "32", 7, 47), ("1KI", 7, "33", 7, 46), ("1KI", 7, "34-37", 7, 48),
+    ("1KI", 7, "38-49", 7, 1), ("1KI", 7, "50", 7, 1),  # "and Solomon finished all his house", the end of the KJV's 7:1
+    # The good wife's household (the KJV's 31:27) before her mouth opened in wisdom (31:26).
+    ("PRO", 31, "26", 31, 27), ("PRO", 31, "27", 31, 26),
+    # Ezekiel 7: "the end is come" (the KJV's 7:6-9) before "now is the end come upon thee" (7:3-5).
+    ("EZK", 7, "3-6", 7, 6), ("EZK", 7, "7-9", 7, 3),
+]
+
+
+def places():
+    """PLACES as {(book code, chapter, verse label): (e-Sword book, chapter, verse)}."""
+    out = {}
+    for code, c, labels, kc, kv in PLACES:
+        if "-" in labels:
+            a, b = map(int, labels.split("-"))
+            pairs = [(str(n), kv + n - a) for n in range(a, b + 1)]
+        else:
+            pairs = [(x, kv) for x in labels.split(",")]
+        for label, v in pairs:
+            assert (code, c, label) not in out, f"PLACES: {code} {c}:{label} twice"
+            out[(code, c, label)] = (CANON.index(code) + 1, kc, v)
+    return out
+
+
+# Where the Septuagint orders or numbers a passage so differently that no table moves it and the passage is too long
+# to place by hand, its verses are placed by their words: Brenton's English matched with the KJV's (Leviticus 8) or
+# with the RV's Apocrypha (Sirach 30-36, where the Greek has two sections the other way round; Esther's additions,
+# at Esther 10:4-16:24, as the Vulgate and the RV number them). The Greek numbers its verses as the English does, so
+# the same places serve it.
+ALIGN = [("LEV", range(8, 9), "kjv.bbli", 3, range(8, 9)),
          ("SIR", range(30, 37), "rv.bbli", 70, range(30, 37)), ("ESG", range(1, 11), "rv.bbli", 17, range(1, 17))]
 STOP = set("the and of to in that he his him they them a for i is be it unto with was shall all not which their thou "
            "thee thy ye you your my me we our upon by from as but this were are so have had an at on or who".split())
@@ -218,8 +280,8 @@ def proverbs(c, label):
     base, seg = re.fullmatch(r"(\d+)([a-z]*)", label).groups()
     base = int(base)
     if c == 24 and base == 22 and seg:
-        k = GREEK_LETTERS.index(seg)  # 22a–22t: 19 pieces of the Hebrew 30:1–14
-        return ("PRO", 30, 1 + k * 14 // 19)
+        k = GREEK_LETTERS.index(seg)  # 22a–e are the Septuagint's own, after 24:22; 22f–t the Hebrew 30:1–14
+        return ("PRO", 24, 22) if k < 5 else ("PRO", 30, k - 4)
     if c == 24 and 35 <= base <= 53:
         return ("PRO", 30, base - 20)
     if c == 24 and 54 <= base <= 62:
@@ -232,7 +294,15 @@ def build(url=USFM):
     if "NEH" in books:  # Nehemiah twice (the English): its own book, not 2 Esdras 11-23
         books["EZR"] = [x for x in books["EZR"] if x[0] <= 10]
     books = {code: fill_gaps(vs) for code, vs in books.items()}
-    placed_by_words = aligned()
+    # Proverbs 24:22f ends the Septuagint's own verses ("…and repent.]") and begins Agur's words (the KJV's 30:1):
+    # the first part goes with 24:22e
+    pro = books.get("PRO", [])
+    for i, (c, label, text) in enumerate(pro):
+        if (c, label) == (24, "22f") and "] " in text and pro[i - 1][:2] == (24, "22e"):
+            head, rest = text.split("] ", 1)
+            pro[i - 1] = (24, "22e", f"{pro[i - 1][2]} {head}]")
+            pro[i] = (c, label, rest)
+    placed_by_words, by_hand = aligned(), places()
     lxx, to_eng = {}, {}
     for a, b in versification("lxx")[0]:
         lxx.setdefault(a, b)  # the first for a verse wins
@@ -250,6 +320,8 @@ def build(url=USFM):
 
     def target(code, c, label):
         """Where a Greek verse goes: (e-Sword book, chapter, verse, how it was placed)."""
+        if (code, c, label) in by_hand:
+            return *by_hand[(code, c, label)], "rule"
         if (code, c, label) in placed_by_words:
             return *placed_by_words[(code, c, label)], "aligned"
         base = int(re.match(r"\d+", label).group())
@@ -362,9 +434,9 @@ def main(into=None):
             "grcbrent: public domain. Brenton printed the Vatican text as Valpy's edition had it, which is the Sixtine "
             "edition's (Rome, 1587), the Septuagint the KJV's translators had.</p><p>The verses are moved to the KJV's "
             "numbering with SIL's versification tables (lxx.vrs, eng.vrs), and where the Septuagint orders a passage otherwise "
-            "(Exodus 35–40, Sirach 30–36) each verse is at the verse it is; a Psalm's title opens its verse 1, and the "
-            "Septuagint's added verses and Daniel 3's are joined to the verse before them. The additions to Esther are "
-            "Esther 10:4–16:24, as in the Vulgate and the Revised Version; Susanna and Bel are Daniel 13–14, the Letter of "
+            "(Exodus 36–39, Numbers 26, 1 Kings 7, Sirach 30–36 and others) each verse is at the verse it is; a Psalm's "
+            "title opens its verse 1, and the Septuagint's added verses and Daniel 3's are joined to the verse before them. "
+            "The additions to Esther are Esther 10:4–16:24, as in the Vulgate and the Revised Version; Susanna and Bel are Daniel 13–14, the Letter of "
             "Jeremiah Baruch 6. Built by Two-edged Sword's tools/lxx.</p>"
             + (f"<p>eBible.org's text of {html.escape(dated.group(1).strip())}.</p>" if dated else ""))
     with module("lxx_brenton.bbli", "Septuagint (Greek, Brenton 1844)", "LXX-Brenton", info, nt=False, apocrypha=True, into=into) as db:

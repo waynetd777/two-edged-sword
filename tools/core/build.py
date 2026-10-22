@@ -2564,8 +2564,8 @@ def write_brenton():
     info = ("<p>The Septuagint in English, translated by Sir Lancelot C. L. Brenton (1844), with the Apocrypha: the Greek "
             "Old Testament the apostles quoted.</p><p>Public domain. From eBible.org's eng-Brenton, courtesy of eBible.org. "
             "The verses are numbered as the KJV's: a Psalm's title opens its verse 1, the Septuagint's added verses are "
-            "joined to the verse before them, and where the Septuagint orders a passage otherwise (Exodus 35–40) each verse "
-            "is at the KJV verse it translates. The Apocrypha is numbered as in the Revised Version: the additions to Esther "
+            "joined to the verse before them, and where the Septuagint orders a passage otherwise (Exodus 36–39, "
+            "Numbers 26, 1 Kings 7 and others) each verse is at the KJV verse it translates. The Apocrypha is numbered as in the Revised Version: the additions to Esther "
             "are Esther 10:4–16:24, Sirach 30–36 in the Latin order, Susanna and Bel Daniel 13–14, the Letter of Jeremiah "
             "Baruch 6, Psalm 151 its own; Sirach's prologue opens 1:1. Built by Two-edged Sword's tools/core.</p>")
     with module("brenton.bbli", "Brenton's English Septuagint", "Brenton", info, nt=False, apocrypha=True, into=BUNDLED) as db:
