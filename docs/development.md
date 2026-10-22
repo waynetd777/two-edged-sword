@@ -89,7 +89,7 @@ and adds `windows-x86_64` to the release's `latest.json`. The job signs with the
 secret `TAURI_SIGNING_PRIVATE_KEY` (the updater key's contents; `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`
 if it has one). It starts from the compiled crates and built-in modules that
 `.github/workflows/windows-cache.yml` saves when it does the same build on `main` after a push
-that changes the code (a cache saved on a release's tag would be seen by that tag alone). For a release made before the job, run it by hand (Actions › Windows release ›
+that changes the code (a cache saved on a release's tag would be seen by that tag alone). The map book has a cache of its own, keyed on `tools/maps/` alone, so it's redrawn only when its builder changes; the other modules' cache is keyed on the rest of `tools/`. For a release made before the job, run it by hand (Actions › Windows release ›
 Run workflow, with the tag). Windows copies install an update quietly, with a progress window
 (`plugins.updater.windows.installMode` in `tauri.windows.conf.json`). The updater leaves each installer
 in a `Two-edged Sword-<version>-updater-…` folder in Temp; the app removes those when it starts
