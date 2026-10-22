@@ -508,7 +508,7 @@ def tsk_html(s):
     s = s.replace("<lb/>", "<br>")  # a line break in a quoted hymn (Lev 19:5)
     s = re.sub(r" -par(?=[A-Z])", "</p><p>", s)  # an RTF paragraph mark left in the text (Num 7:73)
     # A catchword opens its paragraph, in italics: e-Sword's TSK shows it bold with a colon.
-    s = re.sub(r'<p>\s*<hi type="italic">([^<]*)</hi>', r"<p><b>\1:</b>", s)
+    s = re.sub(r'<p>\s*<hi type="italic">([^<]{1,100})</hi>', r"<p><b>\1:</b>", s)  # not a long quotation (1Sa 14:41's Latin)
     s = re.sub(r'<hi type="italic">([^<]*)</hi>', r"<i>\1</i>", s)
     s = re.sub(r"<p>\s*</p>", "", s)
     s = re.sub(r"\s+", " ", s).strip()
@@ -682,7 +682,14 @@ def henry_html(s, book, chapter):
     s = henry_refs(rtf_escapes(s), book, chapter)
     s = re.sub(r"<note\b.*?</note>", "", s, flags=re.S)  # the editors' footnotes
     s = re.sub(r"(&lt;){3,}[^<]*", "", s)  # "<<< Unabridged", a marker left in the text
-    s = re.sub(r'<title[^>]*>(.*?)</title>', r"<p><b>\1</b></p>", s, flags=re.S)
+    def title(m):
+        """A heading, in bold; but a "heading" holding a whole note (JFB's "Gen 49:5-7. Simeon and Levi were associate
+        in wickedness…") is the note: only its opening reference is bold."""
+        if len(re.sub(r"<[^>]+>", "", m[1]).strip()) <= 150:
+            return f"<p><b>{m[1]}</b></p>"
+        lead = re.match(r"\s*((?:<ref>[^<]*</ref>[,;]?\s*)+\.?)(.*)", m[1], re.S)
+        return f"<p><b>{lead[1].strip()}</b> {lead[2].strip()}</p>" if lead else f"<p>{m[1]}</p>"
+    s = re.sub(r'<title[^>]*>(.*?)</title>', title, s, flags=re.S)
     s = re.sub(r'<div\b[^>]*sID="[^"]*"[^>]*type="x-p"[^>]*/>', "<p>", s)
     s = re.sub(r'<div\b[^>]*eID="[^"]*"[^>]*type="x-p"[^>]*/>', "</p>", s)
     s = re.sub(r"<lg\b[^>]*>", "<p>", s).replace("</lg>", "</p>")
@@ -704,6 +711,19 @@ def henry_html(s, book, chapter):
     s = re.sub(r"([a-z])((?:</[ib]>)?)([.;,])((?:</?[ib]>)?)([A-Za-z])", lambda m: m[0] if m[3] != "," and m[5].islower() else f"{m[1]}{m[2]}{m[3]} {m[4]}{m[5]}", s)
     s = re.sub(r"\b(the|of|and)((?:<[ib]>)?)([A-Z][a-z])", r"\1 \2\3", s)
     s = re.sub(r"<b>(?:&lt;|[^\w<])*</b>", "", s)  # a title that is only a stray "<"
+
+    def run_on(m):
+        """A catchword whose bold the source never closed, running on into the note (JFB's Exo 16:3, Deu 3:3): bold to
+        its "--", or only its verse label ("3-8."), or not at all."""
+        t = m[1]
+        if len(re.sub(r"<[^>]+>", "", t)) <= 150:
+            return m[0]
+        cut = t.find("--")
+        if 0 <= cut < 150:
+            return f"<b>{t[:cut + 2]}</b>{t[cut + 2:]}"
+        label = re.match(r"\d+(?:[-,]\s*\d+)?\.\s*", t)
+        return f"<b>{label[0].strip()}</b> {t[label.end():]}" if label else t
+    s = re.sub(r"<b>((?:(?!</?b>).)*)</b>", run_on, s, flags=re.S)
     # Paragraphs: a stretch of the source can start or end inside one, so they're rebuilt from the breaks.
     paras = (re.sub(r"^(<br>|\s)+|(<br>|\s)+$", "", x) for x in re.split(r"</?p>", s))
     return "".join(f"<p>{x}</p>" for x in paras if re.sub(r"<[^>]+>|\s", "", x))
