@@ -15,7 +15,7 @@ import argparse, json, re, sqlite3, sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from modules import HOME, LIBRARY, find  # noqa: E402
+from modules import BUNDLED, ESWORD, HOME, LIBRARY  # noqa: E402
 DATA = HOME / "Library/Application Support/Two-edged Sword"
 
 
@@ -26,11 +26,13 @@ def store_name(module):
 # A term the base uses more often than the translation does (after its modern equivalents are
 # counted) is a sign that something was dropped or changed.
 TERMS = {
-    "jesus": ["jesus"], "christ": ["christ", "messiah"], "lord": ["lord", "jehovah", "yahweh"], "god": ["god"],
-    "blood": ["blood"], "spirit": ["spirit"], "holy ghost": ["holy spirit"], "son": ["son"],
+    "jesus": ["jesus", "jeshu"], "christ": ["christ", "messiah", "meshiha", "meshicha"], "lord": ["lord", "jehovah", "yahweh", "jah"],
+    "god": ["god", "aloha", "elohim"], "blood": ["blood"], "spirit": ["spirit"],
+    "holy ghost": ["holy ghost", "holy spirit", "spirit of holiness"], "son": ["son"],
     "father": ["father"], "begotten": ["begotten", "one and only"], "hell": ["hell"],
     "fasting": ["fasting", "fast"], "virgin": ["virgin"], "saviour": ["savior", "saviour"],
-    "cross": ["cross"], "amen": ["amen"], "believe": ["believe"], "repent": ["repent"],
+    "cross": ["cross"], "amen": ["amen"], "believe": ["believe"], "repent": ["repent", "do penance"],
+    "repentance": ["repentance", "penance"],
     "grace": ["grace"], "heaven": ["heaven", "heavens"], "damnation": ["damnation", "condemn"],
     "lucifer": ["lucifer"], "godhead": ["godhead"], "worship": ["worship"], "for ever": ["for ever", "forever"],
     "joseph": ["joseph"], "commandments": ["commandments", "commands"], "firstborn": ["firstborn", "first-born", "first born"],
@@ -50,9 +52,11 @@ def clean(t):
 
 
 def load(module):
-    p = find(f"{module}.bbli")
-    if not p.exists():
-        sys.exit(f"no Bible module {module!r} in {LIBRARY}")
+    """A Bible as the app reads it: the user's own copy, else the built-in one, else e-Sword X's (whose copies
+    of the built-in Bibles, such as its Brenton, aren't numbered as the app's are)."""
+    p = next((d / f"{module}.bbli" for d in (LIBRARY, BUNDLED, ESWORD) if (d / f"{module}.bbli").is_file()), None)
+    if not p:
+        sys.exit(f"no Bible module {module!r} in {LIBRARY} or the built-in modules")
     c = sqlite3.connect(f"file:{p}?immutable=1", uri=True)
     return {(b, ch, v): clean(t) for b, ch, v, t in c.execute("select Book, Chapter, Verse, Scripture from Bible")}
 
@@ -71,14 +75,19 @@ def count(text, phrase):
     return len(re.findall(r"\b" + re.escape(phrase) + r"\b", text))
 
 
-def reasons(base, text, shorter=True):
+def reasons(base, text, shorter=True, longer=False, brackets=False):
     if not text:
         return ["verse missing"]
-    b, t = base.lower(), text.lower()
+    if brackets:  # text the translation prints in brackets as doubtful (Darby) counts as left out
+        text = re.sub(r"\[[^\]]*\]", " ", text)
+    # The KJV's GOD in capitals is the Hebrew name, as its LORD is: a translation's Jehovah stands for either.
+    b, t = re.sub(r"\bGOD\b", "LORD", base).lower(), text.lower()
     out = [f"fewer '{k}'" for k, alts in TERMS.items() if count(b, k) > sum(count(t, a) for a in alts)]
     bw, tw = len(WORD.findall(b)), len(WORD.findall(t))
     if shorter and bw >= 12 and tw < bw * 0.7:
         out.append(f"much shorter ({tw} words vs {bw})")
+    if longer and tw >= 12 and tw > bw * 1.4 and tw - bw >= 8:
+        out.append(f"much longer ({tw} words vs {bw})")
     return out
 
 
@@ -90,6 +99,8 @@ def main():
     ap.add_argument("--batch", type=int, default=80)
     ap.add_argument("--refs", type=Path, help="review exactly these verses: a file of 'book chapter verse' lines (e-Sword book numbers), # comments")
     ap.add_argument("--no-shorter", action="store_true", help="don't pick verses only for being much shorter (for the Old Testament, where both follow the Masoretic text and a shorter verse is idiom, not omission)")
+    ap.add_argument("--longer", action="store_true", help="also pick verses much longer than the base's (the Septuagint's additions)")
+    ap.add_argument("--brackets", action="store_true", help="count text in square brackets as left out (Darby brackets doubtful text; not for Bibles that bracket supplied words, like YLT)")
     ap.add_argument("--out", type=Path, help="work folder (default: variances-work/<module> in the app's data folder)")
     ap.add_argument("--discard-reviews", action="store_true", help="replace reviews build.py hasn't merged yet")
     a = ap.parse_args()
@@ -109,13 +120,13 @@ def main():
     for ref in sorted(base):
         if only is not None:
             if ref in only:
-                found.append({"book": ref[0], "chapter": ref[1], "verse": ref[2], "why": reasons(base[ref], mod.get(ref, ""), False) or ["often disputed"], "base": base[ref], "text": mod.get(ref, "")})
+                found.append({"book": ref[0], "chapter": ref[1], "verse": ref[2], "why": reasons(base[ref], mod.get(ref, ""), False, brackets=a.brackets) or ["often disputed"], "base": base[ref], "text": mod.get(ref, "")})
             continue
         if not lo <= ref[0] <= hi:
             continue
         if not mod.get(ref) and ref in joined:
             continue
-        why = reasons(base[ref], mod.get(ref, ""), not a.no_shorter)
+        why = reasons(base[ref], mod.get(ref, ""), not a.no_shorter, a.longer, a.brackets)
         if not why and ref in KNOWN:
             why = ["often disputed"]
         if why:

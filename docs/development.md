@@ -239,7 +239,11 @@ python3 tools/variances/build.py esv --work "$W/esv-nt"   # check them and merge
 `disputed-ot.txt` and `disputed-nt.txt` list often-disputed verses a word count misses (Revelation
 22:19, John 7:53–8:11), for `--refs`; drop any the other batches already hold. `build.py` merges
 verse by verse, so folders and books can be added one at a time. Candidates ignore note markers,
-count "Jehovah" as "LORD", and don't call a verse missing when GNB joins it to the one before.
+count "Jehovah" (and "Jah") as the KJV's LORD or GOD, the Aramaic forms of Murdock and Etheridge (Aloha, Jeshu,
+Meshiha, Spirit of Holiness) as their English, and don't call a verse missing when GNB joins it to the one
+before. They read each Bible as the app does: your own copy, else the built-in one, else e-Sword X's.
+`--longer` also picks verses much longer than the KJV's (the Septuagint's additions), and `--brackets`
+counts bracketed text as left out (Darby brackets doubtful text; YLT's brackets are supplied words).
 `candidates.py` stops if a folder holds reviews `build.py` hasn't merged yet; `--discard-reviews` drops them.
 To ship a list, copy `variances-<module>.json` into `src-tauri/variances/`.
 
