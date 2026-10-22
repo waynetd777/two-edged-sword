@@ -871,6 +871,12 @@ function MapsTab({ bookN }: { bookN: number }) {
   // The map shown over the whole window, to zoom into and move around.
   const [full, setFull] = useState<string | null>(null);
   const [showAll, setShowAll] = useState<DOMRect | null>(null);
+  // A map's place list cites verses: each opens in the reader, and shows the verse on hover.
+  const { onRefHover, preview, hide } = useRefPreview(app.settings.bible);
+  const openRef = (r: Ref) => {
+    hide();
+    app.open({ book: r.book, chapter: r.chapter, verse: r.verse, to: r.to }, "read");
+  };
   useEffect(() => {
     let dead = false;
     Promise.all(
@@ -951,7 +957,7 @@ function MapsTab({ bookN }: { bookN: number }) {
       >
         {art ? (
           <div className="es" style={{ padding: 8 }}>
-            {renderHtml(art.html, { onImage: setFull })}
+            {renderHtml(art.html, { onImage: setFull, onRef: openRef, onRefHover })}
           </div>
         ) : (
           <div className="empty">Choose a map.</div>
@@ -991,6 +997,7 @@ function MapsTab({ bookN }: { bookN: number }) {
           </div>
         </Popover>
       )}
+      {preview}
     </div>
   );
 }
