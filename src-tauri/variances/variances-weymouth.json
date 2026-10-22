@@ -1,0 +1,3571 @@
+{
+ "module": "weymouth",
+ "base": "kjv",
+ "updated": "2026-10-22",
+ "records": [
+  {
+   "book": 40,
+   "chapter": 1,
+   "verse": 23,
+   "kind": "virgin-birth",
+   "weight": "minor",
+   "change": "\"a virgin\" becomes \"The maiden\"",
+   "note": "A translation choice: the Greek is parthenos, usually rendered \"virgin\". Matthew 1:18 and 1:25 still say Mary conceived before she and Joseph came together."
+  },
+  {
+   "book": 40,
+   "chapter": 1,
+   "verse": 25,
+   "kind": "virgin-birth",
+   "weight": "major",
+   "change": "Omits \"firstborn\" (\"her firstborn son\" becomes \"a son\")",
+   "note": "\"Her firstborn\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. Luke 2:7 still calls Jesus Mary's firstborn."
+  },
+  {
+   "book": 40,
+   "chapter": 2,
+   "verse": 2,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"to worship him\" becomes \"to do him homage\"",
+   "note": "A translation choice for the Greek proskyneō, which covers both bowing in homage and worship; Weymouth renders it \"do homage\", which does not say Jesus was worshipped."
+  },
+  {
+   "book": 40,
+   "chapter": 2,
+   "verse": 8,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"worship him\" becomes \"do him homage\"",
+   "note": "A translation choice for the Greek proskyneō, which covers both bowing in homage and worship; Weymouth renders it \"do homage\", which does not say Jesus was worshipped."
+  },
+  {
+   "book": 40,
+   "chapter": 4,
+   "verse": 18,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"He\"",
+   "note": "The Textus Receptus names Jesus here; the critical text, which Weymouth follows, has only the verb, so he supplies \"He\". The referent is plain from context."
+  },
+  {
+   "book": 40,
+   "chapter": 5,
+   "verse": 22,
+   "kind": "other",
+   "weight": "major",
+   "change": "Omits \"without a cause\"",
+   "note": "The word (eikē) is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. Without it the warning covers all anger, not only unjust anger."
+  },
+  {
+   "book": 40,
+   "chapter": 5,
+   "verse": 44,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits \"bless them that curse you\" and two other clauses",
+   "note": "These clauses are in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. They may come from Luke 6:27-28, where Weymouth keeps them."
+  },
+  {
+   "book": 40,
+   "chapter": 6,
+   "verse": 13,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits the doxology \"For thine is the kingdom... Amen\"",
+   "note": "The doxology is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. It echoes 1 Chronicles 29:11."
+  },
+  {
+   "book": 40,
+   "chapter": 6,
+   "verse": 33,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the kingdom of God\" becomes \"His Kingdom\"",
+   "note": "\"Of God\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. \"His\" plainly refers to the Father of verse 32."
+  },
+  {
+   "book": 40,
+   "chapter": 8,
+   "verse": 5,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"He\"",
+   "note": "The Textus Receptus names Jesus here; the critical text, which Weymouth follows, has only the verb, so he supplies \"He\". The referent is plain from context."
+  },
+  {
+   "book": 40,
+   "chapter": 8,
+   "verse": 29,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"Jesus\" from the demons' address",
+   "note": "The name is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. They still call him \"Son of God\"."
+  },
+  {
+   "book": 40,
+   "chapter": 9,
+   "verse": 12,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"He\"",
+   "note": "The Textus Receptus names Jesus here; the critical text, which Weymouth follows, has only the verb, so he supplies \"He\". The referent is plain from context."
+  },
+  {
+   "book": 40,
+   "chapter": 11,
+   "verse": 23,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"hell\" becomes \"Hades\"; \"exalted unto heaven\" becomes a question",
+   "note": "The question form follows the critical text (Sinaiticus, Vaticanus); the Textus Receptus has a statement. \"Hades\" renders the Greek hadēs, the place of the dead."
+  },
+  {
+   "book": 40,
+   "chapter": 12,
+   "verse": 25,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"He\"",
+   "note": "The Textus Receptus names Jesus here; the critical text, which Weymouth follows, has only the verb, so he supplies \"He\". The referent is plain from context."
+  },
+  {
+   "book": 40,
+   "chapter": 13,
+   "verse": 36,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"He\"",
+   "note": "The Textus Receptus names Jesus here; the critical text, which Weymouth follows, has only the verb, so he supplies \"He\". The referent is plain from context."
+  },
+  {
+   "book": 40,
+   "chapter": 13,
+   "verse": 51,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"Jesus saith unto them\" and the title \"Lord\"",
+   "note": "Both are in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The question is still plainly his."
+  },
+  {
+   "book": 40,
+   "chapter": 14,
+   "verse": 22,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"He\"",
+   "note": "The Textus Receptus names Jesus here; the critical text, which Weymouth follows, has only the verb, so he supplies \"He\". The referent is plain from context."
+  },
+  {
+   "book": 40,
+   "chapter": 14,
+   "verse": 25,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"He\"",
+   "note": "The Textus Receptus names Jesus here; the critical text, which Weymouth follows, has only the verb, so he supplies \"He\". The referent is plain from context."
+  },
+  {
+   "book": 40,
+   "chapter": 15,
+   "verse": 30,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus' feet\" becomes \"His feet\"",
+   "note": "The Textus Receptus names Jesus here; the critical text, which Weymouth follows, has only the verb, so he supplies \"He\". The referent is plain from context."
+  },
+  {
+   "book": 40,
+   "chapter": 16,
+   "verse": 18,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"gates of hell\" becomes \"might of Hades\"",
+   "note": "The Greek is hadēs, the place of the dead, which the KJV renders \"hell\"; Weymouth keeps the Greek word, as most modern versions do."
+  },
+  {
+   "book": 40,
+   "chapter": 16,
+   "verse": 20,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus the Christ\" becomes \"the Christ\"",
+   "note": "\"Jesus\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The confession that he is the Christ is unchanged."
+  },
+  {
+   "book": 40,
+   "chapter": 17,
+   "verse": 11,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"He\"; omits \"first\" before Elijah comes",
+   "note": "\"Jesus\" and \"first\" are in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. Elijah's coming before the Messiah is still stated in 17:10."
+  },
+  {
+   "book": 40,
+   "chapter": 17,
+   "verse": 20,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"He\"; \"unbelief\" becomes \"faith is so small\"",
+   "note": "\"Jesus\" and apistian (\"unbelief\") are in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The critical text reads oligopistian, \"little faith\"."
+  },
+  {
+   "book": 40,
+   "chapter": 18,
+   "verse": 2,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"He\"",
+   "note": "The Textus Receptus names Jesus here; the critical text, which Weymouth follows, has only the verb, so he supplies \"He\". The referent is plain from context."
+  },
+  {
+   "book": 40,
+   "chapter": 18,
+   "verse": 8,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"everlasting fire\" becomes \"the fire of the Ages\"",
+   "note": "A translation choice for the Greek aiōnios: Weymouth renders it \"of the Ages\", which can read as age-long rather than endless. The same Greek word describes the life of the righteous in Matthew 25:46."
+  },
+  {
+   "book": 40,
+   "chapter": 18,
+   "verse": 11,
+   "kind": "salvation",
+   "weight": "major",
+   "change": "Verse omitted (\"Son of man is come to save\")",
+   "note": "The verse is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The same words stand in Luke 19:10."
+  },
+  {
+   "book": 40,
+   "chapter": 19,
+   "verse": 9,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits \"whoso marrieth her which is put away doth commit adultery\"",
+   "note": "The clause is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The same teaching stands in Matthew 5:32."
+  },
+  {
+   "book": 40,
+   "chapter": 19,
+   "verse": 17,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"Why callest thou me good?\" becomes \"Why ask me about good?\"",
+   "note": "The Textus Receptus agrees with Mark 10:18 and Luke 18:19; Sinaiticus and Vaticanus read \"Why do you ask me about what is good? One is good\", which Weymouth follows. Mark and Luke keep the KJV's wording."
+  },
+  {
+   "book": 40,
+   "chapter": 19,
+   "verse": 29,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"everlasting life\" becomes \"the Life of the Ages\"; omits \"or wife\"",
+   "note": "\"Of the Ages\" is a translation choice for aiōnios that leaves open whether the life is endless. \"Or wife\" is in the Byzantine text but not in Vaticanus; Mark 10:29 also lacks it in the critical text."
+  },
+  {
+   "book": 40,
+   "chapter": 20,
+   "verse": 7,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"and whatsoever is right, that shall ye receive\"",
+   "note": "The clause is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The owner's promise of fair pay still stands in verse 4."
+  },
+  {
+   "book": 40,
+   "chapter": 20,
+   "verse": 16,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits \"for many be called, but few chosen\"",
+   "note": "The clause is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The same saying stands in Matthew 22:14."
+  },
+  {
+   "book": 40,
+   "chapter": 20,
+   "verse": 22,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits \"and to be baptized with the baptism\" clause",
+   "note": "The clause is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. It is kept in Mark 10:38-39."
+  },
+  {
+   "book": 40,
+   "chapter": 21,
+   "verse": 12,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the temple of God\" becomes \"the Temple\"",
+   "note": "\"Of God\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. Jesus still calls it \"my house\" in verse 13."
+  },
+  {
+   "book": 40,
+   "chapter": 22,
+   "verse": 30,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"angels of God\" becomes \"angels\"",
+   "note": "\"Of God\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The meaning is unchanged."
+  },
+  {
+   "book": 40,
+   "chapter": 22,
+   "verse": 37,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"He\"",
+   "note": "The Textus Receptus names Jesus here; the critical text, which Weymouth follows, has only the verb, so he supplies \"He\". The referent is plain from context."
+  },
+  {
+   "book": 40,
+   "chapter": 23,
+   "verse": 8,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"even Christ\" as the one Master",
+   "note": "\"Even Christ\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. Christ is still named as the one Teacher in verse 10."
+  },
+  {
+   "book": 40,
+   "chapter": 23,
+   "verse": 14,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Verse omitted (\"greater damnation\" for devouring widows' houses)",
+   "note": "The verse is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The same words stand in Mark 12:40 and Luke 20:47."
+  },
+  {
+   "book": 40,
+   "chapter": 24,
+   "verse": 2,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"He\"",
+   "note": "The Textus Receptus names Jesus here; the critical text, which Weymouth follows, has only the verb, so he supplies \"He\". The referent is plain from context."
+  },
+  {
+   "book": 40,
+   "chapter": 24,
+   "verse": 36,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Adds \"nor the Son\"",
+   "note": "\"Neither the Son\" is in Sinaiticus and Vaticanus but not in the Byzantine text or the Textus Receptus; Weymouth follows the former. The same words stand in Mark 13:32 in all texts."
+  },
+  {
+   "book": 40,
+   "chapter": 25,
+   "verse": 13,
+   "kind": "judgment",
+   "weight": "major",
+   "change": "Omits \"wherein the Son of man cometh\"",
+   "note": "The clause is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The call to watch for his coming is still plain from 24:42-44."
+  },
+  {
+   "book": 40,
+   "chapter": 25,
+   "verse": 41,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"everlasting fire\" becomes \"the Fire of the Ages\"",
+   "note": "A translation choice for the Greek aiōnios: Weymouth renders it \"of the Ages\", which can read as age-long rather than endless. The same Greek word describes the life of the righteous in Matthew 25:46."
+  },
+  {
+   "book": 40,
+   "chapter": 25,
+   "verse": 46,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"everlasting punishment\" and \"life eternal\" both become \"of the Ages\"",
+   "note": "A translation choice for the Greek aiōnios, used for both the punishment and the life; Weymouth's \"of the Ages\" can read as age-long rather than endless. The KJV's \"everlasting\" and \"eternal\" render the same word."
+  },
+  {
+   "book": 40,
+   "chapter": 27,
+   "verse": 24,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Omits \"just\" (\"this just person\" becomes \"this murder\")",
+   "note": "\"Of this righteous man\" is in Sinaiticus and the Byzantine text but not in Vaticanus or Codex Bezae; Weymouth follows the shorter reading. Pilate's wife still calls Jesus \"that righteous man\" in 27:19."
+  },
+  {
+   "book": 40,
+   "chapter": 27,
+   "verse": 35,
+   "kind": "prophecy",
+   "weight": "major",
+   "change": "Omits the fulfilment of \"They parted my garments among them\"",
+   "note": "The fulfilment quotation is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. It may come from John 19:24, where the fulfilment of Psalm 22:18 still stands."
+  },
+  {
+   "book": 40,
+   "chapter": 28,
+   "verse": 6,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"where the Lord lay\" becomes \"where He lay\"",
+   "note": "\"The Lord\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The referent is plain."
+  },
+  {
+   "book": 40,
+   "chapter": 28,
+   "verse": 20,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the closing \"Amen\"",
+   "note": "The \"Amen\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. It is a liturgical ending."
+  },
+  {
+   "book": 41,
+   "chapter": 1,
+   "verse": 2,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"in the prophets\" becomes \"in Isaiah the Prophet\"",
+   "note": "The Byzantine text and the Textus Receptus read \"in the prophets\"; Sinaiticus and Vaticanus read \"in Isaiah the prophet\", which Weymouth follows. The quotation joins Malachi 3:1 to Isaiah 40:3."
+  },
+  {
+   "book": 41,
+   "chapter": 1,
+   "verse": 42,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"as soon as he had spoken\"",
+   "note": "The phrase is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The healing is still immediate."
+  },
+  {
+   "book": 41,
+   "chapter": 2,
+   "verse": 15,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"as Jesus sat\" becomes \"When He was sitting\"",
+   "note": "The Textus Receptus names Jesus here; the critical text, which Weymouth follows, has only the verb, so he supplies \"He\". The referent is plain from context."
+  },
+  {
+   "book": 41,
+   "chapter": 3,
+   "verse": 15,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"to heal sicknesses\"",
+   "note": "The phrase is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The authority to heal is still shown in Mark 6:13."
+  },
+  {
+   "book": 41,
+   "chapter": 3,
+   "verse": 29,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"eternal damnation\" becomes \"a sin of the Ages\"",
+   "note": "The Textus Receptus reads kriseōs (\"judgment\", \"damnation\"); Sinaiticus and Vaticanus read hamartēmatos (\"sin\"), which Weymouth follows. The verse still says this sin is never forgiven."
+  },
+  {
+   "book": 41,
+   "chapter": 5,
+   "verse": 13,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"He\"",
+   "note": "The Textus Receptus names Jesus here; the critical text, which Weymouth follows, has only the verb, so he supplies \"He\". The referent is plain from context."
+  },
+  {
+   "book": 41,
+   "chapter": 5,
+   "verse": 19,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"He\"",
+   "note": "The Textus Receptus names Jesus here; the critical text, which Weymouth follows, has only the verb, so he supplies \"He\". The referent is plain from context."
+  },
+  {
+   "book": 41,
+   "chapter": 6,
+   "verse": 11,
+   "kind": "judgment",
+   "weight": "major",
+   "change": "Omits \"more tolerable for Sodom and Gomorrha in the day of judgment\"",
+   "note": "The sentence is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. It may come from Matthew 10:15, where it still stands."
+  },
+  {
+   "book": 41,
+   "chapter": 7,
+   "verse": 8,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"as the washing of pots and cups...\"",
+   "note": "The clause is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. Verse 4 still mentions washing cups and pots."
+  },
+  {
+   "book": 41,
+   "chapter": 7,
+   "verse": 16,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Verse omitted (\"If any man have ears to hear\")",
+   "note": "The verse is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The same saying stands in Mark 4:9 and 4:23."
+  },
+  {
+   "book": 41,
+   "chapter": 7,
+   "verse": 27,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"He\"",
+   "note": "The Textus Receptus names Jesus here; the critical text, which Weymouth follows, has only the verb, so he supplies \"He\". The referent is plain from context."
+  },
+  {
+   "book": 41,
+   "chapter": 8,
+   "verse": 1,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"He\"; adds \"again\" before the great crowd",
+   "note": "\"Jesus\" and the lack of \"again\" are in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The critical text reads palin, \"again\"."
+  },
+  {
+   "book": 41,
+   "chapter": 8,
+   "verse": 26,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"nor tell it to any in the town\"",
+   "note": "The clause is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The command to go home quietly remains."
+  },
+  {
+   "book": 41,
+   "chapter": 9,
+   "verse": 23,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"If thou canst believe\" becomes \"If I possibly can!\"",
+   "note": "\"Believe\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. In the shorter text Jesus repeats the father's \"if you can\"; faith is still stressed at the end of the verse."
+  },
+  {
+   "book": 41,
+   "chapter": 9,
+   "verse": 24,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"Lord\" and \"with tears\"",
+   "note": "Both are in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The father's cry of faith is unchanged."
+  },
+  {
+   "book": 41,
+   "chapter": 9,
+   "verse": 29,
+   "kind": "other",
+   "weight": "major",
+   "change": "Omits \"and fasting\"",
+   "note": "\"And fasting\" is in the Byzantine text, the Textus Receptus and most later manuscripts but not in Sinaiticus or Vaticanus; Weymouth follows the latter. Fasting is still taught in Matthew 6:16-18."
+  },
+  {
+   "book": 41,
+   "chapter": 9,
+   "verse": 44,
+   "kind": "judgment",
+   "weight": "major",
+   "change": "Verse omitted (\"their worm dieth not\")",
+   "note": "The verse is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The same words stand in verse 48, taken from Isaiah 66:24."
+  },
+  {
+   "book": 41,
+   "chapter": 9,
+   "verse": 46,
+   "kind": "judgment",
+   "weight": "major",
+   "change": "Verse omitted (\"their worm dieth not\")",
+   "note": "The verse is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The same words stand in verse 48."
+  },
+  {
+   "book": 41,
+   "chapter": 9,
+   "verse": 49,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"and every sacrifice shall be salted with salt\"",
+   "note": "The clause is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. It echoes Leviticus 2:13."
+  },
+  {
+   "book": 41,
+   "chapter": 10,
+   "verse": 21,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits \"take up the cross\"",
+   "note": "The phrase is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. Taking up the cross is still taught in Mark 8:34."
+  },
+  {
+   "book": 41,
+   "chapter": 10,
+   "verse": 52,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"followed Jesus\" becomes \"followed Him\"",
+   "note": "The Textus Receptus names Jesus here; the critical text, which Weymouth follows, has only the verb, so he supplies \"He\". The referent is plain from context."
+  },
+  {
+   "book": 41,
+   "chapter": 11,
+   "verse": 10,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"that cometh in the name of the Lord\"",
+   "note": "The phrase (repeated from verse 9) is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. Verse 9 still blesses him who comes in the name of the Lord."
+  },
+  {
+   "book": 41,
+   "chapter": 11,
+   "verse": 11,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"He\"",
+   "note": "The Textus Receptus names Jesus here; the critical text, which Weymouth follows, has only the verb, so he supplies \"He\". The referent is plain from context."
+  },
+  {
+   "book": 41,
+   "chapter": 11,
+   "verse": 14,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"He\"",
+   "note": "The Textus Receptus names Jesus here; the critical text, which Weymouth follows, has only the verb, so he supplies \"He\". The referent is plain from context."
+  },
+  {
+   "book": 41,
+   "chapter": 11,
+   "verse": 15,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"He\"",
+   "note": "The Textus Receptus names Jesus here; the critical text, which Weymouth follows, has only the verb, so he supplies \"He\". The referent is plain from context."
+  },
+  {
+   "book": 41,
+   "chapter": 11,
+   "verse": 26,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Verse omitted (Father will not forgive the unforgiving)",
+   "note": "The verse is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The same teaching stands in Matthew 6:15."
+  },
+  {
+   "book": 41,
+   "chapter": 12,
+   "verse": 32,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"there is one God\" becomes \"He stands alone\"",
+   "note": "\"God\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The verse still affirms there is none but he."
+  },
+  {
+   "book": 41,
+   "chapter": 12,
+   "verse": 41,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"He\"",
+   "note": "The Textus Receptus names Jesus here; the critical text, which Weymouth follows, has only the verb, so he supplies \"He\". The referent is plain from context."
+  },
+  {
+   "book": 41,
+   "chapter": 14,
+   "verse": 19,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"and another said, Is it I?\"",
+   "note": "The clause is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. Each disciple still asks in turn."
+  },
+  {
+   "book": 41,
+   "chapter": 14,
+   "verse": 22,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"He\"; omits \"eat\"",
+   "note": "\"Jesus\" and \"eat\" are in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The words of institution are otherwise unchanged."
+  },
+  {
+   "book": 41,
+   "chapter": 15,
+   "verse": 28,
+   "kind": "prophecy",
+   "weight": "major",
+   "change": "Verse omitted (\"numbered with the transgressors\" fulfilled)",
+   "note": "The verse is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The fulfilment of Isaiah 53:12 still stands in Luke 22:37."
+  },
+  {
+   "book": 41,
+   "chapter": 16,
+   "verse": 9,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Mark 16:9-20 set apart as doubtful",
+   "note": "Mark 16:9-20 is in nearly all manuscripts and the Textus Receptus but not in Sinaiticus or Vaticanus, which end at 16:8; Weymouth keeps the passage but sets it apart as doubtful, which this copy shows in italics."
+  },
+  {
+   "book": 41,
+   "chapter": 16,
+   "verse": 10,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Set apart as doubtful, with Mark 16:9-20",
+   "note": "Mark 16:9-20 is in nearly all manuscripts and the Textus Receptus but not in Sinaiticus or Vaticanus, which end at 16:8; Weymouth keeps the passage but sets it apart as doubtful, which this copy shows in italics."
+  },
+  {
+   "book": 41,
+   "chapter": 16,
+   "verse": 11,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Set apart as doubtful, with Mark 16:9-20",
+   "note": "Mark 16:9-20 is in nearly all manuscripts and the Textus Receptus but not in Sinaiticus or Vaticanus, which end at 16:8; Weymouth keeps the passage but sets it apart as doubtful, which this copy shows in italics."
+  },
+  {
+   "book": 41,
+   "chapter": 16,
+   "verse": 12,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Set apart as doubtful, with Mark 16:9-20",
+   "note": "Mark 16:9-20 is in nearly all manuscripts and the Textus Receptus but not in Sinaiticus or Vaticanus, which end at 16:8; Weymouth keeps the passage but sets it apart as doubtful, which this copy shows in italics."
+  },
+  {
+   "book": 41,
+   "chapter": 16,
+   "verse": 13,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Set apart as doubtful, with Mark 16:9-20",
+   "note": "Mark 16:9-20 is in nearly all manuscripts and the Textus Receptus but not in Sinaiticus or Vaticanus, which end at 16:8; Weymouth keeps the passage but sets it apart as doubtful, which this copy shows in italics."
+  },
+  {
+   "book": 41,
+   "chapter": 16,
+   "verse": 14,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Set apart as doubtful, with Mark 16:9-20",
+   "note": "Mark 16:9-20 is in nearly all manuscripts and the Textus Receptus but not in Sinaiticus or Vaticanus, which end at 16:8; Weymouth keeps the passage but sets it apart as doubtful, which this copy shows in italics."
+  },
+  {
+   "book": 41,
+   "chapter": 16,
+   "verse": 15,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Set apart as doubtful, with Mark 16:9-20",
+   "note": "Mark 16:9-20 is in nearly all manuscripts and the Textus Receptus but not in Sinaiticus or Vaticanus, which end at 16:8; Weymouth keeps the passage but sets it apart as doubtful, which this copy shows in italics."
+  },
+  {
+   "book": 41,
+   "chapter": 16,
+   "verse": 16,
+   "kind": "salvation",
+   "weight": "major",
+   "change": "Set apart as doubtful, with Mark 16:9-20",
+   "note": "Mark 16:9-20 is in nearly all manuscripts and the Textus Receptus but not in Sinaiticus or Vaticanus, which end at 16:8; Weymouth keeps the passage but sets it apart as doubtful, which this copy shows in italics."
+  },
+  {
+   "book": 41,
+   "chapter": 16,
+   "verse": 17,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Set apart as doubtful, with Mark 16:9-20",
+   "note": "Mark 16:9-20 is in nearly all manuscripts and the Textus Receptus but not in Sinaiticus or Vaticanus, which end at 16:8; Weymouth keeps the passage but sets it apart as doubtful, which this copy shows in italics."
+  },
+  {
+   "book": 41,
+   "chapter": 16,
+   "verse": 18,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Set apart as doubtful, with Mark 16:9-20",
+   "note": "Mark 16:9-20 is in nearly all manuscripts and the Textus Receptus but not in Sinaiticus or Vaticanus, which end at 16:8; Weymouth keeps the passage but sets it apart as doubtful, which this copy shows in italics."
+  },
+  {
+   "book": 41,
+   "chapter": 16,
+   "verse": 19,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Set apart as doubtful, with Mark 16:9-20",
+   "note": "Mark 16:9-20 is in nearly all manuscripts and the Textus Receptus but not in Sinaiticus or Vaticanus, which end at 16:8; Weymouth keeps the passage but sets it apart as doubtful, which this copy shows in italics."
+  },
+  {
+   "book": 41,
+   "chapter": 16,
+   "verse": 20,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Set apart as doubtful, with Mark 16:9-20; omits the closing \"Amen\"",
+   "note": "Mark 16:9-20 is in nearly all manuscripts and the Textus Receptus but not in Sinaiticus or Vaticanus, which end at 16:8; Weymouth keeps the passage but sets it apart as doubtful, which this copy shows in italics."
+  },
+  {
+   "book": 42,
+   "chapter": 1,
+   "verse": 27,
+   "kind": "virgin-birth",
+   "weight": "minor",
+   "change": "\"a virgin\" and \"the virgin\" become \"maiden\"",
+   "note": "A translation choice: the Greek is parthenos, usually rendered \"virgin\". Luke 1:34 still has Mary say she has not known a man."
+  },
+  {
+   "book": 42,
+   "chapter": 2,
+   "verse": 14,
+   "kind": "salvation",
+   "weight": "major",
+   "change": "\"good will toward men\" becomes \"among men who please Him\"",
+   "note": "The Byzantine text and the Textus Receptus read eudokia (\"good will\"); Sinaiticus, Vaticanus and others read eudokias (\"of good will\"), which Weymouth renders \"men who please Him\". Peace is then limited to those God favours."
+  },
+  {
+   "book": 42,
+   "chapter": 2,
+   "verse": 33,
+   "kind": "virgin-birth",
+   "weight": "major",
+   "change": "\"Joseph\" becomes \"the child's father\"",
+   "note": "\"Joseph\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. Luke still describes Jesus' birth as virginal in 1:34-35, and calls Joseph his supposed father in 3:23."
+  },
+  {
+   "book": 42,
+   "chapter": 2,
+   "verse": 38,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord\" becomes \"God\"; \"redemption in Jerusalem\" becomes \"of Jerusalem\"",
+   "note": "\"The Lord\" and \"in\" are in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. Either way Anna thanks God for the child."
+  },
+  {
+   "book": 42,
+   "chapter": 2,
+   "verse": 40,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"in spirit\"",
+   "note": "The phrase is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. It may come from Luke 1:80."
+  },
+  {
+   "book": 42,
+   "chapter": 2,
+   "verse": 43,
+   "kind": "virgin-birth",
+   "weight": "major",
+   "change": "\"Joseph and his mother\" becomes \"His parents\"",
+   "note": "\"Joseph and his mother\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. Luke still calls Joseph Jesus' supposed father in 3:23."
+  },
+  {
+   "book": 42,
+   "chapter": 3,
+   "verse": 26,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Names read \"Semein\", \"Josech\" and \"Joda\" for Semei, Joseph, Juda",
+   "note": "The critical text spells these names differently from the Textus Receptus; Weymouth follows it. The genealogy is otherwise the same."
+  },
+  {
+   "book": 42,
+   "chapter": 3,
+   "verse": 29,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"Jose\" becomes \"Joshua\" in the genealogy",
+   "note": "The Textus Receptus reads Iōsē; the critical text reads Iēsou (Joshua), which Weymouth follows. Only the name in the list differs."
+  },
+  {
+   "book": 42,
+   "chapter": 3,
+   "verse": 33,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"Aram\" becomes \"Admin, son of Arni\" (adds a name)",
+   "note": "The critical text reads \"Admin, son of Arni\" where the Textus Receptus has \"Aram\"; the manuscripts vary widely here. Only the names in the list differ."
+  },
+  {
+   "book": 42,
+   "chapter": 4,
+   "verse": 4,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits \"but by every word of God\"",
+   "note": "The clause is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. It may come from Matthew 4:4, where it still stands."
+  },
+  {
+   "book": 42,
+   "chapter": 4,
+   "verse": 8,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits \"Get thee behind me, Satan\"",
+   "note": "The words are in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. They may come from Matthew 4:10, where they still stand."
+  },
+  {
+   "book": 42,
+   "chapter": 4,
+   "verse": 18,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits \"to heal the brokenhearted\"",
+   "note": "The phrase is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. It is part of Isaiah 61:1, which Jesus is reading."
+  },
+  {
+   "book": 42,
+   "chapter": 4,
+   "verse": 34,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the question \"art thou come to destroy us?\"",
+   "note": "The question is in all the main manuscripts, critical and Byzantine, so this looks like a slip in this edition rather than a textual choice. The same question stands in Mark 1:24."
+  },
+  {
+   "book": 42,
+   "chapter": 4,
+   "verse": 41,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Christ the Son of God\" becomes \"the Son of God\"",
+   "note": "\"Christ\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The verse still ends saying they knew him to be the Christ."
+  },
+  {
+   "book": 42,
+   "chapter": 5,
+   "verse": 38,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"and both are preserved\"",
+   "note": "The clause is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. It may come from Matthew 9:17."
+  },
+  {
+   "book": 42,
+   "chapter": 7,
+   "verse": 19,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"to Jesus\" becomes \"to the Lord\"",
+   "note": "The Textus Receptus reads \"Jesus\"; Sinaiticus and Vaticanus read \"the Lord\", which Weymouth follows. Both name Christ."
+  },
+  {
+   "book": 42,
+   "chapter": 7,
+   "verse": 22,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"He\"",
+   "note": "The Textus Receptus names Jesus here; the critical text, which Weymouth follows, has only the verb, so he supplies \"He\". The referent is plain from context."
+  },
+  {
+   "book": 42,
+   "chapter": 7,
+   "verse": 31,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"And the Lord said\"",
+   "note": "The words are in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The saying is still Jesus'."
+  },
+  {
+   "book": 42,
+   "chapter": 8,
+   "verse": 38,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"He\"",
+   "note": "The Textus Receptus names Jesus here; the critical text, which Weymouth follows, has only the verb, so he supplies \"He\". The referent is plain from context."
+  },
+  {
+   "book": 42,
+   "chapter": 9,
+   "verse": 43,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"which Jesus did\" becomes \"that He was doing\"",
+   "note": "The Textus Receptus names Jesus here; the critical text, which Weymouth follows, has only the verb, so he supplies \"He\". The referent is plain from context."
+  },
+  {
+   "book": 42,
+   "chapter": 9,
+   "verse": 54,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"even as Elias did\"",
+   "note": "The phrase is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. It recalls 2 Kings 1:10-12."
+  },
+  {
+   "book": 42,
+   "chapter": 9,
+   "verse": 55,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits \"Ye know not what manner of spirit ye are of\"",
+   "note": "The rebuke is in many later manuscripts and the Textus Receptus but not in the earliest papyri, Sinaiticus or Vaticanus; Weymouth follows the latter. Jesus still rebukes the disciples."
+  },
+  {
+   "book": 42,
+   "chapter": 9,
+   "verse": 56,
+   "kind": "salvation",
+   "weight": "major",
+   "change": "Omits \"the Son of man is not come to destroy... save\"",
+   "note": "The sentence is in many later manuscripts and the Textus Receptus but not in the earliest papyri, Sinaiticus or Vaticanus; Weymouth follows the latter. Luke 19:10 still says he came to save the lost."
+  },
+  {
+   "book": 42,
+   "chapter": 9,
+   "verse": 57,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits the address \"Lord\"",
+   "note": "The address is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The man's offer to follow is unchanged."
+  },
+  {
+   "book": 42,
+   "chapter": 10,
+   "verse": 15,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"hell\" becomes \"Hades\"; \"exalted to heaven\" becomes a question",
+   "note": "The question form follows the critical text (Sinaiticus, Vaticanus); the Textus Receptus has a statement. \"Hades\" renders the Greek hadēs, the place of the dead."
+  },
+  {
+   "book": 42,
+   "chapter": 10,
+   "verse": 39,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus' feet\" becomes \"the Lord's feet\"",
+   "note": "The Textus Receptus reads \"Jesus\"; the earliest papyri and Sinaiticus read \"the Lord\", which Weymouth follows. Both name Christ."
+  },
+  {
+   "book": 42,
+   "chapter": 11,
+   "verse": 2,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits \"Our... which art in heaven\" and \"Thy will be done...\"",
+   "note": "The fuller wording, as in Matthew 6:9-10, is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. Luke's shorter prayer keeps the address to the Father."
+  },
+  {
+   "book": 42,
+   "chapter": 11,
+   "verse": 4,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits \"but deliver us from evil\"",
+   "note": "The clause is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. It stands in Matthew 6:13."
+  },
+  {
+   "book": 42,
+   "chapter": 11,
+   "verse": 54,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"seeking\" and \"that they might accuse him\"",
+   "note": "The words are in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. Their hostile aim is still plain."
+  },
+  {
+   "book": 42,
+   "chapter": 12,
+   "verse": 31,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the kingdom of God\" becomes \"His Kingdom\"; omits \"all\"",
+   "note": "\"Of God\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. \"His\" plainly refers to the Father of verse 30."
+  },
+  {
+   "book": 42,
+   "chapter": 13,
+   "verse": 2,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"He\"",
+   "note": "The Textus Receptus names Jesus here; the critical text, which Weymouth follows, has only the verb, so he supplies \"He\". The referent is plain from context."
+  },
+  {
+   "book": 42,
+   "chapter": 13,
+   "verse": 25,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Lord, Lord\" becomes a single \"Sir\"",
+   "note": "The doubled address is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. Weymouth also renders it \"Sir\" rather than \"Lord\"."
+  },
+  {
+   "book": 42,
+   "chapter": 16,
+   "verse": 23,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"hell\" becomes \"Hades\"",
+   "note": "The Greek is hadēs, the place of the dead, which the KJV renders \"hell\"; Weymouth keeps the Greek word, as most modern versions do."
+  },
+  {
+   "book": 42,
+   "chapter": 17,
+   "verse": 3,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"against thee\"",
+   "note": "The words are in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The command to forgive is unchanged."
+  },
+  {
+   "book": 42,
+   "chapter": 17,
+   "verse": 9,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"I trow not\"",
+   "note": "The words are in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The question still expects the answer no."
+  },
+  {
+   "book": 42,
+   "chapter": 17,
+   "verse": 36,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Whole verse omitted",
+   "note": "The verse is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The same saying stands in Matthew 24:40."
+  },
+  {
+   "book": 42,
+   "chapter": 18,
+   "verse": 30,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"life everlasting\" becomes \"the Life of the Ages\"",
+   "note": "A translation choice for the Greek aiōnios: Weymouth renders it \"of the Ages\", which leaves open whether the life is endless. Other verses such as John 10:28 still say his people never perish."
+  },
+  {
+   "book": 42,
+   "chapter": 19,
+   "verse": 45,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"and them that bought\"",
+   "note": "The words are in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The cleansing of the Temple is unchanged."
+  },
+  {
+   "book": 42,
+   "chapter": 20,
+   "verse": 13,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"when they see him\"",
+   "note": "The words are in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The meaning is unchanged."
+  },
+  {
+   "book": 42,
+   "chapter": 20,
+   "verse": 23,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"Why tempt ye me?\"",
+   "note": "The question is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. It may come from Matthew 22:18 and Mark 12:15, where it stands."
+  },
+  {
+   "book": 42,
+   "chapter": 21,
+   "verse": 4,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the offerings of God\" becomes \"the offerings\"",
+   "note": "\"Of God\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The gifts are still temple offerings."
+  },
+  {
+   "book": 42,
+   "chapter": 22,
+   "verse": 31,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"And the Lord said\"",
+   "note": "The words are in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The saying is still plainly Jesus'."
+  },
+  {
+   "book": 42,
+   "chapter": 23,
+   "verse": 17,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Whole verse omitted",
+   "note": "The verse is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The custom is still stated in Matthew 27:15 and Mark 15:6."
+  },
+  {
+   "book": 42,
+   "chapter": 23,
+   "verse": 38,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"in letters of Greek, and Latin, and Hebrew\"",
+   "note": "The phrase is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. It may come from John 19:20, where it stands."
+  },
+  {
+   "book": 42,
+   "chapter": 23,
+   "verse": 42,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"said unto Jesus, Lord\" becomes \"said, Jesus\"",
+   "note": "\"Unto Jesus, Lord\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The thief addresses Jesus by name instead of as Lord."
+  },
+  {
+   "book": 42,
+   "chapter": 24,
+   "verse": 36,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus himself\" becomes \"He Himself\"",
+   "note": "The Textus Receptus names Jesus here; the critical text, which Weymouth follows, has only the verb, so he supplies \"He\". The referent is plain from context."
+  },
+  {
+   "book": 42,
+   "chapter": 24,
+   "verse": 42,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"and of an honeycomb\"",
+   "note": "The phrase is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The point that he ate before them is unchanged."
+  },
+  {
+   "book": 42,
+   "chapter": 24,
+   "verse": 53,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"praising and\" and the closing \"Amen\"",
+   "note": "Both are in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. They still bless God."
+  },
+  {
+   "book": 43,
+   "chapter": 1,
+   "verse": 14,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"made flesh\" becomes \"came in the flesh\"; \"only begotten\" becomes \"only\"",
+   "note": "Both are translation choices: the Greek egeneto means \"became\", and monogenēs can mean \"only begotten\" or \"one and only\". \"Came in the flesh\" can read as less than becoming man, though 1 John 4:2 uses that phrase."
+  },
+  {
+   "book": 43,
+   "chapter": 1,
+   "verse": 18,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"the only begotten Son\" becomes \"the only Son\"",
+   "note": "A translation choice for the Greek monogenēs, which can mean \"only begotten\" or \"one and only\"; Weymouth renders it \"only\". The Sonship is still stated."
+  },
+  {
+   "book": 43,
+   "chapter": 3,
+   "verse": 16,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"only begotten\" becomes \"only\"; \"everlasting life\" becomes \"Life of Ages\"",
+   "note": "Both are translation choices: monogenēs can mean \"only begotten\" or \"one and only\", and Weymouth renders aiōnios \"of Ages\", which leaves open whether the life is endless."
+  },
+  {
+   "book": 43,
+   "chapter": 3,
+   "verse": 18,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"only begotten Son of God\" becomes \"only Son\"",
+   "note": "A translation choice for the Greek monogenēs, which can mean \"only begotten\" or \"one and only\"; Weymouth renders it \"only\". The Sonship is still stated."
+  },
+  {
+   "book": 43,
+   "chapter": 3,
+   "verse": 36,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"everlasting life\" becomes \"the Life of the Ages\"",
+   "note": "A translation choice for the Greek aiōnios: Weymouth renders it \"of the Ages\", which leaves open whether the life is endless. Other verses such as John 10:28 still say his people never perish."
+  },
+  {
+   "book": 43,
+   "chapter": 4,
+   "verse": 14,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"everlasting life\" becomes \"the Life of the Ages\"",
+   "note": "A translation choice for the Greek aiōnios: Weymouth renders it \"of the Ages\", which leaves open whether the life is endless. Other verses such as John 10:28 still say his people never perish."
+  },
+  {
+   "book": 43,
+   "chapter": 4,
+   "verse": 42,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"the Christ\" before \"the Saviour of the world\"",
+   "note": "\"The Christ\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. He is still called Saviour of the world."
+  },
+  {
+   "book": 43,
+   "chapter": 4,
+   "verse": 46,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"He\"",
+   "note": "The Textus Receptus names Jesus here; the critical text, which Weymouth follows, has only the verb, so he supplies \"He\". The referent is plain from context."
+  },
+  {
+   "book": 43,
+   "chapter": 5,
+   "verse": 4,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Whole verse omitted (the angel troubling the water)",
+   "note": "The verse is in the Byzantine text and the Textus Receptus but not in the earliest papyri, Sinaiticus or Vaticanus; Weymouth follows the latter. Verse 7 still speaks of the water being stirred."
+  },
+  {
+   "book": 43,
+   "chapter": 5,
+   "verse": 17,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"His\"",
+   "note": "The Textus Receptus names Jesus here; the critical text, which Weymouth follows, has only the verb, so he supplies \"He\". The referent is plain from context."
+  },
+  {
+   "book": 43,
+   "chapter": 5,
+   "verse": 24,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"everlasting life\" becomes \"the Life of the Ages\"",
+   "note": "A translation choice for the Greek aiōnios: Weymouth renders it \"of the Ages\", which leaves open whether the life is endless. Other verses such as John 10:28 still say his people never perish."
+  },
+  {
+   "book": 43,
+   "chapter": 5,
+   "verse": 29,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"resurrection of damnation\" becomes \"resurrection of judgement\"",
+   "note": "A translation choice: the Greek krisis means \"judgment\", which the KJV renders \"damnation\" here. The contrast with the resurrection of life is unchanged."
+  },
+  {
+   "book": 43,
+   "chapter": 5,
+   "verse": 30,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the will of the Father which hath sent me\" loses \"the Father\"",
+   "note": "\"The Father\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. He who sent Jesus is still plainly the Father."
+  },
+  {
+   "book": 43,
+   "chapter": 6,
+   "verse": 14,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the miracle that Jesus did\" becomes \"the miracle He had performed\"",
+   "note": "The Textus Receptus names Jesus here; the critical text, which Weymouth follows, has only the verb, so he supplies \"He\". The referent is plain from context."
+  },
+  {
+   "book": 43,
+   "chapter": 6,
+   "verse": 27,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"everlasting life\" becomes \"the Life of the Ages\"",
+   "note": "A translation choice for the Greek aiōnios: Weymouth renders it \"of the Ages\", which leaves open whether the life is endless. Other verses such as John 10:28 still say his people never perish."
+  },
+  {
+   "book": 43,
+   "chapter": 6,
+   "verse": 39,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Father's will\" becomes \"the will of Him\"",
+   "note": "\"Father's\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. He who sent Jesus is still plainly the Father."
+  },
+  {
+   "book": 43,
+   "chapter": 6,
+   "verse": 40,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"everlasting life\" becomes \"the Life of the Ages\"",
+   "note": "A translation choice for the Greek aiōnios: Weymouth renders it \"of the Ages\", which leaves open whether the life is endless. Other verses such as John 10:28 still say his people never perish."
+  },
+  {
+   "book": 43,
+   "chapter": 6,
+   "verse": 47,
+   "kind": "salvation",
+   "weight": "major",
+   "change": "Omits \"on me\" from \"He that believeth on me\"",
+   "note": "\"On me\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. Faith in Christ is still stated in verses 35 and 40."
+  },
+  {
+   "book": 43,
+   "chapter": 6,
+   "verse": 68,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"eternal life\" becomes \"the Life of the Ages\"",
+   "note": "A translation choice for the Greek aiōnios: Weymouth renders it \"of the Ages\", which leaves open whether the life is endless. Other verses such as John 10:28 still say his people never perish."
+  },
+  {
+   "book": 43,
+   "chapter": 6,
+   "verse": 69,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"Christ, the Son of the living God\" becomes \"Holy One of God\"",
+   "note": "The Textus Receptus agrees with Matthew 16:16; P75, Sinaiticus and Vaticanus read \"the Holy One of God\", which Weymouth follows. Peter's confession that he is the Christ still stands in Matthew 16:16."
+  },
+  {
+   "book": 43,
+   "chapter": 7,
+   "verse": 39,
+   "kind": "trinity",
+   "weight": "minor",
+   "change": "\"the Holy Ghost\" becomes \"the Spirit\"",
+   "note": "Hagion is in the Textus Receptus but not in P66, P75 or Sinaiticus; Weymouth follows the latter. The Holy Spirit is plainly meant."
+  },
+  {
+   "book": 43,
+   "chapter": 7,
+   "verse": 53,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Set apart as doubtful, with John 7:53-8:11",
+   "note": "John 7:53-8:11, the woman taken in adultery, is in Codex Bezae, the Byzantine majority and the Textus Receptus but not in P66, P75, Sinaiticus or Vaticanus; Weymouth keeps it but sets it apart as doubtful, which this copy shows in italics."
+  },
+  {
+   "book": 43,
+   "chapter": 8,
+   "verse": 1,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Set apart as doubtful, with John 7:53-8:11",
+   "note": "John 7:53-8:11, the woman taken in adultery, is in Codex Bezae, the Byzantine majority and the Textus Receptus but not in P66, P75, Sinaiticus or Vaticanus; Weymouth keeps it but sets it apart as doubtful, which this copy shows in italics."
+  },
+  {
+   "book": 43,
+   "chapter": 8,
+   "verse": 2,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Set apart as doubtful, with John 7:53-8:11",
+   "note": "John 7:53-8:11, the woman taken in adultery, is in Codex Bezae, the Byzantine majority and the Textus Receptus but not in P66, P75, Sinaiticus or Vaticanus; Weymouth keeps it but sets it apart as doubtful, which this copy shows in italics."
+  },
+  {
+   "book": 43,
+   "chapter": 8,
+   "verse": 3,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Set apart as doubtful, with John 7:53-8:11",
+   "note": "John 7:53-8:11, the woman taken in adultery, is in Codex Bezae, the Byzantine majority and the Textus Receptus but not in P66, P75, Sinaiticus or Vaticanus; Weymouth keeps it but sets it apart as doubtful, which this copy shows in italics."
+  },
+  {
+   "book": 43,
+   "chapter": 8,
+   "verse": 4,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Set apart as doubtful, with John 7:53-8:11",
+   "note": "John 7:53-8:11, the woman taken in adultery, is in Codex Bezae, the Byzantine majority and the Textus Receptus but not in P66, P75, Sinaiticus or Vaticanus; Weymouth keeps it but sets it apart as doubtful, which this copy shows in italics."
+  },
+  {
+   "book": 43,
+   "chapter": 8,
+   "verse": 5,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Set apart as doubtful, with John 7:53-8:11",
+   "note": "John 7:53-8:11, the woman taken in adultery, is in Codex Bezae, the Byzantine majority and the Textus Receptus but not in P66, P75, Sinaiticus or Vaticanus; Weymouth keeps it but sets it apart as doubtful, which this copy shows in italics."
+  },
+  {
+   "book": 43,
+   "chapter": 8,
+   "verse": 6,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Set apart as doubtful; omits \"as though he heard them not\"",
+   "note": "John 7:53-8:11, the woman taken in adultery, is in Codex Bezae, the Byzantine majority and the Textus Receptus but not in P66, P75, Sinaiticus or Vaticanus; Weymouth keeps it but sets it apart as doubtful, which this copy shows in italics."
+  },
+  {
+   "book": 43,
+   "chapter": 8,
+   "verse": 7,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Set apart as doubtful, with John 7:53-8:11",
+   "note": "John 7:53-8:11, the woman taken in adultery, is in Codex Bezae, the Byzantine majority and the Textus Receptus but not in P66, P75, Sinaiticus or Vaticanus; Weymouth keeps it but sets it apart as doubtful, which this copy shows in italics."
+  },
+  {
+   "book": 43,
+   "chapter": 8,
+   "verse": 8,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Set apart as doubtful, with John 7:53-8:11",
+   "note": "John 7:53-8:11, the woman taken in adultery, is in Codex Bezae, the Byzantine majority and the Textus Receptus but not in P66, P75, Sinaiticus or Vaticanus; Weymouth keeps it but sets it apart as doubtful, which this copy shows in italics."
+  },
+  {
+   "book": 43,
+   "chapter": 8,
+   "verse": 9,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Set apart as doubtful; omits \"being convicted by their own conscience\"",
+   "note": "John 7:53-8:11, the woman taken in adultery, is in Codex Bezae, the Byzantine majority and the Textus Receptus but not in P66, P75, Sinaiticus or Vaticanus; Weymouth keeps it but sets it apart as doubtful, which this copy shows in italics."
+  },
+  {
+   "book": 43,
+   "chapter": 8,
+   "verse": 10,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Set apart as doubtful; omits \"saw none but the woman\"",
+   "note": "John 7:53-8:11, the woman taken in adultery, is in Codex Bezae, the Byzantine majority and the Textus Receptus but not in P66, P75, Sinaiticus or Vaticanus; Weymouth keeps it but sets it apart as doubtful, which this copy shows in italics."
+  },
+  {
+   "book": 43,
+   "chapter": 8,
+   "verse": 11,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Set apart as doubtful, with John 7:53-8:11",
+   "note": "John 7:53-8:11, the woman taken in adultery, is in Codex Bezae, the Byzantine majority and the Textus Receptus but not in P66, P75, Sinaiticus or Vaticanus; Weymouth keeps it but sets it apart as doubtful, which this copy shows in italics."
+  },
+  {
+   "book": 43,
+   "chapter": 8,
+   "verse": 20,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"spake Jesus\" becomes \"He uttered\"",
+   "note": "The Textus Receptus names Jesus here; the critical text, which Weymouth follows, has only the verb, so he supplies \"He\". The referent is plain from context."
+  },
+  {
+   "book": 43,
+   "chapter": 8,
+   "verse": 21,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"said Jesus\" becomes \"He said\"",
+   "note": "The Textus Receptus names Jesus here; the critical text, which Weymouth follows, has only the verb, so he supplies \"He\". The referent is plain from context."
+  },
+  {
+   "book": 43,
+   "chapter": 8,
+   "verse": 29,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Father hath not left me\" becomes \"He has not left me\"",
+   "note": "Ho patēr is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The sender is plainly the Father."
+  },
+  {
+   "book": 43,
+   "chapter": 8,
+   "verse": 59,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"going through the midst of them, and so passed by\"",
+   "note": "The clause is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. It may come from Luke 4:30; his escape is still stated."
+  },
+  {
+   "book": 43,
+   "chapter": 9,
+   "verse": 38,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"he worshipped him\" becomes \"he threw himself at His feet\"",
+   "note": "A translation choice for the Greek prosekynēsen, which covers both bowing in homage and worship; Weymouth's rendering does not say the man worshipped Jesus."
+  },
+  {
+   "book": 43,
+   "chapter": 10,
+   "verse": 26,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"as I said unto you\"",
+   "note": "The words are in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The meaning is unchanged."
+  },
+  {
+   "book": 43,
+   "chapter": 10,
+   "verse": 38,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"know, and believe\" becomes \"know and see clearly\"",
+   "note": "The Textus Receptus reads pisteusēte (\"believe\"); P66, P75 and Vaticanus read ginōskēte (\"understand\"), which Weymouth follows. The call to believe the works stands earlier in the verse."
+  },
+  {
+   "book": 43,
+   "chapter": 11,
+   "verse": 45,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the things which Jesus did\" becomes \"His deeds\"",
+   "note": "The Textus Receptus names Jesus here; the critical text, which Weymouth follows, has only the verb, so he supplies \"He\". The referent is plain from context."
+  },
+  {
+   "book": 43,
+   "chapter": 12,
+   "verse": 4,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"Simon's son\"",
+   "note": "The words are in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. Judas is still plainly identified."
+  },
+  {
+   "book": 43,
+   "chapter": 12,
+   "verse": 47,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"believe not\" becomes \"regards them not\"",
+   "note": "The Textus Receptus reads mē pisteusē (\"believe not\"); the critical text reads mē phylaxē (\"keep not\"), which Weymouth follows. Verse 48 still speaks of rejecting his words."
+  },
+  {
+   "book": 43,
+   "chapter": 12,
+   "verse": 50,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"life everlasting\" becomes \"the Life of the Ages\"",
+   "note": "A translation choice for the Greek aiōnios: Weymouth renders it \"of the Ages\", which leaves open whether the life is endless. Other verses such as John 10:28 still say his people never perish."
+  },
+  {
+   "book": 43,
+   "chapter": 13,
+   "verse": 3,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus knowing\" becomes \"He knew\"",
+   "note": "The Textus Receptus names Jesus here; the critical text, which Weymouth follows, has only the verb, so he supplies \"He\". The referent is plain from context."
+  },
+  {
+   "book": 43,
+   "chapter": 13,
+   "verse": 32,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"If God be glorified in him\"",
+   "note": "The clause is in Sinaiticus corrected, the Byzantine text and the Textus Receptus but not in P66, Vaticanus or Codex Bezae; Weymouth follows the latter. Verse 31 still says God is glorified in him."
+  },
+  {
+   "book": 43,
+   "chapter": 15,
+   "verse": 8,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"my Father\" becomes \"God\"",
+   "note": "A translation liberty: the Greek has \"my Father\" here, as in the KJV. The Father is still God."
+  },
+  {
+   "book": 43,
+   "chapter": 16,
+   "verse": 16,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"because I go to the Father\"",
+   "note": "The clause is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. It may come from verse 17, where the disciples quote it."
+  },
+  {
+   "book": 43,
+   "chapter": 19,
+   "verse": 38,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the body of Jesus\" becomes \"the body\" (third time)",
+   "note": "The Textus Receptus repeats \"Jesus\" here; the critical text reads \"his body\", and Weymouth has \"the body\". The referent is plain from context."
+  },
+  {
+   "book": 43,
+   "chapter": 21,
+   "verse": 25,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the closing \"Amen\"",
+   "note": "The \"Amen\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. It is a liturgical ending."
+  },
+  {
+   "book": 44,
+   "chapter": 2,
+   "verse": 27,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"my soul in hell\" becomes \"me in the Unseen World\"",
+   "note": "The Greek is hadēs, the place of the dead, which the KJV renders \"hell\"; Weymouth renders it \"the Unseen World\". The promise of resurrection is unchanged."
+  },
+  {
+   "book": 44,
+   "chapter": 2,
+   "verse": 30,
+   "kind": "prophecy",
+   "weight": "major",
+   "change": "Omits \"according to the flesh, he would raise up Christ\"",
+   "note": "The words are in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The verse still says God swore to seat David's descendant on his throne, and verse 31 names the Christ."
+  },
+  {
+   "book": 44,
+   "chapter": 2,
+   "verse": 31,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"his soul... in hell\" becomes \"He... in the Unseen World\"",
+   "note": "The critical text lacks \"his soul\", and Weymouth renders hadēs \"the Unseen World\". The resurrection of Christ is unchanged."
+  },
+  {
+   "book": 44,
+   "chapter": 2,
+   "verse": 47,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"added to the church\" becomes \"added to their number\"",
+   "note": "\"To the church\" (tē ekklēsia) is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The critical text has epi to auto, \"together\"."
+  },
+  {
+   "book": 44,
+   "chapter": 3,
+   "verse": 13,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"his Son Jesus\" becomes \"His Servant Jesus\"",
+   "note": "A translation choice: the Greek pais can mean \"child\" or \"servant\", and recalls the Servant of Isaiah 52-53. Most modern versions render it \"servant\"."
+  },
+  {
+   "book": 44,
+   "chapter": 3,
+   "verse": 26,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"his Son Jesus\" becomes \"His Servant\"",
+   "note": "The Greek pais can mean \"child\" or \"servant\"; Weymouth renders it \"Servant\", and \"Jesus\" is in the Textus Receptus but not in Sinaiticus or Vaticanus. Most modern versions render it \"servant\"."
+  },
+  {
+   "book": 44,
+   "chapter": 4,
+   "verse": 24,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"thou art God\"",
+   "note": "\"Thou art God\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. He is still addressed as Sovereign Lord and Creator."
+  },
+  {
+   "book": 44,
+   "chapter": 6,
+   "verse": 3,
+   "kind": "trinity",
+   "weight": "minor",
+   "change": "\"full of the Holy Ghost\" becomes \"full of the Spirit\"",
+   "note": "\"Holy\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus or Vaticanus; Weymouth follows the latter. The Holy Spirit is plainly meant."
+  },
+  {
+   "book": 44,
+   "chapter": 7,
+   "verse": 16,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"Emmor the father of Sychem\" becomes \"Hamor at Shechem\"",
+   "note": "The Textus Receptus reads \"the father of Sychem\"; the critical text reads \"in Shechem\", which Weymouth follows. Only the description of Hamor differs."
+  },
+  {
+   "book": 44,
+   "chapter": 7,
+   "verse": 30,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"an angel of the Lord\" becomes \"an angel\"",
+   "note": "\"Of the Lord\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. Verse 31 still has the voice of the Lord speaking."
+  },
+  {
+   "book": 44,
+   "chapter": 7,
+   "verse": 37,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"the Lord your God\" becomes \"God\"; omits \"him shall ye hear\"",
+   "note": "\"The Lord your\" and \"him shall ye hear\" are in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The prophecy of a Prophet like Moses is unchanged; Acts 3:22 keeps \"him shall ye hear\"."
+  },
+  {
+   "book": 44,
+   "chapter": 8,
+   "verse": 18,
+   "kind": "trinity",
+   "weight": "minor",
+   "change": "\"the Holy Ghost\" becomes \"the Spirit\"",
+   "note": "\"Holy\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus or Vaticanus; Weymouth follows the latter. The Holy Spirit is plainly meant, as in verse 17."
+  },
+  {
+   "book": 44,
+   "chapter": 8,
+   "verse": 22,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"pray God\" becomes \"pray to the Lord\"",
+   "note": "The Textus Receptus reads \"God\"; the critical text reads \"the Lord\", which Weymouth follows. God is meant either way."
+  },
+  {
+   "book": 44,
+   "chapter": 8,
+   "verse": 37,
+   "kind": "salvation",
+   "weight": "major",
+   "change": "Whole verse omitted (the eunuch's confession of faith)",
+   "note": "The verse is in some Western witnesses and the Textus Receptus but not in the Byzantine majority, P45, P74, Sinaiticus or Vaticanus; Weymouth follows the latter. Belief as the condition of baptism is still taught in Mark 16:16 and Acts 2:38-41."
+  },
+  {
+   "book": 44,
+   "chapter": 9,
+   "verse": 5,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"it is hard for thee to kick against the pricks\"",
+   "note": "The clause is in the Latin tradition and the Textus Receptus but not in the Greek manuscripts here; Weymouth follows them. It stands in Acts 26:14."
+  },
+  {
+   "book": 44,
+   "chapter": 9,
+   "verse": 6,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits \"trembling... Lord, what wilt thou have me to do?\"",
+   "note": "Saul's question is in the Latin tradition and the Textus Receptus but not in the Greek manuscripts here; Weymouth follows them. The question stands in Acts 22:10."
+  },
+  {
+   "book": 44,
+   "chapter": 9,
+   "verse": 20,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"preached Christ\" becomes \"proclaim Jesus\"",
+   "note": "The Byzantine text and the Textus Receptus read \"Christ\"; Sinaiticus and Vaticanus read \"Jesus\", which Weymouth follows. He is still proclaimed as the Son of God."
+  },
+  {
+   "book": 44,
+   "chapter": 9,
+   "verse": 29,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord Jesus\" becomes \"the Lord\"",
+   "note": "\"Jesus\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The Lord is plainly Jesus, as in verse 27."
+  },
+  {
+   "book": 44,
+   "chapter": 10,
+   "verse": 30,
+   "kind": "other",
+   "weight": "major",
+   "change": "Omits \"I was fasting\"",
+   "note": "\"Fasting\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. Cornelius is still praying when the angel comes."
+  },
+  {
+   "book": 44,
+   "chapter": 10,
+   "verse": 33,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"commanded thee of God\" becomes \"the Lord has commanded\"",
+   "note": "The Textus Receptus reads \"God\"; the critical text reads \"the Lord\", which Weymouth follows. God is meant either way."
+  },
+  {
+   "book": 44,
+   "chapter": 10,
+   "verse": 48,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the name of the Lord\" becomes \"the name of Jesus Christ\"",
+   "note": "The Textus Receptus reads \"the Lord\"; Sinaiticus and Vaticanus read \"Jesus Christ\", which Weymouth follows. Christ is named either way."
+  },
+  {
+   "book": 44,
+   "chapter": 13,
+   "verse": 20,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"about four hundred and fifty years\" no longer dates the judges",
+   "note": "The critical text places \"about 450 years\" before the judges, covering the time up to the conquest (verse 19); the Textus Receptus dates the judges with it. Weymouth follows the critical order."
+  },
+  {
+   "book": 44,
+   "chapter": 13,
+   "verse": 44,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"word of God\" becomes \"the Lord's Message\"",
+   "note": "The Textus Receptus reads \"of God\"; Sinaiticus and others read \"of the Lord\", which Weymouth follows. God is meant either way."
+  },
+  {
+   "book": 44,
+   "chapter": 13,
+   "verse": 46,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"everlasting life\" becomes \"the Life of the Ages\"",
+   "note": "A translation choice for the Greek aiōnios: Weymouth renders it \"of the Ages\", which leaves open whether the life is endless. Other verses such as John 10:28 still say his people never perish."
+  },
+  {
+   "book": 44,
+   "chapter": 13,
+   "verse": 47,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "Adds \"He says of Christ\" to the quotation",
+   "note": "Weymouth adds words that are not in the Greek of any manuscript, applying Isaiah 49:6 to Christ; in the text Paul quotes it as the Lord's command to himself and Barnabas."
+  },
+  {
+   "book": 44,
+   "chapter": 15,
+   "verse": 11,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord Jesus Christ\" becomes \"the Lord Jesus\"",
+   "note": "\"Christ\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The meaning is unchanged."
+  },
+  {
+   "book": 44,
+   "chapter": 15,
+   "verse": 18,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"Known unto God are all his works\"",
+   "note": "The Textus Receptus and later manuscripts read \"Known unto God are all his works from the beginning\"; Sinaiticus and Vaticanus have only \"known from of old\", which Weymouth joins to verse 17. God's foreknowledge is still implied."
+  },
+  {
+   "book": 44,
+   "chapter": 15,
+   "verse": 34,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Whole verse omitted",
+   "note": "The verse is in some Western witnesses and the Textus Receptus but not in the Byzantine majority, P74, Sinaiticus or Vaticanus; Weymouth follows the latter. Verse 40 still has Silas in Antioch."
+  },
+  {
+   "book": 44,
+   "chapter": 15,
+   "verse": 40,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the grace of God\" becomes \"the grace of the Lord\"",
+   "note": "The Textus Receptus reads \"God\"; Sinaiticus and Vaticanus read \"the Lord\", which Weymouth follows. The meaning is unchanged."
+  },
+  {
+   "book": 44,
+   "chapter": 16,
+   "verse": 10,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord had called us\" becomes \"God had called us\"",
+   "note": "The Textus Receptus reads \"the Lord\"; Sinaiticus and Vaticanus read \"God\", which Weymouth follows. The meaning is unchanged."
+  },
+  {
+   "book": 44,
+   "chapter": 16,
+   "verse": 31,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord Jesus Christ\" becomes \"the Lord Jesus\"",
+   "note": "\"Christ\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. Faith in the Lord Jesus as the way of salvation is unchanged."
+  },
+  {
+   "book": 44,
+   "chapter": 17,
+   "verse": 26,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"of one blood\" becomes \"from one forefather\"",
+   "note": "\"Blood\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The critical text reads \"from one\", meaning one ancestor; the unity of mankind is unchanged."
+  },
+  {
+   "book": 44,
+   "chapter": 17,
+   "verse": 27,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"seek the Lord\" becomes \"seek God\"",
+   "note": "The Textus Receptus reads \"the Lord\"; the critical text reads \"God\", which Weymouth follows. The meaning is unchanged."
+  },
+  {
+   "book": 44,
+   "chapter": 18,
+   "verse": 5,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"pressed in the spirit\" becomes \"preaching fervently\"",
+   "note": "The Textus Receptus reads tō pneumati (\"in the spirit\"); Sinaiticus and Vaticanus read tō logō (\"with the word\"), which Weymouth renders \"preaching\". Only Paul's state differs."
+  },
+  {
+   "book": 44,
+   "chapter": 18,
+   "verse": 21,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"I must by all means keep this feast... in Jerusalem\"",
+   "note": "The sentence is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. Paul's journey to Jerusalem still follows in verse 22."
+  },
+  {
+   "book": 44,
+   "chapter": 18,
+   "verse": 25,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the things of the Lord\" becomes \"the facts about Jesus\"",
+   "note": "The Textus Receptus reads \"of the Lord\"; the critical text reads \"concerning Jesus\", which Weymouth follows. The meaning is unchanged."
+  },
+  {
+   "book": 44,
+   "chapter": 19,
+   "verse": 4,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Christ Jesus\" becomes \"Jesus\"",
+   "note": "\"Christ\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. Jesus is still the one John pointed to."
+  },
+  {
+   "book": 44,
+   "chapter": 19,
+   "verse": 10,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord Jesus\" becomes \"the Lord\"",
+   "note": "\"Jesus\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The Lord is plainly Jesus."
+  },
+  {
+   "book": 44,
+   "chapter": 19,
+   "verse": 20,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the word of God\" becomes \"the Lord's Message\"",
+   "note": "The Textus Receptus reads \"of God\"; the critical text reads \"of the Lord\", which Weymouth follows. The meaning is unchanged."
+  },
+  {
+   "book": 44,
+   "chapter": 20,
+   "verse": 21,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"our Lord Jesus Christ\" becomes \"Jesus our Lord\"",
+   "note": "\"Christ\" is in Sinaiticus and the Byzantine text but not in Vaticanus; Weymouth follows the shorter reading. Faith in Jesus as Lord is unchanged."
+  },
+  {
+   "book": 44,
+   "chapter": 20,
+   "verse": 25,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the kingdom of God\" becomes \"the Kingdom\"",
+   "note": "\"Of God\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. It is still plainly God's kingdom."
+  },
+  {
+   "book": 44,
+   "chapter": 21,
+   "verse": 20,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"glorified the Lord\" becomes \"gave the glory to God\"",
+   "note": "The Textus Receptus reads \"the Lord\"; the critical text reads \"God\", which Weymouth follows. The meaning is unchanged."
+  },
+  {
+   "book": 44,
+   "chapter": 21,
+   "verse": 25,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"that they observe no such thing, save only\"",
+   "note": "The words are in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The decree's requirements are unchanged."
+  },
+  {
+   "book": 44,
+   "chapter": 22,
+   "verse": 16,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the name of the Lord\" becomes \"His name\"",
+   "note": "\"Of the Lord\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The name is plainly the Lord's."
+  },
+  {
+   "book": 44,
+   "chapter": 23,
+   "verse": 9,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"let us not fight against God\"",
+   "note": "The words are in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The Pharisees' defence of Paul is unchanged."
+  },
+  {
+   "book": 44,
+   "chapter": 24,
+   "verse": 6,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"and would have judged according to our law\"",
+   "note": "The clause, with verse 7 and the start of verse 8, is in some later manuscripts and the Textus Receptus but not in the earliest manuscripts; Weymouth follows them. Only Tertullus' account is shorter."
+  },
+  {
+   "book": 44,
+   "chapter": 24,
+   "verse": 7,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Verse omitted",
+   "note": "The verse is in some later manuscripts and the Textus Receptus but not in the earliest manuscripts or the Byzantine majority; Weymouth follows them. Lysias' rescue of Paul is told in Acts 21:31-36."
+  },
+  {
+   "book": 44,
+   "chapter": 28,
+   "verse": 16,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the centurion delivering the prisoners to the captain",
+   "note": "The clause is in the Byzantine text and the Textus Receptus but not in the earliest manuscripts; Weymouth follows them. Paul's house arrest is unchanged."
+  },
+  {
+   "book": 44,
+   "chapter": 28,
+   "verse": 29,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Verse omitted",
+   "note": "The verse is in some later manuscripts and the Textus Receptus but not in the earliest manuscripts; Weymouth follows them. It adds only that the Jews left disputing."
+  },
+  {
+   "book": 45,
+   "chapter": 1,
+   "verse": 16,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the gospel of Christ\" becomes \"the Good News\"",
+   "note": "\"Of Christ\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The gospel is plainly the gospel of Christ, as in verse 9."
+  },
+  {
+   "book": 45,
+   "chapter": 6,
+   "verse": 11,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"our Lord\" after \"Christ Jesus\"",
+   "note": "\"Our Lord\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The meaning is unchanged."
+  },
+  {
+   "book": 45,
+   "chapter": 6,
+   "verse": 22,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"everlasting life\" becomes \"the Life of the Ages\"",
+   "note": "A translation choice for the Greek aiōnios: Weymouth renders it \"of the Ages\", which leaves open whether the life is endless. Other verses such as John 10:28 still say his people never perish."
+  },
+  {
+   "book": 45,
+   "chapter": 8,
+   "verse": 1,
+   "kind": "salvation",
+   "weight": "major",
+   "change": "Omits \"who walk not after the flesh, but after the Spirit\"",
+   "note": "The clause is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. It may come from verse 4, where it still stands."
+  },
+  {
+   "book": 45,
+   "chapter": 8,
+   "verse": 4,
+   "kind": "trinity",
+   "weight": "minor",
+   "change": "\"after the Spirit\" becomes \"by our spiritual natures\"",
+   "note": "A translation choice: the Greek pneuma can mean the Holy Spirit or the human spirit, and Weymouth takes it here as man's spiritual nature. Most versions read the Holy Spirit; the Spirit of God is still named in verse 9."
+  },
+  {
+   "book": 45,
+   "chapter": 8,
+   "verse": 5,
+   "kind": "trinity",
+   "weight": "minor",
+   "change": "\"after the Spirit... things of the Spirit\" becomes \"spiritual natures\"",
+   "note": "A translation choice: the Greek pneuma can mean the Holy Spirit or the human spirit, and Weymouth takes it here as man's spiritual nature. Most versions read the Holy Spirit; the Spirit of God is still named in verse 9."
+  },
+  {
+   "book": 45,
+   "chapter": 8,
+   "verse": 9,
+   "kind": "trinity",
+   "weight": "minor",
+   "change": "\"in the Spirit\" becomes \"to spiritual things\"",
+   "note": "A translation choice: Weymouth takes the first pneuma as spiritual things rather than the Holy Spirit. The Spirit of God and of Christ is still named in the same verse."
+  },
+  {
+   "book": 45,
+   "chapter": 8,
+   "verse": 15,
+   "kind": "trinity",
+   "weight": "minor",
+   "change": "\"the Spirit of adoption\" becomes \"a deep inward conviction\"",
+   "note": "A translation choice: Weymouth renders pneuma here as an inner consciousness rather than the Holy Spirit. Verse 16 still says the Spirit himself bears witness."
+  },
+  {
+   "book": 45,
+   "chapter": 8,
+   "verse": 29,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the firstborn\" becomes \"the Eldest\"",
+   "note": "A translation choice for the Greek prōtotokos, \"firstborn\". \"Eldest\" keeps the idea of rank among many brothers."
+  },
+  {
+   "book": 45,
+   "chapter": 9,
+   "verse": 28,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"in righteousness: because a short work\"",
+   "note": "The words, from Isaiah 10:22-23 in the Septuagint, are in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The swift reckoning is unchanged."
+  },
+  {
+   "book": 45,
+   "chapter": 10,
+   "verse": 17,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the word of God\" becomes \"spoken by Christ\"",
+   "note": "The Textus Receptus reads \"of God\"; P46, Sinaiticus and Vaticanus read \"of Christ\", which Weymouth follows. The message is still divine."
+  },
+  {
+   "book": 45,
+   "chapter": 11,
+   "verse": 6,
+   "kind": "salvation",
+   "weight": "major",
+   "change": "Omits second half: \"But if it be of works...\"",
+   "note": "The clause is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The contrast between grace and works stands in the first half of the verse."
+  },
+  {
+   "book": 45,
+   "chapter": 13,
+   "verse": 2,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"damnation\" becomes \"punishment\"",
+   "note": "A translation choice: the Greek krima means \"judgment\", which the KJV renders \"damnation\" here. The warning to those who resist is unchanged."
+  },
+  {
+   "book": 45,
+   "chapter": 14,
+   "verse": 4,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"God is able\" becomes \"the Master can\"",
+   "note": "The Textus Receptus reads \"God\"; P46, Sinaiticus and Vaticanus read \"the Lord\", which Weymouth renders \"the Master\". The point is unchanged."
+  },
+  {
+   "book": 45,
+   "chapter": 14,
+   "verse": 6,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"he that regardeth not the day... doth not regard it\"",
+   "note": "The clause is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The principle of acting for the Lord is unchanged."
+  },
+  {
+   "book": 45,
+   "chapter": 14,
+   "verse": 10,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"judgment seat of Christ\" becomes \"stand before God to be judged\"",
+   "note": "The Textus Receptus reads \"of Christ\"; Sinaiticus and Vaticanus read \"of God\", which Weymouth follows. 2 Corinthians 5:10 still speaks of the judgment seat of Christ."
+  },
+  {
+   "book": 45,
+   "chapter": 15,
+   "verse": 8,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus Christ\" becomes \"Christ\"",
+   "note": "\"Jesus\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The meaning is unchanged."
+  },
+  {
+   "book": 45,
+   "chapter": 15,
+   "verse": 19,
+   "kind": "trinity",
+   "weight": "minor",
+   "change": "\"the Spirit of God\" becomes \"the Holy Spirit\"",
+   "note": "The Textus Receptus reads \"of God\"; some manuscripts read \"Holy\" and Vaticanus has only \"the Spirit\". Weymouth follows the \"Holy\" reading; the same Spirit is meant."
+  },
+  {
+   "book": 45,
+   "chapter": 16,
+   "verse": 18,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"our Lord Jesus Christ\" becomes \"Christ our Lord\"",
+   "note": "\"Jesus\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The meaning is unchanged."
+  },
+  {
+   "book": 45,
+   "chapter": 16,
+   "verse": 20,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the closing \"Amen\"",
+   "note": "The \"Amen\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. It is a liturgical ending."
+  },
+  {
+   "book": 45,
+   "chapter": 16,
+   "verse": 24,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Verse omitted",
+   "note": "The benediction is in the Byzantine text and the Textus Receptus but not in P46, Sinaiticus or Vaticanus; Weymouth follows the latter. The same blessing stands in verse 20."
+  },
+  {
+   "book": 45,
+   "chapter": 16,
+   "verse": 27,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription \"Written to the Romans from Corinthus...\"",
+   "note": "The subscription is a later scribal note, not part of the letter in any early manuscript; the KJV prints it from the Textus Receptus."
+  },
+  {
+   "book": 46,
+   "chapter": 2,
+   "verse": 13,
+   "kind": "trinity",
+   "weight": "minor",
+   "change": "\"the Holy Ghost\" becomes \"the Spirit\"",
+   "note": "\"Holy\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The Holy Spirit is plainly meant, as in verse 12."
+  },
+  {
+   "book": 46,
+   "chapter": 4,
+   "verse": 20,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"the kingdom of God\" becomes \"Apostolic authority\"",
+   "note": "A translation liberty: the Greek has \"the kingdom of God\" in all manuscripts. Weymouth renders it by what he takes it to mean in context."
+  },
+  {
+   "book": 46,
+   "chapter": 5,
+   "verse": 4,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Twice \"Lord Jesus Christ\" becomes \"Lord Jesus\"",
+   "note": "\"Christ\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The meaning is unchanged."
+  },
+  {
+   "book": 46,
+   "chapter": 6,
+   "verse": 20,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits \"and in your spirit, which are God's\"",
+   "note": "The clause is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The call to glorify God is unchanged."
+  },
+  {
+   "book": 46,
+   "chapter": 7,
+   "verse": 5,
+   "kind": "other",
+   "weight": "major",
+   "change": "Omits \"fasting\"",
+   "note": "\"Fasting\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. Fasting is still taught in Matthew 6:16-18."
+  },
+  {
+   "book": 46,
+   "chapter": 7,
+   "verse": 36,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"his virgin\" becomes \"his still unmarried daughter\"",
+   "note": "A translation choice: the Greek parthenos here is read by some as a man's betrothed and by others as his daughter; Weymouth takes the second view."
+  },
+  {
+   "book": 46,
+   "chapter": 7,
+   "verse": 37,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"keep his virgin\" becomes \"keep his daughter unmarried\"",
+   "note": "A translation choice: the Greek parthenos here is read by some as a man's betrothed and by others as his daughter; Weymouth takes the second view."
+  },
+  {
+   "book": 46,
+   "chapter": 9,
+   "verse": 1,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus Christ our Lord\" becomes \"Jesus, our Lord\"",
+   "note": "\"Christ\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The meaning is unchanged."
+  },
+  {
+   "book": 46,
+   "chapter": 9,
+   "verse": 18,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the gospel of Christ\" becomes \"the Good News\"",
+   "note": "\"Of Christ\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The gospel is still Christ's."
+  },
+  {
+   "book": 46,
+   "chapter": 10,
+   "verse": 9,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"tempt Christ\" becomes \"test the Lord\"",
+   "note": "The Byzantine text, P46 and the Textus Receptus read \"Christ\"; Sinaiticus and Vaticanus read \"the Lord\", which Weymouth follows. With \"Christ\" the verse places Christ with Israel in the wilderness, as verse 4 also does."
+  },
+  {
+   "book": 46,
+   "chapter": 10,
+   "verse": 28,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"for the earth is the Lord's...\"",
+   "note": "The quotation is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. It stands in verse 26."
+  },
+  {
+   "book": 46,
+   "chapter": 11,
+   "verse": 24,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"Take, eat\"",
+   "note": "\"Take, eat\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. It may come from Matthew 26:26, where it still stands."
+  },
+  {
+   "book": 46,
+   "chapter": 11,
+   "verse": 29,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits \"unworthily\" and \"Lord's\" before \"body\"",
+   "note": "Both words are in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. \"Unworthily\" still stands in verse 27."
+  },
+  {
+   "book": 46,
+   "chapter": 15,
+   "verse": 47,
+   "kind": "deity",
+   "weight": "major",
+   "change": "Omits \"the Lord\": \"the second man is from Heaven\"",
+   "note": "\"The Lord\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. Christ's heavenly origin is still stated."
+  },
+  {
+   "book": 46,
+   "chapter": 16,
+   "verse": 22,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord Jesus Christ\" becomes \"the Lord\"",
+   "note": "\"Jesus Christ\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The Lord is plainly Jesus."
+  },
+  {
+   "book": 46,
+   "chapter": 16,
+   "verse": 23,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"our Lord Jesus Christ\" becomes \"the Lord Jesus\"",
+   "note": "\"Our\" and \"Christ\" are in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The meaning is unchanged."
+  },
+  {
+   "book": 46,
+   "chapter": 16,
+   "verse": 24,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"Amen\" and the subscription about Philippi",
+   "note": "The \"Amen\" is in the Byzantine text but not in Vaticanus; the subscription is a later scribal note, and its \"from Philippi\" conflicts with 16:8, which places Paul at Ephesus."
+  },
+  {
+   "book": 47,
+   "chapter": 1,
+   "verse": 6,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Clauses reordered; second \"and salvation\" dropped",
+   "note": "The critical text orders the clauses differently from the Textus Receptus and has \"salvation\" only once; Weymouth follows it. The meaning is unchanged."
+  },
+  {
+   "book": 47,
+   "chapter": 4,
+   "verse": 6,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus Christ\" becomes \"Christ\"",
+   "note": "\"Jesus\" is in Sinaiticus and the Byzantine text but not in P46 or Vaticanus; Weymouth follows the shorter reading. The meaning is unchanged."
+  },
+  {
+   "book": 47,
+   "chapter": 4,
+   "verse": 10,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord Jesus\" becomes \"Jesus\"",
+   "note": "\"The Lord\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The meaning is unchanged."
+  },
+  {
+   "book": 47,
+   "chapter": 5,
+   "verse": 18,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus Christ\" becomes \"Christ\"",
+   "note": "\"Jesus\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The meaning is unchanged."
+  },
+  {
+   "book": 47,
+   "chapter": 13,
+   "verse": 14,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"Amen\" and the subscription",
+   "note": "The \"Amen\" is in the Byzantine text but not in the earliest manuscripts, and the subscription is a later scribal note; Weymouth follows the earliest manuscripts."
+  },
+  {
+   "book": 48,
+   "chapter": 1,
+   "verse": 15,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"it pleased God\" becomes \"He who set me apart\"",
+   "note": "\"God\" is in Sinaiticus and the Byzantine text but not in P46 or Vaticanus; Weymouth follows the shorter reading. God is plainly meant."
+  },
+  {
+   "book": 48,
+   "chapter": 3,
+   "verse": 17,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"in Christ\" after \"confirmed before of God\"",
+   "note": "\"In Christ\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The covenant is still God's, and verse 16 names Christ as the seed."
+  },
+  {
+   "book": 48,
+   "chapter": 4,
+   "verse": 7,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"heir of God through Christ\" becomes \"heir... through God's own act\"",
+   "note": "The Textus Receptus reads \"an heir of God through Christ\"; P46, Sinaiticus and Vaticanus read \"an heir through God\", which Weymouth follows. Christ's part is still plain from verses 4-6."
+  },
+  {
+   "book": 48,
+   "chapter": 6,
+   "verse": 8,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"life everlasting\" becomes \"the Life of the Ages\"",
+   "note": "A translation choice for the Greek aiōnios: Weymouth renders it \"of the Ages\", which leaves open whether the life is endless. Other verses such as John 10:28 still say his people never perish."
+  },
+  {
+   "book": 48,
+   "chapter": 6,
+   "verse": 15,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"in Christ Jesus\"",
+   "note": "\"In Christ Jesus\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. It may come from Galatians 5:6, where it still stands."
+  },
+  {
+   "book": 48,
+   "chapter": 6,
+   "verse": 17,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord Jesus\" becomes \"Jesus as my Master\"",
+   "note": "\"The Lord\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. Weymouth adds \"as my Master\" in its place."
+  },
+  {
+   "book": 48,
+   "chapter": 6,
+   "verse": 18,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription \"To the Galatians written from Rome\"",
+   "note": "The subscription is a later scribal note, not part of the letter in any early manuscript; the KJV prints it from the Textus Receptus."
+  },
+  {
+   "book": 49,
+   "chapter": 2,
+   "verse": 13,
+   "kind": "atonement",
+   "weight": "minor",
+   "change": "\"the blood of Christ\" becomes \"the death of Christ\"",
+   "note": "A translation liberty: the Greek has haima, \"blood\", in all manuscripts. Weymouth renders it by what it stands for; reconciliation through Christ's death is unchanged."
+  },
+  {
+   "book": 49,
+   "chapter": 3,
+   "verse": 9,
+   "kind": "deity",
+   "weight": "major",
+   "change": "Omits \"by Jesus Christ\" after \"created all things\"",
+   "note": "\"By Jesus Christ\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. Christ's part in creation is still stated in Colossians 1:16 and John 1:3."
+  },
+  {
+   "book": 49,
+   "chapter": 3,
+   "verse": 14,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"of our Lord Jesus Christ\" after \"the Father\"",
+   "note": "The phrase is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The prayer is still to the Father."
+  },
+  {
+   "book": 49,
+   "chapter": 5,
+   "verse": 9,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"fruit of the Spirit\" becomes \"effect of the Light\"",
+   "note": "The Textus Receptus reads \"Spirit\"; P46, Sinaiticus and Vaticanus read \"light\", which Weymouth follows. \"The fruit of the Spirit\" still stands in Galatians 5:22."
+  },
+  {
+   "book": 49,
+   "chapter": 5,
+   "verse": 21,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the fear of God\" becomes \"reverence for Christ\"",
+   "note": "The Textus Receptus reads \"God\"; the critical text reads \"Christ\", which Weymouth follows. The meaning is unchanged."
+  },
+  {
+   "book": 49,
+   "chapter": 5,
+   "verse": 29,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord\" becomes \"Christ\"",
+   "note": "The Textus Receptus reads \"the Lord\"; the critical text reads \"Christ\", which Weymouth follows. The meaning is unchanged."
+  },
+  {
+   "book": 49,
+   "chapter": 6,
+   "verse": 24,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"Amen\" and the subscription",
+   "note": "The \"Amen\" is in the Byzantine text but not in the earliest manuscripts, and the subscription is a later scribal note; Weymouth follows the earliest manuscripts."
+  },
+  {
+   "book": 50,
+   "chapter": 1,
+   "verse": 16,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Verses 16 and 17 are in the reverse order",
+   "note": "The critical text has the two verses the other way round; Weymouth follows it. Nothing is lost."
+  },
+  {
+   "book": 50,
+   "chapter": 2,
+   "verse": 6,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"thought it not robbery\" becomes \"a treasure to be tightly grasped\"",
+   "note": "A translation choice for the Greek harpagmos. The KJV says Christ rightly claimed equality with God; Weymouth says he did not cling to it. Both affirm that he had it."
+  },
+  {
+   "book": 50,
+   "chapter": 3,
+   "verse": 12,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Christ Jesus\" becomes \"Christ\"",
+   "note": "\"Jesus\" is in Sinaiticus and the Byzantine text but not in Vaticanus or Codex Bezae; Weymouth follows the shorter reading. The meaning is unchanged."
+  },
+  {
+   "book": 50,
+   "chapter": 4,
+   "verse": 13,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"through Christ\" becomes \"through Him\"",
+   "note": "\"Christ\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. Christ is plainly meant."
+  },
+  {
+   "book": 50,
+   "chapter": 4,
+   "verse": 23,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "\"with you all. Amen\" becomes \"with your spirits\"; subscription omitted",
+   "note": "The critical text reads \"with your spirit\" and lacks the \"Amen\"; the subscription is a later scribal note. Weymouth follows the earliest manuscripts."
+  },
+  {
+   "book": 51,
+   "chapter": 1,
+   "verse": 2,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"and the Lord Jesus Christ\" from the greeting",
+   "note": "The phrase is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. It may come from the other letters' greetings; Christ is named in verse 1."
+  },
+  {
+   "book": 51,
+   "chapter": 1,
+   "verse": 14,
+   "kind": "atonement",
+   "weight": "major",
+   "change": "Omits \"through his blood\"",
+   "note": "The phrase is in some later manuscripts and the Textus Receptus but not in Sinaiticus, Vaticanus or the Byzantine majority; Weymouth follows the former. Redemption through Christ's blood is still stated in Ephesians 1:7 and Colossians 1:20."
+  },
+  {
+   "book": 51,
+   "chapter": 1,
+   "verse": 28,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Christ Jesus\" becomes \"Christ\"",
+   "note": "\"Jesus\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The meaning is unchanged."
+  },
+  {
+   "book": 51,
+   "chapter": 2,
+   "verse": 2,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"of the Father, and of Christ\" becomes \"which is Christ\"",
+   "note": "The manuscripts vary widely here; P46 and Vaticanus read \"of God, Christ\", which Weymouth follows. The Textus Receptus distinguishes the Father and Christ."
+  },
+  {
+   "book": 51,
+   "chapter": 3,
+   "verse": 13,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Christ forgave\" becomes \"the Lord has forgiven\"",
+   "note": "The Textus Receptus reads \"Christ\"; the critical text reads \"the Lord\", which Weymouth follows. The meaning is unchanged."
+  },
+  {
+   "book": 51,
+   "chapter": 3,
+   "verse": 15,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the peace of God\" becomes \"the peace which Christ gives\"",
+   "note": "The Textus Receptus reads \"God\"; the critical text reads \"Christ\", which Weymouth follows. The meaning is unchanged."
+  },
+  {
+   "book": 51,
+   "chapter": 3,
+   "verse": 16,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"to the Lord\" becomes \"to God\"",
+   "note": "The Textus Receptus reads \"the Lord\"; the critical text reads \"God\", which Weymouth follows. The meaning is unchanged."
+  },
+  {
+   "book": 51,
+   "chapter": 3,
+   "verse": 22,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"fearing God\" becomes \"fear the Lord\"",
+   "note": "The Textus Receptus reads \"God\"; the critical text reads \"the Lord\", which Weymouth follows. The meaning is unchanged."
+  },
+  {
+   "book": 51,
+   "chapter": 4,
+   "verse": 18,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"Amen\" and the subscription",
+   "note": "The \"Amen\" is in the Byzantine text but not in the earliest manuscripts, and the subscription is a later scribal note; Weymouth follows the earliest manuscripts."
+  },
+  {
+   "book": 52,
+   "chapter": 1,
+   "verse": 1,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"from God our Father, and the Lord Jesus Christ\"",
+   "note": "The phrase is in Sinaiticus and the Byzantine text but not in Vaticanus; Weymouth follows the shorter reading. God the Father and Christ are named earlier in the verse."
+  },
+  {
+   "book": 52,
+   "chapter": 2,
+   "verse": 19,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"Christ\" after \"Lord Jesus\"",
+   "note": "\"Christ\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The meaning is unchanged."
+  },
+  {
+   "book": 52,
+   "chapter": 3,
+   "verse": 11,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"Christ\" after \"Lord Jesus\"",
+   "note": "\"Christ\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The meaning is unchanged."
+  },
+  {
+   "book": 52,
+   "chapter": 3,
+   "verse": 13,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"Christ\" after \"Lord Jesus\"",
+   "note": "\"Christ\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The meaning is unchanged."
+  },
+  {
+   "book": 52,
+   "chapter": 5,
+   "verse": 28,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"Amen\" and the subscription",
+   "note": "The \"Amen\" is in the Byzantine text but not in the earliest manuscripts, and the subscription is a later scribal note; Weymouth follows the earliest manuscripts."
+  },
+  {
+   "book": 53,
+   "chapter": 1,
+   "verse": 8,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"Christ\" after \"Lord Jesus\"",
+   "note": "\"Christ\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The meaning is unchanged."
+  },
+  {
+   "book": 53,
+   "chapter": 1,
+   "verse": 12,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"Christ\" after the first \"Lord Jesus\"",
+   "note": "\"Christ\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The meaning is unchanged."
+  },
+  {
+   "book": 53,
+   "chapter": 2,
+   "verse": 2,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the day of Christ\" becomes \"the day of the Lord\"",
+   "note": "The Textus Receptus reads \"of Christ\"; the critical text reads \"of the Lord\", which Weymouth follows. The meaning is unchanged."
+  },
+  {
+   "book": 53,
+   "chapter": 2,
+   "verse": 4,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"as God\" before \"taking his seat in the temple\"",
+   "note": "\"As God\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The verse still ends with him claiming to be God."
+  },
+  {
+   "book": 53,
+   "chapter": 2,
+   "verse": 8,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord\" becomes \"the Lord Jesus\"",
+   "note": "The Textus Receptus reads \"the Lord\"; Sinaiticus and others read \"the Lord Jesus\", which Weymouth follows. Christ is meant either way."
+  },
+  {
+   "book": 53,
+   "chapter": 3,
+   "verse": 6,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"in the name of our Lord Jesus Christ\" becomes \"by... the Lord\"",
+   "note": "A translation liberty: the Greek names the Lord Jesus Christ here in all manuscripts. Weymouth's paraphrase leaves the name out."
+  },
+  {
+   "book": 53,
+   "chapter": 3,
+   "verse": 18,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"Amen\" and the subscription",
+   "note": "The \"Amen\" is in the Byzantine text but not in the earliest manuscripts, and the subscription is a later scribal note; Weymouth follows the earliest manuscripts."
+  },
+  {
+   "book": 54,
+   "chapter": 1,
+   "verse": 1,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Lord Jesus Christ\" becomes \"Christ Jesus\"",
+   "note": "\"Lord\" and this word order are in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. Christ is still called \"our hope\"."
+  },
+  {
+   "book": 54,
+   "chapter": 1,
+   "verse": 16,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"life everlasting\" becomes \"the Life of the Ages\"",
+   "note": "A translation choice for the Greek aiōnios: Weymouth renders it \"of the Ages\", which leaves open whether the life is endless. Other verses such as John 10:28 still say his people never perish."
+  },
+  {
+   "book": 54,
+   "chapter": 2,
+   "verse": 7,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"in Christ\" from \"I speak the truth\"",
+   "note": "\"In Christ\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. Paul's oath of truthfulness is unchanged."
+  },
+  {
+   "book": 54,
+   "chapter": 3,
+   "verse": 16,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"God was manifest in the flesh\" becomes \"Christ appeared in human form\"",
+   "note": "The Textus Receptus and later manuscripts read theos (\"God\"); Sinaiticus and other early manuscripts read hos (\"who\"), which Weymouth renders \"Christ\". Christ's deity is still stated in Titus 2:13 and John 1:1."
+  },
+  {
+   "book": 54,
+   "chapter": 4,
+   "verse": 12,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"in spirit\"",
+   "note": "The phrase is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The other virtues are unchanged."
+  },
+  {
+   "book": 54,
+   "chapter": 5,
+   "verse": 12,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"Having damnation\" becomes \"they incur disapproval\"",
+   "note": "A translation choice for the Greek krima, \"judgment\"; \"disapproval\" is much weaker than the KJV's \"damnation\" or most versions' \"condemnation\"."
+  },
+  {
+   "book": 54,
+   "chapter": 5,
+   "verse": 21,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord Jesus Christ\" becomes \"Christ Jesus\"",
+   "note": "\"Lord\" and this word order are in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The meaning is unchanged."
+  },
+  {
+   "book": 54,
+   "chapter": 6,
+   "verse": 5,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"from such withdraw thyself\"",
+   "note": "The clause is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The warning against such teachers is unchanged."
+  },
+  {
+   "book": 54,
+   "chapter": 6,
+   "verse": 21,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "\"with thee\" becomes \"with you all\"; omits \"Amen\" and subscription",
+   "note": "The critical text reads \"with you\" (plural) and lacks the \"Amen\"; the subscription is a later scribal note. Weymouth follows the earliest manuscripts."
+  },
+  {
+   "book": 55,
+   "chapter": 2,
+   "verse": 14,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"before the Lord\" becomes \"in the presence of God\"",
+   "note": "The Textus Receptus reads \"the Lord\"; the critical text reads \"God\", which Weymouth follows. The meaning is unchanged."
+  },
+  {
+   "book": 55,
+   "chapter": 2,
+   "verse": 19,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the name of Christ\" becomes \"the Name of the Lord\"",
+   "note": "The Textus Receptus reads \"Christ\"; the critical text reads \"the Lord\", which Weymouth follows. The meaning is unchanged."
+  },
+  {
+   "book": 55,
+   "chapter": 4,
+   "verse": 1,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord Jesus Christ\" becomes \"Christ Jesus\"",
+   "note": "\"The Lord\" and this word order are in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. Christ is still the judge of the living and the dead."
+  },
+  {
+   "book": 55,
+   "chapter": 4,
+   "verse": 22,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"The Lord Jesus Christ\" becomes \"the Lord\"; omits \"Amen\" and subscription",
+   "note": "\"Jesus Christ\" and the \"Amen\" are in the Byzantine text but not in Sinaiticus; the subscription is a later scribal note. Weymouth follows the earliest manuscripts."
+  },
+  {
+   "book": 56,
+   "chapter": 1,
+   "verse": 4,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"mercy\" and \"Lord\" from the greeting",
+   "note": "\"Mercy\" and \"Lord\" are in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. Christ Jesus is still called our Saviour."
+  },
+  {
+   "book": 56,
+   "chapter": 2,
+   "verse": 11,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"that bringeth salvation\" becomes \"with healing power\"",
+   "note": "A translation choice: the Greek sōtērios means \"saving, bringing salvation\"; Weymouth renders it \"healing\". Salvation is named in verses 13-14."
+  },
+  {
+   "book": 56,
+   "chapter": 3,
+   "verse": 15,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"Amen\" and the subscription",
+   "note": "The \"Amen\" is in the Byzantine text but not in the earliest manuscripts, and the subscription is a later scribal note; Weymouth follows the earliest manuscripts."
+  },
+  {
+   "book": 57,
+   "chapter": 1,
+   "verse": 6,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"in you in Christ Jesus\" becomes \"in us toward Christ\"",
+   "note": "The Textus Receptus reads \"in you in Christ Jesus\"; the critical text reads \"in us unto Christ\", which Weymouth follows. Only the wording of Paul's prayer differs."
+  },
+  {
+   "book": 57,
+   "chapter": 1,
+   "verse": 20,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Second \"in the Lord\" becomes \"in Christ\"",
+   "note": "The Textus Receptus reads \"in the Lord\"; the critical text reads \"in Christ\", which Weymouth follows. The meaning is unchanged."
+  },
+  {
+   "book": 57,
+   "chapter": 1,
+   "verse": 25,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"Amen\" and the subscription",
+   "note": "The \"Amen\" is in the Byzantine text but not in the earliest manuscripts, and the subscription is a later scribal note; Weymouth follows the earliest manuscripts."
+  },
+  {
+   "book": 58,
+   "chapter": 1,
+   "verse": 3,
+   "kind": "atonement",
+   "weight": "minor",
+   "change": "Omits \"by himself\" and \"our\" from purging sins",
+   "note": "\"By himself\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. Christ is still the one who made purification for sins."
+  },
+  {
+   "book": 58,
+   "chapter": 3,
+   "verse": 1,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Christ Jesus\" becomes \"Jesus\"",
+   "note": "\"Christ\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The meaning is unchanged."
+  },
+  {
+   "book": 58,
+   "chapter": 7,
+   "verse": 21,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"after the order of Melchisedec\"",
+   "note": "The phrase is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The Melchizedek priesthood is still stated in verse 17."
+  },
+  {
+   "book": 58,
+   "chapter": 10,
+   "verse": 9,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"O God\"",
+   "note": "\"O God\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. It may come from verse 7, where it still stands."
+  },
+  {
+   "book": 58,
+   "chapter": 10,
+   "verse": 30,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"saith the Lord\"",
+   "note": "\"Saith the Lord\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The quotation is still of the Lord, from Deuteronomy 32:35."
+  },
+  {
+   "book": 58,
+   "chapter": 10,
+   "verse": 34,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"in heaven\"; \"me in my bonds\" becomes \"those who were imprisoned\"",
+   "note": "The Textus Receptus reads \"me in my bonds\" and \"in heaven\"; the critical text reads \"the prisoners\" and lacks \"in heaven\". Weymouth follows it."
+  },
+  {
+   "book": 58,
+   "chapter": 11,
+   "verse": 17,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"only begotten son\" becomes \"only son\"",
+   "note": "A translation choice for the Greek monogenēs, here used of Isaac; Weymouth renders it \"only\"."
+  },
+  {
+   "book": 58,
+   "chapter": 13,
+   "verse": 25,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription \"Written to the Hebrews from Italy\"",
+   "note": "The subscription is a later scribal note, not part of the letter in any early manuscript; the KJV prints it from the Textus Receptus."
+  },
+  {
+   "book": 59,
+   "chapter": 3,
+   "verse": 9,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"God, even the Father\" becomes \"the Lord and Father\"",
+   "note": "The Textus Receptus reads \"God\"; the critical text reads \"the Lord\", which Weymouth follows. The meaning is unchanged."
+  },
+  {
+   "book": 60,
+   "chapter": 1,
+   "verse": 22,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"through the Spirit\" and \"pure\"",
+   "note": "\"Through the Spirit\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The call to love one another is unchanged."
+  },
+  {
+   "book": 60,
+   "chapter": 1,
+   "verse": 23,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"for ever\"",
+   "note": "\"For ever\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The word is still called ever-living and enduring."
+  },
+  {
+   "book": 60,
+   "chapter": 2,
+   "verse": 2,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "Adds \"to salvation\"",
+   "note": "\"Unto salvation\" is in P72, Sinaiticus and Vaticanus but not in the Byzantine text or the Textus Receptus; Weymouth follows the former. Growth in the word is still the point."
+  },
+  {
+   "book": 60,
+   "chapter": 3,
+   "verse": 15,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"the Lord God\" becomes \"Christ as Lord\"",
+   "note": "The Textus Receptus reads \"the Lord God\"; P72, Sinaiticus and Vaticanus read \"Christ as Lord\", which Weymouth follows. The verse then applies Isaiah 8:13, about the LORD of hosts, to Christ."
+  },
+  {
+   "book": 60,
+   "chapter": 4,
+   "verse": 1,
+   "kind": "atonement",
+   "weight": "minor",
+   "change": "Omits \"for us\"",
+   "note": "\"For us\" is in the Byzantine text and the Textus Receptus but not in Vaticanus or some other witnesses; Weymouth follows the shorter reading. 1 Peter 3:18 still says Christ suffered for sins, the just for the unjust."
+  },
+  {
+   "book": 60,
+   "chapter": 5,
+   "verse": 10,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"Jesus\" and \"settle\"; prayer becomes promise",
+   "note": "\"Jesus\" and \"settle\" are in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The critical text also has the verbs as future (\"will\"), as a promise."
+  },
+  {
+   "book": 60,
+   "chapter": 5,
+   "verse": 14,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"Jesus\" and \"Amen\"",
+   "note": "\"Jesus\" and the \"Amen\" are in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The meaning is unchanged."
+  },
+  {
+   "book": 61,
+   "chapter": 2,
+   "verse": 17,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "Omits \"for ever\" from the reserved darkness",
+   "note": "\"For ever\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. It may come from Jude 13, where it still stands."
+  },
+  {
+   "book": 61,
+   "chapter": 3,
+   "verse": 18,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the closing \"Amen\"",
+   "note": "The \"Amen\" is in Sinaiticus and the Byzantine text but not in Vaticanus; Weymouth follows the shorter reading. It is a liturgical ending."
+  },
+  {
+   "book": 62,
+   "chapter": 1,
+   "verse": 7,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus Christ his Son\" becomes \"Jesus, His Son\"",
+   "note": "\"Christ\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The cleansing power of his blood is unchanged."
+  },
+  {
+   "book": 62,
+   "chapter": 4,
+   "verse": 3,
+   "kind": "deity",
+   "weight": "major",
+   "change": "Omits \"Christ is come in the flesh\"",
+   "note": "The words are in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. They stand in verse 2, which the critical text keeps."
+  },
+  {
+   "book": 62,
+   "chapter": 4,
+   "verse": 9,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"only begotten Son\" becomes \"only Son\"",
+   "note": "A translation choice for the Greek monogenēs, which can mean \"only begotten\" or \"one and only\"; Weymouth renders it \"only\". The Sonship is still stated."
+  },
+  {
+   "book": 62,
+   "chapter": 5,
+   "verse": 7,
+   "kind": "trinity",
+   "weight": "major",
+   "change": "Omits the heavenly witnesses: \"the Father, the Word, and the Holy Ghost\"",
+   "note": "The words are in a few late Greek manuscripts, some Latin ones and the Textus Receptus, but not in the Greek manuscripts before the 1500s; Weymouth follows them. The Trinity is still taught elsewhere, as in Matthew 28:19."
+  },
+  {
+   "book": 62,
+   "chapter": 5,
+   "verse": 8,
+   "kind": "trinity",
+   "weight": "major",
+   "change": "Omits \"in earth\"",
+   "note": "\"In earth\" belongs with the heavenly witnesses of verse 7 and has the same textual history; the three witnesses, the Spirit, water and blood, remain."
+  },
+  {
+   "book": 62,
+   "chapter": 5,
+   "verse": 13,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"and that ye may believe on the name\"",
+   "note": "The clause is in the Byzantine text and the Textus Receptus but not in Sinaiticus or Vaticanus; Weymouth follows the latter. He also renders \"eternal life\" as \"the Life of the Ages\"."
+  },
+  {
+   "book": 62,
+   "chapter": 5,
+   "verse": 18,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"keepeth himself\" becomes \"He who is God's Child keeps him\"",
+   "note": "The Textus Receptus reads heauton (\"himself\"); Vaticanus and others read auton (\"him\"), which Weymouth follows and takes of Christ. Either way the believer is kept from the evil one."
+  },
+  {
+   "book": 62,
+   "chapter": 5,
+   "verse": 21,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the closing \"Amen\"",
+   "note": "The \"Amen\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. It is a liturgical ending."
+  },
+  {
+   "book": 63,
+   "chapter": 1,
+   "verse": 3,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord Jesus Christ\" becomes \"Jesus Christ\"",
+   "note": "\"The Lord\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. He is still called the Son of the Father."
+  },
+  {
+   "book": 63,
+   "chapter": 1,
+   "verse": 9,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"transgresseth\" becomes \"presses on in advance\"; second \"of Christ\" dropped",
+   "note": "The Textus Receptus reads parabainōn (\"transgresses\"); Sinaiticus and Vaticanus read proagōn (\"goes ahead\"), which Weymouth follows. The warning against leaving Christ's teaching is unchanged."
+  },
+  {
+   "book": 63,
+   "chapter": 1,
+   "verse": 13,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the closing \"Amen\"",
+   "note": "The \"Amen\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. It is a liturgical ending."
+  },
+  {
+   "book": 65,
+   "chapter": 1,
+   "verse": 4,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"only Lord God, and our Lord\" becomes \"only Sovereign and Lord\"",
+   "note": "\"God\" is in the Byzantine text and the Textus Receptus but not in P72, Sinaiticus or Vaticanus; Weymouth follows the latter. In the shorter text both titles name Jesus Christ."
+  },
+  {
+   "book": 65,
+   "chapter": 1,
+   "verse": 13,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"for ever\" becomes \"of age-long duration\"",
+   "note": "A translation choice for the Greek eis aiōna, \"for ever\"; Weymouth's \"age-long\" can read as limited rather than endless."
+  },
+  {
+   "book": 65,
+   "chapter": 1,
+   "verse": 19,
+   "kind": "trinity",
+   "weight": "minor",
+   "change": "\"having not the Spirit\" becomes \"wholly unspiritual\"",
+   "note": "A translation choice: the Greek pneuma mē echontes can mean \"not having the Spirit\" or \"devoid of spirit\"; Weymouth takes the second. Verses 19-20 still contrast them with those who pray in the Holy Spirit."
+  },
+  {
+   "book": 65,
+   "chapter": 1,
+   "verse": 25,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"wise\"; adds \"through Jesus Christ our Lord\", \"before all time\"",
+   "note": "The Textus Receptus reads \"the only wise God\"; Sinaiticus, Vaticanus and others lack \"wise\" and add the other phrases, which Weymouth follows."
+  },
+  {
+   "book": 66,
+   "chapter": 1,
+   "verse": 5,
+   "kind": "atonement",
+   "weight": "minor",
+   "change": "\"washed us from our sins\" becomes \"freed us\"",
+   "note": "The Textus Receptus reads lousanti (\"washed\"); P18, Sinaiticus and others read lysanti (\"loosed\"), which Weymouth follows. Both say it was by his own blood."
+  },
+  {
+   "book": 66,
+   "chapter": 1,
+   "verse": 8,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"the beginning and the ending\"; \"Lord\" becomes \"Lord God\"",
+   "note": "\"The beginning and the ending\" is in Sinaiticus corrected and the Textus Receptus but not in Alexandrinus or most manuscripts, which also read \"Lord God\"; Weymouth follows them. It still stands in Revelation 21:6 and 22:13."
+  },
+  {
+   "book": 66,
+   "chapter": 1,
+   "verse": 9,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"Christ\" twice",
+   "note": "\"Christ\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The meaning is unchanged."
+  },
+  {
+   "book": 66,
+   "chapter": 1,
+   "verse": 11,
+   "kind": "deity",
+   "weight": "major",
+   "change": "Omits \"I am Alpha and Omega, the first and the last\"",
+   "note": "The words are in the Textus Receptus and a few late manuscripts but not in the Greek manuscripts generally; Weymouth follows them. Christ still says \"I am the First and the Last\" in 1:17."
+  },
+  {
+   "book": 66,
+   "chapter": 1,
+   "verse": 18,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"hell\" becomes \"Hades\"; omits \"Amen\"",
+   "note": "The Greek is hadēs, the place of the dead, which the KJV renders \"hell\"; the \"Amen\" is in the Byzantine text but not in Sinaiticus or Alexandrinus."
+  },
+  {
+   "book": 66,
+   "chapter": 5,
+   "verse": 14,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"four and twenty\" and \"him that liveth for ever and ever\"",
+   "note": "The words are in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The elders still fall down and worship."
+  },
+  {
+   "book": 66,
+   "chapter": 6,
+   "verse": 8,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"Hell\" becomes \"Hades\"",
+   "note": "The Greek is hadēs, the place of the dead, which the KJV renders \"hell\"; Weymouth keeps the Greek word, as most modern versions do."
+  },
+  {
+   "book": 66,
+   "chapter": 8,
+   "verse": 13,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"an angel\" becomes \"a solitary eagle\"",
+   "note": "The Textus Receptus reads angelou (\"angel\"); the Greek manuscripts generally read aetou (\"eagle\"), which Weymouth follows. The message of woe is unchanged."
+  },
+  {
+   "book": 66,
+   "chapter": 11,
+   "verse": 4,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the God of the earth\" becomes \"the Lord of the earth\"",
+   "note": "The Textus Receptus reads \"God\"; the critical text reads \"Lord\", which Weymouth follows. The meaning is unchanged."
+  },
+  {
+   "book": 66,
+   "chapter": 11,
+   "verse": 17,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "Omits \"and art to come\"",
+   "note": "The phrase is in the Textus Receptus and a few late manuscripts but not in the Greek manuscripts generally; Weymouth follows them. The verse goes on to say he has begun to reign."
+  },
+  {
+   "book": 66,
+   "chapter": 12,
+   "verse": 17,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"Christ\" after \"testimony of Jesus\"",
+   "note": "\"Christ\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The meaning is unchanged."
+  },
+  {
+   "book": 66,
+   "chapter": 14,
+   "verse": 5,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"before the throne of God\"",
+   "note": "The phrase is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. They are still called faultless."
+  },
+  {
+   "book": 66,
+   "chapter": 16,
+   "verse": 5,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"O Lord\"; \"and shalt be\" becomes \"the holy One\"",
+   "note": "The Textus Receptus reads \"O Lord... and shalt be\"; the Greek manuscripts read \"who art and wast, the Holy One\", which Weymouth follows. God is still addressed as righteous."
+  },
+  {
+   "book": 66,
+   "chapter": 16,
+   "verse": 17,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"of heaven\" after \"temple\"",
+   "note": "The phrase is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The voice still comes from the throne."
+  },
+  {
+   "book": 66,
+   "chapter": 19,
+   "verse": 1,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"the Lord\" and \"honour\"",
+   "note": "Both words are in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. Salvation and glory are still ascribed to our God."
+  },
+  {
+   "book": 66,
+   "chapter": 19,
+   "verse": 17,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the supper of the great God\" becomes \"God's great supper\"",
+   "note": "The Textus Receptus reads \"the supper of the great God\"; the critical text reads \"the great supper of God\", which Weymouth follows. The meaning is unchanged."
+  },
+  {
+   "book": 66,
+   "chapter": 20,
+   "verse": 12,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"stand before God\" becomes \"standing in front of the throne\"",
+   "note": "The Textus Receptus reads \"God\"; the critical text reads \"the throne\", which Weymouth follows. The meaning is unchanged."
+  },
+  {
+   "book": 66,
+   "chapter": 20,
+   "verse": 13,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"hell\" becomes \"Hades\"",
+   "note": "The Greek is hadēs, the place of the dead, which the KJV renders \"hell\"; Weymouth keeps the Greek word, as most modern versions do."
+  },
+  {
+   "book": 66,
+   "chapter": 20,
+   "verse": 14,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"hell\" becomes \"Hades\"; adds \"the Lake of fire\"",
+   "note": "\"Hades\" renders the Greek hadēs, the place of the dead. The closing \"the lake of fire\" is in Sinaiticus and Alexandrinus but not in the Textus Receptus; Weymouth follows the former."
+  },
+  {
+   "book": 66,
+   "chapter": 21,
+   "verse": 3,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Voice \"out of heaven\" becomes \"from the throne\"",
+   "note": "The Textus Receptus reads \"out of heaven\"; Sinaiticus and Alexandrinus read \"from the throne\", which Weymouth follows. The message is unchanged."
+  },
+  {
+   "book": 66,
+   "chapter": 21,
+   "verse": 4,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"God\" as the one who wipes tears",
+   "note": "\"God\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. God is plainly the subject, from verse 3."
+  },
+  {
+   "book": 66,
+   "chapter": 22,
+   "verse": 14,
+   "kind": "salvation",
+   "weight": "major",
+   "change": "\"do his commandments\" becomes \"wash their robes\"",
+   "note": "The Textus Receptus and the Byzantine text read \"do his commandments\"; Sinaiticus and Alexandrinus read \"wash their robes\", which Weymouth follows. Washing robes in the Lamb's blood is named in 7:14."
+  },
+  {
+   "book": 66,
+   "chapter": 22,
+   "verse": 19,
+   "kind": "salvation",
+   "weight": "major",
+   "change": "\"the book of life\" becomes \"the Tree of Life\"",
+   "note": "The Textus Receptus reads \"book\"; every Greek manuscript reads \"tree\", which Weymouth follows. Erasmus took \"book\" from the Latin when the last verses of his Greek manuscript were missing."
+  },
+  {
+   "book": 66,
+   "chapter": 22,
+   "verse": 21,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"our\", \"Christ\" and \"Amen\"; \"you all\" becomes \"God's people\"",
+   "note": "The Textus Receptus reads \"our Lord Jesus Christ be with you all. Amen\"; the critical text reads \"the Lord Jesus be with the saints\" or \"with all\", which Weymouth follows. The blessing is unchanged."
+  }
+ ]
+}

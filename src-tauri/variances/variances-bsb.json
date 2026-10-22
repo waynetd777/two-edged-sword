@@ -1,0 +1,3877 @@
+{
+ "module": "bsb",
+ "base": "kjv",
+ "updated": "2026-10-22",
+ "records": [
+  {
+   "book": 1,
+   "chapter": 2,
+   "verse": 7,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"a living soul\" becomes \"a living being\"",
+   "note": "Translation choice for Hebrew nephesh chayyah, the same phrase used of animals in Genesis 1. The KJV's \"soul\" is often read as teaching man's distinct soul; Paul quotes it as \"living soul\" in 1 Corinthians 15:45."
+  },
+  {
+   "book": 1,
+   "chapter": 3,
+   "verse": 5,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"as gods\" becomes \"like God\"",
+   "note": "Translation choice: Hebrew elohim can mean God or gods. The BSB makes the serpent's promise likeness to God himself rather than to divine beings."
+  },
+  {
+   "book": 1,
+   "chapter": 3,
+   "verse": 15,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"it shall bruise thy head\" becomes \"He will crush your head\"",
+   "note": "A translation choice: the Hebrew pronoun is masculine singular, which the BSB renders as a person. This makes the traditional messianic reading of the verse more explicit, not less."
+  },
+  {
+   "book": 1,
+   "chapter": 4,
+   "verse": 8,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Adds Cain's words \"Let us go out to the field\"",
+   "note": "The Masoretic text has \"Cain said to Abel\" with no words following; the BSB supplies them from the Samaritan Pentateuch, the Septuagint and the Syriac."
+  },
+  {
+   "book": 1,
+   "chapter": 19,
+   "verse": 18,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"my Lord\" becomes \"my lords\"",
+   "note": "The Masoretic pointing (Adonai) is the form used for God, which the KJV follows; the BSB reads the same consonants as a plural address to the two angels. Lot is then no longer read as addressing the LORD."
+  },
+  {
+   "book": 1,
+   "chapter": 22,
+   "verse": 14,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"it shall be seen\" becomes \"it will be provided\"",
+   "note": "Translation choice: the Hebrew verb is \"see\"; the BSB renders it by the sense of \"The LORD will provide\" (verse 8). The KJV keeps the saying about the LORD appearing on the mount."
+  },
+  {
+   "book": 1,
+   "chapter": 22,
+   "verse": 17,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"thy seed… his enemies\" becomes \"descendants… their enemies\"",
+   "note": "A translation choice: the Hebrew \"seed\" and \"his enemies\" are singular, a wording Paul builds on in Galatians 3:16. The BSB renders the collective sense as plural."
+  },
+  {
+   "book": 1,
+   "chapter": 24,
+   "verse": 43,
+   "kind": "virgin-birth",
+   "weight": "minor",
+   "change": "\"the virgin\" becomes \"a maiden\"",
+   "note": "A translation choice for Hebrew almah, the word used in Isaiah 7:14. The KJV renders it \"virgin\" both here and there; the BSB uses \"maiden\" here but keeps \"virgin\" in Isaiah 7:14."
+  },
+  {
+   "book": 1,
+   "chapter": 49,
+   "verse": 6,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"digged down a wall\" becomes \"hamstring oxen\"",
+   "note": "The Masoretic vowels read shor (ox) and the verb as hamstring, which the BSB follows; the KJV read the same consonants as shur (wall)."
+  },
+  {
+   "book": 1,
+   "chapter": 49,
+   "verse": 24,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"from thence is the shepherd\" becomes \"in the name of the Shepherd\"",
+   "note": "The Masoretic text reads misham (from there); the BSB, with the Syriac and Targum, reads mishem (from the name). The titles Shepherd and Rock of Israel are kept."
+  },
+  {
+   "book": 2,
+   "chapter": 20,
+   "verse": 13,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"Thou shalt not kill\" becomes \"You shall not murder\"",
+   "note": "A translation choice: the Hebrew ratsach is used of unlawful killing, not of war or lawful execution. The KJV's \"kill\" is broader; Jesus quotes it in Matthew 5:21."
+  },
+  {
+   "book": 2,
+   "chapter": 21,
+   "verse": 22,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"her fruit depart\" becomes \"her child is born prematurely\"",
+   "note": "A translation choice for \"her children come out\". The KJV reads a miscarriage with a fine; the BSB reads a live premature birth, which bears on the debate over the unborn child's status."
+  },
+  {
+   "book": 5,
+   "chapter": 23,
+   "verse": 17,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"whore\" and \"sodomite\" become \"shrine prostitute\"",
+   "note": "A translation choice: the Hebrew qadesh (feminine qedeshah) means a consecrated person, used of cult prostitution at shrines. The KJV's \"sodomite\" implies homosexual practice; the BSB names the cultic role."
+  },
+  {
+   "book": 5,
+   "chapter": 32,
+   "verse": 8,
+   "kind": "other",
+   "weight": "major",
+   "change": "\"children of Israel\" becomes \"sons of God\"",
+   "note": "The Masoretic text, which the KJV follows, reads \"sons of Israel\"; a Dead Sea Scroll (4QDeut-j) reads \"sons of God\" and the Septuagint \"angels of God\", which the BSB follows. The nations are then allotted by the number of heavenly beings, not of Israel."
+  },
+  {
+   "book": 5,
+   "chapter": 32,
+   "verse": 22,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"the lowest hell\" becomes \"the depths of Sheol\"",
+   "note": "The Hebrew is sheol, the realm of the dead, which the BSB transliterates. The KJV renders it \"hell\" here."
+  },
+  {
+   "book": 5,
+   "chapter": 32,
+   "verse": 43,
+   "kind": "other",
+   "weight": "major",
+   "change": "Adds \"let all God's angels worship Him\" and another line",
+   "note": "The BSB adds two lines from a Dead Sea Scroll (4QDeut-q) and the Septuagint that the Masoretic text lacks, and renders \"be merciful unto his land\" as \"cleanse His land\" (Hebrew kipper, atone). Hebrews 1:6 quotes the angels line of Christ."
+  },
+  {
+   "book": 5,
+   "chapter": 33,
+   "verse": 2,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"unto them\" becomes \"upon us\"; \"fiery law\" becomes \"flaming fire\"",
+   "note": "The Masoretic text has \"to them\" and a word read as esh dat (fire of law); the BSB follows the Septuagint and Syriac for \"us\" and reads the word as \"flaming fire\"."
+  },
+  {
+   "book": 6,
+   "chapter": 5,
+   "verse": 14,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"did worship\" becomes \"fell facedown in reverence\"; \"my Lord\" capitalised",
+   "note": "A translation choice for the verb that means to bow down or worship. The BSB's capitals (\"He\", \"Commander\", \"my Lord\") present the commander as divine, which makes the KJV's implied reading explicit."
+  },
+  {
+   "book": 7,
+   "chapter": 18,
+   "verse": 30,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"son of Manasseh\" becomes \"son of Moses\"",
+   "note": "The Masoretic text writes \"Manasseh\" with a raised letter nun, added to spare Moses's name; without it the word reads \"Moses\", which the BSB follows with the Septuagint and Vulgate."
+  },
+  {
+   "book": 9,
+   "chapter": 4,
+   "verse": 7,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"God is come into the camp\" becomes \"The gods have entered\"",
+   "note": "A translation choice: Hebrew elohim can mean God or gods, and the verb here is singular. The BSB follows the Philistines' \"these mighty gods\" in verse 8."
+  },
+  {
+   "book": 9,
+   "chapter": 6,
+   "verse": 19,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"fifty thousand and threescore and ten\" becomes \"seventy\"",
+   "note": "Most Hebrew manuscripts read 50,070, which the KJV follows; a few manuscripts and Josephus have 70, which the BSB follows as fitting a small village."
+  },
+  {
+   "book": 9,
+   "chapter": 13,
+   "verse": 1,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"Saul reigned one year\" becomes \"thirty years old… forty-two years\"",
+   "note": "The Hebrew reads literally \"Saul was a son of a year… and reigned two years\", with numbers apparently lost. The BSB supplies 30 from some Septuagint manuscripts and reads the \"two\" as forty-two (Acts 13:21 gives forty); the KJV reads it as his first years."
+  },
+  {
+   "book": 9,
+   "chapter": 15,
+   "verse": 29,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Strength of Israel\" becomes \"the Glory of Israel\"",
+   "note": "A translation choice for the divine title netsach, which can mean strength, eminence or perpetuity. The title of God is rendered differently, not removed."
+  },
+  {
+   "book": 10,
+   "chapter": 12,
+   "verse": 31,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Ammonites put \"under saws\" become set to work with saws",
+   "note": "A translation choice: the Hebrew \"put them in saws\" can mean torture or forced labour. The BSB reads it as labour; the KJV as execution."
+  },
+  {
+   "book": 10,
+   "chapter": 21,
+   "verse": 19,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"Jaareoregim\" becomes \"Jair\"",
+   "note": "The Hebrew has Jaare-oregim; oregim (weavers) is thought to be copied from the end of the verse. Both keep \"the brother of Goliath\", supplied from 1 Chronicles 20:5."
+  },
+  {
+   "book": 10,
+   "chapter": 22,
+   "verse": 6,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"The sorrows of hell\" becomes \"The cords of Sheol\"",
+   "note": "The Hebrew is sheol, the realm of the dead, which the BSB transliterates. The KJV renders it \"hell\" here."
+  },
+  {
+   "book": 11,
+   "chapter": 14,
+   "verse": 24,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"sodomites\" becomes \"male shrine prostitutes\"",
+   "note": "A translation choice: the Hebrew qadesh (feminine qedeshah) means a consecrated person, used of cult prostitution at shrines. The KJV's \"sodomite\" implies homosexual practice; the BSB names the cultic role."
+  },
+  {
+   "book": 11,
+   "chapter": 15,
+   "verse": 12,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"sodomites\" becomes \"male shrine prostitutes\"",
+   "note": "A translation choice: the Hebrew qadesh (feminine qedeshah) means a consecrated person, used of cult prostitution at shrines. The KJV's \"sodomite\" implies homosexual practice; the BSB names the cultic role."
+  },
+  {
+   "book": 11,
+   "chapter": 22,
+   "verse": 46,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"sodomites\" becomes \"male shrine prostitutes\"",
+   "note": "A translation choice: the Hebrew qadesh (feminine qedeshah) means a consecrated person, used of cult prostitution at shrines. The KJV's \"sodomite\" implies homosexual practice; the BSB names the cultic role."
+  },
+  {
+   "book": 12,
+   "chapter": 23,
+   "verse": 7,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"sodomites\" becomes \"male shrine prostitutes\"; \"by\" becomes \"in\" the temple",
+   "note": "A translation choice: the Hebrew qadesh (feminine qedeshah) means a consecrated person, used of cult prostitution at shrines. The KJV's \"sodomite\" implies homosexual practice; the BSB names the cultic role."
+  },
+  {
+   "book": 13,
+   "chapter": 2,
+   "verse": 50,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"Caleb the son of Hur\" becomes Caleb's descendants, then Hur's sons",
+   "note": "The Masoretic text reads ben Hur (son of Hur); the BSB, with the Septuagint, reads bene Hur (sons of Hur) and starts a new list. A genealogical detail."
+  },
+  {
+   "book": 13,
+   "chapter": 3,
+   "verse": 16,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Zedekiah no longer called Jeconiah's son",
+   "note": "The Hebrew has \"Zedekiah his son\"; the BSB leaves out \"his son\", perhaps to match Zedekiah as Jehoiakim's brother in 2 Kings 24:17."
+  },
+  {
+   "book": 13,
+   "chapter": 4,
+   "verse": 3,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"of the father of Etam\" becomes \"the sons of Etam\"",
+   "note": "The Masoretic text reads avi (father of); the BSB, with the Septuagint, reads bene (sons of). A genealogical detail."
+  },
+  {
+   "book": 13,
+   "chapter": 5,
+   "verse": 26,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Pul and Tiglath-pileser made one king, not two",
+   "note": "A translation choice: the Hebrew joins the names with \"and\", which the BSB reads as \"that is\", in line with Assyrian records that Pul was Tiglath-pileser's name in Babylon."
+  },
+  {
+   "book": 13,
+   "chapter": 28,
+   "verse": 12,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"by the spirit\" becomes \"had in mind\"",
+   "note": "A translation choice: the Hebrew baruach can mean \"by the Spirit\" or \"in his spirit\". The KJV's wording leaves open divine inspiration of the temple plans, which verse 19 states."
+  },
+  {
+   "book": 14,
+   "chapter": 17,
+   "verse": 4,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the LORD God of his father\" becomes \"the God of his father\"",
+   "note": "The Masoretic text reads \"the God of his father\"; the KJV's \"LORD\" matches the Septuagint. Only the divine name is affected."
+  },
+  {
+   "book": 14,
+   "chapter": 22,
+   "verse": 2,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Ahaziah's age \"forty and two\" becomes \"twenty-two\"",
+   "note": "The Masoretic text reads 42, which the KJV follows; the BSB reads 22 with some Septuagint manuscripts, the Syriac and 2 Kings 8:26. At 42 he would be older than his father (21:20)."
+  },
+  {
+   "book": 14,
+   "chapter": 36,
+   "verse": 9,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Jehoiachin's age \"eight\" becomes \"eighteen\"",
+   "note": "The Masoretic text reads 8, which the KJV follows; the BSB reads 18 with some Hebrew manuscripts, the Septuagint and 2 Kings 24:8."
+  },
+  {
+   "book": 16,
+   "chapter": 3,
+   "verse": 5,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the work of their Lord\" becomes \"the work under their supervisors\"",
+   "note": "A translation choice: the Hebrew adonehem (their lords or Lord) can mean human overseers or God. The BSB reads it as the officials over the work."
+  },
+  {
+   "book": 18,
+   "chapter": 7,
+   "verse": 20,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"I have sinned\" becomes \"If I have sinned\"; \"to myself\" \"to You\"",
+   "note": "Jewish tradition lists \"to myself\" as a scribal change of \"to you\"; the BSB follows the Septuagint. \"If\" is a translation choice."
+  },
+  {
+   "book": 18,
+   "chapter": 11,
+   "verse": 8,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"deeper than hell\" becomes \"deeper than Sheol\"",
+   "note": "The Hebrew is sheol, the realm of the dead, which the BSB transliterates. The KJV renders it \"hell\" here."
+  },
+  {
+   "book": 18,
+   "chapter": 26,
+   "verse": 6,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"Hell\" and \"destruction\" become \"Sheol\" and \"Abaddon\"",
+   "note": "The Hebrew words sheol and abaddon are transliterated by the BSB. Both name the realm of the dead."
+  },
+  {
+   "book": 19,
+   "chapter": 2,
+   "verse": 7,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"this day have I begotten thee\" becomes \"I have become Your Father\"",
+   "note": "A translation choice: the Hebrew yelidtikha means \"I have begotten you\". The BSB keeps \"My Son\" capitalised; the verse is applied to Christ in Acts 13:33 and Hebrews 1:5."
+  },
+  {
+   "book": 19,
+   "chapter": 9,
+   "verse": 17,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"turned into hell\" becomes \"return to Sheol\"",
+   "note": "The Hebrew is sheol, the realm of the dead, which the BSB transliterates. The KJV renders it \"hell\" here."
+  },
+  {
+   "book": 19,
+   "chapter": 10,
+   "verse": 4,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"God is not in all his thoughts\" becomes \"there is no God\"",
+   "note": "A translation choice: the Hebrew reads literally \"there is no God\" (are) all his thoughts. The BSB makes it the wicked man's denial of God rather than his neglect of him."
+  },
+  {
+   "book": 19,
+   "chapter": 12,
+   "verse": 7,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"preserve them\" becomes \"guard us\"",
+   "note": "The Masoretic text has \"keep them… preserve him\"; the BSB's \"us\" matches the Septuagint and some Hebrew manuscripts. The verse is cited in debates over whether it promises preservation of God's words or of his people."
+  },
+  {
+   "book": 19,
+   "chapter": 16,
+   "verse": 10,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"leave my soul in hell\" becomes \"abandon my soul to Sheol\"",
+   "note": "The Hebrew is sheol, the realm of the dead, which the BSB transliterates. The KJV renders it \"hell\" here. The BSB keeps \"Your Holy One\", the reading applied to Christ's resurrection in Acts 2:27."
+  },
+  {
+   "book": 19,
+   "chapter": 18,
+   "verse": 5,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"The sorrows of hell\" becomes \"The cords of Sheol\"",
+   "note": "The Hebrew is sheol, the realm of the dead, which the BSB transliterates. The KJV renders it \"hell\" here."
+  },
+  {
+   "book": 19,
+   "chapter": 19,
+   "verse": 3,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Voice heard in every language becomes a voice not heard",
+   "note": "A translation choice: the Hebrew reads \"no speech, no words, their voice not heard\". The KJV adds \"where\" to make the heavens' voice universal; the BSB makes it wordless."
+  },
+  {
+   "book": 19,
+   "chapter": 45,
+   "verse": 11,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"thy Lord; and worship thou him\" becomes \"bow to him… your lord\"",
+   "note": "A translation choice: the Hebrew adonayikh and the verb for bowing down are the same in both. The KJV's capital and \"worship\" point to the messianic reading (Hebrews 1:8 cites verse 6); the BSB reads the king as a human lord here."
+  },
+  {
+   "book": 19,
+   "chapter": 51,
+   "verse": 5,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"in sin did my mother conceive me\" becomes \"I was sinful when\"",
+   "note": "A translation choice: the Hebrew says \"in sin my mother conceived me\". The BSB places the sin in David from conception, stating original sin more directly than the KJV's wording."
+  },
+  {
+   "book": 19,
+   "chapter": 55,
+   "verse": 15,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"go down quick into hell\" becomes \"go down to Sheol alive\"",
+   "note": "The Hebrew is sheol, the realm of the dead, which the BSB transliterates. The KJV renders it \"hell\" here."
+  },
+  {
+   "book": 19,
+   "chapter": 68,
+   "verse": 11,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"the company of those that published it\" becomes \"company of women\"",
+   "note": "The Hebrew participle is feminine plural, which the BSB renders as women proclaiming the news."
+  },
+  {
+   "book": 19,
+   "chapter": 86,
+   "verse": 13,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"the lowest hell\" becomes \"the depths of Sheol\"",
+   "note": "The Hebrew is sheol, the realm of the dead, which the BSB transliterates. The KJV renders it \"hell\" here."
+  },
+  {
+   "book": 19,
+   "chapter": 105,
+   "verse": 28,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"they rebelled not against his word\" becomes \"yet they defied His words\"",
+   "note": "The Masoretic text has \"not\", which the KJV follows; the BSB follows the Septuagint and Syriac, which lack it, so it speaks of the Egyptians defying God."
+  },
+  {
+   "book": 19,
+   "chapter": 116,
+   "verse": 3,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"the pains of hell\" becomes \"the anguish of Sheol\"",
+   "note": "The Hebrew is sheol, the realm of the dead, which the BSB transliterates. The KJV renders it \"hell\" here."
+  },
+  {
+   "book": 19,
+   "chapter": 138,
+   "verse": 2,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"magnified thy word above all thy name\" becomes name and word exalted",
+   "note": "A translation choice in a hard Hebrew line, literally \"you have magnified above all your name your word\". The KJV puts God's word above his name; the BSB exalts both above everything."
+  },
+  {
+   "book": 19,
+   "chapter": 139,
+   "verse": 8,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"make my bed in hell\" becomes \"in Sheol\"",
+   "note": "The Hebrew is sheol, the realm of the dead, which the BSB transliterates. The KJV renders it \"hell\" here."
+  },
+  {
+   "book": 20,
+   "chapter": 5,
+   "verse": 5,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"take hold on hell\" becomes \"lead straight to Sheol\"",
+   "note": "The Hebrew is sheol, the realm of the dead, which the BSB transliterates. The KJV renders it \"hell\" here."
+  },
+  {
+   "book": 20,
+   "chapter": 7,
+   "verse": 27,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"the way to hell\" becomes \"the road to Sheol\"",
+   "note": "The Hebrew is sheol, the realm of the dead, which the BSB transliterates. The KJV renders it \"hell\" here."
+  },
+  {
+   "book": 20,
+   "chapter": 8,
+   "verse": 22,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"The LORD possessed me\" becomes \"The LORD created me\"",
+   "note": "A translation choice: the Hebrew qanani can mean \"acquired\" or \"created\"; the Septuagint has \"created\". Where Wisdom is read as Christ, \"created\" was the reading Arius used, so the choice touches his eternity."
+  },
+  {
+   "book": 20,
+   "chapter": 9,
+   "verse": 18,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"the depths of hell\" becomes \"the depths of Sheol\"",
+   "note": "The Hebrew is sheol, the realm of the dead, which the BSB transliterates. The KJV renders it \"hell\" here."
+  },
+  {
+   "book": 20,
+   "chapter": 15,
+   "verse": 11,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"Hell and destruction\" becomes \"Sheol and Abaddon\"",
+   "note": "The Hebrew words sheol and abaddon are transliterated by the BSB. Both name the realm of the dead."
+  },
+  {
+   "book": 20,
+   "chapter": 15,
+   "verse": 24,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"hell beneath\" becomes \"going down to Sheol\"",
+   "note": "The Hebrew is sheol, the realm of the dead, which the BSB transliterates. The KJV renders it \"hell\" here."
+  },
+  {
+   "book": 20,
+   "chapter": 18,
+   "verse": 24,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"must shew himself friendly\" becomes \"may come to ruin\"",
+   "note": "A translation choice: the Hebrew verb is read as from ra'a (to be broken) rather than ra'ah (to be a friend). The proverb then warns against many companions."
+  },
+  {
+   "book": 20,
+   "chapter": 21,
+   "verse": 12,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"righteous man\" and \"God\" merged into \"the Righteous One\"",
+   "note": "A translation choice: the Hebrew tsaddiq (righteous) has no \"man\", and \"God\" is supplied by the KJV. The BSB reads the Righteous One as God, who considers and overthrows."
+  },
+  {
+   "book": 20,
+   "chapter": 23,
+   "verse": 14,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"deliver his soul from hell\" becomes \"from Sheol\"",
+   "note": "The Hebrew is sheol, the realm of the dead, which the BSB transliterates. The KJV renders it \"hell\" here."
+  },
+  {
+   "book": 20,
+   "chapter": 26,
+   "verse": 10,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"The great God that formed all things\" becomes \"an archer\"",
+   "note": "A translation choice in an obscure Hebrew line: rav can mean \"great one\" or \"archer\", and the verb \"form\" or \"wound\". The KJV makes it a statement about God; the BSB, like most modern versions, a proverb about hiring fools."
+  },
+  {
+   "book": 20,
+   "chapter": 27,
+   "verse": 20,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"Hell and destruction\" becomes \"Sheol and Abaddon\"",
+   "note": "The Hebrew words sheol and abaddon are transliterated by the BSB. Both name the realm of the dead."
+  },
+  {
+   "book": 20,
+   "chapter": 29,
+   "verse": 18,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"the people perish\" becomes \"the people cast off restraint\"",
+   "note": "A translation choice: the Hebrew para means \"let loose, run wild\". The KJV's \"perish\" is often quoted of vision and leadership."
+  },
+  {
+   "book": 20,
+   "chapter": 30,
+   "verse": 1,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Names \"Ithiel\" and \"Ucal\" become \"I am weary, O God\"",
+   "note": "The Hebrew consonants can be read as names or, with other vowels, as \"I am weary, O God, and worn out\", which the BSB follows."
+  },
+  {
+   "book": 21,
+   "chapter": 3,
+   "verse": 11,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"set the world in their heart\" becomes \"set eternity in the hearts\"",
+   "note": "A translation choice: the Hebrew olam can mean \"world\" or \"eternity\"; the BSB chooses \"eternity\"."
+  },
+  {
+   "book": 23,
+   "chapter": 5,
+   "verse": 14,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"hell hath enlarged herself\" becomes \"Sheol enlarges its throat\"",
+   "note": "The Hebrew is sheol, the realm of the dead, which the BSB transliterates. The KJV renders it \"hell\" here."
+  },
+  {
+   "book": 23,
+   "chapter": 9,
+   "verse": 3,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"not increased the joy\" becomes \"increased its joy\"",
+   "note": "The written Hebrew (ketiv) has lo, \"not\", which the KJV follows; the margin reading (qere) has lo, \"to it\", which the BSB follows. The two sound the same."
+  },
+  {
+   "book": 23,
+   "chapter": 14,
+   "verse": 9,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"Hell from beneath\" becomes \"Sheol beneath\"",
+   "note": "The Hebrew is sheol, the realm of the dead, which the BSB transliterates. The KJV renders it \"hell\" here."
+  },
+  {
+   "book": 23,
+   "chapter": 14,
+   "verse": 12,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"O Lucifer, son of the morning\" becomes \"O day star\"",
+   "note": "A translation choice: the Hebrew helel means \"shining one\", which the Latin Vulgate rendered lucifer. Reading the verse as Satan's fall rests on the KJV's name; the taunt is addressed to the king of Babylon (verse 4)."
+  },
+  {
+   "book": 23,
+   "chapter": 14,
+   "verse": 15,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"brought down to hell\" becomes \"to Sheol\"",
+   "note": "The Hebrew is sheol, the realm of the dead, which the BSB transliterates. The KJV renders it \"hell\" here."
+  },
+  {
+   "book": 23,
+   "chapter": 19,
+   "verse": 10,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"sluices and ponds for fish\" becomes \"workers in cloth… hired workers\"",
+   "note": "A translation choice in an obscure Hebrew line; the BSB reads the words as weavers and wage-earners rather than fish ponds."
+  },
+  {
+   "book": 23,
+   "chapter": 28,
+   "verse": 15,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"with hell are we at agreement\" becomes \"with Sheol\"",
+   "note": "The Hebrew is sheol, the realm of the dead, which the BSB transliterates. The KJV renders it \"hell\" here."
+  },
+  {
+   "book": 23,
+   "chapter": 28,
+   "verse": 18,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"agreement with hell\" becomes \"agreement with Sheol\"",
+   "note": "The Hebrew is sheol, the realm of the dead, which the BSB transliterates. The KJV renders it \"hell\" here."
+  },
+  {
+   "book": 23,
+   "chapter": 45,
+   "verse": 7,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"create evil\" becomes \"create calamity\"",
+   "note": "A translation choice: the Hebrew ra covers both moral evil and disaster. The contrast with \"peace\" (shalom) leads the BSB to \"calamity\"."
+  },
+  {
+   "book": 23,
+   "chapter": 48,
+   "verse": 10,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"I have chosen thee\" becomes \"I have tested you\"",
+   "note": "The Masoretic bachar usually means \"choose\" but can mean \"test\"; the Great Isaiah Scroll reads \"tested\", which fits the refining image. Israel's election is stated in 41:8-9."
+  },
+  {
+   "book": 23,
+   "chapter": 49,
+   "verse": 12,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"the land of Sinim\" becomes \"the land of Aswan\"",
+   "note": "The Masoretic text reads Sinim; the Great Isaiah Scroll reads Sewenim, identified with Syene (Aswan) in Egypt. The KJV's Sinim has been read as China."
+  },
+  {
+   "book": 23,
+   "chapter": 53,
+   "verse": 11,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "Adds \"the light of life\" after the servant's anguish",
+   "note": "The Masoretic text has \"he shall see\"; the Dead Sea Scrolls (1QIsa-a, 1QIsa-b, 4QIsa-d) and the Septuagint add \"light\", which the BSB follows. It strengthens the reading that the servant lives after his death."
+  },
+  {
+   "book": 23,
+   "chapter": 57,
+   "verse": 9,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"even unto hell\" becomes \"even to Sheol\"",
+   "note": "The Hebrew is sheol, the realm of the dead, which the BSB transliterates. The KJV renders it \"hell\" here."
+  },
+  {
+   "book": 23,
+   "chapter": 59,
+   "verse": 19,
+   "kind": "other",
+   "weight": "major",
+   "change": "\"the Spirit of the LORD shall lift up a standard\" lost",
+   "note": "A translation choice: the Hebrew nosesah can mean \"lift a banner\" or \"drive\", and ruach \"Spirit\" or \"breath\". The BSB makes the LORD the flood, driven by his breath, where the KJV has his Spirit opposing the enemy."
+  },
+  {
+   "book": 23,
+   "chapter": 65,
+   "verse": 11,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"that troop\" and \"that number\" become gods \"Fortune\" and \"Destiny\"",
+   "note": "A translation choice: the Hebrew gad and meni are the names of pagan gods of fortune and fate, which the KJV translates as common nouns."
+  },
+  {
+   "book": 24,
+   "chapter": 3,
+   "verse": 14,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"I am married unto you\" becomes \"I am your master\"",
+   "note": "A translation choice: the Hebrew baalti means \"I am husband\" or \"I am master\". The KJV keeps the marriage image of God and Israel."
+  },
+  {
+   "book": 24,
+   "chapter": 27,
+   "verse": 1,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"Jehoiakim\" becomes \"Zedekiah\"",
+   "note": "The Masoretic text reads Jehoiakim, which the KJV follows; the BSB reads Zedekiah with a few Hebrew manuscripts and the Syriac, matching verses 3 and 12."
+  },
+  {
+   "book": 26,
+   "chapter": 19,
+   "verse": 10,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"a vine in thy blood\" becomes \"a vine in your vineyard\"",
+   "note": "The Masoretic text reads bedamekha (in your blood), which the KJV follows; the BSB, like most modern versions, emends to \"in your vineyard\" for the sense of the image."
+  },
+  {
+   "book": 26,
+   "chapter": 31,
+   "verse": 16,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"cast him down to hell\" becomes \"to Sheol\"",
+   "note": "The Hebrew is sheol, the realm of the dead, which the BSB transliterates. The KJV renders it \"hell\" here."
+  },
+  {
+   "book": 26,
+   "chapter": 31,
+   "verse": 17,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"went down into hell\" becomes \"descended… to Sheol\"",
+   "note": "The Hebrew is sheol, the realm of the dead, which the BSB transliterates. The KJV renders it \"hell\" here."
+  },
+  {
+   "book": 26,
+   "chapter": 32,
+   "verse": 21,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"out of the midst of hell\" becomes \"from the midst of Sheol\"",
+   "note": "The Hebrew is sheol, the realm of the dead, which the BSB transliterates. The KJV renders it \"hell\" here."
+  },
+  {
+   "book": 26,
+   "chapter": 32,
+   "verse": 27,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"gone down to hell\" becomes \"went down to Sheol\"; \"iniquities\" becomes \"shields\"",
+   "note": "The Hebrew is sheol, the realm of the dead, which the BSB transliterates. The KJV renders it \"hell\" here. \"Shields\" for the Hebrew \"iniquities\" is an emendation."
+  },
+  {
+   "book": 26,
+   "chapter": 38,
+   "verse": 13,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"all the young lions thereof\" becomes \"all its villages\"",
+   "note": "The Masoretic text reads kephireha (its young lions); the BSB reads the word as villages. Prophetic readings of the \"young lions\" are lost."
+  },
+  {
+   "book": 27,
+   "chapter": 3,
+   "verse": 25,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"like the Son of God\" becomes \"like a son of the gods\"",
+   "note": "A translation choice: the Aramaic bar-elahin, spoken by a pagan king, can mean \"a son of the gods\" or \"the Son of God\". The KJV's reading lets the fourth figure be taken as the pre-incarnate Christ; Nebuchadnezzar calls him an angel in verse 28."
+  },
+  {
+   "book": 27,
+   "chapter": 7,
+   "verse": 9,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"thrones were cast down\" becomes \"thrones were set in place\"",
+   "note": "A translation choice: the Aramaic remiv means \"were cast\" or \"were placed\". The BSB sets up thrones for judgment rather than overthrowing them."
+  },
+  {
+   "book": 27,
+   "chapter": 9,
+   "verse": 26,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"Messiah be cut off, but not for himself\" becomes \"will have nothing\"",
+   "note": "A translation choice: the Hebrew ve-en lo means literally \"and there is not to him\". The BSB keeps \"the Messiah\" but loses the KJV's hint that he died for others."
+  },
+  {
+   "book": 27,
+   "chapter": 9,
+   "verse": 27,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"overspreading of abominations\" becomes \"on the wing of the temple\"",
+   "note": "A translation choice in a difficult verse. The BSB keeps \"confirm a covenant\" but makes the abomination come on a wing of the temple and the wrath fall \"upon him\" (the desolator) rather than \"the desolate\"."
+  },
+  {
+   "book": 27,
+   "chapter": 11,
+   "verse": 37,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the God of his fathers\" becomes \"the gods of his fathers\"",
+   "note": "A translation choice: the Hebrew elohe can mean God or gods. The KJV's singular supports the reading that this king is of Israel; the BSB makes him a pagan."
+  },
+  {
+   "book": 28,
+   "chapter": 1,
+   "verse": 6,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"utterly take them away\" becomes \"that I should ever forgive them\"",
+   "note": "A translation choice: the Hebrew nasa means \"lift, take away\" and also \"forgive\". The BSB makes the clause a refusal of pardon rather than a threat of removal."
+  },
+  {
+   "book": 28,
+   "chapter": 6,
+   "verse": 7,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"like men\" becomes \"like Adam\"",
+   "note": "A translation choice: the Hebrew ke-adam can mean \"like men\", \"like Adam\" or \"at Adam\" (a place). The BSB's reading implies a covenant with Adam."
+  },
+  {
+   "book": 28,
+   "chapter": 11,
+   "verse": 12,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"ruleth with God\" becomes \"walks with God\"; \"saints\" becomes \"the Holy One\"",
+   "note": "A translation choice in a hard line: the Hebrew qedoshim is plural, which the BSB reads as a plural of majesty for God."
+  },
+  {
+   "book": 30,
+   "chapter": 9,
+   "verse": 2,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"dig into hell\" becomes \"dig down to Sheol\"",
+   "note": "The Hebrew is sheol, the realm of the dead, which the BSB transliterates. The KJV renders it \"hell\" here."
+  },
+  {
+   "book": 32,
+   "chapter": 2,
+   "verse": 2,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"belly of hell\" becomes \"belly of Sheol\"",
+   "note": "The Hebrew is sheol, the realm of the dead, which the BSB transliterates. The KJV renders it \"hell\" here."
+  },
+  {
+   "book": 35,
+   "chapter": 2,
+   "verse": 4,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"live by his faith\" becomes \"live by faith\"",
+   "note": "The Masoretic text has be-emunato, \"by his faith\" or \"faithfulness\"; the BSB leaves out \"his\", as Paul does in Romans 1:17. The doctrine of living by faith is unchanged."
+  },
+  {
+   "book": 35,
+   "chapter": 2,
+   "verse": 5,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"transgresseth by wine\" becomes \"wealth… betrays him\"; \"hell\" becomes \"Sheol\"",
+   "note": "The Masoretic text reads \"wine\"; the Habakkuk commentary from Qumran (1QpHab) reads \"wealth\", which the BSB follows. The Hebrew is sheol, the realm of the dead, which the BSB transliterates. The KJV renders it \"hell\" here."
+  },
+  {
+   "book": 37,
+   "chapter": 2,
+   "verse": 7,
+   "kind": "prophecy",
+   "weight": "major",
+   "change": "\"the desire of all nations shall come\" becomes \"their treasures\" come",
+   "note": "A translation choice: the Hebrew chemdat is singular (desire, desirable thing) but its verb is plural. The KJV reads a messianic title; the BSB reads the nations' wealth coming to the temple."
+  },
+  {
+   "book": 38,
+   "chapter": 9,
+   "verse": 9,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"just, and having salvation\" becomes \"righteous and victorious\"",
+   "note": "A translation choice: the Hebrew nosha means \"saved\" or \"victorious\". The KJV's wording reads as the King bringing salvation; Matthew 21:5 quotes the verse without the phrase."
+  },
+  {
+   "book": 38,
+   "chapter": 13,
+   "verse": 6,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"wounds in thine hands\" becomes \"wounds on your chest\"",
+   "note": "A translation choice: the Hebrew ben yadekha means \"between your hands\", which the BSB takes as the chest. The KJV's \"hands\" is read of the crucifixion."
+  },
+  {
+   "book": 40,
+   "chapter": 1,
+   "verse": 25,
+   "kind": "virgin-birth",
+   "weight": "major",
+   "change": "Omits \"firstborn\" (\"her firstborn son\" becomes \"a Son\")",
+   "note": "The Textus Receptus and the Byzantine majority read \"her firstborn son\"; Sinaiticus, Vaticanus and some early versions have only \"a son\", which the BSB follows. Luke 2:7 still calls Jesus Mary's firstborn."
+  },
+  {
+   "book": 40,
+   "chapter": 4,
+   "verse": 25,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits \"bless them that curse you\" and two other clauses",
+   "note": "The longer text is in the Byzantine majority and the Textus Receptus; Sinaiticus, Vaticanus and some early fathers have the short form. The fuller wording stands in Luke 6:27-28."
+  },
+  {
+   "book": 40,
+   "chapter": 5,
+   "verse": 22,
+   "kind": "other",
+   "weight": "major",
+   "change": "Omits \"without a cause\"",
+   "note": "\"Without a cause\" (eike) is in Bezae, the Byzantine majority and the Textus Receptus but not in Papyrus 64, Sinaiticus or Vaticanus. Without it, all anger at a brother is condemned."
+  },
+  {
+   "book": 40,
+   "chapter": 6,
+   "verse": 13,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits the doxology \"For thine is the kingdom… Amen\"",
+   "note": "The doxology is in the Byzantine majority and the Textus Receptus but not in Sinaiticus, Vaticanus or the earliest Latin witnesses. It is absent from Luke's form of the prayer (Luke 11:4)."
+  },
+  {
+   "book": 40,
+   "chapter": 8,
+   "verse": 29,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"Jesus\" from \"Jesus, thou Son of God\"",
+   "note": "The name is in the Byzantine text and the Textus Receptus but not in Sinaiticus or Vaticanus. The demons still call him Son of God."
+  },
+  {
+   "book": 40,
+   "chapter": 11,
+   "verse": 23,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"hell\" becomes \"Hades\"; \"exalted unto heaven\" becomes a question",
+   "note": "The Greek is hades, which the BSB transliterates; the question form follows Sinaiticus and Vaticanus where the Textus Receptus has a statement. The verse still announces Capernaum's judgment."
+  },
+  {
+   "book": 40,
+   "chapter": 13,
+   "verse": 51,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"Jesus saith unto them\" and the reply \"Lord\"",
+   "note": "Both are in the Byzantine text and the Textus Receptus but not in Sinaiticus or Vaticanus. The disciples' address to Jesus as Lord is lost here."
+  },
+  {
+   "book": 40,
+   "chapter": 14,
+   "verse": 14,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"He\"",
+   "note": "The Textus Receptus names Jesus; Sinaiticus, Vaticanus and other early witnesses do not. The referent is plain from the context."
+  },
+  {
+   "book": 40,
+   "chapter": 15,
+   "verse": 8,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"draweth nigh unto me with their mouth\"",
+   "note": "The phrase is in the Byzantine text and the Textus Receptus, matching the Septuagint of Isaiah 29:13, but not in Sinaiticus or Vaticanus."
+  },
+  {
+   "book": 40,
+   "chapter": 15,
+   "verse": 30,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus' feet\" becomes \"His feet\"",
+   "note": "The Textus Receptus reads \"of Jesus\"; the critical text reads \"his\". The meaning is unchanged; only the name is lost."
+  },
+  {
+   "book": 40,
+   "chapter": 16,
+   "verse": 18,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"gates of hell\" becomes \"gates of Hades\"",
+   "note": "The Greek is hades, the realm of the dead, which the BSB transliterates. The promise that it will not prevail is unchanged."
+  },
+  {
+   "book": 40,
+   "chapter": 16,
+   "verse": 20,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus the Christ\" becomes \"the Christ\"",
+   "note": "The Textus Receptus has \"Jesus the Christ\"; Sinaiticus and Vaticanus have \"the Christ\". He is still identified as the Christ."
+  },
+  {
+   "book": 40,
+   "chapter": 17,
+   "verse": 20,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"Jesus\"; \"unbelief\" becomes \"little faith\"",
+   "note": "The critical text reads \"he said\" and oligopistian (little faith) where the Textus Receptus has \"Jesus said\" and apistian (unbelief). The rebuke is softened from unbelief to weak faith."
+  },
+  {
+   "book": 40,
+   "chapter": 17,
+   "verse": 21,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Verse omitted (\"prayer and fasting\")",
+   "note": "The verse is in the Byzantine majority and the Textus Receptus but not in Sinaiticus or Vaticanus. Mark 9:29 still speaks of prayer."
+  },
+  {
+   "book": 40,
+   "chapter": 18,
+   "verse": 11,
+   "kind": "salvation",
+   "weight": "major",
+   "change": "Verse omitted (\"the Son of man is come to save\")",
+   "note": "The verse is in the Byzantine majority, Bezae and the Textus Receptus but not in Sinaiticus, Vaticanus or several early versions. The same saying stands in Luke 19:10."
+  },
+  {
+   "book": 40,
+   "chapter": 19,
+   "verse": 9,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits \"whoso marrieth her which is put away doth commit adultery\"",
+   "note": "The clause is in Vaticanus, the Byzantine majority and the Textus Receptus but not in Sinaiticus, Bezae and some others. The teaching stands in Matthew 5:32."
+  },
+  {
+   "book": 40,
+   "chapter": 19,
+   "verse": 17,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"Why callest thou me good?\" becomes \"Why ask Me about…good?\"",
+   "note": "The critical text, from Sinaiticus and Vaticanus, has the question about \"what is good\" and \"One who is good\"; the Byzantine text and the Textus Receptus match Mark 10:18 and Luke 18:19. Here \"God\" and the implied claim about Jesus are lost; they stand in the parallels."
+  },
+  {
+   "book": 40,
+   "chapter": 20,
+   "verse": 16,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits \"for many be called, but few chosen\"",
+   "note": "The clause is in the Byzantine majority, Bezae and the Textus Receptus but not in Sinaiticus and Vaticanus. The same saying stands in Matthew 22:14."
+  },
+  {
+   "book": 40,
+   "chapter": 20,
+   "verse": 22,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits \"to be baptized with the baptism that I am baptized with\"",
+   "note": "The baptism clause is in the Byzantine majority and the Textus Receptus but not in Sinaiticus, Vaticanus and Bezae. It stands in Mark 10:38."
+  },
+  {
+   "book": 40,
+   "chapter": 20,
+   "verse": 23,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"and be baptized with the baptism…\"",
+   "note": "As in verse 22, the clause is in the Byzantine majority and the Textus Receptus but not in Sinaiticus, Vaticanus and Bezae. It stands in Mark 10:39."
+  },
+  {
+   "book": 40,
+   "chapter": 21,
+   "verse": 12,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"temple of God\" becomes \"temple courts\"",
+   "note": "\"Of God\" is in most manuscripts and the Textus Receptus but not in Sinaiticus, Vaticanus and some others; the BSB follows the shorter text."
+  },
+  {
+   "book": 40,
+   "chapter": 22,
+   "verse": 30,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"angels of God\" becomes \"angels\"",
+   "note": "\"Of God\" is in most manuscripts and the Textus Receptus but not in Vaticanus, Bezae and some others. Mark 12:25 reads \"angels in heaven\"."
+  },
+  {
+   "book": 40,
+   "chapter": 23,
+   "verse": 8,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"even Christ\" as the one Master",
+   "note": "The words are in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or Bezae. Verse 10 still names the Christ as the one teacher."
+  },
+  {
+   "book": 40,
+   "chapter": 23,
+   "verse": 14,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Verse omitted (\"greater damnation\" for devouring widows' houses)",
+   "note": "The verse is in the Byzantine majority and the Textus Receptus but not in Sinaiticus, Vaticanus, Bezae or early versions. The saying stands in Mark 12:40 and Luke 20:47."
+  },
+  {
+   "book": 40,
+   "chapter": 24,
+   "verse": 2,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits the name \"Jesus\"",
+   "note": "The name is in the Textus Receptus and the Byzantine majority but not in Sinaiticus, Vaticanus and other early witnesses. The referent is still plain."
+  },
+  {
+   "book": 40,
+   "chapter": 24,
+   "verse": 36,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Adds \"nor the Son\"",
+   "note": "The words are in Sinaiticus, Vaticanus and Bezae but not in the Byzantine majority or the Textus Receptus. The KJV itself has \"neither the Son\" in the parallel Mark 13:32."
+  },
+  {
+   "book": 40,
+   "chapter": 25,
+   "verse": 13,
+   "kind": "judgment",
+   "weight": "major",
+   "change": "Omits \"wherein the Son of man cometh\"",
+   "note": "The phrase is in later manuscripts and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses. The coming of the Son of Man is the subject of the surrounding verses (24:44, 25:31)."
+  },
+  {
+   "book": 40,
+   "chapter": 27,
+   "verse": 35,
+   "kind": "prophecy",
+   "weight": "major",
+   "change": "Omits fulfilment of \"They parted my garments…\"",
+   "note": "The quotation of Psalm 22:18 is in some later manuscripts and the Textus Receptus but not in Sinaiticus, Vaticanus or the Byzantine majority. The fulfilment is stated in John 19:24."
+  },
+  {
+   "book": 40,
+   "chapter": 28,
+   "verse": 6,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"where the Lord lay\" becomes \"where He lay\"",
+   "note": "\"The Lord\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus or Vaticanus. The title for the risen Jesus is lost here."
+  },
+  {
+   "book": 40,
+   "chapter": 28,
+   "verse": 9,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"as they went to tell his disciples\"",
+   "note": "The clause is in the Byzantine text and the Textus Receptus but not in Sinaiticus or Vaticanus. The women are already on their way to the disciples in verse 8."
+  },
+  {
+   "book": 40,
+   "chapter": 28,
+   "verse": 20,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the closing \"Amen\"",
+   "note": "The \"Amen\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus or Vaticanus. Nothing of the Great Commission is lost."
+  },
+  {
+   "book": 41,
+   "chapter": 1,
+   "verse": 2,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"in the prophets\" becomes \"in Isaiah the prophet\"",
+   "note": "Sinaiticus, Vaticanus and others read \"in Isaiah the prophet\"; the Byzantine text and the Textus Receptus read \"in the prophets\". The quotation joins Malachi 3:1 to Isaiah 40:3."
+  },
+  {
+   "book": 41,
+   "chapter": 1,
+   "verse": 42,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"as soon as he had spoken\"",
+   "note": "The phrase is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or Bezae. The healing at his word is still immediate."
+  },
+  {
+   "book": 41,
+   "chapter": 3,
+   "verse": 15,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"to heal sicknesses\"",
+   "note": "The phrase is in the Byzantine text and the Textus Receptus but not in Sinaiticus or Vaticanus. The apostles' healing is still told in Mark 6:13."
+  },
+  {
+   "book": 41,
+   "chapter": 3,
+   "verse": 29,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"eternal damnation\" becomes \"eternal sin\"",
+   "note": "The Textus Receptus reads kriseos (judgment); Sinaiticus, Vaticanus and others read hamartematos (sin). Both speak of guilt that is never forgiven."
+  },
+  {
+   "book": 41,
+   "chapter": 5,
+   "verse": 13,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits the name \"Jesus\"",
+   "note": "The name is in the Byzantine text and the Textus Receptus but not in Sinaiticus or Vaticanus. The referent is plain from the context."
+  },
+  {
+   "book": 41,
+   "chapter": 6,
+   "verse": 11,
+   "kind": "judgment",
+   "weight": "major",
+   "change": "Omits \"more tolerable for Sodom and Gomorrha… judgment\"",
+   "note": "The sentence is in the Byzantine majority and the Textus Receptus but not in Sinaiticus, Vaticanus or Bezae. The same warning stands in Matthew 10:15."
+  },
+  {
+   "book": 41,
+   "chapter": 7,
+   "verse": 8,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"as the washing of pots and cups…\" clause",
+   "note": "The clause is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus and others. Similar washings are described in verse 4."
+  },
+  {
+   "book": 41,
+   "chapter": 7,
+   "verse": 16,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Verse omitted (\"If any man have ears to hear\")",
+   "note": "The verse is in the Byzantine majority, Bezae and the Textus Receptus but not in Sinaiticus or Vaticanus. The same call stands in Mark 4:9 and 4:23."
+  },
+  {
+   "book": 41,
+   "chapter": 7,
+   "verse": 27,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits the name \"Jesus\"",
+   "note": "The name is in the Byzantine text and the Textus Receptus but not in Sinaiticus or Vaticanus. The referent is plain from the context."
+  },
+  {
+   "book": 41,
+   "chapter": 8,
+   "verse": 26,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"nor tell it to any in the town\"",
+   "note": "The longer charge is in the Byzantine text and the Textus Receptus; Sinaiticus and Vaticanus have only \"Do not go into the village\"."
+  },
+  {
+   "book": 41,
+   "chapter": 9,
+   "verse": 23,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"If thou canst believe\" becomes \"If You can?\"",
+   "note": "The Textus Receptus has pisteusai (believe); Sinaiticus and Vaticanus lack it, making Jesus echo the father's doubt. The rest of the verse still ties all things to believing."
+  },
+  {
+   "book": 41,
+   "chapter": 9,
+   "verse": 24,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"with tears\" and the address \"Lord\"",
+   "note": "Both are in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus and other early witnesses."
+  },
+  {
+   "book": 41,
+   "chapter": 9,
+   "verse": 29,
+   "kind": "other",
+   "weight": "major",
+   "change": "Omits \"and fasting\"",
+   "note": "The words are in Papyrus 45, the Byzantine majority and the Textus Receptus but not in Sinaiticus or Vaticanus. Fasting as a spiritual discipline is still taught in Matthew 6:16-18."
+  },
+  {
+   "book": 41,
+   "chapter": 9,
+   "verse": 44,
+   "kind": "judgment",
+   "weight": "major",
+   "change": "Verse omitted (\"their worm dieth not…\")",
+   "note": "Verses 44 and 46 are in the Byzantine majority and the Textus Receptus but not in Sinaiticus or Vaticanus. The words still stand in verse 48."
+  },
+  {
+   "book": 41,
+   "chapter": 9,
+   "verse": 46,
+   "kind": "judgment",
+   "weight": "major",
+   "change": "Verse omitted (\"their worm dieth not…\")",
+   "note": "As verse 44, it is in the Byzantine majority and the Textus Receptus but not in Sinaiticus or Vaticanus. The words still stand in verse 48."
+  },
+  {
+   "book": 41,
+   "chapter": 9,
+   "verse": 49,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"every sacrifice shall be salted with salt\"",
+   "note": "The clause is in the Byzantine text and the Textus Receptus but not in Sinaiticus or Vaticanus; it alludes to Leviticus 2:13."
+  },
+  {
+   "book": 41,
+   "chapter": 10,
+   "verse": 21,
+   "kind": "other",
+   "weight": "major",
+   "change": "Omits \"take up the cross\"",
+   "note": "The words are in the Byzantine majority and the Textus Receptus but not in Sinaiticus, Vaticanus or Bezae. Taking up the cross is still taught in Mark 8:34."
+  },
+  {
+   "book": 41,
+   "chapter": 10,
+   "verse": 24,
+   "kind": "other",
+   "weight": "major",
+   "change": "Omits \"for them that trust in riches\"",
+   "note": "The phrase is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus and some others. Without it the saying is about how hard it is for anyone to enter the kingdom."
+  },
+  {
+   "book": 41,
+   "chapter": 11,
+   "verse": 10,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"that cometh in the name of the Lord\"",
+   "note": "The repeated phrase is in the Byzantine text and the Textus Receptus but not in Sinaiticus or Vaticanus. Verse 9 still has \"in the name of the Lord\"."
+  },
+  {
+   "book": 41,
+   "chapter": 11,
+   "verse": 14,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits the name \"Jesus\"",
+   "note": "The name is in the Byzantine text and the Textus Receptus but not in Sinaiticus or Vaticanus. The referent is plain from the context."
+  },
+  {
+   "book": 41,
+   "chapter": 11,
+   "verse": 26,
+   "kind": "salvation",
+   "weight": "major",
+   "change": "Verse omitted (the Father will not forgive the unforgiving)",
+   "note": "The verse is in the Byzantine majority and the Textus Receptus but not in Sinaiticus, Vaticanus and other early witnesses. The teaching stands in Matthew 6:15."
+  },
+  {
+   "book": 41,
+   "chapter": 12,
+   "verse": 4,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"at him they cast stones\"",
+   "note": "The words are in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or Bezae."
+  },
+  {
+   "book": 41,
+   "chapter": 14,
+   "verse": 19,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"and another said, Is it I?\"",
+   "note": "The clause is in the Byzantine text, Bezae and the Textus Receptus but not in Sinaiticus or Vaticanus."
+  },
+  {
+   "book": 41,
+   "chapter": 15,
+   "verse": 28,
+   "kind": "prophecy",
+   "weight": "major",
+   "change": "Verse omitted (\"numbered with the transgressors\" fulfilled)",
+   "note": "The verse is in the Byzantine majority and the Textus Receptus but not in Sinaiticus, Vaticanus or Bezae. Jesus applies Isaiah 53:12 to himself in Luke 22:37."
+  },
+  {
+   "book": 41,
+   "chapter": 16,
+   "verse": 19,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord\" becomes \"the Lord Jesus\"",
+   "note": "Many manuscripts of the longer ending add \"Jesus\", which the BSB follows; the Textus Receptus has \"the Lord\". The BSB prints Mark 16:9-20 in the text."
+  },
+  {
+   "book": 41,
+   "chapter": 16,
+   "verse": 20,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the closing \"Amen\"",
+   "note": "The \"Amen\" is in the Textus Receptus but not in most manuscripts of the longer ending. The BSB keeps verses 9-20 in the text."
+  },
+  {
+   "book": 42,
+   "chapter": 2,
+   "verse": 14,
+   "kind": "salvation",
+   "weight": "major",
+   "change": "\"good will toward men\" becomes \"men on whom His favor rests\"",
+   "note": "Sinaiticus, Vaticanus, Alexandrinus and Bezae read eudokias (of good will), which the BSB renders \"on whom His favor rests\"; the Byzantine majority and the Textus Receptus read eudokia, goodwill to all."
+  },
+  {
+   "book": 42,
+   "chapter": 2,
+   "verse": 33,
+   "kind": "virgin-birth",
+   "weight": "major",
+   "change": "\"Joseph\" becomes \"The Child's father\"",
+   "note": "The Textus Receptus and the Byzantine majority read \"Joseph\"; Sinaiticus, Vaticanus and others read \"his father\". Luke itself calls Joseph and Mary his parents (2:41) and the virgin birth is told in 1:34-35."
+  },
+  {
+   "book": 42,
+   "chapter": 2,
+   "verse": 38,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord\" becomes \"God\"; \"redemption in\" becomes \"of Jerusalem\"",
+   "note": "The critical text reads \"to God\" and \"redemption of Jerusalem\" where the Textus Receptus has \"to the Lord\" and \"in Jerusalem\". The thanksgiving and the expectation are unchanged."
+  },
+  {
+   "book": 42,
+   "chapter": 2,
+   "verse": 40,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"in spirit\"",
+   "note": "The words are in the Byzantine text and the Textus Receptus (as in 1:80) but not in Sinaiticus or Vaticanus."
+  },
+  {
+   "book": 42,
+   "chapter": 2,
+   "verse": 43,
+   "kind": "virgin-birth",
+   "weight": "major",
+   "change": "\"Joseph and his mother\" becomes \"His parents\"",
+   "note": "The Textus Receptus reads \"Joseph and his mother\"; Sinaiticus, Vaticanus and others read \"his parents\". Luke uses \"parents\" himself in 2:27 and 2:41; the virgin birth is told in 1:34-35."
+  },
+  {
+   "book": 42,
+   "chapter": 3,
+   "verse": 26,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Names \"Semei… Joseph… Juda\" become \"Semein… Josech… Joda\"",
+   "note": "The critical text follows Papyrus 75, Sinaiticus and Vaticanus for the spellings; the Textus Receptus has Semei, Joseph and Juda."
+  },
+  {
+   "book": 42,
+   "chapter": 3,
+   "verse": 29,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"Jose\" becomes \"Joshua\"",
+   "note": "The critical text reads Iesou (Joshua) with Papyrus 4, Sinaiticus and Vaticanus; the Textus Receptus reads Iose. A spelling of one ancestor's name."
+  },
+  {
+   "book": 42,
+   "chapter": 3,
+   "verse": 32,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"Salmon\" becomes \"Sala\"",
+   "note": "The critical text reads Sala with Papyrus 4, Sinaiticus and Vaticanus; the Textus Receptus reads Salmon, as in Ruth 4:20-21 and Matthew 1:4-5."
+  },
+  {
+   "book": 42,
+   "chapter": 4,
+   "verse": 4,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits \"but by every word of God\"",
+   "note": "The clause is in Alexandrinus, the Byzantine majority and the Textus Receptus but not in Sinaiticus or Vaticanus. The full quotation of Deuteronomy 8:3 stands in Matthew 4:4."
+  },
+  {
+   "book": 42,
+   "chapter": 4,
+   "verse": 8,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits \"Get thee behind me, Satan\"",
+   "note": "The words are in later manuscripts and the Textus Receptus but not in Sinaiticus, Vaticanus or the Byzantine majority. They stand in Matthew 4:10."
+  },
+  {
+   "book": 42,
+   "chapter": 4,
+   "verse": 18,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits \"to heal the brokenhearted\"",
+   "note": "The phrase is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or Bezae. It stands in Isaiah 61:1, which Jesus is reading."
+  },
+  {
+   "book": 42,
+   "chapter": 4,
+   "verse": 41,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Thou art Christ the Son of God\" drops \"Christ\"",
+   "note": "The title is in the Byzantine text and the Textus Receptus but not in Sinaiticus or Vaticanus. The verse still says they knew he was the Christ."
+  },
+  {
+   "book": 42,
+   "chapter": 5,
+   "verse": 38,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"and both are preserved\"",
+   "note": "The clause is in the Byzantine text and the Textus Receptus but not in Papyrus 75, Sinaiticus or Vaticanus. It stands in Matthew 9:17."
+  },
+  {
+   "book": 42,
+   "chapter": 7,
+   "verse": 19,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"to Jesus\" becomes \"to ask the Lord\"",
+   "note": "The Textus Receptus reads \"Jesus\"; Sinaiticus, Vaticanus and others read \"the Lord\". Only the way he is named differs."
+  },
+  {
+   "book": 42,
+   "chapter": 7,
+   "verse": 22,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits the name \"Jesus\"",
+   "note": "The name is in the Byzantine text and the Textus Receptus but not in Sinaiticus or Vaticanus. The referent is plain from the context."
+  },
+  {
+   "book": 42,
+   "chapter": 7,
+   "verse": 31,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"And the Lord said\"",
+   "note": "The words are in a few late manuscripts and the Textus Receptus but not in most manuscripts, early or Byzantine. The speaker is still Jesus."
+  },
+  {
+   "book": 42,
+   "chapter": 9,
+   "verse": 55,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits \"Ye know not what manner of spirit ye are of\"",
+   "note": "The rebuke is in many later manuscripts and the Textus Receptus but not in Papyrus 75, Sinaiticus, Vaticanus or Alexandrinus."
+  },
+  {
+   "book": 42,
+   "chapter": 9,
+   "verse": 56,
+   "kind": "salvation",
+   "weight": "major",
+   "change": "Omits \"the Son of man is not come to destroy men's lives\"",
+   "note": "The sentence is in some later manuscripts and the Textus Receptus but not in Papyrus 75, Sinaiticus, Vaticanus or the Byzantine majority. The same purpose is stated in Luke 19:10."
+  },
+  {
+   "book": 42,
+   "chapter": 9,
+   "verse": 57,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits the address \"Lord\"",
+   "note": "The address is in Alexandrinus, the Byzantine text and the Textus Receptus but not in Papyrus 75, Sinaiticus or Vaticanus."
+  },
+  {
+   "book": 42,
+   "chapter": 10,
+   "verse": 15,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"hell\" becomes \"Hades\"; the statement becomes a question",
+   "note": "The Greek is hades, which the BSB transliterates; the question form follows Papyrus 75 and Vaticanus where the Textus Receptus has a statement."
+  },
+  {
+   "book": 42,
+   "chapter": 10,
+   "verse": 39,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus' feet\" becomes \"the Lord's feet\"",
+   "note": "The Textus Receptus reads \"Jesus\"; Papyrus 75, Sinaiticus and Vaticanus read \"the Lord\". Only the way he is named differs."
+  },
+  {
+   "book": 42,
+   "chapter": 10,
+   "verse": 41,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus answered\" becomes \"the Lord replied\"",
+   "note": "The Textus Receptus reads \"Jesus\"; Papyrus 75, Sinaiticus and Vaticanus read \"the Lord\". Only the way he is named differs."
+  },
+  {
+   "book": 42,
+   "chapter": 11,
+   "verse": 2,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Shorter Lord's Prayer: omits \"which art in heaven\", \"Thy will be done\"",
+   "note": "The longer wording is in Alexandrinus, the Byzantine majority and the Textus Receptus; Papyrus 75, Vaticanus and others have Luke's short form. The full prayer stands in Matthew 6:9-10."
+  },
+  {
+   "book": 42,
+   "chapter": 11,
+   "verse": 4,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits \"but deliver us from evil\"",
+   "note": "The clause is in the Byzantine text and the Textus Receptus but not in Papyrus 75, Sinaiticus (original) or Vaticanus. It stands in Matthew 6:13."
+  },
+  {
+   "book": 42,
+   "chapter": 11,
+   "verse": 11,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the bread-and-stone question",
+   "note": "The question is in Sinaiticus, the Byzantine text and the Textus Receptus but not in Papyrus 75 or Vaticanus. It stands in Matthew 7:9."
+  },
+  {
+   "book": 42,
+   "chapter": 11,
+   "verse": 44,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"scribes and Pharisees, hypocrites\"",
+   "note": "The words are in the Byzantine text and the Textus Receptus but not in Papyrus 75, Sinaiticus or Vaticanus. They match Matthew 23:27."
+  },
+  {
+   "book": 42,
+   "chapter": 11,
+   "verse": 54,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"seeking\" and \"that they might accuse him\"",
+   "note": "Both are in the Byzantine text and the Textus Receptus but not in Papyrus 75, Sinaiticus or Vaticanus. The intent to catch him is kept."
+  },
+  {
+   "book": 42,
+   "chapter": 12,
+   "verse": 31,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the kingdom of God\" becomes \"His kingdom\"",
+   "note": "The Textus Receptus reads \"of God\"; Sinaiticus, Vaticanus and others read \"his\", referring to the Father in verse 30."
+  },
+  {
+   "book": 42,
+   "chapter": 13,
+   "verse": 2,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits the name \"Jesus\"",
+   "note": "The name is in the Byzantine text and the Textus Receptus but not in Sinaiticus or Vaticanus. The referent is plain from the context."
+  },
+  {
+   "book": 42,
+   "chapter": 13,
+   "verse": 25,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Lord, Lord\" becomes a single \"Lord\"",
+   "note": "The repeated address is in Alexandrinus, the Byzantine text and the Textus Receptus but not in Papyrus 75, Sinaiticus or Vaticanus."
+  },
+  {
+   "book": 42,
+   "chapter": 16,
+   "verse": 23,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"hell\" becomes \"Hades\"",
+   "note": "The Greek is hades, which the BSB transliterates. The verse still describes torment after death."
+  },
+  {
+   "book": 42,
+   "chapter": 17,
+   "verse": 3,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"against thee\"",
+   "note": "The words are in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus and others."
+  },
+  {
+   "book": 42,
+   "chapter": 17,
+   "verse": 36,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Whole verse omitted",
+   "note": "The verse is in Bezae, some versions and the Textus Receptus but not in Papyrus 75, Sinaiticus, Vaticanus or the Byzantine majority. The saying stands in Matthew 24:40."
+  },
+  {
+   "book": 42,
+   "chapter": 20,
+   "verse": 13,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"when they see him\"",
+   "note": "The words are in the Byzantine text and the Textus Receptus but not in Sinaiticus or Vaticanus."
+  },
+  {
+   "book": 42,
+   "chapter": 21,
+   "verse": 4,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"unto the offerings of God\"",
+   "note": "The Textus Receptus reads \"the offerings of God\"; Sinaiticus, Vaticanus and others read \"the gifts\", which the BSB leaves implied."
+  },
+  {
+   "book": 42,
+   "chapter": 22,
+   "verse": 31,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"And the Lord said\"",
+   "note": "The words are in Sinaiticus, the Byzantine text and the Textus Receptus but not in Papyrus 75 or Vaticanus. The speaker is still Jesus."
+  },
+  {
+   "book": 42,
+   "chapter": 22,
+   "verse": 64,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"they struck him on the face\"",
+   "note": "The words are in the Byzantine text and the Textus Receptus but not in Papyrus 75, Sinaiticus or Vaticanus. The beating is in verse 63."
+  },
+  {
+   "book": 42,
+   "chapter": 23,
+   "verse": 17,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Whole verse omitted",
+   "note": "The verse is in Sinaiticus, the Byzantine majority and the Textus Receptus, though placed differently in some, but not in Papyrus 75, Vaticanus or Alexandrinus. The custom is told in Matthew 27:15 and Mark 15:6."
+  },
+  {
+   "book": 42,
+   "chapter": 23,
+   "verse": 38,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"in letters of Greek, and Latin, and Hebrew\"",
+   "note": "The phrase is in Sinaiticus, the Byzantine text and the Textus Receptus but not in Papyrus 75 or Vaticanus. It stands in John 19:20."
+  },
+  {
+   "book": 42,
+   "chapter": 23,
+   "verse": 42,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Lord, remember me\" becomes \"Jesus, remember me\"",
+   "note": "The Textus Receptus has \"said unto Jesus, Lord\"; Papyrus 75, Sinaiticus and Vaticanus have \"said, Jesus\". The thief no longer calls him Lord."
+  },
+  {
+   "book": 42,
+   "chapter": 24,
+   "verse": 42,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"and of an honeycomb\"",
+   "note": "The words are in the Byzantine text and the Textus Receptus but not in Papyrus 75, Sinaiticus or Vaticanus."
+  },
+  {
+   "book": 42,
+   "chapter": 24,
+   "verse": 53,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"and blessing\" and the closing \"Amen\"",
+   "note": "The Textus Receptus joins two readings, \"praising and blessing\", and adds \"Amen\"; the earliest manuscripts have one verb and no \"Amen\"."
+  },
+  {
+   "book": 43,
+   "chapter": 1,
+   "verse": 18,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"only begotten Son\" becomes \"one and only Son, who is Himself God\"",
+   "note": "Papyrus 66, Papyrus 75, Sinaiticus and Vaticanus read monogenes theos (only God); Alexandrinus, the Byzantine majority and the Textus Receptus read \"only begotten Son\". The BSB combines both and drops \"begotten\"; Christ is called God outright."
+  },
+  {
+   "book": 43,
+   "chapter": 3,
+   "verse": 13,
+   "kind": "deity",
+   "weight": "major",
+   "change": "Omits \"which is in heaven\"",
+   "note": "The phrase is in Alexandrinus, the Byzantine majority and the Textus Receptus but not in Papyrus 66, Papyrus 75, Sinaiticus or Vaticanus. Its loss removes a statement that the Son of Man was in heaven while on earth."
+  },
+  {
+   "book": 43,
+   "chapter": 4,
+   "verse": 1,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord knew\" becomes \"Jesus realized\"",
+   "note": "The Textus Receptus reads \"the Lord\"; Sinaiticus and others read \"Jesus\". Only the way he is named differs."
+  },
+  {
+   "book": 43,
+   "chapter": 4,
+   "verse": 42,
+   "kind": "deity",
+   "weight": "major",
+   "change": "Omits \"the Christ\" before \"the Saviour of the world\"",
+   "note": "The title is in the Byzantine majority and the Textus Receptus but not in Papyrus 66, Papyrus 75, Sinaiticus or Vaticanus. The Samaritan woman asks whether he is the Christ in verse 29."
+  },
+  {
+   "book": 43,
+   "chapter": 4,
+   "verse": 46,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits the name \"Jesus\"",
+   "note": "The name is in the Byzantine text and the Textus Receptus but not in Sinaiticus or Vaticanus. The referent is plain from the context."
+  },
+  {
+   "book": 43,
+   "chapter": 5,
+   "verse": 4,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Whole verse omitted (the angel troubling the water)",
+   "note": "The verse is in Alexandrinus, the Byzantine majority and the Textus Receptus but not in Papyrus 66, Papyrus 75, Sinaiticus or Vaticanus. Verse 7 still speaks of the water being stirred."
+  },
+  {
+   "book": 43,
+   "chapter": 5,
+   "verse": 30,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"the Father\" from \"him who sent me\"",
+   "note": "\"Of the Father\" is in later manuscripts and the Textus Receptus but not in Papyrus 66, Papyrus 75, Sinaiticus or Vaticanus. Verse 37 names the Father who sent him."
+  },
+  {
+   "book": 43,
+   "chapter": 6,
+   "verse": 39,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Father's will\" becomes \"the will of Him who sent Me\"",
+   "note": "\"Of the Father\" is in later manuscripts and the Textus Receptus but not in Papyrus 66, Papyrus 75, Sinaiticus or Vaticanus. Verse 40 still says \"my Father\"."
+  },
+  {
+   "book": 43,
+   "chapter": 6,
+   "verse": 47,
+   "kind": "salvation",
+   "weight": "major",
+   "change": "Omits \"on me\": \"he who believes has eternal life\"",
+   "note": "\"On me\" is in Alexandrinus, the Byzantine majority and the Textus Receptus but not in Papyrus 66, Papyrus 75, Sinaiticus or Vaticanus. Belief in Christ is stated in verses 35 and 40."
+  },
+  {
+   "book": 43,
+   "chapter": 6,
+   "verse": 69,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"Christ, the Son of the living God\" becomes \"Holy One of God\"",
+   "note": "Peter's confession reads \"the Holy One of God\" in Papyrus 75, Sinaiticus and Vaticanus; the longer title is in the Byzantine text and the Textus Receptus, as in Matthew 16:16."
+  },
+  {
+   "book": 43,
+   "chapter": 7,
+   "verse": 39,
+   "kind": "trinity",
+   "weight": "minor",
+   "change": "\"the Holy Ghost was not yet given\" becomes \"the Spirit\"",
+   "note": "The Textus Receptus reads \"Holy Spirit\"; Papyrus 66, Sinaiticus and others read \"Spirit\". The same Spirit is meant."
+  },
+  {
+   "book": 43,
+   "chapter": 8,
+   "verse": 6,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"as though he heard them not\"",
+   "note": "The words are in some manuscripts of John 7:53-8:11 and the Textus Receptus but not in others. The BSB prints the passage in the text."
+  },
+  {
+   "book": 43,
+   "chapter": 8,
+   "verse": 9,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"being convicted by their own conscience\" and \"unto the last\"",
+   "note": "The words are in some manuscripts of John 7:53-8:11 and the Textus Receptus but not in others, including Bezae."
+  },
+  {
+   "book": 43,
+   "chapter": 8,
+   "verse": 10,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"saw none but the woman\" and \"those thine accusers\"",
+   "note": "Within the disputed passage John 7:53-8:11 the Textus Receptus has the longer wording; other manuscripts of the passage have the shorter. The passage itself is absent from the earliest manuscripts."
+  },
+  {
+   "book": 43,
+   "chapter": 8,
+   "verse": 20,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits the name \"Jesus\"",
+   "note": "The name is in the Byzantine text and the Textus Receptus but not in Sinaiticus or Vaticanus. The referent is plain from the context."
+  },
+  {
+   "book": 43,
+   "chapter": 8,
+   "verse": 21,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits the name \"Jesus\"",
+   "note": "The name is in the Byzantine text and the Textus Receptus but not in Sinaiticus or Vaticanus. The referent is plain from the context."
+  },
+  {
+   "book": 43,
+   "chapter": 8,
+   "verse": 29,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"the Father\": \"He has not left Me alone\"",
+   "note": "\"The Father\" is in the Byzantine text and the Textus Receptus but not in Papyrus 66, Papyrus 75, Sinaiticus or Vaticanus. The one who sent him is the Father (verse 18)."
+  },
+  {
+   "book": 43,
+   "chapter": 9,
+   "verse": 35,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"the Son of God\" becomes \"the Son of Man\"",
+   "note": "Papyrus 66, Papyrus 75, Sinaiticus and Vaticanus read \"Son of Man\"; Alexandrinus, the Byzantine majority and the Textus Receptus read \"Son of God\". The man still worships Jesus in verse 38."
+  },
+  {
+   "book": 43,
+   "chapter": 10,
+   "verse": 26,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"as I said unto you\"",
+   "note": "The words are in Alexandrinus, the Byzantine text and the Textus Receptus but not in Papyrus 66, Papyrus 75, Sinaiticus or Vaticanus."
+  },
+  {
+   "book": 43,
+   "chapter": 10,
+   "verse": 38,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"know, and believe\" becomes \"know and understand\"",
+   "note": "The Textus Receptus reads pisteusete (believe); Papyrus 66, Papyrus 75 and Vaticanus read ginoskete (understand). The Father in the Son is still stated."
+  },
+  {
+   "book": 43,
+   "chapter": 12,
+   "verse": 4,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"Simon's son\"",
+   "note": "The words are in the Byzantine text and the Textus Receptus but not in Papyrus 66, Papyrus 75, Sinaiticus or Vaticanus. Judas is called son of Simon in John 6:71."
+  },
+  {
+   "book": 43,
+   "chapter": 12,
+   "verse": 47,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"believe not\" becomes \"does not keep them\"",
+   "note": "The Textus Receptus reads \"believe not\"; Papyrus 66, Sinaiticus, Vaticanus and the Byzantine majority read \"keep not\". Verses 44-46 still centre on believing."
+  },
+  {
+   "book": 43,
+   "chapter": 16,
+   "verse": 16,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"because I go to the Father\"",
+   "note": "The clause is in the Byzantine text and the Textus Receptus but not in Papyrus 66, Sinaiticus or Vaticanus. The disciples quote it in verse 17."
+  },
+  {
+   "book": 43,
+   "chapter": 19,
+   "verse": 38,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "The third \"body of Jesus\" becomes \"His body\"",
+   "note": "The Textus Receptus reads \"of Jesus\"; Sinaiticus, Vaticanus and others read \"his\". The referent is plain."
+  },
+  {
+   "book": 43,
+   "chapter": 21,
+   "verse": 25,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the closing \"Amen\"",
+   "note": "The \"Amen\" is in later manuscripts and the Textus Receptus but not in Sinaiticus, Vaticanus or Alexandrinus."
+  },
+  {
+   "book": 44,
+   "chapter": 2,
+   "verse": 27,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"hell\" becomes \"Hades\"",
+   "note": "The Greek is hades, quoting Psalm 16:10 where the Hebrew is sheol. The prophecy of the resurrection is unchanged."
+  },
+  {
+   "book": 44,
+   "chapter": 2,
+   "verse": 30,
+   "kind": "prophecy",
+   "weight": "major",
+   "change": "Omits \"according to the flesh, he would raise up Christ\"",
+   "note": "The phrase is in the Byzantine majority and the Textus Receptus but not in Sinaiticus, Vaticanus or Alexandrinus. The verse still speaks of David's descendant, and verse 31 names the Christ."
+  },
+  {
+   "book": 44,
+   "chapter": 2,
+   "verse": 31,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "Omits \"his soul\"; \"hell\" becomes \"Hades\"",
+   "note": "\"His soul\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus or Vaticanus; hades is transliterated. The resurrection of the Christ is still the subject."
+  },
+  {
+   "book": 44,
+   "chapter": 2,
+   "verse": 47,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"added to the church\" becomes \"added to their number\"",
+   "note": "The Textus Receptus reads \"to the church\"; Sinaiticus, Vaticanus and Alexandrinus read \"together\" (epi to auto), which the BSB renders \"to their number\". The church is still meant."
+  },
+  {
+   "book": 44,
+   "chapter": 3,
+   "verse": 13,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"his Son Jesus\" becomes \"His servant Jesus\"",
+   "note": "A translation choice: the Greek pais means child or servant, and the BSB reads it as an echo of Isaiah's Servant (Isaiah 52:13). Jesus is called God's Son elsewhere in Acts (9:20, 13:33)."
+  },
+  {
+   "book": 44,
+   "chapter": 3,
+   "verse": 26,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"his Son Jesus\" becomes \"His Servant\"",
+   "note": "Pais is translated \"servant\", as in verse 13, and \"Jesus\" is in the Textus Receptus but not in Sinaiticus or Vaticanus. Jesus is called God's Son elsewhere in Acts (9:20)."
+  },
+  {
+   "book": 44,
+   "chapter": 4,
+   "verse": 24,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"thou art God\"",
+   "note": "\"God\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus or Vaticanus. The prayer still addresses the Creator as Sovereign Lord."
+  },
+  {
+   "book": 44,
+   "chapter": 6,
+   "verse": 3,
+   "kind": "trinity",
+   "weight": "minor",
+   "change": "\"full of the Holy Ghost\" becomes \"full of the Spirit\"",
+   "note": "The Textus Receptus reads \"Holy Spirit\"; Sinaiticus, Vaticanus and others read \"Spirit\". The same Spirit is meant (verse 5)."
+  },
+  {
+   "book": 44,
+   "chapter": 7,
+   "verse": 16,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"Emmor the father of Sychem\" becomes \"Hamor at Shechem\"",
+   "note": "The Textus Receptus reads \"of Sychem\" (the father of Sychem); Sinaiticus and Vaticanus read \"in Shechem\". A place in place of a person."
+  },
+  {
+   "book": 44,
+   "chapter": 7,
+   "verse": 30,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"of the Lord\" after \"angel\"",
+   "note": "\"Of the Lord\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus or Vaticanus. Verse 31 still has the voice of the Lord."
+  },
+  {
+   "book": 44,
+   "chapter": 7,
+   "verse": 37,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"the Lord your\" and \"him shall ye hear\"",
+   "note": "Both are in the Byzantine text and the Textus Receptus but not in Sinaiticus or Vaticanus. The prophecy of a prophet like Moses (Deuteronomy 18:15) is kept."
+  },
+  {
+   "book": 44,
+   "chapter": 8,
+   "verse": 18,
+   "kind": "trinity",
+   "weight": "minor",
+   "change": "\"the Holy Ghost was given\" becomes \"the Spirit was given\"",
+   "note": "The Textus Receptus reads \"the Holy Spirit\"; Sinaiticus, Vaticanus and others read \"the Spirit\". Verse 17 names the Holy Spirit."
+  },
+  {
+   "book": 44,
+   "chapter": 8,
+   "verse": 22,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"pray God\" becomes \"pray to the Lord\"",
+   "note": "The Textus Receptus reads \"God\"; Sinaiticus, Vaticanus and others read \"the Lord\". Only the title differs."
+  },
+  {
+   "book": 44,
+   "chapter": 8,
+   "verse": 37,
+   "kind": "salvation",
+   "weight": "major",
+   "change": "Whole verse omitted (the eunuch's confession of faith)",
+   "note": "The verse is in some later manuscripts, Irenaeus and the Textus Receptus but not in Papyrus 45, Sinaiticus, Vaticanus, Alexandrinus or the Byzantine majority. The confession \"Jesus Christ is the Son of God\" is lost here."
+  },
+  {
+   "book": 44,
+   "chapter": 9,
+   "verse": 5,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"it is hard for thee to kick against the pricks\"",
+   "note": "The words are in a few late manuscripts and the Textus Receptus here but in all manuscripts at Acts 26:14, where they still stand."
+  },
+  {
+   "book": 44,
+   "chapter": 9,
+   "verse": 6,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits Saul's question \"Lord, what wilt thou have me to do?\"",
+   "note": "The trembling question and the Lord's answer are in a few late Latin-influenced witnesses and the Textus Receptus but in no Greek manuscript of any age. Paul tells it in Acts 22:10."
+  },
+  {
+   "book": 44,
+   "chapter": 9,
+   "verse": 20,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"preached Christ\" becomes \"proclaim Jesus\"",
+   "note": "The Textus Receptus reads \"Christ\"; Sinaiticus, Vaticanus and others read \"Jesus\". He is still proclaimed as the Son of God."
+  },
+  {
+   "book": 44,
+   "chapter": 9,
+   "verse": 29,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord Jesus\" becomes \"the Lord\"",
+   "note": "\"Jesus\" is in the Textus Receptus but not in Sinaiticus, Vaticanus or the Byzantine majority. The BSB places \"in the name of the Lord\" at the end of verse 28."
+  },
+  {
+   "book": 44,
+   "chapter": 10,
+   "verse": 6,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"he shall tell thee what thou oughtest to do\"",
+   "note": "The words are in a few late manuscripts and the Textus Receptus but in no early manuscript or the Byzantine majority. Peter's message is promised in 11:14."
+  },
+  {
+   "book": 44,
+   "chapter": 10,
+   "verse": 30,
+   "kind": "other",
+   "weight": "major",
+   "change": "Omits \"fasting\"; Cornelius was only praying",
+   "note": "The Textus Receptus and the Byzantine majority have \"fasting and\"; Papyrus 74, Sinaiticus, Vaticanus and Alexandrinus do not. Prayer and the angel's visit are unchanged."
+  },
+  {
+   "book": 44,
+   "chapter": 10,
+   "verse": 33,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"commanded thee of God\" becomes \"the Lord has instructed\"",
+   "note": "The Textus Receptus reads \"God\"; Sinaiticus, Vaticanus and others read \"the Lord\". Only the title differs; the verse still says \"before God\"."
+  },
+  {
+   "book": 44,
+   "chapter": 10,
+   "verse": 48,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"name of the Lord\" becomes \"name of Jesus Christ\"",
+   "note": "The Textus Receptus reads \"the Lord\"; Sinaiticus, Vaticanus and others read \"Jesus Christ\". The baptism is in the same name."
+  },
+  {
+   "book": 44,
+   "chapter": 13,
+   "verse": 33,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"this day have I begotten thee\" becomes \"I have become Your Father\"",
+   "note": "A translation choice: the Greek gegenneka means \"I have begotten\". The BSB gives the sense of the decree in Psalm 2:7; Jesus is still called \"My Son\"."
+  },
+  {
+   "book": 44,
+   "chapter": 13,
+   "verse": 44,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"word of God\" becomes \"word of the Lord\"",
+   "note": "The Textus Receptus reads \"of God\"; Sinaiticus, Alexandrinus and others read \"of the Lord\". Only the title differs."
+  },
+  {
+   "book": 44,
+   "chapter": 15,
+   "verse": 11,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Lord Jesus Christ\" becomes \"Lord Jesus\"",
+   "note": "\"Christ\" is in the Textus Receptus but not in Papyrus 74, Sinaiticus, Vaticanus or most other manuscripts. Salvation by his grace is unchanged."
+  },
+  {
+   "book": 44,
+   "chapter": 15,
+   "verse": 18,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits \"Known unto God are all his works\"",
+   "note": "The Textus Receptus and the Byzantine majority have the sentence; Sinaiticus, Vaticanus and others end the quotation with \"known from of old\". God's foreknowledge is no longer stated here."
+  },
+  {
+   "book": 44,
+   "chapter": 15,
+   "verse": 24,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"saying, Ye must be circumcised, and keep the law\"",
+   "note": "The words are in the Byzantine text and the Textus Receptus but not in Papyrus 74, Sinaiticus, Vaticanus or Alexandrinus. The same demand is stated in 15:1 and 15:5."
+  },
+  {
+   "book": 44,
+   "chapter": 15,
+   "verse": 34,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Whole verse omitted",
+   "note": "The verse is in Bezae, some later manuscripts and the Textus Receptus but not in Papyrus 74, Sinaiticus, Vaticanus, Alexandrinus or the Byzantine majority. It explains why Silas is in Antioch in verse 40."
+  },
+  {
+   "book": 44,
+   "chapter": 15,
+   "verse": 40,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"grace of God\" becomes \"grace of the Lord\"",
+   "note": "The Textus Receptus reads \"God\"; Sinaiticus, Vaticanus and others read \"the Lord\". Only the title differs."
+  },
+  {
+   "book": 44,
+   "chapter": 16,
+   "verse": 10,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord had called us\" becomes \"God had called us\"",
+   "note": "The Textus Receptus reads \"the Lord\"; Sinaiticus, Vaticanus and others read \"God\". Only the title differs."
+  },
+  {
+   "book": 44,
+   "chapter": 16,
+   "verse": 31,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Lord Jesus Christ\" becomes \"Lord Jesus\"",
+   "note": "\"Christ\" is in the Byzantine text and the Textus Receptus but not in Papyrus 74, Sinaiticus or Vaticanus. Faith in him is still the way of salvation."
+  },
+  {
+   "book": 44,
+   "chapter": 17,
+   "verse": 26,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"of one blood\" becomes \"from one man\"",
+   "note": "The Textus Receptus and the Byzantine majority read \"one blood\"; Papyrus 74, Sinaiticus and Vaticanus read only \"one\", which the BSB renders \"one man\". The unity of mankind is kept."
+  },
+  {
+   "book": 44,
+   "chapter": 17,
+   "verse": 27,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"seek the Lord\" becomes \"seek Him\" (God)",
+   "note": "The Textus Receptus reads \"the Lord\"; Sinaiticus, Vaticanus and others read \"God\". Only the title differs."
+  },
+  {
+   "book": 44,
+   "chapter": 18,
+   "verse": 5,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"pressed in the spirit\" becomes \"devoted himself fully to the word\"",
+   "note": "The Textus Receptus reads pneumati (spirit); Papyrus 74, Sinaiticus, Vaticanus and Alexandrinus read logo (word)."
+  },
+  {
+   "book": 44,
+   "chapter": 18,
+   "verse": 21,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits \"I must by all means keep this feast\" in Jerusalem",
+   "note": "The clause is in the Byzantine majority and the Textus Receptus but not in Papyrus 74, Sinaiticus, Vaticanus or Alexandrinus. Paul's journey to Jerusalem still follows in verse 22."
+  },
+  {
+   "book": 44,
+   "chapter": 18,
+   "verse": 25,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"things of the Lord\" becomes \"about Jesus\"",
+   "note": "The Textus Receptus reads \"the Lord\"; Sinaiticus, Vaticanus and others read \"Jesus\". Only the way he is named differs."
+  },
+  {
+   "book": 44,
+   "chapter": 19,
+   "verse": 4,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Christ Jesus\" becomes \"Jesus\"",
+   "note": "\"Christ\" is in the Textus Receptus but not in Papyrus 74, Sinaiticus, Vaticanus or the Byzantine majority. The one to come is still identified as Jesus."
+  },
+  {
+   "book": 44,
+   "chapter": 19,
+   "verse": 10,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"word of the Lord Jesus\" becomes \"word of the Lord\"",
+   "note": "\"Jesus\" is in the Byzantine text and the Textus Receptus but not in Papyrus 74, Sinaiticus or Vaticanus."
+  },
+  {
+   "book": 44,
+   "chapter": 19,
+   "verse": 20,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"word of God\" becomes \"word of the Lord\"",
+   "note": "The Textus Receptus reads \"of God\"; Papyrus 74, Sinaiticus, Vaticanus and Alexandrinus read \"of the Lord\". Only the title differs."
+  },
+  {
+   "book": 44,
+   "chapter": 20,
+   "verse": 25,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"kingdom of God\" becomes \"the kingdom\"",
+   "note": "\"Of God\" is in the Byzantine text and the Textus Receptus but not in Papyrus 74, Sinaiticus, Vaticanus or Alexandrinus. The kingdom he preached is called the kingdom of God in 19:8."
+  },
+  {
+   "book": 44,
+   "chapter": 21,
+   "verse": 20,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"glorified the Lord\" becomes \"glorified God\"",
+   "note": "The Textus Receptus reads \"the Lord\"; Sinaiticus, Vaticanus and others read \"God\". Only the title differs."
+  },
+  {
+   "book": 44,
+   "chapter": 21,
+   "verse": 25,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"that they observe no such thing, save only\"",
+   "note": "The words are in the Byzantine text and the Textus Receptus but not in Papyrus 74, Sinaiticus, Vaticanus or Alexandrinus. The decree's four requirements are unchanged."
+  },
+  {
+   "book": 44,
+   "chapter": 22,
+   "verse": 16,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"name of the Lord\" becomes \"His name\"",
+   "note": "The Textus Receptus reads \"of the Lord\"; Papyrus 74, Sinaiticus, Vaticanus and Alexandrinus read \"his\". The referent is the Righteous One of verse 14."
+  },
+  {
+   "book": 44,
+   "chapter": 23,
+   "verse": 9,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits \"let us not fight against God\"",
+   "note": "The words are in the Byzantine majority and the Textus Receptus but not in Sinaiticus, Vaticanus or Alexandrinus. The Pharisees' question about a spirit or angel remains."
+  },
+  {
+   "book": 44,
+   "chapter": 24,
+   "verse": 6,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"and would have judged according to our law\"",
+   "note": "Verses 6b-8a are in the Byzantine text and the Textus Receptus but not in Papyrus 74, Sinaiticus, Vaticanus or Alexandrinus. See verse 7."
+  },
+  {
+   "book": 44,
+   "chapter": 24,
+   "verse": 7,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Verse omitted (Lysias took Paul from his accusers)",
+   "note": "Verses 6b-8a are in the Byzantine text and the Textus Receptus but not in Papyrus 74, Sinaiticus, Vaticanus or Alexandrinus. Lysias's part is told in Acts 21:31-36 and 23:27."
+  },
+  {
+   "book": 44,
+   "chapter": 28,
+   "verse": 16,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits centurion handing prisoners to \"the captain of the guard\"",
+   "note": "The clause is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or Alexandrinus."
+  },
+  {
+   "book": 44,
+   "chapter": 28,
+   "verse": 29,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Verse omitted (the Jews departed, reasoning among themselves)",
+   "note": "The verse is in some later manuscripts and the Textus Receptus but not in Papyrus 74, Sinaiticus, Vaticanus or Alexandrinus. Their disagreement is told in verse 25."
+  },
+  {
+   "book": 45,
+   "chapter": 1,
+   "verse": 16,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"gospel of Christ\" becomes \"the gospel\"",
+   "note": "\"Of Christ\" is in the Byzantine text and the Textus Receptus but not in Papyrus 46, Sinaiticus, Vaticanus and other early witnesses. The gospel is \"concerning his Son\" in verse 3."
+  },
+  {
+   "book": 45,
+   "chapter": 6,
+   "verse": 11,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"our Lord\" after \"Christ Jesus\"",
+   "note": "\"Our Lord\" is in Sinaiticus, the Byzantine text and the Textus Receptus but not in Papyrus 46, Vaticanus or Alexandrinus."
+  },
+  {
+   "book": 45,
+   "chapter": 8,
+   "verse": 1,
+   "kind": "salvation",
+   "weight": "major",
+   "change": "Omits \"who walk not after the flesh, but after the Spirit\"",
+   "note": "The clause is in the Byzantine majority and the Textus Receptus but not in Sinaiticus or Vaticanus; it matches verse 4, where it still stands."
+  },
+  {
+   "book": 45,
+   "chapter": 9,
+   "verse": 28,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"cut it short in righteousness\" and \"short work\" wording",
+   "note": "The longer wording, from the Septuagint of Isaiah 10:23, is in the Byzantine text and the Textus Receptus but not in Papyrus 46, Sinaiticus or Vaticanus."
+  },
+  {
+   "book": 45,
+   "chapter": 10,
+   "verse": 17,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"word of God\" becomes \"word of Christ\"",
+   "note": "The Textus Receptus reads \"of God\"; Papyrus 46, Sinaiticus and Vaticanus read \"of Christ\". Christ is the subject of the message either way."
+  },
+  {
+   "book": 45,
+   "chapter": 11,
+   "verse": 6,
+   "kind": "salvation",
+   "weight": "major",
+   "change": "Omits second half, \"But if it be of works…\"",
+   "note": "The sentence is in Vaticanus (in a different form), the Byzantine majority and the Textus Receptus but not in Papyrus 46, Sinaiticus or Alexandrinus. The first half still sets grace against works."
+  },
+  {
+   "book": 45,
+   "chapter": 14,
+   "verse": 4,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"God is able\" becomes \"the Lord is able\"",
+   "note": "The Textus Receptus reads \"God\"; Papyrus 46, Sinaiticus, Vaticanus and Alexandrinus read \"the Lord\". Only the title differs."
+  },
+  {
+   "book": 45,
+   "chapter": 14,
+   "verse": 6,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"he that regardeth not the day… regard it\"",
+   "note": "The clause is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or Alexandrinus."
+  },
+  {
+   "book": 45,
+   "chapter": 14,
+   "verse": 10,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"judgment seat of Christ\" becomes \"God's judgment seat\"",
+   "note": "The Textus Receptus reads \"of Christ\"; Sinaiticus, Vaticanus and Alexandrinus read \"of God\". Christ's judgment seat stands in 2 Corinthians 5:10, and verse 11 here calls the judge Lord."
+  },
+  {
+   "book": 45,
+   "chapter": 15,
+   "verse": 8,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus Christ\" becomes \"Christ\"",
+   "note": "\"Jesus\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or Alexandrinus."
+  },
+  {
+   "book": 45,
+   "chapter": 16,
+   "verse": 18,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"our Lord Jesus Christ\" becomes \"our Lord Christ\"",
+   "note": "\"Jesus\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or Alexandrinus."
+  },
+  {
+   "book": 45,
+   "chapter": 16,
+   "verse": 20,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the closing \"Amen\"",
+   "note": "The \"Amen\" is in the Byzantine text and the Textus Receptus but not in Papyrus 46, Sinaiticus or Vaticanus."
+  },
+  {
+   "book": 45,
+   "chapter": 16,
+   "verse": 24,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Verse omitted (closing benediction)",
+   "note": "The benediction is in the Byzantine majority and the Textus Receptus but not in Papyrus 46, Papyrus 61, Sinaiticus, Vaticanus or Alexandrinus. The same blessing is in verse 20."
+  },
+  {
+   "book": 45,
+   "chapter": 16,
+   "verse": 27,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Omits subscription \"Written to the Romans from Corinthus…\"",
+   "note": "The subscription is a later scribal note in the Textus Receptus, not part of the letter in any early manuscript."
+  },
+  {
+   "book": 46,
+   "chapter": 2,
+   "verse": 13,
+   "kind": "trinity",
+   "weight": "minor",
+   "change": "\"the Holy Ghost teacheth\" becomes \"taught by the Spirit\"",
+   "note": "The Textus Receptus reads \"Holy Spirit\"; Papyrus 46, Sinaiticus and Vaticanus read \"Spirit\". The same Spirit is meant."
+  },
+  {
+   "book": 46,
+   "chapter": 5,
+   "verse": 4,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Twice \"Lord Jesus Christ\" becomes \"Lord Jesus\"",
+   "note": "\"Christ\" is in the Byzantine text and the Textus Receptus but not in Papyrus 46, Sinaiticus, Vaticanus or Alexandrinus."
+  },
+  {
+   "book": 46,
+   "chapter": 5,
+   "verse": 5,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"day of the Lord Jesus\" becomes \"Day of the Lord\"",
+   "note": "\"Jesus\" is in Sinaiticus, the Byzantine text and the Textus Receptus but not in Papyrus 46 or Vaticanus."
+  },
+  {
+   "book": 46,
+   "chapter": 6,
+   "verse": 20,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"and in your spirit, which are God's\"",
+   "note": "The words are in the Byzantine text and the Textus Receptus but not in Papyrus 46, Sinaiticus, Vaticanus and other early witnesses."
+  },
+  {
+   "book": 46,
+   "chapter": 7,
+   "verse": 5,
+   "kind": "other",
+   "weight": "major",
+   "change": "Omits \"fasting\" from \"fasting and prayer\"",
+   "note": "The Textus Receptus and the Byzantine majority read \"fasting and prayer\"; Papyrus 46, Sinaiticus and Vaticanus have only \"prayer\"."
+  },
+  {
+   "book": 46,
+   "chapter": 7,
+   "verse": 36,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"his virgin\" becomes \"his betrothed\"",
+   "note": "A translation choice: the Greek parthenos means virgin. The BSB reads the passage as about an engaged man rather than a father and his unmarried daughter."
+  },
+  {
+   "book": 46,
+   "chapter": 9,
+   "verse": 1,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus Christ our Lord\" becomes \"Jesus our Lord\"",
+   "note": "\"Christ\" is in the Byzantine text and the Textus Receptus but not in Papyrus 46, Sinaiticus, Vaticanus or Alexandrinus."
+  },
+  {
+   "book": 46,
+   "chapter": 9,
+   "verse": 18,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"gospel of Christ\" becomes \"it\" (the gospel)",
+   "note": "\"Of Christ\" is in the Byzantine text and the Textus Receptus but not in Papyrus 46, Sinaiticus, Vaticanus and other early witnesses."
+  },
+  {
+   "book": 46,
+   "chapter": 10,
+   "verse": 28,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"for the earth is the Lord's, and the fulness thereof\"",
+   "note": "The repeated quotation is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or Alexandrinus. It stands in verse 26."
+  },
+  {
+   "book": 46,
+   "chapter": 11,
+   "verse": 24,
+   "kind": "atonement",
+   "weight": "major",
+   "change": "Omits \"Take, eat\" and \"broken\"",
+   "note": "\"Take, eat\" and \"broken\" is in the Byzantine text and the Textus Receptus but not in Papyrus 46, Sinaiticus (original), Vaticanus or Alexandrinus. The body \"for you\" remains."
+  },
+  {
+   "book": 46,
+   "chapter": 11,
+   "verse": 29,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Omits \"unworthily\" and \"Lord's\" before \"body\"",
+   "note": "Both are in the Byzantine text and the Textus Receptus but not in Papyrus 46, Sinaiticus or Vaticanus. Eating unworthily is warned of in verse 27."
+  },
+  {
+   "book": 46,
+   "chapter": 15,
+   "verse": 47,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"the second man is the Lord from heaven\" loses \"the Lord\"",
+   "note": "\"The Lord\" is in Alexandrinus, the Byzantine majority and the Textus Receptus but not in Papyrus 46, Sinaiticus or Vaticanus. The heavenly origin of the second man is kept."
+  },
+  {
+   "book": 46,
+   "chapter": 16,
+   "verse": 22,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Lord Jesus Christ\" becomes \"the Lord\"",
+   "note": "\"Jesus Christ\" is in the Byzantine text and the Textus Receptus but not in Papyrus 46, Sinaiticus, Vaticanus or Alexandrinus. \"Maranatha\" is translated \"Come, O Lord\"."
+  },
+  {
+   "book": 46,
+   "chapter": 16,
+   "verse": 23,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"our Lord Jesus Christ\" becomes \"the Lord Jesus\"",
+   "note": "\"Christ\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus or Vaticanus."
+  },
+  {
+   "book": 46,
+   "chapter": 16,
+   "verse": 24,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Omits subscription \"written from Philippi\"",
+   "note": "The subscription is a later scribal note in the Textus Receptus, not part of the letter in any early manuscript."
+  },
+  {
+   "book": 47,
+   "chapter": 1,
+   "verse": 6,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Clauses reordered; second \"and salvation\" absent",
+   "note": "The Textus Receptus order and wording differ from Papyrus 46, Sinaiticus, Vaticanus and Alexandrinus, which have \"salvation\" only once. The thought is unchanged."
+  },
+  {
+   "book": 47,
+   "chapter": 4,
+   "verse": 10,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord Jesus\" becomes \"Jesus\"",
+   "note": "\"The Lord\" is in the Byzantine text and the Textus Receptus but not in Papyrus 46, Sinaiticus or Vaticanus."
+  },
+  {
+   "book": 47,
+   "chapter": 5,
+   "verse": 18,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus Christ\" becomes \"Christ\"",
+   "note": "\"Jesus\" is in the Byzantine text and the Textus Receptus but not in Papyrus 46, Sinaiticus or Vaticanus."
+  },
+  {
+   "book": 47,
+   "chapter": 8,
+   "verse": 4,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"that we would receive the gift, and take upon us\"",
+   "note": "The words are in a few late manuscripts and the Textus Receptus but not in Papyrus 46, Sinaiticus, Vaticanus or the Byzantine majority."
+  },
+  {
+   "book": 47,
+   "chapter": 11,
+   "verse": 31,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"our Lord Jesus Christ\" becomes \"the Lord Jesus\"",
+   "note": "\"Our\" and \"Christ\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus or Vaticanus."
+  },
+  {
+   "book": 47,
+   "chapter": 13,
+   "verse": 14,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Omits \"Amen\" and subscription \"written from Philippi\"",
+   "note": "The \"Amen\" is in Sinaiticus and the Textus Receptus but not in Papyrus 46 or Vaticanus. The subscription is a later scribal note in the Textus Receptus, not part of the letter in any early manuscript."
+  },
+  {
+   "book": 48,
+   "chapter": 3,
+   "verse": 1,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"that ye should not obey the truth\" and \"among you\"",
+   "note": "Both are in later manuscripts and the Textus Receptus but not in Sinaiticus, Vaticanus or Alexandrinus. The obedience of the truth is in Galatians 5:7."
+  },
+  {
+   "book": 48,
+   "chapter": 3,
+   "verse": 17,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"in Christ\" after \"confirmed before of God\"",
+   "note": "\"In Christ\" is in the Byzantine text and the Textus Receptus but not in Papyrus 46, Sinaiticus, Vaticanus or Alexandrinus."
+  },
+  {
+   "book": 48,
+   "chapter": 4,
+   "verse": 7,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"heir of God through Christ\" becomes \"heir through God\"",
+   "note": "The Textus Receptus reads \"heir of God through Christ\"; Papyrus 46, Sinaiticus, Vaticanus and Alexandrinus read \"heir through God\". Sonship through Christ is stated in verses 4-6."
+  },
+  {
+   "book": 48,
+   "chapter": 6,
+   "verse": 15,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"in Christ Jesus\"",
+   "note": "\"In Christ Jesus\" is in the Byzantine text and the Textus Receptus but not in Papyrus 46 or Vaticanus. The same words stand in Galatians 5:6."
+  },
+  {
+   "book": 48,
+   "chapter": 6,
+   "verse": 17,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord Jesus\" becomes \"Jesus\"",
+   "note": "\"The Lord\" is in the Byzantine text and the Textus Receptus but not in Papyrus 46, Sinaiticus, Vaticanus or Alexandrinus."
+  },
+  {
+   "book": 48,
+   "chapter": 6,
+   "verse": 18,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Omits subscription \"To the Galatians written from Rome\"",
+   "note": "The subscription is a later scribal note in the Textus Receptus, not part of the letter in any early manuscript."
+  },
+  {
+   "book": 49,
+   "chapter": 3,
+   "verse": 9,
+   "kind": "deity",
+   "weight": "major",
+   "change": "Omits \"by Jesus Christ\" after \"created all things\"",
+   "note": "\"By Jesus Christ\" is in the Byzantine majority and the Textus Receptus but not in Papyrus 46, Sinaiticus, Vaticanus or Alexandrinus. Christ as creator is still stated in Colossians 1:16 and John 1:3."
+  },
+  {
+   "book": 49,
+   "chapter": 3,
+   "verse": 14,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"of our Lord Jesus Christ\" after \"the Father\"",
+   "note": "The phrase is in the Byzantine text and the Textus Receptus but not in Papyrus 46, Sinaiticus, Vaticanus or Alexandrinus."
+  },
+  {
+   "book": 49,
+   "chapter": 5,
+   "verse": 9,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"fruit of the Spirit\" becomes \"fruit of the light\"",
+   "note": "The Textus Receptus reads \"Spirit\", as in Galatians 5:22; Papyrus 46, Sinaiticus, Vaticanus and Alexandrinus read \"light\", matching verse 8."
+  },
+  {
+   "book": 49,
+   "chapter": 5,
+   "verse": 21,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"fear of God\" becomes \"reverence for Christ\"",
+   "note": "The Textus Receptus reads \"of God\"; Papyrus 46, Sinaiticus, Vaticanus and Alexandrinus read \"of Christ\"."
+  },
+  {
+   "book": 49,
+   "chapter": 5,
+   "verse": 29,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord\" becomes \"Christ\"",
+   "note": "The Textus Receptus reads \"the Lord\"; Papyrus 46, Sinaiticus, Vaticanus and Alexandrinus read \"Christ\". Only the title differs."
+  },
+  {
+   "book": 49,
+   "chapter": 5,
+   "verse": 30,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"of his flesh, and of his bones\"",
+   "note": "The phrase, from Genesis 2:23, is in the Byzantine text and the Textus Receptus but not in Papyrus 46, Sinaiticus, Vaticanus or Alexandrinus."
+  },
+  {
+   "book": 49,
+   "chapter": 6,
+   "verse": 24,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Omits \"Amen\" and subscription \"written from Rome, by Tychicus\"",
+   "note": "The \"Amen\" is in the Byzantine text and the Textus Receptus but not in the earliest manuscripts. The subscription is a later scribal note in the Textus Receptus, not part of the letter in any early manuscript."
+  },
+  {
+   "book": 50,
+   "chapter": 1,
+   "verse": 16,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Verses 16 and 17 are in the reverse order",
+   "note": "The Textus Receptus and the Byzantine text put the insincere preachers first; Papyrus 46, Sinaiticus, Vaticanus and Alexandrinus put those who preach in love first. No content is lost."
+  },
+  {
+   "book": 50,
+   "chapter": 2,
+   "verse": 6,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"thought it not robbery\" becomes equality \"not… to be grasped\"",
+   "note": "A translation choice for the rare Greek harpagmos. The KJV has Christ rightly claiming equality with God; the BSB has him not clinging to it. Both affirm he is in the form of God."
+  },
+  {
+   "book": 50,
+   "chapter": 3,
+   "verse": 16,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"let us walk by the same rule… same thing\"",
+   "note": "The longer wording is in the Byzantine text and the Textus Receptus but not in Papyrus 16, Papyrus 46, Sinaiticus or Vaticanus."
+  },
+  {
+   "book": 50,
+   "chapter": 4,
+   "verse": 23,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"with you all. Amen\" becomes \"with your spirit\"; subscription omitted",
+   "note": "Papyrus 46, Sinaiticus and Vaticanus read \"with your spirit\"; the Textus Receptus reads \"with you all. Amen\" and adds a later subscription."
+  },
+  {
+   "book": 51,
+   "chapter": 1,
+   "verse": 2,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"and the Lord Jesus Christ\" from the greeting",
+   "note": "The phrase is in the Byzantine text and the Textus Receptus but not in Vaticanus and other early witnesses. Paul's other greetings name both."
+  },
+  {
+   "book": 51,
+   "chapter": 1,
+   "verse": 14,
+   "kind": "atonement",
+   "weight": "major",
+   "change": "Omits \"through his blood\"",
+   "note": "The phrase is in a few later manuscripts and the Textus Receptus but not in Sinaiticus, Vaticanus, Alexandrinus or the Byzantine majority. Redemption through Christ's blood is stated in Ephesians 1:7 and Colossians 1:20."
+  },
+  {
+   "book": 51,
+   "chapter": 1,
+   "verse": 28,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"in Christ Jesus\" becomes \"in Christ\"",
+   "note": "\"Jesus\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or Alexandrinus."
+  },
+  {
+   "book": 51,
+   "chapter": 2,
+   "verse": 2,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"and of the Father\"; mystery of God \"namely Christ\"",
+   "note": "The Textus Receptus reads \"of God, and of the Father, and of Christ\"; Papyrus 46 and Vaticanus read \"of God, Christ\", which the BSB takes as Christ being the mystery."
+  },
+  {
+   "book": 51,
+   "chapter": 3,
+   "verse": 13,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"as Christ forgave you\" becomes \"as the Lord forgave you\"",
+   "note": "The Textus Receptus reads \"Christ\"; Papyrus 46, Vaticanus and Alexandrinus read \"the Lord\". Only the title differs."
+  },
+  {
+   "book": 51,
+   "chapter": 3,
+   "verse": 15,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"peace of God\" becomes \"peace of Christ\"",
+   "note": "The Textus Receptus reads \"of God\"; Sinaiticus, Vaticanus and Alexandrinus read \"of Christ\"."
+  },
+  {
+   "book": 51,
+   "chapter": 3,
+   "verse": 16,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"to the Lord\" becomes \"to God\"",
+   "note": "The Textus Receptus reads \"to the Lord\"; Papyrus 46, Sinaiticus, Vaticanus and Alexandrinus read \"to God\"."
+  },
+  {
+   "book": 51,
+   "chapter": 3,
+   "verse": 22,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"fearing God\" becomes \"fear of the Lord\"",
+   "note": "The Textus Receptus reads \"God\"; Papyrus 46, Sinaiticus, Vaticanus and Alexandrinus read \"the Lord\"."
+  },
+  {
+   "book": 51,
+   "chapter": 4,
+   "verse": 18,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Omits \"Amen\" and subscription \"Written from Rome\"",
+   "note": "The \"Amen\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus or Vaticanus. The subscription is a later scribal note in the Textus Receptus, not part of the letter in any early manuscript."
+  },
+  {
+   "book": 52,
+   "chapter": 1,
+   "verse": 1,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"from God our Father, and the Lord Jesus Christ\"",
+   "note": "The second phrase is in the Byzantine text and the Textus Receptus but not in Vaticanus and some others. God the Father and the Lord Jesus Christ are named earlier in the verse."
+  },
+  {
+   "book": 52,
+   "chapter": 2,
+   "verse": 19,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"our Lord Jesus Christ\" becomes \"our Lord Jesus\"",
+   "note": "\"Christ\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or Alexandrinus."
+  },
+  {
+   "book": 52,
+   "chapter": 3,
+   "verse": 11,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"Christ\" after \"Lord Jesus\"",
+   "note": "\"Christ\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or Alexandrinus."
+  },
+  {
+   "book": 52,
+   "chapter": 3,
+   "verse": 13,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"Christ\" after \"Lord Jesus\"; adds \"Amen\"",
+   "note": "\"Christ\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or Alexandrinus; the BSB follows Sinaiticus and Alexandrinus in adding \"Amen\"."
+  },
+  {
+   "book": 52,
+   "chapter": 5,
+   "verse": 28,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Omits closing \"Amen\" and the subscription",
+   "note": "The \"Amen\" is in the Byzantine text and the Textus Receptus but not in Vaticanus and some other early manuscripts. The subscription is a later scribal note in the Textus Receptus, not part of the letter in any early manuscript."
+  },
+  {
+   "book": 53,
+   "chapter": 1,
+   "verse": 8,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"Christ\" from \"gospel of our Lord Jesus\"",
+   "note": "\"Christ\" is in the Byzantine text and the Textus Receptus but not in Vaticanus and some others."
+  },
+  {
+   "book": 53,
+   "chapter": 1,
+   "verse": 12,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"Christ\" in the first \"Lord Jesus Christ\"",
+   "note": "\"Christ\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus or Vaticanus. The full title stands at the end of the verse."
+  },
+  {
+   "book": 53,
+   "chapter": 2,
+   "verse": 2,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"day of Christ\" becomes \"Day of the Lord\"",
+   "note": "The Textus Receptus reads \"of Christ\"; Sinaiticus, Vaticanus and Alexandrinus read \"of the Lord\". The same day of his coming is meant (verse 1)."
+  },
+  {
+   "book": 53,
+   "chapter": 2,
+   "verse": 4,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"as God\" before \"sitteth in the temple\"",
+   "note": "\"As God\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or Alexandrinus. He still proclaims himself to be God."
+  },
+  {
+   "book": 53,
+   "chapter": 2,
+   "verse": 8,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord\" becomes \"the Lord Jesus\"",
+   "note": "Sinaiticus, Alexandrinus and others add \"Jesus\"; Vaticanus, the Byzantine majority and the Textus Receptus lack it. Here the BSB names Christ where the KJV does not."
+  },
+  {
+   "book": 53,
+   "chapter": 3,
+   "verse": 18,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits closing \"Amen\" and the subscription",
+   "note": "The \"Amen\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus (original), Vaticanus or Alexandrinus. The subscription is a later scribal note in the Textus Receptus, not part of the letter in any early manuscript."
+  },
+  {
+   "book": 54,
+   "chapter": 1,
+   "verse": 1,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Lord Jesus Christ\" becomes \"Christ Jesus\"",
+   "note": "The Textus Receptus reads \"Lord Jesus Christ\"; Sinaiticus, Vaticanus and Alexandrinus read \"Christ Jesus\". \"Lord\" is dropped from the title."
+  },
+  {
+   "book": 54,
+   "chapter": 2,
+   "verse": 7,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"in Christ\" from \"I speak the truth\"",
+   "note": "\"In Christ\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus (original), Alexandrinus and other early witnesses."
+  },
+  {
+   "book": 54,
+   "chapter": 3,
+   "verse": 16,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"God was manifest\" becomes \"He appeared\"",
+   "note": "Later manuscripts and the Textus Receptus read theos (God); Sinaiticus (original), Alexandrinus (original) and early versions read hos (who). The difference is a stroke in the abbreviated Greek; Christ's deity is stated in John 1:1 and Romans 9:5."
+  },
+  {
+   "book": 54,
+   "chapter": 4,
+   "verse": 12,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"in spirit\" from the list",
+   "note": "\"In spirit\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or Alexandrinus."
+  },
+  {
+   "book": 54,
+   "chapter": 5,
+   "verse": 21,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord Jesus Christ\" becomes \"Christ Jesus\"",
+   "note": "The Textus Receptus reads \"the Lord Jesus Christ\"; Sinaiticus, Vaticanus and Alexandrinus read \"Christ Jesus\". \"Lord\" is dropped from the title."
+  },
+  {
+   "book": 54,
+   "chapter": 6,
+   "verse": 5,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"from such withdraw thyself\"",
+   "note": "The clause is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Alexandrinus or other early witnesses."
+  },
+  {
+   "book": 54,
+   "chapter": 6,
+   "verse": 21,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "\"with thee\" becomes \"with you all\"; omits \"Amen\" and subscription",
+   "note": "The Textus Receptus reads \"with thee. Amen\"; Sinaiticus and Alexandrinus read \"with you\" (plural) without \"Amen\". The subscription is a later scribal note in the Textus Receptus, not part of the letter in any early manuscript."
+  },
+  {
+   "book": 55,
+   "chapter": 2,
+   "verse": 14,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"before the Lord\" becomes \"before God\"",
+   "note": "The Textus Receptus reads \"the Lord\"; Sinaiticus and others read \"God\". Only the title differs."
+  },
+  {
+   "book": 55,
+   "chapter": 2,
+   "verse": 19,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"name of Christ\" becomes \"name of the Lord\"",
+   "note": "The Textus Receptus reads \"of Christ\"; Sinaiticus, Vaticanus and Alexandrinus read \"of the Lord\". Only the title differs."
+  },
+  {
+   "book": 55,
+   "chapter": 4,
+   "verse": 1,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord Jesus Christ\" becomes \"Christ Jesus\"",
+   "note": "The Textus Receptus reads \"the Lord Jesus Christ\"; Sinaiticus, Vaticanus and Alexandrinus read \"Christ Jesus\". \"Lord\" is dropped from the title."
+  },
+  {
+   "book": 55,
+   "chapter": 4,
+   "verse": 22,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"The Lord Jesus Christ\" becomes \"The Lord\"; omits \"Amen\" and subscription",
+   "note": "\"Jesus Christ\" and \"Amen\" are in the Byzantine text and the Textus Receptus but not in Sinaiticus (original) or Alexandrinus. The subscription is a later scribal note in the Textus Receptus, not part of the letter in any early manuscript."
+  },
+  {
+   "book": 56,
+   "chapter": 1,
+   "verse": 4,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"mercy\"; \"the Lord Jesus Christ\" becomes \"Christ Jesus\"",
+   "note": "The Textus Receptus reads \"grace, mercy, and peace… the Lord Jesus Christ\"; Sinaiticus and Vaticanus read \"grace and peace… Christ Jesus\"."
+  },
+  {
+   "book": 56,
+   "chapter": 3,
+   "verse": 15,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits closing \"Amen\" and the subscription",
+   "note": "The \"Amen\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus (original), Vaticanus or Alexandrinus. The subscription is a later scribal note in the Textus Receptus, not part of the letter in any early manuscript."
+  },
+  {
+   "book": 57,
+   "chapter": 1,
+   "verse": 6,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"in you in Christ Jesus\" becomes \"ours in Christ\"",
+   "note": "The Textus Receptus reads \"in you\" and \"Christ Jesus\"; Papyrus 61, Sinaiticus and others read \"in us\" and \"Christ\"."
+  },
+  {
+   "book": 57,
+   "chapter": 1,
+   "verse": 20,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Second \"in the Lord\" becomes \"in Christ\"",
+   "note": "The Textus Receptus reads \"in the Lord\"; Sinaiticus, Vaticanus and Alexandrinus read \"in Christ\". Only the title differs."
+  },
+  {
+   "book": 57,
+   "chapter": 1,
+   "verse": 25,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits closing \"Amen\" and the subscription",
+   "note": "The \"Amen\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus (original), Vaticanus or Alexandrinus. The subscription is a later scribal note in the Textus Receptus, not part of the letter in any early manuscript."
+  },
+  {
+   "book": 58,
+   "chapter": 1,
+   "verse": 3,
+   "kind": "atonement",
+   "weight": "minor",
+   "change": "Omits \"by himself\" and \"our\" from \"purged our sins\"",
+   "note": "Both are in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or Alexandrinus; Papyrus 46 has \"by himself\". Christ is still the one who made purification."
+  },
+  {
+   "book": 58,
+   "chapter": 1,
+   "verse": 5,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"this day have I begotten thee\" becomes \"I have become Your Father\"",
+   "note": "A translation choice: the Greek gegenneka means \"I have begotten\". The BSB gives the sense of Psalm 2:7; the verse still calls him God's Son."
+  },
+  {
+   "book": 58,
+   "chapter": 2,
+   "verse": 7,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"and didst set him over the works of thy hands\"",
+   "note": "The clause, from Psalm 8:6, is in Sinaiticus, Alexandrinus and the Textus Receptus but not in Papyrus 46, Vaticanus or the Byzantine majority. Verse 8 still has all things put under him."
+  },
+  {
+   "book": 58,
+   "chapter": 3,
+   "verse": 1,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Christ Jesus\" becomes \"Jesus\"",
+   "note": "\"Christ\" is in the Byzantine text and the Textus Receptus but not in Papyrus 13, Papyrus 46, Sinaiticus, Vaticanus or Alexandrinus."
+  },
+  {
+   "book": 58,
+   "chapter": 5,
+   "verse": 5,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"to day have I begotten thee\" becomes \"I have become Your Father\"",
+   "note": "A translation choice for gegenneka, as in Hebrews 1:5. The verse still calls him God's Son."
+  },
+  {
+   "book": 58,
+   "chapter": 7,
+   "verse": 21,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"after the order of Melchisedec\"",
+   "note": "The phrase is in the Byzantine text and the Textus Receptus but not in Papyrus 46, Sinaiticus or Vaticanus. It stands in verse 17."
+  },
+  {
+   "book": 58,
+   "chapter": 10,
+   "verse": 9,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"O God\" from the quotation",
+   "note": "\"O God\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or Alexandrinus. It stands in verse 7."
+  },
+  {
+   "book": 58,
+   "chapter": 10,
+   "verse": 30,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"saith the Lord\"",
+   "note": "\"Saith the Lord\" is in the Byzantine text and the Textus Receptus but not in Papyrus 13, Papyrus 46, Sinaiticus (original) or Vaticanus. The quotation is still of the Lord (Deuteronomy 32:35)."
+  },
+  {
+   "book": 58,
+   "chapter": 10,
+   "verse": 34,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"me in my bonds\" becomes \"those in prison\"; omits \"in heaven\"",
+   "note": "The Textus Receptus reads \"my bonds\" and \"in heaven\"; Papyrus 13, Alexandrinus and others read \"the prisoners\", and Papyrus 13, Papyrus 46, Sinaiticus and Alexandrinus lack \"in heaven\"."
+  },
+  {
+   "book": 58,
+   "chapter": 13,
+   "verse": 25,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits closing \"Amen\" and the subscription",
+   "note": "The \"Amen\" is in most manuscripts and the Textus Receptus but not in Papyrus 46 or Sinaiticus (original). The subscription is a later scribal note in the Textus Receptus, not part of the letter in any early manuscript."
+  },
+  {
+   "book": 59,
+   "chapter": 1,
+   "verse": 12,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord hath promised\" becomes \"God has promised\"",
+   "note": "The Textus Receptus reads \"the Lord\"; Papyrus 23, Sinaiticus, Vaticanus and Alexandrinus have no subject, which the BSB supplies as \"God\"."
+  },
+  {
+   "book": 59,
+   "chapter": 3,
+   "verse": 9,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"God, even the Father\" becomes \"our Lord and Father\"",
+   "note": "The Textus Receptus reads \"God\"; Sinaiticus, Vaticanus and Alexandrinus read \"Lord\". The same Father is meant."
+  },
+  {
+   "book": 60,
+   "chapter": 1,
+   "verse": 22,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"through the Spirit\"",
+   "note": "\"Through the Spirit\" is in the Byzantine text and the Textus Receptus but not in Papyrus 72, Sinaiticus, Vaticanus or Alexandrinus."
+  },
+  {
+   "book": 60,
+   "chapter": 1,
+   "verse": 23,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"for ever\" of the word of God",
+   "note": "\"For ever\" is in the Byzantine text and the Textus Receptus but not in Papyrus 72, Sinaiticus, Vaticanus or Alexandrinus. Verse 25 still says the word of the Lord endures for ever."
+  },
+  {
+   "book": 60,
+   "chapter": 2,
+   "verse": 2,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "Adds \"in your salvation\"",
+   "note": "The words \"unto salvation\" are in Papyrus 72, Sinaiticus, Vaticanus and Alexandrinus but not in the Byzantine majority or the Textus Receptus."
+  },
+  {
+   "book": 60,
+   "chapter": 3,
+   "verse": 15,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"sanctify the Lord God\" becomes \"sanctify Christ as Lord\"",
+   "note": "The Textus Receptus reads \"the Lord God\"; Papyrus 72, Sinaiticus, Vaticanus and Alexandrinus read \"Christ as Lord\". The verse echoes Isaiah 8:13, so the critical reading applies to Christ words said of the LORD."
+  },
+  {
+   "book": 60,
+   "chapter": 4,
+   "verse": 1,
+   "kind": "atonement",
+   "weight": "major",
+   "change": "Omits \"for us\"",
+   "note": "\"For us\" is in Sinaiticus (corrected), the Byzantine majority and the Textus Receptus but not in Vaticanus or some others. Christ's suffering for others is stated in 3:18."
+  },
+  {
+   "book": 60,
+   "chapter": 4,
+   "verse": 14,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits \"on their part he is evil spoken of…\" clause",
+   "note": "The clause is in the Byzantine text and the Textus Receptus but not in Papyrus 72, Sinaiticus, Vaticanus or Alexandrinus."
+  },
+  {
+   "book": 60,
+   "chapter": 5,
+   "verse": 10,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Christ Jesus\" becomes \"Christ\"; the prayer becomes a promise",
+   "note": "The Textus Receptus reads \"Christ Jesus\" and a wish (may he perfect); Sinaiticus and others read \"Christ\", and Alexandrinus and others a promise (he will restore)."
+  },
+  {
+   "book": 60,
+   "chapter": 5,
+   "verse": 14,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"Jesus\" and the closing \"Amen\"",
+   "note": "Both is in the Byzantine text and the Textus Receptus but not in Vaticanus or Alexandrinus."
+  },
+  {
+   "book": 61,
+   "chapter": 2,
+   "verse": 17,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "Omits \"for ever\" from the reserved darkness",
+   "note": "\"For ever\" is in the Byzantine text and the Textus Receptus but not in Papyrus 72 or Vaticanus. Jude 13 has \"for ever\" of the same darkness."
+  },
+  {
+   "book": 62,
+   "chapter": 1,
+   "verse": 7,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"blood of Jesus Christ\" becomes \"blood of Jesus\"",
+   "note": "\"Christ\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus or Vaticanus. Cleansing by his blood is unchanged."
+  },
+  {
+   "book": 62,
+   "chapter": 4,
+   "verse": 3,
+   "kind": "deity",
+   "weight": "major",
+   "change": "Omits \"Christ is come in the flesh\"",
+   "note": "The words are in Sinaiticus, the Byzantine majority and the Textus Receptus but not in Vaticanus or Alexandrinus. The full confession stands in verse 2."
+  },
+  {
+   "book": 62,
+   "chapter": 5,
+   "verse": 7,
+   "kind": "trinity",
+   "weight": "major",
+   "change": "Omits the heavenly witnesses, the Father, Word and Holy Ghost",
+   "note": "The words (the Johannine Comma) are found in only a handful of late Greek manuscripts and in the Latin tradition; they entered the Textus Receptus from Erasmus's third edition. The Trinity is taught elsewhere, as in Matthew 28:19."
+  },
+  {
+   "book": 62,
+   "chapter": 5,
+   "verse": 8,
+   "kind": "trinity",
+   "weight": "minor",
+   "change": "Omits \"in earth\" and \"in one\"",
+   "note": "The words belong to the same late addition as verse 7; without it the three witnesses are the Spirit, the water and the blood."
+  },
+  {
+   "book": 62,
+   "chapter": 5,
+   "verse": 13,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"and that ye may believe on the name of the Son\"",
+   "note": "The closing clause is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or Alexandrinus. Belief in his name opens the verse."
+  },
+  {
+   "book": 62,
+   "chapter": 5,
+   "verse": 18,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"keepeth himself\" becomes \"the One… protects him\"",
+   "note": "The Textus Receptus reads heauton (himself); Alexandrinus and Vaticanus read auton (him), which the BSB takes of Christ keeping the believer."
+  },
+  {
+   "book": 62,
+   "chapter": 5,
+   "verse": 21,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits closing \"Amen\"",
+   "note": "The \"Amen\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or Alexandrinus."
+  },
+  {
+   "book": 63,
+   "chapter": 1,
+   "verse": 3,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"the Lord\" before \"Jesus Christ\"",
+   "note": "\"The Lord\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or Alexandrinus."
+  },
+  {
+   "book": 63,
+   "chapter": 1,
+   "verse": 9,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"transgresseth\" becomes \"runs ahead\"; omits second \"of Christ\"",
+   "note": "The Textus Receptus reads parabainon (transgresses) and repeats \"of Christ\"; Sinaiticus, Vaticanus and Alexandrinus read proagon (goes ahead) and do not repeat it."
+  },
+  {
+   "book": 63,
+   "chapter": 1,
+   "verse": 13,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits closing \"Amen\"",
+   "note": "The \"Amen\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or Alexandrinus."
+  },
+  {
+   "book": 65,
+   "chapter": 1,
+   "verse": 4,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"only Lord God, and our Lord\" becomes \"only Master and Lord\"",
+   "note": "\"God\" is in the Byzantine text and the Textus Receptus but not in Papyrus 72, Sinaiticus, Vaticanus or Alexandrinus. The BSB reads both titles as Jesus Christ's, which states his lordship directly."
+  },
+  {
+   "book": 65,
+   "chapter": 1,
+   "verse": 5,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"the Lord\" becomes \"Jesus\" as Israel's saviour from Egypt",
+   "note": "Alexandrinus, Vaticanus and some early versions read \"Jesus\"; Sinaiticus, the Byzantine majority and the Textus Receptus read \"the Lord\". The BSB reading makes Jesus the one who saved Israel from Egypt."
+  },
+  {
+   "book": 65,
+   "chapter": 1,
+   "verse": 25,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"wise\"; adds \"through Jesus Christ our Lord\"",
+   "note": "The critical text, from Papyrus 72, Sinaiticus, Vaticanus and Alexandrinus, lacks \"wise\" (from Romans 16:27) and adds \"through Jesus Christ our Lord\" and \"before all time\"."
+  },
+  {
+   "book": 66,
+   "chapter": 1,
+   "verse": 5,
+   "kind": "atonement",
+   "weight": "minor",
+   "change": "\"washed us from our sins\" becomes \"released us… by His blood\"",
+   "note": "The Textus Receptus reads lousanti (washed); Papyrus 18, Sinaiticus and Alexandrinus read lusanti (freed). Both are by his blood."
+  },
+  {
+   "book": 66,
+   "chapter": 1,
+   "verse": 8,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"the beginning and the ending\"; \"Lord\" becomes \"Lord God\"",
+   "note": "The Textus Receptus adds \"the beginning and the ending\", from a few late manuscripts; Sinaiticus and Alexandrinus read \"Lord God\". The title Alpha and Omega remains."
+  },
+  {
+   "book": 66,
+   "chapter": 1,
+   "verse": 9,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"Christ\" twice after \"Jesus\"",
+   "note": "\"Christ\" (both times) is in the Byzantine text and the Textus Receptus but not in Sinaiticus or Alexandrinus."
+  },
+  {
+   "book": 66,
+   "chapter": 1,
+   "verse": 11,
+   "kind": "deity",
+   "weight": "major",
+   "change": "Omits \"I am Alpha and Omega, the first and the last\"",
+   "note": "The words are in a few late manuscripts and the Textus Receptus but not in Sinaiticus, Alexandrinus or the Byzantine majority. Christ calls himself the first and the last in verse 17."
+  },
+  {
+   "book": 66,
+   "chapter": 1,
+   "verse": 18,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "Omits \"Amen\"; \"hell\" becomes \"Hades\"",
+   "note": "\"Amen\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus or Alexandrinus. The Greek is hades, the realm of the dead, which the BSB transliterates. The KJV renders it \"hell\"."
+  },
+  {
+   "book": 66,
+   "chapter": 5,
+   "verse": 14,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"four and twenty\" and \"him that liveth for ever\"",
+   "note": "Both are in a few late manuscripts and the Textus Receptus but not in Sinaiticus, Alexandrinus or the Byzantine majority."
+  },
+  {
+   "book": 66,
+   "chapter": 6,
+   "verse": 8,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"Hell\" becomes \"Hades\"",
+   "note": "The Greek is hades, the realm of the dead, which the BSB transliterates. The KJV renders it \"hell\"."
+  },
+  {
+   "book": 66,
+   "chapter": 8,
+   "verse": 13,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"an angel\" becomes \"an eagle\"",
+   "note": "The Textus Receptus reads angelou (angel); Sinaiticus, Alexandrinus and the Byzantine majority read aetou (eagle)."
+  },
+  {
+   "book": 66,
+   "chapter": 11,
+   "verse": 4,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the God of the earth\" becomes \"the Lord of the earth\"",
+   "note": "The Textus Receptus reads \"God\"; Sinaiticus, Alexandrinus and the Byzantine majority read \"Lord\", as in Zechariah 4:14."
+  },
+  {
+   "book": 66,
+   "chapter": 11,
+   "verse": 17,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "Omits \"and art to come\"",
+   "note": "The words are in a few late manuscripts and the Textus Receptus but not in Sinaiticus, Alexandrinus or the Byzantine majority. Here God has already begun to reign."
+  },
+  {
+   "book": 66,
+   "chapter": 12,
+   "verse": 17,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"Christ\"; adds \"the dragon stood on the shore\"",
+   "note": "\"Christ\" is in the Textus Receptus but not in Sinaiticus or Alexandrinus. The added sentence is 13:1a in the KJV, where the Textus Receptus reads \"I stood\"."
+  },
+  {
+   "book": 66,
+   "chapter": 14,
+   "verse": 5,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"before the throne of God\"",
+   "note": "The words are in later manuscripts and the Textus Receptus but not in Sinaiticus, Alexandrinus or the Byzantine majority."
+  },
+  {
+   "book": 66,
+   "chapter": 16,
+   "verse": 5,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"O Lord… and shalt be\" becomes \"O Holy One… was\"",
+   "note": "The Textus Receptus reads \"O Lord… and shalt be\"; Sinaiticus, Alexandrinus and others read \"who is and was, the Holy One\". The title of God differs."
+  },
+  {
+   "book": 66,
+   "chapter": 16,
+   "verse": 17,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"of heaven\" after \"the temple\"",
+   "note": "\"Of heaven\" is in the Byzantine text and the Textus Receptus but not in Alexandrinus and some others."
+  },
+  {
+   "book": 66,
+   "chapter": 19,
+   "verse": 1,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"the Lord\" and \"honour\"",
+   "note": "Both is in the Byzantine text and the Textus Receptus but not in Sinaiticus or Alexandrinus."
+  },
+  {
+   "book": 66,
+   "chapter": 19,
+   "verse": 17,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"supper of the great God\" becomes \"great supper of God\"",
+   "note": "The Textus Receptus reads \"the supper of the great God\"; Sinaiticus, Alexandrinus and the Byzantine majority read \"the great supper of God\"."
+  },
+  {
+   "book": 66,
+   "chapter": 20,
+   "verse": 9,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"from God\" in \"fire came down\"",
+   "note": "The words are in some manuscripts and the Textus Receptus but not in Alexandrinus and others. The fire still comes from heaven."
+  },
+  {
+   "book": 66,
+   "chapter": 20,
+   "verse": 12,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"stand before God\" becomes \"before the throne\"",
+   "note": "The Textus Receptus reads \"before God\"; Sinaiticus, Alexandrinus and the Byzantine majority read \"before the throne\". The throne is God's (verse 11)."
+  },
+  {
+   "book": 66,
+   "chapter": 20,
+   "verse": 13,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"hell\" becomes \"Hades\"",
+   "note": "The Greek is hades, the realm of the dead, which the BSB transliterates. The KJV renders it \"hell\"."
+  },
+  {
+   "book": 66,
+   "chapter": 20,
+   "verse": 14,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"hell\" becomes \"Hades\"; adds \"the lake of fire\"",
+   "note": "The added words are in Sinaiticus, Alexandrinus and others but not in the Textus Receptus. The Greek is hades, the realm of the dead, which the BSB transliterates. The KJV renders it \"hell\"."
+  },
+  {
+   "book": 66,
+   "chapter": 21,
+   "verse": 3,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"out of heaven\" becomes \"from the throne\"",
+   "note": "The Textus Receptus reads \"out of heaven\"; Sinaiticus and Alexandrinus read \"from the throne\"."
+  },
+  {
+   "book": 66,
+   "chapter": 21,
+   "verse": 4,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"God\" as the one who wipes away tears",
+   "note": "\"God\" is in the Byzantine text and the Textus Receptus but not in Alexandrinus. God is the subject of verse 3."
+  },
+  {
+   "book": 66,
+   "chapter": 21,
+   "verse": 24,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "Omits \"of them which are saved\" and \"honour\"",
+   "note": "Both are in a few late manuscripts and the Textus Receptus but not in Sinaiticus, Alexandrinus or the Byzantine majority."
+  },
+  {
+   "book": 66,
+   "chapter": 22,
+   "verse": 14,
+   "kind": "salvation",
+   "weight": "major",
+   "change": "\"do his commandments\" becomes \"wash their robes\"",
+   "note": "The Textus Receptus and the Byzantine majority read \"do his commandments\"; Sinaiticus and Alexandrinus read \"wash their robes\", echoing 7:14. The verse speaks of right to the tree of life."
+  },
+  {
+   "book": 66,
+   "chapter": 22,
+   "verse": 19,
+   "kind": "salvation",
+   "weight": "major",
+   "change": "\"book of life\" becomes \"tree of life\"",
+   "note": "Nearly all Greek manuscripts read \"tree of life\"; the Textus Receptus's \"book of life\" comes from Erasmus's back-translation from the Latin, as his Greek copy lacked the end of Revelation."
+  },
+  {
+   "book": 66,
+   "chapter": 22,
+   "verse": 21,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"Christ\" and \"our\"; \"you all\" becomes \"all the saints\"",
+   "note": "The Textus Receptus reads \"our Lord Jesus Christ… you all\"; Sinaiticus and Alexandrinus read \"the Lord Jesus\" and \"the saints\" or \"all\"."
+  }
+ ]
+}

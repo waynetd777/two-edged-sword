@@ -15,8 +15,9 @@ Click it to see both readings, what changed, and why (usually which manuscripts 
 
 Ask uses the same list, so you can ask "how does this chapter differ from the KJV?".
 
-The app comes with lists for the NIV, ESV, ESV+, ASV, CEV, GNB, MKJV and ISV, each reviewed
-across the whole Bible. They show when you have that translation.
+The app comes with lists for the NIV, ESV, ESV+, ASV, CEV, GNB, MKJV and ISV, and for the built-in
+BSB, RV, Darby, Weymouth, Murdock and Etheridge, each reviewed across the whole Bible (or New
+Testament). They show when you have that translation.
 
 ## Greek and Hebrew
 

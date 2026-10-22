@@ -1,0 +1,2059 @@
+{
+ "module": "etheridge",
+ "base": "kjv",
+ "updated": "2026-10-22",
+ "records": [
+  {
+   "book": 40,
+   "chapter": 4,
+   "verse": 18,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"he\"",
+   "note": "The Textus Receptus names Jesus here; the Peshitta, which Etheridge translates, has only the verb or a pronoun. The referent is plain from context."
+  },
+  {
+   "book": 40,
+   "chapter": 6,
+   "verse": 13,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the closing \"Amen\" of the doxology",
+   "note": "The Peshitta, which Etheridge translates, ends the doxology \"to the age of ages\" without \"Amen\"; the Textus Receptus has it. The doxology itself is kept."
+  },
+  {
+   "book": 40,
+   "chapter": 11,
+   "verse": 23,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"hell\" becomes \"Shiul\" (Sheol)",
+   "note": "The Greek is hadēs and the Syriac shyul (Sheol), the realm of the dead, which Etheridge transliterates where the KJV has \"hell\". A translation choice, not a textual difference."
+  },
+  {
+   "book": 40,
+   "chapter": 12,
+   "verse": 18,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"whom I have chosen\" becomes \"in whom is my pleasure\"",
+   "note": "The Greek has \"whom I chose\"; the Peshitta, which Etheridge translates, has \"in whom I delight\". The servant is still God's beloved, as in Isaiah 42:1."
+  },
+  {
+   "book": 40,
+   "chapter": 14,
+   "verse": 16,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"he\"",
+   "note": "The Textus Receptus names Jesus here; the Peshitta, which Etheridge translates, has only the verb or a pronoun. The referent is plain from context."
+  },
+  {
+   "book": 40,
+   "chapter": 14,
+   "verse": 22,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"he\"",
+   "note": "The Textus Receptus names Jesus here; the Peshitta, which Etheridge translates, has only the verb or a pronoun. The referent is plain from context."
+  },
+  {
+   "book": 40,
+   "chapter": 15,
+   "verse": 8,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"draweth nigh unto me with their mouth\"",
+   "note": "The clause is in the Byzantine text and the Textus Receptus; the Peshitta, which Etheridge translates, lacks it, as do Sinaiticus and Vaticanus. Isaiah 29:13, which is quoted, has it."
+  },
+  {
+   "book": 40,
+   "chapter": 15,
+   "verse": 16,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"he\"",
+   "note": "The Textus Receptus names Jesus here; the Peshitta, which Etheridge translates, has only the verb or a pronoun. The referent is plain from context."
+  },
+  {
+   "book": 40,
+   "chapter": 16,
+   "verse": 6,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"he\"",
+   "note": "The Textus Receptus names Jesus here; the Peshitta, which Etheridge translates, has only the verb or a pronoun. The referent is plain from context."
+  },
+  {
+   "book": 40,
+   "chapter": 16,
+   "verse": 18,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"gates of hell\" becomes \"gates of Sheul\"",
+   "note": "The Greek is hadēs and the Syriac shyul (Sheol), the realm of the dead, which Etheridge transliterates where the KJV has \"hell\". A translation choice, not a textual difference."
+  },
+  {
+   "book": 40,
+   "chapter": 16,
+   "verse": 20,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus the Christ\" becomes \"the Meshicha\"",
+   "note": "\"Jesus\" is in the Textus Receptus here but not in the Peshitta, which Etheridge translates, nor in Sinaiticus and Vaticanus. He is still confessed as the Christ."
+  },
+  {
+   "book": 40,
+   "chapter": 18,
+   "verse": 10,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the first \"in heaven\"",
+   "note": "The Peshitta has \"their angels in heaven\" (Murdock renders it); Etheridge's English leaves the phrase out. The Father is still \"in heaven\"."
+  },
+  {
+   "book": 40,
+   "chapter": 20,
+   "verse": 34,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"he\"",
+   "note": "The Textus Receptus names Jesus here; the Peshitta, which Etheridge translates, has only the verb or a pronoun. The referent is plain from context."
+  },
+  {
+   "book": 40,
+   "chapter": 23,
+   "verse": 8,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"even Christ\"",
+   "note": "\"Christ\" is in the Byzantine text and the Textus Receptus but not in the Peshitta, which Etheridge translates, nor in Sinaiticus and Vaticanus. Verse 10 still names the one Master as Christ."
+  },
+  {
+   "book": 40,
+   "chapter": 24,
+   "verse": 2,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"he\"",
+   "note": "The Textus Receptus names Jesus here; the Peshitta, which Etheridge translates, has only the verb or a pronoun. The referent is plain from context."
+  },
+  {
+   "book": 40,
+   "chapter": 25,
+   "verse": 13,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits \"wherein the Son of man cometh\"",
+   "note": "The clause is in the Byzantine text and the Textus Receptus but not in the Peshitta, which Etheridge translates, nor in Sinaiticus or Vaticanus. The coming of the Son of man is the subject of the context (24:44, 25:31)."
+  },
+  {
+   "book": 40,
+   "chapter": 26,
+   "verse": 29,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"my Father's kingdom\" becomes \"the kingdom of Aloha\"",
+   "note": "The Greek and many Peshitta copies have \"my Father's kingdom\"; the Syriac text Etheridge translated reads \"the kingdom of God\", as Murdock's does. The same kingdom is meant."
+  },
+  {
+   "book": 40,
+   "chapter": 28,
+   "verse": 19,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Adds \"As the Father sent me, so also I send you\"",
+   "note": "The Peshitta, which Etheridge translates, opens the commission with these words from John 20:21; they are not in the Greek manuscripts behind the KJV. The Trinitarian formula is kept."
+  },
+  {
+   "book": 41,
+   "chapter": 1,
+   "verse": 2,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"in the prophets\" becomes \"in Eshaia the prophet\"",
+   "note": "The Textus Receptus reads \"in the prophets\"; the Peshitta, which Etheridge translates, reads \"in Isaiah the prophet\", as the early Greek manuscripts do, though the first line quoted is from Malachi 3:1."
+  },
+  {
+   "book": 41,
+   "chapter": 2,
+   "verse": 15,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"he\" (first time)",
+   "note": "The Textus Receptus names Jesus here; the Peshitta, which Etheridge translates, has only the verb or a pronoun. The referent is plain from context."
+  },
+  {
+   "book": 41,
+   "chapter": 2,
+   "verse": 17,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "Omits \"to repentance\"",
+   "note": "\"To repentance\" is in the Byzantine text and the Textus Receptus but not in the Peshitta, which Etheridge translates, nor in Sinaiticus or Vaticanus. Luke 5:32 has it."
+  },
+  {
+   "book": 41,
+   "chapter": 2,
+   "verse": 19,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"as long as they have the bridegroom... cannot fast\"",
+   "note": "The Peshitta, which Etheridge translates, answers the question with a single \"No\" in place of the clause the Greek texts have. The sense is the same."
+  },
+  {
+   "book": 41,
+   "chapter": 2,
+   "verse": 23,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"on the sabbath day\"",
+   "note": "The Peshitta has \"on the sabbath\" here (Murdock renders it); Etheridge's English leaves it out. Verse 24 still says it was the sabbath."
+  },
+  {
+   "book": 41,
+   "chapter": 5,
+   "verse": 13,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"he\"",
+   "note": "The Textus Receptus names Jesus here; the Peshitta, which Etheridge translates, has only the verb or a pronoun. The referent is plain from context."
+  },
+  {
+   "book": 41,
+   "chapter": 5,
+   "verse": 19,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"he\"",
+   "note": "The Textus Receptus names Jesus here; the Peshitta, which Etheridge translates, has only the verb or a pronoun. The referent is plain from context."
+  },
+  {
+   "book": 41,
+   "chapter": 8,
+   "verse": 1,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"he\"",
+   "note": "The Textus Receptus names Jesus here; the Peshitta, which Etheridge translates, has only the verb or a pronoun. The referent is plain from context."
+  },
+  {
+   "book": 41,
+   "chapter": 8,
+   "verse": 29,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Adds \"the Son of Aloha the Living\" to Peter's confession",
+   "note": "The Peshitta, which Etheridge translates, has the fuller confession, as in Matthew 16:16; the Greek texts behind the KJV have only \"Thou art the Christ\"."
+  },
+  {
+   "book": 41,
+   "chapter": 9,
+   "verse": 5,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"him\"",
+   "note": "The Textus Receptus names Jesus here; the Peshitta, which Etheridge translates, has only the verb or a pronoun. The referent is plain from context."
+  },
+  {
+   "book": 41,
+   "chapter": 9,
+   "verse": 24,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"Lord\" from the father's cry",
+   "note": "\"Lord\" is in the Textus Receptus here but not in the Peshitta, which Etheridge translates; the sense is otherwise the same."
+  },
+  {
+   "book": 41,
+   "chapter": 9,
+   "verse": 43,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "Omits \"into the fire that never shall be quenched\"",
+   "note": "The Peshitta, which Etheridge translates, ends the clause at gehenna; the Textus Receptus adds the phrase. Verse 44 still says \"their fire is not quenched\"."
+  },
+  {
+   "book": 41,
+   "chapter": 9,
+   "verse": 45,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "Omits \"into the fire that never shall be quenched\"",
+   "note": "The phrase is in the Byzantine text and the Textus Receptus but not in the Peshitta, which Etheridge translates, nor in Sinaiticus or Vaticanus. Verse 46 still says \"their fire is not quenched\"."
+  },
+  {
+   "book": 41,
+   "chapter": 10,
+   "verse": 38,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"he\"",
+   "note": "The Textus Receptus names Jesus here; the Peshitta, which Etheridge translates, has only the verb or a pronoun. The referent is plain from context."
+  },
+  {
+   "book": 41,
+   "chapter": 10,
+   "verse": 47,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"Jesus\" from the blind man's cry",
+   "note": "The Textus Receptus has \"Jesus, thou Son of David\"; the Peshitta, which Etheridge translates, has only \"Son of David\". He is named in the first half of the verse."
+  },
+  {
+   "book": 41,
+   "chapter": 10,
+   "verse": 52,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"followed Jesus\"",
+   "note": "The Textus Receptus says he \"followed Jesus in the way\"; the Peshitta, which Etheridge translates, says only that he went in the way."
+  },
+  {
+   "book": 41,
+   "chapter": 11,
+   "verse": 9,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits \"Blessed is he that cometh in the name of the Lord\"",
+   "note": "The Peshitta has the acclamation here (Murdock renders it); it is missing from Etheridge's English, apparently a slip. Matthew 21:9 and John 12:13 have it."
+  },
+  {
+   "book": 41,
+   "chapter": 11,
+   "verse": 10,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"that cometh in the name of the Lord\"",
+   "note": "The phrase is in the Byzantine text and the Textus Receptus but not in the Peshitta, which Etheridge translates, nor in Sinaiticus or Vaticanus. Verse 9 has the same words."
+  },
+  {
+   "book": 41,
+   "chapter": 11,
+   "verse": 14,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"he\"",
+   "note": "The Textus Receptus names Jesus here; the Peshitta, which Etheridge translates, has only the verb or a pronoun. The referent is plain from context."
+  },
+  {
+   "book": 41,
+   "chapter": 11,
+   "verse": 33,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"he\" (second time)",
+   "note": "The Textus Receptus names Jesus here; the Peshitta, which Etheridge translates, has only the verb or a pronoun. The referent is plain from context."
+  },
+  {
+   "book": 41,
+   "chapter": 12,
+   "verse": 32,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"there is one God\" becomes \"One there is\"",
+   "note": "\"God\" is in the Textus Receptus here but not in the Peshitta, which Etheridge translates; the sense is otherwise the same."
+  },
+  {
+   "book": 41,
+   "chapter": 14,
+   "verse": 19,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"and another said, Is it I?\"",
+   "note": "The question is in the Byzantine text and the Textus Receptus but not in the Peshitta, which Etheridge translates, nor in Sinaiticus or Vaticanus. Each disciple still asks \"Is it I?\"."
+  },
+  {
+   "book": 41,
+   "chapter": 14,
+   "verse": 22,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"eat\" (\"Take, eat\" becomes \"Take\")",
+   "note": "\"Eat\" is in the Byzantine text and the Textus Receptus but not in the Peshitta, which Etheridge translates, nor in the early Greek uncials. Matthew 26:26 has it."
+  },
+  {
+   "book": 41,
+   "chapter": 14,
+   "verse": 30,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Omits \"twice\" (\"before the cock crow twice\")",
+   "note": "The Peshitta has \"twice\" (Murdock renders it); Etheridge's English leaves it out. Verse 72 still has \"before the cock crow twice\"."
+  },
+  {
+   "book": 41,
+   "chapter": 15,
+   "verse": 3,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"but he answered nothing\"",
+   "note": "The clause is in some later manuscripts and the Textus Receptus but not in the Peshitta, which Etheridge translates, nor in Sinaiticus or Vaticanus. Verse 5 says he gave no answer."
+  },
+  {
+   "book": 41,
+   "chapter": 16,
+   "verse": 20,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the closing \"Amen\"",
+   "note": "\"Amen\" is in the Textus Receptus but not in the Peshitta, which Etheridge translates; the meaning is unchanged."
+  },
+  {
+   "book": 42,
+   "chapter": 2,
+   "verse": 14,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"good will toward men\" becomes \"good hope for the sons of men\"",
+   "note": "Like the Textus Receptus, the Peshitta has peace and good will to men, not \"men of good will\"; its word is sabra, \"hope\", which Etheridge renders literally."
+  },
+  {
+   "book": 42,
+   "chapter": 2,
+   "verse": 30,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"thy salvation\" becomes \"thy grace\"",
+   "note": "The Greek has \"thy salvation\"; the Peshitta, which Etheridge translates, has \"thy grace\" or mercy. Verse 32 and 3:6 still speak of God's salvation."
+  },
+  {
+   "book": 42,
+   "chapter": 3,
+   "verse": 38,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Adam \"the son of God\" becomes \"who was from Aloha\"",
+   "note": "The Greek has only the genitive \"of God\", which the KJV renders \"the son of God\"; the Peshitta says Adam was \"from God\". Adam's origin in God is the same."
+  },
+  {
+   "book": 42,
+   "chapter": 4,
+   "verse": 8,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"Get thee behind me, Satan\"",
+   "note": "The rebuke is in the Byzantine text and the Textus Receptus but not in the Peshitta, which Etheridge translates, nor in Sinaiticus or Vaticanus. Matthew 4:10 has a like rebuke."
+  },
+  {
+   "book": 42,
+   "chapter": 7,
+   "verse": 13,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord\" becomes \"Jeshu\"",
+   "note": "The Greek has \"the Lord\"; the Peshitta, which Etheridge translates, names him \"Jesus\" here, as it often does in Luke. The same person is meant, though the title is not used."
+  },
+  {
+   "book": 42,
+   "chapter": 7,
+   "verse": 31,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"And the Lord said\"",
+   "note": "The words are in the Textus Receptus but not in the Peshitta, which Etheridge translates, nor in the early Greek manuscripts. Jesus is plainly the speaker."
+  },
+  {
+   "book": 42,
+   "chapter": 7,
+   "verse": 37,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"he\"",
+   "note": "The Textus Receptus names Jesus here; the Peshitta, which Etheridge translates, has only the verb or a pronoun. The referent is plain from context."
+  },
+  {
+   "book": 42,
+   "chapter": 8,
+   "verse": 46,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"he\"",
+   "note": "The Textus Receptus names Jesus here; the Peshitta, which Etheridge translates, has only the verb or a pronoun. The referent is plain from context."
+  },
+  {
+   "book": 42,
+   "chapter": 10,
+   "verse": 1,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord\" becomes \"Jeshu\"",
+   "note": "The Greek has \"the Lord\"; the Peshitta, which Etheridge translates, names him \"Jesus\" here, as it often does in Luke. The same person is meant, though the title is not used."
+  },
+  {
+   "book": 42,
+   "chapter": 10,
+   "verse": 15,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"hell\" becomes \"Shiul\" (Sheol)",
+   "note": "The Greek is hadēs and the Syriac shyul (Sheol), the realm of the dead, which Etheridge transliterates where the KJV has \"hell\". A translation choice, not a textual difference."
+  },
+  {
+   "book": 42,
+   "chapter": 10,
+   "verse": 21,
+   "kind": "trinity",
+   "weight": "minor",
+   "change": "\"rejoiced in spirit\" becomes \"exulted in the Holy Spirit\"",
+   "note": "The Peshitta, which Etheridge translates, reads \"in the Holy Spirit\", as do P75, Sinaiticus and Vaticanus; the Textus Receptus has \"in spirit\". Nothing in the KJV's reading is lost."
+  },
+  {
+   "book": 42,
+   "chapter": 10,
+   "verse": 29,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"him\"",
+   "note": "The Textus Receptus names Jesus here; the Peshitta, which Etheridge translates, does not. The referent is plain from context."
+  },
+  {
+   "book": 42,
+   "chapter": 11,
+   "verse": 39,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord\" becomes \"Jeshu\"",
+   "note": "The Greek has \"the Lord\"; the Peshitta, which Etheridge translates, names him \"Jesus\" here, as it often does in Luke. The same person is meant, though the title is not used."
+  },
+  {
+   "book": 42,
+   "chapter": 11,
+   "verse": 49,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"the wisdom of God\" becomes \"Wisdom\"",
+   "note": "The Greek and some Peshitta copies have \"the wisdom of God\"; the Syriac text Etheridge translated has only \"Wisdom\", as Murdock's does. God's wisdom is still meant."
+  },
+  {
+   "book": 42,
+   "chapter": 12,
+   "verse": 42,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord\" becomes \"Jeshu\"",
+   "note": "The Greek has \"the Lord\"; the Peshitta, which Etheridge translates, names him \"Jesus\" here, as it often does in Luke. The same person is meant, though the title is not used."
+  },
+  {
+   "book": 42,
+   "chapter": 13,
+   "verse": 15,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord\" becomes \"Jeshu\"",
+   "note": "The Greek has \"the Lord\"; the Peshitta, which Etheridge translates, names him \"Jesus\" here, as it often does in Luke. The same person is meant, though the title is not used."
+  },
+  {
+   "book": 42,
+   "chapter": 13,
+   "verse": 23,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits the address \"Lord\"",
+   "note": "The Peshitta, which Etheridge translates, puts the question indirectly (\"one asked him if they are few\"), without the address \"Lord\" that the Greek has."
+  },
+  {
+   "book": 42,
+   "chapter": 16,
+   "verse": 23,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"in hell\" becomes \"in shiul\" (Sheol)",
+   "note": "The Greek is hadēs and the Syriac shyul (Sheol), the realm of the dead, which Etheridge transliterates where the KJV has \"hell\". A translation choice, not a textual difference."
+  },
+  {
+   "book": 42,
+   "chapter": 17,
+   "verse": 6,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord said\" becomes \"He saith\"",
+   "note": "\"The Lord\" (ho kyrios) is in the Greek texts; the Peshitta, which Etheridge translates, has only \"he said\". Jesus is plainly the speaker."
+  },
+  {
+   "book": 42,
+   "chapter": 19,
+   "verse": 8,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"said unto the Lord\" becomes \"said to Jeshu\"",
+   "note": "The Greek has \"the Lord\"; the Peshitta, which Etheridge translates, names him \"Jesus\" here, as it often does in Luke. The same person is meant, though the title is not used."
+  },
+  {
+   "book": 42,
+   "chapter": 22,
+   "verse": 31,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord\" becomes \"Jeshu\"",
+   "note": "The Greek has \"the Lord\"; the Peshitta, which Etheridge translates, names him \"Jesus\" here, as it often does in Luke. The same person is meant, though the title is not used."
+  },
+  {
+   "book": 42,
+   "chapter": 22,
+   "verse": 61,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord turned\" becomes \"Jeshu turned\"",
+   "note": "The Greek has \"the Lord\"; the Peshitta, which Etheridge translates, names him \"Jesus\" here, as it often does in Luke. The same person is meant, though the title is not used."
+  },
+  {
+   "book": 42,
+   "chapter": 24,
+   "verse": 3,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord Jesus\" becomes \"Jeshu\"",
+   "note": "\"Of the Lord Jesus\" is in most Greek manuscripts and the Textus Receptus; the Peshitta, which Etheridge translates, has \"of Jesus\" only. He is called \"the Lord\" in 24:34."
+  },
+  {
+   "book": 43,
+   "chapter": 1,
+   "verse": 18,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"the only begotten Son\" becomes \"the one-begotten God\"",
+   "note": "The Peshitta, which Etheridge translates, reads \"only-begotten God\", as do P66, P75, Sinaiticus and Vaticanus; the Byzantine text and the Textus Receptus read \"only begotten Son\". The Peshitta's reading names Christ as God outright."
+  },
+  {
+   "book": 43,
+   "chapter": 4,
+   "verse": 1,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord\" becomes \"Jeshu\"",
+   "note": "The Textus Receptus has \"the Lord\"; the Peshitta, which Etheridge translates, names him \"Jesus\", as some Greek manuscripts do. The same person is meant, though the title is not used."
+  },
+  {
+   "book": 43,
+   "chapter": 4,
+   "verse": 44,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus himself\" becomes \"he himself\"",
+   "note": "The Textus Receptus names Jesus here; the Peshitta, which Etheridge translates, has only the verb or a pronoun. The referent is plain from context."
+  },
+  {
+   "book": 43,
+   "chapter": 5,
+   "verse": 30,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"the Father\" (\"the will of him who sent me\")",
+   "note": "\"The Father\" is in the Textus Receptus but not in the Peshitta, which Etheridge translates, nor in the early Greek manuscripts; \"him who sent me\" is the Father throughout John."
+  },
+  {
+   "book": 43,
+   "chapter": 6,
+   "verse": 11,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"to the disciples, and the disciples\"",
+   "note": "The words are in the Byzantine text and the Textus Receptus but not in the Peshitta, which Etheridge translates, nor in the early Greek manuscripts. Jesus himself is said to distribute the bread."
+  },
+  {
+   "book": 43,
+   "chapter": 6,
+   "verse": 23,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord\" becomes \"Jeshu\"",
+   "note": "The Textus Receptus has \"the Lord\"; the Peshitta, which Etheridge translates, names him \"Jesus\", as some Greek manuscripts do. The same person is meant, though the title is not used."
+  },
+  {
+   "book": 43,
+   "chapter": 7,
+   "verse": 39,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"the Holy Ghost was not yet given\" omits \"Holy\"",
+   "note": "The Textus Receptus has \"Holy Spirit\"; the Peshitta, which Etheridge translates, has \"the Spirit\", as do several early Greek manuscripts. The same Spirit is meant (verse 39a)."
+  },
+  {
+   "book": 43,
+   "chapter": 7,
+   "verse": 53,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits John 7:53–8:11, the woman taken in adultery",
+   "note": "The Peshitta, which Etheridge translates, does not have the passage, nor do P66, P75, Sinaiticus and Vaticanus; it is in most later Greek manuscripts and the Textus Receptus."
+  },
+  {
+   "book": 43,
+   "chapter": 8,
+   "verse": 1,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits John 7:53–8:11, the woman taken in adultery",
+   "note": "The Peshitta, which Etheridge translates, does not have the passage, nor do P66, P75, Sinaiticus and Vaticanus; it is in most later Greek manuscripts and the Textus Receptus."
+  },
+  {
+   "book": 43,
+   "chapter": 8,
+   "verse": 2,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits John 7:53–8:11, the woman taken in adultery",
+   "note": "The Peshitta, which Etheridge translates, does not have the passage, nor do P66, P75, Sinaiticus and Vaticanus; it is in most later Greek manuscripts and the Textus Receptus."
+  },
+  {
+   "book": 43,
+   "chapter": 8,
+   "verse": 3,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits John 7:53–8:11, the woman taken in adultery",
+   "note": "The Peshitta, which Etheridge translates, does not have the passage, nor do P66, P75, Sinaiticus and Vaticanus; it is in most later Greek manuscripts and the Textus Receptus."
+  },
+  {
+   "book": 43,
+   "chapter": 8,
+   "verse": 4,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits John 7:53–8:11, the woman taken in adultery",
+   "note": "The Peshitta, which Etheridge translates, does not have the passage, nor do P66, P75, Sinaiticus and Vaticanus; it is in most later Greek manuscripts and the Textus Receptus."
+  },
+  {
+   "book": 43,
+   "chapter": 8,
+   "verse": 5,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits John 7:53–8:11, the woman taken in adultery",
+   "note": "The Peshitta, which Etheridge translates, does not have the passage, nor do P66, P75, Sinaiticus and Vaticanus; it is in most later Greek manuscripts and the Textus Receptus."
+  },
+  {
+   "book": 43,
+   "chapter": 8,
+   "verse": 6,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits John 7:53–8:11, the woman taken in adultery",
+   "note": "The Peshitta, which Etheridge translates, does not have the passage, nor do P66, P75, Sinaiticus and Vaticanus; it is in most later Greek manuscripts and the Textus Receptus."
+  },
+  {
+   "book": 43,
+   "chapter": 8,
+   "verse": 7,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits John 7:53–8:11, the woman taken in adultery",
+   "note": "The Peshitta, which Etheridge translates, does not have the passage, nor do P66, P75, Sinaiticus and Vaticanus; it is in most later Greek manuscripts and the Textus Receptus."
+  },
+  {
+   "book": 43,
+   "chapter": 8,
+   "verse": 8,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits John 7:53–8:11, the woman taken in adultery",
+   "note": "The Peshitta, which Etheridge translates, does not have the passage, nor do P66, P75, Sinaiticus and Vaticanus; it is in most later Greek manuscripts and the Textus Receptus."
+  },
+  {
+   "book": 43,
+   "chapter": 8,
+   "verse": 9,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits John 7:53–8:11, the woman taken in adultery",
+   "note": "The Peshitta, which Etheridge translates, does not have the passage, nor do P66, P75, Sinaiticus and Vaticanus; it is in most later Greek manuscripts and the Textus Receptus."
+  },
+  {
+   "book": 43,
+   "chapter": 8,
+   "verse": 10,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits John 7:53–8:11, the woman taken in adultery",
+   "note": "The Peshitta, which Etheridge translates, does not have the passage, nor do P66, P75, Sinaiticus and Vaticanus; it is in most later Greek manuscripts and the Textus Receptus."
+  },
+  {
+   "book": 43,
+   "chapter": 8,
+   "verse": 11,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits John 7:53–8:11, the woman taken in adultery",
+   "note": "The Peshitta, which Etheridge translates, does not have the passage, nor do P66, P75, Sinaiticus and Vaticanus; it is in most later Greek manuscripts and the Textus Receptus."
+  },
+  {
+   "book": 43,
+   "chapter": 8,
+   "verse": 14,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"but ye cannot tell whence I come, and whither I go\"",
+   "note": "The Peshitta has the clause (Murdock renders it); Etheridge's English leaves it out. The contrast is implied in verse 14a and stated in 7:28."
+  },
+  {
+   "book": 43,
+   "chapter": 11,
+   "verse": 2,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord\" becomes \"Jeshu\"",
+   "note": "The Textus Receptus has \"the Lord\"; the Peshitta, which Etheridge translates, names him \"Jesus\", as some Greek manuscripts do. The same person is meant, though the title is not used."
+  },
+  {
+   "book": 43,
+   "chapter": 12,
+   "verse": 4,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"Simon's son\"",
+   "note": "\"Simon's son\" is in the Byzantine text and the Textus Receptus but not in the Peshitta here, nor in Sinaiticus or Vaticanus. Judas is called son of Simon in 6:71 and 13:26."
+  },
+  {
+   "book": 43,
+   "chapter": 12,
+   "verse": 47,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"believe not\" becomes \"doth not keep them\"",
+   "note": "The Textus Receptus has \"believe not\"; the Peshitta, which Etheridge translates, has \"keep not\", as do the early Greek manuscripts. The verse's point is unchanged."
+  },
+  {
+   "book": 43,
+   "chapter": 13,
+   "verse": 23,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"leaning on Jesus' bosom\" becomes \"on his bosom\"",
+   "note": "The Textus Receptus names Jesus here; the Peshitta, which Etheridge translates, does not. The referent is plain from context."
+  },
+  {
+   "book": 43,
+   "chapter": 13,
+   "verse": 29,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus had said unto him\" becomes \"he had instructed him\"",
+   "note": "The Textus Receptus names Jesus here; the Peshitta, which Etheridge translates, has only the verb or a pronoun. The referent is plain from context."
+  },
+  {
+   "book": 43,
+   "chapter": 16,
+   "verse": 27,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"came out from God\" becomes \"from the Father I came forth\"",
+   "note": "The Textus Receptus reads \"from God\"; the Peshitta, which Etheridge translates, reads \"from the Father\", as some Greek manuscripts do. The same truth is stated in verse 28."
+  },
+  {
+   "book": 43,
+   "chapter": 21,
+   "verse": 25,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the closing \"Amen\"",
+   "note": "\"Amen\" is in the Textus Receptus but not in the Peshitta, which Etheridge translates; the meaning is unchanged."
+  },
+  {
+   "book": 44,
+   "chapter": 2,
+   "verse": 24,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"the pains of death\" becomes \"the bands of Shiul\"",
+   "note": "The Textus Receptus and most Greek manuscripts read \"of death\"; the Peshitta, which Etheridge translates, reads \"of Sheol\", as Bezae and the Latin do. Both speak of Christ's release from death."
+  },
+  {
+   "book": 44,
+   "chapter": 2,
+   "verse": 27,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"hell\" becomes \"Shiul\" (Sheol)",
+   "note": "The Greek is hadēs and the Syriac shyul (Sheol), the realm of the dead, which Etheridge transliterates where the KJV has \"hell\". A translation choice, not a textual difference."
+  },
+  {
+   "book": 44,
+   "chapter": 2,
+   "verse": 30,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "Omits \"according to the flesh, he would raise up Christ\"",
+   "note": "The words are in the Byzantine text and the Textus Receptus but not in the Peshitta, which Etheridge translates, nor in Sinaiticus, Vaticanus or Alexandrinus. Verse 31 still applies the oath to the Christ."
+  },
+  {
+   "book": 44,
+   "chapter": 2,
+   "verse": 31,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"his soul was not left in hell\" becomes \"in Shiul\"",
+   "note": "The Greek is hadēs and the Syriac shyul (Sheol), the realm of the dead, which Etheridge transliterates where the KJV has \"hell\". A translation choice, not a textual difference."
+  },
+  {
+   "book": 44,
+   "chapter": 2,
+   "verse": 38,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus Christ\" becomes \"the Lord Jeshu\"",
+   "note": "The Greek reads \"Jesus Christ\"; the Peshitta, which Etheridge translates, has \"our Lord Jesus\". He is still named as Lord, and as Christ in verse 36."
+  },
+  {
+   "book": 44,
+   "chapter": 3,
+   "verse": 20,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"which before was preached unto you\" becomes \"whom he hath ordained\"",
+   "note": "The Textus Receptus reads prokekērygmenon, \"preached before\"; the Peshitta, which Etheridge translates, follows the early manuscripts' prokecheirismenon, \"appointed\"."
+  },
+  {
+   "book": 44,
+   "chapter": 3,
+   "verse": 26,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"his Son Jesus\" becomes \"his Son\"",
+   "note": "\"Jesus\" is in the Byzantine text and the Textus Receptus but not in the Peshitta, which Etheridge translates, nor in the early Greek uncials. The Son is plainly Jesus."
+  },
+  {
+   "book": 44,
+   "chapter": 6,
+   "verse": 3,
+   "kind": "trinity",
+   "weight": "minor",
+   "change": "\"full of the Holy Ghost\" becomes \"the Spirit of the Lord\"",
+   "note": "The Greek has \"Holy Spirit\" (the Textus Receptus) or \"Spirit\"; the Peshitta, which Etheridge translates, has \"the Spirit of the Lord\". The same Spirit is meant."
+  },
+  {
+   "book": 44,
+   "chapter": 8,
+   "verse": 37,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits the verse (the eunuch's confession)",
+   "note": "The verse is in some later Greek manuscripts, the Latin and the Textus Receptus, but not in the Peshitta, which Etheridge translates, nor in P45, P74, Sinaiticus, Vaticanus or Alexandrinus. Confession before baptism is still taught, e.g. Romans 10:9-10."
+  },
+  {
+   "book": 44,
+   "chapter": 9,
+   "verse": 5,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"it is hard for thee to kick against the pricks\"",
+   "note": "The words are in the Textus Receptus (from the Latin) but not in the Peshitta, which Etheridge translates, nor in the Greek manuscripts here; Acts 26:14 has them."
+  },
+  {
+   "book": 44,
+   "chapter": 9,
+   "verse": 6,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"trembling... Lord, what wilt thou have me to do?\"",
+   "note": "The question is in the Textus Receptus (from the Latin) but not in the Peshitta, which Etheridge translates, nor in the Greek manuscripts here; Acts 22:10 has it."
+  },
+  {
+   "book": 44,
+   "chapter": 9,
+   "verse": 20,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"he preached Christ\" becomes \"concerning Jeshu\"",
+   "note": "The Textus Receptus reads \"Christ\"; the Peshitta, which Etheridge translates, reads \"Jesus\", as do the early Greek manuscripts. He is still preached as the Son of God."
+  },
+  {
+   "book": 44,
+   "chapter": 10,
+   "verse": 6,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"he shall tell thee what thou oughtest to do\"",
+   "note": "The clause is in some late manuscripts and the Textus Receptus but not in the Peshitta, which Etheridge translates, nor in the early Greek manuscripts. Verse 32 and 11:14 say Peter will speak to him."
+  },
+  {
+   "book": 44,
+   "chapter": 10,
+   "verse": 33,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"we all here present before God\" becomes \"before thee\"",
+   "note": "The Greek has \"before God\"; the Peshitta, which Etheridge translates, has \"before thee\", as Bezae does. They still wait to hear what God has commanded."
+  },
+  {
+   "book": 44,
+   "chapter": 13,
+   "verse": 18,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"suffered he their manners\" becomes \"he nourished them\"",
+   "note": "Greek manuscripts differ by one letter: etropophorēsen, \"bore with\" (the Textus Receptus), or etrophophorēsen, \"carried, nourished\". The Peshitta, which Etheridge translates, has the second; Deuteronomy 1:31 has the same sense."
+  },
+  {
+   "book": 44,
+   "chapter": 13,
+   "verse": 26,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"the word of this salvation\" becomes \"the word of life\"",
+   "note": "The Greek has \"this salvation\"; the Peshitta, which Etheridge translates, has \"life\". Salvation is stated in verse 47."
+  },
+  {
+   "book": 44,
+   "chapter": 15,
+   "verse": 34,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits the verse (\"it pleased Silas to abide there still\")",
+   "note": "The verse is in some later manuscripts, the Latin and the Textus Receptus, but not in the Peshitta, which Etheridge translates, nor in Sinaiticus, Vaticanus or Alexandrinus. Verse 40 finds Silas still at Antioch."
+  },
+  {
+   "book": 44,
+   "chapter": 18,
+   "verse": 5,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"pressed in the spirit\" becomes \"constrained in his speech\"",
+   "note": "The Textus Receptus reads pneumati, \"in the spirit\"; the Peshitta, which Etheridge translates, follows the early manuscripts' logō, \"in the word\". He still testifies that Jesus is the Christ."
+  },
+  {
+   "book": 44,
+   "chapter": 18,
+   "verse": 6,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"Your blood be upon your own heads\"",
+   "note": "The Greek texts have the saying; the Peshitta, which Etheridge translates, has only \"from now I am clean\". Paul's meaning is the same."
+  },
+  {
+   "book": 44,
+   "chapter": 18,
+   "verse": 25,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the things of the Lord\" becomes \"concerning Jeshu\"",
+   "note": "The Textus Receptus reads \"of the Lord\"; the Peshitta, which Etheridge translates, reads \"of Jesus\", as the early Greek manuscripts do. The same person is meant."
+  },
+  {
+   "book": 44,
+   "chapter": 19,
+   "verse": 10,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the word of the Lord Jesus\" becomes \"the word of the Lord\"",
+   "note": "\"Jesus\" is in the Byzantine text and the Textus Receptus but not in the Peshitta, which Etheridge translates, nor in the early Greek manuscripts."
+  },
+  {
+   "book": 44,
+   "chapter": 20,
+   "verse": 28,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"the church of God\" becomes \"the church of the Meshiha\"",
+   "note": "Greek manuscripts divide between \"of God\" (the Textus Receptus, Sinaiticus, Vaticanus) and \"of the Lord\" (Alexandrinus, Bezae); the Peshitta, which Etheridge translates, has \"of the Christ\". The church is still bought with Christ's blood, but \"God... with his own blood\" is a key text for Christ's deity."
+  },
+  {
+   "book": 44,
+   "chapter": 22,
+   "verse": 10,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord said unto me\" becomes \"he said to me\"",
+   "note": "\"The Lord\" (ho kyrios) is in the Greek texts; the Peshitta, which Etheridge translates, has only \"he said\". Paul has just addressed him as Lord."
+  },
+  {
+   "book": 44,
+   "chapter": 22,
+   "verse": 16,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"calling on the name of the Lord\" becomes \"callest his Name\"",
+   "note": "The Textus Receptus reads \"of the Lord\"; the Peshitta, which Etheridge translates, reads \"his name\", as the early Greek manuscripts do. The name is that of the Just One of verse 14."
+  },
+  {
+   "book": 44,
+   "chapter": 23,
+   "verse": 9,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"let us not fight against God\"",
+   "note": "The words are in later manuscripts and the Textus Receptus but not in the Peshitta, which Etheridge translates, nor in the early Greek manuscripts; Gamaliel says the like in 5:39."
+  },
+  {
+   "book": 44,
+   "chapter": 28,
+   "verse": 16,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the centurion delivering the prisoners to the captain",
+   "note": "The clause is in the Byzantine text and the Textus Receptus but not in the Peshitta, which Etheridge translates, nor in Sinaiticus, Vaticanus or Alexandrinus."
+  },
+  {
+   "book": 44,
+   "chapter": 28,
+   "verse": 29,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits the verse (the Jews departing and reasoning)",
+   "note": "The verse is in later manuscripts and the Textus Receptus but not in the Peshitta, which Etheridge translates, nor in Sinaiticus, Vaticanus or Alexandrinus. Verse 25 already says they departed disagreeing."
+  },
+  {
+   "book": 45,
+   "chapter": 1,
+   "verse": 16,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the gospel of Christ\" becomes \"the gospel\"",
+   "note": "\"Of Christ\" is in the Byzantine text and the Textus Receptus but not in the Peshitta, which Etheridge translates, nor in the early Greek manuscripts. Verse 9 calls it the gospel of his Son."
+  },
+  {
+   "book": 45,
+   "chapter": 7,
+   "verse": 24,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "The verse is missing from this module",
+   "note": "Etheridge translates the verse (\"O miserable man that I am!\") and the Peshitta has it; it is missing only from the electronic text this module was built from. Not a textual difference."
+  },
+  {
+   "book": 45,
+   "chapter": 8,
+   "verse": 1,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"but after the Spirit\"",
+   "note": "The Textus Receptus ends \"who walk not after the flesh, but after the Spirit\"; the Peshitta, which Etheridge translates, has only the first clause, as Alexandrinus does, and the early manuscripts have neither. Verse 4 has the full phrase."
+  },
+  {
+   "book": 45,
+   "chapter": 9,
+   "verse": 28,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"in righteousness: because a short work\"",
+   "note": "The longer wording is in the Byzantine text and the Textus Receptus; the Peshitta, which Etheridge translates, has the shorter one of the early manuscripts. Both quote Isaiah 10:22-23."
+  },
+  {
+   "book": 45,
+   "chapter": 12,
+   "verse": 19,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"Vengeance is mine; I will repay\" becomes \"I will execute thy judgment\"",
+   "note": "The Greek quotes Deuteronomy 32:35, \"Vengeance is mine, I will repay\"; the Peshitta, which Etheridge translates, paraphrases: \"if thou execute not judgment for thyself, I will execute thy judgment\". God still takes up the wrong."
+  },
+  {
+   "book": 45,
+   "chapter": 14,
+   "verse": 4,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"God is able to make him stand\" becomes \"his Lord\"",
+   "note": "The Textus Receptus reads \"God\"; the Peshitta, which Etheridge translates, reads \"his Lord\", as the early Greek manuscripts read \"the Lord\"."
+  },
+  {
+   "book": 45,
+   "chapter": 16,
+   "verse": 20,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the closing \"Amen\"",
+   "note": "\"Amen\" is in the Textus Receptus but not in the Peshitta, which Etheridge translates; the meaning is unchanged."
+  },
+  {
+   "book": 45,
+   "chapter": 16,
+   "verse": 27,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription \"Written to the Romans from Corinthus...\"",
+   "note": "The subscription is a late scribal note in the Textus Receptus editions; Etheridge gives the Peshitta's own colophon or none. It is not part of the letter's text."
+  },
+  {
+   "book": 46,
+   "chapter": 2,
+   "verse": 1,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"the testimony of God\" becomes \"the mystery of Aloha\"",
+   "note": "The Textus Receptus reads martyrion, \"testimony\"; the Peshitta, which Etheridge translates, reads \"mystery\", as P46 and the first hand of Sinaiticus do. Verse 7 speaks of God's wisdom in a mystery."
+  },
+  {
+   "book": 46,
+   "chapter": 2,
+   "verse": 13,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"which the Holy Ghost teacheth\" becomes \"the learning of the Spirit\"",
+   "note": "\"Holy\" is in the Byzantine text and the Textus Receptus but not in the Peshitta, which Etheridge translates, nor in the early Greek manuscripts. The same Spirit is meant (verses 10-12)."
+  },
+  {
+   "book": 46,
+   "chapter": 2,
+   "verse": 14,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"the things of the Spirit of God\" becomes \"spirituals\"",
+   "note": "The Greek has \"the things of the Spirit of God\"; the Peshitta, which Etheridge translates, has \"spiritual things\". The Spirit is named at the end of the verse."
+  },
+  {
+   "book": 46,
+   "chapter": 4,
+   "verse": 10,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"ye are wise in Christ\" becomes \"we are wise in the Meshiha\"",
+   "note": "The Greek and the Peshitta (as Murdock renders it) contrast \"we are fools\" with \"ye are wise\"; Etheridge's text here reads \"we\", apparently a slip, which loses Paul's irony."
+  },
+  {
+   "book": 46,
+   "chapter": 9,
+   "verse": 2,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"in the Lord\"",
+   "note": "All the Greek texts have \"in the Lord\"; the Peshitta, which Etheridge translates, ends \"the seal of my apostleship are you\". Verse 1 has \"my work in the Lord\"."
+  },
+  {
+   "book": 46,
+   "chapter": 10,
+   "verse": 28,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"for the earth is the Lord's, and the fulness thereof\"",
+   "note": "The repeated quotation is in the Byzantine text and the Textus Receptus but not in the Peshitta, which Etheridge translates, nor in the early Greek manuscripts. Verse 26 has it."
+  },
+  {
+   "book": 46,
+   "chapter": 16,
+   "verse": 24,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription \"The first epistle... from Philippi...\"",
+   "note": "The subscription is a late scribal note in the Textus Receptus editions; Etheridge gives the Peshitta's own colophon or none. It is not part of the letter's text."
+  },
+  {
+   "book": 47,
+   "chapter": 4,
+   "verse": 10,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the dying of the Lord Jesus\" becomes \"the dying of Jeshu\"",
+   "note": "\"The Lord\" is in the Textus Receptus but not in the Peshitta, which Etheridge translates, nor in the early Greek manuscripts. He is called \"our Lord Jesus\" in verse 14."
+  },
+  {
+   "book": 47,
+   "chapter": 5,
+   "verse": 18,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"by Jesus Christ\" becomes \"in the Meshiha\"",
+   "note": "\"Jesus\" is in the Textus Receptus but not in the Peshitta, which Etheridge translates, nor in the early Greek manuscripts. Christ is still named."
+  },
+  {
+   "book": 47,
+   "chapter": 5,
+   "verse": 19,
+   "kind": "atonement",
+   "weight": "minor",
+   "change": "\"reconciling the world unto himself\" becomes \"reconciled the world with his greatness\"",
+   "note": "The Greek has \"unto himself\"; the Peshitta, which Etheridge translates, reads \"with his majesty\" (Murdock renders it the same). God is still reconciling the world in Christ, not counting their sins."
+  },
+  {
+   "book": 47,
+   "chapter": 13,
+   "verse": 14,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"The grace of the Lord\" becomes \"The peace of our Lord\"",
+   "note": "The Greek has \"grace\"; the Peshitta, which Etheridge translates, has \"peace\", and it has no subscription (a late scribal note in the Textus Receptus editions). The Trinitarian blessing is otherwise the same."
+  },
+  {
+   "book": 48,
+   "chapter": 1,
+   "verse": 15,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"when it pleased God\" becomes \"when He willed\"",
+   "note": "\"God\" is in the Textus Receptus and most manuscripts but not in the Peshitta, which Etheridge translates, nor in P46 and Vaticanus. God is plainly the one meant."
+  },
+  {
+   "book": 48,
+   "chapter": 5,
+   "verse": 25,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"let us also walk in the Spirit\"",
+   "note": "The Peshitta has a second clause, \"and after the Spirit let us follow\" (Murdock renders it); Etheridge's text leaves it out. Verse 16 still says \"Walk in the Spirit\"."
+  },
+  {
+   "book": 48,
+   "chapter": 6,
+   "verse": 15,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"in Christ Jesus\"",
+   "note": "The phrase is in the Byzantine text and the Textus Receptus but not in the Peshitta, which Etheridge translates, nor in P46 and Vaticanus. Galatians 5:6 has it."
+  },
+  {
+   "book": 48,
+   "chapter": 6,
+   "verse": 18,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription \"To the Galatians written from Rome\"",
+   "note": "The subscription is a late scribal note in the Textus Receptus editions; Etheridge gives the Peshitta's own colophon or none. It is not part of the letter's text."
+  },
+  {
+   "book": 49,
+   "chapter": 3,
+   "verse": 9,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"by Jesus Christ\" (\"who created all things\")",
+   "note": "\"By Jesus Christ\" is in the Byzantine text and the Textus Receptus but not in the Peshitta, which Etheridge translates, nor in the early Greek manuscripts; the Peshitta also reads \"dispensation\" for \"fellowship\", as they do. Colossians 1:16 says all things were created by him."
+  },
+  {
+   "book": 49,
+   "chapter": 3,
+   "verse": 11,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Christ Jesus our Lord\" becomes \"Jeshu our Lord\"",
+   "note": "The Greek has \"Christ Jesus our Lord\"; the Peshitta, which Etheridge translates, has \"Jesus our Lord\". He is called Christ throughout the chapter."
+  },
+  {
+   "book": 49,
+   "chapter": 5,
+   "verse": 9,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"the fruit of the Spirit\" becomes \"the fruits of the light\"",
+   "note": "The Textus Receptus reads \"of the Spirit\"; the Peshitta, which Etheridge translates, reads \"of the light\", as P46, Sinaiticus and Vaticanus do, which fits verse 8 (\"walk as children of light\")."
+  },
+  {
+   "book": 49,
+   "chapter": 5,
+   "verse": 21,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"in the fear of God\" becomes \"in the love of the Meshiha\"",
+   "note": "The Textus Receptus reads \"in the fear of God\", the early Greek manuscripts \"in the fear of Christ\"; the Peshitta, which Etheridge translates, has \"in the love of Christ\". The call to mutual submission is the same."
+  },
+  {
+   "book": 49,
+   "chapter": 6,
+   "verse": 24,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription \"To the Ephesians written from Rome...\"",
+   "note": "The subscription is a late scribal note in the Textus Receptus editions; Etheridge gives the Peshitta's own colophon or none. It is not part of the letter's text."
+  },
+  {
+   "book": 50,
+   "chapter": 1,
+   "verse": 19,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"turn to my salvation\" becomes \"be found unto my life\"",
+   "note": "The Greek has sōtērian, \"salvation\" or deliverance; the Peshitta, which Etheridge translates, has \"life\". Paul is speaking of his release, as verses 20-25 show."
+  },
+  {
+   "book": 50,
+   "chapter": 2,
+   "verse": 16,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"Holding forth the word of life\" becomes \"for a place of salvation\"",
+   "note": "The Greek has \"holding forth the word of life\"; the Peshitta, which Etheridge translates, reads \"that you may be to them in the place of life\", which Etheridge renders \"salvation\"."
+  },
+  {
+   "book": 50,
+   "chapter": 4,
+   "verse": 23,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription \"To the Philippians written from Rome...\"",
+   "note": "The subscription is a late scribal note in the Textus Receptus editions; Etheridge gives the Peshitta's own colophon or none. It is not part of the letter's text."
+  },
+  {
+   "book": 51,
+   "chapter": 1,
+   "verse": 2,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"and the Lord Jesus Christ\" from the greeting",
+   "note": "The words are in the Byzantine text and the Textus Receptus but not in the Peshitta, which Etheridge translates, nor in Vaticanus and other early manuscripts. Christ is named in the same verse."
+  },
+  {
+   "book": 51,
+   "chapter": 1,
+   "verse": 14,
+   "kind": "atonement",
+   "weight": "major",
+   "change": "Omits \"through his blood\"",
+   "note": "The phrase is in the Byzantine majority and the Textus Receptus (from Ephesians 1:7); the Peshitta, which Etheridge translates, lacks it here, as do Sinaiticus, Vaticanus and most early witnesses. Redemption through Christ's blood is still stated in Ephesians 1:7 and Colossians 1:20."
+  },
+  {
+   "book": 51,
+   "chapter": 3,
+   "verse": 15,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"the peace of God\" becomes \"the peace of the Meshiha\"",
+   "note": "The Textus Receptus reads \"of God\"; the Peshitta, which Etheridge translates, reads \"of Christ\", as the early Greek manuscripts do. It also has \"give thanks to Christ\" for \"be ye thankful\"."
+  },
+  {
+   "book": 51,
+   "chapter": 4,
+   "verse": 18,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription \"Written from Rome to Colossians...\"",
+   "note": "The subscription is a late scribal note in the Textus Receptus editions; Etheridge gives the Peshitta's own colophon or none. It is not part of the letter's text."
+  },
+  {
+   "book": 52,
+   "chapter": 1,
+   "verse": 1,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"from God our Father, and the Lord Jesus Christ\"",
+   "note": "The words are in the Byzantine text and the Textus Receptus but not in the Peshitta, which Etheridge translates, nor in Vaticanus and other early manuscripts. The same verse names God the Father and the Lord Jesus Christ."
+  },
+  {
+   "book": 52,
+   "chapter": 2,
+   "verse": 19,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"our Lord Jesus Christ\" becomes \"our Lord Jeshu\"",
+   "note": "\"Christ\" is in the Textus Receptus but not in the Peshitta, which Etheridge translates, nor in the early Greek manuscripts."
+  },
+  {
+   "book": 52,
+   "chapter": 3,
+   "verse": 11,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "God and Christ \"direct our way\" becomes God alone",
+   "note": "The Greek and the Peshitta (as Murdock renders it) make God the Father and the Lord Jesus Christ together the ones who direct Paul's way; Etheridge's rendering makes Christ only the Son of the Father here."
+  },
+  {
+   "book": 52,
+   "chapter": 3,
+   "verse": 12,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord make you to increase\" becomes \"he will cause\"",
+   "note": "\"The Lord\" (ho kyrios) is in the Greek; the Peshitta, which Etheridge translates, has only \"he\". The subject is the God and Lord of verse 11."
+  },
+  {
+   "book": 52,
+   "chapter": 5,
+   "verse": 12,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"and are over you in the Lord\"",
+   "note": "The Greek has \"are over you in the Lord\"; the Peshitta, which Etheridge translates, has \"stand before your faces teaching you\"."
+  },
+  {
+   "book": 52,
+   "chapter": 5,
+   "verse": 28,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription \"The first epistle... from Athens\"",
+   "note": "The subscription is a late scribal note in the Textus Receptus editions; Etheridge gives the Peshitta's own colophon or none. It is not part of the letter's text."
+  },
+  {
+   "book": 53,
+   "chapter": 1,
+   "verse": 6,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"with God\" (\"a righteous thing with God\")",
+   "note": "The Greek and the Peshitta (as Murdock renders it) have \"with God\"; Etheridge's English leaves it out. God's just judgment is the subject of verse 5."
+  },
+  {
+   "book": 53,
+   "chapter": 2,
+   "verse": 2,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the day of Christ\" becomes \"the day of our Lord\"",
+   "note": "The Textus Receptus reads \"of Christ\"; the Peshitta, which Etheridge translates, reads \"of our Lord\", as the early Greek manuscripts read \"of the Lord\". The same day of Christ's coming is meant (verse 1)."
+  },
+  {
+   "book": 53,
+   "chapter": 3,
+   "verse": 18,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"our Lord Jesus Christ\" becomes \"Jeshu Meshiha\"; no subscription",
+   "note": "The Greek has \"our Lord Jesus Christ\"; the Syriac text Etheridge translated, like Murdock's, has \"Jesus Christ\". It has no subscription, which is a late scribal note in the Textus Receptus editions."
+  },
+  {
+   "book": 54,
+   "chapter": 1,
+   "verse": 1,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord Jesus Christ\" becomes \"Jeshu Meshiha\"",
+   "note": "\"Lord\" is in the Textus Receptus but not in the Peshitta, which Etheridge translates, nor in the early Greek manuscripts. He is called \"our Lord\" in verse 2."
+  },
+  {
+   "book": 54,
+   "chapter": 2,
+   "verse": 7,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"in Christ\" (\"I speak the truth in Christ\")",
+   "note": "\"In Christ\" is in the Byzantine text and the Textus Receptus but not in the Peshitta, which Etheridge translates, nor in the early Greek manuscripts. The oath is the same."
+  },
+  {
+   "book": 54,
+   "chapter": 3,
+   "verse": 16,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"God was manifest in the flesh\" becomes \"which was revealed\"",
+   "note": "The Byzantine majority and the Textus Receptus read \"God\" (theos); the Peshitta, which Etheridge translates, reads \"which\", like Sinaiticus' \"who\" (hos) and the Latin \"quod\". The KJV reading states Christ's deity directly; the incarnation is still stated."
+  },
+  {
+   "book": 54,
+   "chapter": 4,
+   "verse": 12,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"in spirit\"",
+   "note": "\"In spirit\" is in the Byzantine text and the Textus Receptus but not in the Peshitta, which Etheridge translates, nor in the early Greek manuscripts."
+  },
+  {
+   "book": 54,
+   "chapter": 6,
+   "verse": 5,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"from such withdraw thyself\"",
+   "note": "The words are in the Byzantine text and the Textus Receptus but not in the Peshitta, which Etheridge translates, nor in the early Greek manuscripts."
+  },
+  {
+   "book": 54,
+   "chapter": 6,
+   "verse": 21,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription \"The first to Timothy was written from Laodicea...\"",
+   "note": "The subscription is a late scribal note in the Textus Receptus editions; Etheridge gives the Peshitta's own colophon or none. It is not part of the letter's text."
+  },
+  {
+   "book": 55,
+   "chapter": 2,
+   "verse": 19,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the name of Christ\" becomes \"the name of the Lord\"",
+   "note": "The Textus Receptus reads \"of Christ\"; the Peshitta, which Etheridge translates, reads \"of the Lord\", as the early Greek manuscripts do. The Lord of the first saying is meant."
+  },
+  {
+   "book": 55,
+   "chapter": 3,
+   "verse": 16,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"given by inspiration of God\" becomes \"which from the Spirit is written\"",
+   "note": "The Greek has theopneustos, \"God-breathed\"; the Peshitta, which Etheridge translates, has \"written by the Spirit\", and Etheridge reads it as limiting \"all scripture\". Inspiration is still stated, by the Spirit rather than by \"God\"."
+  },
+  {
+   "book": 55,
+   "chapter": 4,
+   "verse": 22,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription \"The second epistle unto Timotheus...\"",
+   "note": "The subscription is a late scribal note in the Textus Receptus editions; Etheridge gives the Peshitta's own colophon or none. It is not part of the letter's text."
+  },
+  {
+   "book": 56,
+   "chapter": 3,
+   "verse": 15,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription \"It was written to Titus...\"",
+   "note": "The subscription is a late scribal note in the Textus Receptus editions; Etheridge gives the Peshitta's own colophon or none. It is not part of the letter's text."
+  },
+  {
+   "book": 57,
+   "chapter": 1,
+   "verse": 25,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription \"Written from Rome to Philemon...\"",
+   "note": "The subscription is a late scribal note in the Textus Receptus editions; Etheridge gives the Peshitta's own colophon or none. It is not part of the letter's text."
+  },
+  {
+   "book": 58,
+   "chapter": 1,
+   "verse": 10,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"Lord\" from \"Thou, Lord, in the beginning\"",
+   "note": "The Greek (quoting Psalm 102:25 in the Septuagint) addresses the Son as \"Lord\"; the Peshitta, which Etheridge translates, has \"Thou\" only, as the Hebrew psalm does. The Son is still the creator of earth and heavens."
+  },
+  {
+   "book": 58,
+   "chapter": 2,
+   "verse": 9,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"by the grace of God\" becomes \"He Aloha, in his grace\"",
+   "note": "The Greek reads \"by the grace of God\" (a few witnesses known to Origen, \"apart from God\"). Etheridge's Western Peshitta reads \"for he, God, by his grace, tasted death for every man\", making Christ the God who died; Eastern Peshitta copies read \"apart from God\"."
+  },
+  {
+   "book": 58,
+   "chapter": 10,
+   "verse": 30,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"saith the Lord\"",
+   "note": "The words are in the Textus Receptus but not in the Peshitta, which Etheridge translates, nor in P46 and other early manuscripts. The Lord is named in the second quotation."
+  },
+  {
+   "book": 58,
+   "chapter": 12,
+   "verse": 9,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"the Father of spirits\" becomes \"our spiritual fathers\"",
+   "note": "The Greek has \"the Father of spirits\", meaning God. Etheridge, like Murdock, reads the Syriac as a plural, \"spiritual fathers\", though it can also be read as \"the Father of spirits\"."
+  },
+  {
+   "book": 58,
+   "chapter": 13,
+   "verse": 25,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription \"Written to the Hebrews from Italy...\"",
+   "note": "The subscription is a late scribal note in the Textus Receptus editions; Etheridge gives the Peshitta's own colophon or none. It is not part of the letter's text."
+  },
+  {
+   "book": 59,
+   "chapter": 3,
+   "verse": 6,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "Omits \"and it is set on fire of hell\"",
+   "note": "The Greek says the tongue \"is set on fire by gehenna\"; the Peshitta, which Etheridge translates, says only that it \"is itself kindled with fire\"."
+  },
+  {
+   "book": 60,
+   "chapter": 1,
+   "verse": 13,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"the grace that is to be brought\" becomes \"the joy that cometh\"",
+   "note": "The Greek has \"grace\"; the Peshitta, which Etheridge translates, has \"joy\". The hope is still fixed on Christ's revelation."
+  },
+  {
+   "book": 60,
+   "chapter": 1,
+   "verse": 22,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"through the Spirit\"",
+   "note": "\"Through the Spirit\" is in the Byzantine text and the Textus Receptus but not in the Peshitta, which Etheridge translates, nor in the early Greek manuscripts."
+  },
+  {
+   "book": 60,
+   "chapter": 3,
+   "verse": 15,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"sanctify the Lord God\" becomes \"sanctify the Lord Meshiha\"",
+   "note": "The Textus Receptus reads \"the Lord God\"; the Peshitta, which Etheridge translates, reads \"the Lord Christ\", as the early Greek manuscripts do. Christ is thus named as the Lord of Isaiah 8:13."
+  },
+  {
+   "book": 60,
+   "chapter": 4,
+   "verse": 14,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"on their part he is evil spoken of... glorified\"",
+   "note": "The clause is in the Byzantine text and the Textus Receptus but not in the Peshitta, which Etheridge translates, nor in the early Greek manuscripts."
+  },
+  {
+   "book": 60,
+   "chapter": 5,
+   "verse": 14,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"in Christ Jesus\" becomes \"in the Meshiha\"",
+   "note": "\"Jesus\" is in the Textus Receptus but not in the Peshitta, which Etheridge translates, nor in the early Greek manuscripts."
+  },
+  {
+   "book": 61,
+   "chapter": 1,
+   "verse": 1,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"God and our Saviour Jesus Christ\" becomes \"our Lord and our Redeemer\"",
+   "note": "The Greek reads \"our God and Saviour Jesus Christ\"; the Syriac Etheridge translates has \"our Lord and Redeemer\". Etheridge translates this book from a later Syriac version, not the Peshitta, which lacks it. It also has \"servant and apostle\", which Etheridge's English shortens to \"servant\"."
+  },
+  {
+   "book": 61,
+   "chapter": 1,
+   "verse": 2,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the knowledge of God, and of Jesus our Lord\" omits \"God\"",
+   "note": "The Greek has \"of God and of Jesus our Lord\"; the Syriac Etheridge translates has \"of our Lord Jesus Christ\" only. Etheridge translates this book from a later Syriac version, not the Peshitta, which lacks it."
+  },
+  {
+   "book": 61,
+   "chapter": 2,
+   "verse": 4,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"cast them down to hell\" becomes \"shut them in the deeps\"",
+   "note": "The Greek verb is tartarōsas, \"cast into Tartarus\", which the KJV renders \"hell\"; the Syriac has \"the lower regions\". Etheridge translates this book from a later Syriac version, not the Peshitta, which lacks it."
+  },
+  {
+   "book": 61,
+   "chapter": 2,
+   "verse": 11,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"before the Lord\"",
+   "note": "\"Before the Lord\" is in most Greek manuscripts and the Textus Receptus but not in the Syriac Etheridge translates, nor in Alexandrinus. Etheridge translates this book from a later Syriac version, not the Peshitta, which lacks it."
+  },
+  {
+   "book": 61,
+   "chapter": 2,
+   "verse": 17,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "Omits \"for ever\" (\"the mist of darkness is reserved\")",
+   "note": "\"For ever\" is in the Byzantine text and the Textus Receptus but not in the Syriac Etheridge translates, nor in the early Greek manuscripts. Etheridge translates this book from a later Syriac version, not the Peshitta, which lacks it."
+  },
+  {
+   "book": 61,
+   "chapter": 3,
+   "verse": 18,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Adds \"and (of) Aloha the Father\"",
+   "note": "The Greek has only \"our Lord and Saviour Jesus Christ\"; the Syriac Etheridge translates adds \"and of God the Father\". Etheridge translates this book from a later Syriac version, not the Peshitta, which lacks it."
+  },
+  {
+   "book": 62,
+   "chapter": 1,
+   "verse": 7,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus Christ his Son\" becomes \"Jeshu his Son\"",
+   "note": "\"Christ\" is in the Byzantine text and the Textus Receptus but not in the Peshitta, which Etheridge translates, nor in the early Greek manuscripts."
+  },
+  {
+   "book": 62,
+   "chapter": 4,
+   "verse": 3,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus Christ is come in the flesh\" becomes \"Jeshu hath come\"",
+   "note": "The Textus Receptus reads \"Jesus Christ is come in the flesh\"; the Peshitta, which Etheridge translates, has \"Jesus hath come in the flesh\", and the early Greek manuscripts only \"Jesus\". Verse 2 states it in full."
+  },
+  {
+   "book": 62,
+   "chapter": 4,
+   "verse": 9,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"his only begotten Son\" becomes \"his only Son\"",
+   "note": "The Syriac word (yiḥidaya) is the one Etheridge renders \"only-begotten\" in John 3:16; here he renders it \"only\". A translation choice."
+  },
+  {
+   "book": 62,
+   "chapter": 4,
+   "verse": 16,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"and God in him\"",
+   "note": "\"And God in him\" is in most Greek manuscripts and the Textus Receptus but not in the Peshitta, which Etheridge translates, nor in some early witnesses. Verses 12, 13 and 15 say God dwells in us."
+  },
+  {
+   "book": 62,
+   "chapter": 5,
+   "verse": 7,
+   "kind": "trinity",
+   "weight": "major",
+   "change": "Omits the heavenly witnesses: \"the Father, the Word, and the Holy Ghost\"",
+   "note": "The Comma Johanneum is in the Textus Receptus and some late Greek manuscripts and Latin copies; the Peshitta, which Etheridge translates, lacks it, as do the early Greek manuscripts. Etheridge's verse 7 has the earthly witnesses of the KJV's verse 8. The Trinity is still taught in Matthew 28:19."
+  },
+  {
+   "book": 62,
+   "chapter": 5,
+   "verse": 8,
+   "kind": "trinity",
+   "weight": "major",
+   "change": "Omits \"in earth\"; the three earthly witnesses stand in verse 7",
+   "note": "\"In earth\" belongs with the Comma of verse 7, which the Peshitta, which Etheridge translates, does not have; the three witnesses, the Spirit, the water and the blood, stand in his verse 7."
+  },
+  {
+   "book": 62,
+   "chapter": 5,
+   "verse": 13,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"and that ye may believe on the name...\"",
+   "note": "The clause is in the Byzantine text and the Textus Receptus but not in the Peshitta, which Etheridge translates, nor in the early Greek manuscripts. Belief in the Son's name is still stated in the verse."
+  },
+  {
+   "book": 62,
+   "chapter": 5,
+   "verse": 21,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the closing \"Amen\"",
+   "note": "\"Amen\" is in the Textus Receptus but not in the Peshitta, which Etheridge translates; the meaning is unchanged."
+  },
+  {
+   "book": 63,
+   "chapter": 1,
+   "verse": 3,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord Jesus Christ\" becomes \"Jeshu Meshiha\"",
+   "note": "\"Lord\" is in the Byzantine text and the Textus Receptus but not in the Syriac Etheridge translates, nor in the early Greek manuscripts. Etheridge translates this book from a later Syriac version, not the Peshitta, which lacks it."
+  },
+  {
+   "book": 63,
+   "chapter": 1,
+   "verse": 9,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the doctrine of Christ\" (second time) becomes \"his doctrine\"",
+   "note": "\"Of Christ\" is repeated in the Textus Receptus but not in the Syriac Etheridge translates, nor in the early Greek manuscripts; the referent is plain. Etheridge translates this book from a later Syriac version, not the Peshitta, which lacks it."
+  },
+  {
+   "book": 65,
+   "chapter": 1,
+   "verse": 4,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the only Lord God, and our Lord Jesus Christ\" becomes one person",
+   "note": "The Textus Receptus has \"the only Lord God, and our Lord Jesus Christ\"; the early Greek manuscripts \"our only Master and Lord Jesus Christ\". The Syriac Etheridge translates calls Christ himself \"the only Lord God\". Etheridge translates this book from a later Syriac version, not the Peshitta, which lacks it."
+  },
+  {
+   "book": 65,
+   "chapter": 1,
+   "verse": 6,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"everlasting chains\" becomes \"chains unknown\"",
+   "note": "The Greek has aidiois, \"everlasting\"; the Syriac Etheridge translates has \"unknown\" chains. The angels are still kept for judgment. Etheridge translates this book from a later Syriac version, not the Peshitta, which lacks it."
+  },
+  {
+   "book": 66,
+   "chapter": 1,
+   "verse": 8,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"the beginning and the ending\"; \"the Lord\" becomes \"Aloha the Lord\"",
+   "note": "Most Greek manuscripts lack the title and read \"the Lord God\", as the Syriac Etheridge translates does; the Textus Receptus follows a few late witnesses. The same title stands in 21:6 and 22:13. Etheridge translates this book from a later Syriac version, not the Peshitta, which lacks it."
+  },
+  {
+   "book": 66,
+   "chapter": 1,
+   "verse": 11,
+   "kind": "deity",
+   "weight": "major",
+   "change": "Omits \"I am Alpha and Omega, the first and the last\"",
+   "note": "The words are in the Textus Receptus from a few late manuscripts, not in Alexandrinus, Sinaiticus or the Byzantine majority, and not in the Syriac Etheridge translates; \"which are in Asia\" is also lacking. Christ calls himself the first and the last in 1:17. Etheridge translates this book from a later Syriac version, not the Peshitta, which lacks it."
+  },
+  {
+   "book": 66,
+   "chapter": 1,
+   "verse": 18,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"the keys of hell\" becomes \"the keys... of Sheul\"",
+   "note": "The Greek is hadēs and the Syriac shyul (Sheol), the realm of the dead, which Etheridge transliterates where the KJV has \"hell\". A translation choice, not a textual difference."
+  },
+  {
+   "book": 66,
+   "chapter": 5,
+   "verse": 14,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"four and twenty\" and \"him that liveth for ever and ever\"",
+   "note": "Both phrases are in the Textus Receptus but not in the early and most Byzantine manuscripts, nor in the Syriac Etheridge translates. The object of worship is plain from 5:13. Etheridge translates this book from a later Syriac version, not the Peshitta, which lacks it."
+  },
+  {
+   "book": 66,
+   "chapter": 6,
+   "verse": 8,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"Hell followed with him\" becomes \"Shiul followed\"",
+   "note": "The Greek is hadēs and the Syriac shyul (Sheol), the realm of the dead, which Etheridge transliterates where the KJV has \"hell\". A translation choice, not a textual difference."
+  },
+  {
+   "book": 66,
+   "chapter": 8,
+   "verse": 7,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"fire mingled with blood\" becomes \"fire mingled with the waters\"",
+   "note": "The Greek has \"blood\"; the Syriac Etheridge translates has \"waters\". It also has \"the third of the earth burned\", as the early Greek manuscripts do. Etheridge translates this book from a later Syriac version, not the Peshitta, which lacks it."
+  },
+  {
+   "book": 66,
+   "chapter": 8,
+   "verse": 13,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"an angel\" becomes \"an eagle... having a tail of blood\"",
+   "note": "The Textus Receptus reads \"angel\"; most Greek manuscripts read \"eagle\", as the Syriac Etheridge translates does, which also adds \"having a tail of blood\" and has \"Woe\" twice, not three times. Etheridge translates this book from a later Syriac version, not the Peshitta, which lacks it."
+  },
+  {
+   "book": 66,
+   "chapter": 11,
+   "verse": 17,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "Omits \"and art to come\"",
+   "note": "The phrase is lacking in nearly all Greek manuscripts and in the Syriac Etheridge translates; the Textus Receptus has it from a few late witnesses. The threefold title stands in 1:4, 1:8 and 4:8. Etheridge translates this book from a later Syriac version, not the Peshitta, which lacks it."
+  },
+  {
+   "book": 66,
+   "chapter": 12,
+   "verse": 17,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the testimony of Jesus Christ\" becomes \"the testimony of Jeshu\"",
+   "note": "\"Christ\" is in the Textus Receptus but not in most Greek manuscripts, nor in the Syriac Etheridge translates. Etheridge translates this book from a later Syriac version, not the Peshitta, which lacks it."
+  },
+  {
+   "book": 66,
+   "chapter": 13,
+   "verse": 14,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"by the means of those miracles... saying to them\"",
+   "note": "The Greek texts have the clause about the miracles done before the beast; the Syriac Etheridge translates (as Murdock's) lacks it and says only that he seduces them to make an image. Etheridge translates this book from a later Syriac version, not the Peshitta, which lacks it."
+  },
+  {
+   "book": 66,
+   "chapter": 14,
+   "verse": 4,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Adds \"by Jeshu\" (\"these by Jeshu were redeemed\")",
+   "note": "The Greek says only that they \"were redeemed from among men\"; the Syriac Etheridge translates adds \"by Jesus\". Etheridge translates this book from a later Syriac version, not the Peshitta, which lacks it."
+  },
+  {
+   "book": 66,
+   "chapter": 14,
+   "verse": 5,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"before the throne of God\"",
+   "note": "The words are in the Textus Receptus but not in the early and most Greek manuscripts, nor in the Syriac Etheridge translates. Etheridge translates this book from a later Syriac version, not the Peshitta, which lacks it."
+  },
+  {
+   "book": 66,
+   "chapter": 14,
+   "verse": 10,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"in the presence of the Lamb\" becomes \"before the throne\"",
+   "note": "The Greek has \"before the Lamb\"; the Syriac Etheridge translates has \"before the throne\". Etheridge translates this book from a later Syriac version, not the Peshitta, which lacks it."
+  },
+  {
+   "book": 66,
+   "chapter": 14,
+   "verse": 15,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"Thrust in thy sickle, and reap... the harvest... is ripe\"",
+   "note": "The angel's cry is in the Greek texts but not in the Syriac Etheridge translates (nor in Murdock's), apparently lost in copying; verse 16 shows the sickle thrust in. Etheridge translates this book from a later Syriac version, not the Peshitta, which lacks it."
+  },
+  {
+   "book": 66,
+   "chapter": 15,
+   "verse": 3,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"thou King of saints\" becomes \"King of ages\"",
+   "note": "The Textus Receptus reads \"of saints\", from a few late manuscripts; most Greek manuscripts read \"of the nations\" or \"of the ages\", and the Syriac Etheridge translates \"of ages\". Etheridge translates this book from a later Syriac version, not the Peshitta, which lacks it."
+  },
+  {
+   "book": 66,
+   "chapter": 16,
+   "verse": 5,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"O Lord, which art... and shalt be\" becomes \"who art... and just\"",
+   "note": "The Textus Receptus reads \"O Lord... and shalt be\" (Beza's conjecture); the Greek manuscripts lack \"O Lord\" and read \"the Holy One\", which the Syriac Etheridge translates has as \"just\". Etheridge translates this book from a later Syriac version, not the Peshitta, which lacks it."
+  },
+  {
+   "book": 66,
+   "chapter": 18,
+   "verse": 22,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"the sound of a millstone shall be heard no more\"",
+   "note": "The clause is in most Greek manuscripts and the Textus Receptus but not in Alexandrinus nor in the Syriac Etheridge translates; verse 21 already pictures the millstone cast into the sea. Etheridge translates this book from a later Syriac version, not the Peshitta, which lacks it."
+  },
+  {
+   "book": 66,
+   "chapter": 20,
+   "verse": 5,
+   "kind": "judgment",
+   "weight": "major",
+   "change": "Omits \"But the rest of the dead lived not again until... finished\"",
+   "note": "The sentence is in Alexandrinus, most Greek manuscripts and the Textus Receptus but not in Sinaiticus nor in the Syriac Etheridge translates. The first resurrection is still contrasted with the second death in verse 6. Etheridge translates this book from a later Syriac version, not the Peshitta, which lacks it."
+  },
+  {
+   "book": 66,
+   "chapter": 20,
+   "verse": 9,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "The verse is missing from this module",
+   "note": "The verse is in Etheridge's translation (as in Murdock's, \"they went up on the breadth of the earth...\"); it is missing only from the electronic text this module was built from. Not a textual difference."
+  },
+  {
+   "book": 66,
+   "chapter": 20,
+   "verse": 12,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"stand before God\" becomes \"standing before the throne\"",
+   "note": "The Textus Receptus reads \"before God\", from the Latin; the Greek manuscripts read \"before the throne\", as the Syriac Etheridge translates does. Etheridge translates this book from a later Syriac version, not the Peshitta, which lacks it."
+  },
+  {
+   "book": 66,
+   "chapter": 20,
+   "verse": 13,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"death and hell\" becomes \"death and shiul\"",
+   "note": "The Greek is hadēs and the Syriac shyul (Sheol), the realm of the dead, which Etheridge transliterates where the KJV has \"hell\". A translation choice, not a textual difference."
+  },
+  {
+   "book": 66,
+   "chapter": 20,
+   "verse": 14,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"death and hell\" becomes \"death and shiul\"",
+   "note": "The Greek is hadēs and the Syriac shyul (Sheol), the realm of the dead, which Etheridge transliterates where the KJV has \"hell\". A translation choice, not a textual difference."
+  },
+  {
+   "book": 66,
+   "chapter": 22,
+   "verse": 19,
+   "kind": "salvation",
+   "weight": "major",
+   "change": "\"book of life\" becomes \"tree of life\"",
+   "note": "Almost all Greek manuscripts read \"tree\", as the Syriac Etheridge translates does; \"book\" entered the Textus Receptus through Erasmus, whose Greek copy lacked these verses and was supplied from the Latin. The book of life is still named in 3:5, 20:15 and 21:27. Etheridge translates this book from a later Syriac version, not the Peshitta, which lacks it."
+  }
+ ]
+}

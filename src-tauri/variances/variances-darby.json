@@ -1,0 +1,3202 @@
+{
+ "module": "darby",
+ "base": "kjv",
+ "updated": "2026-10-22",
+ "records": [
+  {
+   "book": 1,
+   "chapter": 3,
+   "verse": 5,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"as gods\" becomes \"as God\"",
+   "note": "Translation choice: the Hebrew elohim can mean God or gods; Darby reads the singular. The serpent promises likeness to God rather than to divine beings."
+  },
+  {
+   "book": 1,
+   "chapter": 3,
+   "verse": 15,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"it shall bruise thy head\" becomes \"he shall crush\"",
+   "note": "Translation choice: the Hebrew pronoun hu' is masculine singular and can be \"it\" (the seed) or \"he\". Darby's \"he\" reads the seed as one person, the messianic reading; \"crush\" renders shuph, which the KJV has as \"bruise\"."
+  },
+  {
+   "book": 1,
+   "chapter": 22,
+   "verse": 8,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"a lamb\" becomes \"the sheep\"",
+   "note": "Translation choice: the Hebrew has the article (hasseh, \"the lamb\" or \"the sheep\"). Darby keeps the article; the sense of God providing his own offering is kept."
+  },
+  {
+   "book": 1,
+   "chapter": 22,
+   "verse": 14,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"it shall be seen\" becomes \"will be provided\"",
+   "note": "Translation choice on the Hebrew yera'eh, read to match the name Jehovah-jireh (\"Jehovah will provide\") in the same verse. The KJV keeps the literal \"seen\"."
+  },
+  {
+   "book": 1,
+   "chapter": 24,
+   "verse": 43,
+   "kind": "virgin-birth",
+   "weight": "minor",
+   "change": "\"the virgin\" becomes \"the damsel\"",
+   "note": "The Hebrew is 'almah, the word used in Isaiah 7:14; Darby renders it \"damsel\" here. A translation choice that bears on how 'almah is read in Isaiah 7:14."
+  },
+  {
+   "book": 1,
+   "chapter": 49,
+   "verse": 6,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"digged down a wall\" becomes \"houghed oxen\"",
+   "note": "The consonants can be read shor (ox) or shur (wall); Darby follows the Masoretic pointing, the KJV the other reading. Only the detail of Simeon and Levi's violence differs."
+  },
+  {
+   "book": 1,
+   "chapter": 49,
+   "verse": 10,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"gathering of the people\" becomes \"obedience of peoples\"",
+   "note": "Translation choice on the rare Hebrew yiqqehat; both keep \"until Shiloh come\", so the messianic promise stands, but the peoples obey rather than gather to him."
+  },
+  {
+   "book": 2,
+   "chapter": 17,
+   "verse": 16,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"the LORD hath sworn\" becomes \"hand is on the throne of Jah\"",
+   "note": "The Hebrew ki-yad 'al-kes Yah is obscure: literally \"for a hand upon the throne (kes) of Jah\". The KJV reads it as an oath; Darby gives it word for word."
+  },
+  {
+   "book": 2,
+   "chapter": 21,
+   "verse": 22,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"her fruit depart from her\" becomes \"she be delivered\"",
+   "note": "Translation choice: the Hebrew weyatse'u yeladeyha (\"her children come out\") can mean a miscarriage or an early live birth. Darby takes it as a birth, which bears on how the penalty in verses 22-23 is read."
+  },
+  {
+   "book": 2,
+   "chapter": 36,
+   "verse": 2,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the LORD had put wisdom\" becomes \"God had put wisdom\"",
+   "note": "The Hebrew has YHWH, which Darby elsewhere renders \"Jehovah\"; his \"God\" here does not follow the Masoretic text. The referent is the same."
+  },
+  {
+   "book": 4,
+   "chapter": 24,
+   "verse": 20,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"perish for ever\" becomes \"be for destruction\"",
+   "note": "The Hebrew 'adey 'obed can be read \"for ever perishing\" or \"unto destruction\"; Darby takes the latter. A translation choice that drops the note of permanence."
+  },
+  {
+   "book": 4,
+   "chapter": 24,
+   "verse": 24,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"perish for ever\" becomes \"be for destruction\"",
+   "note": "The same Hebrew as verse 20, 'adey 'obed, read \"unto destruction\". A translation choice."
+  },
+  {
+   "book": 5,
+   "chapter": 32,
+   "verse": 22,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"the lowest hell\" becomes \"the lowest Sheol\"",
+   "note": "The Hebrew is she'ol, the realm of the dead; Darby keeps the Hebrew word where the KJV has \"hell\" (it also renders she'ol \"grave\" and \"pit\"). A translation choice."
+  },
+  {
+   "book": 5,
+   "chapter": 32,
+   "verse": 43,
+   "kind": "atonement",
+   "weight": "minor",
+   "change": "\"be merciful unto his land\" becomes \"maketh atonement for his land\"",
+   "note": "Translation choice: the Hebrew is kipper, the usual word for making atonement, which Darby keeps. The Septuagint and Dead Sea Scrolls have a longer verse, which Darby does not follow."
+  },
+  {
+   "book": 5,
+   "chapter": 33,
+   "verse": 2,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"with ten thousands of saints\" becomes \"from the myriads of the sanctuary\"",
+   "note": "Translation choice on the Hebrew merivevot qodesh, \"from myriads of holiness\": Darby reads it as the holy place, the KJV as holy ones coming with him."
+  },
+  {
+   "book": 7,
+   "chapter": 18,
+   "verse": 30,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"son of Manasseh\" becomes \"son of Moses\"",
+   "note": "The Hebrew writes Moses (MSH) with a raised letter nun added to make Manasseh, probably to spare Moses' name; Darby reads Moses, as some Septuagint copies and the Vulgate do."
+  },
+  {
+   "book": 7,
+   "chapter": 20,
+   "verse": 18,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"the house of God\" becomes \"Bethel\"",
+   "note": "The Hebrew is Beth-el, which means \"house of God\"; Darby takes it as the town Bethel, as most translations do. A translation choice."
+  },
+  {
+   "book": 7,
+   "chapter": 20,
+   "verse": 26,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"the house of God\" becomes \"Bethel\"",
+   "note": "The Hebrew is Beth-el, which means \"house of God\"; Darby takes it as the town Bethel, as most translations do. A translation choice."
+  },
+  {
+   "book": 7,
+   "chapter": 20,
+   "verse": 31,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"the house of God\" becomes \"Bethel\"",
+   "note": "The Hebrew is Beth-el, which means \"house of God\"; Darby takes it as the town Bethel, as most translations do. A translation choice."
+  },
+  {
+   "book": 7,
+   "chapter": 21,
+   "verse": 2,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"the house of God\" becomes \"Bethel\"",
+   "note": "The Hebrew is Beth-el, which means \"house of God\"; Darby takes it as the town Bethel, as most translations do. A translation choice."
+  },
+  {
+   "book": 9,
+   "chapter": 6,
+   "verse": 19,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"fifty thousand and threescore and ten men\" becomes \"seventy men\"",
+   "note": "The Masoretic text has \"seventy men, fifty thousand men\"; Darby follows Josephus and a few Hebrew manuscripts that lack the fifty thousand, which many take as a copying addition."
+  },
+  {
+   "book": 9,
+   "chapter": 13,
+   "verse": 1,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"reigned one year\" becomes \"was... years old when he became king\"",
+   "note": "The Hebrew reads literally \"Saul was a year old when he began to reign\", a number having dropped out; Darby leaves a gap where the KJV reads it as his first year."
+  },
+  {
+   "book": 10,
+   "chapter": 21,
+   "verse": 19,
+   "kind": "other",
+   "weight": "major",
+   "change": "Elhanan slew \"Goliath\", not \"the brother of Goliath\"",
+   "note": "The Masoretic text here reads \"Goliath\"; the KJV supplies \"the brother of\" (in italics) from 1 Chronicles 20:5, which names Lahmi the brother of Goliath. David kills Goliath in 1 Samuel 17."
+  },
+  {
+   "book": 10,
+   "chapter": 22,
+   "verse": 6,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"The sorrows of hell\" becomes \"The bands of Sheol\"",
+   "note": "The Hebrew is she'ol, the realm of the dead; Darby keeps the Hebrew word where the KJV has \"hell\" (it also renders she'ol \"grave\" and \"pit\"). A translation choice."
+  },
+  {
+   "book": 10,
+   "chapter": 22,
+   "verse": 51,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"the tower of salvation\" becomes \"giveth great deliverances\"",
+   "note": "The written Hebrew (ketiv) is magdil, \"he makes great\"; the reading tradition (qere) is migdol, \"tower\", which the KJV follows, as in Psalm 18:50. Darby follows the written text."
+  },
+  {
+   "book": 14,
+   "chapter": 17,
+   "verse": 4,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the LORD God of his father\" becomes \"the God of his father\"",
+   "note": "The Masoretic text has \"the God of his father\", which Darby follows; the KJV's \"LORD\" agrees with the Septuagint."
+  },
+  {
+   "book": 14,
+   "chapter": 19,
+   "verse": 7,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"our God\" after \"Jehovah\"",
+   "note": "The Hebrew has \"Jehovah our God\" (YHWH eloheinu), as the KJV and ASV render it; Darby's text has \"Jehovah\" alone. The referent is the same."
+  },
+  {
+   "book": 14,
+   "chapter": 22,
+   "verse": 2,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Ahaziah's age \"forty and two\" becomes \"twenty-two\"",
+   "note": "The Masoretic text has forty-two; Darby follows 2 Kings 8:26 and some Septuagint and Syriac copies, which have twenty-two. Forty-two would make him older than his father (21:20)."
+  },
+  {
+   "book": 14,
+   "chapter": 36,
+   "verse": 9,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Jehoiachin's age \"eight\" becomes \"eighteen\"",
+   "note": "The Masoretic text has eight; Darby follows 2 Kings 24:8 and some Septuagint copies, which have eighteen."
+  },
+  {
+   "book": 18,
+   "chapter": 7,
+   "verse": 20,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"I have sinned\" becomes \"Have I sinned\"; \"preserver\" becomes \"Observer\"",
+   "note": "Translation choices: the Hebrew can be read as a question or condition, and notser means one who watches or keeps. Job's complaint stands either way."
+  },
+  {
+   "book": 18,
+   "chapter": 11,
+   "verse": 8,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"deeper than hell\" becomes \"deeper than Sheol\"",
+   "note": "The Hebrew is she'ol, the realm of the dead; Darby keeps the Hebrew word where the KJV has \"hell\" (it also renders she'ol \"grave\" and \"pit\"). A translation choice."
+  },
+  {
+   "book": 18,
+   "chapter": 19,
+   "verse": 25,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"at the latter day\" becomes \"the Last, he shall stand\"",
+   "note": "Translation choice: the Hebrew 'acharon means \"last\" or \"afterwards\". Darby reads it as a title of the Redeemer, the KJV as a time. Both keep the Redeemer standing upon the earth."
+  },
+  {
+   "book": 18,
+   "chapter": 19,
+   "verse": 26,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"in my flesh\" becomes \"from out of my flesh\"",
+   "note": "Translation choice: the Hebrew mibbesari can mean \"from (within) my flesh\" or \"away from my flesh\". Darby gives it word for word, leaving open whether Job sees God in the body."
+  },
+  {
+   "book": 18,
+   "chapter": 26,
+   "verse": 6,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"Hell is naked\" becomes \"Sheol is naked\"",
+   "note": "The Hebrew is she'ol, the realm of the dead; Darby keeps the Hebrew word where the KJV has \"hell\" (it also renders she'ol \"grave\" and \"pit\"). A translation choice."
+  },
+  {
+   "book": 19,
+   "chapter": 9,
+   "verse": 17,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"turned into hell\" becomes \"turned into Sheol\"",
+   "note": "The Hebrew is she'ol, the realm of the dead; Darby keeps the Hebrew word where the KJV has \"hell\" (it also renders she'ol \"grave\" and \"pit\"). A translation choice."
+  },
+  {
+   "book": 19,
+   "chapter": 10,
+   "verse": 4,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"God is not in all his thoughts\" becomes \"There is no God\"",
+   "note": "Translation choice: the Hebrew 'eyn Elohim kol-mezimmotayw can be read either way; Darby takes it as the wicked man's thought, \"There is no God\"."
+  },
+  {
+   "book": 19,
+   "chapter": 16,
+   "verse": 10,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"in hell\" becomes \"to Sheol\"",
+   "note": "The Hebrew is she'ol, the realm of the dead; Darby keeps the Hebrew word where the KJV has \"hell\" (it also renders she'ol \"grave\" and \"pit\"). A translation choice. Darby keeps \"thy Holy One\", which Acts 2:27 applies to Christ."
+  },
+  {
+   "book": 19,
+   "chapter": 18,
+   "verse": 5,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"The sorrows of hell\" becomes \"The bands of Sheol\"",
+   "note": "The Hebrew is she'ol, the realm of the dead; Darby keeps the Hebrew word where the KJV has \"hell\" (it also renders she'ol \"grave\" and \"pit\"). A translation choice."
+  },
+  {
+   "book": 19,
+   "chapter": 19,
+   "verse": 3,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"where their voice is not heard\" becomes \"yet their voice is heard\"",
+   "note": "Translation choice: the Hebrew is literally \"no speech, no words, their voice not heard\". The KJV makes the heavens heard in every language; Darby makes their witness wordless."
+  },
+  {
+   "book": 19,
+   "chapter": 23,
+   "verse": 6,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"for ever\" becomes \"for the length of the days\"",
+   "note": "Translation choice: the Hebrew le'orekh yamim is literally \"for length of days\". The KJV reads it as for ever; Darby keeps the literal phrase."
+  },
+  {
+   "book": 19,
+   "chapter": 55,
+   "verse": 15,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"go down quick into hell\" becomes \"alive into Sheol\"",
+   "note": "The Hebrew is she'ol, the realm of the dead; Darby keeps the Hebrew word where the KJV has \"hell\" (it also renders she'ol \"grave\" and \"pit\"). A translation choice."
+  },
+  {
+   "book": 19,
+   "chapter": 68,
+   "verse": 18,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"gifts for men\" becomes \"gifts in Man\"",
+   "note": "Translation choice: the Hebrew ba'adam is \"in\" or \"among man(kind)\". Darby keeps \"in\" and capitalises Man; Ephesians 4:8, quoting this verse, has \"gave gifts unto men\"."
+  },
+  {
+   "book": 19,
+   "chapter": 77,
+   "verse": 18,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"in the heaven\" becomes \"in the whirlwind\"",
+   "note": "Translation choice: the Hebrew galgal means a wheel or whirlwind; the KJV reads it as the vault of heaven."
+  },
+  {
+   "book": 19,
+   "chapter": 86,
+   "verse": 13,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"the lowest hell\" becomes \"the lowest Sheol\"",
+   "note": "The Hebrew is she'ol, the realm of the dead; Darby keeps the Hebrew word where the KJV has \"hell\" (it also renders she'ol \"grave\" and \"pit\"). A translation choice."
+  },
+  {
+   "book": 19,
+   "chapter": 116,
+   "verse": 3,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"the pains of hell\" becomes \"the anguish of Sheol\"",
+   "note": "The Hebrew is she'ol, the realm of the dead; Darby keeps the Hebrew word where the KJV has \"hell\" (it also renders she'ol \"grave\" and \"pit\"). A translation choice."
+  },
+  {
+   "book": 19,
+   "chapter": 139,
+   "verse": 8,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"my bed in hell\" becomes \"my bed in Sheol\"",
+   "note": "The Hebrew is she'ol, the realm of the dead; Darby keeps the Hebrew word where the KJV has \"hell\" (it also renders she'ol \"grave\" and \"pit\"). A translation choice."
+  },
+  {
+   "book": 20,
+   "chapter": 5,
+   "verse": 5,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"take hold on hell\" becomes \"take hold on Sheol\"",
+   "note": "The Hebrew is she'ol, the realm of the dead; Darby keeps the Hebrew word where the KJV has \"hell\" (it also renders she'ol \"grave\" and \"pit\"). A translation choice."
+  },
+  {
+   "book": 20,
+   "chapter": 7,
+   "verse": 27,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"the way to hell\" becomes \"the way to Sheol\"",
+   "note": "The Hebrew is she'ol, the realm of the dead; Darby keeps the Hebrew word where the KJV has \"hell\" (it also renders she'ol \"grave\" and \"pit\"). A translation choice."
+  },
+  {
+   "book": 20,
+   "chapter": 9,
+   "verse": 18,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"the depths of hell\" becomes \"the depths of Sheol\"",
+   "note": "The Hebrew is she'ol, the realm of the dead; Darby keeps the Hebrew word where the KJV has \"hell\" (it also renders she'ol \"grave\" and \"pit\"). A translation choice."
+  },
+  {
+   "book": 20,
+   "chapter": 15,
+   "verse": 11,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"Hell and destruction\" becomes \"Sheol and destruction\"",
+   "note": "The Hebrew is she'ol, the realm of the dead; Darby keeps the Hebrew word where the KJV has \"hell\" (it also renders she'ol \"grave\" and \"pit\"). A translation choice."
+  },
+  {
+   "book": 20,
+   "chapter": 15,
+   "verse": 24,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"hell beneath\" becomes \"Sheol beneath\"",
+   "note": "The Hebrew is she'ol, the realm of the dead; Darby keeps the Hebrew word where the KJV has \"hell\" (it also renders she'ol \"grave\" and \"pit\"). A translation choice."
+  },
+  {
+   "book": 20,
+   "chapter": 18,
+   "verse": 24,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"must shew himself friendly\" becomes \"will come to ruin\"",
+   "note": "Translation choice on the Hebrew lehitro'ea, read from ra'a' (to be broken) rather than rea' (friend). The second line about the closer friend is the same."
+  },
+  {
+   "book": 20,
+   "chapter": 21,
+   "verse": 12,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"God overthroweth the wicked\" becomes \"he overthroweth the wicked\"",
+   "note": "The Hebrew has no subject for the verb; the KJV supplies \"God\" in italics. Darby leaves the subject unnamed, so it may be the righteous one of the first line."
+  },
+  {
+   "book": 20,
+   "chapter": 23,
+   "verse": 14,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"deliver his soul from hell\" becomes \"from Sheol\"",
+   "note": "The Hebrew is she'ol, the realm of the dead; Darby keeps the Hebrew word where the KJV has \"hell\" (it also renders she'ol \"grave\" and \"pit\"). A translation choice."
+  },
+  {
+   "book": 20,
+   "chapter": 26,
+   "verse": 10,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"The great God that formed all things\" becomes \"A master\"",
+   "note": "The Hebrew rab meholel-kol is obscure: rab can mean \"great one\", \"master\" or \"archer\". The KJV reads it as God the Creator; Darby as a master who employs anyone."
+  },
+  {
+   "book": 20,
+   "chapter": 27,
+   "verse": 20,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"Hell and destruction\" becomes \"Sheol and destruction\"",
+   "note": "The Hebrew is she'ol, the realm of the dead; Darby keeps the Hebrew word where the KJV has \"hell\" (it also renders she'ol \"grave\" and \"pit\"). A translation choice."
+  },
+  {
+   "book": 20,
+   "chapter": 29,
+   "verse": 18,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"the people perish\" becomes \"the people cast off restraint\"",
+   "note": "Translation choice: the Hebrew yippara' means \"let loose\" or \"cast off restraint\" (as in Exodus 32:25). The KJV reads it as perishing."
+  },
+  {
+   "book": 23,
+   "chapter": 5,
+   "verse": 14,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"hell hath enlarged herself\" becomes \"Sheol enlarge its desire\"",
+   "note": "The Hebrew is she'ol, the realm of the dead; Darby keeps the Hebrew word where the KJV has \"hell\" (it also renders she'ol \"grave\" and \"pit\"). A translation choice."
+  },
+  {
+   "book": 23,
+   "chapter": 9,
+   "verse": 3,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"not increased the joy\" becomes \"increased its joy\"",
+   "note": "The written Hebrew (ketiv) is lo', \"not\"; the reading tradition (qere) is lo, \"to it\". The KJV follows the written text, Darby the qere."
+  },
+  {
+   "book": 23,
+   "chapter": 14,
+   "verse": 9,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"Hell from beneath\" becomes \"Sheol from beneath\"",
+   "note": "The Hebrew is she'ol, the realm of the dead; Darby keeps the Hebrew word where the KJV has \"hell\" (it also renders she'ol \"grave\" and \"pit\"). A translation choice."
+  },
+  {
+   "book": 23,
+   "chapter": 14,
+   "verse": 15,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"brought down to hell\" becomes \"brought down to Sheol\"",
+   "note": "The Hebrew is she'ol, the realm of the dead; Darby keeps the Hebrew word where the KJV has \"hell\" (it also renders she'ol \"grave\" and \"pit\"). A translation choice."
+  },
+  {
+   "book": 23,
+   "chapter": 19,
+   "verse": 10,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"sluices and ponds for fish\" becomes \"her pillars... workers for hire\"",
+   "note": "Translation choice: the Hebrew shatoteyha can mean \"foundations\" or \"weavers\", and 'agmey-nefesh \"sad of soul\" or \"ponds\". The KJV and Darby read the verse quite differently."
+  },
+  {
+   "book": 23,
+   "chapter": 28,
+   "verse": 15,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"with hell are we at agreement\" becomes \"with Sheol\"",
+   "note": "The Hebrew is she'ol, the realm of the dead; Darby keeps the Hebrew word where the KJV has \"hell\" (it also renders she'ol \"grave\" and \"pit\"). A translation choice."
+  },
+  {
+   "book": 23,
+   "chapter": 28,
+   "verse": 18,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"agreement with hell\" becomes \"agreement with Sheol\"",
+   "note": "The Hebrew is she'ol, the realm of the dead; Darby keeps the Hebrew word where the KJV has \"hell\" (it also renders she'ol \"grave\" and \"pit\"). A translation choice."
+  },
+  {
+   "book": 23,
+   "chapter": 34,
+   "verse": 14,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"the screech owl\" becomes \"the lilith\"",
+   "note": "Translation choice: the Hebrew lilit is a night creature found only here. Darby keeps the Hebrew name, later used for a night demon; the KJV makes it an owl."
+  },
+  {
+   "book": 23,
+   "chapter": 48,
+   "verse": 16,
+   "kind": "trinity",
+   "weight": "minor",
+   "change": "\"the Lord GOD, and his Spirit, hath sent me\" reordered",
+   "note": "The Hebrew order is \"the Lord Jehovah has sent me, and his Spirit\"; Darby keeps it, which can mean the Spirit is sent with the speaker. The KJV makes the Spirit a sender."
+  },
+  {
+   "book": 23,
+   "chapter": 53,
+   "verse": 11,
+   "kind": "salvation",
+   "weight": "major",
+   "change": "\"justify many\" becomes \"instruct many in righteousness\"",
+   "note": "Translation choice: the Hebrew yatsdiq (make righteous) usually means \"justify\", as the KJV has; Darby renders it \"instruct in righteousness\", as the same verb is often read in Daniel 12:3. Christ bearing their iniquities is kept."
+  },
+  {
+   "book": 23,
+   "chapter": 57,
+   "verse": 9,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"debase thyself even unto hell\" becomes \"unto Sheol\"",
+   "note": "The Hebrew is she'ol, the realm of the dead; Darby keeps the Hebrew word where the KJV has \"hell\" (it also renders she'ol \"grave\" and \"pit\"). A translation choice."
+  },
+  {
+   "book": 23,
+   "chapter": 65,
+   "verse": 11,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"that troop\" and \"that number\" become \"Gad\" and \"Meni\"",
+   "note": "Translation choice: Gad and Meni are taken as the names of the gods Fortune and Destiny. The KJV translates the words."
+  },
+  {
+   "book": 26,
+   "chapter": 31,
+   "verse": 16,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"cast him down to hell\" becomes \"to Sheol\"",
+   "note": "The Hebrew is she'ol, the realm of the dead; Darby keeps the Hebrew word where the KJV has \"hell\" (it also renders she'ol \"grave\" and \"pit\"). A translation choice."
+  },
+  {
+   "book": 26,
+   "chapter": 31,
+   "verse": 17,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"went down into hell\" becomes \"into Sheol\"",
+   "note": "The Hebrew is she'ol, the realm of the dead; Darby keeps the Hebrew word where the KJV has \"hell\" (it also renders she'ol \"grave\" and \"pit\"). A translation choice."
+  },
+  {
+   "book": 26,
+   "chapter": 32,
+   "verse": 21,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"out of the midst of hell\" becomes \"of Sheol\"",
+   "note": "The Hebrew is she'ol, the realm of the dead; Darby keeps the Hebrew word where the KJV has \"hell\" (it also renders she'ol \"grave\" and \"pit\"). A translation choice."
+  },
+  {
+   "book": 26,
+   "chapter": 32,
+   "verse": 27,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"gone down to hell\" becomes \"gone down to Sheol\"",
+   "note": "The Hebrew is she'ol, the realm of the dead; Darby keeps the Hebrew word where the KJV has \"hell\" (it also renders she'ol \"grave\" and \"pit\"). A translation choice."
+  },
+  {
+   "book": 27,
+   "chapter": 3,
+   "verse": 25,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Son of God\" becomes \"a son of God\"",
+   "note": "Translation choice: the Aramaic bar-elahin is indefinite, \"a son of God\" or \"of the gods\", spoken by a pagan king. The KJV's capitals read it as the Son of God."
+  },
+  {
+   "book": 27,
+   "chapter": 7,
+   "verse": 9,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"thrones were cast down\" becomes \"thrones were set\"",
+   "note": "Translation choice: the Aramaic remiw means \"were placed\" or \"were thrown\". Darby reads thrones set up for judgment, the KJV thrones overthrown."
+  },
+  {
+   "book": 27,
+   "chapter": 7,
+   "verse": 13,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"the Son of man\" becomes \"a son of man\"",
+   "note": "Translation choice: the Aramaic kevar 'enash is indefinite, \"like a son of man\". Darby keeps the vision of one coming with the clouds; Jesus takes the title from this verse (Matthew 26:64)."
+  },
+  {
+   "book": 27,
+   "chapter": 9,
+   "verse": 26,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"but not for himself\" becomes \"and shall have nothing\"",
+   "note": "Translation choice: the Hebrew we'eyn lo is literally \"and there is not to him\". The KJV reads it as dying for others; Darby as being left with nothing. Both keep Messiah cut off."
+  },
+  {
+   "book": 27,
+   "chapter": 9,
+   "verse": 27,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"the covenant\" becomes \"a covenant\"; \"a desolator\" for \"make it desolate\"",
+   "note": "Translation choices in a disputed passage: Darby has \"a covenant\" and reads the abominations as bringing \"a desolator\". The KJV reads the verse of the Messiah confirming the covenant."
+  },
+  {
+   "book": 28,
+   "chapter": 6,
+   "verse": 7,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"like men\" becomes \"like Adam\"",
+   "note": "Translation choice: the Hebrew ke'adam can mean \"like Adam\" or \"like man\". Darby takes it as Adam's breach of covenant."
+  },
+  {
+   "book": 28,
+   "chapter": 11,
+   "verse": 12,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"ruleth with God... with the saints\" becomes \"walketh with God... holy things\"",
+   "note": "Translation choice on obscure Hebrew: rad (rules or roams) and qedoshim (holy ones, or the Holy One). Darby reads Judah as still keeping to God."
+  },
+  {
+   "book": 30,
+   "chapter": 9,
+   "verse": 2,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"dig into hell\" becomes \"dig into Sheol\"",
+   "note": "The Hebrew is she'ol, the realm of the dead; Darby keeps the Hebrew word where the KJV has \"hell\" (it also renders she'ol \"grave\" and \"pit\"). A translation choice."
+  },
+  {
+   "book": 32,
+   "chapter": 2,
+   "verse": 2,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"out of the belly of hell\" becomes \"of Sheol\"",
+   "note": "The Hebrew is she'ol, the realm of the dead; Darby keeps the Hebrew word where the KJV has \"hell\" (it also renders she'ol \"grave\" and \"pit\"). A translation choice."
+  },
+  {
+   "book": 35,
+   "chapter": 2,
+   "verse": 5,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"enlargeth his desire as hell\" becomes \"as Sheol\"",
+   "note": "The Hebrew is she'ol, the realm of the dead; Darby keeps the Hebrew word where the KJV has \"hell\" (it also renders she'ol \"grave\" and \"pit\"). A translation choice."
+  },
+  {
+   "book": 38,
+   "chapter": 7,
+   "verse": 2,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"sent unto the house of God\" becomes \"Bethel had sent\"",
+   "note": "The Hebrew is Beth-el, which means \"house of God\"; Darby takes it as the town Bethel, as most translations do. A translation choice. Darby makes Bethel the sender."
+  },
+  {
+   "book": 40,
+   "chapter": 2,
+   "verse": 2,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"worship him\" becomes \"do him homage\"",
+   "note": "Translation choice: the Greek proskyneō is the same in both; Darby often renders it \"do homage\", of God as well (Matthew 4:10), so the difference is one of English."
+  },
+  {
+   "book": 40,
+   "chapter": 2,
+   "verse": 8,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"worship him\" becomes \"do him homage\"",
+   "note": "Translation choice: the Greek proskyneō is the same in both; Darby often renders it \"do homage\", of God as well (Matthew 4:10), so the difference is one of English."
+  },
+  {
+   "book": 40,
+   "chapter": 4,
+   "verse": 12,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"he\"",
+   "note": "The Textus Receptus names Jesus here; the critical text Darby follows has only the verb or a pronoun, so he supplies \"he\". The referent is plain from the context."
+  },
+  {
+   "book": 40,
+   "chapter": 4,
+   "verse": 18,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"he\"",
+   "note": "The Textus Receptus names Jesus here; the critical text Darby follows has only the verb or a pronoun, so he supplies \"he\". The referent is plain from the context."
+  },
+  {
+   "book": 40,
+   "chapter": 5,
+   "verse": 44,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Brackets \"bless those who curse you\" and \"insult you and\"",
+   "note": "The clauses are in the Byzantine text and the Textus Receptus but not in Sinaiticus or Vaticanus; Darby keeps them in brackets as doubtful. The same teaching stands in Luke 6:27-28."
+  },
+  {
+   "book": 40,
+   "chapter": 6,
+   "verse": 13,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits the doxology \"For thine is the kingdom... Amen\"",
+   "note": "The doxology is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or the earliest Latin witnesses; Darby follows the latter. It echoes 1 Chronicles 29:11."
+  },
+  {
+   "book": 40,
+   "chapter": 8,
+   "verse": 3,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"he\"",
+   "note": "The Textus Receptus names Jesus here; the critical text Darby follows has only the verb or a pronoun, so he supplies \"he\". The referent is plain from the context."
+  },
+  {
+   "book": 40,
+   "chapter": 8,
+   "verse": 5,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"he\"",
+   "note": "The Textus Receptus names Jesus here; the critical text Darby follows has only the verb or a pronoun, so he supplies \"he\". The referent is plain from the context."
+  },
+  {
+   "book": 40,
+   "chapter": 8,
+   "verse": 29,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"Jesus\" from the demons' address",
+   "note": "The name is in the Byzantine text and the Textus Receptus but not in Sinaiticus or Vaticanus; they still call him \"Son of God\"."
+  },
+  {
+   "book": 40,
+   "chapter": 10,
+   "verse": 8,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "\"raise the dead\" bracketed as doubtful",
+   "note": "The words are in Sinaiticus, Vaticanus and the Textus Receptus but not in the Byzantine majority; Darby brackets them. The power to raise the dead is shown in 10:1 and Acts 9:40."
+  },
+  {
+   "book": 40,
+   "chapter": 11,
+   "verse": 23,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"hell\" becomes \"hades\"",
+   "note": "The Greek is hadēs in both; Darby keeps the Greek word for the realm of the dead where the KJV has \"hell\". A translation choice."
+  },
+  {
+   "book": 40,
+   "chapter": 12,
+   "verse": 25,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"he\"",
+   "note": "The Textus Receptus names Jesus here; the critical text Darby follows has only the verb or a pronoun, so he supplies \"he\". The referent is plain from the context."
+  },
+  {
+   "book": 40,
+   "chapter": 13,
+   "verse": 36,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"he\"",
+   "note": "The Textus Receptus names Jesus here; the critical text Darby follows has only the verb or a pronoun, so he supplies \"he\". The referent is plain from the context."
+  },
+  {
+   "book": 40,
+   "chapter": 14,
+   "verse": 14,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"he\"",
+   "note": "The Textus Receptus names Jesus here; the critical text Darby follows has only the verb or a pronoun, so he supplies \"he\". The referent is plain from the context."
+  },
+  {
+   "book": 40,
+   "chapter": 14,
+   "verse": 22,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"he\"",
+   "note": "The Textus Receptus names Jesus here; the critical text Darby follows has only the verb or a pronoun, so he supplies \"he\". The referent is plain from the context."
+  },
+  {
+   "book": 40,
+   "chapter": 14,
+   "verse": 25,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"he\"",
+   "note": "The Textus Receptus names Jesus here; the critical text Darby follows has only the verb or a pronoun, so he supplies \"he\". The referent is plain from the context."
+  },
+  {
+   "book": 40,
+   "chapter": 15,
+   "verse": 8,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"draweth nigh unto me with their mouth\"",
+   "note": "The phrase is in the Byzantine text and the Textus Receptus but not in Sinaiticus or Vaticanus; it is in the Septuagint of Isaiah 29:13, which is quoted."
+  },
+  {
+   "book": 40,
+   "chapter": 15,
+   "verse": 16,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"he\"",
+   "note": "The Textus Receptus names Jesus here; the critical text Darby follows has only the verb or a pronoun, so he supplies \"he\". The referent is plain from the context."
+  },
+  {
+   "book": 40,
+   "chapter": 15,
+   "verse": 30,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus' feet\" becomes \"his feet\"",
+   "note": "The Textus Receptus has \"of Jesus\"; Sinaiticus and Vaticanus have \"his\". The referent is plain."
+  },
+  {
+   "book": 40,
+   "chapter": 16,
+   "verse": 18,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"gates of hell\" becomes \"hades' gates\"",
+   "note": "The Greek is hadēs in both; Darby keeps the Greek word for the realm of the dead where the KJV has \"hell\". A translation choice."
+  },
+  {
+   "book": 40,
+   "chapter": 16,
+   "verse": 20,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus the Christ\" becomes \"the Christ\"",
+   "note": "\"Jesus\" is in the Textus Receptus but not in Sinaiticus or Vaticanus; the confession that he is the Christ stands."
+  },
+  {
+   "book": 40,
+   "chapter": 17,
+   "verse": 11,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"he\"",
+   "note": "The Textus Receptus names Jesus here; the critical text Darby follows has only the verb or a pronoun, so he supplies \"he\". The referent is plain from the context."
+  },
+  {
+   "book": 40,
+   "chapter": 17,
+   "verse": 20,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"he\"",
+   "note": "The Textus Receptus names Jesus here; the critical text Darby follows has only the verb or a pronoun, so he supplies \"he\". The referent is plain from the context."
+  },
+  {
+   "book": 40,
+   "chapter": 19,
+   "verse": 17,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"Why callest thou me good? ...God\" becomes \"concerning goodness? one is good\"",
+   "note": "The Textus Receptus agrees with Mark 10:18 and Luke 18:19; Sinaiticus and Vaticanus read \"Why askest thou me concerning good? One is good.\" The saying in full stands in Mark and Luke."
+  },
+  {
+   "book": 40,
+   "chapter": 20,
+   "verse": 7,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "\"whatsoever is right... receive\" bracketed as doubtful",
+   "note": "The clause is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or Bezae. Darby keeps the words in brackets as doubtful. The promise of a just wage is in verse 4."
+  },
+  {
+   "book": 40,
+   "chapter": 20,
+   "verse": 22,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits \"to be baptized with the baptism\" clause",
+   "note": "The clause is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or Bezae; it stands in Mark 10:38."
+  },
+  {
+   "book": 40,
+   "chapter": 21,
+   "verse": 12,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"of God\" bracketed in \"the temple of God\"",
+   "note": "\"Of God\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus or Vaticanus. Darby keeps the words in brackets as doubtful."
+  },
+  {
+   "book": 40,
+   "chapter": 22,
+   "verse": 37,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"he\"",
+   "note": "The Textus Receptus names Jesus here; the critical text Darby follows has only the verb or a pronoun, so he supplies \"he\". The referent is plain from the context."
+  },
+  {
+   "book": 40,
+   "chapter": 23,
+   "verse": 8,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"even Christ\" as the one master",
+   "note": "\"Christ\" is in the Textus Receptus but not in Sinaiticus or Vaticanus here; verse 10 still names Christ as the one master."
+  },
+  {
+   "book": 40,
+   "chapter": 23,
+   "verse": 14,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Verse omitted (woe for devouring widows' houses)",
+   "note": "The verse is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or Bezae; it is likely from Mark 12:40 and Luke 20:47, where it stands."
+  },
+  {
+   "book": 40,
+   "chapter": 24,
+   "verse": 2,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"he\"",
+   "note": "The Textus Receptus names Jesus here; the critical text Darby follows has only the verb or a pronoun, so he supplies \"he\". The referent is plain from the context."
+  },
+  {
+   "book": 40,
+   "chapter": 25,
+   "verse": 13,
+   "kind": "judgment",
+   "weight": "major",
+   "change": "Omits \"wherein the Son of man cometh\"",
+   "note": "The phrase is in the later manuscripts and the Textus Receptus but not in Sinaiticus, Vaticanus or Bezae. The coming of the Son of man is the subject of 24:44 and 25:31."
+  },
+  {
+   "book": 40,
+   "chapter": 27,
+   "verse": 35,
+   "kind": "prophecy",
+   "weight": "major",
+   "change": "Omits the fulfilment \"They parted my garments among them\"",
+   "note": "The quotation of Psalm 22:18 is in the Textus Receptus but not in most Greek manuscripts, early or Byzantine; it likely comes from John 19:24, where it stands."
+  },
+  {
+   "book": 40,
+   "chapter": 28,
+   "verse": 20,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the closing \"Amen\"",
+   "note": "\"Amen\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or Bezae."
+  },
+  {
+   "book": 41,
+   "chapter": 1,
+   "verse": 2,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"in the prophets\" becomes \"in [Isaiah] the prophet\"",
+   "note": "Sinaiticus, Vaticanus and Bezae read \"Isaiah the prophet\"; the Byzantine text and the Textus Receptus read \"the prophets\". The quotation joins Malachi 3:1 to Isaiah 40:3; Darby brackets \"Isaiah\"."
+  },
+  {
+   "book": 41,
+   "chapter": 3,
+   "verse": 15,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "\"to heal sicknesses\" bracketed as doubtful",
+   "note": "The phrase is in the Byzantine text and the Textus Receptus but not in Sinaiticus or Vaticanus. Darby keeps the words in brackets as doubtful. The apostles' power to heal is stated in Matthew 10:1."
+  },
+  {
+   "book": 41,
+   "chapter": 3,
+   "verse": 29,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"eternal damnation\" becomes \"an everlasting sin\"",
+   "note": "The Textus Receptus has kriseōs (judgment); Sinaiticus and Vaticanus have hamartēmatos (sin). Either way the sin is never forgiven."
+  },
+  {
+   "book": 41,
+   "chapter": 5,
+   "verse": 19,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"he\"",
+   "note": "The Textus Receptus names Jesus here; the critical text Darby follows has only the verb or a pronoun, so he supplies \"he\". The referent is plain from the context."
+  },
+  {
+   "book": 41,
+   "chapter": 6,
+   "verse": 11,
+   "kind": "judgment",
+   "weight": "major",
+   "change": "Omits \"more tolerable for Sodom and Gomorrha in the day of judgment\"",
+   "note": "The sentence is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or Bezae; it stands in Matthew 10:15."
+  },
+  {
+   "book": 41,
+   "chapter": 8,
+   "verse": 1,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"he\"; \"very great\" becomes \"again a great\"",
+   "note": "The Textus Receptus has \"Jesus\" and pampollou (very great); Sinaiticus and Vaticanus have palin pollou (again a great) and no name."
+  },
+  {
+   "book": 41,
+   "chapter": 9,
+   "verse": 24,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits the address \"Lord\"",
+   "note": "\"Lord\" is in the Textus Receptus but not in Sinaiticus, Vaticanus or most other manuscripts; Darby brackets \"with tears\", also missing from the early copies."
+  },
+  {
+   "book": 41,
+   "chapter": 9,
+   "verse": 44,
+   "kind": "judgment",
+   "weight": "major",
+   "change": "Verse bracketed as doubtful (\"where their worm dieth not\")",
+   "note": "The verse is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or some others. Darby keeps the words in brackets as doubtful. The same words stand in verse 48 and Isaiah 66:24."
+  },
+  {
+   "book": 41,
+   "chapter": 9,
+   "verse": 46,
+   "kind": "judgment",
+   "weight": "major",
+   "change": "Verse bracketed as doubtful (\"where their worm dieth not\")",
+   "note": "The verse is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or some others. Darby keeps the words in brackets as doubtful. The same words stand in verse 48 and Isaiah 66:24."
+  },
+  {
+   "book": 41,
+   "chapter": 10,
+   "verse": 51,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Lord\" becomes \"Rabboni\"",
+   "note": "The Textus Receptus has Kyrie (Lord); Sinaiticus and Vaticanus have Rabbouni (my master), as in John 20:16."
+  },
+  {
+   "book": 41,
+   "chapter": 10,
+   "verse": 52,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"followed Jesus\" becomes \"followed him\"",
+   "note": "The Textus Receptus names Jesus here; the critical text Darby follows has only the verb or a pronoun, so he supplies \"he\". The referent is plain from the context."
+  },
+  {
+   "book": 41,
+   "chapter": 11,
+   "verse": 10,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"in the name of the Lord\"",
+   "note": "The phrase is in the Byzantine text and the Textus Receptus but not in Sinaiticus or Vaticanus; verse 9 still has \"in the name of the Lord\"."
+  },
+  {
+   "book": 41,
+   "chapter": 11,
+   "verse": 11,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"he\"",
+   "note": "The Textus Receptus names Jesus here; the critical text Darby follows has only the verb or a pronoun, so he supplies \"he\". The referent is plain from the context."
+  },
+  {
+   "book": 41,
+   "chapter": 11,
+   "verse": 14,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"he\"",
+   "note": "The Textus Receptus names Jesus here; the critical text Darby follows has only the verb or a pronoun, so he supplies \"he\". The referent is plain from the context."
+  },
+  {
+   "book": 41,
+   "chapter": 11,
+   "verse": 15,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"he\"",
+   "note": "The Textus Receptus names Jesus here; the critical text Darby follows has only the verb or a pronoun, so he supplies \"he\". The referent is plain from the context."
+  },
+  {
+   "book": 41,
+   "chapter": 12,
+   "verse": 4,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "\"at him they cast stones\" bracketed as doubtful",
+   "note": "The stoning (lithobolēsantes) is in the Byzantine text and the Textus Receptus but not in Sinaiticus or Vaticanus. Darby keeps the words in brackets as doubtful. The servant is still wounded and shamed."
+  },
+  {
+   "book": 41,
+   "chapter": 12,
+   "verse": 32,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"there is one God\" becomes \"he is one\"",
+   "note": "\"God\" is in the Textus Receptus but not in Sinaiticus or Vaticanus; the scribe is still affirming that God is one."
+  },
+  {
+   "book": 41,
+   "chapter": 12,
+   "verse": 40,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"greater damnation\" becomes \"a severer judgment\"",
+   "note": "The Greek (krima or krisis, judgment) is the same in both; \"judgment\" is the literal sense, the KJV's \"damnation\" an interpretation of it. The outcome is still condemnation."
+  },
+  {
+   "book": 41,
+   "chapter": 14,
+   "verse": 19,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "\"and another said, Is it I?\" bracketed as doubtful",
+   "note": "The words are in the Byzantine text and the Textus Receptus but not in Sinaiticus or Vaticanus. Darby keeps the words in brackets as doubtful."
+  },
+  {
+   "book": 41,
+   "chapter": 15,
+   "verse": 3,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"but he answered nothing\"",
+   "note": "The clause is in some later manuscripts and the Textus Receptus but not in Sinaiticus, Vaticanus or most others; his silence is told in verses 4-5."
+  },
+  {
+   "book": 41,
+   "chapter": 15,
+   "verse": 28,
+   "kind": "prophecy",
+   "weight": "major",
+   "change": "Verse bracketed as doubtful (fulfilment of Isaiah 53:12)",
+   "note": "The verse is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus, Alexandrinus or Bezae. Darby keeps the words in brackets as doubtful. Jesus applies Isaiah 53:12 to himself in Luke 22:37."
+  },
+  {
+   "book": 41,
+   "chapter": 16,
+   "verse": 20,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the closing \"Amen\"",
+   "note": "\"Amen\" is in the Textus Receptus and many later manuscripts but not in most of the older witnesses to these verses; Darby keeps the verses themselves."
+  },
+  {
+   "book": 42,
+   "chapter": 1,
+   "verse": 28,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "\"blessed art thou among women\" bracketed as doubtful",
+   "note": "The words are in Alexandrinus, the Byzantine text and the Textus Receptus but not in Sinaiticus or Vaticanus. Darby keeps the words in brackets as doubtful. Elisabeth says them in 1:42."
+  },
+  {
+   "book": 42,
+   "chapter": 2,
+   "verse": 33,
+   "kind": "virgin-birth",
+   "weight": "major",
+   "change": "\"Joseph\" becomes \"his father\"",
+   "note": "The Byzantine text and the Textus Receptus read \"Joseph\"; Sinaiticus and Vaticanus read \"his father\". Luke uses \"his parents\" in 2:41 and Mary says \"thy father\" in 2:48, and 1:34-35 states the virgin birth."
+  },
+  {
+   "book": 42,
+   "chapter": 2,
+   "verse": 40,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "\"in spirit\" bracketed as doubtful",
+   "note": "The words are in the Byzantine text and the Textus Receptus but not in Sinaiticus or Vaticanus; they may come from 1:80. Darby keeps the words in brackets as doubtful."
+  },
+  {
+   "book": 42,
+   "chapter": 2,
+   "verse": 43,
+   "kind": "virgin-birth",
+   "weight": "major",
+   "change": "\"Joseph and his mother\" becomes \"his parents\"",
+   "note": "The Byzantine text and the Textus Receptus read \"Joseph and his mother\"; Sinaiticus and Vaticanus read \"his parents\". The virgin birth is stated in 1:34-35."
+  },
+  {
+   "book": 42,
+   "chapter": 4,
+   "verse": 8,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits \"Get thee behind me, Satan\"",
+   "note": "The words are in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; they stand in Matthew 4:10."
+  },
+  {
+   "book": 42,
+   "chapter": 4,
+   "verse": 18,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits \"to heal the brokenhearted\"",
+   "note": "The phrase is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or Bezae; it is in Isaiah 61:1, which is quoted."
+  },
+  {
+   "book": 42,
+   "chapter": 4,
+   "verse": 41,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Christ the Son of God\" becomes \"the Son of God\"",
+   "note": "\"Christ\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus or Vaticanus; the verse still ends \"they knew him to be the Christ\"."
+  },
+  {
+   "book": 42,
+   "chapter": 7,
+   "verse": 31,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"And the Lord said\"",
+   "note": "The words are in some late manuscripts and the Textus Receptus but not in nearly all Greek manuscripts, early or Byzantine. Jesus is still the speaker, as verse 24 shows."
+  },
+  {
+   "book": 42,
+   "chapter": 8,
+   "verse": 38,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"he\"",
+   "note": "The Textus Receptus names Jesus here; the critical text Darby follows has only the verb or a pronoun, so he supplies \"he\". The referent is plain from the context."
+  },
+  {
+   "book": 42,
+   "chapter": 9,
+   "verse": 55,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Brackets \"Ye know not what manner of spirit ye are of\"",
+   "note": "The words are in many later manuscripts and the Textus Receptus but not in P45, P75, Sinaiticus or Vaticanus; Darby keeps them in brackets as doubtful."
+  },
+  {
+   "book": 42,
+   "chapter": 9,
+   "verse": 56,
+   "kind": "salvation",
+   "weight": "major",
+   "change": "Omits \"the Son of man is not come to destroy... save\"",
+   "note": "The words are in the Textus Receptus and many later manuscripts but not in P75, Sinaiticus or Vaticanus; Darby keeps the related words of verse 55 in brackets. Luke 19:10 still says the Son of man came to save."
+  },
+  {
+   "book": 42,
+   "chapter": 10,
+   "verse": 15,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"hell\" becomes \"hades\"",
+   "note": "The Greek is hadēs in both; Darby keeps the Greek word for the realm of the dead where the KJV has \"hell\". A translation choice."
+  },
+  {
+   "book": 42,
+   "chapter": 11,
+   "verse": 2,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits \"which art in heaven\" and \"Thy will be done...\"",
+   "note": "The fuller text, as in Matthew 6:9-10, is in the Byzantine text and the Textus Receptus; P75, Vaticanus and others have the shorter Lucan form, which Darby follows."
+  },
+  {
+   "book": 42,
+   "chapter": 11,
+   "verse": 4,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits \"but deliver us from evil\"",
+   "note": "The petition is in the Byzantine text and the Textus Receptus but not in P75, Sinaiticus or Vaticanus; Luke's shorter form of the prayer lacks it. It stands in Matthew 6:13."
+  },
+  {
+   "book": 42,
+   "chapter": 11,
+   "verse": 54,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "\"seeking\" and \"that they might accuse him\" bracketed",
+   "note": "The words are in the Byzantine text and the Textus Receptus but not in P75, Sinaiticus or Vaticanus. Darby keeps the words in brackets as doubtful."
+  },
+  {
+   "book": 42,
+   "chapter": 12,
+   "verse": 31,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the kingdom of God\" becomes \"his kingdom\"",
+   "note": "\"Of God\" is in the Byzantine text and the Textus Receptus; Sinaiticus and Vaticanus read \"his\", plainly the Father of verse 30."
+  },
+  {
+   "book": 42,
+   "chapter": 13,
+   "verse": 2,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"he\"",
+   "note": "The Textus Receptus names Jesus here; the critical text Darby follows has only the verb or a pronoun, so he supplies \"he\". The referent is plain from the context."
+  },
+  {
+   "book": 42,
+   "chapter": 13,
+   "verse": 25,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Lord, Lord\" becomes \"Lord\"",
+   "note": "The doubled address is in the Byzantine text and the Textus Receptus but not in P75, Sinaiticus or Vaticanus; it stands in Matthew 7:22."
+  },
+  {
+   "book": 42,
+   "chapter": 16,
+   "verse": 23,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"hell\" becomes \"hades\"",
+   "note": "The Greek is hadēs in both; Darby keeps the Greek word for the realm of the dead where the KJV has \"hell\". A translation choice. The rich man is still in torment."
+  },
+  {
+   "book": 42,
+   "chapter": 17,
+   "verse": 36,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Verse bracketed as doubtful (\"Two men shall be in the field\")",
+   "note": "The verse is in Bezae, some later manuscripts and the Textus Receptus but not in P75, Sinaiticus, Vaticanus, Alexandrinus or the Byzantine majority; it is likely from Matthew 24:40. Darby keeps the words in brackets as doubtful."
+  },
+  {
+   "book": 42,
+   "chapter": 20,
+   "verse": 47,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"greater damnation\" becomes \"a severer judgment\"",
+   "note": "The Greek (krima or krisis, judgment) is the same in both; \"judgment\" is the literal sense, the KJV's \"damnation\" an interpretation of it. The outcome is still condemnation."
+  },
+  {
+   "book": 42,
+   "chapter": 21,
+   "verse": 4,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"of God\" bracketed in \"the offerings of God\"",
+   "note": "\"Of God\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus or Vaticanus. Darby keeps the words in brackets as doubtful."
+  },
+  {
+   "book": 42,
+   "chapter": 22,
+   "verse": 63,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"held Jesus\" becomes \"held him\"",
+   "note": "The Textus Receptus names Jesus here; the critical text Darby follows has only the verb or a pronoun, so he supplies \"he\". The referent is plain from the context."
+  },
+  {
+   "book": 42,
+   "chapter": 22,
+   "verse": 64,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"they struck him on the face\"",
+   "note": "The clause is in the Byzantine text and the Textus Receptus but not in P75, Sinaiticus or Vaticanus; that he was struck is still said."
+  },
+  {
+   "book": 42,
+   "chapter": 23,
+   "verse": 42,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Lord\" is bracketed as doubtful",
+   "note": "The Textus Receptus has \"Lord, remember me\"; P75, Sinaiticus and Vaticanus have \"Jesus, remember me\". Darby keeps \"to Jesus\" and puts \"Lord\" in brackets."
+  },
+  {
+   "book": 42,
+   "chapter": 24,
+   "verse": 36,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus himself\" becomes \"he himself\"",
+   "note": "The Textus Receptus names Jesus here; the critical text Darby follows has only the verb or a pronoun, so he supplies \"he\". The referent is plain from the context."
+  },
+  {
+   "book": 42,
+   "chapter": 24,
+   "verse": 53,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the closing \"Amen\"",
+   "note": "\"Amen\" is in the Byzantine text and the Textus Receptus but not in P75, Sinaiticus or Vaticanus."
+  },
+  {
+   "book": 43,
+   "chapter": 3,
+   "verse": 2,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"came to Jesus\" becomes \"came to him\"",
+   "note": "The Textus Receptus names Jesus here; the critical text Darby follows has only the verb or a pronoun, so he supplies \"he\". The referent is plain from the context."
+  },
+  {
+   "book": 43,
+   "chapter": 3,
+   "verse": 15,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"not perish, but\" bracketed as doubtful",
+   "note": "The words are in the Byzantine text and the Textus Receptus but not in P66, P75, Sinaiticus or Vaticanus, probably from 3:16, where they stand. Darby keeps the words in brackets as doubtful."
+  },
+  {
+   "book": 43,
+   "chapter": 4,
+   "verse": 42,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"the Christ\" before \"the Saviour of the world\"",
+   "note": "\"The Christ\" is in the Byzantine text and the Textus Receptus but not in P66, P75, Sinaiticus or Vaticanus; he is still confessed Saviour of the world."
+  },
+  {
+   "book": 43,
+   "chapter": 4,
+   "verse": 46,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"he\"",
+   "note": "The Textus Receptus names Jesus here; the critical text Darby follows has only the verb or a pronoun, so he supplies \"he\". The referent is plain from the context."
+  },
+  {
+   "book": 43,
+   "chapter": 5,
+   "verse": 3,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Brackets \"waiting for the moving of the water\" with verse 4",
+   "note": "The words are in the Byzantine text and the Textus Receptus but not in P66, P75, Sinaiticus or Vaticanus. Darby's bracket runs from here to the end of verse 4."
+  },
+  {
+   "book": 43,
+   "chapter": 5,
+   "verse": 4,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Verse bracketed as doubtful (the angel troubling the water)",
+   "note": "The verse, with the end of verse 3, is in the Byzantine text and the Textus Receptus but not in P66, P75, Sinaiticus or Vaticanus. Darby keeps it in brackets."
+  },
+  {
+   "book": 43,
+   "chapter": 5,
+   "verse": 29,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"resurrection of damnation\" becomes \"resurrection of judgment\"",
+   "note": "The Greek (krima or krisis, judgment) is the same in both; \"judgment\" is the literal sense, the KJV's \"damnation\" an interpretation of it. The outcome is still condemnation."
+  },
+  {
+   "book": 43,
+   "chapter": 5,
+   "verse": 30,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the will of the Father\" becomes \"the will of him\"",
+   "note": "\"The Father\" is in the Textus Receptus but not in P66, P75, Sinaiticus or Vaticanus; the one who sent him is plainly the Father."
+  },
+  {
+   "book": 43,
+   "chapter": 6,
+   "verse": 39,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Father's will\" becomes \"the will of him\"",
+   "note": "\"Father\" is in the Textus Receptus but not in P66, P75, Sinaiticus or Vaticanus; verse 40 still says \"the will of my Father\"."
+  },
+  {
+   "book": 43,
+   "chapter": 6,
+   "verse": 47,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"on me\" bracketed as doubtful",
+   "note": "\"On me\" is in the Byzantine text and the Textus Receptus but not in P66, Sinaiticus or Vaticanus; Darby keeps it in brackets. Belief in Christ is the subject of the whole passage."
+  },
+  {
+   "book": 43,
+   "chapter": 6,
+   "verse": 69,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"Christ, the Son of the living God\" becomes \"holy one of God\"",
+   "note": "The Byzantine text and the Textus Receptus read as the KJV, like Matthew 16:16; P75, Sinaiticus and Vaticanus read \"the Holy One of God\". Both are confessions of Jesus' unique standing."
+  },
+  {
+   "book": 43,
+   "chapter": 7,
+   "verse": 39,
+   "kind": "trinity",
+   "weight": "minor",
+   "change": "\"the Holy Ghost\" becomes \"[the] Spirit\"",
+   "note": "The Textus Receptus has \"Holy Spirit\"; P66, P75 and Sinaiticus have \"Spirit\" alone. Neither has \"given\", which the KJV supplies in italics."
+  },
+  {
+   "book": 43,
+   "chapter": 7,
+   "verse": 50,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"he that came to Jesus by night\"",
+   "note": "Darby follows the first hand of Sinaiticus, which lacks the clause; most manuscripts have \"he that came to him\", and the Textus Receptus \"to Jesus\". The night visit is told in 3:2."
+  },
+  {
+   "book": 43,
+   "chapter": 8,
+   "verse": 20,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"spake Jesus\" becomes \"spoke he\"",
+   "note": "The Textus Receptus names Jesus here; the critical text Darby follows has only the verb or a pronoun, so he supplies \"he\". The referent is plain from the context."
+  },
+  {
+   "book": 43,
+   "chapter": 8,
+   "verse": 21,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"said Jesus\" becomes \"He said\"",
+   "note": "The Textus Receptus names Jesus here; the critical text Darby follows has only the verb or a pronoun, so he supplies \"he\". The referent is plain from the context."
+  },
+  {
+   "book": 43,
+   "chapter": 8,
+   "verse": 29,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Father hath not left me\" becomes \"he has not left me\"",
+   "note": "\"The Father\" is in the Textus Receptus but not in P66, P75, Sinaiticus or Vaticanus; \"he that has sent me\" is the subject, as in verse 18."
+  },
+  {
+   "book": 43,
+   "chapter": 8,
+   "verse": 59,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "\"going through the midst of them, and so passed by\" bracketed",
+   "note": "The words are in the Byzantine text and the Textus Receptus but not in P66, P75, Sinaiticus or Vaticanus; they may come from Luke 4:30. Darby keeps the words in brackets as doubtful."
+  },
+  {
+   "book": 43,
+   "chapter": 10,
+   "verse": 38,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"and believe\" bracketed in \"know, and believe\"",
+   "note": "The Textus Receptus has \"know and believe\"; P45, P66, P75 and Vaticanus have \"know and understand\". Darby brackets \"and believe\"."
+  },
+  {
+   "book": 43,
+   "chapter": 11,
+   "verse": 45,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the things which Jesus did\" becomes \"what he had done\"",
+   "note": "The Textus Receptus names Jesus here; the critical text Darby follows has only the verb or a pronoun, so he supplies \"he\". The referent is plain from the context."
+  },
+  {
+   "book": 43,
+   "chapter": 12,
+   "verse": 47,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"believe not\" becomes \"do not keep [them]\"",
+   "note": "The Textus Receptus has pisteusē (believe); P66, Sinaiticus and Vaticanus have phylaxē (keep). Belief in his words is still the point of verses 44-48."
+  },
+  {
+   "book": 43,
+   "chapter": 16,
+   "verse": 16,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "\"because I go to the Father\" bracketed as doubtful",
+   "note": "The words are in the Byzantine text and the Textus Receptus but not in P66, Sinaiticus or Vaticanus; they stand in verse 17. Darby keeps the words in brackets as doubtful."
+  },
+  {
+   "book": 43,
+   "chapter": 21,
+   "verse": 25,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the closing \"Amen\"",
+   "note": "\"Amen\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus or Vaticanus."
+  },
+  {
+   "book": 44,
+   "chapter": 2,
+   "verse": 27,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"hell\" becomes \"hades\"; \"Holy One\" becomes \"gracious one\"",
+   "note": "The Greek is hadēs in both; Darby keeps the Greek word for the realm of the dead where the KJV has \"hell\". A translation choice. \"Gracious one\" is Darby's rendering of hosios, the Septuagint word in Psalm 16:10."
+  },
+  {
+   "book": 44,
+   "chapter": 2,
+   "verse": 30,
+   "kind": "deity",
+   "weight": "major",
+   "change": "Omits \"according to the flesh, he would raise up Christ\"",
+   "note": "The words are in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or Alexandrinus. Verse 31 still applies the promise to the resurrection of the Christ."
+  },
+  {
+   "book": 44,
+   "chapter": 2,
+   "verse": 31,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"his soul was not left in hell\" becomes \"he... in hades\"",
+   "note": "\"His soul\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus or Vaticanus; hadēs is the Greek word in both."
+  },
+  {
+   "book": 44,
+   "chapter": 2,
+   "verse": 47,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "\"to the church\" is bracketed as supplied",
+   "note": "\"To the church\" is in the Byzantine text and the Textus Receptus; Sinaiticus, Vaticanus and Alexandrinus read epi to auto (\"together\"), so Darby brackets his English supply."
+  },
+  {
+   "book": 44,
+   "chapter": 3,
+   "verse": 13,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"his Son Jesus\" becomes \"his servant Jesus\"",
+   "note": "The Greek is pais, which can mean child or servant; Darby, like most modern translations, reads it as the Servant of Isaiah 42 and 52-53. A translation choice that changes the title."
+  },
+  {
+   "book": 44,
+   "chapter": 3,
+   "verse": 26,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"his Son Jesus\" becomes \"his servant\"",
+   "note": "The Greek is pais, as in 3:13, rendered \"servant\"; \"Jesus\" is in the Textus Receptus but not in Sinaiticus or Vaticanus."
+  },
+  {
+   "book": 44,
+   "chapter": 6,
+   "verse": 3,
+   "kind": "trinity",
+   "weight": "minor",
+   "change": "\"Holy\" is bracketed in \"the Holy Ghost\"",
+   "note": "Darby brackets \"Holy\" because the critical text he follows here (Sinaiticus, Vaticanus, Alexandrinus) has \"Spirit\" alone; the Textus Receptus has \"Holy Spirit\". The Spirit is still meant."
+  },
+  {
+   "book": 44,
+   "chapter": 7,
+   "verse": 30,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"an angel of the Lord\" becomes \"an angel\"",
+   "note": "\"Of the Lord\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or Alexandrinus; verse 31 has \"the voice of the Lord\"."
+  },
+  {
+   "book": 44,
+   "chapter": 7,
+   "verse": 37,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"the Lord your God\" becomes \"God\"; \"him shall ye hear\" bracketed",
+   "note": "\"The Lord your\" and \"him shall ye hear\" are in the Textus Receptus but not in Sinaiticus, Vaticanus or Alexandrinus; Darby brackets the latter. The prophecy of Deuteronomy 18:15 still stands."
+  },
+  {
+   "book": 44,
+   "chapter": 8,
+   "verse": 18,
+   "kind": "trinity",
+   "weight": "minor",
+   "change": "\"Holy\" is bracketed in \"the Holy Ghost\"",
+   "note": "\"Holy\" is in the Textus Receptus and most manuscripts but not in Sinaiticus; Darby brackets it as doubtful. Verse 17 has \"the Holy Ghost\"."
+  },
+  {
+   "book": 44,
+   "chapter": 8,
+   "verse": 22,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"pray God\" becomes \"supplicate the Lord\"",
+   "note": "The Textus Receptus has \"God\"; Sinaiticus, Vaticanus and Alexandrinus have \"the Lord\". Either way the prayer is to God."
+  },
+  {
+   "book": 44,
+   "chapter": 8,
+   "verse": 37,
+   "kind": "salvation",
+   "weight": "major",
+   "change": "Verse omitted (the eunuch's confession of faith)",
+   "note": "The verse is in some later manuscripts, the Latin and the Textus Receptus but not in P45, P74, Sinaiticus, Vaticanus, Alexandrinus or the Byzantine majority. Faith before baptism is still the pattern of 8:12."
+  },
+  {
+   "book": 44,
+   "chapter": 9,
+   "verse": 5,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"it is hard for thee to kick against the pricks\"",
+   "note": "The words are in the Latin and the Textus Receptus but in almost no Greek manuscript here; they stand in 26:14."
+  },
+  {
+   "book": 44,
+   "chapter": 9,
+   "verse": 6,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits \"trembling... Lord, what wilt thou have me to do?\"",
+   "note": "The words are in the Latin and the Textus Receptus but in no Greek manuscript of this verse; Erasmus brought them in from the Vulgate. The question stands in 22:10."
+  },
+  {
+   "book": 44,
+   "chapter": 9,
+   "verse": 20,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"preached Christ\" becomes \"preached Jesus\"",
+   "note": "The Textus Receptus has \"Christ\"; nearly all Greek manuscripts have \"Jesus\". He is still preached as the Son of God."
+  },
+  {
+   "book": 44,
+   "chapter": 9,
+   "verse": 29,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord Jesus\" becomes \"the Lord\"",
+   "note": "\"Jesus\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or Alexandrinus."
+  },
+  {
+   "book": 44,
+   "chapter": 10,
+   "verse": 6,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"he shall tell thee what thou oughtest to do\"",
+   "note": "The clause is in some late manuscripts and the Textus Receptus but not in the early or Byzantine manuscripts; the same words stand in 10:32 and 11:14 in substance."
+  },
+  {
+   "book": 44,
+   "chapter": 15,
+   "verse": 11,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord Jesus Christ\" becomes \"the Lord Jesus\"",
+   "note": "\"Christ\" is in the Textus Receptus and some later manuscripts but not in Sinaiticus, Vaticanus or Alexandrinus."
+  },
+  {
+   "book": 44,
+   "chapter": 15,
+   "verse": 18,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"Known unto God are all his works\"",
+   "note": "The fuller wording is in the Byzantine text and the Textus Receptus; Sinaiticus, Vaticanus and Alexandrinus end the quotation \"known from eternity\"."
+  },
+  {
+   "book": 44,
+   "chapter": 15,
+   "verse": 24,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "\"saying, Ye must be circumcised, and keep the law\" bracketed",
+   "note": "The words are in the Byzantine text and the Textus Receptus but not in P74, Sinaiticus, Vaticanus or Alexandrinus. Darby keeps the words in brackets as doubtful. The demand is stated in 15:1 and 15:5."
+  },
+  {
+   "book": 44,
+   "chapter": 15,
+   "verse": 34,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Verse omitted (Silas stays at Antioch)",
+   "note": "The verse is in some manuscripts and the Textus Receptus but not in Sinaiticus, Vaticanus, Alexandrinus or the Byzantine majority. It explains 15:40, where Paul chooses Silas."
+  },
+  {
+   "book": 44,
+   "chapter": 16,
+   "verse": 31,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord Jesus Christ\" becomes \"the Lord Jesus\"",
+   "note": "\"Christ\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or Alexandrinus. The call to believe is unchanged."
+  },
+  {
+   "book": 44,
+   "chapter": 17,
+   "verse": 27,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"seek the Lord\" becomes \"seek God\"",
+   "note": "The Textus Receptus has \"the Lord\"; Sinaiticus, Vaticanus and Alexandrinus have \"God\". Paul is speaking of the Creator either way."
+  },
+  {
+   "book": 44,
+   "chapter": 18,
+   "verse": 5,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"pressed in the spirit\" becomes \"pressed in respect of the word\"",
+   "note": "The Byzantine text and the Textus Receptus have pneumati (spirit); Sinaiticus, Vaticanus and Alexandrinus have logō (word): Paul was given wholly to preaching."
+  },
+  {
+   "book": 44,
+   "chapter": 18,
+   "verse": 21,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "\"I must by all means keep this feast\" bracketed",
+   "note": "The words are in the Byzantine text and the Textus Receptus but not in P74, Sinaiticus, Vaticanus or Alexandrinus. Darby keeps the words in brackets as doubtful."
+  },
+  {
+   "book": 44,
+   "chapter": 18,
+   "verse": 25,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the things of the Lord\" becomes \"the things concerning Jesus\"",
+   "note": "The Byzantine text and the Textus Receptus have \"the Lord\"; P74, Sinaiticus, Vaticanus and Alexandrinus have \"Jesus\"."
+  },
+  {
+   "book": 44,
+   "chapter": 19,
+   "verse": 4,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Christ Jesus\" becomes \"Jesus\"",
+   "note": "\"Christ\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or Alexandrinus."
+  },
+  {
+   "book": 44,
+   "chapter": 19,
+   "verse": 10,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord Jesus\" becomes \"the Lord\"",
+   "note": "\"Jesus\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or Alexandrinus."
+  },
+  {
+   "book": 44,
+   "chapter": 19,
+   "verse": 20,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the word of God\" becomes \"the word of the Lord\"",
+   "note": "The Textus Receptus has \"God\"; most manuscripts, early and Byzantine, have \"the Lord\"."
+  },
+  {
+   "book": 44,
+   "chapter": 20,
+   "verse": 25,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"of God\" bracketed in \"the kingdom of God\"",
+   "note": "\"Of God\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or Alexandrinus. Darby keeps the words in brackets as doubtful."
+  },
+  {
+   "book": 44,
+   "chapter": 20,
+   "verse": 28,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"his own blood\" becomes \"the blood of his own\"",
+   "note": "Darby keeps \"church of God\" with the Textus Receptus, but follows the early manuscripts' order tou haimatos tou idiou, which he renders \"the blood of his own\", that is, his own Son. The KJV reads it as God's own blood."
+  },
+  {
+   "book": 44,
+   "chapter": 21,
+   "verse": 20,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"glorified the Lord\" becomes \"glorified God\"",
+   "note": "The Byzantine text and the Textus Receptus have \"the Lord\"; Sinaiticus, Vaticanus and Alexandrinus have \"God\"."
+  },
+  {
+   "book": 44,
+   "chapter": 21,
+   "verse": 25,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Brackets \"observe no such thing, save only\"",
+   "note": "The words are in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or Alexandrinus; Darby brackets them as supplied. The decree of 15:29 is unchanged."
+  },
+  {
+   "book": 44,
+   "chapter": 22,
+   "verse": 16,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the name of the Lord\" becomes \"his name\"",
+   "note": "The Textus Receptus has \"of the Lord\"; the early and Byzantine manuscripts have \"his\". The referent is Jesus, \"that Just One\" of verse 14."
+  },
+  {
+   "book": 44,
+   "chapter": 23,
+   "verse": 9,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"let us not fight against God\"",
+   "note": "The words are in some later manuscripts and the Textus Receptus but not in Sinaiticus, Vaticanus or Alexandrinus, which leave the sentence broken off; Darby marks the break."
+  },
+  {
+   "book": 44,
+   "chapter": 24,
+   "verse": 6,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "\"and would have judged according to our law\" bracketed",
+   "note": "The words, through the start of verse 8, are in some later manuscripts and the Textus Receptus but not in P74, Sinaiticus, Vaticanus, Alexandrinus or the Byzantine majority. Darby keeps the words in brackets as doubtful."
+  },
+  {
+   "book": 44,
+   "chapter": 24,
+   "verse": 7,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Verse bracketed as doubtful (Lysias takes Paul away)",
+   "note": "Verse 7, with the end of verse 6 and the start of verse 8, is in some later manuscripts and the Textus Receptus but not in P74, Sinaiticus, Vaticanus, Alexandrinus or the Byzantine majority. Darby keeps the passage in brackets."
+  },
+  {
+   "book": 44,
+   "chapter": 24,
+   "verse": 8,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "\"Commanding his accusers to come unto thee\" bracketed",
+   "note": "The clause ends the addition that began in verse 6; it is in the Textus Receptus but not in the early manuscripts. Darby's bracket closes here."
+  },
+  {
+   "book": 44,
+   "chapter": 28,
+   "verse": 16,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "The centurion delivering the prisoners is bracketed",
+   "note": "The clause is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or Alexandrinus. Darby keeps the words in brackets as doubtful."
+  },
+  {
+   "book": 44,
+   "chapter": 28,
+   "verse": 29,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Verse bracketed as doubtful",
+   "note": "The verse is in the Byzantine text and the Textus Receptus but not in P74, Sinaiticus, Vaticanus or Alexandrinus. Darby keeps it in brackets."
+  },
+  {
+   "book": 45,
+   "chapter": 1,
+   "verse": 16,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the gospel of Christ\" becomes \"the glad tidings\"",
+   "note": "\"Of Christ\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or Alexandrinus; \"glad tidings\" is Darby's word for gospel."
+  },
+  {
+   "book": 45,
+   "chapter": 3,
+   "verse": 8,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"whose damnation is just\" becomes \"whose judgment is just\"",
+   "note": "The Greek (krima or krisis, judgment) is the same in both; \"judgment\" is the literal sense, the KJV's \"damnation\" an interpretation of it. The outcome is still condemnation."
+  },
+  {
+   "book": 45,
+   "chapter": 6,
+   "verse": 11,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"our Lord\" after \"Christ Jesus\"",
+   "note": "\"Our Lord\" is in the Byzantine text and the Textus Receptus but not in P46, Alexandrinus or Vaticanus."
+  },
+  {
+   "book": 45,
+   "chapter": 8,
+   "verse": 1,
+   "kind": "salvation",
+   "weight": "major",
+   "change": "Omits \"who walk not after the flesh, but after the Spirit\"",
+   "note": "The clause is in the Byzantine text and the Textus Receptus but not in Sinaiticus or Vaticanus; the same words stand in verse 4."
+  },
+  {
+   "book": 45,
+   "chapter": 9,
+   "verse": 28,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "\"cut it short in righteousness: because\" bracketed",
+   "note": "The words are in the Byzantine text and the Textus Receptus but not in P46, Sinaiticus, Alexandrinus or Vaticanus; they come from the Septuagint of Isaiah 10:22-23. Darby keeps the words in brackets as doubtful."
+  },
+  {
+   "book": 45,
+   "chapter": 11,
+   "verse": 6,
+   "kind": "salvation",
+   "weight": "major",
+   "change": "Omits \"But if it be of works...\" clause",
+   "note": "The second half is in the Byzantine text and the Textus Receptus but not in P46, Sinaiticus or Alexandrinus; the first half states the same contrast between grace and works."
+  },
+  {
+   "book": 45,
+   "chapter": 13,
+   "verse": 2,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"damnation\" becomes \"sentence of guilt\"",
+   "note": "The Greek (krima or krisis, judgment) is the same in both; \"judgment\" is the literal sense, the KJV's \"damnation\" an interpretation of it. The outcome is still condemnation."
+  },
+  {
+   "book": 45,
+   "chapter": 14,
+   "verse": 4,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"God is able\" becomes \"the Lord is able\"",
+   "note": "The Byzantine text and the Textus Receptus have \"God\"; P46, Sinaiticus, Vaticanus and Alexandrinus have \"the Lord\"."
+  },
+  {
+   "book": 45,
+   "chapter": 14,
+   "verse": 6,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"he that regardeth not the day... doth not regard it\"",
+   "note": "The clause is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or Alexandrinus; the verse keeps the parallel about eating."
+  },
+  {
+   "book": 45,
+   "chapter": 14,
+   "verse": 10,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"judgment seat of Christ\" becomes \"of God\"",
+   "note": "The Byzantine text and the Textus Receptus read \"Christ\"; Sinaiticus, Vaticanus and Alexandrinus read \"God\". 2 Corinthians 5:10 still has \"the judgment seat of Christ\"."
+  },
+  {
+   "book": 45,
+   "chapter": 16,
+   "verse": 18,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"our Lord Jesus Christ\" becomes \"our Lord Christ\"",
+   "note": "\"Jesus\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or Alexandrinus."
+  },
+  {
+   "book": 45,
+   "chapter": 16,
+   "verse": 20,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the closing \"Amen\"",
+   "note": "\"Amen\" is in the Textus Receptus and some later manuscripts but not in P46, Sinaiticus or Vaticanus."
+  },
+  {
+   "book": 45,
+   "chapter": 16,
+   "verse": 27,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription \"Written to the Romans from Corinthus...\"",
+   "note": "The subscriptions are not part of the letters; they were added by later scribes and printed in the Textus Receptus. Darby, like modern editions, leaves them out."
+  },
+  {
+   "book": 46,
+   "chapter": 2,
+   "verse": 13,
+   "kind": "trinity",
+   "weight": "minor",
+   "change": "\"the Holy Ghost\" becomes \"the Spirit\"",
+   "note": "\"Holy\" is in the Byzantine text and the Textus Receptus but not in P46, Sinaiticus, Vaticanus or Alexandrinus. The Spirit of God is meant, as in verses 10-12."
+  },
+  {
+   "book": 46,
+   "chapter": 6,
+   "verse": 20,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"and in your spirit, which are God's\"",
+   "note": "The words are in the Byzantine text and the Textus Receptus but not in P46, Sinaiticus, Vaticanus or Alexandrinus; the bought body is still God's, as verse 19 says."
+  },
+  {
+   "book": 46,
+   "chapter": 7,
+   "verse": 5,
+   "kind": "other",
+   "weight": "major",
+   "change": "Omits \"fasting\"",
+   "note": "\"Fasting\" is in the Byzantine text and the Textus Receptus but not in P11, P46, Sinaiticus, Vaticanus or Alexandrinus."
+  },
+  {
+   "book": 46,
+   "chapter": 7,
+   "verse": 36,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"his virgin\" becomes \"his virginity\"",
+   "note": "Translation choice: the Greek is parthenos (virgin). Darby reads it as the man's own virginity, so the passage is about his staying unmarried, not about a father's or betrothed's daughter."
+  },
+  {
+   "book": 46,
+   "chapter": 7,
+   "verse": 37,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"keep his virgin\" becomes \"keep his own virginity\"",
+   "note": "Translation choice, as in verse 36: Darby reads parthenos as the man's own virginity rather than a woman in his charge."
+  },
+  {
+   "book": 46,
+   "chapter": 9,
+   "verse": 1,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus Christ our Lord\" becomes \"Jesus our Lord\"",
+   "note": "\"Christ\" is in the Byzantine text and the Textus Receptus but not in P46, Sinaiticus, Vaticanus or Alexandrinus."
+  },
+  {
+   "book": 46,
+   "chapter": 9,
+   "verse": 18,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the gospel of Christ\" becomes \"the glad tidings\"",
+   "note": "\"Of Christ\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or Alexandrinus."
+  },
+  {
+   "book": 46,
+   "chapter": 10,
+   "verse": 28,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"for the earth is the Lord's, and the fulness thereof\"",
+   "note": "The repeated quotation is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or Alexandrinus; it stands in verse 26."
+  },
+  {
+   "book": 46,
+   "chapter": 11,
+   "verse": 24,
+   "kind": "atonement",
+   "weight": "minor",
+   "change": "Omits \"Take, eat\" and \"broken\"",
+   "note": "Both are in the Byzantine text and the Textus Receptus but not in P46, Sinaiticus, Vaticanus or Alexandrinus; the body is still given \"for you\"."
+  },
+  {
+   "book": 46,
+   "chapter": 11,
+   "verse": 29,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"unworthily\" and \"Lord's\" before \"body\"",
+   "note": "Both are in the Byzantine text and the Textus Receptus but not in P46, Sinaiticus, Vaticanus or Alexandrinus; verse 27 still has \"unworthily\" and \"the body and blood of the Lord\"."
+  },
+  {
+   "book": 46,
+   "chapter": 15,
+   "verse": 47,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"the second man is the Lord from heaven\" loses \"the Lord\"",
+   "note": "\"The Lord\" is in the Byzantine text and the Textus Receptus but not in P46, Sinaiticus, Vaticanus or the first hand of Ephesius; the second man is still \"out of heaven\"."
+  },
+  {
+   "book": 46,
+   "chapter": 16,
+   "verse": 22,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus Christ\" bracketed in \"the Lord Jesus Christ\"",
+   "note": "\"Jesus Christ\" is in the Byzantine text and the Textus Receptus but not in P46, Sinaiticus, Vaticanus or Alexandrinus. Darby keeps the words in brackets as doubtful."
+  },
+  {
+   "book": 46,
+   "chapter": 16,
+   "verse": 24,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription about Philippi and Stephanas",
+   "note": "The subscriptions are not part of the letters; they were added by later scribes and printed in the Textus Receptus. Darby, like modern editions, leaves them out."
+  },
+  {
+   "book": 47,
+   "chapter": 1,
+   "verse": 6,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Clauses reordered; second \"and salvation\" dropped",
+   "note": "Darby follows the order of P46, Sinaiticus and Alexandrinus, which differs from the Textus Receptus and lacks the second \"and salvation\". The thought of comfort for their salvation is kept."
+  },
+  {
+   "book": 47,
+   "chapter": 4,
+   "verse": 10,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord Jesus\" becomes \"Jesus\"",
+   "note": "\"Lord\" is in the Byzantine text and the Textus Receptus but not in P46, Sinaiticus, Vaticanus or Alexandrinus."
+  },
+  {
+   "book": 47,
+   "chapter": 11,
+   "verse": 31,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"our Lord Jesus Christ\" becomes \"the Lord Jesus\"",
+   "note": "\"Our\" and \"Christ\" are in the Byzantine text and the Textus Receptus but not in Sinaiticus or Vaticanus."
+  },
+  {
+   "book": 47,
+   "chapter": 13,
+   "verse": 14,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"Amen\" and the subscription",
+   "note": "\"Amen\" is in the Textus Receptus but not in P46, Sinaiticus or Vaticanus. The subscriptions are not part of the letters; they were added by later scribes and printed in the Textus Receptus. Darby, like modern editions, leaves them out."
+  },
+  {
+   "book": 48,
+   "chapter": 3,
+   "verse": 17,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"in Christ\" after \"confirmed before of God\"",
+   "note": "\"In Christ\" is in the Byzantine text and the Textus Receptus but not in P46, Sinaiticus, Vaticanus or Alexandrinus."
+  },
+  {
+   "book": 48,
+   "chapter": 4,
+   "verse": 7,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"an heir of God through Christ\" becomes \"heir also through God\"",
+   "note": "The Byzantine text and the Textus Receptus have \"of God through Christ\"; P46, Sinaiticus, Vaticanus and Alexandrinus have \"through God\". Christ's part in sonship stands in verses 4-6."
+  },
+  {
+   "book": 48,
+   "chapter": 6,
+   "verse": 15,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"in Christ Jesus\" bracketed as doubtful",
+   "note": "The words are in Sinaiticus, Alexandrinus, the Byzantine text and the Textus Receptus but not in P46 or Vaticanus. Darby keeps the words in brackets as doubtful."
+  },
+  {
+   "book": 48,
+   "chapter": 6,
+   "verse": 18,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription \"To the Galatians written from Rome\"",
+   "note": "The subscriptions are not part of the letters; they were added by later scribes and printed in the Textus Receptus. Darby, like modern editions, leaves them out."
+  },
+  {
+   "book": 49,
+   "chapter": 3,
+   "verse": 9,
+   "kind": "deity",
+   "weight": "major",
+   "change": "Omits \"by Jesus Christ\" as creator",
+   "note": "\"By Jesus Christ\" is in the Byzantine text and the Textus Receptus but not in P46, Sinaiticus, Vaticanus or Alexandrinus. Creation through Christ is stated in Colossians 1:16 and John 1:3."
+  },
+  {
+   "book": 49,
+   "chapter": 3,
+   "verse": 14,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"of our Lord Jesus Christ\" bracketed as doubtful",
+   "note": "The words are in the Byzantine text and the Textus Receptus but not in P46, Sinaiticus, Vaticanus or Alexandrinus. Darby keeps the words in brackets as doubtful."
+  },
+  {
+   "book": 49,
+   "chapter": 5,
+   "verse": 9,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"the fruit of the Spirit\" becomes \"the fruit of the light\"",
+   "note": "The Byzantine text and the Textus Receptus have \"Spirit\", likely from Galatians 5:22; P49, Sinaiticus, Vaticanus and Alexandrinus have \"light\", matching verse 8."
+  },
+  {
+   "book": 49,
+   "chapter": 5,
+   "verse": 21,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the fear of God\" becomes \"[the] fear of Christ\"",
+   "note": "The Textus Receptus has \"God\"; P46, Sinaiticus, Vaticanus, Alexandrinus and most manuscripts have \"Christ\"."
+  },
+  {
+   "book": 49,
+   "chapter": 5,
+   "verse": 29,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord\" becomes \"the Christ\"",
+   "note": "The Textus Receptus has \"the Lord\"; P46, Sinaiticus, Vaticanus, Alexandrinus and the Byzantine majority have \"Christ\"."
+  },
+  {
+   "book": 49,
+   "chapter": 5,
+   "verse": 30,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "\"of his flesh, and of his bones\" bracketed as doubtful",
+   "note": "The words, echoing Genesis 2:23, are in the Byzantine text and the Textus Receptus but not in P46, Sinaiticus or Vaticanus. Darby keeps the words in brackets as doubtful."
+  },
+  {
+   "book": 49,
+   "chapter": 6,
+   "verse": 24,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"Amen\" and the subscription",
+   "note": "The closing \"Amen\" is in the Byzantine text and the Textus Receptus but not in P46, Sinaiticus or Vaticanus. The subscriptions are not part of the letters; they were added by later scribes and printed in the Textus Receptus. Darby, like modern editions, leaves them out."
+  },
+  {
+   "book": 50,
+   "chapter": 1,
+   "verse": 16,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Verses 16 and 17 are in the reverse order",
+   "note": "Darby follows Sinaiticus, Vaticanus and Alexandrinus, which put the preachers \"of love\" first; the Textus Receptus puts those \"of contention\" first. Nothing is lost."
+  },
+  {
+   "book": 50,
+   "chapter": 2,
+   "verse": 30,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the work of Christ\" becomes \"the work\"",
+   "note": "\"Of Christ\" is in most manuscripts and the Textus Receptus; Darby follows Ephraemi (C), which has \"the work\" alone. The work is plainly Christ's."
+  },
+  {
+   "book": 50,
+   "chapter": 3,
+   "verse": 16,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"rule\" and \"let us mind the same thing\"",
+   "note": "The words are in the Byzantine text and the Textus Receptus but not in P16, P46, Sinaiticus or Vaticanus; the call to be of one mind stands in 2:2."
+  },
+  {
+   "book": 50,
+   "chapter": 4,
+   "verse": 13,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"through Christ\" becomes \"in him\"",
+   "note": "The Byzantine text and the Textus Receptus name Christ; Sinaiticus, Vaticanus and Alexandrinus have only \"him\". The referent is plainly Christ."
+  },
+  {
+   "book": 50,
+   "chapter": 4,
+   "verse": 23,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "\"with you all. Amen\" becomes \"with your spirit. Amen\"; subscription omitted",
+   "note": "\"With your spirit\" is the reading of P46, Sinaiticus, Vaticanus and Alexandrinus. The subscriptions are not part of the letters; they were added by later scribes and printed in the Textus Receptus. Darby, like modern editions, leaves them out."
+  },
+  {
+   "book": 51,
+   "chapter": 1,
+   "verse": 2,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"and the Lord Jesus Christ\" bracketed in the greeting",
+   "note": "The words are in Sinaiticus, Alexandrinus, Ephraemi and the Textus Receptus but not in Vaticanus, Bezae and some others. Darby keeps the words in brackets as doubtful."
+  },
+  {
+   "book": 51,
+   "chapter": 1,
+   "verse": 14,
+   "kind": "atonement",
+   "weight": "major",
+   "change": "Omits \"through his blood\"",
+   "note": "The phrase is in some later manuscripts and the Textus Receptus but not in Sinaiticus, Vaticanus or the Byzantine majority; it is likely from Ephesians 1:7. Redemption by his blood is stated in Colossians 1:20."
+  },
+  {
+   "book": 51,
+   "chapter": 1,
+   "verse": 19,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"it pleased the Father\" becomes \"the fulness [of the Godhead] was pleased\"",
+   "note": "The Greek has neither \"the Father\" nor \"of the Godhead\"; the KJV supplies the one (in italics), Darby the other (in brackets, from 2:9). Darby makes the fulness the subject."
+  },
+  {
+   "book": 51,
+   "chapter": 1,
+   "verse": 28,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Christ Jesus\" becomes \"Christ\"",
+   "note": "\"Jesus\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or Alexandrinus."
+  },
+  {
+   "book": 51,
+   "chapter": 2,
+   "verse": 2,
+   "kind": "deity",
+   "weight": "major",
+   "change": "Omits \"and of the Father, and of Christ\"",
+   "note": "Darby reads \"the mystery of God\" alone, with a few late witnesses. The Textus Receptus has \"of God, and of the Father, and of Christ\"; P46 and Vaticanus have \"of God, Christ\", calling Christ the mystery of God. 1:27 still says the mystery is Christ in you."
+  },
+  {
+   "book": 51,
+   "chapter": 3,
+   "verse": 15,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the peace of God\" becomes \"the peace of Christ\"",
+   "note": "The Textus Receptus has \"God\"; Sinaiticus, Vaticanus, Alexandrinus and the Byzantine majority have \"Christ\"."
+  },
+  {
+   "book": 51,
+   "chapter": 3,
+   "verse": 16,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"to the Lord\" becomes \"to God\"",
+   "note": "The Byzantine text and the Textus Receptus have \"the Lord\"; P46, Sinaiticus, Vaticanus and Alexandrinus have \"God\"."
+  },
+  {
+   "book": 51,
+   "chapter": 3,
+   "verse": 22,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"fearing God\" becomes \"fearing the Lord\"",
+   "note": "The Textus Receptus has \"God\"; P46, Sinaiticus, Vaticanus and Alexandrinus have \"the Lord\". The next verses speak of serving the Lord Christ."
+  },
+  {
+   "book": 51,
+   "chapter": 4,
+   "verse": 18,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"Amen\" and the subscription",
+   "note": "The closing \"Amen\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or Alexandrinus. The subscriptions are not part of the letters; they were added by later scribes and printed in the Textus Receptus. Darby, like modern editions, leaves them out."
+  },
+  {
+   "book": 52,
+   "chapter": 1,
+   "verse": 1,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"from God our Father, and the Lord Jesus Christ\"",
+   "note": "The words are in Sinaiticus, Alexandrinus, the Byzantine text and the Textus Receptus but not in Vaticanus, which Darby follows here. God the Father and the Lord Jesus Christ are named earlier in the verse."
+  },
+  {
+   "book": 52,
+   "chapter": 2,
+   "verse": 19,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"our Lord Jesus Christ\" becomes \"our Lord Jesus\"",
+   "note": "\"Christ\" is in the Textus Receptus and some later manuscripts but not in Sinaiticus, Vaticanus or Alexandrinus."
+  },
+  {
+   "book": 52,
+   "chapter": 3,
+   "verse": 11,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"our Lord Jesus Christ\" becomes \"our Lord Jesus\"",
+   "note": "\"Christ\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or Alexandrinus."
+  },
+  {
+   "book": 52,
+   "chapter": 3,
+   "verse": 13,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"our Lord Jesus Christ\" becomes \"our Lord Jesus\"",
+   "note": "\"Christ\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus or Vaticanus."
+  },
+  {
+   "book": 52,
+   "chapter": 5,
+   "verse": 28,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"Amen\" and the subscription",
+   "note": "The closing \"Amen\" is in the Byzantine text and the Textus Receptus but not in Vaticanus or the first hand of Sinaiticus. The subscriptions are not part of the letters; they were added by later scribes and printed in the Textus Receptus. Darby, like modern editions, leaves them out."
+  },
+  {
+   "book": 53,
+   "chapter": 2,
+   "verse": 2,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"the day of Christ\" becomes \"the day of the Lord\"",
+   "note": "The Textus Receptus has \"Christ\"; Sinaiticus, Vaticanus, Alexandrinus and the Byzantine majority have \"the Lord\". The coming of Christ is the subject of verse 1."
+  },
+  {
+   "book": 53,
+   "chapter": 2,
+   "verse": 4,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Omits \"as God\" before \"sitteth in the temple\"",
+   "note": "\"As God\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or Alexandrinus; he still shows himself \"that he is God\"."
+  },
+  {
+   "book": 53,
+   "chapter": 2,
+   "verse": 8,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord\" becomes \"the Lord Jesus\"",
+   "note": "\"Jesus\" is in Sinaiticus, Alexandrinus and other early witnesses but not in the Byzantine text or the Textus Receptus. Darby adds it."
+  },
+  {
+   "book": 53,
+   "chapter": 3,
+   "verse": 18,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"Amen\" and the subscription",
+   "note": "The closing \"Amen\" is in the Byzantine text and the Textus Receptus but not in the first hand of Sinaiticus or Vaticanus. The subscriptions are not part of the letters; they were added by later scribes and printed in the Textus Receptus. Darby, like modern editions, leaves them out."
+  },
+  {
+   "book": 54,
+   "chapter": 1,
+   "verse": 1,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord Jesus Christ\" becomes \"Christ Jesus\"",
+   "note": "The Textus Receptus has \"Lord Jesus Christ\"; Sinaiticus, Alexandrinus and most manuscripts have \"Christ Jesus\"."
+  },
+  {
+   "book": 54,
+   "chapter": 1,
+   "verse": 17,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the only wise God\" becomes \"only God\"",
+   "note": "\"Wise\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Alexandrinus or the first hand of Claromontanus; it may come from Romans 16:27."
+  },
+  {
+   "book": 54,
+   "chapter": 2,
+   "verse": 7,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"in Christ\" from \"I speak the truth\"",
+   "note": "\"In Christ\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus or Alexandrinus; it is likely from Romans 9:1."
+  },
+  {
+   "book": 54,
+   "chapter": 4,
+   "verse": 10,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"the Saviour of all men\" becomes \"preserver of all men\"",
+   "note": "Translation choice: the Greek is sōtēr (saviour) in both. Darby renders it \"preserver\" here, reading God's care for all men, while \"specially of those that believe\" keeps salvation for believers."
+  },
+  {
+   "book": 54,
+   "chapter": 4,
+   "verse": 12,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"in spirit\"",
+   "note": "The words are in the Byzantine text and the Textus Receptus but not in Sinaiticus, Alexandrinus or Ephraemi."
+  },
+  {
+   "book": 54,
+   "chapter": 5,
+   "verse": 12,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"having damnation\" becomes \"being guilty\"",
+   "note": "The Greek (krima or krisis, judgment) is the same in both; \"judgment\" is the literal sense, the KJV's \"damnation\" an interpretation of it. The outcome is still condemnation."
+  },
+  {
+   "book": 54,
+   "chapter": 5,
+   "verse": 21,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord Jesus Christ\" becomes \"Christ Jesus\"",
+   "note": "The Textus Receptus has \"Lord Jesus Christ\"; Sinaiticus, Alexandrinus and most manuscripts have \"Christ Jesus\"."
+  },
+  {
+   "book": 54,
+   "chapter": 6,
+   "verse": 5,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"from such withdraw thyself\"",
+   "note": "The words are in the Byzantine text and the Textus Receptus but not in Sinaiticus, Alexandrinus or the first hand of Claromontanus."
+  },
+  {
+   "book": 54,
+   "chapter": 6,
+   "verse": 21,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"Amen\" and the subscription",
+   "note": "The closing \"Amen\" is in the Byzantine text and the Textus Receptus but not in the first hand of Sinaiticus or Alexandrinus. The subscriptions are not part of the letters; they were added by later scribes and printed in the Textus Receptus. Darby, like modern editions, leaves them out."
+  },
+  {
+   "book": 55,
+   "chapter": 2,
+   "verse": 19,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the name of Christ\" becomes \"the name of [the] Lord\"",
+   "note": "The Textus Receptus has \"Christ\"; Sinaiticus, Alexandrinus and the Byzantine majority have \"the Lord\", as in the quotation before it."
+  },
+  {
+   "book": 55,
+   "chapter": 4,
+   "verse": 1,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord Jesus Christ\" becomes \"Christ Jesus\"",
+   "note": "\"The Lord\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus or Alexandrinus; he is still the judge of the living and the dead."
+  },
+  {
+   "book": 55,
+   "chapter": 4,
+   "verse": 22,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"Amen\" and the subscription",
+   "note": "The closing \"Amen\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Alexandrinus or Ephraemi. The subscriptions are not part of the letters; they were added by later scribes and printed in the Textus Receptus. Darby, like modern editions, leaves them out."
+  },
+  {
+   "book": 56,
+   "chapter": 1,
+   "verse": 4,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"mercy\"; \"the Lord Jesus Christ\" becomes \"Christ Jesus\"",
+   "note": "The Textus Receptus has \"grace, mercy, and peace\" and \"Lord Jesus Christ\"; Sinaiticus and Ephraemi have \"grace and peace\" and \"Christ Jesus\"."
+  },
+  {
+   "book": 56,
+   "chapter": 3,
+   "verse": 15,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"Amen\" and the subscription",
+   "note": "The closing \"Amen\" is in the Byzantine text and the Textus Receptus but not in the first hand of Sinaiticus or Ephraemi. The subscriptions are not part of the letters; they were added by later scribes and printed in the Textus Receptus. Darby, like modern editions, leaves them out."
+  },
+  {
+   "book": 57,
+   "chapter": 1,
+   "verse": 20,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Second \"in the Lord\" becomes \"in Christ\"",
+   "note": "The Textus Receptus has \"the Lord\"; Sinaiticus, Alexandrinus and the Byzantine majority have \"Christ\"."
+  },
+  {
+   "book": 57,
+   "chapter": 1,
+   "verse": 25,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"Amen\" and the subscription",
+   "note": "The closing \"Amen\" is in the Byzantine text and the Textus Receptus but not in P87 or the first hand of Sinaiticus. The subscriptions are not part of the letters; they were added by later scribes and printed in the Textus Receptus. Darby, like modern editions, leaves them out."
+  },
+  {
+   "book": 58,
+   "chapter": 1,
+   "verse": 3,
+   "kind": "atonement",
+   "weight": "minor",
+   "change": "\"by himself\" bracketed; omits \"our\"",
+   "note": "\"By himself\" and \"our\" are in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or Alexandrinus; Darby keeps \"by himself\" in brackets. The purging is still his own work."
+  },
+  {
+   "book": 58,
+   "chapter": 3,
+   "verse": 1,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Christ Jesus\" becomes \"Jesus\"",
+   "note": "\"Christ\" is in the Byzantine text and the Textus Receptus but not in P13, P46, Sinaiticus, Vaticanus or Alexandrinus."
+  },
+  {
+   "book": 58,
+   "chapter": 7,
+   "verse": 21,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "\"after the order of Melchisedec\" bracketed",
+   "note": "The words are in the Byzantine text and the Textus Receptus but not in P46, Sinaiticus or Vaticanus; Psalm 110:4 is quoted in full in 5:6 and 7:17. Darby keeps the words in brackets as doubtful."
+  },
+  {
+   "book": 58,
+   "chapter": 10,
+   "verse": 9,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"O God\"",
+   "note": "\"O God\" is in some later manuscripts and the Textus Receptus but not in P46, Sinaiticus, Vaticanus or Alexandrinus; it stands in verse 7."
+  },
+  {
+   "book": 58,
+   "chapter": 10,
+   "verse": 12,
+   "kind": "atonement",
+   "weight": "minor",
+   "change": "\"for ever\" goes with \"sat down\", not with \"one sacrifice\"",
+   "note": "Punctuation choice: the Greek eis to diēnekes can go with either. The KJV says the sacrifice is for ever; Darby that he sat down in perpetuity. 10:14 still says he has perfected them for ever."
+  },
+  {
+   "book": 58,
+   "chapter": 10,
+   "verse": 34,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"in heaven\"; \"me in my bonds\" becomes \"prisoners\"",
+   "note": "The Textus Receptus has \"my bonds\" and \"in heaven\"; P13, P46, Alexandrinus and others have \"the prisoners\" and lack \"in heaven\". The better and abiding possession is still promised."
+  },
+  {
+   "book": 58,
+   "chapter": 13,
+   "verse": 25,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription \"Written to the Hebrews from Italy\"",
+   "note": "The subscriptions are not part of the letters; they were added by later scribes and printed in the Textus Receptus. Darby, like modern editions, leaves them out."
+  },
+  {
+   "book": 59,
+   "chapter": 1,
+   "verse": 12,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord hath promised\" becomes \"He has promised\"",
+   "note": "\"The Lord\" is in the Byzantine text and the Textus Receptus but not in P23, Sinaiticus, Vaticanus or Alexandrinus; the subject is God, as verse 13 shows."
+  },
+  {
+   "book": 59,
+   "chapter": 3,
+   "verse": 9,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"God, even the Father\" becomes \"the Lord and Father\"",
+   "note": "The Byzantine text and the Textus Receptus have \"God\"; Sinaiticus, Vaticanus and Alexandrinus have \"the Lord\"."
+  },
+  {
+   "book": 60,
+   "chapter": 1,
+   "verse": 22,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"through the Spirit\"",
+   "note": "The phrase is in the Byzantine text and the Textus Receptus but not in P72, Sinaiticus, Vaticanus or Alexandrinus; the Spirit's sanctifying work is named in 1:2."
+  },
+  {
+   "book": 60,
+   "chapter": 1,
+   "verse": 23,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"for ever\" of the word of God",
+   "note": "\"For ever\" is in the Byzantine text and the Textus Receptus but not in P72, Sinaiticus, Vaticanus or Alexandrinus; verse 25 still says the word abides for ever."
+  },
+  {
+   "book": 60,
+   "chapter": 2,
+   "verse": 2,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "Adds \"to salvation\"",
+   "note": "\"Unto salvation\" is in P72, Sinaiticus, Vaticanus and Alexandrinus but not in the Byzantine text or the Textus Receptus."
+  },
+  {
+   "book": 60,
+   "chapter": 3,
+   "verse": 15,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"the Lord God\" becomes \"[the] Lord the Christ\"",
+   "note": "The Byzantine text and the Textus Receptus read \"the Lord God\"; P72, Sinaiticus, Vaticanus and Alexandrinus read \"the Lord the Christ\". The verse then applies Isaiah 8:13, said of the LORD of hosts, to Christ."
+  },
+  {
+   "book": 60,
+   "chapter": 4,
+   "verse": 14,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "\"on their part he is evil spoken of...\" bracketed",
+   "note": "The clause is in the Byzantine text and the Textus Receptus but not in P72, Sinaiticus, Vaticanus or Alexandrinus. Darby keeps the words in brackets as doubtful."
+  },
+  {
+   "book": 60,
+   "chapter": 5,
+   "verse": 14,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"Jesus\" and \"Amen\"",
+   "note": "Both are in the Byzantine text and the Textus Receptus but not in Vaticanus or Alexandrinus."
+  },
+  {
+   "book": 61,
+   "chapter": 2,
+   "verse": 4,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"cast them down to hell\" becomes \"to the deepest pit of gloom\"",
+   "note": "Translation choice: the Greek is the verb tartaroō, \"cast into Tartarus\", found only here. Darby describes the place; the KJV calls it hell."
+  },
+  {
+   "book": 61,
+   "chapter": 2,
+   "verse": 17,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"for ever\" bracketed in the reserved darkness",
+   "note": "\"For ever\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus or Vaticanus; it may come from Jude 13. Darby keeps the words in brackets as doubtful."
+  },
+  {
+   "book": 62,
+   "chapter": 5,
+   "verse": 7,
+   "kind": "trinity",
+   "weight": "major",
+   "change": "Omits the heavenly witnesses: \"the Father, the Word, and the Holy Ghost\"",
+   "note": "The words are in no Greek manuscript before the 14th century; they came into the Textus Receptus from late Latin copies in Erasmus's third edition. The Trinity is taught elsewhere, as in Matthew 28:19."
+  },
+  {
+   "book": 62,
+   "chapter": 5,
+   "verse": 8,
+   "kind": "trinity",
+   "weight": "major",
+   "change": "Omits \"there are three that bear witness in earth\"",
+   "note": "The words are the second half of the same addition (the Johannine Comma) and are in no early Greek manuscript."
+  },
+  {
+   "book": 62,
+   "chapter": 5,
+   "verse": 13,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"and that ye may believe on the name of the Son\"",
+   "note": "The clause is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or Alexandrinus; belief on the Son is still named in the verse."
+  },
+  {
+   "book": 62,
+   "chapter": 5,
+   "verse": 21,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the closing \"Amen\"",
+   "note": "\"Amen\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or Alexandrinus."
+  },
+  {
+   "book": 63,
+   "chapter": 1,
+   "verse": 9,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"transgresseth\" becomes \"goes forward\"; second \"of Christ\" dropped",
+   "note": "The Byzantine text and the Textus Receptus have parabainōn (transgresses); Sinaiticus, Vaticanus and Alexandrinus have proagōn (goes ahead). The second \"of Christ\" is in the Textus Receptus but not in the early manuscripts."
+  },
+  {
+   "book": 63,
+   "chapter": 1,
+   "verse": 13,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the closing \"Amen\"",
+   "note": "\"Amen\" is in the Textus Receptus and some later manuscripts but not in Sinaiticus, Vaticanus or Alexandrinus."
+  },
+  {
+   "book": 65,
+   "chapter": 1,
+   "verse": 4,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"only Lord God, and our Lord\" becomes \"only Master and Lord\"",
+   "note": "The Byzantine text and the Textus Receptus have \"God\"; P72, Sinaiticus, Vaticanus and Alexandrinus lack it. Darby's reading makes Jesus Christ the only Master and Lord."
+  },
+  {
+   "book": 65,
+   "chapter": 1,
+   "verse": 25,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"wise\"; adds \"through Jesus Christ our Lord\"",
+   "note": "The Textus Receptus has \"only wise God\" and lacks the phrase about Christ; P72, Sinaiticus, Vaticanus and Alexandrinus lack \"wise\" and add \"through Jesus Christ our Lord\" and \"before all time\"."
+  },
+  {
+   "book": 66,
+   "chapter": 1,
+   "verse": 8,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"the beginning and the ending\"; \"Lord\" becomes \"Lord God\"",
+   "note": "The Textus Receptus has \"the beginning and the ending\" and \"Lord\"; Sinaiticus, Alexandrinus and most manuscripts lack the phrase and read \"Lord God\". The phrase stands in 21:6 and 22:13."
+  },
+  {
+   "book": 66,
+   "chapter": 1,
+   "verse": 9,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"Christ\" twice after \"Jesus\"",
+   "note": "\"Christ\" is in the Textus Receptus but not in Sinaiticus, Alexandrinus or Ephraemi."
+  },
+  {
+   "book": 66,
+   "chapter": 1,
+   "verse": 11,
+   "kind": "deity",
+   "weight": "major",
+   "change": "Omits \"I am Alpha and Omega, the first and the last\"",
+   "note": "The words are in some late manuscripts and the Textus Receptus but not in Sinaiticus, Alexandrinus, Ephraemi or the Byzantine majority. Christ calls himself \"the first and the last\" in 1:17."
+  },
+  {
+   "book": 66,
+   "chapter": 1,
+   "verse": 18,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"hell\" becomes \"hades\"; omits \"Amen\"",
+   "note": "The Greek is hadēs in both. \"Amen\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Alexandrinus or Ephraemi."
+  },
+  {
+   "book": 66,
+   "chapter": 5,
+   "verse": 14,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"four and twenty\" and \"him that liveth for ever and ever\"",
+   "note": "The words are in the Textus Receptus but not in Sinaiticus, Alexandrinus, Ephraemi or the Byzantine majority; the elders still fall down and worship."
+  },
+  {
+   "book": 66,
+   "chapter": 6,
+   "verse": 8,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"Hell followed with him\" becomes \"hades followed\"",
+   "note": "The Greek is hadēs in both; Darby keeps the Greek word for the realm of the dead where the KJV has \"hell\". A translation choice."
+  },
+  {
+   "book": 66,
+   "chapter": 11,
+   "verse": 4,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the God of the earth\" becomes \"the Lord of the earth\"",
+   "note": "The Textus Receptus has \"God\"; nearly all Greek manuscripts have \"Lord\", as in Zechariah 4:14."
+  },
+  {
+   "book": 66,
+   "chapter": 11,
+   "verse": 17,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "Omits \"and art to come\"",
+   "note": "The words are in some late manuscripts and the Textus Receptus but not in Sinaiticus, Alexandrinus or Ephraemi. Here God has begun to reign, so the title looks to the present."
+  },
+  {
+   "book": 66,
+   "chapter": 12,
+   "verse": 17,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"Christ\" after \"testimony of Jesus\"",
+   "note": "\"Christ\" is in the Textus Receptus and some later manuscripts but not in Sinaiticus, Alexandrinus, Ephraemi or most Byzantine copies."
+  },
+  {
+   "book": 66,
+   "chapter": 14,
+   "verse": 5,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"before the throne of God\"",
+   "note": "The words are in the Textus Receptus and a few late manuscripts but not in Sinaiticus, Alexandrinus, Ephraemi or the Byzantine majority."
+  },
+  {
+   "book": 66,
+   "chapter": 16,
+   "verse": 5,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"O Lord\"; \"and shalt be\" becomes \"the holy one\"",
+   "note": "The Textus Receptus has \"O Lord\" and \"shalt be\"; Sinaiticus, Alexandrinus, Ephraemi and nearly all others have \"the holy one\" (hosios). Beza conjectured \"shalt be\" to match 1:4."
+  },
+  {
+   "book": 66,
+   "chapter": 19,
+   "verse": 1,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"the Lord\" and \"honour\"",
+   "note": "Both are in the Textus Receptus but not in Sinaiticus, Alexandrinus or Ephraemi; the praise is still to \"our God\"."
+  },
+  {
+   "book": 66,
+   "chapter": 20,
+   "verse": 9,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "\"from God\" bracketed as the fire's source",
+   "note": "\"From God\" is in Sinaiticus, the Byzantine text and the Textus Receptus but not in Alexandrinus. Darby keeps the words in brackets as doubtful."
+  },
+  {
+   "book": 66,
+   "chapter": 20,
+   "verse": 12,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"stand before God\" becomes \"standing before the throne\"",
+   "note": "The Textus Receptus has \"God\"; Sinaiticus, Alexandrinus and the Byzantine majority have \"the throne\", the great white throne of verse 11."
+  },
+  {
+   "book": 66,
+   "chapter": 20,
+   "verse": 13,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"death and hell\" becomes \"death and hades\"",
+   "note": "The Greek is hadēs in both; Darby keeps the Greek word for the realm of the dead where the KJV has \"hell\". A translation choice."
+  },
+  {
+   "book": 66,
+   "chapter": 20,
+   "verse": 14,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"hell\" becomes \"hades\"; adds \"[even] the lake of fire\"",
+   "note": "The Greek is hadēs in both. \"The lake of fire\" at the end is in Alexandrinus and the Byzantine majority but not in the Textus Receptus."
+  },
+  {
+   "book": 66,
+   "chapter": 21,
+   "verse": 4,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"God shall wipe away\" becomes \"he shall wipe away\"",
+   "note": "\"God\" is in the Textus Receptus but not in Sinaiticus or Alexandrinus; God is the subject from verse 3."
+  },
+  {
+   "book": 66,
+   "chapter": 21,
+   "verse": 24,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "Omits \"of them which are saved\" and \"and honour\"",
+   "note": "Both are in the Textus Receptus but not in the early or most Byzantine manuscripts. Only the saved enter the city, as 21:27 says."
+  },
+  {
+   "book": 66,
+   "chapter": 22,
+   "verse": 14,
+   "kind": "salvation",
+   "weight": "major",
+   "change": "\"do his commandments\" becomes \"wash their robes\"",
+   "note": "The Byzantine text and the Textus Receptus read \"do his commandments\"; Sinaiticus and Alexandrinus read \"wash their robes\". Washing robes in the Lamb's blood is also in 7:14."
+  },
+  {
+   "book": 66,
+   "chapter": 22,
+   "verse": 19,
+   "kind": "salvation",
+   "weight": "major",
+   "change": "\"book of life\" becomes \"tree of life\"",
+   "note": "Almost all Greek manuscripts read \"tree\"; \"book\" entered the Textus Receptus through Erasmus, whose Greek copy lacked these verses and was supplied from the Latin. The book of life is still named in 3:5, 20:15 and 21:27."
+  },
+  {
+   "book": 66,
+   "chapter": 22,
+   "verse": 21,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"our Lord\" becomes \"the Lord\"; \"you all\" becomes \"all the saints\"",
+   "note": "The Textus Receptus has \"our\" and \"you all\"; the Byzantine majority has \"all the saints\", Sinaiticus \"the saints\". Darby keeps \"Christ\"."
+  }
+ ]
+}

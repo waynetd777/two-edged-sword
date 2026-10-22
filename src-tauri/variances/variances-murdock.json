@@ -1,0 +1,2176 @@
+{
+ "module": "murdock",
+ "base": "kjv",
+ "updated": "2026-10-22",
+ "records": [
+  {
+   "book": 40,
+   "chapter": 4,
+   "verse": 18,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"he\"",
+   "note": "The Textus Receptus names Jesus here; Murdock's Peshitta has only a pronoun or the verb. The referent is plain from context."
+  },
+  {
+   "book": 40,
+   "chapter": 11,
+   "verse": 23,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"hell\" becomes \"the grave\"",
+   "note": "The Peshitta has shyul (Sheol), as the Greek has hadēs; the KJV renders it \"hell\", Murdock \"the grave\". Either way the realm of the dead is meant, not necessarily the place of punishment."
+  },
+  {
+   "book": 40,
+   "chapter": 12,
+   "verse": 18,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"whom I have chosen\" becomes \"in whom I have complacency\"",
+   "note": "The Greek of this quotation of Isaiah 42:1 has \"chosen\"; the Peshitta's wording, which Murdock follows, speaks of God's delight in the servant instead. The servant's calling is still plain."
+  },
+  {
+   "book": 40,
+   "chapter": 14,
+   "verse": 16,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"he\"",
+   "note": "The Textus Receptus names Jesus here; Murdock's Peshitta has only a pronoun or the verb. The referent is plain from context."
+  },
+  {
+   "book": 40,
+   "chapter": 14,
+   "verse": 22,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"he\"",
+   "note": "The Textus Receptus names Jesus here; Murdock's Peshitta has only a pronoun or the verb. The referent is plain from context."
+  },
+  {
+   "book": 40,
+   "chapter": 14,
+   "verse": 31,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"our Lord\"",
+   "note": "The Peshitta often calls Jesus \"our Lord\" in narrative where the Greek has his name; the same person is meant."
+  },
+  {
+   "book": 40,
+   "chapter": 15,
+   "verse": 6,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"the commandment of God\" becomes \"the word of God\"",
+   "note": "The Textus Receptus has \"commandment\"; the Peshitta reads \"word\", as do Sinaiticus and Vaticanus. The honour clause is in verse 5, and the command meant is the fifth."
+  },
+  {
+   "book": 40,
+   "chapter": 15,
+   "verse": 8,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"draweth nigh unto me with their mouth\"",
+   "note": "The clause, from Isaiah 29:13, is in the Byzantine text and the Textus Receptus but not in the Peshitta, Sinaiticus or Vaticanus; the sense is kept by \"honoreth me with the lips\"."
+  },
+  {
+   "book": 40,
+   "chapter": 15,
+   "verse": 16,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"he\"",
+   "note": "The Textus Receptus names Jesus here; Murdock's Peshitta has only a pronoun or the verb. The referent is plain from context."
+  },
+  {
+   "book": 40,
+   "chapter": 16,
+   "verse": 6,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"he\"",
+   "note": "The Textus Receptus names Jesus here; Murdock's Peshitta has only a pronoun or the verb. The referent is plain from context."
+  },
+  {
+   "book": 40,
+   "chapter": 16,
+   "verse": 18,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"the gates of hell\" becomes \"the gates of death\"",
+   "note": "The Peshitta has \"the gates of Sheol\", as the Greek has hadēs; Murdock renders it \"death\". The promise that they will not prevail is the same."
+  },
+  {
+   "book": 40,
+   "chapter": 16,
+   "verse": 20,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus the Christ\" becomes \"the Messiah\"",
+   "note": "\"Jesus\" is in the Textus Receptus but not in the Peshitta or most early Greek manuscripts; the confession of him as the Messiah is unchanged."
+  },
+  {
+   "book": 40,
+   "chapter": 20,
+   "verse": 34,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"he\"",
+   "note": "The Textus Receptus names Jesus here; Murdock's Peshitta has only a pronoun or the verb. The referent is plain from context."
+  },
+  {
+   "book": 40,
+   "chapter": 23,
+   "verse": 8,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"even Christ\" as the one Master",
+   "note": "\"Ho Christos\" is in the Byzantine text and the Textus Receptus but not in the Peshitta, Sinaiticus or Vaticanus. Verse 10 still names the Messiah as the one guide."
+  },
+  {
+   "book": 40,
+   "chapter": 23,
+   "verse": 13,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Verses 13 and 14 come in the reverse order",
+   "note": "The Peshitta, like many Byzantine manuscripts, has the woe about widows' houses before the woe about shutting the kingdom; both are kept. The critical Greek text lacks the widows' woe here."
+  },
+  {
+   "book": 40,
+   "chapter": 24,
+   "verse": 2,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"he\"",
+   "note": "The Textus Receptus names Jesus here; Murdock's Peshitta has only a pronoun or the verb. The referent is plain from context."
+  },
+  {
+   "book": 40,
+   "chapter": 25,
+   "verse": 13,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"wherein the Son of man cometh\"",
+   "note": "The clause is in the Byzantine text and the Textus Receptus but not in the Peshitta, Sinaiticus or Vaticanus. His coming is plain from 24:44 and 25:31."
+  },
+  {
+   "book": 40,
+   "chapter": 26,
+   "verse": 29,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"my Father's kingdom\" becomes \"the kingdom of God\"",
+   "note": "The Greek, the Textus Receptus included, has \"my Father's kingdom\"; Murdock's text reads \"the kingdom of God\". The same kingdom is meant."
+  },
+  {
+   "book": 40,
+   "chapter": 27,
+   "verse": 9,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"Jeremy the prophet\" becomes \"the prophet\"",
+   "note": "The Greek manuscripts name Jeremiah, though the words are closest to Zechariah 11:12-13; the Peshitta names no prophet. The fulfilment is still claimed."
+  },
+  {
+   "book": 40,
+   "chapter": 27,
+   "verse": 35,
+   "kind": "prophecy",
+   "weight": "major",
+   "change": "Omits the fulfilment of \"They parted my garments… cast lots\"",
+   "note": "The quotation of Psalm 22:18 is in the Textus Receptus but not in the Peshitta or most Greek manuscripts, Byzantine and Alexandrian alike. John 19:24 cites the same fulfilment."
+  },
+  {
+   "book": 41,
+   "chapter": 1,
+   "verse": 2,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"in the prophets\" becomes \"in Isaiah the prophet\"",
+   "note": "The Byzantine text and the Textus Receptus read \"in the prophets\"; the Peshitta, with Sinaiticus and Vaticanus, reads \"in Isaiah the prophet\". The quotation joins Malachi 3:1 to Isaiah 40:3."
+  },
+  {
+   "book": 41,
+   "chapter": 5,
+   "verse": 13,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"he\"",
+   "note": "The Textus Receptus names Jesus here; Murdock's Peshitta has only a pronoun or the verb. The referent is plain from context."
+  },
+  {
+   "book": 41,
+   "chapter": 5,
+   "verse": 19,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"he\"",
+   "note": "The Textus Receptus names Jesus here; Murdock's Peshitta has only a pronoun or the verb. The referent is plain from context."
+  },
+  {
+   "book": 41,
+   "chapter": 8,
+   "verse": 1,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"he\"",
+   "note": "The Textus Receptus names Jesus here; Murdock's Peshitta has only a pronoun or the verb. The referent is plain from context."
+  },
+  {
+   "book": 41,
+   "chapter": 9,
+   "verse": 5,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"said to Jesus\" becomes \"said to him\"",
+   "note": "The Textus Receptus names Jesus here; Murdock's Peshitta has only a pronoun or the verb. The referent is plain from context."
+  },
+  {
+   "book": 41,
+   "chapter": 9,
+   "verse": 24,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits the address \"Lord\" and \"with tears\"",
+   "note": "\"Kyrie\" and \"with tears\" are in the Byzantine text and the Textus Receptus but not in the Peshitta, Sinaiticus or Vaticanus."
+  },
+  {
+   "book": 41,
+   "chapter": 10,
+   "verse": 38,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"he\"",
+   "note": "The Textus Receptus names Jesus here; Murdock's Peshitta has only a pronoun or the verb. The referent is plain from context."
+  },
+  {
+   "book": 41,
+   "chapter": 10,
+   "verse": 47,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus, thou Son of David\" becomes \"Thou Son of David\"",
+   "note": "The Textus Receptus names Jesus here; Murdock's Peshitta has only a pronoun or the verb. The referent is plain from context."
+  },
+  {
+   "book": 41,
+   "chapter": 10,
+   "verse": 52,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"followed Jesus\" becomes \"followed after him\"",
+   "note": "The Textus Receptus names Jesus here; Murdock's Peshitta has only a pronoun or the verb. The referent is plain from context."
+  },
+  {
+   "book": 41,
+   "chapter": 11,
+   "verse": 10,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"that cometh in the name of the Lord\"",
+   "note": "The repeated phrase is in the Byzantine text and the Textus Receptus but not in the Peshitta, Sinaiticus or Vaticanus; it is still in verse 9."
+  },
+  {
+   "book": 41,
+   "chapter": 11,
+   "verse": 14,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"he\"",
+   "note": "The Textus Receptus names Jesus here; Murdock's Peshitta has only a pronoun or the verb. The referent is plain from context."
+  },
+  {
+   "book": 41,
+   "chapter": 11,
+   "verse": 33,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus answering saith\" becomes \"He said\"",
+   "note": "The Textus Receptus names Jesus here; Murdock's Peshitta has only a pronoun or the verb. The referent is plain from context."
+  },
+  {
+   "book": 41,
+   "chapter": 13,
+   "verse": 20,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord\" becomes \"God\"",
+   "note": "The Greek has kyrios; the Peshitta's wording, which Murdock follows, names God. The same person, the Father, is meant."
+  },
+  {
+   "book": 41,
+   "chapter": 15,
+   "verse": 3,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"but he answered nothing\"",
+   "note": "The clause is in some Byzantine manuscripts and the Textus Receptus but not in the Peshitta or most early witnesses; his silence is still told in verse 5."
+  },
+  {
+   "book": 41,
+   "chapter": 16,
+   "verse": 20,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Omits \"Amen\"; adds a closing note on Mark's Gospel",
+   "note": "The note, that Mark preached the Gospel in Latin at Rome, is a scribe's subscription carried in the Peshitta tradition, not part of the Gospel; the Textus Receptus ends with \"Amen\"."
+  },
+  {
+   "book": 42,
+   "chapter": 1,
+   "verse": 8,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"before God\" becomes \"before the Lord\"",
+   "note": "The Greek has theou; Murdock's Peshitta has the title \"Lord\". The same God is meant."
+  },
+  {
+   "book": 42,
+   "chapter": 2,
+   "verse": 9,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the angel of the Lord\" becomes \"the angel of God\"",
+   "note": "The Greek has kyriou; the Peshitta's wording, which Murdock follows, has \"God\". The same God is meant, and \"the glory of the Lord\" follows."
+  },
+  {
+   "book": 42,
+   "chapter": 2,
+   "verse": 14,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"good will toward men\" becomes \"good hope for men\"",
+   "note": "The Textus Receptus reads eudokia, \"good will\"; the early Greek manuscripts eudokias, \"of good will\". The Peshitta has \"good hope\", which keeps peace offered to all."
+  },
+  {
+   "book": 42,
+   "chapter": 2,
+   "verse": 30,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"thy salvation\" becomes \"thy mercy\"",
+   "note": "The Greek has to sōtērion, \"salvation\"; the Peshitta reads \"thy mercy\". Simeon is still speaking of the child as God's promised deliverance (verses 31-32)."
+  },
+  {
+   "book": 42,
+   "chapter": 4,
+   "verse": 8,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"Get thee behind me, Satan\"",
+   "note": "The words are in the Byzantine text and the Textus Receptus, from Matthew 4:10, but not in the Peshitta, Sinaiticus or Vaticanus; Jesus' answer from Scripture is kept."
+  },
+  {
+   "book": 42,
+   "chapter": 7,
+   "verse": 13,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord\" becomes \"Jesus\"",
+   "note": "The Greek has \"the Lord\" here; the Peshitta names Jesus. The same person is meant."
+  },
+  {
+   "book": 42,
+   "chapter": 7,
+   "verse": 31,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"And the Lord said\"",
+   "note": "The words are in the Textus Receptus but not in the Peshitta or most Greek manuscripts; Jesus is still the speaker."
+  },
+  {
+   "book": 42,
+   "chapter": 7,
+   "verse": 37,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"he\"",
+   "note": "The Textus Receptus names Jesus here; Murdock's Peshitta has only a pronoun or the verb. The referent is plain from context."
+  },
+  {
+   "book": 42,
+   "chapter": 8,
+   "verse": 46,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"he\"",
+   "note": "The Textus Receptus names Jesus here; Murdock's Peshitta has only a pronoun or the verb. The referent is plain from context."
+  },
+  {
+   "book": 42,
+   "chapter": 10,
+   "verse": 1,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord\" becomes \"Jesus\"",
+   "note": "The Greek has \"the Lord\" here; the Peshitta names Jesus. The same person is meant."
+  },
+  {
+   "book": 42,
+   "chapter": 10,
+   "verse": 29,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"unto Jesus\"",
+   "note": "The Textus Receptus names Jesus here; Murdock's Peshitta has only a pronoun or the verb. The referent is plain from context."
+  },
+  {
+   "book": 42,
+   "chapter": 10,
+   "verse": 39,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus' feet\" becomes \"the feet of our Lord\"",
+   "note": "The Peshitta often calls Jesus \"our Lord\" in narrative where the Greek has his name; the same person is meant."
+  },
+  {
+   "book": 42,
+   "chapter": 11,
+   "verse": 39,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord\" becomes \"Jesus\"",
+   "note": "The Greek has \"the Lord\" here; the Peshitta names Jesus. The same person is meant."
+  },
+  {
+   "book": 42,
+   "chapter": 11,
+   "verse": 49,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the wisdom of God\" becomes \"wisdom\"",
+   "note": "The Greek has \"the wisdom of God\"; the Peshitta reads \"wisdom\" alone. The saying is still God's."
+  },
+  {
+   "book": 42,
+   "chapter": 12,
+   "verse": 42,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord said\" becomes \"Jesus said to him\"",
+   "note": "The Greek has \"the Lord\" here; the Peshitta names Jesus. The same person is meant."
+  },
+  {
+   "book": 42,
+   "chapter": 13,
+   "verse": 15,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord\" becomes \"Jesus\"",
+   "note": "The Greek has \"the Lord\" here; the Peshitta names Jesus. The same person is meant."
+  },
+  {
+   "book": 42,
+   "chapter": 13,
+   "verse": 23,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits the address \"Lord\"",
+   "note": "Murdock gives the question as reported speech, following the Peshitta, so the address \"Lord\" in the Greek is not there."
+  },
+  {
+   "book": 42,
+   "chapter": 17,
+   "verse": 6,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord said\" becomes \"He said\"",
+   "note": "The Greek has \"the Lord\"; the Peshitta has a pronoun. Jesus is plainly meant."
+  },
+  {
+   "book": 42,
+   "chapter": 19,
+   "verse": 8,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"said unto the Lord\" becomes \"said to Jesus\"",
+   "note": "The Greek has \"the Lord\" here; the Peshitta names Jesus. The same person is meant."
+  },
+  {
+   "book": 42,
+   "chapter": 22,
+   "verse": 31,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord\" becomes \"Jesus\"",
+   "note": "The Greek has \"the Lord\" here; the Peshitta names Jesus. The same person is meant."
+  },
+  {
+   "book": 42,
+   "chapter": 22,
+   "verse": 61,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord\" becomes \"Jesus\"",
+   "note": "The Greek has \"the Lord\" here; the Peshitta names Jesus. The same person is meant."
+  },
+  {
+   "book": 42,
+   "chapter": 24,
+   "verse": 3,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord Jesus\" becomes \"Jesus\"",
+   "note": "Most Greek manuscripts and the Textus Receptus read \"the Lord Jesus\"; the Peshitta has \"Jesus\" alone, and Codex Bezae lacks the words. He is called Lord in 24:34."
+  },
+  {
+   "book": 43,
+   "chapter": 1,
+   "verse": 7,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"that all men through him might believe\"",
+   "note": "The clause is in every Greek text and in the printed Peshitta; it is missing from this copy of Murdock, perhaps by oversight. The purpose of John's witness is unchanged in verse 8."
+  },
+  {
+   "book": 43,
+   "chapter": 1,
+   "verse": 18,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"the only begotten Son\" becomes \"the only begotten God\"",
+   "note": "The Peshitta reads \"only begotten God\", with P66, P75, Sinaiticus and Vaticanus; the Byzantine majority and the Textus Receptus read \"only begotten Son\". Christ's deity is stated more directly, not less."
+  },
+  {
+   "book": 43,
+   "chapter": 4,
+   "verse": 1,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord\" becomes \"Jesus\"",
+   "note": "The Greek has \"the Lord\" here; the Peshitta names Jesus. The same person is meant."
+  },
+  {
+   "book": 43,
+   "chapter": 5,
+   "verse": 30,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"the Father\" (\"him that sent me\")",
+   "note": "\"Patros\" is in the Textus Receptus but not in the Peshitta or the early Greek manuscripts; the one who sent him is the Father throughout."
+  },
+  {
+   "book": 43,
+   "chapter": 6,
+   "verse": 11,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"to the disciples, and the disciples\"",
+   "note": "The words are in the Byzantine text and the Textus Receptus but not in the Peshitta, Sinaiticus or Vaticanus; the disciples' part is told in the other Gospels."
+  },
+  {
+   "book": 43,
+   "chapter": 6,
+   "verse": 23,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord had given thanks\" becomes \"Jesus blessed it\"",
+   "note": "The Greek has \"the Lord\" here; the Peshitta names Jesus. The same person is meant."
+  },
+  {
+   "book": 43,
+   "chapter": 6,
+   "verse": 39,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"the Father's\" (\"him that sent me\")",
+   "note": "\"Patros\" is in the Textus Receptus but not in the Peshitta or most Greek manuscripts; verse 40 names the Father."
+  },
+  {
+   "book": 43,
+   "chapter": 7,
+   "verse": 39,
+   "kind": "trinity",
+   "weight": "minor",
+   "change": "\"the Holy Ghost\" becomes \"the Spirit\"",
+   "note": "\"Holy\" is in the Textus Receptus but not in the Peshitta, P66, P75 or Sinaiticus; the Holy Spirit is plainly meant."
+  },
+  {
+   "book": 43,
+   "chapter": 8,
+   "verse": 9,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"being convicted by their own conscience\"; Jesus not named",
+   "note": "The early Peshitta lacks John 7:53–8:11; Murdock gives it from the printed Syriac text, which, like many Greek copies, lacks the conscience clause here."
+  },
+  {
+   "book": 43,
+   "chapter": 8,
+   "verse": 10,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"saw none but the woman\" and \"those thine accusers\"",
+   "note": "The early Peshitta lacks John 7:53–8:11; Murdock gives it from the printed Syriac text. Like many Greek copies of the passage, it lacks these words; the sense is unchanged."
+  },
+  {
+   "book": 43,
+   "chapter": 8,
+   "verse": 49,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"my Father\" becomes \"God\"",
+   "note": "The Greek has \"my Father\"; Murdock's Peshitta reads \"God\". The same person is meant."
+  },
+  {
+   "book": 43,
+   "chapter": 11,
+   "verse": 2,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"anointed the Lord\" becomes \"anointed the feet of Jesus\"",
+   "note": "The Greek has \"the Lord\" here; the Peshitta names Jesus. The same person is meant."
+  },
+  {
+   "book": 43,
+   "chapter": 12,
+   "verse": 47,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"believe not\" becomes \"not observe them\"",
+   "note": "The Textus Receptus has pisteusē, \"believe\"; the Peshitta reads \"keep\", with the early Greek manuscripts (phylaxē). Hearing without keeping is still what is judged in verse 48."
+  },
+  {
+   "book": 43,
+   "chapter": 13,
+   "verse": 3,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"come from God\" becomes \"came out from the Father\"",
+   "note": "The Greek has \"from God\"; the Peshitta reads \"from the Father\". The same person is meant."
+  },
+  {
+   "book": 43,
+   "chapter": 13,
+   "verse": 19,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"ye may believe\" becomes \"ye may know\"",
+   "note": "The Greek has pisteusēte, \"believe\"; Murdock's Peshitta has \"know\". The point, that the event will confirm who he is, is unchanged."
+  },
+  {
+   "book": 43,
+   "chapter": 13,
+   "verse": 23,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"leaning on Jesus' bosom\" becomes \"reclining on his bosom\"",
+   "note": "The Textus Receptus names Jesus here; Murdock's Peshitta has only a pronoun or the verb. The referent is plain from context."
+  },
+  {
+   "book": 43,
+   "chapter": 16,
+   "verse": 27,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"came out from God\" becomes \"proceeded from the presence of the Father\"",
+   "note": "The Textus Receptus reads \"from God\"; the Peshitta reads \"from the Father\", as do some early Greek manuscripts. The same person is meant."
+  },
+  {
+   "book": 43,
+   "chapter": 18,
+   "verse": 18,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"for it was cold\" and Peter warming himself",
+   "note": "It is in every Greek text and in the printed Peshitta; it is missing from this copy of Murdock, perhaps by oversight. Peter by the fire is told again in verse 25."
+  },
+  {
+   "book": 43,
+   "chapter": 21,
+   "verse": 25,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Omits \"Amen\"; adds a closing note on the Gospel",
+   "note": "The note, that the Gospel was given in Greek at Ephesus, is a scribe's subscription carried in the Peshitta tradition, not part of the text; the Textus Receptus ends with \"Amen\"."
+  },
+  {
+   "book": 44,
+   "chapter": 1,
+   "verse": 7,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Father\" becomes \"God\"",
+   "note": "The Greek has \"the Father\"; Murdock's Peshitta reads \"God\". The same person is meant."
+  },
+  {
+   "book": 44,
+   "chapter": 2,
+   "verse": 27,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"in hell\" becomes \"in the grave\"",
+   "note": "The Peshitta has shyul (Sheol), as the Greek has hadēs; the KJV renders it \"hell\", Murdock \"the grave\". The realm of the dead is meant, not necessarily the place of punishment."
+  },
+  {
+   "book": 44,
+   "chapter": 2,
+   "verse": 30,
+   "kind": "prophecy",
+   "weight": "major",
+   "change": "Omits \"according to the flesh, he would raise up Christ\"",
+   "note": "The words are in the Byzantine majority and the Textus Receptus but not in the Peshitta, Sinaiticus, Vaticanus or Alexandrinus. Verse 31 still says the promise is of the Messiah."
+  },
+  {
+   "book": 44,
+   "chapter": 2,
+   "verse": 31,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"his soul was not left in hell\" becomes \"he was not left in the grave\"",
+   "note": "The Textus Receptus has \"his soul\"; the Peshitta, with the early Greek manuscripts, lacks it. The Peshitta has shyul (Sheol), as the Greek has hadēs; the KJV renders it \"hell\", Murdock \"the grave\". The realm of the dead is meant, not necessarily the place of punishment."
+  },
+  {
+   "book": 44,
+   "chapter": 2,
+   "verse": 38,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus Christ\" becomes \"the Lord Jesus\"",
+   "note": "The Greek has \"Jesus Christ\"; the Peshitta reads \"the Lord Jesus\". The same person is named."
+  },
+  {
+   "book": 44,
+   "chapter": 2,
+   "verse": 39,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord our God\" becomes \"God\"",
+   "note": "The Greek has kyrios ho theos hēmōn; Murdock's Peshitta reads \"God\" alone. The same God calls."
+  },
+  {
+   "book": 44,
+   "chapter": 3,
+   "verse": 22,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord your God\" becomes \"the Lord\"; omits \"unto the fathers\"",
+   "note": "\"Unto the fathers\" and \"your\" are in the Textus Receptus but not in the Peshitta or the early Greek manuscripts; the prophecy of Deuteronomy 18:15 is unchanged."
+  },
+  {
+   "book": 44,
+   "chapter": 3,
+   "verse": 26,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"his Son Jesus\" becomes \"his Son\"",
+   "note": "\"Jesus\" is in the Textus Receptus but not in the Peshitta or most Greek manuscripts; the Son meant is plain."
+  },
+  {
+   "book": 44,
+   "chapter": 4,
+   "verse": 2,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"through Jesus\" becomes \"by the Messiah\"",
+   "note": "The Greek names Jesus; the Peshitta uses the title \"the Messiah\". The same person is meant."
+  },
+  {
+   "book": 44,
+   "chapter": 4,
+   "verse": 33,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord Jesus\" becomes \"Jesus Messiah\"",
+   "note": "Manuscripts vary between \"the Lord Jesus\" and \"the Lord Jesus Christ\"; the Peshitta reads \"Jesus the Messiah\". The same person is named."
+  },
+  {
+   "book": 44,
+   "chapter": 6,
+   "verse": 3,
+   "kind": "trinity",
+   "weight": "minor",
+   "change": "\"the Holy Ghost\" becomes \"the Spirit of the Lord\"",
+   "note": "The Textus Receptus has \"Holy Spirit\" and the early Greek manuscripts \"Spirit\"; the Peshitta reads \"the Spirit of the Lord\". The Holy Spirit is meant."
+  },
+  {
+   "book": 44,
+   "chapter": 8,
+   "verse": 24,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord\" becomes \"God\"",
+   "note": "The Greek has kyrios, \"the Lord\", here; the Peshitta reads \"God\", as it often does in Acts. Either may mean God or Christ, so the referent can shift, but nothing is lost."
+  },
+  {
+   "book": 44,
+   "chapter": 8,
+   "verse": 25,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the word of the Lord\" becomes \"the word of God\"",
+   "note": "The Greek has kyrios, \"the Lord\", here; the Peshitta reads \"God\", as it often does in Acts. Either may mean God or Christ, so the referent can shift, but nothing is lost."
+  },
+  {
+   "book": 44,
+   "chapter": 8,
+   "verse": 37,
+   "kind": "salvation",
+   "weight": "major",
+   "change": "In italics, as not in the Peshitta",
+   "note": "The verse is in the Textus Receptus and some Western witnesses but not in the Peshitta or the early Greek manuscripts; Murdock prints it in italics as words the Peshitta lacks. Belief before baptism is still taught elsewhere (Mark 16:16)."
+  },
+  {
+   "book": 44,
+   "chapter": 9,
+   "verse": 5,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"it is hard for thee to kick against the pricks\"",
+   "note": "The clause is in the Textus Receptus (from the Latin) but not in the Peshitta or the Greek manuscripts here; it is in all texts at Acts 26:14."
+  },
+  {
+   "book": 44,
+   "chapter": 9,
+   "verse": 6,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits Saul's question \"Lord, what wilt thou have me to do?\"",
+   "note": "The words came into the Textus Receptus from the Latin and are not in the Peshitta or the Greek manuscripts here; Paul's question is in all texts at Acts 22:10."
+  },
+  {
+   "book": 44,
+   "chapter": 9,
+   "verse": 20,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"preached Christ\" becomes \"announced Jesus\"",
+   "note": "The Textus Receptus has \"Christ\"; the Peshitta, with the early Greek manuscripts, reads \"Jesus\". The same person is preached as the Son of God."
+  },
+  {
+   "book": 44,
+   "chapter": 9,
+   "verse": 29,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord Jesus\" becomes \"Jesus\"",
+   "note": "The Textus Receptus reads \"the Lord Jesus\"; the early Greek manuscripts have \"the Lord\" and the Peshitta \"Jesus\". The same person is meant."
+  },
+  {
+   "book": 44,
+   "chapter": 9,
+   "verse": 31,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the fear of the Lord\" becomes \"the fear of God\"",
+   "note": "The Greek has kyrios, \"the Lord\", here; the Peshitta reads \"God\", as it often does in Acts. Either may mean God or Christ, so the referent can shift, but nothing is lost."
+  },
+  {
+   "book": 44,
+   "chapter": 9,
+   "verse": 35,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord\" becomes \"God\"",
+   "note": "The Greek has kyrios, \"the Lord\", here; the Peshitta reads \"God\", as it often does in Acts. Either may mean God or Christ, so the referent can shift, but nothing is lost."
+  },
+  {
+   "book": 44,
+   "chapter": 10,
+   "verse": 33,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"present before God\" becomes \"before thee\"",
+   "note": "Most Greek manuscripts read \"before God\"; the Peshitta, with Codex Bezae, reads \"before thee\". Hearing what God commands is still the point."
+  },
+  {
+   "book": 44,
+   "chapter": 12,
+   "verse": 11,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord\" becomes \"God\"",
+   "note": "The Greek has kyrios, \"the Lord\", here; the Peshitta reads \"God\", as it often does in Acts. Either may mean God or Christ, so the referent can shift, but nothing is lost."
+  },
+  {
+   "book": 44,
+   "chapter": 12,
+   "verse": 23,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the angel of the Lord\" becomes \"the angel of God\"",
+   "note": "The Greek has kyrios, \"the Lord\", here; the Peshitta reads \"God\", as it often does in Acts. Either may mean God or Christ, so the referent can shift, but nothing is lost."
+  },
+  {
+   "book": 44,
+   "chapter": 13,
+   "verse": 2,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"ministered to the Lord\" becomes \"making supplication to God\"",
+   "note": "The Greek has kyrios, \"the Lord\", here; the Peshitta reads \"God\", as it often does in Acts. Either may mean God or Christ, so the referent can shift, but nothing is lost."
+  },
+  {
+   "book": 44,
+   "chapter": 13,
+   "verse": 5,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the word of God\" becomes \"the word of our Lord\"",
+   "note": "The Greek has theos, \"God\", here; the Peshitta reads \"the Lord\", as it sometimes does in Acts. The same God is meant."
+  },
+  {
+   "book": 44,
+   "chapter": 13,
+   "verse": 18,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"suffered he their manners\" becomes \"he fed them\"",
+   "note": "Manuscripts divide between etropophorēsen, \"put up with\", which the Textus Receptus has, and etrophophorēsen, \"cared for\", which the Peshitta follows. Either is true of the wilderness years."
+  },
+  {
+   "book": 44,
+   "chapter": 13,
+   "verse": 48,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"glorified the word of the Lord\" becomes \"glorified God\"",
+   "note": "The Greek has kyrios, \"the Lord\", here; the Peshitta reads \"God\", as it often does in Acts. Either may mean God or Christ, so the referent can shift, but nothing is lost."
+  },
+  {
+   "book": 44,
+   "chapter": 14,
+   "verse": 26,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the grace of God\" becomes \"the grace of the Lord\"",
+   "note": "The Greek has theos, \"God\", here; the Peshitta reads \"the Lord\", as it sometimes does in Acts. The same God is meant."
+  },
+  {
+   "book": 44,
+   "chapter": 15,
+   "verse": 35,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the word of the Lord\" becomes \"the word of God\"",
+   "note": "The Greek has kyrios, \"the Lord\", here; the Peshitta reads \"God\", as it often does in Acts. Either may mean God or Christ, so the referent can shift, but nothing is lost."
+  },
+  {
+   "book": 44,
+   "chapter": 15,
+   "verse": 36,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the word of the Lord\" becomes \"the word of God\"",
+   "note": "The Greek has kyrios, \"the Lord\", here; the Peshitta reads \"God\", as it often does in Acts. Either may mean God or Christ, so the referent can shift, but nothing is lost."
+  },
+  {
+   "book": 44,
+   "chapter": 17,
+   "verse": 27,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"seek the Lord\" becomes \"search after God\"",
+   "note": "The Textus Receptus reads \"the Lord\"; the Peshitta, with the early Greek manuscripts, reads \"God\". The same God is meant."
+  },
+  {
+   "book": 44,
+   "chapter": 18,
+   "verse": 5,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"pressed in the spirit\" becomes \"impeded in discourse\", the Jews resisting",
+   "note": "The Textus Receptus has tō pneumati, \"in the spirit\"; the early Greek manuscripts tō logō, \"in the word\". The Peshitta reads \"in the word\" and adds the Jews' opposition from verse 6."
+  },
+  {
+   "book": 44,
+   "chapter": 18,
+   "verse": 6,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"Your blood be upon your own heads\"",
+   "note": "The words are in every Greek text; Murdock's Peshitta lacks them. Paul's \"I am clean\" keeps the sense."
+  },
+  {
+   "book": 44,
+   "chapter": 18,
+   "verse": 25,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the things of the Lord\" becomes \"respecting Jesus\"",
+   "note": "The Textus Receptus reads \"the Lord\"; the Peshitta, with the early Greek manuscripts, reads \"Jesus\". The same person is meant."
+  },
+  {
+   "book": 44,
+   "chapter": 18,
+   "verse": 26,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the way of God\" becomes \"the way of the Lord\"",
+   "note": "The Greek has theos, \"God\", here; the Peshitta reads \"the Lord\", as it sometimes does in Acts. The same God is meant."
+  },
+  {
+   "book": 44,
+   "chapter": 19,
+   "verse": 10,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord Jesus\" becomes \"the Lord\"",
+   "note": "\"Jesus\" is in the Textus Receptus but not in the Peshitta or the early Greek manuscripts; Christ is still meant."
+  },
+  {
+   "book": 44,
+   "chapter": 20,
+   "verse": 19,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Serving the Lord\" becomes \"laboring for God\"",
+   "note": "The Greek has kyrios, \"the Lord\", here; the Peshitta reads \"God\", as it often does in Acts. Either may mean God or Christ, so the referent can shift, but nothing is lost."
+  },
+  {
+   "book": 44,
+   "chapter": 21,
+   "verse": 20,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"glorified the Lord\" becomes \"glorified God\"",
+   "note": "The Textus Receptus reads \"the Lord\"; the Peshitta, with the early Greek manuscripts, reads \"God\". The same God is praised."
+  },
+  {
+   "book": 44,
+   "chapter": 21,
+   "verse": 22,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"the multitude must needs come together\"",
+   "note": "The clause is in the Byzantine text and the Textus Receptus but not in the Peshitta, Vaticanus or P74; the sense is unchanged."
+  },
+  {
+   "book": 44,
+   "chapter": 21,
+   "verse": 25,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"that they observe no such thing, save only\"",
+   "note": "The words are in the Byzantine text and the Textus Receptus but not in the Peshitta, Sinaiticus or Vaticanus; the four rules themselves are kept."
+  },
+  {
+   "book": 44,
+   "chapter": 22,
+   "verse": 16,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the name of the Lord\" becomes \"his name\"",
+   "note": "The Textus Receptus reads \"of the Lord\"; the Peshitta, with the early Greek manuscripts, reads \"his\". The Just One of verse 14 is meant."
+  },
+  {
+   "book": 44,
+   "chapter": 23,
+   "verse": 9,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"let us not fight against God\"",
+   "note": "The clause is in the Byzantine text and the Textus Receptus but not in the Peshitta, Sinaiticus or Vaticanus; it may come from Acts 5:39."
+  },
+  {
+   "book": 45,
+   "chapter": 1,
+   "verse": 16,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the gospel of Christ\" becomes \"the gospel\"",
+   "note": "\"Of Christ\" is in the Textus Receptus but not in the Peshitta or the early Greek manuscripts; whose gospel it is, is plain from verse 9."
+  },
+  {
+   "book": 45,
+   "chapter": 4,
+   "verse": 8,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord\" becomes \"God\"",
+   "note": "The Greek has kyrios, \"the Lord\", here; the Peshitta reads \"God\". The same God is meant."
+  },
+  {
+   "book": 45,
+   "chapter": 8,
+   "verse": 1,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"but after the Spirit\"",
+   "note": "The Textus Receptus has the whole clause; the early Greek manuscripts lack it, and the Peshitta, with Alexandrinus, has only \"who walk not after the flesh\". Verse 4 has the whole phrase."
+  },
+  {
+   "book": 45,
+   "chapter": 12,
+   "verse": 19,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"Vengeance is mine; I will repay\" becomes \"I will execute judgment for thee\"",
+   "note": "The Greek quotes Deuteronomy 32:35 as \"Vengeance is mine, I will repay\"; the Peshitta renders it as a promise that God will judge for the wronged. Both leave vengeance to God."
+  },
+  {
+   "book": 45,
+   "chapter": 14,
+   "verse": 4,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"God is able\" becomes \"his Lord hath power\"",
+   "note": "The Textus Receptus reads \"God\"; the Peshitta, with the early Greek manuscripts, reads \"the Lord\". The master in the verse is Christ."
+  },
+  {
+   "book": 45,
+   "chapter": 14,
+   "verse": 11,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"confess to God\" becomes \"to me... give praise\"",
+   "note": "The Greek has \"to God\"; the Peshitta has \"to me\", as in Isaiah 45:23. The Lord who speaks is the one praised."
+  },
+  {
+   "book": 45,
+   "chapter": 15,
+   "verse": 19,
+   "kind": "trinity",
+   "weight": "minor",
+   "change": "\"the Spirit of God\" becomes \"the Holy Spirit\"",
+   "note": "The Textus Receptus reads \"Spirit of God\"; the Peshitta reads \"Holy Spirit\", with Alexandrinus and others. The same Spirit is meant."
+  },
+  {
+   "book": 45,
+   "chapter": 16,
+   "verse": 10,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"approved in Christ\" becomes \"chosen in our Lord\"",
+   "note": "The Peshitta often has \"our Lord\" where the Greek has \"Christ\"; the same person is meant."
+  },
+  {
+   "book": 45,
+   "chapter": 16,
+   "verse": 20,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the closing \"Amen\"",
+   "note": "The Amen is in the Textus Receptus but not in the Peshitta or the early Greek manuscripts; the blessing is unchanged."
+  },
+  {
+   "book": 45,
+   "chapter": 16,
+   "verse": 27,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription naming Phebe and Cenchrea",
+   "note": "\"To God only wise\" becomes \"to him who only is wise\", as in the Peshitta. The subscription is a late scribal note printed in Textus Receptus editions and the KJV, not part of the letter's text; Murdock does not have it."
+  },
+  {
+   "book": 46,
+   "chapter": 2,
+   "verse": 13,
+   "kind": "trinity",
+   "weight": "minor",
+   "change": "\"the Holy Ghost\" becomes \"the spirit\"",
+   "note": "The Textus Receptus reads \"Holy Spirit\"; the Peshitta, with the early Greek manuscripts, has \"Spirit\" alone."
+  },
+  {
+   "book": 46,
+   "chapter": 2,
+   "verse": 14,
+   "kind": "trinity",
+   "weight": "minor",
+   "change": "\"the things of the Spirit of God\" becomes \"spirituals\"",
+   "note": "The Greek has \"the things of the Spirit of God\"; the Peshitta reads \"spiritual things\" and names the Spirit as the discerner. The Spirit's role is kept."
+  },
+  {
+   "book": 46,
+   "chapter": 4,
+   "verse": 19,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"if the Lord will\" becomes \"if God be willing\"",
+   "note": "The Greek has kyrios, \"the Lord\", here; the Peshitta reads \"God\". The same God is meant."
+  },
+  {
+   "book": 46,
+   "chapter": 7,
+   "verse": 22,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord's freeman\" becomes \"God's freedman\"",
+   "note": "The Greek has kyrios, \"the Lord\", here; the Peshitta reads \"God\". The same God is meant."
+  },
+  {
+   "book": 46,
+   "chapter": 7,
+   "verse": 25,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"of the Lord\" becomes \"from God\", twice",
+   "note": "The Greek has kyrios, \"the Lord\", here; the Peshitta reads \"God\". The same God is meant."
+  },
+  {
+   "book": 46,
+   "chapter": 9,
+   "verse": 2,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"in the Lord\"",
+   "note": "The Greek has \"in the Lord\"; Murdock's Peshitta lacks it. Paul's apostleship is still from Christ (verse 1)."
+  },
+  {
+   "book": 46,
+   "chapter": 10,
+   "verse": 28,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"for the earth is the Lord's, and the fulness thereof\"",
+   "note": "The repeated quotation is in the Byzantine text and the Textus Receptus but not in the Peshitta or the early Greek manuscripts; it stands in verse 26."
+  },
+  {
+   "book": 46,
+   "chapter": 16,
+   "verse": 24,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription naming the letter's bearers",
+   "note": "The subscription is a late scribal note printed in Textus Receptus editions and the KJV, not part of the letter's text; Murdock does not have it."
+  },
+  {
+   "book": 47,
+   "chapter": 4,
+   "verse": 10,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord Jesus\" becomes \"Jesus\"",
+   "note": "The Textus Receptus reads \"the Lord Jesus\"; the Peshitta, with the early Greek manuscripts, reads \"Jesus\". The same person is meant."
+  },
+  {
+   "book": 47,
+   "chapter": 5,
+   "verse": 18,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus Christ\" becomes \"the Messiah\"",
+   "note": "The Textus Receptus reads \"Jesus Christ\"; the Peshitta, with the early Greek manuscripts, reads \"Christ\" alone. The same person is meant."
+  },
+  {
+   "book": 47,
+   "chapter": 6,
+   "verse": 16,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"as God hath said\" becomes \"as it is said\"",
+   "note": "The Greek names God as the speaker; the Peshitta has a passive. The words quoted are still God's."
+  },
+  {
+   "book": 47,
+   "chapter": 8,
+   "verse": 19,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the glory of the same Lord\" becomes \"the glory of God\"",
+   "note": "The Greek has \"the Lord\"; Murdock's Peshitta reads \"God\". The giving still honours God."
+  },
+  {
+   "book": 47,
+   "chapter": 8,
+   "verse": 21,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"in the sight of the Lord\" becomes \"before God\"",
+   "note": "The Greek has kyrios, \"the Lord\", here; the Peshitta reads \"God\". The same God is meant."
+  },
+  {
+   "book": 47,
+   "chapter": 9,
+   "verse": 7,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"God loveth a cheerful giver\" becomes \"the Lord loveth\"",
+   "note": "The Greek has theos, \"God\", here; the Peshitta reads \"the Lord\". The same God is meant."
+  },
+  {
+   "book": 47,
+   "chapter": 13,
+   "verse": 14,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"The grace\" becomes \"The peace\"; omits the subscription",
+   "note": "The Greek has charis, \"grace\"; Murdock's Peshitta reads \"peace\". The rest of the threefold blessing is the same. The subscription is a late scribal note printed in Textus Receptus editions and the KJV, not part of the letter's text; Murdock does not have it."
+  },
+  {
+   "book": 48,
+   "chapter": 1,
+   "verse": 15,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"it pleased God\" becomes \"it pleased him\"",
+   "note": "The Textus Receptus reads \"God\"; the Peshitta, with the early Greek manuscripts, reads only \"him\" (P46 and Vaticanus lack the word). God is plainly meant."
+  },
+  {
+   "book": 48,
+   "chapter": 6,
+   "verse": 15,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"in Christ Jesus\"",
+   "note": "The Textus Receptus reads \"in Christ Jesus\"; the Peshitta, with the early Greek manuscripts, reads nothing here. The new creation is still in Christ (2 Corinthians 5:17)."
+  },
+  {
+   "book": 49,
+   "chapter": 3,
+   "verse": 6,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"in Christ\" becomes \"in him\"",
+   "note": "The Greek has \"in Christ\" (the early manuscripts \"in Christ Jesus\"); the Peshitta has \"in him\". The referent is plain."
+  },
+  {
+   "book": 49,
+   "chapter": 3,
+   "verse": 9,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"by Jesus Christ\"",
+   "note": "The Textus Receptus reads \"who created all things by Jesus Christ\"; the Peshitta, with the early Greek manuscripts, reads \"God the Creator of all things\" alone. Christ as agent of creation is still stated in Colossians 1:16."
+  },
+  {
+   "book": 49,
+   "chapter": 5,
+   "verse": 9,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"the fruit of the Spirit\" becomes \"the fruits of the light\"",
+   "note": "The Textus Receptus reads \"Spirit\"; the Peshitta, with P46, Sinaiticus and Vaticanus, reads \"light\", fitting verse 8. The fruit of the Spirit is still listed in Galatians 5:22."
+  },
+  {
+   "book": 49,
+   "chapter": 5,
+   "verse": 17,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the will of the Lord\" becomes \"the pleasure of God\"",
+   "note": "The Greek has kyrios, \"the Lord\", here; the Peshitta reads \"God\". The same God is meant."
+  },
+  {
+   "book": 49,
+   "chapter": 5,
+   "verse": 21,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the fear of God\" becomes \"the love of the Messiah\"",
+   "note": "The Textus Receptus reads \"fear of God\"; the early Greek manuscripts \"fear of Christ\", and the Peshitta \"love of the Messiah\". Submission is still grounded in Christ."
+  },
+  {
+   "book": 49,
+   "chapter": 5,
+   "verse": 29,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord\" becomes \"the Messiah\"",
+   "note": "The Textus Receptus reads \"the Lord\"; the Peshitta, with the early Greek manuscripts, reads \"Christ\". The same person is meant."
+  },
+  {
+   "book": 49,
+   "chapter": 6,
+   "verse": 24,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription naming where the letter was written",
+   "note": "The subscription is a late scribal note printed in Textus Receptus editions and the KJV, not part of the letter's text; Murdock does not have it."
+  },
+  {
+   "book": 50,
+   "chapter": 1,
+   "verse": 16,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Verses 16 and 17 come in the reverse order",
+   "note": "The Peshitta, with the early Greek manuscripts, puts \"of love\" before \"of contention\"; the Textus Receptus has the reverse. Both verses are kept."
+  },
+  {
+   "book": 50,
+   "chapter": 1,
+   "verse": 28,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"and that of God\"",
+   "note": "The Greek has \"and that from God\"; Murdock's Peshitta lacks it. The sign of life for the believers is kept."
+  },
+  {
+   "book": 50,
+   "chapter": 4,
+   "verse": 23,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription naming where the letter was written",
+   "note": "The subscription is a late scribal note printed in Textus Receptus editions and the KJV, not part of the letter's text; Murdock does not have it."
+  },
+  {
+   "book": 51,
+   "chapter": 1,
+   "verse": 2,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"and the Lord Jesus Christ\" from the greeting",
+   "note": "The Textus Receptus reads \"from God our Father and the Lord Jesus Christ\"; the Peshitta, with the early Greek manuscripts, reads \"from God our Father\" alone. Christ is named in verse 1 and verse 3."
+  },
+  {
+   "book": 51,
+   "chapter": 1,
+   "verse": 10,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"worthy of the Lord\" becomes \"as is right... please God\"",
+   "note": "The Greek has \"worthy of the Lord\"; the Peshitta reads \"as is right\" and makes God the one pleased. The call to a worthy walk is kept."
+  },
+  {
+   "book": 51,
+   "chapter": 1,
+   "verse": 14,
+   "kind": "atonement",
+   "weight": "major",
+   "change": "Omits \"through his blood\"",
+   "note": "The phrase is in some later manuscripts and the Textus Receptus but not in the Peshitta, Sinaiticus, Vaticanus or the Byzantine majority; it matches Ephesians 1:7. Peace \"through the blood of his cross\" is still stated in 1:20."
+  },
+  {
+   "book": 51,
+   "chapter": 3,
+   "verse": 15,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the peace of God\" becomes \"the peace of the Messiah\"",
+   "note": "The Textus Receptus reads \"of God\"; the Peshitta, with the early Greek manuscripts, reads \"of Christ\". The same peace is meant."
+  },
+  {
+   "book": 51,
+   "chapter": 3,
+   "verse": 16,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"to the Lord\" becomes \"unto God\"; \"word of Christ\" becomes \"his word\"",
+   "note": "The Textus Receptus reads \"to the Lord\"; the Peshitta, with the early Greek manuscripts, reads \"to God\". Murdock has \"his word\" where the Greek has \"the word of Christ\"."
+  },
+  {
+   "book": 51,
+   "chapter": 3,
+   "verse": 18,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"in the Lord\" becomes \"in the Messiah\"",
+   "note": "The Greek has \"in the Lord\"; the Peshitta reads \"in the Messiah\". The same person is meant."
+  },
+  {
+   "book": 51,
+   "chapter": 3,
+   "verse": 22,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"fearing God\" becomes \"in the fear of the Lord\"",
+   "note": "The Textus Receptus reads \"God\"; the Peshitta, with the early Greek manuscripts, reads \"the Lord\". The same reverence is meant."
+  },
+  {
+   "book": 52,
+   "chapter": 1,
+   "verse": 1,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"from God our Father, and the Lord Jesus Christ\"",
+   "note": "The Textus Receptus reads the full greeting; the Peshitta, with the early Greek manuscripts, reads \"Grace be with you, and peace\" alone. Both are named earlier in the verse."
+  },
+  {
+   "book": 52,
+   "chapter": 2,
+   "verse": 2,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the gospel of God\" becomes \"the gospel of the Messiah\"",
+   "note": "The Greek has \"the gospel of God\"; Murdock's Peshitta reads \"of the Messiah\". Verses 8 and 9 still call it God's gospel."
+  },
+  {
+   "book": 52,
+   "chapter": 2,
+   "verse": 19,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"our Lord Jesus Christ\" becomes \"our Lord Jesus\"",
+   "note": "The Textus Receptus reads \"our Lord Jesus Christ\"; the Peshitta, with the early Greek manuscripts, reads \"our Lord Jesus\". The same person is meant."
+  },
+  {
+   "book": 53,
+   "chapter": 2,
+   "verse": 2,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the day of Christ\" becomes \"the day of our Lord\"",
+   "note": "The Textus Receptus reads \"of Christ\"; the Peshitta, with the early Greek manuscripts, reads \"of the Lord\". The same day is meant."
+  },
+  {
+   "book": 53,
+   "chapter": 3,
+   "verse": 18,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"our Lord Jesus Christ\" becomes \"Jesus the Messiah\"; omits subscription",
+   "note": "Murdock's Peshitta reads \"the grace of Jesus the Messiah\" where the Greek has \"our Lord Jesus Christ\". The subscription is a late scribal note printed in Textus Receptus editions and the KJV, not part of the letter's text; Murdock does not have it."
+  },
+  {
+   "book": 54,
+   "chapter": 1,
+   "verse": 1,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Lord Jesus Christ\" becomes \"the Messiah, Jesus\"",
+   "note": "The Textus Receptus reads \"the Lord Jesus Christ\"; the Peshitta, with the early Greek manuscripts, reads \"Christ Jesus\" without \"Lord\". The same person is meant."
+  },
+  {
+   "book": 54,
+   "chapter": 2,
+   "verse": 7,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"in Christ\" (\"I speak the truth\")",
+   "note": "The Textus Receptus reads \"I speak the truth in Christ\"; the Peshitta, with the early Greek manuscripts, reads \"I speak the truth\" alone. Paul's oath is unchanged in force."
+  },
+  {
+   "book": 54,
+   "chapter": 3,
+   "verse": 16,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"God was manifest in the flesh\" becomes \"which was revealed in the flesh\"",
+   "note": "The Peshitta reads \"which\", with Codex Bezae and the Latin; Sinaiticus reads \"who\" and the Byzantine majority and the Textus Receptus \"God\". The verse no longer names God, though the mystery revealed is still Christ."
+  },
+  {
+   "book": 54,
+   "chapter": 4,
+   "verse": 12,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"in spirit\"",
+   "note": "The words are in the Textus Receptus but not in the Peshitta or the early Greek manuscripts; the other marks of an example are kept."
+  },
+  {
+   "book": 54,
+   "chapter": 6,
+   "verse": 21,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription naming where the letter was written",
+   "note": "The subscription is a late scribal note printed in Textus Receptus editions and the KJV, not part of the letter's text; Murdock does not have it."
+  },
+  {
+   "book": 55,
+   "chapter": 2,
+   "verse": 19,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the name of Christ\" becomes \"the name of our Lord\"",
+   "note": "The Textus Receptus reads \"of Christ\"; the Peshitta, with the early Greek manuscripts, reads \"of the Lord\". The same person is meant."
+  },
+  {
+   "book": 55,
+   "chapter": 3,
+   "verse": 16,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"given by inspiration of God\" becomes \"written by the Spirit\"",
+   "note": "The Greek has theopneustos, \"God-breathed\"; the Peshitta reads \"written by the Spirit\", and Murdock's \"that was written\" can be read as limiting \"all scripture\". Its divine origin is still stated."
+  },
+  {
+   "book": 55,
+   "chapter": 4,
+   "verse": 22,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription naming where the letter was written",
+   "note": "The subscription is a late scribal note printed in Textus Receptus editions and the KJV, not part of the letter's text; Murdock does not have it."
+  },
+  {
+   "book": 56,
+   "chapter": 1,
+   "verse": 4,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "\"Grace, mercy, and peace\" becomes \"Grace and peace\"",
+   "note": "The words are in the Textus Receptus but not in the Peshitta or the early Greek manuscripts; the greeting is otherwise the same."
+  },
+  {
+   "book": 56,
+   "chapter": 3,
+   "verse": 15,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription naming where the letter was written",
+   "note": "The subscription is a late scribal note printed in Textus Receptus editions and the KJV, not part of the letter's text; Murdock does not have it."
+  },
+  {
+   "book": 57,
+   "chapter": 1,
+   "verse": 20,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"refresh my bowels in the Lord\" becomes \"in the Messiah\"",
+   "note": "The Textus Receptus reads \"in the Lord\"; the Peshitta, with the early Greek manuscripts, reads \"in Christ\". The same person is meant."
+  },
+  {
+   "book": 58,
+   "chapter": 1,
+   "verse": 10,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits the address \"Lord\" (\"Thou, Lord\")",
+   "note": "The Greek, quoting Psalm 102:25, has kyrie; Murdock's Peshitta lacks it. The words are still addressed to the Son (verse 8)."
+  },
+  {
+   "book": 58,
+   "chapter": 2,
+   "verse": 9,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"by the grace of God should taste death\" becomes \"God himself... tasted death\"",
+   "note": "Nearly all Greek manuscripts read \"by the grace of God\", a few \"apart from God\". The West Syriac Peshitta Murdock follows reads \"for he, God, in his grace tasted death\", while East Syriac copies read \"apart from God\". Here God is made the subject of Christ's death."
+  },
+  {
+   "book": 58,
+   "chapter": 6,
+   "verse": 3,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"if God permit\" becomes \"if the Lord permit\"",
+   "note": "The Greek has theos, \"God\", here; the Peshitta reads \"the Lord\". The same God is meant."
+  },
+  {
+   "book": 58,
+   "chapter": 8,
+   "verse": 2,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"which the Lord pitched\" becomes \"which God hath pitched\"",
+   "note": "The Greek has kyrios, \"the Lord\", here; the Peshitta reads \"God\". The same God is meant."
+  },
+  {
+   "book": 58,
+   "chapter": 10,
+   "verse": 30,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"saith the Lord\"",
+   "note": "The words are in the Textus Receptus but not in the Peshitta or the early Greek manuscripts; the quotation of Deuteronomy 32:35 is still the Lord's."
+  },
+  {
+   "book": 58,
+   "chapter": 12,
+   "verse": 9,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"the Father of spirits\" becomes \"our spiritual fathers\"",
+   "note": "The Greek has \"the Father of spirits\", God; Murdock renders the Peshitta as \"our spiritual fathers\", so the verse no longer speaks of God. Verse 10 still sets God's discipline against that of human fathers."
+  },
+  {
+   "book": 58,
+   "chapter": 13,
+   "verse": 25,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription naming where the letter was written",
+   "note": "The subscription is a late scribal note printed in Textus Receptus editions and the KJV, not part of the letter's text; Murdock does not have it."
+  },
+  {
+   "book": 59,
+   "chapter": 1,
+   "verse": 12,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord hath promised\" becomes \"God hath promised\"",
+   "note": "The Textus Receptus reads \"the Lord\"; the early Greek manuscripts have no subject, and the Peshitta reads \"God\". The same God promises."
+  },
+  {
+   "book": 59,
+   "chapter": 3,
+   "verse": 6,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "Omits \"set on fire of hell\"",
+   "note": "The Greek has \"by Gehenna\"; Murdock's Peshitta says only that the tongue is itself on fire. The warning about the tongue is kept."
+  },
+  {
+   "book": 59,
+   "chapter": 3,
+   "verse": 9,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"God, even the Father\" becomes \"the Lord and Father\"",
+   "note": "The Textus Receptus reads \"God and Father\"; the Peshitta, with the early Greek manuscripts, reads \"Lord and Father\". The same person is blessed."
+  },
+  {
+   "book": 59,
+   "chapter": 4,
+   "verse": 6,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"God resisteth the proud\" becomes \"The Lord humbleth the lofty\"",
+   "note": "The Greek has theos, \"God\", here; the Peshitta reads \"the Lord\". The same God is meant."
+  },
+  {
+   "book": 60,
+   "chapter": 1,
+   "verse": 13,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"the grace that is to be brought\" becomes \"the joy, which will come\"",
+   "note": "The Greek has charis, \"grace\"; Murdock's Peshitta reads \"joy\". The hope fixed on Christ's revelation is unchanged."
+  },
+  {
+   "book": 60,
+   "chapter": 1,
+   "verse": 22,
+   "kind": "trinity",
+   "weight": "minor",
+   "change": "Omits \"through the Spirit\"",
+   "note": "The words are in the Textus Receptus but not in the Peshitta or the early Greek manuscripts; obedience to the truth is kept."
+  },
+  {
+   "book": 60,
+   "chapter": 1,
+   "verse": 25,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the word of the Lord\" becomes \"the word of our God\"",
+   "note": "The Greek has kyrios, \"the Lord\", here; the Peshitta reads \"God\". The same God is meant."
+  },
+  {
+   "book": 60,
+   "chapter": 2,
+   "verse": 2,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "Adds \"nourished up to life\" (\"grow unto salvation\")",
+   "note": "The early Greek manuscripts add eis sōtērian, \"unto salvation\", which the Textus Receptus lacks; the Peshitta has it, and Murdock renders it \"to life\"."
+  },
+  {
+   "book": 60,
+   "chapter": 2,
+   "verse": 7,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"the stone which the builders disallowed... head of the corner\"",
+   "note": "It is in every Greek text and in the printed Peshitta; it is missing from this copy of Murdock, perhaps by oversight. The verse breaks off mid-sentence here."
+  },
+  {
+   "book": 60,
+   "chapter": 2,
+   "verse": 13,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"for the Lord's sake\" becomes \"for God's sake\"",
+   "note": "The Greek has kyrios, \"the Lord\", here; the Peshitta reads \"God\". The same God is meant."
+  },
+  {
+   "book": 60,
+   "chapter": 3,
+   "verse": 15,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord God\" becomes \"the Lord the Messiah\"",
+   "note": "The Textus Receptus reads \"the Lord God\"; the Peshitta, with the early Greek manuscripts, reads \"Christ as Lord\". Isaiah 8:13 is applied to Christ, so his deity is stated, not lessened."
+  },
+  {
+   "book": 60,
+   "chapter": 4,
+   "verse": 14,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"on their part he is evil spoken of... glorified\"",
+   "note": "The words are in the Textus Receptus but not in the Peshitta or the early Greek manuscripts; the blessing on those reproached is kept."
+  },
+  {
+   "book": 60,
+   "chapter": 5,
+   "verse": 14,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"in Christ Jesus\" becomes \"in the Messiah\"",
+   "note": "The Textus Receptus reads \"in Christ Jesus\"; the Peshitta, with the early Greek manuscripts, reads \"in Christ\". The same person is meant."
+  },
+  {
+   "book": 61,
+   "chapter": 1,
+   "verse": 1,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"of God and our Saviour\" becomes \"of Our Lord and Redeemer\"",
+   "note": "2 Peter is not in the Peshitta's canon; Murdock translates it from the later Syriac version printed with it. Most Greek manuscripts read \"our God and Saviour\", which may name Christ as God; Sinaiticus and a few others read \"Lord\", as here."
+  },
+  {
+   "book": 61,
+   "chapter": 1,
+   "verse": 2,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"of God, and of Jesus our Lord\" becomes \"of our Lord Jesus\"",
+   "note": "2 Peter is not in the Peshitta's canon; Murdock translates it from the later Syriac version printed with it. A few Greek and Latin witnesses likewise name only Christ here."
+  },
+  {
+   "book": 61,
+   "chapter": 2,
+   "verse": 11,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"before the Lord\"",
+   "note": "2 Peter is not in the Peshitta's canon; Murdock translates it from the later Syriac version printed with it. Some Greek manuscripts and the Latin also lack the words."
+  },
+  {
+   "book": 61,
+   "chapter": 2,
+   "verse": 17,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "Omits \"for ever\"",
+   "note": "2 Peter is not in the Peshitta's canon; Murdock translates it from the later Syriac version printed with it. Some early Greek manuscripts also lack the words; the darkness reserved for them is kept."
+  },
+  {
+   "book": 61,
+   "chapter": 3,
+   "verse": 18,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Adds \"and of God the Father\"",
+   "note": "2 Peter is not in the Peshitta's canon; Murdock translates it from the later Syriac version printed with it. The words are not in the Greek; the doxology is otherwise the same."
+  },
+  {
+   "book": 62,
+   "chapter": 1,
+   "verse": 7,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus Christ his Son\" becomes \"Jesus his Son\"",
+   "note": "The Textus Receptus reads \"Jesus Christ\"; the Peshitta, with the early Greek manuscripts, reads \"Jesus\". The cleansing blood is the same."
+  },
+  {
+   "book": 62,
+   "chapter": 3,
+   "verse": 1,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"called the sons of God\" becomes \"called us sons, and made us such\"",
+   "note": "The early Greek manuscripts and the Peshitta add \"and so we are\"; Murdock's text lacks \"of God\" after \"sons\", though the Father's love is the subject."
+  },
+  {
+   "book": 62,
+   "chapter": 4,
+   "verse": 16,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"and God in him\"",
+   "note": "The words are in the Greek texts; Murdock's Peshitta lacks them. The mutual indwelling is stated in 4:13 and 4:15."
+  },
+  {
+   "book": 62,
+   "chapter": 5,
+   "verse": 7,
+   "kind": "trinity",
+   "weight": "major",
+   "change": "In italics, as not in the Peshitta",
+   "note": "The heavenly witnesses are in the Textus Receptus and late Latin witnesses but not in the Peshitta or the Greek manuscripts before the late Middle Ages; Murdock prints the verse in italics as words the Peshitta lacks. The Trinity is taught elsewhere (Matthew 28:19)."
+  },
+  {
+   "book": 62,
+   "chapter": 5,
+   "verse": 8,
+   "kind": "trinity",
+   "weight": "minor",
+   "change": "Omits \"in earth\"",
+   "note": "\"In earth\" belongs to the heavenly witnesses of verse 7 and is not in the Peshitta or the early Greek manuscripts; the three witnesses, the Spirit, water and blood, remain."
+  },
+  {
+   "book": 62,
+   "chapter": 5,
+   "verse": 12,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Son of God\" becomes \"the Son\"",
+   "note": "The Greek has \"the Son of God\"; Murdock's Peshitta reads \"the Son\". The Son of God is named in verse 13."
+  },
+  {
+   "book": 62,
+   "chapter": 5,
+   "verse": 13,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"and that ye may believe on the name of the Son of God\"",
+   "note": "The words are in the Textus Receptus but not in the Peshitta or the early Greek manuscripts; belief in the Son's name is still in the verse."
+  },
+  {
+   "book": 62,
+   "chapter": 5,
+   "verse": 21,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the closing \"Amen\"",
+   "note": "The words are in the Textus Receptus but not in the Peshitta or the early Greek manuscripts; the meaning is unchanged."
+  },
+  {
+   "book": 63,
+   "chapter": 1,
+   "verse": 9,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the doctrine of Christ\" (second) becomes \"his doctrine\"",
+   "note": "2 John is not in the Peshitta's canon; Murdock translates it from the later Syriac version printed with it. The second \"of Christ\" is in the Textus Receptus but not in the early Greek manuscripts."
+  },
+  {
+   "book": 65,
+   "chapter": 1,
+   "verse": 5,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord\" becomes \"God\"",
+   "note": "Jude is not in the Peshitta's canon; Murdock translates it from the later Syriac version printed with it. Greek manuscripts vary here between \"the Lord\", \"Jesus\" and \"God\"."
+  },
+  {
+   "book": 65,
+   "chapter": 1,
+   "verse": 6,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"everlasting chains\" becomes \"chains unknown\"",
+   "note": "Jude is not in the Peshitta's canon; Murdock translates it from the later Syriac version printed with it. The Greek has aidiois, \"everlasting\"; the angels are still kept for judgment."
+  },
+  {
+   "book": 65,
+   "chapter": 1,
+   "verse": 25,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"wise\"; adds \"by means of Jesus the Messiah our Lord\"",
+   "note": "Jude is not in the Peshitta's canon; Murdock translates it from the later Syriac version printed with it. Both agree with the early Greek manuscripts against the Textus Receptus; God is still the only God and Saviour."
+  },
+  {
+   "book": 66,
+   "chapter": 1,
+   "verse": 5,
+   "kind": "atonement",
+   "weight": "minor",
+   "change": "\"washed us from our sins\" becomes \"released us\"",
+   "note": "Revelation is not in the Peshitta's canon; Murdock translates it from the later Syriac version printed with it. The Textus Receptus reads lousanti, \"washed\"; P18, Sinaiticus and others read lysanti, \"loosed\". Both say it was by his blood."
+  },
+  {
+   "book": 66,
+   "chapter": 1,
+   "verse": 8,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"the beginning and the ending\"; \"the Lord\" becomes \"the Lord God\"",
+   "note": "Revelation is not in the Peshitta's canon; Murdock translates it from the later Syriac version printed with it. Both agree with the early Greek manuscripts against the Textus Receptus; \"Alpha and Omega\" is kept."
+  },
+  {
+   "book": 66,
+   "chapter": 1,
+   "verse": 11,
+   "kind": "deity",
+   "weight": "major",
+   "change": "Omits \"I am Alpha and Omega, the first and the last\"",
+   "note": "Revelation is not in the Peshitta's canon; Murdock translates it from the later Syriac version printed with it. The words are in the Textus Receptus but not in the Greek manuscripts generally; Christ still says \"I am the First and the Last\" in 1:17."
+  },
+  {
+   "book": 66,
+   "chapter": 1,
+   "verse": 18,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"the keys of hell\" becomes \"of the unseen world\"",
+   "note": "Revelation is not in the Peshitta's canon; Murdock translates it from the later Syriac version printed with it. The Greek has hadēs, the realm of the dead, which the KJV renders \"hell\"."
+  },
+  {
+   "book": 66,
+   "chapter": 2,
+   "verse": 16,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "Omits \"Repent\"",
+   "note": "Revelation is not in the Peshitta's canon; Murdock translates it from the later Syriac version printed with it. The Greek begins \"Repent therefore\"; only \"or if not\" remains here, though the call to repent stands in 2:5."
+  },
+  {
+   "book": 66,
+   "chapter": 5,
+   "verse": 14,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"four and twenty\" and \"him that liveth for ever and ever\"",
+   "note": "Revelation is not in the Peshitta's canon; Murdock translates it from the later Syriac version printed with it. The words are in the Textus Receptus but not in Sinaiticus or most early witnesses; the elders still worship."
+  },
+  {
+   "book": 66,
+   "chapter": 8,
+   "verse": 7,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"mingled with blood\" becomes \"mingled with water\"; adds a third of the earth burned",
+   "note": "Revelation is not in the Peshitta's canon; Murdock translates it from the later Syriac version printed with it. The Greek has \"blood\"; \"water\" is that text's reading. The early Greek manuscripts also have the third of the earth burned, which the Textus Receptus lacks."
+  },
+  {
+   "book": 66,
+   "chapter": 8,
+   "verse": 13,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"an angel\" becomes \"an eagle\", with \"a tail of blood\"",
+   "note": "Revelation is not in the Peshitta's canon; Murdock translates it from the later Syriac version printed with it. The Textus Receptus has \"angel\"; the early Greek manuscripts read \"eagle\". \"A tail of blood\" is in no Greek text."
+  },
+  {
+   "book": 66,
+   "chapter": 11,
+   "verse": 4,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the God of the earth\" becomes \"the Lord of the earth\"",
+   "note": "Revelation is not in the Peshitta's canon; Murdock translates it from the later Syriac version printed with it. The Textus Receptus reads theou; the early Greek manuscripts read kyriou, as here."
+  },
+  {
+   "book": 66,
+   "chapter": 11,
+   "verse": 17,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"and art to come\"",
+   "note": "Revelation is not in the Peshitta's canon; Murdock translates it from the later Syriac version printed with it. The words are in the Textus Receptus but not in the early Greek manuscripts, since God has now come to reign."
+  },
+  {
+   "book": 66,
+   "chapter": 12,
+   "verse": 17,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus Christ\" becomes \"Jesus\"; adds \"he stood on the sand\"",
+   "note": "Revelation is not in the Peshitta's canon; Murdock translates it from the later Syriac version printed with it. \"Christ\" is in the Textus Receptus but not the early Greek manuscripts. The added line is the KJV's 13:1 \"I stood\", which those manuscripts read as \"he stood\"."
+  },
+  {
+   "book": 66,
+   "chapter": 13,
+   "verse": 12,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"causeth the earth... to worship the first beast\"",
+   "note": "Revelation is not in the Peshitta's canon; Murdock translates it from the later Syriac version printed with it. The clause is in the Greek texts; worship of the beast is still told in 13:8 and 13:15."
+  },
+  {
+   "book": 66,
+   "chapter": 13,
+   "verse": 14,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the miracles done \"in the sight of the beast\"",
+   "note": "Revelation is not in the Peshitta's canon; Murdock translates it from the later Syriac version printed with it. The words are in the Greek texts; the signs are still told in verse 13."
+  },
+  {
+   "book": 66,
+   "chapter": 14,
+   "verse": 5,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"before the throne of God\"",
+   "note": "Revelation is not in the Peshitta's canon; Murdock translates it from the later Syriac version printed with it. The words are in the Textus Receptus but not in the early Greek manuscripts; they are still called without fault."
+  },
+  {
+   "book": 66,
+   "chapter": 14,
+   "verse": 15,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"Thrust in thy sickle, and reap... the harvest... is ripe\"",
+   "note": "Revelation is not in the Peshitta's canon; Murdock translates it from the later Syriac version printed with it. The angel's words are in the Greek texts; the reaping is still told in verse 16."
+  },
+  {
+   "book": 66,
+   "chapter": 14,
+   "verse": 20,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"without the city, and blood came out of the winepress\"",
+   "note": "Revelation is not in the Peshitta's canon; Murdock translates it from the later Syriac version printed with it. The words are in the Greek texts; the depth \"to the horses' bridles\" is kept without saying what rose so high."
+  },
+  {
+   "book": 66,
+   "chapter": 16,
+   "verse": 5,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"O Lord\"; \"and shalt be\" becomes \"and art holy\"",
+   "note": "Revelation is not in the Peshitta's canon; Murdock translates it from the later Syriac version printed with it. \"O Lord\" and \"shalt be\" are in the Textus Receptus (the latter from Beza); the Greek manuscripts read \"the Holy One\", as here."
+  },
+  {
+   "book": 66,
+   "chapter": 18,
+   "verse": 22,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"the sound of a millstone shall be heard no more\"",
+   "note": "Revelation is not in the Peshitta's canon; Murdock translates it from the later Syriac version printed with it. Most Greek manuscripts have it; the city's silence is still told."
+  },
+  {
+   "book": 66,
+   "chapter": 19,
+   "verse": 1,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord our God\" becomes \"our God\"",
+   "note": "Revelation is not in the Peshitta's canon; Murdock translates it from the later Syriac version printed with it. The Textus Receptus reads \"the Lord our God\"; the early Greek manuscripts read \"our God\", as here."
+  },
+  {
+   "book": 66,
+   "chapter": 20,
+   "verse": 5,
+   "kind": "judgment",
+   "weight": "major",
+   "change": "Omits \"But the rest of the dead lived not again until the thousand years were finished\"",
+   "note": "Revelation is not in the Peshitta's canon; Murdock translates it from the later Syriac version printed with it. The sentence is in most Greek manuscripts and the Textus Receptus but not in Sinaiticus or this Syriac text; \"the first resurrection\" is still named."
+  },
+  {
+   "book": 66,
+   "chapter": 20,
+   "verse": 12,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"stand before God\" becomes \"standing before the throne\"",
+   "note": "Revelation is not in the Peshitta's canon; Murdock translates it from the later Syriac version printed with it. The Textus Receptus reads \"God\"; the early Greek manuscripts read \"the throne\", as here."
+  },
+  {
+   "book": 66,
+   "chapter": 20,
+   "verse": 13,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"death and hell\" becomes \"death and the grave\"",
+   "note": "Revelation is not in the Peshitta's canon; Murdock translates it from the later Syriac version printed with it. The Greek has hadēs, the realm of the dead, which the KJV renders \"hell\"."
+  },
+  {
+   "book": 66,
+   "chapter": 20,
+   "verse": 14,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"death and hell\" becomes \"death and the grave\"; adds \"this lake of fire\"",
+   "note": "Revelation is not in the Peshitta's canon; Murdock translates it from the later Syriac version printed with it. The Greek has hadēs, which the KJV renders \"hell\"; the early Greek manuscripts add \"the lake of fire\", which the Textus Receptus lacks."
+  },
+  {
+   "book": 66,
+   "chapter": 21,
+   "verse": 4,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"God shall wipe away all tears\" becomes passive",
+   "note": "Revelation is not in the Peshitta's canon; Murdock translates it from the later Syriac version printed with it. \"God\" is in the Textus Receptus but not in Sinaiticus and some others; God is still the one who acts (verse 3)."
+  },
+  {
+   "book": 66,
+   "chapter": 21,
+   "verse": 22,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord God Almighty\" becomes \"the Lord Almighty\"",
+   "note": "Revelation is not in the Peshitta's canon; Murdock translates it from the later Syriac version printed with it. The Greek has \"the Lord God Almighty\"; the title is otherwise the same."
+  },
+  {
+   "book": 66,
+   "chapter": 22,
+   "verse": 19,
+   "kind": "salvation",
+   "weight": "major",
+   "change": "\"the book of life\" becomes \"the tree of life\"",
+   "note": "Revelation is not in the Peshitta's canon; Murdock translates it from the later Syriac version printed with it. The Textus Receptus reads \"book\"; every Greek manuscript reads \"tree\". Erasmus took \"book\" from the Latin. Losing a share in the holy city is kept."
+  }
+ ]
+}
