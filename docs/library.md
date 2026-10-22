@@ -76,7 +76,7 @@ The app comes with these, so it works with nothing else installed. All are publi
 | Abbott-Smith's Manual Greek Lexicon | CrossWire |
 | Spurgeon's Morning and Evening | CrossWire, from the Christian Classics Ethereal Library |
 | Daily Light on the Daily Path | CrossWire |
-| Bible Maps: the land in Jesus' day, Paul's journeys, the Exodus, the tribes | Drawn for the app, from OpenBible.info (CC BY), NASA and USGS terrain and Natural Earth |
+| Bible Maps: fifteen maps, from the patriarchs, the Exodus and the tribes through David's kingdom, the divided kingdoms and the Assyrian, Babylonian and Persian empires, to Jesus' land and ministry, Paul's journeys, the seven churches and the Roman Empire, with plans of Jerusalem in the Old Testament and in Jesus' day | Drawn for the app, from OpenBible.info (CC BY), NASA and USGS terrain and Natural Earth |
 
 Where e-Sword X has a module the app also has, the app's copy is read. To read e-Sword's instead, choose **e-Sword X** beside it under [In e-Sword X too](app:library#copies) on the Library screen. That list shows while **Read e-Sword X** is on.
 

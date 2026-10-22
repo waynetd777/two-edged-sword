@@ -852,13 +852,14 @@ function mapHint(b: number): RegExp {
   if (b === 1) return /patriarch|near east|ancient/i;
   if (b >= 2 && b <= 5) return /exodus|egypt|sinai/i;
   if (b >= 6 && b <= 8) return /canaan|tribal|division/i;
-  if (b >= 9 && b <= 14) return /saul|david|solomon|united|kingdoms of israel|judah/i;
-  if (b >= 15 && b <= 17) return /persian/i;
+  if (b >= 9 && b <= 14) return /saul|david|solomon|united|kingdoms of israel|judah|assyrian|old testament/i;
+  if (b >= 15 && b <= 17) return /persian|old testament/i;
   if (b === 27) return /persian|greek|babylon/i;
-  if (b >= 23 && b <= 39) return /assyrian|babylon|kingdoms of israel|judah/i;
-  if (b >= 40 && b <= 43) return /jesus|herod|roman rule|jerusalem/i;
-  if (b === 44) return /paul|apostles|early ministry|spread/i;
+  if (b >= 23 && b <= 39) return /assyrian|babylon|kingdoms of israel|judah|old testament/i;
+  if (b >= 40 && b <= 43) return /jesus|herod|roman rule/i;
+  if (b === 44) return /paul|apostles|early ministry|spread|roman empire/i;
   if (b >= 45 && b <= 65) return /paul|roman empire|new testament|spread/i;
+  if (b === 66) return /seven churches|roman empire|new testament/i;
   return /world of the new testament|roman empire|spread/i;
 }
 
