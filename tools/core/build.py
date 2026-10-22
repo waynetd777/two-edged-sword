@@ -11,13 +11,13 @@ Spurgeon's Morning and Evening and Daily Light, Weymouth's New Testament, Brento
 the Byzantine Greek New Testament (plain and word by word), WLC+ (tools/wlc's, bundled), and
 OpenBible.info's cross-references and Bible places.
 
-    python3 tools/core/build.py [--if-missing] [--only henry easton jfb clarke barnes smith nave isbe webster1828 bdb wesley torrey hitchcock abbott sme daily
+    python3 tools/core/build.py [--if-missing] [--only henry easton jfb clarke barnes smith nave isbe webster1828 bdb wesley torrey hitchcock abbott sme daily maps
                                        byz byz+ brenton weymouth wlc+ openbible places asv web ylt darby webster rv bsb bsb+ webster+]
 
 Writes kjv.bbli, kjv+.bbli, strong.lexi, kjc.lexi, tsk.cmti, henry.cmti, jfb.cmti, clarke.cmti,
 barnes.cmti, easton.dcti, smith.dcti, nave.dcti, isbe.dcti, webster1828.dcti, bdb_unabridged.lexi,
 wesley.cmti, torrey.dcti, hitchcock.dcti, abbott.lexi, sme.devi, daily.devi, byz.bbli, byz+.bbli, brenton.bbli,
-weymouth.bbli, wlc+.bbli, openbible_xref.cmti, places.dcti, asv.bbli, web.bbli, ylt.bbli, darby.bbli, webster.bbli, rv.bbli, bsb.bbli, bsb+.bbli and webster+.bbli to src-tauri/modules/, which the app bundle carries in
+weymouth.bbli, wlc+.bbli, openbible_xref.cmti, places.dcti, maps.refi (tools/maps), asv.bbli, web.bbli, ylt.bbli, darby.bbli, webster.bbli, rv.bbli, bsb.bbli, bsb+.bbli and webster+.bbli to src-tauri/modules/, which the app bundle carries in
 Contents/Resources/modules/ (and a debug build reads in place). With --if-missing, builds only the
 commentaries, dictionaries and Bibles not there yet, or everything if the KJV and what's built from
 it aren't (the release build runs it that way); --only builds just the ones named (after the KJV,
@@ -2540,6 +2540,12 @@ def write_places():
     print(f"places.dcti: {len(rows)} places")
 
 
+def write_maps():
+    import maps.build as maps
+    maps.build(into=BUNDLED)
+
+
+MORE |= {"maps": ("maps.refi", write_maps)}
 MORE |= {"wesley": ("wesley.cmti", write_wesley), "torrey": ("torrey.dcti", write_torrey),
          "hitchcock": ("hitchcock.dcti", write_hitchcock), "abbott": ("abbott.lexi", write_abbott),
          "sme": ("sme.devi", write_spurgeon), "daily": ("daily.devi", write_daily_light),

@@ -291,13 +291,15 @@ Scripts in `tools/` share `tools/modules.py`:
 
 `tools/books.py` holds the 66 books' names in each source's spelling.
 
-`tools/core/build.py` builds the built-in modules from public-domain sources only (its docstring
-lists them), under the ids the app looks for first: `kjv`, `kjv+`, `strong`, `kjc` and `tsk`; the
-other Bibles (`asv`, `web`, `ylt`, `darby`, `webster`), commentaries and dictionaries (`henry`, `jfb`,
-`clarke`, `barnes`, `easton`, `smith`, `nave`, `isbe`) take e-Sword's ids, so e-Sword X's copies,
-where there are, are read instead; so do the Berean Standard Bible (`bsb`) and the Strong's
-editions `bsb+` and `webster+`. `--only jfb asv` builds just those; `--if-missing` builds only
-what isn't there.
+`tools/core/build.py` builds the built-in modules from public-domain and openly licensed sources (its
+docstring lists them and their licences), under the ids the app looks for first: `kjv`, `kjv+`,
+`strong`, `kjc` and `tsk`. The others mostly take e-Sword's ids (`asv`, `henry`, `wesley`, …); where
+e-Sword X has a module the app also has, the app's copy is read unless the user chooses e-Sword's on
+the Library screen (Settings › `eswordCopies`). `--only jfb asv` builds just those; `--if-missing`
+builds only what isn't there. It also builds WLC+ (`tools/wlc`) into the bundle, and the map book,
+`maps.refi`, with `tools/maps/build.py`: maps drawn from OpenBible.info's places, NASA and USGS terrain
+(Mapzen's Terrain Tiles) and Natural Earth's coasts, at 3,600 pixels wide. Its first run downloads
+some thousands of terrain tiles (cached); `--only jesus --pictures DIR` draws one map to look at.
 
 Nothing from e-Sword X goes into a module that could be shipped: its licence forbids passing its
 modules on. Two scripts read e-Sword modules, so what they build is for your own library only:
