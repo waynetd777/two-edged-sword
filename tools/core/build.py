@@ -179,9 +179,10 @@ targum's Jastrow, syriac/sedra.py's SEDRA).
             so the module is shared under it), Strong's numbers and English from STEPBible (CC BY 4.0) (tools/lxx/plus.py).
   peshitta+  The Peshitta word by word, its English and Strong's numbers from the Greek of Byz+ (lined up word by
             word; STEPBible's, CC BY 4.0), or from Murdock's and Etheridge's translations (tools/syriac/build.py).
-  clementine+  Vulg-C+: the Clementine word by word, its forms from Collatinus (GPL) chosen by taggers trained on the
-            UD Latin LLCT and CIRCSE treebanks (CC BY-SA 4.0), English from Whitaker's WORDS and Collatinus, and
-            Strong's numbers from WLC+, Byz+ and LXX+ lined up with it (tools/latin/clementine.py).
+  clementine+  Vulg-C+: the Clementine word by word, tagged by Stanza 1.14.0's model trained on the PROIEL treebank
+            (CC BY-NC-SA, so this one module is shared under CC BY-NC-SA 4.0 and must be left out of a build that's
+            sold), English from Whitaker's WORDS, and Strong's numbers from WLC+, Byz+ and LXX+ lined up with it
+            (tools/latin/clementine.py; it needs `pip install stanza==1.14.0` to be rebuilt).
 
 The GitHub files are taken at a fixed commit and checked against their sha256, so a rebuild makes
 the same modules; eBible.org's, CrossWire's and the Berean Bible's files have no fixed version to

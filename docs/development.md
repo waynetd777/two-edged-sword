@@ -268,7 +268,7 @@ then press **Rescan**.
 | `tools/beza/plus.py` | Beza 1598+, word by word | beza | STEPBible |
 | `tools/lxx/build.py` | Brenton's Greek Septuagint, with the Apocrypha | | eBible.org |
 | `tools/lxx/plus.py` | LXX-Brenton+, word by word | lxx | GLAUx, STEPBible |
-| `tools/latin/clementine.py` | Vulg-C+, word by word | vulgate, wlc, lxx/plus.py | Collatinus, UD Latin LLCT and CIRCSE, Whitaker's WORDS |
+| `tools/latin/clementine.py` | Vulg-C+, word by word, with Strong's numbers (needs `pip install stanza==1.14.0`) | vulgate, wlc, lxx/plus.py | Stanza's PROIEL model (CC BY-NC-SA), Whitaker's WORDS, WLC+, Byz+, LXX-Brenton+ |
 | `tools/latin/build.py` | Latin+, word by word (downloads about 1 GB) | | e-Sword's Latin Vulgate, Stanza, Whitaker's WORDS |
 | `tools/targum/build.py` | Targum+ and Ps-Jon+, word by word | sefaria, wlc | WLC+, Jastrow |
 | `tools/syriac/build.py` | Peshitta+, word by word, from the Greek | crosswire | Byz+, STEPBible, Murdock, Etheridge |
@@ -312,8 +312,10 @@ builds only what isn't there. It also builds other tools' public-domain and open
 bundle: the Peshitta, Murdock, Etheridge, Tyndale, Geneva 1599 and Douay-Rheims (`tools/crosswire`), the
 Clementine Vulgate (`tools/vulgate`), the Greek Brenton (`tools/lxx/build.py`), Ginsburg and Ginsburg+
 (`tools/ginsburg`, shared under the GPL as the app is, since a few verses come from a GPL-3.0 source),
-WLC+ (`tools/wlc`), and the word-by-word LXX-Brenton+, Vulg-C+ and Peshitta+ (`tools/lxx/plus.py`,
-`tools/latin/clementine.py`, `tools/syriac/build.py`), from open sources only, and the Aramaic Targum, Targum Pseudo-Jonathan and its English
+WLC+ (`tools/wlc`), the word-by-word LXX-Brenton+ and Peshitta+ (`tools/lxx/plus.py`, `tools/syriac/build.py`),
+from open sources only, Vulg-C+ (`tools/latin/clementine.py`: Stanza 1.14.0's tagging, trained on the
+non-commercial PROIEL treebank, so it's the one module shared under CC BY-NC-SA, to be left out of a build that's
+sold; it needs Stanza installed only when it's rebuilt), and the Aramaic Targum, Targum Pseudo-Jonathan and its English
 (`targum_aramaic`, `pseudojonathan_aramaic`, `pseudojonathan_english`; `tools/sefaria`'s `open_targum`). These take named Sefaria
 versions only (`open_versions`), each checked against the licence Sefaria's API gives it: a version that isn't public domain, CC0,
 CC BY or CC BY-SA stops the build. Each runs inside `shipping()`, so it reads only the built-in modules. And the map book,
