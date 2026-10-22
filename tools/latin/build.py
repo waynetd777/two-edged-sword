@@ -1,14 +1,15 @@
 # Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
 # SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
-"""Builds the Latin Bibles word by word: latin+.bbli ("Latin Vulgate w/ glosses") from latin.bbli
-and clementine+.bbli ("Latin Vulgate (Clementine) w/ glosses") from clementine.bbli, each word with
-its English meaning, dictionary form and grammar, as the Greek interlinears are.
+"""Builds latin+.bbli ("Latin Vulgate w/ glosses") word by word from e-Sword's latin.bbli, each word
+with its English meaning, dictionary form and grammar, as the Greek interlinears are. For the user's
+own library only: latin.bbli is e-Sword's, and the tagger's PROIEL model is non-commercial (CC BY-NC-SA).
+The Clementine's (clementine+.bbli, which the app ships) is built from open sources by
+tools/latin/clementine.py, which also uses this file's gloss tables, grammar wording and verse splitting.
 
-    python3 tools/latin/build.py [latin clementine]
+    python3 tools/latin/build.py
 
-Reads the plain modules from the library (tools/modules.py finds them) (tools/vulgate builds the Clementine) and writes
-the new ones beside them; the app finds them after Library → Rescan. With module names, builds only
-those.
+Reads latin.bbli from the library (tools/modules.py finds it) and writes latin+.bbli beside it; the
+app finds it after Library → Rescan.
 
 Each word's dictionary form and grammar come from Stanza (Stanford NLP, Apache 2.0) with its Latin
 model trained on the PROIEL treebank, which has the Vulgate New Testament in it: it reads a verse at
@@ -39,7 +40,6 @@ VENV = CACHE / "venv"
 DICTLINE = "https://raw.githubusercontent.com/mk270/whitakers-words/1f2f0fb0867a896d7b9284a03d615ed635d6f992/DICTLINE.GEN"
 MODULES = {
     "latin": dict(title="Latin Vulgate w/ glosses", abbrev="Latin+"),
-    "clementine": dict(title="Latin Vulgate (Clementine) w/ glosses", abbrev="Vulg-C+"),
 }
 
 
