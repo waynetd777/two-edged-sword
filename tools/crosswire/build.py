@@ -116,7 +116,11 @@ MENDS = {
                 (42, 13, 5): [("except ye resent", "except ye repent")], (42, 14, 3): [("And Jews answered", "And Jesus answered")],
                 (44, 1, 10): [("toward heav,", "toward heaven,")], (40, 1, 25): [("called is name", "called his name")],
                 # Verse 18 of the Syriac's numbering, which the KJV's begins chapter 13 with, left in brackets.
-                (66, 12, 17): [(" [ (Revelation of John 12:18) And he stood on the sand of the sea. ]", " And he stood on the sand of the sea.")]},
+                (66, 12, 17): [(" [ (Revelation of John 12:18) And he stood on the sand of the sea. ]", " And he stood on the sand of the sea.")],
+                # The module repeats Titus 2:15 here; Murdock's own words, from his 1852 printing (archive.org,
+                # newtestamentorbo1852murd).
+                (57, 1, 1): [("These things speak thou, and exhort, and inculcate, with all authority; and let no one despise thee.",
+                              "Paul, a prisoner of Jesus the Messiah, and Timothy a brother; to the beloved Philemon, a laborer with us,")]},
 }
 
 # Rules for moving each module to the KJV's numbering, as tools/vulgate's RULES: by SWORD book name.

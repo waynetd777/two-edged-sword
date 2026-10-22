@@ -318,7 +318,9 @@ def build(name, nlp, dic):
     about = (info + "<p>This edition shows each word with its English meaning, dictionary form and grammar. The dictionary "
              "form and grammar are from Stanza's Latin tagger (Stanford NLP, trained on the PROIEL treebank), which reads each "
              "word in its sentence; the English is the first sense in William Whitaker's WORDS dictionary. Both are the "
-             "work of a program, so some words will be wrong. Built by Two-edged Sword's tools/latin.</p>")
+             "work of a program, so some words will be wrong. Built by Two-edged Sword's tools/latin.</p>"
+             "<p><b>For personal study only.</b> Its text is the e-Sword module it was built from, whose licence doesn't allow "
+             "passing it on, and its tagging comes from a model trained on the PROIEL treebank (CC BY-NC-SA).</p>")
     ot, nt, apoc = (any(lo <= r[0] <= hi for r in rows) for lo, hi in ((1, 39), (40, 66), (67, 99)))
     with module(f"{name}+.bbli", m["title"], m["abbrev"], about, ot=ot, nt=nt, apocrypha=apoc) as db:
         db.executemany("INSERT INTO Bible VALUES (?,?,?,?)", out)
