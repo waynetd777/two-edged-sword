@@ -88,15 +88,27 @@ export const htmlText = (html: string) =>
 /** Marks a picture `clear` when much of it is see-through, so the dark theme can put a plate behind it (styles.css). */
 export function markClear(e: { currentTarget: HTMLImageElement }) {
   const img = e.currentTarget;
-  const c = document.createElement("canvas");
-  c.width = c.height = 32;
-  const g = c.getContext("2d", { willReadFrequently: true });
-  if (!g || !img.naturalWidth) return;
-  g.drawImage(img, 0, 0, 32, 32);
-  const px = g.getImageData(0, 0, 32, 32).data;
-  let clear = 0;
-  for (let i = 3; i < px.length; i += 4) if (px[i] < 16) clear++;
-  img.classList.toggle("clear", clear > 32 * 32 * 0.2);
+  const look = (tries: number) => {
+    const c = document.createElement("canvas");
+    c.width = c.height = 32;
+    const g = c.getContext("2d", { willReadFrequently: true });
+    if (!g || !img.naturalWidth) return;
+    g.drawImage(img, 0, 0, 32, 32);
+    const px = g.getImageData(0, 0, 32, 32).data;
+    let clear = 0;
+    for (let i = 3; i < px.length; i += 4) if (px[i] < 16) clear++;
+    // Wholly blank: not drawn yet (a large picture, a map, can come out so when it has only just loaded, and
+    // then got the plate, a white border round it), not a drawing, which has ink. Look again a little later.
+    if (clear === 32 * 32 && tries > 0) {
+      setTimeout(() => look(tries - 1), 250);
+      return;
+    }
+    img.classList.toggle("clear", clear > 32 * 32 * 0.2);
+  };
+  img
+    .decode()
+    .catch(() => {})
+    .then(() => look(8));
 }
 
 export function renderHtml(html: string, opts: RenderOpts = {}): ReactNode {
