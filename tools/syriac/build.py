@@ -38,7 +38,9 @@ both):
      preposition and pronoun ("to you", "before you", "your own"); a Greek genitive pronoun left over
      beside a word's Greek goes with it when the Syriac has the suffix (ܫܡܟ "your name"); the
      proclitics ܘ and ܒ read "and" and "in" before the English, unless it starts with a preposition.
-  5. A word still without English: the Greek it is surely lined up with elsewhere in the NT (its form,
+  5. A known homograph still without English (HOMOGRAPHS, SENSES) takes the sense whose Greek word is in
+     its verse and not another word's (ܚܘܒܝܢ ὀφειλήματα "our debts", ἀγάπη "love"; ܐܬܐ σημεῖον "sign").
+     Any other word still without English: the Greek it is surely lined up with elsewhere in the NT (its form,
      at least 3 times, 60% of them the same Strong's number), when the verse's Greek hasn't that word
      and has no content word left over near its place that it might render, and the word is not a
      known homograph (HOMOGRAPHS); else Murdock's (1852) or Etheridge's (1846–49) English for it in
@@ -126,6 +128,44 @@ OR_ELSE = {"ܒܝܬ": ("among", {"G3624", "G3614"}), "ܐܬܪܐ": ("place", {"G511
 # and "change", ܦܠܚܐ "farmer" and "serve", ܨܒܘܬ "thing" and "will".
 HOMOGRAPHS = {"ܚܘܒܝܢ", "ܚܘܒܐ", "ܚܘܒܗ", "ܚܘܒܢ", "ܚܘܒܝܟ", "ܚܘܒܝܗܘܢ", "ܚܘܒܝܟܘܢ", "ܐܬܐ", "ܐܬܘܬܐ", "ܣܥܪܐ", "ܒܪܟܘ", "ܒܪܟ",
               "ܕܡܟ", "ܕܡܝܐ", "ܡܝܐ", "ܐܬܪܐ", "ܥܢܐ", "ܫܢܐ", "ܦܠܚܐ", "ܨܒܘܬ"}
+# The senses of those homographs, as the Greek words that render them: one left without English takes the Greek of its
+# verse that is one of these, when no other word of the verse has it (or one has it only by chance), with that Greek's
+# English, or the English given here. ܫܢܐ is ܠܫܢܐ "tongue" too, with its ܠ taken for a proclitic.
+_LOVE_DEBT = {"G26": None, "G5360": None, "G3783": None, "G3782": None, "G1156": None, "G266": None, "G3900": None}
+_DEBT = {"G3783": None, "G3782": None, "G1156": None, "G266": None, "G3900": None}
+_COME = {g: "come" for g in ("G2064", "G2240", "G3854", "G2658", "G2186", "G3918", "G4334", "G1904", "G4905", "G2597", "G2718")}
+SENSES = {
+    "ܚܘܒ": _LOVE_DEBT, "ܚܘܒܬ": _DEBT,  # ܚܘܒܐ "love" or "debt", ܚܘܒܬܐ "debt"; and their suffixed forms (see sense)
+    "ܐܬܐ": {**_COME, "G4592": None}, "ܐܬܘܬܐ": {"G4592": None, "G5039": "signs"},
+    "ܣܥܪܐ": {"G2359": None, "G2915": None, "G2916": None},
+    "ܒܪܟ": {"G2127": None, "G2128": None, "G2168": None, "G1120": None, "G2578": "kneel", "G5207": None, "G3816": None, "G5043": None},
+    "ܒܪܟܘ": {"G2127": None, "G2128": None, "G2168": None, "G1120": None, "G2578": "kneel"},
+    "ܕܡܟ": {"G2518": None, "G2837": None, "G879": "sleep", "G129": None},
+    "ܕܡܝܐ": {"G5092": "price", "G4185": None, "G927": None, "G5204": None, "G3664": None, "G3666": None, "G3667": None},
+    "ܡܝܐ": {"G5204": None, "G5202": None}, "ܥܢܐ": {"G4263": None, "G4167": None, "G4168": None, "G611": None},
+    "ܫܢܐ": {"G2094": None, "G1763": None, "G3599": None, "G236": None, "G3105": None, "G1100": None},
+    "ܦܠܚܐ": {"G1092": None, "G289": None, "G2040": None, "G4904": None, "G3000": None, "G1398": None, "G4757": None, "G4961": None},
+    "ܨܒܘܬ": {"G4229": None, "G2307": None},
+}
+SENSE_OWNER = {"ܗ": "his", "ܢ": "our", "ܝ": "my", "ܟ": "your", "ܝܢ": "our", "ܝܟ": "your", "ܝܗ": "her", "ܘܗܝ": "his",
+               "ܝܗܝ": "his", "ܟܘܢ": "your", "ܗܘܢ": "their", "ܝܟܘܢ": "your", "ܝܗܘܢ": "their"}
+_SENSE_FORM = re.compile(f"^(ܚܘܒܬ|ܚܘܒ)(ܐ|{'|'.join(sorted(SENSE_OWNER, key=len, reverse=True))})$")
+
+
+def sense(pre, rest):
+    """(proclitics, form, {Strong's number: English or None}) for a homograph with senses, or None. A proclitic the
+    Syriac word wasn't split at (ܘܚܘܒܬܗ "and his debt") is taken off here."""
+    for _ in range(3):
+        m = _SENSE_FORM.match(rest)
+        senses = SENSES.get(m.group(1) if m else rest)
+        if senses:
+            if rest == "ܫܢܐ" and "ܠ" not in pre:
+                senses = {g: e for g, e in senses.items() if g != "G1100"}  # "tongue" only as ܠܫܢܐ
+            return pre, rest, senses
+        if len(rest) < 4 or rest[0] not in PROCLITICS:
+            return None
+        pre, rest = pre + rest[0], rest[1:]
+    return None
 # Nouns that end in ܝ "my" (ܒܢܝ "sons of" and many others don't).
 MINE = {"ܒܪܝ": "son", "ܐܒܝ": "father", "ܐܡܝ": "mother", "ܠܒܝ": "heart", "ܢܦܫܝ": "soul", "ܐܠܗܝ": "God", "ܡܪܝ": "lord",
         "ܪܚܡܝ": "friend", "ܒܪܬܝ": "daughter", "ܐܚܬܝ": "sister", "ܪܘܚܝ": "spirit", "ܦܓܪܝ": "body", "ܫܡܝ": "name"}
@@ -309,15 +349,19 @@ def choose(c, L):
 PREPOSITIONS = {"in", "to", "into", "through", "from", "with", "on", "by", "at", "for", "of", "upon", "toward", "among", "before", "after"}
 
 
-def english(c, k, wi, w, chosen, used):
+def english(c, k, wi, w, chosen, used, seg=None, j=None, gloss_as=None):
     """(Strong's number or "", Greek word, Greek grammar, English) for Syriac word wi of verse k.
-    `used`: the verse's Greek words already taken, by index (a genitive pronoun goes to one word only)."""
+    `used`: the verse's Greek words already taken, by index (a genitive pronoun goes to one word only).
+    `seg`, `j`, `gloss_as`: a homograph's proclitics and form, the Greek word of its sense and that sense's English."""
     toks = [ti for ti, o in enumerate(c.owner[k]) if o == wi]
-    pre, rest = c.seg[w]
-    j = chosen.get(toks[-1])
+    pre, rest = seg or c.seg[w]
+    if j is None:
+        j = chosen.get(toks[-1])
     gw = c.grk[k][j] if j is not None else None
-    num, greek, tvm, gloss = (gw[1], re.sub(r"[^\w]", "", gw[0]), gw[2], gw[3]) if gw else ("", "", "", "")
-    if rest in FIXED:
+    num, greek, tvm, gloss = (gw[1], re.sub(r"[^\w]", "", gw[0]), gw[2], gloss_as or gw[3]) if gw else ("", "", "", "")
+    if seg:
+        pass  # a homograph's sense: none of the small words' rules below
+    elif rest in FIXED:
         fixed, renders = FIXED[rest]
         if num == ARTICLE and rest in PRONOUNS:
             gloss = PRONOUNS[rest]
@@ -375,6 +419,10 @@ def english(c, k, wi, w, chosen, used):
             gloss = f"{g2[3]} {bare(gloss)}" if tvm.startswith(("noun", "adjective")) else f"{gloss} {POSSESSIVE[g2[3]]}"
             used.add(jj)
             break
+    # A homograph's own suffix, where the Greek has no pronoun: ܘܚܘܒܬܗ "and his debt".
+    if (seg and tvm.startswith("noun") and (m := _SENSE_FORM.match(rest)) and m.group(2) in SENSE_OWNER
+            and not {x.lower() for x in gloss.split()} & set(POSSESSIVE)):
+        gloss = f"{SENSE_OWNER[m.group(2)]} {bare(gloss)}"
     return num, greek, tvm, suffixed(rest, pre, tvm, gloss)
 
 
@@ -464,12 +512,55 @@ def main(into=None):
     chosen = choose(c, L)
 
     # 1. The Greek each word is lined up with in its verse.
-    res, used = {}, {}
+    res, used, held = {}, {}, {}
+    last = {k: {c.owner[k][ti]: ti for ti in range(len(c.owner[k]))} for k in c.keys}  # each word's stem token
     for k in c.keys:
         used[k] = set(chosen[k].values())
         for wi, w in enumerate(c.syr[k]):
             num, greek, tvm, gloss = english(c, k, wi, w, chosen[k], used[k])
             res[(k, wi)] = (num, greek, tvm, gloss, "greek" if gloss else None)
+            j = chosen[k].get(last[k][wi])
+            if num and j is not None and c.G[k][j] == num:
+                held[(k, j)] = wi
+
+    # 1b. A homograph left without English takes a sense whose Greek word is in its verse (ܚܘܒܝܢ ὀφειλήματα "our
+    #     debts", ܐܬܐ σημεῖον "sign"): one no other word renders, or one another word has only by chance (it is
+    #     that word's Greek fewer than 3 times over the NT, or in under 15% of its places; it then loses it). The
+    #     nearest, if more than one.
+    share, occ, stats = Counter(), Counter(), Counter()
+    for (k, wi), r in res.items():
+        rest = c.seg[c.syr[k][wi]][1]
+        occ[rest] += 1
+        if r[0]:
+            share[(rest, r[0])] += 1
+    for k in c.keys:
+        g, n = c.G[k], len(c.syr[k])
+        for wi, w in enumerate(c.syr[k]):
+            if res[(k, wi)][4] or not (s := sense(*c.seg[w])):
+                continue
+            pre, rest, senses = s
+            options = []
+            for j, gj in enumerate(g):
+                if gj not in senses:
+                    continue
+                hi = held.get((k, j))
+                if hi is not None:
+                    hrest = c.seg[c.syr[k][hi]][1]
+                    hs = sense(*c.seg[c.syr[k][hi]])
+                    if (hs and gj in hs[2]) or (share[(hrest, gj)] >= 3 and share[(hrest, gj)] >= 0.15 * occ[hrest]):
+                        continue  # surely that word's
+                options.append((hi is not None, abs(j / len(g) - wi / n), j))
+            if not options:
+                continue
+            _, _, j = min(options)
+            if (hi := held.pop((k, j), None)) is not None:
+                res[(k, hi)] = ("", "", "", "", None)
+                stats["homograph took the Greek of a word that had it by chance"] += 1
+            used[k].add(j)
+            held[(k, j)] = wi
+            num, greek, tvm, gloss = english(c, k, wi, w, chosen[k], used[k], seg=(pre, rest), j=j, gloss_as=senses[g[j]])
+            res[(k, wi)] = (num, greek, tvm, gloss, "greek")
+            stats["homograph's sense from its verse's Greek"] += 1
 
     # 2. A word left without English takes the Greek it is surely lined up with elsewhere in the NT, when the verse's
     #    Greek hasn't that word (where it has, another Syriac word renders it): its commonest English there, marked
@@ -494,7 +585,6 @@ def main(into=None):
         total = sum(linked[key].values())
         return num if n >= at_least and n / total >= share and total / occurs[key] >= 0.4 else None
 
-    stats = Counter()
     for k in c.keys:
         for wi, w in enumerate(c.syr[k]):
             if res[(k, wi)][4]:
@@ -504,7 +594,7 @@ def main(into=None):
                 continue
             key = ("form", rest)
             num = sure(key, 3, 0.6)
-            if not num or rest in HOMOGRAPHS or num in c.G[k]:  # where the verse's Greek has it, another word renders it
+            if not num or rest in HOMOGRAPHS or sense(pre, rest) or num in c.G[k]:  # where the verse's Greek has it, another word renders it
                 continue
             # A content word of the verse's Greek left over near this word's place: what it renders, most likely.
             g, n = c.G[k], len(c.syr[k])
