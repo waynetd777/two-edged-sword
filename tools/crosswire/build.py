@@ -98,12 +98,25 @@ MODULES = {
 # Brackets the sources left unpaired, mended from the sense (found by checking each Bible's brackets match
 # within a chapter), and a misread letter beside one: by SWORD module name, then (book, chapter, verse).
 MENDS = {
-    "DRC": {(9, 14, 42): [("said: (Cast", "said: Cast")], (9, 20, 2): [("him: (God", "him: God")]},
+    "DRC": {(9, 14, 42): [("said: (Cast", "said: Cast")], (9, 20, 2): [("him: (God", "him: God")],
+            # Words and verses missing from the module, as Challoner's text has them (the Clementine has them all).
+            (11, 17, 19): [("", "And Elias said to her: Give me thy son. And he took him out of her bosom, and carried him into the upper chamber where he abode, and laid him upon his own bed.")],
+            (20, 30, 19): [("There are three things, which go well, and the fourth that walketh happily:", "The way of an eagle in the air, the way of a serpent upon a rock, the way of a ship in the midst of the sea, and the way of a man in youth.")],
+            (20, 30, 29): [("", "There are three things, which go well, and the fourth that walketh happily:")],
+            (43, 8, 14): [("whence I came and whither I go.", "whence I came and whither I go: but you know not whence I come, or whither I go.")],
+            (43, 17, 1): [("he said: the hour is come.", "he said: Father, the hour is come.")],
+            (55, 2, 1): [("be strong in Christ Jesus:", "be strong in the grace which is in Christ Jesus:")],
+            (14, 32, 32): [("are written in the book of the kings", "are written in the vision of Isaias the son of Amos the prophet, and in the book of the kings")]},
     "Geneva1599": {(2, 11, 3): [("And the Lord gaue", "(And the Lord gaue")], (5, 5, 5): [("into the mount, and he said", "into the mount) and he said")]},
     "Tyndale": {(3, 14, 28): [("righte fote:", "righte fote):")], (46, 1, 5): [("thinges ve are", "thinges ye are")],
                 (46, 1, 6): [("even as", "(even as")], (46, 13, 8): [("shall cease) or", "shall cease or")],
                 (47, 12, 1): [("me (no dout", "me no dout")], (58, 9, 15): [("which chaunsed for", "(which chaunsed for")]},
-    "Murdock": {(66, 18, 17): [("by sea) stood", "by sea, stood")]},
+    "Murdock": {(66, 18, 17): [("by sea) stood", "by sea, stood")],
+                # Letters lost in the module's text.
+                (42, 13, 5): [("except ye resent", "except ye repent")], (42, 14, 3): [("And Jews answered", "And Jesus answered")],
+                (44, 1, 10): [("toward heav,", "toward heaven,")], (40, 1, 25): [("called is name", "called his name")],
+                # Verse 18 of the Syriac's numbering, which the KJV's begins chapter 13 with, left in brackets.
+                (66, 12, 17): [(" [ (Revelation of John 12:18) And he stood on the sand of the sea. ]", " And he stood on the sand of the sea.")]},
 }
 
 # Rules for moving each module to the KJV's numbering, as tools/vulgate's RULES: by SWORD book name.
