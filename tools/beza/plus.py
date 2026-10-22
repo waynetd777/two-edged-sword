@@ -64,15 +64,25 @@ def words(ws, edition=None):
 
 # ---------- English ----------
 
+# Where TBESG's gloss is wrong (λαμπάς "window"; μετέωρος "a meteorite"; κτάομαι "to posses"; "ungodlinessness").
+GLOSS_FIX = {"G2985": "torch", "G8308": "lofty", "G2932": "acquire", "G763": "ungodliness"}
+# Forms Strong numbers otherwise than TAGNT does: ἦσαν "were" (G2258, as ἦν), not ἤμην's G2252, "I was".
+FORM_NUMBER = {"ἦσαν": "G2258"}
+
+
 def glosses():
-    """{"G0025": "love", …}: TBESG's gloss for each Strong's number, from its first entry."""
+    """{"G0025": "love", …}: TBESG's gloss for each Strong's number, from its first entry (or the next, where
+    the first is a name's, "Field of"); GLOSS_FIX's where TBESG's is wrong."""
     out = {}
     for line in lexicon("TBESG").split("\n"):
         f = line.split("\t")
-        if len(f) > 6 and re.match(r"G\d{4}[a-zA-Z]?$", f[0]) and f[0] not in out:
+        if len(f) > 6 and re.match(r"G\d{4}[a-zA-Z]?$", f[0]) and (f[0] not in out or out[f[0]].endswith(" of")):
             g = f[6].split(":")[0].strip()  # "lord: God" is the word lord in its sense God
-            g = re.sub(r"\(-\w+\)", "", re.sub(r"^to\s+", "", g)).strip()  # "thus(-ly)"
+            g = re.sub(r"\(-\w+\)", "", re.sub(r"^(?:to|an?|\d+)\s+", "", g)).strip()  # "thus(-ly)", "a siren", "1 winter yearling"
             out[f[0]] = g
+    for n, g in GLOSS_FIX.items():
+        for k in [k for k in out if k[:5] == f"G{int(n[1:]):04d}"]:
+            out[k] = g
     return out
 
 
@@ -81,9 +91,28 @@ PLURAL = {"man": "men", "woman": "women", "child": "children", "foot": "feet", "
           "leaf": "leaves", "loaf": "loaves", "thief": "thieves", "wolf": "wolves", "calf": "calves", "half": "halves"}
 
 
+# Glosses left as they are in the plural: already plural (stairs, loins), mass and abstract nouns, and the
+# words TBESG glosses a noun with that aren't nouns ("which").
+SINGULAR = {"which", "who", "whom", "what", "this", "that", "these", "those", "each", "all", "every", "much", "many", "other",
+            "same", "one", "none", "nothing", "something", "anything", "everything", "both", "few", "several", "such",
+            "the", "and", "or", "if", "not", "no", "yes", "very", "more", "most", "less", "least", "above", "below",
+            "between", "behind", "before", "after", "here", "there", "near", "far", "outside", "inside",
+            "gold", "silver", "bronze", "copper", "iron", "lead", "tin", "wool", "linen", "flax", "cotton", "silk", "wheat",
+            "barley", "grain", "flour", "bread", "meat", "flesh", "blood", "milk", "honey", "wine", "oil", "salt",
+            "incense", "frankincense", "myrrh", "dust", "ash", "ashes", "clay", "mud", "sand", "smoke",
+            "darkness", "news", "people", "cattle", "clothing", "livestock", "offspring", "advice",
+            "information", "knowledge", "wisdom", "understanding", "righteousness", "justice", "mercy", "grace", "peace",
+            "joy", "glory", "honour", "honor", "shame", "anger", "wrath", "fear", "love", "hope", "faith", "strength",
+            "might", "lawlessness", "wickedness", "truth",
+            "money", "wealth", "property", "baggage", "equipment", "furniture", "deer", "fish", "sheep", "swine"}
+
+
 def plural(g):
-    """A simple English plural of a one-word gloss; anything else as it is."""
-    if not re.fullmatch(r"[a-z]+", g):
+    """A simple English plural of a one-word gloss; anything else as it is (a gloss already plural,
+    ending in -s but not -ss, and SINGULAR's)."""
+    if not re.fullmatch(r"[a-z]+", g) or g in SINGULAR:
+        return g
+    if re.search(r"[^s]s$", g):  # already plural: stairs, loins, wonders
         return g
     if g in PLURAL:
         return PLURAL[g]
@@ -119,6 +148,8 @@ def gloss_for(num, code, G):
             return AUTOS_P[m.group(1)] if m.group(2) == "P" else AUTOS.get((m.group(1), m.group(2), m.group(3)), "he")
     if n == 3588:
         return "the"
+    if n == 2258 and re.search(r"-[123]P$", code or ""):  # ἦσαν, ἦτε, ἦμεν: TBESG's "was" is the singular's
+        return "were"
     m = re.match(r"P-([12][NGDAV][SP])", code)
     if m and m.group(1)[1] != "V":
         return PERSONAL.get(m.group(1), g)

@@ -21,11 +21,17 @@ Sources:
   Strong's numbers: the lemma's, by STEPBible's TBESG headwords (Translators Brief lexicon of
     Extended Strongs for Greek, Tyndale House, CC BY 4.0, tools/stepbible.py), which number the
     Septuagint's words beyond Strong's too (G6000 on). Where a headword has two numbers, the one
-    TAGNT (the Greek NT, CC BY 4.0) uses more is taken, a name's only for a capitalised word.
+    TAGNT (the Greek NT, CC BY 4.0) uses more is taken, a name's only for a capitalised word (τύραννος
+    is never Tyrannus). FORM_NUMBER (tools/beza/plus.py) numbers ἦσαν G2258, as Strong does.
     Where Strong numbers forms of a word apart (εἶπεν G2036 for λέγω, μου G3450 for ἐγώ, ἦν G2258
     for εἰμί), the form takes the number TAGNT gives it, as Byz+ does.
   English: TBESG's gloss for the number, as Byz+ has it (tools/beza/plus.py's gloss_for: αὐτός and
-    the personal pronouns by case, plural nouns plural). A name with no number is transliterated.
+    the personal pronouns by case, plural nouns plural; its GLOSS_FIX where TBESG's is wrong), but
+    for OT_GLOSS's (Ἰησοῦς Joshua, but Jesus in Sirach, its author's name, save Joshua son of
+    Nave there; χριστός anointed). A name with no
+    number is transliterated. Brenton's words written as one (διατοῦτο, ἀναμέσον) are PHRASES: one
+    box with each word's number. strong.lexi (tools/core) has TBESG's entries for its numbers
+    beyond Strong's.
 
 Brenton's text is the Vatican (Sixtine) one and Rahlfs' his own, and lxx_brenton.bbli numbers the
 verses as the KJV does, so the two are matched by their words, not their numbers: for each of
@@ -34,7 +40,8 @@ both Greek versions; Tobit: both texts) that shares most words with it is found,
 rarer words, and the words are lined up in order, accents, case, final sigma and a closing movable
 nu ignored; where the texts differ a word matches its like in the same place (one letter apart). A
 word matched to none takes the analysis GLAUx gives the same form most often anywhere in the
-Septuagint, or else TAGNT's number for it.
+Septuagint (its grammar TAGNT's for the form where the NT has it), or else TAGNT's number for it (a
+Koine ending, ἤλθοσαν, as ἦλθον), or a verb's whose headword is nearly its form (ἀναγγελῶ).
 
 GLAUx spells headwords as LSJ does (γίγνομαι), Strong's as the Koine does (γίνομαι): SPELL and a
 γιγν → γιν rule bring them together (and -υμι, -ομαι as TBESG's -υω, -ω where it has those). FIXES
@@ -50,7 +57,7 @@ from difflib import SequenceMatcher
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from beza.plus import gloss_for, glosses  # noqa: E402
+from beza.plus import FORM_NUMBER, gloss_for, glosses  # noqa: E402
 from modules import CACHES, fetch, find, greek_key, module, similar as ratio  # noqa: E402
 from stepbible import robinson, tagnt  # noqa: E402
 
@@ -78,13 +85,46 @@ SPELL = {"γίγνομαι": "γίνομαι", "γιγνώσκω": "γινώσκ
          "ἀείδω": "ᾄδω", "χειμάρρους": "χειμάρρος", "ζυγόν": "ζυγός", "ἵλαος": "ἵλεως", "ταμιεῖον": "ταμεῖον", "ὠδίς": "ὠδίν",
          "νόος": "νοῦς", "ἔνατος": "ἔννατος", "διπλόος": "διπλοῦς", "ὀρεινή": "ὀρεινός", "νίζω": "νίπτω", "ἔσθω": "ἐσθίω",
          "οἰκτίρω": "οἰκτείρω", "οἰκτειρέω": "οἰκτείρω", "ἅλως": "ἅλων", "νεομηνία": "νουμηνία", "ἐξαείρω": "ἐξαίρω",
-         "ἐλαχύς": "ἐλάχιστος"}
-# A form the tagger gets wrong -> its lemma.
-FIXES = {"πρόσχες": "προσέχω", "πρόσχετε": "προσέχω", "ἐπλούτησεν": "πλουτέω", "ἐπλούτησε": "πλουτέω", "λήψῃ": "λαμβάνω",
+         "ἐλαχύς": "ἐλάχιστος", "θυμιάζω": "θυμιάω", "ξυρέω": "ξυράω", "τίρυμι": "ῥύομαι", "ἰδίω": "ὁράω",
+         "ἀποστράπτω": "ἀποστρέφω", "ἰάζω": "ἰάομαι", "κεκράσσω": "κράζω", "μισθωτής": "μισθωτός", "ρίζαι": "ῥίζα",
+         "ἱστάω": "ἵστημι", "κρατύς": "κρείσσων", "ἐσώτερος": "ἐσωτέρω", "φύλαξ": "φυλακτήριος",
+         "Νεφθαλί": "Νεφθαλείμ", "Νεφθαλίς": "Νεφθαλείμ", "Νεφθαλίμ": "Νεφθαλείμ",
+         "Χαναναῖος": "Χανααναῖος", "Χανανῖτις": "Χανααναῖος"}
+# A form the tagger gets wrong -> its lemma, or (lemma, Robinson's code) where its grammar is wrong too.
+FIXES = {"πρόσχες": ("προσέχω", "V-2AAM-2S"), "πρόσχετε": ("προσέχω", "V-2AAM-2P"), "ἐπλούτησεν": ("πλουτέω", "V-AAI-3S"),
+         "ἐπλούτησε": ("πλουτέω", "V-AAI-3S"), "λήψῃ": ("λαμβάνω", "V-FDI-2S"), "μᾶλλον": ("μᾶλλον", "ADV"),
+         "μάλιστα": ("μάλιστα", "ADV"), "δεῖ": ("δεῖ", "V-PAI-3S"), "ἔδει": ("δεῖ", "V-IAI-3S"), "δέον": ("δεῖ", "V-PAP-NSN"),
+         "δέοντα": ("δεῖ", "V-PAP-APN"), "δέοι": ("δεῖ", "V-PAO-3S"), "δέῃ": ("δεῖ", "V-PAS-3S"), "δεήσει": ("δεῖ", "V-FAI-3S"),
+         "ἀπῇραν": ("ἀπαίρω", "V-AAI-3P"), "ἀπῆρεν": ("ἀπαίρω", "V-AAI-3S"), "ἀπῆρε": ("ἀπαίρω", "V-AAI-3S"),
+         "ἐξῇραν": ("ἐξαίρω", "V-AAI-3P"), "ἐπῇραν": ("ἐπαίρω", "V-AAI-3P"), "ᾖραν": ("αἴρω", "V-AAI-3P"), "ᾖρα": ("αἴρω", "V-AAI-1S"),
+         "ἦρεν": ("αἴρω", "V-AAI-3S"), "ἦρε": ("αἴρω", "V-AAI-3S"), "προσάξετε": ("προσάγω", "V-FAI-2P"),
+         "προσάξεις": ("προσάγω", "V-FAI-2S"), "προσάξει": ("προσάγω", "V-FAI-3S"), "προσάξουσι": ("προσάγω", "V-FAI-3P"),
+         "προσάξουσιν": ("προσάγω", "V-FAI-3P"), "ἀνάξω": ("ἀνάγω", "V-FAI-1S"), "ἀνάξει": ("ἀνάγω", "V-FAI-3S"),
+         "ἀναγγελῶ": ("ἀναγγέλλω", "V-FAI-1S"), "ἐλυτρώσω": ("λυτρόω", "V-AMI-2S"), "ἐντελοῦμαι": ("ἐντέλλομαι", "V-FDI-1S"),
+         "ἰησοῖ": ("Ἰησοῦς", "N-DSM"), "γνώτωσαν": ("γινώσκω", "V-2AAM-3P"), "γνώτω": ("γινώσκω", "V-2AAM-3S"), "ἀναφορεῖς": ("ἀναφορεύς", "N-NPM"),
          "μακράν": "μακράν", "οὐδέ": "οὐδέ", "μηδέ": "μηδέ", "ἐναντίον": "ἐναντίον", "σαούλ": "Σαούλ", "καθάπερ": "καθάπερ",
          "ἐάν": "ἐάν", "πλησίον": "πλησίον", "οὐχί": "οὐχί", "κἀγώ": "κἀγώ", "κᾀγώ": "κἀγώ", "ἱνατί": "ἱνατί"}
-# A word beginning so (unaccented) -> its lemma: πρεσβύτεροι is πρεσβύτερος, not πρέσβυς as LSJ has it.
-STEMS = {"πρεσβυτερ": "πρεσβύτερος"}
+# Elided words GLAUx hasn't in their place -> their lemma.
+ELIDED = {"οὐδ": "οὐδέ", "μηδ": "μηδέ", "ἐπ": "ἐπί", "ἐφ": "ἐπί", "ἀπ": "ἀπό", "ἀφ": "ἀπό", "κατ": "κατά", "καθ": "κατά",
+          "μετ": "μετά", "μεθ": "μετά", "παρ": "παρά", "δι": "διά", "ὑπ": "ὑπό", "ὑφ": "ὑπό", "ἀντ": "ἀντί", "ἀνθ": "ἀντί",
+          "ἀλλ": "ἀλλά", "δ": "δέ", "τ": "τε", "οὐκ": "οὐ", "ἐπέκεινα": "ἐπέκεινα"}
+# Brenton's words written as one (unaccented) -> each part's number, the English and the grammar.
+PHRASES = {"διατουτο": (["G1223", "G5124"], "therefore", "preposition · demonstrative pronoun"),
+           "αναμεσον": (["G303", "G3319"], "between", "preposition · adjective"),
+           "αναμεσοσ": (["G303", "G3319"], "between", "preposition · adjective"),
+           "επιτοαυτο": (["G1909", "G3588", "G846"], "together", "preposition · article · pronoun"),
+           "διαπαντοσ": (["G1275"], "continually", "adverb"),
+           "διατι": (["G1302"], "why?", "adverb · interrogative"),
+           "καθοτι": (["G2530"], "because", "conjunction"),
+           "εξεναντιασ": (["G1537", "G1727"], "opposite", "preposition · adjective")}
+# The numbers' English in the Septuagint, where the NT's is wrong for it: Ἰησοῦς is Joshua (but for Jesus son of
+# Sirach and his grandfather, in Sirach), χριστός the anointed (king, priest).
+OT_GLOSS = {"G2424": "Joshua", "G5547": "anointed"}
+# A word beginning so (unaccented) -> its lemma: πρεσβύτεροι is πρεσβύτερος, not πρέσβυς as LSJ has it;
+# ἐπεσκέψατο ἐπισκέπτομαι, not ἐπισκοπέω; βέλτιον βελτίων, not ἀγαθός; δεηθήσομαι δέομαι, not δέω.
+STEMS = {"πρεσβυτερ": "πρεσβύτερος", "χερουβ": "χερουβίμ", "βελτι": "βελτίων", "επεσκεψ": "ἐπισκέπτομαι",
+         "επισκεψ": "ἐπισκέπτομαι", "επισκεπτ": "ἐπισκέπτομαι", "επεσκεπ": "ἐπισκέπτομαι",
+         "δεηθ": "δέομαι", "εδεηθ": "δέομαι", "δεομαι": "δέομαι", "δεομεθα": "δέομαι", "δεομεν": "δέομαι", "εδεομην": "δέομαι"}
 # The words Strong numbers by form: a form takes TAGNT's number for it if it is one of its lemma's family.
 FAMILIES = [{"G1510", "G2258", "G1488", "G2076", "G1526", "G2071", "G5600", "G5607", "G2077", "G2070", "G2075", "G2252", "G2277",
              "G1498", "G1511", "G2074", "G2073", "G2468", "G5605", "G5604", "G5608", "G5606"},
@@ -106,25 +146,37 @@ def nfc(s):
 def form_of(w):
     """A word as printed, for matching forms: lower case, a grave accent as acute, no punctuation, no
     closing movable nu (ἐστὶν is ἐστί)."""
-    t = unicodedata.normalize("NFD", w.lower()).replace("̀", "́")
-    t = unicodedata.normalize("NFC", re.sub(r"[^\ẁ-ͯ]|\d", "", t))
+    t = unicodedata.normalize("NFD", w.lower()).replace("\u0300", "\u0301")
+    t = unicodedata.normalize("NFC", re.sub(r"[^\w\u0300-\u036f]|\d", "", t))
     return t[:-1] if len(t) >= 4 and t.endswith("ν") and t[-2] in "εέιί" else t
+
+
+def printed(word):
+    """A word as printed, lower case, a grave accent as acute, no punctuation (movable nu kept)."""
+    t = unicodedata.normalize("NFD", word.lower()).replace("\u0300", "\u0301")
+    return unicodedata.normalize("NFC", re.sub(r"[^\w\u0300-\u036f]|\d", "", t))
 
 
 def fixed(word, lemma):
     """The lemma, or FIXES' or STEMS' for the word."""
-    t = unicodedata.normalize("NFD", word.lower()).replace("\u0300", "\u0301")
-    t = unicodedata.normalize("NFC", re.sub(r"[^\w\u0300-\u036f]|\d", "", t))
+    t = printed(word)
     if t in FIXES:
-        return FIXES[t]
+        f = FIXES[t]
+        return f[0] if isinstance(f, tuple) else f
     k = key(word)
     return next((v for s, v in STEMS.items() if k.startswith(s)), lemma)
 
 
+def fixed_code(word):
+    """FIXES' grammar for the word, or None."""
+    f = FIXES.get(printed(word))
+    return f[1] if isinstance(f, tuple) else None
+
+
 def lemma_of(w):
     """A headword for matching TBESG's: accents kept, lower case, no punctuation or digits."""
-    t = unicodedata.normalize("NFD", (w or "").lower()).replace("̀", "́")
-    return unicodedata.normalize("NFC", re.sub(r"[^\ẁ-ͯ]|\d", "", t))
+    t = unicodedata.normalize("NFD", (w or "").lower()).replace("\u0300", "\u0301")
+    return unicodedata.normalize("NFC", re.sub(r"[^\w\u0300-\u036f]|\d", "", t))
 
 
 # ---------- GLAUx ----------
@@ -152,12 +204,12 @@ def glaux(tlg):
 CASE = {"n": "N", "g": "G", "d": "D", "a": "A", "v": "V"}
 NUM = {"s": "S", "p": "P", "d": "P"}
 GEN = {"m": "M", "f": "F", "n": "N"}
-TENSE = {"p": "P", "i": "I", "f": "F", "a": "A", "r": "R", "l": "L", "t": "R"}
+TENSE = {"p": "P", "i": "I", "f": "F", "a": "A", "r": "R", "l": "L", "t": "F"}  # t, future perfect: spelt out after
 MOOD = {"i": "I", "s": "S", "o": "O", "m": "M", "n": "N", "p": "P"}
 VOICE = {"a": "A", "m": "M", "p": "P", "e": "E"}
 DEMONSTRATIVE = {"οὗτος", "ἐκεῖνος", "ὅδε", "τοιοῦτος", "τοσοῦτος"}
 RELATIVE = {"ὅς", "ὅστις", "ὅσος", "οἷος"}
-REFLEXIVE = {"ἐμαυτοῦ", "σεαυτοῦ", "ἑαυτοῦ"}
+REFLEXIVE = {"ἐμαυτοῦ": "1", "σεαυτοῦ": "2", "ἑαυτοῦ": "3"}
 PERSON = {"ἐγώ": "1", "ἡμεῖς": "1", "σύ": "2", "ὑμεῖς": "2"}
 NEGATIVE = {"οὐ", "μή", "οὐχί"}
 
@@ -191,7 +243,7 @@ def code(tag, lemma):
         if lemma == "τις":
             return f"X-{cng}"
         if lemma in REFLEXIVE:
-            return f"F-{per if per in '123' else '3'}{cng}"
+            return f"F-{REFLEXIVE[lemma]}{cng}"
         return f"P-{cng}"
     if lemma in NEGATIVE:
         return "PRT-N"
@@ -205,13 +257,15 @@ class Numbers:
 
     def __init__(self):
         from stepbible import lexicon
-        self.by_lemma, self.by_key, self.name, self.first = defaultdict(list), defaultdict(list), {}, {}
+        self.by_lemma, self.by_key, self.name, self.first, self.verbs = defaultdict(list), defaultdict(list), {}, {}, set()
         for line in lexicon("TBESG").split("\n"):
             f = line.split("\t")
             if len(f) > 6 and re.fullmatch(r"G\d{4}[A-Za-z]?", f[0]):
                 n = f"G{int(f[0][1:5])}"
-                self.name.setdefault(n, f[5].startswith("N:"))
+                self.name.setdefault(n, bool(re.fullmatch(r"N:.*-(P|L|PG|LG)", f[5])))  # a person or place, not χερουβίμ
                 self.first.setdefault(n, key(re.split(r"[,;/]", f[3])[0]))
+                if f[5].startswith("G:V"):
+                    self.verbs.add(n)
                 for hw in re.split(r"[,;/]\s*", f[3]):
                     if hw.strip():
                         for d, k in ((self.by_lemma, lemma_of(hw)), (self.by_key, key(hw))):
@@ -225,20 +279,33 @@ class Numbers:
                     forms[form_of(w.greek)][w.num] += 1
                     codes[(form_of(w.greek), w.num)][w.code] += 1
         self.forms = forms
+        self.forms_key = defaultdict(Counter)
+        for f, c in forms.items():
+            self.forms_key[key(f)].update(c)
         self.usual = {f: c.most_common(1)[0][0] for f, c in forms.items() if c.most_common(1)[0][1] >= 0.9 * sum(c.values())}
+        by_key = defaultdict(Counter)
+        for f, c in forms.items():
+            by_key[key(f)].update(c)
+        self.usual_key = {k: c.most_common(1)[0][0] for k, c in by_key.items() if c.most_common(1)[0][1] >= 0.9 * sum(c.values())}
         self.codes = {k: c.most_common(1)[0][0] for k, c in codes.items()}
         self.missing = Counter()  # lemmas TBESG hasn't, for the report
         self.others = {}  # form -> the lemmas GLAUx gives it anywhere, commonest first (main sets it)
 
     def pick(self, cands, capital, lemma=""):
-        """The likeliest of a headword's numbers: a name's only for a capitalised word, one whose first
-        headword it is (ἔνθεν G6033, not G1782 ἐντεῦθεν, ἔνθεν), the one TAGNT uses more."""
-        return max(cands, key=lambda n: (capital or not self.name.get(n), self.first.get(n) == key(lemma), self.use[n], -int(n[1:])))
+        """The likeliest of a headword's numbers, or None: a name's only for a capitalised word (τύραννος
+        is never Tyrannus), one whose first headword it is (ἔνθεν G6033, not G1782 ἐντεῦθεν, ἔνθεν),
+        the one TAGNT uses more."""
+        cands = [n for n in cands if capital or not self.name.get(n)]
+        if not cands:
+            return None
+        return max(cands, key=lambda n: (self.first.get(n) == key(lemma), self.use[n], -int(n[1:])))
 
-    def __call__(self, word, lemma, again=True):
+    def __call__(self, word, lemma, again=True, verb=False):
         """(number or None, how): "lemma", "form" (Strong's by-form number), "tagnt" (the form's, the
         lemma being unknown) or "none"."""
         f = form_of(word)
+        if printed(word) in FORM_NUMBER:
+            return FORM_NUMBER[printed(word)], "form"
         lemma = fixed(word, lemma)
         if lemma:
             lemma = SPELL.get(lemma, lemma).replace("γιγν", "γιν").replace("γίγν", "γίν")  # γίγνομαι: γίνομαι
@@ -249,9 +316,11 @@ class Numbers:
             for a, b in (("υμι", "υω"), ("ομαι", "ω"), ("ω", "ομαι"), ("υμαι", "υω")):  # ἀπόλλυμι: ἀπολλύω; ψεύδω: ψεύδομαι
                 if not cands and k.endswith(a):
                     cands = self.by_key.get(k[:-len(a)] + b)
+            if not cands and k.startswith("ε") and k.endswith("ω"):  # ἐλυτρόω, the tagger's lemma with the augment: λυτρόω
+                cands = self.by_key.get(k[1:])
         n = self.pick(cands, word[:1].isupper(), lemma) if cands else None
         if n:
-            c = self.forms.get(f)
+            c = self.forms.get(f) or self.forms_key.get(key(word))  # ἴδον: TAGNT's εἶδον
             if c:
                 fam = next((x for x in FAMILIES if n in x), None)
                 if fam:
@@ -262,13 +331,22 @@ class Numbers:
         if lemma and again:
             self.missing[lemma] += 1
             for other in self.others.get(f, ()):  # the tagger's slip: what it makes of the same form elsewhere
-                if other != lemma and (n := self(word, other, again=False)[0]):
+                if other != lemma and (n := self(word, other, again=False, verb=verb)[0]):
                     return n, "lemma"
         if f in self.usual:
             return self.usual[f], "tagnt"
+        k = key(word)
+        for a, b in (("", ""), ("οσαν", "ον"), ("οσα", "ον")):  # ἤλθοσαν, the Koine's ἦλθον
+            if k.endswith(a) and (n := self.usual_key.get(k[:len(k) - len(a)] + b)):
+                return n, "tagnt"
+        if verb and len(k) >= 6:  # a verb the tagger didn't know: the TBESG verb most like it (ἀναγγελῶ, ἀναγγέλλω)
+            best = max(((ratio(k, hk), n) for hk, ns in self.by_key.items() if hk[:4] == k[:4] for n in ns if n in self.verbs),
+                       default=(0, None))
+            if best[0] >= 0.8:
+                return best[1], "stem"
         c = self.by_key.get(key(word))  # an indeclinable, or a form that is its own headword
-        if c:
-            return self.pick(c, word[:1].isupper()), "tagnt"
+        if c and (n := self.pick(c, word[:1].isupper())):
+            return n, "tagnt"
         return None, "none"
 
 
@@ -327,9 +405,12 @@ class Book:
         return [w for j in range(lo, lo + n) for w in self.units[j][1]]
 
 
-def line_up(ks, win):
-    """For each of a verse's words (keys `ks`), its GLAUx word in `win` or None."""
+def line_up(ks, win, caps=None):
+    """For each of a verse's words (keys `ks`), its GLAUx word in `win` or None. A word spelt otherwise
+    is matched only to one capitalised as it is (`caps`, for each word: a capital not first in the
+    verse), so that a name isn't taken for a word like it (Ἰησοῦς, νήσους)."""
     wk = [key(w[0]) for w in win]
+    caps = caps or [None] * len(ks)
     got = [None] * len(ks)
     for op, i1, i2, j1, j2 in SequenceMatcher(None, ks, wk, autojunk=False).get_opcodes():
         if op == "equal":
@@ -339,7 +420,7 @@ def line_up(ks, win):
             used = set()
             for d in range(i2 - i1):
                 for e in range(j1, j2):
-                    if e not in used and similar(ks[i1 + d], wk[e]):
+                    if e not in used and similar(ks[i1 + d], wk[e]) and caps[i1 + d] in (None, win[e][0][:1].isupper()):
                         got[i1 + d] = win[e]
                         used.add(e)
                         break
@@ -367,13 +448,14 @@ def main(into=None):
     books = {b: Book([texts[t] for t in ts]) for b, ts in SOURCES.items()}
     print(f"Brenton: {len(brenton)} verses; GLAUx: {sum(len(v) for v in texts.values())} verses in {len(texts)} texts")
 
-    out, stats, worst, unknown = [], defaultdict(Counter), [], Counter()
+    out, stats, worst, unknown, bare = [], defaultdict(Counter), [], Counter(), Counter()
     for b, c, v, text in brenton:
         toks = re.findall(r"\S+", text or "")
         words = [(i, key(t)) for i, t in enumerate(toks) if GREEK_WORD.search(t) and key(t)]
         ks = [k for _, k in words]
         win = books[b].match(ks) if b in books and ks else None
-        got = line_up(ks, win) if win else [None] * len(ks)
+        caps = [toks[i][:1].isupper() if d else None for d, (i, _) in enumerate(words)]
+        got = line_up(ks, win, caps) if win else [None] * len(ks)
         s = stats[b]
         parts, at = [], {i: d for d, (i, _) in enumerate(words)}
         glossed = 0
@@ -381,6 +463,13 @@ def main(into=None):
             d = at.get(i)
             if d is None:
                 parts.append(html.escape(t, quote=False))
+                continue
+            if key(t) in PHRASES:  # Brenton's διατοῦτο: one box, a number for each word
+                ns, en, gr = PHRASES[key(t)]
+                parts.append(f"<div><grk>{html.escape(t, quote=False)}</grk>{''.join(f'<num>{x}</num>' for x in ns)}"
+                             f"<tvm>{gr}</tvm><gra>{en}</gra></div>")
+                s["phrase"] += 1
+                glossed += 1
                 continue
             if got[d]:
                 _, lemma, tag = got[d]
@@ -390,24 +479,37 @@ def main(into=None):
                 s["byform"] += 1
             else:
                 lemma, tag = None, None
-            if lemma and fixed(t, lemma) != lemma:
-                tag = None if (tag or "-")[0] == "n" else tag  # the tagger's lemma was wrong; its tag may be too
-            n, how = numbers(t, lemma)
+            refixed = bool(lemma) and fixed(t, lemma) != lemma  # the tagger's lemma was wrong, so its grammar may be too
+            if not lemma and t[-1:] in "ʼ’'" and printed(t) in ELIDED:  # ἐπʼ, οὐδʼ
+                lemma = ELIDED[printed(t)]
+            n, how = numbers(t, lemma, verb=(tag or "")[:1] == "v")
             s[how] += 1
-            cd = code(tag, nfc(lemma)) if tag else (numbers.codes.get((form_of(t), n), "") if n else "")
+            nt_code = numbers.codes.get((form_of(t), n), "") if n else ""
+            if (not got[d] or refixed) and nt_code:
+                tag = None  # matched to no GLAUx word, or its lemma put right: the NT's grammar for the form first
+            cd = fixed_code(t) or (code(tag, nfc(lemma)) if tag else "") or nt_code
             name = lemma[:1].isupper() if lemma else (t[:1].isupper() and d > 0)  # a name: its lemma capitalised, or a capital not first
+            if name and re.search(r"[βγδζθκλμπτφχ]$", key(t)):
+                cd = "N-PRI"  # a Hebrew name, not declined (Ἀβραάμ, Δαυίδ): the tagger's case is a guess
             if not n and name:
                 cd = cd or "N-PRI"
             en = gloss_for(n, cd, G) if n else ""
+            if n in OT_GLOSS and not (n == "G2424" and b == 70 and "ναυη" not in ks):  # Sirach's Jesus, but Joshua son of Nave
+                en = OT_GLOSS[n]
+            if not n and not name:
+                bare[(printed(t), lemma)] += 1
             if not en and name:
                 en = translit(t.strip(".,;:·()[]ʼ’'"))
                 s["translit"] += 1
             glossed += bool(en)
+            gr = robinson(cd, unknown) if cd else ""
+            if tag and tag[:1] == "v" and tag[3:4] == "t" and not fixed_code(t):
+                gr = gr.replace("future", "future perfect", 1)  # κεκράξομαι: Robinson's codes haven't the tense
             box = f"<div><grk>{html.escape(t, quote=False)}</grk>"
             if n:
                 box += f"<num>{n}</num>"
-            if cd:
-                box += f"<tvm>{html.escape(robinson(cd, unknown), quote=False)}</tvm>"
+            if gr:
+                box += f"<tvm>{html.escape(gr, quote=False)}</tvm>"
             box += f"<gra>{html.escape(en, quote=False) or '—'}</gra></div>"
             parts.append(box)
         out.append((b, c, v, "".join(parts)))
@@ -433,6 +535,7 @@ def main(into=None):
     print("  least numbered books: " + ", ".join(f"{BOOK_NAMES.get(b, b)} {s['numbered'] / max(s['words'], 1):.1%}" for b, s in low[:8]))
     print("  least glossed verses: " + ", ".join(f"{b}:{c}:{v} {r:.0%}" for r, (b, c, v) in sorted(worst)[:8]))
     print(f"  lemmas TBESG hasn't: {[x for x in numbers.missing.most_common(400) if x[0][:1].islower()][:60]}")
+    print(f"  words with no number, not names: {sum(bare.values())}; commonest: {bare.most_common(50)}")
     if unknown:
         print(f"  grammar codes not spelled out: {unknown.most_common(12)}")
 
@@ -440,15 +543,21 @@ def main(into=None):
             "1587), with the Apocrypha, word by word: each word with English under it, its Strong's number and its grammar. "
             "Brenton's text is public domain (eBible.org's grcbrent).</p>"
             "<p>Each word's dictionary word and grammar are those of the same word in the Septuagint of GLAUx, the Greek Language "
-            "Automated corpus (Alek Keersmaekers, https://github.com/alekkeersmaekers/glaux, CC BY-SA 4.0), matched word for word, "
-            "as GLAUx's text (Rahlfs') differs from Brenton's in places; a word it hasn't there takes what GLAUx gives the same "
-            "form elsewhere. GLAUx's Genesis was annotated by hand; the rest by its automatic tagger (about 99% of lemmas right, "
-            "97% of grammar, by the author's measure), which was trained partly on treebanks licensed for non-commercial use.</p>"
-            "<p>The Strong's numbers are found from the dictionary word by STEPBible's TBESG and TAGNT (Tyndale House, "
-            "www.STEPBible.org, CC BY 4.0), which number the Septuagint's words beyond Strong's too; the English is TBESG's gloss "
-            "for the number, the dictionary sense, not a translation of the verse. A name with no number is transliterated. "
+            "Automated corpus (Alek Keersmaekers, https://github.com/alekkeersmaekers/glaux, CC BY-SA 4.0), whose text is Rahlfs' "
+            "as the Greek Wikisource has it (el.wikisource.org, CC BY-SA 3.0). The words are matched one by one, as that text "
+            "differs from Brenton's in places; a word it hasn't there takes what GLAUx gives the same form elsewhere. GLAUx's "
+            "Genesis was annotated by hand; the rest by its automatic tagger (about 99% of lemmas right, 97% of grammar, by the "
+            "author's measure), which was trained partly on treebanks licensed for non-commercial use. Some of the tagger's "
+            "slips are put right here by form.</p>"
+            "<p>The Strong's numbers are found from the dictionary word with STEPBible's TBESG and TAGNT (Tyndale House, "
+            "www.STEPBible.org, CC BY 4.0, https://creativecommons.org/licenses/by/4.0/), which number the Septuagint's words "
+            "beyond Strong's too (G6000 on; strong.lexi has their entries). STEPBible's data is adapted here: their numbers "
+            "are given without the letter that marks a meaning (G2424I is G2424), and their glosses are shortened and inflected "
+            "(a plural noun's made plural, the pronouns by case), a few put right. The English is the dictionary sense, not a "
+            "translation of the verse; Ἰησοῦς is glossed Joshua, χριστός anointed. A name with no number is transliterated. "
             f"{total['numbered'] / w:.0%} of the words are numbered, {total['glossed'] / w:.0%} have English.</p>"
-            "<p>This module, built from GLAUx, is shared under CC BY-SA 4.0. Built by Two-edged Sword's tools/lxx/plus.py.</p>")
+            "<p>This module, built from GLAUx, is shared under CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/). "
+            "Built by Two-edged Sword's tools/lxx/plus.py.</p>")
     with module("lxx_brenton+.bbli", "Septuagint (Greek, Brenton 1844) w/ glosses", "LXX-Brenton+", info, nt=False, apocrypha=True,
                 strongs=True, into=into) as db:
         db.executemany("INSERT INTO Bible VALUES (?,?,?,?)", out)

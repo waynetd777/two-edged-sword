@@ -460,13 +460,41 @@ def hebrew():
     return out
 
 
+def tbesg_extra(have):
+    """Entries for the Greek numbers STEPBible's TBESG has and Strong's hasn't (G6000 on: the Septuagint's words,
+    the NT's variants), as strong.lexi's other entries are: [(number, definition)]. A number TBESG splits by
+    meaning (G2424G, G2424I) is one entry here, its first."""
+    from stepbible import lexicon
+    rows, seen = [], set(have)
+    for line in lexicon("TBESG").split("\n"):
+        f = line.split("\t")
+        if len(f) < 8 or not re.fullmatch(r"G\d{4,5}[A-Za-z]?", f[0]):
+            continue
+        n = "G" + str(int(re.match(r"G(\d+)", f[0])[1]))
+        if n in seen:
+            continue
+        seen.add(n)
+        d = re.sub(r"<ref='[^']*'>(.*?)</ref>", r"\1", f[7])
+        d = re.sub(r"<br\s*/?>", "<br>", d, flags=re.I).replace("__", "")
+        d = re.sub(r"<(?!/?(?:b|i|br)\b)[^>]*>", "", d).strip()
+        gloss = html.escape(f[6].strip())
+        rows.append((n, f"<p><grk>{html.escape(f[3])}</grk></p><p><lat>{html.escape(f[4])}</lat></p><p><b>{gloss}</b></p>"
+                        f"<p>{d}</p><p><i>STEPBible's TBESG (CC BY 4.0).</i></p>"))
+    print(f"  strong.lexi: {len(rows)} entries from STEPBible's TBESG for numbers beyond Strong's")
+    return rows
+
+
 def write_strong(entries, counts):
     info = ("<p>Strong's Hebrew and Greek dictionaries, from James Strong's Exhaustive Concordance of the Bible (1890).</p>"
             "<p>Public domain. The Greek is Ulrik Petersen's XML edition (1.4, 2007), the Hebrew David Troidl's and "
             "David Instone-Brewer's, both from the Open Scriptures project (github.com/openscriptures/strongs). "
             "The occurrences are counted in the KJV's Strong's numbers. Built by Two-edged Sword's tools/core.</p>"
             "<p>+ (addition) marks a rendering with other words; X (multiplication) a rendering from an idiom; "
-            "( ) a word sometimes given with the main one; [ ] a word added.</p>")
+            "( ) a word sometimes given with the main one; [ ] a word added.</p>"
+            "<p>The Greek numbers beyond Strong's (G5625 on, the Septuagint's words and the New Testament's variants, which "
+            "LXX-Brenton+ uses) are STEPBible's extended Strong's numbers, with the entries of their brief lexicon, TBESG "
+            "(Translators Brief lexicon of Extended Strongs for Greek, Tyndale House, www.STEPBible.org, CC BY 4.0, "
+            "https://creativecommons.org/licenses/by/4.0/), its references given as text.</p>")
     rows = []
     for n, e in entries.items():
         total = f"<p><b>Total KJV occurrences: {counts[n]}</b></p>" if counts.get(n) else ""
@@ -474,6 +502,7 @@ def write_strong(entries, counts):
         text = re.sub(r"<i>([^<]*?[a-z])</i>([a-z]+)", r"<i>\1\2</i>", text).replace("<heb></heb>", "")  # "<i>to have affection f</i>or"
         text = re.sub(r"\s+", " ", re.sub(r",?\s*<lat></lat>\s*;", ";", text))  # H595's "sometimes, <lat></lat>;", a form lost
         rows.append((n, f"<p>{e['word']}</p><p><lat>{e['translit']}</lat></p><p><i>{e['pron']}</i></p><p>{text}</p>{total}"))
+    rows += tbesg_extra(set(entries))
     rows.sort(key=lambda r: (r[0][0], int(re.match(r"\d+", r[0][1:])[0])))
     with module("strong.lexi", "Strong's Hebrew and Greek Dictionaries", "Strong", info, into=BUNDLED) as db:
         db.executemany("INSERT INTO Lexicon VALUES (?,?)", rows)
@@ -2494,6 +2523,7 @@ def write_byz_plus():
             if form and form != n:
                 changed[(n, form)] += 1
                 n = form
+            n = bp.FORM_NUMBER.get(accented_form(w), n)  # ἦσαν: G2258, "were"
             g = bp.gloss_for(n, code, G)
             w = w.replace("¶", "")  # a paragraph mark, before the word
             w = re.sub(r"(?<=\w)-$", "—", w)  # the source's dash, a hyphen on the word before it
