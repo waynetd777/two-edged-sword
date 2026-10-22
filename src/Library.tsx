@@ -272,20 +272,25 @@ export function LibraryScreen() {
             <div className="hint" style={{ fontSize: 12.5, paddingBottom: 6 }}>
               Two-edged Sword has its own copy of these, and e-Sword X has one. Choose which is read.
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(380px, 1fr))", gap: "4px 24px" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(440px, 1fr))", gap: "4px 28px" }}>
               {both.map((m) => (
-                <div key={copyKey(m)} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12.5, minHeight: 30 }}>
-                  <span style={{ flexGrow: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={blurb(m)}>
+                <div key={copyKey(m)} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 12.5, minHeight: 30 }}>
+                  <span
+                    style={{ flex: "1 1 auto", minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
+                    title={blurb(m)}
+                  >
                     {m.title}
                   </span>
-                  <Seg
-                    value={m.source === "esword" ? "esword" : "tes"}
-                    options={[
-                      ["tes", "Two-edged Sword"],
-                      ["esword", "e-Sword X"],
-                    ]}
-                    onChange={(v) => v !== (m.source === "esword" ? "esword" : "tes") && !busy && choose(m, v === "esword")}
-                  />
+                  <span style={{ flexShrink: 0, whiteSpace: "nowrap" }}>
+                    <Seg
+                      value={m.source === "esword" ? "esword" : "tes"}
+                      options={[
+                        ["tes", "Two-edged Sword"],
+                        ["esword", "e-Sword X"],
+                      ]}
+                      onChange={(v) => v !== (m.source === "esword" ? "esword" : "tes") && !busy && choose(m, v === "esword")}
+                    />
+                  </span>
                 </div>
               ))}
             </div>
