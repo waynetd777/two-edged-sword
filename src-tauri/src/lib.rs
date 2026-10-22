@@ -110,17 +110,28 @@ fn read_esword(data: &std::path::Path) -> bool {
     store::read(data, "settings").ok().and_then(|v| v.get("readEsword").and_then(|b| b.as_bool())).unwrap_or(true)
 }
 
+/// Settings › eswordCopies: the modules ("commentary:wesley") to read from e-Sword's library where
+/// the app has its own copy too. None by default: the app's are read.
+fn esword_copies(data: &std::path::Path) -> std::collections::HashSet<String> {
+    let v = store::read(data, "settings").ok();
+    let list = v.as_ref().and_then(|v| v.get("eswordCopies")).and_then(|l| l.as_array());
+    list.map(|l| l.iter().filter_map(|x| x.as_str().map(String::from)).collect()).unwrap_or_default()
+}
+
 #[tauri::command]
 fn library_info(st: State<AppState>) -> LibraryInfo {
     LibraryInfo::of(&st.lib())
 }
 
 /// Looks for modules again (after new ones are added), reading e-Sword's folder or not as
-/// `esword` says, or as the saved setting says without it.
+/// `esword` says, and e-Sword's copies of the modules in `esword_copies`; or as the saved settings
+/// say without them.
 #[tauri::command]
-async fn rescan_library(st: State<'_, AppState>, esword: Option<bool>) -> Result<LibraryInfo, String> {
+async fn rescan_library(st: State<'_, AppState>, esword: Option<bool>, esword_copies: Option<Vec<String>>) -> Result<LibraryInfo, String> {
     let dirs = library::dirs(esword.unwrap_or_else(|| read_esword(&st.data)));
-    let fresh = Arc::new(tauri::async_runtime::spawn_blocking(move || Library::scan(dirs)).await.map_err(|e| e.to_string())?);
+    let copies = esword_copies.map(|l| l.into_iter().collect()).unwrap_or_else(|| self::esword_copies(&st.data));
+    let fresh =
+        Arc::new(tauri::async_runtime::spawn_blocking(move || Library::scan_choosing(dirs, &copies)).await.map_err(|e| e.to_string())?);
     *st.lib_cell.write().map_err(|e| e.to_string())? = fresh.clone();
     let (lib, index, ask_root) = (fresh.clone(), st.index.clone(), study::root(&st.data));
     std::thread::spawn(move || {
@@ -815,7 +826,7 @@ pub fn run() {
     }
     // Made up front, so Show in Finder has somewhere to go before anything is built into it.
     let _ = std::fs::create_dir_all(library::app_dir());
-    let lib = Arc::new(Library::scan(library::dirs(read_esword(&data))));
+    let lib = Arc::new(Library::scan_choosing(library::dirs(read_esword(&data)), &esword_copies(&data)));
     let index = Arc::new(index::Index::new(data.join("search-index.sqlite")));
     // The KJV's words, so the journal's spell checker takes its spellings as right.
     {

@@ -35,7 +35,8 @@ Select a result to read it in context. Ask can summarise what the results say.
 
 <a href="images/index.md#study"><picture><source media="(prefers-color-scheme: dark)" srcset="images/word-study-dark.png"><img alt="Word Study for G26, agapē" src="images/word-study-light.png"></picture></a>
 
-Everything about one Greek or Hebrew word: its Strong's entry, where it's used, every verse in
-context, related words, and the articles on it in your library.
+Everything about one Greek or Hebrew word: its Strong's entry, its entries in your other lexicons
+(such as Brown-Driver-Briggs), where it's used, every verse in context, related words, and the
+articles on it in your library.
 
 Type a Strong's number, an English word ("love") or a transliteration ("agape").

@@ -100,7 +100,7 @@ POS = {"N": "noun", "V": "verb", "A": "adjective", "T": "article", "P": "pronoun
 WORDS = {"PREP": "preposition", "CONJ": "conjunction", "ADV": "adverb", "PRT": "particle", "INJ": "interjection", "COND": "conjunction",
          "HEB": "Hebrew word", "ARAM": "Aramaic word", "PRT-N": "particle · negative", "CONJ-N": "conjunction · negative",
          "ADV-N": "adverb · negative", "ADV-I": "adverb · interrogative", "ADV-C": "adverb · comparative", "ADV-S": "adverb · superlative",
-         "ADV-K": "adverb · correlative", "PRT-I": "particle · interrogative", "COND-K": "conjunction · correlative"}
+         "ADV-K": "adverb · with crasis", "PRT-I": "particle · interrogative", "COND-K": "conjunction · with crasis"}
 CASE = {"N": "nom.", "G": "gen.", "D": "dat.", "A": "acc.", "V": "voc."}
 NUMBER = {"S": "sing.", "P": "plur."}
 GENDER = {"M": "masc.", "F": "fem.", "N": "neut."}

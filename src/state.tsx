@@ -29,6 +29,8 @@ export interface Settings {
   kjvGlosses: boolean;
   /** Read e-Sword X's library as well as the app's own modules (skipped quietly if it isn't there). */
   readEsword: boolean;
+  /** Modules ("commentary:wesley") read from e-Sword X where the app has its own copy too: the app's, otherwise. */
+  eswordCopies: string[];
   layout: "verse" | "paragraph";
   bible: string;
   compare: string[];
@@ -111,6 +113,7 @@ const DEFAULTS: Settings = {
   redLetters: true,
   kjvGlosses: true,
   readEsword: true,
+  eswordCopies: [],
   layout: "verse",
   bible: "kjv",
   compare: ["kjv", "asv", "kjv+"],
@@ -387,7 +390,7 @@ interface Ctx {
   concordance: string | null;
   tsk: string | null;
   /** Looks for modules again; `esword` says whether to read e-Sword X's library (the setting if left out). */
-  rescan: (esword?: boolean) => Promise<void>;
+  rescan: (esword?: boolean, eswordCopies?: string[]) => Promise<void>;
 
   /** The settings, with `bible` the Bible being read this session (see set). */
   settings: Settings;
@@ -820,8 +823,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     lexicon,
     concordance,
     tsk,
-    rescan: async (esword) => {
-      const l = await api.rescan(typeof esword === "boolean" ? esword : settings.readEsword);
+    rescan: async (esword, eswordCopies) => {
+      const l = await api.rescan(typeof esword === "boolean" ? esword : settings.readEsword, eswordCopies ?? settings.eswordCopies);
       forgetSizes(); // a Bible's chapters are read again: it may be another copy now
       setLib(l);
     },

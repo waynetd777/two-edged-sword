@@ -48,16 +48,25 @@ def get(name):
     return fetch(SRC.format(name), CACHE / f"{name}.xml")
 
 
+# Where TBESH's word ("first: beginning") says less than its sense.
+GLOSS_FIXES = {"H7225": "beginning"}
+
+
 def glosses():
-    """{"H1254a": "create", "H0430": "God", …}: TBESH's gloss for each Strong's number, from its first
-    entry (the others are the word as part of a name, or its other senses)."""
-    out = {}
+    """{"H1254a": "create", "H0430": "God", …}: TBESH's gloss for each Strong's number. Its entries give the
+    word and one sense ("land: country/planet", "son: child"): the word is taken, from the number's first
+    entry that is the common word (lower case, not "a Name of" or "a Part of" a name: גַּיְא "valley", not
+    "Valley"), or else its first."""
+    entries = {}
     for line in lexicon("TBESH").split("\n"):
         f = line.split("\t")
-        if len(f) > 6 and re.match(r"H\d{4}[a-z]?$", f[0]) and f[0] not in out:
-            g = f[6].split(":")[-1].strip()  # "first: beginning" is the sense "beginning" of "first"
-            g = re.sub(r"^to\s+", "", g).replace("[Obj.]", "[obj.]")
-            out[f[0]] = g
+        if len(f) > 6 and re.match(r"H\d{4}[a-z]?$", f[0]):
+            entries.setdefault(f[0], []).append((f[1], re.sub(r"^to\s+", "", f[6].split(":")[0].strip())))
+    out = {}
+    for k, es in entries.items():
+        common = [g for kind, g in es if g[:1].islower() and not re.search(r"Name of|Part of", kind)]
+        out[k] = (common or [g for _, g in es])[0].replace("[Obj.]", "[obj.]")
+    out.update(GLOSS_FIXES)
     return out
 
 
@@ -147,11 +156,13 @@ def english(lemma, morph):
     for letter, seg in zip(prefixes, segs):
         words.append(PREFIX[letter] + (" the" if seg == "Rd" else ""))
     base = " ".join(g for g in (gloss_for(p) for p in parts if re.match(r"\d", p)) if g)
-    main = segs[len(prefixes)] if len(segs) > len(prefixes) else ""
+    # A word that is only prefixes and a suffix (לוֹ, "to him") has no main part: its suffix is the object.
+    has_main = any(re.match(r"\d", p) for p in parts)
+    main = segs[len(prefixes)] if has_main and len(segs) > len(prefixes) else ""
     # A noun, adjective or participle owns its suffix ("my shepherd"); a verb or preposition takes it as object.
     owns = main[:1] in ("N", "A") or (main[:1] == "V" and main[2:3] in ("r", "s"))
     after = []
-    for seg in segs[len(prefixes) + 1:]:
+    for seg in segs[len(prefixes) + (1 if has_main else 0):]:
         if seg.startswith("Sp"):
             code = seg[2:]
             pos = POSSESSIVE.get(code) or POSSESSIVE.get(code[:1] + code[-1:])
@@ -161,7 +172,8 @@ def english(lemma, morph):
                 after.append(OBJECT[pos])
         elif seg == "Sd":
             words.append("toward")
-    return " ".join(words + ([base] if base else []) + after)
+    out = " ".join(words + ([base] if base else []) + after).split()
+    return " ".join(w for k, w in enumerate(out) if k == 0 or w != out[k - 1])  # "with me me": the gloss had the pronoun
 
 
 def ref(osis):
@@ -185,7 +197,8 @@ def word(w):
     """<w lemma="c/d/776" morph="HC/Td/Ncbsa">וְ/הָ/אָרֶץ</w> -> {text: וְהָאָרֶץ, nums: [H776], …}."""
     lemma, morph = w.get("lemma") or "", w.get("morph") or ""
     nums = [f"H{m.group(1)}" for part in lemma.split("/") if (m := re.match(r"(\d+)", part.strip()))]
-    return {"text": (w.text or "").replace("/", ""), "nums": nums, "grammar": grammar(morph), "english": english(lemma, morph)}
+    # All its text: a large, small or suspended letter is an element inside it (Deu 6:4's ע and ד).
+    return {"text": "".join(w.itertext()).replace("/", ""), "nums": nums, "grammar": grammar(morph), "english": english(lemma, morph)}
 
 
 def esc(t):
@@ -197,9 +210,13 @@ def render(w):
     return f"<div><grk>{w['text']}</grk>{nums}<tvm>{esc(w['grammar'])}</tvm><gra>{esc(w['english']) or '—'}</gra></div>"
 
 
+# Verses the KJV divides at a lesser pause than the atnach: how many words go in the first half.
+SPLIT = {"Ps.13.6": 6, "1Kgs.20.3": 6}  # "...in thy salvation." | "I will sing"; "...Thus saith Ben-hadad," | "Thy silver"
+
+
 def verse(v):
     """The verse's words, as its two halves: up to the word with the atnach (U+0591), the verse's
-    main pause, and the rest ([] if it has none)."""
+    main pause (or where SPLIT says), and the rest ([] if it has none)."""
     out = []
     for el in v:
         tag = el.tag.replace(NS, "")
@@ -209,11 +226,12 @@ def verse(v):
             out += [word(w) for w in el.iter(f"{NS}w")]
         elif tag == "seg" and el.get("type") in SEGS and out:
             out[-1]["text"] += el.text or ""  # a maqaf, sof pasuq or paseq stays with the word before it
-    cut = next((i + 1 for i, x in enumerate(out) if "\u0591" in x["text"]), len(out))
+    cut = SPLIT.get(v.get("osisID")) or next((i + 1 for i, x in enumerate(out) if "\u0591" in x["text"]), len(out))
     return "".join(map(render, out[:cut])), "".join(map(render, out[cut:]))
 
 
-def main():
+def main(into=None):
+    """Writes wlc+.bbli to the modules folder, or to `into` (tools/core bundles it with the app)."""
     GLOSS.update(glosses())
     moves = verse_map()
     verses = {}
@@ -238,7 +256,7 @@ def main():
             "(Tyndale House), CC BY 4.0, https://github.com/STEPBible/STEPBible-Data. The English is the dictionary sense, "
             "not a translation in context. Verses are numbered as in the KJV (psalm titles are part of verse 1); "
             "where the margin corrects the text (ketiv/qere), the reading is given. Built by Two-edged Sword's tools/wlc.</p>")
-    with module("wlc+.bbli", "Westminster Leningrad Codex w/ Strong's", "WLC+", info, nt=False, strongs=True, rtl=True) as db:
+    with module("wlc+.bbli", "Westminster Leningrad Codex w/ Strong's", "WLC+", info, nt=False, strongs=True, rtl=True, into=into) as db:
         db.executemany("INSERT INTO Bible VALUES (?,?,?,?)", rows)
     print(f"wlc+.bbli: {len(rows)} verses")
 

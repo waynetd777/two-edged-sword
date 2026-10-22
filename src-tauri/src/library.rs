@@ -3,12 +3,12 @@
 
 //! The library: every module is a SQLite file in e-Sword X's formats, opened read-only and
 //! immutable so nothing we do can change it or take a lock e-Sword would notice. Modules come
-//! from three folders (`Source`), and the first to have a module wins; a folder that isn't there
-//! is skipped.
+//! from three folders (`Source`), and the first to have a module wins, but for a module the user
+//! has chosen e-Sword's copy of; a folder that isn't there is skipped.
 
 use rusqlite::{Connection, OpenFlags, OptionalExtension};
 use serde::Serialize;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 
@@ -35,6 +35,23 @@ impl Kind {
             _ => None,
         }
     }
+
+    /// The kind as the frontend names it ("bible"), for a module's key.
+    fn name(self) -> &'static str {
+        match self {
+            Kind::Bible => "bible",
+            Kind::Commentary => "commentary",
+            Kind::Dictionary => "dictionary",
+            Kind::Lexicon => "lexicon",
+            Kind::Reference => "reference",
+            Kind::Devotional => "devotional",
+        }
+    }
+}
+
+/// A module's key in Settings › eswordCopies: "commentary:wesley".
+pub fn key(kind: Kind, id: &str) -> String {
+    format!("{}:{id}", kind.name())
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -56,8 +73,11 @@ pub struct ModuleInfo {
     pub features: Vec<&'static str>,
     /// The file's size in bytes.
     pub size: u64,
-    /// Which folder it was found in.
+    /// Which folder it was read from.
     pub source: Source,
+    /// Every folder that has it, in reading order: two when e-Sword's library has one of the app's
+    /// modules (the user chooses which is read).
+    pub copies: Vec<Source>,
     #[serde(skip)]
     pub path: PathBuf,
 }
@@ -106,13 +126,12 @@ pub fn local(file: &str) -> Option<Library> {
     dirs.iter().any(|(_, d)| d.join(file).is_file()).then(|| Library::scan(dirs))
 }
 
-/// The folders to read, in order.
+/// The folders to read, in order: the app's own modules before e-Sword's copies of them.
 pub fn dirs(esword: bool) -> Vec<(Source, PathBuf)> {
-    let mut d = vec![(Source::App, app_dir())];
+    let mut d = vec![(Source::App, app_dir()), (Source::Bundled, bundled_dir())];
     if esword {
         d.push((Source::Esword, esword_dir()));
     }
-    d.push((Source::Bundled, bundled_dir()));
     d
 }
 
@@ -139,7 +158,14 @@ fn url_escape(p: &str) -> String {
 }
 
 impl Library {
+    #[cfg(test)]
     pub fn scan(dirs: Vec<(Source, PathBuf)>) -> Library {
+        Library::scan_choosing(dirs, &HashSet::new())
+    }
+
+    /// As `scan`, but a module whose key (`key`) is in `esword_copies` is read from e-Sword's
+    /// library when that has it too.
+    pub fn scan_choosing(dirs: Vec<(Source, PathBuf)>, esword_copies: &HashSet<String>) -> Library {
         let mut modules: Vec<ModuleInfo> = Vec::new();
         for (source, dir) in &dirs {
             // A folder that isn't there (no e-Sword, nothing built yet) has nothing to add.
@@ -151,13 +177,18 @@ impl Library {
                     continue;
                 };
                 let Some(kind) = Kind::from_ext(&ext.to_ascii_lowercase()) else { continue };
-                if modules.iter().any(|m| m.kind == kind && m.id == stem) {
-                    continue;
+                let had = modules.iter().position(|m| m.kind == kind && m.id == stem);
+                if let Some(i) = had {
+                    modules[i].copies.push(*source);
+                    if !(*source == Source::Esword && esword_copies.contains(&key(kind, stem))) {
+                        continue;
+                    }
                 }
                 match read_details(&path, kind) {
                     Ok((title, abbrev, info, strongs, rtl, features)) => {
                         let size = std::fs::metadata(&path).map(|m| m.len()).unwrap_or(0);
-                        modules.push(ModuleInfo {
+                        let copies = had.map(|i| modules[i].copies.clone()).unwrap_or_else(|| vec![*source]);
+                        let m = ModuleInfo {
                             id: stem.to_string(),
                             kind,
                             title,
@@ -168,8 +199,13 @@ impl Library {
                             features,
                             size,
                             source: *source,
+                            copies,
                             path,
-                        })
+                        };
+                        match had {
+                            Some(i) => modules[i] = m,
+                            None => modules.push(m),
+                        }
                     }
                     Err(err) => eprintln!("skipping {}: {err}", path.display()),
                 }
@@ -323,6 +359,28 @@ mod tests {
         assert!(is_rtl_text("בְּרֵאשִׁית<num>H7225</num> בָּרָא"));
         assert!(!is_rtl_text("In the beginning<num>H7225</num>"));
         assert!(!is_rtl_text("Βίβλος γενέσεως"));
+    }
+
+    #[test]
+    fn chooses_which_copy() {
+        let root = std::env::temp_dir().join(format!("tes-copies-{}", std::process::id()));
+        let (app, esword) = (root.join("app"), root.join("esword"));
+        for (dir, title) in [(&app, "Ours"), (&esword, "e-Sword")] {
+            std::fs::create_dir_all(dir).unwrap();
+            let c = Connection::open(dir.join("wesley.cmti")).unwrap();
+            c.execute_batch(&format!(
+                "CREATE TABLE Details (Title, Abbreviation, Information, Version); INSERT INTO Details VALUES ('{title}', 'W', '', 1);"
+            ))
+            .unwrap();
+        }
+        let dirs = || vec![(Source::Bundled, app.clone()), (Source::Esword, esword.clone())];
+        let ours = Library::scan(dirs());
+        assert_eq!((ours.modules.len(), ours.modules[0].title.as_str()), (1, "Ours"));
+        assert_eq!(ours.modules[0].copies, vec![Source::Bundled, Source::Esword]);
+        let theirs = Library::scan_choosing(dirs(), &HashSet::from([key(Kind::Commentary, "wesley")]));
+        assert_eq!((theirs.modules.len(), theirs.modules[0].title.as_str(), theirs.modules[0].source), (1, "e-Sword", Source::Esword));
+        assert_eq!(theirs.modules[0].copies, vec![Source::Bundled, Source::Esword]);
+        let _ = std::fs::remove_dir_all(&root);
     }
 
     #[test]

@@ -138,6 +138,23 @@ export function useRefPreview(bible: string, side: "below" | "right" = "below") 
 // A dictionary's entry names, lower-cased to the real name; loaded once per module for "See X" links.
 const topicCache = new Map<string, Promise<Map<string, string>>>();
 /** Resolves a name to an entry of the dictionary (not `self`), once its names have loaded. */
+/** A dictionary's topics by the names a cross-reference may use ("See EKRON", "See PARABLE"): each topic's own name,
+ *  then the parts of a combined one ("Ekron; Ekronite"), without a numbered or bracketed qualifier ("Absalom (1)",
+ *  "Enon (Aenon)"), and singular or plural. A topic's own name always wins; else the first topic to claim a name. */
+export function topicNames(ts: string[]): Map<string, string> {
+  const m = new Map(ts.map((t) => [t.toLowerCase(), t]));
+  const add = (k: string, t: string) => k && !m.has(k) && m.set(k, t);
+  for (const t of ts)
+    for (const part of t.toLowerCase().split(/\s*;\s*/)) {
+      const bare = part.replace(/\s*\([^)]*\)\s*$/, "").trim();
+      for (const k of [part, bare]) {
+        add(k, t);
+        add(k.endsWith("s") ? k.slice(0, -1) : k + "s", t);
+      }
+    }
+  return m;
+}
+
 export function useTopics(module: string | undefined, self?: string) {
   const [names, setNames] = useState<Map<string, string> | null>(null);
   useEffect(() => {
@@ -145,7 +162,7 @@ export function useTopics(module: string | undefined, self?: string) {
     if (!module) return;
     let p = topicCache.get(module);
     if (!p) {
-      p = api.topics("dictionary", module, "", 200000).then((ts) => new Map(ts.map((t) => [t.toLowerCase(), t])));
+      p = api.topics("dictionary", module, "", 200000).then(topicNames);
       p.catch(() => topicCache.delete(module));
       topicCache.set(module, p);
     }

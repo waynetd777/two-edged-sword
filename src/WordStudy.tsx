@@ -4,13 +4,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { api, TopicHit, VerseHit } from "./api";
 import { AskPanel } from "./Ask";
-import { BOOKS, fmtRef, SHORT } from "./bible";
+import { BOOKS, fmtRef, Ref, SHORT } from "./bible";
 import { headwords, plainText, renderHtml, tokenize } from "./esword";
 import { Lex, lexEntry, loadLex } from "./lexicon";
 import { Icon } from "./icons";
 import { Topbar } from "./Shell";
 import { useApp } from "./state";
-import { orderModules } from "./StudyPane";
+import { orderModules, useRefPreview } from "./StudyPane";
 import { SayButton } from "./speech";
 
 type Entry = Omit<Lex, "renderings">;
@@ -47,6 +47,8 @@ export function WordStudyScreen() {
   const [verses, setVerses] = useState<VerseHit[]>([]);
   const [related, setRelated] = useState<Entry[]>([]);
   const [topics, setTopics] = useState<TopicHit[]>([]);
+  const [others, setOthers] = useState<Other[]>([]);
+  const { onRefHover, preview } = useRefPreview(app.settings.bible);
   const greek = num.startsWith("G");
   const sb = app.strongsBible;
 
@@ -155,6 +157,23 @@ export function WordStudyScreen() {
       dead = true;
     };
   }, [num, onlyBook, sb]);
+  // The number's entries in the other lexicons (BDB, Thayer's, …): every one but Strong's and the concordance.
+  useEffect(() => {
+    let dead = false;
+    setOthers([]);
+    const ms = (app.lib?.modules ?? []).filter((m) => m.kind === "lexicon" && m.id !== app.lexicon && m.id !== app.concordance);
+    Promise.all(
+      ms.map((m) =>
+        api
+          .article("lexicon", m.id, num)
+          .then((a) => (a && plainText(a.html).trim() ? { id: m.id, title: m.title, html: a.html } : null))
+          .catch(() => null),
+      ),
+    ).then((r) => !dead && setOthers(r.filter((x): x is Other => !!x)));
+    return () => {
+      dead = true;
+    };
+  }, [num, app.lib, app.lexicon, app.concordance]);
   // Dictionary articles for the English words the KJV uses for it.
   useEffect(() => {
     let dead = false;
@@ -305,6 +324,9 @@ export function WordStudyScreen() {
                 )}
               </div>
             </div>
+            {others.map((l) => (
+              <OtherLexicon key={l.id} l={l} onRef={(r) => app.open(r, "read")} onRefHover={onRefHover} onStrongs={app.studyWord} />
+            ))}
             {sb && <BookChart num={num} dist={dist} onlyBook={onlyBook} setOnlyBook={setOnlyBook} />}
             {sb && (
               <div className="card" style={{ padding: "6px 20px 10px" }}>
@@ -416,11 +438,59 @@ export function WordStudyScreen() {
           </div>
         </div>
       )}
+      {preview}
     </div>
   );
 }
 
 /** How many verses in each book of its Testament use a number: a bar a book, which lists that book's verses when clicked. */
+/** Another lexicon's entry for the number. A long one (BDB's run to pages) shows its opening until opened: its first
+ *  paragraphs, cut to a few lines. */
+interface Other {
+  id: string;
+  title: string;
+  html: string;
+}
+const PREVIEW = 3;
+
+function OtherLexicon({
+  l,
+  onRef,
+  onRefHover,
+  onStrongs,
+}: {
+  l: Other;
+  onRef: (r: Ref) => void;
+  onRefHover: (r: Ref | null, el: HTMLElement | null) => void;
+  onStrongs: (num: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const paras = useMemo(() => l.html.match(/<p>[\s\S]*?<\/p>/g) ?? [l.html], [l.html]);
+  const long = paras.length > PREVIEW || l.html.length > 1200;
+  const shut = long && !open;
+  return (
+    <div className="card" style={{ padding: "6px 20px 12px" }}>
+      <div className="label" style={{ padding: "10px 0 4px" }}>
+        {l.title}
+      </div>
+      <div
+        className="es selectable"
+        style={{
+          font: "400 16px/1.6 var(--serif)",
+          ...(shut && { maxHeight: 180, overflow: "hidden", maskImage: "linear-gradient(#000 70%, transparent)" }),
+        }}
+      >
+        {renderHtml(open || !long ? l.html : paras.slice(0, PREVIEW).join(""), { onRef, onRefHover, onStrongs, inlineNums: true })}
+      </div>
+      {long && (
+        <button type="button" className="btn small" onClick={() => setOpen(!open)}>
+          {open ? "Show less" : "Show all"}
+        </button>
+      )}
+    </div>
+  );
+}
+
 function BookChart({
   num,
   dist,

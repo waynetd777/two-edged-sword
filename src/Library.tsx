@@ -10,7 +10,7 @@ import { Icon } from "./icons";
 import { BibleSelect, Topbar } from "./Shell";
 import { useApp } from "./state";
 import { orderModules } from "./StudyPane";
-import { ClearButton, fmtSize, Popover, Switch } from "./ui";
+import { ClearButton, fmtSize, Popover, Seg, Switch } from "./ui";
 import { FILES_APP, isMac } from "./keys";
 
 const total = (ms: ModuleInfo[]) => fmtSize(ms.reduce((t, m) => t + (m.size ?? 0), 0));
@@ -164,10 +164,10 @@ export function LibraryScreen() {
   const hidden = app.settings.hiddenBibles;
   const showInfo: ShowInfo = (m, rect) => setInfo({ m, rect });
   // A rescan that fails says why, and the buttons come back.
-  const rescan = async (esword?: boolean) => {
+  const rescan = async (esword?: boolean, eswordCopies?: string[]) => {
     setBusy(true);
     try {
-      await app.rescan(esword);
+      await app.rescan(esword, eswordCopies);
       return true;
     } catch (e) {
       app.toast(`Couldn't rescan the library: ${e}`);
@@ -177,6 +177,14 @@ export function LibraryScreen() {
     }
   };
   const none = !!q && !ms.some((m) => m.id !== app.tsk && matches(m, q));
+  // Modules the app has and e-Sword X has too: the user picks the copy read, the app's unless they choose e-Sword's.
+  const both = ms.filter((m) => m.copies.includes("esword") && m.copies.length > 1 && (!q || matches(m, q)));
+  const copyKey = (m: ModuleInfo) => `${m.kind}:${m.id}`;
+  const choose = (m: ModuleInfo, esword: boolean) => {
+    const list = app.settings.eswordCopies.filter((k) => k !== copyKey(m)).concat(esword ? [copyKey(m)] : []);
+    app.set({ eswordCopies: list });
+    rescan(undefined, list);
+  };
   return (
     <div className="main">
       <Topbar>
@@ -255,6 +263,34 @@ export function LibraryScreen() {
             {busy ? "Rescanning…" : "Rescan"}
           </button>
         </div>
+        {both.length > 0 && (
+          <div className="card" data-help="copies" style={{ padding: "14px 16px", display: "flex", flexDirection: "column", gap: 4 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", paddingBottom: 4 }}>
+              <span className="label">In e-Sword X too</span>
+              <span className="n">{both.length}</span>
+            </div>
+            <div className="hint" style={{ fontSize: 12.5, paddingBottom: 6 }}>
+              Two-edged Sword has its own copy of these, and e-Sword X has one. Choose which is read.
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(380px, 1fr))", gap: "4px 24px" }}>
+              {both.map((m) => (
+                <div key={copyKey(m)} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12.5, minHeight: 30 }}>
+                  <span style={{ flexGrow: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={blurb(m)}>
+                    {m.title}
+                  </span>
+                  <Seg
+                    value={m.source === "esword" ? "esword" : "tes"}
+                    options={[
+                      ["tes", "Two-edged Sword"],
+                      ["esword", "e-Sword X"],
+                    ]}
+                    onChange={(v) => v !== (m.source === "esword" ? "esword" : "tes") && !busy && choose(m, v === "esword")}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
         {!q && (
           <div className="card" style={{ padding: "14px 16px", display: "flex", alignItems: "center", gap: 14 }}>
             <Icon name="map" size={22} style={{ color: "var(--accent)" }} />

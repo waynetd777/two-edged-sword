@@ -20,10 +20,18 @@ numbers one lower, and its splits and joins; Jeremiah's chapters 25–51, in ano
 11–23, which is Nehemiah; Greek Esther and Daniel), and from the Hebrew to the KJV's (Malachi 4,
 Joel 2–3, the Psalms' titles, and the rest). Rules here cover what the tables don't: eBible's
 3 Kingdoms has chapters 20 and 21 the other way round (Naboth's vineyard first); Malachi ends
-with Elijah before "Remember the law of Moses", the KJV's 4:4; its
+with Elijah before "Remember the law of Moses", the KJV's 4:4; 2 Esdras 17 (Nehemiah 7) has no verse 68,
+as the KJV's numbering hasn't, so from 69 its verses keep their numbers; eBible's English Brenton has
+Nehemiah as a book of its own too, numbered as the KJV, which is read instead of 2 Esdras 11–23; its
 Proverbs has the Hebrew 30:1–14 as 24:22a–t (spread over the KJV's fourteen verses in order),
 30:15–33 and 31:1–9 as 24:35–62, and no chapter 30; and in a chapter eBible already numbers as the
 KJV does (Deuteronomy 28–29), the verses keep their numbers.
+
+Where the Septuagint orders a passage so otherwise that no table moves it (Exodus 35–40, Leviticus 8,
+Sirach 30–36, the additions to Esther), each verse is placed by its words: eBible's English Brenton
+matched with the KJV, or with the RV's Apocrypha, which numbers the additions Esther 10:4–16:24 as the
+Vulgate does (aligned; the Greek numbers its verses as the English). Lettered verses that fill a gap in
+the numbering take its numbers (Tobit 4:7a–l are 4:8–18).
 
 What the KJV has no verse for is joined to the verse before it, as tools/vulgate does: a Psalm's
 title to its verse 1; the Septuagint's added verses (1 Kings 2:35a–o, 12:24a–z, and the other
@@ -38,13 +46,13 @@ Lamentations 1:1. Where the Septuagint lacks a verse the KJV has, there is none.
 SIL's tables are taken at a fixed commit (eBible.org's zip has no fixed version to take).
 Downloads are cached in ~/Library/Caches/Two-edged Sword/lxx.
 """
-import html, io, re, sys, zipfile
+import html, io, math, re, sqlite3, sys, zipfile
 from functools import lru_cache
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from books import USFM as BOOK_CODES  # noqa: E402
-from modules import CACHES, LIBRARY, chapter_lengths, fetch, find, module  # noqa: E402
+from modules import BUNDLED, CACHES, LIBRARY, chapter_lengths, fetch, find, module  # noqa: E402
 CACHE = CACHES / "lxx"
 USFM = "https://ebible.org/Scriptures/grcbrent_usfm.zip"
 VRS = "https://raw.githubusercontent.com/sillsdev/libpalaso/0e913f4b4ee64c9d42b1891254513b83dbb4906c/SIL.Scripture/Resources/{}.vrs.txt"
@@ -59,9 +67,10 @@ def get(url, name):
     return fetch(url, CACHE / name, timeout=300).read_bytes()
 
 
-def usfm():
-    """{book code: [(chapter, verse label, text)]} in the files' order, and the copyright page."""
-    z = zipfile.ZipFile(io.BytesIO(get(USFM, "grcbrent_usfm.zip")))
+def usfm(url=USFM):
+    """{book code: [(chapter, verse label, text)]} in the files' order, and the copyright page, of
+    eBible's grcbrent (or another of its Septuagints, the English eng-Brenton)."""
+    z = zipfile.ZipFile(io.BytesIO(get(url, url.rsplit("/", 1)[1])))
     books, about = {}, ""
     for name in sorted(z.namelist()):
         if name.endswith("copr.htm"):
@@ -92,6 +101,62 @@ def usfm():
             verses[0] = (c1, n1, f"{clean(ip.group(1))} {t1}")
         books[code] = verses
     return books, about
+
+
+ENG = "https://ebible.org/Scriptures/eng-Brenton_usfm.zip"
+# Where the Septuagint orders or numbers a passage so differently that no table moves it, its verses are placed
+# by their words: Brenton's English matched with the KJV's (Exodus 35-40, the making of the tabernacle in another
+# order; Leviticus 8) or with the RV's Apocrypha (Sirach 30-36, where the Greek has two sections the other way
+# round; Esther's additions, at Esther 10:4-16:24, as the Vulgate and the RV number them). The Greek numbers its
+# verses as the English does, so the same places serve it.
+ALIGN = [("EXO", range(35, 41), "kjv.bbli", 2, range(35, 41)), ("LEV", range(8, 9), "kjv.bbli", 3, range(8, 9)),
+         ("SIR", range(30, 37), "rv.bbli", 70, range(30, 37)), ("ESG", range(1, 11), "rv.bbli", 17, range(1, 17))]
+STOP = set("the and of to in that he his him they them a for i is be it unto with was shall all not which their thou "
+           "thee thy ye you your my me we our upon by from as but this were are so have had an at on or who".split())
+
+
+def words(t):
+    return {w for w in re.findall(r"[a-z]+", re.sub(r"<[^>]+>", " ", t).lower()) if w not in STOP and len(w) > 2}
+
+
+@lru_cache(maxsize=1)
+def aligned():
+    """{(book code, chapter, verse label): (e-Sword book, chapter, verse)} for the passages in ALIGN: each Brenton
+    verse at the reference verse whose words it shares most (cosine of their words, 0.3 at least), the best
+    matches placed first, one Brenton verse to a reference verse. A verse left unmatched is placed as before."""
+    eng, _ = usfm(ENG)
+    out = {}
+    for code, chs, ref_file, book, ref_chs in ALIGN:
+        path = BUNDLED / ref_file if (BUNDLED / ref_file).is_file() else find(ref_file)  # the built-in RV has the Apocrypha; e-Sword's hasn't
+        db = sqlite3.connect(f"file:{path}?immutable=1", uri=True)
+        ref = {(c, v): words(t) for c, v, t in db.execute("SELECT Chapter, Verse, Scripture FROM Bible WHERE Book=?", (book,)) if c in ref_chs}
+        db.close()
+        src = [(c, label, words(t)) for c, label, t in eng.get(code, []) if c in chs]
+        scores = sorted(((len(w & rw) / math.sqrt(len(w) * len(rw)), i, k) for i, (_, _, w) in enumerate(src) if w
+                         for k, rw in ref.items() if rw and w & rw), reverse=True)
+        got, taken = {}, set()
+        for score, i, k in scores:
+            if score >= 0.3 and i not in got and k not in taken:
+                got[i] = k
+                taken.add(k)
+        out |= {(code, src[i][0], src[i][1]): (book, *k) for i, k in got.items()}
+    return out
+
+
+def fill_gaps(vs):
+    """Lettered verses that fill a gap in the numbering take its numbers: Tobit 4:7a-7l, then 19, are 4:8-18."""
+    out, k = list(vs), 0
+    while k < len(out):
+        c, label, _ = out[k]
+        run = k + 1
+        while run < len(out) and out[run][0] == c and re.fullmatch(rf"{re.escape(label)}[a-z]", out[run][1]):
+            run += 1
+        if label.isdigit() and run > k + 1 and run < len(out) and out[run][0] == c and out[run][1].isdigit() \
+                and int(out[run][1]) - int(label) - 1 == run - k - 1:
+            for j in range(k + 1, run):
+                out[j] = (c, str(int(label) + j - k), out[j][2])
+        k = run
+    return out
 
 
 def clean(body):
@@ -161,8 +226,12 @@ def proverbs(c, label):
     return None
 
 
-def build():
-    books, about = usfm()
+def build(url=USFM):
+    books, about = usfm(url)
+    if "NEH" in books:  # Nehemiah twice (the English): its own book, not 2 Esdras 11-23
+        books["EZR"] = [x for x in books["EZR"] if x[0] <= 10]
+    books = {code: fill_gaps(vs) for code, vs in books.items()}
+    placed_by_words = aligned()
     lxx, to_eng = {}, {}
     for a, b in versification("lxx")[0]:
         lxx.setdefault(a, b)  # the first for a verse wins
@@ -180,6 +249,8 @@ def build():
 
     def target(code, c, label):
         """Where a Greek verse goes: (e-Sword book, chapter, verse, how it was placed)."""
+        if (code, c, label) in placed_by_words:
+            return *placed_by_words[(code, c, label)], "aligned"
         base = int(re.match(r"\d+", label).group())
         if code == "SUS":
             return 27, 13, base, "own"
@@ -192,6 +263,12 @@ def build():
         o = proverbs(c, label) if code == "PRO" else None
         if code == "MAL" and c == 3 and base in (22, 23, 24):
             o = ("MAL", 3, {22: 23, 23: 24, 24: 22}[base])  # Elijah (the Hebrew 3:23–24) before "Remember the law of Moses" (3:22)
+        if code == "NEH":  # the English's Nehemiah, beside 2 Esdras 11-23 (left out), is numbered as the KJV
+            return 16, c, base, "own"
+        if code == "EZR" and c == 17 and base >= 69:
+            # 2 Esdras 17 (Nehemiah 7) has no verse 68, as the KJV's numbering hasn't: from 69 the numbers are the KJV's,
+            # where the table moves the Hebrew's 7:68-72 to 7:69-73
+            return 16, 7, base, "own"
         if code == "1KI" and c in (20, 21):
             o = ("1KI", 41 - c, base)  # 3 Kingdoms 20 is Naboth's vineyard (the KJV's 21), 21 the siege of Samaria (20)
         how = "rule" if o else None
@@ -223,7 +300,7 @@ def build():
         for c, label, text in vs:
             b, ch, v, how = target(code, c, label)
             placed.append((code, c, label, text, b, ch, v, how))
-            if how in ("table", "rule") and not re.search(r"[a-z]", label):
+            if how in ("table", "rule", "aligned") and not re.search(r"[a-z]", label) or how == "aligned":
                 claimed.add((b, ch, v))
 
     out, order, joined, notes = {}, [], 0, []
@@ -232,8 +309,8 @@ def build():
         if v == 0:
             v = 1  # a Psalm's title opens verse 1
         key = (b, ch, v)
-        extra = bool(re.search(r"[a-z]", label)) and how != "rule"  # a lettered verse a rule places isn't an addition
-        homeless = b <= 39 and how != "own" and key not in kjv_verses()
+        extra = bool(re.search(r"[a-z]", label)) and how not in ("rule", "aligned")  # a lettered verse a rule places isn't an addition
+        homeless = b <= 39 and how not in ("own", "aligned") and key not in kjv_verses()  # Esther 10:4-16:24 are the additions' own
         if (extra or homeless or (how == "same" and key in claimed)) and last and last[0] == b:
             key = last  # joined to the verse before it
             joined += 1
@@ -282,9 +359,11 @@ def main():
     info = ("<p>The Greek Septuagint with Apocrypha, compiled by Sir Lancelot C. L. Brenton (1844), from eBible.org's "
             "grcbrent: public domain. Brenton printed the Vatican text as Valpy's edition had it, which is the Sixtine "
             "edition's (Rome, 1587), the Septuagint the KJV's translators had.</p><p>The verses are moved to the KJV's "
-            "numbering with SIL's versification tables (lxx.vrs, eng.vrs); what the KJV has no verse for (Psalm titles, "
-            "the Septuagint's added verses, the Greek additions to Esther and Daniel 3) is joined to the verse before it. "
-            "Susanna and Bel are Daniel 13–14, the Letter of Jeremiah Baruch 6. Built by Two-edged Sword's tools/lxx.</p>"
+            "numbering with SIL's versification tables (lxx.vrs, eng.vrs), and where the Septuagint orders a passage otherwise "
+            "(Exodus 35–40, Sirach 30–36) each verse is at the verse it is; a Psalm's title opens its verse 1, and the "
+            "Septuagint's added verses and Daniel 3's are joined to the verse before them. The additions to Esther are "
+            "Esther 10:4–16:24, as in the Vulgate and the Revised Version; Susanna and Bel are Daniel 13–14, the Letter of "
+            "Jeremiah Baruch 6. Built by Two-edged Sword's tools/lxx.</p>"
             + (f"<p>eBible.org's text of {html.escape(dated.group(1).strip())}.</p>" if dated else ""))
     with module("lxx_brenton.bbli", "Septuagint (Greek, Brenton 1844)", "LXX-Brenton", info, nt=False, apocrypha=True) as db:
         db.executemany("INSERT INTO Bible VALUES (?,?,?,?)", rows)

@@ -41,12 +41,14 @@ export interface ModuleInfo {
   size: number;
   /** Which folder it was found in: the app's own, e-Sword X's, or the app bundle. */
   source: LibrarySource;
+  /** Every folder that has it, in reading order: two when e-Sword X has one of the app's modules. */
+  copies: LibrarySource[];
 }
 
 export type LibrarySource = "app" | "esword" | "bundled";
 
 export interface LibraryInfo {
-  /** The folders read, in order; the first to have a module wins. */
+  /** The folders read, in order; the first to have a module wins, unless e-Sword's copy is chosen (Settings › eswordCopies). */
   dirs: { source: LibrarySource; path: string; found: boolean }[];
   modules: ModuleInfo[];
 }
@@ -227,7 +229,7 @@ export interface TrayInfo {
 
 export const api = {
   library: () => invoke<LibraryInfo>("library_info"),
-  rescan: (esword?: boolean) => invoke<LibraryInfo>("rescan_library", { esword }),
+  rescan: (esword?: boolean, eswordCopies?: string[]) => invoke<LibraryInfo>("rescan_library", { esword, eswordCopies }),
   chapter: (bible: string, book: number, chapter: number) => invoke<Verse[]>("get_chapter", { bible, book, chapter }),
   bibleNotes: (bible: string, book: number, chapter: number) => invoke<BibleNote[]>("bible_notes", { bible, book, chapter }),
   passages: (bible: string, ranges: Range[]) => invoke<Passage[]>("get_passages", { bible, ranges }),

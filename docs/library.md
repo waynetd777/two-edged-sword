@@ -23,10 +23,11 @@ The app reads Bibles and books from three places, and never changes them:
 - **Rescan** picks up modules added since the app started.
 - **Show in <!-- mac -->Finder<!-- /mac --><!-- github --> (Mac) or <!-- /github --><!-- windows -->File Explorer<!-- /windows --><!-- github --> (Windows)<!-- /github -->** opens your modules folder.
 - **Read e-Sword X** turns e-Sword X's library on or off.
+- [In e-Sword X too](app:library#copies) lists the modules both the app and e-Sword X have, and which copy each reads. The app's is the default.
 
 ## Built-in modules
 
-The app comes with these, so it works with nothing else installed. All are public domain.
+The app comes with these, so it works with nothing else installed. All are public domain except where the table says otherwise; each module's information has its credits.
 
 | Module | From |
 |---|---|
@@ -42,17 +43,33 @@ The app comes with these, so it works with nothing else installed. All are publi
 | Young's Literal Translation (YLT) | eBible.org |
 | Darby Translation (1890) | eBible.org |
 | Webster's Bible (1833) | eBible.org |
+| Revised Version (RV, 1885) | eBible.org |
+| Weymouth New Testament (1912) | CrossWire |
+| Brenton's English Septuagint (1844), with the Apocrypha | eBible.org |
+| Greek NT: Byzantine Majority Text (Byz, 2018) | Robinson and Pierpont |
+| Byz+: the Byzantine Greek NT word by word | Robinson and Pierpont; English from STEPBible (CC BY) |
+| WLC+: the Hebrew Old Testament word by word | Open Scriptures and STEPBible (CC BY) |
 | Webster's Bible with Strong's numbers (Webster+) | eBible.org; the numbers carried over from the KJV+ |
 | Berean Standard Bible (BSB), with the words of Christ in red | berean.bible |
 | Berean Standard Bible with Strong's numbers (BSB+) | berean.bible, from its translation tables |
 | Jamieson, Fausset & Brown Commentary (JFB) | CrossWire, from the Christian Classics Ethereal Library |
 | Adam Clarke's Commentary on the Bible | CrossWire, from Wikisource |
 | Barnes' Notes on the New Testament | CrossWire |
+| Wesley's Explanatory Notes | CrossWire |
+| OpenBible.info Cross-References, the links readers voted helpful | OpenBible.info (CC BY) |
 | Smith's Bible Dictionary | CrossWire |
 | Nave's Topical Bible | CrossWire, from the Christian Classics Ethereal Library |
 | International Standard Bible Encyclopedia (ISBE) | CrossWire |
+| Torrey's Topical Textbook | CrossWire |
+| Hitchcock's Bible Names | CrossWire, from the Christian Classics Ethereal Library |
+| Bible Places: where each place is, and the verses that name it | OpenBible.info (CC BY) |
+| Webster's Dictionary (1828) | CrossWire, Akai Tsurugi's edition (CC BY-SA) |
+| Brown-Driver-Briggs Hebrew Lexicon (BDB), unabridged | Eliran Wong's edition |
+| Abbott-Smith's Manual Greek Lexicon | CrossWire |
+| Spurgeon's Morning and Evening | CrossWire, from the Christian Classics Ethereal Library |
+| Daily Light on the Daily Path | CrossWire |
 
-If you have e-Sword X, its copies of these are used instead while **Read e-Sword X** is on.
+Where e-Sword X has a module the app also has, the app's copy is read. To read e-Sword's instead, choose **e-Sword X** beside it under [In e-Sword X too](app:library#copies) on the Library screen. That list shows while **Read e-Sword X** is on.
 
 ## Formats
 
@@ -92,7 +109,6 @@ show after **Rescan**. They're numbered like the KJV, so they compare beside it.
 | Syriac Peshitta NT, Murdock, Etheridge, Tyndale, Geneva 1599, Douay-Rheims | CrossWire |
 | Targum, Targum Pseudo-Jonathan, the Babylonian Talmud | Sefaria |
 | Clementine Vulgate (1592) | Clementine Vulgate Project |
-| WLC+: the Hebrew Old Testament word by word | Open Scriptures, STEPBible |
 | Ginsburg's Hebrew Bible (1894), and Ginsburg+ word by word | Ginsburg Hebrew Bible project |
 | Beza's Greek New Testament (1598), and Beza 1598+ word by word | textus-receptus.com, STEPBible |
 | Brenton's Greek Septuagint with the Apocrypha, and LXX-Brenton+ word by word | eBible.org, STEPBible |
@@ -111,25 +127,18 @@ on [Bible Support](https://www.biblesupport.com) (free sign-in).
 
 **Bibles**
 
-- Brenton's English Septuagint (e-Sword): the Greek Old Testament the apostles quoted.
 - Greek NT INT+ (e-Sword): the best single tool for the Greek behind the KJV and modern versions.
-- Greek NT TR+, BYZ+ and WH+ (e-Sword): three Greek texts with Strong's numbers and grammar.
+- Greek NT TR+ and WH+ (e-Sword): two more Greek texts with Strong's numbers and grammar.
 - Greek OT+ and Hebrew OT+ (e-Sword): the Old Testament in Greek and Hebrew, with Strong's
   numbers.
-- Weymouth and the Revised Version (e-Sword).
 
 **Commentaries**
 
 - Keil & Delitzsch on the Old Testament, and Spurgeon's Treasury of David on the Psalms
   (e-Sword).
-- Robertson's Word Pictures and Vincent's Word Studies (e-Sword): Greek word studies.
+- Vincent's Word Studies (e-Sword): Greek word studies. Robertson's Word Pictures (e-Sword) is like it, but not all public domain: its last two volumes are in copyright in the US until 2028 and 2029.
 - The Cambridge Bible, Bullinger's Companion Bible and MacLaren's Expositions (e-Sword); Lange and
   Meyer (Bible Support).
-
-**Dictionaries**
-
-- Torrey's Topical Textbook and Hitchcock's Bible Names (e-Sword).
-- Webster's 1828 Dictionary (e-Sword): what KJV-era English words meant.
 
 **Books and devotionals**
 
