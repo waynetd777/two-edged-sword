@@ -2604,12 +2604,14 @@ MORE |= {"ginsburg": ("ginsburg.bbli", lambda: write_tool("ginsburg.build")), "g
 
 def main():
     if "--if-missing" in sys.argv and all((BUNDLED / f).exists() for f in CORE):
-        for file, build in MORE.values():  # only the ones not built yet
-            if not (BUNDLED / file).exists():
-                build()
+        # Only the ones not built yet, the plain Bibles first: some of the rest are matched against them
+        # (the Greek Septuagint's verses against the RV's).
         for bid in BIBLES:
             if not (BUNDLED / f"{bid}.bbli").exists():
                 write_bible(bid)
+        for file, build in MORE.values():
+            if not (BUNDLED / file).exists():
+                build()
         return
     if "--only" in sys.argv:  # --only henry easton asv: just those
         names = sys.argv[sys.argv.index("--only") + 1:]
@@ -2638,10 +2640,10 @@ def main():
     write_tsk()
     write_henry()
     write_easton()
+    for bid in BIBLES:  # first: some of the rest are matched against them
+        write_bible(bid)
     for _, build in MORE.values():
         build()
-    for bid in BIBLES:
-        write_bible(bid)
 
 
 if __name__ == "__main__":
