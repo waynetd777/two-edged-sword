@@ -1,0 +1,3382 @@
+{
+ "module": "drc",
+ "base": "kjv",
+ "updated": "2026-10-22",
+ "records": [
+  {
+   "book": 1,
+   "chapter": 3,
+   "verse": 15,
+   "kind": "prophecy",
+   "weight": "major",
+   "change": "\"it shall bruise thy head\" becomes \"she shall crush thy head\"",
+   "note": "The Vulgate reads ipsa conteret (she shall crush), and \"lie in wait for her heel\"; the Masoretic Hebrew has hu' (he, it: the seed), as the Septuagint's autos. Catholic tradition has read the woman as Mary; the KJV, with the Hebrew, makes the seed the victor."
+  },
+  {
+   "book": 1,
+   "chapter": 4,
+   "verse": 8,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Adds Cain's words \"Let us go forth abroad\"",
+   "note": "The Vulgate, with the Septuagint and the Samaritan Pentateuch, supplies what Cain said; the Masoretic Hebrew has \"Cain said to Abel\" with no words following, and the KJV renders it \"talked with\"."
+  },
+  {
+   "book": 1,
+   "chapter": 6,
+   "verse": 3,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"My spirit shall not always strive with man\" becomes \"…remain in man\"",
+   "note": "Jerome's Vulgate reads non permanebit (shall not remain), as the Septuagint; the Hebrew yadon is uncertain and the KJV takes it as \"strive\". Either way man's days are limited to 120 years."
+  },
+  {
+   "book": 1,
+   "chapter": 14,
+   "verse": 18,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"and he was the priest\" becomes \"for he was the priest\"",
+   "note": "Jerome's Vulgate reads erat enim sacerdos, making Melchizedek's bread and wine a priestly act; the Hebrew we-hu' kohen is \"and he was priest\". Catholic tradition reads it as a figure of the Eucharist; Hebrews 7 speaks of his priesthood without the bread and wine."
+  },
+  {
+   "book": 1,
+   "chapter": 22,
+   "verse": 2,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"land of Moriah\" becomes \"land of vision\"; \"only son\" becomes \"only begotten\"",
+   "note": "The Vulgate translates the name Moriah as terram visionis, linking it to ra'ah (see), and renders yachid (only) as unigenitum, the word John uses of Christ. The Hebrew has the place-name and \"only son\"."
+  },
+  {
+   "book": 1,
+   "chapter": 37,
+   "verse": 2,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"seventeen years old\" becomes \"sixteen\"; the report becomes a \"most wicked crime\"",
+   "note": "The Clementine Vulgate reads sedecim (sixteen) and accusavit fratres suos apud patrem crimine pessimo; the Hebrew, followed by the KJV, has seventeen and \"their evil report\"."
+  },
+  {
+   "book": 1,
+   "chapter": 41,
+   "verse": 45,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"Zaphnathpaaneah\" becomes \"the saviour of the world\"",
+   "note": "The Vulgate translates the Egyptian name as Salvatorem mundi, following an early interpretation of it; the Hebrew gives the name itself. Jerome's rendering makes Joseph a figure of Christ."
+  },
+  {
+   "book": 1,
+   "chapter": 44,
+   "verse": 31,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"to the grave\" becomes \"unto hell\"",
+   "note": "Jerome's Vulgate renders the Hebrew she'ol as infernus, which the Douay-Rheims gives as \"hell\"; the KJV renders she'ol \"grave\" here and \"hell\" elsewhere. A translation choice: she'ol is the place of the dead."
+  },
+  {
+   "book": 1,
+   "chapter": 47,
+   "verse": 31,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"Israel bowed himself upon the bed's head\" becomes \"adored God, turning to…\"",
+   "note": "Jerome's Vulgate reads adoravit Israel Deum, conversus ad lectuli caput, adding \"God\"; the Hebrew has \"bowed upon the head of the bed\", the Septuagint \"upon the top of his staff\", which Hebrews 11:21 quotes."
+  },
+  {
+   "book": 1,
+   "chapter": 49,
+   "verse": 10,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"until Shiloh come\" becomes \"till he come that is to be sent\"",
+   "note": "Jerome's Vulgate reads donec veniat qui mittendus est, \"and he shall be the expectation of nations\"; the Hebrew shiloh is obscure. Both read the promise of a coming ruler from Judah."
+  },
+  {
+   "book": 1,
+   "chapter": 49,
+   "verse": 32,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse missing: the purchase of the field from the children of Heth",
+   "note": "Jerome's Vulgate does not translate this verse, which is in the Hebrew; the purchase it recalls is told in Genesis 23:17-20."
+  },
+  {
+   "book": 1,
+   "chapter": 50,
+   "verse": 19,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"in the place of God?\" becomes \"resist the will of God?\"",
+   "note": "Jerome renders the Hebrew hatachat 'elohim 'ani freely; the Hebrew has Joseph disclaim God's place as judge, the Vulgate has him submit to God's will. Both lead to his forgiving his brothers."
+  },
+  {
+   "book": 2,
+   "chapter": 6,
+   "verse": 3,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"by my name JEHOVAH\" becomes \"my name ADONAI\"",
+   "note": "Jerome's Vulgate puts Adonai (Lord), the word read aloud in place of the divine name, where the Hebrew has YHWH; the KJV prints \"JEHOVAH\". The same name is meant."
+  },
+  {
+   "book": 2,
+   "chapter": 14,
+   "verse": 13,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"the salvation of the LORD\" becomes \"the great wonders of the Lord\"",
+   "note": "Jerome renders the Hebrew yeshu'ah (salvation, deliverance) as magnalia (great works). The deliverance at the Red Sea is the same."
+  },
+  {
+   "book": 2,
+   "chapter": 15,
+   "verse": 3,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the LORD is his name\" becomes \"Almighty is his name\"",
+   "note": "The Vulgate reads omnipotens nomen ejus, where the Hebrew has the divine name YHWH; the Septuagint also has a title, Kyrios. The Douay-Rheims generally renders the name \"the Lord\"."
+  },
+  {
+   "book": 2,
+   "chapter": 30,
+   "verse": 15,
+   "kind": "atonement",
+   "weight": "minor",
+   "change": "Omits \"to make an atonement for your souls\"",
+   "note": "Jerome's Vulgate shortens the verse and lacks the clause, which is in the Hebrew; verse 16 keeps the idea as \"he may be merciful to their souls\"."
+  },
+  {
+   "book": 2,
+   "chapter": 32,
+   "verse": 12,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"repent of this evil\" becomes \"be appeased upon the wickedness\"",
+   "note": "The Hebrew asks God to relent from the harm (ra'ah) he intended; Jerome's Vulgate reads placabilis esto super nequitia populi tui, making the evil the people's sin. Moses still intercedes for Israel."
+  },
+  {
+   "book": 2,
+   "chapter": 33,
+   "verse": 13,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"shew me now thy way\" becomes \"shew me thy face\"",
+   "note": "The Vulgate reads ostende mihi faciem tuam; the Hebrew has derakeka (thy ways). Moses' request to see God's face comes in verse 18 in both."
+  },
+  {
+   "book": 2,
+   "chapter": 34,
+   "verse": 29,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"the skin of his face shone\" becomes \"his face was horned\"",
+   "note": "Jerome's Vulgate reads cornuta (horned), taking the Hebrew qaran, from qeren (horn, ray), as \"sent out horns\"; the KJV, with the Septuagint, has \"shone\". Hence Moses' horns in medieval art; Paul's reading of the glory in 2 Corinthians 3 follows \"shone\"."
+  },
+  {
+   "book": 2,
+   "chapter": 34,
+   "verse": 30,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"the skin of his face shone\" becomes \"the face of Moses horned\"",
+   "note": "Jerome's Vulgate reads cornuta (horned), taking the Hebrew qaran, from qeren (horn, ray), as \"sent out horns\"; the KJV, with the Septuagint, has \"shone\". Hence Moses' horns in medieval art; Paul's reading of the glory in 2 Corinthians 3 follows \"shone\"."
+  },
+  {
+   "book": 2,
+   "chapter": 34,
+   "verse": 35,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"the skin of Moses' face shone\" becomes \"was horned\"",
+   "note": "Jerome's Vulgate reads cornuta (horned), taking the Hebrew qaran, from qeren (horn, ray), as \"sent out horns\"; the KJV, with the Septuagint, has \"shone\". Hence Moses' horns in medieval art; Paul's reading of the glory in 2 Corinthians 3 follows \"shone\"."
+  },
+  {
+   "book": 2,
+   "chapter": 40,
+   "verse": 14,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse missing: Aaron's sons clothed with coats",
+   "note": "Jerome's Vulgate condenses verses 12 to 15 of the Hebrew into two; the clothing and anointing of the priests are summed up in the Douay's verse 13."
+  },
+  {
+   "book": 2,
+   "chapter": 40,
+   "verse": 15,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse missing: the sons' anointing to an everlasting priesthood",
+   "note": "Jerome's Vulgate condenses verses 12 to 15 of the Hebrew; the Douay's verse 13 keeps \"that the unction of them may prosper to an everlasting priesthood\"."
+  },
+  {
+   "book": 3,
+   "chapter": 4,
+   "verse": 20,
+   "kind": "atonement",
+   "weight": "minor",
+   "change": "\"make an atonement for them\" becomes \"praying for them\"",
+   "note": "Jerome's Vulgate often renders the Hebrew kipper (make atonement) as rogabit pro eo (shall pray for him) or by a paraphrase, which the Douay-Rheims follows; the KJV has \"make an atonement\". The sacrifice and its effect are the same; the wording of atonement is lost."
+  },
+  {
+   "book": 3,
+   "chapter": 5,
+   "verse": 5,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"he shall confess\" becomes \"Let him do penance\"",
+   "note": "Jerome's Vulgate reads agat paenitentiam pro peccato; the Hebrew hitwaddah means \"confess\". The Latin puts penance where the Hebrew requires confession of the sin."
+  },
+  {
+   "book": 3,
+   "chapter": 5,
+   "verse": 6,
+   "kind": "atonement",
+   "weight": "minor",
+   "change": "\"make an atonement for him\" becomes \"pray for him\"",
+   "note": "Jerome's Vulgate often renders the Hebrew kipper (make atonement) as rogabit pro eo (shall pray for him) or by a paraphrase, which the Douay-Rheims follows; the KJV has \"make an atonement\". The sacrifice and its effect are the same; the wording of atonement is lost."
+  },
+  {
+   "book": 3,
+   "chapter": 8,
+   "verse": 34,
+   "kind": "atonement",
+   "weight": "minor",
+   "change": "\"make an atonement for you\" becomes \"the rite… accomplished\"",
+   "note": "Jerome's Vulgate often renders the Hebrew kipper (make atonement) as rogabit pro eo (shall pray for him) or by a paraphrase, which the Douay-Rheims follows; the KJV has \"make an atonement\". The sacrifice and its effect are the same; the wording of atonement is lost."
+  },
+  {
+   "book": 3,
+   "chapter": 10,
+   "verse": 17,
+   "kind": "atonement",
+   "weight": "minor",
+   "change": "\"to make atonement for them\" becomes \"may pray for them\"",
+   "note": "Jerome's Vulgate often renders the Hebrew kipper (make atonement) as rogabit pro eo (shall pray for him) or by a paraphrase, which the Douay-Rheims follows; the KJV has \"make an atonement\". The sacrifice and its effect are the same; the wording of atonement is lost."
+  },
+  {
+   "book": 3,
+   "chapter": 14,
+   "verse": 20,
+   "kind": "atonement",
+   "weight": "minor",
+   "change": "Omits \"the priest shall make an atonement for him\"",
+   "note": "Jerome's Vulgate shortens the verse to \"the man shall be rightly cleansed\"; the Hebrew has the priest make atonement before he is clean."
+  },
+  {
+   "book": 3,
+   "chapter": 16,
+   "verse": 6,
+   "kind": "atonement",
+   "weight": "minor",
+   "change": "\"make an atonement for himself\" becomes \"prayed for himself\"",
+   "note": "Jerome's Vulgate often renders the Hebrew kipper (make atonement) as rogabit pro eo (shall pray for him) or by a paraphrase, which the Douay-Rheims follows; the KJV has \"make an atonement\". The sacrifice and its effect are the same; the wording of atonement is lost."
+  },
+  {
+   "book": 3,
+   "chapter": 16,
+   "verse": 11,
+   "kind": "atonement",
+   "weight": "minor",
+   "change": "\"make an atonement for himself\" becomes \"praying for himself\"",
+   "note": "Jerome's Vulgate often renders the Hebrew kipper (make atonement) as rogabit pro eo (shall pray for him) or by a paraphrase, which the Douay-Rheims follows; the KJV has \"make an atonement\". The sacrifice and its effect are the same; the wording of atonement is lost."
+  },
+  {
+   "book": 3,
+   "chapter": 16,
+   "verse": 18,
+   "kind": "atonement",
+   "weight": "minor",
+   "change": "\"make an atonement for it\" becomes \"pray for himself\"",
+   "note": "Jerome's Vulgate often renders the Hebrew kipper (make atonement) as rogabit pro eo (shall pray for him) or by a paraphrase, which the Douay-Rheims follows; the KJV has \"make an atonement\". The sacrifice and its effect are the same; the wording of atonement is lost. Here the Hebrew atones for the altar; the Vulgate has the priest pray for himself."
+  },
+  {
+   "book": 3,
+   "chapter": 16,
+   "verse": 34,
+   "kind": "atonement",
+   "weight": "minor",
+   "change": "\"to make an atonement for\" becomes \"that you pray for\"",
+   "note": "Jerome's Vulgate often renders the Hebrew kipper (make atonement) as rogabit pro eo (shall pray for him) or by a paraphrase, which the Douay-Rheims follows; the KJV has \"make an atonement\". The sacrifice and its effect are the same; the wording of atonement is lost."
+  },
+  {
+   "book": 4,
+   "chapter": 15,
+   "verse": 25,
+   "kind": "atonement",
+   "weight": "minor",
+   "change": "\"make an atonement for all the congregation\" becomes \"pray for\"",
+   "note": "Jerome's Vulgate often renders the Hebrew kipper (make atonement) as rogabit pro eo (shall pray for him) or by a paraphrase, which the Douay-Rheims follows; the KJV has \"make an atonement\". The sacrifice and its effect are the same; the wording of atonement is lost."
+  },
+  {
+   "book": 4,
+   "chapter": 24,
+   "verse": 20,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"perish for ever\" becomes \"shall be destroyed\"",
+   "note": "The Hebrew 'adey 'obed can be read \"for ever perishing\" or \"unto destruction\"; Jerome's Vulgate has perdentur, without \"for ever\". A translation choice."
+  },
+  {
+   "book": 4,
+   "chapter": 24,
+   "verse": 24,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"perish for ever\" becomes \"perish\"; Chittim becomes \"Italy\"",
+   "note": "Jerome's Vulgate reads de Italia for the Hebrew Kittim and \"the Hebrews\" for Eber, interpreting the names, and lacks \"for ever\" (see verse 20). The prophecy of ships from the west is the same."
+  },
+  {
+   "book": 5,
+   "chapter": 6,
+   "verse": 25,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"it shall be our righteousness\" becomes \"he will be merciful to us\"",
+   "note": "Jerome's Vulgate reads eritque nostri misericors; the Hebrew has utsedaqah tihyeh-lanu (it shall be righteousness to us). The Latin puts God's mercy where the Hebrew speaks of righteousness from keeping the law."
+  },
+  {
+   "book": 5,
+   "chapter": 33,
+   "verse": 12,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"the LORD shall cover him\" becomes \"as in a bride chamber\"",
+   "note": "Jerome's Vulgate reads quasi in thalamo tota die morabitur, a free rendering of the Hebrew chopheph 'alayw (he shields him); the Hebrew has the LORD covering Benjamin all day."
+  },
+  {
+   "book": 5,
+   "chapter": 33,
+   "verse": 27,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"The eternal God is thy refuge\" becomes \"His dwelling is above\"",
+   "note": "Jerome's Vulgate reads habitaculum ejus sursum, taking the Hebrew me'onah 'elohey qedem differently (qedem as \"of old\" or \"above\"); the Hebrew names the eternal God as Israel's dwelling place. The everlasting arms are in both."
+  },
+  {
+   "book": 7,
+   "chapter": 9,
+   "verse": 9,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"they honour God and man\" becomes \"gods and men make use of\"",
+   "note": "The Hebrew 'elohim can mean God or gods; Jerome's Vulgate reads dii utuntur et homines, the KJV \"God\". In Jotham's fable the oil serves both worship and men."
+  },
+  {
+   "book": 7,
+   "chapter": 13,
+   "verse": 18,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"seeing it is secret\" becomes \"which is wonderful\"",
+   "note": "The Hebrew peli means wonderful, beyond understanding; the Vulgate reads mirabile, the KJV \"secret\". The same root gives \"Wonderful\" in Isaiah 9:6."
+  },
+  {
+   "book": 7,
+   "chapter": 18,
+   "verse": 30,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"the son of Manasseh\" becomes \"the son of Moses\"",
+   "note": "The Masoretic Hebrew writes Manasseh with a raised letter nun, apparently added to spare Moses' name; the Vulgate reads Moysi, as many scholars do. The KJV follows the Masoretic form."
+  },
+  {
+   "book": 7,
+   "chapter": 20,
+   "verse": 15,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"twenty and six thousand\" becomes \"five and twenty thousand\"",
+   "note": "Jerome's Vulgate reads viginti quinque millia, as some Septuagint copies; the Masoretic Hebrew has 26,000. Verse 35 gives 25,100 slain."
+  },
+  {
+   "book": 9,
+   "chapter": 13,
+   "verse": 1,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"Saul reigned one year\" becomes \"was a child of one year\"",
+   "note": "The Hebrew ben-shanah Sha'ul bemolko reads literally \"Saul was a son of a year when he became king\", a number apparently lost; Jerome renders it word for word, the KJV as the length of a reign."
+  },
+  {
+   "book": 9,
+   "chapter": 15,
+   "verse": 29,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"the Strength of Israel will not lie\" becomes \"…will not spare\"",
+   "note": "Jerome's Vulgate reads triumphator in Israel non parcet; the Hebrew has netsach yisra'el lo' yeshaqqer (the Strength, or Glory, of Israel will not lie). God's unchanging purpose is the point of both."
+  },
+  {
+   "book": 9,
+   "chapter": 28,
+   "verse": 6,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"by Urim\" becomes \"by priests\"",
+   "note": "Jerome's Vulgate reads per sacerdotes, explaining the Urim, the priest's means of inquiry; the Hebrew names the Urim. The meaning, that no answer came, is the same."
+  },
+  {
+   "book": 10,
+   "chapter": 12,
+   "verse": 31,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"put them under saws\" becomes \"he sawed them\"",
+   "note": "Jerome's Vulgate reads serravit, making David saw the people, with iron chariots and knives; the Hebrew wayyasem bammegerah can be read as put to work with saws or under saws."
+  },
+  {
+   "book": 10,
+   "chapter": 21,
+   "verse": 19,
+   "kind": "omission",
+   "weight": "major",
+   "change": "\"slew the brother of Goliath\" becomes \"slew Goliath\"; names translated",
+   "note": "The Masoretic Hebrew of this verse has Elhanan slay Goliath; the KJV supplies \"the brother of\" from 1 Chronicles 20:5. Jerome's Vulgate follows the Hebrew and translates the names (Adeodatus, son of the Forest, an embroiderer)."
+  },
+  {
+   "book": 11,
+   "chapter": 8,
+   "verse": 47,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"repent\" becomes \"do penance in their heart\"",
+   "note": "Jerome's Vulgate renders the Hebrew shub (turn back, repent) here as paenitentiam agere, which the Douay-Rheims gives as \"do penance\"; the KJV has \"repent\". A translation choice that Catholic and Protestant readers understand differently."
+  },
+  {
+   "book": 11,
+   "chapter": 12,
+   "verse": 15,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"the cause was from the LORD\" becomes \"the Lord was turned away\"",
+   "note": "Jerome's Vulgate reads aversatus fuerat eum Dominus; the Hebrew sibbah (a turn of events) is from the LORD, to fulfil his word. Both make the division God's doing."
+  },
+  {
+   "book": 12,
+   "chapter": 2,
+   "verse": 14,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Adds \"and they were not divided\" at Elisha's first stroke",
+   "note": "The Vulgate, with the Septuagint, has the waters not part at first; the Masoretic Hebrew lacks this. Elisha then calls on the God of Elijah and the waters part."
+  },
+  {
+   "book": 12,
+   "chapter": 17,
+   "verse": 14,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"did not believe in the LORD\" becomes \"would not obey the Lord\"",
+   "note": "Jerome's Vulgate reads noluerunt obedire; the Hebrew lo' he'eminu means they did not believe or trust. Unbelief becomes disobedience."
+  },
+  {
+   "book": 14,
+   "chapter": 33,
+   "verse": 19,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"before he was humbled\" becomes \"before he did penance\"",
+   "note": "Jerome's Vulgate reads antequam ageret paenitentiam; the Hebrew lifney hikkan'o means \"before he humbled himself\". Manasseh's repentance is told in verses 12-13 in both."
+  },
+  {
+   "book": 15,
+   "chapter": 9,
+   "verse": 8,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"grace hath been shewed\" becomes \"has our prayer been made\"",
+   "note": "Jerome's Vulgate reads facta est deprecatio nostra; the Hebrew has techinnah (grace, favour) from the LORD. The Latin makes it Israel's prayer rather than God's favour."
+  },
+  {
+   "book": 18,
+   "chapter": 19,
+   "verse": 25,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"he shall stand at the latter day\" becomes \"I shall rise\"",
+   "note": "Jerome's Vulgate reads in novissimo die de terra surrecturus sum, making Job himself rise out of the earth on the last day; the Hebrew has the redeemer stand at the last upon the dust. Both are read of resurrection."
+  },
+  {
+   "book": 18,
+   "chapter": 19,
+   "verse": 26,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"worms destroy this body\" becomes \"clothed again with my skin\"",
+   "note": "Jerome's Vulgate reads rursum circumdabor pelle mea (I shall be clothed again with my skin), and in verse 25 \"in the last day I shall rise out of the earth\"; the Hebrew is difficult. The Vulgate states bodily resurrection plainly; both see God in the flesh."
+  },
+  {
+   "book": 18,
+   "chapter": 42,
+   "verse": 6,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"repent in dust and ashes\" becomes \"do penance in dust and ashes\"",
+   "note": "Jerome's Vulgate renders the Hebrew nicham (repent, be sorry) here as paenitentiam agere, which the Douay-Rheims gives as \"do penance\"; the KJV has \"repent\". A translation choice that Catholic and Protestant readers understand differently."
+  },
+  {
+   "book": 19,
+   "chapter": 2,
+   "verse": 12,
+   "kind": "prophecy",
+   "weight": "major",
+   "change": "\"Kiss the Son\" becomes \"Embrace discipline\"",
+   "note": "The Douay-Rheims Psalms follow the Vulgate's Gallican Psalter, translated from the Greek Septuagint; the KJV follows the Masoretic Hebrew. The Septuagint reads draxasthe paideias (lay hold of instruction) for the Hebrew nashqu-bar (kiss the son), so the messianic \"Son\" of verse 7 is not named here; the Lord's anger follows."
+  },
+  {
+   "book": 19,
+   "chapter": 7,
+   "verse": 11,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"angry with the wicked every day\" becomes \"is he angry every day?\"",
+   "note": "The Douay-Rheims Psalms follow the Vulgate's Gallican Psalter, translated from the Greek Septuagint; the KJV follows the Masoretic Hebrew. The Septuagint reads \"God is a just judge, strong and patient, not bringing on wrath every day\"; the Hebrew has God angry every day."
+  },
+  {
+   "book": 19,
+   "chapter": 12,
+   "verse": 7,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"Thou shalt keep them\" becomes \"wilt preserve us\"",
+   "note": "The Douay-Rheims Psalms follow the Vulgate's Gallican Psalter, translated from the Greek Septuagint; the KJV follows the Masoretic Hebrew. The Septuagint reads \"us\"; the Hebrew has \"them\" (the poor of verse 5, or, as some KJV readers take it, the words of verse 6)."
+  },
+  {
+   "book": 19,
+   "chapter": 23,
+   "verse": 6,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"for ever\" becomes \"unto length of days\"",
+   "note": "The Vulgate reads in longitudinem dierum, a literal rendering of the Hebrew le'orek yamim (for length of days); the KJV renders it \"for ever\"."
+  },
+  {
+   "book": 19,
+   "chapter": 24,
+   "verse": 5,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"righteousness\" from God becomes \"mercy\"",
+   "note": "The Douay-Rheims Psalms follow the Vulgate's Gallican Psalter, translated from the Greek Septuagint; the KJV follows the Masoretic Hebrew. The Septuagint reads eleemosynen (mercy) for the Hebrew tsedaqah (righteousness)."
+  },
+  {
+   "book": 19,
+   "chapter": 45,
+   "verse": 11,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"he is thy Lord\" becomes \"he is the Lord thy God\"",
+   "note": "The Douay-Rheims Psalms follow the Vulgate's Gallican Psalter, translated from the Greek Septuagint; the KJV follows the Masoretic Hebrew. The Vulgate reads ipse est Dominus Deus tuus, et adorabunt eum, adding \"God\"; the Hebrew has \"he is thy lord\". Hebrews 1:8 applies this psalm to Christ."
+  },
+  {
+   "book": 19,
+   "chapter": 47,
+   "verse": 9,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"the shields of the earth\" becomes \"the strong gods of the earth\"",
+   "note": "The Douay-Rheims Psalms follow the Vulgate's Gallican Psalter, translated from the Greek Septuagint; the KJV follows the Masoretic Hebrew. The Septuagint reads hoi krataioi tes ges (the mighty of the earth) are exalted; the Hebrew has the shields (rulers) of the earth belonging to God."
+  },
+  {
+   "book": 19,
+   "chapter": 49,
+   "verse": 15,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"the power of the grave\" becomes \"the hand of hell\"",
+   "note": "The Douay-Rheims Psalms follow the Vulgate's Gallican Psalter, translated from the Greek Septuagint; the KJV follows the Masoretic Hebrew. The Septuagint and Vulgate read hades/inferus for the Hebrew she'ol, which the KJV renders \"grave\" here."
+  },
+  {
+   "book": 19,
+   "chapter": 72,
+   "verse": 14,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"precious shall their blood be\" becomes \"their names shall be honourable\"",
+   "note": "The Douay-Rheims Psalms follow the Vulgate's Gallican Psalter, translated from the Greek Septuagint; the KJV follows the Masoretic Hebrew. The Septuagint reads to onoma auton (their name) for the Hebrew damam (their blood). The king's care for the poor is the same."
+  },
+  {
+   "book": 19,
+   "chapter": 84,
+   "verse": 11,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"a sun and shield\" becomes \"God loveth mercy and truth\"",
+   "note": "The Douay-Rheims Psalms follow the Vulgate's Gallican Psalter, translated from the Greek Septuagint; the KJV follows the Masoretic Hebrew. The Septuagint reads \"the Lord loves mercy and truth\" where the Hebrew calls God a sun and shield. The rest of the verse is shorter too."
+  },
+  {
+   "book": 19,
+   "chapter": 97,
+   "verse": 7,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"worship him, all ye gods\" becomes \"Adore him, all you his angels\"",
+   "note": "The Douay-Rheims Psalms follow the Vulgate's Gallican Psalter, translated from the Greek Septuagint; the KJV follows the Masoretic Hebrew. The Septuagint reads angeloi (angels) for the Hebrew 'elohim (gods); Hebrews 1:6 quotes the Septuagint's wording of this line, or of Deuteronomy 32:43."
+  },
+  {
+   "book": 19,
+   "chapter": 110,
+   "verse": 3,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "Adds \"before the day star I begot thee\"",
+   "note": "The Douay-Rheims Psalms follow the Vulgate's Gallican Psalter, translated from the Greek Septuagint; the KJV follows the Masoretic Hebrew. The Septuagint reads \"from the womb before the morning star I begot thee\", reading the Hebrew yaldutheka (thy youth) as yelidtika (I have begotten thee). Christians have read it of the Son's eternal generation."
+  },
+  {
+   "book": 19,
+   "chapter": 138,
+   "verse": 2,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"thy word above all thy name\" becomes \"thy holy name above all\"",
+   "note": "The Douay-Rheims Psalms follow the Vulgate's Gallican Psalter, translated from the Greek Septuagint; the KJV follows the Masoretic Hebrew. The Septuagint reads \"thou hast magnified thy holy name above all\"; the Hebrew, as the KJV renders it, sets God's word above his name."
+  },
+  {
+   "book": 19,
+   "chapter": 145,
+   "verse": 13,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Adds \"The Lord is faithful in all his words…\"",
+   "note": "The Douay-Rheims Psalms follow the Vulgate's Gallican Psalter, translated from the Greek Septuagint; the KJV follows the Masoretic Hebrew. The Septuagint, and a Dead Sea Scrolls copy, have this line for the missing nun verse of the acrostic; the Masoretic Hebrew lacks it."
+  },
+  {
+   "book": 20,
+   "chapter": 21,
+   "verse": 12,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"God overthroweth the wicked\" becomes \"may withdraw the wicked from evil\"",
+   "note": "The Hebrew is terse; Jerome's Vulgate reads ut detrahat impios a malo, the KJV supplies \"God\" as the one who overthrows. The just man's concern with the wicked is in both."
+  },
+  {
+   "book": 20,
+   "chapter": 26,
+   "verse": 10,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"The great God that formed all things\" becomes \"Judgment determineth causes\"",
+   "note": "The Hebrew rab mecholel-kol is obscure (a master who forms all, or an archer who wounds all); Jerome's Vulgate reads judicium determinat causas. The KJV's reference to God is one reading among several."
+  },
+  {
+   "book": 20,
+   "chapter": 30,
+   "verse": 1,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"Agur the son of Jakeh\" becomes \"Gatherer the son of Vomiter\"",
+   "note": "Jerome's Vulgate translates the names (Congregans, Vomens) and reads Ithiel and Ucal as \"with whom God is\" and \"strengthened by God\"; the KJV keeps them as names."
+  },
+  {
+   "book": 22,
+   "chapter": 1,
+   "verse": 1,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Verse missing: the title \"The song of songs, which is Solomon's\"",
+   "note": "The Vulgate prints the title as a heading, not a verse, so the Douay-Rheims' verse 1 is the KJV's verse 2. Nothing of the text is lost."
+  },
+  {
+   "book": 23,
+   "chapter": 9,
+   "verse": 6,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"The everlasting Father\" becomes \"the Father of the world to come\"",
+   "note": "Jerome's Vulgate reads Pater futuri saeculi for the Hebrew 'abi-'ad (father of eternity); both keep \"God the Mighty\". The child is still named with divine titles."
+  },
+  {
+   "book": 23,
+   "chapter": 11,
+   "verse": 2,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"the fear of the LORD\" becomes \"godliness\"",
+   "note": "The Vulgate reads pietatis, following the Septuagint's eusebeias, where the Hebrew repeats yir'at YHWH (the fear of the LORD) from verse 3. With it the Vulgate lists seven gifts of the Spirit."
+  },
+  {
+   "book": 23,
+   "chapter": 11,
+   "verse": 10,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"his rest shall be glorious\" becomes \"his sepulchre shall be glorious\"",
+   "note": "Jerome's Vulgate reads sepulchrum ejus gloriosum for the Hebrew menuchato (his resting place); the Latin reads it of Christ's tomb. The Septuagint has \"his rest\"."
+  },
+  {
+   "book": 23,
+   "chapter": 12,
+   "verse": 3,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"wells of salvation\" becomes \"the saviour's fountains\"",
+   "note": "Jerome's Vulgate renders the Hebrew yeshu'ah (salvation) here as salvator (saviour), and sometimes tsedeq (righteousness) as justus (the just one), reading the verse of a person, the Messiah. The Hebrew has the abstract nouns, as the KJV."
+  },
+  {
+   "book": 23,
+   "chapter": 16,
+   "verse": 1,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"Send ye the lamb\" becomes \"Send forth, O Lord, the lamb\"",
+   "note": "Jerome's Vulgate reads Emitte agnum, Domine, dominatorem terrae, a prayer for the Lamb as ruler, read of Christ; the Hebrew tells Moab to send lambs as tribute to the ruler of the land."
+  },
+  {
+   "book": 23,
+   "chapter": 26,
+   "verse": 1,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"salvation will God appoint for walls\" becomes \"a saviour, a wall\"",
+   "note": "Jerome's Vulgate renders the Hebrew yeshu'ah (salvation) here as salvator (saviour), and sometimes tsedeq (righteousness) as justus (the just one), reading the verse of a person, the Messiah. The Hebrew has the abstract nouns, as the KJV."
+  },
+  {
+   "book": 23,
+   "chapter": 45,
+   "verse": 8,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"pour down righteousness… bring forth salvation\" becomes \"rain the just… a saviour\"",
+   "note": "Jerome's Vulgate renders the Hebrew yeshu'ah (salvation) here as salvator (saviour), and sometimes tsedeq (righteousness) as justus (the just one), reading the verse of a person, the Messiah. The Hebrew has the abstract nouns, as the KJV. This verse, Rorate caeli, is sung in Advent."
+  },
+  {
+   "book": 23,
+   "chapter": 51,
+   "verse": 5,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"My righteousness… my salvation\" becomes \"My just one… my saviour\"",
+   "note": "Jerome's Vulgate renders the Hebrew yeshu'ah (salvation) here as salvator (saviour), and sometimes tsedeq (righteousness) as justus (the just one), reading the verse of a person, the Messiah. The Hebrew has the abstract nouns, as the KJV."
+  },
+  {
+   "book": 23,
+   "chapter": 59,
+   "verse": 19,
+   "kind": "other",
+   "weight": "minor",
+   "change": "The Spirit's \"standard against him\" becomes \"which… driveth on\"",
+   "note": "Jerome's Vulgate reads quasi fluvius violentus quem spiritus Domini cogit; the Hebrew can be read with the KJV (the enemy comes like a flood, the Spirit lifts a standard) or as the LORD coming like a rushing stream driven by his wind."
+  },
+  {
+   "book": 23,
+   "chapter": 62,
+   "verse": 1,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"the righteousness… the salvation thereof\" becomes \"her just one… her saviour\"",
+   "note": "Jerome's Vulgate renders the Hebrew yeshu'ah (salvation) here as salvator (saviour), and sometimes tsedeq (righteousness) as justus (the just one), reading the verse of a person, the Messiah. The Hebrew has the abstract nouns, as the KJV."
+  },
+  {
+   "book": 23,
+   "chapter": 62,
+   "verse": 11,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"thy salvation cometh\" becomes \"thy Saviour cometh\"",
+   "note": "Jerome's Vulgate renders the Hebrew yeshu'ah (salvation) here as salvator (saviour), and sometimes tsedeq (righteousness) as justus (the just one), reading the verse of a person, the Messiah. The Hebrew has the abstract nouns, as the KJV."
+  },
+  {
+   "book": 24,
+   "chapter": 11,
+   "verse": 19,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"destroy the tree with the fruit\" becomes \"put wood on his bread\"",
+   "note": "Jerome's Vulgate, with the Septuagint, reads mittamus lignum in panem ejus; the Fathers read it of the cross and the body of Christ. The Hebrew has \"destroy the tree with its fruit\"."
+  },
+  {
+   "book": 24,
+   "chapter": 23,
+   "verse": 6,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"THE LORD OUR RIGHTEOUSNESS\" becomes \"The Lord our just one\"",
+   "note": "Jerome's Vulgate reads Dominus justus noster; the Hebrew YHWH tsidqenu means \"the LORD our righteousness\". Both make the messianic King bear the divine name."
+  },
+  {
+   "book": 26,
+   "chapter": 18,
+   "verse": 30,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"Repent, and turn yourselves\" becomes \"Be converted, and do penance\"",
+   "note": "Jerome's Vulgate renders the Hebrew shub (turn back, repent) here as paenitentiam agere, which the Douay-Rheims gives as \"do penance\"; the KJV has \"repent\". A translation choice that Catholic and Protestant readers understand differently."
+  },
+  {
+   "book": 27,
+   "chapter": 7,
+   "verse": 9,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"the thrones were cast down\" becomes \"thrones were placed\"",
+   "note": "The Aramaic remiw means \"were set\" or \"were thrown\"; the Vulgate, with the Septuagint, reads positi sunt, the KJV \"cast down\"."
+  },
+  {
+   "book": 27,
+   "chapter": 9,
+   "verse": 24,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"anoint the most Holy\" becomes \"the Saint of saints… anointed\"",
+   "note": "Jerome's Vulgate reads ungatur Sanctus sanctorum, a person; the Hebrew qodesh qodashim usually means a most holy place or thing. The Latin reads the verse of Christ's anointing."
+  },
+  {
+   "book": 27,
+   "chapter": 9,
+   "verse": 25,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"unto the Messiah the Prince\" becomes \"unto Christ, the prince\"",
+   "note": "Jerome's Vulgate reads usque ad Christum ducem, rendering the Hebrew mashiach nagid (an anointed one, a prince) by the Greek-derived title; the KJV's \"Messiah\" is the Hebrew form. Both read the verse of Christ."
+  },
+  {
+   "book": 27,
+   "chapter": 9,
+   "verse": 26,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"Messiah be cut off\" becomes \"Christ shall be slain\"",
+   "note": "Jerome's Vulgate reads occidetur Christus, et non erit ejus populus qui eum negaturus est (the people that shall deny him shall not be his), for the Hebrew we'eyn lo (and he shall have nothing, or not for himself). Both keep the Messiah's death."
+  },
+  {
+   "book": 27,
+   "chapter": 9,
+   "verse": 27,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "Becomes \"in the temple the abomination of desolation\"",
+   "note": "Jerome's Vulgate reads erit in templo abominatio desolationis, close to Matthew 24:15; the Hebrew is difficult and the KJV renders it \"for the overspreading of abominations he shall make it desolate\"."
+  },
+  {
+   "book": 27,
+   "chapter": 11,
+   "verse": 37,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"nor the desire of women\" becomes \"follow the lust of women\"",
+   "note": "Jerome's Vulgate reads et erit in concupiscentiis feminarum; the Hebrew says he will not regard the desire of women, which some read as a god or as Messianic hope."
+  },
+  {
+   "book": 28,
+   "chapter": 1,
+   "verse": 6,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"I will utterly take them away\" becomes \"I will utterly forget them\"",
+   "note": "The Hebrew ki-naso' 'essa' lahem can be read \"take away\" or \"forgive\"; Jerome's Vulgate reads oblivione obliviscar eorum. The withdrawal of mercy is the same."
+  },
+  {
+   "book": 28,
+   "chapter": 6,
+   "verse": 7,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"they like men\" becomes \"they, like Adam\"",
+   "note": "The Hebrew ke'adam can mean \"like men\" or \"like Adam\"; Jerome's Vulgate reads sicut Adam, the KJV \"like men\"."
+  },
+  {
+   "book": 28,
+   "chapter": 12,
+   "verse": 3,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"he had power with God\" becomes \"he had success with an angel\"",
+   "note": "Jerome's Vulgate reads directus est cum angelo; the Hebrew has 'elohim (God), and verse 4 names the angel. The account is of Jacob's wrestling at Peniel."
+  },
+  {
+   "book": 28,
+   "chapter": 13,
+   "verse": 14,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"I will be thy plagues\" becomes \"I will be thy death\"",
+   "note": "Jerome's Vulgate reads ero mors tua, o mors; morsus tuus ero, inferne (I will be thy bite, O hell), and \"comfort\" for \"repentance\". The Hebrew 'ehi has been read \"I will be\" or \"where are\"; 1 Corinthians 15:55 follows the Septuagint's \"where\"."
+  },
+  {
+   "book": 35,
+   "chapter": 2,
+   "verse": 4,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"his soul which is lifted up\" becomes \"he that is unbelieving\"",
+   "note": "Jerome's Vulgate reads qui incredulus est for the Hebrew 'uppelah (puffed up), and \"in his faith\"; the Septuagint has \"if he draw back\", as Hebrews 10:38 quotes. \"The just shall live by faith\" stands in all."
+  },
+  {
+   "book": 35,
+   "chapter": 3,
+   "verse": 18,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"the God of my salvation\" becomes \"God my Jesus\"",
+   "note": "Jerome's Vulgate reads in Deo Jesu meo, rendering the Hebrew yish'i (my salvation) by the name Jesus, which comes from the same Hebrew root. The Hebrew has \"the God of my salvation\"."
+  },
+  {
+   "book": 38,
+   "chapter": 9,
+   "verse": 9,
+   "kind": "prophecy",
+   "weight": "minor",
+   "change": "\"he is just, and having salvation\" becomes \"the just and saviour\"",
+   "note": "Jerome's Vulgate reads justus et salvator; the Hebrew nosha' means \"saved\" or \"victorious\", the Septuagint sozon (saving). Matthew 21:5 quotes the verse of Christ's entry into Jerusalem."
+  },
+  {
+   "book": 39,
+   "chapter": 2,
+   "verse": 16,
+   "kind": "other",
+   "weight": "major",
+   "change": "\"he hateth putting away\" becomes \"hate her, put her away\"",
+   "note": "Jerome's Vulgate reads cum odio habueris, dimitte, with the Septuagint, as permission to divorce; the Masoretic Hebrew ki-sane' shallach is read by the KJV as God hating divorce. The Douay's note takes it as a reproach, not a command; Matthew 19:8-9 gives Christ's teaching."
+  },
+  {
+   "book": 40,
+   "chapter": 1,
+   "verse": 18,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"birth of Jesus Christ\" becomes \"generation of Christ\"",
+   "note": "The Vulgate reads Christi generatio, with some Old Latin and Greek witnesses; the Textus Receptus and most Greek manuscripts have \"Jesus Christ\". Jesus is named in 1:16 and 1:21."
+  },
+  {
+   "book": 40,
+   "chapter": 3,
+   "verse": 2,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"Repent ye\" becomes \"Do penance\"",
+   "note": "The Douay-Rheims renders the Vulgate's paenitentiam agite (Greek metanoeite) \"do penance\" where the KJV has \"repent\". A translation choice: Catholic usage takes it to include works of penance, Protestant readers a turning of mind and heart."
+  },
+  {
+   "book": 40,
+   "chapter": 3,
+   "verse": 11,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"unto repentance\" becomes \"unto penance\"",
+   "note": "\"Penance\" renders the Vulgate's paenitentia (Greek metanoia), which the KJV translates \"repentance\". A translation choice that Catholic and Protestant readers understand differently."
+  },
+  {
+   "book": 40,
+   "chapter": 4,
+   "verse": 17,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"Repent\" becomes \"Do penance\"",
+   "note": "The Douay-Rheims renders the Vulgate's paenitentiam agite (Greek metanoeite) \"do penance\" where the KJV has \"repent\". A translation choice: Catholic usage takes it to include works of penance, Protestant readers a turning of mind and heart."
+  },
+  {
+   "book": 40,
+   "chapter": 5,
+   "verse": 22,
+   "kind": "judgment",
+   "weight": "major",
+   "change": "Omits \"without a cause\"",
+   "note": "The Vulgate lacks sine causa, as do Sinaiticus and Vaticanus; Jerome noted it in some Greek copies. The Textus Receptus has eike. Without it, any anger toward a brother is condemned."
+  },
+  {
+   "book": 40,
+   "chapter": 5,
+   "verse": 44,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"bless them that curse you\"",
+   "note": "The Vulgate lacks the clause, as do Sinaiticus and Vaticanus; it keeps \"do good to them that hate you\" and \"calumniate you\", which those manuscripts lack. The command to bless is in Luke 6:28."
+  },
+  {
+   "book": 40,
+   "chapter": 6,
+   "verse": 11,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"daily bread\" becomes \"supersubstantial bread\"",
+   "note": "Jerome's Vulgate reads supersubstantialem here (but quotidianum in Luke 11:3) for the rare Greek epiousion; the KJV has \"daily\". Catholic tradition has read it of the Eucharist as well as ordinary bread."
+  },
+  {
+   "book": 40,
+   "chapter": 6,
+   "verse": 13,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits the doxology \"For thine is the kingdom… Amen\"",
+   "note": "The doxology is in the Byzantine text and the Textus Receptus but not in the Vulgate, Sinaiticus, Vaticanus or the early Latin and Greek fathers' commentaries on the prayer; the prayer ends \"deliver us from evil\"."
+  },
+  {
+   "book": 40,
+   "chapter": 8,
+   "verse": 5,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"he\"",
+   "note": "The Vulgate has only a pronoun or the verb here, where the Textus Receptus names Jesus; Sinaiticus and Vaticanus agree with the Vulgate. The referent is plain from context."
+  },
+  {
+   "book": 40,
+   "chapter": 13,
+   "verse": 36,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits the name \"Jesus\"",
+   "note": "The Vulgate has only a pronoun or the verb here, where the Textus Receptus names Jesus; Sinaiticus and Vaticanus agree with the Vulgate. The referent is plain from context."
+  },
+  {
+   "book": 40,
+   "chapter": 13,
+   "verse": 51,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"Jesus saith unto them\" and the title \"Lord\"",
+   "note": "Both are in the Textus Receptus but not in the Vulgate, Sinaiticus or Vaticanus; the disciples answer only \"Yes\"."
+  },
+  {
+   "book": 40,
+   "chapter": 14,
+   "verse": 14,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"he\"",
+   "note": "The Vulgate has only a pronoun or the verb here, where the Textus Receptus names Jesus; Sinaiticus and Vaticanus agree with the Vulgate. The referent is plain from context."
+  },
+  {
+   "book": 40,
+   "chapter": 14,
+   "verse": 25,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"he\"",
+   "note": "The Vulgate has only a pronoun or the verb here, where the Textus Receptus names Jesus; Sinaiticus and Vaticanus agree with the Vulgate. The referent is plain from context."
+  },
+  {
+   "book": 40,
+   "chapter": 15,
+   "verse": 1,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"to Jesus\" becomes \"to him\"",
+   "note": "The Vulgate has only a pronoun or the verb here, where the Textus Receptus names Jesus. The referent is plain from context."
+  },
+  {
+   "book": 40,
+   "chapter": 15,
+   "verse": 8,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"draweth nigh unto me with their mouth\"",
+   "note": "The clause, from Isaiah 29:13, is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus. The rest of the quotation is the same."
+  },
+  {
+   "book": 40,
+   "chapter": 15,
+   "verse": 16,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus said\" becomes \"he said\"",
+   "note": "The Vulgate has only a pronoun or the verb here, where the Textus Receptus names Jesus; Sinaiticus and Vaticanus agree with the Vulgate. The referent is plain from context."
+  },
+  {
+   "book": 40,
+   "chapter": 15,
+   "verse": 30,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus' feet\" becomes \"his feet\"",
+   "note": "The Vulgate has only a pronoun or the verb here, where the Textus Receptus names Jesus; Sinaiticus and Vaticanus agree with the Vulgate. The referent is plain from context."
+  },
+  {
+   "book": 40,
+   "chapter": 15,
+   "verse": 31,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"the maimed to be whole\"",
+   "note": "The Vulgate lists only the dumb, the lame and the blind; the Textus Receptus and most Greek manuscripts include the maimed made whole."
+  },
+  {
+   "book": 40,
+   "chapter": 16,
+   "verse": 6,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus said\" becomes \"Who said\"",
+   "note": "The Vulgate has only a pronoun or the verb here, where the Textus Receptus names Jesus. The referent is plain from context."
+  },
+  {
+   "book": 40,
+   "chapter": 17,
+   "verse": 11,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"Jesus\" and \"first\" in \"Elias shall first come\"",
+   "note": "The Vulgate reads Elias quidem venturus est, without the name or \"first\", as do Sinaiticus and Vaticanus; Elijah still comes to restore all things."
+  },
+  {
+   "book": 40,
+   "chapter": 18,
+   "verse": 26,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"worshipped him… Lord\" becomes \"besought him\"",
+   "note": "The Vulgate reads rogabat eum (besought him) and lacks the address \"Lord\"; the Greek has prosekunei (worshipped, did obeisance). In the parable the servant still pleads with his master."
+  },
+  {
+   "book": 40,
+   "chapter": 19,
+   "verse": 17,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"Why callest thou me good?\" becomes \"Why askest thou me concerning good?\"",
+   "note": "The Vulgate reads Quid me interrogas de bono?, as do Sinaiticus and Vaticanus; the Textus Receptus has the wording of Mark 10:18 and Luke 18:19, where the Douay-Rheims keeps \"Why callest thou me good?\"."
+  },
+  {
+   "book": 40,
+   "chapter": 19,
+   "verse": 24,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"kingdom of God\" becomes \"kingdom of heaven\"",
+   "note": "The Vulgate reads regnum caelorum here, with some Greek manuscripts; the Textus Receptus has \"kingdom of God\". Matthew uses both phrases for the same kingdom."
+  },
+  {
+   "book": 40,
+   "chapter": 20,
+   "verse": 22,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits \"to be baptized with the baptism that I am baptized with\"",
+   "note": "The clause, which is in Mark 10:38, is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus. Only the cup is mentioned."
+  },
+  {
+   "book": 40,
+   "chapter": 20,
+   "verse": 23,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the baptism clause, as in verse 22",
+   "note": "As in verse 22, the clause about the baptism is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus; the parallel in Mark 10:39 has it."
+  },
+  {
+   "book": 40,
+   "chapter": 23,
+   "verse": 8,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"even Christ\" as the one Master",
+   "note": "\"Even Christ\" is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus. Verse 10 still names Christ as the one Master."
+  },
+  {
+   "book": 40,
+   "chapter": 24,
+   "verse": 2,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus said\" becomes \"he answering, said\"",
+   "note": "The Vulgate has only a pronoun or the verb here, where the Textus Receptus names Jesus; Sinaiticus and Vaticanus agree with the Vulgate. The referent is plain from context."
+  },
+  {
+   "book": 40,
+   "chapter": 25,
+   "verse": 13,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits \"wherein the Son of man cometh\"",
+   "note": "The phrase is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus. The call to watch stands, but the verse no longer names the Son of man's coming."
+  },
+  {
+   "book": 40,
+   "chapter": 28,
+   "verse": 20,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the closing \"Amen\"",
+   "note": "The closing \"Amen\" is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus. The meaning is unchanged."
+  },
+  {
+   "book": 41,
+   "chapter": 1,
+   "verse": 2,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"in the prophets\" becomes \"in Isaias the prophet\"",
+   "note": "The Vulgate reads in Isaia propheta, as do Sinaiticus and Vaticanus; the Textus Receptus has \"in the prophets\". The quotation joins Malachi 3:1 to Isaiah 40:3."
+  },
+  {
+   "book": 41,
+   "chapter": 3,
+   "verse": 29,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"eternal damnation\" becomes \"an everlasting sin\"",
+   "note": "The Vulgate reads aeterni delicti (an eternal sin), as do Sinaiticus and Vaticanus (hamartematos); the Textus Receptus has kriseos (judgment). Either way the sin is never forgiven."
+  },
+  {
+   "book": 41,
+   "chapter": 5,
+   "verse": 19,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"he\"",
+   "note": "The Vulgate has only a pronoun or the verb here, where the Textus Receptus names Jesus; Sinaiticus and Vaticanus agree with the Vulgate. The referent is plain from context."
+  },
+  {
+   "book": 41,
+   "chapter": 6,
+   "verse": 11,
+   "kind": "judgment",
+   "weight": "major",
+   "change": "Omits \"more tolerable for Sodom and Gomorrha in the day of judgment\"",
+   "note": "The sentence, which is in Matthew 10:15, is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus. Only the shaking off of dust remains."
+  },
+  {
+   "book": 41,
+   "chapter": 6,
+   "verse": 12,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"repent\" becomes \"do penance\"",
+   "note": "The Douay-Rheims renders the Vulgate's paenitentiam agite (Greek metanoeite) \"do penance\" where the KJV has \"repent\". A translation choice: Catholic usage takes it to include works of penance, Protestant readers a turning of mind and heart."
+  },
+  {
+   "book": 41,
+   "chapter": 7,
+   "verse": 27,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus said\" becomes \"Who said\"",
+   "note": "The Vulgate has only a pronoun or the verb here, where the Textus Receptus names Jesus; Sinaiticus and Vaticanus agree with the Vulgate. The referent is plain from context."
+  },
+  {
+   "book": 41,
+   "chapter": 8,
+   "verse": 1,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits the name \"Jesus\"",
+   "note": "The Vulgate has only a pronoun or the verb here, where the Textus Receptus names Jesus; Sinaiticus and Vaticanus agree with the Vulgate. The referent is plain from context."
+  },
+  {
+   "book": 41,
+   "chapter": 10,
+   "verse": 21,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits \"take up the cross\"",
+   "note": "\"Take up the cross\" is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus. The call to follow Jesus remains; taking up the cross is in Mark 8:34."
+  },
+  {
+   "book": 41,
+   "chapter": 10,
+   "verse": 50,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"came to Jesus\" becomes \"came to him\"",
+   "note": "The Vulgate has only a pronoun or the verb here, where the Textus Receptus names Jesus. The referent is plain from context."
+  },
+  {
+   "book": 41,
+   "chapter": 10,
+   "verse": 51,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Lord\" becomes \"Rabboni\"",
+   "note": "The Vulgate reads Rabboni, as do Sinaiticus and Vaticanus (Rabbouni, \"my Master\"); the Textus Receptus has Kyrie (Lord)."
+  },
+  {
+   "book": 41,
+   "chapter": 10,
+   "verse": 52,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"followed Jesus\" becomes \"followed him\"",
+   "note": "The Vulgate has only a pronoun or the verb here, where the Textus Receptus names Jesus; Sinaiticus and Vaticanus agree with the Vulgate. The referent is plain from context."
+  },
+  {
+   "book": 41,
+   "chapter": 11,
+   "verse": 10,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"in the name of the Lord\"",
+   "note": "The second \"in the name of the Lord\" is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus. Verse 9 still has the phrase."
+  },
+  {
+   "book": 41,
+   "chapter": 11,
+   "verse": 11,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"he\"",
+   "note": "The Vulgate has only a pronoun or the verb here, where the Textus Receptus names Jesus; Sinaiticus and Vaticanus agree with the Vulgate. The referent is plain from context."
+  },
+  {
+   "book": 41,
+   "chapter": 11,
+   "verse": 14,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"he\"",
+   "note": "The Vulgate has only a pronoun or the verb here, where the Textus Receptus names Jesus; Sinaiticus and Vaticanus agree with the Vulgate. The referent is plain from context."
+  },
+  {
+   "book": 41,
+   "chapter": 11,
+   "verse": 15,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus went\" becomes \"he was entered\"",
+   "note": "The Vulgate has only a pronoun or the verb here, where the Textus Receptus names Jesus; Sinaiticus and Vaticanus agree with the Vulgate. The referent is plain from context."
+  },
+  {
+   "book": 41,
+   "chapter": 12,
+   "verse": 29,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"our God is one Lord\" becomes \"thy God is one God\"",
+   "note": "The Vulgate reads Dominus Deus tuus, Deus unus est; the Greek, quoting Deuteronomy 6:4, has \"our God is one Lord\". The confession of one God is the same."
+  },
+  {
+   "book": 41,
+   "chapter": 15,
+   "verse": 3,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"but he answered nothing\"",
+   "note": "The clause is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus. Jesus' silence is still stated in verses 4 and 5."
+  },
+  {
+   "book": 41,
+   "chapter": 16,
+   "verse": 20,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the closing \"Amen\"",
+   "note": "The Vulgate ends Mark without \"Amen\"; the Textus Receptus has it. The Douay-Rheims keeps the longer ending, verses 9 to 20, as the KJV does."
+  },
+  {
+   "book": 42,
+   "chapter": 1,
+   "verse": 28,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"thou that art highly favoured\" becomes \"full of grace\"",
+   "note": "The Vulgate reads gratia plena for the Greek kecharitomene (one who has been favoured, or graced); the KJV has \"highly favoured\". \"Full of grace\" is the wording of the Hail Mary; both keep \"blessed art thou among women\"."
+  },
+  {
+   "book": 42,
+   "chapter": 2,
+   "verse": 9,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"glory of the Lord\" becomes \"brightness of God\"",
+   "note": "The Vulgate reads claritas Dei; the Greek of the Textus Receptus has doxa kyriou (glory of the Lord). The same divine person is meant; only the title differs."
+  },
+  {
+   "book": 42,
+   "chapter": 2,
+   "verse": 14,
+   "kind": "other",
+   "weight": "major",
+   "change": "\"good will toward men\" becomes \"to men of good will\"",
+   "note": "The Vulgate reads hominibus bonae voluntatis, from the Greek eudokias, as in Sinaiticus and Vaticanus; the Textus Receptus has eudokia, good will from God toward men. The peace is to those God favours, or to men of good will."
+  },
+  {
+   "book": 42,
+   "chapter": 2,
+   "verse": 33,
+   "kind": "virgin-birth",
+   "weight": "major",
+   "change": "\"Joseph\" becomes \"his father\"",
+   "note": "The Vulgate reads pater ejus (his father), as do Sinaiticus and Vaticanus; the Textus Receptus has \"Joseph\". Luke has already told of the virgin birth (1:34-35), and Mary herself says \"thy father\" in 2:48."
+  },
+  {
+   "book": 42,
+   "chapter": 2,
+   "verse": 40,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"in spirit\"",
+   "note": "\"In spirit\" is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus. The child still grows strong and full of wisdom."
+  },
+  {
+   "book": 42,
+   "chapter": 2,
+   "verse": 43,
+   "kind": "virgin-birth",
+   "weight": "major",
+   "change": "\"Joseph and his mother\" becomes \"his parents\"",
+   "note": "The Vulgate reads parentes ejus (his parents), as do Sinaiticus and Vaticanus; the Textus Receptus has \"Joseph and his mother\". \"Parents\" is also used in 2:27 and 2:41 in both."
+  },
+  {
+   "book": 42,
+   "chapter": 3,
+   "verse": 2,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"word of God\" becomes \"word of the Lord\"",
+   "note": "The Vulgate reads verbum Domini; the Greek of the Textus Receptus has rhema theou (word of God). The same divine person is meant; only the title differs."
+  },
+  {
+   "book": 42,
+   "chapter": 3,
+   "verse": 29,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"Jose\" becomes \"Jesus\" in the genealogy",
+   "note": "The Vulgate reads Jesu, as do the critical Greek texts (Iesou); the Textus Receptus has Iose. It is a different man, an ancestor of Joseph."
+  },
+  {
+   "book": 42,
+   "chapter": 4,
+   "verse": 8,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits \"Get thee behind me, Satan\"",
+   "note": "The rebuke, which is in Matthew 4:10, is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus. Jesus still answers from Scripture."
+  },
+  {
+   "book": 42,
+   "chapter": 4,
+   "verse": 41,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Christ the Son of God\" becomes \"the son of God\"",
+   "note": "\"Christ\" is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus. The end of the verse still says they knew he was Christ."
+  },
+  {
+   "book": 42,
+   "chapter": 7,
+   "verse": 22,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"he\"",
+   "note": "The Vulgate has only a pronoun or the verb here, where the Textus Receptus names Jesus; Sinaiticus and Vaticanus agree with the Vulgate. The referent is plain from context."
+  },
+  {
+   "book": 42,
+   "chapter": 9,
+   "verse": 57,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits the address \"Lord\"",
+   "note": "The address \"Lord\" is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus."
+  },
+  {
+   "book": 42,
+   "chapter": 10,
+   "verse": 21,
+   "kind": "trinity",
+   "weight": "minor",
+   "change": "\"Jesus rejoiced in spirit\" becomes \"he rejoiced in the Holy Ghost\"",
+   "note": "The Vulgate reads exsultavit Spiritu Sancto, without the name, as do Sinaiticus and Vaticanus (\"in the Holy Spirit\"); the Textus Receptus has \"Jesus\" and \"in spirit\". The Vulgate names the Holy Spirit explicitly."
+  },
+  {
+   "book": 42,
+   "chapter": 10,
+   "verse": 39,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus' feet\" becomes \"the Lord's feet\"",
+   "note": "The Vulgate reads pedes Domini, as do Sinaiticus and Vaticanus (tou kyriou); the Textus Receptus has \"Jesus'\". Both refer to Jesus."
+  },
+  {
+   "book": 42,
+   "chapter": 10,
+   "verse": 41,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"the Lord\"",
+   "note": "The Vulgate reads Dominus, as do Sinaiticus and Vaticanus (ho kyrios); the Textus Receptus has \"Jesus\". Both refer to Jesus."
+  },
+  {
+   "book": 42,
+   "chapter": 11,
+   "verse": 2,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Shorter Lord's Prayer: omits \"which art in heaven\", \"Thy will be done\"",
+   "note": "The Vulgate has Luke's shorter form of the prayer, as do Sinaiticus (in part) and Vaticanus; the Textus Receptus fills it out from Matthew 6:9-10, where the Douay-Rheims has the full wording."
+  },
+  {
+   "book": 42,
+   "chapter": 11,
+   "verse": 4,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits \"but deliver us from evil\"",
+   "note": "The petition is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus. Luke's form of the prayer is shorter; Matthew 6:13 has the petition in the Douay-Rheims too."
+  },
+  {
+   "book": 42,
+   "chapter": 13,
+   "verse": 2,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"he\"",
+   "note": "The Vulgate has only a pronoun or the verb here, where the Textus Receptus names Jesus; Sinaiticus and Vaticanus agree with the Vulgate. The referent is plain from context."
+  },
+  {
+   "book": 42,
+   "chapter": 13,
+   "verse": 3,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"except ye repent\" becomes \"unless you shall do penance\"",
+   "note": "The Douay-Rheims renders the Vulgate's paenitentiam agite (Greek metanoeite) \"do penance\" where the KJV has \"repent\". A translation choice: Catholic usage takes it to include works of penance, Protestant readers a turning of mind and heart."
+  },
+  {
+   "book": 42,
+   "chapter": 13,
+   "verse": 5,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"except ye repent\" becomes \"except you do penance\"",
+   "note": "The Douay-Rheims renders the Vulgate's paenitentiam agite (Greek metanoeite) \"do penance\" where the KJV has \"repent\". A translation choice: Catholic usage takes it to include works of penance, Protestant readers a turning of mind and heart."
+  },
+  {
+   "book": 42,
+   "chapter": 13,
+   "verse": 25,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Lord, Lord\" becomes \"Lord\"",
+   "note": "The Vulgate has the address once, as do Sinaiticus and Vaticanus; the Textus Receptus repeats it, as in Matthew 7:22 and 25:11."
+  },
+  {
+   "book": 42,
+   "chapter": 16,
+   "verse": 23,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"in hell\" moves to verse 22: \"buried in hell\"",
+   "note": "The Vulgate joins the Greek's \"in Hades\" to the previous clause: the rich man \"was buried in hell\", and then lifts up his eyes in torments. The same words, divided differently; the rich man is in torment in both."
+  },
+  {
+   "book": 42,
+   "chapter": 16,
+   "verse": 30,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"they will repent\" becomes \"they will do penance\"",
+   "note": "The Douay-Rheims renders the Vulgate's paenitentiam agite (Greek metanoeite) \"do penance\" where the KJV has \"repent\". A translation choice: Catholic usage takes it to include works of penance, Protestant readers a turning of mind and heart."
+  },
+  {
+   "book": 42,
+   "chapter": 17,
+   "verse": 3,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"if he repent\" becomes \"if he do penance\"",
+   "note": "The Douay-Rheims renders the Vulgate's paenitentiam agite (Greek metanoeite) \"do penance\" where the KJV has \"repent\". A translation choice: Catholic usage takes it to include works of penance, Protestant readers a turning of mind and heart."
+  },
+  {
+   "book": 42,
+   "chapter": 22,
+   "verse": 63,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"held Jesus\" becomes \"held him\"",
+   "note": "The Vulgate has only a pronoun or the verb here, where the Textus Receptus names Jesus. The referent is plain from context."
+  },
+  {
+   "book": 43,
+   "chapter": 4,
+   "verse": 1,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord knew\" becomes \"Jesus… understood\"",
+   "note": "The Vulgate reads Jesus, as do Sinaiticus and some other Greek manuscripts; the Textus Receptus has \"the Lord\". Both refer to Jesus."
+  },
+  {
+   "book": 43,
+   "chapter": 4,
+   "verse": 42,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"the Christ\" before \"the Saviour of the world\"",
+   "note": "\"The Christ\" is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus. Jesus is still confessed as Saviour of the world."
+  },
+  {
+   "book": 43,
+   "chapter": 4,
+   "verse": 46,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"He\"",
+   "note": "The Vulgate has only a pronoun or the verb here, where the Textus Receptus names Jesus; Sinaiticus and Vaticanus agree with the Vulgate. The referent is plain from context."
+  },
+  {
+   "book": 43,
+   "chapter": 5,
+   "verse": 16,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"and sought to slay him\"",
+   "note": "The clause is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus. Verse 18 still says they sought to kill him."
+  },
+  {
+   "book": 43,
+   "chapter": 5,
+   "verse": 30,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the will of the Father\" becomes \"the will of him\"",
+   "note": "\"The Father\" is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus. The one who sent him is still the Father, as the context shows."
+  },
+  {
+   "book": 43,
+   "chapter": 6,
+   "verse": 69,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Son of the living God\" becomes \"the Son of God\"",
+   "note": "The Vulgate reads Christus Filius Dei; the Textus Receptus has \"the Son of the living God\", and Sinaiticus and Vaticanus \"the Holy One of God\". Peter's confession of Jesus as the Christ stands."
+  },
+  {
+   "book": 43,
+   "chapter": 7,
+   "verse": 39,
+   "kind": "trinity",
+   "weight": "minor",
+   "change": "\"the Holy Ghost was not yet given\" becomes \"the Spirit\"",
+   "note": "The Vulgate reads Spiritus without Sanctus, as do Sinaiticus and Vaticanus; the Textus Receptus has \"Holy\". The Spirit meant is the same."
+  },
+  {
+   "book": 43,
+   "chapter": 7,
+   "verse": 50,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"came to Jesus\" becomes \"came to him\"",
+   "note": "The Vulgate has only a pronoun or the verb here, where the Textus Receptus names Jesus. The referent is plain from context."
+  },
+  {
+   "book": 43,
+   "chapter": 8,
+   "verse": 6,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"as though he heard them not\"",
+   "note": "The Vulgate keeps the account of the adulterous woman but without this phrase, which is in the Textus Receptus and some later manuscripts."
+  },
+  {
+   "book": 43,
+   "chapter": 8,
+   "verse": 9,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"being convicted by their own conscience\"",
+   "note": "The Vulgate keeps the account of the adulterous woman (John 7:53-8:11), as the KJV does, but without this clause, which is in the Textus Receptus and some later Greek manuscripts."
+  },
+  {
+   "book": 43,
+   "chapter": 8,
+   "verse": 10,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"and saw none but the woman\" and \"those thine\"",
+   "note": "The Vulgate reads Mulier, ubi sunt qui te accusabant?, without these words of the Textus Receptus. The account is the same."
+  },
+  {
+   "book": 43,
+   "chapter": 8,
+   "verse": 29,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Father hath not left me\" becomes \"he hath not left me\"",
+   "note": "\"The Father\" is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus. The one who sent him is still the subject."
+  },
+  {
+   "book": 43,
+   "chapter": 8,
+   "verse": 59,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"going through the midst of them, and so passed by\"",
+   "note": "The clause is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus. Jesus still hides himself and leaves the temple."
+  },
+  {
+   "book": 43,
+   "chapter": 12,
+   "verse": 4,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"Simon's son\"",
+   "note": "The Vulgate names Judas Iscariot without his father here; the Textus Receptus has \"Simon's son\", which is also in John 6:71 and 13:2."
+  },
+  {
+   "book": 43,
+   "chapter": 12,
+   "verse": 47,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"believe not\" becomes \"keep them not\"",
+   "note": "The Vulgate reads non custodierit, as do Sinaiticus and Vaticanus (phylaxe, keep); the Textus Receptus has pisteuse (believe). Hearing without keeping, rather than without believing."
+  },
+  {
+   "book": 43,
+   "chapter": 13,
+   "verse": 3,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits the name \"Jesus\"",
+   "note": "The Vulgate has only a pronoun or the verb here, where the Textus Receptus names Jesus. The referent is plain from context."
+  },
+  {
+   "book": 43,
+   "chapter": 13,
+   "verse": 37,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits the address \"Lord\"",
+   "note": "The Vulgate has Peter's question without \"Lord\"; the Textus Receptus and most Greek manuscripts have Kyrie. Peter still addresses Jesus."
+  },
+  {
+   "book": 43,
+   "chapter": 19,
+   "verse": 23,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"crucified Jesus\" becomes \"crucified him\"",
+   "note": "The Vulgate has only a pronoun or the verb here, where the Textus Receptus names Jesus. The referent is plain from context."
+  },
+  {
+   "book": 43,
+   "chapter": 20,
+   "verse": 21,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"said Jesus\" becomes \"He said\"; \"my Father\" becomes \"the Father\"",
+   "note": "The Vulgate has neither the name nor \"my\" (Pater); the Textus Receptus has both. Jesus is the speaker, and the Father who sent him is the same."
+  },
+  {
+   "book": 43,
+   "chapter": 21,
+   "verse": 17,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus saith\" becomes \"He said\"; \"son of Jonas\" becomes \"son of John\"",
+   "note": "The Vulgate reads Dixit ei and Simon Joannis, as Sinaiticus and Vaticanus read Ioannou; the Textus Receptus has \"Jesus\" and Iona. The speaker and the man meant are the same."
+  },
+  {
+   "book": 43,
+   "chapter": 21,
+   "verse": 25,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the closing \"Amen\"",
+   "note": "The closing \"Amen\" is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus. The meaning is unchanged."
+  },
+  {
+   "book": 44,
+   "chapter": 2,
+   "verse": 17,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"saith God\" becomes \"saith the Lord\"",
+   "note": "The Vulgate reads dicit Dominus; the Greek of the Textus Receptus has legei ho theos (saith God). The same divine person is meant; only the title differs."
+  },
+  {
+   "book": 44,
+   "chapter": 2,
+   "verse": 30,
+   "kind": "prophecy",
+   "weight": "major",
+   "change": "Omits \"according to the flesh, he would raise up Christ\"",
+   "note": "The phrase is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus. The Vulgate reads only that one of David's line would sit on his throne; verse 31 still says David spoke of Christ's resurrection."
+  },
+  {
+   "book": 44,
+   "chapter": 2,
+   "verse": 38,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"Repent\" becomes \"Do penance\"",
+   "note": "The Douay-Rheims renders the Vulgate's paenitentiam agite (Greek metanoeite) \"do penance\" where the KJV has \"repent\". A translation choice: Catholic usage takes it to include works of penance, Protestant readers a turning of mind and heart."
+  },
+  {
+   "book": 44,
+   "chapter": 2,
+   "verse": 47,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"added to the church\" becomes \"increased… together\"",
+   "note": "The Vulgate reads augebat… in idipsum (increased together), as Sinaiticus and Vaticanus read epi to auto; the Textus Receptus has \"to the church\". The growth of the believers is the same."
+  },
+  {
+   "book": 44,
+   "chapter": 3,
+   "verse": 19,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"Repent ye\" becomes \"Be penitent\"",
+   "note": "The Vulgate reads Paenitemini, which the Douay-Rheims renders \"Be penitent\" (Greek metanoesate, \"repent\"). A translation choice; the rest of the KJV's verse is in the Douay's verse 20."
+  },
+  {
+   "book": 44,
+   "chapter": 3,
+   "verse": 26,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"his Son Jesus\" becomes \"his Son\"",
+   "note": "The Vulgate reads filium suum without the name; the Textus Receptus has \"his Son Jesus\", and Sinaiticus and Vaticanus \"his servant\". The Vulgate keeps \"Son\"."
+  },
+  {
+   "book": 44,
+   "chapter": 4,
+   "verse": 21,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"glorified God\" becomes \"glorified what had been done\"",
+   "note": "The Vulgate reads clarificabant id quod factum fuerat; the Greek has edoxazon ton theon (glorified God). The people still praise the healing."
+  },
+  {
+   "book": 44,
+   "chapter": 4,
+   "verse": 24,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"thou art God\"",
+   "note": "The Vulgate reads tu es qui fecisti (thou art he that didst make), as do Sinaiticus and Vaticanus; the Textus Receptus has \"thou art God, which hast made\". They still pray to God as Creator."
+  },
+  {
+   "book": 44,
+   "chapter": 6,
+   "verse": 7,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"word of God\" becomes \"word of the Lord\"",
+   "note": "The Vulgate reads verbum Domini; the Greek of the Textus Receptus has tou theou (of God). The same divine person is meant; only the title differs."
+  },
+  {
+   "book": 44,
+   "chapter": 7,
+   "verse": 7,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"said God\" becomes \"said the Lord\"",
+   "note": "The Vulgate reads dixit Dominus; the Greek of the Textus Receptus has ho theos eipen (said God). The same divine person is meant; only the title differs."
+  },
+  {
+   "book": 44,
+   "chapter": 7,
+   "verse": 16,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"Emmor the father of Sychem\" becomes \"Hemor, the son of Sichem\"",
+   "note": "The Vulgate reads Hemor filii Sichem (Hamor son of Shechem); the Textus Receptus has tou Sychem, which the KJV takes as \"the father of\" (Genesis 33:19). A difference in reading the genitive."
+  },
+  {
+   "book": 44,
+   "chapter": 7,
+   "verse": 30,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"an angel of the Lord\" becomes \"an angel\"",
+   "note": "\"Of the Lord\" is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus. The Lord's voice is still heard in verse 31."
+  },
+  {
+   "book": 44,
+   "chapter": 7,
+   "verse": 37,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord your God\" becomes \"God\"",
+   "note": "The Vulgate reads Deus, as do Sinaiticus and Vaticanus (ho theos); the Textus Receptus has \"the Lord your God\". The prophecy of Deuteronomy 18:15 is the same."
+  },
+  {
+   "book": 44,
+   "chapter": 8,
+   "verse": 22,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"Repent\" becomes \"Do penance\"",
+   "note": "The Douay-Rheims renders the Vulgate's paenitentiam agite (Greek metanoeite) \"do penance\" where the KJV has \"repent\". A translation choice: Catholic usage takes it to include works of penance, Protestant readers a turning of mind and heart."
+  },
+  {
+   "book": 44,
+   "chapter": 9,
+   "verse": 5,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord said\" becomes \"And he\"",
+   "note": "The Vulgate reads Et ille, as do Sinaiticus and Vaticanus (ho de); the Textus Receptus has \"the Lord said\". The speaker is still Jesus, who names himself."
+  },
+  {
+   "book": 44,
+   "chapter": 9,
+   "verse": 20,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"preached Christ\" becomes \"preached Jesus\"",
+   "note": "The Vulgate reads Jesum, as do Sinaiticus and Vaticanus; the Textus Receptus has \"Christ\". He still preaches that Jesus is the Son of God."
+  },
+  {
+   "book": 44,
+   "chapter": 10,
+   "verse": 14,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits the address \"Lord\"",
+   "note": "The Vulgate has Absit Domine (\"Not so, Lord\"); the Douay-Rheims renders it \"Far be it from me\" without the address. A translation choice, not a textual difference."
+  },
+  {
+   "book": 44,
+   "chapter": 10,
+   "verse": 30,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits \"I was fasting\"",
+   "note": "The Vulgate reads orans eram (I was praying), as do Sinaiticus and Vaticanus; the Textus Receptus has \"fasting\" as well as praying. Fasting is still commended elsewhere, as in 13:2-3."
+  },
+  {
+   "book": 44,
+   "chapter": 10,
+   "verse": 33,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"before God… of God\" becomes \"in thy sight… by the Lord\"",
+   "note": "The Vulgate reads in conspectu tuo and a Domino; the Textus Receptus has \"before God\" and \"of God\". Cornelius and his household still wait to hear what God has commanded."
+  },
+  {
+   "book": 44,
+   "chapter": 12,
+   "verse": 24,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"word of God\" becomes \"word of the Lord\"",
+   "note": "The Vulgate reads verbum Domini; the Greek of the Textus Receptus has tou theou (of God). The same divine person is meant; only the title differs."
+  },
+  {
+   "book": 44,
+   "chapter": 14,
+   "verse": 23,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"ordained them elders\" becomes \"ordained to them priests\"",
+   "note": "The Douay-Rheims renders the Vulgate's presbyteros (Greek presbyterous, elders) as \"priests\", the English word that comes from presbyter; the KJV has \"elders\". A translation choice: Catholic readers see the ordained priesthood here, Protestant readers church elders."
+  },
+  {
+   "book": 44,
+   "chapter": 15,
+   "verse": 18,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"Known unto God are all his works\" becomes a shorter sentence",
+   "note": "The Vulgate has a shorter form, notum a saeculo est Domino opus suum; Sinaiticus and Vaticanus join a shorter form to verse 17. The Textus Receptus has the fuller sentence."
+  },
+  {
+   "book": 44,
+   "chapter": 15,
+   "verse": 24,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"Ye must be circumcised, and keep the law\"",
+   "note": "The clause is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus. The issue is stated in verses 1 and 5."
+  },
+  {
+   "book": 44,
+   "chapter": 15,
+   "verse": 34,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Adds \"and Judas alone departed to Jerusalem\"",
+   "note": "The Vulgate keeps the verse, as the KJV does, and adds this clause, found in Codex Bezae; Sinaiticus and Vaticanus lack the whole verse."
+  },
+  {
+   "book": 44,
+   "chapter": 16,
+   "verse": 10,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord had called us\" becomes \"God had called us\"",
+   "note": "The Vulgate reads Deus, as do Sinaiticus and Vaticanus (ho theos); the Textus Receptus has \"the Lord\"."
+  },
+  {
+   "book": 44,
+   "chapter": 16,
+   "verse": 31,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord Jesus Christ\" becomes \"the Lord Jesus\"",
+   "note": "\"Christ\" is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus. Salvation by believing on the Lord Jesus is unchanged."
+  },
+  {
+   "book": 44,
+   "chapter": 17,
+   "verse": 26,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"of one blood\" becomes \"of one\"",
+   "note": "The Vulgate reads ex uno, as do Sinaiticus and Vaticanus (ex henos); the Textus Receptus has \"one blood\". The unity of mankind from one origin is the same."
+  },
+  {
+   "book": 44,
+   "chapter": 17,
+   "verse": 27,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"seek the Lord\" becomes \"seek God\"",
+   "note": "The Vulgate reads Deum, as do Sinaiticus and Vaticanus (ton theon); the Textus Receptus has \"the Lord\"."
+  },
+  {
+   "book": 44,
+   "chapter": 17,
+   "verse": 30,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"repent\" becomes \"do penance\"",
+   "note": "The Douay-Rheims renders the Vulgate's paenitentiam agite (Greek metanoeite) \"do penance\" where the KJV has \"repent\". A translation choice: Catholic usage takes it to include works of penance, Protestant readers a turning of mind and heart."
+  },
+  {
+   "book": 44,
+   "chapter": 18,
+   "verse": 5,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"pressed in the spirit\" becomes \"earnest in preaching\"",
+   "note": "The Vulgate reads instabat verbo (pressed on with the word), as do Sinaiticus and Vaticanus (logo); the Textus Receptus has pneumati (in the spirit)."
+  },
+  {
+   "book": 44,
+   "chapter": 18,
+   "verse": 21,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"I must by all means keep this feast… in Jerusalem\"",
+   "note": "The sentence is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus. Paul still promises to return, God willing."
+  },
+  {
+   "book": 44,
+   "chapter": 18,
+   "verse": 25,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the things of the Lord\" becomes \"the things… of Jesus\"",
+   "note": "The Vulgate reads ea quae sunt Jesu, as do Sinaiticus and Vaticanus (peri tou Iesou); the Textus Receptus has \"of the Lord\". Both refer to Jesus."
+  },
+  {
+   "book": 44,
+   "chapter": 18,
+   "verse": 26,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"way of God\" becomes \"way of the Lord\"",
+   "note": "The Vulgate reads viam Domini; the Greek of the Textus Receptus has ten tou theou hodon (the way of God). The same divine person is meant; only the title differs."
+  },
+  {
+   "book": 44,
+   "chapter": 18,
+   "verse": 27,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "Omits \"through grace\"",
+   "note": "The Vulgate reads his qui crediderant (them who had believed) without \"through grace\"; the Greek has dia tes charitos. Salvation by grace is still stated in 15:11."
+  },
+  {
+   "book": 44,
+   "chapter": 19,
+   "verse": 4,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Christ Jesus\" becomes \"Jesus\"",
+   "note": "\"Christ\" is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus. He is still the one John said would come."
+  },
+  {
+   "book": 44,
+   "chapter": 19,
+   "verse": 10,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord Jesus\" becomes \"the Lord\"",
+   "note": "\"Jesus\" is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus."
+  },
+  {
+   "book": 44,
+   "chapter": 21,
+   "verse": 20,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"glorified the Lord\" becomes \"glorified God\"",
+   "note": "The Vulgate reads Deum, as do Sinaiticus and Vaticanus (ton theon); the Textus Receptus has \"the Lord\"."
+  },
+  {
+   "book": 44,
+   "chapter": 22,
+   "verse": 3,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"zealous toward God\" becomes \"zealous for the law\"",
+   "note": "The Vulgate reads aemulator legis; the Greek has zelotes tou theou (zealous for God). Paul's zeal is for the law of God either way."
+  },
+  {
+   "book": 44,
+   "chapter": 22,
+   "verse": 16,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the name of the Lord\" becomes \"his name\"",
+   "note": "The Vulgate reads nomine ipsius, as do Sinaiticus and Vaticanus (autou); the Textus Receptus has \"of the Lord\". The name is of the Just One of verse 14."
+  },
+  {
+   "book": 44,
+   "chapter": 23,
+   "verse": 9,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"let us not fight against God\"",
+   "note": "The clause is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus. The sentence is left as a question."
+  },
+  {
+   "book": 44,
+   "chapter": 24,
+   "verse": 14,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"the God of my fathers\" becomes \"the Father and my God\"",
+   "note": "The Vulgate reads Patri et Deo meo, apparently reading the Greek patroo theo (ancestral God) as \"Father and God\". Paul's service of the God of Israel is the same."
+  },
+  {
+   "book": 44,
+   "chapter": 26,
+   "verse": 20,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"repent… meet for repentance\" becomes \"do penance… worthy of penance\"",
+   "note": "The Douay-Rheims renders the Vulgate's paenitentiam agite (Greek metanoeite) \"do penance\" where the KJV has \"repent\". A translation choice: Catholic usage takes it to include works of penance, Protestant readers a turning of mind and heart."
+  },
+  {
+   "book": 44,
+   "chapter": 28,
+   "verse": 16,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the centurion delivering the prisoners to the captain",
+   "note": "The clause is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus. Paul is still allowed to live alone with a soldier."
+  },
+  {
+   "book": 45,
+   "chapter": 1,
+   "verse": 16,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the gospel of Christ\" becomes \"the gospel\"",
+   "note": "\"Of Christ\" is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus. The gospel meant is the same."
+  },
+  {
+   "book": 45,
+   "chapter": 5,
+   "verse": 12,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"for that all have sinned\" becomes \"in whom all have sinned\"",
+   "note": "The Vulgate reads in quo omnes peccaverunt, taking the Greek eph' ho as \"in whom\" (in Adam); the KJV has \"for that\" (because). Augustine built the doctrine of original sin partly on the Latin reading; the passage teaches sin through Adam in both."
+  },
+  {
+   "book": 45,
+   "chapter": 8,
+   "verse": 1,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits \"but after the Spirit\"",
+   "note": "The Vulgate has only qui non secundum carnem ambulant; Sinaiticus and Vaticanus have neither clause; the Textus Receptus has both, as in verse 4."
+  },
+  {
+   "book": 45,
+   "chapter": 10,
+   "verse": 17,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"word of God\" becomes \"word of Christ\"",
+   "note": "The Vulgate reads verbum Christi, as do Sinaiticus and Vaticanus (rhematos Christou); the Textus Receptus has theou (God)."
+  },
+  {
+   "book": 45,
+   "chapter": 11,
+   "verse": 6,
+   "kind": "salvation",
+   "weight": "major",
+   "change": "Omits \"But if it be of works… work is no more work\"",
+   "note": "The second half of the verse is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus. Its point is the converse of the first half, which remains: grace excludes works."
+  },
+  {
+   "book": 45,
+   "chapter": 14,
+   "verse": 6,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"he that regardeth not the day\" clause",
+   "note": "The clause is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus. The parallel clause about eating is kept."
+  },
+  {
+   "book": 45,
+   "chapter": 15,
+   "verse": 19,
+   "kind": "trinity",
+   "weight": "minor",
+   "change": "\"the Spirit of God\" becomes \"the Holy Ghost\"",
+   "note": "The Vulgate reads Spiritus Sancti, with some Greek manuscripts; the Textus Receptus has \"Spirit of God\". The same Spirit is meant."
+  },
+  {
+   "book": 45,
+   "chapter": 16,
+   "verse": 18,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"our Lord Jesus Christ\" becomes \"Christ our Lord\"",
+   "note": "\"Jesus\" is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus."
+  },
+  {
+   "book": 45,
+   "chapter": 16,
+   "verse": 20,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the closing \"Amen\"",
+   "note": "The \"Amen\" is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus. The meaning is unchanged."
+  },
+  {
+   "book": 45,
+   "chapter": 16,
+   "verse": 27,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription \"Written to the Romans from Corinthus…\"",
+   "note": "The subscription is a later note found in the Textus Receptus and printed by the KJV; it is not in the Vulgate or the earliest Greek manuscripts and is not part of the text."
+  },
+  {
+   "book": 46,
+   "chapter": 2,
+   "verse": 1,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"testimony of God\" becomes \"testimony of Christ\"",
+   "note": "The Vulgate reads testimonium Christi, with some Greek manuscripts; the Textus Receptus has \"of God\", and some early manuscripts \"mystery of God\"."
+  },
+  {
+   "book": 46,
+   "chapter": 2,
+   "verse": 13,
+   "kind": "trinity",
+   "weight": "minor",
+   "change": "\"the Holy Ghost teacheth\" becomes \"the doctrine of the Spirit\"",
+   "note": "\"Holy\" is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus. The Spirit meant is the same."
+  },
+  {
+   "book": 46,
+   "chapter": 5,
+   "verse": 4,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Second \"our Lord Jesus Christ\" becomes \"our Lord Jesus\"",
+   "note": "The second \"Christ\" is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus."
+  },
+  {
+   "book": 46,
+   "chapter": 6,
+   "verse": 20,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits \"and in your spirit, which are God's\"; adds \"and bear\"",
+   "note": "The Vulgate reads glorificate et portate Deum in corpore vestro; Sinaiticus and Vaticanus also lack the clause about the spirit, which is in the Textus Receptus. \"Bear God\" is a Latin addition."
+  },
+  {
+   "book": 46,
+   "chapter": 7,
+   "verse": 5,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits \"fasting\"",
+   "note": "\"Fasting\" is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus. Only prayer is named as the reason for abstaining."
+  },
+  {
+   "book": 46,
+   "chapter": 7,
+   "verse": 32,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"please the Lord\" becomes \"please God\"",
+   "note": "The Vulgate reads placeat Deo; the Greek of the Textus Receptus has kyrio (the Lord). The same divine person is meant; only the title differs."
+  },
+  {
+   "book": 46,
+   "chapter": 9,
+   "verse": 5,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"a sister, a wife\" becomes \"a woman, a sister\"",
+   "note": "The Greek adelphen gynaika can mean \"a sister as wife\" or \"a sister, a woman\"; the Vulgate's mulierem sororem is read by Catholics of a woman helper, the KJV's \"a sister, a wife\" of a believing wife, as Peter had (Matthew 8:14)."
+  },
+  {
+   "book": 46,
+   "chapter": 9,
+   "verse": 18,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the gospel of Christ\" becomes \"the gospel\"",
+   "note": "\"Of Christ\" is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus."
+  },
+  {
+   "book": 46,
+   "chapter": 10,
+   "verse": 16,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"body of Christ\" becomes \"body of the Lord\"",
+   "note": "The Vulgate reads corporis Domini; the Greek of the Textus Receptus has tou Christou (of Christ). The same divine person is meant; only the title differs."
+  },
+  {
+   "book": 46,
+   "chapter": 10,
+   "verse": 28,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"for the earth is the Lord's, and the fulness thereof\"",
+   "note": "The repeated quotation of Psalm 24:1 is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus. It stands in verse 26."
+  },
+  {
+   "book": 46,
+   "chapter": 11,
+   "verse": 24,
+   "kind": "atonement",
+   "weight": "minor",
+   "change": "\"broken for you\" becomes \"delivered for you\"",
+   "note": "The Vulgate reads quod pro vobis tradetur (which shall be delivered); Sinaiticus and Vaticanus have only \"which is for you\"; the Textus Receptus has klomenon (broken)."
+  },
+  {
+   "book": 46,
+   "chapter": 11,
+   "verse": 27,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"eat this bread, and drink this cup\" becomes \"or drink the chalice\"",
+   "note": "The Vulgate reads vel biberit (or drink), as do most Greek manuscripts (e); the Textus Receptus has kai (and). The Catholic practice of communion in one kind has been linked to this reading."
+  },
+  {
+   "book": 46,
+   "chapter": 15,
+   "verse": 47,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"the Lord from heaven\" becomes \"from heaven, heavenly\"",
+   "note": "The Vulgate reads secundus homo de caelo, caelestis; Sinaiticus and Vaticanus have \"from heaven\" without \"the Lord\", which is in the Textus Receptus. Christ's heavenly origin is still stated."
+  },
+  {
+   "book": 46,
+   "chapter": 15,
+   "verse": 51,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"We shall not all sleep\" becomes \"We shall all indeed rise again\"",
+   "note": "The Vulgate reads omnes quidem resurgemus, sed non omnes immutabimur, from a Greek variant (in Bezae); the Textus Receptus and most manuscripts have \"we shall not all sleep, but we shall all be changed\". Both teach the resurrection and transformation at the last trumpet."
+  },
+  {
+   "book": 46,
+   "chapter": 16,
+   "verse": 24,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription \"written from Philippi…\"",
+   "note": "The subscription is a later note found in the Textus Receptus and printed by the KJV; it is not in the Vulgate or the earliest Greek manuscripts and is not part of the text."
+  },
+  {
+   "book": 47,
+   "chapter": 4,
+   "verse": 10,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord Jesus\" becomes \"Jesus\"",
+   "note": "\"The Lord\" is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus."
+  },
+  {
+   "book": 47,
+   "chapter": 4,
+   "verse": 14,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"raised up the Lord Jesus\" becomes \"raised up Jesus\"",
+   "note": "The Vulgate reads suscitavit Jesum and cum Jesu (with Jesus), as do Vaticanus and some others; the Textus Receptus has \"the Lord Jesus\" and \"by Jesus\"."
+  },
+  {
+   "book": 47,
+   "chapter": 5,
+   "verse": 18,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"by Jesus Christ\" becomes \"by Christ\"",
+   "note": "\"Jesus\" is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus."
+  },
+  {
+   "book": 47,
+   "chapter": 8,
+   "verse": 21,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"in the sight of the Lord\" becomes \"before God\"",
+   "note": "The Vulgate reads coram Deo; the Greek of the Textus Receptus has kyriou (the Lord). The same divine person is meant; only the title differs."
+  },
+  {
+   "book": 47,
+   "chapter": 9,
+   "verse": 12,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"thanksgivings unto God\" becomes \"thanksgivings in the Lord\"",
+   "note": "The Vulgate reads in Domino; the Greek of the Textus Receptus has to theo (to God). The same divine person is meant; only the title differs."
+  },
+  {
+   "book": 47,
+   "chapter": 10,
+   "verse": 18,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"whom the Lord commendeth\" becomes \"whom God commendeth\"",
+   "note": "The Vulgate reads Deus; the Greek of the Textus Receptus has ho kyrios (the Lord). The same divine person is meant; only the title differs."
+  },
+  {
+   "book": 47,
+   "chapter": 11,
+   "verse": 4,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"another Jesus\" becomes \"another Christ\"",
+   "note": "The Vulgate reads alium Christum; the Greek has allon Iesoun (another Jesus). The warning against a false gospel is the same."
+  },
+  {
+   "book": 47,
+   "chapter": 11,
+   "verse": 17,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"after the Lord\" becomes \"according to God\"",
+   "note": "The Vulgate reads secundum Deum; the Greek of the Textus Receptus has kata kyrion (after the Lord). The same divine person is meant; only the title differs."
+  },
+  {
+   "book": 47,
+   "chapter": 12,
+   "verse": 7,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the second \"lest I should be exalted above measure\"",
+   "note": "The Vulgate states the purpose once; the Greek, both the Textus Receptus and most manuscripts, repeats it at the end of the verse. The meaning is the same."
+  },
+  {
+   "book": 47,
+   "chapter": 13,
+   "verse": 14,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription \"written from Philippi…\"",
+   "note": "The subscription is a later note found in the Textus Receptus and printed by the KJV; it is not in the Vulgate or the earliest Greek manuscripts and is not part of the text."
+  },
+  {
+   "book": 48,
+   "chapter": 1,
+   "verse": 15,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"it pleased God\" becomes \"it pleased him\"",
+   "note": "The Vulgate reads placuit ei, as do Vaticanus and some others; the Textus Receptus names God. The one who called Paul is plainly God."
+  },
+  {
+   "book": 48,
+   "chapter": 3,
+   "verse": 17,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"in Christ\" after \"confirmed before of God\"",
+   "note": "\"In Christ\" is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus."
+  },
+  {
+   "book": 48,
+   "chapter": 4,
+   "verse": 7,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"heir of God through Christ\" becomes \"heir also through God\"",
+   "note": "The Vulgate reads haeres per Deum, as do Sinaiticus and Vaticanus; the Textus Receptus has \"of God through Christ\"."
+  },
+  {
+   "book": 48,
+   "chapter": 6,
+   "verse": 18,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription \"To the Galatians written from Rome\"",
+   "note": "The subscription is a later note found in the Textus Receptus and printed by the KJV; it is not in the Vulgate or the earliest Greek manuscripts and is not part of the text."
+  },
+  {
+   "book": 49,
+   "chapter": 3,
+   "verse": 9,
+   "kind": "deity",
+   "weight": "major",
+   "change": "Omits \"by Jesus Christ\" after \"created all things\"",
+   "note": "\"By Jesus Christ\" is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus. Christ's part in creation is still stated in Colossians 1:16 and John 1:3."
+  },
+  {
+   "book": 49,
+   "chapter": 5,
+   "verse": 9,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"fruit of the Spirit\" becomes \"fruit of the light\"",
+   "note": "The Vulgate reads fructus lucis, as do Sinaiticus and Vaticanus (photos); the Textus Receptus has pneumatos (Spirit), as in Galatians 5:22."
+  },
+  {
+   "book": 49,
+   "chapter": 5,
+   "verse": 10,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"acceptable unto the Lord\" becomes \"well pleasing to God\"",
+   "note": "The Vulgate reads beneplacitum Deo; the Greek of the Textus Receptus has to kyrio (unto the Lord). The same divine person is meant; only the title differs."
+  },
+  {
+   "book": 49,
+   "chapter": 5,
+   "verse": 17,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the will of the Lord\" becomes \"the will of God\"",
+   "note": "The Vulgate reads voluntas Dei; the Greek of the Textus Receptus has tou kyriou (of the Lord). The same divine person is meant; only the title differs."
+  },
+  {
+   "book": 49,
+   "chapter": 5,
+   "verse": 21,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"fear of God\" becomes \"fear of Christ\"",
+   "note": "The Vulgate reads timore Christi, as do Sinaiticus and Vaticanus; the Textus Receptus has theou (God)."
+  },
+  {
+   "book": 49,
+   "chapter": 5,
+   "verse": 29,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord\" becomes \"Christ\"",
+   "note": "The Vulgate reads Christus, as do Sinaiticus and Vaticanus; the Textus Receptus has ho kyrios (the Lord). Both refer to Christ."
+  },
+  {
+   "book": 49,
+   "chapter": 5,
+   "verse": 32,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"a great mystery\" becomes \"a great sacrament\"",
+   "note": "The Vulgate renders the Greek mysterion as sacramentum, which the Douay-Rheims gives as \"sacrament\"; the KJV has \"mystery\". Catholic teaching counts marriage a sacrament partly from this verse; the passage speaks of Christ and the church in both."
+  },
+  {
+   "book": 49,
+   "chapter": 6,
+   "verse": 24,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription \"To the Ephesians written from Rome…\"",
+   "note": "The subscription is a later note found in the Textus Receptus and printed by the KJV; it is not in the Vulgate or the earliest Greek manuscripts and is not part of the text."
+  },
+  {
+   "book": 50,
+   "chapter": 1,
+   "verse": 7,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"partakers of my grace\" becomes \"partakers of my joy\"",
+   "note": "The Vulgate reads socios gaudii mei; the Greek has charitos (grace). A Latin reading, perhaps of chara (joy) for charis."
+  },
+  {
+   "book": 50,
+   "chapter": 1,
+   "verse": 16,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Verses 16 and 17 are in the reverse order",
+   "note": "The Vulgate puts \"some out of charity\" before \"some out of contention\", as do Sinaiticus and Vaticanus; the Textus Receptus has the reverse. The content is the same."
+  },
+  {
+   "book": 50,
+   "chapter": 4,
+   "verse": 13,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"through Christ\" becomes \"in him\"",
+   "note": "The Vulgate reads in eo, as do Sinaiticus and Vaticanus; the Textus Receptus names Christ. The one who strengthens is plainly Christ."
+  },
+  {
+   "book": 50,
+   "chapter": 4,
+   "verse": 23,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "\"with you all\" becomes \"with your spirit\"; omits the subscription",
+   "note": "The Vulgate reads cum spiritu vestro, as do the early Greek manuscripts. The subscription is a later note found in the Textus Receptus and printed by the KJV; it is not in the Vulgate or the earliest Greek manuscripts and is not part of the text."
+  },
+  {
+   "book": 51,
+   "chapter": 1,
+   "verse": 10,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"worthy of the Lord\" becomes \"worthy of God\"",
+   "note": "The Vulgate reads digne Deo; the Greek of the Textus Receptus has tou kyriou (of the Lord). The same divine person is meant; only the title differs."
+  },
+  {
+   "book": 51,
+   "chapter": 3,
+   "verse": 13,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Christ forgave\" becomes \"the Lord hath forgiven\"",
+   "note": "The Vulgate reads Dominus, as do Vaticanus and some others (ho kyrios); the Textus Receptus has ho Christos. Both refer to Christ."
+  },
+  {
+   "book": 51,
+   "chapter": 3,
+   "verse": 15,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"peace of God\" becomes \"peace of Christ\"",
+   "note": "The Vulgate reads pax Christi, as do Sinaiticus and Vaticanus; the Textus Receptus has tou theou (of God)."
+  },
+  {
+   "book": 51,
+   "chapter": 3,
+   "verse": 16,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"to the Lord\" becomes \"to God\"",
+   "note": "The Vulgate reads Deo, as do Sinaiticus and Vaticanus (to theo); the Textus Receptus has to kyrio (to the Lord)."
+  },
+  {
+   "book": 52,
+   "chapter": 1,
+   "verse": 1,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"from God our Father, and the Lord Jesus Christ\"",
+   "note": "The second half of the greeting is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus. The Douay-Rheims has only \"Grace be to you and peace\", at the start of its verse 2."
+  },
+  {
+   "book": 52,
+   "chapter": 4,
+   "verse": 17,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"to meet the Lord\" becomes \"to meet Christ\"",
+   "note": "The Vulgate reads obviam Christo; the Greek has tou kyriou (the Lord). The Lord meant is Christ in both."
+  },
+  {
+   "book": 52,
+   "chapter": 5,
+   "verse": 28,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription \"written from Athens\"",
+   "note": "The subscription is a later note found in the Textus Receptus and printed by the KJV; it is not in the Vulgate or the earliest Greek manuscripts and is not part of the text."
+  },
+  {
+   "book": 53,
+   "chapter": 1,
+   "verse": 12,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"our Lord Jesus Christ\" becomes \"our Lord Jesus\"",
+   "note": "The Douay-Rheims omits \"Christ\" in the first phrase, as do Sinaiticus and Vaticanus; the Clementine Vulgate and the Textus Receptus have it."
+  },
+  {
+   "book": 53,
+   "chapter": 2,
+   "verse": 2,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"day of Christ\" becomes \"day of the Lord\"",
+   "note": "The Vulgate reads dies Domini, as do Sinaiticus and Vaticanus (tou kyriou); the Textus Receptus has tou Christou."
+  },
+  {
+   "book": 53,
+   "chapter": 2,
+   "verse": 4,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"as God\" before \"sitteth in the temple\"",
+   "note": "\"As God\" is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus. He still shows himself as if he were God."
+  },
+  {
+   "book": 53,
+   "chapter": 2,
+   "verse": 13,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"beloved of the Lord\" becomes \"of God\"; \"from the beginning\" becomes \"firstfruits\"",
+   "note": "The Vulgate reads dilecti a Deo and primitias (firstfruits), the latter as Vaticanus (aparchen); the Textus Receptus has kyriou and ap' arches (from the beginning)."
+  },
+  {
+   "book": 53,
+   "chapter": 3,
+   "verse": 1,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"word of the Lord\" becomes \"word of God\"",
+   "note": "The Vulgate reads sermo Dei; the Greek of the Textus Receptus has tou kyriou (of the Lord). The same divine person is meant; only the title differs."
+  },
+  {
+   "book": 53,
+   "chapter": 3,
+   "verse": 3,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord is faithful\" becomes \"God is faithful\"",
+   "note": "The Vulgate reads Deus; the Greek of the Textus Receptus has ho kyrios (the Lord). The same divine person is meant; only the title differs."
+  },
+  {
+   "book": 53,
+   "chapter": 3,
+   "verse": 18,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription \"written from Athens\"",
+   "note": "The subscription is a later note found in the Textus Receptus and printed by the KJV; it is not in the Vulgate or the earliest Greek manuscripts and is not part of the text."
+  },
+  {
+   "book": 54,
+   "chapter": 1,
+   "verse": 1,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Lord Jesus Christ\" becomes \"Christ Jesus\"",
+   "note": "\"Lord\" is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus."
+  },
+  {
+   "book": 54,
+   "chapter": 2,
+   "verse": 7,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"in Christ\" from \"I speak the truth\"",
+   "note": "\"In Christ\" is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus."
+  },
+  {
+   "book": 54,
+   "chapter": 3,
+   "verse": 16,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"God was manifest\" becomes \"which was manifested\"",
+   "note": "The Vulgate reads quod manifestatum est (which was manifested), with the Western Greek ho; Sinaiticus has hos (who), the Textus Receptus theos (God). Christ's deity is stated elsewhere, as in John 1:1 and Titus 2:13."
+  },
+  {
+   "book": 54,
+   "chapter": 4,
+   "verse": 12,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"in spirit\" from the list",
+   "note": "\"In spirit\" is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus."
+  },
+  {
+   "book": 54,
+   "chapter": 4,
+   "verse": 14,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"the presbytery\" becomes \"the priesthood\"; \"gift\" becomes \"grace\"",
+   "note": "The Douay-Rheims renders the Vulgate's presbyterii (Greek presbyteriou, body of elders) as \"priests\", the English word that comes from presbyter; the KJV has \"elders\". A translation choice: Catholic readers see the ordained priesthood here, Protestant readers church elders."
+  },
+  {
+   "book": 54,
+   "chapter": 5,
+   "verse": 21,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord Jesus Christ\" becomes \"Christ Jesus\"",
+   "note": "\"Lord\" is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus."
+  },
+  {
+   "book": 54,
+   "chapter": 6,
+   "verse": 1,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"name of God\" becomes \"name of the Lord\"",
+   "note": "The Vulgate reads nomen Domini; the Greek of the Textus Receptus has tou theou (of God). The same divine person is meant; only the title differs."
+  },
+  {
+   "book": 54,
+   "chapter": 6,
+   "verse": 5,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"from such withdraw thyself\"",
+   "note": "The clause is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus. Verse 11 still tells Timothy to flee these things."
+  },
+  {
+   "book": 54,
+   "chapter": 6,
+   "verse": 21,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription \"written from Laodicea…\"",
+   "note": "The subscription is a later note found in the Textus Receptus and printed by the KJV; it is not in the Vulgate or the earliest Greek manuscripts and is not part of the text."
+  },
+  {
+   "book": 55,
+   "chapter": 2,
+   "verse": 19,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"name of Christ\" becomes \"name of the Lord\"",
+   "note": "The Vulgate reads nomen Domini, as do Sinaiticus and Vaticanus (kyriou); the Textus Receptus has Christou."
+  },
+  {
+   "book": 55,
+   "chapter": 4,
+   "verse": 1,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord Jesus Christ\" becomes \"Jesus Christ\"",
+   "note": "\"The Lord\" is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus."
+  },
+  {
+   "book": 55,
+   "chapter": 4,
+   "verse": 22,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription \"ordained the first bishop…\"",
+   "note": "The subscription is a later note found in the Textus Receptus and printed by the KJV; it is not in the Vulgate or the earliest Greek manuscripts and is not part of the text."
+  },
+  {
+   "book": 56,
+   "chapter": 1,
+   "verse": 4,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"mercy\"; \"the Lord Jesus Christ\" becomes \"Christ Jesus\"",
+   "note": "\"Mercy\" and \"Lord\" is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus."
+  },
+  {
+   "book": 56,
+   "chapter": 1,
+   "verse": 5,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"ordain elders\" becomes \"ordain priests\"",
+   "note": "The Douay-Rheims renders the Vulgate's presbyteros (Greek presbyterous, elders) as \"priests\", the English word that comes from presbyter; the KJV has \"elders\". A translation choice: Catholic readers see the ordained priesthood here, Protestant readers church elders."
+  },
+  {
+   "book": 56,
+   "chapter": 2,
+   "verse": 11,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"that bringeth salvation\" becomes \"God our Saviour\"",
+   "note": "The Vulgate reads gratia Dei Salvatoris nostri; the Greek has he soterios (bringing salvation). The grace still saves; the Vulgate names God as Saviour."
+  },
+  {
+   "book": 56,
+   "chapter": 3,
+   "verse": 15,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription \"ordained the first bishop…\"",
+   "note": "The subscription is a later note found in the Textus Receptus and printed by the KJV; it is not in the Vulgate or the earliest Greek manuscripts and is not part of the text."
+  },
+  {
+   "book": 57,
+   "chapter": 1,
+   "verse": 25,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription \"Written from Rome to Philemon…\"",
+   "note": "The subscription is a later note found in the Textus Receptus and printed by the KJV; it is not in the Vulgate or the earliest Greek manuscripts and is not part of the text."
+  },
+  {
+   "book": 58,
+   "chapter": 1,
+   "verse": 3,
+   "kind": "atonement",
+   "weight": "minor",
+   "change": "Omits \"by himself\" and \"our\" from purging sins",
+   "note": "The Vulgate reads purgationem peccatorum faciens, as do Sinaiticus and Vaticanus; the Textus Receptus has di' heautou (by himself) and hemon (our). Christ still makes the purification of sins."
+  },
+  {
+   "book": 58,
+   "chapter": 3,
+   "verse": 1,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Christ Jesus\" becomes \"Jesus\"",
+   "note": "\"Christ\" is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus."
+  },
+  {
+   "book": 58,
+   "chapter": 9,
+   "verse": 14,
+   "kind": "trinity",
+   "weight": "minor",
+   "change": "\"the eternal Spirit\" becomes \"the Holy Ghost\"",
+   "note": "The Vulgate reads per Spiritum Sanctum, with a few Greek manuscripts (hagiou); the Textus Receptus and most have aioniou (eternal). Both may be read as the Holy Spirit."
+  },
+  {
+   "book": 58,
+   "chapter": 9,
+   "verse": 24,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Christ is not entered\" becomes \"Jesus is not entered\"",
+   "note": "The Vulgate reads Jesus; the Greek has ho Christos. The same person is meant."
+  },
+  {
+   "book": 58,
+   "chapter": 10,
+   "verse": 19,
+   "kind": "atonement",
+   "weight": "minor",
+   "change": "\"blood of Jesus\" becomes \"blood of Christ\"",
+   "note": "The Vulgate reads sanguine Christi; the Greek has Iesou. The atoning blood is the same."
+  },
+  {
+   "book": 58,
+   "chapter": 10,
+   "verse": 30,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"saith the Lord\"",
+   "note": "\"Saith the Lord\" is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus. The next quotation still names the Lord."
+  },
+  {
+   "book": 58,
+   "chapter": 10,
+   "verse": 34,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"me in my bonds\" becomes \"them in bands\"; omits \"in heaven\"",
+   "note": "The Vulgate reads vinctis (the prisoners), as do the early manuscripts (desmiois), and lacks \"in heaven\", with Sinaiticus and others; the Textus Receptus has desmois mou and en ouranois."
+  },
+  {
+   "book": 58,
+   "chapter": 11,
+   "verse": 21,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"worshipped, leaning upon\" becomes \"adored the top of his rod\"",
+   "note": "The Greek, quoting the Septuagint of Genesis 47:31, is prosekynesen epi to akron tes rhabdou autou; the Vulgate reads adoravit fastigium virgae ejus, as if Jacob venerated the staff, the KJV supplies \"leaning\" so that he worshipped God upon it."
+  },
+  {
+   "book": 58,
+   "chapter": 12,
+   "verse": 14,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"see the Lord\" becomes \"see God\"",
+   "note": "The Vulgate reads videbit Deum; the Greek of the Textus Receptus has ton kyrion (the Lord). The same divine person is meant; only the title differs."
+  },
+  {
+   "book": 58,
+   "chapter": 13,
+   "verse": 25,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription \"Written to the Hebrews from Italy…\"",
+   "note": "The subscription is a later note found in the Textus Receptus and printed by the KJV; it is not in the Vulgate or the earliest Greek manuscripts and is not part of the text."
+  },
+  {
+   "book": 59,
+   "chapter": 1,
+   "verse": 12,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord hath promised\" becomes \"God hath promised\"",
+   "note": "The Vulgate reads Deus; the Textus Receptus has ho kyrios, and Sinaiticus and Vaticanus only the verb."
+  },
+  {
+   "book": 59,
+   "chapter": 5,
+   "verse": 14,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"the elders of the church\" becomes \"the priests of the church\"",
+   "note": "The Douay-Rheims renders the Vulgate's presbyteros (Greek presbyterous, elders) as \"priests\", the English word that comes from presbyter; the KJV has \"elders\". A translation choice: Catholic readers see the ordained priesthood here, Protestant readers church elders. Catholic teaching finds the anointing of the sick here."
+  },
+  {
+   "book": 60,
+   "chapter": 1,
+   "verse": 22,
+   "kind": "trinity",
+   "weight": "minor",
+   "change": "Omits \"through the Spirit\"",
+   "note": "\"Through the Spirit\" is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus. The Vulgate also reads \"obedience of charity\" for \"obeying the truth\"."
+  },
+  {
+   "book": 60,
+   "chapter": 2,
+   "verse": 2,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "Adds \"unto salvation\"",
+   "note": "The Vulgate reads crescatis in salutem, as do Sinaiticus and Vaticanus (eis soterian); the Textus Receptus lacks the phrase."
+  },
+  {
+   "book": 60,
+   "chapter": 2,
+   "verse": 13,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"for the Lord's sake\" becomes \"for God's sake\"",
+   "note": "The Vulgate reads propter Deum; the Greek of the Textus Receptus has dia ton kyrion (for the Lord's sake). The same divine person is meant; only the title differs."
+  },
+  {
+   "book": 60,
+   "chapter": 3,
+   "verse": 15,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"the Lord God\" becomes \"the Lord Christ\"",
+   "note": "The Vulgate reads Dominum Christum, as do Sinaiticus and Vaticanus; the Textus Receptus has kyrion ton theon. Applied to Isaiah 8:13, the Vulgate's reading calls Christ the LORD to be sanctified."
+  },
+  {
+   "book": 60,
+   "chapter": 4,
+   "verse": 1,
+   "kind": "atonement",
+   "weight": "minor",
+   "change": "Omits \"for us\"",
+   "note": "\"For us\" is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus. Christ's suffering for sins is stated in 3:18."
+  },
+  {
+   "book": 60,
+   "chapter": 5,
+   "verse": 3,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"God's heritage\" becomes \"the clergy\"",
+   "note": "The Greek ton kleron (the portions allotted) is rendered from the Vulgate's in cleris as \"the clergy\"; the KJV supplies \"God's heritage\", the people in the elders' charge. A translation choice."
+  },
+  {
+   "book": 61,
+   "chapter": 1,
+   "verse": 10,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "Adds \"by good works\" to making your calling sure",
+   "note": "The Vulgate reads per bona opera, with a few Greek manuscripts (Sinaiticus, Alexandrinus: dia ton kalon ergon); the Textus Receptus lacks the phrase. Verses 5-8 already call for virtue added to faith."
+  },
+  {
+   "book": 61,
+   "chapter": 2,
+   "verse": 11,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"before the Lord\"",
+   "note": "The Vulgate lacks \"before the Lord\", as do Alexandrinus and some others; the Textus Receptus and Sinaiticus and Vaticanus have para kyrio."
+  },
+  {
+   "book": 61,
+   "chapter": 2,
+   "verse": 17,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "Omits \"for ever\" from the reserved darkness",
+   "note": "\"For ever\" is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus. The darkness is still reserved for them."
+  },
+  {
+   "book": 61,
+   "chapter": 3,
+   "verse": 12,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"day of God\" becomes \"day of the Lord\"",
+   "note": "The Vulgate reads diei Domini; the Greek of the Textus Receptus has tes tou theou hemeras (the day of God). The same divine person is meant; only the title differs."
+  },
+  {
+   "book": 62,
+   "chapter": 4,
+   "verse": 3,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"confesseth not that Jesus Christ is come…\" becomes \"dissolveth Jesus\"",
+   "note": "The Vulgate reads qui solvit Jesum (that dissolves, or divides, Jesus), from a Greek variant lyei known to early writers; the Textus Receptus has the fuller confession, Sinaiticus and Vaticanus \"confesseth not Jesus\". The incarnation is still confessed in verse 2."
+  },
+  {
+   "book": 62,
+   "chapter": 5,
+   "verse": 6,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"the Spirit is truth\" becomes \"Christ is the truth\"",
+   "note": "The Vulgate reads quoniam Christus est veritas; the Greek has hoti to pneuma estin he aletheia (the Spirit is truth). The Spirit still testifies."
+  },
+  {
+   "book": 62,
+   "chapter": 5,
+   "verse": 13,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"and that ye may believe on the name…\"",
+   "note": "The last clause is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus. The verse still addresses those who believe in the name of the Son of God."
+  },
+  {
+   "book": 62,
+   "chapter": 5,
+   "verse": 18,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"begotten of God keepeth himself\" becomes \"generation of God preserveth him\"",
+   "note": "The Vulgate reads generatio Dei conservat eum, taking the Greek ho gennetheis (he that was begotten) as the begetting itself, and \"him\" with Vaticanus (auton). Either way the one born of God is kept from the evil one."
+  },
+  {
+   "book": 62,
+   "chapter": 5,
+   "verse": 20,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"Jesus Christ\"; \"him that is true\" becomes \"the true God\"",
+   "note": "The Vulgate reads ut cognoscamus verum Deum et simus in vero Filio ejus, without the name; the Greek has \"him that is true… in his Son Jesus Christ\". The verse still ends \"This is the true God\"."
+  },
+  {
+   "book": 63,
+   "chapter": 1,
+   "verse": 3,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord Jesus Christ\" becomes \"Christ Jesus\"",
+   "note": "\"The Lord\" is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus."
+  },
+  {
+   "book": 63,
+   "chapter": 1,
+   "verse": 9,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Second \"doctrine of Christ\" becomes \"the doctrine\"",
+   "note": "The second \"of Christ\" is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus. The Vulgate also reads recedit (revolteth) for \"transgresseth\"."
+  },
+  {
+   "book": 63,
+   "chapter": 1,
+   "verse": 13,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the closing \"Amen\"",
+   "note": "The closing \"Amen\" is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus."
+  },
+  {
+   "book": 65,
+   "chapter": 1,
+   "verse": 4,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"the only Lord God\" becomes \"the only sovereign Ruler\"",
+   "note": "The Vulgate reads solum Dominatorem without Deum, as do Sinaiticus and Vaticanus (despoten without theon); the Textus Receptus has \"the only Lord God\". Whether one or two persons are meant depends on this word."
+  },
+  {
+   "book": 65,
+   "chapter": 1,
+   "verse": 5,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"the Lord\" becomes \"Jesus\" as saviour of Israel from Egypt",
+   "note": "The Vulgate reads Jesus, as do Alexandrinus and Vaticanus; the Textus Receptus has ho kyrios. The Vulgate's reading makes Jesus the one who brought Israel out of Egypt."
+  },
+  {
+   "book": 65,
+   "chapter": 1,
+   "verse": 25,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"wise\"; adds \"through Jesus Christ our Lord\"",
+   "note": "The Vulgate reads soli Deo Salvatori nostro, per Jesum Christum Dominum nostrum, and \"before all ages\", as do Sinaiticus and Vaticanus; the Textus Receptus has \"only wise God\" and lacks the rest."
+  },
+  {
+   "book": 66,
+   "chapter": 1,
+   "verse": 8,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"saith the Lord\" becomes \"saith the Lord God\"",
+   "note": "The Vulgate reads Dominus Deus, as do the early Greek manuscripts; the Textus Receptus has ho kyrios. The Vulgate keeps \"the beginning and the end\", which Sinaiticus and Alexandrinus lack."
+  },
+  {
+   "book": 66,
+   "chapter": 1,
+   "verse": 9,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"Christ\" twice after \"Jesus\"",
+   "note": "The Vulgate reads in Christo Jesu and testimonium Jesu, as do Sinaiticus and Alexandrinus in part; the Textus Receptus has \"Jesus Christ\" twice."
+  },
+  {
+   "book": 66,
+   "chapter": 1,
+   "verse": 11,
+   "kind": "deity",
+   "weight": "major",
+   "change": "Omits \"I am Alpha and Omega, the first and the last\"",
+   "note": "The self-description is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus. Christ still calls himself the First and the Last in verse 17."
+  },
+  {
+   "book": 66,
+   "chapter": 1,
+   "verse": 18,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"Amen\"; \"hell and death\" become \"death and hell\"",
+   "note": "The Vulgate lacks \"Amen\" and has mortis et inferni, as do the early Greek manuscripts; the Textus Receptus has \"Amen\" and hell before death."
+  },
+  {
+   "book": 66,
+   "chapter": 2,
+   "verse": 5,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"repent\" becomes \"do penance\" twice",
+   "note": "The Douay-Rheims renders the Vulgate's paenitentiam agite (Greek metanoeite) \"do penance\" where the KJV has \"repent\". A translation choice: Catholic usage takes it to include works of penance, Protestant readers a turning of mind and heart."
+  },
+  {
+   "book": 66,
+   "chapter": 2,
+   "verse": 16,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"Repent\" becomes \"do penance\"",
+   "note": "The Douay-Rheims renders the Vulgate's paenitentiam agite (Greek metanoeite) \"do penance\" where the KJV has \"repent\". A translation choice: Catholic usage takes it to include works of penance, Protestant readers a turning of mind and heart."
+  },
+  {
+   "book": 66,
+   "chapter": 2,
+   "verse": 22,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"except they repent\" becomes \"except they do penance\"",
+   "note": "The Douay-Rheims renders the Vulgate's paenitentiam agite (Greek metanoeite) \"do penance\" where the KJV has \"repent\". A translation choice: Catholic usage takes it to include works of penance, Protestant readers a turning of mind and heart."
+  },
+  {
+   "book": 66,
+   "chapter": 3,
+   "verse": 3,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"repent\" becomes \"do penance\"",
+   "note": "The Douay-Rheims renders the Vulgate's paenitentiam agite (Greek metanoeite) \"do penance\" where the KJV has \"repent\". A translation choice: Catholic usage takes it to include works of penance, Protestant readers a turning of mind and heart."
+  },
+  {
+   "book": 66,
+   "chapter": 3,
+   "verse": 19,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"repent\" becomes \"do penance\"",
+   "note": "The Douay-Rheims renders the Vulgate's paenitentiam agite (Greek metanoeite) \"do penance\" where the KJV has \"repent\". A translation choice: Catholic usage takes it to include works of penance, Protestant readers a turning of mind and heart."
+  },
+  {
+   "book": 66,
+   "chapter": 9,
+   "verse": 11,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Adds \"in Latin Exterminans\" to Abaddon and Apollyon",
+   "note": "The Vulgate gives the angel's name in Latin as well (latine habens nomen Exterminans, \"Destroyer\"); the Greek gives only the Hebrew and Greek names. The meaning is the same."
+  },
+  {
+   "book": 66,
+   "chapter": 9,
+   "verse": 20,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"repented not\" becomes \"did not do penance\"",
+   "note": "The Douay-Rheims renders the Vulgate's paenitentiam agite (Greek metanoeite) \"do penance\" where the KJV has \"repent\". A translation choice: Catholic usage takes it to include works of penance, Protestant readers a turning of mind and heart."
+  },
+  {
+   "book": 66,
+   "chapter": 11,
+   "verse": 1,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"the angel stood\"",
+   "note": "The Vulgate reads dictum est mihi (it was said to me), as do the early Greek manuscripts; the Textus Receptus has \"the angel stood, saying\". The command to measure is the same."
+  },
+  {
+   "book": 66,
+   "chapter": 11,
+   "verse": 4,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the God of the earth\" becomes \"the Lord of the earth\"",
+   "note": "The Vulgate reads Domini terrae, as do the early Greek manuscripts (kyriou); the Textus Receptus has theou."
+  },
+  {
+   "book": 66,
+   "chapter": 14,
+   "verse": 7,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Fear God\" becomes \"Fear the Lord\"",
+   "note": "The Vulgate reads Timete Dominum; the Greek of the Textus Receptus has ton theon (God). The same divine person is meant; only the title differs."
+  },
+  {
+   "book": 66,
+   "chapter": 16,
+   "verse": 17,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"of heaven\" after \"temple\"",
+   "note": "\"Of heaven\" is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus."
+  },
+  {
+   "book": 66,
+   "chapter": 18,
+   "verse": 5,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"God hath remembered\" becomes \"the Lord hath remembered\"",
+   "note": "The Vulgate reads Dominus; the Greek of the Textus Receptus has ho theos (God). The same divine person is meant; only the title differs."
+  },
+  {
+   "book": 66,
+   "chapter": 18,
+   "verse": 8,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord God\" becomes \"God\"",
+   "note": "The Vulgate reads Deus, as do Alexandrinus and some others; the Textus Receptus has kyrios ho theos."
+  },
+  {
+   "book": 66,
+   "chapter": 19,
+   "verse": 1,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"honour\" and \"the Lord\"",
+   "note": "\"Honour\" and \"the Lord\" is in the Textus Receptus but not in the Vulgate or in Sinaiticus and Vaticanus. The praise is to \"our God\"."
+  },
+  {
+   "book": 66,
+   "chapter": 20,
+   "verse": 12,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"stand before God\" becomes \"before the throne\"",
+   "note": "The Vulgate reads in conspectu throni, as do the Greek manuscripts generally; the Textus Receptus has theou (God), from Erasmus's Latin-based text. The judgment is still before God's throne (verse 11)."
+  },
+  {
+   "book": 66,
+   "chapter": 21,
+   "verse": 3,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Voice \"out of heaven\" becomes \"from the throne\"",
+   "note": "The Vulgate reads de throno, as do Sinaiticus and Alexandrinus; the Textus Receptus has ek tou ouranou (out of heaven)."
+  },
+  {
+   "book": 66,
+   "chapter": 22,
+   "verse": 14,
+   "kind": "salvation",
+   "weight": "major",
+   "change": "\"do his commandments\" becomes \"wash their robes in the blood…\"",
+   "note": "The Vulgate reads qui lavant stolas suas in sanguine Agni; Sinaiticus and Alexandrinus have \"wash their robes\" without \"in the blood of the Lamb\"; the Textus Receptus has \"do his commandments\". The Lamb's blood washing robes is in 7:14."
+  }
+ ]
+}
