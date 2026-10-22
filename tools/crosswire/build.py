@@ -338,6 +338,18 @@ DRC_RULES = {
 }
 
 
+def syriac(t, where):
+    """The Peshitta's text mended: a Latin V the module has for a final mim (ܐܒܪܗV, ܠܥܠV: 40 words in
+    Hebrews 6:20–10:1) is ܡ, and every semkath is the ordinary letter ܣ (U+0723), not the final form ܤ
+    (U+0724) the module has throughout: Unicode's Syriac shapes a letter by its place in the word, as the
+    other corpora (SEDRA, ETCBC) encode it, so a search typed on a Syriac keyboard finds it. Any other
+    Latin letter or digit left in it stops the build."""
+    t = re.sub(r"(?<=[\u0710-\u072f])V", "\u0721", t).replace("\u0724", "\u0723")
+    if re.search(r"[A-Za-z0-9]", re.sub(r"<[^>]*>", "", t)):
+        sys.exit(f"Peshitta {where}: a Latin letter or digit in the Syriac: {t}")
+    return t
+
+
 def build(name, into=None):
     """Writes the module `name` (a key of MODULES) to the app's modules folder, or to `into`."""
     m = MODULES[name]
@@ -366,6 +378,8 @@ def build(name, into=None):
             rows = vulgate.move(rows, rs, kjv, n)
         verses += [(n, ch, v, t.strip()) for ch, v, t in rows if t.strip()]
     verses = sorted((b, ch, v, t) for (b, ch, v), t in mend_verses(name, {(b, ch, v): t for b, ch, v, t in verses}, MENDS.get(name, {})).items())
+    if name == "Peshitta":
+        verses = [(b, ch, v, syriac(t, f"{OSIS[b - 1]} {ch}:{v}")) for b, ch, v, t in verses]
 
     mine = {}
     for b, ch, v, _ in verses:
