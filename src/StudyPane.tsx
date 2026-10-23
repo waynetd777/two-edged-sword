@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { licenceOf, SOURCE } from "./About";
+import { Cover, JUSTIFIED, licenceOf, SOURCE, splitCover } from "./About";
 import { api, Article, Commentary, Coverage, isMapBook, ModuleInfo, Verse } from "./api";
 import { book, BOOKS, fmtRef, mentionsPassage, Ref } from "./bible";
 import { AskPanel } from "./Ask";
@@ -327,16 +327,21 @@ function linkPlainRefs(html: string): string {
 export function AboutTab({ m, what }: { m: ModuleInfo | undefined; what: string }) {
   const app = useApp();
   const { onRefHover, preview, hide } = useRefPreview(app.settings.bible);
-  const body = useMemo(() => (m ? linkPlainRefs(m.info) : ""), [m]);
+  // A cover the description opens with goes to the top right, the text round it.
+  const [cover, body] = useMemo(() => {
+    const [c, rest] = splitCover(m?.info ?? "");
+    return [c, m ? linkPlainRefs(rest) : ""];
+  }, [m]);
   if (!m) return <div className="empty">Nothing is known about this {what}.</div>;
   return (
-    <div className="scroll" style={{ flexGrow: 1, padding: "14px 22px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
-      <b style={{ font: "500 20px var(--display)" }}>{m.title}</b>
-      <div className="hint" style={{ fontSize: 12 }}>
+    <div className="scroll" style={{ flexGrow: 1, padding: "14px 22px 20px" }}>
+      {cover && <Cover src={cover} title={m.title} />}
+      <b style={{ display: "block", font: "500 20px var(--display)", marginBottom: 6 }}>{m.title}</b>
+      <div className="hint" style={{ fontSize: 12, marginBottom: 10 }}>
         {licenceOf(m)} · {m.source === "bundled" ? "Built in" : `From ${SOURCE[m.source]}`}
       </div>
       {m.info.trim() ? (
-        <div className="es" style={{ fontSize: 13, lineHeight: 1.55 }}>
+        <div className="es" style={{ fontSize: 13, lineHeight: 1.55, ...JUSTIFIED }}>
           {renderHtml(body, {
             onRef: (r) => {
               hide();

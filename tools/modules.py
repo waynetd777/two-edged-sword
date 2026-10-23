@@ -104,6 +104,8 @@ def module(file: str, title: str, abbrev: str, info: str, *, ot=True, nt=True, a
     ext = file.rsplit(".", 1)[-1]
     if ext not in SCHEMA:
         raise ValueError(f"unknown module format: {file}")
+    from covers import with_cover  # its cover, at the start of its description (tools/covers)
+    info = with_cover(file, info)
     p = (into or LIBRARY) / file
     p.parent.mkdir(parents=True, exist_ok=True)
     tmp = p.with_suffix(".tmp")

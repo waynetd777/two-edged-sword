@@ -1,5 +1,6 @@
 // Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
 // SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
+import { CSSProperties } from "react";
 import { LibrarySource, ModuleInfo } from "./api";
 import { isLicensed } from "./Ask";
 
@@ -14,3 +15,23 @@ export function licenceOf(m: ModuleInfo): "Personal use" | "Non-commercial" | "O
 }
 
 export const SOURCE: Record<LibrarySource, string> = { app: "your modules folder", esword: "e-Sword X", bundled: "built in" };
+
+/** A module's About text split into the cover it opens with, if any (the app's own books have one), and the rest. */
+export function splitCover(info: string): [string | undefined, string] {
+  const c = info.match(/^\s*<p>\s*<img src="(data:image\/[^"]+)"[^>]*>\s*<\/p>/);
+  return c ? [c[1], info.slice(c[0].length)] : [undefined, info];
+}
+
+/** A book's cover at the top right of its About text, which runs round it, justified so it has a straight edge. */
+export function Cover({ src, title, width = 84 }: { src: string; title: string; width?: number }) {
+  return (
+    <img
+      src={src}
+      alt={`The cover of ${title}`}
+      style={{ float: "right", width, margin: "2px 0 10px 16px", borderRadius: 4, boxShadow: "0 1px 6px rgba(0,0,0,.35)" }}
+    />
+  );
+}
+
+/** About text set justified, with hyphens so the gaps stay small. */
+export const JUSTIFIED: CSSProperties = { textAlign: "justify", hyphens: "auto" };

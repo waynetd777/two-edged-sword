@@ -6,6 +6,7 @@ import { api, Article, JournalEntry } from "./api";
 import { fmtRef } from "./bible";
 import { docSegments, plainText, renderHtml, wordRangeAt } from "./esword";
 import { ImageViewer } from "./ImageViewer";
+import { imagePlaces, Place, PlacePopover } from "./MapPlaces";
 import { SongsButton } from "./ChapterSongs";
 import { Icon } from "./icons";
 import { useListenKey, usePlayer } from "./speech";
@@ -54,12 +55,29 @@ export function DocReader({ focus, setFocus, openPalette }: { focus: boolean; se
   const [image, setImage] = useState<string | null>(null);
   const segs = useMemo(() => (art ? docSegments(art.html) : []), [art]);
   const images = useMemo(() => segs.flatMap((h) => Array.from(h.matchAll(/<img[^>]+src="(data:image\/[^"]+)"/gi), (m) => m[1])), [segs]);
+  // A map's places (its dots): the one clicked, and each picture's for the full-screen viewer.
+  const [place, setPlace] = useState<{ place: Place; rect: DOMRect } | null>(null);
+  useEffect(() => setPlace(null), [doc.module, doc.title]);
+  const places = useMemo(
+    () =>
+      segs.flatMap((h) =>
+        Array.from(new DOMParser().parseFromString(h, "text/html").querySelectorAll("img"))
+          .filter((im) => (im.getAttribute("src") || "").startsWith("data:image/"))
+          .map(imagePlaces),
+      ),
+    [segs],
+  );
   // The paragraphs are rendered once per chapter, not on every word read aloud; their links call
   // the handlers of the latest render.
   const handlers = useRef({ app, hide, onRefHover });
   useLayoutEffect(() => {
     handlers.current = { app, hide, onRefHover };
   });
+  const openRef = (r: { book: number; chapter: number; verse?: number; to?: number }) => {
+    hide();
+    setPlace(null);
+    app.open({ book: r.book, chapter: r.chapter, verse: r.verse, to: r.to }, "read");
+  };
   const rendered = useMemo(
     () =>
       segs.map((h) =>
@@ -71,6 +89,7 @@ export function DocReader({ focus, setFocus, openPalette }: { focus: boolean; se
           onRefHover: (r, el) => handlers.current.onRefHover(r, el),
           onStrongs: (n) => handlers.current.app.studyWord(n),
           onImage: setImage,
+          onPlace: (p, rect) => setPlace({ place: p, rect }),
         }),
       ),
     [segs],
@@ -817,7 +836,17 @@ export function DocReader({ focus, setFocus, openPalette }: { focus: boolean; se
       )}
       {focus && <FocusHints click="Click an image to see it full screen" />}
       {image && (
-        <ImageViewer images={images.length ? images : [image]} start={Math.max(0, images.indexOf(image))} onClose={() => setImage(null)} />
+        <ImageViewer
+          images={images.length ? images : [image]}
+          start={Math.max(0, images.indexOf(image))}
+          onClose={() => setImage(null)}
+          places={images.length ? places : undefined}
+          onRef={openRef}
+          onRefHover={onRefHover}
+        />
+      )}
+      {place && !image && (
+        <PlacePopover place={place.place} anchor={place.rect} onClose={() => setPlace(null)} onRef={openRef} onRefHover={onRefHover} />
       )}
     </div>
   );

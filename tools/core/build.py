@@ -1455,9 +1455,182 @@ def write_scofield():
             books.append((v[0], v[5][m.end():]))
         else:
             notes.append(v)
-    info = ("<p>The notes of the Scofield Reference Bible, by C. I. Scofield, in the edition of 1917.</p>"
+    import covers
+    thumb = covers.html(covers.design([("THE", 34), ("SCOFIELD", 76), ("REFERENCE", 54), ("NOTES", 54)],
+                                      [("C. I. SCOFIELD", 34), ("1917", 26)], (26, 26, 30), ornament="diamonds"))[1]
+    info = (thumb + "<p>The notes of the Scofield Reference Bible, by C. I. Scofield, in the edition of 1917.</p>"
             "<p>Public domain. CrossWire's Scofield module (2.1), from Wikisource's text. Built by Two-edged Sword's tools/core.</p>")
     write_commentary("scofield.cmti", "Scofield Reference Notes (1917)", "Scofield", info, (books, chapters, notes))
+
+
+SHA256[CROSSWIRE.format("TDavid")] = "d0081cba094f399ceb95f372e13068a4d76814de4529bc6794eab0f2ed6e89cc"
+# Treasury of David's three parts, as its headings name them ("HINTS TO PREACHERS." in Psalm 119), and the heading each has here.
+TDAVID_PARTS = {"EXPOSITION": "EXPOSITION", "EXPLANATORY NOTES": "EXPLANATORY NOTES AND QUAINT SAYINGS", "HINTS TO": "HINTS TO THE VILLAGE PREACHER"}
+# A paragraph's verse label: "<b>Verse 1.</b>", "<b>Ver. 3.</b>", "Verses 70-72.", "Verses 1 <i>and</i> 2.", "Verse 1 (<i>second clause</i>)".
+TDAVID_LABEL = re.compile(r"<p>(?:<b>)?\s*(?:Verses?|Vers?\.)\s*(\d+(?:\s*(?:[-–,]|and|to|<i>and</i>)\s*\d+)*)(?=\s*(?:</b>)?\s*(?:[.(<]|$))")
+# An introduction's heading run into its paragraph: "TITLE. MICHTAM OF DAVID.", "TITLE and SUBJECT.", "GENERAL, REMARKS.".
+TDAVID_HEAD = re.compile(r"^<p>((?:TITLE|Title|SUBJECT|DIVISION|AUTHOR|OCCASION|GENERAL,? REMARKS)(?:(?:,| AND| and) (?:TITLE|SUBJECT|DIVISION|AUTHOR|OCCASION|ETC|&amp;c))*)\.\s*")
+
+
+def tdavid_range(label, n):
+    """A label's verses ("2", "70-72", "1, 2", "1 <i>and</i> 2") as (first, last): a list with a gap ("2,4-5,8") is its first."""
+    runs = [[int(x) for x in re.findall(r"\d+", r)] for r in re.split(r"\s*(?:,|and|<i>and</i>)\s*", label)]
+    v1 = v2 = runs[0][0]
+    for r in runs:
+        if r[0] > v2 + 1:
+            break
+        v2 = max(v2, r[-1])
+    return v1, max(v1, min(v2, n))
+
+
+def tdavid_psalm(c, n, osis):
+    """One psalm of Treasury of David as (its introduction, its notes): the psalm comes as one entry, the exposition,
+    the "Explanatory Notes and Quaint Sayings" and the "Hints to the Village Preacher" one after the other, each
+    by verse labels. A note is filed on the verses of an exposition's label, with that verse's notes and hints after it
+    under their headings; what is on the psalm as a whole (its title, division, notes on "Whole Psalm." or the title,
+    the books on it, Psalm 68's translation) is its introduction."""
+    # A heading that holds the text after it (Psalm 2's "HINTS TO THE VILLAGE PREACHER <hi>Whole Psalm.</hi> Shows us …").
+    osis = re.sub(r'<title type="x-s">(HINTS TO THE VILLAGE PREACHER)\s+(.+?)</title>',
+                  r'<title type="x-s">\1</title><div sID="t" type="x-p"/>\2<div eID="t" type="x-p"/>', osis, flags=re.S)
+    osis = re.sub(r"<l\b[^>]*\beID=[^>]*/>", "<br>", osis)  # a line of verse
+    osis = re.sub(r"<item\b[^>]*>", "<p>", osis).replace("</item>", "</p>")
+    # Psalm 119 is a verse at a time, each opening "Psalms 119:3*"; one (122) has no EXPOSITION heading after it.
+    osis = re.sub(r"Psalms 119:\d+\*", '<title type="x-s">EXPOSITION</title>', osis)
+    osis = re.sub(r"[\x80-\x9f]", lambda m: bytes([ord(m[0])]).decode("cp437"), osis)  # "quotidi\x8a": letters in DOS's code page (è)
+    osis = re.sub(r"\{(\d)\}", r'<hi type="super">\1</hi>', osis)  # the footnotes' "{1}"
+    if c == 119:  # its own verses, written "Psalms 114:129" (and one, "114:48", that isn't either)
+        osis = re.sub(r"Psalms 114:(91|128|129|158)\b", r"Psalms 119:\1", osis)
+    if c == 110:  # "verses 1-3 … 5-7", linked to Psalm 106
+        osis = re.sub(r'<reference osisRef="Ps\.106\.(\d+)-Ps\.106\.(\d+)">Ps 106:', r'<reference osisRef="Ps.110.\1-Ps.110.\2">Ps 110:', osis)
+    intro = {"": [], "aside": [], "EXPLANATORY NOTES": [], "HINTS TO": [], "works": []}
+    notes, part, verses, pending, at = [], "", None, [], None
+    for p in re.findall(r"<p>.*?</p>", commentary_html(osis, 19, c, {})):
+        plain = re.sub(r"<[^>]+>", "", p).strip()
+        if 'See Psalms on "' in plain or 'See Psalms "' in plain:  # a link to a page of the e-text the module hasn't (Psalm 68:1's long note)
+            continue
+        heading = re.fullmatch(r"<p><b>(.*)</b></p>", p) and "</b>" not in p[6:-8] or \
+            re.fullmatch(r"EXPOSITION\.?|EXPLANATORY NOTES AND QUAINT SAYINGS\.?|HINTS TO (?:THE VILLAGE )?PREACHERS?\.?", plain)
+        if re.fullmatch(r"WORKS? UPON THE .*PSALM\.?", plain):
+            part = "works"
+            intro[part].append(f"<p><b>{plain}</b></p>")
+            continue
+        if heading:
+            if re.fullmatch(r"Psalms? \d+(?: OVERVIEW)?", plain):
+                continue
+            kind = next((k for k in TDAVID_PARTS if plain.startswith(k)), None)
+            if kind:
+                part, verses = kind, None
+                at = None if kind == "EXPOSITION" else at
+                if c == 119 and at:  # Psalm 119's notes and hints are on the verse in hand, labelled or not
+                    verses = (at, at)
+                    notes.append([part, at, at, []])
+                rest = plain[len(kind):].lstrip(".").strip() if kind == "EXPOSITION" else ""
+                if rest:  # Psalm 70's "EXPOSITION (The Reader is referred for full Exposition and Notes to Ps 40:13-17 …)"
+                    intro[""].append(f"<p>{p[6:-8][p[6:-8].find('('):]}</p>")
+                continue
+            p = f"<p><b>{p[6:-8].rstrip('. ')}</b></p>"
+            if part in ("EXPLANATORY NOTES", "HINTS TO") and re.match(r"TITLE\b", plain):  # notes on the title
+                verses = None
+            elif part == "EXPOSITION":  # a heading in the exposition, as Psalm 68's NEW TRANSLATION: on the psalm, up to the next verse
+                part = "aside"
+        m = TDAVID_LABEL.match(p)
+        if m and part in ("EXPOSITION", "aside", "EXPLANATORY NOTES", "HINTS TO"):
+            part = "EXPOSITION" if part == "aside" else part
+            verses = tdavid_range(m[1], n)
+            if not p.startswith("<p><b>"):  # in bold, as most are
+                end = m.end() + (p[m.end():m.end() + 1] == ".")
+                p = f"<p><b>{p[3:end].strip()}</b>{p[end:]}"
+            if c == 119:  # a verse at a time, some of its headings missing: what follows the exposition is notes, on its verse
+                if at and part == "EXPOSITION":
+                    part = "EXPLANATORY NOTES"
+                at = at or verses[0]
+                verses = (at, at)
+            if part == "EXPOSITION":
+                if pending and not any(x[0] == "EXPOSITION" for x in notes):  # the first verse, unlabelled ("How amiable", Psalm 84)
+                    verses = (1, verses[1])
+                notes.append([part, *verses, pending + [p]])
+                pending = []
+            else:
+                notes.append([part, *verses, [p]])
+            continue
+        if part in ("EXPLANATORY NOTES", "HINTS TO") and re.match(r"<p>(?:<i>)?\s*(?:Whole Psalm|Title)\b", p):
+            verses = None
+        if part == "EXPOSITION" and not verses:
+            pending.append(p)  # before the exposition's first label: with it
+        elif part in ("EXPOSITION", "EXPLANATORY NOTES", "HINTS TO") and verses:
+            notes[-1][3].append(p)
+        else:
+            if part == "":  # a heading, as the others are
+                p = re.sub(TDAVID_HEAD, lambda m: f"<p><b>{m[1].upper().replace('GENERAL,', 'GENERAL').replace('&AMP;C', 'ETC')}</b></p><p>", p)
+            intro[part].append(p)
+    if pending:
+        intro[""] += pending
+    # The exposition's labels are the notes' verses (a verse it passes over is with the one before it); the notes and
+    # hints go with the note on their first verse, or are one of their own where the exposition has none.
+    exposition = [x for x in notes if x[0] == "EXPOSITION"]
+    for a, b in zip(exposition, exposition[1:]):
+        if a[1] == b[1] and a[2] > b[2]:  # "Verses 4-19." over a stretch the verses after it take one by one: with the first
+            b[3][:0], a[3] = a[3], []
+    groups = []
+    for part, v1, v2, paras in exposition:
+        if not paras:
+            continue
+        if groups and v1 <= groups[-1][1]:
+            if v1 < groups[-1][0]:
+                print(f"tdavid: Psalm {c}: verse {v1} labelled after verse {groups[-1][0]}")
+            groups[-1][1] = max(groups[-1][1], v2)
+            groups[-1][2]["EXPOSITION"] += paras
+        else:
+            groups.append([v1, v2, {"EXPOSITION": paras, "EXPLANATORY NOTES": [], "HINTS TO": []}])
+    for a, b in zip(groups, groups[1:] + [[n + 1]]):
+        a[1] = max(a[1], b[0] - 1)
+    for part, v1, v2, paras in notes:
+        if part == "EXPOSITION":
+            continue
+        if v1 > n:  # a note filed by a misprinted label (Psalm 13's "Verse 8", which is Psalm 20:8's): with the last
+            print(f"tdavid: Psalm {c} has {n} verses, a note is on verse {v1}")
+            v1 = n
+        g = next((g for g in groups if g[0] <= v1 <= g[1]), None)
+        if not g:
+            g = [v1, v1, {"EXPOSITION": [], "EXPLANATORY NOTES": [], "HINTS TO": []}]
+            groups.append(g)
+            groups.sort(key=lambda g: g[0])
+        g[2][part] += paras
+    out = []
+    for g in groups:
+        body = "".join(f"<p><b>{TDAVID_PARTS[k]}</b></p>" + "".join(g[2][k]) for k in TDAVID_PARTS if g[2][k])
+        out.append((19, c, g[0], c, g[1], body))
+    head = "".join(intro[""]) + "".join(intro["aside"])
+    for k in ("EXPLANATORY NOTES", "HINTS TO"):
+        if intro[k]:
+            head += f"<p><b>{TDAVID_PARTS[k]}</b></p>" + "".join(intro[k])
+    return head + "".join(intro["works"]), out
+
+
+def write_tdavid():
+    """Spurgeon's Treasury of David (CrossWire's TDavid 2.1, zCom4, OSIS from the Spurgeon Archive's text): Psalms
+    only, each psalm one entry; tdavid_psalm parts it. Volume 1's preface is the book's introduction."""
+    z, canon = crosswire("TDavid")
+    books, chapters, verses = [], [], []
+    for b, c, n, head, entries in sword_chapters(z, canon, zcom4):
+        if not entries:
+            continue
+        if c == 1:
+            preface = re.sub(r"\s*Preface\s*", "<title>Preface</title>", head.split("<chapter", 1)[0], count=1)
+            books.append((b, commentary_html(preface, b, c, {})))
+        intro, notes = tdavid_psalm(c, n, "".join(t for _, _, t in entries))
+        chapters.append((b, c, intro))
+        verses += notes
+    import covers
+    thumb = covers.html(covers.design([("THE", 36), ("TREASURY", 76), ("OF DAVID", 76)],
+                                      [("C. H. SPURGEON", 36)], (92, 58, 36), ornament="harp"))[1]
+    info = (thumb + "<p>The Treasury of David, by C. H. Spurgeon (seven volumes, 1869–1885): his exposition of each psalm, "
+            "with Explanatory Notes and Quaint Sayings gathered from other writers, and Hints to the Village Preacher.</p>"
+            "<p>Each verse's note has the three parts under their headings; what is on a psalm as a whole (its title, "
+            "its division, the notes on the whole psalm and the books on it) is the psalm's introduction.</p>"
+            "<p>Public domain. CrossWire's TDavid module (2.1), from the Spurgeon Archive's text (archive.spurgeon.org). "
+            "Built by Two-edged Sword's tools/core.</p>")
+    write_commentary("tdavid.cmti", "Spurgeon's Treasury of David", "TDavid", info, (books, chapters, verses))
 
 
 BARNES_LABEL = re.compile(r"(?:^|<br\s*/?>|<blockquote>)\s*(?:(?:[1-3]\s?)?[A-Z][A-Za-z]+\s+)?(?:Verses?|Ver)\.?\s*(\d+)(?:\s*(?:[-–,]|and)\s*(\d+))*\b[.:]?")
@@ -2787,10 +2960,11 @@ def write_targum_plus(name):
 
 # Public-domain books: Josephus (Whiston), Edersheim's Life and Times and The Pilgrim's Progress from CCEL's ThML
 # editions (tools/ccel), and Fox's Book of Martyrs from Project Gutenberg's (tools/gutenberg).
-MORE |= {n: (f"{n}.refi", lambda n=n: write_ccel(n)) for n in ("josephus", "edersheim", "pilgrim", "lawrence", "bounds")}
-MORE |= {"foxe": ("foxe.refi", lambda: write_gutenberg("foxe"))}
+MORE |= {n: (f"{n}.refi", lambda n=n: write_ccel(n)) for n in ("josephus", "edersheim", "pilgrim", "lawrence", "bounds", "sheldon")}
+MORE |= {"foxe": ("foxe.refi", lambda: write_gutenberg("foxe")), "strong_theology": ("strong_theology.refi", lambda: write_gutenberg("strong_theology"))}
+MORE |= {"tdavid": ("tdavid.cmti", write_tdavid)}
 # Clarence Larkin's books with their charts, from the Internet Archive's scans (tools/larkin).
-MORE |= {f"larkin_{n}": (f"larkin_{n}.refi", lambda n=n: write_larkin(n)) for n in ("dispensational_truth", "revelation")}
+MORE |= {f"larkin_{n}": (f"larkin_{n}.refi", lambda n=n: write_larkin(n)) for n in ("dispensational_truth", "revelation", "daniel", "second_coming", "spirit_world")}
 
 
 # After the Targums they read.

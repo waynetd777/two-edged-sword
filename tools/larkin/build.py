@@ -4,8 +4,11 @@
 
   larkin_dispensational_truth.refi   Dispensational Truth, or God's Plan and Purpose in the Ages (revised, 1920)
   larkin_revelation.refi             The Book of Revelation (1919), its charts printed sideways turned to read
+  larkin_daniel.refi                 The Book of Daniel (1929)
+  larkin_second_coming.refi          The Second Coming of Christ (1918), from a later reprint
+  larkin_spirit_world.refi           The Spirit World (1921)
 
-    python3 tools/larkin/build.py [dispensational_truth revelation]
+    python3 tools/larkin/build.py [dispensational_truth revelation daniel second_coming spirit_world]
 
 Larkin (1850–1924) published his books himself, from 1918; they are public domain (published in the United States
 before 1930, and their author dead more than 70 years). The charts are the heart of them, so each page that has a
@@ -17,8 +20,11 @@ The text is the Archive's OCR (its hOCR: every line with its place and size on t
 running heads and page numbers are dropped, and on a page with a chart, so are the chart's own labels (short lines,
 or lone ones, that aren't the page's text). A line in larger type at a chapter's start is its heading. Words broken
 at a line's end are joined. Bible references written in the text ("Matt. 12:40") are linked where each is a real
-verse (tools/core's link_plain_refs). The OCR's misreadings are left as they are, and a chart's text is in the
-picture only, so it can't be searched.
+verse (tools/core's link_plain_refs). Lines and paragraphs the OCR misread past use are left out (garbled), and
+fixes/<book>.json, a proofreading of the built text, drops the junk that's left and puts misread words right; each
+of its fixes was accepted only where another scanned copy's OCR reads it that way, it changes a few letters, or it
+takes out only junk or a running head. Other misreadings are left as they are, and a chart's text is in the picture
+only, so it can't be searched.
 
 Sources: the Archive's item (archive.org/details/<id>), its hOCR and its page images (<id>_jp2.zip), each checked
 against its sha256, as the Archive's files have no versions. Downloads are cached in
@@ -26,15 +32,17 @@ against its sha256, as the Archive's files have no versions. Downloads are cache
 what it's drawn from changes (its scans, leaves, turning or other copies, or the code that draws pictures). Writes to
 the app's modules folder, or to `into`.
 """
-import base64, io, re, statistics, sys, zipfile
+import base64, io, json, re, statistics, sys, zipfile
 import xml.etree.ElementTree as ET
-from html import escape
+from html import escape, unescape
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from modules import CACHES, fetch, module  # noqa: E402
+import covers  # noqa: E402
 
 CACHE = CACHES / "larkin"
+FIXES = Path(__file__).resolve().parent / "fixes"  # the proofreading: per book, paragraphs to drop and misreadings put right
 NS = "{http://www.w3.org/1999/xhtml}"
 ARCHIVE = "https://archive.org/download/{id}/{id}{suffix}"
 
@@ -53,6 +61,7 @@ BOOKS = {
         hocr="f9743a4645a97217e96040866e42fe6967ed49a59a34d2c70066fcf7778a41f5",
         jp2="1207c47210912f92a25bcb27c9a4737e242fd19640a8c5c855f8e94c92537877",
         title="Dispensational Truth", abbrev="Larkin DT",
+        cover=("dispensationaltr0000clar", 1),  # that copy's cover has no library label on it
         about="Clarence Larkin's Dispensational Truth, or God's Plan and Purpose in the Ages (revised and enlarged "
               "edition, 1920), with its charts: the ages and dispensations of Scripture set out in large drawings, "
               "from the Creation to the New Heavens and the New Earth.",
@@ -128,6 +137,7 @@ BOOKS = {
         hocr="6c1170959c81c89892aa4f487bb3ca233d7fc259ba39b82c208e0755c9c01e0b",
         jp2="2c6d39444038487d460e6b9b4d036a879f2271fdb88eb79fb8cae1713744bf28",
         title="The Book of Revelation", abbrev="Larkin Rev",
+        cover=("bookofrevelation00lark", 1),
         about="Clarence Larkin's The Book of Revelation: A Study of the Last Prophetic Book of Holy Scripture (1919), "
               "with its charts: the book read as a whole, from \"the things which thou hast seen\" to the New Heaven "
               "and the New Earth.",
@@ -158,6 +168,120 @@ BOOKS = {
             (175, "THE SEVEN DOOMS", "10. The Seven Dooms"),
             (225, "THE SEVEN NEW THINGS", "11. The Seven New Things"),
             (239, "THE AGES OF THE AGES", "12. The Ages of the Ages"),
+        ],
+    ),
+    "daniel": dict(
+        id="bookofdaniel00lark",
+        hocr="a120e2a6c11c2f7b7d66a53f779c236ac907299e335f257f148498d5e692b2ab",
+        jp2="4b509949366b188783508c9b35c9029eef239000f0ab9dc685c9534097502c7e",
+        title="The Book of Daniel", abbrev="Larkin Dan",
+        cover=("bookofdaniel00lark", 1),
+        about="Clarence Larkin's The Book of Daniel (1929), published after his death, with its charts: the book "
+              "expounded chapter by chapter, its history and its prophecy of the times of the Gentiles.",
+        first=15, last=293,
+        spreads=[20, 136, 192],
+        charts=[116, 156, 157, 167, 224, 225, 229],
+        tables={224, 225},  # comparing Daniel, Matthew 24 and Revelation: pictures, with the prose under them
+        sideways=[116, 229],
+        # The blank backs of the fold-out chart (the OCR read what shows through), and the pages announcing the two
+        # divisions of the exposition.
+        skip={19, 22, 35, 133},
+        # "Daniel and Revelation Compared" opens the prophetical chapters; "Daniel's Seventieth Week" is chapter 9's.
+        ahead={136, 192},
+        chapters=[
+            (15, "INTRODUCTION", "Introduction"),
+            (23, "THE PROPHETIC WORD", "The Prophetic Word"),
+            (28, "THE BOOK OF DANIEL", "The Book of Daniel"),
+            (37, "CHAPTER ONE", "1. The Beginning of Gentile Dominion"),
+            (46, "CHAPTER TWO", "2. Nebuchadnezzar's Dream"),
+            (74, "CHAPTER THREE", "3. The Golden Image"),
+            (87, "CHAPTER FOUR", "4. The Tree Dream"),
+            (96, "CHAPTER FIVE", "5. The Fall of Babylon"),
+            (124, "CHAPTER SIX", "6. The Lions' Den"),
+            (139, "CHAPTER SEVEN", "7. The Four Wild Beasts"),
+            (177, "CHAPTER EIGHT", "8. The Ram and the He-Goat"),
+            (195, "CHAPTER NINE", "9. The Seventy Weeks"),
+            (243, "THE SCRIPTURE OF TRUTH", "10–12. The Scripture of Truth"),
+            (245, "PART ONE", "10–12, Part 1: The Relation of Supernatural Beings to the Earth"),
+            (254, "PART TWO", "10–12, Part 2: The Pre-written History of the Kings of the North and the South"),
+            (272, "PART THREE", "10–12, Part 3: The Time of the End"),
+        ],
+    ),
+    "second_coming": dict(
+        id="secondcomingofch0000clar",
+        hocr="d7ec45bc64c7baca7d485052651d2fc705c07c005170fa997bf806bfcaf7215b",
+        jp2="ad40a345e19cbe098d181bd553e4f52f52383a303ccc01a67f2bca5310abd60d",
+        title="The Second Coming of Christ", abbrev="Larkin SC",
+        cover=("secondcomingofch0000clar", 1),
+        about="Clarence Larkin's The Second Coming of Christ (1918), with its charts: a short pamphlet on the Lord's "
+              "return, its stages, the resurrections and judgments, and the signs of the times.",
+        # From the frontispiece (the Ascension) to the poem that ends the book, before the publisher's list. The only scan
+        # is of a later reprint by Larkin's estate; its fixes were checked against a second OCR of the same pages.
+        first=4, last=73,
+        spreads=[38],  # Chart No. 4, The Stages of the Second Coming
+        charts=[4, 6, 8, 19, 22, 23, 24, 32, 34, 36, 40, 43, 45, 47, 48, 50, 52, 54, 56, 58, 60, 63, 64, 65, 66, 71],
+        # Pages of text with a small picture or table on them: pictured, but read as text pages (their one-line headings
+        # and short lines kept, which a chart's page takes for its labels).
+        figures={23, 24, 32, 45, 47, 58, 63, 64, 66, 71},
+        sideways=[6, 8, 40, 43, 48, 50, 52, 54, 56, 60, 65],
+        # The frontispiece goes under the Foreword's heading; Chart No. 1 and the charts of the Resurrections and of the
+        # Church and the Kingdom, printed before their chapters, under theirs.
+        ahead={4, 6, 40, 48},
+        chapters=[
+            (5, "FOREWORD", "Foreword"),
+            (7, "THE SECOND COMING OF CHRIST", "1. The Second Coming of Christ"),
+            (33, "THE TRANSFIGURATION", "2. The Transfiguration"),
+            (35, "THE SPIRIT WORLD", "3. The Spirit World"),
+            (41, "THE RESURRECTIONS", "4. The Resurrections"),
+            (42, "THE IMMINENCY", "5. The Imminency of the Second Coming"),
+            (46, "THE HISTORY OF THE DOCTRINE", "6. The History of the Doctrine"),
+            (49, "THE CHURCH VERSUS", "7. The Church Versus the Kingdom"),
+            (59, "IS THE WORLD TO BE CONVERTED", "8. Is the World to Be Converted Before Christ Comes?"),
+            (67, "THE SIGNS OF THE TIMES", "9. The Signs of the Times"),
+            (72, "HE SHALL COME", "10. Poem: He Shall Come"),
+        ],
+    ),
+    "spirit_world": dict(
+        id="rare1921christia0000unse",
+        hocr="b3f49e8e122daab8eb037654bbd054270fc2f0b766fc389711783d9ba9cddb90",
+        jp2="435533124dd89f832968e9d3197191d090059bf85dac870593729fe783d3bc23",
+        title="The Spirit World", abbrev="Larkin SW",
+        cover=("rare1921christia0000unse", 1),
+        about="Clarence Larkin's The Spirit World (1921), with its charts and pictures: what the Scriptures reveal of "
+              "angels, Satan and demons, the Underworld, the intermediate state, the resurrection and the judgments.",
+        # From the frontispiece ("The Ministry of Angels") to the end of the last chapter, before the publisher's list
+        # of the author's other books.
+        first=8, last=174,
+        spreads=[],
+        charts=[8, 16, 18, 20, 25, 26, 29, 31, 33, 35, 38, 40, 44, 47, 49, 54, 57, 65, 73, 80, 82, 84, 86, 88, 90, 92, 94,
+                96, 98, 100, 104, 107, 112, 114, 125, 127, 131, 134, 137, 139, 141, 147, 162, 164, 167, 170],
+        sideways=[16, 25, 57, 73, 82, 88, 90, 104, 112, 127, 141, 147, 162, 164, 167, 170],
+        # The title page, copyright, dedication and contents; and the two charts whose verses (Ezek. 1:4-14, Rev. 4:6-8)
+        # are printed as part of them.
+        skip={9, 10, 11, 12, 13, 14, 18, 20},
+        # The frontispiece goes with the Foreword; "The Prophetic Earth", facing page 1, opens chapter 1.
+        ahead={8, 16},
+        chapters=[
+            (15, "PO VV OUR", "Foreword"),  # "FOREWORD", in spaced capitals, as the OCR reads it
+            (17, "THE SPIRIT WORLD", "1. The Spirit World"),
+            (21, "THE TRI", "2. The Tri-Unity of God"),
+            (24, "SATAN", "3. Satan"),
+            (39, "THE FALLEN ANGELS", "4. The Fallen Angels"),
+            (53, "DEMONISM", "5. Demonism"),
+            (63, "THE UNDERWORLD", "6. The Underworld"),
+            (77, "THE SPIRITS IN PRISON", "7. The Spirits in Prison"),
+            (81, "NATURAL LAW", "8. Natural Law in the Spirit World"),
+            (89, "THE RELATION OF THE SPIRIT WOR", "9. The Relation of the Spirit World to the Natural World"),
+            (99, "MAN", "10. Man's Relation to the Spirit World"),
+            (106, "SOUL SLEEP", "11. Soul Sleep"),
+            (113, "THE INTERMEDIATE STATE", "12. The Intermediate State"),
+            (121, "RECOGNITION AND RELATIONSHIP", "13. Recognition and Relationship in the Spirit World"),
+            (124, "THE FINAL STATE", "14. The Final State"),
+            (130, "THE ABOLITION OF DEATH", "15. The Abolition of Death"),
+            (135, "SPIRIT TRANSFORMATION", "16. Spirit Transformation"),
+            (145, "THE RESURRECTION", "17. The Resurrection"),
+            (152, "THE RESURRECTION BODY", "18. The Resurrection Body"),
+            (160, "THE JUDGMENTS", "19. The Judgments"),
         ],
     ),
 }
@@ -216,6 +340,56 @@ def junk(text):
     return len(text) < 40 and not real
 
 
+def english():
+    """A list of English words, lower case: the system's (macOS's /usr/share/dict/words), or none."""
+    try:
+        return {w.strip().lower() for w in open("/usr/share/dict/words", encoding="utf-8")}
+    except OSError:
+        return set()
+
+
+def known_words(hocr, leaves):
+    """Words to trust a line of OCR by: English words, and the book's own that it uses more than once (its names,
+    Nebuchadnezzar and Jehoiakim); a misreading is seldom read the same way twice."""
+    from collections import Counter
+    n = Counter(w.lower() for leaf in leaves for p in hocr[leaf][2] for _, _, line in p for w in re.findall(r"[A-Za-z]{3,}", line))
+    return english() | {w for w, k in n.items() if k >= 2}
+
+
+TWO = set("am an as at be by do go he if in is it me my no of oh on or so to up us we ye lo".split())  # real two-letter words
+
+
+def known_word(w, known):
+    """Whether a lower-case word is known, or is one with an ending the dictionary leaves off ("fumes", "opposeth")."""
+    return w in known or any(w.endswith(s) and len(w) > len(s) + 1 and {w[:-len(s)], w[:-len(s)] + "e"} & known
+                             for s in ("s", "es", "ed", "d", "ing", "eth", "th", "est", "st", "ly", "'s", "’s"))
+
+
+def garbled(line, known):
+    """Whether a line (or a paragraph) of OCR is mostly misread. Either of three or more words of three letters, fewer
+    than a third are known ("pol aires poner, ¢ ecm sen an eer take us b"; a line of names, "Hivites, Perizzites,
+    Girgashites…", has some); or of five or more words, fewer than 60% are real ones ("= oii wath. ae ar yerres? a
+    ae"), not counting numbers and references, signs, initials ("B. C."), abbreviations ("Thess."), a word broken at
+    the line's end, or a capitalised name."""
+    words = [w.lower() for w in re.findall(r"[A-Za-z]{3,}", line)]
+    if len(words) >= 3 and sum(w in known for w in words) < len(words) / 3:
+        return True
+    good = bad = 0
+    for t in re.split(r"[\s—–]+", line):
+        t = t.strip("_*()[]—–“”\"‘’'")
+        if not t:
+            continue
+        if re.fullmatch(r"[(\[]?\d+[:\d\-–,;.)\]]*|[—–\-]+|[&+=×]|[^\w\s]+|[A-Z][a-z]{1,4}\.|[A-Z][.:]|[A-Z]\.[A-Z]\.?|\S*[a-z]-"
+                        r"|[(\[“\"‘']*[A-Z][a-z]{4,}[)\]\"”’'.,;:!?]*", t):
+            continue
+        w = re.sub(r"^[(\[\"“‘']+|[)\]\"”’'.,;:!?]+$", "", t)
+        real = w in ("a", "A", "I", "O") or (
+            re.fullmatch(r"[A-Za-z]{2,}(?:['’-][A-Za-z]+)*", w) is not None and (len(w) > 2 or w.lower() in TWO)
+            and all(known_word(p.lower(), known) for p in re.split(r"['’-]", w) if len(p) > 2))
+        good, bad = good + real, bad + (not real)
+    return good + bad >= 5 and good < (good + bad) * 0.6
+
+
 def vocabulary(hocr, leaves):
     """The words the book uses: those read on its pages of text (`leaves`, not its charts), lower case."""
     from collections import Counter
@@ -232,34 +406,80 @@ def wordy(text, vocab):
     return good / (good + bad) if good + bad else 1.0
 
 
-def paragraphs(W, H, pars, chart, start=None, vocab=None):
+def running(text, heads):
+    """Whether a line in capitals is a running head with its page number misread ("GENTILE DOMINION Zo", the end of
+    "THE BEGINNING OF GENTILE DOMINION"): most of its letters are a run of a title's (not a heading of the text's own
+    at the top of a page, "THE SERMON ON THE MOUNT")."""
+    from difflib import SequenceMatcher
+    if sum(map(str.isupper, text)) < 0.7 * sum(map(str.isalpha, text)):
+        return False
+    s = re.sub(r"[^A-Z]", "", text.upper())
+    for h in heads:
+        h = re.sub(r"[^A-Z]", "", h.upper())
+        m = SequenceMatcher(None, s, h, autojunk=False).find_longest_match(0, len(s), 0, len(h))
+        if m.size >= 8 and m.size >= 0.8 * len(s) - 4:
+            return True
+    return False
+
+
+def paragraphs(W, H, pars, chart, start=None, vocab=None, known=None, heads=(), table=False):
     """A leaf's paragraphs as (is a heading, text): no running head or page number, nothing the OCR made of a
     drawing (junk), and on a chart's leaf only its text, not the chart's labels; there a line in large type is a
-    heading only if it's the chapter's that starts on the leaf (`start`, its first words)."""
+    heading only if it's the chapter's that starts on the leaf (`start`, its first words). `heads` are the book's
+    title and its chapters', as its running heads print them. On a page that's a table (`table`), only its prose is
+    kept, not the table's rows."""
+    def opens(text):  # whether it's the heading of the chapter starting here
+        bare = re.sub(r"^[IVXLlNn1|]{1,6}\.?(\s*\|)?\s+", "", text.upper()).replace(" ", "")
+        return bool(start) and bare.startswith(start.replace(" ", ""))
+
     sizes = [size for p in pars for _, size, _ in p if size]
     body = statistics.median(sizes) if sizes else 0
     out = []
     for p in pars:
+        # A running head read as the first line of the paragraph under it ("118 THE BOOK OF DANIEL writers of…").
+        if len(p) > 1 and p[0][0][3] < H * 0.1 and len(p[0][2]) < 50 and re.search(r"^\d{1,3}\s|\s\d{1,3}$", p[0][2]):
+            p = p[1:]
+        # The page number read as the last line of the paragraph over it (a chapter's first page has it at the foot,
+        # in the middle: "…who stands for" "1").
+        while len(p) > 1 and p[-1][0][1] > H * 0.85 and p[-1][0][2] - p[-1][0][0] < W * 0.06 and re.fullmatch(r"\W?\d{1,3}\W?", p[-1][2]):
+            p = p[:-1]
+        if known:
+            p = [line for line in p if not garbled(line[2], known)] or p[:0]
+            if not p:
+                continue
         top, bottom = p[0][0][1], p[-1][0][3]
         text = joined(p)
-        if not re.search(r"[A-Za-z]{2}", text):
-            continue  # a page number, a speck
+        if not re.search(r"[A-Za-z]{2}", text) or (known and garbled(text, known)):
+            continue  # a page number, a speck, a paragraph of misreadings
         heading = body and statistics.median(size for _, size, _ in p) >= 1.4 * body and len(text) < 90
         if bottom < H * 0.07 and len(text) < 80 and not heading:
             continue  # the running head (a part's heading at the very top of a page isn't one)
+        if bottom < H * 0.11 and len(text) < 70 and not heading and not opens(text) and (
+                re.search(r"^\d{1,3}\s|\s\d{1,3}$", text) or running(text, heads)):
+            continue  # a running head, lower on a tall page: with its page number ("266 THE BOOK OF DANIEL") or in
+            # capitals with the number misread ("GENTILE DOMINION Zo")
         if top > H * 0.93 and len(text) < 12:
             continue  # the page number
-        bare = re.sub(r"^[IVXLlNn1|]{1,6}\.?(\s*\|)?\s+", "", text.upper()).replace(" ", "")
-        opens = bool(start) and bare.startswith(start.replace(" ", ""))  # the heading of the chapter starting here
-        if not opens and (junk(text) or (vocab and wordy(text, vocab) < (0.6 if chart else 0.3))):
+        if not opens(text) and (junk(text) or (vocab and wordy(text, vocab) < (0.6 if chart else 0.3))):
             continue  # the OCR's reading of a drawing, or of a chart's lettering
         if chart and heading:
-            heading = opens
+            heading = opens(text)
         widths = [b[2] - b[0] for b, _, _ in p]
         if chart and not heading and (len(p) < 2 or statistics.median(widths) < W * 0.3):
             continue  # a chart's label
+        words = re.findall(r"[A-Za-z]+", text)
+        if table and not heading and sum(w[0].islower() for w in words) < 0.4 * len(words):
+            continue  # a row of a table drawn on the page, read across its columns ("FIRST HALF MIDDLE LAST HALF")
         out.append((bool(heading), text))
     return out
+
+
+def carried(prev, text):
+    """Whether a page's first paragraph, `text`, carries on the sentence that `prev` stops in the middle of: `prev` is
+    a paragraph (not a heading or a signature) ending in a letter, ";" or "-" (not a comma, nor a dash, which comes
+    before a quotation, nor a stray " ;"), and `text` doesn't open with a heading in capitals ("THE STONE. THE …")."""
+    return (len(prev) > 80 and re.search(r"[A-Za-z;-]$", prev) is not None and not re.search(r"\s;$", prev)
+            and not re.match(r"[“\"‘']?[A-Z][A-Z’'\- ]{2,40}\.(\s|$)", text))
 
 
 def linked(s, link_plain_refs, passage_refs):
@@ -482,6 +702,121 @@ def picture(z, names, leaves, width, others=(), turn=False):
     return f'<p><img src="data:image/webp;base64,{base64.b64encode(buf.getvalue()).decode()}"></p>'
 
 
+def _jp2(item_id):
+    """The sha256 of an item's page images, from the book or copy it's listed as."""
+    return next(x["jp2"] for x in [*BOOKS.values(), *(c for v in BOOKS.values() for c in v.get("copies", []))]
+                if x.get("id") == item_id)
+
+
+def _page(item_id, leaf):
+    z, names = _zip(item_id, _jp2(item_id))
+    from PIL import Image
+    return Image.open(io.BytesIO(z.read(names[leaf]))).convert("RGB")
+
+
+def scanned_cover(item_id, leaf):
+    """The book's front cover, in colour, cut from its scan: the board round the book in the scan (rows and columns
+    mostly dark at the edges) taken off."""
+    import numpy as np
+    im = _page(item_id, leaf)
+    dark = np.asarray(im.convert("L")) < 60
+    h, w = dark.shape
+    cols, rows = dark.mean(0), dark.mean(1)
+    x0 = next((x for x in range(w // 4) if cols[x] < 0.5), 0)
+    x1 = w - next((x for x in range(w // 4) if cols[w - 1 - x] < 0.5), 0)
+    y0 = next((y for y in range(h // 4) if rows[y] < 0.5), 0)
+    y1 = h - next((y for y in range(h // 4) if rows[h - 1 - y] < 0.5), 0)
+    return im.crop((x0, y0, x1, y1))
+
+
+# The covers drawn afresh from the scans, as the books looked new (tools/covers): the scans' covers are faded, stained
+# and worn. Each has the cloth's colour, the lettering in the nearest free typeface set where the scan has it (in pixels
+# of a cover 1400 high), and the printed emblems cut from the scan and cleaned.
+def _cover_daniel():
+    w, h = 855, 1400
+    return covers.gold(covers.cloth(w, h, (132, 24, 36)), covers.words(w, h, [("THE BOOK OF", "goudy", 56, 257, 696, 428),
+                                                            ("DANIEL", "goudy", 112, 416, 700, 428)]))
+
+
+def _cover_revelation():
+    w, h = 873, 1400
+    scan = scanned_cover("bookofrevelation00lark", 1)
+    k = scan.height / 1400
+    seal = covers.printed(scan, tuple(int(v * k) for v in (270, 420, 610, 745)), (270, 420, 610, 745), w, h)
+    words = covers.words(w, h, [("The", "fraktur", None, 290, 135, w / 2), ("Book of Revelation", "fraktur", None, 382, 640, w / 2),
+                          ("Illustrated", "fraktur", None, 787, 160, w / 2), ("Clarence Larkin", "fraktur", None, 1162, 370, w / 2)])
+    import numpy as np
+    return covers.ink(covers.cloth(w, h, (62, 122, 112)), np.maximum(words, seal), (16, 22, 22))
+
+
+def _cover_dispensational_truth():
+    import numpy as np
+    from PIL import Image, ImageDraw
+    w, h = 1366, 1400
+    cx, o, i = w // 2, 100, 132  # the outer rule's inset, and the two panels'
+    rules = Image.new("L", (w, h), 0)
+    d = ImageDraw.Draw(rules)
+    d.rectangle((o, o + 10, w - o, h - o - 10), outline=255, width=8)
+    d.rectangle((i, i + 10, w - i, 540), outline=255, width=6)
+    d.rectangle((i, 566, w - i, h - i - 10), outline=255, width=6)
+    box = (cx - 129, 508, cx + 130, 769)
+    d.rectangle(box, fill=0)
+    # The ornament from the copy whose print of it is sharpest.
+    ornament = covers.printed(_page("dispensationaltr0000lark", 1), (1335, 1306, 2034, 1995), box, w, h)
+    words = covers.words(w, h, [("DISPENSATIONAL", "goudy", 92, 324, 1052, cx), ("TRUTH", "goudy", 86, 459, 478, cx),
+                          ("CLARENCE LARKIN", "goudy", 32, 1135, 500, cx)])
+    return covers.ink(covers.cloth(w, h, (110, 44, 52)), np.maximum.reduce([np.asarray(rules, float) / 255, ornament, words]), (26, 12, 14))
+
+
+def _cover_second_coming():
+    """A paper cover printed in blue: the title in black letter between two engravings, cut from the scan and cleaned."""
+    import numpy as np
+    from PIL import Image, ImageDraw
+    w, h = 884, 1400
+    scan = scanned_cover("secondcomingofch0000clar", 1)
+    k = scan.height / 1400
+    paper = float(np.median(np.asarray(scan.convert("L").crop(tuple(int(v * k) for v in (130, 940, 300, 1020))))))
+    cut = lambda box: covers.printed(scan, tuple(int(v * k) for v in box), box, w, h, paper - 30)
+    rules = Image.new("L", (w, h), 0)
+    d = ImageDraw.Draw(rules)
+    d.rectangle((86, 106, w - 86, h - 86), outline=255, width=6)
+    d.rectangle((100, 120, w - 100, h - 100), outline=255, width=2)
+    d.line((100, 372, w - 100, 372), fill=255, width=4)
+    d.line((100, 1046, w - 100, 1046), fill=255, width=4)
+    words = covers.words(w, h, [("The", "fraktur", None, 492, 150, w / 2), ("Second Coming", "fraktur", None, 592, 560, w / 2),
+                                ("of Christ", "fraktur", None, 682, 330, w / 2), ("By", "fraktur", None, 738, 40, w / 2),
+                                ("Clarence Larkin", "fraktur", None, 800, 400, w / 2),
+                                ("Author and Publisher of", "fraktur", None, 836, 220, w / 2),
+                                ("“Dispensational Truth”", "fraktur", None, 880, 270, w / 2)])
+    art = np.maximum(cut((104, 124, w - 104, 368)), cut((104, 1050, w - 104, h - 104)))
+    return covers.ink(covers.material(w, h, "smooth", (156, 182, 206)),
+                      np.maximum.reduce([np.asarray(rules, float) / 255, words, art]), (28, 34, 96))
+
+
+def _cover_spirit_world():
+    """Brown cloth with a double rule round it, the title and author printed in black."""
+    import numpy as np
+    from PIL import Image, ImageDraw
+    w, h = 894, 1400
+    rules = Image.new("L", (w, h), 0)
+    d = ImageDraw.Draw(rules)
+    d.rectangle((80, 130, w - 80, h - 140), outline=255, width=7)
+    d.rectangle((104, 154, w - 104, h - 164), outline=255, width=4)
+    words = covers.words(w, h, [("The", "fraktur", None, 268, 66, w / 2), ("Spirit World", "goudy", None, 384, 536, w / 2),
+                                ("CLARENCE LARKIN", "goudy", 22, 1134, 360, w / 2)])
+    return covers.ink(covers.cloth(w, h, (146, 74, 46)), np.maximum(np.asarray(rules, float) / 255, words), (28, 18, 16))
+
+
+COVERS = {"daniel": _cover_daniel, "second_coming": _cover_second_coming, "spirit_world": _cover_spirit_world, "revelation": _cover_revelation, "dispensational_truth": _cover_dispensational_truth}
+
+
+def cover(name, b):
+    """The book's cover, drawn afresh (COVERS) or else cut from its scan (`cover`: an item and leaf)."""
+    if name in COVERS:
+        return covers.html(COVERS[name]())
+    return covers.html(scanned_cover(*b["cover"])) if b.get("cover") else ("", "")
+
+
 _zips = {}
 
 
@@ -550,8 +885,40 @@ def build(name, into=None):
         drawn = dict(pool.map(_render, jobs))
     spreads = set(b["spreads"]) | {n + 1 for n in b["spreads"]}
     starts = {leaf: (words, title) for leaf, words, title in b["chapters"]}
-    vocab = vocabulary(hocr, [n for n in range(b["first"], b["last"] + 1) if n not in b["charts"] and n not in spreads])
+    heads = [b["title"], *(re.sub(r"^[\d–, ]+(Part \d+)?[.:]\s*", "", title) for _, _, title in b["chapters"])]
+    text_leaves = [n for n in range(b["first"], b["last"] + 1) if n not in b["charts"] and n not in spreads]
+    vocab = vocabulary(hocr, text_leaves)
+    known = known_words(hocr, text_leaves)
     rows, cur, title, pictures, ahead = [], [], None, 0, []
+
+    fixes = json.loads(FIXES.joinpath(f"{name}.json").read_text()) if FIXES.joinpath(f"{name}.json").is_file() else {}
+    unused = []
+
+    def finish(title, paras):
+        """A chapter's paragraphs as they'll be shown: proofread, then with their Bible references linked. A paragraph
+        of misreadings made only once its pieces were joined ("= oii wath." + "yerres? a ae") is dropped, and so are
+        those the proofreading found (FIXES), whose misread words are put right."""
+        f = fixes.get(title, {})
+        drop, todo = list(f.get("drop", [])), [tuple(x) for x in f.get("fix", [])]
+        out = []
+        for h in paras:
+            if h.startswith("<p><img"):
+                out.append(h)
+                continue
+            bold = h.startswith("<p><b>")
+            text = unescape(h[6:-8] if bold else h[3:-4])
+            if any(text.startswith(d) for d in drop):
+                drop = [d for d in drop if not text.startswith(d)]
+                continue
+            for wrong, right in [x for x in todo if x[0] in text]:
+                text = text.replace(wrong, right, 1)
+                todo.remove((wrong, right))
+            text = re.sub(r"\s{2,}", " ", text).strip()
+            if not text or (not bold and garbled(text, known)):
+                continue
+            out.append(f"<p><b>{escape(text)}</b></p>" if bold else f"<p>{linked(escape(text), link_plain_refs, passage_refs)}</p>")
+        unused.extend(f"{title}: {x}" for x in drop + [w for w, _ in todo])
+        return "".join(out)
     for leaf in range(b["first"], b["last"] + 1):
         # A picture on the page a chapter starts on goes after that chapter's heading (held till it's read).
         held = []
@@ -559,42 +926,60 @@ def build(name, into=None):
         if leaf in drawn:
             dest.append(drawn[leaf])
             pictures += 1
+        if leaf in b.get("skip", ()):
+            cur += held
+            continue  # a page of its own between parts ("Second Division, Prophetical, Chapters 7 to 12")
         texted = leaf in b.get("spread_text", ()) or leaf - 1 in b.get("spread_text", ())
         if leaf in spreads and not texted:
             cur += held
             continue  # a two-page chart's text is in the picture
         W, H, pars = hocr[leaf]
         on = starts.get(leaf)
-        for k, (heading, text) in enumerate(paragraphs(W, H, pars, leaf in b["charts"] or leaf in spreads, on and on[0], vocab)):
+        # A page of text with a small picture on it (`figures`) is pictured, but its text is read as a text page's.
+        chart = (leaf in b["charts"] and leaf not in b.get("figures", ())) or leaf in spreads
+        for k, (heading, text) in enumerate(paragraphs(W, H, pars, chart, on and on[0], vocab, known, heads,
+                                                         leaf in b.get("tables", ()))):
             start = starts.get(leaf)
             # "IX THE JEWS", "Il PRE - …", "n. The Things Which Are": the chapter's number as the OCR read it set aside.
             bare = re.sub(r"^[IVXLlNn1|]{1,6}\.?(\s*\|)?\s+", "", text.upper()).replace(" ", "")
             # A chapter's heading, or a page's first paragraphs where its heading is in the text's own type (a Foreword).
             if (heading or k < 3) and start and bare.startswith(start[0].replace(" ", "")):
                 if title:
-                    rows.append((title, "".join(cur)))
+                    rows.append((title, finish(title, cur)))
                 title, cur = start[1], [f"<p><b>{escape(start[1])}</b></p>", *ahead, *held]
                 ahead, held = [], []
                 starts.pop(leaf)
                 continue
             if heading and len(text) < 4:
                 continue  # a word of a heading read on its own ("THE")
+            if heading and title and re.sub(r"\W", "", title.split(" ", 1)[-1].split(": ")[-1].lower()) == re.sub(r"\W", "", text.lower()):
+                continue  # the chapter's title under its "CHAPTER ONE", which its heading already says
             if heading:
                 cur.append(f"<p><b>{escape(text)}</b></p>")
-            elif text[:1].islower() and cur and cur[-1].startswith("<p>") and not cur[-1].startswith(("<p><b>", "<p><img")):
-                # A sentence carried over a column or a page ("ce," "and so…"): joined to its paragraph.
-                prev = cur[-1][3:-4]
+            elif (last := next((i for i in range(len(cur) - 1, -1, -1) if not cur[i].startswith("<p><img")), None)) is not None \
+                    and cur[last].startswith("<p>") and not cur[last].startswith("<p><b>") and (text[:1].islower() or (
+                        k == 0 and not chart and carried(unescape(cur[last][3:-4]), text))):
+                # A sentence carried over a column or a page ("ce," "and so…"), or a page's first paragraph where the one
+                # before stops without a stop or a comma ("…who stands for" "Daniel's People"; not after a dash, which
+                # comes before a quotation, nor on a chart's page, where it's a label): joined to its paragraph, over a
+                # page's picture put between them (which then follows the paragraph).
+                prev = cur[last][3:-4]
                 joint = prev[:-1] if prev.endswith("-") else prev + " "
-                cur[-1] = f"<p>{joint}{linked(escape(text), link_plain_refs, passage_refs)}</p>"
+                cur[last] = f"<p>{joint}{escape(text)}</p>"
             else:
-                cur.append(f"<p>{linked(escape(text), link_plain_refs, passage_refs)}</p>")
+                cur.append(f"<p>{escape(text)}</p>")
         cur += held  # a chapter's page whose heading wasn't found keeps its picture where it is
-    rows.append((title, "".join(cur)))
+    rows.append((title, finish(title, cur)))
+    front, thumb = cover(name, b)
+    if front:
+        rows[0] = (rows[0][0], front + rows[0][1])
+    if unused:
+        print(f"  {len(unused)} of the proofreading's fixes no longer match:\n    " + "\n    ".join(unused))
     missed = [t for _, t in starts.values()]
     if missed:
         sys.exit(f"{name}: chapter headings not found: {', '.join(missed)}")
     refs = sum(h.count("<ref") for _, h in rows)
-    info = (f"<p>{escape(b['about'])}</p><p>From the Internet Archive's scan (archive.org/details/{b['id']}), public "
+    info = (f"{thumb}<p>{escape(b['about'])}</p><p>From the Internet Archive's scan (archive.org/details/{b['id']}), public "
             f"domain. The text is the scan's OCR, so some words are misread; each page with a chart is kept as a "
             f"picture. {len(rows)} chapters, {pictures} pictures, {refs} Bible references linked. "
             "Built by Two-edged Sword's tools/larkin.</p>"

@@ -4,7 +4,7 @@
 import { useState } from "react";
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
 import { isMapBook, ModuleInfo } from "./api";
-import { licenceOf, SOURCE } from "./About";
+import { Cover, JUSTIFIED, licenceOf, SOURCE, splitCover } from "./About";
 import { htmlText, renderHtml } from "./esword";
 import { Icon } from "./icons";
 import { BibleSelect, Topbar } from "./Shell";
@@ -488,8 +488,16 @@ export function LibraryScreen() {
                 </button>
               )}
             </div>
-            <div className="es" style={{ fontSize: 12.5, lineHeight: 1.5, maxHeight: 300, overflowY: "auto" }}>
-              {renderHtml(info.m.info)}
+            <div className="es" style={{ fontSize: 12.5, lineHeight: 1.5, maxHeight: 300, overflowY: "auto", ...JUSTIFIED }}>
+              {(() => {
+                const [cover, rest] = splitCover(info.m.info);
+                return (
+                  <>
+                    {cover && <Cover src={cover} title={info.m.title} width={70} />}
+                    {renderHtml(rest)}
+                  </>
+                );
+              })()}
             </div>
             <div className="hint" style={{ fontSize: 12 }}>
               {info.m.source === "bundled" ? "Built in" : `From ${SOURCE[info.m.source]}`}

@@ -402,12 +402,27 @@ Its docstring lists them and their licences.
     opens, and footnotes are listed under each chapter.
   - `foxe.refi`, built with `tools/gutenberg/build.py` from Project Gutenberg's HTML (Forbush's
     edition). Its Bible references aren't marked, so they aren't linked.
-  - `larkin_dispensational_truth.refi` and `larkin_revelation.refi`, built with
+  - `larkin_dispensational_truth.refi`, `larkin_revelation.refi`, `larkin_daniel.refi`,
+    `larkin_second_coming.refi` and `larkin_spirit_world.refi`, built with
     `tools/larkin/build.py` from the Internet Archive's scans: the OCR's text, and each page with a
     chart as a picture (two-page charts joined, sideways ones turned, other copies used where they
     show more at the binding). Chart pages, chapter starts and turns are listed by hand in `BOOKS`.
     Pictures are drawn on every core and kept in the cache; one is redrawn only when what it's
-    drawn from changes.
+    drawn from changes. Lines where most words aren't English or used elsewhere in the book are taken
+    as garbled OCR and left out. `tools/larkin/fixes/<book>.json` holds a proofreading of the built
+    text (paragraphs to drop, misread words put right), each fix checked against other scanned copies'
+    OCR before it went in.
+- **Covers.** Every module has one: a small copy at the start of its description, which the About
+  views float to the top right, and the books also open with it. `tools/covers.py` draws them as new
+  bindings, in free fonts from Google Fonts (pinned), from a kit of materials (cloth, linen, buckram,
+  leather, paper), stamps (gold, silver, blind, ink), borders, emblems and layouts (classic, a label,
+  a band, half-bound, an all-over pattern).
+  - Larkin's are drawn from their scans (`COVERS` in `tools/larkin/build.py`); the other books'
+    are a `cover` in their builder's `BOOKS`.
+  - Every other module's is in `tools/covers_catalog.py`, by file name; related modules are bound
+    alike (each original language, the Talmud by its orders, a module and its "w/ glosses" twin).
+  - `modules.module()` adds the cover as a module is written, so every builder gets it.
+    `python3 tools/covers.py apply <folder>` adds or redraws them in modules already built.
 
 Nothing from e-Sword X goes into a module that could be shipped: its licence forbids passing its
 modules on. These scripts read e-Sword modules, so they build for your own library only:

@@ -9,8 +9,9 @@ marked there "Public Domain":
   pilgrim.refi    John Bunyan, The Pilgrim's Progress (1678 and 1684), both parts
   lawrence.refi   Brother Lawrence, The Practice of the Presence of God: his conversations and letters
   bounds.refi     E. M. Bounds on prayer: seven of his books (1907–1931) in one
+  sheldon.refi    Charles M. Sheldon, In His Steps (1896)
 
-    python3 tools/ccel/build.py [josephus edersheim pilgrim lawrence bounds]
+    python3 tools/ccel/build.py [josephus edersheim pilgrim lawrence bounds sheldon]
 
 A chapter of the book is a chapter in the app, titled from the book's own headings ("Antiquities 1.1: The
 Constitution of the World…"). CCEL marks each Bible reference with the passage it means (scripRef's
@@ -33,12 +34,15 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from books import ABBR, OSIS  # noqa: E402
 from modules import CACHES, fetch, module  # noqa: E402
+import covers  # noqa: E402
 
 CACHE = CACHES / "ccel"
 BOOKS = {
     "josephus": dict(
         url="https://www.ccel.org/ccel/josephus/complete.xml",
         sha256="b7cff7c4a88f7a9b0daf293696f38a66964d81d0e87802a18be0f3a50f1548a3",
+        cover=dict(title=[("THE WORKS OF", 40), ("FLAVIUS", 78), ("JOSEPHUS", 78)], author=[("TRANSLATED BY", 22), ("WILLIAM WHISTON", 34)],
+                   rgb=(28, 42, 78), ornament="star"),
         title="The Works of Flavius Josephus", abbrev="Josephus",
         about="The works of Flavius Josephus (37–c. 100), the Jewish historian, in William Whiston's translation (1737): "
               "his Life, the Antiquities of the Jews, the Wars of the Jews, Against Apion and the Discourse to the Greeks "
@@ -46,12 +50,16 @@ BOOKS = {
     "edersheim": dict(
         url="https://www.ccel.org/ccel/edersheim/lifetimes.xml",
         sha256="aa20f33d57f0f1d780886840c2d1ac523bb7004e9ff7f7f23a536c5c56150334",
+        cover=dict(title=[("THE LIFE AND TIMES", 40), ("OF", 30), ("JESUS", 78), ("THE MESSIAH", 56)], author=[("ALFRED EDERSHEIM", 36)],
+                   rgb=(32, 72, 52), ornament="cross"),
         title="The Life and Times of Jesus the Messiah", abbrev="Edersheim",
         about="Alfred Edersheim's The Life and Times of Jesus the Messiah (1883; third edition, 1886): the Gospel story "
               "told against the Jewish life, worship and teaching of its time, with the author's notes and appendices."),
     "pilgrim": dict(
         url="https://www.ccel.org/ccel/bunyan/pilgrim.xml",
         sha256="1ebdfd4db68990f3cb26cb81305f0a32f2eb9ec0faedf33e2ee54414f9414353",
+        cover=dict(title=[("THE", 36), ("PILGRIM’S", 78), ("PROGRESS", 78)], author=[("JOHN BUNYAN", 40)], rgb=(186, 160, 118),
+                   stamp=(58, 34, 22), ornament="diamonds"),
         title="The Pilgrim's Progress", abbrev="Pilgrim",
         about="John Bunyan's The Pilgrim's Progress from This World to That Which Is to Come (Part I, 1678; Part II, "
               "1684): Christian's journey, and then Christiana's, told as a dream, with the Bible verses Bunyan set in "
@@ -60,6 +68,8 @@ BOOKS = {
         url="https://www.ccel.org/ccel/lawrence/practice.xml",
         sha256="05149b19c169d3f148add4a75f90a84fce96a75ba776b919f8c4fc59d78b3c6d",
         skip=("The Practice of the Presence of God: The Best Rule of Holy Life", "Appendix to electronic edition"),
+        cover=dict(title=[("THE PRACTICE", 54), ("OF THE", 34), ("PRESENCE", 70), ("OF GOD", 54)], author=[("BROTHER LAWRENCE", 36)],
+                   rgb=(64, 86, 112), ornament="lamp"),
         title="The Practice of the Presence of God", abbrev="Br Lawrence",
         about="The conversations and letters of Brother Lawrence (Nicolas Herman, c. 1614–1691), a lay brother of the "
               "Carmelites in Paris, on living every moment in the presence of God."),
@@ -74,10 +84,21 @@ BOOKS = {
             ("weapon", "f67928a78e0a6d773e7a45fecb66adf918ca2a11de20175bb083d0e13f6f5bc5", "The Weapon of Prayer"),
         ],
         skip=("Title Page",),
+        cover=dict(title=[("E. M. BOUNDS", 50), ("ON", 34), ("PRAYER", 86)], author=[("SEVEN BOOKS", 30)], rgb=(84, 40, 72),
+                   ornament="lamp"),
         title="E. M. Bounds on Prayer", abbrev="Bounds",
         about="Seven books on prayer by Edward McKendree Bounds (1835–1913), a Methodist minister: Power Through Prayer, "
               "Purpose in Prayer, Prayer and Praying Men, The Reality of Prayer, The Essentials of Prayer, The Necessity "
               "of Prayer and The Weapon of Prayer, most of them edited from his papers by Homer W. Hodge after his death."),
+    "sheldon": dict(
+        url="https://www.ccel.org/ccel/sheldon/ihsteps.xml",
+        sha256="f3202342cc40e304659f9e0ccb4b712c9d557efcae2dda636b2ab606bf95fcfb",
+        skip=("Title Page",),
+        cover=dict(title=[("IN", 40), ("HIS", 78), ("STEPS", 78)], author=[("CHARLES M. SHELDON", 34)],
+                   rgb=(96, 62, 34), ornament="cross"),
+        title="In His Steps", abbrev="In His Steps",
+        about="Charles M. Sheldon's In His Steps (1896), the novel behind the question “What would Jesus do?”: the members "
+              "of First Church in the town of Raymond pledge for a year to ask it before everything they do, and act on the answer."),
 }
 # Josephus's works by their CCEL titles, as the chapters are named.
 WORKS = {"Life Of Flavius Josephus": "Life", "Antiquities of the Jews": "Antiquities", "The Wars of the Jews": "Wars",
@@ -395,8 +416,10 @@ def build(name, into=None):
         seen[t] = seen.get(t, 0) + 1
         if seen[t] > 1:
             rows[i] = (f"{t} ({seen[t]})", h)
-    info = (f"<p>{escape(b['about'])}</p><p>From the Christian Classics Ethereal Library's edition (ccel.org), "
-            f"public domain. {len(rows)} chapters; {refs} Bible references, each linked. "
+    front, thumb = covers.html(covers.design(**b["cover"]))  # a cover drawn for it (tools/covers)
+    rows[0] = (rows[0][0], front + rows[0][1])
+    info = (f"{thumb}<p>{escape(b['about'])}</p><p>From the Christian Classics Ethereal Library's edition (ccel.org), "
+            f"public domain. {len(rows)} chapters; {refs} Bible reference{'s' * (refs != 1)}, each linked. "
             "Built by Two-edged Sword's tools/ccel.</p>")
     with module(f"{name}.refi", b["title"], b["abbrev"], info, into=into) as db:
         db.executemany("INSERT INTO Reference VALUES (?,?)", rows)
