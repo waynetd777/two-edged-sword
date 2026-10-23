@@ -65,6 +65,7 @@ const SAME_AS: &[(Kind, &str, &str)] = &[
     (Kind::Reference, "the_life_and_times_of_jesus_the_messiah", "edersheim"),
     (Kind::Reference, "the_practice_of_the_presence_of_god", "lawrence"),
     (Kind::Devotional, "spurgeon", "sme"),
+    (Kind::Commentary, "spurgeon", "tdavid"),
 ];
 
 /// e-Sword's modules that are parts of one of the app's books (its kind, e-Sword's file name, the app's): left out
