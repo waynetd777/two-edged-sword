@@ -19,7 +19,7 @@ Compare shows any number of translations side by side, verse by verse.
 
 <a href="images/index.md#study"><picture><source media="(prefers-color-scheme: dark)" srcset="images/search-dark.png"><img alt="Searching the KJV for “tithe”, with the verse in context" src="images/search-light.png"></picture></a>
 
-Search looks through a Bible, every commentary and dictionary, and your journal at once.
+Search looks through a Bible, every commentary and dictionary, your books and devotionals, and your journal at once.
 
 - Narrow it to part of the Bible, such as the Gospels or the Letters.
 - Match the exact phrase, all or any of the words, or whole words only.

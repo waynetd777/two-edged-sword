@@ -310,7 +310,7 @@ const MONTHS: [&str; 12] =
     ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 /// A devotional's day as a title: "September 24". Month 13 is how one module files a December day.
-fn day_title(month: i64, day: i64) -> String {
+pub fn day_title(month: i64, day: i64) -> String {
     format!("{} {day}", MONTHS[(month.clamp(1, 13) as usize - 1).min(11)])
 }
 

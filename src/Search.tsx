@@ -5,7 +5,7 @@ import { Fragment, ReactNode, useEffect, useMemo, useRef, useState } from "react
 import { api, Article, Commentary, SearchMode, SearchResults, Verse } from "./api";
 import { AskPanel, withheld, Working } from "./Ask";
 import { book, fmtRef, isApocrypha, Ref, SECTIONS } from "./bible";
-import { plainText, renderHtml } from "./esword";
+import { docSegments, plainText, renderHtml } from "./esword";
 import { Icon } from "./icons";
 import { mdPlain } from "./md";
 import { BibleSelect, Topbar } from "./Shell";
@@ -14,7 +14,7 @@ import { short, useRefPreview, useTopics } from "./StudyPane";
 import { ApoPill, TrailButtons, useTrail } from "./ui";
 import { shortcut } from "./keys";
 
-type Scope = "all" | "bible" | "commentary" | "dictionary" | "journal";
+type Scope = "all" | "bible" | "commentary" | "dictionary" | "book" | "journal";
 
 /** The search as last left, for the rest of the session. */
 let saved: {
@@ -27,6 +27,7 @@ let saved: {
   res: SearchResults | null;
   scope: Scope;
   cmod: string | null;
+  bmod: string | null;
   pick: Pick | null;
   scroll: number;
   searchFor: string | null;
@@ -35,7 +36,8 @@ type Pick =
   | { kind: "verse"; ref: Ref }
   | { kind: "comment"; module: string; ref: Ref }
   | { kind: "dict"; module: string; topic: string }
-  | { kind: "journal"; id: string };
+  | { kind: "journal"; id: string }
+  | { kind: "book"; module: string; doc: "reference" | "devotional"; title: string; snippet: string };
 
 // The whole Bible takes in a Bible's Apocrypha (67–78) too; they are also a range of their own.
 const RANGES: { name: string; from: number; to: number }[] = [
@@ -77,12 +79,13 @@ export function SearchScreen() {
   const [err, setErr] = useState<string | null>(null);
   const [scope, setScope] = useState<Scope>(was?.scope ?? "all");
   const [cmod, setCmod] = useState<string | null>(was?.cmod ?? null);
+  const [bmod, setBmod] = useState<string | null>(was?.bmod ?? null);
   const [pick, setPick] = useState<Pick | null>(was?.pick ?? null);
   const [ix, setIx] = useState<{ building: boolean; done: number; total: number } | null>(null);
   const list = useRef<HTMLDivElement>(null);
   const scrollTop = useRef(was?.scroll ?? 0);
   useEffect(() => {
-    saved = { q, ran, mode, whole, range, bible, res, scope, cmod, pick, scroll: scrollTop.current, searchFor: app.searchFor };
+    saved = { q, ran, mode, whole, range, bible, res, scope, cmod, bmod, pick, scroll: scrollTop.current, searchFor: app.searchFor };
   });
   useEffect(() => {
     if (list.current) list.current.scrollTop = scrollTop.current;
@@ -150,6 +153,7 @@ export function SearchScreen() {
       setRes(r);
       setRan(text);
       setCmod(r.commentaries[0]?.module ?? null);
+      setBmod(null);
       const first = r.bible.hits[0];
       setPick(first ? { kind: "verse", ref: { book: first.book, chapter: first.chapter, verse: first.verse } } : null);
     } catch (e) {
@@ -179,8 +183,17 @@ export function SearchScreen() {
   }, [app.journal, ran, terms, mode, whole, res?.strongs]);
   const cTotal = res?.commentaries.reduce((n, m) => n + m.count, 0) ?? 0;
   const dTotal = res?.dictionaries.reduce((n, m) => n + m.count, 0) ?? 0;
-  const total = (res?.bible.count ?? 0) + cTotal + dTotal + journalHits.length;
+  // Books and devotionals together, each marked with what it is.
+  const docs = res
+    ? [
+        ...res.books.map((m) => ({ ...m, doc: "reference" as const })),
+        ...(res.devotionals ?? []).map((m) => ({ ...m, doc: "devotional" as const })),
+      ]
+    : [];
+  const bTotal = docs.reduce((n, m) => n + m.count, 0);
+  const total = (res?.bible.count ?? 0) + cTotal + dTotal + bTotal + journalHits.length;
   const cur = res?.commentaries.find((m) => m.module === cmod) ?? res?.commentaries[0];
+  const bcur = docs.find((m) => m.module === bmod) ?? docs[0];
   const show = (s: Scope) => scope === "all" || scope === s;
 
   return (
@@ -240,6 +253,7 @@ export function SearchScreen() {
                 ["bible", "Bible", res?.bible.count ?? 0],
                 ["commentary", "Commentaries", cTotal],
                 ["dictionary", "Dictionaries", dTotal],
+                ["book", "Books", bTotal],
                 ["journal", "Journal", journalHits.length],
               ] as [Scope, string, number][]
             ).map(([s, l, n]) => (
@@ -492,6 +506,56 @@ export function SearchScreen() {
                   ))}
                 </>
               )}
+              {show("book") && docs.length > 0 && (
+                <>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "18px 12px 6px" }}>
+                    <span className="label">Books</span>
+                    <span className="n">
+                      {bTotal} chapter{bTotal === 1 ? "" : "s"}
+                    </span>
+                  </div>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 6, padding: "0 12px 6px" }}>
+                    {docs.map((m) => (
+                      <button
+                        key={m.module}
+                        type="button"
+                        className={`chip ${bcur?.module === m.module ? "on" : ""}`}
+                        title={m.title}
+                        onClick={() => setBmod(m.module)}
+                      >
+                        {m.title.length > 28 ? m.abbrev : m.title}
+                        <span className="n">{m.count}</span>
+                      </button>
+                    ))}
+                  </div>
+                  {bcur?.hits.map((h, k) => {
+                    const on = pick?.kind === "book" && pick.module === bcur.module && pick.title === h.title;
+                    return (
+                      <button
+                        key={k}
+                        type="button"
+                        className="bm"
+                        onClick={() => setPick({ kind: "book", module: bcur.module, doc: bcur.doc, title: h.title, snippet: h.snippet })}
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns: "140px minmax(0,1fr)",
+                          gap: 12,
+                          padding: "10px 12px",
+                          background: on ? "var(--accentsoft)" : undefined,
+                        }}
+                      >
+                        <b style={{ fontSize: 12.5 }}>{h.title}</b>
+                        <span style={{ font: "400 14.5px/1.55 var(--serif)" }}>{mark(h.snippet, terms, whole)}</span>
+                      </button>
+                    );
+                  })}
+                  {bcur && bcur.count > bcur.hits.length && (
+                    <div className="n" style={{ padding: "4px 12px" }}>
+                      First {bcur.hits.length} of {bcur.count} shown.
+                    </div>
+                  )}
+                </>
+              )}
               {show("journal") && journalHits.length > 0 && (
                 <>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "18px 12px 6px" }}>
@@ -646,6 +710,7 @@ function Preview({ pick, bible, terms, whole }: { pick: Pick | null; bible: stri
     hide();
     app.open({ book: r.book, chapter: r.chapter, verse: r.verse, to: r.to }, "read");
   };
+  if (pick.kind === "book") return <BookPreview pick={pick} terms={terms} whole={whole} />;
   if (pick.kind === "journal") {
     const e = app.journal.find((x) => x.id === pick.id);
     return (
@@ -723,6 +788,86 @@ function Preview({ pick, bible, terms, whole }: { pick: Pick | null; bible: stri
           <div className="es prose selectable">
             {renderHtml(art.html, { onRef: openRef, onRefHover, onStrongs: app.studyWord, topic, onTopic: (t) => openTopic(t) })}
           </div>
+        )}
+      </div>
+      {preview}
+    </>
+  );
+}
+
+/** A book's chapter (or a devotional's day) with a match: the paragraph the words are in, with the one either side,
+ *  and Open, which opens the book there. */
+function BookPreview({
+  pick,
+  terms,
+  whole,
+}: {
+  pick: Extract<Pick, { kind: "book" }>;
+  terms: string[];
+  whole: boolean;
+}) {
+  const app = useApp();
+  const [html, setHtml] = useState<string | null>(null);
+  const { onRefHover, preview, hide } = useRefPreview(app.settings.bible);
+  useEffect(() => {
+    let dead = false;
+    setHtml(null);
+    (pick.doc === "devotional" ? api.devotion(pick.module, pick.title) : api.article("reference", pick.module, pick.title).then((a) => a?.html ?? null))
+      .then((h) => {
+        if (!dead) setHtml(h ?? "");
+      })
+      .catch(() => {
+        if (!dead) setHtml("");
+      });
+    return () => {
+      dead = true;
+    };
+  }, [pick]);
+  const segs = useMemo(() => (html ? docSegments(html) : []), [html]);
+  // The first paragraph with one of the words in it (the snippet is from the first match).
+  const at = useMemo(() => {
+    const words = terms.map((w) => w.toLowerCase()).filter(Boolean);
+    const i = segs.findIndex((s) => {
+      const p = plainText(s).toLowerCase();
+      return words.some((w) => (whole ? new RegExp(`\\b${w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`).test(p) : p.includes(w)));
+    });
+    return Math.max(0, i);
+  }, [segs, terms, whole]);
+  const mod = app.mod(pick.doc, pick.module);
+  const open = () => app.openDoc(pick.module, pick.title, pick.doc, at + 1);
+  return (
+    <>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "14px 20px", borderBottom: "1px solid var(--border)" }}>
+        <div style={{ minWidth: 0 }}>
+          <div className="label" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+            {mod?.title ?? pick.module}
+          </div>
+          <div style={{ font: "500 22px/1.3 var(--display)" }}>{pick.title}</div>
+        </div>
+        <button className="btn primary" type="button" style={{ marginLeft: "auto" }} onClick={open}>
+          Open<span style={{ opacity: 0.75 }}>{shortcut("⏎")}</span>
+        </button>
+      </div>
+      <div className="scroll" style={{ flexGrow: 1, padding: "16px 22px" }}>
+        {html === null ? (
+          <div className="hint">Loading…</div>
+        ) : (
+          segs.slice(Math.max(0, at - 1), at + 2).map((s, k) => {
+            const i = Math.max(0, at - 1) + k;
+            return (
+              <div key={i} className="es prose selectable" style={{ marginBottom: 12, color: i === at ? "var(--text)" : "var(--muted)" }}>
+                {i === at
+                  ? mark(plainText(s), terms, whole)
+                  : renderHtml(s, {
+                      onRef: (r) => {
+                        hide();
+                        app.open({ book: r.book, chapter: r.chapter, verse: r.verse, to: r.to }, "read");
+                      },
+                      onRefHover,
+                    })}
+              </div>
+            );
+          })
         )}
       </div>
       {preview}

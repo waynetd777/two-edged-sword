@@ -1,17 +1,13 @@
 # Two-edged Sword
 
 A Bible study app for macOS and Windows, for reading Bibles, commentaries, dictionaries and books
-beside your own notes. It comes with 63 modules: the KJV and some twenty more Bibles (among them the
-Berean Standard Bible, Tyndale, the Geneva, the Douay-Rheims, the Vulgate, the Septuagint and the Peshitta, and Strong's and word-by-word editions), Strong's dictionaries, BDB and Abbott-Smith, the Treasury of Scripture Knowledge, six commentaries (Matthew Henry, JFB, Clarke,
-Barnes, Wesley, Scofield), dictionaries from Easton's to the ISBE, a book of fifteen Bible maps, and books: the works of Josephus, Edersheim's
-Life and Times of Jesus the Messiah, Fox's Book of Martyrs, The Pilgrim's Progress, Brother Lawrence's Practice of the
-Presence of God and seven of E. M. Bounds's books on prayer.
-It also reads modules in e-Sword X's formats: your own, and on a Mac e-Sword X's library if you have it.
-It never changes them: your journal, highlights and plans are kept separately.
+beside your own notes. It comes with a library of Bibles, commentaries, dictionaries and books, so it works with nothing else installed
+([what's included](#whats-included)), and also reads modules in e-Sword X's formats: your own, and on a Mac
+e-Sword X's library if you have it. It never changes them: your journal, highlights and plans are kept separately.
 
 See it on the [Two-edged Sword website](https://two-edged-sword.davies.co.za/).
 
-**Contents:** [Download](#download) · [What it does](#what-it-does) · [Quick start](#quick-start) · [Thanks](#thanks) · [Licence](#licence) · [Documentation](#documentation)
+**Contents:** [Download](#download) · [What's included](#whats-included) · [What it does](#what-it-does) · [Quick start](#quick-start) · [Thanks](#thanks) · [Licence](#licence) · [Documentation](#documentation)
 
 ## Download
 
@@ -40,6 +36,23 @@ A few things differ on Windows: see [On Windows](docs/features.md#on-windows).
 The app checks for updates once a day and offers to install them. **Check for Updates…** checks now: at the foot of Settings, and in the app menu on a Mac or the notification-area menu on Windows.
 
 <a href="docs/images/index.md#the-readme"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/read-dark.png"><img alt="Reading 1 John 1 with the study pane open on the commentaries" src="docs/images/read-light.png"></picture></a>
+
+## What's included
+
+The app comes with these modules. The [Library guide](docs/library.md#built-in-modules) lists each with its source and
+licence.
+
+| Kind | Modules |
+|---|---|
+| English Bibles | KJV, Berean Standard Bible, ASV, World English Bible, Young's Literal, Darby, Webster, Revised Version, Weymouth NT, Tyndale, Geneva 1599, Douay-Rheims, Brenton's Septuagint, Murdock's and Etheridge's Peshitta, Targum Pseudo-Jonathan |
+| With Strong's numbers | KJV+, BSB+, Webster+ |
+| Hebrew, Greek, Latin, Syriac and Aramaic | WLC+ and Ginsburg (Hebrew), Byzantine NT and Brenton's Septuagint (Greek), Clementine Vulgate (Latin), Peshitta (Syriac), the Targum and Pseudo-Jonathan (Aramaic); most also word by word with English |
+| Dictionaries and lexicons | Strong's Hebrew and Greek, Brown-Driver-Briggs, Abbott-Smith, King James Concordance, Easton's, Smith's, Nave's, the ISBE, Torrey's, Hitchcock's, Webster's 1828, Bible places |
+| Commentaries | Matthew Henry, Jamieson-Fausset-Brown, Adam Clarke, Barnes, Wesley, Scofield |
+| Cross-references | Treasury of Scripture Knowledge, OpenBible.info |
+| Books | Josephus, Edersheim's Life and Times of Jesus the Messiah, Fox's Book of Martyrs, The Pilgrim's Progress, Brother Lawrence, E. M. Bounds on prayer, Larkin's Dispensational Truth and The Book of Revelation (with their charts) |
+| Devotionals | Spurgeon's Morning and Evening, Daily Light |
+| Maps | Bible Maps: fifteen maps drawn for the app |
 
 ## What it does
 

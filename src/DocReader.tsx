@@ -16,7 +16,7 @@ import { docHlKey, docLabel, parseDocLabel } from "./docref";
 import { WordLookup } from "./WordLookup";
 import { SearchField, Topbar } from "./Shell";
 import { HlColor, hlName, useApp } from "./state";
-import { DictionaryTab, useRefPreview } from "./StudyPane";
+import { AboutTab, DictionaryTab, useRefPreview } from "./StudyPane";
 import { ClearButton, copyText, Popover, scrollToThird, SearchList, SideNav, wordAt, wordHover } from "./ui";
 import { dayTitle, today as readingDay } from "./plans";
 import { useAssistant } from "./assistant";
@@ -714,11 +714,19 @@ export function DocReader({ focus, setFocus, openPalette }: { focus: boolean; se
                   ["notes", "Notes", "Your journal entries on this " + unit],
                   ["dictionary", "Dictionary", "Dictionary and encyclopedia articles"],
                   ...(canAsk ? [["ask", "Ask", `Ask about this ${unit}, answered from the book`]] : []),
+                  ["about", "About", `About this ${devo ? "devotional" : "book"}: its edition, source and terms`],
                 ] as [typeof tab, string, string][]
               ).map(([t, l, tip]) => (
-                <button key={t} type="button" className={`tab ${tab === t ? "on" : ""}`} title={tip} onClick={() => setTab(t)}>
+                <button
+                  key={t}
+                  type="button"
+                  className={`tab ${tab === t ? "on" : ""}`}
+                  title={tip}
+                  aria-label={t === "about" ? l : undefined}
+                  onClick={() => setTab(t)}
+                >
                   {t === "ask" && <Icon name="chat" />}
-                  {l}
+                  {t === "about" ? <Icon name="info" /> : l}
                   {t === "notes" && notes.length > 0 && <span className="n">{notes.length}</span>}
                 </button>
               ))}
@@ -733,6 +741,7 @@ export function DocReader({ focus, setFocus, openPalette }: { focus: boolean; se
                 onNew={() => (sel ? noteOnSel() : app.startEntry({ verses: [docLabel(bookTitle, doc.title)], title: doc.title }))}
               />
             )}
+            {tab === "about" && <AboutTab m={mod} what={devo ? "devotional" : "book"} />}
             {tab === "dictionary" && (
               <DictionaryTab
                 dict={app.settings.studyDict}

@@ -1,7 +1,7 @@
 // Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
 // SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
-//! A full-text index of the commentaries and dictionaries, so searching them does not mean
+//! A full-text index of the commentaries, dictionaries, books and devotionals, so searching them does not mean
 //! reading several hundred megabytes of HTML with LIKE each time. It is derived data, kept in
 //! the app's data folder, built in the background, and rebuilt per module whenever a module's
 //! file changes (or a new module appears). Until a module is indexed, search falls back to LIKE.
@@ -67,7 +67,7 @@ fn open(path: &Path) -> rusqlite::Result<Connection> {
 fn indexed_kinds(lib: &Library) -> Vec<(Kind, String, PathBuf)> {
     lib.modules
         .iter()
-        .filter(|m| (m.kind == Kind::Commentary && m.id != "tsk") || m.kind == Kind::Dictionary)
+        .filter(|m| (m.kind == Kind::Commentary && m.id != "tsk") || matches!(m.kind, Kind::Dictionary | Kind::Reference | Kind::Devotional))
         .map(|m| (m.kind, m.id.clone(), m.path.clone()))
         .collect()
 }
@@ -181,6 +181,8 @@ fn build_one(c: &mut Connection, lib: &Library, kind: Kind, id: &str, path: &Pat
     remove(c, &k).map_err(|e| e.to_string())?;
     let sql = match kind {
         Kind::Commentary => "SELECT rowid, Comments FROM VerseCommentary",
+        Kind::Reference => "SELECT rowid, Content FROM Reference",
+        Kind::Devotional => "SELECT rowid, Devotion FROM Devotional",
         _ => "SELECT rowid, Topic || ' ' || Definition FROM Dictionary",
     };
     let tx = c.transaction().map_err(|e| e.to_string())?;

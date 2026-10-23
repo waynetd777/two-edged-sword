@@ -2,18 +2,20 @@
 // SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { licenceOf, SOURCE } from "./About";
 import { api, Article, Commentary, Coverage, isMapBook, ModuleInfo, Verse } from "./api";
-import { book, fmtRef, mentionsPassage, Ref } from "./bible";
+import { book, BOOKS, fmtRef, mentionsPassage, Ref } from "./bible";
 import { AskPanel } from "./Ask";
 import { plainText, renderHtml, docSegments } from "./esword";
 import { Icon } from "./icons";
 import { ImageViewer } from "./ImageViewer";
 import { imagePlaces, Place, PlacePopover } from "./MapPlaces";
+import { findRefs } from "./md";
 import { DictAt, useApp } from "./state";
 import { ClearButton, Popover, TrailButtons, useTrail, wordAt, wordHover } from "./ui";
 import { useAssistant } from "./assistant";
 
-export type StudyTab = "commentary" | "dictionary" | "notes" | "maps" | "ask";
+export type StudyTab = "commentary" | "dictionary" | "notes" | "maps" | "ask" | "about";
 
 interface Props {
   tab: StudyTab;
@@ -236,6 +238,7 @@ export function StudyPane(p: Props) {
     ["notes", "Notes"],
     ["maps", "Maps"],
     ...(canAsk ? [["ask", "Ask"] as [StudyTab, string]] : []),
+    ["about", "About"],
   ];
   const tips: Record<StudyTab, string> = {
     commentary: "Every commentary on the verse, with cross-references",
@@ -243,6 +246,7 @@ export function StudyPane(p: Props) {
     notes: "Your journal entries on this passage",
     maps: "Maps for this book",
     ask: "Ask about the verse or chapter, answered from your library",
+    about: "About this Bible: its edition, source and terms",
   };
   const vref: Ref = { book: p.book, chapter: p.chapter, verse: p.verse };
   const noteCount = app.journal.filter((e) => mentionsPassage(e, vref)).length;
@@ -250,9 +254,16 @@ export function StudyPane(p: Props) {
     <aside className="study" aria-label="Study pane">
       <div className="tabs">
         {tabs.map(([t, l]) => (
-          <button key={t} type="button" className={`tab ${p.tab === t ? "on" : ""}`} title={tips[t]} onClick={() => p.setTab(t)}>
+          <button
+            key={t}
+            type="button"
+            className={`tab ${p.tab === t ? "on" : ""}`}
+            title={tips[t]}
+            aria-label={t === "about" ? l : undefined}
+            onClick={() => p.setTab(t)}
+          >
             {t === "ask" && <Icon name="chat" />}
-            {l}
+            {t === "about" ? <Icon name="info" /> : l}
             {t === "notes" && noteCount > 0 && <span className="n">{noteCount}</span>}
           </button>
         ))}
@@ -274,6 +285,7 @@ export function StudyPane(p: Props) {
       )}
       {p.tab === "notes" && <NotesTab vref={vref} selRef={p.selRef} />}
       {p.tab === "maps" && <MapsTab bookN={p.book} />}
+      {p.tab === "about" && <AboutTab m={app.mod("bible", app.settings.bible)} what="Bible" />}
       {p.tab === "ask" && (
         <AskPanel
           source="Read"
@@ -286,6 +298,58 @@ export function StudyPane(p: Props) {
         />
       )}
     </aside>
+  );
+}
+
+/** References written as text in a module's description ("John 3:16") as e-Sword's <ref>s, so they open. */
+function linkPlainRefs(html: string): string {
+  return html
+    .split(/(<[^>]+>)/)
+    .map((part, i) => {
+      if (i % 2) return part;
+      let out = "",
+        at = 0;
+      for (const h of findRefs(part)) {
+        const r = h.ref;
+        const b = BOOKS[r.book - 1];
+        if (!b) continue;
+        const v = `${b.abbr} ${r.chapter}${r.verse ? `:${r.verse}` : ""}${r.toChapter ? `-${r.toChapter}:${r.to}` : r.to ? `-${r.to}` : ""}`;
+        out += part.slice(at, h.index) + `<ref v="${v}">${part.slice(h.index, h.index + h.length)}</ref>`;
+        at = h.index + h.length;
+      }
+      return out + part.slice(at);
+    })
+    .join("");
+}
+
+/** The study pane's About tab: the Bible or book being read, as its module describes itself, with its terms
+ *  and where it came from. References in the description open the passage. */
+export function AboutTab({ m, what }: { m: ModuleInfo | undefined; what: string }) {
+  const app = useApp();
+  const { onRefHover, preview, hide } = useRefPreview(app.settings.bible);
+  const body = useMemo(() => (m ? linkPlainRefs(m.info) : ""), [m]);
+  if (!m) return <div className="empty">Nothing is known about this {what}.</div>;
+  return (
+    <div className="scroll" style={{ flexGrow: 1, padding: "14px 22px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
+      <b style={{ font: "500 20px var(--display)" }}>{m.title}</b>
+      <div className="hint" style={{ fontSize: 12 }}>
+        {licenceOf(m)} · {m.source === "bundled" ? "Built in" : `From ${SOURCE[m.source]}`}
+      </div>
+      {m.info.trim() ? (
+        <div className="es" style={{ fontSize: 13, lineHeight: 1.55 }}>
+          {renderHtml(body, {
+            onRef: (r) => {
+              hide();
+              app.open({ book: r.book, chapter: r.chapter, verse: r.verse, to: r.to }, "read");
+            },
+            onRefHover,
+          })}
+        </div>
+      ) : (
+        <div className="hint">This {what} has no description.</div>
+      )}
+      {preview}
+    </div>
   );
 }
 

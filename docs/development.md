@@ -402,6 +402,12 @@ Its docstring lists them and their licences.
     opens, and footnotes are listed under each chapter.
   - `foxe.refi`, built with `tools/gutenberg/build.py` from Project Gutenberg's HTML (Forbush's
     edition). Its Bible references aren't marked, so they aren't linked.
+  - `larkin_dispensational_truth.refi` and `larkin_revelation.refi`, built with
+    `tools/larkin/build.py` from the Internet Archive's scans: the OCR's text, and each page with a
+    chart as a picture (two-page charts joined, sideways ones turned, other copies used where they
+    show more at the binding). Chart pages, chapter starts and turns are listed by hand in `BOOKS`.
+    Pictures are drawn on every core and kept in the cache; one is redrawn only when what it's
+    drawn from changes.
 
 Nothing from e-Sword X goes into a module that could be shipped: its licence forbids passing its
 modules on. These scripts read e-Sword modules, so they build for your own library only:

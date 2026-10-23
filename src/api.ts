@@ -167,7 +167,14 @@ export interface SearchResults {
   bible: ModuleMatches<VerseHit>;
   commentaries: ModuleMatches<CommentMatch>[];
   dictionaries: ModuleMatches<string>[];
+  /** Reference books and devotionals: each chapter (or day) with a match, and the text round it. */
+  books: ModuleMatches<BookMatch>[];
+  devotionals: ModuleMatches<BookMatch>[];
   strongs: boolean;
+}
+export interface BookMatch {
+  title: string;
+  snippet: string;
 }
 
 export interface MusicTrack {

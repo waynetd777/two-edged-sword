@@ -88,7 +88,7 @@ export interface Settings {
   /** The study pane as it was left: its tab, the commentary and dictionary entry chosen, and whether it follows the reading. */
   studyTab: StudyTab;
   /** The study pane beside a book: its tab. */
-  docTab: "notes" | "dictionary" | "ask";
+  docTab: "notes" | "dictionary" | "ask" | "about";
   studyCommentary: string | null;
   studyDict: DictAt | null;
   dictModule: string | null;

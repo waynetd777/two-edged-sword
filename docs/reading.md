@@ -26,6 +26,8 @@ The screensaver and lock don't come on while the app's window is in front showin
   Jerusalem) and any map books of your own. Click a map to enlarge, zoom and move it.
   On Bible Maps, click a place's dot or name to list its verses. Hover a verse to read it; click it to open it.
 - **Ask**: questions about the verse or chapter ([Ask](ask.md)).
+- **ⓘ About**: the Bible you're reading: its edition, where it comes from and its terms (public domain, open licence,
+  non-commercial or personal use).
 
 <a href="images/index.md#reading"><picture><source media="(prefers-color-scheme: dark)" srcset="images/maps-place-dark.png"><img alt="John 4 beside the Maps tab, Capernaum clicked: its verses in each Gospel" src="images/maps-place-light.png"></picture></a>
 
@@ -84,13 +86,12 @@ in yellow wherever they appear.
 <a href="images/index.md#reading"><picture><source media="(prefers-color-scheme: dark)" srcset="images/books-dark.png"><img alt="Foxe's Book of Martyrs with a paragraph selected and highlighted" src="images/books-light.png"></picture></a>
 
 The **Books** menu, beside the Bible picker, opens a reference book or devotional. Chapters are
-down the side; a devotional opens on today's reading. The app comes with the works of Josephus,
-Edersheim's Life and Times of Jesus the Messiah, Fox's Book of Martyrs, The Pilgrim's Progress,
-Brother Lawrence's Practice of the Presence of God and E. M. Bounds on Prayer (seven of his books).
-Click a Bible reference in them to open it.
+down the side; a devotional opens on today's reading. The app comes with a shelf of books (the
+[Library guide](library.md#built-in-modules) lists them). Click a Bible reference in a book to open it.
 
 Paragraphs work like verses: click one to highlight it, bookmark it, add a note, listen from there, ask about it or copy it.
-The study pane has your notes on the chapter, the dictionaries and Ask.
+The study pane has your notes on the chapter, the dictionaries and Ask. **ⓘ** shows what the book is: its edition,
+source and terms.
 
 In the dark theme, a drawing with no background of its own is shown on a light card so its ink stays visible.
 

@@ -1612,6 +1612,28 @@ button.ks-chip {
   padding: 10px 14px;
   border-bottom: 1px solid var(--border);
 }
+/* A narrow study pane tightens its tabs, and the verse chip at their end is never pushed out of it. */
+.study {
+  container-type: inline-size;
+}
+.study .tabs > .chip {
+  flex-shrink: 0;
+}
+@container (max-width: 560px) {
+  .study .tabs {
+    gap: 0;
+    padding: 10px 10px;
+  }
+  .study .tabs .tab {
+    padding: 0 8px;
+  }
+}
+@container (max-width: 470px) {
+  .study .tabs .tab {
+    padding: 0 6px;
+    gap: 4px;
+  }
+}
 .prose {
   font: 400 15.5px/1.65 var(--serif);
   text-wrap: pretty;

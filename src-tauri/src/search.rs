@@ -52,6 +52,13 @@ pub struct CommentMatch {
     pub snippet: String,
 }
 
+/// A chapter of a book (or a devotional's day, "September 24") with a match: its title, and the text round it.
+#[derive(Serialize)]
+pub struct BookMatch {
+    pub title: String,
+    pub snippet: String,
+}
+
 #[derive(Serialize)]
 pub struct ModuleMatches<T> {
     pub module: String,
@@ -66,6 +73,9 @@ pub struct Results {
     pub bible: ModuleMatches<VerseMatch>,
     pub commentaries: Vec<ModuleMatches<CommentMatch>>,
     pub dictionaries: Vec<ModuleMatches<String>>,
+    /// Reference books, then devotionals.
+    pub books: Vec<ModuleMatches<BookMatch>>,
+    pub devotionals: Vec<ModuleMatches<BookMatch>>,
     /// True when the query was a Strong's number.
     pub strongs: bool,
 }
@@ -314,6 +324,8 @@ pub fn run(lib: &Library, index: Option<&crate::index::Index>, q: &Query) -> Res
             },
             commentaries: vec![],
             dictionaries: vec![],
+            books: vec![],
+            devotionals: vec![],
             strongs: true,
         });
     }
@@ -449,7 +461,47 @@ pub fn run(lib: &Library, index: Option<&crate::index::Index>, q: &Query) -> Res
     }
     dictionaries.sort_by_key(|d| std::cmp::Reverse(d.count));
 
-    Ok(Results { bible, commentaries, dictionaries, strongs: false })
+    // Books and devotionals (the whole library): each chapter or day with a match, and the text round it.
+    let docs = |kind: Kind| {
+        let (table, cols, text, order) = match kind {
+            Kind::Reference => ("Reference", "Chapter, Content", "Content", "rowid"),
+            _ => ("Devotional", "Month, Day, Devotion", "Devotion", "Month, Day"),
+        };
+        let mut out = Vec::new();
+        for m in lib.of_kind(kind) {
+            let mut hits = Vec::new();
+            let mut count = 0;
+            let exact = candidate_rows(lib, index, kind, &m.id, table, cols, text, "1", order, &terms, &phrase, q, MAX_COMMENT_HITS, |r| {
+                let (title, html) = if kind == Kind::Reference {
+                    (r.get::<_, String>(0)?, r.get::<_, Option<String>>(1)?.unwrap_or_default())
+                } else {
+                    (crate::content::day_title(r.get(0)?, r.get(1)?), r.get::<_, Option<String>>(2)?.unwrap_or_default())
+                };
+                let p = plain(&html);
+                if let Some(at) = matches(&p, &terms, &phrase, q.mode, q.whole_words) {
+                    count += 1;
+                    if hits.len() < MAX_COMMENT_HITS {
+                        hits.push(BookMatch { title, snippet: snippet(&p, at) });
+                    }
+                }
+                Ok(())
+            });
+            match exact {
+                Ok(Some(n)) => count = n,
+                Ok(None) => {}
+                Err(e) => eprintln!("search {}: {e}", m.id),
+            }
+            if count > 0 {
+                out.push(ModuleMatches { module: m.id.clone(), title: m.title.clone(), abbrev: m.abbrev.clone(), count, hits });
+            }
+        }
+        out.sort_by_key(|b| std::cmp::Reverse(b.count));
+        out
+    };
+    let books = docs(Kind::Reference);
+    let devotionals = docs(Kind::Devotional);
+
+    Ok(Results { bible, commentaries, dictionaries, books, devotionals, strongs: false })
 }
 
 /// Feeds `f` the rows of the module that could match. With the index (an indexed module) its

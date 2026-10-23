@@ -18,7 +18,7 @@ Two minutes to find your way around.
 
 Two-edged Sword is for reading the Bible with everything written about it beside the text: commentaries, dictionaries, the Greek and Hebrew, other translations, and your own notes.
 
-It comes with the KJV and some twenty more Bibles, Strong's dictionaries and two lexicons, the Treasury of Scripture Knowledge, six commentaries, a shelf of dictionaries, fifteen Bible maps, and books from Josephus to Brother Lawrence and E. M. Bounds, so it works with nothing else installed.
+It comes with the KJV and some twenty more Bibles, Strong's dictionaries and two lexicons, the Treasury of Scripture Knowledge, six commentaries, a shelf of dictionaries, fifteen Bible maps and a shelf of books, so it works with nothing else installed. The [Library guide](library.md#built-in-modules) lists them all.
 
 <!-- mac -->
 If you have e-Sword X, the app reads its library too. Nothing in it is copied or changed.
@@ -150,6 +150,7 @@ Type a word or name in the **Dictionary** tab's box to look it up in all your di
 
 - **Notes**: your journal entries on the verse.
 - **Maps**: maps that suit the book you're in, from the built-in Bible Maps and your own map books. Click a map to see it enlarged.
+- **ⓘ**: about the Bible you're reading: its edition, source and terms. Beside a book, it's about the book.
 
 ### Ask about it
 
@@ -216,13 +217,13 @@ It opens at the passage you're reading, in the Bibles chosen in Settings › Bib
 
 ## Search
 
-One search across a Bible, every commentary and dictionary, and your journal.
+One search across a Bible, every commentary and dictionary, your books and devotionals, and your journal.
 
 ### Search for something
 
 [Open Search](app:search)
 
-Type a word or phrase and press ↩. **Look in**, down the side, shows results from everything, or from just the Bible, commentaries, dictionaries or your journal.
+Type a word or phrase and press ↩. **Look in**, down the side, shows results from everything, or from just the Bible, commentaries, dictionaries, books or your journal. Click a book's result to see the paragraph, and **Open** to read on from there.
 
 ### Narrow it down
 

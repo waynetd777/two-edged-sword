@@ -1704,7 +1704,8 @@ def isbe_html(s):
     return re.sub(r"\.\.(?=</p>)", ".", s)
 
 
-PLAIN_PASSAGE = re.compile(r"\b((?:[1-3] ?)?[A-Z][a-z]{1,15}\.?) (\d{1,3}):(\d{1,3})(?:[-–]\d{1,3})?(?:, ?\d{1,3}(?![\d:]))*")
+# A verse after a comma is the same chapter's ("Lu 6:1, 3"), unless a book's name follows it ("Eze 48:1-7, 1 Cor 2:11").
+PLAIN_PASSAGE = re.compile(r"\b((?:[1-3] ?)?[A-Z][a-z]{1,15}\.?) (\d{1,3}):(\d{1,3})(?:[-–]\d{1,3})?(?:, ?\d{1,3}(?![\d:]| ?[A-Z][a-z]*\.? \d))*")
 
 
 def link_plain_refs(s):
@@ -2770,6 +2771,13 @@ def write_gutenberg(name):
         gb.main(into=BUNDLED, names=[name])
 
 
+def write_larkin(name):
+    """One of Larkin's books, from the Internet Archive's public-domain scans (tools/larkin)."""
+    import larkin.build as lb
+    with shipping():
+        lb.main(into=BUNDLED, names=[name])
+
+
 def write_targum_plus(name):
     """Targum+ or Ps-Jon+ from the built-in Targum and WLC+, with Jastrow's glosses (CC BY-NC, so non-commercial)."""
     import targum.build as tg
@@ -2781,6 +2789,8 @@ def write_targum_plus(name):
 # editions (tools/ccel), and Fox's Book of Martyrs from Project Gutenberg's (tools/gutenberg).
 MORE |= {n: (f"{n}.refi", lambda n=n: write_ccel(n)) for n in ("josephus", "edersheim", "pilgrim", "lawrence", "bounds")}
 MORE |= {"foxe": ("foxe.refi", lambda: write_gutenberg("foxe"))}
+# Clarence Larkin's books with their charts, from the Internet Archive's scans (tools/larkin).
+MORE |= {f"larkin_{n}": (f"larkin_{n}.refi", lambda n=n: write_larkin(n)) for n in ("dispensational_truth", "revelation")}
 
 
 # After the Targums they read.
