@@ -1,7 +1,7 @@
 {
  "module": "bsb",
  "base": "kjv",
- "updated": "2026-10-22",
+ "updated": "2026-10-23",
  "records": [
   {
    "book": 1,
@@ -1004,21 +1004,21 @@
   },
   {
    "book": 40,
-   "chapter": 4,
-   "verse": 25,
-   "kind": "omission",
-   "weight": "major",
-   "change": "Omits \"bless them that curse you\" and two other clauses",
-   "note": "The longer text is in the Byzantine majority and the Textus Receptus; Sinaiticus, Vaticanus and some early fathers have the short form. The fuller wording stands in Luke 6:27-28."
-  },
-  {
-   "book": 40,
    "chapter": 5,
    "verse": 22,
    "kind": "other",
    "weight": "major",
    "change": "Omits \"without a cause\"",
    "note": "\"Without a cause\" (eike) is in Bezae, the Byzantine majority and the Textus Receptus but not in Papyrus 64, Sinaiticus or Vaticanus. Without it, all anger at a brother is condemned."
+  },
+  {
+   "book": 40,
+   "chapter": 5,
+   "verse": 44,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits \"bless them that curse you\" and two other clauses",
+   "note": "The longer text is in the Byzantine majority and the Textus Receptus; Sinaiticus, Vaticanus and some early fathers have the short form. The fuller wording stands in Luke 6:27-28."
   },
   {
    "book": 40,
