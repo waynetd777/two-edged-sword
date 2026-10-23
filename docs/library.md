@@ -75,6 +75,7 @@ The app comes with these, so it works with nothing else installed. All are publi
 | Adam Clarke's Commentary on the Bible | CrossWire, from Wikisource |
 | Barnes' Notes on the New Testament | CrossWire |
 | Wesley's Explanatory Notes | CrossWire |
+| Scofield Reference Notes (1917) | CrossWire, from Wikisource |
 | OpenBible.info Cross-References, the links readers voted helpful | OpenBible.info (CC BY) |
 | Smith's Bible Dictionary | CrossWire |
 | Nave's Topical Bible | CrossWire, from the Christian Classics Ethereal Library |
@@ -92,6 +93,8 @@ The app comes with these, so it works with nothing else installed. All are publi
 | Edersheim's The Life and Times of Jesus the Messiah | Christian Classics Ethereal Library |
 | Fox's Book of Martyrs (Forbush's edition, 1926) | Project Gutenberg |
 | Bunyan's The Pilgrim's Progress, both parts | Christian Classics Ethereal Library |
+| Brother Lawrence's The Practice of the Presence of God | Christian Classics Ethereal Library |
+| E. M. Bounds on Prayer: Power Through Prayer, Purpose in Prayer, Prayer and Praying Men, The Reality, The Essentials, The Necessity and The Weapon of Prayer | Christian Classics Ethereal Library |
 
 If e-Sword X has one of these too, you can read its copy instead: choose **e-Sword X** beside it under [In e-Sword X too](app:library#copies) on the Library screen. That list shows only while **Read e-Sword X** is on.
 

@@ -7,8 +7,10 @@ marked there "Public Domain":
                   Antiquities of the Jews, the Wars of the Jews, Against Apion and the Discourse on Hades
   edersheim.refi  Alfred Edersheim, The Life and Times of Jesus the Messiah (1883)
   pilgrim.refi    John Bunyan, The Pilgrim's Progress (1678 and 1684), both parts
+  lawrence.refi   Brother Lawrence, The Practice of the Presence of God: his conversations and letters
+  bounds.refi     E. M. Bounds on prayer: seven of his books (1907–1931) in one
 
-    python3 tools/ccel/build.py [josephus edersheim pilgrim]
+    python3 tools/ccel/build.py [josephus edersheim pilgrim lawrence bounds]
 
 A chapter of the book is a chapter in the app, titled from the book's own headings ("Antiquities 1.1: The
 Constitution of the World…"). CCEL marks each Bible reference with the passage it means (scripRef's
@@ -54,6 +56,28 @@ BOOKS = {
         about="John Bunyan's The Pilgrim's Progress from This World to That Which Is to Come (Part I, 1678; Part II, "
               "1684): Christian's journey, and then Christiana's, told as a dream, with the Bible verses Bunyan set in "
               "its margins."),
+    "lawrence": dict(
+        url="https://www.ccel.org/ccel/lawrence/practice.xml",
+        sha256="05149b19c169d3f148add4a75f90a84fce96a75ba776b919f8c4fc59d78b3c6d",
+        skip=("The Practice of the Presence of God: The Best Rule of Holy Life", "Appendix to electronic edition"),
+        title="The Practice of the Presence of God", abbrev="Br Lawrence",
+        about="The conversations and letters of Brother Lawrence (Nicolas Herman, c. 1614–1691), a lay brother of the "
+              "Carmelites in Paris, on living every moment in the presence of God."),
+    "bounds": dict(
+        parts=[  # (CCEL's name, its sha256, the book's title in chapter names)
+            ("power", "3db594d5db6ed1051807e9135a9cc186db79bb0e29320b80d6e1a08ab747d130", "Power Through Prayer"),
+            ("purpose", "ca459b635fbf8503985fada4e4e477966d68035a4a526d20f8e77800ae958158", "Purpose in Prayer"),
+            ("prayingmen", "cb76e71624d98570f49ec2d98db7e559f66826b81474227eb69cda088b171996", "Prayer and Praying Men"),
+            ("reality", "4105d0e12a05c8217a966ca372b16f5451ab0c0f4dd2ad8dc749f987fe6c91c1", "The Reality of Prayer"),
+            ("essentials", "9a23ce9261e2cc5606ff6e14b01eb9dbc830128097539d57d123f7997bebf218", "The Essentials of Prayer"),
+            ("necessity", "ce64dd0f86d175fc470e955c69c6fdf3ef0a2d1ec8f2741a42ea1ba9ba780f93", "The Necessity of Prayer"),
+            ("weapon", "f67928a78e0a6d773e7a45fecb66adf918ca2a11de20175bb083d0e13f6f5bc5", "The Weapon of Prayer"),
+        ],
+        skip=("Title Page",),
+        title="E. M. Bounds on Prayer", abbrev="Bounds",
+        about="Seven books on prayer by Edward McKendree Bounds (1835–1913), a Methodist minister: Power Through Prayer, "
+              "Purpose in Prayer, Prayer and Praying Men, The Reality of Prayer, The Essentials of Prayer, The Necessity "
+              "of Prayer and The Weapon of Prayer, most of them edited from his papers by Homer W. Hodge after his death."),
 }
 # Josephus's works by their CCEL titles, as the chapters are named.
 WORKS = {"Life Of Flavius Josephus": "Life", "Antiquities of the Jews": "Antiquities", "The Wars of the Jews": "Wars",
@@ -77,13 +101,16 @@ def roman(s):
 def title_case(s):
     """THE JEWISH WORLD IN THE DAYS OF CHRIST → The Jewish World in the Days of Christ (a heading in capitals)."""
     s = re.sub(r"\s+", " ", s).strip().rstrip(".").replace(" - ", " – ")
-    letters = [c for c in s if c.isalpha()]
+    letters = [c for c in re.sub(r"\([^)]*\)", "", s) if c.isalpha()]  # "(Continued)" aside
     if not letters or sum(c.isupper() for c in letters) < 0.8 * len(letters):
         return s  # not in capitals
     out, start = [], True
     for w in s.lower().split(" "):
         bare = w.strip("[('‘\"")
-        out.append(w if (not start and bare in SMALL) else re.sub(r"[a-z]", lambda m: m[0].upper(), w, count=1))
+        if w.startswith("(continued"):
+            out.append("(Continued" + w[10:])
+        else:
+            out.append(w if (not start and bare in SMALL) else re.sub(r"[a-z]", lambda m: m[0].upper(), w, count=1))
         start = w.endswith((".", ":", "–"))  # a new sentence starts with a capital
     return " ".join(out).replace("'S ", "'s ")
 
@@ -240,7 +267,7 @@ def heading(div):
     return t
 
 
-def short(s, most=70):
+def short(s, most=80):
     """A chapter's title kept to a line: cut at a word, with an ellipsis."""
     s = s.rstrip(" ,;:")
     if len(s) <= most:
@@ -304,12 +331,59 @@ def chapters_pilgrim(body):
             yield f"Part {roman(part[1])}: {title_case(d2.get('title', ''))}", d2
 
 
+def own_text(div):
+    """Whether a div has paragraphs of its own, besides its heading and its sub-chapters."""
+    return any(k.tag in ("p", "verse") and "".join(k.itertext()).strip() for k in div)
+
+
+def label(div):
+    """A div's name: CCEL's title for it ("II. PRAYER AND FAITH (Continued)"), or its heading where the title
+    is only a number ("Section i", "Chapter I")."""
+    t = div.get("title", "").strip().replace("FOREWARD", "FOREWORD")
+    if not t or re.fullmatch(r"(?:Chapter|Section|Book)\s+[\dIVXLC]+", t, re.I):
+        return heading(div) or t
+    return t
+
+
+def chapters_plain(body, skip, book=""):
+    """A chapter for each div1, or for each of its div2s (and the div1 itself if it has text of its own),
+    titled from their headings: "Conversations: First Conversation", or with `book` first,
+    "Power Through Prayer 1: Men of Prayer Needed"."""
+    n = 0
+    for d1 in body.iter("div1"):
+        t = d1.get("title", "").strip()
+        if t in skip or t.upper().startswith(("INDEX", "CONTENTS")):
+            continue
+        h1 = title_case(re.sub(r"^[\dIVXLC]+\.?\s+(?=\S)", "", label(d1)))
+        d2s = [d for d in d1.findall("div2") if not d.get("title", "").startswith("Index")]
+        chapter = re.match(r"(?:CHAPTER\s+)?([\dIVXLC]+)\b\.?", heading(d1) or t, re.I)
+        if not d2s or own_text(d1):
+            if book and chapter and not re.search(r"\b(foreword|forward|introduction)\b", h1, re.I):
+                n += 1
+                name = f"{book} {n}" if re.fullmatch(r"(?:Chapter )?[\dIVXLC]+", h1, re.I) else f"{book} {n}: {h1}"
+            else:
+                name = f"{book}: {h1}" if book else h1
+            yield short(name), d1
+        for d2 in d2s:
+            yield short(f"{h1}: {title_case(label(d2))}"), d2
+
+
 def build(name, into=None):
     b = BOOKS[name]
-    src = fetch(b["url"], CACHE / f"{name}.xml", sha256=b["sha256"])
-    body = ET.parse(src).getroot().find("ThML.body")
+    if "parts" in b:
+        bodies = [(fetch(f"https://www.ccel.org/ccel/{name}/{part}.xml", CACHE / f"{name}_{part}.xml", sha256=sha), book)
+                  for part, sha, book in b["parts"]]
+    else:
+        bodies = [(fetch(b["url"], CACHE / f"{name}.xml" if name in ("josephus", "edersheim", "pilgrim") else CACHE / f"{name}_{b['url'].rsplit('/', 1)[1][:-4]}.xml", sha256=b["sha256"]), "")]
     rows, refs = [], 0
-    for title, div in {"josephus": chapters_josephus, "edersheim": chapters_edersheim, "pilgrim": chapters_pilgrim}[name](body):
+    chapters = []
+    for src, book in bodies:
+        body = ET.parse(src).getroot().find("ThML.body")
+        if name in ("josephus", "edersheim", "pilgrim"):
+            chapters += list({"josephus": chapters_josephus, "edersheim": chapters_edersheim, "pilgrim": chapters_pilgrim}[name](body))
+        else:
+            chapters += list(chapters_plain(body, b.get("skip", ()), book))
+    for title, div in chapters:
         c = Chapter(name)
         html = c.html(div)
         if not html:

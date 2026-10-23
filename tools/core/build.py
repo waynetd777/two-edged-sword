@@ -78,7 +78,8 @@ passing its modules on):
     pictures in the source and are shown as "…". Not used: the Open Scriptures BDB, whose entries are
     mostly still short glosses without references.
   More of CrossWire's public-domain modules: Wesley's Notes (Wesley 1.1, zCom, ThML; the words each note
-    is on, before " - " at a sentence's start, bold), Torrey's New Topical Textbook (Torrey 1.3, RawLD,
+    is on, before " - " at a sentence's start, bold), the Scofield Reference Notes of 1917 (Scofield 2.1, zCom,
+    OSIS from Wikisource; each book's introduction, filed as its first verse's note, moved to the book), Torrey's New Topical Textbook (Torrey 1.3, RawLD,
     ThML, its outline tidied: a subtopic and its verses on one line, a heading in capitals bold), Hitchcock's
     Bible Names (Hitchcock 2.0, zLD, TEI), Abbott-Smith's Manual Greek Lexicon
     (AbbottSmithStrongs 4.1, zLD, TEI: each Strong's number's key links to its headword's entry, so
@@ -1442,6 +1443,23 @@ def write_clarke():
     write_commentary("clarke.cmti", "Adam Clarke's Commentary on the Bible", "Clarke", info, osis_commentary("Clarke", {}, CLARKE_LABEL))
 
 
+def write_scofield():
+    """Scofield's notes (CrossWire's Scofield 2.1, zCom, OSIS from Wikisource's text of the 1917 edition). Each book's
+    introduction is filed as the note on its first verse, under "Book Introduction - Genesis": it goes with the
+    book instead, without that heading and the reference to the book's first chapter under it."""
+    books, chapters, verses = osis_commentary("Scofield", {}, re.compile(r"(?!)"))
+    notes = []
+    for v in verses:
+        m = re.match(r"<p><b>Book Introduction\b[^<]*</b></p>(?:<p>(?:<ref>[^<]*</ref>(?:; )?)+</p>)?", v[5])
+        if m:
+            books.append((v[0], v[5][m.end():]))
+        else:
+            notes.append(v)
+    info = ("<p>The notes of the Scofield Reference Bible, by C. I. Scofield, in the edition of 1917.</p>"
+            "<p>Public domain. CrossWire's Scofield module (2.1), from Wikisource's text. Built by Two-edged Sword's tools/core.</p>")
+    write_commentary("scofield.cmti", "Scofield Reference Notes (1917)", "Scofield", info, (books, chapters, notes))
+
+
 BARNES_LABEL = re.compile(r"(?:^|<br\s*/?>|<blockquote>)\s*(?:(?:[1-3]\s?)?[A-Z][A-Za-z]+\s+)?(?:Verses?|Ver)\.?\s*(\d+)(?:\s*(?:[-–,]|and)\s*(\d+))*\b[.:]?")
 BARNES_NONE = re.compile(r"No (?:specific (?:Barnes text|notes from Barnes) on|entry from BARNES for) this verse\.?\s*(?:<scripRef[^>]*>[^<]*</scripRef>\.?)?", re.I)
 
@@ -1857,7 +1875,7 @@ def write_bdb():
 
 
 # The commentaries and dictionaries beyond Matthew Henry and Easton: id → (file, builder).
-MORE = {"jfb": ("jfb.cmti", write_jfb), "clarke": ("clarke.cmti", write_clarke), "barnes": ("barnes.cmti", write_barnes),
+MORE = {"jfb": ("jfb.cmti", write_jfb), "clarke": ("clarke.cmti", write_clarke), "scofield": ("scofield.cmti", write_scofield), "barnes": ("barnes.cmti", write_barnes),
         "smith": ("smith.dcti", write_smith), "nave": ("nave.dcti", write_nave), "isbe": ("isbe.dcti", write_isbe),
         "webster1828": ("webster1828.dcti", write_webster1828), "bdb": ("bdb_unabridged.lexi", write_bdb)}
 # ---- other public-domain English Bibles, from eBible.org ------------------------------------------
@@ -2761,7 +2779,7 @@ def write_targum_plus(name):
 
 # Public-domain books: Josephus (Whiston), Edersheim's Life and Times and The Pilgrim's Progress from CCEL's ThML
 # editions (tools/ccel), and Fox's Book of Martyrs from Project Gutenberg's (tools/gutenberg).
-MORE |= {n: (f"{n}.refi", lambda n=n: write_ccel(n)) for n in ("josephus", "edersheim", "pilgrim")}
+MORE |= {n: (f"{n}.refi", lambda n=n: write_ccel(n)) for n in ("josephus", "edersheim", "pilgrim", "lawrence", "bounds")}
 MORE |= {"foxe": ("foxe.refi", lambda: write_gutenberg("foxe"))}
 
 

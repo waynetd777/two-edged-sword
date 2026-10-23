@@ -396,7 +396,8 @@ Its docstring lists them and their licences.
   coasts, at 3,600 pixels wide. Its first run downloads some thousands of terrain tiles (cached);
   `--only jesus --pictures DIR` draws one map to look at.
 - **Books**, all public domain and pinned by sha256:
-  - `josephus.refi`, `edersheim.refi` and `pilgrim.refi`, built with `tools/ccel/build.py` from the
+  - `josephus.refi`, `edersheim.refi`, `pilgrim.refi`, `lawrence.refi` and `bounds.refi` (seven books
+    in one), built with `tools/ccel/build.py` from the
     Christian Classics Ethereal Library's ThML editions. Each `scripRef` becomes a `<ref>` the app
     opens, and footnotes are listed under each chapter.
   - `foxe.refi`, built with `tools/gutenberg/build.py` from Project Gutenberg's HTML (Forbush's

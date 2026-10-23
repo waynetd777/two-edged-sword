@@ -1,10 +1,11 @@
 # Two-edged Sword
 
 A Bible study app for macOS and Windows, for reading Bibles, commentaries, dictionaries and books
-beside your own notes. It comes with 60 modules: the KJV and some twenty more Bibles (among them the
-Berean Standard Bible, Tyndale, the Geneva, the Douay-Rheims, the Vulgate, the Septuagint and the Peshitta, and Strong's and word-by-word editions), Strong's dictionaries, BDB and Abbott-Smith, the Treasury of Scripture Knowledge, five commentaries (Matthew Henry, JFB, Clarke,
-Barnes, Wesley), dictionaries from Easton's to the ISBE, a book of fifteen Bible maps, and four books: the works of Josephus,
-Edersheim's Life and Times of Jesus the Messiah, Fox's Book of Martyrs and The Pilgrim's Progress.
+beside your own notes. It comes with 63 modules: the KJV and some twenty more Bibles (among them the
+Berean Standard Bible, Tyndale, the Geneva, the Douay-Rheims, the Vulgate, the Septuagint and the Peshitta, and Strong's and word-by-word editions), Strong's dictionaries, BDB and Abbott-Smith, the Treasury of Scripture Knowledge, six commentaries (Matthew Henry, JFB, Clarke,
+Barnes, Wesley, Scofield), dictionaries from Easton's to the ISBE, a book of fifteen Bible maps, and books: the works of Josephus, Edersheim's
+Life and Times of Jesus the Messiah, Fox's Book of Martyrs, The Pilgrim's Progress, Brother Lawrence's Practice of the
+Presence of God and seven of E. M. Bounds's books on prayer.
 It also reads modules in e-Sword X's formats: your own, and on a Mac e-Sword X's library if you have it.
 It never changes them: your journal, highlights and plans are kept separately.
 

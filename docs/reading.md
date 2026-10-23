@@ -84,9 +84,10 @@ in yellow wherever they appear.
 <a href="images/index.md#reading"><picture><source media="(prefers-color-scheme: dark)" srcset="images/books-dark.png"><img alt="Foxe's Book of Martyrs with a paragraph selected and highlighted" src="images/books-light.png"></picture></a>
 
 The **Books** menu, beside the Bible picker, opens a reference book or devotional. Chapters are
-down the side; a devotional opens on today's reading. The app comes with four books: the works of
-Josephus, Edersheim's Life and Times of Jesus the Messiah, Fox's Book of Martyrs and The Pilgrim's
-Progress. Click a Bible reference in them to open it.
+down the side; a devotional opens on today's reading. The app comes with the works of Josephus,
+Edersheim's Life and Times of Jesus the Messiah, Fox's Book of Martyrs, The Pilgrim's Progress,
+Brother Lawrence's Practice of the Presence of God and E. M. Bounds on Prayer (seven of his books).
+Click a Bible reference in them to open it.
 
 Paragraphs work like verses: click one to highlight it, bookmark it, add a note, listen from there, ask about it or copy it.
 The study pane has your notes on the chapter, the dictionaries and Ask.
