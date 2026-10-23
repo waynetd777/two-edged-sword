@@ -7,8 +7,9 @@
   larkin_daniel.refi                 The Book of Daniel (1929)
   larkin_second_coming.refi          The Second Coming of Christ (1918), from a later reprint
   larkin_spirit_world.refi           The Spirit World (1921)
+  larkin_rightly_dividing.refi       Rightly Dividing the Word (1921), from a later printing
 
-    python3 tools/larkin/build.py [dispensational_truth revelation daniel second_coming spirit_world]
+    python3 tools/larkin/build.py [dispensational_truth revelation daniel second_coming spirit_world rightly_dividing]
 
 Larkin (1850–1924) published his books himself, from 1918; they are public domain (published in the United States
 before 1930, and their author dead more than 70 years). The charts are the heart of them, so each page that has a
@@ -282,6 +283,64 @@ BOOKS = {
             (145, "THE RESURRECTION", "17. The Resurrection"),
             (152, "THE RESURRECTION BODY", "18. The Resurrection Body"),
             (160, "THE JUDGMENTS", "19. The Judgments"),
+        ],
+    ),
+    "rightly_dividing": dict(
+        id="bwb_W9-CVU-096",
+        hocr="fb238864d54425dd58d5deff5bf15a9fa617027138a04e152e7122515451365b",
+        jp2="00e75da99bc7c04eecb15c13e8ce0778d909198640eeb183b65b509709264528",
+        title="Rightly Dividing the Word", abbrev="Larkin RDW",
+        cover=("bwb_W9-CVU-096", 1),
+        about="Clarence Larkin's Rightly Dividing the Word (1921), with its charts: the fundamental doctrines of the "
+              "faith set out in contrasts, as Law and Grace, Faith and Works, Standing and State, from the Ages and "
+              "Dispensations to Heaven and Hell and the Palace Beautiful.",
+        # From the frontispiece ("The Light of Prophecy") and the Foreword to the last chapter's end, before the
+        # publisher's list of the author's other books. The book has no charts across two pages.
+        first=6, last=342,
+        spreads=[],
+        charts=[6, 14, 16, 18, 20, 22, 25, 26, 28, 38, 42, 50, 52, 56, 66, 68, 72, 76, 78, 80, 82, 96, 98, 102, 107, 110,
+                116, 120, 122, 126, 132, 136, 138, 150, 158, 160, 162, 172, 186, 204, 206, 211, 216, 218, 220, 224, 225,
+                226, 227, 230, 235, 244, 254, 258, 264, 274, 282, 286, 288, 308, 321, 326, 327, 329, 335],
+        # Pages of text with a small picture under it: pictured, but read as text pages (their one-line headings kept).
+        figures={107, 120, 186, 204, 211, 274, 286, 326},
+        sideways=[14, 16, 18, 20, 22, 25, 26, 28, 38, 42, 50, 52, 56, 66, 68, 72, 76, 78, 80, 82, 102, 110, 122, 126, 136,
+                  138, 150, 158, 160, 162, 172, 206, 218, 230, 235, 258, 264, 282, 308, 327],
+        # The title page, its back, the dedication, the contents, and the blank back of the leopard's plate; and the four
+        # trees of the Two Natures, pictured with their captions, which aren't text of the page.
+        skip={7, 8, 9, 11, 12, 224, 225, 226, 227, 236},
+        # The frontispiece goes under the Foreword; the others are charts printed on the page before their chapter.
+        ahead={6, 18, 56, 72, 76, 218, 327},
+        chapters=[
+            (10, "FOREWORD", "Foreword"),
+            (13, "RIGHTLY DIVIDING", "1. Rightly Dividing the Word"),
+            (19, "AGES AND DISPENSATIONS", "2. Ages and Dispensations"),
+            (41, "JEW AND GENTILE", "3. Jew and Gentile"),
+            (57, "CHURCH AND KINGDOM", "4. Church and Kingdom"),
+            (73, "THE FOUR GOSPELS", "5. The Four Gospels"),
+            (77, "THE TWO ADVENTS", "6. The Two Advents"),
+            (95, "THE SPIRIT WORLD", "7. The Spirit World"),
+            (108, "SATAN", "8. Satan"),
+            (115, "THE SATANIC TRINITY", "9. The Satanic Trinity"),
+            (121, "THE “MYSTERY OF GODLINESS”", "10. The \"Mystery of Godliness\" and the \"Mystery of Iniquity\""),
+            (141, "RESURRECTION OF JESUS", "11. The Resurrection of Jesus"),
+            (149, "THE RESURRECTIONS", "12. The Resurrections"),
+            (157, "THE JUDGMENTS", "13. The Judgments"),
+            (170, "THE TWO ADAMS", "14. The Two Adams"),
+            (187, "ATONEMENT AND REDEMPTION", "15. Atonement and Redemption"),
+            (196, "SIN AND SALVATION", "16. Sin and Salvation"),
+            (205, "LAW AND GRACE", "17. Law and Grace"),
+            (212, "FAITH AND WORKS", "18. Faith and Works"),
+            (219, "THE TWO NATURES", "19. The Two Natures"),
+            (229, "STANDING AND STATE", "20. Standing and State"),
+            (234, "REGENERATION AND BAPTISM", "21. Regeneration and Baptism"),
+            (246, "ELECTION AND FREE", "22. Election and Free-will"),
+            (252, "THE RECIPROCAL INDWELLING", "23. The Reciprocal Indwelling of Christ and the Believer"),
+            (262, "THE THREEFOLD WORK", "24. The Threefold Work of Christ"),
+            (275, "CHRIST OUR PASSOVER", "25. Christ Our Passover"),
+            (287, "HEAVEN AND HELL", "26. Heaven and Hell"),
+            (306, ": XXVII JUDAISM", "27. Judaism and Christianity"),  # its number read as part of the heading
+            (320, "THE CIRCLES OF THE", "28. The Circles of the Christian Life"),
+            (328, "PALACE BEAUTIFUL", "29. Palace Beautiful, or the Christian Life Under the Similitude of a Palace"),
         ],
     ),
 }
@@ -735,7 +794,8 @@ def scanned_cover(item_id, leaf):
 def _cover_daniel():
     w, h = 855, 1400
     return covers.gold(covers.cloth(w, h, (132, 24, 36)), covers.words(w, h, [("THE BOOK OF", "goudy", 56, 257, 696, 428),
-                                                            ("DANIEL", "goudy", 112, 416, 700, 428)]))
+                                                            ("DANIEL", "goudy", 112, 416, 700, 428),
+                                                                            ("CLARENCE LARKIN", "goudy", 30, 1180, 420, 428)]))
 
 
 def _cover_revelation():
@@ -807,7 +867,27 @@ def _cover_spirit_world():
     return covers.ink(covers.cloth(w, h, (146, 74, 46)), np.maximum(np.asarray(rules, float) / 255, words), (28, 18, 16))
 
 
-COVERS = {"daniel": _cover_daniel, "second_coming": _cover_second_coming, "spirit_world": _cover_spirit_world, "revelation": _cover_revelation, "dispensational_truth": _cover_dispensational_truth}
+def _cover_rightly_dividing():
+    """Red cloth with a double rule round it, the title and author printed in black, and the ornament under the title
+    cut from the scan and cleaned."""
+    import numpy as np
+    from PIL import Image, ImageDraw
+    w, h = 870, 1400
+    cx = w // 2
+    scan = scanned_cover("bwb_W9-CVU-096", 1)
+    k = scan.height / 1400
+    src = (184, 378, 626, 572)  # the ornament, in the scan (as a cover 1400 high), round its centre at x 405
+    ornament = covers.printed(scan, tuple(int(v * k) for v in src), (cx - 221, 378, cx + 221, 572), w, h, channel="R")
+    rules = Image.new("L", (w, h), 0)
+    d = ImageDraw.Draw(rules)
+    d.rectangle((cx - 322, 130, cx + 322, 1236), outline=255, width=6)
+    d.rectangle((cx - 306, 146, cx + 306, 1220), outline=255, width=3)
+    words = covers.words(w, h, [("Rightly Dividing", "goudy", None, 240, 556, cx), ("The Word", "goudy", None, 344, 360, cx),
+                                ("CLARENCE LARKIN", "goudy", 20, 636, 342, cx)])
+    return covers.ink(covers.cloth(w, h, (124, 34, 34)), np.maximum.reduce([np.asarray(rules, float) / 255, words, ornament]), (26, 12, 12))
+
+
+COVERS = {"daniel": _cover_daniel, "second_coming": _cover_second_coming, "spirit_world": _cover_spirit_world, "rightly_dividing": _cover_rightly_dividing, "revelation": _cover_revelation, "dispensational_truth": _cover_dispensational_truth}
 
 
 def cover(name, b):
@@ -956,13 +1036,13 @@ def build(name, into=None):
                 continue  # the chapter's title under its "CHAPTER ONE", which its heading already says
             if heading:
                 cur.append(f"<p><b>{escape(text)}</b></p>")
-            elif (last := next((i for i in range(len(cur) - 1, -1, -1) if not cur[i].startswith("<p><img")), None)) is not None \
+            elif (last := next((i for i in range(len(cur) - 1, -1, -1) if not cur[i].startswith(("<p><img", "<p>*"))), None)) is not None \
                     and cur[last].startswith("<p>") and not cur[last].startswith("<p><b>") and (text[:1].islower() or (
                         k == 0 and not chart and carried(unescape(cur[last][3:-4]), text))):
                 # A sentence carried over a column or a page ("ce," "and so…"), or a page's first paragraph where the one
                 # before stops without a stop or a comma ("…who stands for" "Daniel's People"; not after a dash, which
                 # comes before a quotation, nor on a chart's page, where it's a label): joined to its paragraph, over a
-                # page's picture put between them (which then follows the paragraph).
+                # page's picture or footnote put between them (which then follows the paragraph).
                 prev = cur[last][3:-4]
                 joint = prev[:-1] if prev.endswith("-") else prev + " "
                 cur[last] = f"<p>{joint}{escape(text)}</p>"

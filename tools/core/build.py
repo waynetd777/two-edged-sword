@@ -1633,6 +1633,246 @@ def write_tdavid():
     write_commentary("tdavid.cmti", "Spurgeon's Treasury of David", "TDavid", info, (books, chapters, verses))
 
 
+
+SHA256[CROSSWIRE.format("KD")] = "ca3bdb6a04c0b717ee2faed71b432d58195db96f217f490ce6f7d9c36a2876f7"
+# Greek and Hebrew the e-text has in a font's encoding (BibleWorks' Bwhebb and Bwgrkl, or Greek read as Latin-1 or
+# Hebrew), a few references it gets wrong, and some of its typos.
+MENDS["kd.cmti"] = [
+    ("JwH and the noun RˆANA", "הוּא and the noun נַעַר"), ("JYHI and HRFˆáNA", "הִיא and נַעֲרָה"),
+    ("spelt LJ˜HF, afterwards HlEJ˜HF", "spelt הָאֵל, afterwards הָאֵלֶּה"),
+    ("verbs H›L is often written HO or WO without T, as WVOˆá", "verbs ל״ה is often written הֹ or וֹ without ת, as עֲשׂוֹ"),
+    ("wHVOˆá", "עֲשׂהוּ"), ("HJORi", "רְאֹה"), ("full form†w", "full form וּן"), ("softened into w.", "softened into וּ."),
+    ("BYBIJF", "אָבִיב"), ("TXAtAMiJA", "אַמְתַּחַת"), ("RTAbF", "בָּתַר"), ("RTEbE", "בֶּתֶר"), ("LZFWgO", "גּוֹזָל"),
+    ("DBEZE", "זֶבֶד"), ("DBAZF", "זָבַד"), ("ŠM˜RiXE", "חֶרְמֵשׁ"), ("JNE‹E", "טֶנֶא"), ("„wQYiHA", "הַיְקוּם"),
+    ("HWESiMA", "מַסְוֶה"), ("RQEˆ˜a sprout", "עֵקֶר a sprout"), ("RJ˜Ši", "שְׁאֵר"), ("RwKZF for RKFZF", "זָכוּר for זָכָר"),
+    ("BVEkE for VBEkE", "כֶּשֶׂב for כֶּבֶשׂ"), ("WYmFˆA‰LJE ‡SAJåNE", "נֶאֱסַף אֶל־עַמָּיו"),
+    ("TJzOHA HRFWtOHA HNEŠiMI TJE", "אֶת מִשְׁנֶה הַתּוֹרָה הַזֹּאת"),
+    ("„YNŠJR „YJYBN", "נביאים ראשׁנים"), ("„YN§JR „YJYBN", "נביאים ראשׁנים"),
+    ("name of „YJIYBINi", "name of נְבִיאִים"), ("„YNI ŠOJRIHF „YJIYBINi", "נְבִיאִים הָרִאשֹׁנִים"),
+    ("„YNIOERXáJÁHF", "הָאַחֲרוֹנִים"), ("JTfMiLEŠiJÁ", "אַשְׁלֶמְתָא"), ("JTFYiMFDiQA JTMLŠJ", "אשׁלמתא קַדְמָיְתָא"),
+    ("JNFYFNiTI JTMLŠJ", "אשׁלמתא תִנְיָנָא"), ("JyFNARFKidF‰LJA JnFMÁMi", "מְמַנָּא עַל־דָּכְרָנַיָּא"), ("YRBD‰Lˆ", "על־דברי"),
+    ("HOEFHYi „JUNi", "נְאֻם יְהוָה"), ("RŠEJá †JAYA", "יַעַן אֲשֶׁר"), ("SYˆKH, JY‹XH, DYB †TN", "הכעיס, החטיא, נתן ביד"),
+    ("RVFˆF „YN˜Ši", "שְׁנֵים עָשָׂר"), ("RSAYR˜Ti = RVFˆF YR˜ti", "תְרֵיסַר = תְּרֵי עָשָׂר"), ("qêtanniÝm, minores)on", "qĕtannîm, minores) on"),
+    ("grafeiÚa", "γραφεῖα"), ("oÎ aÏrxiereuÃj... aÏnaginwskeÂtw touÃj noÂmouj paÚsi", "ὁ ἀρχιερεὺς... ἀναγινωσκέτω τοὺς νόμους πᾶσι"),
+    ("eÏpiÂpnoia profhtikhÃ", "ἐπίπνοια προφητικὴ"), ("uÎpomnhmatoÂgrafoj", "ὑπομνηματογράφος"),
+    ("eÏpiÃ twÌn uÎpomnhmaÂtwn", "ἐπὶ τῶν ὑπομνημάτων"), ("twÌn dwÂdeka profhtwÌn", "τῶν δώδεκα προφητῶν"),
+    ("monoÂbibloj, toÃ dwdekaproÂfhton", "μονόβιβλος, τὸ δωδεκαπρόφητον"), ("êù́ìç Öáñá̀í", "κώμη Φαρὰν"),
+    ("ïé̓͂êïí èṍåéí åõ̓ù÷é́áò å̔́íåêá", "οἶκον θύειν εὐωχίας ἕνεκα"), ("הב́לבכיע", "δάμαλις"), ("ו̓פץכש́טחףבם", "ἐτυλώθησαν"),
+    ("וץ ירצוּ את־עונם̓הןךח́פב ףןץףי̀ב ע̓לבספי́בץ בע̓פש͂ם", "ירצוּ את־עונם, εὐδοκήσουσι τὰς ἁμαρτίας αὐτῶν"),
+    ("εἰς ἁÌρματα", "εἰς ἅρματα"), ("Σουβηìμ (<i>l</i>. Σουληìμ) κληìρου Ισσαìχαρ καιÌ νῦν ἐστιÌ κωìμη ΣουληÌμ",
+                                     "Σουβήμ (<i>l</i>. Σουλήμ) κλήρου Ἰσσάχαρ καὶ νῦν ἐστὶ κώμη Σουλήμ"),
+    ("fגּבהאheb&gt;, an Aramean mode of spelling for גּבהה heb&gt;; and asרעפּתheb&gt;", "גּבהא, an Aramean mode of spelling for גּבהה; and as רעפּת"),
+    ("<p>2 Sa22:14-16</p>", "<p><ref>2Sa 22:14-16</ref></p>"), ("commences with w (<i>and</i>)", "commences with ו (<i>and</i>)"),
+    ("κατ’ ̓ξοχήν", "κατ’ ἐξοχήν"), ("̓́Εσμουνον", "Ἔσμουνον"), ("̓́Αδωδος", "Ἄδωδος"), ("̓́Ελαμος γὰρ’Ελαμαίους", "Ἔλαμος γὰρ Ἐλαμαίους"),
+    ("(אלים( sdog)", "(אלים, gods)"), ("στερέωα", "στερέωμα"), ("(οπφὴμία)", "(μορφὴ μία)"), ("“to cut, or new,”", "“to cut, or hew,”"),
+    ("synonymous with איך, non-existence", "synonymous with אין, non-existence"), ("headed תיקרא in", "headed ויקרא in"),
+    ("<p><b>Israel has attained in the midst of the peoples out of deep humiliation.</b></p><p>", " Israel has attained in the midst of the peoples out of deep humiliation. "),
+    ("<p><ref>Exo 1:1-9</ref> Moses now started", "<p><ref>Exo 4:1-9</ref> Moses now started"),
+    ("<p><ref>2Sa 22:3</ref> The God", "<p><ref>2Sa 23:3</ref> The God"),
+]
+# A note's label, at the start of its slot: "<reference osisRef="Gen.1.2-Gen.1.5">Gen 1:2-5</reference>", "1Ki 1:1-2",
+# "2 Sa22:14-16", "<reference …>Gen 50:1</reference>-3.", "Vers. 8-21.".
+KD_LABEL = re.compile(r'\s*(?:<div\b[^>]*/>\s*)*(?:(?:<reference osisRef="[^"]*">\s*)?[1-3]?\s?[A-Z][a-z]{1,3}\.?\s?(\d+):(\d+)'
+                      r'(?:\s?[-–]\s?(?:(\d+):)?(\d+))?(?:\s*</reference>)?(?:[-–](\d+)\b)?|Vers?\.\s*(\d+)(?:\s?[-–]\s?(\d+))?)')
+# The headings where, in a book's first slot, its introduction ends and the first section's begins.
+KD_SECTION = ("The Creation of the World", "I. Laws and Ordinances", "I. Preparations", "I. History of the People",
+              "I. David King", "I. History Of Solomon", "I. Genealogies", "I. The Return", "I. Nehemiah", "I. Israel’s",
+              "I. The Judgment of God", "I. The Approaching", "Ruth Goes", "Ahaziah", "III. History of Solomon", "The Opening",
+              "FIRST BOOK OF THE PSALTER", "SUPERSCRIPTION AND MOTTO", "EXPOSITION OF THE SONG", "First Half",
+              "Historico-Biographical", "Mission of Jonah", "Judgment upon", "God’s Love", "The Banquet")
+
+# A heading run into the end of a paragraph, what it heads following: often the next chapter's, at the end of the last
+# note on this one ("… both cycles touch. Penitential Prayer and intercession for Restoration to Favour", Psalm 51's).
+KD_RUN_IN = re.compile(r'(?<=[.!?”)])\s+([A-Z“](?:[^.!?<>]|</?reference\b[^>]*>){3,200}?)\s*(<div eID="[^"]*" type="x-p"/>\s*(?:<div sID="[^"]*" type="x-p"/>|(?=<title)))')
+# Headings in a chapter's last slot that begin the next chapter's introduction.
+KD_NEXT = re.compile(r'<title[^>]*>((?:Belshazzar’s Feast|III\. Sights or Visions)[^<]*)</title>')
+
+# Psalm 13's introduction is in Psalm 140's place, and Psalm 140's here.
+KD_MOVED = {(19, 13): (19, 140)}
+
+
+def kd_run_in(text, b):
+    """A heading run into the end of a paragraph, the text after it being what it heads: (where it starts, the heading,
+    where the text it heads starts), or None. Headings are in title case, or (in the Psalms) followed by "This Psalm …"."""
+    m = KD_NEXT.search(text)
+    if m:
+        return m.start(), m[1], m.end()
+    for m in KD_RUN_IN.finditer(text):
+        words = re.sub(r"<[^>]+>", "", m[1]).split()
+        if re.search(r":(?!\d)", m[1]) or re.search("[\u0590-\u05ff]", m[1]):
+            continue
+        if len(words) >= 3 and sum(w[0].isupper() for w in words) >= 0.6 * len(words) or \
+                b == 19 and re.search(r"\b[Tt]his Psalm\b|\bThe Psalm\b|\bPs(?:a|alm)?\.? \d", text[m.end():m.end() + 3000]):
+            start = m.start(1)
+            # Its first part, if it has a full stop: "Guilt and Punishment of Israel. Its Future Restoration - Mic 2:1-13"
+            while True:
+                p = re.search(r'(?:[.!?”)]|^)\s+([A-Z][^.!?<>]{0,120}[.])\s*$', text[:start])
+                if not p or sum(w[0].isupper() for w in p[1].split()) < 0.5 * len(p[1].split()):
+                    break
+                start = p.start(1)
+            return start, text[start:m.end(1)].strip(), m.end(1)
+    return None
+
+# The books whose Hebrew phrases the e-text has backwards ("שׁמות ואלה" for ואלה שׁמות): its older text, from BibleWorks.
+# Phrases with vowels (from the newer text, Wikisource's) are the right way round.
+KD_BACKWARDS = {*range(1, 18), 23, 27}
+
+
+def kd_hebrew(s):
+    """Each phrase of more than one Hebrew word in s, outside tags, with its words in order."""
+    def run(m):
+        return m[0] if re.search("[\u0591-\u05bb]", m[0]) else " ".join(reversed(m[0].split(" ")))
+    return "".join(x if x.startswith("<") else re.sub(r"[\u0590-\u05ff]+(?: [\u0590-\u05ff]+)+", run, x)
+                   for x in re.split(r"(<[^>]+>)", s))
+
+
+def kd_greek(s):
+    """Breathings the e-text set loose: "ου ̓ μή" (οὐ μή), "ἀλλ ̓" (ἀλλ’), "̓αμβακούμ" (ἀμβακούμ)."""
+    s = re.sub(r"([αεηιουωΑΕΗΙΟΥΩ]) ?([\u0313\u0314])", lambda m: unicodedata.normalize("NFC", m[1] + m[2]), s)
+    s = re.sub(r"(?<=[\u0370-\u03ff\u1f00-\u1fff]) ?\u0313", "’", s)
+    return re.sub(r"(?<=[\s(])([\u0313\u0314])([αεηιουωΑΕΗΙΟΥΩ])", lambda m: unicodedata.normalize("NFC", m[2] + m[1]), s)
+
+
+def kd_label(text, c):
+    """The verses a slot's label names in chapter c, as (first, last), or None."""
+    m = KD_LABEL.match(text)
+    if not m:
+        return None
+    if m[6]:
+        return int(m[6]), int(m[7] or m[6])
+    if int(m[1]) != c:
+        return None
+    if m[3]:  # "Gen 5:1-6:8": to the chapter's end
+        return int(m[2]), int(m[4]) if int(m[3]) == c else 999
+    return int(m[2]), int(m[4] or m[5] or m[2])
+
+
+def kd_osis(s):
+    """KD's OSIS made ready for commentary_html: footnotes numbered and listed at the end, tables kept,
+    poetry by lines, and the "&lt;" the e-text leaves where it lost a reference taken out."""
+    notes = []
+
+    def note(m):
+        notes.append(m[1].strip())
+        return f'<hi type="super">{len(notes)}</hi>'
+    s = re.sub(r"<note\b[^>]*>(.*?)</note>", note, s, flags=re.S)
+    if notes:
+        s += '<div sID="n" type="x-p"/><hi type="bold">Notes</hi><div eID="n" type="x-p"/>'
+        s += "".join(f'<div sID="n" type="x-p"/><hi type="super">{n}</hi> {t}<div eID="n" type="x-p"/>' for n, t in enumerate(notes, 1))
+    s = re.sub(r"\s*\(&lt;\)|,?\s*&lt;(?=[,;)\s])", "", s)
+    s = re.sub(r"<l\b[^>]*eID=[^>]*/>", "<br>", s)
+    s = re.sub(r"\bRth\b", "Ruth", s)
+    s = re.sub(r"<item\b[^>]*>", '<div sID="i" type="x-p"/>', s).replace("</item>", '<div eID="i" type="x-p"/>')
+    s = re.sub(r"<table\b[^>]*>", '<div sID="t" type="x-p"/>⟦table⟧', s).replace("</table>", '⟦/table⟧<div eID="t" type="x-p"/>')
+    s = re.sub(r"<row\b[^>]*>", "⟦tr⟧", s).replace("</row>", "⟦/tr⟧")
+    s = re.sub(r"<cell\b[^>]*>", "⟦td⟧", s).replace("</cell>", "⟦/td⟧")
+    return s
+
+
+def kd_html(s, b, c):
+    s = commentary_html(kd_osis(s), b, c, {})
+    if b in KD_BACKWARDS:
+        s = kd_hebrew(s)
+    s = kd_greek(s)
+    s = re.sub(r"<p>\s*⟦table⟧", "<table>", s)
+    s = re.sub(r"⟦/table⟧\s*</p>", "</table>", s)
+    s = re.sub(r"\s*⟦(/?t[rd])⟧\s*", r"<\1>", s)
+    s = re.sub(r"^<p><ref>([^<]*)</ref>\s*<ref>\1</ref>", r"<p><ref>\1</ref>", s)  # "Ver. 4 describes", after its label
+    # Ranges the linking cut short: "<ref>Gen 5:1-6</ref>:8" (Gen 5:1-6:8), "<ref>Gen 50:1</ref>-3".
+    def whole(m):
+        r = passage_refs(f"{m[1]}-{m[2]}")
+        return r[0] if r else m[0]
+    s = re.sub(r"<ref>(\S+ \d+:\d+)-(\d+)</ref>(:\d+)", lambda m: whole([m[0], m[1], m[2] + m[3]]), s)
+    s = re.sub(r"<ref>(\S+ \d+:\d+)</ref>[-–](\d+(?::\d+)?)\b", whole, s)
+    return s.replace("Hebrew_Bible_", "Hebrew ")
+
+
+def write_kd():
+    """Keil and Delitzsch (CrossWire's KD 2.0, zCom4, OSIS from Wikisource's text). Each note opens with the
+    verses it is on ("Gen 1:2-5"), and is sometimes filed a slot or two from them; a book's introduction, and a
+    section's, come before the first label in a chapter's first slot."""
+    z, canon = crosswire("KD")
+    books, chapters, verses = [], [], []
+    counts = verse_counts()
+    for b, c, n, head, entries in sword_chapters(z, canon, zcom4):
+        if not entries:
+            continue
+        for i, e in enumerate(entries):
+            m = kd_run_in(e[2], b)
+            if not m:
+                continue
+            start, title, _ = m
+            # To the chapter the heading names ("The Preamble - Jos 1:1-9", at the end of Joshua 19), or the next; a psalm's
+            # heading may name another ("Elohimic Variation of the Jahve - Psa 14:1-7", Psalm 53's).
+            named = re.search(r"-\s*(?:[1-3]\s?)?[A-Z][a-z]+\.?\s+(\d+)(?::\d+)?(?:[-–]\d+(?::\d+)?)?\s*$", re.sub(r"<[^>]+>", "", title))
+            to = KD_MOVED.get((b, c), (b, int(named[1]) if named and b != 19 else c + 1))
+            if i == len(entries) - 1 and to[1] in counts[b]:  # the next chapter's heading and introduction: with that chapter
+                chapters.append((*to, kd_html(f"<title>{title}</title>{e[2][m[2]:]}", *to)))
+                e[2] = e[2][:start]
+            else:
+                e[2] = f"{e[2][:start]}<title>{title}</title>{e[2][m[2]:]}"
+        first = head + entries[0][2]
+        if not kd_label(entries[0][2], c):
+            # The introduction runs to the first label for this chapter at a paragraph's start, or is the whole slot.
+            m = re.search(rf'<div [se]ID="[^"]*" type="x-p"/>\s*(?=(?:<div [se]ID="[^"]*" type="x-p"/>\s*)*(?:<reference osisRef="[^"]*">)?[1-3]?\s?[A-Z][a-z]{{1,3}}\.?\s?{c}:\d)', first)
+            if m or re.match(r"(?:\s|<(?!title)[^>]*>)*<title", first):
+                end = m.end() if m else len(first)
+                pre, rest = first[:end], first[end:]
+                if c == 1:
+                    cut = next((t.start() for t in re.finditer(r"<title[^>]*>([^<]*)", pre) if t[1].strip().startswith(KD_SECTION)), len(pre))
+                    intro = kd_html(pre[:cut], b, c)
+                    if has_text(re.sub(r"<p><b>.*?</b></p>", "", intro)):
+                        books.append((b, intro))
+                    pre = pre[cut:]
+                if has_text(kd_html(re.sub(r"<title\b.*?</title>", "", pre, flags=re.S), b, c)):
+                    chapters.append((b, 13 if (b, c) == (19, 140) else c, kd_html(pre, b, c)))  # see KD_MOVED
+                entries[0][2] = rest
+                if not has_text(rest):
+                    entries = entries[1:]
+        # A slot with no text (only a heading) goes with the next.
+        for i in range(len(entries) - 1, 0, -1):
+            if not has_text(re.sub(r"<title\b.*?</title>", "", entries[i - 1][2], flags=re.S)):
+                entries[i][0], entries[i][2] = entries[i - 1][0], entries[i - 1][2] + entries[i][2]
+                del entries[i - 1]
+        # Where each note starts and ends, by its label where it has one.
+        labels = [kd_label(text, c) for _, _, text in entries]
+        if len(entries) > 1 and entries[0][0] == 1 and labels[1] and labels[1][0] == 1:
+            # A slot at verse 1 before a note that starts there ("Psa 110:1-7 consists of three sevens…") is the chapter's introduction.
+            chapters.append((b, c, kd_html(entries[0][2], b, c)))
+            entries, labels = entries[1:], labels[1:]
+        spans, covered = [], 0
+        for (v1, v2, text), lab in zip(entries, labels):
+            if lab and covered < lab[0] <= v1:
+                v1 = lab[0]
+            if lab and lab[1] > v2:
+                v2 = min(lab[1], n)
+            spans.append([v1, v2, text])
+            covered = max(covered, v1)
+        for i in range(len(spans) - 1):
+            spans[i][1] = max(spans[i][0], min(spans[i][1], spans[i + 1][0] - 1))
+        pending = ""
+        for v1, v2, text in spans:
+            body = pending + kd_html(text, b, c)
+            if has_text(re.sub(r"<p><b>(?:(?!</p>).){0,200}?</b></p>", "", body)):
+                verses.append((b, c, v1, c, v2, body))
+                pending = ""
+            else:
+                pending = body
+        if pending and verses and verses[-1][:2] == (b, c):
+            verses[-1] = (*verses[-1][:5], verses[-1][5] + pending)
+    merged = {}
+    for b, c, t in chapters:
+        merged[(b, c)] = merged.get((b, c), "") + t
+    chapters = [(*k, t) for k, t in sorted(merged.items())]
+    import covers
+    thumb = covers.html(covers.design([("BIBLICAL", 46), ("COMMENTARY", 46), ("ON THE", 30), ("OLD TESTAMENT", 46)],
+                                      [("C. F. KEIL", 34), ("F. DELITZSCH", 34)], (70, 74, 36), ornament="lamp"))[1]
+    info = (thumb + "<p>Biblical Commentary on the Old Testament, by C. F. Keil and F. Delitzsch, in the English translation "
+            "of T. &amp; T. Clark's Foreign Theological Library (1866–1891).</p>"
+            "<p>Public domain. CrossWire's KD module (2.0), from Wikisource's text and an earlier BibleWorks module. Built by Two-edged Sword's tools/core.</p>")
+    write_commentary("kd.cmti", "Keil & Delitzsch Commentary on the Old Testament", "K&D", info, (books, chapters, verses))
+
+
 BARNES_LABEL = re.compile(r"(?:^|<br\s*/?>|<blockquote>)\s*(?:(?:[1-3]\s?)?[A-Z][A-Za-z]+\s+)?(?:Verses?|Ver)\.?\s*(\d+)(?:\s*(?:[-–,]|and)\s*(\d+))*\b[.:]?")
 BARNES_NONE = re.compile(r"No (?:specific (?:Barnes text|notes from Barnes) on|entry from BARNES for) this verse\.?\s*(?:<scripRef[^>]*>[^<]*</scripRef>\.?)?", re.I)
 
@@ -2962,9 +3202,9 @@ def write_targum_plus(name):
 # editions (tools/ccel), and Fox's Book of Martyrs from Project Gutenberg's (tools/gutenberg).
 MORE |= {n: (f"{n}.refi", lambda n=n: write_ccel(n)) for n in ("josephus", "edersheim", "pilgrim", "lawrence", "bounds", "sheldon")}
 MORE |= {"foxe": ("foxe.refi", lambda: write_gutenberg("foxe")), "strong_theology": ("strong_theology.refi", lambda: write_gutenberg("strong_theology"))}
-MORE |= {"tdavid": ("tdavid.cmti", write_tdavid)}
+MORE |= {"tdavid": ("tdavid.cmti", write_tdavid), "kd": ("kd.cmti", write_kd)}
 # Clarence Larkin's books with their charts, from the Internet Archive's scans (tools/larkin).
-MORE |= {f"larkin_{n}": (f"larkin_{n}.refi", lambda n=n: write_larkin(n)) for n in ("dispensational_truth", "revelation", "daniel", "second_coming", "spirit_world")}
+MORE |= {f"larkin_{n}": (f"larkin_{n}.refi", lambda n=n: write_larkin(n)) for n in ("dispensational_truth", "revelation", "daniel", "second_coming", "spirit_world", "rightly_dividing")}
 
 
 # After the Targums they read.

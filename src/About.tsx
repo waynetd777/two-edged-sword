@@ -1,8 +1,9 @@
 // Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
 // SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
-import { CSSProperties } from "react";
+import { CSSProperties, useState } from "react";
 import { LibrarySource, ModuleInfo } from "./api";
 import { isLicensed } from "./Ask";
+import { ImageViewer } from "./ImageViewer";
 
 /** A module's terms, as its About text gives them: copyrighted ones are for personal use; one under a
  *  non-commercial licence (Vulg-C+'s CC BY-NC-SA) mustn't be sold; CC BY, CC BY-SA, CC0, GPL or Apache
@@ -22,14 +23,22 @@ export function splitCover(info: string): [string | undefined, string] {
   return c ? [c[1], info.slice(c[0].length)] : [undefined, info];
 }
 
-/** A book's cover at the top right of its About text, which runs round it, justified so it has a straight edge. */
+/** A book's cover at the top right of its About text, which runs round it, justified so it has a straight edge.
+ *  A click shows it full screen. */
 export function Cover({ src, title, width = 84 }: { src: string; title: string; width?: number }) {
+  const [big, setBig] = useState(false);
   return (
-    <img
-      src={src}
-      alt={`The cover of ${title}`}
-      style={{ float: "right", width, margin: "2px 0 10px 16px", borderRadius: 4, boxShadow: "0 1px 6px rgba(0,0,0,.35)" }}
-    />
+    <>
+      <img
+        src={src}
+        alt={`The cover of ${title}`}
+        title="Click to enlarge"
+        className="zoomable"
+        onClick={() => setBig(true)}
+        style={{ float: "right", width, margin: "2px 0 10px 16px", borderRadius: 4, boxShadow: "0 1px 6px rgba(0,0,0,.35)", cursor: "zoom-in" }}
+      />
+      {big && <ImageViewer images={[src]} start={0} onClose={() => setBig(false)} />}
+    </>
   );
 }
 

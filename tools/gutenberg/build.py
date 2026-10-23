@@ -41,7 +41,7 @@ BOOKS = {
     "foxe": dict(
         url="https://www.gutenberg.org/cache/epub/22400/pg22400-images.html",
         sha256="2d6d9403042e3c9db9a9fc89d505e0e551190c1e8f2b376a8fadbf98b74ff5a4",
-        cover=dict(title=[("FOX’S", 60), ("BOOK OF", 60), ("MARTYRS", 78)], author=[("EDITED BY", 22), ("WILLIAM BYRON FORBUSH", 27)],
+        cover=dict(title=[("FOX’S", 60), ("BOOK OF", 60), ("MARTYRS", 78)], author=[("JOHN FOXE", 36), ("EDITED BY", 20), ("WILLIAM BYRON FORBUSH", 26)],
                    rgb=(34, 32, 36), ornament="cross"),
         title="Fox's Book of Martyrs", abbrev="Foxe",
         about="John Foxe's history of the Christian martyrs, from Stephen to the persecutions of the Protestants, "

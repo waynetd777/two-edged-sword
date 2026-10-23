@@ -69,13 +69,15 @@ def words(w, h, lines):
     return np.asarray(m, float) / 255
 
 
-def printed(im, src, box, w, h, ground=None):
+def printed(im, src, box, w, h, ground=None, channel=None):
     """An emblem printed on a cover, cut from a scan (`src`, its pixels) and set at `box` on the new one, as a clean
     mask: the ink darker than the cloth round it (or than `ground`, for an emblem that's mostly ink), its speckle
-    smoothed and its edges sharp, as if freshly printed."""
+    smoothed and its edges sharp, as if freshly printed. `channel` ("R") judges by one colour, where black ink on red
+    cloth differs most."""
     import numpy as np
     from PIL import Image, ImageFilter
-    a = np.asarray(im.crop(src).convert("L").filter(ImageFilter.MedianFilter(5)), float)
+    c = im.crop(src)
+    a = np.asarray((c.getchannel(channel) if channel else c.convert("L")).filter(ImageFilter.MedianFilter(5)), float)
     if ground is None:
         ground = np.median(np.concatenate([a[:8].ravel(), a[-8:].ravel(), a[:, :8].ravel(), a[:, -8:].ravel()]))
     x0, y0, x1, y1 = box
@@ -183,7 +185,7 @@ def design(title, author, rgb, stamp=GOLD, ornament="diamonds", w=900, h=1400):
 
 
 def html(pixels):
-    """A cover as the app shows it: a picture to open the book with, and a thumbnail for its description."""
+    """A cover as the app shows it: a picture to open the book with, and a smaller copy for its description."""
     import numpy as np
     from PIL import Image
     im = Image.fromarray(np.clip(pixels, 0, 255).astype("uint8")) if not isinstance(pixels, Image.Image) else pixels
@@ -195,7 +197,7 @@ def html(pixels):
         s.save(buf, "WEBP", quality=85, method=6)
         return base64.b64encode(buf.getvalue()).decode()
     return (f'<p><img src="data:image/webp;base64,{webp(1400)}"></p>',
-            f'<p><img src="data:image/webp;base64,{webp(240)}"></p>')
+            f'<p><img src="data:image/webp;base64,{webp(600)}"></p>')  # sharp in the About views, and enlarged
 
 
 # The full kit, for the covers of every module (CATALOG, in tools/covers_catalog.py): materials, stamps, borders,

@@ -403,7 +403,7 @@ Its docstring lists them and their licences.
   - `foxe.refi`, built with `tools/gutenberg/build.py` from Project Gutenberg's HTML (Forbush's
     edition). Its Bible references aren't marked, so they aren't linked.
   - `larkin_dispensational_truth.refi`, `larkin_revelation.refi`, `larkin_daniel.refi`,
-    `larkin_second_coming.refi` and `larkin_spirit_world.refi`, built with
+    `larkin_second_coming.refi`, `larkin_spirit_world.refi` and `larkin_rightly_dividing.refi`, built with
     `tools/larkin/build.py` from the Internet Archive's scans: the OCR's text, and each page with a
     chart as a picture (two-page charts joined, sideways ones turned, other copies used where they
     show more at the binding). Chart pages, chapter starts and turns are listed by hand in `BOOKS`.

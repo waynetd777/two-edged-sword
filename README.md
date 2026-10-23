@@ -48,9 +48,9 @@ licence.
 | With Strong's numbers | KJV+, BSB+, Webster+ |
 | Hebrew, Greek, Latin, Syriac and Aramaic | WLC+ and Ginsburg (Hebrew), Byzantine NT and Brenton's Septuagint (Greek), Clementine Vulgate (Latin), Peshitta (Syriac), the Targum and Pseudo-Jonathan (Aramaic); most also word by word with English |
 | Dictionaries and lexicons | Strong's Hebrew and Greek, Brown-Driver-Briggs, Abbott-Smith, King James Concordance, Easton's, Smith's, Nave's, the ISBE, Torrey's, Hitchcock's, Webster's 1828, Bible places |
-| Commentaries | Matthew Henry, Jamieson-Fausset-Brown, Adam Clarke, Barnes, Wesley, Scofield, Spurgeon's Treasury of David |
+| Commentaries | Matthew Henry, Jamieson-Fausset-Brown, Adam Clarke, Barnes, Wesley, Scofield, Keil & Delitzsch, Spurgeon's Treasury of David |
 | Cross-references | Treasury of Scripture Knowledge, OpenBible.info |
-| Books | Josephus, Edersheim's Life and Times of Jesus the Messiah, Fox's Book of Martyrs, The Pilgrim's Progress, Brother Lawrence, E. M. Bounds on prayer, Sheldon's In His Steps, Strong's Systematic Theology, Larkin's Dispensational Truth, The Book of Revelation, The Book of Daniel, The Second Coming of Christ and The Spirit World (with their charts) |
+| Books | Josephus, Edersheim's Life and Times of Jesus the Messiah, Fox's Book of Martyrs, The Pilgrim's Progress, Brother Lawrence, E. M. Bounds on prayer, Sheldon's In His Steps, Strong's Systematic Theology, Larkin's Dispensational Truth, The Book of Revelation, The Book of Daniel, The Second Coming of Christ, The Spirit World and Rightly Dividing the Word (with their charts) |
 | Devotionals | Spurgeon's Morning and Evening, Daily Light |
 | Maps | Bible Maps: fifteen maps drawn for the app |
 
