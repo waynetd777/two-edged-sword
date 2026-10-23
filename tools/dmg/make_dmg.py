@@ -98,7 +98,8 @@ def main():
         finally:
             run("hdiutil", "detach", dev)
         OUT.parent.mkdir(parents=True, exist_ok=True)
-        run("hdiutil", "convert", str(rw), "-format", "UDZO", "-imagekey", "zlib-level=9", "-ov", "-o", str(OUT))
+        # LZMA (ULMO, macOS 10.15 and later; the app needs 13): the modules pack about a quarter smaller than with zlib.
+        run("hdiutil", "convert", str(rw), "-format", "ULMO", "-ov", "-o", str(OUT))
     print(f"wrote {OUT.relative_to(ROOT)} ({OUT.stat().st_size / 1e6:.0f} MB)")
 
 
