@@ -1054,7 +1054,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "\"Jesus' feet\" becomes \"his feet\"",
-   "note": "The Textus Receptus names Jesus here; the critical text, which the ASV follows, has only the verb, so the ASV supplies \"he\". The referent is plain from context."
+   "note": "The Textus Receptus has tou Iēsou (Jesus'); the critical text, which the ASV follows, has autou (his). The referent is plain from context."
   },
   {
    "book": 40,
@@ -1098,8 +1098,8 @@
    "verse": 21,
    "kind": "omission",
    "weight": "major",
-   "change": "Verse omitted (printed in italics in this copy)",
-   "note": "The ASV leaves this verse out with the Westcott–Hort Greek text, which follows Sinaiticus and Vaticanus; this e-Sword copy prints it in italics to show that. It is in the Byzantine majority and the Textus Receptus."
+   "change": "Verse omitted; given only in a bracketed footnote",
+   "note": "The ASV leaves this verse out with the Westcott–Hort Greek text, which follows Sinaiticus and Vaticanus, and gives it only in a bracketed footnote. It is in the Byzantine majority and the Textus Receptus."
   },
   {
    "book": 40,
@@ -1116,8 +1116,8 @@
    "verse": 11,
    "kind": "salvation",
    "weight": "major",
-   "change": "Verse omitted (printed in italics in this copy)",
-   "note": "The ASV leaves this verse out with the Westcott–Hort Greek text, which follows Sinaiticus and Vaticanus; this e-Sword copy prints it in italics to show that. It is in the Byzantine majority and the Textus Receptus."
+   "change": "Verse omitted; given only in a bracketed footnote",
+   "note": "The ASV leaves this verse out with the Westcott–Hort Greek text, which follows Sinaiticus and Vaticanus, and gives it only in a bracketed footnote. It is in the Byzantine majority and the Textus Receptus."
   },
   {
    "book": 40,
@@ -1179,8 +1179,8 @@
    "verse": 14,
    "kind": "omission",
    "weight": "major",
-   "change": "Verse omitted (printed in italics in this copy)",
-   "note": "The ASV leaves this verse out with the Westcott–Hort Greek text, which follows Sinaiticus and Vaticanus; this e-Sword copy prints it in italics to show that. It is in the Byzantine majority and the Textus Receptus."
+   "change": "Verse omitted; given only in a bracketed footnote",
+   "note": "The ASV leaves this verse out with the Westcott–Hort Greek text, which follows Sinaiticus and Vaticanus, and gives it only in a bracketed footnote. It is in the Byzantine majority and the Textus Receptus."
   },
   {
    "book": 40,
@@ -1314,8 +1314,8 @@
    "verse": 16,
    "kind": "omission",
    "weight": "major",
-   "change": "Verse omitted (printed in italics in this copy)",
-   "note": "The ASV leaves this verse out with the Westcott–Hort Greek text, which follows Sinaiticus and Vaticanus; this e-Sword copy prints it in italics to show that. It is in the Byzantine majority and the Textus Receptus."
+   "change": "Verse omitted; given only in a bracketed footnote",
+   "note": "The ASV leaves this verse out with the Westcott–Hort Greek text, which follows Sinaiticus and Vaticanus, and gives it only in a bracketed footnote. It is in the Byzantine majority and the Textus Receptus."
   },
   {
    "book": 41,
@@ -1368,8 +1368,8 @@
    "verse": 44,
    "kind": "judgment",
    "weight": "major",
-   "change": "Verse omitted (printed in italics in this copy)",
-   "note": "The ASV leaves this verse out with the Westcott–Hort Greek text, which follows Sinaiticus and Vaticanus; this e-Sword copy prints it in italics to show that. It is in the Byzantine majority and the Textus Receptus."
+   "change": "Verse omitted; a bracketed footnote notes the omission",
+   "note": "The ASV leaves this verse out with the Westcott–Hort Greek text, which follows Sinaiticus and Vaticanus; the same words stand in verse 48. It is in the Byzantine majority and the Textus Receptus."
   },
   {
    "book": 41,
@@ -1377,8 +1377,8 @@
    "verse": 46,
    "kind": "judgment",
    "weight": "major",
-   "change": "Verse omitted (printed in italics in this copy)",
-   "note": "The ASV leaves this verse out with the Westcott–Hort Greek text, which follows Sinaiticus and Vaticanus; this e-Sword copy prints it in italics to show that. It is in the Byzantine majority and the Textus Receptus."
+   "change": "Verse omitted; a bracketed footnote notes the omission",
+   "note": "The ASV leaves this verse out with the Westcott–Hort Greek text, which follows Sinaiticus and Vaticanus; the same words stand in verse 48. It is in the Byzantine majority and the Textus Receptus."
   },
   {
    "book": 41,
@@ -1410,20 +1410,11 @@
   {
    "book": 41,
    "chapter": 10,
-   "verse": 51,
-   "kind": "deity",
-   "weight": "minor",
-   "change": "\"Lord\" becomes \"Rabboni\"",
-   "note": "The Textus Receptus has Kyrie (Lord); Sinaiticus and Vaticanus have Rabbouni (my Master), as in John 20:16."
-  },
-  {
-   "book": 41,
-   "chapter": 10,
    "verse": 52,
    "kind": "deity",
    "weight": "minor",
    "change": "\"followed Jesus\" becomes \"followed him\"",
-   "note": "The Textus Receptus names Jesus here; the critical text, which the ASV follows, has only the verb, so the ASV supplies \"he\". The referent is plain from context."
+   "note": "The Textus Receptus has tō Iēsou (Jesus); the critical text, which the ASV follows, has autō (him). The referent is plain from context."
   },
   {
    "book": 41,
@@ -1467,8 +1458,8 @@
    "verse": 26,
    "kind": "omission",
    "weight": "major",
-   "change": "Verse omitted (printed in italics in this copy)",
-   "note": "The ASV leaves this verse out with the Westcott–Hort Greek text, which follows Sinaiticus and Vaticanus; this e-Sword copy prints it in italics to show that. It is in the Byzantine majority and the Textus Receptus."
+   "change": "Verse omitted; given only in a bracketed footnote",
+   "note": "The ASV leaves this verse out with the Westcott–Hort Greek text, which follows Sinaiticus and Vaticanus, and gives it only in a bracketed footnote. It is in the Byzantine majority and the Textus Receptus."
   },
   {
    "book": 41,
@@ -1530,8 +1521,8 @@
    "verse": 28,
    "kind": "omission",
    "weight": "major",
-   "change": "Verse omitted (printed in italics in this copy)",
-   "note": "The ASV leaves this verse out with the Westcott–Hort Greek text, which follows Sinaiticus and Vaticanus; this e-Sword copy prints it in italics to show that. It is in the Byzantine majority and the Textus Receptus."
+   "change": "Verse omitted; given only in a bracketed footnote",
+   "note": "The ASV leaves this verse out with the Westcott–Hort Greek text, which follows Sinaiticus and Vaticanus, and gives it only in a bracketed footnote. It is in the Byzantine majority and the Textus Receptus."
   },
   {
    "book": 42,
@@ -1603,7 +1594,7 @@
    "kind": "other",
    "weight": "minor",
    "change": "\"Aram\" becomes \"Arni\"",
-   "note": "The Textus Receptus has Aram, as in Matthew 1:3-4 and Ruth 4:19; the ASV follows early manuscripts reading Arni, which vary here."
+   "note": "The Textus Receptus has Aram, as in Matthew 1:3-4 (Ram in Ruth 4:19); the ASV follows early manuscripts reading Arni, which vary here."
   },
   {
    "book": 42,
@@ -1621,7 +1612,7 @@
    "kind": "omission",
    "weight": "major",
    "change": "Omits \"Get thee behind me, Satan\"",
-   "note": "The words are in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or other early witnesses. The same rebuke stands in Matthew 4:10."
+   "note": "The words are in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or other early witnesses. A like rebuke, \"Get thee hence, Satan\", stands in Matthew 4:10."
   },
   {
    "book": 42,
@@ -1756,7 +1747,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "\"Jesus' feet\" becomes \"the Lord's feet\"",
-   "note": "The Textus Receptus has Iēsou; P75, Sinaiticus and Vaticanus have kyriou. Both refer to Christ."
+   "note": "The Textus Receptus has Iēsou with P45, P75 and most manuscripts; P3, Sinaiticus, the first hand of Vaticanus and Bezae have kyriou. Both refer to Christ."
   },
   {
    "book": 42,
@@ -1837,7 +1828,7 @@
    "kind": "omission",
    "weight": "major",
    "change": "Verse omitted (printed in italics in this copy)",
-   "note": "The ASV leaves this verse out with the Westcott–Hort Greek text, which follows Sinaiticus and Vaticanus; this e-Sword copy prints it in italics to show that. It is in the Byzantine majority and the Textus Receptus."
+   "note": "The ASV leaves this verse out with P75, Sinaiticus, Alexandrinus, Vaticanus and most Byzantine manuscripts; it is in Bezae, the Latin and Syriac versions and the Textus Receptus, and matches Matthew 24:40. This e-Sword copy prints it in italics."
   },
   {
    "book": 42,
@@ -1891,7 +1882,7 @@
    "kind": "omission",
    "weight": "major",
    "change": "Verse omitted (printed in italics in this copy)",
-   "note": "The ASV leaves this verse out with the Westcott–Hort Greek text, which follows Sinaiticus and Vaticanus; this e-Sword copy prints it in italics to show that. It is in the Byzantine majority and the Textus Receptus."
+   "note": "The ASV leaves this verse out with P75, Alexandrinus and Vaticanus; Sinaiticus, the Byzantine majority and the Textus Receptus have it, and Bezae puts it after verse 19. This e-Sword copy prints it in italics."
   },
   {
    "book": 42,
@@ -1927,7 +1918,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "\"Jesus himself\" becomes \"he himself\"",
-   "note": "The Textus Receptus names Jesus here; the critical text, which the ASV follows, has only the verb, so the ASV supplies \"he\". The referent is plain from context."
+   "note": "The Textus Receptus has autos ho Iēsous; the critical text, which the ASV follows, has autos alone. The referent is plain from context."
   },
   {
    "book": 42,
@@ -1945,7 +1936,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "\"came to Jesus\" becomes \"came unto him\"",
-   "note": "The Textus Receptus names Jesus here; the critical text, which the ASV follows, has only the verb, so the ASV supplies \"he\". The referent is plain from context."
+   "note": "The Textus Receptus has pros ton Iēsoun; the critical text, which the ASV follows, has pros auton (unto him). The referent is plain from context."
   },
   {
    "book": 43,
@@ -2035,7 +2026,7 @@
    "kind": "trinity",
    "weight": "minor",
    "change": "\"the Holy Ghost\" becomes \"the Spirit\"",
-   "note": "Hagion is in the Textus Receptus but not in P66, P75 or Sinaiticus; the Holy Spirit is plainly meant."
+   "note": "Hagion is in the first hand of P66, the Byzantine text and the Textus Receptus but not in P75 or Sinaiticus; the Holy Spirit is plainly meant."
   },
   {
    "book": 43,
@@ -2250,8 +2241,8 @@
    "verse": 38,
    "kind": "deity",
    "weight": "minor",
-   "change": "\"the body of Jesus\" becomes \"his body\" (third time)",
-   "note": "The Textus Receptus names Jesus here; the critical text, which the ASV follows, has a pronoun or the verb alone. The referent is plain from context."
+   "change": "The second \"the body of Jesus\" becomes \"his body\"",
+   "note": "The Textus Receptus has to sōma tou Iēsou here; the critical text, which the ASV follows, has to sōma autou (his body). The referent is plain from context."
   },
   {
    "book": 43,
@@ -2386,7 +2377,7 @@
    "kind": "salvation",
    "weight": "major",
    "change": "Verse omitted (printed in italics in this copy)",
-   "note": "The ASV leaves this verse out with the Westcott–Hort Greek text, which follows Sinaiticus and Vaticanus; this e-Sword copy prints it in italics to show that. It is in the Byzantine majority and the Textus Receptus."
+   "note": "The ASV leaves this verse out with P45, P74, Sinaiticus, Alexandrinus, Vaticanus and most Byzantine manuscripts; it is in Laudianus, a few later manuscripts, the Latin and the Textus Receptus. This e-Sword copy prints it in italics."
   },
   {
    "book": 44,
@@ -2503,7 +2494,7 @@
    "kind": "omission",
    "weight": "major",
    "change": "Verse omitted (printed in italics in this copy)",
-   "note": "The ASV leaves this verse out with the Westcott–Hort Greek text, which follows Sinaiticus and Vaticanus; this e-Sword copy prints it in italics to show that. It is in the Byzantine majority and the Textus Receptus."
+   "note": "The ASV leaves this verse out with the Westcott–Hort Greek text; it is missing from Sinaiticus, Alexandrinus, Vaticanus and most Byzantine manuscripts, and this e-Sword copy prints it in italics to show that. It is in Ephraemi, Bezae and some others, and the Textus Receptus took it from them."
   },
   {
    "book": 44,
@@ -2638,7 +2629,7 @@
    "kind": "omission",
    "weight": "minor",
    "change": "Omits \"the multitude must needs come together\"",
-   "note": "The clause is in the Byzantine text and the Textus Receptus but not in Vaticanus or P74; the sense is unchanged."
+   "note": "The clause is in P74, Sinaiticus, Alexandrinus, the Byzantine text and the Textus Receptus but not in Vaticanus, the first hand of Ephraemi and a few others; the sense is unchanged."
   },
   {
    "book": 44,
@@ -2710,7 +2701,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "Omits \"our Lord\" after \"Christ Jesus\"",
-   "note": "\"Our Lord\" is in the Textus Receptus but not in Sinaiticus, Vaticanus and other early witnesses. Christ's lordship is stated throughout the chapter (6:23)."
+   "note": "\"Our Lord\" is in Sinaiticus, the Byzantine majority and the Textus Receptus but not in P46, Alexandrinus, Vaticanus or the Western witnesses. Christ's lordship is stated throughout the chapter (6:23)."
   },
   {
    "book": 45,
@@ -2810,15 +2801,6 @@
    "weight": "minor",
    "change": "\"Lord Jesus Christ\" becomes \"Lord Christ\"",
    "note": "The Textus Receptus has \"Jesus\"; the early Alexandrian manuscripts lack it."
-  },
-  {
-   "book": 45,
-   "chapter": 16,
-   "verse": 20,
-   "kind": "omission",
-   "weight": "minor",
-   "change": "Omits the closing \"Amen\"",
-   "note": "\"Amen\" is in the Byzantine text and Textus Receptus but not in the early Alexandrian manuscripts."
   },
   {
    "book": 45,
@@ -3295,7 +3277,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "Omits \"Christ\" after \"Lord Jesus\"",
-   "note": "\"Christ\" is in the Textus Receptus but not in the early Alexandrian manuscripts. \"In flaming fire\" is kept, at the end of the ASV's 1:7."
+   "note": "\"Christ\" is in Sinaiticus, Alexandrinus and the Textus Receptus but not in Vaticanus or the Byzantine majority. \"In flaming fire\" is kept, at the end of the ASV's 1:7."
   },
   {
    "book": 53,
@@ -3313,7 +3295,7 @@
    "kind": "judgment",
    "weight": "minor",
    "change": "\"Day of Christ\" becomes \"day of the Lord\"",
-   "note": "The Textus Receptus reads \"Christ\"; the early and most Byzantine manuscripts read \"the Lord\". Both refer to Christ's coming (2:1)."
+   "note": "The Byzantine text and Textus Receptus read \"Christ\"; Sinaiticus, Alexandrinus and Vaticanus read \"the Lord\". Both refer to Christ's coming (2:1)."
   },
   {
    "book": 53,
@@ -3331,7 +3313,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "\"The Lord\" becomes \"the Lord Jesus\"",
-   "note": "The early Alexandrian manuscripts add \"Jesus\"; the Byzantine text and Textus Receptus lack it. The ASV names Christ as the one who slays the lawless one."
+   "note": "Sinaiticus, Alexandrinus and others add \"Jesus\"; Vaticanus, the Byzantine text and the Textus Receptus lack it. The ASV names Christ as the one who slays the lawless one."
   },
   {
    "book": 53,
@@ -3529,7 +3511,7 @@
    "kind": "omission",
    "weight": "minor",
    "change": "Omits \"in heaven\"; \"me in my bonds\" becomes \"them in bonds\"",
-   "note": "The Textus Receptus reads \"my bonds\" and \"in heaven\"; the early manuscripts read \"the prisoners\" and lack \"in heaven\". The KJV reading implies Pauline authorship."
+   "note": "\"My bonds\" is in Sinaiticus, the Byzantine text and the Textus Receptus, and Alexandrinus and others read \"the prisoners\"; \"in heaven\" is Byzantine, not in P46, Sinaiticus or Alexandrinus. The KJV reading implies Pauline authorship."
   },
   {
    "book": 58,
@@ -3628,7 +3610,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "Omits \"Jesus\" and \"Amen\"",
-   "note": "Both are in the Byzantine text and Textus Receptus but not in the early Alexandrian manuscripts."
+   "note": "Both are in Sinaiticus, the Byzantine text and the Textus Receptus but not in Alexandrinus or Vaticanus."
   },
   {
    "book": 61,
@@ -3655,7 +3637,7 @@
    "kind": "deity",
    "weight": "major",
    "change": "Omits \"Christ is come in the flesh\"",
-   "note": "The Byzantine text and Textus Receptus repeat the full confession of 4:2; the early manuscripts read \"confesseth not Jesus\". The incarnation is still stated in 4:2."
+   "note": "The Byzantine text and Textus Receptus repeat the full confession of 4:2; Alexandrinus and Vaticanus read \"confesseth not Jesus\". The incarnation is still stated in 4:2."
   },
   {
    "book": 62,
@@ -3700,7 +3682,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "\"The Lord Jesus Christ\" becomes \"Jesus Christ\"",
-   "note": "\"Lord\" is in the Byzantine text and Textus Receptus but not in Sinaiticus or Alexandrinus."
+   "note": "\"Lord\" is in Sinaiticus, the Byzantine text and the Textus Receptus but not in Alexandrinus or Vaticanus."
   },
   {
    "book": 63,
@@ -3754,7 +3736,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "Omits \"the beginning and the ending\"; \"Lord\" becomes \"Lord God\"",
-   "note": "Sinaiticus, Alexandrinus and most Greek manuscripts lack the title and read \"Lord God\"; the Textus Receptus follows a few late witnesses. The same title stands in Revelation 21:6 and 22:13."
+   "note": "Alexandrinus and most Greek manuscripts lack the title and read \"Lord God\"; the Textus Receptus has the title from a few witnesses, among them the first hand of Sinaiticus. The same title stands in Revelation 21:6 and 22:13."
   },
   {
    "book": 66,
@@ -3916,7 +3898,7 @@
    "kind": "salvation",
    "weight": "minor",
    "change": "Omits \"of them which are saved\" and \"and honour\"",
-   "note": "Both are in the Textus Receptus but not in the early or most Byzantine manuscripts. Only the saved enter the city in 21:27."
+   "note": "\"Of them which are saved\" is in the Textus Receptus but in almost no Greek manuscripts; \"and honour\" is in the Byzantine text but not in Sinaiticus or Alexandrinus. Only the saved enter the city in 21:27."
   },
   {
    "book": 66,
@@ -3943,7 +3925,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "Omits \"Christ\"; \"you all\" becomes \"the saints\"",
-   "note": "\"Christ\" and \"you\" are in the Textus Receptus; the early manuscripts read \"the Lord Jesus\" and \"the saints\"."
+   "note": "\"Christ\" is in the Byzantine text and Textus Receptus but not in Alexandrinus. In place of the TR's \"you all\", the ASV's \"the saints\" follows Sinaiticus; Alexandrinus reads \"all\" and the Byzantine \"all the saints\"."
   }
  ]
 }

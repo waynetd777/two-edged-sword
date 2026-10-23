@@ -235,7 +235,7 @@
    "kind": "salvation",
    "weight": "major",
    "change": "Verse omitted (\"Son of man is come to save\")",
-   "note": "The verse is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The same words stand in Luke 19:10."
+   "note": "The verse is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. A near-identical saying stands in Luke 19:10."
   },
   {
    "book": 40,
@@ -612,8 +612,8 @@
    "verse": 10,
    "kind": "deity",
    "weight": "minor",
-   "change": "Omits \"that cometh in the name of the Lord\"",
-   "note": "The phrase (repeated from verse 9) is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. Verse 9 still blesses him who comes in the name of the Lord."
+   "change": "Omits \"in the name of the Lord\" after \"the kingdom\"",
+   "note": "\"In the name of the Lord\" (repeated from verse 9) is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. Verse 9 still blesses him who comes in the Lord's name."
   },
   {
    "book": 41,
@@ -802,7 +802,7 @@
    "kind": "omission",
    "weight": "major",
    "change": "Set apart as doubtful, with Mark 16:9-20; omits the closing \"Amen\"",
-   "note": "Mark 16:9-20 is in nearly all manuscripts and the Textus Receptus but not in Sinaiticus or Vaticanus, which end at 16:8; Weymouth keeps the passage but sets it apart as doubtful, which this copy shows in italics."
+   "note": "Mark 16:9-20 is in nearly all manuscripts and the Textus Receptus but not in Sinaiticus or Vaticanus, which end at 16:8; Weymouth sets it apart as doubtful (italics in this copy). The closing \"Amen\" is in the Byzantine text and the Textus Receptus but not in several other witnesses."
   },
   {
    "book": 42,
@@ -901,7 +901,7 @@
    "kind": "omission",
    "weight": "major",
    "change": "Omits \"Get thee behind me, Satan\"",
-   "note": "The words are in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. They may come from Matthew 4:10, where they still stand."
+   "note": "The words are in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. They may come from Matthew 4:10 (\"Get thee hence, Satan\") or from the same words spoken to Peter in Matthew 16:23 and Mark 8:33."
   },
   {
    "book": 42,
@@ -1635,15 +1635,6 @@
   {
    "book": 43,
    "chapter": 13,
-   "verse": 3,
-   "kind": "deity",
-   "weight": "minor",
-   "change": "\"Jesus knowing\" becomes \"He knew\"",
-   "note": "The Textus Receptus names Jesus here; the critical text, which Weymouth follows, has only the verb, so he supplies \"He\". The referent is plain from context."
-  },
-  {
-   "book": 43,
-   "chapter": 13,
    "verse": 32,
    "kind": "omission",
    "weight": "minor",
@@ -1674,7 +1665,7 @@
    "verse": 38,
    "kind": "deity",
    "weight": "minor",
-   "change": "\"the body of Jesus\" becomes \"the body\" (third time)",
+   "change": "\"the body of Jesus\" becomes \"the body\" (second time)",
    "note": "The Textus Receptus repeats \"Jesus\" here; the critical text reads \"his body\", and Weymouth has \"the body\". The referent is plain from context."
   },
   {
@@ -2710,7 +2701,7 @@
    "kind": "atonement",
    "weight": "major",
    "change": "Omits \"through his blood\"",
-   "note": "The phrase is in some later manuscripts and the Textus Receptus but not in Sinaiticus, Vaticanus or the Byzantine majority; Weymouth follows the former. Redemption through Christ's blood is still stated in Ephesians 1:7 and Colossians 1:20."
+   "note": "The phrase is in some later manuscripts and the Textus Receptus but not in Sinaiticus, Vaticanus or the Byzantine majority; Weymouth follows the latter. Redemption through Christ's blood is still stated in Ephesians 1:7 and Colossians 1:20."
   },
   {
    "book": 51,
@@ -2953,7 +2944,7 @@
    "kind": "omission",
    "weight": "minor",
    "change": "Omits \"from such withdraw thyself\"",
-   "note": "The clause is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The warning against such teachers is unchanged."
+   "note": "The clause is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. A similar command to turn away from such people stands in 2 Timothy 3:5."
   },
   {
    "book": 54,
@@ -3016,7 +3007,7 @@
    "kind": "salvation",
    "weight": "minor",
    "change": "\"that bringeth salvation\" becomes \"with healing power\"",
-   "note": "A translation choice: the Greek sōtērios means \"saving, bringing salvation\"; Weymouth renders it \"healing\". Salvation is named in verses 13-14."
+   "note": "A translation choice: the Greek sōtērios means \"saving, bringing salvation\"; Weymouth renders it \"healing\". Christ is still called Saviour in verse 13 and said to redeem us in verse 14."
   },
   {
    "book": 56,
@@ -3142,7 +3133,7 @@
    "kind": "omission",
    "weight": "minor",
    "change": "Omits \"through the Spirit\" and \"pure\"",
-   "note": "\"Through the Spirit\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The call to love one another is unchanged."
+   "note": "\"Through the Spirit\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; \"pure\" is missing from Alexandrinus and Vaticanus, though P72 and Sinaiticus have it. The call to love one another is unchanged."
   },
   {
    "book": 60,
@@ -3169,7 +3160,7 @@
    "kind": "deity",
    "weight": "major",
    "change": "\"the Lord God\" becomes \"Christ as Lord\"",
-   "note": "The Textus Receptus reads \"the Lord God\"; P72, Sinaiticus and Vaticanus read \"Christ as Lord\", which Weymouth follows. The verse then applies Isaiah 8:13, about the LORD of hosts, to Christ."
+   "note": "The Textus Receptus reads \"the Lord God\"; Sinaiticus, Vaticanus and the critical text read \"Christ as Lord\", which Weymouth follows. The verse then applies Isaiah 8:13, about the LORD of hosts, to Christ."
   },
   {
    "book": 60,
@@ -3250,14 +3241,14 @@
    "kind": "trinity",
    "weight": "major",
    "change": "Omits the heavenly witnesses: \"the Father, the Word, and the Holy Ghost\"",
-   "note": "The words are in a few late Greek manuscripts, some Latin ones and the Textus Receptus, but not in the Greek manuscripts before the 1500s; Weymouth follows them. The Trinity is still taught elsewhere, as in Matthew 28:19."
+   "note": "The words are in the Textus Receptus, some Latin manuscripts and a few late Greek ones (none earlier than about the 14th century); Weymouth omits them, following the earlier Greek witnesses. The Trinity is still taught elsewhere, as in Matthew 28:19."
   },
   {
    "book": 62,
    "chapter": 5,
    "verse": 8,
-   "kind": "trinity",
-   "weight": "major",
+   "kind": "omission",
+   "weight": "minor",
    "change": "Omits \"in earth\"",
    "note": "\"In earth\" belongs with the heavenly witnesses of verse 7 and has the same textual history; the three witnesses, the Spirit, water and blood, remain."
   },
@@ -3367,7 +3358,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "Omits \"the beginning and the ending\"; \"Lord\" becomes \"Lord God\"",
-   "note": "\"The beginning and the ending\" is in Sinaiticus corrected and the Textus Receptus but not in Alexandrinus or most manuscripts, which also read \"Lord God\"; Weymouth follows them. It still stands in Revelation 21:6 and 22:13."
+   "note": "\"The beginning and the ending\" is in Sinaiticus as first written, a few other manuscripts and the Textus Receptus, but not in Alexandrinus or most manuscripts, which also read \"Lord God\"; Weymouth follows them. It still stands in Revelation 21:6 and 22:13."
   },
   {
    "book": 66,
@@ -3376,7 +3367,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "Omits \"Christ\" twice",
-   "note": "\"Christ\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The meaning is unchanged."
+   "note": "\"Christ\" is in the Textus Receptus and many later manuscripts but not in Sinaiticus or Alexandrinus; Weymouth follows the latter. The meaning is unchanged."
   },
   {
    "book": 66,
@@ -3403,7 +3394,7 @@
    "kind": "omission",
    "weight": "minor",
    "change": "Omits \"four and twenty\" and \"him that liveth for ever and ever\"",
-   "note": "The words are in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The elders still fall down and worship."
+   "note": "The words are in the Textus Receptus but not in Sinaiticus, Alexandrinus or most other manuscripts; Weymouth follows the latter. The elders still fall down and worship."
   },
   {
    "book": 66,
@@ -3448,7 +3439,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "Omits \"Christ\" after \"testimony of Jesus\"",
-   "note": "\"Christ\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The meaning is unchanged."
+   "note": "\"Christ\" is in the Textus Receptus and some later manuscripts but not in Sinaiticus or Alexandrinus; Weymouth follows the latter. The meaning is unchanged."
   },
   {
    "book": 66,
@@ -3457,7 +3448,7 @@
    "kind": "omission",
    "weight": "minor",
    "change": "Omits \"before the throne of God\"",
-   "note": "The phrase is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. They are still called faultless."
+   "note": "The phrase is in the Textus Receptus and a few later manuscripts but not in Sinaiticus, Alexandrinus or most others; Weymouth follows the latter. They are still called faultless."
   },
   {
    "book": 66,
@@ -3475,7 +3466,7 @@
    "kind": "omission",
    "weight": "minor",
    "change": "Omits \"of heaven\" after \"temple\"",
-   "note": "The phrase is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. The voice still comes from the throne."
+   "note": "The phrase is in the Textus Receptus and many later manuscripts but not in Alexandrinus or other early witnesses; Weymouth follows the latter. The voice still comes from the throne."
   },
   {
    "book": 66,
@@ -3484,7 +3475,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "Omits \"the Lord\" and \"honour\"",
-   "note": "Both words are in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. Salvation and glory are still ascribed to our God."
+   "note": "Both words are in the Textus Receptus and some later manuscripts but not in Sinaiticus or Alexandrinus; Weymouth follows the latter. Salvation and glory are still ascribed to our God."
   },
   {
    "book": 66,
@@ -3538,7 +3529,7 @@
    "kind": "omission",
    "weight": "minor",
    "change": "Omits \"God\" as the one who wipes tears",
-   "note": "\"God\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses; Weymouth follows the latter. God is plainly the subject, from verse 3."
+   "note": "\"God\" is in the Textus Receptus and many later manuscripts but not in Sinaiticus or Alexandrinus; Weymouth follows the latter. God is plainly the subject, from verse 3."
   },
   {
    "book": 66,

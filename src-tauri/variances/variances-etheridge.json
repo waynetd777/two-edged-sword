@@ -19,7 +19,7 @@
    "kind": "omission",
    "weight": "minor",
    "change": "Omits the closing \"Amen\" of the doxology",
-   "note": "The Peshitta, which Etheridge translates, ends the doxology \"to the age of ages\" without \"Amen\"; the Textus Receptus has it. The doxology itself is kept."
+   "note": "The Peshitta has the closing \"Amen\" (Murdock renders it); Etheridge's English ends at \"to the age of ages\". The doxology itself is kept."
   },
   {
    "book": 40,
@@ -316,7 +316,7 @@
    "kind": "omission",
    "weight": "major",
    "change": "Omits \"Blessed is he that cometh in the name of the Lord\"",
-   "note": "The Peshitta has the acclamation here (Murdock renders it); it is missing from Etheridge's English, apparently a slip. Matthew 21:9 and John 12:13 have it."
+   "note": "The Peshitta has the acclamation here (Murdock renders it), but it is missing from Etheridge's English. Matthew 21:9 and John 12:13 have it."
   },
   {
    "book": 41,
@@ -325,7 +325,7 @@
    "kind": "omission",
    "weight": "minor",
    "change": "Omits \"that cometh in the name of the Lord\"",
-   "note": "The phrase is in the Byzantine text and the Textus Receptus but not in the Peshitta, which Etheridge translates, nor in Sinaiticus or Vaticanus. Verse 9 has the same words."
+   "note": "The phrase is in the Byzantine text and the Textus Receptus but not in the Peshitta, which Etheridge translates, nor in Sinaiticus or Vaticanus. The Peshitta has it in verse 9, though Etheridge's English drops it there too; Matthew 21:9 has it."
   },
   {
    "book": 41,
@@ -415,7 +415,7 @@
    "kind": "salvation",
    "weight": "minor",
    "change": "\"thy salvation\" becomes \"thy grace\"",
-   "note": "The Greek has \"thy salvation\"; the Peshitta, which Etheridge translates, has \"thy grace\" or mercy. Verse 32 and 3:6 still speak of God's salvation."
+   "note": "The Greek has \"thy salvation\"; the Peshitta, which Etheridge translates, has \"thy grace\" or mercy. Luke 3:6 still speaks of God's salvation."
   },
   {
    "book": 42,
@@ -779,15 +779,6 @@
   },
   {
    "book": 43,
-   "chapter": 8,
-   "verse": 14,
-   "kind": "omission",
-   "weight": "minor",
-   "change": "Omits \"but ye cannot tell whence I come, and whither I go\"",
-   "note": "The Peshitta has the clause (Murdock renders it); Etheridge's English leaves it out. The contrast is implied in verse 14a and stated in 7:28."
-  },
-  {
-   "book": 43,
    "chapter": 11,
    "verse": 2,
    "kind": "deity",
@@ -929,15 +920,6 @@
    "weight": "major",
    "change": "Omits the verse (the eunuch's confession)",
    "note": "The verse is in some later Greek manuscripts, the Latin and the Textus Receptus, but not in the Peshitta, which Etheridge translates, nor in P45, P74, Sinaiticus, Vaticanus or Alexandrinus. Confession before baptism is still taught, e.g. Romans 10:9-10."
-  },
-  {
-   "book": 44,
-   "chapter": 9,
-   "verse": 5,
-   "kind": "omission",
-   "weight": "minor",
-   "change": "Omits \"it is hard for thee to kick against the pricks\"",
-   "note": "The words are in the Textus Receptus (from the Latin) but not in the Peshitta, which Etheridge translates, nor in the Greek manuscripts here; Acts 26:14 has them."
   },
   {
    "book": 44,
@@ -1100,15 +1082,6 @@
    "weight": "minor",
    "change": "\"the gospel of Christ\" becomes \"the gospel\"",
    "note": "\"Of Christ\" is in the Byzantine text and the Textus Receptus but not in the Peshitta, which Etheridge translates, nor in the early Greek manuscripts. Verse 9 calls it the gospel of his Son."
-  },
-  {
-   "book": 45,
-   "chapter": 7,
-   "verse": 24,
-   "kind": "omission",
-   "weight": "minor",
-   "change": "The verse is missing from this module",
-   "note": "Etheridge translates the verse (\"O miserable man that I am!\") and the Peshitta has it; it is missing only from the electronic text this module was built from. Not a textual difference."
   },
   {
    "book": 45,
@@ -1449,8 +1422,8 @@
    "verse": 12,
    "kind": "omission",
    "weight": "minor",
-   "change": "Omits \"and are over you in the Lord\"",
-   "note": "The Greek has \"are over you in the Lord\"; the Peshitta, which Etheridge translates, has \"stand before your faces teaching you\"."
+   "change": "\"are over you in the Lord\" becomes \"stand before your faces\"",
+   "note": "The Greek has \"are over you in the Lord, and admonish you\"; the Peshitta, which Etheridge translates, has \"stand before your faces teaching you\", without \"in the Lord\"."
   },
   {
    "book": 52,
@@ -1523,15 +1496,6 @@
    "weight": "minor",
    "change": "Omits \"in spirit\"",
    "note": "\"In spirit\" is in the Byzantine text and the Textus Receptus but not in the Peshitta, which Etheridge translates, nor in the early Greek manuscripts."
-  },
-  {
-   "book": 54,
-   "chapter": 6,
-   "verse": 5,
-   "kind": "omission",
-   "weight": "minor",
-   "change": "Omits \"from such withdraw thyself\"",
-   "note": "The words are in the Byzantine text and the Textus Receptus but not in the Peshitta, which Etheridge translates, nor in the early Greek manuscripts."
   },
   {
    "book": 54,
@@ -1755,7 +1719,7 @@
    "verse": 3,
    "kind": "deity",
    "weight": "minor",
-   "change": "\"Jesus Christ is come in the flesh\" becomes \"Jeshu hath come\"",
+   "change": "Drops \"Christ\": \"Jeshu hath come in the flesh\"",
    "note": "The Textus Receptus reads \"Jesus Christ is come in the flesh\"; the Peshitta, which Etheridge translates, has \"Jesus hath come in the flesh\", and the early Greek manuscripts only \"Jesus\". Verse 2 states it in full."
   },
   {
@@ -1774,7 +1738,7 @@
    "kind": "omission",
    "weight": "minor",
    "change": "Omits \"and God in him\"",
-   "note": "\"And God in him\" is in most Greek manuscripts and the Textus Receptus but not in the Peshitta, which Etheridge translates, nor in some early witnesses. Verses 12, 13 and 15 say God dwells in us."
+   "note": "The clause is in the Greek manuscripts and the Textus Receptus but not in the Peshitta, which Etheridge translates. Verses 12, 13 and 15 say God dwells in us."
   },
   {
    "book": 62,
@@ -1789,10 +1753,10 @@
    "book": 62,
    "chapter": 5,
    "verse": 8,
-   "kind": "trinity",
-   "weight": "major",
-   "change": "Omits \"in earth\"; the three earthly witnesses stand in verse 7",
-   "note": "\"In earth\" belongs with the Comma of verse 7, which the Peshitta, which Etheridge translates, does not have; the three witnesses, the Spirit, the water and the blood, stand in his verse 7."
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"in earth\"; the same three witnesses stand in verse 7",
+   "note": "\"In earth\" only sets these witnesses against the heavenly ones of the Comma in verse 7, which the Peshitta that Etheridge translates lacks. The Spirit, the water and the blood are all still named."
   },
   {
    "book": 62,

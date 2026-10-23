@@ -73,7 +73,7 @@
    "kind": "other",
    "weight": "minor",
    "change": "\"The virgin\" becomes \"a young woman\"",
-   "note": "Translation choice: the Hebrew 'almah, also used in Isaiah 7:14, means a young woman of marriageable age; verse 16 still calls Rebekah a virgin."
+   "note": "Translation choice: the Hebrew 'almah, also used in Isaiah 7:14, means a young woman of marriageable age. In verse 16 the Hebrew calls Rebekah betulah (virgin), which the CEV renders \"unmarried\"."
   },
   {
    "book": 1,
@@ -244,7 +244,7 @@
    "kind": "atonement",
    "weight": "minor",
    "change": "\"Make an atonement\" on the altar becomes \"purify the altar\"",
-   "note": "A translation choice for the Hebrew kipper, which can mean purify or atone; the blood of the sin offering is kept. The atonement vocabulary of the Day of Atonement rite is lost here but kept in Leviticus 16."
+   "note": "A translation choice for the Hebrew kipper, which can mean purify or atone; the blood of the sin offering is kept. The CEV likewise avoids the word atonement in Leviticus 16, using forgiveness instead."
   },
   {
    "book": 2,
@@ -451,7 +451,7 @@
    "kind": "other",
    "weight": "major",
    "change": "Omits \"a man in whom is the spirit\"",
-   "note": "The Masoretic text describes Joshua as a man with the spirit (ruach); the CEV replaces this with \"can do the job\", losing the ground of his appointment. Deuteronomy 34:9 still says he was full of the spirit of wisdom."
+   "note": "The Masoretic text describes Joshua as a man with the spirit (ruach); the CEV replaces this with \"can do the job\", losing the ground of his appointment. The Hebrew of Deuteronomy 34:9 also calls him full of the spirit of wisdom, where the CEV has only wisdom."
   },
   {
    "book": 4,
@@ -550,7 +550,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "\"God of gods, and Lord of lords\" becomes \"more powerful than\" them",
-   "note": "A translation choice; the Hebrew titles are paraphrased as a comparison, losing the divine titles quoted in 1 Timothy 6:15 and Revelation 17:14."
+   "note": "A translation choice; the Hebrew titles are paraphrased as a comparison. The title \"Lord of lords\" is applied to Christ in 1 Timothy 6:15 and Revelation 17:14."
   },
   {
    "book": 5,
@@ -784,7 +784,7 @@
    "kind": "other",
    "weight": "minor",
    "change": "\"LORD was their inheritance\" becomes \"would always provide for them\"",
-   "note": "A paraphrase choice; the Hebrew says the LORD himself is the Levites' inheritance, not only their provider. The same idea is kept in Numbers 18:20."
+   "note": "A paraphrase choice; the Hebrew says the LORD himself is the Levites' inheritance, not only their provider. The CEV renders the same statement in Numbers 18:20 as provision too."
   },
   {
    "book": 6,
@@ -837,8 +837,8 @@
    "verse": 5,
    "kind": "omission",
    "weight": "minor",
-   "change": "Omits Sinai and the mountains melting \"before the LORD\"",
-   "note": "The Masoretic text links the quaking mountains to the LORD's presence and to Sinai; the CEV's verse leaves both out. A paraphrase choice, not a textual difference."
+   "change": "Omits \"even that Sinai\"; the LORD named only in 5:4",
+   "note": "The Masoretic text names Sinai as the mountain that melted before the LORD; the CEV leaves Sinai out but keeps the LORD's coming in 5:4. A paraphrase choice, not a textual difference."
   },
   {
    "book": 7,
@@ -893,15 +893,6 @@
    "weight": "minor",
    "change": "Omits \"shall be the LORD's\" and \"burnt offering\"",
    "note": "The Masoretic text vows that whatever comes out shall be the LORD's and offered as a burnt offering; the CEV says \"whoever\" will be sacrificed. The wording bears on how Jephthah's vow is read."
-  },
-  {
-   "book": 7,
-   "chapter": 13,
-   "verse": 18,
-   "kind": "deity",
-   "weight": "minor",
-   "change": "Name \"secret\" becomes \"you couldn't understand it\"",
-   "note": "The Hebrew pil'i means \"wonderful\", the word of Isaiah 9:6, often read as a sign of a divine visitor. The CEV keeps the sense of mystery but loses the word."
   },
   {
    "book": 7,
@@ -1270,7 +1261,7 @@
    "kind": "other",
    "weight": "minor",
    "change": "\"ashes upon his face\" becomes \"a bandage\"",
-   "note": "A translation choice for the Hebrew aphar, which modern lexicons take as a headband or bandage rather than ashes."
+   "note": "A translation choice for the rare Hebrew 'apher, which modern lexicons take as a headband or bandage; the KJV read it as 'epher, ashes."
   },
   {
    "book": 11,
@@ -1468,7 +1459,7 @@
    "kind": "other",
    "weight": "minor",
    "change": "Names \"the father of Gibeon\" as Jeiel",
-   "note": "The Masoretic text leaves him unnamed here; the CEV supplies the name from the parallel 9:35, as some Septuagint manuscripts do."
+   "note": "The Masoretic text leaves him unnamed here; the CEV, like several modern versions, supplies the name from the parallel list in 9:35."
   },
   {
    "book": 13,
@@ -1908,8 +1899,8 @@
    "verse": 2,
    "kind": "omission",
    "weight": "minor",
-   "change": "Drops \"God most high\" and \"performeth all things for me\"",
-   "note": "The Masoretic text has both; the CEV compresses the verse to \"my protector\", losing the title Most High and the statement that God accomplishes all things for the psalmist."
+   "change": "Drops \"performeth all things for me\"; \"God most high\" moved to verse 1",
+   "note": "The Masoretic text has both; the CEV moves the title Most High into verse 1 and compresses this verse to \"my protector\", losing the statement that God accomplishes all things for the psalmist."
   },
   {
    "book": 19,
@@ -1971,7 +1962,7 @@
    "verse": 17,
    "kind": "prophecy",
    "weight": "major",
-   "change": "\"son of man\" and \"man of thy right hand\" rephrased away",
+   "change": "\"Son of man\" becomes \"the one you raised to be your own\"",
    "note": "Translation choice on the Masoretic text; the phrase \"son of man\", read messianically by some (the Targum names the King Messiah), no longer appears."
   },
   {
@@ -2035,7 +2026,7 @@
    "kind": "other",
    "weight": "minor",
    "change": "\"from everlasting to everlasting\" becomes \"always been God\"",
-   "note": "Translation choice; the CEV keeps God's eternity past but drops the explicit \"to everlasting\" future. Verse 4 still states it."
+   "note": "Translation choice; the CEV keeps God's eternity past but drops the explicit \"to everlasting\" future, though verse 4 still sets God above time."
   },
   {
    "book": 19,
@@ -2485,7 +2476,7 @@
    "kind": "omission",
    "weight": "minor",
    "change": "Omits \"the prophets\" and \"the seers\" whom the LORD covered",
-   "note": "The words are in the Masoretic text; some scholars take them as later glosses. The CEV leaves out who was blinded."
+   "note": "The words are in the Masoretic text; some scholars take them as later glosses. The CEV drops them here, though its 29:9 addresses \"you prophets\"."
   },
   {
    "book": 23,
@@ -2557,7 +2548,7 @@
    "kind": "prophecy",
    "weight": "minor",
    "change": "Words to the despised one are addressed to Israel",
-   "note": "Translation choice: the CEV reads the despised servant as Israel and adds \"you are my chosen ones\"; the KJV leaves the Servant, read as messianic, unnamed."
+   "note": "Translation choice: the CEV reads the despised servant as Israel and addresses Israel by name; the KJV leaves the Servant, read as messianic, unnamed."
   },
   {
    "book": 23,
@@ -2809,7 +2800,7 @@
    "kind": "salvation",
    "weight": "minor",
    "change": "\"New spirit\" and \"heart of flesh\" become eagerness to be faithful",
-   "note": "A paraphrase of the Masoretic text; the promise of one heart, a new spirit and a heart of flesh for a stony one, read as inward renewal, is reduced to a change of attitude. The same promise is stated in full in Ezekiel 36:26."
+   "note": "A paraphrase of the Masoretic text; the promise of one heart, a new spirit and a heart of flesh for a stony one, read as inward renewal, is reduced to a change of attitude. The same promise comes again in Ezekiel 36:26, which the CEV also paraphrases."
   },
   {
    "book": 26,
@@ -2818,7 +2809,7 @@
    "kind": "salvation",
    "weight": "minor",
    "change": "\"Make you a new heart and a new spirit\" becomes \"thinking pure thoughts\"",
-   "note": "A paraphrase of the Masoretic text; the call to a new heart and spirit, read as inward renewal, becomes a change of thinking. The promise itself is kept in full in Ezekiel 36:26."
+   "note": "A paraphrase of the Masoretic text; the call to a new heart and spirit, read as inward renewal, becomes a change of thinking. The CEV keeps a promised \"new heart\" in Ezekiel 36:26, though not the new spirit."
   },
   {
    "book": 26,
@@ -2944,7 +2935,7 @@
    "kind": "prophecy",
    "weight": "major",
    "change": "\"he\" becomes \"this foreigner\"",
-   "note": "The Aramaic has only \"he\"; the CEV names him a foreign ruler, settling a disputed prophecy that some read of the Messiah confirming the covenant."
+   "note": "The Hebrew has only \"he\"; the CEV names him a foreign ruler, settling a disputed prophecy that some read of the Messiah confirming the covenant."
   },
   {
    "book": 27,
@@ -3087,8 +3078,8 @@
    "verse": 4,
    "kind": "salvation",
    "weight": "minor",
-   "change": "\"the just shall live by his faith\" becomes \"acceptable to me\"",
-   "note": "A paraphrase of the Masoretic text; \"the just\" and \"shall live\" are lost in a verse quoted in Romans 1:17, Galatians 3:11 and Hebrews 10:38, though faith is kept."
+   "change": "\"The just shall live by his faith\" becomes who is \"acceptable\" to God",
+   "note": "A paraphrase of the Masoretic text; \"the just\" and the promise that they shall live become a statement of who is acceptable to God, in a verse quoted in Romans 1:17, Galatians 3:11 and Hebrews 10:38."
   },
   {
    "book": 35,
@@ -3673,7 +3664,7 @@
    "kind": "omission",
    "weight": "minor",
    "change": "Omits the closing \"Amen\"",
-   "note": "The Amen is in the Textus Receptus and some later manuscripts but not in most witnesses to the longer ending."
+   "note": "The Amen is in the Byzantine majority and the Textus Receptus but not in some other witnesses to the longer ending. Nothing of substance is lost."
   },
   {
    "book": 42,
@@ -3826,7 +3817,7 @@
    "kind": "omission",
    "weight": "major",
    "change": "Omits \"which art in heaven\" and \"Thy will be done\"",
-   "note": "Luke's prayer is shorter in Sinaiticus, Vaticanus and the critical text; the Byzantine text and the Textus Receptus have the fuller form, as in Matthew 6:9-10."
+   "note": "Both phrases are absent from P75 and Vaticanus (Sinaiticus lacks only the first); the Byzantine text and the Textus Receptus have the fuller form, as in Matthew 6:9-10."
   },
   {
    "book": 42,
@@ -3835,7 +3826,7 @@
    "kind": "omission",
    "weight": "major",
    "change": "Omits \"but deliver us from evil\"",
-   "note": "Luke's shorter form of the Lord's Prayer follows Sinaiticus (corrected), Vaticanus and early papyri; the petition is still stated in Matthew 6:13."
+   "note": "Luke's shorter form of the Lord's Prayer follows P75, the first hand of Sinaiticus and Vaticanus; the Byzantine text and the Textus Receptus have the petition, which is still stated in Matthew 6:13."
   },
   {
    "book": 42,
@@ -3871,7 +3862,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "\"the Lord said\" becomes \"Jesus said\"",
-   "note": "\"And the Lord said\" is in the Byzantine majority and Textus Receptus but not in P75, Vaticanus or Sinaiticus; the CEV supplies the name. The title \"Lord\" is lost here only."
+   "note": "\"And the Lord said\" is in the Byzantine majority, the Textus Receptus and Sinaiticus but not in P75 or Vaticanus; the CEV supplies the name. The title \"Lord\" is lost here only."
   },
   {
    "book": 42,
@@ -3907,7 +3898,7 @@
    "kind": "omission",
    "weight": "minor",
    "change": "Omits \"in letters of Greek, and Latin, and Hebrew\"",
-   "note": "The phrase is in the Byzantine majority and Textus Receptus but not in P75, Vaticanus or Sinaiticus (first hand); the three languages are still stated in John 19:20."
+   "note": "The phrase is in the Byzantine majority and the Textus Receptus but not in P75, Vaticanus or the first hand of Ephraemi; the three languages are still stated in John 19:20."
   },
   {
    "book": 42,
@@ -3943,7 +3934,7 @@
    "kind": "omission",
    "weight": "minor",
    "change": "Omits \"blessing\" and the closing \"Amen\"",
-   "note": "\"Praising and blessing\" and \"Amen\" are in the Byzantine majority and Textus Receptus; P75, Sinaiticus and Vaticanus have one verb and no \"Amen\". The sense is unchanged."
+   "note": "\"Praising and blessing\" and \"Amen\" are in the Byzantine majority and the Textus Receptus; P75, Sinaiticus and Vaticanus have one verb, and P75 and Sinaiticus have no \"Amen\". The sense is unchanged."
   },
   {
    "book": 43,
@@ -4141,7 +4132,7 @@
    "kind": "omission",
    "weight": "minor",
    "change": "Omits \"in my name\"",
-   "note": "\"In my name\" is in every Greek text; the CEV leaves it out here and in verse 13, following the critical text's added \"me\". Asking in Christ's name is still stated in John 15:16 and 16:23."
+   "note": "A translation choice: \"in my name\" is in the Greek here and in verse 13, and the CEV's \"ask me\" reflects the critical text's added \"me\". Asking in Christ's name is still stated in John 15:16 and 16:23."
   },
   {
    "book": 43,
@@ -4573,7 +4564,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "\"the firstborn among many brethren\" becomes \"the first of many\"",
-   "note": "A translation choice: prototokos carries rank and pre-eminence, which \"first\" does not; Christ is still \"firstborn\" elsewhere, e.g. Colossians 1:15 in other versions."
+   "note": "A translation choice: prototokos carries rank and pre-eminence, which \"first\" does not. The CEV still calls Christ \"the first-born Son\" in Colossians 1:15."
   },
   {
    "book": 45,
@@ -4834,16 +4825,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "\"grace of Christ\" becomes God's kindness; Christ not named",
-   "note": "Most manuscripts, including the critical text, read \"the grace of Christ\"; P46 and a few others omit \"Christ\". The CEV credits the calling and kindness to God alone."
-  },
-  {
-   "book": 48,
-   "chapter": 2,
-   "verse": 20,
-   "kind": "salvation",
-   "weight": "minor",
-   "change": "\"crucified with Christ\" becomes \"I have died\"",
-   "note": "A translation choice; the Greek is the same. The believer's union with Christ's death is less explicit, though \"Christ lives in me\" remains."
+   "note": "Most manuscripts and the Textus Receptus read \"the grace of Christ\", and the critical text brackets \"Christ\"; P46 and a few others omit it. The CEV gives the calling and kindness to God alone."
   },
   {
    "book": 48,
@@ -5347,7 +5329,7 @@
    "kind": "atonement",
    "weight": "minor",
    "change": "Omits \"by himself\" before purging sins",
-   "note": "\"By himself\" is in the Byzantine majority and Textus Receptus but not in Sinaiticus, Vaticanus or Alexandrinus; it stresses Christ alone made the cleansing, which Hebrews 9:12-14 still states."
+   "note": "\"By himself\" is in P46 (as \"through him\"), D, the Byzantine majority and the Textus Receptus but not in Sinaiticus, Vaticanus or Alexandrinus. That Christ alone made the cleansing is still stated in Hebrews 9:12-14."
   },
   {
    "book": 58,
@@ -5581,7 +5563,7 @@
    "kind": "trinity",
    "weight": "major",
    "change": "Omits \"in heaven, the Father, the Word, and the Holy Ghost\"",
-   "note": "The Johannine Comma is in the Textus Receptus and some late Greek and Latin manuscripts, but not in the Greek manuscripts before the late Middle Ages. The Trinity is taught elsewhere, as in Matthew 28:19."
+   "note": "The Johannine Comma is in the Textus Receptus and much of the Latin tradition (quoted from the 4th century), but in Greek only in a few manuscripts from the late Middle Ages on. The Trinity is taught elsewhere, as in Matthew 28:19."
   },
   {
    "book": 62,
@@ -5680,7 +5662,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "Omits \"the beginning and the ending\"; \"Lord\" becomes \"Lord God\"",
-   "note": "Sinaiticus, Alexandrinus and most Greek manuscripts lack the title and read \"Lord God\"; the Textus Receptus follows a few late witnesses. The same title stands in Revelation 21:6 and 22:13."
+   "note": "Alexandrinus, Ephraemi and most Greek manuscripts lack the title and read \"Lord God\"; the Textus Receptus keeps it, with the first hand of Sinaiticus and a few others. The same title stands in Revelation 21:6 and 22:13."
   },
   {
    "book": 66,
@@ -5832,8 +5814,8 @@
    "verse": 5,
    "kind": "deity",
    "weight": "minor",
-   "change": "Omits \"O Lord\"; \"shalt be\" becomes \"the holy God\"",
-   "note": "The Textus Receptus has 'O Lord' and 'which shalt be' (ho esomenos); the manuscripts omit 'Lord' and read 'the Holy One' (ho hosios), which the CEV follows."
+   "change": "Omits \"O Lord\"; adds \"holy\" (\"the holy God\")",
+   "note": "The Textus Receptus has 'O Lord' and 'which shalt be' (ho esomenos); the manuscripts omit 'Lord' and read 'the Holy One' (ho hosios), which the CEV follows while keeping 'you always will be' in its paraphrase."
   },
   {
    "book": 66,
@@ -5887,7 +5869,7 @@
    "kind": "other",
    "weight": "minor",
    "change": "\"out of heaven\" becomes \"from the throne\"; omits \"be their God\"",
-   "note": "The Textus Receptus reads 'out of heaven'; Sinaiticus and Vaticanus read 'from the throne', which the CEV follows. 'And be their God' is uncertain in the manuscripts and left out."
+   "note": "The Textus Receptus reads 'out of heaven'; Sinaiticus and Alexandrinus read 'from the throne', which the CEV follows. 'And be their God' is uncertain in the manuscripts and left out."
   },
   {
    "book": 66,

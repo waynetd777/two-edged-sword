@@ -216,8 +216,8 @@
    "verse": 4,
    "kind": "deity",
    "weight": "minor",
-   "change": "\"the LORD God of his father\" becomes \"the God of his father\"",
-   "note": "The Masoretic text reads only \"the God of his father\"; the KJV adds \"LORD\". The same God is meant."
+   "change": "\"the Lord God of his father\" becomes \"the God of his father\"",
+   "note": "The Masoretic text reads only \"the God of his father\"; the KJV adds \"Lord\". The same God is meant."
   },
   {
    "book": 18,
@@ -279,7 +279,7 @@
    "verse": 17,
    "kind": "judgment",
    "weight": "minor",
-   "change": "\"turned into hell\" becomes \"turned back unto Sheol\"",
+   "change": "\"turned into hell\" becomes \"return to Sheol\"",
    "note": "The Hebrew is she'ol, the grave or place of the dead; the KJV renders it \"hell\" here, the RV transliterates it here. A translation choice, not a textual one."
   },
   {
@@ -883,7 +883,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "\"Jesus' feet\" becomes \"his feet\"",
-   "note": "The Textus Receptus names Jesus here; the critical text, which the RV follows, has only the verb, so the RV supplies \"he\". The referent is plain from context."
+   "note": "The Textus Receptus names Jesus here; the critical text, which the RV follows, has only the pronoun \"his\". The referent is plain from context."
   },
   {
    "book": 40,
@@ -1252,7 +1252,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "\"followed Jesus\" becomes \"followed him\"",
-   "note": "The Textus Receptus names Jesus here; the critical text, which the RV follows, has only the verb, so the RV supplies \"he\". The referent is plain from context."
+   "note": "The Textus Receptus names Jesus here; the critical text, which the RV follows, has only the pronoun \"him\". The referent is plain from context."
   },
   {
    "book": 41,
@@ -1765,7 +1765,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "\"Jesus himself\" becomes \"he himself\"",
-   "note": "The Textus Receptus names Jesus here; the critical text, which the RV follows, has only the verb, so the RV supplies \"he\". The referent is plain from context."
+   "note": "The Textus Receptus has autos ho Iēsous (Jesus himself); the critical text, which the RV follows, has only autos (he himself). The referent is plain from context."
   },
   {
    "book": 42,
@@ -1783,7 +1783,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "\"came to Jesus\" becomes \"came unto him\"",
-   "note": "The Textus Receptus names Jesus here; the critical text, which the RV follows, has only the verb, so the RV supplies \"he\". The referent is plain from context."
+   "note": "The Textus Receptus has pros ton Iēsoun (to Jesus); the critical text, which the RV follows, has pros auton (to him). The referent is plain from context."
   },
   {
    "book": 43,
@@ -1890,8 +1890,8 @@
    "verse": 53,
    "kind": "omission",
    "weight": "major",
-   "change": "In John 7:53–8:11, set apart as not original",
-   "note": "The RV prints John 7:53–8:11, the woman taken in adultery, in brackets as not original: P66, P75, Sinaiticus and Vaticanus lack it; the Byzantine majority and the Textus Receptus have it."
+   "change": "John 7:53–8:11 is set in brackets as doubtful",
+   "note": "The RV prints John 7:53–8:11, the woman taken in adultery, in brackets, with a margin note that most ancient authorities omit it: P66, P75, Sinaiticus and Vaticanus lack it; the Byzantine majority and the Textus Receptus have it."
   },
   {
    "book": 43,
@@ -1899,8 +1899,8 @@
    "verse": 1,
    "kind": "omission",
    "weight": "major",
-   "change": "In John 7:53–8:11, set apart as not original",
-   "note": "The RV prints John 7:53–8:11, the woman taken in adultery, in brackets as not original: P66, P75, Sinaiticus and Vaticanus lack it; the Byzantine majority and the Textus Receptus have it."
+   "change": "John 7:53–8:11 is set in brackets as doubtful",
+   "note": "The RV prints John 7:53–8:11, the woman taken in adultery, in brackets, with a margin note that most ancient authorities omit it: P66, P75, Sinaiticus and Vaticanus lack it; the Byzantine majority and the Textus Receptus have it."
   },
   {
    "book": 43,
@@ -1908,8 +1908,8 @@
    "verse": 2,
    "kind": "omission",
    "weight": "major",
-   "change": "In John 7:53–8:11, set apart as not original",
-   "note": "The RV prints John 7:53–8:11, the woman taken in adultery, in brackets as not original: P66, P75, Sinaiticus and Vaticanus lack it; the Byzantine majority and the Textus Receptus have it."
+   "change": "John 7:53–8:11 is set in brackets as doubtful",
+   "note": "The RV prints John 7:53–8:11, the woman taken in adultery, in brackets, with a margin note that most ancient authorities omit it: P66, P75, Sinaiticus and Vaticanus lack it; the Byzantine majority and the Textus Receptus have it."
   },
   {
    "book": 43,
@@ -1917,8 +1917,8 @@
    "verse": 3,
    "kind": "omission",
    "weight": "major",
-   "change": "In John 7:53–8:11, set apart as not original",
-   "note": "The RV prints John 7:53–8:11, the woman taken in adultery, in brackets as not original: P66, P75, Sinaiticus and Vaticanus lack it; the Byzantine majority and the Textus Receptus have it."
+   "change": "John 7:53–8:11 is set in brackets as doubtful",
+   "note": "The RV prints John 7:53–8:11, the woman taken in adultery, in brackets, with a margin note that most ancient authorities omit it: P66, P75, Sinaiticus and Vaticanus lack it; the Byzantine majority and the Textus Receptus have it."
   },
   {
    "book": 43,
@@ -1926,8 +1926,8 @@
    "verse": 4,
    "kind": "omission",
    "weight": "major",
-   "change": "In John 7:53–8:11, set apart as not original",
-   "note": "The RV prints John 7:53–8:11, the woman taken in adultery, in brackets as not original: P66, P75, Sinaiticus and Vaticanus lack it; the Byzantine majority and the Textus Receptus have it."
+   "change": "John 7:53–8:11 is set in brackets as doubtful",
+   "note": "The RV prints John 7:53–8:11, the woman taken in adultery, in brackets, with a margin note that most ancient authorities omit it: P66, P75, Sinaiticus and Vaticanus lack it; the Byzantine majority and the Textus Receptus have it."
   },
   {
    "book": 43,
@@ -1935,8 +1935,8 @@
    "verse": 5,
    "kind": "omission",
    "weight": "major",
-   "change": "In John 7:53–8:11, set apart as not original",
-   "note": "The RV prints John 7:53–8:11, the woman taken in adultery, in brackets as not original: P66, P75, Sinaiticus and Vaticanus lack it; the Byzantine majority and the Textus Receptus have it."
+   "change": "John 7:53–8:11 is set in brackets as doubtful",
+   "note": "The RV prints John 7:53–8:11, the woman taken in adultery, in brackets, with a margin note that most ancient authorities omit it: P66, P75, Sinaiticus and Vaticanus lack it; the Byzantine majority and the Textus Receptus have it."
   },
   {
    "book": 43,
@@ -1944,8 +1944,8 @@
    "verse": 6,
    "kind": "omission",
    "weight": "major",
-   "change": "In John 7:53–8:11, set apart as not original",
-   "note": "The RV prints John 7:53–8:11, the woman taken in adultery, in brackets as not original: P66, P75, Sinaiticus and Vaticanus lack it; the Byzantine majority and the Textus Receptus have it. Also: Omits \"as though he heard them not\"."
+   "change": "John 7:53–8:11 is set in brackets as doubtful",
+   "note": "The RV prints John 7:53–8:11, the woman taken in adultery, in brackets, with a margin note that most ancient authorities omit it: P66, P75, Sinaiticus and Vaticanus lack it; the Byzantine majority and the Textus Receptus have it. Also: Omits \"as though he heard them not\"."
   },
   {
    "book": 43,
@@ -1953,8 +1953,8 @@
    "verse": 7,
    "kind": "omission",
    "weight": "major",
-   "change": "In John 7:53–8:11, set apart as not original",
-   "note": "The RV prints John 7:53–8:11, the woman taken in adultery, in brackets as not original: P66, P75, Sinaiticus and Vaticanus lack it; the Byzantine majority and the Textus Receptus have it."
+   "change": "John 7:53–8:11 is set in brackets as doubtful",
+   "note": "The RV prints John 7:53–8:11, the woman taken in adultery, in brackets, with a margin note that most ancient authorities omit it: P66, P75, Sinaiticus and Vaticanus lack it; the Byzantine majority and the Textus Receptus have it."
   },
   {
    "book": 43,
@@ -1962,8 +1962,8 @@
    "verse": 8,
    "kind": "omission",
    "weight": "major",
-   "change": "In John 7:53–8:11, set apart as not original",
-   "note": "The RV prints John 7:53–8:11, the woman taken in adultery, in brackets as not original: P66, P75, Sinaiticus and Vaticanus lack it; the Byzantine majority and the Textus Receptus have it."
+   "change": "John 7:53–8:11 is set in brackets as doubtful",
+   "note": "The RV prints John 7:53–8:11, the woman taken in adultery, in brackets, with a margin note that most ancient authorities omit it: P66, P75, Sinaiticus and Vaticanus lack it; the Byzantine majority and the Textus Receptus have it."
   },
   {
    "book": 43,
@@ -1971,8 +1971,8 @@
    "verse": 9,
    "kind": "omission",
    "weight": "major",
-   "change": "In John 7:53–8:11, set apart as not original",
-   "note": "The RV prints John 7:53–8:11, the woman taken in adultery, in brackets as not original: P66, P75, Sinaiticus and Vaticanus lack it; the Byzantine majority and the Textus Receptus have it. Also: Omits \"being convicted by their own conscience\"."
+   "change": "John 7:53–8:11 is set in brackets as doubtful",
+   "note": "The RV prints John 7:53–8:11, the woman taken in adultery, in brackets, with a margin note that most ancient authorities omit it: P66, P75, Sinaiticus and Vaticanus lack it; the Byzantine majority and the Textus Receptus have it. Also: Omits \"being convicted by their own conscience\"."
   },
   {
    "book": 43,
@@ -1980,8 +1980,8 @@
    "verse": 10,
    "kind": "omission",
    "weight": "major",
-   "change": "In John 7:53–8:11, set apart as not original",
-   "note": "The RV prints John 7:53–8:11, the woman taken in adultery, in brackets as not original: P66, P75, Sinaiticus and Vaticanus lack it; the Byzantine majority and the Textus Receptus have it. Also: Omits \"saw none but the woman\" and \"those thine accusers\"."
+   "change": "John 7:53–8:11 is set in brackets as doubtful",
+   "note": "The RV prints John 7:53–8:11, the woman taken in adultery, in brackets, with a margin note that most ancient authorities omit it: P66, P75, Sinaiticus and Vaticanus lack it; the Byzantine majority and the Textus Receptus have it. Also: Omits \"saw none but the woman\" and \"those thine accusers\"."
   },
   {
    "book": 43,
@@ -1989,8 +1989,8 @@
    "verse": 11,
    "kind": "omission",
    "weight": "major",
-   "change": "In John 7:53–8:11, set apart as not original",
-   "note": "The RV prints John 7:53–8:11, the woman taken in adultery, in brackets as not original: P66, P75, Sinaiticus and Vaticanus lack it; the Byzantine majority and the Textus Receptus have it."
+   "change": "John 7:53–8:11 is set in brackets as doubtful",
+   "note": "The RV prints John 7:53–8:11, the woman taken in adultery, in brackets, with a margin note that most ancient authorities omit it: P66, P75, Sinaiticus and Vaticanus lack it; the Byzantine majority and the Textus Receptus have it."
   },
   {
    "book": 43,
@@ -2071,7 +2071,7 @@
    "kind": "salvation",
    "weight": "minor",
    "change": "\"believe not\" becomes \"keep them not\"",
-   "note": "The Textus Receptus has pisteusē (believe); Sinaiticus, Vaticanus and most manuscripts have phylaxē (keep). Belief is still the subject of verse 46."
+   "note": "The Textus Receptus and the Byzantine text have pisteusē (believe); P66, Sinaiticus, Vaticanus and other early manuscripts have phylaxē (keep). Belief is still the subject of verse 46."
   },
   {
    "book": 43,
@@ -2097,8 +2097,8 @@
    "verse": 38,
    "kind": "deity",
    "weight": "minor",
-   "change": "\"the body of Jesus\" becomes \"his body\" (third time)",
-   "note": "The Textus Receptus names Jesus here; the critical text, which the RV follows, has a pronoun or the verb alone. The referent is plain from context."
+   "change": "The second \"the body of Jesus\" becomes \"his body\"",
+   "note": "The Textus Receptus repeats to sōma tou Iēsou; the critical text, which the RV follows, has to sōma autou (his body). The referent is plain from context."
   },
   {
    "book": 43,
@@ -2142,7 +2142,7 @@
    "verse": 31,
    "kind": "judgment",
    "weight": "minor",
-   "change": "\"his soul was not left in hell\" becomes \"he was... unto Hades\"",
+   "change": "Omits \"his soul\"; \"hell\" becomes \"Hades\"",
    "note": "The Textus Receptus has hē psychē autou (his soul); Sinaiticus and Vaticanus lack it. Hadēs is rendered \"Hades\" as a translation choice."
   },
   {
@@ -2629,7 +2629,7 @@
    "kind": "deity",
    "weight": "major",
    "change": "\"Judgment seat of Christ\" becomes \"of God\"",
-   "note": "The Textus Receptus reads \"of Christ\"; Sinaiticus, Vaticanus and other early witnesses read \"of God\". Christ as judge is still stated in 2 Corinthians 5:10, and 14:11 applies Isaiah's words about God to him."
+   "note": "The Textus Receptus reads \"of Christ\"; Sinaiticus, Vaticanus and other early witnesses read \"of God\". Christ as judge is still stated in 2 Corinthians 5:10, and Philippians 2:10-11 applies Isaiah 45:23 to Jesus."
   },
   {
    "book": 45,
@@ -2988,8 +2988,8 @@
    "verse": 16,
    "kind": "omission",
    "weight": "minor",
-   "change": "Omits \"rule\" and \"let us mind the same thing\"",
-   "note": "The words are in the Byzantine text and Textus Receptus but not in P46, Sinaiticus or Vaticanus; the thought is in 2:2."
+   "change": "Omits \"let us mind the same thing\"",
+   "note": "The clause, and the word for \"rule\" (which the RV still supplies), is in the Byzantine text and Textus Receptus but not in P46, Sinaiticus or Vaticanus; the thought is in 2:2."
   },
   {
    "book": 50,
@@ -3160,7 +3160,7 @@
    "kind": "judgment",
    "weight": "minor",
    "change": "\"Day of Christ\" becomes \"day of the Lord\"",
-   "note": "The Textus Receptus reads \"Christ\"; the early and most Byzantine manuscripts read \"the Lord\". Both refer to Christ's coming (2:1)."
+   "note": "The Textus Receptus and Byzantine text read \"Christ\"; Sinaiticus, Vaticanus and other early witnesses read \"the Lord\". Both refer to Christ's coming (2:1)."
   },
   {
    "book": 53,

@@ -234,8 +234,8 @@
    "verse": 24,
    "kind": "deity",
    "weight": "minor",
-   "change": "Omits the address \"Lord\" and \"with tears\"",
-   "note": "\"Kyrie\" and \"with tears\" are in the Byzantine text and the Textus Receptus but not in the Peshitta, Sinaiticus or Vaticanus."
+   "change": "Omits the address \"Lord\"",
+   "note": "\"Kyrie\" is in the Byzantine text and the Textus Receptus but not in the Peshitta, Sinaiticus or Vaticanus."
   },
   {
    "book": 41,
@@ -577,7 +577,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "Omits \"the Father's\" (\"him that sent me\")",
-   "note": "\"Patros\" is in the Textus Receptus but not in the Peshitta or most Greek manuscripts; verse 40 names the Father."
+   "note": "\"Patros\" is in the Byzantine text and the Textus Receptus but not in the Peshitta, Sinaiticus or Vaticanus; the one who sent him is the Father throughout John."
   },
   {
    "book": 43,
@@ -748,7 +748,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "\"the Lord your God\" becomes \"the Lord\"; omits \"unto the fathers\"",
-   "note": "\"Unto the fathers\" and \"your\" are in the Textus Receptus but not in the Peshitta or the early Greek manuscripts; the prophecy of Deuteronomy 18:15 is unchanged."
+   "note": "\"Unto the fathers\" is in the Byzantine text and the Textus Receptus but not in the Peshitta, Sinaiticus, Alexandrinus or Vaticanus; Murdock gives the divine name only as \"the Lord\". The prophecy of Deuteronomy 18:15 is unchanged."
   },
   {
    "book": 44,
@@ -757,7 +757,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "\"his Son Jesus\" becomes \"his Son\"",
-   "note": "\"Jesus\" is in the Textus Receptus but not in the Peshitta or most Greek manuscripts; the Son meant is plain."
+   "note": "\"Jesus\" is in the Byzantine text and the Textus Receptus but not in the Peshitta, Sinaiticus, Alexandrinus or Vaticanus; the Son meant is plain."
   },
   {
    "book": 44,
@@ -812,15 +812,6 @@
    "weight": "major",
    "change": "In italics, as not in the Peshitta",
    "note": "The verse is in the Textus Receptus and some Western witnesses but not in the Peshitta or the early Greek manuscripts; Murdock prints it in italics as words the Peshitta lacks. Belief before baptism is still taught elsewhere (Mark 16:16)."
-  },
-  {
-   "book": 44,
-   "chapter": 9,
-   "verse": 5,
-   "kind": "omission",
-   "weight": "minor",
-   "change": "Omits \"it is hard for thee to kick against the pricks\"",
-   "note": "The clause is in the Textus Receptus (from the Latin) but not in the Peshitta or the Greek manuscripts here; it is in all texts at Acts 26:14."
   },
   {
    "book": 44,
@@ -1108,7 +1099,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "\"God is able\" becomes \"his Lord hath power\"",
-   "note": "The Textus Receptus reads \"God\"; the Peshitta, with the early Greek manuscripts, reads \"the Lord\". The master in the verse is Christ."
+   "note": "The Textus Receptus reads \"God\"; the Peshitta, with the early Greek manuscripts, reads \"the Lord\". The Lord here is often taken to be Christ (compare verses 6-9)."
   },
   {
    "book": 45,
@@ -1322,7 +1313,7 @@
    "chapter": 3,
    "verse": 9,
    "kind": "deity",
-   "weight": "minor",
+   "weight": "major",
    "change": "Omits \"by Jesus Christ\"",
    "note": "The Textus Receptus reads \"who created all things by Jesus Christ\"; the Peshitta, with the early Greek manuscripts, reads \"God the Creator of all things\" alone. Christ as agent of creation is still stated in Colossians 1:16."
   },
@@ -1976,15 +1967,6 @@
   },
   {
    "book": 66,
-   "chapter": 2,
-   "verse": 16,
-   "kind": "salvation",
-   "weight": "minor",
-   "change": "Omits \"Repent\"",
-   "note": "Revelation is not in the Peshitta's canon; Murdock translates it from the later Syriac version printed with it. The Greek begins \"Repent therefore\"; only \"or if not\" remains here, though the call to repent stands in 2:5."
-  },
-  {
-   "book": 66,
    "chapter": 5,
    "verse": 14,
    "kind": "omission",
@@ -2152,7 +2134,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "\"God shall wipe away all tears\" becomes passive",
-   "note": "Revelation is not in the Peshitta's canon; Murdock translates it from the later Syriac version printed with it. \"God\" is in the Textus Receptus but not in Sinaiticus and some others; God is still the one who acts (verse 3)."
+   "note": "Revelation is not in the Peshitta's canon; Murdock translates it from the later Syriac version printed with it. \"God\" is in the Textus Receptus but not in Sinaiticus and some others; verse 3 still has God dwelling with his people."
   },
   {
    "book": 66,

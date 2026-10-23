@@ -181,7 +181,7 @@
    "kind": "virgin-birth",
    "weight": "minor",
    "change": "\"the virgin\" becomes \"the damsel\"",
-   "note": "The Hebrew is 'almah, the word in Isaiah 7:14; the Septuagint renders it neanis (\"young woman\") here but parthenos (\"virgin\") in Isaiah 7:14, and calls Rebekah parthenos in 24:16. It bears on how 'almah is read."
+   "note": "The Hebrew is 'almah, the word in Isaiah 7:14; the Septuagint has parthenos ('virgin') here as there, and Brenton renders it 'damsel'. The Greek supports the KJV's 'virgin'."
   },
   {
    "book": 1,
@@ -720,8 +720,8 @@
    "verse": 5,
    "kind": "other",
    "weight": "minor",
-   "change": "Israel wanders forty-two years, not forty",
-   "note": "The Septuagint's 5:4-6 differs from the Hebrew: it speaks of forty-two years in the wilderness and of most of the fighting men from Egypt being uncircumcised. The Hebrew and the KJV have forty years (also 5:6)."
+   "change": "Joshua circumcised them; Israel wandered \"forty and two years\"",
+   "note": "The Septuagint's 5:4-6 differs from the Hebrew: it has forty-two years in the wilderness and most fighting men from Egypt uncircumcised. The Hebrew and the KJV say the wilderness-born were uncircumcised, and give forty years in 5:6."
   },
   {
    "book": 6,
@@ -838,7 +838,7 @@
    "kind": "omission",
    "weight": "minor",
    "change": "Verse not in the Septuagint",
-   "note": "The Septuagint lacks 13:33, that the LORD was Levi's inheritance; the Hebrew and the KJV have it. The same is said in 13:14 and 18:7."
+   "note": "The Septuagint lacks 13:33, that the LORD was Levi's inheritance; the Hebrew and the KJV have it. The Septuagint says the same in its 13:14, where the Hebrew names the LORD's fire offerings as Levi's inheritance."
   },
   {
    "book": 6,
@@ -901,7 +901,7 @@
    "kind": "omission",
    "weight": "minor",
    "change": "Omits \"thou shalt see an enemy in my habitation\"",
-   "note": "The Septuagint keeps only \"there shall not be an old man in thine house for ever\"; the Hebrew foretells distress in God's dwelling as well. The judgment on Eli's house stands."
+   "note": "The Septuagint keeps only \"thou shalt not have an old man in my house for ever\"; the Hebrew foretells distress in God's dwelling as well. The judgment on Eli's house stands."
   },
   {
    "book": 9,
@@ -1216,7 +1216,7 @@
    "kind": "omission",
    "weight": "minor",
    "change": "Not here: the Septuagint has it in its addition after 2:46",
-   "note": "The Septuagint gathers this account of Solomon's prosperity into a summary after 2:46, where Brenton's text has it; the Hebrew and the KJV have it here. Moved, not lost (the Greek has 40,000 mares there, 4,000 at 10:26)."
+   "note": "The Septuagint gathers this account of Solomon's prosperity into a summary after 2:46, where Brenton's text has it; the Hebrew and the KJV have it here. Moved, not lost."
   },
   {
    "book": 11,
@@ -1225,7 +1225,7 @@
    "kind": "omission",
    "weight": "minor",
    "change": "Not here: the Septuagint has it in its addition after 2:46",
-   "note": "The Septuagint gathers this account of Solomon's prosperity into a summary after 2:46, where Brenton's text has it; the Hebrew and the KJV have it here. Moved, not lost (the Greek has 40,000 mares there, 4,000 at 10:26)."
+   "note": "The Septuagint gathers this account of Solomon's prosperity into a summary after 2:46, where Brenton's text has it; the Hebrew and the KJV have it here. Moved, not lost."
   },
   {
    "book": 11,
@@ -1253,15 +1253,6 @@
    "weight": "minor",
    "change": "Not here: in Brenton's text it is at 4:21",
    "note": "The Septuagint orders 4:20-5:1 otherwise; the officers' provisioning (4:27-28) stands where the KJV has 4:21. Moved, not lost."
-  },
-  {
-   "book": 11,
-   "chapter": 5,
-   "verse": 17,
-   "kind": "omission",
-   "weight": "minor",
-   "change": "Not here: the Septuagint has it in 6:1",
-   "note": "The Septuagint joins the laying of the costly foundation stones to its longer 6:1, where Brenton's text has it; the Hebrew and the KJV have it here."
   },
   {
    "book": 11,
@@ -1332,17 +1323,8 @@
    "verse": 33,
    "kind": "omission",
    "weight": "minor",
-   "change": "Verse not in the Septuagint",
-   "note": "The Septuagint describes the temple doors in 6:31-34 otherwise and more briefly; nothing in it answers to this verse. The Hebrew and the KJV have it."
-  },
-  {
-   "book": 11,
-   "chapter": 6,
-   "verse": 37,
-   "kind": "omission",
-   "weight": "minor",
-   "change": "Not here: the Septuagint has it in 6:1",
-   "note": "The dates of founding and finishing the temple (6:37-38) stand in the Septuagint's longer 6:1, where Brenton's text has them; the Hebrew and the KJV have them here."
+   "change": "Omits the temple door's posts of olive wood",
+   "note": "Brenton's 6:31 seems to pass from the oracle doors to the end of 6:33, so its \"four-fold\" answers to the \"fourth part\" here. The temple door-posts of olive wood are not given. A building detail."
   },
   {
    "book": 11,
@@ -1350,8 +1332,8 @@
    "verse": 38,
    "kind": "omission",
    "weight": "minor",
-   "change": "Not here: the Septuagint has it in 6:1",
-   "note": "The dates of founding and finishing the temple (6:37-38) stand in the Septuagint's longer 6:1, where Brenton's text has them; the Hebrew and the KJV have them here."
+   "change": "Omits \"So was he seven years in building it\"",
+   "note": "The Septuagint ends the verse at the house's completion; the Hebrew adds the seven years. They can still be reckoned from the fourth year to the eleventh (6:37-38), and Brenton's addition at 2:35 says \"in seven years\"."
   },
   {
    "book": 11,
@@ -1386,8 +1368,8 @@
    "verse": 16,
    "kind": "omission",
    "weight": "minor",
-   "change": "Not here: the Septuagint has it in its addition after 10:22",
-   "note": "The Septuagint gives Solomon's levy, his cities and his bondservants (9:15-22) after 10:22, and Pharaoh's taking of Gezer at 4:34; Brenton's text has them there. Moved, not lost."
+   "change": "Not here: the Septuagint has it in its addition after 4:34",
+   "note": "The Septuagint tells of Pharaoh taking Gezer and giving it as his daughter's dowry in its addition after 4:34, where Brenton's text has it; the Hebrew and the KJV have it here. Moved, not lost."
   },
   {
    "book": 11,
@@ -1872,8 +1854,8 @@
    "verse": 17,
    "kind": "omission",
    "weight": "minor",
-   "change": "Lists only Elam and Asshur among Shem's sons",
-   "note": "The Septuagint (Vaticanus) breaks off after Asshur and lacks the rest of Shem's line to 1:24, which repeats Genesis 10:22-29 and 11:10-26; the Hebrew and the KJV have it."
+   "change": "Omits Lud, Aram, Uz, Hul, Gether and Meshech among Shem's sons",
+   "note": "The Septuagint (Vaticanus) lacks 1:17b-23 (Genesis 10:22-29) and runs from Asshur straight on to Arphaxad in 1:24, so these names, and Arphaxad's line down to Joktan's sons, are missing; the Hebrew and the KJV have them."
   },
   {
    "book": 13,
@@ -2142,8 +2124,8 @@
    "verse": 17,
    "kind": "omission",
    "weight": "minor",
-   "change": "Verse not in the Septuagint",
-   "note": "The Septuagint's Esther is a freer and often shorter rendering of the Hebrew, and has nothing for this verse; the Hebrew and the KJV have it. Memucan's fear that all wives would despise their husbands is implied in 1:18-20."
+   "change": "Not here: this edition prints it at the start of 7:5",
+   "note": "The Septuagint has a shorter 1:17: Memucan had told them the queen's words and how she disobeyed the king. Brenton's text here prints it at the start of 7:5. The fear that wives will dishonour their husbands follows in 1:18."
   },
   {
    "book": 17,
@@ -2205,8 +2187,8 @@
    "verse": 1,
    "kind": "omission",
    "weight": "minor",
-   "change": "Verse not in the Septuagint",
-   "note": "The Septuagint's Esther is a freer and often shorter rendering of the Hebrew, and has nothing for this verse; the Hebrew and the KJV have it."
+   "change": "Shorter: lacks the enemies' hope turned to the Jews' rule",
+   "note": "The Septuagint's 9:1 gives only the date the king's letters arrived, and this edition prints it at the end of 3:13; the Hebrew and the KJV add that the enemies' hope was turned and the Jews ruled over them."
   },
   {
    "book": 17,
@@ -2232,8 +2214,8 @@
    "verse": 27,
    "kind": "omission",
    "weight": "minor",
-   "change": "Verse not in the Septuagint",
-   "note": "The Septuagint's Esther is a freer and often shorter rendering of the Hebrew, and has nothing for this verse; the Hebrew and the KJV have it."
+   "change": "Not here: this edition runs it into 9:28",
+   "note": "The Septuagint has this verse, Mordecai establishing the days and the Jews taking them on themselves, their seed and those joined to them; Brenton's text here prints it as the start of 9:28. Moved, not lost."
   },
   {
    "book": 17,
@@ -2637,8 +2619,8 @@
    "verse": 4,
    "kind": "other",
    "weight": "minor",
-   "change": "Verse not in the Septuagint",
-   "note": "The Septuagint lacks \"The LORD hath made all things for himself: yea, even the wicked for the day of evil\"; its 16:2 ends with the ungodly perishing in an evil day. The Hebrew and the KJV have the verse, often cited on God's sovereignty."
+   "change": "Reworded: the Lord's works \"done with righteousness\" (at 16:9 here)",
+   "note": "The Septuagint's form of this saying, at 16:9 in Brenton's text, says the Lord's works are done with righteousness and the ungodly man is kept for the evil day. The Hebrew and the KJV say the LORD made all things for himself, even the wicked for the day of evil, a verse often cited on God's sovereignty."
   },
   {
    "book": 20,
@@ -2818,7 +2800,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "\"the name of his children\" for \"his son's name\"",
-   "note": "The Septuagint's Proverbs 30 opens with sayings the Hebrew lacks, so in Brenton's text Agur's questions stand at 30:6; it asks \"what is the name of his children?\" where the Hebrew and the KJV ask \"what is his son's name?\""
+   "note": "The Septuagint asks \"what is the name of his children?\" where the Hebrew and the KJV ask \"what is his son's name?\", a question often read of the Son of God."
   },
   {
    "book": 23,
@@ -2988,8 +2970,8 @@
    "verse": 10,
    "kind": "judgment",
    "weight": "minor",
-   "change": "Omits \"for ever\" and \"for ever and ever\"",
-   "note": "The Septuagint says Edom's fire shall not be quenched and its smoke shall go up, but lacks \"for ever\" and \"none shall pass through it for ever and ever\"; Revelation 14:11 and 19:3 echo the Hebrew's lasting smoke."
+   "change": "Smoke not \"for ever\"; no \"none shall pass through it for ever\"",
+   "note": "The Septuagint applies \"for ever\" to the fire (\"never be quenched\") and not to the smoke, and in place of \"none shall pass through it for ever and ever\" has desolation \"for a long time\" (34:11 here). Revelation 14:11 and 19:3 echo the Hebrew's smoke going up for ever."
   },
   {
    "book": 23,
@@ -3043,7 +3025,7 @@
    "kind": "omission",
    "weight": "minor",
    "change": "Omits \"my salvation shall be for ever\"",
-   "note": "The Septuagint keeps only \"my righteousness shall not fail\"; the Hebrew and the KJV set God's everlasting salvation against the vanishing heavens (repeated in 51:8)."
+   "note": "The standard Greek Septuagint text has \"my salvation shall be for ever\", so the gap is in this English text, not in the Septuagint. God's lasting salvation is still stated in 51:8."
   },
   {
    "book": 23,
@@ -3106,7 +3088,7 @@
    "kind": "atonement",
    "weight": "major",
    "change": "\"to shew him light... to justify the just one\"",
-   "note": "The Septuagint and two Dead Sea Isaiah scrolls (1QIsa-a, 4QIsa-d) have the servant see light after his travail; the Greek then has God justify the just one who serves many well. The Hebrew and the KJV have the righteous servant justify many by his knowledge. Both keep \"he shall bear their sins\"."
+   "note": "The Septuagint and three Dead Sea Isaiah scrolls (1QIsa-a, 1QIsa-b, 4QIsa-d) have the servant see light after his travail; the Greek then has God justify the just one who serves many well, where the Hebrew and the KJV have the righteous servant justify many by his knowledge. Both keep \"he shall bear their sins\"."
   },
   {
    "book": 23,
@@ -3142,7 +3124,7 @@
    "kind": "prophecy",
    "weight": "minor",
    "change": "\"for Sion's sake... turn away ungodliness from Jacob\"",
-   "note": "The Septuagint has the deliverer come for Zion's sake and turn ungodliness away from Jacob, the form Paul quotes in Romans 11:26. The Hebrew and the KJV have him come to Zion, to those in Jacob who turn from transgression."
+   "note": "The Septuagint has the deliverer come for Zion's sake and turn ungodliness away from Jacob; Paul in Romans 11:26 follows this Greek, though with \"out of Sion\". The Hebrew and the KJV have him come to Zion, to those in Jacob who turn from transgression."
   },
   {
    "book": 23,
@@ -3169,7 +3151,7 @@
    "kind": "omission",
    "weight": "minor",
    "change": "Not here: the Septuagint has it in 63:19",
-   "note": "The Septuagint numbers 64:1 with 63:19, where Brenton's text has \"If thou wouldest open the heaven...\"; the Hebrew and the KJV begin chapter 64 with it."
+   "note": "Brenton's text, like the Hebrew, counts this line as the end of 63:19 (\"If thou wouldest open the heaven...\"); only the KJV begins chapter 64 with it."
   },
   {
    "book": 23,
@@ -3286,7 +3268,7 @@
    "kind": "omission",
    "weight": "major",
    "change": "Verse not in the Septuagint",
-   "note": "The Septuagint of Jeremiah is about an eighth shorter than the Hebrew, and some Dead Sea fragments of Jeremiah (4QJer-b, 4QJer-d) support its shorter form; it lacks 10:10, \"the LORD is the true God, he is the living God, and an everlasting king\", as does 4QJer-b. Brenton's text has 10:5 here, the Greek ordering 10:5-10 otherwise. The living God is still set against idols in 10:11-16."
+   "note": "The Septuagint of Jeremiah is about an eighth shorter than the Hebrew. It lacks 10:10, \"the LORD is the true God, he is the living God, and an everlasting king\", and so does 4QJer-b; Brenton's text has 10:5b here. The LORD as maker of the earth is still set against idols in 10:11-16."
   },
   {
    "book": 24,
@@ -3601,7 +3583,7 @@
    "kind": "prophecy",
    "weight": "major",
    "change": "Verse not in the Septuagint",
-   "note": "The Septuagint of Jeremiah, about an eighth shorter than the Hebrew, has no 33:14-26. It lacks this verse, where Jerusalem is called \"The LORD our righteousness\"; 23:6, in the Greek too, gives the name to the coming king."
+   "note": "The Septuagint of Jeremiah, about an eighth shorter than the Hebrew, has no 33:14-26. It lacks this verse, where Jerusalem is called \"The LORD our righteousness\"; the Hebrew gives that name to the coming king at 23:6, where the Greek has \"Josedec\"."
   },
   {
    "book": 24,
@@ -4006,7 +3988,7 @@
    "kind": "omission",
    "weight": "minor",
    "change": "Verse not in the Septuagint",
-   "note": "The Septuagint lacks 11:11 and the start of 11:12; the Hebrew and the KJV have it. The judgment at Israel's border is still in 11:10."
+   "note": "The Septuagint lacks 11:11-12; the Hebrew and the KJV have them. The judgment in Israel, with \"ye shall know that I am the LORD\", is still in 11:10."
   },
   {
    "book": 26,
@@ -4015,7 +3997,7 @@
    "kind": "omission",
    "weight": "minor",
    "change": "Verse not in the Septuagint",
-   "note": "The Septuagint lacks 11:11-12a, with \"ye shall know that I am the LORD\" and the charge of following the heathen; the Hebrew and the KJV have it."
+   "note": "The Septuagint lacks 11:11-12, with \"ye shall know that I am the LORD\" and the charge of following the heathen; the Hebrew and the KJV have them."
   },
   {
    "book": 26,
@@ -4042,7 +4024,7 @@
    "kind": "judgment",
    "weight": "minor",
    "change": "\"down to Hades\" for \"down to hell\"",
-   "note": "The Hebrew she'ol is the grave or place of the dead; the Septuagint renders it Hades, the KJV \"hell\" (also 31:15-17)."
+   "note": "The Hebrew she'ol is the grave or place of the dead; here the Septuagint renders it Hades and the KJV \"hell\"."
   },
   {
    "book": 26,
@@ -4141,7 +4123,7 @@
    "kind": "other",
    "weight": "minor",
    "change": "No \"Judah yet ruleth with God\"",
-   "note": "The Septuagint joins Judah to Israel's ungodliness and adds that God knows them and they shall be his holy people; the Hebrew and the KJV set faithful Judah against Ephraim."
+   "note": "The Septuagint joins Judah to Israel's ungodliness and adds that God knows them and they shall be his holy people; the KJV reads the disputed Hebrew as setting faithful Judah against Ephraim."
   },
   {
    "book": 28,
@@ -4150,7 +4132,7 @@
    "kind": "prophecy",
    "weight": "minor",
    "change": "\"where is thy penalty, O death? O Hades, where is thy sting?\"",
-   "note": "The Septuagint makes the lines taunting questions, the form behind 1 Corinthians 15:55; the Hebrew and the KJV have God's threat, \"O death, I will be thy plagues; O grave, I will be thy destruction\"."
+   "note": "The Septuagint reads the Hebrew ehi as \"where\", as most modern versions do, and has \"penalty\" and \"sting\", the form behind 1 Corinthians 15:55; the KJV reads ehi as \"I will be\": \"O death, I will be thy plagues; O grave, I will be thy destruction\"."
   },
   {
    "book": 30,
@@ -4195,7 +4177,7 @@
    "kind": "salvation",
    "weight": "major",
    "change": "\"the just shall live by my faith\"; \"if he should draw back\"",
-   "note": "The Septuagint reads \"by my faith\" (God's faithfulness) and \"if he draw back, my soul has no pleasure in him\"; Hebrews 10:38 quotes this Greek, Romans 1:17 and Galatians 3:11 the words without a pronoun. The Hebrew and the KJV have \"by his faith\"."
+   "note": "The Septuagint reads \"by my faith\" (God's faithfulness) and \"if he draw back, my soul has no pleasure in him\"; Hebrews 10:38 follows this Greek with the clauses reversed and without \"my faith\", and Romans 1:17 and Galatians 3:11 have \"by faith\". The Hebrew and the KJV have \"by his faith\"."
   },
   {
    "book": 37,
@@ -4231,7 +4213,7 @@
    "kind": "other",
    "weight": "minor",
    "change": "\"if thou shouldest hate thy wife and put her away\"",
-   "note": "The Septuagint reads 2:16 as a warning to the man who puts his wife away; the Hebrew and the KJV have God saying he hates putting away."
+   "note": "The Septuagint reads 2:16 as a warning to the man who hates his wife and puts her away, as the ESV also reads the ambiguous Hebrew; the KJV takes it as God saying he hates putting away."
   }
  ]
 }

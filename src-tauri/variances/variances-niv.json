@@ -41,15 +41,6 @@
   },
   {
    "book": 1,
-   "chapter": 16,
-   "verse": 10,
-   "kind": "deity",
-   "weight": "minor",
-   "change": "\"the angel of the LORD\" becomes \"The angel\"",
-   "note": "The Masoretic text has \"the angel of the LORD\" here; the NIV shortens the repeated phrase (it keeps it in verses 9 and 11). Some read this angel as an appearance of God himself."
-  },
-  {
-   "book": 1,
    "chapter": 19,
    "verse": 18,
    "kind": "deity",
@@ -100,7 +91,7 @@
    "kind": "other",
    "weight": "minor",
    "change": "\"the son of Nahor\" becomes \"Nahor's grandson\"",
-   "note": "The Hebrew says \"son\"; the NIV interprets it from Genesis 24:29, where Laban is Bethuel's son and Nahor's grandson."
+   "note": "The Hebrew says \"son\"; the NIV reads it as a descendant, since Genesis 22:20-23 and 24:15, 24, 29 make Laban the son of Bethuel, who was Nahor's son."
   },
   {
    "book": 1,
@@ -190,7 +181,7 @@
    "kind": "other",
    "weight": "major",
    "change": "\"Shalt not kill\" narrowed to \"shall not murder\"",
-   "note": "The Hebrew \"ratzach\" denotes unlawful killing rather than killing in general, so the NIV's \"murder\" is more precise; but it visibly narrows the KJV's broader wording, which has been invoked in debates over war, self-defense and capital punishment."
+   "note": "The Hebrew ratsach is never used of killing in war or of animals and usually means murder, though Numbers 35 also uses it of manslaughter. The NIV's \"murder\" narrows the KJV's broader \"kill\", which has been invoked in debates over war, self-defense and capital punishment."
   },
   {
    "book": 2,
@@ -316,7 +307,7 @@
    "kind": "other",
    "weight": "minor",
    "change": "\"Sodomite\" becomes \"shrine prostitute\"",
-   "note": "The Hebrew \"qadesh\" denotes a male cult prostitute serving pagan shrines; the KJV's \"sodomite\" imports a link to homosexuality from the Sodom narrative that the term itself does not specify. The same word recurs at 1 Kings 14:24; 15:12; 22:46 and 2 Kings 23:7."
+   "note": "The Hebrew qadesh, literally \"consecrated one\", denotes a male cult prostitute at a shrine; the KJV renders it \"sodomite\", the NIV by its cultic role. The same word recurs at 1 Kings 14:24; 15:12; 22:46 and 2 Kings 23:7."
   },
   {
    "book": 5,
@@ -343,7 +334,7 @@
    "kind": "other",
    "weight": "major",
    "change": "Drops \"a fiery law for them\"",
-   "note": "The rare Hebrew phrase here, traditionally read as 'a fiery law' given from God's right hand, is instead read by the NIV as a place name meaning mountain slopes, losing the traditional allusion to the giving of the Law at Sinai."
+   "note": "The Hebrew is obscure: the KJV follows the Masoretic marginal reading 'esh dat, \"a fiery law\", while the NIV reads the written consonants as 'ashdot, \"slopes\", and takes \"his right hand\" as \"the south\". The allusion to the law given at Sinai is lost."
   },
   {
    "book": 6,
@@ -415,7 +406,7 @@
    "kind": "other",
    "weight": "major",
    "change": "\"Son of Manasseh\" becomes \"son of Moses\"",
-   "note": "The Masoretic Text inserts a suspended letter to disguise this priest as a descendant of Manasseh rather than Moses; the NIV follows the plain consonantal reading and ancient manuscript evidence naming him a son of Moses directly."
+   "note": "The Masoretic text writes the name with a raised letter nun, which makes it read Manasseh; scribal tradition says this spared Moses' name. The NIV reads Moses, as the consonants without the nun, the Vulgate and some Septuagint manuscripts do."
   },
   {
    "book": 9,
@@ -484,7 +475,7 @@
    "book": 10,
    "chapter": 21,
    "verse": 19,
-   "kind": "omission",
+   "kind": "other",
    "weight": "minor",
    "change": "\"Jaareoregim\" becomes \"Jair\"",
    "note": "\"Jaareoregim\" is widely thought to be a scribal duplication of \"oregim\" (\"weavers\") from later in the verse; the NIV follows the shorter name \"Jair\" found in the parallel at 1 Chronicles 20:5. Both texts already harmonize \"the brother of Goliath\" into the verse."
@@ -532,7 +523,7 @@
    "kind": "other",
    "weight": "minor",
    "change": "\"Sodomites\" becomes \"male shrine prostitutes\"",
-   "note": "Same Hebrew term (\"qadesh\") as Deuteronomy 23:17; the KJV's \"sodomites\" reads a sexual-orientation sense into a word denoting participants in Canaanite cultic prostitution."
+   "note": "Same Hebrew term (qadesh) as Deuteronomy 23:17; the KJV renders it \"sodomites\", the NIV by the cultic role of male prostitutes at Canaanite shrines."
   },
   {
    "book": 11,
@@ -541,7 +532,7 @@
    "kind": "other",
    "weight": "minor",
    "change": "\"Sodomites\" becomes \"male shrine prostitutes\"",
-   "note": "Same Hebrew term (\"qadesh\") as Deuteronomy 23:17 and 1 Kings 14:24; the KJV's \"sodomites\" reads a sexual-orientation sense into a word denoting participants in Canaanite cultic prostitution."
+   "note": "Same Hebrew term (qadesh) as Deuteronomy 23:17 and 1 Kings 14:24; the KJV renders it \"sodomites\", the NIV by the cultic role of male prostitutes at Canaanite shrines."
   },
   {
    "book": 11,
@@ -550,7 +541,7 @@
    "kind": "other",
    "weight": "minor",
    "change": "\"Sodomites\" becomes \"male shrine prostitutes\"",
-   "note": "Same Hebrew term (\"qadesh\") as Deuteronomy 23:17 and 1 Kings 14:24; 15:12; the KJV's \"sodomites\" reads a sexual-orientation sense into a word denoting participants in Canaanite cultic prostitution."
+   "note": "Same Hebrew term (qadesh) as Deuteronomy 23:17 and 1 Kings 14:24; 15:12; the KJV renders it \"sodomites\", the NIV by the cultic role of male prostitutes at Canaanite shrines."
   },
   {
    "book": 12,
@@ -585,8 +576,8 @@
    "verse": 16,
    "kind": "other",
    "weight": "minor",
-   "change": "Zedekiah no longer called Jeconiah's son",
-   "note": "The Hebrew has \"Zedekiah his son\"; the NIV renders the list as successors and drops \"his son\", reading this Zedekiah as a successor, not a son. A translation choice on a genealogical point."
+   "change": "Drops \"his son\" after Zedekiah",
+   "note": "The Hebrew has \"Zedekiah his son\", which can make him Jeconiah's son or another son of Jehoiakim (2 Chronicles 36:10 calls Zedekiah Jehoiachin's brother); the NIV renders the list as successors and drops \"his son\". A translation choice on a genealogical point."
   },
   {
    "book": 13,
@@ -793,7 +784,7 @@
    "kind": "prophecy",
    "weight": "major",
    "change": "Singular \"him\" made plural \"them\", losing the messianic reference",
-   "note": "Hebrews 2:6-9 applies this verse to Christ using the singular; the NIV's gender-neutral \"them\" follows the Hebrew's generic \"man\" but obscures that reading here, though it is kept in the NIV's own text of Hebrews."
+   "note": "Hebrews 2:6-9 applies this verse to Christ using the singular; the NIV's gender-neutral \"them\" follows the Hebrew's generic \"man\" but obscures that reading here, and its text of Hebrews 2:7-8 also uses the plural."
   },
   {
    "book": 19,
@@ -908,9 +899,9 @@
    "chapter": 105,
    "verse": 28,
    "kind": "other",
-   "weight": "major",
-   "change": "\"Rebelled not\" becomes \"had they not rebelled\"",
-   "note": "The KJV reads that Israel did not rebel against God's word; the NIV takes the same Hebrew as a rhetorical question implying the opposite, that they did rebel, a substantial change in what the verse reports."
+   "weight": "minor",
+   "change": "\"They rebelled not\" becomes \"had they not rebelled\"",
+   "note": "The Masoretic text reads \"they rebelled not\", which the KJV keeps and which is usually taken of Moses and Aaron obeying; the Septuagint drops the \"not\". The NIV keeps the Hebrew but reads it as a question, implying that the Egyptians had rebelled."
   },
   {
    "book": 19,
@@ -1089,8 +1080,8 @@
    "verse": 1,
    "kind": "other",
    "weight": "minor",
-   "change": "\"Ithiel and Ucal\" read instead as \"I am weary... but I can prevail\"",
-   "note": "The consonantal Hebrew here is ambiguous; the NIV repoints it as a first-person confession of weariness rather than the two names Ithiel and Ucal that the KJV, following the Masoretic vowel points, takes as men Agur addressed. Both readings come from the same consonants."
+   "change": "\"Ithiel and Ucal\" read as \"I am weary, God\"",
+   "note": "The same consonants can be read as names (the KJV, following the Masoretic vowels) or repointed as speech; the NIV keeps one Ithiel and reads the rest as \"I am weary, God, but I can prevail\", so Ucal is no longer a name."
   },
   {
    "book": 21,
@@ -1169,7 +1160,7 @@
    "chapter": 19,
    "verse": 10,
    "kind": "other",
-   "weight": "major",
+   "weight": "minor",
    "change": "\"Makers of sluices and ponds\" become \"workers in cloth\" and \"wage earners\"",
    "note": "The underlying Hebrew term is uncertain; the NIV reads it as textile workers and hired labourers rather than the makers of dams and fishponds the KJV gives from the traditional vocalization. Either way the verse's point, that Egypt's economy will fail, is unchanged."
   },
@@ -1216,7 +1207,7 @@
    "kind": "other",
    "weight": "major",
    "change": "\"Create evil\" softened to \"create disaster\"",
-   "note": "The Hebrew ra' covers both moral evil and calamity; the NIV takes the narrower sense of disaster, avoiding any implication that God authors moral evil, while the KJV's broader \"evil\" has long featured in debate over God's sovereignty over evil."
+   "note": "The Hebrew ra' covers both moral evil and calamity; the NIV chooses the narrower \"disaster\", while the KJV's broader \"evil\" has long featured in debate over God's sovereignty over evil."
   },
   {
    "book": 23,
@@ -1306,7 +1297,7 @@
    "kind": "prophecy",
    "weight": "major",
    "change": "title \"THE LORD OUR RIGHTEOUSNESS\" becomes \"The LORD Our Righteous Savior\"",
-   "note": "The Hebrew name (Yahweh Tsidkenu) joins the divine name directly to \"our righteousness\" as the Branch's title; the NIV's \"Righteous Savior\" conveys the sense but no longer carries the divine name itself in the title."
+   "note": "The Hebrew name (Yahweh Tsidkenu) means \"the LORD is our righteousness\"; the NIV keeps \"The LORD\" but turns \"our righteousness\" into \"Our Righteous Savior\", which loosens the title's statement that the LORD is his people's righteousness."
   },
   {
    "book": 24,
@@ -1666,7 +1657,7 @@
    "kind": "prophecy",
    "weight": "minor",
    "change": "\"having salvation\" becomes \"victorious\"",
-   "note": "A translation choice for the Hebrew nosha, \"saved\" or \"victorious\". The messianic king still comes righteous and lowly, as quoted in Matthew 21:5."
+   "note": "A translation choice for the Hebrew nosha, which can mean \"saved\" or \"victorious\". The king still comes righteous and lowly on a donkey, and the Gospels quote the verse (Matthew 21:5; John 12:15)."
   },
   {
    "book": 38,
@@ -1738,7 +1729,7 @@
    "kind": "judgment",
    "weight": "minor",
    "change": "\"hell\" becomes \"Hades\"",
-   "note": "The Greek word is Hades (the realm of the dead), which the NIV transliterates rather than rendering \"hell\" as the KJV does; this is a translation choice, not a manuscript difference. Hell as eternal punishment (Gehenna) is still taught elsewhere, e.g. Matthew 25:41."
+   "note": "The Greek word is Hades (the realm of the dead), which the NIV transliterates rather than rendering \"hell\" as the KJV does; this is a translation choice, not a manuscript difference. Hell as final punishment (Gehenna) is still taught elsewhere, e.g. Matthew 10:28."
   },
   {
    "book": 40,
@@ -1819,7 +1810,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "\"even Christ\" dropped from \"your Master\"",
-   "note": "The words \"even Christ,\" naming Jesus explicitly, are present in the Byzantine text and Textus Receptus but absent from the earliest manuscripts the NIV follows; the reference to Jesus remains plain from context."
+   "note": "The words \"even Christ\" are in the Byzantine text and Textus Receptus but absent from the earliest manuscripts the NIV follows. Jesus is still named as the one Instructor, the Messiah, at Matthew 23:10."
   },
   {
    "book": 40,
@@ -1945,7 +1936,7 @@
    "kind": "judgment",
    "weight": "major",
    "change": "Verse omitted: \"where their worm dieth not\"",
-   "note": "This description of unquenched judgment is missing from the earliest manuscripts at verse 44, most likely copied into later manuscripts from verse 48 where it does appear; the NIV follows the earlier text. The same warning is present three verses later in both versions."
+   "note": "This description of unquenched judgment is missing from the earliest manuscripts at verse 44, most likely copied into later manuscripts from verse 48 where it does appear; the NIV follows the earlier text. The same warning stands four verses later, at verse 48, in both versions."
   },
   {
    "book": 41,
@@ -1990,7 +1981,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "\"Lord\" becomes \"Rabbi\"",
-   "note": "The earliest manuscripts have the blind man address Jesus with the Aramaic \"Rabboni\" (teacher), which the NIV renders \"Rabbi\"; the Textus Receptus instead reads \"Lord.\" Both are titles of respect addressed to Jesus."
+   "note": "Both texts have the Aramaic title rhabbouni (\"my teacher\"); the KJV renders it \"Lord\" and the NIV \"Rabbi\", so this is a translation choice, not a manuscript difference. Both are titles of respect addressed to Jesus."
   },
   {
    "book": 41,
@@ -2188,7 +2179,7 @@
    "kind": "omission",
    "weight": "major",
    "change": "Omits \"Get thee behind me, Satan\"",
-   "note": "The rebuke is present in the Byzantine text, harmonized from Matthew 4:10, but missing from the oldest Lukan manuscripts, which the NIV follows. The same words appear at Luke 4:8's Matthean parallel and later at Luke 4:13 and 22:31 Satan is still named as the tempter."
+   "note": "The rebuke is in the Byzantine text and Textus Receptus but missing from the oldest Lukan manuscripts, which the NIV follows; it is thought to have been borrowed from Matthew's account. Jesus still rebukes Satan by name at Matthew 4:10 in both versions (\"Away from me, Satan!\" in the NIV)."
   },
   {
    "book": 42,
@@ -2309,39 +2300,12 @@
   },
   {
    "book": 42,
-   "chapter": 22,
-   "verse": 43,
-   "kind": "other",
-   "weight": "minor",
-   "change": "Printed NIV footnotes verses 43-44 as missing from early manuscripts",
-   "note": "The verse is in this text, but the printed NIV footnotes that many early manuscripts (P75, Vaticanus and others) lack verses 43 and 44; this e-Sword copy has no footnotes. Sinaiticus' first hand and the Byzantine majority have them."
-  },
-  {
-   "book": 42,
-   "chapter": 22,
-   "verse": 44,
-   "kind": "other",
-   "weight": "minor",
-   "change": "Printed NIV footnotes verses 43-44 as missing from early manuscripts",
-   "note": "The verse is in this text, but the printed NIV footnotes that many early manuscripts (P75, Vaticanus and others) lack verses 43 and 44; this e-Sword copy has no footnotes. Sinaiticus' first hand and the Byzantine majority have them."
-  },
-  {
-   "book": 42,
    "chapter": 23,
    "verse": 17,
    "kind": "omission",
    "weight": "major",
    "change": "Whole verse omitted",
    "note": "\"For of necessity he must release one unto them at the feast\" is missing from the earliest manuscripts (including P75, Sinaiticus and Vaticanus) and is considered borrowed from Matthew 27:15/Mark 15:6; the NIV omits it, usually with a footnote. The custom itself is still described in the surrounding verses and in the other Gospels."
-  },
-  {
-   "book": 42,
-   "chapter": 23,
-   "verse": 34,
-   "kind": "other",
-   "weight": "minor",
-   "change": "Printed NIV footnotes \"Father, forgive them\" as missing from some manuscripts",
-   "note": "The saying is in this text, but the printed NIV footnotes that some early manuscripts (P75, Vaticanus, a corrector of Sinaiticus) lack it; this e-Sword copy has no footnotes. Sinaiticus' first hand and the Byzantine majority have it."
   },
   {
    "book": 42,
@@ -2377,7 +2341,7 @@
    "kind": "omission",
    "weight": "minor",
    "change": "Drops closing \"Amen\"; \"blessing\" God is also dropped",
-   "note": "The closing \"Amen\" is a scribal addition found in the Byzantine/Textus Receptus text but absent from the earliest manuscripts, which the NIV follows; such closing amens are dropped throughout the NIV New Testament."
+   "note": "The closing \"Amen\" is in the Byzantine/Textus Receptus text but absent from the earliest manuscripts, which the NIV follows. The two verbs \"praising and blessing\" also become one, \"praising\", with no change of meaning."
   },
   {
    "book": 43,
@@ -2709,8 +2673,8 @@
    "verse": 24,
    "kind": "deity",
    "weight": "minor",
-   "change": "\"Lord, thou art God\" becomes \"Sovereign Lord\"",
-   "note": "The NIV compresses the address into a single title, \"Sovereign Lord,\" rather than the KJV's separate \"Lord, thou art God\"; the prayer's acknowledgment of God as maker of heaven and earth follows either way."
+   "change": "Drops \"thou art God\"; \"Lord\" becomes \"Sovereign Lord\"",
+   "note": "The Byzantine text and Textus Receptus have \"thou art God\" after the address; the earliest manuscripts lack it, and the NIV follows them, rendering Despota as \"Sovereign Lord\". The prayer still names God as maker of heaven and earth."
   },
   {
    "book": 44,
@@ -2735,9 +2699,9 @@
    "chapter": 7,
    "verse": 59,
    "kind": "deity",
-   "weight": "major",
-   "change": "Omits \"calling upon God\" before \"Lord Jesus, receive my spirit\"",
-   "note": "The Textus Receptus has Stephen \"calling upon God, and saying, Lord Jesus...\"; the earliest manuscripts, followed by the NIV, lack \"God,\" leaving only \"Lord Jesus.\" The KJV's wording makes explicit that Stephen prayed to Jesus as God; the NIV still shows him praying to Jesus, but without that label attached."
+   "weight": "minor",
+   "change": "\"calling upon God, and saying\" becomes \"prayed\"",
+   "note": "The Greek is the same in both texts and has no word for \"God\"; the KJV supplies it (printed in italics), and the NIV renders the verb as \"prayed\". In both versions Stephen addresses his prayer to the Lord Jesus."
   },
   {
    "book": 44,
@@ -2746,7 +2710,7 @@
    "kind": "deity",
    "weight": "major",
    "change": "Verse omitted: the eunuch's confession \"Jesus Christ is the Son of God\"",
-   "note": "This verse is absent from the earliest Greek manuscripts and is widely held to be a later addition reflecting an early baptismal creed; the NIV omits it and renumbers the chapter accordingly. The confession of Jesus as Son of God is affirmed many times elsewhere in Acts and the Gospels."
+   "note": "The verse is absent from the earliest Greek manuscripts and from most Byzantine ones, and is widely held to be a later addition reflecting an early baptismal confession; the NIV omits it, leaving the verse number blank. Jesus is confessed as Son of God many times elsewhere in Acts and the Gospels."
   },
   {
    "book": 44,
@@ -2755,7 +2719,7 @@
    "kind": "omission",
    "weight": "major",
    "change": "Omits \"it is hard for thee to kick against the pricks\"",
-   "note": "This clause is a well-known Byzantine/Textus Receptus expansion, borrowed from Paul's retelling of his conversion at Acts 26:14, and is absent from the earliest manuscripts of chapter 9. No doctrine is at stake; the idiom about resisting God is still present at 26:14."
+   "note": "The clause is in the Textus Receptus (from the Latin Vulgate and very few Greek manuscripts) but not in the Byzantine majority or the earliest manuscripts; it matches Paul's account at Acts 26:14. No doctrine is at stake, and the saying is still present at 26:14."
   },
   {
    "book": 44,
@@ -2763,8 +2727,8 @@
    "verse": 6,
    "kind": "omission",
    "weight": "major",
-   "change": "Omits Saul's question and the Lord's reply before the command",
-   "note": "\"Lord, what wilt thou have me to do? And the Lord said unto him, Arise\" is another Byzantine harmonization, borrowed from Acts 22:10, missing from the earliest manuscripts of chapter 9. The content is preserved at its original locations in chapters 22 and 26."
+   "change": "Omits \"trembling and astonished\", Saul's question and the Lord's reply",
+   "note": "\"And he trembling and astonished said, Lord, what wilt thou have me to do? And the Lord said unto him\" is in the Textus Receptus (from the Vulgate and very few Greek manuscripts) but not in the Byzantine majority or earlier manuscripts; it echoes Acts 22:10, where the question is still found."
   },
   {
    "book": 44,
@@ -2772,8 +2736,8 @@
    "verse": 29,
    "kind": "deity",
    "weight": "minor",
-   "change": "Omits \"in the name of the Lord Jesus\"",
-   "note": "The earliest manuscripts, which the NIV follows, lack this phrase describing how Paul spoke; the Textus Receptus includes it. Paul's bold preaching in Jesus' name is still described two verses earlier, at 9:27."
+   "change": "Phrase moves to verse 28 as \"in the name of the Lord\"; \"Jesus\" dropped",
+   "note": "The critical text divides the verses so the phrase ends 9:28 and reads \"the Lord\" without \"Jesus\"; the Textus Receptus has \"in the name of the Lord Jesus\" at 9:29. Paul's bold preaching in Jesus' name is also stated at 9:27."
   },
   {
    "book": 44,
@@ -2782,7 +2746,7 @@
    "kind": "omission",
    "weight": "major",
    "change": "Omits \"he shall tell thee what thou oughtest to do\"",
-   "note": "This clause is in the Textus Receptus but absent from the earliest manuscripts, likely copied in from the angel's near-identical words to Cornelius in verse 32. No doctrine is affected, and the same instruction is given there."
+   "note": "The Textus Receptus has this clause but the earliest manuscripts lack it; it may have been added from similar words at Acts 10:32 or 11:14. No doctrine is affected, and the NIV's 11:14 still says Peter will bring a message."
   },
   {
    "book": 44,
@@ -2818,7 +2782,7 @@
    "kind": "deity",
    "weight": "major",
    "change": "\"this day have I begotten thee\" becomes \"today I have become your father\"",
-   "note": "Both texts have the same Greek, quoting Psalm 2:7's \"I have begotten you\"; the NIV chooses a paraphrase that reframes eternal begetting as becoming a father, a different image for Christ's sonship. The verse is quoted in its fuller form at Hebrews 1:5 and 5:5."
+   "note": "The Greek is the same (Psalm 2:7, \"I have begotten you\"); the NIV renders it \"I have become your father\" and writes \"son\" in lower case here. The same psalm is quoted at Hebrews 1:5 and 5:5, where the NIV also has \"become your Father\"."
   },
   {
    "book": 44,
@@ -2889,8 +2853,8 @@
    "verse": 21,
    "kind": "omission",
    "weight": "major",
-   "change": "Omits Paul's vow to \"keep this feast that cometh in Jerusalem\"",
-   "note": "This clause about a feast obligation is in the Textus Receptus but absent from the earliest manuscripts, and the NIV follows the shorter text. No doctrine is affected; it is a detail of Paul's travel plans."
+   "change": "Omits \"I must by all means keep this feast that cometh in Jerusalem\"",
+   "note": "This clause about a feast is in the Byzantine text and Textus Receptus but absent from the earliest manuscripts, and the NIV follows the shorter text. No doctrine is affected; it is a detail of Paul's travel plans."
   },
   {
    "book": 44,
@@ -2971,7 +2935,7 @@
    "kind": "omission",
    "weight": "major",
    "change": "Verse omitted: Lysias forcibly took Paul from his accusers",
-   "note": "This verse is part of the same longer Byzantine reading omitted at 24:6, absent from the earliest manuscripts; the NIV follows the shorter text and renumbers accordingly. It is a narrative detail with no doctrine at stake."
+   "note": "This verse is part of the same longer reading omitted at 24:6, found in the Textus Receptus and some later manuscripts but absent from the earliest; the NIV follows the shorter text, leaving the verse blank. It is a narrative detail with no doctrine at stake."
   },
   {
    "book": 44,
@@ -2998,7 +2962,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "Omits \"of Christ\" from \"the gospel of Christ\"",
-   "note": "The earliest manuscripts (Sinaiticus, Vaticanus, P46) lack \"of Christ\" here, which the Byzantine text and Textus Receptus include; the gospel is identified as Christ's throughout Romans regardless."
+   "note": "Sinaiticus, Vaticanus and other early manuscripts lack \"of Christ\" here, which the Byzantine text and Textus Receptus include; the gospel is identified as Christ's throughout Romans regardless."
   },
   {
    "book": 45,
@@ -3025,7 +2989,7 @@
    "kind": "omission",
    "weight": "major",
    "change": "Omits \"who walk not after the flesh, but after the Spirit\"",
-   "note": "This clause is absent from the earliest manuscripts and is thought to be a scribal addition copied from verse 4; without it, freedom from condemnation reads as unconditional rather than tied to how one walks."
+   "note": "This clause is absent from the earliest manuscripts and is thought to be a scribal addition copied from verse 4. The NIV's verse rests on being \"in Christ Jesus\", and walking by the Spirit is still described in 8:4."
   },
   {
    "book": 45,
@@ -3214,7 +3178,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "\"the Lord Jesus Christ\" becomes \"the Lord\"",
-   "note": "The shorter title is found in the earliest manuscripts; the call to love the Lord and the transliterated \"Maranatha\" are retained."
+   "note": "The shorter title is found in the earliest manuscripts; the Textus Receptus adds \"Jesus Christ\". The NIV also translates \"Anathema Maranatha\" as \"cursed! Come, Lord!\"."
   },
   {
    "book": 46,
@@ -3241,7 +3205,7 @@
    "kind": "salvation",
    "weight": "minor",
    "change": "Drops the repeated \"salvation\" in the verse's second half",
-   "note": "The earliest manuscripts have a shorter, less repetitive form of this verse than the Byzantine text and Textus Receptus; salvation is still named as the outcome of the Corinthians' endurance."
+   "note": "The earliest manuscripts order the clauses differently from the Byzantine text and Textus Receptus and lack the second \"salvation\". \"Salvation\" is still named in the first half, as the purpose of the apostles' distress for the Corinthians."
   },
   {
    "book": 47,
@@ -3294,8 +3258,8 @@
    "verse": 1,
    "kind": "omission",
    "weight": "minor",
-   "change": "Omits \"among you\" from the crucifixion scene",
-   "note": "The Alexandrian text lacks \"among you\" (en hymin), found in the Byzantine tradition and Textus Receptus; the sense of the verse is unaffected."
+   "change": "Omits \"that ye should not obey the truth\" and \"among you\"",
+   "note": "Both phrases are in the Byzantine tradition and Textus Receptus but absent from the early Alexandrian manuscripts the NIV follows; the first is thought to echo Galatians 5:7. The sense of the verse is largely unaffected."
   },
   {
    "book": 48,
@@ -3384,8 +3348,8 @@
    "verse": 16,
    "kind": "other",
    "weight": "minor",
-   "change": "Content of verses 16 and 17 are swapped",
-   "note": "Manuscripts differ on whether the clause about preaching from envy or the one about preaching from love comes first; both statements appear in the passage either way, only reordered between this verse and the next."
+   "change": "The contents of verses 16 and 17 are swapped",
+   "note": "Manuscripts differ on whether the clause about preaching from contention or the one about preaching from love comes first; both statements appear in the passage either way, only reordered between this verse and the next."
   },
   {
    "book": 50,
@@ -3403,7 +3367,7 @@
    "kind": "omission",
    "weight": "minor",
    "change": "Omits \"by the same rule, mind the same thing\"",
-   "note": "The earliest manuscripts lack this clause, thought to be a scribal addition echoing Galatians 6:16; the exhortation to press on toward the goal is retained."
+   "note": "The earliest manuscripts lack this clause, thought to be a scribal addition echoing Galatians 6:16 and Philippians 2:2; the exhortation to live up to what has already been attained is retained."
   },
   {
    "book": 50,
@@ -3601,7 +3565,7 @@
    "kind": "judgment",
    "weight": "minor",
    "change": "\"damnation\" becomes \"judgment\"",
-   "note": "The Greek word (krima) means judgment or verdict rather than specifically eternal damnation; this is a translation choice, not a manuscript difference, with NIV closer to the word's ordinary sense and KJV stronger than the context of a broken pledge requires."
+   "note": "The Greek word krima means judgment or verdict, not specifically eternal damnation; this is a translation choice, not a manuscript difference. In 1611 English \"damnation\" could mean condemnation generally."
   },
   {
    "book": 54,
@@ -3655,7 +3619,7 @@
    "kind": "deity",
    "weight": "major",
    "change": "\"The Lord Jesus Christ\" becomes \"The Lord\"",
-   "note": "The earliest manuscripts read simply \"the Lord\" in this closing blessing, without \"Jesus Christ\"; the fuller title is used throughout the rest of the letter."
+   "note": "The earliest manuscripts read simply \"the Lord\" in this closing blessing, without \"Jesus Christ\"; Christ is named throughout the rest of the letter."
   },
   {
    "book": 56,
@@ -3680,7 +3644,7 @@
    "chapter": 1,
    "verse": 5,
    "kind": "deity",
-   "weight": "minor",
+   "weight": "major",
    "change": "\"I have begotten thee\" becomes \"I have become your Father\"",
    "note": "Both render the same Greek verb (gennao, to beget) from Psalm 2:7; NIV's wording avoids the word \"begotten\", long used of the Son's eternal generation from the Father, though the underlying text and meaning are unchanged."
   },
@@ -3691,7 +3655,7 @@
    "kind": "omission",
    "weight": "major",
    "change": "Omits \"and set him over the works of thy hands\"",
-   "note": "This clause, from the Greek Old Testament of Psalm 8:6, is missing from the earliest manuscripts of Hebrews and is largely repeated in the next verse; NIV also renders the psalm's \"him\" as \"them\", a gender-neutral choice that softens its individual, messianic application to Christ."
+   "note": "This clause from the Greek Psalm 8:6 is in Sinaiticus and Alexandrinus but not in P46, Vaticanus or most later manuscripts, and is widely thought to have been added from the psalm. The NIV also renders the psalm's \"him\" as \"them\" (mankind), which bears on how the quotation is applied to Christ."
   },
   {
    "book": 58,
@@ -3736,7 +3700,7 @@
    "kind": "omission",
    "weight": "minor",
    "change": "Drops \"through the Spirit\" describing purification",
-   "note": "The phrase \"dia pneumatos\" appears in the Byzantine text behind the KJV but is absent from the early Alexandrian manuscripts the NIV follows. The Spirit's role in sanctification is stated elsewhere, including two verses earlier (1 Peter 1:2)."
+   "note": "The phrase dia pneumatos appears in the Byzantine text behind the KJV but is absent from the early Alexandrian manuscripts the NIV follows. The Spirit's role in sanctification is stated at the start of the letter (1 Peter 1:2)."
   },
   {
    "book": 60,
@@ -3771,7 +3735,7 @@
    "verse": 14,
    "kind": "omission",
    "weight": "major",
-   "change": "Drops \"on your part he is glorified\"",
+   "change": "Drops \"he is evil spoken of... he is glorified\"",
    "note": "The closing clause, \"on their part he is evil spoken of, but on your part he is glorified,\" is missing from the earliest manuscripts and most modern critical editions, though present in the Byzantine text behind the KJV. Its absence doesn't affect the verse's main point about being blessed in suffering for Christ's name."
   },
   {
@@ -3790,7 +3754,7 @@
    "kind": "judgment",
    "weight": "major",
    "change": "Drops \"for ever\" describing reserved darkness",
-   "note": "The words \"eis aiōna\" (for ever), found in the Byzantine text behind the KJV, are absent from the earlier manuscripts the NIV follows, possibly harmonized in some copies from the parallel wording in Jude 13. Eternal judgment for false teachers is affirmed elsewhere in the same passage."
+   "note": "The words eis aiona (for ever), found in the Byzantine text behind the KJV, are absent from the earlier manuscripts the NIV follows, possibly added from the parallel wording in Jude 13. The false teachers' coming judgment is still stated in the chapter (2:3, 9)."
   },
   {
    "book": 62,
@@ -3805,10 +3769,10 @@
    "book": 62,
    "chapter": 1,
    "verse": 7,
-   "kind": "atonement",
+   "kind": "deity",
    "weight": "minor",
    "change": "\"Jesus Christ his Son\" becomes \"Jesus, his Son\"",
-   "note": "Both textual traditions read \"Jesus Christ\" here; the NIV's dropping of \"Christ\" is a translation choice, not a manuscript variant. The teaching that the Son's blood cleanses from all sin is unchanged."
+   "note": "The Byzantine text behind the KJV adds \"Christ\" after \"Jesus\"; the earliest manuscripts read \"Jesus, his Son\", which the NIV follows. The teaching that the Son's blood cleanses from all sin is unchanged."
   },
   {
    "book": 62,
@@ -3817,7 +3781,7 @@
    "kind": "deity",
    "weight": "major",
    "change": "Drops \"Christ\" and \"is come in the flesh\"",
-   "note": "A minority of manuscripts read simply \"does not confess Jesus,\" which some modern editions and the NIV follow, against the fuller Byzantine reading behind the KJV, \"Jesus Christ is come in the flesh.\" The fuller confession of the incarnation is made explicitly one verse earlier and elsewhere in the letter."
+   "note": "Alexandrinus, Vaticanus and modern critical editions read simply \"does not confess Jesus\"; the fuller \"Jesus Christ is come in the flesh\" is the Byzantine reading behind the KJV. The incarnation is confessed explicitly in the previous verse and in 2 John 7."
   },
   {
    "book": 62,
@@ -3843,8 +3807,8 @@
    "verse": 8,
    "kind": "trinity",
    "weight": "major",
-   "change": "The \"earthly witnesses\" wording loses its added heavenly counterpart",
-   "note": "This verse is the second half of the same interpolation as verse 7 (the \"Comma Johanneum\"); the NIV's shorter text, \"the Spirit, the water and the blood, and the three are in agreement,\" preserves what is generally regarded as John's actual, single statement, which later copying split into separate heavenly and earthly witnesses."
+   "change": "Drops \"in earth\"; part of the disputed passage at verse 7",
+   "note": "\"In earth\" belongs to the Comma Johanneum that begins in verse 7, found in the Textus Receptus but not in the early Greek manuscripts; without it the NIV reads one statement, \"the Spirit, the water and the blood; and the three are in agreement.\" The three earthly witnesses themselves are unchanged."
   },
   {
    "book": 62,
@@ -3862,7 +3826,7 @@
    "kind": "other",
    "weight": "major",
    "change": "\"He keepeth himself\" becomes \"the One... keeps them safe\"",
-   "note": "The Greek \"ho gennētheis\" (the one born/begotten) is ambiguous: the KJV takes it as the believer keeping himself, the NIV as Christ (\"the one born of God\") keeping the believer safe. Commentators argue for both readings; this is a translation and interpretive choice, not a manuscript difference."
+   "note": "Manuscripts differ: the Byzantine text behind the KJV reads heauton (himself), the critical text auton (him), and ho gennetheis (the one begotten) is ambiguous. The KJV takes it as the believer keeping himself, the NIV as Christ keeping the believer safe; commentators argue for both."
   },
   {
    "book": 63,
@@ -3871,7 +3835,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "Drops \"the Lord\" before \"Jesus Christ\"",
-   "note": "Some manuscripts include \"kyriou\" (Lord) before \"Jesus Christ\" here and some do not; the NIV follows the shorter reading. Christ's lordship is affirmed throughout the letter regardless of this one title."
+   "note": "Some manuscripts include kyriou (Lord) before \"Jesus Christ\" here and some do not; the NIV follows the shorter reading. Christ's lordship is stated throughout the New Testament regardless of this one title."
   },
   {
    "book": 65,
@@ -3879,8 +3843,8 @@
    "verse": 4,
    "kind": "deity",
    "weight": "minor",
-   "change": "Recasts two Lord titles as naming Christ alone",
-   "note": "The Greek construction (\"despotēs kai kyrios\") most naturally names one person, Jesus Christ, as both Master and Lord; the KJV's wording can be read as naming two beings, God and Christ, separately. The NIV's rendering, if anything, states Christ's deity more directly."
+   "change": "Drops \"God\" from \"only Lord God\"; Christ is \"only Sovereign and Lord\"",
+   "note": "The KJV follows manuscripts reading \"only Lord God, and our Lord Jesus Christ\", which can be read as naming God and Christ separately; the critical text lacks \"God\" and reads \"our only Master and Lord, Jesus Christ\", naming one person. The NIV's reading states Christ's lordship directly."
   },
   {
    "book": 65,
@@ -3898,7 +3862,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "Omits \"the beginning and the ending\"; \"Lord\" becomes \"Lord God\"",
-   "note": "Sinaiticus, Alexandrinus and most Greek manuscripts lack the title and read \"Lord God\"; the Textus Receptus follows a few late witnesses. The same title stands in Revelation 21:6 and 22:13."
+   "note": "Alexandrinus and most Greek manuscripts, the Byzantine majority included, lack the title and read \"Lord God\"; the Textus Receptus follows a few witnesses that have it, among them the first hand of Sinaiticus and the Latin Vulgate. The same title stands in Revelation 21:6 and 22:13."
   },
   {
    "book": 66,
@@ -3950,9 +3914,9 @@
    "chapter": 8,
    "verse": 13,
    "kind": "other",
-   "weight": "major",
+   "weight": "minor",
    "change": "\"An angel\" becomes \"an eagle\"",
-   "note": "Manuscripts genuinely differ here between angelou (angel), behind the KJV, and aetou (eagle), found in some important early witnesses and followed by the NIV. Either way the same three-fold woe is pronounced over the earth."
+   "note": "Sinaiticus, Alexandrinus and most Greek manuscripts read aetou (eagle), followed by the NIV; the Textus Receptus reads angelou (angel), which has little Greek support. Either way the same three-fold woe is pronounced over the earth."
   },
   {
    "book": 66,
@@ -4021,10 +3985,10 @@
    "book": 66,
    "chapter": 18,
    "verse": 20,
-   "kind": "omission",
+   "kind": "other",
    "weight": "minor",
    "change": "Splits \"holy apostles\" into separate \"saints\" and \"apostles\"",
-   "note": "Some early manuscripts add \"and\" before \"apostles,\" making \"saints\" a third group rather than an adjective on apostles, as the NIV follows; the Textus Receptus reads \"holy apostles and prophets\" as one group. Both readings still call the redeemed to rejoice over Babylon's fall."
+   "note": "Most Greek manuscripts read \"the saints and the apostles and the prophets\", which the NIV follows; the Textus Receptus lacks the first \"and\", so \"holy\" describes the apostles. Both readings call the redeemed to rejoice over Babylon's fall."
   },
   {
    "book": 66,
@@ -4051,7 +4015,7 @@
    "kind": "judgment",
    "weight": "minor",
    "change": "\"hell\" translated as \"Hades\"",
-   "note": "The NIV transliterates the Greek \"Hades\" rather than translating it \"hell\" as the KJV does, keeping the temporary abode of the dead distinct from the final \"lake of fire\" named two verses later. The judgment described is the same in both versions."
+   "note": "The NIV transliterates the Greek \"Hades\" rather than translating it \"hell\" as the KJV does, keeping the temporary abode of the dead distinct from the final \"lake of fire\" named in the next verse. The judgment described is the same in both versions."
   },
   {
    "book": 66,
@@ -4066,7 +4030,7 @@
    "book": 66,
    "chapter": 21,
    "verse": 3,
-   "kind": "omission",
+   "kind": "other",
    "weight": "minor",
    "change": "Voice comes \"from the throne,\" not \"out of heaven\"",
    "note": "Some early manuscripts read \"the throne\" for \"heaven\" here, a reading the NIV follows; the Textus Receptus's \"heaven\" and the throne are already the same location in this vision, so nothing doctrinal changes."
@@ -4096,7 +4060,7 @@
    "kind": "salvation",
    "weight": "major",
    "change": "\"do his commandments\" becomes \"wash their robes\"",
-   "note": "The Textus Receptus reads \"those who do his commandments\" while the Alexandrian text reads \"those who wash their robes,\" a well-known variant from similar-sounding Greek words. This shifts the stated basis of the blessing from obedience to cleansing through Christ's blood, though both ideas appear elsewhere in Revelation (7:14; 12:11)."
+   "note": "The Textus Receptus and Byzantine text read \"do his commandments\"; Sinaiticus, Alexandrinus and other early witnesses read \"wash their robes,\" two similar-sounding Greek phrases. Washing robes in the Lamb's blood appears in Revelation 7:14, and keeping God's commandments in 12:17 and 14:12."
   },
   {
    "book": 66,
@@ -4113,8 +4077,8 @@
    "verse": 21,
    "kind": "deity",
    "weight": "major",
-   "change": "Drops \"Christ\"; \"you all\" becomes \"God's people\"",
-   "note": "The Alexandrian text reads \"the Lord Jesus\" without \"Christ,\" which the Textus Receptus includes, and \"his people\" instead of \"you all.\" The title of Christ is shortened here, though \"Jesus\" and \"Lord\" are both retained."
+   "change": "Drops \"our\" and \"Christ\"; \"you all\" becomes \"God's people\"",
+   "note": "Some early manuscripts read \"the Lord Jesus\" without \"Christ\" and \"with the saints\" (God's people) where the Textus Receptus has \"with you all\"; the manuscripts vary widely here. The title is shortened, though \"Lord\" and \"Jesus\" are both retained."
   }
  ]
 }

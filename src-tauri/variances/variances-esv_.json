@@ -144,7 +144,7 @@
    "verse": 43,
    "kind": "other",
    "weight": "major",
-   "change": "Adds \"O heavens; bow down to him, all gods\"",
+   "change": "\"O ye nations, with his people\" becomes \"O heavens\"; adds \"bow down to him, all gods\"",
    "note": "The ESV follows a Dead Sea Scroll (4QDeut) and partly the Septuagint instead of the Masoretic text the KJV translates. The added line is close to the words Hebrews 1:6 applies to Christ."
   },
   {
@@ -190,7 +190,7 @@
    "kind": "other",
    "weight": "minor",
    "change": "\"an enemy in my habitation\" becomes \"in distress... envious eye\"; God unnamed",
-   "note": "A translation choice for difficult Hebrew: the KJV reads an enemy in God's dwelling, the ESV Eli's house looking on in distress. The ESV also makes the giving passive, so God is not named."
+   "note": "A translation choice for difficult Hebrew: the KJV reads an enemy in God's dwelling, the ESV Eli's house looking on in distress. The Hebrew does not name God as the giver; the KJV supplies the subject and the ESV makes it passive."
   },
   {
    "book": 9,
@@ -313,7 +313,7 @@
    "book": 13,
    "chapter": 2,
    "verse": 42,
-   "kind": "omission",
+   "kind": "other",
    "weight": "minor",
    "change": "Caleb's firstborn \"Mesha\" becomes \"Mareshah\"",
    "note": "The Masoretic text has Mesha; the ESV follows the Septuagint's Mareshah and restructures the line so Hebron is Mareshah's son."
@@ -486,8 +486,8 @@
    "verse": 3,
    "kind": "other",
    "weight": "minor",
-   "change": "Voice heard in every language becomes a voice not heard",
-   "note": "Translation choice: the KJV supplies \"where\" so creation's witness is heard everywhere; the ESV reads the heavens' speech as wordless and unheard. Verse 4 still says their message goes out through all the earth."
+   "change": "\"no speech nor language, where\" becomes \"no speech, nor... words, whose\"",
+   "note": "A translation choice: the KJV supplies \"where\", so creation's witness is heard in every language, while the ESV's wording can be read as the heavens speaking without words. Verse 4 still says their message goes out through all the earth."
   },
   {
    "book": 19,
@@ -856,7 +856,7 @@
    "kind": "other",
    "weight": "minor",
    "change": "\"a vine in thy blood\" becomes \"a vine in a vineyard\"",
-   "note": "The Masoretic text reads bedameka \"in your blood\"; the ESV follows an emendation (bekarmeka, \"in your vineyard\") adopted by many modern versions."
+   "note": "Most Hebrew manuscripts read bedameka \"in your blood\", as the KJV does; the ESV follows two Hebrew manuscripts reading bekarmeka \"in your vineyard\", as many modern versions do."
   },
   {
    "book": 26,
@@ -1881,8 +1881,8 @@
    "verse": 20,
    "kind": "omission",
    "weight": "major",
-   "change": "Omits the closing \"Amen\"",
-   "note": "The closing Amen is in the Byzantine majority and the Textus Receptus but not in several other witnesses to the long ending."
+   "change": "Bracketed with Mark 16:9–20; omits the closing \"Amen\"",
+   "note": "Part of the longer ending the ESV encloses in double brackets, since Sinaiticus and Vaticanus end at 16:8. The closing Amen is in the Byzantine majority and the Textus Receptus but not in several other witnesses to the longer ending."
   },
   {
    "book": 42,
@@ -1899,8 +1899,8 @@
    "verse": 14,
    "kind": "other",
    "weight": "major",
-   "change": "\"good will toward men\" becomes \"peace among those he favours\"",
-   "note": "Sinaiticus, A, B and D read eudokias (\"of good will\"), the Byzantine majority eudokia (\"good will\"). The ESV's reading limits the peace to those God favours rather than announcing good will to all."
+   "change": "\"good will toward men\" becomes \"among those with whom he is pleased\"",
+   "note": "Sinaiticus (first hand), A, B and D read eudokias (\"of good will\"); the Byzantine majority and the Textus Receptus read eudokia (\"good will\"). The ESV's reading limits the peace to those God favours rather than announcing good will to all."
   },
   {
    "book": 42,
@@ -3178,7 +3178,7 @@
    "kind": "other",
    "weight": "minor",
    "change": "Omits subscription \"Written to the Romans from Corinthus\"",
-   "note": "The subscription is a later scribal note printed in KJV editions, not part of the letter in any Greek text; the ESV prints only the doxology."
+   "note": "The subscription is a later scribal note found in late Greek manuscripts and printed in the Textus Receptus and KJV, not part of Paul's letter; the ESV prints only the doxology."
   },
   {
    "book": 46,
@@ -3322,7 +3322,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "\"Our Lord Jesus Christ\" becomes \"the Lord Jesus\"",
-   "note": "The Textus Receptus adds hēmōn and Christou; Sinaiticus and Vaticanus lack them."
+   "note": "The Textus Receptus adds Christou, which Sinaiticus and Vaticanus lack. The KJV's \"our\" translates the Greek article, not a separate word, so \"the Lord\" is only a different rendering."
   },
   {
    "book": 46,
@@ -4195,7 +4195,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "Omits \"the beginning and the ending\"; \"Lord\" becomes \"Lord God\"",
-   "note": "Sinaiticus, Alexandrinus and most Greek manuscripts lack the title and read \"Lord God\"; the Textus Receptus follows a few late witnesses. The same title stands in Revelation 21:6 and 22:13."
+   "note": "Alexandrinus and most Greek manuscripts lack the title and read \"Lord God\"; the Textus Receptus has the title, with Sinaiticus's first hand and the Latin. The same title stands in Revelation 21:6 and 22:13."
   },
   {
    "book": 66,
@@ -4294,7 +4294,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "\"O Lord... and shalt be\" becomes \"O Holy One... was\"",
-   "note": "The Textus Receptus reading kyrie... ho esomenos goes back to Beza, not to Greek manuscripts; they read ho hosios (\"the Holy One\")."
+   "note": "The Textus Receptus's \"and shalt be\" (ho esomenos) is Beza's conjecture; Greek manuscripts read ho hosios (\"the Holy One\"). \"O Lord\" (kyrie) was already in Erasmus's text but is missing from many manuscripts."
   },
   {
    "book": 66,

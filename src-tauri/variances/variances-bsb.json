@@ -64,7 +64,7 @@
    "kind": "prophecy",
    "weight": "minor",
    "change": "\"thy seed… his enemies\" becomes \"descendants… their enemies\"",
-   "note": "A translation choice: the Hebrew \"seed\" and \"his enemies\" are singular, a wording Paul builds on in Galatians 3:16. The BSB renders the collective sense as plural."
+   "note": "A translation choice: the Hebrew \"seed\" and the pronoun \"his\" are singular, a wording Paul builds on in Galatians 3:16. The BSB renders the collective sense as plural."
   },
   {
    "book": 1,
@@ -414,7 +414,7 @@
    "verse": 7,
    "kind": "other",
    "weight": "minor",
-   "change": "\"preserve them\" becomes \"guard us\"",
+   "change": "\"keep them… preserve them\" becomes \"keep us… guard us\"",
    "note": "The Masoretic text has \"keep them… preserve him\"; the BSB's \"us\" matches the Septuagint and some Hebrew manuscripts. The verse is cited in debates over whether it promises preservation of God's words or of his people."
   },
   {
@@ -639,7 +639,7 @@
    "verse": 1,
    "kind": "other",
    "weight": "minor",
-   "change": "Names \"Ithiel\" and \"Ucal\" become \"I am weary, O God\"",
+   "change": "Second \"Ithiel and Ucal\" read as \"I am weary, O God, and worn out\"",
    "note": "The Hebrew consonants can be read as names or, with other vowels, as \"I am weary, O God, and worn out\", which the BSB follows."
   },
   {
@@ -685,7 +685,7 @@
    "kind": "other",
    "weight": "minor",
    "change": "\"O Lucifer, son of the morning\" becomes \"O day star\"",
-   "note": "A translation choice: the Hebrew helel means \"shining one\", which the Latin Vulgate rendered lucifer. Reading the verse as Satan's fall rests on the KJV's name; the taunt is addressed to the king of Babylon (verse 4)."
+   "note": "A translation choice: the Hebrew helel means \"shining one\", which the Latin Vulgate rendered lucifer. The taunt is addressed to the king of Babylon (verse 4); it has also long been read of Satan's fall, which the BSB's wording still allows."
   },
   {
    "book": 23,
@@ -892,7 +892,7 @@
    "kind": "prophecy",
    "weight": "minor",
    "change": "\"overspreading of abominations\" becomes \"on the wing of the temple\"",
-   "note": "A translation choice in a difficult verse. The BSB keeps \"confirm a covenant\" but makes the abomination come on a wing of the temple and the wrath fall \"upon him\" (the desolator) rather than \"the desolate\"."
+   "note": "A translation choice in a difficult verse. The BSB keeps \"confirm a covenant\" but makes the abomination come on a wing of the temple and the decreed destruction fall \"upon him\" (the desolator) rather than \"the desolate\"."
   },
   {
    "book": 27,
@@ -1099,7 +1099,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "\"Jesus the Christ\" becomes \"the Christ\"",
-   "note": "The Textus Receptus has \"Jesus the Christ\"; Sinaiticus and Vaticanus have \"the Christ\". He is still identified as the Christ."
+   "note": "The Byzantine majority, the Textus Receptus and the first hand of Sinaiticus have \"Jesus the Christ\"; Vaticanus and a corrector of Sinaiticus have \"the Christ\". He is still identified as the Christ."
   },
   {
    "book": 40,
@@ -1234,7 +1234,7 @@
    "kind": "judgment",
    "weight": "major",
    "change": "Omits \"wherein the Son of man cometh\"",
-   "note": "The phrase is in later manuscripts and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses. The coming of the Son of Man is the subject of the surrounding verses (24:44, 25:31)."
+   "note": "The phrase is in the Byzantine majority and the Textus Receptus but not in Sinaiticus, Vaticanus or most early witnesses. The coming of the Son of Man is the subject of the surrounding verses (24:44, 25:31)."
   },
   {
    "book": 40,
@@ -1504,7 +1504,7 @@
    "kind": "omission",
    "weight": "minor",
    "change": "Omits the closing \"Amen\"",
-   "note": "The \"Amen\" is in the Textus Receptus but not in most manuscripts of the longer ending. The BSB keeps verses 9-20 in the text."
+   "note": "The \"Amen\" is in the Byzantine majority and the Textus Receptus but not in some manuscripts of the longer ending. The BSB keeps verses 9-20 in the text."
   },
   {
    "book": 42,
@@ -1594,7 +1594,7 @@
    "kind": "omission",
    "weight": "major",
    "change": "Omits \"Get thee behind me, Satan\"",
-   "note": "The words are in later manuscripts and the Textus Receptus but not in Sinaiticus, Vaticanus or the Byzantine majority. They stand in Matthew 4:10."
+   "note": "The words are in Alexandrinus, the Byzantine majority and the Textus Receptus but not in Sinaiticus, Vaticanus or Bezae. They stand in Matthew 4:10."
   },
   {
    "book": 42,
@@ -1693,7 +1693,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "\"Jesus' feet\" becomes \"the Lord's feet\"",
-   "note": "The Textus Receptus reads \"Jesus\"; Papyrus 75, Sinaiticus and Vaticanus read \"the Lord\". Only the way he is named differs."
+   "note": "The Textus Receptus reads \"Jesus\", with Papyrus 75, Alexandrinus and the Byzantine text; Sinaiticus and Vaticanus (first hand) read \"the Lord\". Only the way he is named differs."
   },
   {
    "book": 42,
@@ -1702,7 +1702,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "\"Jesus answered\" becomes \"the Lord replied\"",
-   "note": "The Textus Receptus reads \"Jesus\"; Papyrus 75, Sinaiticus and Vaticanus read \"the Lord\". Only the way he is named differs."
+   "note": "The Textus Receptus reads \"Jesus\", with Alexandrinus, the first hand of Vaticanus and the Byzantine text; Papyrus 75 and Sinaiticus read \"the Lord\". Only the way he is named differs."
   },
   {
    "book": 42,
@@ -2097,7 +2097,7 @@
    "verse": 38,
    "kind": "deity",
    "weight": "minor",
-   "change": "The third \"body of Jesus\" becomes \"His body\"",
+   "change": "The second \"body of Jesus\" becomes \"His body\"",
    "note": "The Textus Receptus reads \"of Jesus\"; Sinaiticus, Vaticanus and others read \"his\". The referent is plain."
   },
   {
@@ -2251,7 +2251,7 @@
    "kind": "omission",
    "weight": "major",
    "change": "Omits Saul's question \"Lord, what wilt thou have me to do?\"",
-   "note": "The trembling question and the Lord's answer are in a few late Latin-influenced witnesses and the Textus Receptus but in no Greek manuscript of any age. Paul tells it in Acts 22:10."
+   "note": "The trembling question and \"And the Lord said unto him\" came into the Textus Receptus from Latin witnesses and are in no Greek manuscript; the Lord's command that follows is in all. Paul tells the question in Acts 22:10."
   },
   {
    "book": 44,
@@ -2269,7 +2269,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "\"the Lord Jesus\" becomes \"the Lord\"",
-   "note": "\"Jesus\" is in the Textus Receptus but not in Sinaiticus, Vaticanus or the Byzantine majority. The BSB places \"in the name of the Lord\" at the end of verse 28."
+   "note": "\"Jesus\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or Alexandrinus. The BSB places \"in the name of the Lord\" at the end of verse 28."
   },
   {
    "book": 44,
@@ -2440,7 +2440,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "\"Christ Jesus\" becomes \"Jesus\"",
-   "note": "\"Christ\" is in the Textus Receptus but not in Papyrus 74, Sinaiticus, Vaticanus or the Byzantine majority. The one to come is still identified as Jesus."
+   "note": "\"Christ\" is in the Byzantine text and the Textus Receptus but not in Papyrus 74, Sinaiticus, Vaticanus or Alexandrinus. The one to come is still identified as Jesus."
   },
   {
    "book": 44,
@@ -2458,7 +2458,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "\"word of God\" becomes \"word of the Lord\"",
-   "note": "The Textus Receptus reads \"of God\"; Papyrus 74, Sinaiticus, Vaticanus and Alexandrinus read \"of the Lord\". Only the title differs."
+   "note": "The Greek of the Textus Receptus, the Byzantine text and the early manuscripts all read \"of the Lord\"; the KJV's \"of God\" follows the Latin Vulgate and earlier English versions. Only the title differs."
   },
   {
    "book": 44,
@@ -2512,7 +2512,7 @@
    "kind": "omission",
    "weight": "minor",
    "change": "Omits \"and would have judged according to our law\"",
-   "note": "Verses 6b-8a are in the Byzantine text and the Textus Receptus but not in Papyrus 74, Sinaiticus, Vaticanus or Alexandrinus. See verse 7."
+   "note": "Verses 6b-8a are in Laudianus, many minuscules and the Textus Receptus but not in Papyrus 74, Sinaiticus, Vaticanus, Alexandrinus or the Byzantine majority. See verse 7."
   },
   {
    "book": 44,
@@ -2521,7 +2521,7 @@
    "kind": "omission",
    "weight": "major",
    "change": "Verse omitted (Lysias took Paul from his accusers)",
-   "note": "Verses 6b-8a are in the Byzantine text and the Textus Receptus but not in Papyrus 74, Sinaiticus, Vaticanus or Alexandrinus. Lysias's part is told in Acts 21:31-36 and 23:27."
+   "note": "Verses 6b-8a are in Laudianus, many minuscules and the Textus Receptus but not in Papyrus 74, Sinaiticus, Vaticanus, Alexandrinus or the Byzantine majority. Lysias's part is told in Acts 21:31-36 and 23:27."
   },
   {
    "book": 44,
@@ -2539,7 +2539,7 @@
    "kind": "omission",
    "weight": "major",
    "change": "Verse omitted (the Jews departed, reasoning among themselves)",
-   "note": "The verse is in some later manuscripts and the Textus Receptus but not in Papyrus 74, Sinaiticus, Vaticanus or Alexandrinus. Their disagreement is told in verse 25."
+   "note": "The verse is in the Byzantine majority and the Textus Receptus but not in Papyrus 74, Sinaiticus, Vaticanus or Alexandrinus. Their disagreement is told in verse 25."
   },
   {
    "book": 45,
@@ -2647,7 +2647,7 @@
    "kind": "omission",
    "weight": "minor",
    "change": "Omits the closing \"Amen\"",
-   "note": "The \"Amen\" is in the Byzantine text and the Textus Receptus but not in Papyrus 46, Sinaiticus or Vaticanus."
+   "note": "The \"Amen\" is in the Textus Receptus and some manuscripts but not in Papyrus 46, Sinaiticus, Vaticanus or the Byzantine majority."
   },
   {
    "book": 45,
@@ -2845,7 +2845,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "\"our Lord Jesus Christ\" becomes \"the Lord Jesus\"",
-   "note": "\"Our\" and \"Christ\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus or Vaticanus."
+   "note": "\"Our\" and \"Christ\" are in the Textus Receptus, and \"Christ\" in the Byzantine text, but neither is in Sinaiticus or Vaticanus."
   },
   {
    "book": 47,
@@ -2854,7 +2854,7 @@
    "kind": "other",
    "weight": "minor",
    "change": "Omits \"Amen\" and subscription \"written from Philippi\"",
-   "note": "The \"Amen\" is in Sinaiticus and the Textus Receptus but not in Papyrus 46 or Vaticanus. The subscription is a later scribal note in the Textus Receptus, not part of the letter in any early manuscript."
+   "note": "The \"Amen\" is in the Byzantine text and the Textus Receptus but not in Papyrus 46, Sinaiticus (original), Alexandrinus or Vaticanus. The subscription is a later scribal note in the Textus Receptus, not part of the letter in any early manuscript."
   },
   {
    "book": 48,
@@ -2899,7 +2899,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "\"the Lord Jesus\" becomes \"Jesus\"",
-   "note": "\"The Lord\" is in the Byzantine text and the Textus Receptus but not in Papyrus 46, Sinaiticus, Vaticanus or Alexandrinus."
+   "note": "\"The Lord\" is in Sinaiticus, the Byzantine text and the Textus Receptus but not in Papyrus 46, Vaticanus or Alexandrinus."
   },
   {
    "book": 48,
@@ -2935,7 +2935,7 @@
    "kind": "other",
    "weight": "minor",
    "change": "\"fruit of the Spirit\" becomes \"fruit of the light\"",
-   "note": "The Textus Receptus reads \"Spirit\", as in Galatians 5:22; Papyrus 46, Sinaiticus, Vaticanus and Alexandrinus read \"light\", matching verse 8."
+   "note": "Papyrus 46, the Byzantine text and the Textus Receptus read \"Spirit\", as in Galatians 5:22; Sinaiticus, Vaticanus and Alexandrinus read \"light\", matching verse 8."
   },
   {
    "book": 49,
@@ -3106,7 +3106,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "\"our Lord Jesus Christ\" becomes \"our Lord Jesus\"",
-   "note": "\"Christ\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or Alexandrinus."
+   "note": "\"Christ\" is in the Textus Receptus and a few manuscripts but not in Sinaiticus, Vaticanus, Alexandrinus or the Byzantine majority."
   },
   {
    "book": 52,
@@ -3142,7 +3142,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "Omits \"Christ\" from \"gospel of our Lord Jesus\"",
-   "note": "\"Christ\" is in the Byzantine text and the Textus Receptus but not in Vaticanus and some others."
+   "note": "\"Christ\" is in Sinaiticus, Alexandrinus and the Textus Receptus but not in Vaticanus or the Byzantine majority."
   },
   {
    "book": 53,
@@ -3151,7 +3151,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "Omits \"Christ\" in the first \"Lord Jesus Christ\"",
-   "note": "\"Christ\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus or Vaticanus. The full title stands at the end of the verse."
+   "note": "\"Christ\" is in Alexandrinus, some other manuscripts and the Textus Receptus but not in Sinaiticus, Vaticanus or the Byzantine majority. The full title stands at the end of the verse."
   },
   {
    "book": 53,
@@ -3214,7 +3214,7 @@
    "kind": "deity",
    "weight": "major",
    "change": "\"God was manifest\" becomes \"He appeared\"",
-   "note": "Later manuscripts and the Textus Receptus read theos (God); Sinaiticus (original), Alexandrinus (original) and early versions read hos (who). The difference is a stroke in the abbreviated Greek; Christ's deity is stated in John 1:1 and Romans 9:5."
+   "note": "The Byzantine majority and the Textus Receptus read theos (God); Sinaiticus (original) and Ephraemi (original) read hos (who), and Alexandrinus's original reading is disputed. The difference is a stroke in the abbreviated Greek; Christ's deity is stated in John 1:1 and Romans 9:5."
   },
   {
    "book": 54,
@@ -3223,7 +3223,7 @@
    "kind": "omission",
    "weight": "minor",
    "change": "Omits \"in spirit\" from the list",
-   "note": "\"In spirit\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or Alexandrinus."
+   "note": "\"In spirit\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Alexandrinus or Ephraemi."
   },
   {
    "book": 54,
@@ -3232,7 +3232,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "\"the Lord Jesus Christ\" becomes \"Christ Jesus\"",
-   "note": "The Textus Receptus reads \"the Lord Jesus Christ\"; Sinaiticus, Vaticanus and Alexandrinus read \"Christ Jesus\". \"Lord\" is dropped from the title."
+   "note": "The Byzantine text and the Textus Receptus read \"the Lord Jesus Christ\"; Sinaiticus and Alexandrinus read \"Christ Jesus\". \"Lord\" is dropped from the title."
   },
   {
    "book": 54,
@@ -3268,7 +3268,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "\"name of Christ\" becomes \"name of the Lord\"",
-   "note": "The Textus Receptus reads \"of Christ\"; Sinaiticus, Vaticanus and Alexandrinus read \"of the Lord\". Only the title differs."
+   "note": "The Textus Receptus reads \"of Christ\"; Sinaiticus, Alexandrinus and Ephraemi read \"of the Lord\". Only the title differs."
   },
   {
    "book": 55,
@@ -3277,7 +3277,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "\"the Lord Jesus Christ\" becomes \"Christ Jesus\"",
-   "note": "The Textus Receptus reads \"the Lord Jesus Christ\"; Sinaiticus, Vaticanus and Alexandrinus read \"Christ Jesus\". \"Lord\" is dropped from the title."
+   "note": "The Textus Receptus reads \"the Lord Jesus Christ\"; Sinaiticus, Alexandrinus and Ephraemi read \"Christ Jesus\". \"Lord\" is dropped from the title."
   },
   {
    "book": 55,
@@ -3286,7 +3286,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "\"The Lord Jesus Christ\" becomes \"The Lord\"; omits \"Amen\" and subscription",
-   "note": "\"Jesus Christ\" and \"Amen\" are in the Byzantine text and the Textus Receptus but not in Sinaiticus (original) or Alexandrinus. The subscription is a later scribal note in the Textus Receptus, not part of the letter in any early manuscript."
+   "note": "\"Jesus Christ\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus (original) and a few others (Alexandrinus has \"Lord Jesus\"); \"Amen\" is not in Sinaiticus (original), Alexandrinus or Ephraemi. The subscription is a later scribal note, not part of the letter in any early manuscript."
   },
   {
    "book": 56,
@@ -3295,7 +3295,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "Omits \"mercy\"; \"the Lord Jesus Christ\" becomes \"Christ Jesus\"",
-   "note": "The Textus Receptus reads \"grace, mercy, and peace… the Lord Jesus Christ\"; Sinaiticus and Vaticanus read \"grace and peace… Christ Jesus\"."
+   "note": "The Textus Receptus reads \"grace, mercy, and peace… the Lord Jesus Christ\"; Sinaiticus reads \"grace and peace\", and Sinaiticus and Alexandrinus read \"Christ Jesus\"."
   },
   {
    "book": 56,
@@ -3304,7 +3304,7 @@
    "kind": "omission",
    "weight": "minor",
    "change": "Omits closing \"Amen\" and the subscription",
-   "note": "The \"Amen\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus (original), Vaticanus or Alexandrinus. The subscription is a later scribal note in the Textus Receptus, not part of the letter in any early manuscript."
+   "note": "The \"Amen\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus (original), Alexandrinus or Ephraemi. The subscription is a later scribal note in the Textus Receptus, not part of the letter in any early manuscript."
   },
   {
    "book": 57,
@@ -3313,7 +3313,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "\"in you in Christ Jesus\" becomes \"ours in Christ\"",
-   "note": "The Textus Receptus reads \"in you\" and \"Christ Jesus\"; Papyrus 61, Sinaiticus and others read \"in us\" and \"Christ\"."
+   "note": "The Textus Receptus reads \"in you\" and \"Christ Jesus\"; Alexandrinus, Ephraemi and others read \"in us\" (Papyrus 61 and Sinaiticus have \"in you\"), and Papyrus 61, Sinaiticus (original) and Alexandrinus read \"Christ\" alone."
   },
   {
    "book": 57,
@@ -3322,7 +3322,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "Second \"in the Lord\" becomes \"in Christ\"",
-   "note": "The Textus Receptus reads \"in the Lord\"; Sinaiticus, Vaticanus and Alexandrinus read \"in Christ\". Only the title differs."
+   "note": "The Textus Receptus reads \"in the Lord\"; Sinaiticus, Alexandrinus and Ephraemi read \"in Christ\". Only the title differs."
   },
   {
    "book": 57,
@@ -3331,7 +3331,7 @@
    "kind": "omission",
    "weight": "minor",
    "change": "Omits closing \"Amen\" and the subscription",
-   "note": "The \"Amen\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus (original), Vaticanus or Alexandrinus. The subscription is a later scribal note in the Textus Receptus, not part of the letter in any early manuscript."
+   "note": "The \"Amen\" is in Sinaiticus, the Byzantine text and the Textus Receptus but not in Alexandrinus or Claromontanus (original). The subscription is a later scribal note in the Textus Receptus, not part of the letter in any early manuscript."
   },
   {
    "book": 58,
@@ -3394,7 +3394,7 @@
    "kind": "omission",
    "weight": "minor",
    "change": "Omits \"O God\" from the quotation",
-   "note": "\"O God\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or Alexandrinus. It stands in verse 7."
+   "note": "\"O God\" is in the Byzantine text and the Textus Receptus but not in Papyrus 46, Sinaiticus (original), Alexandrinus or Ephraemi. It stands in verse 7."
   },
   {
    "book": 58,
@@ -3403,7 +3403,7 @@
    "kind": "omission",
    "weight": "minor",
    "change": "Omits \"saith the Lord\"",
-   "note": "\"Saith the Lord\" is in the Byzantine text and the Textus Receptus but not in Papyrus 13, Papyrus 46, Sinaiticus (original) or Vaticanus. The quotation is still of the Lord (Deuteronomy 32:35)."
+   "note": "\"Saith the Lord\" is in Alexandrinus, the Byzantine text and the Textus Receptus but not in Papyrus 13, Papyrus 46 or Sinaiticus (original). The quotation is still of the Lord (Deuteronomy 32:35)."
   },
   {
    "book": 58,
@@ -3511,7 +3511,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "Omits \"Jesus\" and the closing \"Amen\"",
-   "note": "Both is in the Byzantine text and the Textus Receptus but not in Vaticanus or Alexandrinus."
+   "note": "Both are in Sinaiticus, the Byzantine text and the Textus Receptus but not in Vaticanus or Alexandrinus."
   },
   {
    "book": 61,
@@ -3592,7 +3592,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "Omits \"the Lord\" before \"Jesus Christ\"",
-   "note": "\"The Lord\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Vaticanus or Alexandrinus."
+   "note": "\"The Lord\" is in Sinaiticus, the Byzantine text and the Textus Receptus but not in Alexandrinus or Vaticanus."
   },
   {
    "book": 63,
@@ -3655,7 +3655,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "Omits \"the beginning and the ending\"; \"Lord\" becomes \"Lord God\"",
-   "note": "The Textus Receptus adds \"the beginning and the ending\", from a few late manuscripts; Sinaiticus and Alexandrinus read \"Lord God\". The title Alpha and Omega remains."
+   "note": "\"The beginning and the ending\" is in Sinaiticus (original), a few later manuscripts and the Textus Receptus but not in Alexandrinus, Ephraemi or the Byzantine majority; these, with Sinaiticus, read \"Lord God\". The title Alpha and Omega remains."
   },
   {
    "book": 66,
@@ -3772,7 +3772,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "Omits \"the Lord\" and \"honour\"",
-   "note": "Both is in the Byzantine text and the Textus Receptus but not in Sinaiticus or Alexandrinus."
+   "note": "Both are in the Textus Receptus, from a few late manuscripts, but not in Sinaiticus, Alexandrinus or most Byzantine manuscripts."
   },
   {
    "book": 66,

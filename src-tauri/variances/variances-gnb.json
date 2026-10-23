@@ -559,7 +559,7 @@
    "kind": "other",
    "weight": "minor",
    "change": "\"stand against the blood of thy neighbour\" becomes \"testify to help him\"",
-   "note": "A translation choice: the Hebrew forbids standing against a neighbour's life; the GNB makes it a duty to speak up at a trial, an interpretation."
+   "note": "A translation choice: the Hebrew idiom \"stand upon the blood of your neighbour\" can mean acting against his life (KJV) or standing idly by when his life is at stake. The GNB applies it to speaking up at a trial."
   },
   {
    "book": 3,
@@ -1279,7 +1279,7 @@
    "kind": "other",
    "weight": "minor",
    "change": "David's doubts (\"although my house be not so\") become confident statements",
-   "note": "Translation choice: the Hebrew can be read as statements, as in the KJV, or as rhetorical questions expecting \"yes\", as in the GNB and most modern versions."
+   "note": "Translation choice: the Hebrew can be read as a concession, as in the KJV, or as a rhetorical question expecting \"yes\" (\"Is not my house so with God?\"), as in many modern versions. The GNB turns the verse into positive statements of assurance, ending \"God will surely bring it about\" where the KJV has \"although he make it not to grow\"."
   },
   {
    "book": 10,
@@ -1315,7 +1315,7 @@
    "kind": "other",
    "weight": "minor",
    "change": "\"Captains of the host\" becomes \"Joab the commander of your army\"",
-   "note": "The GNB follows the Septuagint's \"Joab the commander\"; the Masoretic text reads \"the commanders of the army\", as in verse 19."
+   "note": "The GNB follows the Septuagint's \"Joab the commander of the army\", which matches verse 19, where Joab is named alone. The Masoretic text, followed by the KJV, has the plural \"captains of the host\" here."
   },
   {
    "book": 11,
@@ -1684,7 +1684,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "\"glory of the LORD\" becomes \"the dazzling light\"",
-   "note": "A translation choice that renders God's glory as light and drops the divine name. 7:1 and 7:3 still speak of the LORD's presence filling the house."
+   "note": "A translation choice that renders God's glory as light and drops the divine name. 7:1 in the GNB still speaks of \"the LORD's presence\" filling the Temple."
   },
   {
    "book": 14,
@@ -2089,7 +2089,7 @@
    "kind": "other",
    "weight": "minor",
    "change": "\"Who hath prevented me\" becomes \"Who can attack him\"",
-   "note": "GNB follows the Septuagint's \"him\" (Leviathan) for Hebrew \"me\"; the KJV's claim that all under heaven is God's is lost."
+   "note": "A conjectural reading: the GNB has 'him' (Leviathan) where the Masoretic text has 'me' (God), and 'still be safe' for 'that I should repay'. The KJV's claim that all under heaven is God's is lost."
   },
   {
    "book": 19,
@@ -2161,7 +2161,7 @@
    "kind": "judgment",
    "weight": "minor",
    "change": "\"Turned into hell\" becomes \"Death is the destiny\"",
-   "note": "Hebrew Sheol, which the KJV renders \"hell\", is translated \"world of the dead\"; a translation choice that removes the sense of punishment the KJV's word carries."
+   "note": "Hebrew Sheol, which the KJV renders \"hell\", is translated simply as \"death\"; a translation choice that removes the sense of punishment the KJV's word carries."
   },
   {
    "book": 19,
@@ -2215,7 +2215,7 @@
    "kind": "judgment",
    "weight": "minor",
    "change": "\"Sorrows of hell\" becomes \"danger of death\"",
-   "note": "Hebrew Sheol, which the KJV renders \"hell\", is translated \"world of the dead\"; a translation choice that removes the sense of punishment the KJV's word carries."
+   "note": "Hebrew Sheol, which the KJV renders \"hell\", is rendered as \"death\" here; a translation choice that removes the sense of punishment the KJV's word carries."
   },
   {
    "book": 19,
@@ -2251,7 +2251,7 @@
    "kind": "other",
    "weight": "minor",
    "change": "Drops \"eat and worship\" and \"none can keep alive his soul\"",
-   "note": "GNB follows an emended Hebrew text (\"all who sleep in the earth\"); the Masoretic text reads as the KJV."
+   "note": "The GNB follows a conjectural reading of a difficult verse: it takes the 'fat' as 'proud' and the dying as 'all mortals', and leaves out 'eat' and the last clause. The Masoretic text reads as the KJV."
   },
   {
    "book": 19,
@@ -2998,7 +2998,7 @@
    "kind": "omission",
    "weight": "minor",
    "change": "Omits \"even to him shall men come\"",
-   "note": "The clause is in the Masoretic text; GNB leaves it out in its paraphrase. The nations' coming to the LORD is still stated in 45:14 and 45:22."
+   "note": "The clause is in the Masoretic text; GNB leaves it out in its paraphrase. The nations' coming to the LORD is still stated in 45:22 and 45:23 (\"Everyone will come and kneel before me\")."
   },
   {
    "book": 23,
@@ -3016,7 +3016,7 @@
    "kind": "trinity",
    "weight": "major",
    "change": "\"the Lord GOD, and his Spirit\" becomes \"given me his power\"",
-   "note": "A translation choice: the Hebrew names the Spirit as sending with the Lord GOD, a verse long read of Father, Son and Spirit. GNB makes the Spirit the LORD's power."
+   "note": "The Hebrew \"and his Spirit\" can be read as a second sender, as in the KJV (a verse long read of Father, Son and Spirit), or as what is sent with the speaker, \"sent me with his Spirit\". GNB makes the Spirit the LORD's power and drops the Spirit as a separate sender."
   },
   {
    "book": 23,
@@ -3420,7 +3420,7 @@
    "verse": 26,
    "kind": "salvation",
    "weight": "minor",
-   "change": "\"a new spirit\" becomes \"a new mind\"; \"heart of flesh\" \"obedient heart\"",
+   "change": "\"a new spirit\" becomes \"a new mind\"; \"heart of flesh\" becomes \"obedient heart\"",
    "note": "A translation choice for Hebrew ruach and basar; the image of an inward spiritual renewal is flattened. Verse 27 still promises God's own spirit."
   },
   {
@@ -3430,7 +3430,7 @@
    "kind": "other",
    "weight": "minor",
    "change": "\"my spirit in you\" becomes \"my breath in them\"",
-   "note": "Hebrew ruach can mean spirit or breath; the GNB carries on the breath image of verses 5-10, where the KJV reads God's Spirit giving life."
+   "note": "Hebrew ruach can mean spirit or breath. The GNB keeps the breath image of verses 5-10, which the KJV also has there, while here the KJV reads God's spirit giving life."
   },
   {
    "book": 26,
@@ -3565,7 +3565,7 @@
    "kind": "prophecy",
    "weight": "major",
    "change": "\"Messiah be cut off, but not for himself\" becomes \"killed unjustly\"",
-   "note": "A translation choice for mashiach and the obscure Hebrew \"and not to him\"; the KJV's reading of a substitutionary death is lost."
+   "note": "A translation choice for mashiach and the obscure Hebrew \"and not to him\". The KJV's \"not for himself\" is often read as a substitutionary death, which \"killed unjustly\" does not convey."
   },
   {
    "book": 27,
@@ -3592,7 +3592,7 @@
    "kind": "prophecy",
    "weight": "minor",
    "change": "\"a time, times, and an half\" becomes \"three and a half years\"",
-   "note": "An interpretation of the Aramaic-style idiom; the text does not say years."
+   "note": "An interpretation of the Hebrew idiom \"a time, times and a half\" (as in the Aramaic of 7:25); the text does not say years."
   },
   {
    "book": 27,
@@ -3780,8 +3780,8 @@
    "verse": 9,
    "kind": "other",
    "weight": "minor",
-   "change": "\"a pure language\" becomes \"change the people\"; \"call upon the name\" dropped",
-   "note": "A paraphrase of \"purified lip\" that loses the image of pure speech and calling on the LORD's name."
+   "change": "\"a pure language\" becomes \"change the people\"; \"call upon the name\" becomes prayer",
+   "note": "A paraphrase of \"purified lip\" that loses the image of pure speech and the explicit mention of the LORD's name; calling on him becomes praying to him alone."
   },
   {
    "book": 37,
@@ -3979,7 +3979,7 @@
    "kind": "other",
    "weight": "major",
    "change": "Omits \"without a cause\"",
-   "note": "The phrase is in the Byzantine majority and the Textus Receptus but not in Sinaiticus, Vaticanus or some early papyri; the GNB follows the latter. Without it the warning covers all anger, not only unjust anger."
+   "note": "The phrase is in the Byzantine majority and the Textus Receptus but not in an early papyrus (P64), Sinaiticus (first hand), Vaticanus or the Vulgate; the GNB follows the latter. Without it the warning covers all anger, not only unjust anger."
   },
   {
    "book": 40,
@@ -4033,7 +4033,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "\"Lord\" becomes \"Sir\"",
-   "note": "The Greek kyrie can mean either; GNB renders it \"sir\" when strangers address Jesus, a translation choice. Other verses still call him Lord."
+   "note": "The Greek kyrie can mean either; GNB renders it \"sir\" in many addresses to Jesus, here by a disciple, a translation choice. Other verses still call him Lord."
   },
   {
    "book": 40,
@@ -5086,7 +5086,7 @@
    "kind": "omission",
    "weight": "major",
    "change": "In John 7:53–8:11, bracketed as not original",
-   "note": "The GNB sets John 7:53–8:11, the woman taken in adultery, apart as not original: P66, P75, Sinaiticus and Vaticanus lack it; the Byzantine majority and the Textus Receptus have it. Also: Woman taken in adultery (7:53-8:11) bracketed as not original."
+   "note": "The GNB sets John 7:53–8:11, the woman taken in adultery, apart as not original: P66, P75, Sinaiticus and Vaticanus lack it; the Byzantine majority and the Textus Receptus have it."
   },
   {
    "book": 43,
@@ -5356,7 +5356,7 @@
    "kind": "other",
    "weight": "minor",
    "change": "Omits \"the father of Sychem\"",
-   "note": "The Textus Receptus reads \"Hamor the father of Sychem\"; the critical text reads \"Hamor in Shechem\", and the GNB drops the place."
+   "note": "The Textus Receptus reads \"Hamor the father of Sychem\"; the critical text reads \"the sons of Hamor in Shechem\", which the GNB follows with \"the clan of Hamor\"."
   },
   {
    "book": 44,
@@ -5707,7 +5707,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "\"our Lord Jesus Christ\" becomes \"Christ our Lord\"",
-   "note": "\"Jesus\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Alexandrinus or Vaticanus. The full title remains in 16:20."
+   "note": "\"Jesus\" is in the Byzantine text and the Textus Receptus but not in Sinaiticus, Alexandrinus or Vaticanus. The same person is named, and \"Jesus Christ\" appears in 16:27."
   },
   {
    "book": 45,
@@ -6085,7 +6085,7 @@
    "kind": "deity",
    "weight": "major",
    "change": "Omits \"and the Lord Jesus Christ\" from the greeting",
-   "note": "The phrase is in Sinaiticus, Alexandrinus and the Textus Receptus but not in Vaticanus and others, which the GNB follows. Grace from Christ is stated in 4:18 and the other Pauline greetings."
+   "note": "The phrase is in Sinaiticus, Alexandrinus and the Textus Receptus but not in Vaticanus and others, which the GNB follows. Christ is named with the Father in the next verse (1:3) and in the other Pauline greetings."
   },
   {
    "book": 51,
@@ -6616,7 +6616,7 @@
    "kind": "judgment",
    "weight": "minor",
    "change": "Omits \"for ever\" from the darkness reserved",
-   "note": "The Textus Receptus adds \"eis aiōna\"; P72, Sinaiticus, Alexandrinus and Vaticanus lack it. The same phrase appears in Jude 13."
+   "note": "The Textus Receptus, Alexandrinus and the Byzantine text have \"eis aiōna\"; P72, Sinaiticus and Vaticanus lack it. The same phrase appears in Jude 13."
   },
   {
    "book": 62,
@@ -6667,8 +6667,8 @@
    "book": 62,
    "chapter": 5,
    "verse": 8,
-   "kind": "trinity",
-   "weight": "major",
+   "kind": "omission",
+   "weight": "minor",
    "change": "Omits \"in earth\", the other half of the Comma",
    "note": "The words belong with the Comma of verse 7 and stand or fall with it; without them the Spirit, water and blood are the only three witnesses."
   },
@@ -6760,7 +6760,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "Omits \"the beginning and the ending\"; \"Lord\" becomes \"Lord God\"",
-   "note": "Sinaiticus, Alexandrinus and most Greek manuscripts lack the title and read \"Lord God\"; the Textus Receptus follows a few late witnesses. The same title stands in Revelation 21:6 and 22:13. The GNB also renders \"Alpha and Omega\" as \"the first and the last\"."
+   "note": "Alexandrinus, C and most Greek manuscripts lack the title and read \"Lord God\"; the Textus Receptus follows the first hand of Sinaiticus, a few late witnesses and the Latin. The same title stands in Revelation 21:6 and 22:13; GNB also renders \"Alpha and Omega\" as \"the first and the last\"."
   },
   {
    "book": 66,
@@ -6967,7 +6967,7 @@
    "kind": "salvation",
    "weight": "major",
    "change": "\"do his commandments\" becomes \"wash their robes clean\"",
-   "note": "The Textus Receptus and Byzantine text read \"poiountes tas entolas autou\"; Sinaiticus and Alexandrinus read \"plunontes tas stolas autōn\". The right to the tree of life is tied to cleansing rather than obedience."
+   "note": "The Textus Receptus reads \"poiountes tas entolas autou\"; Sinaiticus and Alexandrinus read \"plunontes tas stolas autōn\", and the Byzantine witnesses are divided. The right to the tree of life is tied to cleansing rather than obedience."
   },
   {
    "book": 66,

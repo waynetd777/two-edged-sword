@@ -811,7 +811,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "second \"ark of God\" becomes \"ark of the LORD\"",
-   "note": "The Masoretic text has \"ark of God\" both times; the ISV varies the second to \"the LORD\". The referent is the same."
+   "note": "The Masoretic text reads 'the ark of the LORD' the second time, as the ISV does; the KJV has 'ark of God' in both places. The referent is the same."
   },
   {
    "book": 13,
@@ -882,8 +882,8 @@
    "verse": 4,
    "kind": "deity",
    "weight": "minor",
-   "change": "\"the LORD God of his father\" becomes \"the God of his ancestors\"",
-   "note": "The Masoretic text reads \"the God of his father\" here, without the divine name the KJV has; the ISV follows it. The same God is meant."
+   "change": "\"the Lord God of his father\" becomes \"the God of his ancestors\"",
+   "note": "The Hebrew reads only \"the God of his father\"; the KJV adds \"Lord\" (not the divine name LORD), and the ISV follows the Hebrew. The same God is meant."
   },
   {
    "book": 14,
@@ -2340,8 +2340,8 @@
    "verse": 31,
    "kind": "omission",
    "weight": "minor",
-   "change": "Omits the second \"unto men\"",
-   "note": "The critical text lacks the second tois anthropois found in the Textus Receptus; \"the Spirit\" for \"the Holy Ghost\" matches the Greek of both."
+   "change": "Omits \"unto men\" both times",
+   "note": "The critical text lacks the second tois anthropois found in the Textus Receptus; the ISV also leaves out the first as a translation choice, which changes no meaning. \"The Spirit\" for \"the Holy Ghost\" matches the Greek of both."
   },
   {
    "book": 40,
@@ -2368,7 +2368,7 @@
    "kind": "omission",
    "weight": "major",
    "change": "Omits \"draweth nigh unto me with their mouth\"",
-   "note": "The clause is in the Byzantine text and Textus Receptus but not in Sinaiticus or Vaticanus, which match Isaiah 29:13 in the Septuagint more briefly."
+   "note": "The clause is in the Byzantine text and Textus Receptus but not in Sinaiticus, Vaticanus or Codex Bezae; the longer form matches Isaiah 29:13. Honouring God with the lips alone is still stated, as in Mark 7:6."
   },
   {
    "book": 40,
@@ -4618,7 +4618,7 @@
    "kind": "deity",
    "weight": "minor",
    "change": "Omits \"the beginning and the ending\"; \"Lord\" becomes \"Lord God\"",
-   "note": "Sinaiticus, Alexandrinus and most Greek manuscripts lack the title and read \"Lord God\"; the Textus Receptus follows a few late witnesses. The same title stands in Revelation 21:6 and 22:13."
+   "note": "Alexandrinus and most Greek manuscripts lack the title and read \"Lord God\"; the Textus Receptus follows the first hand of Sinaiticus, a few minuscules and the Latin. The same title stands in Revelation 21:6 and 22:13."
   },
   {
    "book": 66,
