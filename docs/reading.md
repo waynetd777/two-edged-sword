@@ -84,7 +84,8 @@ in yellow wherever they appear.
 <a href="images/index.md#reading"><picture><source media="(prefers-color-scheme: dark)" srcset="images/books-dark.png"><img alt="Foxe's Book of Martyrs with a paragraph selected and highlighted" src="images/books-light.png"></picture></a>
 
 The **Books** menu, beside the Bible picker, opens a reference book or devotional. Chapters are
-down the side; a devotional opens on today's reading.
+down the side; a devotional opens on today's reading. The app comes with the works of Josephus and
+Edersheim's Life and Times of Jesus the Messiah; click a Bible reference in them to open it.
 
 Paragraphs work like verses: click one to highlight it, bookmark it, add a note, listen from there, ask about it or copy it.
 The study pane has your notes on the chapter, the dictionaries and Ask.

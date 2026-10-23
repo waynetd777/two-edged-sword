@@ -395,6 +395,10 @@ Its docstring lists them and their licences.
   OpenBible.info's places, NASA and USGS terrain (Mapzen's Terrain Tiles) and Natural Earth's
   coasts, at 3,600 pixels wide. Its first run downloads some thousands of terrain tiles (cached);
   `--only jesus --pictures DIR` draws one map to look at.
+- **Books**, `josephus.refi` and `edersheim.refi`, built with `tools/ccel/build.py` from the
+  Christian Classics Ethereal Library's ThML editions (public domain). Each `scripRef` becomes a
+  `<ref>` the app opens, footnotes are listed under each chapter, and the files are pinned by
+  sha256.
 
 Nothing from e-Sword X goes into a module that could be shipped: its licence forbids passing its
 modules on. These scripts read e-Sword modules, so they build for your own library only:

@@ -2738,11 +2738,22 @@ def write_targum(name):
 MORE |= {n: (f"{n}.bbli", lambda n=n: write_targum(n)) for n in ("targum_aramaic", "pseudojonathan_aramaic", "pseudojonathan_english")}
 
 
+def write_ccel(name):
+    """A book from CCEL's public-domain ThML (tools/ccel)."""
+    import ccel.build as cb
+    with shipping():
+        cb.main(into=BUNDLED, names=[name])
+
+
 def write_targum_plus(name):
     """Targum+ or Ps-Jon+ from the built-in Targum and WLC+, with Jastrow's glosses (CC BY-NC, so non-commercial)."""
     import targum.build as tg
     with shipping():
         tg.main(into=BUNDLED, names=[name])
+
+
+# Public-domain books from CCEL's ThML editions: Josephus (Whiston) and Edersheim's Life and Times (tools/ccel).
+MORE |= {n: (f"{n}.refi", lambda n=n: write_ccel(n)) for n in ("josephus", "edersheim")}
 
 
 # After the Targums they read.
