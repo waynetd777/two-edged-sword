@@ -66,7 +66,7 @@ function Screens() {
     if (app.lib) runScene(app, player.still);
   }, [app.lib]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ⌘1–⌘7 switch screens, ⌘K opens the palette, ⌘, Settings, ⌘. focus mode, ⌘[ ⌘] history,
+  // ⌘1–⌘8 switch screens, ⌘K opens the palette, ⌘, Settings, ⌘. focus mode, ⌘[ ⌘] history,
   // ⌘+ ⌘− the reading text size (as its slider does). Listened for once, with the app as it is now.
   const appRef = useRef(app);
   appRef.current = app;

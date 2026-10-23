@@ -1,7 +1,7 @@
 # Features
 
 A Bible study app for macOS and Windows, for reading Bibles, commentaries, dictionaries and books
-beside your own notes. It comes with 48 modules: the KJV and some twenty more Bibles (among them the
+beside your own notes. It comes with 54 modules: the KJV and some twenty more Bibles (among them the
 Berean Standard Bible, Tyndale, the Geneva, the Douay-Rheims, the Vulgate, the Septuagint and the Peshitta, and Strong's and word-by-word editions), Strong's dictionaries, BDB and Abbott-Smith, the Treasury of Scripture Knowledge, five commentaries (Matthew Henry, JFB, Clarke,
 Barnes, Wesley), dictionaries from Easton's to the ISBE, and a book of fifteen Bible maps; and it reads more modules in
 e-Sword X's formats: your own, and on a Mac e-Sword X's library if you have it.

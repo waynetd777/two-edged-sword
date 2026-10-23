@@ -166,10 +166,11 @@ export function Palette({ onClose, onAsk }: { onClose: () => void; onAsk: (ref: 
           ["journal", "Journal", "⌘5"],
           ["plans", "Quiet time", "⌘6"],
           ["library", "Library", "⌘7"],
+          ["history", "KJV History", "⌘8"],
           ["settings", "Settings", "⌘,"],
         ] as [Screen, string, string][]
       ).forEach(([s, l, k]) =>
-        out.push({ id: s, group: "Screens", icon: s === "plans" ? "plans" : s, label: l, kbd: k, run: () => go(s) }),
+        out.push({ id: s, group: "Screens", icon: s === "history" ? "lineage" : s, label: l, kbd: k, run: () => go(s) }),
       );
     }
     return out;
