@@ -1,13 +1,12 @@
 // Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
 // SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
-import { ReactNode, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { ReactNode, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
 import { APOCRYPHA, apocryphaName, BookSizes, BOOKS, book, isApocrypha, SECTIONS } from "./bible";
 import { api, isReadOnly } from "./api";
 import { bibleSizes } from "./sizes";
 import { Icon } from "./icons";
 import { useApp } from "./state";
-import { confirm } from "@tauri-apps/plugin-dialog";
 
 /** Tooltips everywhere in the app, styled like its popovers in place of macOS's plain ones. Any element there with a title (or data-tip, or an icon-only button's aria-label) gets one: the title moves to data-tip
  *  so the native tooltip doesn't show as well. Shown after a short pause, below the element (above
@@ -156,10 +155,59 @@ export const wordHover = {
   },
 };
 
-/** Asks before anything is deleted, as a native macOS alert with Delete as its button.
+/** The delete being asked about now (ConfirmHost shows it), and who's waiting for the answer. */
+type Asking = { title: string; detail: string; answer: (ok: boolean) => void };
+let asking: Asking | null = null;
+const askingSubs = new Set<() => void>();
+const setAsking = (a: Asking | null) => {
+  asking = a;
+  askingSubs.forEach((f) => f());
+};
+
+/** Asks before anything is deleted, in the app's own dialog with Delete as its button.
  *  Used for every delete in the app, rather than window.confirm. */
 export function confirmDelete(what: string, detail = "This can't be undone."): Promise<boolean> {
-  return confirm(detail, { title: `Delete ${what}?`, kind: "warning", okLabel: "Delete", cancelLabel: "Cancel" }).catch(() => false);
+  asking?.answer(false);
+  return new Promise((answer) => setAsking({ title: `Delete ${what}?`, detail, answer }));
+}
+
+/** The dialog confirmDelete opens. Rendered once, in App. Enter deletes, Esc cancels. */
+export function ConfirmHost() {
+  const a = useSyncExternalStore(
+    (f) => {
+      askingSubs.add(f);
+      return () => askingSubs.delete(f);
+    },
+    () => asking,
+  );
+  const ok = useRef<HTMLButtonElement>(null);
+  useEffect(() => ok.current?.focus(), [a]);
+  if (!a) return null;
+  const done = (yes: boolean) => {
+    setAsking(null);
+    a.answer(yes);
+  };
+  return (
+    <Dialog onClose={() => done(false)} width={400} label={a.title}>
+      <div className="confirm">
+        <span className="confirm-icon" aria-hidden>
+          <Icon name="trash" />
+        </span>
+        <div>
+          <div className="confirm-title">{a.title}</div>
+          <div className="confirm-detail">{a.detail}</div>
+        </div>
+      </div>
+      <div className="foot">
+        <button className="btn" type="button" style={{ marginLeft: "auto" }} onClick={() => done(false)}>
+          Cancel
+        </button>
+        <button ref={ok} className="btn danger" type="button" onClick={() => done(true)}>
+          Delete
+        </button>
+      </div>
+    </Dialog>
+  );
 }
 
 /** The popovers and dialogs open, last opened last: Escape closes only the top one. */
@@ -179,8 +227,9 @@ function useDismiss(ref: React.RefObject<HTMLElement | null>, onClose: () => voi
         close.current();
       }
     };
+    // A click in one opened over this (a delete being confirmed) isn't a click outside it.
     const down = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) close.current();
+      if (layers[layers.length - 1] === me && ref.current && !ref.current.contains(e.target as Node)) close.current();
     };
     window.addEventListener("keydown", key, true);
     const t = window.setTimeout(() => window.addEventListener("mousedown", down), 0);

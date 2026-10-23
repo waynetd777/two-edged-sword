@@ -26,7 +26,7 @@ import { useKeepAwake } from "./awake";
 import { useIdlePointer } from "./pointer";
 import { hideSplash } from "./splash";
 import { useTray } from "./tray";
-import { Tooltips, WordHoverBox } from "./ui";
+import { ConfirmHost, Tooltips, WordHoverBox } from "./ui";
 import { UpdateDialog } from "./Update";
 import { WelcomeDialog } from "./Welcome";
 import { cmdKey, isMac } from "./keys";
@@ -191,6 +191,7 @@ function Screens() {
       <WordHoverBox />
       <QuietTime focus={focus && screen === "read"} />
       <UpdateDialog />
+      <ConfirmHost />
       <WelcomeDialog />
     </div>
   );

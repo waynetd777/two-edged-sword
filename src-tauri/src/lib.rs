@@ -29,6 +29,7 @@ mod media;
 mod music;
 #[cfg(windows)]
 mod music_files;
+mod pdf;
 #[cfg(target_os = "macos")]
 mod platform;
 mod process;
@@ -731,11 +732,6 @@ fn check_for_updates(app: AppHandle) {
     updates::check_now(&app);
 }
 
-#[tauri::command]
-fn print_page(window: tauri::WebviewWindow) -> Result<(), String> {
-    window.print().map_err(|e| e.to_string())
-}
-
 /// In the Dock while the window is open, only in the menu bar while it is closed. Runs on the main
 /// thread, as every caller does: the tray's menu handler, the window's events and Reopen.
 fn set_in_dock(app: &AppHandle, shown: bool) {
@@ -928,7 +924,8 @@ pub fn run() {
             assistant_status,
             ask,
             ask_cancel,
-            print_page,
+            pdf::export_pdf,
+            pdf::pdf_page_size,
             check_for_updates,
             scene,
             media::media_state,

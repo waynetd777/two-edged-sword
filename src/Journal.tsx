@@ -21,7 +21,7 @@ import { useSpelling } from "./spelling";
 import { useFind } from "./find";
 import { journalParas, speechBlocks, useListenKey, usePlayer } from "./speech";
 import { MONTH_NAMES } from "./plans";
-import { ExportDialog, longDate } from "./JournalExport";
+import { longDate, PrintDialog } from "./JournalPrint";
 import { JournalAsk } from "./JournalAsk";
 import { HighlightPicker, RefPrompt, SpellMenu, tagOptions, TagPicker } from "./JournalPickers";
 import { useEscExitsFocus } from "./ReadingColumn";
@@ -103,7 +103,7 @@ export function JournalScreen({
   const [tag, setTag] = useState<string | null>(null);
   const [saved, setSaved] = useState<string>("");
   const [err, setErr] = useState<string | null>(null);
-  const [exporting, setExporting] = useState(false);
+  const [printing, setPrinting] = useState(false);
   const saveTimer = useRef<number | undefined>(undefined);
   const pendingSave = useRef<{ id: string; run: () => void } | null>(null);
   // The save being written now, which a delete waits for (or the save would bring the entry back).
@@ -167,6 +167,7 @@ export function JournalScreen({
   );
   const [allTags, setAllTags] = useState(false);
   const shownTags = allTags ? tags : tags.slice(0, 5).concat(tag && tags.indexOf(tag) >= 5 ? [tag] : []);
+  const listedLabel = tag ? `entries tagged #${tag}` : filter.trim() ? `entries matching “${filter.trim()}”` : "your whole journal";
   const cur = (draft && draft.id === selId ? draft : app.journal.find((e) => e.id === selId)) ?? null;
 
   const persist = (e: JournalEntry) => {
@@ -385,16 +386,16 @@ export function JournalScreen({
             saved={saved}
             err={err}
             onDelete={remove}
-            onExport={() => setExporting(true)}
+            onPrint={() => setPrinting(true)}
             listed={entries}
             tagCounts={tagCounts}
-            listedLabel={tag ? `entries tagged #${tag}` : filter.trim() ? `entries matching “${filter.trim()}”` : "your whole journal"}
+            listedLabel={listedLabel}
           />
         ) : (
           <div className="empty">Choose an entry, or start a new one.</div>
         )}
       </div>
-      {exporting && <ExportDialog current={cur} onClose={() => setExporting(false)} />}
+      {printing && <PrintDialog current={cur} listed={entries} listedLabel={listedLabel} onClose={() => setPrinting(false)} />}
     </div>
   );
 }
@@ -406,7 +407,7 @@ function Editor({
   saved,
   err,
   onDelete,
-  onExport,
+  onPrint,
   listed,
   listedLabel,
   tagCounts,
@@ -416,7 +417,7 @@ function Editor({
   saved: string;
   err: string | null;
   onDelete: () => void;
-  onExport: () => void;
+  onPrint: () => void;
   listed: JournalEntry[];
   listedLabel: string;
   /** How often each tag is used in the journal, for the tags offered. */
@@ -639,6 +640,11 @@ function Editor({
         canAsk={canAsk}
         ask={ask}
         setAsk={setAsk}
+        onReveal={() =>
+          revealItemInDir(`${app.journalDir}/Me. Journal - ${entry.created.slice(0, 7)}.md`).catch(() => app.toast("Save the entry first"))
+        }
+        onPrint={onPrint}
+        onDelete={onDelete}
       />
       {!reading && find.bar}
       <div className="scroll" style={{ flexGrow: 1, padding: "28px 0 40px" }}>
@@ -808,26 +814,6 @@ function Editor({
             <span>Shows beside {entry.verses.join(", ")} in Read</span>
           </>
         )}
-        <button
-          className="btn"
-          type="button"
-          style={{ marginLeft: "auto" }}
-          onClick={() =>
-            revealItemInDir(`${app.journalDir}/Me. Journal - ${entry.created.slice(0, 7)}.md`).catch(() =>
-              app.toast("Save the entry first"),
-            )
-          }
-        >
-          <Icon name="finder" />
-          Show in {FILES_APP}
-        </button>
-        <button className="btn" type="button" onClick={onExport}>
-          <Icon name="export" />
-          Export…
-        </button>
-        <button className="ibtn" type="button" aria-label="Delete entry" title="Delete entry" disabled={reading} onClick={onDelete}>
-          <Icon name="trash" />
-        </button>
       </div>
       {ask && (
         <JournalAsk
@@ -909,7 +895,8 @@ function Editor({
   );
 }
 
-/** The editor's toolbar: formatting, highlighting, verses and tags, find, how the save went, and Ask.
+/** The editor's toolbar: formatting, highlighting, verses and tags, find, how the save went, the
+ *  entry's file, Print and Delete, and Ask.
  *  Its buttons keep the selection in the entry, so what they do acts on it. */
 function Toolbar({
   reading,
@@ -928,6 +915,9 @@ function Toolbar({
   canAsk,
   ask,
   setAsk,
+  onReveal,
+  onPrint,
+  onDelete,
 }: {
   reading: boolean;
   cmd: (c: string, v?: string) => void;
@@ -946,6 +936,9 @@ function Toolbar({
   canAsk: boolean;
   ask: boolean;
   setAsk: (a: boolean) => void;
+  onReveal: () => void;
+  onPrint: () => void;
+  onDelete: () => void;
 }) {
   return (
     <div
@@ -1085,9 +1078,19 @@ function Toolbar({
               </>
             )}
       </div>
+      <span style={{ width: 1, height: 18, background: "var(--border)", margin: "0 4px 0 10px" }} />
+      <button className="ibtn" type="button" aria-label={`Show in ${FILES_APP}`} title={`Show in ${FILES_APP}`} onClick={onReveal}>
+        <Icon name="finder" />
+      </button>
+      <button className="ibtn" type="button" aria-label="Print" title="Print or save as PDF" onClick={onPrint}>
+        <Icon name="print" />
+      </button>
+      <button className="ibtn" type="button" aria-label="Delete entry" title="Delete entry" onClick={onDelete}>
+        <Icon name="trash" />
+      </button>
       {canAsk && (
         <>
-          <span style={{ width: 1, height: 18, background: "var(--border)", margin: "0 4px 0 10px" }} />
+          <span style={{ width: 1, height: 18, background: "var(--border)", margin: "0 4px" }} />
           <button className={`btn small ${ask ? "on" : ""}`} type="button" onClick={() => setAsk(!ask)}>
             <Icon name="chat" />
             Ask

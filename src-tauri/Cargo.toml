@@ -43,14 +43,19 @@ libc = "0.2"
 lofty = "0.25"
 harper-core = { version = "2", default-features = false, features = ["concurrent"] }
 windows = { version = "0.62", features = ["Foundation", "Media", "Win32_Foundation", "Win32_Globalization", "Win32_System_Com", "Win32_System_Power", "Win32_System_Registry", "Win32_System_WinRT"] }
+# Export as PDF through WebView2's PrintToPdf (pdf.rs), at tauri's own versions; the paper size
+# from the user's locale.
+webview2-com = "0.39"
+windows-core = "0.62"
+windows-sys = { version = "0.61", features = ["Win32_Globalization"] }
 
 # AppKit and the rest: the app is macOS only. Elsewhere only the tests are built (lib.rs).
 [target.'cfg(target_os = "macos")'.dependencies]
 objc2 = "0.6"
 block2 = "0.6"
 objc2-media-player = { version = "0.3", default-features = false, features = ["std", "block2", "MPRemoteCommandCenter", "MPRemoteCommand", "MPRemoteCommandEvent", "MPNowPlayingInfoCenter", "MPMediaItem"] }
-objc2-foundation = { version = "0.3", default-features = false, features = ["std", "NSProcessInfo", "NSString", "NSValue", "NSArray", "NSRange", "NSDictionary", "NSURL"] }
-objc2-app-kit = { version = "0.3", default-features = false, features = ["std", "NSColor", "NSSpellChecker", "NSWindow", "NSResponder", "NSAppearance", "NSCursor"] }
+objc2-foundation = { version = "0.3", default-features = false, features = ["std", "NSProcessInfo", "NSString", "NSValue", "NSArray", "NSRange", "NSDictionary", "NSURL", "NSGeometry", "objc2-core-foundation"] }
+objc2-app-kit = { version = "0.3", default-features = false, features = ["std", "NSColor", "NSSpellChecker", "NSWindow", "NSResponder", "NSAppearance", "NSCursor", "NSText", "NSPrintInfo", "NSPrintOperation", "NSView"] }
 objc2-avf-audio = { version = "0.3", default-features = false, features = ["std", "AVSpeechSynthesis"] }
 
 # Thin LTO with parallel codegen units: incremental release builds in ~20s instead of minutes.

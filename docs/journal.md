@@ -49,6 +49,30 @@ and F9 go to the previous or next entry.
 
 An answer from Ask anywhere in the app can be added to the journal in one click.
 
+## Print
+
+**Print** (the printer button in the toolbar) saves entries as a PDF, or as one Markdown file. Choose which:
+
+- **This entry**.
+- **On** its verses, or its chapter: every entry written on them.
+- **The entries in the list**: a tag or filter narrows it.
+- **From** this month, the last 3 months, this year or chosen dates.
+
+Up to 50 entries print at a time.
+
+With 3 or more, the PDF opens with a cover: the dates, how much you wrote, and where in the Bible the entries are. Then:
+
+| Option | What it does |
+| --- | --- |
+| Order | Oldest or newest first |
+| Group | None, by tag (each entry's first tag) or by book (its first verse's) |
+| Verse text | Each entry's verses, from the Bible you're reading |
+| In your words | The names you use for God, the words and phrases you repeat, when you write and what you highlighted. Worked out from your text; nothing is sent anywhere |
+| Overview | With an AI assistant set up: an opening on how the entries relate, and their key themes |
+| New page | Each entry on a page of its own |
+
+Every page is numbered, and the PDF opens once it's saved.
+
 ## Spelling and grammar
 
 <!-- mac -->macOS checks<!-- /mac --><!-- github --> On a Mac, macOS checks; <!-- /github --><!-- windows -->The app checks<!-- /windows --> spelling (red underline) and grammar (blue underline). Click an underlined word for
