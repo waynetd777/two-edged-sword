@@ -1767,13 +1767,21 @@ button.ks-chip {
 }
 /* The journal's printed document (journalDoc.ts): navy and the app's blue on white paper, the
    display face for titles and the reading serif for the text. Its colours and faces are fixed,
-   whatever the app's theme and reading font. journalDoc.ts cuts it into pages (.jpage), each
+   whatever the app's theme and reading font. journalDoc.ts cuts it into pages (.jpage, the text in .jbody), each
    printed with a forced break after it. */
-.jpage,
+.jbody,
 .jcut {
   display: flow-root;
 }
+.jbody > :first-child,
+.jcut > :first-child {
+  margin-top: 0 !important;
+}
+/* A page: the paper, its margins inside it. */
 .jpage {
+  position: relative;
+  box-sizing: border-box;
+  overflow: hidden;
   break-after: page;
   page-break-after: always;
 }
@@ -1781,9 +1789,12 @@ button.ks-chip {
   break-after: auto;
   page-break-after: auto;
 }
-.jpage > :first-child,
-.jcut > :first-child {
-  margin-top: 0 !important;
+.jfoot {
+  position: absolute;
+  display: flex;
+  justify-content: space-between;
+  font: 8pt var(--p-ui);
+  color: #8a929c;
 }
 /* Where a page ends part-way through something (.cut) and the next page carries on with it (.cont). */
 .jdoc .cut {
@@ -1843,10 +1854,12 @@ button.ks-chip {
 }
 
 /* The cover. */
+/* The band runs to the paper's edges, over the margins (--pm, set by journalDoc.ts). */
 .jdoc .band {
   background: var(--p-navy);
   color: #fff;
-  padding: 34pt 32pt 28pt;
+  margin: calc(-1 * var(--pm, 0pt)) calc(-1 * var(--pm, 0pt)) 0;
+  padding: calc(var(--pm, 0pt) + 30pt) var(--pm, 32pt) 28pt;
 }
 .jdoc .band .label {
   color: #8cc4ff;

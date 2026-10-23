@@ -925,7 +925,7 @@ pub fn run() {
             ask,
             ask_cancel,
             pdf::export_pdf,
-            pdf::pdf_page_size,
+            pdf::pdf_paper_size,
             check_for_updates,
             scene,
             media::media_state,

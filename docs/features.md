@@ -16,7 +16,7 @@ are kept separately.
 | [Reading](reading.md) | Read with the study pane, books and devotionals, Listen, songs for the chapter |
 | [Study](study.md) | Compare translations, Search, Word Study |
 | [Translations and manuscripts](manuscripts.md) | Differences from the KJV, Greek and Hebrew, KJV History, the Targums and Talmud |
-| [Journal](journal.md) | Entries linked to verses, kept in step with Markdown notes apps such as [Brainstead](https://brainstead.davies.co.za/) |
+| [Journal](journal.md) | Entries linked to verses, kept in step with Markdown notes apps such as [Brainstead](https://brainstead.davies.co.za/), and printed as a PDF |
 | [Quiet time](quiet-time.md) | Reading plans, worship music, the reminder, the menu bar |
 | [Ask](ask.md) | The AI assistant and what it sends |
 | [Library](library.md) | Your modules, adding and building more |

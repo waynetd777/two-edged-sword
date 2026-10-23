@@ -446,11 +446,11 @@ mod tests {
         assert_eq!(parse(&again), vec![e]);
         let spaced = stripped.replace("## Born of the Spirit\n", "## Born of the Spirit\n\n");
         assert_eq!(parse(&spaced), got);
-        let edited = "# September 2026\n\n## Oh the Greatness of God\n\n*Friday 25 September 2026 · 02:09* · #prayer\n\nAbba Father.\n";
+        let edited = "# September 2026\n\n## Morning prayer\n\n*Friday 25 September 2026 · 02:09* · #prayer\n\nLord, thank You.\n";
         let got = parse(edited);
         assert_eq!(
             (got[0].id.as_str(), got[0].tags.clone(), got[0].body.as_str()),
-            ("20260925-0209", vec!["prayer".to_string()], "Abba Father.")
+            ("20260925-0209", vec!["prayer".to_string()], "Lord, thank You.")
         );
         assert_eq!(from_meta_line("*Saturday 5 September 2026 · 06:00* · #prayer").unwrap().0, "2026-09-05T06:00");
     }

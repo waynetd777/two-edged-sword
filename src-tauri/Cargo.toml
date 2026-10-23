@@ -55,7 +55,7 @@ objc2 = "0.6"
 block2 = "0.6"
 objc2-media-player = { version = "0.3", default-features = false, features = ["std", "block2", "MPRemoteCommandCenter", "MPRemoteCommand", "MPRemoteCommandEvent", "MPNowPlayingInfoCenter", "MPMediaItem"] }
 objc2-foundation = { version = "0.3", default-features = false, features = ["std", "NSProcessInfo", "NSString", "NSValue", "NSArray", "NSRange", "NSDictionary", "NSURL", "NSGeometry", "objc2-core-foundation"] }
-objc2-app-kit = { version = "0.3", default-features = false, features = ["std", "NSColor", "NSSpellChecker", "NSWindow", "NSResponder", "NSAppearance", "NSCursor", "NSText", "NSPrintInfo", "NSPrintOperation", "NSView"] }
+objc2-app-kit = { version = "0.3", default-features = false, features = ["std", "NSColor", "NSSpellChecker", "NSWindow", "NSResponder", "NSAppearance", "NSCursor", "NSPrintInfo", "NSPrintOperation", "NSView"] }
 objc2-avf-audio = { version = "0.3", default-features = false, features = ["std", "AVSpeechSynthesis"] }
 
 # Thin LTO with parallel codegen units: incremental release builds in ~20s instead of minutes.

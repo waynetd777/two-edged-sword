@@ -14,7 +14,6 @@ import { assistantModels, assistantReady, pickModel, useAssistant } from "./assi
 import { book, parseRef, Ref, refOverlaps } from "./bible";
 import { plainText } from "./esword";
 import { COVER_FROM, entryRefs, Group, Overview, overviewPrompt, paginate, PRINT_MAX, printHtml, Quote, readOverview } from "./journalDoc";
-import { isMac } from "./keys";
 import { nowLocal, useApp } from "./state";
 import { Dialog, Seg } from "./ui";
 
@@ -215,7 +214,7 @@ export function PrintDialog({
 
     // PDF: the document laid out in a print-only container, printed straight to the file.
     setBusy("Laying out the pages…");
-    const [w, h] = await api.pdfPageSize();
+    const paper = await api.pdfPaperSize();
     const html = printHtml({
       title,
       about,
@@ -227,23 +226,17 @@ export function PrintDialog({
       perPage: list.length > 1 && perPage,
       overview: ov,
     });
-    // A little short of the page: printed, lines can sit a point or two lower than on screen.
-    const root = await paginate(html, w, h - 8);
-    // On Windows the page's print style draws the footer; on a Mac it is stamped on afterwards.
-    const foot = document.createElement("style");
-    if (!isMac)
-      foot.textContent = `@media print { @page { @bottom-left { content: ${JSON.stringify(title)}; font: 8pt var(--ui); color: #7d8794; } @bottom-right { content: "Page " counter(page) " of " counter(pages); font: 8pt var(--ui); color: #7d8794; } } }`;
-    document.head.append(foot);
+    // Half an inch all round.
+    const root = await paginate(html, paper, 36, title);
     document.body.appendChild(root);
     setBusy("Making the PDF…");
     try {
       await new Promise((r) => setTimeout(r, 60));
-      await api.exportPdf(dest, isMac ? title : null);
+      await api.exportPdf(dest);
       app.toast("Saved as PDF");
       close();
     } finally {
       root.remove();
-      foot.remove();
     }
   };
 

@@ -248,6 +248,29 @@ the app run side by side (4 by default). It needs Pillow.
 - `"unread": true` shows today's reading as not yet done, so the menu-bar window shows Start Quiet
   time.
 
+## Printing to PDF
+
+The journal's PDF is the main window's page printed to a file with no print panel: WebKit's
+`NSPrintOperation` on a Mac, WebView2's `PrintToPdf` on Windows (`pdf.rs`). It prints with no
+margins; the page lays out each sheet itself.
+
+- **Pages are made in the app.** WebKit's print cuts every page-height, through lines and pictures,
+  and ignores `break-inside` and `break-after: avoid`. CSS columns don't help: they lay out
+  differently when printing. So `paginate` in `journalDoc.ts` lays the document out at the text
+  width, cuts each page after its last whole line (`findBreak`), and gives each its own `.jpage`
+  with a forced break after it, which WebKit keeps.
+- **What it keeps together**: `WHOLE` is never split, `WITH_NEXT` never ends a page, `NEED` is the
+  room something needs to start on a page, and a paragraph leaves at least two lines either side.
+- **Each page is measured as cut** (a cut verse box keeps its padding) and cut again shorter if it's
+  too tall. 8 points are spare at the foot: printed lines sit up to 3 points lower than on screen.
+- **Margins and footer** are inside each `.jpage`, so the cover's band runs to the paper's edges
+  (`--pm`). The paper is the user's (`pdf_paper_size`: A4, or Letter).
+- **Faces and colours are fixed** (`--p-*` in `.jdoc`): the reading-font setting changes `--serif`
+  and `--display`, and the theme the colours.
+- **Checking a change**: print through WebKit, not Chrome, which paginates properly and hides these
+  problems. A small Swift program that loads the page in a `WKWebView` and runs the same
+  `NSPrintOperation` does it without the app.
+
 ## The product page
 
 `site/` is the app's web page, https://two-edged-sword.davies.co.za/: plain HTML, CSS and JavaScript
@@ -467,6 +490,7 @@ reference, and images inline as `data:` URLs.
 | `src-tauri/src/library.rs`, `content.rs` | Finding modules and reading text out of them |
 | `src-tauri/src/search.rs`, `index.rs` | Search and its index |
 | `src-tauri/src/journal.rs` | The journal's monthly Markdown files |
+| `src/JournalPrint.tsx`, `src/journalDoc.ts`, `src-tauri/src/pdf.rs` | Printing the journal: the dialog; the document (cover, In your words, the entries) and its pages; printing the page straight to a PDF ([Printing to PDF](#printing-to-pdf)) |
 | `src-tauri/src/store.rs` | The JSON files in Application Support |
 | `src/music.ts` | One shared poll of what Music is playing, for Quiet time and Lyrics |
 | `src-tauri/src/music.rs` | Worship songs played through Music, for Quiet time and for a chapter (`src/ChapterSongs.tsx`) |

@@ -609,11 +609,13 @@ function settle(p: Pos, root: Node): Pos {
   }
 }
 
-/**
- * The document as pages `w` points wide and at most `h` tall (the printable area), in a
- * #print-root ready to print.
- */
-export async function paginate(html: string, w: number, h: number): Promise<HTMLElement> {
+/** The document as pages of `paper` (width and height in points), with `margin` all round and
+ *  `title` in each page's footer, in a #print-root ready to print. */
+export async function paginate(html: string, paper: [number, number], margin: number, title: string): Promise<HTMLElement> {
+  // The text area: the paper less the margins, and a few points spare at the foot, as printed lines
+  // can sit a point or two lower than on screen.
+  const w = paper[0] - 2 * margin,
+    h = paper[1] - 2 * margin - 8;
   const probe = document.createElement("div");
   probe.className = "jdoc";
   probe.style.cssText = `position:fixed;left:-100000px;top:0;visibility:hidden;width:${w}pt`;
@@ -659,13 +661,28 @@ export async function paginate(html: string, w: number, h: number): Promise<HTML
     root.append(page!);
   }
   probe.remove();
+  // Each page: the paper, its margins inside it (so the cover's band can run to the edges), and
+  // a footer with the title and the page's number.
+  const bodies = Array.from(root.children);
+  bodies.forEach((body, i) => {
+    const page = document.createElement("div");
+    page.className = "jpage";
+    page.style.cssText = `width:${paper[0]}pt;height:${paper[1] - 2}pt;padding:${margin}pt`;
+    const foot = document.createElement("div");
+    foot.className = "jfoot";
+    foot.style.cssText = `left:${margin}pt;right:${margin}pt;bottom:${margin / 2 - 4}pt`;
+    foot.innerHTML = `<span>${escHtml(title)}</span><span>Page ${i + 1} of ${bodies.length}</span>`;
+    body.replaceWith(page);
+    page.append(body, foot);
+  });
+  root.style.setProperty("--pm", `${margin}pt`);
   return root;
 }
 
 /** The page cut from the top of `rest` (which keeps what's left): at most `limit` px tall as measured. */
 function cutPage(rest: HTMLElement, limit: number, px: number, w: number): HTMLElement {
   const page = document.createElement("div");
-  page.className = "jpage";
+  page.className = "jbody";
   page.style.width = `${w}pt`;
   const raw = rest.getBoundingClientRect().height > limit ? findBreak(rest, limit, px) : null;
   if (!raw) {

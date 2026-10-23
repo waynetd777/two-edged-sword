@@ -343,11 +343,11 @@ export const api = {
   /** Whether a web page lets itself be shown inside the app, rather than in a window of its own. */
   webFrameable: (url: string) => invoke<boolean>("web_frameable", { url }),
   askCancel: (chatId: string) => invoke<void>("ask_cancel", { chatId }),
-  /** Prints the window's page (its @media print styles) straight to a PDF at `dest`, waits for
-   *  it, and opens it in the PDF viewer. On a Mac `footer` (a title) and "Page N of M" are stamped along the bottom of each page. */
-  exportPdf: (dest: string, footer: string | null) => invoke<void>("export_pdf", { dest, footer }),
-  /** The printable area of a page, in points: what exportPdf prints on. */
-  pdfPageSize: () => invoke<[number, number]>("pdf_page_size"),
+  /** Prints the window's page (its @media print styles) straight to a PDF at `dest`, with no
+   *  margins (the page lays out its own), waits for it, and opens it in the PDF viewer. */
+  exportPdf: (dest: string) => invoke<void>("export_pdf", { dest }),
+  /** The paper exportPdf prints on, in points: width and height. */
+  pdfPaperSize: () => invoke<[number, number]>("pdf_paper_size"),
   /** The screenshot scene the app was launched with (TES_SCENE), as JSON, or null. */
   scene: () => invoke<string | null>("scene"),
   // Reading aloud: macOS's synthesiser (tts.rs), or the web view's speech on Windows (webSpeech.ts).
