@@ -2745,6 +2745,13 @@ def write_ccel(name):
         cb.main(into=BUNDLED, names=[name])
 
 
+def write_gutenberg(name):
+    """A book from Project Gutenberg's public-domain HTML (tools/gutenberg)."""
+    import gutenberg.build as gb
+    with shipping():
+        gb.main(into=BUNDLED, names=[name])
+
+
 def write_targum_plus(name):
     """Targum+ or Ps-Jon+ from the built-in Targum and WLC+, with Jastrow's glosses (CC BY-NC, so non-commercial)."""
     import targum.build as tg
@@ -2752,8 +2759,10 @@ def write_targum_plus(name):
         tg.main(into=BUNDLED, names=[name])
 
 
-# Public-domain books from CCEL's ThML editions: Josephus (Whiston) and Edersheim's Life and Times (tools/ccel).
-MORE |= {n: (f"{n}.refi", lambda n=n: write_ccel(n)) for n in ("josephus", "edersheim")}
+# Public-domain books: Josephus (Whiston), Edersheim's Life and Times and The Pilgrim's Progress from CCEL's ThML
+# editions (tools/ccel), and Fox's Book of Martyrs from Project Gutenberg's (tools/gutenberg).
+MORE |= {n: (f"{n}.refi", lambda n=n: write_ccel(n)) for n in ("josephus", "edersheim", "pilgrim")}
+MORE |= {"foxe": ("foxe.refi", lambda: write_gutenberg("foxe"))}
 
 
 # After the Targums they read.

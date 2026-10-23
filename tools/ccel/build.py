@@ -6,8 +6,9 @@ marked there "Public Domain":
   josephus.refi   The Works of Flavius Josephus, William Whiston's translation (1737): his Life, the
                   Antiquities of the Jews, the Wars of the Jews, Against Apion and the Discourse on Hades
   edersheim.refi  Alfred Edersheim, The Life and Times of Jesus the Messiah (1883)
+  pilgrim.refi    John Bunyan, The Pilgrim's Progress (1678 and 1684), both parts
 
-    python3 tools/ccel/build.py [josephus edersheim]
+    python3 tools/ccel/build.py [josephus edersheim pilgrim]
 
 A chapter of the book is a chapter in the app, titled from the book's own headings ("Antiquities 1.1: The
 Constitution of the World…"). CCEL marks each Bible reference with the passage it means (scripRef's
@@ -45,6 +46,13 @@ BOOKS = {
         title="The Life and Times of Jesus the Messiah", abbrev="Edersheim",
         about="Alfred Edersheim's The Life and Times of Jesus the Messiah (1883; third edition, 1886): the Gospel story "
               "told against the Jewish life, worship and teaching of its time, with the author's notes and appendices."),
+    "pilgrim": dict(
+        url="https://www.ccel.org/ccel/bunyan/pilgrim.xml",
+        sha256="1ebdfd4db68990f3cb26cb81305f0a32f2eb9ec0faedf33e2ee54414f9414353",
+        title="The Pilgrim's Progress", abbrev="Pilgrim",
+        about="John Bunyan's The Pilgrim's Progress from This World to That Which Is to Come (Part I, 1678; Part II, "
+              "1684): Christian's journey, and then Christiana's, told as a dream, with the Bible verses Bunyan set in "
+              "its margins."),
 }
 # Josephus's works by their CCEL titles, as the chapters are named.
 WORKS = {"Life Of Flavius Josephus": "Life", "Antiquities of the Jews": "Antiquities", "The Wars of the Jews": "Wars",
@@ -124,6 +132,8 @@ class Chapter:
             return f"<{tag}>{self.inline(el)}</{tag}>"
         if tag == "br":
             return " "
+        if tag == "l":  # a line of verse
+            return f"{self.inline(el).strip()}<br>"
         if tag == "span":
             if el.get("class") == "Greek" or el.get("lang") == "EL":
                 return f"<grk>{self.inline(el)}</grk>"
@@ -155,6 +165,12 @@ class Chapter:
             s = self.inline(el).strip()
             if s:
                 self.out.append(f"<p><b>{s}</b></p>")
+        elif tag == "verse":
+            s = self.inline(el).strip()
+            if s.endswith("<br>"):
+                s = s[:-4]
+            if s:
+                self.out.append(f"<p>{s}</p>")
         elif tag == "li":
             s = self.inline(el).strip()
             if s:
@@ -253,12 +269,25 @@ def chapters_edersheim(body):
             yield (f"Appendix {i}: {h}" if appendix else f"Book {book}, Chapter {i}: {h}"), d2
 
 
+def chapters_pilgrim(body):
+    for d1 in body.iter("div1"):
+        t = d1.get("title", "").strip()
+        if t in ("Title Page", "CONTENTS", "Indexes"):
+            continue
+        part = re.match(r"PART\s+([IV]+)$", t)
+        if not part:
+            yield title_case(t), d1
+            continue
+        for d2 in d1.findall("div2"):
+            yield f"Part {roman(part[1])}: {title_case(d2.get('title', ''))}", d2
+
+
 def build(name, into=None):
     b = BOOKS[name]
     src = fetch(b["url"], CACHE / f"{name}.xml", sha256=b["sha256"])
     body = ET.parse(src).getroot().find("ThML.body")
     rows, refs = [], 0
-    for title, div in (chapters_josephus if name == "josephus" else chapters_edersheim)(body):
+    for title, div in {"josephus": chapters_josephus, "edersheim": chapters_edersheim, "pilgrim": chapters_pilgrim}[name](body):
         c = Chapter(name)
         html = c.html(div)
         if not html:

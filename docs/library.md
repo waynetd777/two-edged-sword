@@ -90,6 +90,8 @@ The app comes with these, so it works with nothing else installed. All are publi
 | Bible Maps: fifteen maps, from the patriarchs, the Exodus and the tribes through David's kingdom, the divided kingdoms and the Assyrian, Babylonian and Persian empires, to Jesus' land and ministry, Paul's journeys, the seven churches and the Roman Empire, with plans of Jerusalem in the Old Testament and in Jesus' day | Drawn for the app, from OpenBible.info (CC BY), NASA and USGS terrain and Natural Earth |
 | The Works of Flavius Josephus (Whiston's translation): his Life, the Antiquities, the Wars of the Jews, Against Apion | Christian Classics Ethereal Library |
 | Edersheim's The Life and Times of Jesus the Messiah | Christian Classics Ethereal Library |
+| Fox's Book of Martyrs (Forbush's edition, 1926) | Project Gutenberg |
+| Bunyan's The Pilgrim's Progress, both parts | Christian Classics Ethereal Library |
 
 If e-Sword X has one of these too, you can read its copy instead: choose **e-Sword X** beside it under [In e-Sword X too](app:library#copies) on the Library screen. That list shows only while **Read e-Sword X** is on.
 
