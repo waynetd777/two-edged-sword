@@ -12,6 +12,10 @@ The app reads Bibles and books from three places, and never changes them:
 - e-Sword X isn't needed. Without it, that folder is skipped.
 - To leave e-Sword X's library out, turn off **Read e-Sword X** on the Library screen.
 
+<!-- github -->
+**Contents:** [The Library screen](#the-library-screen) · [Built-in modules](#built-in-modules) · [Formats](#formats) · [Adding modules](#adding-modules) · [Building modules](#building-modules) · [Free modules worth having](#free-modules-worth-having) · [Thanks to e-Sword](#thanks-to-e-sword)
+<!-- /github -->
+
 ## The Library screen
 
 <a href="images/index.md#library"><picture><source media="(prefers-color-scheme: dark)" srcset="images/library-dark.png"><img alt="The Library searched for Strong: the Bibles with Strong's numbers, each with its features and licence" src="images/library-light.png"></picture></a>
@@ -85,7 +89,7 @@ The app comes with these, so it works with nothing else installed. All are publi
 | Daily Light on the Daily Path | CrossWire |
 | Bible Maps: fifteen maps, from the patriarchs, the Exodus and the tribes through David's kingdom, the divided kingdoms and the Assyrian, Babylonian and Persian empires, to Jesus' land and ministry, Paul's journeys, the seven churches and the Roman Empire, with plans of Jerusalem in the Old Testament and in Jesus' day | Drawn for the app, from OpenBible.info (CC BY), NASA and USGS terrain and Natural Earth |
 
-Where e-Sword X has a module the app also has, the app's copy is read. To read e-Sword's instead, choose **e-Sword X** beside it under [In e-Sword X too](app:library#copies) on the Library screen. That list shows while **Read e-Sword X** is on.
+To read e-Sword X's copy of one of these instead of the app's, choose **e-Sword X** beside it under [In e-Sword X too](app:library#copies) on the Library screen. That list shows while **Read e-Sword X** is on.
 
 ## Formats
 
@@ -103,8 +107,7 @@ The app reads e-Sword X's Mac formats:
 The Library lists maps and timelines on a card of their own: e-Sword's picture books (starred there) and books titled Maps or Atlas. The Talmud's tractates have their own card too.
 
 It doesn't read the Windows formats (`.bblx`, `.cmtx` and so on), EPUB or SWORD modules. Where a
-module comes in both, take the Mac one. That holds on Windows too: e-Sword for Windows encrypts its
-modules' text.
+module comes in both, take the Mac one, on Windows too: e-Sword for Windows encrypts its modules' text.
 
 ## Adding modules
 
@@ -116,9 +119,9 @@ Then press **Rescan**.
 
 ## Building modules
 
-Some texts aren't e-Sword downloads. They are built from free sources by scripts that come with
-the app's source code, not with the app itself. Once built, they go in your modules folder and
-show after **Rescan**. They're numbered like the KJV, so they compare beside it.
+Some texts aren't e-Sword downloads. Scripts in the app's source code (not in the app) build them
+from free sources. Put a built module in your modules folder and it shows after **Rescan**. They're
+numbered like the KJV, so they compare beside it.
 
 | Text | From |
 |---|---|
@@ -165,7 +168,7 @@ EPUB or text need converting to a `.refi` first.
 
 Rick Meyers has given e-Sword away free since 2000, and it has put God's word, with a lifetime of
 commentaries, dictionaries and lexicons, into the hands of millions. This app reads e-Sword X's
-formats and, if you have it, its library. We owe that to his work. Thank you, Rick.
+formats and, if you have it, its library, and owes that to his work. Thank you, Rick.
 
 - e-Sword is free, but it isn't ours to share. Its licence doesn't allow its modules to be passed
   on, so the app never copies them, and nothing from e-Sword is built into it.

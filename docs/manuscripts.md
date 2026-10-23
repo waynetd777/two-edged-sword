@@ -2,7 +2,9 @@
 
 <sub>[Features](features.md) › Translations and manuscripts</sub>
 
-[Differences from the KJV](#differences-from-the-kjv) · [Greek and Hebrew](#greek-and-hebrew) · [KJV History](#kjv-history) · [Targums and Talmud](#targums-and-talmud)
+<!-- github -->
+**Contents:** [Differences from the KJV](#differences-from-the-kjv) · [Greek and Hebrew](#greek-and-hebrew) · [KJV History](#kjv-history) · [Targums and Talmud](#targums-and-talmud)
+<!-- /github -->
 
 ## Differences from the KJV
 
@@ -17,7 +19,7 @@ Ask uses the same list, so you can ask "how does this chapter differ from the KJ
 
 The app comes with lists for the NIV, ESV, ESV+, ASV, CEV, GNB, MKJV and ISV, and for the built-in
 BSB, RV, Darby, Weymouth, Douay-Rheims, Brenton's Septuagint, Murdock and Etheridge, each reviewed across the whole Bible (or New
-Testament). They show when you have that translation.
+Testament). A list shows when you have that translation.
 
 ## Greek and Hebrew
 
@@ -27,7 +29,7 @@ Word-by-word Bibles show each original word over its English and its Strong's nu
 
 - Hover a word for its grammar, or a number for its dictionary entry. Click a word to look it up.
 - Greek and Hebrew Bibles without English of their own get the KJV's commonest rendering of each
-  word. Settings › Appearance turns this off.
+  word. Turn this off in Settings › Appearance.
 - Hebrew and Syriac read right to left.
 - Built in: Byz+ (Greek New Testament), WLC+ and Ginsburg+ (Hebrew), LXX-Brenton+ (the Septuagint, with the
   Apocrypha), Vulg-C+ (the Latin Vulgate) and Peshitta+ (the Syriac New Testament).

@@ -4,6 +4,8 @@ Tauri 2, with a React and TypeScript frontend (Vite) and a Rust backend. The Rus
 modules (e-Sword X's SQLite formats, read-only), keeps the search index, writes the journal, speaks aloud and
 runs the AI tools for Ask. The frontend is everything you see.
 
+**Contents:** [Commands](#commands) · [Security checks](#security-checks) · [Where things live](#where-things-live) · [Signing and Full Disk Access](#signing-and-full-disk-access) · [Open at Login](#open-at-login) · [Help](#help) · [Writing the docs](#writing-the-docs) · [Screenshots](#screenshots) · [The product page](#the-product-page) · [Differences from the KJV](#differences-from-the-kjv) · [Building modules](#building-modules) · [Writing modules](#writing-modules) · [Reference book format](#reference-book-format) · [The code](#the-code) · [Licensed Bibles](#licensed-bibles)
+
 ## Commands
 
 | Command | What it does |
@@ -21,18 +23,20 @@ runs the AI tools for Ask. The frontend is everything you see.
 | `make screenshots` | Retake the screenshots in `docs/images/` |
 | `make site` | Remake the product page's WebP pictures from the dark screenshots |
 | `make og` | Render the product page's share card, `site/img/og.png` |
-| `make visions` | Flick through the pictures behind a song's words in Safari, drawn as on the Lyrics page (`visions.html`; ← → step, keys for theme, words (the flames without them), verses, colours, beat; a box to find one by name or theme; each picture's themes on the bar). `make visions v=eagle` starts at one; `?theme=light` shows it on paper |
+| `make visions` | Flick through the pictures behind a song's words in Safari, drawn as on the Lyrics page (`visions.html`; ← → step; keys for theme, words, verses, colours, beat; a box to find one by name or theme). `make visions v=eagle` starts at one; `?theme=light` shows it on paper |
 | `make icons` | Redraw the icon artwork and regenerate the icon set |
 | `make sign-check` | Show how the installed app is signed |
 
-- If hot reload leaves a screen broken after an edit, reload the window (⌘R) or restart
-  `make dev` before treating it as a bug.
+- If hot reload leaves a screen broken after an edit, reload the window (⌘R) or restart `make dev`
+  before treating it as a bug.
 - The app also builds on Windows, so far without screenshot mode or updates (the media
-  controls are `media_win.rs`, Open at Login the Run key in `login_win.rs`): `npx tauri build --debug --no-bundle` (needs Rust,
-  Node, Python and Visual Studio Build Tools with the C++ workload) makes
-  `src-tauri/target/debug/TwoEdgedSword.exe`; `npx tauri build` makes the installer,
+  controls are `media_win.rs`, Open at Login the Run key in `login_win.rs`):
+  `npx tauri build --debug --no-bundle` (needs Rust, Node, Python and Visual Studio Build Tools
+  with the C++ workload) makes `src-tauri/target/debug/TwoEdgedSword.exe`; `npx tauri build` makes the installer,
   `src-tauri/target/release/bundle/nsis/Two-edged Sword_<version>_x64-setup.exe` (per user, no
-  admin; the built-in modules beside the .exe; `src-tauri/windows/hooks.nsh` makes its uninstaller's Delete the application data clear `%APPDATA%\Two-edged Sword`, which Tauri's own step misses). The module tools keep their downloads in
+  admin; the built-in modules beside the .exe; `src-tauri/windows/hooks.nsh` makes the uninstaller's
+  Delete the application data clear `%APPDATA%\Two-edged Sword`, which Tauri's own step misses).
+  The module tools keep their downloads in
   `%LOCALAPPDATA%\Two-edged Sword\Caches` there. The AppKit modules are
   `#[cfg(target_os = "macos")]`, and `src-tauri/src/other.rs` stands in for them elsewhere; any
   new AppKit call, or macOS-only Tauri API, needs the same `cfg`. `tauri.windows.conf.json` holds
@@ -57,8 +61,8 @@ runs the AI tools for Ask. The frontend is everything you see.
 - On macOS 27, release builds link with Rust's lld against the macOS 26 SDK, because macOS 27's
   linker sometimes breaks proc-macro builds ("can't find crate"). The Makefile explains.
 
-A release build moves to the next patch version once the current one has been released, that is,
-once `v<version>` is tagged on GitHub (`tools/bump_version.py`, which keeps `tauri.conf.json`,
+A release build moves to the next patch version once the current one is released (`v<version>` is
+tagged on GitHub) (`tools/bump_version.py`, which keeps `tauri.conf.json`,
 `package.json`, `Cargo.toml` and the lock files in step), so local builds between releases share a
 version. Every build gets its own build number, stamped on the app and the binary; Settings shows
 both. For a minor or major step, run `python3 tools/bump_version.py 1.1.0` first.
@@ -69,8 +73,8 @@ notes or with uncommitted changes, then bumps and builds the app, makes the DMG 
 creates the GitHub release with `Two-edged-Sword.dmg`, `Two-edged-Sword.app.tar.gz` and
 `latest.json`, and installs the app, opening it again if it was running. `INSTALL=0` skips the
 install and `DRY_RUN=1` prints the steps. After a failure, run it again: the unreleased version is
-kept.
-The README's download link points at the latest release's `Two-edged-Sword.dmg`, so keep that name.
+kept. The README's download link points at the latest release's `Two-edged-Sword.dmg`, so keep
+that name.
 
 `make dmg` also runs `tools/update_files.py`, which packs the app as `Two-edged-Sword.app.tar.gz`,
 signs it and writes `latest.json`. Installed copies read
@@ -93,9 +97,9 @@ both installers ship the same modules. It starts from the compiled crates that
 `.github/workflows/windows-cache.yml` saves when it does the same build on `main` after a push that
 changes the code (a cache saved on a release's tag would be seen by that tag alone); that build skips
 the modules (`tauri.no-modules.conf.json`). To add the installer to a release by hand (Actions ›
-Windows release › Run workflow, with the tag), the release needs its modules zip. Windows copies install an update quietly, with a progress window
-(`plugins.updater.windows.installMode` in `tauri.windows.conf.json`). The updater leaves each installer
-in a `Two-edged Sword-<version>-updater-…` folder in Temp; the app removes those when it starts
+Windows release › Run workflow, with the tag), the release needs its modules zip. Windows copies
+install an update quietly, with a progress window (`plugins.updater.windows.installMode` in
+`tauri.windows.conf.json`). The updater leaves each installer in a `Two-edged Sword-<version>-updater-…` folder in Temp; the app removes those when it starts
 (`remove_old_installers` in `updates.rs`).
 
 ## Security checks
@@ -193,8 +197,7 @@ run side by side (4 by default). It needs Pillow.
 - The window is invisible, click-through and out of the Dock, and never takes the focus, so
   nothing flashes on screen. The app saves its webview's snapshot to the file in `TES_SNAPSHOT`
   after `TES_SNAPSHOT_AFTER` seconds; the script draws the window's buttons and rounded corners
-  back on, and takes a blank shot again.
-
+  back on, and retakes a blank shot.
 - Each scene is in `tools/screenshots/scenes.json`. `src/scene.ts` sets it up, and nothing is
   saved.
 - Ask, Worship, Songs for the chapter, Closing verse, Lyrics and Journal shots use fixtures in `tools/screenshots/`, so no
@@ -215,7 +218,10 @@ run side by side (4 by default). It needs Pillow.
 
 ## The product page
 
-`site/` is the app's web page, https://two-edged-sword.davies.co.za/: plain HTML, CSS and JavaScript with no build step. `.github/workflows/pages.yml` publishes it to GitHub Pages on every push to `main` that changes `site/`; `site/.nojekyll` keeps Pages from running Jekyll over it, and `site/sitemap.xml` is what Google Search Console is given.
+`site/` is the app's web page, https://two-edged-sword.davies.co.za/: plain HTML, CSS and JavaScript
+with no build step. `.github/workflows/pages.yml` publishes it to GitHub Pages on every push to
+`main` that changes `site/`; `site/.nojekyll` keeps Pages from running Jekyll over it, and
+`site/sitemap.xml` is what Google Search Console is given.
 
 - Its pictures are WebP copies of the dark screenshots, in `site/img/`. After `make screenshots`, `make site` remakes them (it needs `cwebp`, from `brew install webp`). `img/og.png` is the share card, 1200×630, rendered from `tools/og.html` with headless Chrome: `make og`.
 - Each zoomable screenshot is a `.tour`: the `li` steps under it carry the spot to centre on (`data-x`, `data-y`, in percent of the picture, and `data-s`, the scale) or the picture to show (`data-img`), and `data-caption` for the line under it. `landing.js` plays them while the tour is on screen.
@@ -226,8 +232,8 @@ run side by side (4 by default). It needs Pillow.
 ## Differences from the KJV
 
 The ≠ lists are reviewed one translation at a time. The app ships the ones in `src-tauri/variances/`;
-a list in the app's data folder takes their place, so a new or rebuilt one shows at once.
-To make one for another translation:
+a list in the app's data folder takes their place, so a new or rebuilt one shows at once. To make
+one for another translation:
 
 ```sh
 W=~/Library/Application\ Support/Two-edged\ Sword/variances-work
@@ -280,7 +286,7 @@ Run each with `python3`. Downloads are cached in `~/Library/Caches/Two-edged Swo
 Sources on GitHub, Bitbucket and SWORD's svn are pinned to a commit or revision, so a rebuild gives the same text; move the pin on purpose.
 
 All are public domain or openly licensed, except some Sefaria translations, SEDRA's glosses and
-Jastrow, which are for non-commercial use. That's fine for personal study.
+Jastrow, which are non-commercial (fine for personal study).
 
 - LXX-Brenton+'s word forms are GLAUx's, tagged by a model trained partly on non-commercial treebanks; GLAUx
   publishes its results under CC BY-SA 4.0, so LXX-Brenton+ is shared under it.
@@ -308,8 +314,7 @@ docstring lists them and their licences), under the ids the app looks for first:
 `strong`, `kjc` and `tsk`. The others mostly take e-Sword's ids (`asv`, `henry`, `wesley`, …); where
 e-Sword X has a module the app also has, the app's copy is read unless the user chooses e-Sword's on
 the Library screen (Settings › `eswordCopies`). `--only jfb asv` builds just those; `--if-missing`
-builds only what isn't there. It also builds other tools' public-domain and openly licensed Bibles into the
-bundle: the Peshitta, Murdock, Etheridge, Tyndale, Geneva 1599 and Douay-Rheims (`tools/crosswire`), the
+builds only what isn't there. It also builds other tools' Bibles into the bundle: the Peshitta, Murdock, Etheridge, Tyndale, Geneva 1599 and Douay-Rheims (`tools/crosswire`), the
 Clementine Vulgate (`tools/vulgate`), the Greek Brenton (`tools/lxx/build.py`), Ginsburg and Ginsburg+
 (`tools/ginsburg`, shared under the GPL as the app is, since a few verses come from a GPL-3.0 source),
 WLC+ (`tools/wlc`), the word-by-word LXX-Brenton+ and Peshitta+ (`tools/lxx/plus.py`, `tools/syriac/build.py`),

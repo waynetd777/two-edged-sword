@@ -3,11 +3,13 @@
 A Bible study app for macOS and Windows, for reading Bibles, commentaries, dictionaries and books
 beside your own notes. It comes with 56 modules: the KJV and some twenty more Bibles (among them the
 Berean Standard Bible, Tyndale, the Geneva, the Douay-Rheims, the Vulgate, the Septuagint and the Peshitta, and Strong's and word-by-word editions), Strong's dictionaries, BDB and Abbott-Smith, the Treasury of Scripture Knowledge, five commentaries (Matthew Henry, JFB, Clarke,
-Barnes, Wesley), dictionaries from Easton's to the ISBE, and a book of fifteen Bible maps; and it reads more modules in
-e-Sword X's formats: your own, and on a Mac e-Sword X's library if you have it.
+Barnes, Wesley), dictionaries from Easton's to the ISBE, and a book of fifteen Bible maps.
+It also reads modules in e-Sword X's formats: your own, and on a Mac e-Sword X's library if you have it.
 It only reads them, and keeps your journal, highlights and plans separately.
 
 See it on the [Two-edged Sword website](https://two-edged-sword.davies.co.za/).
+
+**Contents:** [Download](#download) · [What it does](#what-it-does) · [Quick start](#quick-start) · [Thanks](#thanks) · [Licence](#licence) · [Documentation](#documentation)
 
 ## Download
 

@@ -6,12 +6,15 @@ Ask answers questions about whatever you're looking at: a passage, a word, searc
 journal entry or a book. It answers from your own commentaries, lexicons and dictionaries, and
 names its sources.
 
-- Chats stay on your computer. Find them under **Recent** on any Ask panel.
-- Opening an old chat takes you back to where it started.
+- Chats stay on your computer: find them under **Recent** on any Ask panel. Opening one takes you back to where it started.
 - An answer can be added to your journal in one click.
-- After each answer the box offers a next question in grey; → or Tab types it in. Settings › AI assistant › **Suggest a next question** turns it off.
+- After each answer the box offers a next question in grey; → or Tab types it in. Turn it off in Settings › AI assistant › **Suggest a next question**.
 - Ask also knows this guide, so you can ask how to do something in the app ("how do I hide my
   highlights?").
+
+<!-- github -->
+**Contents:** [Claude Code, Codex, Antigravity or Copilot](#claude-code-codex-antigravity-or-copilot) · [Answers from your library](#answers-from-your-library) · [What is sent](#what-is-sent) · [Where it keeps things](#where-it-keeps-things)
+<!-- /github -->
 
 ## Claude Code, Codex, Antigravity or Copilot
 
@@ -62,7 +65,7 @@ Books and devotionals work the same way: the assistant can search the whole book
 
 ## What is sent
 
-The first question goes with what you're looking at, such as the passage or the open journal
+The first question goes with what you're looking at, such as the passage or open journal
 entry. After that, only what the assistant chooses to read is sent.
 
 **Licensed text.** Turn off Settings › AI assistant › **Licensed text** and no copyrighted

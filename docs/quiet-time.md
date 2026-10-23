@@ -2,7 +2,9 @@
 
 <sub>[Features](features.md) › Quiet time</sub>
 
-[Plans](#plans) · [Worship music](#worship-music) · [Closing verse](#closing-verse) · [Favourite passage](#favourite-passage) · [Daily reminder](#daily-reminder) · [Menu bar](#menu-bar)
+<!-- github -->
+**Contents:** [Plans](#plans) · [Worship music](#worship-music) · [Closing verse](#closing-verse) · [Favourite passage](#favourite-passage) · [Daily reminder](#daily-reminder) · [Menu bar](#menu-bar)
+<!-- /github -->
 
 ## Plans
 
@@ -22,15 +24,14 @@ library, or Our Daily Bread and Heartlight online.
 - **Add a website…**, under Online in the devotionals list, adds a devotional site of your own:
   a name and its address. For a page whose address changes each day, put `{yyyy}`, `{mm}` and
   `{dd}` where the date goes. Your sites can be chosen for any plan; × removes one.
-- A site that won't be shown inside another app opens in its own window instead.
-- An online devotional shows in the reading column, under the Quiet time bar. In the dark theme
-  its page is inverted to look dark, with its pictures as they should be. **Open in window** shows
-  it in a window of its own.
+- An online devotional shows in the reading column, under the Quiet time bar. A site that won't
+  show inside the app opens in its own window instead, and **Open in window** does that for any.
+  In the dark theme its page is inverted to look dark, with its pictures as they should be.
 - Our Daily Bread opens at today's devotion: the app follows the link to it from the site's list.
   Its page stays still while its opening verse is read, then scrolls with the reading.
 - With audio, Our Daily Bread and Heartlight are read aloud by themselves once their page has
-  loaded, from the top of the day's reading, as the Bible is. Other online devotionals wait for
-  you to click **Listen**.
+  loaded, from the top of the day's reading. Other online devotionals wait for you to click
+  **Listen**.
 - In the dark theme, each online devotional has a moon button, in the devotionals list and over its
   page. Turn it off for a site that's dark already, to show it as the site made it.
 - To hear an online devotional, click **Listen** over its page, then click where reading should
@@ -87,9 +88,9 @@ scroll:
   song's artwork: a cross, a dove passing over, tongues of fire, hands raised, the throne, chains
   breaking, a river and over a hundred more, one or two at a time. Some are old photographs,
   engravings and paintings: the lion of Judah, Dürer's praying hands, the ark of the covenant,
-  the Creation of Adam. Pictures of what the song sings about come more often: a song about
-  fire gets fire, and none comes twice in a song. The larger ones keep beside the words, in
-  focus mode too. One that has no room clear of the other waits, or comes smaller.
+  the Creation of Adam. Pictures of what the song sings about come more often (a song about
+  fire gets fire), and none comes twice in a song. The larger ones keep beside the words, in
+  focus mode too. One with no room waits, or comes smaller.
   Settings › Listening › **While a song plays** turns them off.
 - Each picture has a verse beneath it, faint, in the Bible chosen in Settings › Listening ›
   **Verses from** (the default translation until you choose one). A verse keeps beside the
@@ -108,8 +109,8 @@ scroll:
 
 Lyrics come from LRCLIB (lrclib.net), a free public lyrics database: the song's name, artist,
 album and length are sent to it. If it has none, lyrics you've saved with the song in Music are
-shown, not timed. LRCLIB is sometimes busy: the app tries again for a few seconds, then says so.
-Open the song's Lyrics again later to retry.
+shown, not timed. If LRCLIB is busy, the app tries for a few seconds, then says so: open the
+song's Lyrics again later.
 
 **Try it now**, under the Closing verse card, runs today's Quiet time with its songs and closing
 verse without marking anything read. **Try it with audio** does the same, read aloud.

@@ -2,7 +2,9 @@
 
 <sub>[Features](features.md) › Reading</sub>
 
-[Read](#read) · [Books and devotionals](#books-and-devotionals) · [Listen](#listen) · [Songs for the chapter](#songs-for-the-chapter)
+<!-- github -->
+**Contents:** [Read](#read) · [Books and devotionals](#books-and-devotionals) · [Listen](#listen) · [Songs for the chapter](#songs-for-the-chapter)
+<!-- /github -->
 
 ## Read
 
@@ -10,18 +12,18 @@
 
 The chapter shows beside a study pane that follows the verse you select.
 
-While [Read](app:read) or [Compare](app:compare) is in front, and all through Quiet time, the screen doesn't sleep, so the
-screensaver and lock don't come on.
+While [Read](app:read) or [Compare](app:compare) is in front, and all through Quiet time, the screensaver and lock
+don't come on.
 
 ### The study pane
 
-- **Commentary**: every commentary on the verse, in the order you set in the [Library](app:library#commentaries), with its
-  cross-references below: a pill for the Treasury of Scripture Knowledge and one for OpenBible.info's, the links readers voted helpful.
+- **Commentary**: every commentary on the verse, in the order you set in the [Library](app:library#commentaries), then
+  cross-references: a pill each for the Treasury of Scripture Knowledge and OpenBible.info (the links readers voted helpful).
 - **Dictionary**: type a word to look it up in all your dictionaries.
 - **Notes**: your journal entries on the verse.
-- **Maps** for the book, from the built-in Bible Maps (fifteen maps, from the patriarchs to the seven churches, with two plans of
-  Jerusalem) and any map books of your own. Click a map to see it enlarged, to zoom into and move around.
-  On Bible Maps, click a place's dot or name for its verses: point at one to read it, click it to open it.
+- **Maps** for the book: the built-in Bible Maps (fifteen, from the patriarchs to the seven churches, with two plans of
+  Jerusalem) and any map books of your own. Click a map to enlarge, zoom and move it.
+  On Bible Maps, click a place's dot or name for its verses: point to read, click to open.
 - **Ask**: questions about the verse or chapter ([Ask](ask.md)).
 
 <a href="images/index.md#reading"><picture><source media="(prefers-color-scheme: dark)" srcset="images/maps-place-dark.png"><img alt="John 4 beside the Maps tab, Capernaum clicked: its verses in each Gospel" src="images/maps-place-light.png"></picture></a>
@@ -31,8 +33,7 @@ screensaver and lock don't come on.
 ### Look up a word
 
 Click any word for its Greek or Hebrew, how the KJV translates it, and dictionary articles. The
-speaker beside it says the word aloud. Words in commentaries, dictionaries and books work the
-same way.
+speaker beside it says the word aloud. This works in commentaries, dictionaries and books too.
 
 ### Select verses
 
@@ -50,7 +51,7 @@ The highlighter in the top bar hides and shows all highlights.
 
 - ← and → turn the page. The passage picker goes book, chapter, verse.
 - Hover a reference or Strong's number for a preview.
-- ⌘. is focus mode: the text across most of the window, justified. The pointer hides when the mouse is still for a few seconds and comes back when it moves. Esc leaves it.
+- ⌘. is focus mode: justified text across most of the window. The pointer hides when still. Esc leaves it.
 - Read by paragraph (Settings › Appearance), a chapter is justified too.
 - ⌘+ and ⌘− make the text bigger or smaller, as the **Aa** slider does, in focus mode too.
 
@@ -99,8 +100,7 @@ Click a picture or chart to see it enlarged. There:
 
 <a href="images/index.md#reading"><picture><source media="(prefers-color-scheme: dark)" srcset="images/listen-dark.png"><img alt="Listening to 1 John 1, the word being spoken highlighted" src="images/listen-light.png"></picture></a>
 
-Reads the chapter aloud, highlighting each word as it's spoken, and carries on into the next
-chapter. The verse being read stays a third of the way down the page. Choose the speed (0.5× to
+Reads the chapter aloud, highlighting each word, and carries on into the next chapter. The verse being read stays a third of the way down the page. Choose the speed (0.5× to
 2×) and a sleep timer in the player.
 
 | Keys | Does |

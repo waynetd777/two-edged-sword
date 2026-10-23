@@ -3,9 +3,13 @@
 A Bible study app for macOS and Windows, for reading Bibles, commentaries, dictionaries and books
 beside your own notes. It comes with 56 modules: the KJV and some twenty more Bibles (among them the
 Berean Standard Bible, Tyndale, the Geneva, the Douay-Rheims, the Vulgate, the Septuagint and the Peshitta, and Strong's and word-by-word editions), Strong's dictionaries, BDB and Abbott-Smith, the Treasury of Scripture Knowledge, five commentaries (Matthew Henry, JFB, Clarke,
-Barnes, Wesley), dictionaries from Easton's to the ISBE, and a book of fifteen Bible maps; and it reads more modules in
+Barnes, Wesley), dictionaries from Easton's to the ISBE, and a book of fifteen Bible maps. It also reads modules in
 e-Sword X's formats: your own, and on a Mac e-Sword X's library if you have it.
 It only reads them, and keeps your journal, highlights and plans separately.
+
+<!-- github -->
+**Contents:** [First run](#first-run) · [Updates](#updates) · [On Windows](#on-windows) · [Getting around](#getting-around) · [Settings](#settings) · [Licence and credits](#licence-and-credits)
+<!-- /github -->
 
 | Page | What's in it |
 |---|---|
@@ -39,15 +43,15 @@ Something refused by mistake can be allowed in System Settings › Privacy & Sec
 <!-- /mac -->
 
 <!-- windows -->
-On Windows, if Windows says it protected your PC when you run the installer, click **More info**,
-then **Run anyway**: the app isn't code-signed. It installs for you alone, with no administrator
-password, and asks for nothing more.
+The app isn't code-signed. If Windows says it protected your PC when you run the installer, click
+**More info**, then **Run anyway**. It installs for you alone, needs no administrator password and
+asks for nothing more.
 <!-- /windows -->
 
 ## Updates
 
 - The app checks for a new version once a day, and soon after it opens.
-- When there is one, it asks the next time its window is in front, with what's new in it:
+- When there is one, it asks the next time its window is in front, and says what's new:
   **Install and Restart**, **Later** (asked again the next day) or **Skip This Version**. Esc is Later.
 - Installing shows the download's progress, saves your work and restarts the app.
 - **Check for Updates…** checks now: at the foot of Settings, and in the <!-- mac -->app menu<!-- /mac --><!-- github --> on a Mac or the <!-- /github --><!-- windows -->notification-area menu<!-- /windows --><!-- github --> on Windows<!-- /github -->.<!-- windows --> An update installs with a progress window and reopens the app.<!-- /windows -->
@@ -57,7 +61,7 @@ password, and asks for nothing more.
 <!-- windows -->
 ## On Windows
 
-The app works the same on Windows, with these differences:
+It works the same on Windows, except:
 
 | | On Windows |
 |---|---|
@@ -88,9 +92,9 @@ The app works the same on Windows, with these differences:
 - Hover any control to see what it does.
 - The **Help** menu has this help (⌘?) and **Two-edged Sword Website**. **About Two-edged Sword**, in the
   app menu, shows the version, with the website under it.
-- The **?** at the top right opens the help beside the screen, at the part of the guides for that
-  screen. Type to search every page; **Getting started** and **All topics**, under the search box,
-  open the walk-throughs and the other guides; **Ask about Two-edged Sword** asks the assistant instead.
+- The **?** at the top right opens the help beside the screen, at the part for that screen.
+  Type to search every page. Under the search box, **Getting started** and **All topics** open the
+  walk-throughs and other guides, and **Ask about Two-edged Sword** asks the assistant instead.
   Esc closes it.
 
 <a href="images/index.md#features"><picture><source media="(prefers-color-scheme: dark)" srcset="images/help-dark.png"><img alt="The help beside Read, open at the Read section of the Reading guide" src="images/help-light.png"></picture></a>

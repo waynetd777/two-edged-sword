@@ -2,9 +2,13 @@
 
 <sub>[Features](features.md) › Getting started</sub>
 
-Walk-throughs of everything the app does, a step at a time. In the app, a link marked ↗ takes you to what it names, and the help stays open beside it while you try it.
+Walk-throughs of everything the app does, a step at a time. In the app, a link marked ↗ takes you to what it names, and the help stays open beside it.
 
 The app offers these when it opens until you tick **Don't ask me again**. They're always in the help (?): click **Getting started** at the top.
+
+<!-- github -->
+**Contents:** [Start here](#start-here) · [Read the Bible](#read-the-bible) · [Study a verse](#study-a-verse) · [Greek and Hebrew](#greek-and-hebrew) · [Compare translations](#compare-translations) · [Search](#search) · [Highlights, bookmarks and notes](#highlights-bookmarks-and-notes) · [Listen](#listen) · [Books, devotionals and maps](#books-devotionals-and-maps) · [Keep a journal](#keep-a-journal) · [Quiet time](#quiet-time) · [Worship music](#worship-music) · [Ask about Scripture](#ask-about-scripture) · [Translations and manuscripts](#translations-and-manuscripts) · [Add modules](#add-modules) · [Make it yours](#make-it-yours)
+<!-- /github -->
 
 ## Start here
 
@@ -14,16 +18,16 @@ Two minutes to find your way around.
 
 Two-edged Sword is for reading the Bible with everything written about it beside the text: commentaries, dictionaries, the Greek and Hebrew, other translations, and your own notes.
 
-It comes with the KJV and some twenty more Bibles, Strong's Hebrew and Greek dictionaries and two lexicons, the Treasury of Scripture Knowledge, five commentaries, a shelf of dictionaries and fifteen Bible maps, so it works with nothing else installed.
+It comes with the KJV and some twenty more Bibles, Strong's dictionaries and two lexicons, the Treasury of Scripture Knowledge, five commentaries, a shelf of dictionaries and fifteen Bible maps, so it works with nothing else installed.
 
 <!-- mac -->
-If you have e-Sword X, the app reads its library too, so everything you've downloaded there is here as well. Nothing in it is copied or changed.
+If you have e-Sword X, the app reads its library too. Nothing in it is copied or changed.
 <!-- /mac -->
 
 ### Allow what the app asks for
 
 <!-- mac -->
-macOS asks once for each thing the app uses. Allow them as they come:
+macOS asks once for each of these. Allow them as they come:
 
 | Prompt | When | For |
 |---|---|---|
@@ -32,15 +36,15 @@ macOS asks once for each thing the app uses. Allow them as they come:
 | Notifications | Turning on the daily reminder | The reminder |
 | Control Music | First worship song | Worship music |
 
-Refused one by mistake? Allow Two-edged Sword in System Settings › Privacy & Security.
+Refused one by mistake? Allow the app in System Settings › Privacy & Security.
 <!-- /mac -->
 <!-- windows -->
-Nothing to allow: the app is installed for you alone and asks for no permissions. Your settings are kept in `%APPDATA%\Two-edged Sword` and your journal in Documents › Two-edged Sword.
+Nothing to allow: the app asks for no permissions. Your settings are kept in `%APPDATA%\Two-edged Sword` and your journal in Documents › Two-edged Sword.
 <!-- /windows -->
 
 ### Choose your Bible
 
-Settings › Bibles sets the translation the app opens with, up to three favourites that get a button each in the top bar, and the Bibles Compare starts with.
+Settings › Bibles sets the translation the app opens with, up to three favourites (a top-bar button each), and the Bibles Compare starts with.
 
 The Bible menu in the top bar changes translation for now; your default comes back next time.
 
@@ -67,11 +71,11 @@ Press ⌘K and type a reference ("rom 8 28"), a word, a Strong's number ("G26") 
 
 [Try ⌘K](app:palette)
 
-⌘[ and ⌘] go back and forward through where you've been, as in a browser. They remember screens, passages, words and searches.
+⌘[ and ⌘] go back and forward through screens, passages, words and searches, as in a browser.
 
 ### Get help anywhere
 
-- Press ? on any screen, or click **?** at the top right, for the help on that screen. Type in it to search all the help.
+- Press ? on any screen, or click **?** at the top right, for that screen's help. Type in it to search all the help.
 - Under the search box, **Getting started** brings back these walk-throughs and **All topics** lists every guide.
 - Hover any button to see what it does.
 - **Ask about Two-edged Sword**, at the foot of the help, asks the AI assistant how to do something.
@@ -96,7 +100,7 @@ Or click the passage picker at the top left and choose book, chapter and verse, 
 
 ### Verse or paragraph
 
-The **Paragraph** and **Verse** switch at the top of the chapter changes the layout. Paragraphs read like a printed Bible, justified; verses put each on its own line, with room in the margin for marks such as ≠ and your notes.
+The **Paragraph** and **Verse** switch at the top of the chapter changes the layout. Paragraphs read like a printed Bible; verses put each on its own line, with room in the margin for marks such as ≠ and your notes.
 
 ### Make it comfortable
 
@@ -122,7 +126,7 @@ The study pane beside the chapter follows the verse you select.
 
 [Open Romans 8](app:open/romans-8)
 
-Click a verse (not a word) to select it. ⇧-click selects a range. The study pane on the right now shows what's written about it.
+Click a verse (not a word) to select it; ⇧-click selects a range. The study pane on the right shows what's written about it.
 
 ### Commentaries and cross-references
 
@@ -142,7 +146,7 @@ The **Dictionary** tab looks a word up in every dictionary you have at once.
 
 ### Ask about it
 
-The **Ask** tab answers questions about the verse or chapter from your own commentaries and dictionaries. The Ask walk-through sets it up.
+The **Ask** tab answers questions about the verse or chapter from your own commentaries and dictionaries. Set it up with the Ask walk-through.
 
 ## Greek and Hebrew
 
@@ -152,13 +156,11 @@ The original words behind any verse, without knowing the languages.
 
 [Open John 3](app:open/john-3)
 
-Click any word in the text. A box shows the Greek or Hebrew behind it, its Strong's number, how the KJV translates it elsewhere, and dictionary articles. The speaker says the word aloud.
-
-Words in commentaries, dictionaries and books work the same way.
+Click any word in the text. A box shows the Greek or Hebrew behind it, its Strong's number, how the KJV translates it elsewhere, and dictionary articles. The speaker says the word aloud. Words in commentaries, dictionaries and books work the same way.
 
 ### Word Study
 
-Click **Word study** in that box, or press ⌘4, for everything about one word: its Strong's entry, every verse that uses it in context, a chart of where it's used, related words, and the articles on it in your library.
+Click **Word study** in that box, or press ⌘4, for everything about one word: its Strong's entry, every verse that uses it, a chart of where it's used, related words, and articles on it in your library.
 
 [Open Word Study](app:word)
 
@@ -289,7 +291,7 @@ Click a paragraph to highlight, bookmark, note, listen to, ask about or copy it,
 
 ### Pictures and charts
 
-Click a picture or chart to see it enlarged:
+Click a picture or chart to enlarge it:
 
 - Scroll, or use two fingers on a trackpad, to zoom in and out.
 - Drag to move it around.
@@ -297,7 +299,7 @@ Click a picture or chart to see it enlarged:
 
 ### Maps
 
-Bible Maps comes with the app, and other map books open from **Books** like any other. The study pane's **Maps** tab picks maps that suit the book you're reading; click one to zoom into it full screen, as with pictures. On Bible Maps, click a place's dot or name, there or full screen, for its verses: point at one to read it, click it to open it.
+Bible Maps comes with the app; other map books open from **Books** like any other. The study pane's **Maps** tab picks maps that suit the book you're reading; click one to enlarge it, as with pictures. On Bible Maps, click a place's dot or name, there or full screen, for its verses: point at one to read it, click it to open it.
 
 ## Keep a journal
 
@@ -358,10 +360,10 @@ F7 and F9 move between parts; F8 or ⌘P pauses.
 Settings › Quiet time sends a notification at a time you choose, with the day's readings, if you haven't read yet.
 
 <!-- mac -->
-Turning it on sends one straight away, so macOS can ask to allow them. It comes while the app runs, in the menu bar too: turn on **Open at login** in the menu-bar window so it always is.
+Turning it on sends one straight away, so macOS can ask to allow them. It comes while the app runs, in the menu bar too: turn on **Open at login** in the menu-bar window to keep it running.
 <!-- /mac -->
 <!-- windows -->
-It comes while the app runs, in the notification area too: turn on **Open at login** in the window its icon opens so it always is.
+It comes while the app runs, in the notification area too: turn on **Open at login** in the window its icon opens to keep it running.
 <!-- /windows -->
 
 ### End the day well
@@ -450,7 +452,7 @@ Chats stay on your computer, under **Recent** on any Ask panel. Add an answer to
 
 ### What is sent
 
-The first question goes with what you're looking at; after that, only what the assistant chooses to read. Settings › AI assistant can include your journal, limit it to the passage, or keep copyrighted modules' text from being sent.
+The first question goes with what you're looking at; after that, only what the assistant chooses to read. Settings › AI assistant can include your journal, limit it to the passage, or keep copyrighted modules' text back.
 
 ## Translations and manuscripts
 
