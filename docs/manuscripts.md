@@ -10,16 +10,16 @@
 
 <a href="images/index.md#translations-and-manuscripts"><picture><source media="(prefers-color-scheme: dark)" srcset="images/differences-dark.png"><img alt="Colossians 1:14 in the ASV, with the popup saying it omits “through his blood” and why" src="images/differences-light.png"></picture></a>
 
-In Verse layout, a **≠** beside a verse marks where the translation differs in meaning from the
-KJV, such as an omitted phrase or a changed name of God. It's faint for minor differences.
+With verses one per line (**Verse**, beside **Paragraph** in the reader), a **≠** beside a verse marks
+where the translation differs in meaning from the KJV, such as an omitted phrase or a changed name of God. A faint ≠ marks a minor difference.
 
 Click it to see both readings, what changed, and why (usually which manuscripts each follows).
 
 Ask uses the same list, so you can ask "how does this chapter differ from the KJV?".
 
 The app comes with lists for the NIV, ESV, ESV+, ASV, CEV, GNB, MKJV and ISV, and for the built-in
-BSB, RV, Darby, Weymouth, Douay-Rheims, Brenton's Septuagint, Murdock and Etheridge, each reviewed across the whole Bible (or New
-Testament). A list shows when you have that translation.
+BSB, RV, Darby, Weymouth, Douay-Rheims, Brenton's Septuagint, Murdock and Etheridge, each checked across the whole Bible (or the whole New
+Testament). A list is used only when you have that translation.
 
 ## Greek and Hebrew
 
@@ -46,7 +46,7 @@ Word-by-word Bibles show each original word over its English and its Strong's nu
 
 ### Other editions' readings
 
-- **Greek NT TR+ and WH+** show another edition's reading in ⟨ ⟩. Hover it to see whose.
+- **Greek NT TR+ and WH+** show another edition's reading in ⟨ ⟩. Hover it to see which edition.
 - **Greek NT INT+** marks in red the words that not every edition has, with a letter for each
   edition: τ Stephanus, σ Scrivener, β Byzantine, α Alexandrian, ν NA28.
 
@@ -58,12 +58,12 @@ Word-by-word Bibles show each original word over its English and its Strong's nu
 translators used, and the English Bibles before it. Below the KJV come its revisions, from
 Webster's and the Revised Version to the ESV, and the Bibles translated afresh since.
 
-- The chips on each card show what you have: green is the text itself, amber the closest
-  stand-in, blue a related module. Click one to read it. A **+** beside one opens its edition
+- The coloured labels on each card show what you have: green is the text itself, amber the closest
+  stand-in, blue a related module. Click one to read it. A **+** beside a label opens the edition
   with Strong's numbers, glosses or notes.
 - A yellow **A** means that Bible has the Apocrypha.
 - Hover a card to light up what it came from and what came from it.
-- The **ⓘ** on a card says what it is and what it means for the KJV.
+- The **ⓘ** on a card explains what it is and how it bears on the KJV.
 - **Ask** opens a panel for questions about the history.
 
 ## Targums and Talmud

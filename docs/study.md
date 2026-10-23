@@ -8,9 +8,9 @@
 
 <a href="images/index.md#study"><picture><source media="(prefers-color-scheme: dark)" srcset="images/compare-dark.png"><img alt="KJV+, ASV and YLT side by side" src="images/compare-light.png"></picture></a>
 
-Any number of translations side by side, verse by verse.
+Compare shows any number of translations side by side, verse by verse.
 
-- **Add** a translation from the menu.
+- **+ Add** adds a translation.
 - **Highlight differences** marks wording that differs from the first column.
 - **Strong's numbers** shows them for the Bibles that have them.
 - ← and → turn the page.
@@ -19,7 +19,7 @@ Any number of translations side by side, verse by verse.
 
 <a href="images/index.md#study"><picture><source media="(prefers-color-scheme: dark)" srcset="images/search-dark.png"><img alt="Searching the KJV for “tithe”, with the verse in context" src="images/search-light.png"></picture></a>
 
-Searches a Bible, every commentary and dictionary, and your journal at once.
+Search looks through a Bible, every commentary and dictionary, and your journal at once.
 
 - Narrow it to part of the Bible, such as the Gospels or the Letters.
 - Match the exact phrase, all or any of the words, or whole words only.
@@ -39,4 +39,4 @@ Everything about one Greek or Hebrew word: its Strong's entry, its entries in yo
 (such as Brown-Driver-Briggs), where it's used, every verse in context, related words, and the
 articles on it in your library.
 
-Type a Strong's number, an English word ("love") or a transliteration ("agape").
+In its search box, type a Strong's number, an English word ("love") or a transliteration ("agape").

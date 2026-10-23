@@ -1172,7 +1172,7 @@ function WorshipCard({ plan, update }: { plan: Plan; update: (p: Plan) => void }
   );
 }
 
-/** The closing verse in Quiet time: whether to end with one; and a favourite passage read every day before it. */
+/** The closing verse in Quiet time: whether to end with one; and a favourite passage read every day after it. */
 function ClosingSetting({ plan, update }: { plan: Plan; update: (p: Plan) => void }) {
   return (
     <div className="card" style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: 10 }}>

@@ -664,7 +664,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     reloadJournal();
   }, [reloadJournal]);
-  // Edits made elsewhere (Obsidian) are picked up: the files are checked every few seconds while
+  // Edits made elsewhere (in a notes app) are picked up: the files are checked every few seconds while
   // the window is showing, and at once when it comes back to the front.
   useEffect(() => {
     if (!journalDir) return;

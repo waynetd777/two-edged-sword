@@ -258,7 +258,7 @@ export function SettingsScreen() {
           <Section title="Journal">
             <Row
               label="Save journal to"
-              hint="One Markdown file per month, e.g. 2026-09.md. In your Obsidian vault the entries open there too."
+              hint="One Markdown file per month, e.g. 2026-09.md. Choose a folder your Markdown notes app (such as Brainstead) uses, and the entries show there too."
             >
               <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
                 <code style={{ fontSize: 12 }}>{app.journalDir.replace(/^\/Users\/[^/]+/, "~")}</code>

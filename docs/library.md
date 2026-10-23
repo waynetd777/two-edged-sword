@@ -20,18 +20,18 @@ The app reads Bibles and books from three places, and never changes them:
 
 <a href="images/index.md#library"><picture><source media="(prefers-color-scheme: dark)" srcset="images/library-dark.png"><img alt="The Library searched for Strong: the Bibles with Strong's numbers, each with its features and licence" src="images/library-light.png"></picture></a>
 
-- Every module, with its size and features. The ⓘ beside one shows its description and which
-  folder it came from.
+- It lists every module, with its size and features. The ⓘ beside one shows its description and
+  which folder it came from.
 - **In picker** chooses which Bibles appear in the Bible menu.
 - Set the default Bible, and the order of [commentaries](app:library#commentaries) and [dictionaries](app:library#dictionaries).
 - **Rescan** picks up modules added since the app started.
 - **Show in <!-- mac -->Finder<!-- /mac --><!-- github --> (Mac) or <!-- /github --><!-- windows -->File Explorer<!-- /windows --><!-- github --> (Windows)<!-- /github -->** opens your modules folder.
 - **Read e-Sword X** turns e-Sword X's library on or off.
-- [In e-Sword X too](app:library#copies) lists the modules both the app and e-Sword X have, and which copy each reads. The app's is the default.
+- [In e-Sword X too](app:library#copies) lists the modules both the app and e-Sword X have, and which copy is read for each. The app's own copy is the default.
 
 ## Built-in modules
 
-The app comes with these, so it works with nothing else installed. All are public domain except where the table says otherwise; each module's information has its credits.
+The app comes with these, so it works with nothing else installed. All are public domain unless the table says otherwise. Each module's ⓘ shows its credits.
 
 | Module | From |
 |---|---|
@@ -89,7 +89,7 @@ The app comes with these, so it works with nothing else installed. All are publi
 | Daily Light on the Daily Path | CrossWire |
 | Bible Maps: fifteen maps, from the patriarchs, the Exodus and the tribes through David's kingdom, the divided kingdoms and the Assyrian, Babylonian and Persian empires, to Jesus' land and ministry, Paul's journeys, the seven churches and the Roman Empire, with plans of Jerusalem in the Old Testament and in Jesus' day | Drawn for the app, from OpenBible.info (CC BY), NASA and USGS terrain and Natural Earth |
 
-To read e-Sword X's copy of one of these instead of the app's, choose **e-Sword X** beside it under [In e-Sword X too](app:library#copies) on the Library screen. That list shows while **Read e-Sword X** is on.
+If e-Sword X has one of these too, you can read its copy instead: choose **e-Sword X** beside it under [In e-Sword X too](app:library#copies) on the Library screen. That list shows only while **Read e-Sword X** is on.
 
 ## Formats
 
@@ -104,14 +104,16 @@ The app reads e-Sword X's Mac formats:
 | `.refi` | Reference books, and maps and timelines |
 | `.devi` | Devotionals |
 
-The Library lists maps and timelines on a card of their own: e-Sword's picture books (starred there) and books titled Maps or Atlas. The Talmud's tractates have their own card too.
+The Library screen gives maps and timelines a card of their own. These are e-Sword's picture books (a star before the title) and books with Maps or Atlas in the title. The Talmud's tractates have their own card too.
 
 It doesn't read the Windows formats (`.bblx`, `.cmtx` and so on), EPUB or SWORD modules. Where a
-module comes in both, take the Mac one, on Windows too: e-Sword for Windows encrypts its modules' text.
+module comes in both formats, get the Mac one, on Windows too: e-Sword for Windows encrypts its
+modules' text, so the app can't read it.
 
 ## Adding modules
 
-- **From e-Sword**: e-Sword X's Download window installs them in its library.
+- **From e-Sword**: download them in e-Sword X's Download window. They go into its library, which
+  the app reads.
 - **From elsewhere**: copy the file into your modules folder (not a subfolder). **Show in <!-- mac -->Finder<!-- /mac --><!-- github --> (Mac) or <!-- /github --><!-- windows -->File Explorer<!-- /windows --><!-- github --> (Windows)<!-- /github -->**
   on the Library screen opens it.
 
@@ -119,21 +121,21 @@ Then press **Rescan**.
 
 ## Building modules
 
-Some texts aren't e-Sword downloads. Scripts in the app's source code (not in the app) build them
-from free sources. Put a built module in your modules folder and it shows after **Rescan**. They're
-numbered like the KJV, so they compare beside it.
+Some texts aren't e-Sword downloads. Scripts in the app's source code (not in the app itself) build
+them from free sources. Put a built module in your modules folder and it shows after **Rescan**.
+Their verses are numbered like the KJV's, so they line up beside it in Compare.
 
 | Text | From |
 |---|---|
-| Targum (English), the Babylonian Talmud. The Aramaic Targum and Pseudo-Jonathan are built in; building them gives Sefaria's merged text instead | Sefaria |
+| Targum (English), the Babylonian Talmud. The Aramaic Targum and Pseudo-Jonathan are built in; build them only if you want Sefaria's merged text instead | Sefaria |
 | Beza's Greek New Testament (1598), and Beza 1598+ word by word | textus-receptus.com, STEPBible |
 | Latin+, Jerome's Vulgate word by word (needs e-Sword's Latin Vulgate) | Stanza, Whitaker's WORDS |
-| Targum+ and Ps-Jon+, word by word. Both are built in; building them gives them from Sefaria's merged text instead | Sefaria, Jastrow |
+| Targum+ and Ps-Jon+, word by word. Both are built in; build them only if you want them from Sefaria's merged text instead | Sefaria, Jastrow |
 | Peshitta SEDRA: the Peshitta word by word, with SEDRA's Syriac glosses and grammar | ETCBC, SEDRA |
 | The Rheims New Testament (1582) | Bible Support |
 
 All are public domain or openly licensed, except some Sefaria translations, SEDRA's glosses and
-Jastrow, which are for non-commercial use. That's fine for personal study.
+Jastrow's dictionary, which are for non-commercial use only. Personal study is fine.
 
 ## Free modules worth having
 
@@ -151,7 +153,7 @@ on [Bible Support](https://www.biblesupport.com) (free sign-in).
 
 - Keil & Delitzsch on the Old Testament, and Spurgeon's Treasury of David on the Psalms
   (e-Sword).
-- Vincent's Word Studies (e-Sword): Greek word studies. Robertson's Word Pictures (e-Sword) is like it, but not all public domain: its last two volumes are in copyright in the US until 2028 and 2029.
+- Vincent's Word Studies (e-Sword): notes on the Greek words, verse by verse. Robertson's Word Pictures (e-Sword) is similar, but not all public domain: its last two volumes are in copyright in the US until 2028 and 2029.
 - The Cambridge Bible, Bullinger's Companion Bible and MacLaren's Expositions (e-Sword); Lange and
   Meyer (Bible Support).
 
@@ -161,14 +163,14 @@ on [Bible Support](https://www.biblesupport.com) (free sign-in).
   and Schaff's History of the Christian Church (e-Sword).
 - Spurgeon's Faith's Checkbook and his sermons (Bible Support).
 
-Avoid copyrighted modules shared without the publisher's permission. Books that exist only as
-EPUB or text need converting to a `.refi` first.
+Avoid copyrighted modules shared without the publisher's permission. A book that exists only as
+EPUB or plain text must be converted to a `.refi` first.
 
 ## Thanks to e-Sword
 
 Rick Meyers has given e-Sword away free since 2000, and it has put God's word, with a lifetime of
 commentaries, dictionaries and lexicons, into the hands of millions. This app reads e-Sword X's
-formats and, if you have it, its library, and owes that to his work. Thank you, Rick.
+formats and, if you have e-Sword X, its library. It owes that to his work. Thank you, Rick.
 
 - e-Sword is free, but it isn't ours to share. Its licence doesn't allow its modules to be passed
   on, so the app never copies them, and nothing from e-Sword is built into it.

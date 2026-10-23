@@ -7,8 +7,8 @@ journal entry or a book. It answers from your own commentaries, lexicons and dic
 names its sources.
 
 - Chats stay on your computer: find them under **Recent** on any Ask panel. Opening one takes you back to where it started.
-- An answer can be added to your journal in one click.
-- After each answer the box offers a next question in grey; → or Tab types it in. Turn it off in Settings › AI assistant › **Suggest a next question**.
+- **Add to journal**, under an answer, saves it as a new journal entry.
+- After each answer, the question box suggests a next question in grey; → or Tab types it in. Turn it off in Settings › AI assistant › **Suggest a next question**.
 - Ask also knows this guide, so you can ask how to do something in the app ("how do I hide my
   highlights?").
 
@@ -59,7 +59,7 @@ and reference books that cite the verses.
   commentators differ?" makes it read and compare them.
 - It's told to name the source for each point, and to say when your library has nothing.
 - **Include my journal** (Settings › AI assistant, off at first) adds your entries on the passage.
-- **Search my library** off gives it only the passage text.
+- Turn off **Search my library** (Settings › AI assistant) to give it only the passage text.
 
 Books and devotionals work the same way: the assistant can search the whole book.
 
@@ -72,8 +72,8 @@ entry. After that, only what the assistant chooses to read is sent.
 module's text is sent. A licensed Bible is swapped for a public-domain one, and licensed
 commentaries, dictionaries and books are left out.
 
-**What the assistant can do.** Each tool is given only its read and search tools, and none of
-them can change files.
+**What the assistant can do.** Each AI tool is allowed only to read and search. None of them can
+change files.
 
 - Claude Code, Antigravity and Copilot are kept to the chat's own folder. Your Claude Code
   settings still load, and an allow rule there could widen that.

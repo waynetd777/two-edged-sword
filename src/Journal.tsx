@@ -456,7 +456,7 @@ function Editor({
     shown.current = entry.body;
   }, [entry.id]); // eslint-disable-line react-hooks/exhaustive-deps
   // Only a real change is saved: clicking in and out must not write back a copy made before the
-  // file changed elsewhere (in Obsidian, say).
+  // file changed elsewhere (in a notes app, say).
   const sync = () => {
     if (!ed.current) return;
     const body = htmlToMd(ed.current);

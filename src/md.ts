@@ -79,9 +79,9 @@ function linkRefs(text: string): string {
 }
 
 // An escaped mark (\*), ***bold italic***, **bold**, *italic*, and _italic_ only at word edges, so
-// my_notes_file stays as it is; and highlights: ==yellow== (Obsidian's own) and
+// my_notes_file stays as it is; and highlights: ==yellow== (the highlight syntax Markdown notes apps use) and
 // <mark class="hl-green">the other colours</mark>; and <sup>superscript</sup> and <sub>subscript</sub>
-// ("17<sup>th</sup>"), as Obsidian shows them.
+// ("17<sup>th</sup>"), as Markdown notes apps show them.
 const INLINE_RE = new RegExp(
   String.raw`\\[\\*_=]|<(sup|sub)>.+?<\/\1>|<mark class="hl-(?:${HL_COLOURS.join("|")})">.+?<\/mark>|==(?=\S)(?:\\.|[^\\])+?==|\*\*\*(?=\S)(?:\\.|[^\\])+?\*\*\*|\*\*(?=\S)(?:\\.|[^\\])+?\*\*|\*(?=[^\s*])(?:\\.|[^*\\])+\*|(?<![\p{L}\p{N}_\\])_(?=[^\s_])(?:\\.|[^_\\])+_(?![\p{L}\p{N}_])`,
   "gu",

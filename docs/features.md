@@ -4,8 +4,8 @@ A Bible study app for macOS and Windows, for reading Bibles, commentaries, dicti
 beside your own notes. It comes with 56 modules: the KJV and some twenty more Bibles (among them the
 Berean Standard Bible, Tyndale, the Geneva, the Douay-Rheims, the Vulgate, the Septuagint and the Peshitta, and Strong's and word-by-word editions), Strong's dictionaries, BDB and Abbott-Smith, the Treasury of Scripture Knowledge, five commentaries (Matthew Henry, JFB, Clarke,
 Barnes, Wesley), dictionaries from Easton's to the ISBE, and a book of fifteen Bible maps. It also reads modules in
-e-Sword X's formats: your own, and on a Mac e-Sword X's library if you have it.
-It only reads them, and keeps your journal, highlights and plans separately.
+e-Sword X's formats: ones you add yourself, and on a Mac e-Sword X's library if you have it.
+It never changes them: your journal, highlights and plans are kept separately.
 
 <!-- github -->
 **Contents:** [First run](#first-run) · [Updates](#updates) · [On Windows](#on-windows) · [Getting around](#getting-around) · [Settings](#settings) · [Licence and credits](#licence-and-credits)
@@ -17,7 +17,7 @@ It only reads them, and keeps your journal, highlights and plans separately.
 | [Reading](reading.md) | Read with the study pane, books and devotionals, Listen, songs for the chapter |
 | [Study](study.md) | Compare translations, Search, Word Study |
 | [Translations and manuscripts](manuscripts.md) | Differences from the KJV, Greek and Hebrew, KJV History, the Targums and Talmud |
-| [Journal](journal.md) | Entries linked to verses, kept in step with Obsidian |
+| [Journal](journal.md) | Entries linked to verses, kept in step with Markdown notes apps such as [Brainstead](https://brainstead.davies.co.za/) |
 | [Quiet time](quiet-time.md) | Reading plans, worship music, the reminder, the menu bar |
 | [Ask](ask.md) | The AI assistant and what it sends |
 | [Library](library.md) | Your modules, adding and building more |
@@ -44,17 +44,17 @@ Something refused by mistake can be allowed in System Settings › Privacy & Sec
 
 <!-- windows -->
 The app isn't code-signed. If Windows says it protected your PC when you run the installer, click
-**More info**, then **Run anyway**. It installs for you alone, needs no administrator password and
-asks for nothing more.
+**More info**, then **Run anyway**. It installs for your account only, needs no administrator
+password and asks for no other permissions.
 <!-- /windows -->
 
 ## Updates
 
 - The app checks for a new version once a day, and soon after it opens.
-- When there is one, it asks the next time its window is in front, and says what's new:
+- When there is one, it says what's new the next time its window is in front, and offers
   **Install and Restart**, **Later** (asked again the next day) or **Skip This Version**. Esc is Later.
 - Installing shows the download's progress, saves your work and restarts the app.
-- **Check for Updates…** checks now: at the foot of Settings, and in the <!-- mac -->app menu<!-- /mac --><!-- github --> on a Mac or the <!-- /github --><!-- windows -->notification-area menu<!-- /windows --><!-- github --> on Windows<!-- /github -->.<!-- windows --> An update installs with a progress window and reopens the app.<!-- /windows -->
+- **Check for Updates…** checks straight away. It's at the foot of Settings, and in the <!-- mac -->app menu<!-- /mac --><!-- github --> on a Mac or the <!-- /github --><!-- windows -->notification-area menu<!-- /windows --><!-- github --> on Windows<!-- /github -->.<!-- windows --> An update installs with a progress window and reopens the app.<!-- /windows -->
 - An update waits while Ask is answering or the search index is being built.
 
 
@@ -69,7 +69,7 @@ It works the same on Windows, except:
 | e-Sword | e-Sword for Windows' modules can't be read: their text is encrypted. Modules in e-Sword X's formats work, in your modules folder ([Adding modules](library.md#adding-modules)) |
 | Your data | In `%APPDATA%\Two-edged Sword`. Uninstalling with **Delete the application data** ticked removes it; your journal in Documents stays |
 | Voices | Windows' own: add more, Hebrew and Greek included, as [Better voices](reading.md#better-voices) says |
-| Spelling and grammar | Windows' spell checker, and grammar by Harper, on the PC |
+| Spelling and grammar | Windows' spell checker, and grammar checking by Harper, which runs on your PC |
 | Worship songs | The music files in your Music folder, played by the app ([Worship music](quiet-time.md#worship-music)) |
 | The menu bar icon | In the notification area, by the clock, with Help and Check for Updates… |
 | Ask | Each AI tool is installed in your Windows account ([Ask](ask.md#claude-code-codex-antigravity-or-copilot)) |
@@ -88,8 +88,8 @@ It works the same on Windows, except:
 | ? or ⌘? | Help for the screen you're on |
 
 - **Back and forward** (top left) remember screens, passages, words and searches.
-- The **sidebar** lists your bookmarks and recent chapters. Hover one for a preview; × removes it.
-- Hover any control to see what it does.
+- The **sidebar** lists your bookmarks and recent chapters. Hover over one for a preview; × removes it.
+- Hover over any control to see what it does.
 - The **Help** menu has this help (⌘?) and **Two-edged Sword Website**. **About Two-edged Sword**, in the
   app menu, shows the version, with the website under it.
 - The **?** at the top right opens the help beside the screen, at the part for that screen.
@@ -103,10 +103,10 @@ It works the same on Windows, except:
 
 - **[Appearance](app:settings#appearance)**: theme, font and size, words of Jesus in red, verse or paragraph layout.
 - **[Bibles](app:settings#bibles)**: the default translation, up to three favourites, and the [Compare](app:compare) columns.
-- **[Highlights](app:settings#highlights)**: a name for each of the eight colours, such as a theme.
-- **[Listening](app:settings#listening)**: voices, speed, whether to highlight each word and read on, and the pictures
-  shown while a song plays, with a verse beneath each and the Bible it's from.
-- **[Journal](app:settings#journal)**: its folder, notes beside verses, and grammar checking.
+- **[Highlights](app:settings#highlights)**: a name for each of the eight colours, such as the theme you mark with it ("Promises").
+- **[Listening](app:settings#listening)**: voices, speed, whether to highlight each word as it's read and carry on into the next
+  chapter or journal entry, and the pictures shown while a song plays, with a verse beneath each and the Bible it's from.
+- **[Journal](app:settings#journal)**: where entries are saved, notes beside verses, and grammar checking.
 - **[Quiet time](app:settings#quiet-time)**: the daily reminder, and what to do when you fall behind.
 - **[AI assistant](app:settings#ai-assistant)**: which tools are installed, the default model, what Ask may read and send, and
   whether it suggests a next question ([Ask](ask.md)).

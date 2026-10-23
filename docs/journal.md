@@ -13,16 +13,18 @@
 
 The toolbar has headings, bold, italic, lists and quotes, and can:
 
-- highlight, in the same eight colours as the readers
+- highlight, in the same eight colours as Read and books
 - insert a verse from the Bible, or link one
 - add a tag
 
-**Tags.** Type # to pick a tag from a list: your highlight themes first, then the tags you use
-most. Arrow keys and Enter choose one.
-The tags above the list filter it: your most used come first, and **+ more** shows the rest.
-The box above them filters by words, tags (with or without #) or verses; Esc clears it.
+**Tags.** Type # in an entry to pick a tag from a list: your highlight themes first, then the tags
+you use most. Arrow keys and Enter choose one.
 
-**Verse references** you type become links. Hover one for the verse, click it to open it. Most
+**Find entries.** The tags above the list of entries filter it: your most used come first, and
+**+ more** shows the rest. The box above them filters by words, tags (with or without #) or verses;
+Esc clears it.
+
+**Verse references** you type become links. Hover one to read the verse; click it to open it. Most
 ways of writing a reference work, even common misspellings ("Isiah").
 
 ⌘F finds in the entry and ⌥⌘F replaces.
@@ -60,7 +62,8 @@ Grammar checking can be turned off in Settings › Journal.
 
 ## Where it's kept
 
-Entries are Markdown files, one per month, in `~/Documents/Two-edged Sword/`. To keep them in
-your Obsidian vault, choose a folder there in Settings › Journal.
+Entries are Markdown files, one per month, in `~/Documents/Two-edged Sword/`. To use them in a
+notes app that works with Markdown files, such as [Brainstead](https://brainstead.davies.co.za/),
+choose one of its folders in Settings › Journal.
 
-Changes made in Obsidian show in the app within a few seconds.
+Changes made there show in the app within a few seconds.

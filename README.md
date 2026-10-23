@@ -5,7 +5,7 @@ beside your own notes. It comes with 56 modules: the KJV and some twenty more Bi
 Berean Standard Bible, Tyndale, the Geneva, the Douay-Rheims, the Vulgate, the Septuagint and the Peshitta, and Strong's and word-by-word editions), Strong's dictionaries, BDB and Abbott-Smith, the Treasury of Scripture Knowledge, five commentaries (Matthew Henry, JFB, Clarke,
 Barnes, Wesley), dictionaries from Easton's to the ISBE, and a book of fifteen Bible maps.
 It also reads modules in e-Sword X's formats: your own, and on a Mac e-Sword X's library if you have it.
-It only reads them, and keeps your journal, highlights and plans separately.
+It never changes them: your journal, highlights and plans are kept separately.
 
 See it on the [Two-edged Sword website](https://two-edged-sword.davies.co.za/).
 
@@ -44,17 +44,17 @@ The app checks for updates once a day and offers to install them. **Check for Up
 - **Read** a chapter beside every commentary on the verse, cross-references, dictionaries and
   your notes. Click any word for its Greek or Hebrew.
 - **Highlight** in eight colours, each standing for a theme you name.
-- **Books and devotionals** from your library, with the same tools as Scripture.
+- **Books and devotionals** from your library: highlight, bookmark, note, listen to or ask about any paragraph, as you would a verse.
 - **Listen** to anything read aloud, each word highlighted as it's spoken.
-- **Differences from the KJV**: a mark wherever a translation differs in meaning, and why.
+- **Differences from the KJV**: a mark wherever a translation differs in meaning from the KJV, with the reason.
 - **Greek, Hebrew, Latin and Syriac** word by word, each word over its English and Strong's number.
 - **Ask** questions about what you're reading, answered from your own library.
 - **Compare** translations side by side, **Search** the whole library, and **Word Study** a Greek
   or Hebrew word.
-- **Journal** entries linked to their verses, kept in step with Obsidian.
+- **Journal** entries linked to their verses, saved as Markdown files, so a notes app that works with Markdown, such as [Brainstead](https://brainstead.davies.co.za/), can open them too.
 - **Quiet time** plans, with worship songs chosen for the day and a daily reminder. Songs can be chosen for any chapter too.
 - **Build more modules** from free sources, such as the Targums, the Talmud and Beza's Greek New Testament.
-- **KJV History**: the manuscripts and editions behind the KJV, and which you have.
+- **KJV History**: the manuscripts and editions behind the KJV, and which of them you have.
 
 <table>
   <tr>
@@ -99,7 +99,7 @@ On Windows (10 or 11) it needs Rust, Node, Python and Visual Studio Build Tools 
 workload: `npx tauri build --debug --no-bundle` builds the app and `npx tauri build` the installer
 (see [Development](docs/development.md#commands)).
 
-Without a signing certificate, macOS asks for access to e-Sword's data after every build, if you have e-Sword X
+If you have e-Sword X and no signing certificate, macOS asks again for access to its data after every build
 ([Signing and Full Disk Access](docs/development.md#signing-and-full-disk-access)).
 
 Licensed Bibles are read where e-Sword keeps them and never copied into this repo.
@@ -114,9 +114,9 @@ app reads e-Sword X's formats and library, and owes that to his work
 
 Two-edged Sword is free software under the [GNU General Public License](LICENSE), version 3 or
 later: you may use, share and change it, and anything you pass on must stay free under the same
-licence. The Bible texts and books it reads keep their own terms: the built-in modules are public
-domain or openly licensed ([Library](docs/library.md#built-in-modules)), and so on for the rest
-([Licence and credits](docs/features.md#licence-and-credits)).
+licence. The Bible texts and books it reads keep their own terms. The built-in modules are public
+domain or openly licensed ([Library](docs/library.md#built-in-modules)); the terms of the rest are in
+[Licence and credits](docs/features.md#licence-and-credits).
 
 Three built-in modules are for non-commercial use only. Vulg-C+ (`src-tauri/modules/clementine+.bbli`),
 whose word-by-word tagging comes from a model trained on the PROIEL treebank, is shared under

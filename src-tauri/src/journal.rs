@@ -1,7 +1,7 @@
 // Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
 // SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
-//! The journal: Markdown, one file per month (`Me. Journal - 2026-09.md`), so it reads naturally in Obsidian
+//! The journal: Markdown, one file per month (`Me. Journal - 2026-09.md`), so it reads naturally in a Markdown notes app
 //! or any editor. Each entry is a `## Title` heading, a hidden `<!-- tes … -->` comment holding
 //! its id, dates, verses and tags (recovered from the visible line if an editor drops it), a visible line generated from those, and the body.
 
@@ -245,7 +245,7 @@ pub fn parse(text: &str) -> Vec<Entry> {
 }
 
 /// The month file with entry `id` taken out and, if given, `put` added in date order. Everything
-/// else, including what was written in Obsidian (above the first entry, entries the app can't
+/// else, including what was written in another app (above the first entry, entries the app can't
 /// read), is kept as it was. None when nothing is left, so the file can go.
 fn splice(text: &str, key: &str, id: &str, put: Option<&Entry>) -> Option<String> {
     let lines: Vec<&str> = text.lines().collect();
@@ -295,7 +295,7 @@ fn month_files(dir: &Path) -> Vec<(String, std::path::PathBuf)> {
 }
 
 /// A fingerprint of the month files (names, sizes, modified times), cheap enough to poll: it
-/// changes whenever one is written, here or in Obsidian. It reads no file, so nothing only in
+/// changes whenever one is written, here or in another app. It reads no file, so nothing only in
 /// the cloud is downloaded.
 pub fn stamp(dir: &Path) -> String {
     month_files(dir)
@@ -342,7 +342,7 @@ fn read_month(dir: &Path, key: &str) -> Result<String, String> {
 }
 
 /// A month file keeps the modified time it had: an edit here doesn't make an old month look new
-/// (to Finder, Obsidian's sort, a backup). A new month file gets the time it's made.
+/// (to Finder, a notes app's sort, a backup). A new month file gets the time it's made.
 fn write_month(dir: &Path, key: &str, text: Option<String>) -> Result<(), String> {
     let p = month_path(dir, key);
     match text {
@@ -529,7 +529,7 @@ mod tests {
         );
         std::fs::create_dir_all(&dir).unwrap();
         std::fs::write(dir.join("Me. Journal - 2026-09.md"), &text).unwrap();
-        // Its meta line was deleted in Obsidian: the body's own "*…*" line is not taken for it.
+        // Its meta line was deleted in another app: the body's own "*…*" line is not taken for it.
         assert!(parse(&text)[1].body.starts_with("*emphasis* line"));
         e.body = "Rewritten.".into();
         save(&dir, &e).unwrap();

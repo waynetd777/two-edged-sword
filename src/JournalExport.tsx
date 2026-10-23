@@ -150,7 +150,7 @@ export function ExportDialog({ current, onClose }: { current: JournalEntry | nul
           <span className="hint">
             {fmt === "pdf"
               ? "Opens the print dialog: choose Save as PDF. It uses the app's reading fonts."
-              : "One Markdown file. Your journal is already Markdown in its folder, so Obsidian sees it without exporting."}
+              : "One Markdown file. Your journal is already Markdown in its folder, so a Markdown notes app such as Brainstead reads it without exporting."}
           </span>
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
