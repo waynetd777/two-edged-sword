@@ -15,7 +15,8 @@ Constitution of the World…"). CCEL marks each Bible reference with the passage
 parsed="|John|16|13|0|0"), so each becomes a <ref> the app opens, its v giving the passage in e-Sword's
 abbreviations while the text stays as printed ("John xvi. 13"); a reference to the Apocrypha stays text.
 Footnotes are numbered in the text and listed under the chapter. Greek is marked as Greek. Edersheim's
-figures (plans of the Temple and the like) are fetched and kept in the chapter. The indexes, which give
+figures (a synagogue's plan, the Last Supper's table, the family trees of the Maccabees and Herod) are fetched,
+turned level (the scans are a degree or two askew) and kept in the chapter. The indexes, which give
 the printed edition's page numbers, are left out.
 
 The files are taken as they were when this was written, checked against their sha256: CCEL has no
@@ -151,8 +152,7 @@ class Chapter:
     def image(self, src):
         url = urllib.parse.urljoin("https://www.ccel.org/", src)
         p = fetch(url, CACHE / self.book / Path(src).name)
-        kind = "jpeg" if p.suffix.lower() in (".jpg", ".jpeg") else p.suffix.lower().lstrip(".")
-        return f'<img src="data:image/{kind};base64,{base64.b64encode(p.read_bytes()).decode()}">'
+        return f'<img src="data:image/png;base64,{base64.b64encode(straightened(p)).decode()}">'
 
     def block(self, el):
         """A block element's paragraphs, into out."""
@@ -200,6 +200,28 @@ def words(el):
             s += words(k)
         s += k.tail or ""
     return s
+
+
+def straightened(path):
+    """A scanned figure as a PNG, turned level and trimmed: the scans are a degree or two askew. The angle
+    is the one, within 4°, at which the rows of ink are most sharply divided (the lines of text and the
+    trees' rules lie flat), found in steps of 0.05°."""
+    import io
+    import numpy as np
+    from PIL import Image, ImageOps
+    im = Image.open(path).convert("L")
+    ink = Image.fromarray(((np.asarray(im) < 128) * 255).astype(np.uint8))
+    def sharpness(d):
+        rows = np.asarray(ink.rotate(d, resample=Image.BILINEAR, expand=True, fillcolor=0), dtype=np.float32).sum(1)
+        return float(((rows[1:] - rows[:-1]) ** 2).sum())
+    d = max(np.arange(-4, 4.001, 0.05), key=sharpness)
+    im = im.rotate(float(d), resample=Image.BICUBIC, expand=True, fillcolor=255)
+    box = ImageOps.invert(im).point(lambda v: 255 if v > 60 else 0).getbbox()
+    if box:
+        im = im.crop((max(0, box[0] - 8), max(0, box[1] - 8), min(im.width, box[2] + 8), min(im.height, box[3] + 8)))
+    out = io.BytesIO()
+    im.save(out, "PNG", optimize=True)
+    return out.getvalue()
 
 
 def heading(div):
