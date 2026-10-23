@@ -1027,6 +1027,11 @@ input[type="range"] {
 .es p {
   margin: 0 0 0.6em;
 }
+.es ul,
+.es ol {
+  margin: 0 0 0.6em;
+  padding-left: 1.4em;
+}
 .es p:last-child {
   margin-bottom: 0;
 }

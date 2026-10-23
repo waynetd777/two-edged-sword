@@ -154,6 +154,12 @@ export function renderHtml(html: string, opts: RenderOpts = {}): ReactNode {
         return <sub>{kids()}</sub>;
       case "br":
         return <br />;
+      case "ul":
+        return <ul>{kids()}</ul>;
+      case "ol":
+        return <ol>{kids()}</ol>;
+      case "li":
+        return <li>{kids()}</li>;
       case "red":
         return <span className="red">{kids()}</span>;
       case "blu":
