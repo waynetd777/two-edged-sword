@@ -164,7 +164,7 @@ Click **Word study** in that box, or press ⌘4, for everything about one word: 
 
 ### Word-by-word Bibles
 
-Bibles with + in their name, such as KJV+, carry Strong's numbers: hover a number for its entry. Original-language Bibles such as WLC+, Byz+, LXX-Brenton+ (the Septuagint), Vulg-C+ (the Latin Vulgate) and Peshitta+ (the Syriac) show each word over its English, with its grammar on hover. All of these come with the app.
+Bibles with + in their name, such as KJV+, carry Strong's numbers: hover a number for its entry. Original-language Bibles such as WLC+, Byz+, LXX-Brenton+ (the Septuagint), Vulg-C+ (the Latin Vulgate), Peshitta+ (the Syriac), Targum+ and Ps-Jon+ (the Aramaic Targums) show each word over its English, with its grammar on hover. All of these come with the app.
 
 Settings › Appearance can give original-language Bibles the KJV's commonest English for each word.
 

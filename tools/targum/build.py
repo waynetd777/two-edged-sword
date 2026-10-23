@@ -231,7 +231,7 @@ def hebrew():
     return out
 
 
-def build(name, heb, jas):
+def build(name, heb, jas, into=None):
     src = find(f"{name}.bbli")
     if not src.exists():
         print(f"  no {src.name}; skipped")
@@ -274,14 +274,18 @@ def build(name, heb, jas):
              "word's English (STEPBible's TBESH, CC BY 4.0) and Strong's number; otherwise the English is the first gloss of "
              "the headword it seems to be in Jastrow's Dictionary of the Targumim (1903; Sefaria's digitisation, CC BY-NC). "
              f"{paired / total:.0%} of the words are paired and {looked / total:.0%} from Jastrow. The pairing and the "
-             "look-ups are a program's, so some are wrong; the tooltip says which each is. Built by Two-edged Sword's tools/targum.</p>")
-    with module(f"{name}+.bbli", m["title"], m["abbrev"], about, nt=False, strongs=True, rtl=True) as db:
+             "look-ups are a program's, so some are wrong; the tooltip says which each is. Built by Two-edged Sword's tools/targum.</p>"
+             "<p><b>Licence: non-commercial use only.</b> Because its look-ups come from Jastrow's digitisation (CC BY-NC), "
+             "this module is shared under the Creative Commons Attribution-NonCommercial 4.0 licence "
+             "(creativecommons.org/licenses/by-nc/4.0).</p>")
+    with module(f"{name}+.bbli", m["title"], m["abbrev"], about, nt=False, strongs=True, rtl=True, into=into) as db:
         db.executemany("INSERT INTO Bible VALUES (?,?,?,?)", out)
     print(f"{name}+.bbli: {len(out)} verses")
 
 
-def main():
-    names = sys.argv[1:] or list(MODULES)
+def main(into=None, names=None):
+    """Writes the modules named (all, by default) to the app's modules folder, or to `into`."""
+    names = names or sys.argv[1:] or list(MODULES)
     for n in names:
         if n not in MODULES:
             sys.exit(f"unknown module {n}; one of {', '.join(MODULES)}")
@@ -292,7 +296,7 @@ def main():
     print(f"Jastrow: {len(jas)} headwords with English")
     for n in names:
         print(n)
-        build(n, heb, jas)
+        build(n, heb, jas, into)
 
 
 if __name__ == "__main__":

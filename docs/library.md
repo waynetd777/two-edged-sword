@@ -57,6 +57,7 @@ The app comes with these, so it works with nothing else installed. All are publi
 | Targum (Aramaic): Onkelos on the Torah, Jonathan on the Prophets, the Targums of the Writings | Sefaria: Torat Emet's Onkelos, the Mikraot Gedolot, Wikisource's Chronicles |
 | Targum Pseudo-Jonathan (Aramaic) | Sefaria, from Torat Emet |
 | Targum Pseudo-Jonathan (English): Etheridge's translation (1862) | Sefaria; a verse from its Community Translation (CC0) |
+| Targum+ and Ps-Jon+: the Aramaic Targum and Targum Pseudo-Jonathan word by word, with Strong's numbers and English. **Non-commercial use only** (CC BY-NC) | English and numbers from WLC+ (STEPBible, CC BY) where a word pairs with the Hebrew, else from Jastrow's dictionary (Sefaria's digitisation, CC BY-NC) |
 | LXX-Brenton+: the Greek Septuagint word by word, with the Apocrypha, Strong's numbers and English | GLAUx (CC BY-SA), STEPBible (CC BY) |
 | Vulg-C+: the Clementine Vulgate word by word, with Strong's numbers and English. **Non-commercial use only** (CC BY-NC-SA) | Stanza's tagger, trained on the PROIEL treebank (CC BY-NC-SA); Whitaker's WORDS; numbers from WLC+, Byz+ and LXX-Brenton+ |
 | Peshitta+: the Syriac Peshitta word by word, its English and Strong's numbers from the Greek | Byz+ and STEPBible (CC BY), Murdock's and Etheridge's translations |
@@ -124,7 +125,7 @@ show after **Rescan**. They're numbered like the KJV, so they compare beside it.
 | Targum (English), the Babylonian Talmud. The Aramaic Targum and Pseudo-Jonathan are built in; building them gives Sefaria's merged text instead | Sefaria |
 | Beza's Greek New Testament (1598), and Beza 1598+ word by word | textus-receptus.com, STEPBible |
 | Latin+, Jerome's Vulgate word by word (needs e-Sword's Latin Vulgate) | Stanza, Whitaker's WORDS |
-| Targum+ and Ps-Jon+, word by word | Sefaria, Jastrow |
+| Targum+ and Ps-Jon+, word by word. Both are built in; building them gives them from Sefaria's merged text instead | Sefaria, Jastrow |
 | Peshitta SEDRA: the Peshitta word by word, with SEDRA's Syriac glosses and grammar | ETCBC, SEDRA |
 | The Rheims New Testament (1582) | Bible Support |
 

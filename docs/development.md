@@ -313,7 +313,8 @@ bundle: the Peshitta, Murdock, Etheridge, Tyndale, Geneva 1599 and Douay-Rheims 
 Clementine Vulgate (`tools/vulgate`), the Greek Brenton (`tools/lxx/build.py`), Ginsburg and Ginsburg+
 (`tools/ginsburg`, shared under the GPL as the app is, since a few verses come from a GPL-3.0 source),
 WLC+ (`tools/wlc`), the word-by-word LXX-Brenton+ and Peshitta+ (`tools/lxx/plus.py`, `tools/syriac/build.py`),
-from open sources only, Vulg-C+ (`tools/latin/clementine.py`: Stanza 1.14.0's tagging, trained on the
+from open sources only, Targum+ and Ps-Jon+ (`tools/targum`, from the built-in Targums; their Jastrow glosses are CC BY-NC, so
+they're shared under CC BY-NC and left out of a build that's sold, like Vulg-C+), Vulg-C+ (`tools/latin/clementine.py`: Stanza 1.14.0's tagging, trained on the
 non-commercial PROIEL treebank, so it's the one module shared under CC BY-NC-SA, to be left out of a build that's
 sold; it needs Stanza installed only when it's rebuilt), and the Aramaic Targum, Targum Pseudo-Jonathan and its English
 (`targum_aramaic`, `pseudojonathan_aramaic`, `pseudojonathan_english`; `tools/sefaria`'s `open_targum`). These take named Sefaria

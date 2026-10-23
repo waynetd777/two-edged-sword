@@ -157,7 +157,7 @@ modules.shipping(), so it reads only the built-in modules (the KJV's verses, the
 user's library or e-Sword X's. Not built in: what reads an e-Sword module (beza's TR+ and Beza 1598+
 with it; latin/build.py's Latin+, from e-Sword's latin.bbli; rheims, from a file on Bible Support's
 e-Sword downloads); what has a non-commercial source (sefaria's Talmud and Targum translations,
-targum's Jastrow, syriac/sedra.py's SEDRA).
+syriac/sedra.py's SEDRA), but for Vulg-C+, Targum+ and Ps-Jon+ (below).
   peshitta, murdock, etheridge, tyndale, geneva1599, drc  CrossWire's modules of those names, each
             "DistributionLicense=Public Domain" (tools/crosswire); the Douay-Rheims also reads the
             Clementine Vulgate Project's text.
@@ -173,8 +173,13 @@ targum's Jastrow, syriac/sedra.py's SEDRA).
             ("Onkelos <book>", public domain; not the Sifsei Chachomim Chumash, CC BY-NC), Jonathan on the Prophets and
             the Writings' Targums from the Mikraot Gedolot (public domain), Chronicles from Wikisource (public domain),
             Pseudo-Jonathan from Torat Emet (public domain), its English Etheridge's (1862, public domain) with the
-            Sefaria Community Translation (CC0) where Etheridge has no verse. Targum (English), Targum+, Ps-Jon+ and the
+            Sefaria Community Translation (CC0) where Etheridge has no verse. Targum (English) and the
             Talmud aren't built in (CC BY-NC versions).
+  targum_aramaic+, pseudojonathan_aramaic+  Targum+ and Ps-Jon+: the built-in Targum and Pseudo-Jonathan word by
+            word, their English and Strong's numbers from WLC+
+            (STEPBible's, CC BY 4.0) where a word pairs with the Hebrew, else from Jastrow's Dictionary of the Targumim
+            in UniquePixels/jastrow's digitisation (CC BY-NC, so these two are shared under CC BY-NC 4.0 and must be
+            left out of a build that's sold) (tools/targum).
   lxx+      LXX-Brenton+: the Greek Brenton word by word, its words' forms and grammar from GLAUx (CC BY-SA 4.0,
             so the module is shared under it), Strong's numbers and English from STEPBible (CC BY 4.0) (tools/lxx/plus.py).
   peshitta+  The Peshitta word by word, its English and Strong's numbers from the Greek of Byz+ (lined up word by
@@ -2729,8 +2734,19 @@ def write_targum(name):
 
 
 # The Targums from public-domain and CC0 versions only (each checked against Sefaria's own licence for it);
-# they read only the KJV's chapter lengths. Targum (English) and the word-by-word Targums are left out (NC versions).
+# they read only the KJV's chapter lengths. Targum (English) is left out (NC versions).
 MORE |= {n: (f"{n}.bbli", lambda n=n: write_targum(n)) for n in ("targum_aramaic", "pseudojonathan_aramaic", "pseudojonathan_english")}
+
+
+def write_targum_plus(name):
+    """Targum+ or Ps-Jon+ from the built-in Targum and WLC+, with Jastrow's glosses (CC BY-NC, so non-commercial)."""
+    import targum.build as tg
+    with shipping():
+        tg.main(into=BUNDLED, names=[name])
+
+
+# After the Targums they read.
+MORE |= {f"{n}+": (f"{n}+.bbli", lambda n=n: write_targum_plus(n)) for n in ("targum_aramaic", "pseudojonathan_aramaic")}
 
 
 def main():
