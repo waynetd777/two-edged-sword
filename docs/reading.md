@@ -27,7 +27,7 @@ The screensaver and lock don't come on while the app's window is in front showin
   On Bible Maps, click a place's dot or name to list its verses. Hover a verse to read it; click it to open it.
 - **Ask**: questions about the verse or chapter ([Ask](ask.md)).
 - **ⓘ About**: the Bible you're reading: its edition, where it comes from and its terms (public domain, open licence,
-  non-commercial or personal use).
+  non-commercial or personal use), with its cover. Click the cover to see it full screen.
 
 <a href="images/index.md#reading"><picture><source media="(prefers-color-scheme: dark)" srcset="images/maps-place-dark.png"><img alt="John 4 beside the Maps tab, Capernaum clicked: its verses in each Gospel" src="images/maps-place-light.png"></picture></a>
 
@@ -90,8 +90,8 @@ down the side; a devotional opens on today's reading. The app comes with a shelf
 [Library guide](library.md#built-in-modules) lists them). Click a Bible reference in a book to open it.
 
 Paragraphs work like verses: click one to highlight it, bookmark it, add a note, listen from there, ask about it or copy it.
-The study pane has your notes on the chapter, the dictionaries and Ask. **ⓘ** shows what the book is: its edition,
-source and terms.
+The study pane has your notes on the chapter, the dictionaries and Ask. **ⓘ** shows what the book is: its cover,
+edition, source and terms. Click the cover to see it full screen.
 
 In the dark theme, a drawing with no background of its own is shown on a light card so its ink stays visible.
 
@@ -100,6 +100,8 @@ Click a picture or chart to see it enlarged. There:
 - Scroll, or use two fingers on a trackpad, to zoom in and out.
 - Drag to move it around.
 - Double-click to fit it again; ← → go to the chapter's other pictures; Esc closes.
+
+On a map in Bible Maps, click a place's dot or name to list its verses, as in the study pane's Maps tab.
 
 ## Listen
 

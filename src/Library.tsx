@@ -151,6 +151,7 @@ export function LibraryScreen() {
   const bibles = app.bibles.filter((b) => !q || matches(b, q));
   const [busy, setBusy] = useState(false);
   const [info, setInfo] = useState<{ m: ModuleInfo; rect: DOMRect } | null>(null);
+  const [copyInfo, setCopyInfo] = useState<{ m: ModuleInfo; rect: DOMRect } | null>(null);
   const ms = app.lib?.modules ?? [];
   const n = (k: ModuleInfo["kind"]) => ms.filter((m) => m.kind === k).length;
   // The cards after the dictionaries, study helps before books to read: maps, reference books and the Talmud apart, though all are reference books.
@@ -267,7 +268,9 @@ export function LibraryScreen() {
           <div className="card" data-help="copies" style={{ padding: "14px 16px", display: "flex", flexDirection: "column", gap: 4 }}>
             <div style={{ display: "flex", justifyContent: "space-between", paddingBottom: 4 }}>
               <span className="label">In e-Sword X too</span>
-              <span className="n">{both.length}</span>
+              <span className="n">
+                {both.length} · {both.filter((m) => m.source === "esword").length} read from e-Sword X
+              </span>
             </div>
             <div className="hint" style={{ fontSize: 12.5, paddingBottom: 6 }}>
               Two-edged Sword has its own copy of these, and e-Sword X has one. Choose which is read.
@@ -291,6 +294,16 @@ export function LibraryScreen() {
                       onChange={(v) => v !== (m.source === "esword" ? "esword" : "tes") && !busy && choose(m, v === "esword")}
                     />
                   </span>
+                  <button
+                    className="ibtn"
+                    type="button"
+                    aria-label={`About the two copies of ${m.title}`}
+                    title="About the two copies"
+                    style={{ width: 22, height: 22, flexShrink: 0 }}
+                    onClick={(e) => setCopyInfo({ m, rect: e.currentTarget.getBoundingClientRect() })}
+                  >
+                    <Icon name="info" size={13} />
+                  </button>
                 </div>
               ))}
             </div>
@@ -455,6 +468,28 @@ export function LibraryScreen() {
             ))}
         </div>
       </div>
+      {copyInfo && (
+        <Popover anchor={copyInfo.rect} onClose={() => setCopyInfo(null)} width={360}>
+          <div className="hint" style={{ padding: "14px 16px", display: "flex", flexDirection: "column", gap: 8, fontSize: 12.5, lineHeight: 1.5 }}>
+            <b style={{ color: "var(--text)", fontSize: 13.5 }}>{copyInfo.m.title}</b>
+            <span>
+              There are two copies of this:{" "}
+              {copyInfo.m.copies.includes("bundled") ? "the one built into Two-edged Sword" : "Two-edged Sword's, in your modules folder"}, and
+              one in e-Sword X’s library. The one chosen here is the one read everywhere: in the reader, the study pane, Search
+              and Ask.
+            </span>
+            <span>
+              <b style={{ color: "var(--text)" }}>Two-edged Sword</b> is the default.
+              {copyInfo.m.copies.includes("bundled") ? " It’s the app’s own edition, kept up to date with the app." : ""}
+            </span>
+            <span>
+              <b style={{ color: "var(--text)" }}>e-Sword X</b> reads e-Sword’s copy instead, as e-Sword has it: its text, notes
+              and title may differ.
+            </span>
+            <span>Nothing is copied or changed either way.</span>
+          </div>
+        </Popover>
+      )}
       {info && (
         <Popover anchor={info.rect} onClose={() => setInfo(null)} width={420}>
           <div style={{ padding: "14px 16px", display: "flex", flexDirection: "column", gap: 8 }}>

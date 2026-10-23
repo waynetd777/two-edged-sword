@@ -149,10 +149,39 @@ def _ornament(d, kind, cx, cy, s):
                 d.line((x, y0, x, y1), fill=255, width=max(1, w // 2))
 
 
-def design(title, author, rgb, stamp=GOLD, ornament="diamonds", w=900, h=1400):
+def bitmap(module):
+    """One of the app's pictures (src/pictures/<module>.ts, made by tools/bitmap.py) as a grey image with its fade
+    in its alpha."""
+    import re
+    from PIL import Image
+    src = (Path(__file__).resolve().parent.parent / "src/pictures" / f"{module}.ts").read_text()
+    data = re.sub(r"[^A-Za-z0-9+/=]", "", re.search(r"base64,([^;]+?)\";", src, re.S)[1])
+    return Image.open(io.BytesIO(base64.b64decode(data))).convert("LA")
+
+
+def _plate(img, module, box):
+    """One of the app's pictures as a plate set into the cover at `box`: printed in a dark sepia on cream paper, its
+    faded edges going to the paper."""
+    import numpy as np
+    from PIL import Image
+    x0, y0, x1, y1 = box
+    im = bitmap(module)
+    k = max((x1 - x0) / im.width, (y1 - y0) / im.height) * 1.3  # in on the subject, past the picture's faded margin
+    im = im.resize((int(im.width * k), int(im.height * k)), Image.LANCZOS)
+    l, t = (im.width - (x1 - x0)) // 2, (im.height - (y1 - y0)) // 2
+    a = np.asarray(im.crop((l, t, l + x1 - x0, t + y1 - y0)), float) / 255
+    tone = a[..., 0] * a[..., 1] + (1 - a[..., 1]) * .82  # where it fades, the paper
+    tone = np.clip((tone - .12) / .8, 0, 1)[..., None]
+    ink, paper = np.array([58, 40, 30], float), np.array([236, 226, 202], float)
+    img[y0:y1, x0:x1] = ink * (1 - tone) + paper * tone
+    return img
+
+
+def design(title, author, rgb, stamp=GOLD, ornament="diamonds", w=900, h=1400, picture=None):
     """A cloth cover designed for a book with no scan of one: `title` and `author` are lists of (text, cap height)
     lines in capitals, the title centred in the upper half and the author near the foot, a double ruled frame round
-    them, and an ornament between; stamped in gold, or in ink (an RGB colour)."""
+    them, and an ornament between (or `picture`, one of the app's pictures, src/pictures/<picture>.ts, set in as a
+    plate); stamped in gold, or in ink (an RGB colour)."""
     import numpy as np
     from PIL import Image, ImageDraw
     frame = Image.new("L", (w, h), 0)
@@ -161,7 +190,12 @@ def design(title, author, rgb, stamp=GOLD, ornament="diamonds", w=900, h=1400):
     d.rectangle((66, 66, w - 66, h - 66), outline=255, width=2)
     for x, y in ((66, 66), (w - 66, 66), (66, h - 66), (w - 66, h - 66)):  # a small square at each corner
         d.rectangle((x - 9, y - 9, x + 9, y + 9), fill=255)
-    _ornament(d, ornament, w // 2, 790, 150)
+    plate = (w // 2 - 160, 600, w // 2 + 160, 1000)
+    if picture:  # the plate's gilt rule
+        d.rectangle((plate[0] - 14, plate[1] - 14, plate[2] + 14, plate[3] + 14), outline=255, width=3)
+        d.rectangle((plate[0] - 5, plate[1] - 5, plate[2] + 5, plate[3] + 5), outline=255, width=2)
+    else:
+        _ornament(d, ornament, w // 2, 790, 150)
     lines, room = [], w - 220
 
     def block(rows, middle):
@@ -181,6 +215,8 @@ def design(title, author, rgb, stamp=GOLD, ornament="diamonds", w=900, h=1400):
     block(author, 1130)
     mask = np.maximum(np.asarray(frame, float) / 255, words(w, h, lines))
     base = cloth(w, h, rgb)
+    if picture:
+        base = _plate(base, picture, plate)
     return gold(base, mask) if stamp == GOLD else ink(base, mask, stamp)
 
 

@@ -18,7 +18,7 @@ Two minutes to find your way around.
 
 Two-edged Sword is for reading the Bible with everything written about it beside the text: commentaries, dictionaries, the Greek and Hebrew, other translations, and your own notes.
 
-It comes with the KJV and some twenty more Bibles, Strong's dictionaries and two lexicons, the Treasury of Scripture Knowledge, six commentaries, a shelf of dictionaries, fifteen Bible maps and a shelf of books, so it works with nothing else installed. The [Library guide](library.md#built-in-modules) lists them all.
+It comes with the KJV and some twenty more Bibles, Strong's dictionaries and two lexicons, the Treasury of Scripture Knowledge, commentaries from Matthew Henry to Keil & Delitzsch, a shelf of dictionaries, fifteen Bible maps and a shelf of books, so it works with nothing else installed. The [Library guide](library.md#built-in-modules) lists them all.
 
 <!-- mac -->
 If you have e-Sword X, the app reads its library too. Nothing in it is copied or changed.

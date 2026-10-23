@@ -27,7 +27,7 @@ The app reads Bibles and books from three places, and never changes them:
 - **Rescan** picks up modules added since the app started.
 - **Show in <!-- mac -->Finder<!-- /mac --><!-- github --> (Mac) or <!-- /github --><!-- windows -->File Explorer<!-- /windows --><!-- github --> (Windows)<!-- /github -->** opens your modules folder.
 - **Read e-Sword X** turns e-Sword X's library on or off.
-- [In e-Sword X too](app:library#copies) lists the modules both the app and e-Sword X have, and which copy is read for each. The app's own copy is the default.
+- [In e-Sword X too](app:library#copies) lists the modules both the app and e-Sword X have, and which copy is read for each. The app's own copy is the default. The ⓘ beside each choice explains it. e-Sword's copies of the books the app builds count too, under whatever name e-Sword gives them ("Fox's Book of Martyrs", Larkin's books, Edersheim), so each shows once. e-Sword's modules that are parts of a book the app has whole (Josephus's *Antiquities* and *Wars*, four of Bounds's books, *Dispensational Truth Charts*) are left out.
 
 ## Built-in modules
 

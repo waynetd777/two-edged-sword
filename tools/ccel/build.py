@@ -85,7 +85,7 @@ BOOKS = {
         ],
         skip=("Title Page",),
         cover=dict(title=[("E. M. BOUNDS", 50), ("ON", 34), ("PRAYER", 86)], author=[("SEVEN BOOKS", 30)], rgb=(84, 40, 72),
-                   ornament="lamp"),
+                   picture="hands-bitmap"),  # Dürer's Praying Hands, as the music player shows them
         title="E. M. Bounds on Prayer", abbrev="Bounds",
         about="Seven books on prayer by Edward McKendree Bounds (1835–1913), a Methodist minister: Power Through Prayer, "
               "Purpose in Prayer, Prayer and Praying Men, The Reality of Prayer, The Essentials of Prayer, The Necessity "

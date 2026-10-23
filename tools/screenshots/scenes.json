@@ -114,8 +114,8 @@
   {
     "name": "books",
     "doc": {
-      "module": "foxes_book_of_martyrs",
-      "title": "Chapter 1"
+      "module": "foxe",
+      "title": "Chapter 2: The Ten Primitive Persecutions"
     },
     "selectPara": 2,
     "click": ".vtool .dot:nth-child(3)",

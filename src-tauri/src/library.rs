@@ -49,6 +49,44 @@ impl Kind {
     }
 }
 
+/// e-Sword's copies of books the app builds itself, under other names: (its kind, e-Sword's file name, the app's).
+/// Each is taken as a copy of the app's module, so the Library offers the choice of which is read, as for a module
+/// both have under the same name.
+const SAME_AS: &[(Kind, &str, &str)] = &[
+    (Kind::Reference, "bunyan_the_pilgrims_progress", "pilgrim"),
+    (Kind::Reference, "dispensational_truth", "larkin_dispensational_truth"),
+    (Kind::Reference, "foxes_book_of_martyrs", "foxe"),
+    (Kind::Reference, "in_his_steps", "sheldon"),
+    (Kind::Reference, "larkin_rightly_dividing_the_word", "larkin_rightly_dividing"),
+    (Kind::Reference, "larkin_the_book_of_daniel", "larkin_daniel"),
+    (Kind::Reference, "larkin_the_book_of_revelation", "larkin_revelation"),
+    (Kind::Reference, "larkin_the_spirit_world", "larkin_spirit_world"),
+    (Kind::Reference, "strong_systematic_theology", "strong_theology"),
+    (Kind::Reference, "the_life_and_times_of_jesus_the_messiah", "edersheim"),
+    (Kind::Reference, "the_practice_of_the_presence_of_god", "lawrence"),
+    (Kind::Devotional, "spurgeon", "sme"),
+];
+
+/// e-Sword's modules that are parts of one of the app's books (its kind, e-Sword's file name, the app's): left out
+/// while the app has the whole, which holds them.
+const PART_OF: &[(Kind, &str, &str)] = &[
+    (Kind::Reference, "antiquities_of_the_jews", "josephus"),
+    (Kind::Reference, "wars_of_the_jews", "josephus"),
+    (Kind::Reference, "prayer_and_praying_men", "bounds"),
+    (Kind::Reference, "the_necessity_of_prayer", "bounds"),
+    (Kind::Reference, "the_reality_of_prayer", "bounds"),
+    (Kind::Reference, "the_weapon_of_prayer", "bounds"),
+    (Kind::Reference, "dispensational_truth_charts", "larkin_dispensational_truth"),
+];
+
+/// The id a module in `source` goes by: an e-Sword copy of one of the app's books, the app's name for it.
+fn same_as(source: Source, kind: Kind, stem: &str) -> &str {
+    match source {
+        Source::Esword => SAME_AS.iter().find(|(k, e, _)| *k == kind && *e == stem).map_or(stem, |(_, _, a)| a),
+        _ => stem,
+    }
+}
+
 /// A module's key in Settings › eswordCopies: "commentary:wesley".
 pub fn key(kind: Kind, id: &str) -> String {
     format!("{}:{id}", kind.name())
@@ -177,6 +215,12 @@ impl Library {
                     continue;
                 };
                 let Some(kind) = Kind::from_ext(&ext.to_ascii_lowercase()) else { continue };
+                let stem = same_as(*source, kind, stem);
+                if *source == Source::Esword
+                    && PART_OF.iter().any(|(k, e, whole)| *k == kind && *e == stem && modules.iter().any(|m| m.kind == kind && m.id == *whole))
+                {
+                    continue; // a part of a book the app has whole
+                }
                 let had = modules.iter().position(|m| m.kind == kind && m.id == stem);
                 if let Some(i) = had {
                     modules[i].copies.push(*source);
@@ -380,6 +424,27 @@ mod tests {
         let theirs = Library::scan_choosing(dirs(), &HashSet::from([key(Kind::Commentary, "wesley")]));
         assert_eq!((theirs.modules.len(), theirs.modules[0].title.as_str(), theirs.modules[0].source), (1, "e-Sword", Source::Esword));
         assert_eq!(theirs.modules[0].copies, vec![Source::Bundled, Source::Esword]);
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn knows_esword_names_for_the_apps_books() {
+        let root = std::env::temp_dir().join(format!("tes-same-as-{}", std::process::id()));
+        let (app, esword) = (root.join("app"), root.join("esword"));
+        for (dir, file) in [(&app, "foxe.refi"), (&esword, "foxes_book_of_martyrs.refi"), (&app, "josephus.refi"), (&esword, "wars_of_the_jews.refi")] {
+            std::fs::create_dir_all(dir).unwrap();
+            let c = Connection::open(dir.join(file)).unwrap();
+            c.execute_batch("CREATE TABLE Details (Title, Abbreviation, Information, Version, Graphics); INSERT INTO Details VALUES ('Fox', 'F', '', 1, 0);")
+                .unwrap();
+        }
+        let dirs = || vec![(Source::Bundled, app.clone()), (Source::Esword, esword.clone())];
+        let ours = Library::scan(dirs());
+        assert_eq!(ours.modules.iter().map(|m| m.id.as_str()).collect::<Vec<_>>(), ["foxe", "josephus"]); // Wars is part of Josephus
+        assert_eq!((ours.modules[0].id.as_str(), ours.modules[0].source), ("foxe", Source::Bundled));
+        assert_eq!(ours.modules[0].copies, vec![Source::Bundled, Source::Esword]);
+        let theirs = Library::scan_choosing(dirs(), &HashSet::from([key(Kind::Reference, "foxe")]));
+        assert_eq!((theirs.modules[0].id.as_str(), theirs.modules[0].source), ("foxe", Source::Esword));
+        assert!(theirs.modules[0].path.ends_with("foxes_book_of_martyrs.refi"));
         let _ = std::fs::remove_dir_all(&root);
     }
 
