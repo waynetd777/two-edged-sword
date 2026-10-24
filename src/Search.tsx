@@ -797,22 +797,17 @@ function Preview({ pick, bible, terms, whole }: { pick: Pick | null; bible: stri
 
 /** A book's chapter (or a devotional's day) with a match: the paragraph the words are in, with the one either side,
  *  and Open, which opens the book there. */
-function BookPreview({
-  pick,
-  terms,
-  whole,
-}: {
-  pick: Extract<Pick, { kind: "book" }>;
-  terms: string[];
-  whole: boolean;
-}) {
+function BookPreview({ pick, terms, whole }: { pick: Extract<Pick, { kind: "book" }>; terms: string[]; whole: boolean }) {
   const app = useApp();
   const [html, setHtml] = useState<string | null>(null);
   const { onRefHover, preview, hide } = useRefPreview(app.settings.bible);
   useEffect(() => {
     let dead = false;
     setHtml(null);
-    (pick.doc === "devotional" ? api.devotion(pick.module, pick.title) : api.article("reference", pick.module, pick.title).then((a) => a?.html ?? null))
+    (pick.doc === "devotional"
+      ? api.devotion(pick.module, pick.title)
+      : api.article("reference", pick.module, pick.title).then((a) => a?.html ?? null)
+    )
       .then((h) => {
         if (!dead) setHtml(h ?? "");
       })

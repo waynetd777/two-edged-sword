@@ -146,7 +146,14 @@ export function WebPage({ focus, setFocus }: { focus: boolean; setFocus: (f: boo
   // Space plays and pauses, as in the other readers (the page sends it here when it has the keyboard).
   useEffect(() => {
     const k = (e: KeyboardEvent) => {
-      if (e.key !== " " || e.metaKey || e.ctrlKey || e.altKey || (e.target as HTMLElement)?.closest?.("input, textarea, select, [contenteditable]")) return;
+      if (
+        e.key !== " " ||
+        e.metaKey ||
+        e.ctrlKey ||
+        e.altKey ||
+        (e.target as HTMLElement)?.closest?.("input, textarea, select, [contenteditable]")
+      )
+        return;
       e.preventDefault();
       listen();
     };

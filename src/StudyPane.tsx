@@ -619,7 +619,16 @@ function CrossRefs({
           type="button"
           aria-label={open ? "Hide the cross-references" : "Show the cross-references"}
           onClick={() => setOpen(!open)}
-          style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 6, border: 0, background: "transparent", padding: 0, cursor: "pointer" }}
+          style={{
+            marginLeft: "auto",
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            border: 0,
+            background: "transparent",
+            padding: 0,
+            cursor: "pointer",
+          }}
         >
           <span className="n">{count}</span>
           <Icon name={open ? "down" : "up"} className="sm" />

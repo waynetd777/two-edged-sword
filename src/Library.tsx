@@ -470,21 +470,23 @@ export function LibraryScreen() {
       </div>
       {copyInfo && (
         <Popover anchor={copyInfo.rect} onClose={() => setCopyInfo(null)} width={360}>
-          <div className="hint" style={{ padding: "14px 16px", display: "flex", flexDirection: "column", gap: 8, fontSize: 12.5, lineHeight: 1.5 }}>
+          <div
+            className="hint"
+            style={{ padding: "14px 16px", display: "flex", flexDirection: "column", gap: 8, fontSize: 12.5, lineHeight: 1.5 }}
+          >
             <b style={{ color: "var(--text)", fontSize: 13.5 }}>{copyInfo.m.title}</b>
             <span>
               There are two copies of this:{" "}
-              {copyInfo.m.copies.includes("bundled") ? "the one built into Two-edged Sword" : "Two-edged Sword's, in your modules folder"}, and
-              one in e-Sword X’s library. The one chosen here is the one read everywhere: in the reader, the study pane, Search
-              and Ask.
+              {copyInfo.m.copies.includes("bundled") ? "the one built into Two-edged Sword" : "Two-edged Sword's, in your modules folder"},
+              and one in e-Sword X’s library. The one chosen here is the one read everywhere: in the reader, the study pane, Search and Ask.
             </span>
             <span>
               <b style={{ color: "var(--text)" }}>Two-edged Sword</b> is the default.
               {copyInfo.m.copies.includes("bundled") ? " It’s the app’s own edition, kept up to date with the app." : ""}
             </span>
             <span>
-              <b style={{ color: "var(--text)" }}>e-Sword X</b> reads e-Sword’s copy instead, as e-Sword has it: its text, notes
-              and title may differ.
+              <b style={{ color: "var(--text)" }}>e-Sword X</b> reads e-Sword’s copy instead, as e-Sword has it: its text, notes and title
+              may differ.
             </span>
             <span>Nothing is copied or changed either way.</span>
           </div>

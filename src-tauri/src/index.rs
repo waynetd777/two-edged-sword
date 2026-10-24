@@ -67,7 +67,9 @@ fn open(path: &Path) -> rusqlite::Result<Connection> {
 fn indexed_kinds(lib: &Library) -> Vec<(Kind, String, PathBuf)> {
     lib.modules
         .iter()
-        .filter(|m| (m.kind == Kind::Commentary && m.id != "tsk") || matches!(m.kind, Kind::Dictionary | Kind::Reference | Kind::Devotional))
+        .filter(|m| {
+            (m.kind == Kind::Commentary && m.id != "tsk") || matches!(m.kind, Kind::Dictionary | Kind::Reference | Kind::Devotional)
+        })
         .map(|m| (m.kind, m.id.clone(), m.path.clone()))
         .collect()
 }

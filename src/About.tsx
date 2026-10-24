@@ -35,7 +35,14 @@ export function Cover({ src, title, width = 84 }: { src: string; title: string; 
         title="Click to enlarge"
         className="zoomable"
         onClick={() => setBig(true)}
-        style={{ float: "right", width, margin: "2px 0 10px 16px", borderRadius: 4, boxShadow: "0 1px 6px rgba(0,0,0,.35)", cursor: "zoom-in" }}
+        style={{
+          float: "right",
+          width,
+          margin: "2px 0 10px 16px",
+          borderRadius: 4,
+          boxShadow: "0 1px 6px rgba(0,0,0,.35)",
+          cursor: "zoom-in",
+        }}
       />
       {big && <ImageViewer images={[src]} start={0} onClose={() => setBig(false)} />}
     </>

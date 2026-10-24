@@ -218,7 +218,9 @@ impl Library {
                 let Some(kind) = Kind::from_ext(&ext.to_ascii_lowercase()) else { continue };
                 let stem = same_as(*source, kind, stem);
                 if *source == Source::Esword
-                    && PART_OF.iter().any(|(k, e, whole)| *k == kind && *e == stem && modules.iter().any(|m| m.kind == kind && m.id == *whole))
+                    && PART_OF
+                        .iter()
+                        .any(|(k, e, whole)| *k == kind && *e == stem && modules.iter().any(|m| m.kind == kind && m.id == *whole))
                 {
                     continue; // a part of a book the app has whole
                 }
@@ -432,7 +434,9 @@ mod tests {
     fn knows_esword_names_for_the_apps_books() {
         let root = std::env::temp_dir().join(format!("tes-same-as-{}", std::process::id()));
         let (app, esword) = (root.join("app"), root.join("esword"));
-        for (dir, file) in [(&app, "foxe.refi"), (&esword, "foxes_book_of_martyrs.refi"), (&app, "josephus.refi"), (&esword, "wars_of_the_jews.refi")] {
+        for (dir, file) in
+            [(&app, "foxe.refi"), (&esword, "foxes_book_of_martyrs.refi"), (&app, "josephus.refi"), (&esword, "wars_of_the_jews.refi")]
+        {
             std::fs::create_dir_all(dir).unwrap();
             let c = Connection::open(dir.join(file)).unwrap();
             c.execute_batch("CREATE TABLE Details (Title, Abbreviation, Information, Version, Graphics); INSERT INTO Details VALUES ('Fox', 'F', '', 1, 0);")
