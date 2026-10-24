@@ -1,0 +1,13 @@
+[
+  {"name": "tut-card-teaching", "card": true, "word": "G5206", "crop": [196, 48, 400, 250]},
+  {"name": "tut2-compare", "screen": "compare", "loc": {"book": 45, "chapter": 8}, "settings": {"compare": ["kjv", "asv", "ylt"]}},
+  {"name": "tut2-search", "search": "adoption", "clickText": "Letters", "settle": 10},
+  {"name": "tut2-word", "loc": {"book": 45, "chapter": 8, "verse": 15}, "settings": {"studyTab": "commentary"}, "clickText": "adoption"},
+  {"name": "tut2-word-study", "word": "G5206"},
+  {"name": "tut2-dictionary", "loc": {"book": 45, "chapter": 8, "verse": 15}, "settings": {"studyTab": "dictionary"}, "pending": {"article": {"module": "easton", "topic": "Adoption"}}},
+  {"name": "tut2-commentary", "loc": {"book": 45, "chapter": 8, "verse": 28}, "settings": {"studyTab": "commentary"}, "pending": {"commentary": "henry"}},
+  {"name": "tut2-ask", "loc": {"book": 45, "chapter": 8, "verse": 28}, "chatFile": "tut-fixtures/ask-romans-8.json", "settings": {"studyTab": "ask"}, "scrollTop": true},
+  {"name": "tut2-songs", "loc": {"book": 45, "chapter": 8}, "settings": {"studyPane": false}, "chapterSongsFile": "chapter-songs.json", "click": ["[aria-label=\"Songs for this chapter\"]", ".popover .btn.primary"]},
+  {"name": "tut2-journal", "screen": "journal", "journal": "demo-romans-8"},
+  {"name": "tut2-print", "screen": "journal", "journal": "demo-romans-8", "click": "[aria-label=\"Print\"]"}
+]

@@ -175,8 +175,10 @@ on [Bible Support](https://www.biblesupport.com) (free sign-in).
   and Schaff's History of the Christian Church (e-Sword).
 - Spurgeon's Faith's Checkbook and his sermons (Bible Support).
 
-Avoid copyrighted modules shared without the publisher's permission. A book that exists only as
-EPUB or plain text must be converted to a `.refi` first.
+- Download each module yourself: e-Sword's modules may not be passed on, so don't copy someone else's.
+- For copyrighted works, such as modern translations and commentaries, [eStudySource](https://estudysource.com/) sells licensed, high-quality modules.
+- On Windows, download the e-Sword X (Mac) versions, such as `.bbli` and `.cmti`: modules made for e-Sword on Windows can't be read.
+- A book that exists only as EPUB or plain text must be converted to a `.refi` first.
 
 ## Thanks to e-Sword
 

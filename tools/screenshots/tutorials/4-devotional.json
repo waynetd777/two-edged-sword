@@ -1,0 +1,13 @@
+[
+  {"name": "tut-card-devotional", "card": true, "screen": "plans", "crop": [945, 108, 400, 250]},
+  {"name": "tut4-plans", "screen": "plans"},
+  {"name": "tut4-choose", "screen": "plans", "clickText": "Choose a plan…"},
+  {"name": "tut4-cards", "screen": "plans", "crop": [218, 425, 1150, 205]},
+  {"name": "tut4-worship", "loc": {"book": 19, "chapter": 15}, "settings": {"studyPane": false}, "sessionFile": "tut-fixtures/devotional-worship.json"},
+  {"name": "tut4-lyrics", "settings": {"studyPane": false, "songVerseBible": "kjv"}, "songFile": "lyrics-song.json", "songVision": "cross", "songVisionAt": 0.75},
+  {"name": "tut4-lyrics-focus", "settings": {"studyPane": false, "songVerseBible": "kjv"}, "songFile": "lyrics-song.json", "songVision": "dove", "songVisionAt": 0.5, "focus": true},
+  {"name": "tut4-closing", "loc": {"book": 26, "chapter": 36}, "settings": {"studyPane": false}, "sessionFile": "tut-fixtures/devotional-closing.json"},
+  {"name": "tut4-reminder", "screen": "settings", "scrollTo": "input[type=time]", "settings": {"reminder": true, "reminderTime": "06:30"}, "crop": [415, 615, 750, 180]},
+  {"name": "tut4-tray", "tray": true, "unread": true, "width": 680},
+  {"name": "tut4-journal-ask", "screen": "journal", "journal": "demo-shepherd", "click": ["[role=toolbar] > button:last-child", ".seg button:nth-child(2)"]}
+]

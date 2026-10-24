@@ -6,6 +6,8 @@ Walk-throughs of everything the app does, a step at a time. In the app, a link m
 
 Each time the app opens, it offers these walk-throughs, until you tick **Don't ask me again**. They're always in the help: press ? and click **Getting started** at the top.
 
+For more, the website has five [tutorials](https://two-edged-sword.davies.co.za/tutorials/), each following one real task from start to finish with a picture for every step: reading John's Gospel, leading a study on Romans 8, answering a hard question about the text, a daily quiet time, and making the library your own.
+
 <!-- github -->
 **Contents:** [Start here](#start-here) · [Read the Bible](#read-the-bible) · [Study a verse](#study-a-verse) · [Greek and Hebrew](#greek-and-hebrew) · [Compare translations](#compare-translations) · [Search](#search) · [Highlights, bookmarks and notes](#highlights-bookmarks-and-notes) · [Listen](#listen) · [Books, devotionals and maps](#books-devotionals-and-maps) · [Keep a journal](#keep-a-journal) · [Quiet time](#quiet-time) · [Worship music](#worship-music) · [Ask about Scripture](#ask-about-scripture) · [Translations and manuscripts](#translations-and-manuscripts) · [Add modules](#add-modules) · [Make it yours](#make-it-yours)
 <!-- /github -->
@@ -83,6 +85,7 @@ Press ⌘K and type a reference ("rom 8 28"), a word, a Strong's number ("G26") 
 - Under the search box, **Getting started** brings back these walk-throughs and **All topics** lists every guide.
 - Hover any button to see what it does.
 - **Ask about Two-edged Sword**, at the foot of the help, asks the AI assistant how to do something.
+- The [tutorials](https://two-edged-sword.davies.co.za/tutorials/) on the website take you through the app one task at a time.
 <!-- mac -->
 - Closing the window leaves the app in the menu bar, with today's reading. Quit from its menu, or with ⌘Q.
 <!-- /mac -->

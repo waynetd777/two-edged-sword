@@ -13,6 +13,7 @@ are kept separately.
 | Page | What's in it |
 |---|---|
 | [Getting started](getting-started.md) | Step-by-step walk-throughs of everything the app does |
+| [Tutorials](https://two-edged-sword.davies.co.za/tutorials/) | On the website: five tutorials, each one real task with a picture for every step |
 | [Reading](reading.md) | Read with the study pane, books and devotionals, Listen, songs for the chapter |
 | [Study](study.md) | Compare translations, Search, Word Study |
 | [Translations and manuscripts](manuscripts.md) | Differences from the KJV, Greek and Hebrew, KJV History, the Targums and Talmud |

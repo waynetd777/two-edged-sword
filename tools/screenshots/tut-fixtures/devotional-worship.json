@@ -1,0 +1,61 @@
+{
+  "planId": "scene",
+  "dayKey": "scene",
+  "i": 0,
+  "audio": false,
+  "preview": true,
+  "steps": [
+    {
+      "key": "worship",
+      "label": "Worship",
+      "kind": "worship",
+      "songs": 3,
+      "when": "before",
+      "intro": "Today you read who may dwell in God's holy hill in Psalm 15, the call to wisdom in Proverbs 24, and Jesus telling Nicodemus that he must be born again in John 3. These songs lift your eyes to the Saviour who makes us new, and to the Spirit who gives new birth.",
+      "picked": [
+        {
+          "id": "tut-1",
+          "name": "Holy Spirit",
+          "artist": "Francesca Battistelli",
+          "why": "It asks the Spirit to come, as Jesus says in John 3 that we must be born of the Spirit."
+        },
+        {
+          "id": "tut-2",
+          "name": "Amazing Grace",
+          "artist": "John Newton",
+          "why": "It sings of the new birth Jesus speaks of in John 3: I once was lost, but now am found; was blind, but now I see."
+        },
+        {
+          "id": "tut-3",
+          "name": "Holy, Holy, Holy",
+          "artist": "Reginald Heber",
+          "why": "Psalm 15 asks who may abide in God's tabernacle: this hymn bows before the holiness that question is about."
+        }
+      ]
+    },
+    {
+      "key": "19.15",
+      "label": "Psalm 15",
+      "kind": "bible",
+      "bible": "kjv",
+      "b": 19,
+      "c": 15
+    },
+    {
+      "key": "20.24",
+      "label": "Proverbs 24",
+      "kind": "bible",
+      "bible": "kjv",
+      "b": 20,
+      "c": 24
+    },
+    {
+      "key": "43.3",
+      "label": "John 3",
+      "kind": "bible",
+      "bible": "kjv",
+      "b": 43,
+      "c": 3
+    }
+  ]
+}

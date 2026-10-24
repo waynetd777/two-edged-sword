@@ -5,7 +5,8 @@ beside your own notes. It comes with a library of Bibles, commentaries, dictiona
 ([what's included](#whats-included)), and also reads modules in e-Sword X's formats: your own, and on a Mac
 e-Sword X's library if you have it. It never changes them: your journal, highlights and plans are kept separately.
 
-See it on the [Two-edged Sword website](https://two-edged-sword.davies.co.za/).
+See it on the [Two-edged Sword website](https://two-edged-sword.davies.co.za/), and learn it step by step with its
+[tutorials](https://two-edged-sword.davies.co.za/tutorials/).
 
 **Contents:** [Download](#download) · [What's included](#whats-included) · [What it does](#what-it-does) · [Quick start](#quick-start) · [Thanks](#thanks) · [Licence](#licence) · [Documentation](#documentation)
 
@@ -81,7 +82,7 @@ licence.
     <td align="center"><a href="docs/manuscripts.md#greek-and-hebrew"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/interlinear-dark.png"><img alt="Luke 17 in the Greek Textus Receptus, word by word, with Scrivener's readings" src="docs/images/interlinear-light.png"></picture></a><br><sub><a href="docs/manuscripts.md#greek-and-hebrew">Greek word by word</a></sub></td>
   </tr>
   <tr>
-    <td align="center"><a href="docs/ask.md"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/ask-dark.png"><img alt="Ask comparing the commentators on 1 John 1:1" src="docs/images/ask-light.png"></picture></a><br><sub><a href="docs/ask.md">Ask compares the commentators</a></sub></td>
+    <td align="center"><a href="docs/ask.md"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/ask-dark.png"><img alt="Ask comparing the commentators on Romans 8:28" src="docs/images/ask-light.png"></picture></a><br><sub><a href="docs/ask.md">Ask compares the commentators</a></sub></td>
     <td align="center"><a href="docs/study.md#compare"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/compare-dark.png"><img alt="KJV+, ASV and YLT compared, differences highlighted" src="docs/images/compare-light.png"></picture></a><br><sub><a href="docs/study.md#compare">Compare translations</a></sub></td>
   </tr>
   <tr>
@@ -146,6 +147,8 @@ build of it, leave those three out (`tools/core/build.py` builds them as `clemen
 The same guides are in the app, under Help (⌘?).
 
 - [Getting started](docs/getting-started.md): step-by-step walk-throughs of everything the app does
+- [Tutorials](https://two-edged-sword.davies.co.za/tutorials/), on the website: five, each following one real task, from
+  reading John's Gospel to leading a study on Romans 8
 - [Features](docs/features.md): getting around and Settings, then [Reading](docs/reading.md),
   [Study](docs/study.md), [Translations and manuscripts](docs/manuscripts.md),
   [Journal](docs/journal.md) and [Quiet time](docs/quiet-time.md)

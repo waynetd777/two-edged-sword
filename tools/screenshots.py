@@ -12,10 +12,13 @@ corners are drawn back on it here. Written 1400px wide in sRGB with no colour pr
     python3 tools/screenshots.py read ask        # just these
     python3 tools/screenshots.py --theme dark    # one theme
     python3 tools/screenshots.py -j 1            # one at a time (default: 4 side by side)
+    python3 tools/screenshots.py --tutorials     # the website tutorials' pictures (tutorials/*.json)
     make screenshots                             # the same as the first
 
 Needs: the Vite dev server (started here if it isn't running), Pillow, and e-Sword X's modules.
-Scenes are in tools/screenshots/scenes.json.
+Scenes are in tools/screenshots/scenes.json, and the website tutorials' in tutorials/<tutorial>.json: those are
+taken on the demo home (demo_home.py) and written to site/img/tut/ instead, at twice the window's
+width in points.
 """
 
 import argparse
@@ -33,12 +36,18 @@ import urllib.request
 
 from PIL import Image, ImageCms, ImageDraw, ImageStat
 
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent / "screenshots"))
+import demo_home  # noqa: E402
+
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 HERE = ROOT / "tools" / "screenshots"
 OUT = ROOT / "docs" / "images"
+SITE = ROOT / "site" / "img" / "tut"
+DEMO_HOME = HERE / "out" / "home"
 BIN = ROOT / "src-tauri" / "target" / "debug" / "TwoEdgedSword"
 DEV_URL = "http://localhost:1430"
 WIDTH = 1400
+POINTS = 1440  # the window's width in points; the site's pictures are twice this, whatever the display's scale
 SETTLE = 6.0  # seconds after launch before the snapshot: splash, library load, scene, fonts
 
 
@@ -84,7 +93,7 @@ def capture(scene, theme):
     (one, or the scene's "frames" of them), or None."""
     # A fixture from a file beside scenes.json: "chatFile" becomes "chat", and so on.
     files = {"chatFile": "chat", "sessionFile": "session", "entriesFile": "entries", "variancesFile": "variances", "songFile": "song", "chapterSongsFile": "chapterSongs"}
-    sc = {k: v for k, v in scene.items() if k not in files and k not in ("crop", "width", "settle", "songVision", "songVisionAt", "songVisionDur", "frames", "every", "step", "darkOnly")}
+    sc = {k: v for k, v in scene.items() if k not in files and k not in ("crop", "width", "settle", "songVision", "songVisionAt", "songVisionDur", "frames", "every", "step", "darkOnly", "home", "site", "card")}
     for f, k in files.items():
         if f in scene:
             sc[k] = json.loads((HERE / scene[f]).read_text(encoding="utf-8"))
@@ -100,7 +109,9 @@ def capture(scene, theme):
     if "step" in scene:
         sc["stepped"] = True  # the song's picture waits for the frames (src/sceneClock.ts)
     # No favourite translations unless the scene names them: the user's own could be licensed Bibles.
-    sc["settings"] = {"favBibles": [], **sc.get("settings", {}), "theme": theme}
+    # On the demo home, its own settings: favourites all public domain, and its colours' names (a
+    # scene clears the user's).
+    sc["settings"] = {**(demo_home.settings() if scene.get("home") else {"favBibles": []}), **sc.get("settings", {}), "theme": theme}
     with tempfile.TemporaryDirectory() as tmp:
         shot = pathlib.Path(tmp) / "shot.tiff"
         frames, every = scene.get("frames", 1), scene.get("every", 0.1)
@@ -110,6 +121,9 @@ def capture(scene, theme):
         # (src/sceneClock.ts): evenly spaced frames, however slowly WebKit draws them.
         if "step" in scene:
             env["TES_SNAPSHOT_STEP"] = str(scene["step"])
+        # "home": "demo": the app runs in the tutorials' demo home folder, on its data alone.
+        if scene.get("home"):
+            env["HOME"] = str(DEMO_HOME)
         if frames > 1:
             # Half the window's 1440 points, 1440px at 2x: a full-size snapshot takes 0.75s, this 0.14s.
             env["TES_SNAPSHOT_WIDTH"] = "720"
@@ -144,18 +158,20 @@ def capture(scene, theme):
 
 def chrome(im, theme):
     """Draws back what a webview snapshot leaves out: the window's (unfocused) buttons and its
-    rounded corners, as a capture of the window showed them. Measured at 1400px wide."""
-    k = 4  # drawn large and scaled down, for smooth edges
+    rounded corners, as a capture of the window showed them. Measured at 1400px wide, and scaled
+    to the picture's width."""
     w, h = im.size
+    s = w / WIDTH
+    k = 4  # drawn large and scaled down, for smooth edges
     over = Image.new("RGBA", (w * k, h * k))
     d = ImageDraw.Draw(over)
     fill, rim = ((224, 225, 226), (219, 220, 222)) if theme == "light" else ((129, 131, 132), (136, 137, 139))
     for cx in (15, 37.5, 60):
         cy, r = 16, 6.75
-        d.ellipse([(cx - r) * k, (cy - r) * k, (cx + r) * k, (cy + r) * k], fill=fill + (255,), outline=rim + (255,), width=k)
+        d.ellipse([(cx - r) * s * k, (cy - r) * s * k, (cx + r) * s * k, (cy + r) * s * k], fill=fill + (255,), outline=rim + (255,), width=round(k * s))
     im = Image.alpha_composite(im.convert("RGBA"), over.resize((w, h), Image.LANCZOS))
     mask = Image.new("L", (w * k, h * k))
-    ImageDraw.Draw(mask).rounded_rectangle([0, 0, w * k - 1, h * k - 1], radius=16 * k, fill=255)
+    ImageDraw.Draw(mask).rounded_rectangle([0, 0, w * k - 1, h * k - 1], radius=round(16 * s * k), fill=255)
     im.putalpha(mask.resize((w, h), Image.LANCZOS))
     return im
 
@@ -174,6 +190,8 @@ def shoot(scene, theme):
     else:
         print(f"  {scene['name']} {theme}: " + ("no window" if ims is None else "blank"))
         return False
+    if scene.get("site"):
+        return site(scene, ims[0], theme)
     # A scene may keep its own width (the menu-bar window, at its natural 2x size).
     width = scene.get("width", WIDTH)
 
@@ -217,19 +235,48 @@ def shoot(scene, theme):
     return True
 
 
+def site(scene, im, theme):
+    """A website tutorial's picture: site/img/tut/<name>.webp at twice the window's width in points,
+    so it's sharp on a Retina screen and doesn't grow on a display scaled past 2x. A "card" (a
+    crop drawn at its own size on the tutorials' index) gets a copy at the window's own size too,
+    <name>@1x.webp, for a 1x screen. "crop" is given at the docs' 1400px width and scaled."""
+    SITE.mkdir(parents=True, exist_ok=True)
+    # The menu-bar window is small: kept at its own 2x size ("width"), with no window buttons.
+    full = scene.get("width", 2 * POINTS) if scene.get("tray") else 2 * POINTS
+    for width, suffix in [(full, "")] + ([(full // 2, "@1x")] if scene.get("card") else []):
+        out = im.resize((width, round(im.height * width / im.width)), Image.LANCZOS)
+        if not scene.get("tray"):
+            out = chrome(out, theme)
+        if "crop" in scene:
+            s = width / WIDTH
+            x, y, w, h = (round(v * s) for v in scene["crop"])
+            out = out.crop((x, y, x + w, y + h))
+        path = SITE / f"{scene['name']}{suffix}.webp"
+        out.save(path, quality=82, method=6)
+        print(f"  {path.relative_to(ROOT)}  {out.width}x{out.height}")
+    return True
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("names", nargs="*", help="scenes to take (default: all)")
     ap.add_argument("--theme", choices=["light", "dark"], action="append", help="default: both")
     ap.add_argument("-j", type=int, default=4, metavar="N", help="apps to run side by side (default 4)")
+    ap.add_argument("--tutorials", action="store_true", help="the website tutorials' scenes (tutorials/*.json)")
     a = ap.parse_args()
-    scenes = json.loads((HERE / "scenes.json").read_text(encoding="utf-8"))
+    docs = json.loads((HERE / "scenes.json").read_text(encoding="utf-8"))
+    # The tutorials' scenes: on the demo home, for the site, in its dark theme.
+    tuts = [{"home": "demo", "site": True, "darkOnly": True, **s} for f in sorted((HERE / "tutorials").glob("*.json")) for s in json.loads(f.read_text(encoding="utf-8"))]
+    scenes = tuts if a.tutorials else docs
     if a.names:
-        unknown = set(a.names) - {s["name"] for s in scenes}
+        everything = docs + tuts
+        unknown = set(a.names) - {s["name"] for s in everything}
         if unknown:
             sys.exit(f"no such scene: {', '.join(sorted(unknown))}")
-        scenes = [s for s in scenes if s["name"] in a.names]
+        scenes = [s for s in everything if s["name"] in a.names]
     themes = a.theme or ["light", "dark"]
+    if any(s.get("home") for s in scenes):
+        demo_home.main()
     OUT.mkdir(parents=True, exist_ok=True)
     server = dev_server()
     try:

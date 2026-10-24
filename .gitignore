@@ -34,3 +34,6 @@ _sift/local/
 
 # Python bytecode (tools/)
 __pycache__/
+
+# The website tutorials' demo home (tools/screenshots/demo_home.py)
+tools/screenshots/out/

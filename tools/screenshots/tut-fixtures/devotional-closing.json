@@ -1,0 +1,19 @@
+{
+  "planId": "scene",
+  "dayKey": "scene",
+  "i": 3,
+  "audio": false,
+  "preview": true,
+  "steps": [
+    { "key": "19.15", "label": "Psalm 15", "kind": "bible", "bible": "kjv", "b": 19, "c": 15 },
+    { "key": "20.24", "label": "Proverbs 24", "kind": "bible", "bible": "kjv", "b": 20, "c": 24 },
+    { "key": "43.3", "label": "John 3", "kind": "bible", "bible": "kjv", "b": 43, "c": 3 },
+    {
+      "key": "closing", "label": "Closing verse", "kind": "closing", "bible": "kjv",
+      "picked": {
+        "b": 26, "c": 36, "v": 26, "v2": 27, "label": "Ezekiel 36:26–27",
+        "why": "Psalm 15 asked who may dwell with God, and the answer was a clean heart and an upright walk, which none of us has by ourselves. In John 3 Jesus said we must be born again, of water and of the Spirit. These verses are the promise behind both: God gives a new heart, and puts His Spirit within us to walk in His ways."
+      }
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "id": "tut-ask-colossians",
+  "title": "How does this chapter differ from the KJV?",
+  "about": "Colossians 1",
+  "source": "Read",
+  "created": "2026-10-20T20:30:00.000Z",
+  "updated": "2026-10-20T20:31:00.000Z",
+  "model": "claude:sonnet",
+  "messages": [
+    {
+      "role": "user",
+      "text": "How does this chapter differ from the KJV?"
+    },
+    {
+      "role": "assistant",
+      "text": "The BSB differs from the KJV in meaning in three places in Colossians 1. One matters more than the others, and none changes what the chapter teaches about Christ.\n\n**Verse 14: \"through his blood\" left out (major)**\n- The KJV reads \"In whom we have redemption through his blood, even the forgiveness of sins.\" The BSB has \"in whom we have redemption, the forgiveness of sins.\"\n- The list of differences says the phrase is in a few later manuscripts and the Textus Receptus, the printed Greek the KJV translated, but not in Sinaiticus, Vaticanus, Alexandrinus or the Byzantine majority. Byz+ agrees: its verse 14 has no word for blood.\n- It is certainly Scripture elsewhere. Ephesians 1:7 says the same words in every text, and Colossians 1:20 says Christ made peace \"through the blood of his cross\".\n\n**Verse 2: \"and the Lord Jesus Christ\" (minor)**\nThe greeting ends at \"God our Father\" in the BSB. The longer greeting is in the Byzantine text and the Textus Receptus, but not in Vaticanus and other early manuscripts.\n\n**Verse 28: \"in Christ Jesus\" becomes \"in Christ\" (minor)**\n\"Jesus\" is in the Byzantine text and the Textus Receptus, but not in Sinaiticus, Vaticanus or Alexandrinus.\n\n**What doesn't change**\nIn every text, verses 15 to 20 say the same: Christ is the image of the invisible God, all things were created by him and for him, by him all things consist, and in him all fulness dwells."
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+[
+  {"name": "tut-card-reading", "card": true, "loc": {"book": 43, "chapter": 3, "verse": 16}, "settings": {"studyTab": "commentary"}, "crop": [215, 392, 400, 250]},
+  {"name": "tut-read-first", "loc": {"book": 43, "chapter": 1}, "settings": {"studyPane": false}},
+  {"name": "tut-palette", "loc": {"book": 43, "chapter": 1}, "settings": {"studyPane": false}, "click": "button.field", "type": ["input[placeholder^=\"Reference\"]", "john 3"]},
+  {"name": "tut-settings-bibles", "screen": "settings", "scrollTo": "[data-help=\"bibles\"]"},
+  {"name": "tut-john3-paragraph", "loc": {"book": 43, "chapter": 3}, "settings": {"studyPane": false, "layout": "paragraph"}},
+  {"name": "tut-john3-study", "loc": {"book": 43, "chapter": 3, "verse": 16}, "settings": {"studyTab": "commentary"}},
+  {"name": "tut-word", "loc": {"book": 43, "chapter": 3, "verse": 16}, "settings": {"bible": "kjv+", "studyTab": "commentary"}, "clickText": "loved"},
+  {"name": "tut-settings-highlights", "screen": "settings", "scrollTo": "[data-help=\"highlights\"]"},
+  {"name": "tut-listen", "loc": {"book": 43, "chapter": 3, "verse": 16}, "settings": {"studyPane": false}, "player": {"bible": "kjv", "book": 43, "chapter": 3, "verse": 16, "count": 36, "char": 12}},
+  {"name": "tut-focus", "loc": {"book": 19, "chapter": 23}, "focus": true}
+]

@@ -1,0 +1,12 @@
+[
+  {"name": "tut-card-library", "card": true, "screen": "library", "crop": [960, 130, 400, 250]},
+  {"name": "tut5-library", "screen": "library"},
+  {"name": "tut5-order", "screen": "library", "scrollTo": "[data-help=\"commentaries\"]"},
+  {"name": "tut5-folder", "screen": "library", "crop": [220, 112, 1160, 72]},
+  {"name": "tut5-books", "doc": {"module": "pilgrim", "title": "Part 1: The Third Stage"}, "selectPara": 3, "settings": {"studyPane": false}},
+  {"name": "tut5-chart", "settle": 9, "doc": {"module": "larkin_dispensational_truth", "title": "12. The King"}, "settings": {"studyPane": false}, "click": ".docbody img"},
+  {"name": "tut5-maps", "doc": {"module": "maps", "title": "13. The Journeys of Paul"}, "settings": {"studyPane": false}},
+  {"name": "tut5-ai", "screen": "settings", "scrollTo": "[data-help=\"ai-assistant\"]", "settle": 14, "crop": [415, 145, 750, 600]},
+  {"name": "tut5-models", "settle": 12, "loc": {"book": 45, "chapter": 8, "verse": 28}, "settings": {"studyTab": "ask"}, "click": "label:has(textarea[aria-label=\"Question\"]) button.btn.small"},
+  {"name": "tut5-appearance", "screen": "settings", "scrollTo": "[data-help=\"appearance\"]"}
+]

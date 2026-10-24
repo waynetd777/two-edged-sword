@@ -11,7 +11,7 @@ SIGN_ID  := $(APPLE_SIGNING_IDENTITY)
 # "-" is an ad-hoc signature: an empty identity makes the bundler fail instead.
 export APPLE_SIGNING_IDENTITY := $(if $(SIGN_ID),$(SIGN_ID),-)
 
-.PHONY: check lint fmt test app install-app dmg release dev icons screenshots sign-check help core visions site og
+.PHONY: check lint fmt test app install-app dmg release dev icons screenshots tutorials sign-check help core visions site og
 
 ## cargo test + TypeScript type-check.
 check:
@@ -89,6 +89,10 @@ icons:
 ## Retake docs/images/*-light.png and *-dark.png from tools/screenshots/scenes.json.
 screenshots:
 	@python3 tools/screenshots.py
+
+## Retake the website tutorials' pictures (site/img/tut/*.webp) from tools/screenshots/tutorials/, on the demo home.
+tutorials:
+	@python3 tools/screenshots.py --tutorials
 
 ## Remake the product page's pictures (site/img/*.webp) from the dark screenshots. Needs cwebp (brew install webp).
 site:

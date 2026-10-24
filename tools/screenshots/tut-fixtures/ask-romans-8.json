@@ -1,0 +1,19 @@
+{
+  "id": "tut-ask-romans-8",
+  "title": "How do the commentators differ on this verse?",
+  "about": "Romans 8:28",
+  "source": "Read",
+  "created": "2026-10-20T20:00:00.000Z",
+  "updated": "2026-10-20T20:01:00.000Z",
+  "model": "claude:sonnet",
+  "messages": [
+    {
+      "role": "user",
+      "text": "How do the commentators differ on this verse?"
+    },
+    {
+      "role": "assistant",
+      "text": "They agree on the heart of it: God works every providence, even affliction, for the good of those who love Him, and the promise is theirs because they are called by Him. They part on what \"his purpose\" means.\n\n**What \"all things\" are**\n- Barnes: \"all our afflictions and trials\". They wean us from this world and lead us to look to God for support, and to heaven for a final home.\n- Henry: all God's providences, \"merciful providences, afflicting providences\", like Joseph's troubles. Our sins are not His doing, though He makes even His permitting them work for our good.\n- Wesley: \"ease or pain, poverty or riches, and the ten thousand changes of life\", working for spiritual and eternal good.\n- Clarke: it is present tense, so the promise holds while we love God now. He calls it \"blasphemous nonsense\" to say sin works for our good.\n\n**What \"called according to his purpose\" means**\n- Henry: effectually called, \"according to the eternal purpose\", not for any merit of ours.\n- JFB: called \"in pursuance of an eternal purpose of love\", so nothing can thwart it.\n- Wesley: His \"gracious design of saving a lost world by the death of his Son\".\n- Clarke: \"the invited\", welcomed to the blessings of the covenant as God first promised Abraham, that all nations would be blessed in him.\n\n**For the group**\nAll of them point to the same comfort: the God who gave His own Son for us means us well in all He sends (JFB)."
+    }
+  ]
+}

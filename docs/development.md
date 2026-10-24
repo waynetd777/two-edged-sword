@@ -247,6 +247,18 @@ the app run side by side (4 by default). It needs Pillow.
   window's natural size.
 - `"unread": true` shows today's reading as not yet done, so the menu-bar window shows Start Quiet
   time.
+- The website tutorials' pictures are scenes in `tools/screenshots/tutorials/` (one file a
+  tutorial; their fixtures are in `tools/screenshots/tut-fixtures/`). `python3 tools/screenshots.py
+  --tutorials` takes them all, and naming one takes it alone; `make screenshots` leaves them out.
+  - They run on a demo home folder (`HOME` set to `tools/screenshots/out/home`, written by
+    `demo_home.py`): its invented highlights, bookmarks, journal and reading plan, and only the
+    built-in modules, so nothing of yours shows. Its search index is kept between runs; the first
+    run builds it, which takes a few minutes.
+  - They're saved to `site/img/tut/<name>.webp` in dark only, at twice the window's width in points
+    (2880), whatever the display's scale. A `"crop"` is given at 1400 wide and scaled.
+  - A `"card": true` scene (a card on the tutorials' index and the home page) also gets
+    `<name>@1x.webp`, cut at the window's own size in points (411 by 257 for a 400 by 250 crop), for
+    `srcset`. The card shows it at that size, so it's sharp on a 1x screen too.
 
 ## Printing to PDF
 
@@ -280,6 +292,18 @@ with no build step. `.github/workflows/pages.yml` publishes it to GitHub Pages o
 
 - Its pictures are WebP copies of the dark screenshots, in `site/img/`. After `make screenshots`,
   `make site` remakes them (it needs `cwebp`, from `brew install webp`).
+- `site/tutorials/` has the tutorials: an index and five pages (Reading, Teaching, Digging deeper,
+  Devotional, Your library), each following one invented story (the Thursday group at Hillside
+  Church, Romans 8, and Anna's question about Colossians 1:14) with a picture for every step. They
+  share `landing.css` with the home page, plus `tutorials.css` and `tutorials.js`.
+  - A Mac / Windows PC switch at the top swaps every key (`data-win="Ctrl+K"` on a `kbd`) and the
+    `.os-pane` blocks, and is remembered per browser.
+  - Ask is shown as You ask, It reads and The answer (`.ask`), so it's clear what you type and what
+    the assistant does.
+  - Their pictures are the tutorial scenes (see Screenshots). A change to a screen a tutorial shows
+    should retake its pictures and update its steps in the same change.
+  - They give glory to God and speak of Jesus as Lord and Saviour and of the Holy Spirit as
+    Comforter, as the story allows; invented names only.
 - `img/og.png` is the share card, 1200×630, rendered from `tools/og.html` with headless Chrome by
   `make og`.
 - Each zoomable screenshot is a `.tour`. Each `li` step under it carries either a spot to centre on
