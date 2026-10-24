@@ -375,7 +375,7 @@ modules folder; then press **Rescan**. "Run first" names the scripts whose outpu
 | `tools/targum/build.py` | Targum+ and Ps-Jon+, word by word | sefaria, wlc | WLC+, Jastrow |
 | `tools/syriac/build.py` | Peshitta+, word by word, from the Greek | crosswire | Byz+, STEPBible, Murdock, Etheridge |
 | `tools/syriac/sedra.py` | Peshitta SEDRA, word by word | crosswire | ETCBC, SEDRA |
-| `tools/rheims/build.py` | The Rheims New Testament (1582) | crosswire | Bible Support file 11077, in ~/Downloads |
+| `tools/rheims/build.py` | The Rheims New Testament (1582), read from Google's scans with macOS's Vision (Mac only) | crosswire | Internet Archive (`vulgatenewtesta00jerogoog`) |
 
 - Run each with `python3`. Downloads are cached in `~/Library/Caches/Two-edged Sword/`.
 - `tools/core` also builds into the app the modules from `crosswire`, `vulgate`, `lxx`, `ginsburg`,
@@ -471,6 +471,10 @@ Its docstring lists them and their licences.
     alike (each original language, the Talmud by its orders, a module and its "w/ glosses" twin).
   - `modules.module()` adds the cover as a module is written, so every builder gets it.
     `python3 tools/covers.py apply <folder>` adds or redraws them in modules already built.
+- **Histories.** Every module's description has a short history of the work, a paragraph headed
+  **History.** after its first. They are in `tools/history.py`, by file name (a "+" edition shares
+  its plain one's, the Talmud's tractates one). `modules.module()` adds it as a module is written;
+  `python3 tools/history.py apply <folder>` adds or replaces it in modules already built.
 
 Nothing from e-Sword X goes into a module that could be shipped: its licence forbids passing its
 modules on. These scripts read e-Sword modules, so they build for your own library only:
@@ -481,7 +485,7 @@ modules on. These scripts read e-Sword modules, so they build for your own libra
 
 These aren't built in either:
 
-- `rheims`, as its source is a file from Bible Support's e-Sword downloads;
+- `rheims`, as it is a machine reading of the scans, with misreadings left in, and its build needs a Mac;
 - `sefaria`'s Targum (English) and Talmud, `targum` and `syriac/sedra.py`, as their sources are
   non-commercial.
 

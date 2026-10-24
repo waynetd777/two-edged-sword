@@ -144,7 +144,7 @@ Their verses are numbered like the KJV's, so they line up beside it in Compare.
 | Latin+, Jerome's Vulgate word by word, with Strong's numbers (needs e-Sword's Latin Vulgate) | Stanza, Whitaker's WORDS, STEPBible |
 | Targum+ and Ps-Jon+, word by word. Both are built in; build them only if you want them from Sefaria's merged text instead | Sefaria, Jastrow |
 | Peshitta SEDRA: the Peshitta word by word, with SEDRA's Syriac glosses and grammar | ETCBC, SEDRA |
-| The Rheims New Testament (1582) | Bible Support |
+| The Rheims New Testament (1582), read from the scanned book (on a Mac) | Internet Archive |
 | Stephanus' Textus Receptus (1550), TR 1550+ word by word, and the Modern King James Version | CrossWire, STEPBible |
 | The Westminster Leningrad Codex as running Hebrew (WLC+ is built in) | Open Scriptures |
 

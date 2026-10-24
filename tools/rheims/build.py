@@ -3,20 +3,24 @@
 """Builds rheims1582.bbli ("Rheims New Testament (1582)"): the Catholic English New Testament of 1582,
 in the modernised spelling of Bagster's 1872 parallel edition, from a machine reading (OCR) of it.
 
-    python3 tools/rheims/build.py [ocr.zip] [raw.rtf]
+    python3 tools/rheims/build.py
 
 The source is "The Vulgate New Testament, with the Douay version of 1582. In parallel columns"
-(Bagster, 1872; public domain), as Google Books read it: Bible Support's file 11077
-(biblesupport.com/e-sword-downloads/file/11077) has that reading as DR_NT_2016_GoogleOCR_HTMLtext.zip
-(the book's pages, Latin and English) and NT_Text_RAW.rtf (the English, with some passages
-missing). Both are looked for in ~/Downloads unless given.
+(Bagster, 1872; public domain) in the Internet Archive's scan of the University of Toronto's copy
+(archive.org/details/vulgatenewtestam00lond, 384 colour pages at 300 ppi, pinned by sha256; Google's
+black-and-white scan, vulgatenewtesta00jerogoog, reads worse). Its OCR runs the Latin and English
+columns together, so the pages are read here, with macOS's Vision (ocr.swift,
+compiled once into the cache): each page's English column (the outer one; it has more lines, its type
+being smaller) is cut into strips at the gaps between lines, as Vision shrinks a large image and loses
+the small type. It is read twice, with different settings (READINGS), as each drops or garbles lines
+the other reads. So the build needs a Mac. Earlier builds read Bible Support's copy of Google Books'
+reading (file 11077), which can no longer be downloaded.
 
 The reading has no reliable verse numbers (they come out as °, *, " or run into words), so the
 verses are found by lining the text up with Challoner's revision of the same translation, drc.bbli
 (tools/crosswire builds it), which keeps most of the 1582 wording: the two word streams are matched
 in order (letters only, case ignored), and each verse runs from its first word to the next verse's.
-The RTF fills in a verse the pages' reading lost or garbled, where its own reading of that verse
-matches Challoner better.
+Each verse is taken from the reading that matches Challoner better.
 
 The reading is then cleaned: specks read as symbols or stray letters, misread verse numbers and
 quotation marks (the 1582 text has none) are dropped; a misread word that is no English word is
@@ -31,56 +35,139 @@ What can't be mended is left: real words misread, and words lost at the edge of 
 starting with a small letter has usually lost its first word). A verse neither reading has, like the first verses of Matthew, is left out. The Details
 record how many verses there are and how closely they follow Challoner's.
 
-Writes to the app's modules folder, where the app finds it after Library → Rescan.
+Writes to the app's modules folder, where the app finds it after Library → Rescan. The scans and
+each page's readings are cached in ~/Library/Caches/Two-edged Sword/rheims.
 """
 import html, os, re, sqlite3, subprocess, sys, zipfile
+from concurrent.futures import ProcessPoolExecutor
 from difflib import SequenceMatcher
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from modules import HOME, find, module, similar  # noqa: E402
-ZIP = HOME / "Downloads/DR_NT_2016_GoogleOCR_HTMLtext.zip"
-RTF = HOME / "Downloads/NT_Text_RAW.rtf"
+from modules import CACHES, fetch, find, module, similar  # noqa: E402
+CACHE = CACHES / "rheims"
+ITEM = "vulgatenewtestam00lond"
+SCANS = f"https://archive.org/download/{ITEM}/{ITEM}_jp2.zip"
+SCANS_SHA256 = "42957c16015fe24d9dec4b4fc288119405c2964c73766ebc4dcbb230600b8375"
+# The readings: (name, strip height, blur, scale, overlap), in pixels of the 2556-wide scans. Each drops or garbles
+# lines the others read (most often a line at a strip's edge, so their strips are cut in different places), and each
+# verse is taken from the one that reads it best.
+READINGS = [("a", 220, 0.0, 2.0, 4), ("b", 380, 0.5, 1.5, 0), ("c", 300, 0.3, 2.0, 10)]
+OCR = Path(__file__).resolve().parent / "ocr.swift"
 
 TOKEN = re.compile(r"[A-Za-z][A-Za-z'’]*|\d+|[^\sA-Za-z\d]+")
-LATIN = {"et", "in", "est", "qui", "non", "ad", "cum", "ut", "quod", "enim", "autem", "eius", "eum", "vos", "nos", "sunt", "quia",
-         "illi", "ille", "dixit", "suum", "sed", "de", "ab", "ex", "super", "nobis", "vobis", "erat", "ego", "tu", "dominus", "deus"}
-ENGLISH = {"the", "and", "of", "to", "that", "he", "in", "is", "not", "for", "him", "his", "them", "they", "which", "with", "you",
-           "unto", "be", "shall", "was", "a", "it", "said", "have", "all", "as", "but", "we", "this", "from", "our", "your"}
-
-
 def norm(t):
     return re.sub(r"[^a-z]", "", t.lower())
 
 
-def english(par):
-    words = [w.lower() for w in re.findall(r"[A-Za-z]+", par)]
-    return sum(w in ENGLISH for w in words) >= sum(w in LATIN for w in words)
+def ocr_tool():
+    """tools/rheims/ocr.swift, compiled into the cache (again when the source is newer)."""
+    exe = CACHE / "ocr"
+    if not exe.exists() or exe.stat().st_mtime < OCR.stat().st_mtime:
+        print("compiling ocr.swift (once)")
+        subprocess.run(["swiftc", "-O", str(OCR), "-o", str(exe)], check=True)
+    return exe
 
 
-def pages(zip_path):
-    """The book's English paragraphs in page order, as one text."""
-    out = []
-    with zipfile.ZipFile(zip_path) as z:
-        names = [n for n in z.namelist() if re.search(r"(^|/)p(\d+)[-.]", n)]
-        names.sort(key=lambda n: int(re.search(r"(?:^|/)p(\d+)", n).group(1)))
-        for n in names:
-            t = z.read(n).decode("utf-8", "replace")
-            for p in re.findall(r"<p class='gtxt_column'[^>]*>(.*?)</p>", t, re.S):
-                s = html.unescape(re.sub(r"<[^>]+>", " ", re.sub(r"<br\s*/?>", " ", p)))
-                s = re.sub(r"\s+", " ", s).strip()
-                if s and english(s):
-                    out.append(s)
-    return "\n".join(out)
+# Common words of each language, to tell the page's English column from its Latin one.
+LATIN = {"et", "est", "qui", "non", "ad", "cum", "ut", "quod", "enim", "autem", "eius", "ejus", "eum", "vos", "nos", "sunt",
+         "quia", "sed", "de", "ab", "ex", "super", "nobis", "vobis", "erat", "ego", "dixit", "illi"}
+ENGLISH = {"the", "and", "of", "to", "that", "he", "is", "not", "for", "him", "his", "them", "they", "which", "with", "you",
+           "unto", "be", "shall", "was", "it", "said", "have", "all", "as", "but", "we", "this", "from", "our", "your"}
 
 
-def rtf_text(path):
-    return subprocess.run(["textutil", "-convert", "txt", "-stdout", str(path)], capture_output=True, text=True, check=True).stdout
+def english_column(im, exe, work):
+    """(left, right) of the page's English column: the side of the gutter (the emptiest upright strip near the middle)
+    where a strip read from the middle has more English words than Latin. It is the outer column, so it alternates;
+    neither line count nor line height tells the two apart reliably."""
+    import numpy as np
+    a = np.asarray(im) < 128
+    h, w = a.shape
+    ink = a[int(h * .1):int(h * .95)].sum(0)
+    lo, hi = int(w * .35), int(w * .65)
+    g = lo + int(np.argmin(np.convolve(ink[lo:hi], np.ones(15), "same")))
+    score = []
+    for k, (x0, x1) in enumerate(((0, g), (g, w))):
+        f = work / f"side-{k}-{os.getpid()}.png"
+        im.crop((x0, int(h * .4), x1, int(h * .5))).save(f)
+        words = re.findall(r"[a-z]+", subprocess.run([str(exe), str(f)], capture_output=True, text=True).stdout.lower())
+        f.unlink()
+        score.append(sum(x in ENGLISH for x in words) - sum(x in LATIN for x in words))
+    return (0, g) if score[0] >= score[1] else (g, w)
 
 
-def tokens(text):
-    # A word broken at the end of a line: "for- give" -> "forgive".
-    text = re.sub(r"([a-z])- ([a-z])", r"\1\2", text)
+def read_page(args):
+    """One scanned page's English column as text, by one reading's settings: the column cut into strips at the gaps
+    between lines (Vision shrinks a large image and loses the small type), each read in turn."""
+    from PIL import Image, ImageFilter
+    import numpy as np
+    page, name, strip, blur, scale, pad, exe, work = args
+    im = Image.open(page).convert("L")
+    x0, x1 = english_column(im, exe, work)
+    col = im.crop((x0, 0, x1, im.height))
+    ink = (np.asarray(col) < 128).sum(1)
+    cuts, y = [0], 0
+    while y + strip < col.height:
+        y += strip
+        while y < col.height and ink[y]:
+            y += 1
+        cuts.append(y)
+    cuts.append(col.height)
+    files = []
+    for k, (a, b) in enumerate(zip(cuts, cuts[1:])):
+        if b <= a:  # a cut at the foot of the page
+            continue
+        s = col.crop((0, max(0, a - pad), col.width, min(col.height, b + pad)))
+        if blur:
+            s = s.filter(ImageFilter.GaussianBlur(blur))
+        if scale != 1:
+            s = s.resize((int(s.width * scale), int(s.height * scale)), Image.LANCZOS)
+        files.append(work / f"{Path(page).stem}-{name}-{k:02d}.png")
+        s.save(files[-1])
+    text = subprocess.run([str(exe), *map(str, files)], capture_output=True, text=True, check=True).stdout
+    for f in files:
+        f.unlink()
+    return text
+
+
+def scanned(reading):
+    """The book's English column, page by page, as one text: the Internet Archive's colour scans (pinned by sha256),
+    read by macOS's Vision with one of READINGS' settings. Each page's reading is cached."""
+    name, *settings = reading
+    pages = CACHE / ITEM
+    if not pages.exists():
+        with zipfile.ZipFile(fetch(SCANS, CACHE / f"{ITEM}_jp2.zip", sha256=SCANS_SHA256, log=True)) as z:
+            z.extractall(CACHE)
+        (CACHE / f"{ITEM}_jp2").rename(pages)
+    out_dir = CACHE / f"ocr-{name}"
+    out_dir.mkdir(exist_ok=True)
+    exe, todo = ocr_tool(), []
+    scans = sorted(pages.glob("*.jp2"))
+    for page in scans:
+        if not (out_dir / f"{page.stem}.txt").exists():
+            todo.append((str(page), name, *settings, exe, out_dir))
+    if todo:
+        print(f"reading {len(todo)} pages ({name})")
+        with ProcessPoolExecutor() as pool:
+            for args, text in zip(todo, pool.map(read_page, todo)):
+                (out_dir / f"{Path(args[0]).stem}.txt").write_text(text, encoding="utf-8")
+    return "\n".join(body((out_dir / f"{p.stem}.txt").read_text(encoding="utf-8")) for p in scans)
+
+
+def body(page):
+    """A page's reading without its running head ("MATTHEW XIII. 39-XIV. 6.", read in many ways): its first line, where
+    that has none of the commonest English words."""
+    lines = page.split("\n")
+    if lines and not ENGLISH & set(re.findall(r"[a-z]+", lines[0].lower())):
+        lines = lines[1:]
+    return "\n".join(lines)
+
+
+def tokens(text, known=()):
+    # A word broken at the end of a line: "for- give" -> "forgive", and "be-cause" where the reading joined the line's
+    # end to the next and the whole is a word of the English Bibles.
+    text = re.sub(r"([a-z])-\s+([a-z])", r"\1\2", text)
+    text = re.sub(r"\b([a-z]+)-([a-z]+)\b", lambda m: m[1] + m[2] if norm(m[1] + m[2]) in known else m[0], text)
     return [m.group() for m in TOKEN.finditer(text)]
 
 
@@ -460,29 +547,27 @@ def vocabulary():
 
 
 def main():
-    zp = Path(sys.argv[1]) if len(sys.argv) > 1 else ZIP
-    rp = Path(sys.argv[2]) if len(sys.argv) > 2 else RTF
-    for p in (zp, rp, find("drc.bbli")):
-        if not p.exists():
-            sys.exit(f"no {p}")
+    if not find("drc.bbli").exists():
+        sys.exit(f"no {find('drc.bbli')}; tools/crosswire/build.py DRC makes it")
+    CACHE.mkdir(parents=True, exist_ok=True)
     ref = challoner()
     known, counts = vocabulary()
     print(f"Challoner: {len(ref)} verses; {len(known)} known words")
-    a = verses(ref, tokens(pages(zp)), known, counts)
-    print(f"pages: {len(a)} verses, {sum(s for _, s in a.values()) / max(len(a), 1):.0%} of Challoner's words matched on average")
-    b = verses(ref, tokens(rtf_text(rp)), known, counts)
-    print(f"RTF: {len(b)} verses, {sum(s for _, s in b.values()) / max(len(b), 1):.0%} on average")
-    best, from_rtf = {}, 0
+    readings = []
+    for r in READINGS:
+        got = verses(ref, tokens(scanned(r), known), known, counts)
+        print(f"reading {r[0]}: {len(got)} verses, {sum(s for _, s in got.values()) / max(len(got), 1):.0%} of Challoner's words matched on average")
+        readings.append(got)
+    best, taken = {}, [0] * len(readings)
     for key, _ in ref:
-        x, y = a.get(key), b.get(key)
-        if x and (not y or x[1] >= y[1] - 0.1):
-            best[key] = x
-        elif y:
-            best[key] = y
-            from_rtf += 1
+        got = [(r[key][1], -i, r[key]) for i, r in enumerate(readings) if key in r]
+        if got:
+            _, i, best[key] = max(got)
+            taken[-i] += 1
     shares = [s for _, s in best.values()]
     weak = sum(s < 0.5 for s in shares)
-    print(f"kept: {len(best)} verses ({from_rtf} from the RTF), {sum(shares) / len(shares):.0%} matched on average, {weak} under half")
+    print(f"kept: {len(best)} verses (" + ", ".join(f"{n} from {r[0]}" for r, n in zip(READINGS, taken)) + f"), "
+          f"{sum(shares) / len(shares):.0%} matched on average, {weak} under half")
     rows = [(*k, t) for k, (t, _) in sorted(best.items()) if t]
     print(f"  {sum(FILLED.values())} lost words put back from Challoner")
     if os.environ.get("RHEIMS_REPORT"):
@@ -494,7 +579,8 @@ def main():
 
     info = ("<p>The Rheims New Testament of 1582, the English College's Catholic translation from the Vulgate, which the KJV's "
             "translators consulted. The text is Bagster's 1872 parallel edition (The Vulgate New Testament, with the Douay "
-            "version of 1582), whose spelling is modernised, as Google Books' machine reading has it; verses are divided by lining "
+            "version of 1582), whose spelling is modernised, read by machine (OCR) from the Internet Archive's scan of the University of "
+            "Toronto's copy (archive.org/details/vulgatenewtestam00lond), public domain; verses are divided by lining "
             f"it up with Challoner's revision. {len(rows)} verses; on average {sum(shares) / len(shares):.0%} of each verse's words "
             "are Challoner's too, so much of the rest is the 1582 wording, but some is misreading, and words lost at the edge of "
             "a column are missing. Built by Two-edged Sword's tools/rheims.</p>")
