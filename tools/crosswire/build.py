@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 """Builds e-Sword Bibles from CrossWire's SWORD modules: the Syriac Peshitta, the two English
 translations of it (Murdock, Etheridge), Tyndale, the Geneva Bible of 1599 and the Douay-Rheims,
-and, for the modules folder only, Stephanus' Textus Receptus of 1550 and the Modern King James Version.
+and, for the modules folder only, Stephanus' Textus Receptus of 1550 and Green's Modern King James Version.
 
     python3 tools/crosswire/build.py [Peshitta Murdock Etheridge Tyndale Geneva1599 DRC TR MKJV]
 
@@ -98,7 +98,15 @@ MODULES = {
     "TR": dict(file="tr1550", title="Greek NT: Textus Receptus (Stephanus 1550)", abbrev="TR1550", variant="x-2",
                about="Robert Estienne's (Stephanus') Greek New Testament of 1550, the Textus Receptus the KJV is most often compared with, unaccented, from Maurice Robinson's electronic edition. Where Scrivener's 1894 text (the Greek the KJV's translators chose) differs, this has the 1550's reading."),
     "MKJV": dict(file="mkjv", title="Modern King James Version", abbrev="MKJV",
-                 about="Jay P. Green's Modern King James Version (1962–1998): the KJV's Hebrew and Greek texts in modern English. Copyright Jay P. Green; distributed by CrossWire with his permission."),
+                 about="Jay P. Green Sr.'s Modern King James Version (1962–1998): the KJV's Hebrew and Greek texts in modern English. Copyright Jay P. Green Sr.; distributed by CrossWire with his son's permission (2002)."),
+}
+
+# Modules taken from an earlier version of CrossWire's, as the Wayback Machine kept it, pinned by sha256: CrossWire's
+# MKJV 2.0 (2026) is mkjv.org's Illustrated Modern King James Version, another work, though its conf still calls it
+# Green's; 1.4 (2009) is Green's text.
+ARCHIVED = {
+    "MKJV": ("https://web.archive.org/web/20160425044622id_/http://www.crosswire.org/ftpmirror/pub/sword/packages/rawzip/MKJV.zip",
+             "47a5c8b0aec093bca9ef2d9411610635ae5cf16ccbfc98762ee0f61cc4150499"),
 }
 
 # Brackets the sources left unpaired, mended from the sense (found by checking each Bible's brackets match
@@ -117,6 +125,7 @@ MENDS = {
     "Tyndale": {(3, 14, 28): [("righte fote:", "righte fote):")], (46, 1, 5): [("thinges ve are", "thinges ye are")],
                 (46, 1, 6): [("even as", "(even as")], (46, 13, 8): [("shall cease) or", "shall cease or")],
                 (47, 12, 1): [("me (no dout", "me no dout")], (58, 9, 15): [("which chaunsed for", "(which chaunsed for")]},
+    "MKJV": {(14, 20, 34): [("the /Book of", "the Book of")], (20, 24, 29): [("Do not `say", "Do not say")]},
     "Murdock": {(66, 18, 17): [("by sea) stood", "by sea, stood")],
                 # Letters lost in the module's text.
                 (42, 13, 5): [("except ye resent", "except ye repent")], (42, 14, 3): [("And Jews answered", "And Jesus answered")],
@@ -159,7 +168,7 @@ RULES = {
     },
     "DRC": {},
     "TR": {},
-    "MKJV": {"Lev": ["13:13 / But when raw flesh"], "Ps": ["89:45 / How long, LORD"]},
+    "MKJV": {},
 }
 
 
@@ -228,7 +237,11 @@ def ztext(z, test):
 
 def read(name):
     """(conf, {book: [(chapter, verse, raw text)]}, Sirach's prologue) for a module, in its own versification."""
-    z = zipfile.ZipFile(io.BytesIO(get(RAWZIP.format(name), f"{name}.zip")))
+    if name in ARCHIVED:
+        url, sha = ARCHIVED[name]
+        z = zipfile.ZipFile(io.BytesIO(get(url, f"{name}-{sha[:8]}.zip", sha)))
+    else:
+        z = zipfile.ZipFile(io.BytesIO(get(RAWZIP.format(name), f"{name}.zip")))
     c = conf(z)
     if c.get("CipherKey") is not None:
         sys.exit(f"{name} is enciphered")
@@ -405,8 +418,8 @@ def build(name, into=None):
         if m.get("variant"):
             rows = [(ch, v, variant(t, m["variant"])) for ch, v, t in rows]
         rows = [(ch, v, text(t, source)) for ch, v, t in rows]
-        if name == "MKJV":  # six apostrophes lost in CrossWire's text (Ezra 8:36 "king�s"): its others are straight
-            rows = [(ch, v, re.sub(r"\s+(?='s\b)", "", t.replace("\ufffd", "'"))) for ch, v, t in rows]  # and LORD's, a tag before it
+        if name == "MKJV":  # words Green supplied, in braces in four verses (the rest have none): italics, as elsewhere
+            rows = [(ch, v, re.sub(r"\{([^}]*)\}", r"<i>\1</i>", t)) for ch, v, t in rows]
         if b == "Ps" and titles:
             rows = [(ch, v, f"<b>{t}</b>" if (ch, v) in titles and t else t) for ch, v, t in rows]
         if b == "Sir" and prologue:

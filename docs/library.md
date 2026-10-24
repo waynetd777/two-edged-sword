@@ -21,7 +21,7 @@ The app reads Bibles and books from three places, and never changes them:
 <a href="images/index.md#library"><picture><source media="(prefers-color-scheme: dark)" srcset="images/library-dark.png"><img alt="The Library searched for Strong: the Bibles with Strong's numbers, each with its features and licence" src="images/library-light.png"></picture></a>
 
 - It lists every module, with its size and features. The ⓘ beside one shows its description and
-  which folder it came from.
+  which folder it came from. The modules the app builds also have a short history of the work.
 - **In picker** chooses which Bibles appear in the Bible menu.
 - Set the default Bible, and the order of [commentaries](app:library#commentaries) and [dictionaries](app:library#dictionaries).
 - **Rescan** picks up modules added since the app started.
@@ -145,7 +145,7 @@ Their verses are numbered like the KJV's, so they line up beside it in Compare.
 | Targum+ and Ps-Jon+, word by word. Both are built in; build them only if you want them from Sefaria's merged text instead | Sefaria, Jastrow |
 | Peshitta SEDRA: the Peshitta word by word, with SEDRA's Syriac glosses and grammar | ETCBC, SEDRA |
 | The Rheims New Testament (1582), read from the scanned book (on a Mac) | Internet Archive |
-| Stephanus' Textus Receptus (1550), TR 1550+ word by word, and the Modern King James Version | CrossWire, STEPBible |
+| Stephanus' Textus Receptus (1550), TR 1550+ word by word, and Green's Modern King James Version (its 1993 text; e-Sword's is his 1998 revision, which the app's MKJV notes follow) | CrossWire, STEPBible |
 | The Westminster Leningrad Codex as running Hebrew (WLC+ is built in) | Open Scriptures |
 
 All are public domain or openly licensed, except some Sefaria translations, SEDRA's glosses,

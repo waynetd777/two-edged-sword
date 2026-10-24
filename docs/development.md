@@ -359,7 +359,7 @@ modules folder; then press **Rescan**. "Run first" names the scripts whose outpu
 
 | Script | Builds | Run first | From |
 |---|---|---|---|
-| `tools/crosswire/build.py` | Syriac Peshitta NT, Murdock, Etheridge, Tyndale, Geneva 1599, Douay-Rheims; Stephanus' TR (1550) and the MKJV, not built in | | CrossWire |
+| `tools/crosswire/build.py` | Syriac Peshitta NT, Murdock, Etheridge, Tyndale, Geneva 1599, Douay-Rheims; Stephanus' TR (1550) and the MKJV (CrossWire's 1.4, from the Wayback Machine: its 2.0 is another work), not built in | | CrossWire |
 | `tools/crosswire/trplus.py` | TR 1550+, Stephanus' TR word by word, not built in | | CrossWire, STEPBible |
 | `tools/sefaria/build.py` | Targum, Targum Pseudo-Jonathan, the Babylonian Talmud (Sefaria's merged text, all versions) | | Sefaria |
 | `tools/vulgate/build.py` | Clementine Vulgate (1592) | | Clementine Vulgate Project |
