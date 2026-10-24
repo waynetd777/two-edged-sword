@@ -21,6 +21,15 @@ from contextlib import contextmanager
 from difflib import SequenceMatcher
 from pathlib import Path
 
+# HTTPS checked against the system's own trust store where truststore is installed (pip install truststore): Windows
+# then fetches a root certificate it hasn't seen yet, as its browsers do, where Python's OpenSSL would refuse it
+# (archive.org's GoDaddy root, on a fresh Windows).
+try:
+    import truststore
+    truststore.inject_into_ssl()
+except ImportError:
+    pass
+
 HOME = Path.home()
 # Windows keeps an app's caches and data under %LOCALAPPDATA% and %APPDATA% (store.rs), macOS under ~/Library.
 WINDOWS = sys.platform == "win32"
@@ -294,6 +303,20 @@ def greek_key(w, nu_from=2) -> str:
     if len(t) >= nu_from and t.endswith("ν") and t[-2:-1] in ("ε", "ι"):
         t = t[:-1]
     return t
+
+
+# Webster's Second International word list (1934, public domain), as macOS has it in /usr/share/dict/words, from
+# FreeBSD's source, for where there's no system list (Windows): it differs from macOS's in 44 entries.
+WEB2 = ("https://raw.githubusercontent.com/freebsd/freebsd-src/4a65e12dfbaba7193e37fcd2e14fbc20776a78b9/share/dict/web2",
+        "92165d95d72a67377e80052b1b9c3d63a4ac402ccd71690c89d949e809738238")
+
+
+def english_words() -> set:
+    """English words, lower case: the system's list (/usr/share/dict/words), or else the same list from FreeBSD."""
+    words = Path("/usr/share/dict/words")
+    if not words.is_file():
+        words = fetch(WEB2[0], CACHES / "words" / "web2", sha256=WEB2[1])
+    return {w.strip().lower() for w in words.read_text(encoding="utf-8").splitlines() if w.strip()}
 
 
 def similar(a, b) -> float:

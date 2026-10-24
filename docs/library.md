@@ -137,6 +137,11 @@ Some texts aren't e-Sword downloads. Scripts in the app's source code (not in th
 them from free sources. Put a built module in your modules folder and it shows after **Rescan**.
 Their verses are numbered like the KJV's, so they line up beside it in Compare.
 
+- The scripts need Python 3, and run on a Mac or on Windows. The Rheims New Testament reads a
+  little better built on a Mac.
+- A script that reads an e-Sword module (Latin+ reads e-Sword's Latin Vulgate) finds it in your
+  modules folder<!-- mac --> or in e-Sword X's<!-- /mac -->.
+
 | Text | From |
 |---|---|
 | Targum (English), the Babylonian Talmud. The Aramaic Targum and Pseudo-Jonathan are built in; build them only if you want Sefaria's merged text instead | Sefaria |
@@ -144,7 +149,7 @@ Their verses are numbered like the KJV's, so they line up beside it in Compare.
 | Latin+, Jerome's Vulgate word by word, with Strong's numbers (needs e-Sword's Latin Vulgate) | Stanza, Whitaker's WORDS, STEPBible |
 | Targum+ and Ps-Jon+, word by word. Both are built in; build them only if you want them from Sefaria's merged text instead | Sefaria, Jastrow |
 | Peshitta SEDRA: the Peshitta word by word, with SEDRA's Syriac glosses and grammar | ETCBC, SEDRA |
-| The Rheims New Testament (1582), read from the scanned book (on a Mac) | Internet Archive |
+| The Rheims New Testament (1582), read from the scanned book | Internet Archive |
 | Stephanus' Textus Receptus (1550), TR 1550+ word by word, and Green's Modern King James Version in its 1993 text, as MKJV 1993 (e-Sword's MKJV is his 1998 revision); each has its own differences from the KJV | CrossWire, STEPBible |
 | The Westminster Leningrad Codex as running Hebrew (WLC+ is built in) | Open Scriptures |
 

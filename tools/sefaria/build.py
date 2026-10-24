@@ -28,7 +28,7 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from modules import CACHES, LIBRARY, chapter_lengths, fetch, keep, module, restore, write_whole  # noqa: E402
+from modules import CACHES, LIBRARY, chapter_lengths, english_words as words, fetch, keep, module, restore, write_whole  # noqa: E402
 CACHE = CACHES / "sefaria"
 EXPORT = "https://storage.googleapis.com/sefaria-export/json/"
 LINKS = "https://storage.googleapis.com/sefaria-export/links/links{}.csv"
@@ -371,11 +371,8 @@ def links_by_tractate(titles):
 
 
 def english_words():
-    """Words, for telling "bean</b>before" (two words) from "establish</b>es" (one): the system's word list."""
-    try:
-        return {w.strip().lower() for w in open("/usr/share/dict/words", encoding="utf-8")}
-    except OSError:
-        return set()
+    """Words, for telling "bean</b>before" (two words) from "establish</b>es" (one): tools/modules' list."""
+    return words()
 
 
 WORDS = None

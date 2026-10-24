@@ -9,12 +9,14 @@ The source is "The Vulgate New Testament, with the Douay version of 1582. In par
 (Bagster, 1872; public domain) in the Internet Archive's scan of the University of Toronto's copy
 (archive.org/details/vulgatenewtestam00lond, 384 colour pages at 300 ppi, pinned by sha256; Google's
 black-and-white scan, vulgatenewtesta00jerogoog, reads worse). Its OCR runs the Latin and English
-columns together, so the pages are read here, with macOS's Vision (ocr.swift,
-compiled once into the cache): each page's English column (the outer one; it has more lines, its type
-being smaller) is cut into strips at the gaps between lines, as Vision shrinks a large image and loses
-the small type. It is read twice, with different settings (READINGS), as each drops or garbles lines
-the other reads. So the build needs a Mac. Earlier builds read Bible Support's copy of Google Books'
-reading (file 11077), which can no longer be downloaded.
+columns together, so the pages are read here: with macOS's Vision (ocr.swift, compiled once into the
+cache), or on Windows with Windows' own OCR (ocr.ps1, one kept running in each worker, as PowerShell
+is slow to start). Each page's English column (the outer one, found by reading a strip of each and
+kept in columns/) is cut into strips at the gaps between lines, as Vision shrinks a large image and
+loses the small type, and Windows' OCR refuses one. It is read three times, with different settings
+(READINGS, READINGS_WINDOWS), as each drops or garbles lines the others read. Vision reads these
+scans better: 85% of Challoner's words matched, against 82% on Windows. Earlier builds read Bible
+Support's copy of Google Books' reading (file 11077), which can no longer be downloaded.
 
 The reading has no reliable verse numbers (they come out as °, *, " or run into words), so the
 verses are found by lining the text up with Challoner's revision of the same translation, drc.bbli
@@ -44,7 +46,7 @@ from difflib import SequenceMatcher
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from modules import CACHES, fetch, find, module, similar  # noqa: E402
+from modules import CACHES, WINDOWS, english_words, fetch, find, module, similar  # noqa: E402
 CACHE = CACHES / "rheims"
 ITEM = "vulgatenewtestam00lond"
 SCANS = f"https://archive.org/download/{ITEM}/{ITEM}_jp2.zip"
@@ -53,7 +55,10 @@ SCANS_SHA256 = "42957c16015fe24d9dec4b4fc288119405c2964c73766ebc4dcbb230600b8375
 # lines the others read (most often a line at a strip's edge, so their strips are cut in different places), and each
 # verse is taken from the one that reads it best.
 READINGS = [("a", 220, 0.0, 2.0, 4), ("b", 380, 0.5, 1.5, 0), ("c", 300, 0.3, 2.0, 10)]
-OCR = Path(__file__).resolve().parent / "ocr.swift"
+# Windows' OCR reads these scans best at their own size, Vision enlarged.
+READINGS_WINDOWS = [("a", 220, 0.0, 1.0, 4), ("b", 380, 0.0, 1.0, 0), ("c", 600, 0.0, 1.5, 0)]
+OCR = Path(__file__).resolve().parent / "ocr.swift"  # macOS's Vision
+OCR_WINDOWS = Path(__file__).resolve().parent / "ocr.ps1"  # Windows' own OCR (Windows.Media.Ocr)
 
 TOKEN = re.compile(r"[A-Za-z][A-Za-z'’]*|\d+|[^\sA-Za-z\d]+")
 def norm(t):
@@ -61,12 +66,15 @@ def norm(t):
 
 
 def ocr_tool():
-    """tools/rheims/ocr.swift, compiled into the cache (again when the source is newer)."""
+    """The command that reads images' text, given their paths: on Windows ocr.ps1, with Windows' own OCR; on a Mac
+    ocr.swift, compiled into the cache (again when the source is newer)."""
+    if WINDOWS:
+        return ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", str(OCR_WINDOWS)]
     exe = CACHE / "ocr"
     if not exe.exists() or exe.stat().st_mtime < OCR.stat().st_mtime:
         print("compiling ocr.swift (once)")
         subprocess.run(["swiftc", "-O", str(OCR), "-o", str(exe)], check=True)
-    return exe
+    return [str(exe)]
 
 
 # Common words of each language, to tell the page's English column from its Latin one.
@@ -76,10 +84,35 @@ ENGLISH = {"the", "and", "of", "to", "that", "he", "is", "not", "for", "him", "h
            "unto", "be", "shall", "was", "it", "said", "have", "all", "as", "but", "we", "this", "from", "our", "your"}
 
 
-def english_column(im, exe, work):
+_server = None  # this worker's ocr.ps1, on Windows
+
+
+def ocr(exe, files):
+    """The text of images, each one's lines top to bottom: on Windows through one ocr.ps1 kept running in this worker
+    (each start of PowerShell costs a second), on a Mac by running the tool once for them all."""
+    global _server
+    if not WINDOWS:
+        return subprocess.run([*exe, *map(str, files)], capture_output=True, text=True, encoding="utf-8", check=True).stdout
+    if _server is None or _server.poll() is not None:
+        _server = subprocess.Popen(exe, stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True, encoding="utf-8")
+    _server.stdin.write("\t".join(map(str, files)) + "\n")
+    _server.stdin.flush()
+    lines = []
+    for line in _server.stdout:
+        if line.rstrip("\n") == "\x1e":
+            return "".join(lines)
+        lines.append(line)
+    raise RuntimeError("ocr.ps1 stopped")
+
+
+def english_column(im, exe, work, known):
     """(left, right) of the page's English column: the side of the gutter (the emptiest upright strip near the middle)
     where a strip read from the middle has more English words than Latin. It is the outer column, so it alternates;
-    neither line count nor line height tells the two apart reliably."""
+    neither line count nor line height tells the two apart reliably. Found once for all the readings: kept in the
+    file `known`."""
+    if known.is_file():
+        x0, x1 = known.read_text().split()
+        return int(x0), int(x1)
     import numpy as np
     a = np.asarray(im) < 128
     h, w = a.shape
@@ -90,10 +123,13 @@ def english_column(im, exe, work):
     for k, (x0, x1) in enumerate(((0, g), (g, w))):
         f = work / f"side-{k}-{os.getpid()}.png"
         im.crop((x0, int(h * .4), x1, int(h * .5))).save(f)
-        words = re.findall(r"[a-z]+", subprocess.run([str(exe), str(f)], capture_output=True, text=True).stdout.lower())
+        words = re.findall(r"[a-z]+", ocr(exe, [f]).lower())
         f.unlink()
         score.append(sum(x in ENGLISH for x in words) - sum(x in LATIN for x in words))
-    return (0, g) if score[0] >= score[1] else (g, w)
+    x0, x1 = (0, g) if score[0] >= score[1] else (g, w)
+    known.parent.mkdir(exist_ok=True)
+    known.write_text(f"{x0} {x1}")
+    return x0, x1
 
 
 def read_page(args):
@@ -103,13 +139,14 @@ def read_page(args):
     import numpy as np
     page, name, strip, blur, scale, pad, exe, work = args
     im = Image.open(page).convert("L")
-    x0, x1 = english_column(im, exe, work)
+    x0, x1 = english_column(im, exe, work, CACHE / ("columns-windows" if WINDOWS else "columns") / f"{Path(page).stem}.txt")
     col = im.crop((x0, 0, x1, im.height))
     ink = (np.asarray(col) < 128).sum(1)
     cuts, y = [0], 0
     while y + strip < col.height:
         y += strip
-        while y < col.height and ink[y]:
+        stop = y + strip  # a page with no gaps (the cover) is still cut, as no OCR takes a page-long strip
+        while y < min(col.height, stop) and ink[y]:
             y += 1
         cuts.append(y)
     cuts.append(col.height)
@@ -124,7 +161,7 @@ def read_page(args):
             s = s.resize((int(s.width * scale), int(s.height * scale)), Image.LANCZOS)
         files.append(work / f"{Path(page).stem}-{name}-{k:02d}.png")
         s.save(files[-1])
-    text = subprocess.run([str(exe), *map(str, files)], capture_output=True, text=True, check=True).stdout
+    text = ocr(exe, files)
     for f in files:
         f.unlink()
     return text
@@ -139,7 +176,7 @@ def scanned(reading):
         with zipfile.ZipFile(fetch(SCANS, CACHE / f"{ITEM}_jp2.zip", sha256=SCANS_SHA256, log=True)) as z:
             z.extractall(CACHE)
         (CACHE / f"{ITEM}_jp2").rename(pages)
-    out_dir = CACHE / f"ocr-{name}"
+    out_dir = CACHE / (f"ocr-windows-{name}" if WINDOWS else f"ocr-{name}")  # each OCR's readings apart
     out_dir.mkdir(exist_ok=True)
     exe, todo = ocr_tool(), []
     scans = sorted(pages.glob("*.jp2"))
@@ -512,13 +549,10 @@ def clean(toks):
 
 
 def vocabulary():
-    """Words that are real: the system dictionary, and every word of the library's English Bibles
+    """Words that are real: the system's word list (tools/modules'), and every word of the library's English Bibles
     (for the archaic ones: loveth, sayest, whither); and how often each occurs in lower case in the
     KJV and Challoner, the modern spellings the 1872 edition shares."""
-    known, counts = set(), {}
-    words = Path("/usr/share/dict/words")
-    if words.exists():
-        known |= {w.strip().lower() for w in words.read_text(encoding="utf-8").splitlines()}
+    known, counts = english_words() | {""}, {}  # "": a token of marks only counts as known, as it always has
     for f in ("kjv.bbli", "drc.bbli", "geneva1599.bbli", "tyndale.bbli"):
         modern = f in ("kjv.bbli", "drc.bbli")
         p = find(f)
@@ -554,7 +588,7 @@ def main():
     known, counts = vocabulary()
     print(f"Challoner: {len(ref)} verses; {len(known)} known words")
     readings = []
-    for r in READINGS:
+    for r in READINGS_WINDOWS if WINDOWS else READINGS:
         got = verses(ref, tokens(scanned(r), known), known, counts)
         print(f"reading {r[0]}: {len(got)} verses, {sum(s for _, s in got.values()) / max(len(got), 1):.0%} of Challoner's words matched on average")
         readings.append(got)
@@ -566,7 +600,7 @@ def main():
             taken[-i] += 1
     shares = [s for _, s in best.values()]
     weak = sum(s < 0.5 for s in shares)
-    print(f"kept: {len(best)} verses (" + ", ".join(f"{n} from {r[0]}" for r, n in zip(READINGS, taken)) + f"), "
+    print(f"kept: {len(best)} verses (" + ", ".join(f"{n} from {r[0]}" for r, n in zip(READINGS_WINDOWS if WINDOWS else READINGS, taken)) + f"), "
           f"{sum(shares) / len(shares):.0%} matched on average, {weak} under half")
     rows = [(*k, t) for k, (t, _) in sorted(best.items()) if t]
     print(f"  {sum(FILLED.values())} lost words put back from Challoner")

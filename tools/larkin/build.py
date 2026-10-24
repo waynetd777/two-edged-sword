@@ -39,7 +39,7 @@ from html import escape, unescape
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from modules import CACHES, fetch, module  # noqa: E402
+from modules import CACHES, english_words, fetch, module  # noqa: E402
 import covers  # noqa: E402
 
 CACHE = CACHES / "larkin"
@@ -400,11 +400,8 @@ def junk(text):
 
 
 def english():
-    """A list of English words, lower case: the system's (macOS's /usr/share/dict/words), or none."""
-    try:
-        return {w.strip().lower() for w in open("/usr/share/dict/words", encoding="utf-8")}
-    except OSError:
-        return set()
+    """A list of English words, lower case (tools/modules')."""
+    return english_words()
 
 
 def known_words(hocr, leaves):

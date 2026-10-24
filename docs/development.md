@@ -375,9 +375,21 @@ modules folder; then press **Rescan**. "Run first" names the scripts whose outpu
 | `tools/targum/build.py` | Targum+ and Ps-Jon+, word by word | sefaria, wlc | WLC+, Jastrow |
 | `tools/syriac/build.py` | Peshitta+, word by word, from the Greek | crosswire | Byz+, STEPBible, Murdock, Etheridge |
 | `tools/syriac/sedra.py` | Peshitta SEDRA, word by word | crosswire | ETCBC, SEDRA |
-| `tools/rheims/build.py` | The Rheims New Testament (1582), read from the scanned book with macOS's Vision (Mac only) | crosswire | Internet Archive (`vulgatenewtestam00lond`, the University of Toronto's copy) |
+| `tools/rheims/build.py` | The Rheims New Testament (1582), read from the scanned book with macOS's Vision or Windows' OCR | crosswire | Internet Archive (`vulgatenewtestam00lond`, the University of Toronto's copy) |
 
-- Run each with `python3`. Downloads are cached in `~/Library/Caches/Two-edged Sword/`.
+- Run each with `python3`, on a Mac or on Windows. Downloads are cached in
+  `~/Library/Caches/Two-edged Sword/` (on Windows, `%LOCALAPPDATA%\Two-edged Sword\Caches`), and the
+  modules written to the app's modules folder, `%APPDATA%\Two-edged Sword\Modules` on Windows.
+- On Windows, `pip install truststore` too: the tools then check HTTPS certificates against Windows'
+  own store, which fetches a root certificate it hasn't seen yet (archive.org's, on a new PC), where
+  Python's own check would fail.
+- `tools/rheims` reads the scans with macOS's Vision (`ocr.swift`) or, on Windows, Windows' own OCR
+  (`ocr.ps1`, with its own reading settings). The Mac's build is the better: 85% of Challoner's
+  words matched against Windows' 82%, with the same verses. A script that reads an e-Sword
+  module looks in the modules folder and, on a Mac, e-Sword X's folder; on Windows, put the e-Sword
+  X (Mac) version in the modules folder. Without macOS's word list (`/usr/share/dict/words`),
+  `tools/sefaria` divides a few run-together words less well and `tools/larkin` has only each
+  book's own words to judge its scans' OCR by.
 - Every download is also kept in a private archive, `Two-edged Sword Sources` in OneDrive (or the
   folder `$TES_SOURCES` names), at the same path as in the cache, so a source can't be lost to a
   cleared cache or a site gone down (Rheims' first source was, when Bible Support stopped its
@@ -492,7 +504,7 @@ modules on. These scripts read e-Sword modules, so they build for your own libra
 
 These aren't built in either:
 
-- `rheims`, as it is a machine reading of the scans, with misreadings left in, and its build needs a Mac;
+- `rheims`, as it is a machine reading of the scans, with misreadings left in;
 - `sefaria`'s Targum (English) and Talmud, `targum` and `syriac/sedra.py`, as their sources are
   non-commercial.
 
