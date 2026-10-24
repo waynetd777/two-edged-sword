@@ -1,0 +1,2203 @@
+{
+ "module": "rheims1582",
+ "base": "kjv",
+ "updated": "2026-10-25",
+ "records": [
+  {
+   "book": 40,
+   "chapter": 1,
+   "verse": 18,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"birth of Jesus Christ\" becomes \"generation of Christ\"",
+   "note": "The Rheims follows the Vulgate's Christi generatio, with some Old Latin and Greek witnesses; the Textus Receptus has \"Jesus Christ\". Jesus is named in 1:16 and 1:21."
+  },
+  {
+   "book": 40,
+   "chapter": 5,
+   "verse": 22,
+   "kind": "judgment",
+   "weight": "major",
+   "change": "Omits \"without a cause\"",
+   "note": "The Rheims follows the Vulgate, which lacks sine causa, as do Sinaiticus and Vaticanus; the Textus Receptus has eike. Without it, any anger toward a brother is condemned."
+  },
+  {
+   "book": 40,
+   "chapter": 5,
+   "verse": 44,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"bless them that curse you\"",
+   "note": "The Rheims follows the Vulgate, which lacks the clause, as do Sinaiticus and Vaticanus; the Textus Receptus has it. The command to bless is in Luke 6:28."
+  },
+  {
+   "book": 40,
+   "chapter": 6,
+   "verse": 13,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits the doxology \"For thine is the kingdom… for ever\"",
+   "note": "The Rheims follows the Vulgate, which ends the prayer \"deliver us from evil. Amen.\", as do Sinaiticus and Vaticanus; the doxology is in the Byzantine text and the Textus Receptus."
+  },
+  {
+   "book": 40,
+   "chapter": 8,
+   "verse": 5,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"when Jesus was entered\" becomes \"when he was entered\"",
+   "note": "The Rheims follows the Vulgate, which has only a pronoun or the verb here, where the Textus Receptus names Jesus. The referent is plain from context."
+  },
+  {
+   "book": 40,
+   "chapter": 9,
+   "verse": 13,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "Omits \"to repentance\": \"not come to call the just, but sinners\"",
+   "note": "\"To repentance\" is in the Textus Receptus but not in the Vulgate, which the Rheims follows, nor in Sinaiticus and Vaticanus. The call of sinners to repentance is still stated in Luke 5:32."
+  },
+  {
+   "book": 40,
+   "chapter": 13,
+   "verse": 36,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits the name \"Jesus\"; \"he came into the house\"",
+   "note": "The Rheims follows the Vulgate, which has only a pronoun or the verb here, where the Textus Receptus names Jesus. The referent is plain from context."
+  },
+  {
+   "book": 40,
+   "chapter": 13,
+   "verse": 51,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"Jesus saith unto them\" and the title \"Lord\"",
+   "note": "Both are in the Textus Receptus but not in the Vulgate, which the Rheims follows, nor in Sinaiticus and Vaticanus; the disciples answer only \"Yea\"."
+  },
+  {
+   "book": 40,
+   "chapter": 14,
+   "verse": 14,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus went forth\" becomes \"he coming forth\"",
+   "note": "The Rheims follows the Vulgate, which has only a pronoun or the verb here, where the Textus Receptus names Jesus. The referent is plain from context."
+  },
+  {
+   "book": 40,
+   "chapter": 14,
+   "verse": 25,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus went unto them\" becomes \"he came unto them\"",
+   "note": "The Rheims follows the Vulgate, which has only a pronoun or the verb here, where the Textus Receptus names Jesus. The referent is plain from context."
+  },
+  {
+   "book": 40,
+   "chapter": 15,
+   "verse": 1,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"to Jesus\" becomes \"to him\"",
+   "note": "The Rheims follows the Vulgate, which has only a pronoun or the verb here, where the Textus Receptus names Jesus. The referent is plain from context."
+  },
+  {
+   "book": 40,
+   "chapter": 15,
+   "verse": 8,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"draweth nigh unto me with their mouth\"",
+   "note": "The clause, from Isaiah 29:13, is in the Textus Receptus but not in the Vulgate, which the Rheims follows, nor in Sinaiticus and Vaticanus. The rest of the quotation is the same."
+  },
+  {
+   "book": 40,
+   "chapter": 15,
+   "verse": 16,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus said\" becomes \"he said\"",
+   "note": "The Rheims follows the Vulgate, which has only a pronoun or the verb here, where the Textus Receptus names Jesus. The referent is plain from context."
+  },
+  {
+   "book": 40,
+   "chapter": 15,
+   "verse": 30,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus' feet\" becomes \"his feet\"",
+   "note": "The Rheims follows the Vulgate, which has only a pronoun or the verb here, where the Textus Receptus names Jesus. The referent is plain from context."
+  },
+  {
+   "book": 40,
+   "chapter": 15,
+   "verse": 31,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"the maimed to be whole\"",
+   "note": "The Rheims follows the Vulgate, which lists only the dumb, the lame and the blind; the Textus Receptus and most Greek manuscripts include the maimed made whole."
+  },
+  {
+   "book": 40,
+   "chapter": 16,
+   "verse": 6,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus said\" becomes \"Who said\"",
+   "note": "The Rheims follows the Vulgate, which has only a pronoun or the verb here, where the Textus Receptus names Jesus. The referent is plain from context."
+  },
+  {
+   "book": 40,
+   "chapter": 17,
+   "verse": 11,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"Jesus\" and \"first\": \"Elias indeed shall come\"",
+   "note": "The Rheims follows the Vulgate's Elias quidem venturus est, without the name or \"first\", as do Sinaiticus and Vaticanus; Elijah still comes to restore all things."
+  },
+  {
+   "book": 40,
+   "chapter": 18,
+   "verse": 26,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"worshipped him… Lord\" becomes \"besought him\"",
+   "note": "The Rheims follows the Vulgate's rogabat eum and lacks the address \"Lord\"; the Greek has prosekunei (worshipped, did obeisance). In the parable the servant still pleads with his master."
+  },
+  {
+   "book": 40,
+   "chapter": 19,
+   "verse": 17,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"Why callest thou me good?\" becomes \"What askest thou me of good?\"",
+   "note": "The Rheims follows the Vulgate, Quid me interrogas de bono?, as do Sinaiticus and Vaticanus; the Textus Receptus has the wording of Mark 10:18 and Luke 18:19, which the Rheims keeps there."
+  },
+  {
+   "book": 40,
+   "chapter": 19,
+   "verse": 24,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"kingdom of God\" becomes \"kingdom of heaven\"",
+   "note": "The Rheims follows the Vulgate's regnum caelorum here, with some Greek manuscripts; the Textus Receptus has \"kingdom of God\". Matthew uses both phrases for the same kingdom."
+  },
+  {
+   "book": 40,
+   "chapter": 20,
+   "verse": 22,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits \"to be baptized with the baptism that I am baptized with\"",
+   "note": "The Rheims follows the Vulgate, which lacks the clause, as do Sinaiticus and Vaticanus; the Textus Receptus has it. The baptism saying is still in Mark 10:38."
+  },
+  {
+   "book": 40,
+   "chapter": 20,
+   "verse": 23,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the baptism clause, as in verse 22",
+   "note": "As in verse 22, the clause is in the Textus Receptus but not in the Vulgate, which the Rheims follows, nor in Sinaiticus and Vaticanus; the parallel in Mark 10:39 has it."
+  },
+  {
+   "book": 40,
+   "chapter": 23,
+   "verse": 8,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"even Christ\" as the one master",
+   "note": "\"Even Christ\" is in the Textus Receptus but not in the Vulgate, which the Rheims follows, nor in Sinaiticus and Vaticanus. Verse 10 still names Christ as the one Master."
+  },
+  {
+   "book": 40,
+   "chapter": 24,
+   "verse": 2,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus said\" becomes \"he answering, said\"",
+   "note": "The Rheims follows the Vulgate, which has only a pronoun or the verb here, where the Textus Receptus names Jesus. The referent is plain from context."
+  },
+  {
+   "book": 40,
+   "chapter": 25,
+   "verse": 13,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits \"wherein the Son of man cometh\"",
+   "note": "The phrase is in the Textus Receptus but not in the Vulgate, which the Rheims follows, nor in Sinaiticus and Vaticanus. The call to watch stands, but the verse no longer names the Son of man's coming."
+  },
+  {
+   "book": 40,
+   "chapter": 28,
+   "verse": 20,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the closing \"Amen\"",
+   "note": "The closing \"Amen\" is in the Textus Receptus but not in the Vulgate, which the Rheims follows, nor in Sinaiticus and Vaticanus. The meaning is unchanged."
+  },
+  {
+   "book": 41,
+   "chapter": 1,
+   "verse": 2,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"in the prophets\" becomes \"in Esay the Prophet\"",
+   "note": "The Rheims follows the Vulgate, in Isaia propheta, as do Sinaiticus and Vaticanus; the Textus Receptus has \"in the prophets\". The quotation joins Malachi 3:1 to Isaiah 40:3."
+  },
+  {
+   "book": 41,
+   "chapter": 2,
+   "verse": 17,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "Omits \"to repentance\": \"not to call the just, but sinners\"",
+   "note": "\"To repentance\" is in the Textus Receptus but not in the Vulgate, which the Rheims follows, nor in Sinaiticus and Vaticanus. The call of sinners to repentance is still stated in Luke 5:32."
+  },
+  {
+   "book": 41,
+   "chapter": 3,
+   "verse": 29,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"eternal damnation\" becomes \"guilty of an eternal sin\"",
+   "note": "The Rheims follows the Vulgate's aeterni delicti, as do Sinaiticus and Vaticanus (hamartematos); the Textus Receptus has kriseos (judgment). Either way the sin is never forgiven."
+  },
+  {
+   "book": 41,
+   "chapter": 5,
+   "verse": 19,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus suffered him not\" becomes \"he admitted him not\"",
+   "note": "The Rheims follows the Vulgate, which has only a pronoun or the verb here, where the Textus Receptus names Jesus. The referent is plain from context."
+  },
+  {
+   "book": 41,
+   "chapter": 6,
+   "verse": 11,
+   "kind": "judgment",
+   "weight": "major",
+   "change": "Omits \"more tolerable for Sodom and Gomorrha in the day of judgment\"",
+   "note": "The sentence, which is in Matthew 10:15, is in the Textus Receptus but not in the Vulgate, which the Rheims follows, nor in Sinaiticus and Vaticanus. Only the shaking off of dust remains."
+  },
+  {
+   "book": 41,
+   "chapter": 7,
+   "verse": 27,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus said\" becomes \"Who said\"",
+   "note": "The Rheims follows the Vulgate, which has only a pronoun or the verb here, where the Textus Receptus names Jesus. The referent is plain from context."
+  },
+  {
+   "book": 41,
+   "chapter": 8,
+   "verse": 1,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits the name \"Jesus\"; \"calling his Disciples together, he saith\"",
+   "note": "The Rheims follows the Vulgate, which has only a pronoun or the verb here, where the Textus Receptus names Jesus. The referent is plain from context."
+  },
+  {
+   "book": 41,
+   "chapter": 10,
+   "verse": 21,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits \"take up the cross\"; reads \"come, follow me\"",
+   "note": "\"Take up the cross\" is in the Textus Receptus but not in the Vulgate, which the Rheims follows, nor in Sinaiticus and Vaticanus. The call to follow Jesus remains; taking up the cross is in Mark 8:34."
+  },
+  {
+   "book": 41,
+   "chapter": 10,
+   "verse": 50,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"came to Jesus\" becomes \"came to him\"",
+   "note": "The Rheims follows the Vulgate, which has only a pronoun or the verb here, where the Textus Receptus names Jesus. The referent is plain from context."
+  },
+  {
+   "book": 41,
+   "chapter": 10,
+   "verse": 51,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Lord\" becomes \"Rabboni\"",
+   "note": "The Rheims follows the Vulgate's Rabboni, as do Sinaiticus and Vaticanus (Rabbouni, \"my Master\"); the Textus Receptus has Kyrie (Lord)."
+  },
+  {
+   "book": 41,
+   "chapter": 10,
+   "verse": 52,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"followed Jesus\" becomes \"followed him\"",
+   "note": "The Rheims follows the Vulgate, which has only a pronoun or the verb here, where the Textus Receptus names Jesus. The referent is plain from context."
+  },
+  {
+   "book": 41,
+   "chapter": 11,
+   "verse": 10,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"in the name of the Lord\"",
+   "note": "The second \"in the name of the Lord\" is in the Textus Receptus but not in the Vulgate, which the Rheims follows, nor in Sinaiticus and Vaticanus. Verse 9 still has the phrase."
+  },
+  {
+   "book": 41,
+   "chapter": 11,
+   "verse": 11,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus entered\" becomes \"he entered\"",
+   "note": "The Rheims follows the Vulgate, which has only a pronoun or the verb here, where the Textus Receptus names Jesus. The referent is plain from context."
+  },
+  {
+   "book": 41,
+   "chapter": 11,
+   "verse": 14,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus answered\" becomes \"answering he said\"",
+   "note": "The Rheims follows the Vulgate, which has only a pronoun or the verb here, where the Textus Receptus names Jesus. The referent is plain from context."
+  },
+  {
+   "book": 41,
+   "chapter": 11,
+   "verse": 15,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus went\" becomes \"he was entered\"",
+   "note": "The Rheims follows the Vulgate, which has only a pronoun or the verb here, where the Textus Receptus names Jesus. The referent is plain from context."
+  },
+  {
+   "book": 41,
+   "chapter": 12,
+   "verse": 29,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"our God is one Lord\" becomes \"thy God, is one God\"",
+   "note": "The Rheims follows the Vulgate's Dominus Deus tuus, Deus unus est; the Greek, quoting Deuteronomy 6:4, has \"our God is one Lord\". The confession of one God is the same."
+  },
+  {
+   "book": 41,
+   "chapter": 15,
+   "verse": 3,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"but he answered nothing\"",
+   "note": "The clause is in the Textus Receptus but not in the Vulgate, which the Rheims follows, nor in Sinaiticus and Vaticanus. Jesus' silence is still stated in verses 4 and 5."
+  },
+  {
+   "book": 41,
+   "chapter": 16,
+   "verse": 20,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the closing \"Amen\"",
+   "note": "The Rheims follows the Vulgate, which ends Mark without \"Amen\"; the Textus Receptus has it. The Rheims keeps the longer ending, verses 9 to 20, as the KJV does."
+  },
+  {
+   "book": 42,
+   "chapter": 2,
+   "verse": 9,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"glory of the Lord\" becomes \"brightness of God\"",
+   "note": "The Rheims follows the Vulgate's claritas Dei; the Textus Receptus has doxa kyriou (glory of the Lord). The same divine glory is meant; only the title differs."
+  },
+  {
+   "book": 42,
+   "chapter": 2,
+   "verse": 14,
+   "kind": "other",
+   "weight": "major",
+   "change": "\"good will toward men\" becomes \"to men of good will\"",
+   "note": "The Rheims follows the Vulgate, hominibus bonae voluntatis, from the Greek eudokias of Sinaiticus and Vaticanus; the Textus Receptus has eudokia, good will from God toward men."
+  },
+  {
+   "book": 42,
+   "chapter": 2,
+   "verse": 33,
+   "kind": "virgin-birth",
+   "weight": "major",
+   "change": "\"Joseph\" becomes \"his father\"",
+   "note": "The Rheims follows the Vulgate's pater ejus, as do Sinaiticus and Vaticanus; the Textus Receptus has \"Joseph\". Luke has already told of the virgin birth (1:34-35), and Mary herself says \"thy father\" in 2:48."
+  },
+  {
+   "book": 42,
+   "chapter": 2,
+   "verse": 40,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"in spirit\"; the child \"waxed strong\"",
+   "note": "\"In spirit\" is in the Textus Receptus but not in the Vulgate, which the Rheims follows, nor in Sinaiticus and Vaticanus. The child still grows strong and full of wisdom."
+  },
+  {
+   "book": 42,
+   "chapter": 2,
+   "verse": 43,
+   "kind": "virgin-birth",
+   "weight": "major",
+   "change": "\"Joseph and his mother\" becomes \"his parents\"",
+   "note": "The Rheims follows the Vulgate's parentes ejus, as do Sinaiticus and Vaticanus; the Textus Receptus has \"Joseph and his mother\". \"Parents\" is also used in 2:27 and 2:41 in both."
+  },
+  {
+   "book": 42,
+   "chapter": 3,
+   "verse": 2,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"word of God\" becomes \"word of our Lord\"",
+   "note": "The Rheims follows the Vulgate's verbum Domini; the Textus Receptus has rhema theou (word of God). The same divine person is meant; only the title differs."
+  },
+  {
+   "book": 42,
+   "chapter": 3,
+   "verse": 29,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"Jose\" becomes \"Jesus\" in the genealogy",
+   "note": "The Rheims follows the Vulgate's Jesu, as do the critical Greek texts (Iesou); the Textus Receptus has Iose. It is a different man, an ancestor of Joseph."
+  },
+  {
+   "book": 42,
+   "chapter": 4,
+   "verse": 8,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits \"Get thee behind me, Satan\"",
+   "note": "The Rheims follows the Vulgate, which lacks the rebuke, as do Sinaiticus and Vaticanus; the Textus Receptus has it here as in Matthew 4:10. Jesus still answers from Scripture."
+  },
+  {
+   "book": 42,
+   "chapter": 4,
+   "verse": 41,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Christ the Son of God\" becomes \"the son of God\"",
+   "note": "\"Christ\" is in the Textus Receptus but not in the Vulgate, which the Rheims follows, nor in Sinaiticus and Vaticanus. The end of the verse still says they knew he was Christ."
+  },
+  {
+   "book": 42,
+   "chapter": 7,
+   "verse": 22,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus answering\" becomes \"answering, he said\"",
+   "note": "The Rheims follows the Vulgate, which has only a pronoun or the verb here, where the Textus Receptus names Jesus. The referent is plain from context."
+  },
+  {
+   "book": 42,
+   "chapter": 8,
+   "verse": 54,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"he put them all out\"",
+   "note": "The clause is in the Textus Receptus but not in the Vulgate, which the Rheims follows, nor in Sinaiticus and Vaticanus. Verse 51 still says he let no one in but Peter, James, John and the parents."
+  },
+  {
+   "book": 42,
+   "chapter": 9,
+   "verse": 57,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits the address \"Lord\"",
+   "note": "The address \"Lord\" is in the Textus Receptus but not in the Vulgate, which the Rheims follows, nor in Sinaiticus and Vaticanus."
+  },
+  {
+   "book": 42,
+   "chapter": 10,
+   "verse": 21,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus rejoiced\" becomes \"he rejoiced\"",
+   "note": "The Vulgate has no name here, as in Sinaiticus and Vaticanus, where the Textus Receptus names Jesus. The referent is plain from context."
+  },
+  {
+   "book": 42,
+   "chapter": 10,
+   "verse": 39,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus' feet\" becomes \"our Lord's feet\"",
+   "note": "The Rheims follows the Vulgate's pedes Domini, as do Sinaiticus and Vaticanus (tou kyriou); the Textus Receptus has \"Jesus'\". Both refer to Jesus."
+  },
+  {
+   "book": 42,
+   "chapter": 10,
+   "verse": 41,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus\" becomes \"our Lord\"",
+   "note": "The Rheims follows the Vulgate's Dominus, as do Sinaiticus and Vaticanus (ho kyrios); the Textus Receptus has \"Jesus\". Both refer to Jesus."
+  },
+  {
+   "book": 42,
+   "chapter": 11,
+   "verse": 2,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Shorter prayer: omits \"which art in heaven\", \"Thy will be done\"",
+   "note": "The Rheims follows the Vulgate's shorter form of Luke's prayer, as does Vaticanus; the Textus Receptus fills it out from Matthew 6:9-10, where the Rheims has the full wording."
+  },
+  {
+   "book": 42,
+   "chapter": 11,
+   "verse": 4,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits \"but deliver us from evil\"",
+   "note": "The Rheims follows the Vulgate, which lacks the petition, as do Sinaiticus and Vaticanus; the Textus Receptus has it. The petition is in Matthew 6:13 in the Rheims too."
+  },
+  {
+   "book": 42,
+   "chapter": 11,
+   "verse": 44,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"scribes and Pharisees, hypocrites\"",
+   "note": "The words are in the Textus Receptus but not in the Vulgate, which the Rheims follows, nor in Sinaiticus and Vaticanus. The woes are still addressed to the Pharisees in verses 42-43."
+  },
+  {
+   "book": 42,
+   "chapter": 13,
+   "verse": 2,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus answering\" becomes \"he answering\"",
+   "note": "The Rheims follows the Vulgate, which has only a pronoun or the verb here, where the Textus Receptus names Jesus. The referent is plain from context."
+  },
+  {
+   "book": 42,
+   "chapter": 13,
+   "verse": 3,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"except ye repent\" becomes \"unless you have penance\"",
+   "note": "The Rheims renders the Vulgate's paenitentiam habere (Greek metanoeo) with \"penance\" where the KJV has \"repent\". A translation choice: Catholic usage takes it to include works of penance, Protestant readers a turning of mind and heart."
+  },
+  {
+   "book": 42,
+   "chapter": 13,
+   "verse": 5,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"except ye repent\" becomes \"if you have not penance\"",
+   "note": "The Rheims renders the Vulgate's paenitentiam agere (Greek metanoeo) with \"penance\" where the KJV has \"repent\". A translation choice: Catholic usage takes it to include works of penance, Protestant readers a turning of mind and heart."
+  },
+  {
+   "book": 42,
+   "chapter": 13,
+   "verse": 25,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Lord, Lord\" becomes \"Lord\"",
+   "note": "The Rheims follows the Vulgate, which has the address once, as do Sinaiticus and Vaticanus; the Textus Receptus repeats it, as in Matthew 7:22 and 25:11."
+  },
+  {
+   "book": 42,
+   "chapter": 16,
+   "verse": 23,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "\"in hell\" moves to verse 22: \"buried in hell\"",
+   "note": "The Vulgate, which the Rheims follows, joins the Greek's \"in Hades\" to the previous clause: the rich man \"was buried in hell\". The same words divided differently; the rich man is in torment in both."
+  },
+  {
+   "book": 42,
+   "chapter": 22,
+   "verse": 63,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"held Jesus\" becomes \"held him\"",
+   "note": "The Rheims follows the Vulgate, which has only a pronoun or the verb here, where the Textus Receptus names Jesus. The referent is plain from context."
+  },
+  {
+   "book": 43,
+   "chapter": 4,
+   "verse": 1,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord knew\" becomes \"Jesus therefore understood\"",
+   "note": "The Rheims follows the Vulgate's Jesus, as do Sinaiticus and some other Greek manuscripts; the Textus Receptus has \"the Lord\". Both refer to Jesus."
+  },
+  {
+   "book": 43,
+   "chapter": 4,
+   "verse": 42,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"the Christ\" before \"the Saviour of the world\"",
+   "note": "\"The Christ\" is in the Textus Receptus but not in the Vulgate, which the Rheims follows, nor in Sinaiticus and Vaticanus. Jesus is still confessed as Saviour of the world."
+  },
+  {
+   "book": 43,
+   "chapter": 4,
+   "verse": 46,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"So Jesus came\" becomes \"He came\"",
+   "note": "The Rheims follows the Vulgate, which has only a pronoun or the verb here, where the Textus Receptus names Jesus. The referent is plain from context."
+  },
+  {
+   "book": 43,
+   "chapter": 5,
+   "verse": 16,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"and sought to slay him\"",
+   "note": "The clause is in the Textus Receptus but not in the Vulgate, which the Rheims follows, nor in Sinaiticus and Vaticanus. Verse 18 still says they sought to kill him."
+  },
+  {
+   "book": 43,
+   "chapter": 5,
+   "verse": 30,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the will of the Father\" becomes \"the will of him\"",
+   "note": "\"The Father\" is in the Textus Receptus but not in the Vulgate, which the Rheims follows, nor in Sinaiticus and Vaticanus. The one who sent him is still the Father, as the context shows."
+  },
+  {
+   "book": 43,
+   "chapter": 6,
+   "verse": 69,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Son of the living God\" becomes \"the Son of God\"",
+   "note": "The Rheims follows the Vulgate, Christus Filius Dei; the Textus Receptus has \"the Son of the living God\", and Sinaiticus and Vaticanus \"the Holy One of God\". Peter's confession of Jesus as the Christ stands."
+  },
+  {
+   "book": 43,
+   "chapter": 7,
+   "verse": 39,
+   "kind": "trinity",
+   "weight": "minor",
+   "change": "\"the Holy Ghost was not yet given\" becomes \"the Spirit\"",
+   "note": "The Rheims follows the Vulgate, which reads Spiritus without Sanctus, as do Sinaiticus and P75; the Textus Receptus has \"Holy\". The Spirit meant is the same."
+  },
+  {
+   "book": 43,
+   "chapter": 8,
+   "verse": 6,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"as though he heard them not\"",
+   "note": "The Rheims follows the Vulgate, which keeps the account of the adulterous woman but without this phrase, found in the Textus Receptus and some later manuscripts."
+  },
+  {
+   "book": 43,
+   "chapter": 8,
+   "verse": 9,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"being convicted by their own conscience\"",
+   "note": "The Rheims follows the Vulgate, which keeps John 7:53-8:11 as the KJV does but without this clause, found in the Textus Receptus and some later Greek manuscripts."
+  },
+  {
+   "book": 43,
+   "chapter": 8,
+   "verse": 10,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"and saw none but the woman\"",
+   "note": "The Rheims follows the Vulgate, Mulier, ubi sunt qui te accusabant?, without these words of the Textus Receptus. The account is the same."
+  },
+  {
+   "book": 43,
+   "chapter": 8,
+   "verse": 29,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Father hath not left me\" becomes \"he hath not left me\"",
+   "note": "The Rheims follows the Vulgate, which lacks \"the Father\", as do Sinaiticus and Vaticanus; the Textus Receptus has it. The one who sent him is still the subject."
+  },
+  {
+   "book": 43,
+   "chapter": 8,
+   "verse": 59,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"going through the midst of them, and so passed by\"",
+   "note": "The Rheims follows the Vulgate, which lacks the clause, as do Sinaiticus and Vaticanus; it is in the Textus Receptus. Jesus still hides himself and leaves the temple."
+  },
+  {
+   "book": 43,
+   "chapter": 12,
+   "verse": 4,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"Simon's son\"",
+   "note": "The Rheims follows the Vulgate, which names Judas Iscariot without his father here; the Textus Receptus has \"Simon's son\", as John 6:71 and 13:2 also do."
+  },
+  {
+   "book": 43,
+   "chapter": 12,
+   "verse": 47,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"believe not\" becomes \"keep them not\"",
+   "note": "The Rheims follows the Vulgate (non custodierit), as do Sinaiticus and Vaticanus (phylaxe); the Textus Receptus has pisteuse (believe). Hearing without keeping, rather than without believing."
+  },
+  {
+   "book": 43,
+   "chapter": 13,
+   "verse": 3,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits the name \"Jesus\"",
+   "note": "The Rheims follows the Vulgate, which has only the participle here, where the Textus Receptus names Jesus. The referent is plain from context."
+  },
+  {
+   "book": 43,
+   "chapter": 13,
+   "verse": 37,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits the address \"Lord\"",
+   "note": "The Rheims follows the Vulgate, which has Peter's question without Domine; the Textus Receptus and most Greek manuscripts have Kyrie. Peter still addresses Jesus."
+  },
+  {
+   "book": 43,
+   "chapter": 19,
+   "verse": 23,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"crucified Jesus\" becomes \"crucified him\"",
+   "note": "The Rheims follows the Vulgate, which has only a pronoun here, where the Textus Receptus names Jesus. The referent is plain from context."
+  },
+  {
+   "book": 43,
+   "chapter": 20,
+   "verse": 21,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"said Jesus\" becomes \"He said\"",
+   "note": "The Rheims follows the Vulgate, which has only the verb here, where the Textus Receptus names Jesus. Jesus is still the speaker."
+  },
+  {
+   "book": 43,
+   "chapter": 21,
+   "verse": 15,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"son of Jonas\" becomes \"Simon of John\"",
+   "note": "The Rheims follows the Vulgate (Simon Joannis), as Sinaiticus and Vaticanus read Ioannou; the Textus Receptus has Iona. The man meant is the same."
+  },
+  {
+   "book": 43,
+   "chapter": 21,
+   "verse": 16,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"son of Jonas\" becomes \"of John\"; \"my sheep\" becomes \"My Lambs\"",
+   "note": "The Rheims follows the Vulgate, which reads Simon Joannis and pasce agnos meos; the Greek has Iona (Textus Receptus) and probata (sheep). The charge to Peter is the same."
+  },
+  {
+   "book": 43,
+   "chapter": 21,
+   "verse": 17,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus saith\" becomes \"He saith\"; \"son of Jonas\" becomes \"of John\"",
+   "note": "The Rheims follows the Vulgate (Dicit ei, Simon Joannis), as Sinaiticus and Vaticanus read Ioannou; the Textus Receptus has \"Jesus\" and Iona. The speaker and the man meant are the same."
+  },
+  {
+   "book": 43,
+   "chapter": 21,
+   "verse": 25,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the closing \"Amen\"",
+   "note": "The Rheims follows the Vulgate, which lacks the closing \"Amen\", as do Sinaiticus and Vaticanus; it is in the Textus Receptus. The meaning is unchanged."
+  },
+  {
+   "book": 44,
+   "chapter": 2,
+   "verse": 17,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"saith God\" becomes \"saith our Lord\"",
+   "note": "The Rheims follows the Vulgate (dicit Dominus); the Greek of the Textus Receptus has legei ho theos (saith God). The same divine person is meant; only the title differs."
+  },
+  {
+   "book": 44,
+   "chapter": 2,
+   "verse": 30,
+   "kind": "prophecy",
+   "weight": "major",
+   "change": "Omits \"according to the flesh, he would raise up Christ\"",
+   "note": "The Rheims follows the Vulgate, which lacks the phrase, as do Sinaiticus and Vaticanus; it is in the Textus Receptus. Verse 31 still says David spoke of Christ's resurrection."
+  },
+  {
+   "book": 44,
+   "chapter": 2,
+   "verse": 47,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"added to the church\" becomes \"increased them… daily together\"",
+   "note": "The Rheims follows the Vulgate (augebat… in idipsum), as Sinaiticus and Vaticanus read epi to auto; the Textus Receptus has \"to the church\". The growth of the believers is the same."
+  },
+  {
+   "book": 44,
+   "chapter": 3,
+   "verse": 19,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"Repent ye\" becomes \"Be Penitent\"",
+   "note": "The Rheims follows the Vulgate's Paenitemini (Greek metanoesate, \"repent\"); a translation choice. The rest of the KJV's verse stands in the Rheims' verse 20."
+  },
+  {
+   "book": 44,
+   "chapter": 3,
+   "verse": 26,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"his Son Jesus\" becomes \"his son\"",
+   "note": "The Rheims follows the Vulgate (filium suum), as Sinaiticus and Vaticanus lack Iesoun; the Textus Receptus has \"his Son Jesus\". The one God raised up is still plainly Jesus."
+  },
+  {
+   "book": 44,
+   "chapter": 4,
+   "verse": 21,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"glorified God\" becomes \"glorified that which had been done\"",
+   "note": "The Rheims follows the Vulgate (clarificabant id quod factum fuerat); the Greek has edoxazon ton theon (glorified God). The people still praise the healing."
+  },
+  {
+   "book": 44,
+   "chapter": 4,
+   "verse": 24,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"thou art God\"",
+   "note": "The Rheims follows the Vulgate (tu qui fecisti), close to Sinaiticus and Vaticanus; the Textus Receptus has \"thou art God, which hast made\". They still pray to God as Creator."
+  },
+  {
+   "book": 44,
+   "chapter": 7,
+   "verse": 16,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"Emmor the father of Sychem\" becomes \"Hemor, the son of Sichem\"",
+   "note": "The Rheims follows the Vulgate (Hemor filii Sichem); the Textus Receptus has tou Sychem, which the KJV takes as \"the father of\" (Genesis 33:19). A difference in reading the genitive."
+  },
+  {
+   "book": 44,
+   "chapter": 7,
+   "verse": 30,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"an angel of the Lord\" becomes \"an Angel\"",
+   "note": "The Rheims follows the Vulgate, which lacks \"of the Lord\", as do Sinaiticus and Vaticanus; it is in the Textus Receptus. The Lord's voice is still heard in verse 31."
+  },
+  {
+   "book": 44,
+   "chapter": 7,
+   "verse": 37,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord your God\" becomes \"God\"",
+   "note": "The Rheims follows the Vulgate (Deus), as do Sinaiticus and Vaticanus (ho theos); the Textus Receptus has \"the Lord your God\". The prophecy of Deuteronomy 18:15 is the same."
+  },
+  {
+   "book": 44,
+   "chapter": 9,
+   "verse": 5,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord said\" becomes \"And he\"",
+   "note": "The Rheims follows the Vulgate, Et ille, as do Sinaiticus and Vaticanus; the Textus Receptus has \"the Lord said\". The speaker is still Jesus, who names himself."
+  },
+  {
+   "book": 44,
+   "chapter": 9,
+   "verse": 20,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"preached Christ\" becomes \"preached Jesus\"",
+   "note": "The Rheims follows the Vulgate (Jesum), as do Sinaiticus and Vaticanus; the Textus Receptus has \"Christ\". He still preaches that Jesus is the Son of God."
+  },
+  {
+   "book": 44,
+   "chapter": 10,
+   "verse": 30,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits \"I was fasting\"",
+   "note": "The Rheims follows the Vulgate (orans eram, I was praying), as do Sinaiticus and Vaticanus; the Textus Receptus has fasting as well as praying. Fasting is still commended elsewhere, as in 13:2-3."
+  },
+  {
+   "book": 44,
+   "chapter": 10,
+   "verse": 33,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"before God… of God\" becomes \"in thy sight… of the Lord\"",
+   "note": "The Rheims follows the Vulgate (in conspectu tuo, a Domino); the Textus Receptus has \"before God\" and \"of God\". Cornelius and his household still wait to hear what God has commanded."
+  },
+  {
+   "book": 44,
+   "chapter": 12,
+   "verse": 24,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"word of God\" becomes \"word of our Lord\"",
+   "note": "The Rheims follows the Vulgate (verbum Domini); the Greek of the Textus Receptus has tou theou (of God). The same divine person is meant; only the title differs."
+  },
+  {
+   "book": 44,
+   "chapter": 14,
+   "verse": 23,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"ordained them elders\" becomes \"ordained to them Priests\"",
+   "note": "The Rheims renders the Vulgate's presbyteros (Greek presbyterous, elders) as \"Priests\", the English word that comes from presbyter. A translation choice: Catholic readers see the ordained priesthood here, Protestant readers church elders."
+  },
+  {
+   "book": 44,
+   "chapter": 15,
+   "verse": 18,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"Known unto God are all his works\" becomes a shorter sentence",
+   "note": "The Rheims follows the Vulgate's shorter form, notum a saeculo est Domino opus suum; Sinaiticus and Vaticanus join a shorter form to verse 17. The Textus Receptus has the fuller sentence."
+  },
+  {
+   "book": 44,
+   "chapter": 15,
+   "verse": 24,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"Ye must be circumcised, and keep the law\"",
+   "note": "The Rheims follows the Vulgate, which lacks the clause, as do Sinaiticus and Vaticanus; it is in the Textus Receptus. The issue is stated in verses 1 and 5."
+  },
+  {
+   "book": 44,
+   "chapter": 15,
+   "verse": 34,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Adds \"and Judas departed alone\"",
+   "note": "The Rheims follows the Vulgate, which keeps the verse as the KJV does and adds this clause, found in Codex Bezae; Sinaiticus and Vaticanus lack the whole verse."
+  },
+  {
+   "book": 44,
+   "chapter": 16,
+   "verse": 10,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord had called us\" becomes \"God had called us\"",
+   "note": "The Rheims follows the Vulgate (Deus), as do Sinaiticus and Vaticanus (ho theos); the Textus Receptus has \"the Lord\"."
+  },
+  {
+   "book": 44,
+   "chapter": 16,
+   "verse": 31,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord Jesus Christ\" becomes \"our Lord Jesus\"",
+   "note": "The Rheims follows the Vulgate, which lacks \"Christ\", as do Sinaiticus and Vaticanus; it is in the Textus Receptus. Salvation by believing on the Lord Jesus is unchanged."
+  },
+  {
+   "book": 44,
+   "chapter": 17,
+   "verse": 26,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"of one blood\" becomes \"of one\"",
+   "note": "The Rheims follows the Vulgate (ex uno), as do Sinaiticus and Vaticanus (ex henos); the Textus Receptus has \"one blood\". The unity of mankind from one origin is the same."
+  },
+  {
+   "book": 44,
+   "chapter": 17,
+   "verse": 27,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"seek the Lord\" becomes \"seek God\"",
+   "note": "The Rheims follows the Vulgate (Deum), as do Sinaiticus and Vaticanus (ton theon); the Textus Receptus has \"the Lord\"."
+  },
+  {
+   "book": 44,
+   "chapter": 18,
+   "verse": 5,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"pressed in the spirit\" becomes \"instant in preaching\"",
+   "note": "The Rheims follows the Vulgate (instabat verbo), as Sinaiticus and Vaticanus read logo (the word); the Textus Receptus has pneumati (in the spirit)."
+  },
+  {
+   "book": 44,
+   "chapter": 18,
+   "verse": 21,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"I must by all means keep this feast… in Jerusalem\"",
+   "note": "The Rheims follows the Vulgate, which lacks the sentence, as do Sinaiticus and Vaticanus; it is in the Textus Receptus. Paul still promises to return, God willing."
+  },
+  {
+   "book": 44,
+   "chapter": 18,
+   "verse": 25,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the things of the Lord\" becomes \"things that pertain to Jesus\"",
+   "note": "The Rheims follows the Vulgate (ea quae sunt Jesu), as do Sinaiticus and Vaticanus (peri tou Iesou); the Textus Receptus has \"of the Lord\". Both refer to Jesus."
+  },
+  {
+   "book": 44,
+   "chapter": 18,
+   "verse": 26,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"way of God\" becomes \"way of our Lord\"",
+   "note": "The Rheims follows the Vulgate (viam Domini); the Greek of the Textus Receptus has ten tou theou hodon (the way of God). The same divine person is meant; only the title differs."
+  },
+  {
+   "book": 44,
+   "chapter": 18,
+   "verse": 27,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "Omits \"through grace\"",
+   "note": "The Rheims follows the Vulgate (his qui crediderant) without \"through grace\"; the Greek has dia tes charitos. Salvation by grace is still stated in 15:11."
+  },
+  {
+   "book": 44,
+   "chapter": 19,
+   "verse": 4,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Christ Jesus\" becomes \"Jesus\"",
+   "note": "The Rheims follows the Vulgate, which lacks \"Christ\", as do Sinaiticus and Vaticanus; it is in the Textus Receptus. He is still the one John said would come."
+  },
+  {
+   "book": 44,
+   "chapter": 19,
+   "verse": 10,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord Jesus\" becomes \"our Lord\"",
+   "note": "The Rheims follows the Vulgate, which lacks \"Jesus\", as do Sinaiticus and Vaticanus; it is in the Textus Receptus."
+  },
+  {
+   "book": 44,
+   "chapter": 21,
+   "verse": 20,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"glorified the Lord\" becomes \"magnified God\"",
+   "note": "The Rheims follows the Vulgate (Deum), as do Sinaiticus and Vaticanus (ton theon); the Textus Receptus has \"the Lord\"."
+  },
+  {
+   "book": 44,
+   "chapter": 22,
+   "verse": 3,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"zealous toward God\" becomes \"an emulator of the Law\"",
+   "note": "The Rheims follows the Vulgate (aemulator legis); the Greek has zelotes tou theou (zealous for God). Paul's zeal is for the law of God either way."
+  },
+  {
+   "book": 44,
+   "chapter": 22,
+   "verse": 16,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the name of the Lord\" becomes \"his name\"",
+   "note": "The Rheims follows the Vulgate (nomine ipsius), as do Sinaiticus and Vaticanus (autou); the Textus Receptus has \"of the Lord\". The name is that of the Just One of verse 14."
+  },
+  {
+   "book": 44,
+   "chapter": 23,
+   "verse": 9,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"let us not fight against God\"",
+   "note": "The Rheims follows the Vulgate, which lacks the clause, as do Sinaiticus and Vaticanus; it is in the Textus Receptus. The sentence is left as a question."
+  },
+  {
+   "book": 44,
+   "chapter": 24,
+   "verse": 14,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"the God of my fathers\" becomes \"the father my God\"",
+   "note": "The Rheims follows the Vulgate (Patri et Deo meo), apparently reading the Greek patroo theo (ancestral God) as \"Father and God\". Paul's service of the God of Israel is the same."
+  },
+  {
+   "book": 44,
+   "chapter": 28,
+   "verse": 16,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the centurion delivering the prisoners to the captain",
+   "note": "The Rheims follows the Vulgate, which lacks the clause, as do Sinaiticus and Vaticanus; it is in the Textus Receptus. Paul is still allowed to live alone with a soldier."
+  },
+  {
+   "book": 45,
+   "chapter": 1,
+   "verse": 16,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the gospel of Christ\" becomes \"the Gospel\"",
+   "note": "The Rheims follows the Vulgate, which lacks \"of Christ\", as do Sinaiticus and Vaticanus; it is in the Textus Receptus. The gospel meant is the same."
+  },
+  {
+   "book": 45,
+   "chapter": 8,
+   "verse": 1,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits \"but after the Spirit\"",
+   "note": "The Rheims follows the Vulgate, which has only qui non secundum carnem ambulant; Sinaiticus and Vaticanus have neither clause, the Textus Receptus both. Both stand in verse 4."
+  },
+  {
+   "book": 45,
+   "chapter": 10,
+   "verse": 17,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"word of God\" becomes \"word of Christ\"",
+   "note": "The Rheims follows the Vulgate (verbum Christi), as do Sinaiticus and Vaticanus (rhematos Christou); the Textus Receptus has theou (God)."
+  },
+  {
+   "book": 45,
+   "chapter": 11,
+   "verse": 6,
+   "kind": "salvation",
+   "weight": "major",
+   "change": "Omits \"But if it be of works… work is no more work\"",
+   "note": "The Rheims follows the Vulgate, which lacks the second half, as do P46, the first hand of Sinaiticus and Alexandrinus; it is in the Textus Receptus. The first half remains: grace excludes works."
+  },
+  {
+   "book": 45,
+   "chapter": 14,
+   "verse": 6,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"he that regardeth not the day\" clause",
+   "note": "The Rheims follows the Vulgate, which lacks the clause, as do Sinaiticus and Vaticanus; it is in the Textus Receptus. The parallel clause about eating is kept."
+  },
+  {
+   "book": 45,
+   "chapter": 15,
+   "verse": 19,
+   "kind": "trinity",
+   "weight": "minor",
+   "change": "\"the Spirit of God\" becomes \"the holy Ghost\"",
+   "note": "The Rheims follows the Vulgate (Spiritus Sancti), with some Greek manuscripts; the Textus Receptus has \"Spirit of God\". The same Spirit is meant."
+  },
+  {
+   "book": 45,
+   "chapter": 16,
+   "verse": 18,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"our Lord Jesus Christ\" becomes \"Christ our Lord\"",
+   "note": "The Rheims follows the Vulgate, which lacks \"Jesus\", as do Sinaiticus and Vaticanus; it is in the Textus Receptus."
+  },
+  {
+   "book": 45,
+   "chapter": 16,
+   "verse": 20,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the closing \"Amen\"",
+   "note": "The Rheims follows the Vulgate, which lacks the \"Amen\", as do Sinaiticus and Vaticanus; it is in the Textus Receptus. The meaning is unchanged."
+  },
+  {
+   "book": 45,
+   "chapter": 16,
+   "verse": 27,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription \"Written to the Romans from Corinthus…\"",
+   "note": "The subscription is a later note printed in Textus Receptus editions and the KJV; it is not in the Vulgate or the earliest Greek manuscripts and is not part of the text."
+  },
+  {
+   "book": 46,
+   "chapter": 2,
+   "verse": 1,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"testimony of God\" becomes \"testimony of Christ\"",
+   "note": "The Rheims follows the Vulgate (testimonium Christi), with some Greek manuscripts; the Textus Receptus has \"of God\", and some early manuscripts \"mystery of God\"."
+  },
+  {
+   "book": 46,
+   "chapter": 2,
+   "verse": 13,
+   "kind": "trinity",
+   "weight": "minor",
+   "change": "\"the Holy Ghost teacheth\" becomes \"the doctrine of the Spirit\"",
+   "note": "The Rheims follows the Vulgate, which lacks \"Holy\", as do Sinaiticus and Vaticanus; it is in the Textus Receptus. The Spirit meant is the same."
+  },
+  {
+   "book": 46,
+   "chapter": 5,
+   "verse": 4,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Second \"our Lord Jesus Christ\" becomes \"our Lord Jesus\"",
+   "note": "The Rheims follows the Vulgate, which lacks the second \"Christ\", as do Sinaiticus and Vaticanus; it is in the Textus Receptus."
+  },
+  {
+   "book": 46,
+   "chapter": 6,
+   "verse": 20,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits \"and in your spirit, which are God's\"; adds \"and bear\"",
+   "note": "The Rheims follows the Vulgate (glorificate et portate Deum in corpore vestro); Sinaiticus and Vaticanus also lack the clause about the spirit, which is in the Textus Receptus. \"Bear God\" is a Latin addition."
+  },
+  {
+   "book": 46,
+   "chapter": 7,
+   "verse": 5,
+   "kind": "omission",
+   "weight": "major",
+   "change": "Omits \"fasting\"",
+   "note": "The Rheims follows the Vulgate, which lacks \"fasting\", as do Sinaiticus and Vaticanus; it is in the Textus Receptus. Only prayer is named as the reason for abstaining."
+  },
+  {
+   "book": 46,
+   "chapter": 7,
+   "verse": 32,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"please the Lord\" becomes \"please God\"",
+   "note": "The Rheims follows the Vulgate (placeat Deo); the Greek of the Textus Receptus has kyrio (the Lord). The same divine person is meant; only the title differs."
+  },
+  {
+   "book": 46,
+   "chapter": 9,
+   "verse": 18,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the gospel of Christ\" becomes \"the Gospel\"",
+   "note": "The Rheims follows the Vulgate, which lacks \"of Christ\", as do Sinaiticus and Vaticanus; it is in the Textus Receptus."
+  },
+  {
+   "book": 46,
+   "chapter": 10,
+   "verse": 16,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"body of Christ\" becomes \"body of our Lord\"",
+   "note": "The Rheims follows the Vulgate (corporis Domini); the Greek of the Textus Receptus has tou Christou (of Christ). The same divine person is meant; only the title differs."
+  },
+  {
+   "book": 46,
+   "chapter": 10,
+   "verse": 28,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"for the earth is the Lord's, and the fulness thereof\"",
+   "note": "The Rheims follows the Vulgate, which lacks the repeated quotation of Psalm 24:1, as do Sinaiticus and Vaticanus; it is in the Textus Receptus. It stands in verse 26."
+  },
+  {
+   "book": 46,
+   "chapter": 11,
+   "verse": 24,
+   "kind": "atonement",
+   "weight": "minor",
+   "change": "\"broken for you\" becomes \"Which Shall Be Delivered For You\"",
+   "note": "The Rheims follows the Vulgate, quod pro vobis tradetur; Sinaiticus and Vaticanus have only \"which is for you\", and the Textus Receptus klomenon (broken)."
+  },
+  {
+   "book": 46,
+   "chapter": 15,
+   "verse": 47,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"the Lord from heaven\" becomes \"from heaven, heavenly\"",
+   "note": "The Rheims follows the Vulgate, secundus homo de caelo, caelestis; Sinaiticus and Vaticanus have \"from heaven\" without \"the Lord\", which is in the Textus Receptus. Christ's heavenly origin is still stated."
+  },
+  {
+   "book": 46,
+   "chapter": 16,
+   "verse": 24,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription \"written from Philippi…\"",
+   "note": "The subscription is a later note printed in Textus Receptus editions and the KJV; it is not in the Vulgate or the earliest Greek manuscripts and is not part of the text."
+  },
+  {
+   "book": 47,
+   "chapter": 4,
+   "verse": 10,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord Jesus\" becomes \"Jesus\"",
+   "note": "The Rheims follows the Vulgate, which lacks \"the Lord\", as do Sinaiticus and Vaticanus; it is in the Textus Receptus."
+  },
+  {
+   "book": 47,
+   "chapter": 4,
+   "verse": 14,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"raised up the Lord Jesus\" becomes \"raised up Jesus\"",
+   "note": "The Rheims follows the Vulgate (suscitavit Jesum, cum Jesu), as do Vaticanus and some others; the Textus Receptus has \"the Lord Jesus\" and \"by Jesus\"."
+  },
+  {
+   "book": 47,
+   "chapter": 5,
+   "verse": 18,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"by Jesus Christ\" becomes \"by Christ\"",
+   "note": "The Rheims follows the Vulgate, which lacks \"Jesus\", as do Sinaiticus and Vaticanus; it is in the Textus Receptus."
+  },
+  {
+   "book": 47,
+   "chapter": 8,
+   "verse": 21,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"in the sight of the Lord\" becomes \"before God\"",
+   "note": "The Rheims follows the Vulgate (coram Deo); the Greek of the Textus Receptus has kyriou (the Lord). The same divine person is meant; only the title differs."
+  },
+  {
+   "book": 47,
+   "chapter": 9,
+   "verse": 12,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"thanksgivings unto God\" becomes \"thanksgivings in our Lord\"",
+   "note": "The Rheims follows the Vulgate (in Domino); the Greek of the Textus Receptus has to theo (to God). The same divine person is meant; only the title differs."
+  },
+  {
+   "book": 47,
+   "chapter": 10,
+   "verse": 18,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"whom the Lord commendeth\" becomes \"whom God commendeth\"",
+   "note": "The Rheims follows the Vulgate (Deus); the Greek of the Textus Receptus has ho kyrios (the Lord). The same divine person is meant; only the title differs."
+  },
+  {
+   "book": 47,
+   "chapter": 11,
+   "verse": 4,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"another Jesus\" becomes \"another Christ\"",
+   "note": "The Rheims follows the Vulgate (alium Christum); the Greek has allon Iesoun (another Jesus). The warning against a false gospel is the same."
+  },
+  {
+   "book": 47,
+   "chapter": 11,
+   "verse": 17,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"after the Lord\" becomes \"according to God\"",
+   "note": "The Rheims follows the Vulgate (secundum Deum); the Greek has kata kyrion (after the Lord), which in Paul usually means Christ."
+  },
+  {
+   "book": 47,
+   "chapter": 12,
+   "verse": 7,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the second \"lest I should be exalted above measure\"",
+   "note": "The Rheims follows the Vulgate, which states the purpose once; the Greek, both the Textus Receptus and most manuscripts, repeats it at the end of the verse. The meaning is the same."
+  },
+  {
+   "book": 47,
+   "chapter": 13,
+   "verse": 14,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription \"written from Philippi…\"",
+   "note": "The subscription is a later note printed in Textus Receptus editions and the KJV; it is not in the Vulgate or the earliest Greek manuscripts and is not part of the text."
+  },
+  {
+   "book": 48,
+   "chapter": 1,
+   "verse": 15,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"it pleased God\" becomes \"it pleased him\"",
+   "note": "The Rheims follows the Vulgate (placuit ei), as do Vaticanus and some others; the Textus Receptus names God. The one who called Paul is plainly God."
+  },
+  {
+   "book": 48,
+   "chapter": 3,
+   "verse": 17,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"in Christ\" after \"confirmed of God\"",
+   "note": "The Rheims follows the Vulgate, which lacks \"in Christ\", as do Sinaiticus and Vaticanus; it is in the Textus Receptus."
+  },
+  {
+   "book": 48,
+   "chapter": 4,
+   "verse": 7,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"heir of God through Christ\" becomes \"an heir also by God\"",
+   "note": "The Rheims follows the Vulgate (haeres per Deum), as do Sinaiticus and Vaticanus; the Textus Receptus has \"of God through Christ\"."
+  },
+  {
+   "book": 48,
+   "chapter": 6,
+   "verse": 18,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription \"Unto the Galatians written from Rome\"",
+   "note": "The subscription is a later note printed in Textus Receptus editions and the KJV; it is not in the Vulgate or the earliest Greek manuscripts and is not part of the text."
+  },
+  {
+   "book": 49,
+   "chapter": 3,
+   "verse": 9,
+   "kind": "deity",
+   "weight": "major",
+   "change": "Omits \"by Jesus Christ\" after \"created all things\"",
+   "note": "The Rheims follows the Vulgate, which lacks the phrase, as do Sinaiticus and Vaticanus; the Textus Receptus has it. Christ's part in creation is stated in Colossians 1:16 and John 1:3."
+  },
+  {
+   "book": 49,
+   "chapter": 5,
+   "verse": 9,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"fruit of the Spirit\" becomes \"fruit of the light\"",
+   "note": "The Rheims follows the Vulgate (fructus lucis), as do Sinaiticus and Vaticanus (photos); the Textus Receptus has pneumatos (Spirit), as in Galatians 5:22."
+  },
+  {
+   "book": 49,
+   "chapter": 5,
+   "verse": 10,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"acceptable unto the Lord\" becomes \"well pleasing to God\"",
+   "note": "The Rheims follows the Vulgate (beneplacitum Deo); the Greek has to kyrio (unto the Lord), most likely meaning Christ."
+  },
+  {
+   "book": 49,
+   "chapter": 5,
+   "verse": 21,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"fear of God\" becomes \"fear of Christ\"",
+   "note": "The Rheims follows the Vulgate (timore Christi), as do Sinaiticus and Vaticanus; the Textus Receptus has theou (God)."
+  },
+  {
+   "book": 49,
+   "chapter": 5,
+   "verse": 29,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord\" becomes \"Christ\"",
+   "note": "The Rheims follows the Vulgate (Christus), as do Sinaiticus and Vaticanus; the Textus Receptus has ho kyrios (the Lord). Both refer to Christ."
+  },
+  {
+   "book": 49,
+   "chapter": 6,
+   "verse": 24,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription \"Written from Rome unto the Ephesians…\"",
+   "note": "The subscription is a later note printed in Textus Receptus editions and the KJV; it is not in the Vulgate or the earliest Greek manuscripts and is not part of the text."
+  },
+  {
+   "book": 50,
+   "chapter": 1,
+   "verse": 7,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"partakers of my grace\" becomes \"partakers of my joy\"",
+   "note": "The Rheims follows the Vulgate (socios gaudii mei); the Greek has charitos (grace). A Latin reading, perhaps of chara (joy) for charis."
+  },
+  {
+   "book": 50,
+   "chapter": 1,
+   "verse": 16,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Verses 16 and 17 are in the reverse order",
+   "note": "The Rheims follows the Vulgate, which puts \"of charity\" before \"of contention\", as do Sinaiticus and Vaticanus; the Textus Receptus has the reverse. The content is the same."
+  },
+  {
+   "book": 50,
+   "chapter": 4,
+   "verse": 13,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"through Christ\" becomes \"in him\"",
+   "note": "The Rheims follows the Vulgate's in eo, as do Sinaiticus and Vaticanus; the Textus Receptus names Christ. The one who strengthens is plainly Christ."
+  },
+  {
+   "book": 50,
+   "chapter": 4,
+   "verse": 23,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "\"with you all\" becomes \"with your spirit\"; omits the subscription",
+   "note": "The Rheims follows the Vulgate's cum spiritu vestro, as do the early Greek manuscripts. The subscription is a later note in the Textus Receptus, printed by the KJV, and not part of the text."
+  },
+  {
+   "book": 51,
+   "chapter": 1,
+   "verse": 10,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"worthy of the Lord\" becomes \"worthy of God\"",
+   "note": "The Rheims follows the Vulgate's digne Deo; the Greek has tou kyriou (of the Lord), most likely meaning Christ."
+  },
+  {
+   "book": 51,
+   "chapter": 1,
+   "verse": 14,
+   "kind": "atonement",
+   "weight": "major",
+   "change": "Omits \"through his blood\"",
+   "note": "The Rheims translates a Latin text without per sanguinem eius, as in Sinaiticus and Vaticanus; the Textus Receptus has it, and the Clementine Vulgate and Challoner later added it. Redemption through Christ's blood is stated in Ephesians 1:7."
+  },
+  {
+   "book": 51,
+   "chapter": 3,
+   "verse": 13,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Christ forgave\" becomes \"our Lord hath pardoned\"",
+   "note": "The Rheims follows the Vulgate's Dominus, as do Vaticanus and some others (ho kyrios); the Textus Receptus has ho Christos. Both refer to Christ."
+  },
+  {
+   "book": 51,
+   "chapter": 3,
+   "verse": 15,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"peace of God\" becomes \"peace of Christ\"",
+   "note": "The Rheims follows the Vulgate's pax Christi, as do Sinaiticus and Vaticanus; the Textus Receptus has tou theou (of God)."
+  },
+  {
+   "book": 51,
+   "chapter": 3,
+   "verse": 16,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"to the Lord\" becomes \"to God\"",
+   "note": "The Rheims follows the Vulgate's Deo, as do Sinaiticus and Vaticanus (to theo); the Textus Receptus has to kyrio (to the Lord)."
+  },
+  {
+   "book": 51,
+   "chapter": 4,
+   "verse": 18,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription \"Written from Rome to the Colossians…\"",
+   "note": "The subscription is a later note found in the Textus Receptus and printed by the KJV; the Rheims, following the Vulgate, lacks it, as do the earliest Greek manuscripts. It is not part of the text."
+  },
+  {
+   "book": 52,
+   "chapter": 1,
+   "verse": 1,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"from God our Father, and the Lord Jesus Christ\"",
+   "note": "The second half of the greeting is in the Textus Receptus and Sinaiticus but not in the Vulgate, which the Rheims follows, or Vaticanus. The verse still names God the Father and the Lord Jesus Christ."
+  },
+  {
+   "book": 52,
+   "chapter": 4,
+   "verse": 17,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"to meet the Lord\" becomes \"to meet Christ\"",
+   "note": "The Rheims follows the Vulgate's obviam Christo; the Greek has tou kyriou (the Lord). The Lord meant is Christ in both."
+  },
+  {
+   "book": 52,
+   "chapter": 5,
+   "verse": 28,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription \"written from Athens\"",
+   "note": "The subscription is a later note found in the Textus Receptus and printed by the KJV; the Rheims, following the Vulgate, lacks it, as do the earliest Greek manuscripts. It is not part of the text."
+  },
+  {
+   "book": 53,
+   "chapter": 2,
+   "verse": 2,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"day of Christ\" becomes \"day of our Lord\"",
+   "note": "The Rheims follows the Vulgate, dies Domini, as do Sinaiticus and Vaticanus (tou kyriou); the Textus Receptus has tou Christou."
+  },
+  {
+   "book": 53,
+   "chapter": 2,
+   "verse": 4,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"as God\" before \"sitteth in the temple\"",
+   "note": "\"As God\" is in the Textus Receptus but not in the Vulgate, which the Rheims follows, or in Sinaiticus and Vaticanus. He still shows himself as though he were God."
+  },
+  {
+   "book": 53,
+   "chapter": 2,
+   "verse": 13,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"beloved of the Lord\" becomes \"of God\"; \"from the beginning\" becomes \"firstfruits\"",
+   "note": "The Rheims follows the Vulgate's dilecti a Deo and primitias (firstfruits), the latter as Vaticanus (aparchen); the Textus Receptus has kyriou and ap' arches (from the beginning)."
+  },
+  {
+   "book": 53,
+   "chapter": 3,
+   "verse": 1,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"word of the Lord\" becomes \"word of God\"",
+   "note": "The Rheims follows the Vulgate's sermo Dei; the Greek of the Textus Receptus has tou kyriou (of the Lord). Only the title differs."
+  },
+  {
+   "book": 53,
+   "chapter": 3,
+   "verse": 18,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription \"written from Athens\"",
+   "note": "The subscription is a later note found in the Textus Receptus and printed by the KJV; the Rheims, following the Vulgate, lacks it, as do the earliest Greek manuscripts. It is not part of the text."
+  },
+  {
+   "book": 54,
+   "chapter": 1,
+   "verse": 1,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Lord Jesus Christ\" becomes \"Christ Jesus\"",
+   "note": "\"Lord\" is in the Textus Receptus but not in the Vulgate, which the Rheims follows, or in Sinaiticus and Alexandrinus (Vaticanus lacks this letter)."
+  },
+  {
+   "book": 54,
+   "chapter": 2,
+   "verse": 7,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"in Christ\" from \"I speak the truth\"",
+   "note": "\"In Christ\" is in the Textus Receptus but not in the Vulgate, which the Rheims follows, or in the first hand of Sinaiticus and Alexandrinus."
+  },
+  {
+   "book": 54,
+   "chapter": 3,
+   "verse": 3,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"not greedy of filthy lucre\"",
+   "note": "The phrase is in the Textus Receptus but not in the Vulgate, which the Rheims follows, or in Sinaiticus and Alexandrinus. The same quality is still required of deacons (3:8) and bishops (Titus 1:7)."
+  },
+  {
+   "book": 54,
+   "chapter": 3,
+   "verse": 16,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"God was manifest\" becomes \"which was manifested\"",
+   "note": "The Rheims follows the Vulgate, quod manifestatum est, with the Western Greek ho; Sinaiticus has hos (who), the Textus Receptus theos (God). Christ's deity is stated elsewhere, as in John 1:1 and Titus 2:13."
+  },
+  {
+   "book": 54,
+   "chapter": 4,
+   "verse": 12,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"in spirit\" from the list",
+   "note": "\"In spirit\" is in the Textus Receptus but not in the Vulgate, which the Rheims follows, or in Sinaiticus and Alexandrinus."
+  },
+  {
+   "book": 54,
+   "chapter": 5,
+   "verse": 21,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord Jesus Christ\" becomes \"Christ Jesus\"",
+   "note": "\"Lord\" is in the Textus Receptus but not in the Vulgate, which the Rheims follows, or in Sinaiticus and Alexandrinus."
+  },
+  {
+   "book": 54,
+   "chapter": 6,
+   "verse": 1,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"name of God\" becomes \"name of our Lord\"",
+   "note": "The Rheims follows the Vulgate's nomen Domini; the Greek of the Textus Receptus has tou theou (of God). Only the title differs."
+  },
+  {
+   "book": 54,
+   "chapter": 6,
+   "verse": 5,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"from such withdraw thyself\"",
+   "note": "The Rheims follows the Vulgate, which lacks the clause, as do Sinaiticus and Alexandrinus; the Textus Receptus has it. Verse 11 still tells Timothy to flee these things."
+  },
+  {
+   "book": 55,
+   "chapter": 2,
+   "verse": 19,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"name of Christ\" becomes \"name of our Lord\"",
+   "note": "The Rheims follows the Vulgate's nomen Domini, as do Sinaiticus and Alexandrinus (kyriou); the Textus Receptus has Christou."
+  },
+  {
+   "book": 55,
+   "chapter": 4,
+   "verse": 1,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord Jesus Christ\" becomes \"Jesus Christ\"",
+   "note": "\"The Lord\" is in the Textus Receptus but not in the Vulgate, which the Rheims follows, or in Sinaiticus and Alexandrinus."
+  },
+  {
+   "book": 55,
+   "chapter": 4,
+   "verse": 22,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription \"ordained the first bishop…\"",
+   "note": "The subscription is a later note found in the Textus Receptus and printed by the KJV; the Rheims, following the Vulgate, lacks it, as do the earliest Greek manuscripts. It is not part of the text."
+  },
+  {
+   "book": 56,
+   "chapter": 1,
+   "verse": 4,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"mercy\"; \"the Lord Jesus Christ\" becomes \"Christ Jesus\"",
+   "note": "\"Mercy\" and \"Lord\" are in the Textus Receptus but not in the Vulgate, which the Rheims follows, or in Sinaiticus and other early manuscripts."
+  },
+  {
+   "book": 56,
+   "chapter": 2,
+   "verse": 11,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"that bringeth salvation\" becomes \"God our Saviour\"",
+   "note": "The Rheims follows the Vulgate's gratia Dei Salvatoris nostri; the Greek has he soterios (bringing salvation). The grace still saves; the Vulgate names God as Saviour."
+  },
+  {
+   "book": 56,
+   "chapter": 3,
+   "verse": 15,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription \"ordained the first bishop…\"",
+   "note": "The subscription is a later note found in the Textus Receptus and printed by the KJV; the Rheims, following the Vulgate, lacks it, as do the earliest Greek manuscripts. It is not part of the text."
+  },
+  {
+   "book": 57,
+   "chapter": 1,
+   "verse": 25,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription \"Written from Rome to Philemon…\"",
+   "note": "The subscription is a later note found in the Textus Receptus and printed by the KJV; the Rheims, following the Vulgate, lacks it, as do the earliest Greek manuscripts. It is not part of the text."
+  },
+  {
+   "book": 58,
+   "chapter": 1,
+   "verse": 3,
+   "kind": "atonement",
+   "weight": "minor",
+   "change": "\"by himself purged our sins\" becomes \"making purgation of sins\"",
+   "note": "The Rheims follows the Vulgate, purgationem peccatorum faciens, as do Sinaiticus and Vaticanus; the Textus Receptus has di' heautou (by himself) and hemon (our). Christ still makes the purification of sins."
+  },
+  {
+   "book": 58,
+   "chapter": 3,
+   "verse": 1,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Christ Jesus\" becomes \"Jesus\"",
+   "note": "\"Christ\" is in the Textus Receptus but not in the Vulgate, which the Rheims follows, or in Sinaiticus and Vaticanus."
+  },
+  {
+   "book": 58,
+   "chapter": 9,
+   "verse": 14,
+   "kind": "trinity",
+   "weight": "minor",
+   "change": "\"the eternal Spirit\" becomes \"the holy Ghost\"",
+   "note": "The Rheims follows the Vulgate's per Spiritum Sanctum, with a few Greek manuscripts (hagiou); the Textus Receptus and most have aioniou (eternal). Both may be read as the Holy Spirit."
+  },
+  {
+   "book": 58,
+   "chapter": 9,
+   "verse": 24,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Christ is not entered\" becomes \"Jesus is not entered\"",
+   "note": "The Rheims follows the Vulgate's Jesus; the Greek has ho Christos. The same person is meant."
+  },
+  {
+   "book": 58,
+   "chapter": 10,
+   "verse": 19,
+   "kind": "atonement",
+   "weight": "minor",
+   "change": "\"blood of Jesus\" becomes \"blood of Christ\"",
+   "note": "The Rheims follows the Vulgate's sanguine Christi; the Greek has Iesou. The atoning blood is the same."
+  },
+  {
+   "book": 58,
+   "chapter": 10,
+   "verse": 30,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"saith the Lord\"",
+   "note": "\"Saith the Lord\" is in the Textus Receptus but not in the Vulgate, which the Rheims follows, or in P46 and the first hand of Sinaiticus. The next quotation still names the Lord."
+  },
+  {
+   "book": 58,
+   "chapter": 10,
+   "verse": 34,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"me in my bonds\" becomes \"them in bonds\"; omits \"in heaven\"",
+   "note": "The Rheims follows the Vulgate's vinctis (the prisoners), as do Alexandrinus and Bezae, and lacks \"in heaven\" with P46 and Sinaiticus; the Textus Receptus has desmois mou and en ouranois."
+  },
+  {
+   "book": 58,
+   "chapter": 12,
+   "verse": 14,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"see the Lord\" becomes \"see God\"",
+   "note": "The Rheims follows the Vulgate's videbit Deum; the Greek of the Textus Receptus has ton kyrion (the Lord). Only the title differs."
+  },
+  {
+   "book": 58,
+   "chapter": 13,
+   "verse": 25,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the subscription \"Written to the Hebrews from Italy…\"",
+   "note": "The subscription is a later note found in the Textus Receptus and printed by the KJV; the Rheims, following the Vulgate, lacks it, as do the earliest Greek manuscripts. It is not part of the text."
+  },
+  {
+   "book": 59,
+   "chapter": 1,
+   "verse": 12,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord hath promised\" becomes \"God hath promised\"",
+   "note": "The Rheims follows the Vulgate's Deus; the Textus Receptus has ho kyrios, and Sinaiticus and Vaticanus only the verb."
+  },
+  {
+   "book": 60,
+   "chapter": 1,
+   "verse": 22,
+   "kind": "trinity",
+   "weight": "minor",
+   "change": "Omits \"through the Spirit\"; \"obeying the truth\" becomes \"obedience of charity\"",
+   "note": "\"Through the Spirit\" is in the Textus Receptus but not in the Vulgate, which the Rheims follows, or in Sinaiticus and Vaticanus; \"obedience of charity\" is also the Vulgate's."
+  },
+  {
+   "book": 60,
+   "chapter": 2,
+   "verse": 2,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "Adds \"unto salvation\"",
+   "note": "The Rheims follows the Vulgate, crescatis in salutem, as do Sinaiticus and Vaticanus (eis soterian); the Textus Receptus lacks the phrase."
+  },
+  {
+   "book": 60,
+   "chapter": 2,
+   "verse": 13,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"for the Lord's sake\" becomes \"for God\"",
+   "note": "The Rheims follows the Vulgate's propter Deum; the Greek of the Textus Receptus has dia ton kyrion (for the Lord's sake). Only the title differs."
+  },
+  {
+   "book": 60,
+   "chapter": 3,
+   "verse": 15,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"the Lord God\" becomes \"our Lord Christ\"",
+   "note": "The Rheims follows the Vulgate's Dominum Christum, as do Sinaiticus and Vaticanus; the Textus Receptus has kyrion ton theon. Applied to Isaiah 8:13, this reading calls Christ the LORD to be sanctified."
+  },
+  {
+   "book": 60,
+   "chapter": 4,
+   "verse": 1,
+   "kind": "atonement",
+   "weight": "minor",
+   "change": "Omits \"for us\"",
+   "note": "The Rheims follows the Vulgate, which lacks the phrase, as do P72 and Vaticanus; the Textus Receptus has it. Christ's suffering for sins is stated in 3:18."
+  },
+  {
+   "book": 60,
+   "chapter": 5,
+   "verse": 3,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"God's heritage\" becomes \"the Clergy\"",
+   "note": "The Rheims renders the Vulgate's in cleris (Greek ton kleron, the portions allotted) as \"the Clergy\"; the KJV supplies \"God's heritage\", the people in the elders' charge. A translation choice."
+  },
+  {
+   "book": 61,
+   "chapter": 2,
+   "verse": 11,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"before the Lord\"",
+   "note": "The Rheims follows the Vulgate, which lacks the phrase, as do Alexandrinus and some others; the Textus Receptus, Sinaiticus and Vaticanus have para kyrio."
+  },
+  {
+   "book": 61,
+   "chapter": 2,
+   "verse": 17,
+   "kind": "judgment",
+   "weight": "minor",
+   "change": "Omits \"for ever\" from the reserved darkness",
+   "note": "\"For ever\" is in the Textus Receptus but not in the Vulgate, which the Rheims follows, or in Sinaiticus and Vaticanus. The darkness is still reserved for them."
+  },
+  {
+   "book": 61,
+   "chapter": 3,
+   "verse": 12,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"day of God\" becomes \"day of our Lord\"",
+   "note": "The Rheims follows the Vulgate's diei Domini; the Greek of the Textus Receptus has tes tou theou hemeras (the day of God). Only the title differs."
+  },
+  {
+   "book": 62,
+   "chapter": 4,
+   "verse": 3,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"confesseth not that Jesus Christ is come…\" becomes \"dissolveth Jesus\"",
+   "note": "The Rheims follows the Vulgate, qui solvit Iesum, from a Greek variant lyei known to early writers; the Textus Receptus has the fuller confession. The incarnation is still confessed in verse 2."
+  },
+  {
+   "book": 62,
+   "chapter": 5,
+   "verse": 6,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"the Spirit is truth\" becomes \"Christ is the truth\"",
+   "note": "The Rheims follows the Vulgate's quoniam Christus est veritas; the Greek has hoti to pneuma estin he aletheia (the Spirit is truth). The Spirit still testifies."
+  },
+  {
+   "book": 62,
+   "chapter": 5,
+   "verse": 13,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"and that ye may believe on the name…\"",
+   "note": "The Rheims follows the Vulgate, which lacks the last clause, as do Sinaiticus and Vaticanus; the Textus Receptus has it. The verse still addresses those who believe in the Son of God."
+  },
+  {
+   "book": 62,
+   "chapter": 5,
+   "verse": 18,
+   "kind": "other",
+   "weight": "minor",
+   "change": "\"begotten of God keepeth himself\" becomes \"generation of God preserveth him\"",
+   "note": "The Rheims follows the Vulgate's generatio Dei conservat eum, taking ho gennetheis as the begetting itself, and \"him\" with Vaticanus (auton). Either way the one born of God is kept from the evil one."
+  },
+  {
+   "book": 62,
+   "chapter": 5,
+   "verse": 20,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"Jesus Christ\"; \"him that is true\" becomes \"the true God\"",
+   "note": "The Rheims follows the Vulgate's ut cognoscamus verum Deum et simus in vero Filio ejus, without the name. The verse still ends \"This is the true God\"."
+  },
+  {
+   "book": 63,
+   "chapter": 1,
+   "verse": 3,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord Jesus Christ\" becomes \"Christ Jesus\"",
+   "note": "\"The Lord\" is in the Textus Receptus and Sinaiticus but not in the Vulgate, which the Rheims follows, or in Alexandrinus and Vaticanus."
+  },
+  {
+   "book": 63,
+   "chapter": 1,
+   "verse": 9,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Second \"doctrine of Christ\" becomes \"the doctrine\"",
+   "note": "The second \"of Christ\" is in the Textus Receptus but not in the Vulgate, which the Rheims follows, or in Sinaiticus and Vaticanus."
+  },
+  {
+   "book": 63,
+   "chapter": 1,
+   "verse": 13,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits the closing \"Amen\"",
+   "note": "The closing \"Amen\" is in the Textus Receptus but not in the Vulgate, which the Rheims follows, or in Sinaiticus and Vaticanus."
+  },
+  {
+   "book": 65,
+   "chapter": 1,
+   "verse": 4,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"the only Lord God\" becomes \"the only Dominator\"",
+   "note": "The Rheims follows the Vulgate's solum Dominatorem without Deum, as do Sinaiticus and Vaticanus (despoten without theon); the Textus Receptus has \"the only Lord God\". Whether one or two persons are meant depends on this word."
+  },
+  {
+   "book": 65,
+   "chapter": 1,
+   "verse": 5,
+   "kind": "deity",
+   "weight": "major",
+   "change": "\"the Lord\" becomes \"Jesus\" as saviour of Israel from Egypt",
+   "note": "The Rheims follows the Vulgate's Jesus, as do Alexandrinus and Vaticanus; the Textus Receptus has ho kyrios. This reading makes Jesus the one who brought Israel out of Egypt."
+  },
+  {
+   "book": 65,
+   "chapter": 1,
+   "verse": 25,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"wise\"; adds \"by Jesus Christ our Lord\"",
+   "note": "The Rheims follows the Vulgate, soli Deo Salvatori nostro per Iesum Christum Dominum nostrum, with \"before all ages\", as do Sinaiticus and Vaticanus; the Textus Receptus has \"only wise God\" and lacks the rest."
+  },
+  {
+   "book": 66,
+   "chapter": 1,
+   "verse": 8,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"saith the Lord\" becomes \"saith our Lord God\"",
+   "note": "The Rheims follows the Vulgate, Dominus Deus, as do the early Greek manuscripts; the Textus Receptus has ho kyrios. The title Almighty is kept."
+  },
+  {
+   "book": 66,
+   "chapter": 1,
+   "verse": 9,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Jesus Christ\" becomes \"Christ Jesus\", then just \"Jesus\"",
+   "note": "The Rheims follows the Vulgate's in Christo Jesu and testimonium Jesu; the early Greek manuscripts have only Iesou in both places, the Textus Receptus \"Jesus Christ\" twice."
+  },
+  {
+   "book": 66,
+   "chapter": 1,
+   "verse": 11,
+   "kind": "deity",
+   "weight": "major",
+   "change": "Omits \"I am Alpha and Omega, the first and the last\"",
+   "note": "The Rheims follows the Vulgate, which lacks the self-description, as do Sinaiticus, Alexandrinus and Ephraemi; the Textus Receptus has it. Christ still calls himself the First and the Last in verse 17."
+  },
+  {
+   "book": 66,
+   "chapter": 1,
+   "verse": 18,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"Amen\"; \"hell and death\" become \"death and hell\"",
+   "note": "The Rheims follows the Vulgate, which lacks \"Amen\" and has mortis et inferni, as do the early Greek manuscripts; the Textus Receptus has \"Amen\" and hell before death."
+  },
+  {
+   "book": 66,
+   "chapter": 9,
+   "verse": 20,
+   "kind": "salvation",
+   "weight": "minor",
+   "change": "\"repented not\" becomes \"neither have done penance\"",
+   "note": "The Rheims renders the Vulgate's paenitentiam agere (Greek metanoeo) \"do penance\" where the KJV has \"repent\". A translation choice: Catholic usage takes it to include works of penance, Protestant readers a turning of mind and heart."
+  },
+  {
+   "book": 66,
+   "chapter": 11,
+   "verse": 1,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"the angel stood\"",
+   "note": "The Rheims follows the Vulgate's dictum est mihi (it was said to me); Alexandrinus and other early Greek manuscripts have only \"saying\", the Textus Receptus \"the angel stood, saying\". The command to measure is the same."
+  },
+  {
+   "book": 66,
+   "chapter": 11,
+   "verse": 4,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the God of the earth\" becomes \"the Lord of the earth\"",
+   "note": "The Rheims follows the Vulgate's Domini terrae, as do the early Greek manuscripts (kyriou); the Textus Receptus has theou."
+  },
+  {
+   "book": 66,
+   "chapter": 14,
+   "verse": 7,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"Fear God\" becomes \"Fear our Lord\"",
+   "note": "The Rheims follows the Vulgate's Timete Dominum; the Greek manuscripts generally, and the Textus Receptus, have ton theon (God). Only the title differs."
+  },
+  {
+   "book": 66,
+   "chapter": 16,
+   "verse": 17,
+   "kind": "omission",
+   "weight": "minor",
+   "change": "Omits \"of heaven\" after \"temple\"",
+   "note": "\"Of heaven\" is in the Textus Receptus and many later manuscripts but not in the Vulgate, which the Rheims follows, or in Alexandrinus and other early Greek manuscripts."
+  },
+  {
+   "book": 66,
+   "chapter": 18,
+   "verse": 8,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"the Lord God\" becomes \"God\"",
+   "note": "The Rheims follows the Vulgate's Deus, as do Alexandrinus and some others; the Textus Receptus has kyrios ho theos."
+  },
+  {
+   "book": 66,
+   "chapter": 19,
+   "verse": 1,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "Omits \"honour\" and \"the Lord\"; \"Salvation\" reads \"Praise\"",
+   "note": "\"Honour\" and \"the Lord\" are in the Textus Receptus but not in the Vulgate or in Sinaiticus and Alexandrinus; the Rheims also has \"Praise\" where the Greek and Challoner have \"Salvation\". The praise is to \"our God\"."
+  },
+  {
+   "book": 66,
+   "chapter": 20,
+   "verse": 12,
+   "kind": "deity",
+   "weight": "minor",
+   "change": "\"stand before God\" becomes \"in the sight of the throne\"",
+   "note": "The Rheims follows the Vulgate's in conspectu throni, as do the Greek manuscripts generally; the Textus Receptus has theou (God). The judgment is still before God's throne (verse 11)."
+  },
+  {
+   "book": 66,
+   "chapter": 21,
+   "verse": 3,
+   "kind": "other",
+   "weight": "minor",
+   "change": "Voice \"out of heaven\" becomes \"from the throne\"",
+   "note": "The Rheims follows the Vulgate's de throno, as do Sinaiticus and Alexandrinus; the Textus Receptus has ek tou ouranou (out of heaven)."
+  },
+  {
+   "book": 66,
+   "chapter": 22,
+   "verse": 14,
+   "kind": "salvation",
+   "weight": "major",
+   "change": "\"do his commandments\" becomes \"wash their stoles\"",
+   "note": "The Rheims follows the Latin qui lavant stolas suas, as do Sinaiticus and Alexandrinus; the Textus Receptus has \"do his commandments\", and the Clementine Vulgate and Challoner add \"in the blood of the Lamb\". Robes washed in the Lamb's blood are in 7:14."
+  }
+ ]
+}

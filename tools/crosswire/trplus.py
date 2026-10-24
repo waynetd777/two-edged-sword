@@ -80,8 +80,10 @@ def accent(word, printed):
     return None
 
 
-def main():
-    words, nt, G = tr1550(), tagnt(), glosses()
+def accented(nt=None):
+    """{(book, chapter, verse): [(word as shown, number, code)]}: the 1550's words, accented and punctuated as TAGNT
+    prints them (see the top). tools/crosswire's tr1550.bbli is these words; tr1550+.bbli has them word by word."""
+    words, nt = tr1550(), nt or tagnt()
     forms = {}
     for tag in nt.values():
         for w in tag:
@@ -89,7 +91,7 @@ def main():
             if letters(f):
                 forms.setdefault(letters(f), Counter())[f[:1].lower() + f[1:]] += 1
     common = {k: c.most_common(1)[0][0] for k, c in forms.items()}
-    out, stats = [], {"words": 0, "accented": 0, "glossed": 0}
+    out = {}
     for (b, c, v), ws in sorted(words.items()):
         keys = [greek_key(w) for w, _, _ in ws]
         shown = [None] * len(ws)
@@ -108,10 +110,17 @@ def main():
                 shown[i] = SPELT[letters(w)]
             if shown[i] is None and ws[i][2] == "N-PRI":  # a name, capitalised as TAGNT's are
                 shown[i] = w[:1].upper() + w[1:]
+        out[(b, c, v)] = [(shown[i] or w, num, code) for i, (w, num, code) in enumerate(ws)]
+    return out
+
+
+def main():
+    G = glosses()
+    out, stats = [], {"words": 0, "accented": 0, "glossed": 0}
+    for (b, c, v), ws in sorted(accented().items()):
         s = []
-        for i, (w, num, code) in enumerate(ws):
+        for i, (word, num, code) in enumerate(ws):
             g = gloss_for(num, code, G)
-            word = shown[i] or w
             if g and i > 0 and word[:1].isupper() and g[:1].islower():
                 g = g[:1].upper() + g[1:]
             elif g and word[:1].islower() and g[:1].isupper() and g != "God" and "PRI" not in code:

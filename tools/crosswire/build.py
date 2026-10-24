@@ -96,7 +96,7 @@ MODULES = {
                 about="The Douay-Rheims Bible, the English Catholic translation from the Latin Vulgate (New Testament Rheims 1582, Old Testament Douay 1609–1610), in Bishop Richard Challoner's revision of 1749–1752. With the deuterocanonical books (Tobit, Judith, Wisdom, Sirach, Baruch with the Letter of Jeremiah as chapter 6, 1–2 Maccabees) and the additions to Esther (10:4–16:24) and Daniel (3:24–90, 13–14)."),
     # Not built into the app: the TR is CC BY-NC-SA and the MKJV in copyright (CrossWire may distribute it).
     "TR": dict(file="tr1550", title="Greek NT: Textus Receptus (Stephanus 1550)", abbrev="TR1550", variant="x-2",
-               about="Robert Estienne's (Stephanus') Greek New Testament of 1550, the Textus Receptus the KJV is most often compared with, unaccented, from Maurice Robinson's electronic edition. Where Scrivener's 1894 text (the Greek the KJV's translators chose) differs, this has the 1550's reading."),
+               about="Robert Estienne's (Stephanus') Greek New Testament of 1550, the Textus Receptus the KJV is most often compared with, from Maurice Robinson's electronic edition, accented and punctuated as STEPBible's TAGNT (Tyndale House, CC BY 4.0) prints the same words; a word no edition there spells so is unaccented. Where Scrivener's 1894 text (the Greek the KJV's translators chose) differs, this has the 1550's reading."),
     # Its own name, as e-Sword's MKJV (mkjv.bbli) is Green's 1998 revision, which the app's MKJV variance notes follow.
     "MKJV": dict(file="mkjv1993", title="Modern King James Version (1993)", abbrev="MKJV 1993",
                  about="Jay P. Green Sr.'s Modern King James Version, in its 1993 text: the KJV's Hebrew and Greek texts in modern English. Green revised it in 1998 (e-Sword's MKJV), using \"Jehovah\" for the LORD among other changes. Copyright Jay P. Green Sr.; distributed by CrossWire with his son's permission (2002)."),
@@ -436,6 +436,10 @@ def build(name, into=None):
     verses = sorted((b, ch, v, t) for (b, ch, v), t in mend_verses(name, {(b, ch, v): t for b, ch, v, t in verses}, MENDS.get(name, {})).items())
     if name == "Peshitta":
         verses = [(b, ch, v, syriac(t, f"{OSIS[b - 1]} {ch}:{v}")) for b, ch, v, t in verses]
+    if name == "TR":  # the module's Greek has no accents or punctuation: TR 1550+'s words, which TAGNT's give them
+        from crosswire.trplus import accented
+        words = accented()
+        verses = [(b, ch, v, " ".join(w for w, _, _ in words[(b, ch, v)]) if (b, ch, v) in words else t) for b, ch, v, t in verses]
 
     mine = {}
     for b, ch, v, _ in verses:
