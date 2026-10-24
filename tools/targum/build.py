@@ -57,7 +57,7 @@ EQUIV = {k.translate(FINAL): tuple(x.translate(FINAL) for x in v) if isinstance(
 
 def jastrow():
     """{consonants of a headword: (headword, first gloss)}. Of homographs, an Aramaic entry (Jastrow's
-    "ch.") is preferred; an entry that only points to another ("v. הוי") takes that one's gloss."""
+    "ch.") is preferred; an entry that only points to another ("v. הוי") takes that one's gloss. Abbreviations and the letters' names are left out."""
     entries, by_id = [], {}
     for part in (1, 2):
         p = fetch(JASTROW.format(part), CACHE / f"jastrow-part{part}.jsonl", timeout=300)
@@ -68,6 +68,8 @@ def jastrow():
     out = {}
     for e in entries:
         hw = re.sub(r"[\sIVX²³⁴⁵⁶⁷⁸⁹¹]+$", "", e.get("hw", "")).strip()
+        if re.search(r'["״\']', hw):
+            continue  # an abbreviation or a letter's name (סמ"ך Samekh, בי"ת Beth), never an ordinary word
         key = consonants(hw)
         if not key:
             continue

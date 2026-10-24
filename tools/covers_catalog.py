@@ -17,7 +17,7 @@ CATALOG = {}
 
 # English Bibles: each its own binding.
 CATALOG |= pair("kjv", dict(base=("leather", (24, 22, 24)), layout="classic", font="fell", border="corners", emblem="cross",
-                            title=[("HOLY BIBLE", 82)], sub=[("KING JAMES VERSION", 30), ("1611", 30)]), STRONGS)
+                            title=[("HOLY BIBLE", 82)], sub=[("KING JAMES VERSION", 30), ("1769", 30)]), STRONGS)
 CATALOG |= pair("webster", dict(base=("cloth", (36, 52, 86)), layout="classic", border="triple", emblem="quill",
                                 title=[("THE HOLY BIBLE", 58)], sub=[("NOAH WEBSTER", 32), ("1833", 24)]), STRONGS)
 CATALOG |= pair("bsb", dict(base=("smooth", (232, 226, 214)), layout="top", font="cinzel", border="single", emblem="wheat",
@@ -43,6 +43,8 @@ CATALOG |= {
                        title=[("THE NEW", 40), ("TESTAMENT", 52)], sub=[("RHEIMS", 36), ("1582", 28)]),
     "weymouth": dict(base=("buckram", (54, 74, 50)), layout="classic", border="single", emblem="lamp",
                      title=[("THE NEW TESTAMENT", 40), ("IN MODERN SPEECH", 32)], sub=[("R. F. WEYMOUTH", 32)]),
+    "mkjv": dict(base=("buckram", (34, 50, 44)), layout="classic", border="double", emblem="dove",
+                 title=[("THE HOLY BIBLE", 58)], sub=[("MODERN KING JAMES VERSION", 24), ("JAY P. GREEN", 28)]),
     "brenton": dict(base=("cloth", (88, 82, 48)), layout="classic", border="greek", emblem="scroll",
                     title=[("THE SEPTUAGINT", 50), ("IN ENGLISH", 36)], sub=[("SIR LANCELOT BRENTON", 28), ("1844", 24)]),
     "etheridge": dict(base=("linen", (196, 176, 136)), layout="classic", stamp=(70, 40, 26), border="beaded", emblem="rosette",
@@ -57,13 +59,15 @@ CATALOG |= pair("byz", {**GREEK, "emblem": "alphaomega", "title": [("Η ΚΑΙΝ
                         "sub": [("BYZANTINE TEXT", 30), ("2018", 24)]}, GLOSSES)
 CATALOG |= pair("beza1598", {**GREEK, "base": ("leather", (60, 26, 30)), "emblem": "chirho",
                              "title": [("Η ΚΑΙΝΗ", 54, "greek"), ("ΔΙΑΘΗΚΗ", 54, "greek")], "sub": [("THEODORE BEZA", 30), ("1598", 24)]}, GLOSSES)
+CATALOG |= pair("tr1550", {**GREEK, "base": ("leather", (52, 32, 22)), "emblem": "book",
+                           "title": [("Η ΚΑΙΝΗ", 54, "greek"), ("ΔΙΑΘΗΚΗ", 54, "greek")], "sub": [("TEXTUS RECEPTUS", 28), ("STEPHANUS 1550", 24)]}, GLOSSES)
 CATALOG |= pair("lxx_brenton", {**GREEK, "base": ("leather", (34, 58, 52)), "emblem": "scroll",
                                 "title": [("Η ΠΑΛΑΙΑ", 50, "greek"), ("ΔΙΑΘΗΚΗ", 54, "greek")], "sub": [("THE SEPTUAGINT", 30), ("BRENTON 1844", 24)]}, GLOSSES)
 HEBREW = dict(base=("leather", (30, 46, 40)), layout="classic", border="double", font="goudy")
 CATALOG |= pair("ginsburg", {**HEBREW, "emblem": "menorah", "title": [("תורה נביאים כתובים", 46, "hebrew")],
                              "sub": [("HEBREW BIBLE", 30), ("GINSBURG 1894", 24)]}, GLOSSES)
-CATALOG |= {"wlc+": {**HEBREW, "base": ("leather", (40, 34, 60)), "emblem": "tablets", "badge": STRONGS,
-                     "title": [("תורה נביאים כתובים", 46, "hebrew")], "sub": [("WESTMINSTER", 30), ("LENINGRAD CODEX", 26)]}}
+CATALOG |= pair("wlc", {**HEBREW, "base": ("leather", (40, 34, 60)), "emblem": "tablets",
+                        "title": [("תורה נביאים כתובים", 46, "hebrew")], "sub": [("WESTMINSTER", 30), ("LENINGRAD CODEX", 26)]}, STRONGS)
 TARGUM = dict(base=("cloth", (44, 50, 92)), layout="band", accent=(26, 28, 52), border="single", emblem="menorah", font="goudy")
 CATALOG |= pair("targum_aramaic", {**TARGUM, "title": [("תרגום", 60, "hebrew"), ("TARGUM", 40)], "sub": [("ONKELOS & JONATHAN", 26), ("ARAMAIC", 24)]}, GLOSSES)
 CATALOG |= pair("pseudojonathan_aramaic", {**TARGUM, "base": ("cloth", (70, 44, 84)), "accent": (40, 24, 50),

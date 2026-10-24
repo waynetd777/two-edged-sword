@@ -68,7 +68,7 @@ const TIERS: { name: string; hint: string; items: Source[] }[] = [
         date: "Greek, c. 250–100 BC",
         note: "The Greek Old Testament, quoted by the apostles. Consulted for hard Hebrew passages.",
         kjv: "A second witness to the Old Testament: the translators checked it where the Hebrew was obscure. The New Testament often quotes the Old in its wording, so the KJV's quotations sometimes differ from its own Old Testament.",
-        have: /Greek Old Testament \(Septuagint\)|Septuagint LXX Greek/i,
+        have: /Greek Old Testament \(Septuagint\)|Septuagint LXX Greek|^Septuagint \(Greek, Brenton/i,
         near: /Brenton/i,
         nearNote: "Brenton's English translation (1844).",
       },

@@ -28,8 +28,10 @@ Sources:
   English: TBESG's gloss for the number, as Byz+ has it (tools/beza/plus.py's gloss_for: αὐτός and
     the personal pronouns by case, plural nouns plural; its GLOSS_FIX where TBESG's is wrong), but
     for OT_GLOSS's (Ἰησοῦς Joshua, but Jesus in Sirach, its author's name, save Joshua son of
-    Nave there; χριστός anointed). A name with no
-    number is transliterated. Brenton's words written as one (διατοῦτο, ἀναμέσον) are PHRASES: one
+    Nave there; χριστός anointed). A name with no Greek number takes the Hebrew number and English
+    of the name it stands for in the same verse of the Hebrew (tools/wlc's, the Open Scriptures
+    Hebrew Bible, CC BY 4.0): the one whose English sounds like the Greek's transliteration
+    (`hebrew_name`: Φισῶν, Phisōn, is Pishon H6376); any other is transliterated. Brenton's words written as one (διατοῦτο, ἀναμέσον) are PHRASES: one
     box with each word's number. strong.lexi (tools/core) has TBESG's entries for its numbers
     beyond Strong's.
 
@@ -427,6 +429,47 @@ def line_up(ks, win, caps=None):
     return got
 
 
+def sound(s):
+    """A name as it sounds, for comparing a Greek transliteration with an English one: Phisōn and Pishon are both pison."""
+    s = unicodedata.normalize("NFD", s.lower())
+    s = "".join(ch for ch in s if not unicodedata.combining(ch))
+    for a, b in (("ph", "p"), ("th", "t"), ("ch", "k"), ("kh", "k"), ("sh", "s"), ("ts", "s"), ("tz", "s"), ("z", "s"), ("c", "k"),
+                 ("q", "k"), ("x", "ks"), ("j", "i"), ("y", "i"), ("w", "u"), ("v", "b"), ("f", "p"), ("ou", "u"), ("eu", "eb"), ("ae", "e")):
+        s = s.replace(a, b)
+    return re.sub(r"(.)\1+", r"\1", re.sub(r"[^a-z]", "", s).replace("h", ""))
+
+
+def sounds_like(a, b):
+    """0 to 1: how alike two names sound, letters and consonants alone taken equally."""
+    a, b = sound(a), sound(b)
+    if not a or not b:
+        return 0
+    ca, cb = re.sub("[aeiou]", "", a), re.sub("[aeiou]", "", b)
+    return (ratio(a, b) + (ratio(ca, cb) if ca and cb else 0)) / 2
+
+
+def hebrew_names():
+    """{KJV verse: {Hebrew Strong's number: English}} for the names (proper nouns and gentilics) of each verse of
+    the Hebrew Old Testament, from tools/wlc."""
+    import wlc.build as wlc
+    out = {}
+    for k, ws in wlc.read().items():
+        for w in ws:
+            if ("proper noun" in w["grammar"] or "gentilic" in w["grammar"]) and w["nums"]:
+                n = w["nums"][-1]
+                out.setdefault(k, {})[n] = wlc.gloss_for(n[1:]) or w["english"]
+    return out
+
+
+def hebrew_name(name, names):
+    """(number, English) of the Hebrew name in `names` that a transliterated Greek name is: one that sounds much like it
+    (Nebrōd, Nimrod), or fairly like it and clearly more than the verse's other names (Nauē, Nun); else None."""
+    best = sorted(((sounds_like(name, e), n, e) for n, e in names.items()), reverse=True)
+    if best and (best[0][0] >= 0.75 or best[0][0] >= 0.6 and (len(best) == 1 or best[0][0] - best[1][0] >= 0.15)):
+        return best[0][1], best[0][2]
+    return None
+
+
 def main(into=None):
     """Writes lxx_brenton+.bbli to the library, or to `into`."""
     if not find("lxx_brenton.bbli").exists():
@@ -435,6 +478,7 @@ def main(into=None):
     brenton = db.execute("SELECT Book, Chapter, Verse, Scripture FROM Bible ORDER BY Book, Chapter, Verse").fetchall()
     db.close()
     numbers, G = Numbers(), glosses()
+    hebrew = hebrew_names()
     texts = {t: glaux(t) for t in sorted({t for ts in SOURCES.values() for t in ts})}
     # Every form's commonest analysis in the whole Septuagint, for a word matched to none.
     analyses = defaultdict(Counter)
@@ -496,6 +540,11 @@ def main(into=None):
             en = gloss_for(n, cd, G) if n else ""
             if n in OT_GLOSS and not (n == "G2424" and b == 70 and "ναυη" not in ks):  # Sirach's Jesus, but Joshua son of Nave
                 en = OT_GLOSS[n]
+            if not n and name and b <= 39:  # a name Strong's Greek hasn't: the Hebrew name it stands for in the verse
+                heb = hebrew_name(translit(t.strip(".,;:·()[]ʼ’'")), hebrew.get((b, c, v), {}))
+                if heb:
+                    n, en = heb
+                    s["hebrew"] += 1
             if not n and not name:
                 bare[(printed(t), lemma)] += 1
             if not en and name:
@@ -524,7 +573,7 @@ def main(into=None):
         total.update(s)
     w = total["words"]
     print(f"{w} words: {total['glaux'] / w:.1%} matched to GLAUx's, {total['byform'] / w:.1%} analysed by form; "
-          f"{total['numbered'] / w:.1%} numbered, {total['glossed'] / w:.1%} glossed ({total['translit'] / w:.1%} names transliterated)")
+          f"{total['numbered'] / w:.1%} numbered, {total['glossed'] / w:.1%} glossed ({total['hebrew']} names numbered as the Hebrew's, {total['translit'] / w:.1%} transliterated)")
     print(f"  numbers: {total['lemma']} by lemma, {total['form']} by-form (Strong's), {total['tagnt']} from TAGNT by form, {total['none']} none")
     for name, part in (("canon", [s for b, s in stats.items() if b <= 39]), ("Apocrypha", [s for b, s in stats.items() if b > 39])):
         s = sum(part, Counter())
@@ -554,7 +603,9 @@ def main(into=None):
             "beyond Strong's too (G6000 on; strong.lexi has their entries). STEPBible's data is adapted here: their numbers "
             "are given without the letter that marks a meaning (G2424I is G2424), and their glosses are shortened and inflected "
             "(a plural noun's made plural, the pronouns by case), a few put right. The English is the dictionary sense, not a "
-            "translation of the verse; Ἰησοῦς is glossed Joshua, χριστός anointed. A name with no number is transliterated. "
+            "translation of the verse; Ἰησοῦς is glossed Joshua, χριστός anointed. A name Strong's Greek hasn't takes the Hebrew "
+            "number and English of the name it stands for in the same verse of the Hebrew (the Open Scriptures Hebrew Bible, "
+            "CC BY 4.0), where one sounds like it (Φισῶν, Pishon H6376); any other name with no number is transliterated. "
             f"{total['numbered'] / w:.0%} of the words are numbered, {total['glossed'] / w:.0%} have English.</p>"
             "<p>This module, built from GLAUx, is shared under CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/). "
             "Built by Two-edged Sword's tools/lxx/plus.py.</p>")

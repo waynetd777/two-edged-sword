@@ -1,7 +1,8 @@
 # Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
 # SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 """Builds wlc+.bbli ("Westminster Leningrad Codex w/ Strong's"): the Hebrew Old Testament word by
-word, each word with its English, Strong's number and grammar, as the Greek interlinears are.
+word, each word with its English, Strong's number and grammar, as the Greek interlinears are; and
+wlc.bbli ("Westminster Leningrad Codex"), the same text as running Hebrew, for the modules folder.
 
     python3 tools/wlc/build.py
 
@@ -227,11 +228,11 @@ def verse(v):
         elif tag == "seg" and el.get("type") in SEGS and out:
             out[-1]["text"] += el.text or ""  # a maqaf, sof pasuq or paseq stays with the word before it
     cut = SPLIT.get(v.get("osisID")) or next((i + 1 for i, x in enumerate(out) if "\u0591" in x["text"]), len(out))
-    return "".join(map(render, out[:cut])), "".join(map(render, out[cut:]))
+    return out[:cut], out[cut:]
 
 
-def main(into=None):
-    """Writes wlc+.bbli to the modules folder, or to `into` (tools/core bundles it with the app)."""
+def read():
+    """{KJV verse: [word]}, in the KJV's numbering."""
     GLOSS.update(glosses())
     moves = verse_map()
     verses = {}
@@ -246,10 +247,16 @@ def main(into=None):
             parts = [(m.get("a", k), first), (m.get("b", k), second)] if "a" in m or "b" in m else [(m.get(None, k), first + second)]
             for key, text in parts:
                 if text:
-                    verses[key] = f"{verses[key]}{text}" if key in verses else text
+                    verses[key] = verses.get(key, []) + text
         print(f"  {b}", end="", flush=True)
     print()
-    rows = [(b, c, v, f"<heb>{t}</heb>") for (b, c, v), t in sorted(verses.items())]
+    return verses
+
+
+def main(into=None, verses=None):
+    """Writes wlc+.bbli to the modules folder, or to `into` (tools/core bundles it with the app)."""
+    verses = verses or read()
+    rows = [(b, c, v, f"<heb>{''.join(map(render, ws))}</heb>") for (b, c, v), ws in sorted(verses.items())]
     info = ("<p>The Westminster Leningrad Codex, the Hebrew text of the Leningrad Codex (1008) as in BHS, word by word: each "
             "word with its English, Strong's number and grammar. Text, Strong's numbers and grammar from the Open Scriptures "
             "Hebrew Bible (morphhb), CC BY 4.0, https://github.com/openscriptures/morphhb; English from STEPBible's TBESH "
@@ -261,5 +268,25 @@ def main(into=None):
     print(f"wlc+.bbli: {len(rows)} verses")
 
 
+def running(ws):
+    """The words as running text: a space between them, but none after a maqaf, which joins a word to the next."""
+    return "".join(w["text"] + ("" if w["text"].endswith("\u05be") else " ") for w in ws).strip()
+
+
+def plain(into=None, verses=None):
+    """Writes wlc.bbli, the same text as running Hebrew, to the modules folder or to `into`."""
+    verses = verses or read()
+    rows = [(b, c, v, f"<heb>{esc(running(ws))}</heb>") for (b, c, v), ws in sorted(verses.items())]
+    info = ("<p>The Westminster Leningrad Codex, the Hebrew text of the Leningrad Codex (1008) as in BHS, from the Open "
+            "Scriptures Hebrew Bible (morphhb), CC BY 4.0, https://github.com/openscriptures/morphhb. WLC+ has it word by "
+            "word. Verses are numbered as in the KJV (psalm titles are part of verse 1); where the margin corrects the text "
+            "(ketiv/qere), the reading is given. Built by Two-edged Sword's tools/wlc.</p>")
+    with module("wlc.bbli", "Westminster Leningrad Codex", "WLC", info, nt=False, rtl=True, into=into) as db:
+        db.executemany("INSERT INTO Bible VALUES (?,?,?,?)", rows)
+    print(f"wlc.bbli: {len(rows)} verses")
+
+
 if __name__ == "__main__":
-    main()
+    vs = read()
+    main(verses=vs)
+    plain(verses=vs)

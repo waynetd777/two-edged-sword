@@ -141,13 +141,16 @@ Their verses are numbered like the KJV's, so they line up beside it in Compare.
 |---|---|
 | Targum (English), the Babylonian Talmud. The Aramaic Targum and Pseudo-Jonathan are built in; build them only if you want Sefaria's merged text instead | Sefaria |
 | Beza's Greek New Testament (1598), and Beza 1598+ word by word | textus-receptus.com, STEPBible |
-| Latin+, Jerome's Vulgate word by word (needs e-Sword's Latin Vulgate) | Stanza, Whitaker's WORDS |
+| Latin+, Jerome's Vulgate word by word, with Strong's numbers (needs e-Sword's Latin Vulgate) | Stanza, Whitaker's WORDS, STEPBible |
 | Targum+ and Ps-Jon+, word by word. Both are built in; build them only if you want them from Sefaria's merged text instead | Sefaria, Jastrow |
 | Peshitta SEDRA: the Peshitta word by word, with SEDRA's Syriac glosses and grammar | ETCBC, SEDRA |
 | The Rheims New Testament (1582) | Bible Support |
+| Stephanus' Textus Receptus (1550), TR 1550+ word by word, and the Modern King James Version | CrossWire, STEPBible |
+| The Westminster Leningrad Codex as running Hebrew (WLC+ is built in) | Open Scriptures |
 
-All are public domain or openly licensed, except some Sefaria translations, SEDRA's glosses and
-Jastrow's dictionary, which are for non-commercial use only. Personal study is fine.
+All are public domain or openly licensed, except some Sefaria translations, SEDRA's glosses,
+Jastrow's dictionary and the Textus Receptus, which are for non-commercial use only, and the
+Modern King James Version, which is in copyright. Personal study is fine.
 
 ## Free modules worth having
 

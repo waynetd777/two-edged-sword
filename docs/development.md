@@ -359,10 +359,11 @@ modules folder; then press **Rescan**. "Run first" names the scripts whose outpu
 
 | Script | Builds | Run first | From |
 |---|---|---|---|
-| `tools/crosswire/build.py` | Syriac Peshitta NT, Murdock, Etheridge, Tyndale, Geneva 1599, Douay-Rheims | | CrossWire |
+| `tools/crosswire/build.py` | Syriac Peshitta NT, Murdock, Etheridge, Tyndale, Geneva 1599, Douay-Rheims; Stephanus' TR (1550) and the MKJV, not built in | | CrossWire |
+| `tools/crosswire/trplus.py` | TR 1550+, Stephanus' TR word by word, not built in | | CrossWire, STEPBible |
 | `tools/sefaria/build.py` | Targum, Targum Pseudo-Jonathan, the Babylonian Talmud (Sefaria's merged text, all versions) | | Sefaria |
 | `tools/vulgate/build.py` | Clementine Vulgate (1592) | | Clementine Vulgate Project |
-| `tools/wlc/build.py` | WLC+: the Hebrew Old Testament word by word | | Open Scriptures, STEPBible |
+| `tools/wlc/build.py` | WLC+: the Hebrew Old Testament word by word; WLC, the same as running Hebrew, not built in | | Open Scriptures, STEPBible |
 | `tools/ginsburg/build.py` | Ginsburg's Hebrew Bible (1894) | wlc | ahembd/Ginsburg_Hebrew_Bible |
 | `tools/ginsburg/plus.py` | Ginsburg+, word by word | ginsburg | WLC+ |
 | `tools/beza/build.py` | Beza's Greek New Testament (1598) | | textus-receptus.com; e-Sword's TR+ if you have it |
@@ -370,7 +371,7 @@ modules folder; then press **Rescan**. "Run first" names the scripts whose outpu
 | `tools/lxx/build.py` | Brenton's Greek Septuagint, with the Apocrypha | | eBible.org |
 | `tools/lxx/plus.py` | LXX-Brenton+, word by word | lxx | GLAUx, STEPBible |
 | `tools/latin/clementine.py` | Vulg-C+, word by word, with Strong's numbers (needs `pip install stanza==1.14.0`) | vulgate, wlc, lxx/plus.py | Stanza's PROIEL model (CC BY-NC-SA), Whitaker's WORDS, WLC+, Byz+, LXX-Brenton+ |
-| `tools/latin/build.py` | Latin+, word by word (downloads about 1 GB) | | e-Sword's Latin Vulgate, Stanza, Whitaker's WORDS |
+| `tools/latin/build.py` | Latin+, word by word, with Strong's numbers, in the KJV's numbering (downloads about 1 GB) | vulgate, wlc, lxx/plus.py | e-Sword's Latin Vulgate, Stanza, Whitaker's WORDS, WLC+, Byz+, LXX-Brenton+ |
 | `tools/targum/build.py` | Targum+ and Ps-Jon+, word by word | sefaria, wlc | WLC+, Jastrow |
 | `tools/syriac/build.py` | Peshitta+, word by word, from the Greek | crosswire | Byz+, STEPBible, Murdock, Etheridge |
 | `tools/syriac/sedra.py` | Peshitta SEDRA, word by word | crosswire | ETCBC, SEDRA |

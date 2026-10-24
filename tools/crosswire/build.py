@@ -1,9 +1,10 @@
 # Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
 # SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 """Builds e-Sword Bibles from CrossWire's SWORD modules: the Syriac Peshitta, the two English
-translations of it (Murdock, Etheridge), Tyndale, the Geneva Bible of 1599 and the Douay-Rheims.
+translations of it (Murdock, Etheridge), Tyndale, the Geneva Bible of 1599 and the Douay-Rheims,
+and, for the modules folder only, Stephanus' Textus Receptus of 1550 and the Modern King James Version.
 
-    python3 tools/crosswire/build.py [Peshitta Murdock Etheridge Tyndale Geneva1599 DRC]
+    python3 tools/crosswire/build.py [Peshitta Murdock Etheridge Tyndale Geneva1599 DRC TR MKJV]
 
 Writes peshitta.bbli ("Syriac Peshitta", right to left), murdock.bbli ("Murdock's Peshitta
 (English)"), etheridge.bbli ("Etheridge's Peshitta (English)"), tyndale.bbli ("Tyndale Bible
@@ -93,6 +94,11 @@ MODULES = {
                        about="The Geneva Bible in its 1599 printing, the English Bible of Shakespeare, the Puritans and the Pilgrims, in its own spelling; the epistles' subscriptions are shown after their last verses. Mark Langley's electronic edition, without the notes and without the Apocrypha."),
     "DRC": dict(file="drc", title="Douay-Rheims (Challoner)", abbrev="DRC",
                 about="The Douay-Rheims Bible, the English Catholic translation from the Latin Vulgate (New Testament Rheims 1582, Old Testament Douay 1609–1610), in Bishop Richard Challoner's revision of 1749–1752. With the deuterocanonical books (Tobit, Judith, Wisdom, Sirach, Baruch with the Letter of Jeremiah as chapter 6, 1–2 Maccabees) and the additions to Esther (10:4–16:24) and Daniel (3:24–90, 13–14)."),
+    # Not built into the app: the TR is CC BY-NC-SA and the MKJV in copyright (CrossWire may distribute it).
+    "TR": dict(file="tr1550", title="Greek NT: Textus Receptus (Stephanus 1550)", abbrev="TR1550", variant="x-2",
+               about="Robert Estienne's (Stephanus') Greek New Testament of 1550, the Textus Receptus the KJV is most often compared with, unaccented, from Maurice Robinson's electronic edition. Where Scrivener's 1894 text (the Greek the KJV's translators chose) differs, this has the 1550's reading."),
+    "MKJV": dict(file="mkjv", title="Modern King James Version", abbrev="MKJV",
+                 about="Jay P. Green's Modern King James Version (1962–1998): the KJV's Hebrew and Greek texts in modern English. Copyright Jay P. Green; distributed by CrossWire with his permission."),
 }
 
 # Brackets the sources left unpaired, mended from the sense (found by checking each Bible's brackets match
@@ -152,6 +158,8 @@ RULES = {
         "3John": ["1:15 +"], "Rev": ["12:18 > 13:1", "13:1 +"],
     },
     "DRC": {},
+    "TR": {},
+    "MKJV": {"Lev": ["13:13 / But when raw flesh"], "Ps": ["89:45 / How long, LORD"]},
 }
 
 
@@ -367,6 +375,15 @@ def syriac(t, where):
     return t
 
 
+def variant(t, keep):
+    """A slot's markup with one edition's readings where the module gives two (the TR's x-1, Scrivener's, and x-2,
+    Stephanus'). A word the module left untagged, its number in the reading and its grammar after it (John 9:21's
+    αυτου 846 {P-GSM}), is tagged as the others are."""
+    t = re.sub(r'([^\s<>]+) (\d+) </seg> \{([^}\s]+)\}', r'<w lemma="strong:G\2" morph="robinson:\3">\1</w> </seg>', t)
+    return re.sub(r'<seg\b[^>]*subType="([^"]*)"[^>]*type="x-variant"[^>]*>(.*?)</seg>',
+                  lambda x: x[2] if x[1] == keep else "", t, flags=re.S)
+
+
 def build(name, into=None):
     """Writes the module `name` (a key of MODULES) to the app's modules folder, or to `into`."""
     m = MODULES[name]
@@ -385,7 +402,11 @@ def build(name, into=None):
             continue
         if name == "Geneva1599":
             rows = units(rows)
+        if m.get("variant"):
+            rows = [(ch, v, variant(t, m["variant"])) for ch, v, t in rows]
         rows = [(ch, v, text(t, source)) for ch, v, t in rows]
+        if name == "MKJV":  # six apostrophes lost in CrossWire's text (Ezra 8:36 "king�s"): its others are straight
+            rows = [(ch, v, re.sub(r"\s+(?='s\b)", "", t.replace("\ufffd", "'"))) for ch, v, t in rows]  # and LORD's, a tag before it
         if b == "Ps" and titles:
             rows = [(ch, v, f"<b>{t}</b>" if (ch, v) in titles and t else t) for ch, v, t in rows]
         if b == "Sir" and prologue:

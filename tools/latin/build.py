@@ -1,9 +1,14 @@
 # Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
 # SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 """Builds latin+.bbli ("Latin Vulgate w/ glosses") word by word from e-Sword's latin.bbli, each word
-with its English meaning, dictionary form and grammar, as the Greek interlinears are, for the user's
-own library (latin.bbli is e-Sword's, so it isn't shipped). The Clementine's, clementine+.bbli, which
-the app ships, is built the same way by tools/latin/clementine.py, with Strong's numbers too.
+with its English meaning, Strong's number, dictionary form and grammar, as the Greek interlinears are, for
+the user's own library (latin.bbli is e-Sword's, so it isn't shipped). The Clementine's, clementine+.bbli,
+which the app ships, is built the same way by tools/latin/clementine.py.
+
+latin.bbli has the KJV's numbering but in Job 39–41 and the Psalms (the Vulgate's psalms, their titles verses of
+their own); `to_kjv` moves those verses to where the same words are in clementine.bbli, which tools/vulgate numbered
+as the KJV's, so the Strong's numbers (tools/latin/strongs.py, which lines the verses up with WLC+, Byz+ and LXX+ by
+number) and Compare line up.
 
     python3 tools/latin/build.py
 
@@ -29,11 +34,11 @@ Words in <i> (the Hebrew letters heading Psalm 119's stanzas) are left as they a
 
 WORDS is taken at a fixed commit. Downloads are cached in ~/Library/Caches/Two-edged Sword/latin.
 """
-import html, os, re, sqlite3, subprocess, sys
+import html, os, re, sqlite3, subprocess, sys, unicodedata
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from modules import CACHES, fetch, find, module  # noqa: E402
+from modules import CACHES, chapter_lengths, fetch, find, module  # noqa: E402
 CACHE = CACHES / "latin"
 VENV = CACHE / "venv"
 STANZA = "1.14.0"  # the Stanza the virtual environment gets (its Latin model is its version's)
@@ -55,6 +60,8 @@ def venv():
         print("making a virtual environment for Stanza (once)")
         subprocess.run([sys.executable, "-m", "venv", str(VENV)], check=True)
         subprocess.run([str(py), "-m", "pip", "install", "-q", f"stanza=={STANZA}"], check=True)
+    if subprocess.run([str(py), "-c", "import PIL"], capture_output=True).returncode:  # for the module's cover (tools/covers)
+        subprocess.run([str(py), "-m", "pip", "install", "-q", "pillow"], check=True)
     os.execv(str(py), [str(py), *sys.argv])
 
 
@@ -234,7 +241,7 @@ def split_que(w):
 
 
 def read(name):
-    """A plain module's verses [(book, chapter, verse, text)] and its About text, wherever find() finds it."""
+    """A plain module's verses [(book, chapter, verse, text)] and its About text (without its cover), wherever find() finds it."""
     src = find(f"{name}.bbli")
     if not src.exists():
         return None, None
@@ -242,7 +249,65 @@ def read(name):
     rows = db.execute("SELECT Book, Chapter, Verse, Scripture FROM Bible ORDER BY Book, Chapter, Verse").fetchall()
     info = db.execute("SELECT Information FROM Details").fetchone()[0] or ""
     db.close()
-    return rows, info
+    # without the module's own cover, so the + edition gets its own (tools/covers adds a cover only where there is none)
+    return rows, re.sub(r'^\s*<p>\s*<img src="data:image/webp;base64,[^"]*">\s*</p>', "", info)
+
+
+def words_of(t):
+    """A verse's words as compared across Vulgates: lower case, without tags or punctuation, one spelling (æ ae, j i, v u)."""
+    t = unicodedata.normalize("NFD", re.sub(r"<[^>]+>|\(\d+-\d+\)", " ", t).lower().replace("æ", "ae").replace("œ", "oe"))
+    t = "".join(ch for ch in t if not unicodedata.combining(ch)).replace("j", "i").replace("v", "u")
+    return set(re.findall(r"[a-z]+", t))
+
+
+def to_kjv(rows):
+    """e-Sword's Vulgate in the KJV's numbering. It has it already but in Job 39–41 and the Psalms, which keep the
+    Vulgate's numbers and divide their verses a little otherwise than the Clementine. So each of their verses is put where the
+    same words are in the Clementine (clementine.bbli, which tools/vulgate moved to the KJV's numbering): the verses of
+    both lined up in order, by the words they share, a verse one or two of the Clementine's on from the last, and
+    verses that go to one verse joined; a title, a verse of its own, joins verse 1 and is bold, as in the KJV."""
+    clem = read("clementine")[0]
+    if clem is None:
+        sys.exit("to number the Psalms as the KJV's, latin+ needs clementine.bbli (built in, or tools/vulgate/build.py)")
+    for book in (18, 19):
+        rows = [r for r in rows if r[0] != book] + [(book, c, v, t) for c, v, t in line_up(
+            [(c, v, t) for b, c, v, t in rows if b == book], [((c, v), t) for b, c, v, t in clem if b == book])]
+    return sorted(rows)
+
+
+def line_up(mine, theirs):
+    """[(chapter, verse, text)]: one book's verses `mine` put where the same words are in `theirs`, [((chapter, verse), text)]."""
+    tw, mw = [words_of(t) for _, t in theirs], [words_of(t) for *_, t in mine]
+    n, m, band = len(mine), len(theirs), 80
+
+    def sim(i, j):
+        a, b = mw[i], tw[j]
+        return len(a & b) / max(len(a | b), 1)
+    # best[i][j]: the best total with mine[i] at theirs[j]; each verse goes 0 to 2 of theirs on from the one before
+    best, back = [dict() for _ in range(n)], [dict() for _ in range(n)]
+    for i in range(n):
+        lo, hi = max(0, i * m // n - band), min(m, i * m // n + band)
+        for j in range(lo, hi):
+            s = sim(i, j)
+            if i == 0:
+                best[i][j] = s if j == 0 else -1
+                continue
+            prev = max(((best[i - 1][k], k) for k in (j, j - 1, j - 2) if k in best[i - 1]), default=None)
+            if prev:
+                best[i][j], back[i][j] = prev[0] + s, prev[1]
+    j = max(best[n - 1], key=lambda k: (best[n - 1][k], k == m - 1))
+    place = [0] * n
+    for i in range(n - 1, -1, -1):
+        place[i] = j
+        j = back[i].get(j, j)
+    out = {}
+    for i, ((c, v, t), j) in enumerate(zip(mine, place)):
+        (kc, kv), clem_t = theirs[j]
+        # A title: a verse of mine joined to another at verse 1, where the Clementine's verse 1 starts with its title.
+        if kv == 1 and clem_t.startswith("<b>") and i + 1 < n and place[i + 1] == j:
+            t = f"<b>{t}</b>"
+        out[(kc, kv)] = f"{out[(kc, kv)]} {t}".replace("</b> <b>", " ") if (kc, kv) in out else t
+    return [(c, v, t) for (c, v), t in sorted(out.items())]
 
 
 def tag(rows, nlp):
@@ -269,6 +334,24 @@ def tag(rows, nlp):
         print(f"  {min(k + step, len(batch))} verses", end="\r", flush=True)
     print()
     return verses, tagged
+
+
+def lemma_key(lemma):
+    """A lemma as the alignment counts it: Stanza's homonym number dropped, one spelling."""
+    return norm(lemma.rstrip("0123456789"))
+
+
+def numbers(rows, tagged):
+    """{(verse index, piece index): Strong's number} for the tagged words, from tools/latin/strongs (rows in the KJV's numbering)."""
+    from latin import strongs
+    order = {}
+    for (vi, pi) in sorted(tagged):
+        order.setdefault(vi, []).append(pi)
+    refs = [(b, c, v) for b, c, v, _ in rows]
+    latin = {refs[vi]: [lemma_key(tagged[(vi, pi)][0]) for pi in order.get(vi, [])] for vi in range(len(rows))}
+    upos = {refs[vi]: [tagged[(vi, pi)][1] for pi in order.get(vi, [])] for vi in range(len(rows))}
+    found = strongs.assign(latin, upos)
+    return {(vi, pis[wi]): num for vi, pis in order.items() for wi, num in found.get(refs[vi], {}).items()}
 
 
 def render(rows, verses, tagged, dic, nums=None):
@@ -312,17 +395,24 @@ def build(name, nlp, dic):
     if rows is None:
         print(f"  no {name}.bbli; skipped")
         return
+    if name == "latin":
+        rows = to_kjv(rows)
     verses, tagged = tag(rows, nlp)
-    out = render(rows, verses, tagged, dic)
+    nums = numbers(rows, tagged)
+    print(f"  {len(nums)} of {len(tagged)} words have a Strong's number ({len(nums) / max(len(tagged), 1):.1%})")
+    out = render(rows, verses, tagged, dic, nums)
     m = MODULES[name]
-    about = (info + "<p>This edition shows each word with its English meaning, dictionary form and grammar. The dictionary "
+    about = (info + "<p>This edition shows each word with its English meaning, Strong's number, dictionary form and grammar. The dictionary "
              "form and grammar are from Stanza's Latin tagger (Stanford NLP, trained on the PROIEL treebank), which reads each "
-             "word in its sentence; the English is the first sense in William Whitaker's WORDS dictionary. Both are the "
+             "word in its sentence; the English is the first sense in William Whitaker's WORDS dictionary. The Strong's numbers "
+             "are the Hebrew or Greek word's each Latin word renders, found by lining the verses up with WLC+, Byz+ and LXX+ "
+             "(tools/latin/strongs.py); a word with no clear counterpart has none. The verses are numbered as the KJV's (the "
+             "Psalms by the Hebrew numbering, their titles part of verse 1). All are the "
              "work of a program, so some words will be wrong. Built by Two-edged Sword's tools/latin.</p>"
              "<p><b>For personal study only.</b> Its text is the e-Sword module it was built from, whose licence doesn't allow "
              "passing it on, and its tagging comes from a model trained on the PROIEL treebank (CC BY-NC-SA).</p>")
     ot, nt, apoc = (any(lo <= r[0] <= hi for r in rows) for lo, hi in ((1, 39), (40, 66), (67, 99)))
-    with module(f"{name}+.bbli", m["title"], m["abbrev"], about, ot=ot, nt=nt, apocrypha=apoc) as db:
+    with module(f"{name}+.bbli", m["title"], m["abbrev"], about, ot=ot, nt=nt, apocrypha=apoc, strongs=True) as db:
         db.executemany("INSERT INTO Bible VALUES (?,?,?,?)", out)
     print(f"{name}+.bbli: {len(out)} verses")
 

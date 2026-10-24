@@ -61,11 +61,6 @@ def part_of(b, c, v):
     return "New Testament" if 40 <= b <= 66 else "deuterocanon" if b >= 67 or strongs.greek_part(b, c, v) else "Old Testament"
 
 
-def lemma_key(lemma):
-    """A lemma as the alignment counts it: Stanza's homonym number dropped, one spelling."""
-    return plus.norm(lemma.rstrip("0123456789"))
-
-
 def main(into=None):
     """Writes clementine+.bbli to the app's modules folder, or to `into`."""
     try:
@@ -87,18 +82,8 @@ def build(into):
     nlp, dic = plus.pipeline(), plus.whitaker()
     verses, tagged = plus.tag(rows, nlp)
 
-    # each verse's words in order, for the alignment
-    order = {}
-    for (vi, pi) in sorted(tagged):
-        order.setdefault(vi, []).append(pi)
+    nums = plus.numbers(rows, tagged)
     refs = [(b, c, v) for b, c, v, _ in rows]
-    latin = {refs[vi]: [lemma_key(tagged[(vi, pi)][0]) for pi in order.get(vi, [])] for vi in range(len(rows))}
-    upos = {refs[vi]: [tagged[(vi, pi)][1] for pi in order.get(vi, [])] for vi in range(len(rows))}
-    found = strongs.assign(latin, upos)
-    nums = {}
-    for vi, pis in order.items():
-        for wi, num in found.get(refs[vi], {}).items():
-            nums[(vi, pis[wi])] = num
 
     stats = {p: Counter() for p in PARTS}
     for (vi, pi), t in tagged.items():
