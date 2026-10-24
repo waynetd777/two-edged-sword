@@ -345,9 +345,9 @@ def talmud_links():
                     raise
                 write_whole(part, json.dumps(pairs))
                 print(f"  links{n}.csv: {len(pairs)} links from the Talmud to the Bible")
-            out += json.loads(part.read_text())
+            out += json.loads(part.read_text(encoding="utf-8"))
         write_whole(p, json.dumps(out))
-    return json.loads(p.read_text())
+    return json.loads(p.read_text(encoding="utf-8"))
 
 
 SEG = re.compile(r"^(.+?) (\d+)([ab])(?::(\d+)(?:-(\d+))?)?$")

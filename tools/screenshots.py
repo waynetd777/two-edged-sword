@@ -87,7 +87,7 @@ def capture(scene, theme):
     sc = {k: v for k, v in scene.items() if k not in files and k not in ("crop", "width", "settle", "songVision", "songVisionAt", "songVisionDur", "frames", "every", "step", "darkOnly")}
     for f, k in files.items():
         if f in scene:
-            sc[k] = json.loads((HERE / scene[f]).read_text())
+            sc[k] = json.loads((HERE / scene[f]).read_text(encoding="utf-8"))
     # "songVision": one of the pictures behind the song's words, shown in full (Visions.tsx),
     # "songVisionAt" (0–1) of the way through it.
     if "songVision" in scene and "song" in sc:
@@ -125,7 +125,7 @@ def capture(scene, theme):
                 time.sleep(0.2)
             if not done.exists():
                 return None
-            times = [0.0] if frames == 1 else [float(t) for t in done.read_text().split()]
+            times = [0.0] if frames == 1 else [float(t) for t in done.read_text(encoding="utf-8").split()]
             ims = []
             for f, t in zip(shots, times):
                 if not f.exists():
@@ -223,7 +223,7 @@ def main():
     ap.add_argument("--theme", choices=["light", "dark"], action="append", help="default: both")
     ap.add_argument("-j", type=int, default=4, metavar="N", help="apps to run side by side (default 4)")
     a = ap.parse_args()
-    scenes = json.loads((HERE / "scenes.json").read_text())
+    scenes = json.loads((HERE / "scenes.json").read_text(encoding="utf-8"))
     if a.names:
         unknown = set(a.names) - {s["name"] for s in scenes}
         if unknown:

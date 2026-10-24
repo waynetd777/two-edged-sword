@@ -154,7 +154,7 @@ def bitmap(module):
     in its alpha."""
     import re
     from PIL import Image
-    src = (Path(__file__).resolve().parent.parent / "src/pictures" / f"{module}.ts").read_text()
+    src = (Path(__file__).resolve().parent.parent / "src/pictures" / f"{module}.ts").read_text(encoding="utf-8")
     data = re.sub(r"[^A-Za-z0-9+/=]", "", re.search(r"base64,([^;]+?)\";", src, re.S)[1])
     return Image.open(io.BytesIO(base64.b64decode(data))).convert("LA")
 

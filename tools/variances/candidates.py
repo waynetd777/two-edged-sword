@@ -114,7 +114,7 @@ def main():
     base, mod = load(a.base), load(a.module)
     only = None
     if a.refs:
-        only = {tuple(int(x) for x in line.split("#")[0].split()) for line in a.refs.read_text().splitlines() if line.split("#")[0].strip()}
+        only = {tuple(int(x) for x in line.split("#")[0].split()) for line in a.refs.read_text(encoding="utf-8").splitlines() if line.split("#")[0].strip()}
     joined = bridged(mod)
     found = []
     for ref in sorted(base):
@@ -138,7 +138,7 @@ def main():
         old.unlink()
     for i in range(0, len(found), a.batch):
         name = f"{i // a.batch + 1:03d}.json"
-        (out / "batches" / name).write_text(json.dumps({"base": a.base, "module": a.module, "candidates": found[i:i + a.batch]}, indent=1, ensure_ascii=False))
+        (out / "batches" / name).write_text(json.dumps({"base": a.base, "module": a.module, "candidates": found[i:i + a.batch]}, indent=1, ensure_ascii=False), encoding="utf-8")
     print(f"{len(found)} candidates in {-(-len(found) // a.batch)} batches → {out}")
 
 

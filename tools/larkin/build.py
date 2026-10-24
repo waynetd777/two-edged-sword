@@ -932,7 +932,7 @@ def _render(job):
     b = BOOKS[name]
     kept = CACHE / "pictures" / f"{name}-{leaf}-{_key(name, leaf)}.html"
     if kept.is_file():
-        return leaf, kept.read_text()
+        return leaf, kept.read_text(encoding="utf-8")
     z, names = _zip(b["id"], b["jp2"])
     if leaf in b["spreads"]:
         others = [(*_zip(c["id"], c["jp2"]), c["leaves"][leaf]) for c in b.get("copies", []) if leaf in c["leaves"]]
@@ -943,7 +943,7 @@ def _render(job):
     for old in kept.parent.glob(f"{name}-{leaf}-*.html"):  # an older drawing of it
         old.unlink()
     tmp = kept.with_suffix(".part")
-    tmp.write_text(html)
+    tmp.write_text(html, encoding="utf-8")
     tmp.replace(kept)
     return leaf, html
 
@@ -971,7 +971,7 @@ def build(name, into=None):
     known = known_words(hocr, text_leaves)
     rows, cur, title, pictures, ahead = [], [], None, 0, []
 
-    fixes = json.loads(FIXES.joinpath(f"{name}.json").read_text()) if FIXES.joinpath(f"{name}.json").is_file() else {}
+    fixes = json.loads(FIXES.joinpath(f"{name}.json").read_text(encoding="utf-8")) if FIXES.joinpath(f"{name}.json").is_file() else {}
     unused = []
 
     def finish(title, paras):

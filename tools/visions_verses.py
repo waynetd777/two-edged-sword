@@ -19,7 +19,7 @@ from books import NAMES  # noqa: E402
 ROOT = Path(__file__).resolve().parent.parent
 names = [n.lower() for n in NAMES]
 
-refs = sorted({r for p in (ROOT / "src/pictures").glob("*.ts") for r in re.findall(r'^\s+verse: "([^"]+)",$', p.read_text(), re.M)})
+refs = sorted({r for p in (ROOT / "src/pictures").glob("*.ts") for r in re.findall(r'^\s+verse: "([^"]+)",$', p.read_text(encoding="utf-8"), re.M)})
 db = sqlite3.connect(f"file:{ROOT / 'src-tauri/modules/kjv.bbli'}?mode=ro", uri=True)
 out = {}
 for ref in refs:
@@ -37,5 +37,5 @@ body = "".join(f"  {json.dumps(k)}: {json.dumps(v, ensure_ascii=False)},\n" for 
     "// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.\n\n"
     "// Made by tools/visions_verses.py: each picture's verse in the KJV, for the pictures viewer only.\n\n"
     f"export const KJV_VERSES: Record<string, string> = {{\n{body}}};\n"
-)
+, encoding="utf-8")
 print(f"{len(out)} verses")

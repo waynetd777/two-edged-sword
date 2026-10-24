@@ -431,7 +431,7 @@ def vocabulary():
     known, counts = set(), {}
     words = Path("/usr/share/dict/words")
     if words.exists():
-        known |= {w.strip().lower() for w in words.read_text().splitlines()}
+        known |= {w.strip().lower() for w in words.read_text(encoding="utf-8").splitlines()}
     for f in ("kjv.bbli", "drc.bbli", "geneva1599.bbli", "tyndale.bbli"):
         modern = f in ("kjv.bbli", "drc.bbli")
         p = find(f)
@@ -486,8 +486,8 @@ def main():
     rows = [(*k, t) for k, (t, _) in sorted(best.items()) if t]
     print(f"  {sum(FILLED.values())} lost words put back from Challoner")
     if os.environ.get("RHEIMS_REPORT"):
-        Path(os.environ["RHEIMS_REPORT"] + ".filled").write_text("\n".join(f"{n}\t{w}" for w, n in sorted(FILLED.items(), key=lambda x: -x[1])))
-        Path(os.environ["RHEIMS_REPORT"]).write_text("\n".join(f"{n}\t{a}\t{b}" for (a, b), n in sorted(FIXED.items(), key=lambda x: -x[1])))
+        Path(os.environ["RHEIMS_REPORT"] + ".filled").write_text("\n".join(f"{n}\t{w}" for w, n in sorted(FILLED.items(), key=lambda x: -x[1])), encoding="utf-8")
+        Path(os.environ["RHEIMS_REPORT"]).write_text("\n".join(f"{n}\t{a}\t{b}" for (a, b), n in sorted(FIXED.items(), key=lambda x: -x[1])), encoding="utf-8")
     missing = [k for k, _ in ref if k not in best]
     if missing:
         print(f"  none for {len(missing)} verses: {', '.join(f'{b}:{c}:{v}' for b, c, v in missing[:12])}{'…' if len(missing) > 12 else ''}")

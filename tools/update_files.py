@@ -15,7 +15,7 @@ import argparse, datetime, json, os, subprocess, sys, tarfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-CONF = json.loads((ROOT / "src-tauri/tauri.conf.json").read_text())
+CONF = json.loads((ROOT / "src-tauri/tauri.conf.json").read_text(encoding="utf-8"))
 NAME, VERSION = CONF["productName"], CONF["version"]
 APP = ROOT / f"src-tauri/target/release/bundle/macos/{NAME}.app"
 OUT = ROOT / "src-tauri/target/release/bundle/dmg"
@@ -40,7 +40,7 @@ def main():
     env.pop("TAURI_SIGNING_PRIVATE_KEY", None)
     subprocess.run(["npx", "tauri", "signer", "sign", str(archive)], cwd=ROOT, env=env, check=True,
                    stdout=subprocess.DEVNULL)
-    signature = Path(f"{archive}.sig").read_text().strip()
+    signature = Path(f"{archive}.sig").read_text(encoding="utf-8").strip()
     latest = {
         "version": VERSION,
         "notes": notes,
@@ -50,7 +50,7 @@ def main():
             "url": f"https://github.com/{REPO}/releases/download/v{VERSION}/{archive.name}",
         }},
     }
-    (OUT / "latest.json").write_text(json.dumps(latest, indent=2) + "\n")
+    (OUT / "latest.json").write_text(json.dumps(latest, indent=2) + "\n", encoding="utf-8")
     for f in (archive, Path(f"{archive}.sig"), OUT / "latest.json"):
         print(f.relative_to(ROOT))
 

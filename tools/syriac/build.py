@@ -289,7 +289,7 @@ def cached_links(c):
         h.update(f"{k}\t{' '.join(c.S[k])}\t{' '.join(c.G[k])}\n".encode())
     p = CACHE / f"links-{h.hexdigest()[:16]}.json"
     if p.is_file():
-        return {tuple(map(int, k.split("."))): v for k, v in json.loads(p.read_text()).items()}
+        return {tuple(map(int, k.split("."))): v for k, v in json.loads(p.read_text(encoding="utf-8")).items()}
     out = links(c)
     write_whole(p, json.dumps({".".join(map(str, k)): v for k, v in out.items()}, separators=(",", ":")))
     return {k: [list(x) for x in v] for k, v in out.items()}
@@ -480,7 +480,7 @@ def cached_english(c, name, text):
         h.update(f"{k}\t{' '.join(c.S[k])}\t{text.get(k, '')}\n".encode())
     p = CACHE / f"english-{h.hexdigest()[:16]}.json"
     if p.is_file():
-        return {tuple(map(int, k.split("."))): {int(i): e for i, e in v.items()} for k, v in json.loads(p.read_text()).items()}
+        return {tuple(map(int, k.split("."))): {int(i): e for i, e in v.items()} for k, v in json.loads(p.read_text(encoding="utf-8")).items()}
     print(f"  aligning {TRANSLATIONS[name]}'s English (both ways)")
     keys, S, E, own, surf = [], {}, {}, {}, {}
     for k in c.keys:

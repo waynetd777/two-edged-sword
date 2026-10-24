@@ -427,11 +427,11 @@ def get(url, name):
 
 
 def geojson(name):
-    return json.loads(get(NE.format(name), f"{name}.geojson").read_text())
+    return json.loads(get(NE.format(name), f"{name}.geojson").read_text(encoding="utf-8"))
 
 
 def jsonl(name):
-    return [json.loads(x) for x in get(GEO.format(name), f"{name}.jsonl").read_text().splitlines() if x.strip()]
+    return [json.loads(x) for x in get(GEO.format(name), f"{name}.jsonl").read_text(encoding="utf-8").splitlines() if x.strip()]
 
 
 # The kinds of place a map marks with a dot: not regions, rivers or seas (named on the map by hand), nor gates,

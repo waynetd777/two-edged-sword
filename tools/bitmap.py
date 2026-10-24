@@ -71,5 +71,5 @@ pathlib.Path(a.out).write_text(
     f"// Made by tools/bitmap.py: a {w}x{h} grey bitmap with its edges faded, from\n"
     f"// {a.source or a.image}\n\n"
     f"export const {a.name} = \"{uri}\";\n"
-)
+, encoding="utf-8")
 print(f"  {a.out}  {w}x{h}  {len(uri) // 1024} KB")

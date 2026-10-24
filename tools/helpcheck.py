@@ -13,7 +13,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 DOCS = ROOT / "docs"
-GUIDES_TS = (ROOT / "src/guides.ts").read_text()
+GUIDES_TS = (ROOT / "src/guides.ts").read_text(encoding="utf-8")
 def slug(heading: str) -> str:
     """GitHub's anchor for a heading, as src/guides.ts makes it."""
     return re.sub(r"\s", "-", re.sub(r"[^\w\s-]", "", heading.strip().lower()))
@@ -23,12 +23,12 @@ def slug(heading: str) -> str:
 HELP_TARGETS = {
     w
     for f in (ROOT / "src").glob("*.tsx")
-    for line in f.read_text().splitlines()
+    for line in f.read_text(encoding="utf-8").splitlines()
     if "data-help=" in line
     for w in re.findall(r'"([\w-]+)"', line.split("data-help=", 1)[1])
 }
 # Settings marks each section with the slug of its title (src/Settings.tsx Section).
-HELP_TARGETS |= {slug(t) for t in re.findall(r'<Section title="([^"]+)"', (ROOT / "src/Settings.tsx").read_text())}
+HELP_TARGETS |= {slug(t) for t in re.findall(r'<Section title="([^"]+)"', (ROOT / "src/Settings.tsx").read_text(encoding="utf-8"))}
 APP_ACTIONS = {"read", "compare", "search", "word", "journal", "plans", "library", "history", "settings", "open", "palette", "modules", "rescan"}
 
 
@@ -46,7 +46,7 @@ def main() -> int:
         p: {
             slug(h)
             for h in re.findall(
-                r"^#{2,3} (.+)$", (DOCS / f"{p}.md").read_text(), re.MULTILINE
+                r"^#{2,3} (.+)$", (DOCS / f"{p}.md").read_text(encoding="utf-8"), re.MULTILINE
             )
         }
         for p in pages
@@ -54,7 +54,7 @@ def main() -> int:
     }
 
     for page in anchors:
-        text = (DOCS / f"{page}.md").read_text()
+        text = (DOCS / f"{page}.md").read_text(encoding="utf-8")
         for os_ in ("mac", "windows", "github"):
             if text.count(f"<!-- {os_} -->") != text.count(f"<!-- /{os_} -->"):
                 errors.append(f"docs/{page}.md has an unclosed <!-- {os_} --> part")

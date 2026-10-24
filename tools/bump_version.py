@@ -20,11 +20,11 @@ CONF, PACKAGE, NPMLOCK, CARGO, LOCK = (ROOT / p for p in ("src-tauri/tauri.conf.
 
 
 def replace(path, pattern, new, count=1):
-    text = path.read_text()
+    text = path.read_text(encoding="utf-8")
     out, n = re.subn(pattern, new, text, count=count, flags=re.M)
     if n != count:
         sys.exit(f"bump_version: no version found in {path.relative_to(ROOT)}")
-    path.write_text(out)
+    path.write_text(out, encoding="utf-8")
 
 
 def released(version):
@@ -37,7 +37,7 @@ def released(version):
 
 
 def main():
-    old = json.loads(CONF.read_text())["version"]
+    old = json.loads(CONF.read_text(encoding="utf-8"))["version"]
     if len(sys.argv) > 1:
         new = sys.argv[1]
         if not re.fullmatch(r"\d+\.\d+\.\d+", new):

@@ -47,11 +47,11 @@ def main():
         sys.exit(f"not reviewed yet: {', '.join(missing)}")
     base, picked_all, records, errs = "kjv", set(), {}, []
     for b in batches:
-        batch = json.loads(b.read_text())
+        batch = json.loads(b.read_text(encoding="utf-8"))
         base = batch["base"]
         picked = {(c["book"], c["chapter"], c["verse"]) for c in batch["candidates"]}
         picked_all |= picked
-        out = json.loads(reviewed[b.name].read_text())
+        out = json.loads(reviewed[b.name].read_text(encoding="utf-8"))
         for r in out["records"]:
             bad = check(r, b.name)
             errs += bad
@@ -64,7 +64,7 @@ def main():
         sys.exit("\n".join(errs))
     target = DATA / f"{store_name(a.module)}.json"
     if target.exists():
-        for r in json.loads(target.read_text()).get("records", []):
+        for r in json.loads(target.read_text(encoding="utf-8")).get("records", []):
             if (r["book"], r["chapter"], r["verse"]) not in picked_all:
                 records.setdefault((r["book"], r["chapter"], r["verse"]), r)
     doc = {"module": a.module, "base": base, "updated": datetime.date.today().isoformat(), "records": [records[k] for k in sorted(records)]}

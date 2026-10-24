@@ -20,7 +20,7 @@ from pathlib import Path
 from bump_version import released
 
 ROOT = Path(__file__).resolve().parent.parent
-NAME = json.loads((ROOT / "src-tauri/tauri.conf.json").read_text())["productName"]
+NAME = json.loads((ROOT / "src-tauri/tauri.conf.json").read_text(encoding="utf-8"))["productName"]
 OUT = "src-tauri/target/release/bundle/dmg"
 INSTALLED = f"/Applications/{NAME}.app"
 # What tools/bump_version.py changes, and all the release commits.
@@ -50,7 +50,7 @@ def output(*cmd):
 
 
 def version():
-    old = json.loads((ROOT / "src-tauri/tauri.conf.json").read_text())["version"]
+    old = json.loads((ROOT / "src-tauri/tauri.conf.json").read_text(encoding="utf-8"))["version"]
     if not DRY_RUN:
         return old
     major, minor, patch = old.split(".")  # what make app's bump would make it

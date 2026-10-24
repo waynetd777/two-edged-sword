@@ -168,7 +168,7 @@ def cached_links(name, L, O, keys):
         h.update(f"{k}\t{' '.join(L[k])}\t{' '.join(O[k])}\n".encode())
     p = CACHE / f"{name}-{h.hexdigest()[:16]}.json"
     if p.is_file():
-        return {tuple(int(x) if x.isdigit() else x for x in k.split(".")): [tuple(x) for x in v] for k, v in json.loads(p.read_text()).items()}
+        return {tuple(int(x) if x.isdigit() else x for x in k.split(".")): [tuple(x) for x in v] for k, v in json.loads(p.read_text(encoding="utf-8")).items()}
     print(f"  aligning the Latin with the {name} (both ways; once, then cached)")
     out = links(L, O, keys)
     print()
