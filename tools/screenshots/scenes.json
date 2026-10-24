@@ -17,6 +17,47 @@
     }
   },
   {
+    "name": "read-verse",
+    "loc": {
+      "book": 43,
+      "chapter": 3,
+      "verse": 16
+    },
+    "settings": {
+      "bible": "kjv",
+      "studyPane": true,
+      "studyTab": "commentary",
+      "favBibles": [
+        "kjv",
+        "asv",
+        "ylt"
+      ]
+    }
+  },
+  {
+    "name": "read-dictionary",
+    "loc": {
+      "book": 19,
+      "chapter": 23
+    },
+    "settings": {
+      "bible": "kjv",
+      "studyPane": true,
+      "studyTab": "dictionary",
+      "favBibles": [
+        "kjv",
+        "asv",
+        "ylt"
+      ]
+    },
+    "pending": {
+      "article": {
+        "module": "easton",
+        "topic": "Shepherd"
+      }
+    }
+  },
+  {
     "name": "help",
     "loc": {
       "book": 62,
@@ -37,8 +78,9 @@
   {
     "name": "ask",
     "loc": {
-      "book": 62,
-      "chapter": 1
+      "book": 45,
+      "chapter": 8,
+      "verse": 28
     },
     "chatFile": "ask-chat.json",
     "settings": {

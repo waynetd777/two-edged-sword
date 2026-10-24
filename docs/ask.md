@@ -1,6 +1,6 @@
 # Ask
 
-<a href="images/index.md#ask"><picture><source media="(prefers-color-scheme: dark)" srcset="images/ask-dark.png"><img alt="Ask comparing the commentators on 1 John 1:1" src="images/ask-light.png"></picture></a>
+<a href="images/index.md#ask"><picture><source media="(prefers-color-scheme: dark)" srcset="images/ask-dark.png"><img alt="Ask comparing the commentators on Romans 8:28" src="images/ask-light.png"></picture></a>
 
 Ask answers questions about whatever you're looking at: a passage, a word, search results, a
 journal entry or a book. It answers from your own commentaries, lexicons and dictionaries, and

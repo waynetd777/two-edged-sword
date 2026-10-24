@@ -8,7 +8,7 @@
 
 ## Read
 
-<a href="images/index.md#reading"><picture><source media="(prefers-color-scheme: dark)" srcset="images/read-dark.png"><img alt="Reading 1 John 1 with the study pane on the commentaries" src="images/read-light.png"></picture></a>
+<a href="images/index.md#reading"><picture><source media="(prefers-color-scheme: dark)" srcset="images/read-verse-dark.png"><img alt="John 3:16 selected, with its toolbar, beside the commentaries and cross-references on it" src="images/read-verse-light.png"></picture></a>
 
 Read shows the chapter beside a study pane, which follows the verse you select.
 
@@ -37,6 +37,8 @@ The screensaver and lock don't come on while the app's window is in front showin
 
 Click any word for its Greek or Hebrew, how the KJV translates it, and dictionary articles. The
 speaker button beside the word says it aloud. This works in commentaries, dictionaries and books too.
+
+<a href="images/index.md#reading"><picture><source media="(prefers-color-scheme: dark)" srcset="images/read-dictionary-dark.png"><img alt="Psalm 23 beside the Dictionary tab, open at Easton's article on Shepherd" src="images/read-dictionary-light.png"></picture></a>
 
 ### Select verses
 

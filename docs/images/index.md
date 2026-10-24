@@ -18,7 +18,8 @@ On [Features](../features.md).
 
 On [Reading](../reading.md).
 
-- Reading 1 John 1 with the study pane on the commentaries: [light](read-light.png) · [dark](read-dark.png)
+- John 3:16 selected, with its toolbar, beside the commentaries and cross-references on it: [light](read-verse-light.png) · [dark](read-verse-dark.png)
+- Psalm 23 beside the Dictionary tab, open at Easton's article on Shepherd: [light](read-dictionary-light.png) · [dark](read-dictionary-dark.png)
 - Foxe's Book of Martyrs with a paragraph selected and highlighted: [light](books-light.png) · [dark](books-dark.png)
 - Listening to 1 John 1, the word being spoken highlighted: [light](listen-light.png) · [dark](listen-dark.png)
 - Songs for Romans 8: what the chapter is about and why each song relates to it: [light](chapter-songs-light.png) · [dark](chapter-songs-dark.png)
@@ -46,7 +47,7 @@ On [Translations and manuscripts](../manuscripts.md).
 
 On [Ask](../ask.md).
 
-- Ask comparing the commentators on 1 John 1:1: [light](ask-light.png) · [dark](ask-dark.png)
+- Ask comparing the commentators on Romans 8:28: [light](ask-light.png) · [dark](ask-dark.png)
 - The model menu, grouped by the tool that runs each model: [light](ask-models-light.png) · [dark](ask-models-dark.png)
 
 ## Journal
