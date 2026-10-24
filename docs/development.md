@@ -375,9 +375,16 @@ modules folder; then press **Rescan**. "Run first" names the scripts whose outpu
 | `tools/targum/build.py` | Targum+ and Ps-Jon+, word by word | sefaria, wlc | WLC+, Jastrow |
 | `tools/syriac/build.py` | Peshitta+, word by word, from the Greek | crosswire | Byz+, STEPBible, Murdock, Etheridge |
 | `tools/syriac/sedra.py` | Peshitta SEDRA, word by word | crosswire | ETCBC, SEDRA |
-| `tools/rheims/build.py` | The Rheims New Testament (1582), read from Google's scans with macOS's Vision (Mac only) | crosswire | Internet Archive (`vulgatenewtesta00jerogoog`) |
+| `tools/rheims/build.py` | The Rheims New Testament (1582), read from the scanned book with macOS's Vision (Mac only) | crosswire | Internet Archive (`vulgatenewtestam00lond`, the University of Toronto's copy) |
 
 - Run each with `python3`. Downloads are cached in `~/Library/Caches/Two-edged Sword/`.
+- Every download is also kept in a private archive, `Two-edged Sword Sources` in OneDrive (or the
+  folder `$TES_SOURCES` names), at the same path as in the cache, so a source can't be lost to a
+  cleared cache or a site gone down (Rheims' first source was, when Bible Support stopped its
+  downloads). When a download fails, or no longer matches its pinned sha256, `modules.fetch` takes
+  the archived copy; a source that has changed keeps its old copy beside the new one, dated.
+  `python3 tools/modules.py archive` keeps whatever is in the cache now. The archive is never
+  committed or shared, as some sources may not be passed on.
 - `tools/core` also builds into the app the modules from `crosswire`, `vulgate`, `lxx`, `ginsburg`,
   `latin/clementine.py` and `syriac/build.py`, and three of `sefaria`'s Targums, from open versions
   only (see [Writing modules](#writing-modules)).

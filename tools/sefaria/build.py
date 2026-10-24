@@ -28,7 +28,7 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from modules import CACHES, LIBRARY, chapter_lengths, fetch, module, write_whole  # noqa: E402
+from modules import CACHES, LIBRARY, chapter_lengths, fetch, keep, module, restore, write_whole  # noqa: E402
 CACHE = CACHES / "sefaria"
 EXPORT = "https://storage.googleapis.com/sefaria-export/json/"
 LINKS = "https://storage.googleapis.com/sefaria-export/links/links{}.csv"
@@ -332,21 +332,21 @@ def talmud_links():
     first that isn't there; about 680 MB, read as it streams, and only these pairs kept), cached
     part by part, so a build stopped half way picks up where it stopped."""
     p = CACHE / "talmud_links.json"
-    if not p.exists():
+    if not p.exists() and not restore(p):  # from the sources' archive (tools/modules), if the cache has lost it
         out = []
         for n in itertools.count():
             part = CACHE / "links" / f"links{n}.json"
-            if not part.exists():
+            if not part.exists() and not restore(part):
                 try:
                     pairs = link_pairs(LINKS.format(n))
                 except urllib.error.HTTPError as e:
                     if e.code == 404 and n:
                         break
                     raise
-                write_whole(part, json.dumps(pairs))
+                keep(write_whole(part, json.dumps(pairs)))
                 print(f"  links{n}.csv: {len(pairs)} links from the Talmud to the Bible")
             out += json.loads(part.read_text(encoding="utf-8"))
-        write_whole(p, json.dumps(out))
+        keep(write_whole(p, json.dumps(out)))
     return json.loads(p.read_text(encoding="utf-8"))
 
 

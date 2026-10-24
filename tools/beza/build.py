@@ -50,7 +50,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from books import NAMES  # noqa: E402
-from modules import CACHES, download, fetch as fetch_to, find, module, write_whole  # noqa: E402
+from modules import CACHES, download, fetch as fetch_to, find, keep, module, restore, write_whole  # noqa: E402
 CACHE = CACHES / "beza"
 API = "https://textus-receptus.com/api.php"
 SCRIVENER = "https://raw.githubusercontent.com/byztxt/greektext-scrivener/6049a43b135ed870f843b83eb6a04764fc796678/textonly/{}.SCV"
@@ -72,8 +72,9 @@ def pages(titles):
     out, todo = {}, []
     for t in titles:
         p = CACHE / (re.sub(r"[^\w]+", "_", t) + ".wiki")
-        if p.exists():
+        if p.exists() or restore(p):  # from the sources' archive (tools/modules), if the cache has lost it
             out[t] = p.read_text(encoding="utf-8") or None
+            keep(p)
         else:
             todo.append(t)
     for k in range(0, len(todo), 50):
@@ -91,7 +92,7 @@ def pages(titles):
         for t in batch:
             w = text.get(where[t])
             out[t] = w
-            write_whole(CACHE / (re.sub(r"[^\w]+", "_", t) + ".wiki"), w or "")
+            keep(write_whole(CACHE / (re.sub(r"[^\w]+", "_", t) + ".wiki"), w or ""))
         print(f"  fetched {min(k + 50, len(todo))} of {len(todo)} pages", end="\r", flush=True)
         time.sleep(1.5)
     if todo:

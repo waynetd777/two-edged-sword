@@ -30,6 +30,15 @@ LIBRARY = Path(os.environ.get("TES_LIBRARY") or os.environ.get("ESWORD_LIBRARY")
 ESWORD = HOME / "Library/Containers/net.e-sword.e-Sword-X/Data/Library/Application Support"
 BUNDLED = Path(__file__).resolve().parent.parent / "src-tauri/modules"
 LIBRARY.mkdir(parents=True, exist_ok=True)
+# A private copy of every source the builders download, kept where neither a cleared cache nor a site gone down can
+# lose it: the caches' files at the same paths, in OneDrive (or $TES_SOURCES). Never committed or shared, as some
+# sources may not be passed on. None (and nothing kept) where there is no OneDrive.
+_ONEDRIVE = Path(os.environ.get("OneDrive", HOME / "OneDrive")) if WINDOWS else HOME / "Library/CloudStorage/OneDrive-Personal"
+ARCHIVE = (Path(os.environ["TES_SOURCES"]) if os.environ.get("TES_SOURCES")
+           else _ONEDRIVE / "Two-edged Sword Sources" if _ONEDRIVE.is_dir() else None)
+# What isn't kept: things made, not downloaded, that can be made again (WebKit's cache, Stanza's Python environment, the
+# compiled OCR tool and the Rheims scans unzipped, whose zip is kept).
+ARCHIVE_SKIP = ("WebKit", "latin/venv", "rheims/ocr", "rheims/vulgatenewtestam00lond")
 
 
 SEARCH = (LIBRARY, ESWORD, BUNDLED)
@@ -172,16 +181,84 @@ def download(url, *, ua=UA, timeout=120, retries=3) -> bytes:
 def fetch(url, path, *, sha256=None, log=False, **kw) -> Path:
     """`path`, a cached copy of `url`: downloaded when it's missing, empty or (with `sha256`) not
     the file expected, and written whole (to a .part file, then renamed) so a failed download
-    leaves nothing behind. A download that doesn't match `sha256` stops the build."""
+    leaves nothing behind. Each is kept in ARCHIVE too, and taken from there when the download
+    fails or no longer matches `sha256`; with no copy there, a mismatch stops the build."""
     path = Path(path)
     if path.is_file() and path.stat().st_size and (not sha256 or hashlib.sha256(path.read_bytes()).hexdigest() == sha256):
+        keep(path)
         return path
     if log:
         print(f"downloading {url}")
-    data = download(url, **kw)
+    try:
+        data = download(url, **kw)
+    except (OSError, http.client.HTTPException) as e:  # urllib's errors are OSErrors
+        if restore(path, sha256):
+            print(f"  {url}: {e}; using the archived copy")
+            return path
+        raise
     if sha256 and (got := hashlib.sha256(data).hexdigest()) != sha256:
+        if restore(path, sha256):
+            print(f"  {url} has changed (sha256 {got}); using the archived copy of the version expected")
+            return path
         sys.exit(f"{url}: sha256 {got}, expected {sha256}; the source has changed, so check it and update the hash")
-    return write_whole(path, data)
+    write_whole(path, data)
+    keep(path)
+    return path
+
+
+def _archived(path) -> Path | None:
+    """Where ARCHIVE keeps a file of CACHES; None for one it doesn't keep."""
+    path = Path(path)
+    if ARCHIVE is None or not path.is_relative_to(CACHES):
+        return None
+    rel = path.relative_to(CACHES).as_posix()
+    return None if any(rel == s or rel.startswith(s + "/") for s in ARCHIVE_SKIP) else ARCHIVE / rel
+
+
+def keep(path):
+    """Copies a downloaded file from CACHES into ARCHIVE, unless it's there already. A different copy there before (the
+    source has changed) is kept beside it, dated, not replaced."""
+    import shutil
+    a = _archived(path)
+    if a is None or not Path(path).is_file():
+        return
+    size = Path(path).stat().st_size
+    if a.is_file():
+        if a.stat().st_size == size:
+            return
+        a.rename(a.with_name(f"{a.name}.{time.strftime('%Y-%m-%d', time.localtime(a.stat().st_mtime))}"))
+    a.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(path, a.with_name(a.name + ".part"))
+    a.with_name(a.name + ".part").replace(a)
+
+
+def restore(path, sha256=None) -> bool:
+    """Copies a file back into CACHES from ARCHIVE, the copy with `sha256` if given (the newest, or one of the dated
+    ones the source has had); whether there was one."""
+    import shutil
+    a = _archived(path)
+    if a is None:
+        return False
+    for c in [a, *sorted(a.parent.glob(a.name + ".*-*-*"), reverse=True)] if a.parent.is_dir() else []:
+        if c.is_file() and (not sha256 or hashlib.sha256(c.read_bytes()).hexdigest() == sha256):
+            Path(path).parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(c, path)
+            return True
+    return False
+
+
+def archive_all():
+    """Keeps every file now in CACHES (but ARCHIVE_SKIP's) in ARCHIVE: for sources downloaded before it existed."""
+    if ARCHIVE is None:
+        sys.exit("no archive: no OneDrive folder, and $TES_SOURCES isn't set")
+    n = 0
+    for p in sorted(CACHES.rglob("*")):
+        if p.is_file() and not p.name.endswith(".part") and _archived(p) is not None:
+            a = _archived(p)
+            if not (a.is_file() and a.stat().st_size == p.stat().st_size):
+                keep(p)
+                n += 1
+    print(f"{n} files kept in {ARCHIVE}")
 
 
 def write_whole(path, data) -> Path:
@@ -222,3 +299,10 @@ def greek_key(w, nu_from=2) -> str:
 def similar(a, b) -> float:
     """How alike two sequences are, 0 to 1 (difflib's ratio)."""
     return SequenceMatcher(None, a, b).ratio()
+
+
+if __name__ == "__main__":
+    if sys.argv[1:] == ["archive"]:
+        archive_all()  # python3 tools/modules.py archive
+    else:
+        sys.exit("python3 tools/modules.py archive: keeps every downloaded source in the caches in the archive")
