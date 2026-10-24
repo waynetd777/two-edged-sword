@@ -145,7 +145,7 @@ Their verses are numbered like the KJV's, so they line up beside it in Compare.
 | Targum+ and Ps-Jon+, word by word. Both are built in; build them only if you want them from Sefaria's merged text instead | Sefaria, Jastrow |
 | Peshitta SEDRA: the Peshitta word by word, with SEDRA's Syriac glosses and grammar | ETCBC, SEDRA |
 | The Rheims New Testament (1582), read from the scanned book (on a Mac) | Internet Archive |
-| Stephanus' Textus Receptus (1550), TR 1550+ word by word, and Green's Modern King James Version (its 1993 text; e-Sword's is his 1998 revision, which the app's MKJV notes follow) | CrossWire, STEPBible |
+| Stephanus' Textus Receptus (1550), TR 1550+ word by word, and Green's Modern King James Version in its 1993 text, as MKJV 1993 (e-Sword's MKJV is his 1998 revision); each has its own differences from the KJV | CrossWire, STEPBible |
 | The Westminster Leningrad Codex as running Hebrew (WLC+ is built in) | Open Scriptures |
 
 All are public domain or openly licensed, except some Sefaria translations, SEDRA's glosses,

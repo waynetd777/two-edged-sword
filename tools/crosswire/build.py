@@ -97,8 +97,9 @@ MODULES = {
     # Not built into the app: the TR is CC BY-NC-SA and the MKJV in copyright (CrossWire may distribute it).
     "TR": dict(file="tr1550", title="Greek NT: Textus Receptus (Stephanus 1550)", abbrev="TR1550", variant="x-2",
                about="Robert Estienne's (Stephanus') Greek New Testament of 1550, the Textus Receptus the KJV is most often compared with, unaccented, from Maurice Robinson's electronic edition. Where Scrivener's 1894 text (the Greek the KJV's translators chose) differs, this has the 1550's reading."),
-    "MKJV": dict(file="mkjv", title="Modern King James Version", abbrev="MKJV",
-                 about="Jay P. Green Sr.'s Modern King James Version (1962–1998): the KJV's Hebrew and Greek texts in modern English. Copyright Jay P. Green Sr.; distributed by CrossWire with his son's permission (2002)."),
+    # Its own name, as e-Sword's MKJV (mkjv.bbli) is Green's 1998 revision, which the app's MKJV variance notes follow.
+    "MKJV": dict(file="mkjv1993", title="Modern King James Version (1993)", abbrev="MKJV 1993",
+                 about="Jay P. Green Sr.'s Modern King James Version, in its 1993 text: the KJV's Hebrew and Greek texts in modern English. Green revised it in 1998 (e-Sword's MKJV), using \"Jehovah\" for the LORD among other changes. Copyright Jay P. Green Sr.; distributed by CrossWire with his son's permission (2002)."),
 }
 
 # Modules taken from an earlier version of CrossWire's, as the Wayback Machine kept it, pinned by sha256: CrossWire's
@@ -125,7 +126,10 @@ MENDS = {
     "Tyndale": {(3, 14, 28): [("righte fote:", "righte fote):")], (46, 1, 5): [("thinges ve are", "thinges ye are")],
                 (46, 1, 6): [("even as", "(even as")], (46, 13, 8): [("shall cease) or", "shall cease or")],
                 (47, 12, 1): [("me (no dout", "me no dout")], (58, 9, 15): [("which chaunsed for", "(which chaunsed for")]},
-    "MKJV": {(14, 20, 34): [("the /Book of", "the Book of")], (20, 24, 29): [("Do not `say", "Do not say")]},
+    "MKJV": {(14, 20, 34): [("the /Book of", "the Book of")], (20, 24, 29): [("Do not `say", "Do not say")],
+             # Words doubled in the module.
+             (5, 23, 11): [("into the the middle", "into the middle")], (11, 10, 15): [("men, and and from", "men, and from")],
+             (23, 66, 3): [("an ox is is as", "an ox is as")], (26, 21, 11): [("and it it polished", "and it is polished")]},
     "Murdock": {(66, 18, 17): [("by sea) stood", "by sea, stood")],
                 # Letters lost in the module's text.
                 (42, 13, 5): [("except ye resent", "except ye repent")], (42, 14, 3): [("And Jews answered", "And Jesus answered")],
@@ -418,8 +422,9 @@ def build(name, into=None):
         if m.get("variant"):
             rows = [(ch, v, variant(t, m["variant"])) for ch, v, t in rows]
         rows = [(ch, v, text(t, source)) for ch, v, t in rows]
-        if name == "MKJV":  # words Green supplied, in braces in four verses (the rest have none): italics, as elsewhere
-            rows = [(ch, v, re.sub(r"\{([^}]*)\}", r"<i>\1</i>", t)) for ch, v, t in rows]
+        if name == "MKJV":  # words Green supplied, in braces in four verses (the rest have none): italics, as elsewhere;
+            # and Luke 3's "son of", marked as supplied but followed by the "of" again ("son of of Matthat")
+            rows = [(ch, v, re.sub(r"\bson of of\b", "son of", re.sub(r"\{([^}]*)\}", r"<i>\1</i>", t))) for ch, v, t in rows]
         if b == "Ps" and titles:
             rows = [(ch, v, f"<b>{t}</b>" if (ch, v) in titles and t else t) for ch, v, t in rows]
         if b == "Sir" and prologue:

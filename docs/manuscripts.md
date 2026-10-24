@@ -17,9 +17,10 @@ Click it to see both readings, what changed, and why (usually which manuscripts 
 
 Ask uses the same list, so you can ask "how does this chapter differ from the KJV?".
 
-The app comes with lists for the NIV, ESV, ESV+, ASV, CEV, GNB, MKJV and ISV, and for the built-in
-BSB, RV, Darby, Weymouth, Douay-Rheims, Brenton's Septuagint, Murdock and Etheridge, each checked across the whole Bible (or the whole New
-Testament). A list is used only when you have that translation.
+The app comes with lists for the NIV, ESV, ESV+, ASV, CEV, GNB, MKJV and ISV, for the 1993 MKJV the
+app's tools build, and for the built-in BSB, RV, Darby, Weymouth, Douay-Rheims, Brenton's Septuagint,
+Murdock and Etheridge, each checked across the whole Bible (or the whole New Testament). A list is
+used only when you have that translation.
 
 ## Greek and Hebrew
 
