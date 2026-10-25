@@ -55,9 +55,23 @@ Word-by-word Bibles show each original word over its English and its Strong's nu
 
 <a href="images/index.md#translations-and-manuscripts"><picture><source media="(prefers-color-scheme: dark)" srcset="images/kjv-history-dark.png"><img alt="The KJV's family tree: manuscript traditions, printed editions, earlier English Bibles, and which are in the library" src="images/kjv-history-light.png"></picture></a>
 
-**KJV History** (⌘8) is the KJV's family tree: the manuscripts, the printed editions the
-translators used, and the English Bibles before it. Below the KJV come its revisions, from
-Webster's and the Revised Version to the ESV, and the Bibles translated afresh since.
+**KJV History** (⌘8) is the KJV's family tree, in two tabs:
+
+- **Before the KJV**: the manuscripts, the printed editions the translators used, and the English
+  Bibles before it.
+- **After the KJV**: the English Bibles since, by family, oldest on the left. Each line runs from a
+  Bible to one revised from it.
+
+<a href="images/index.md#translations-and-manuscripts"><picture><source media="(prefers-color-scheme: dark)" srcset="images/kjv-history-after-dark.png"><img alt="The English Bibles since the KJV by family, from Webster's and the Revised Version to the ESV, NLT and CSB" src="images/kjv-history-after-light.png"></picture></a>
+
+| Family | Bibles |
+|---|---|
+| The KJV kept | Webster's, MKJV, NKJV, KJ21, MEV |
+| The revision line | RV, ASV, RSV, NRSV, ESV |
+| From the American Standard | NASB, WEB, LSB |
+| Literal, made afresh | Young's, Darby |
+| New translations | NIV, NIrV, HCSB, NET, ISV, BSB, CSB |
+| Plain English | Living Bible, GNB, CEV, NLT, The Message |
 
 - The coloured labels on each card show what you have: green is the text itself, amber the closest
   stand-in, blue a related module. Click one to read it. A **+** beside a label opens the edition
@@ -65,6 +79,11 @@ Webster's and the Revised Version to the ESV, and the Bibles translated afresh s
 - A yellow **A** means that Bible has the Apocrypha.
 - Hover a card to light up what it came from and what came from it.
 - The **ⓘ** on a card explains what it is and how it bears on the KJV.
+- On an English Bible, a **vs** chip (**vs KJV**, **vs RSV**) opens it in Compare beside the KJV
+  or the Bible it came from, with the differences highlighted. It shows when both are in your
+  library. Your own Compare columns are kept: Compare from the sidebar shows them again.
+- After the KJV, **TR**, **MT** or **CT** on a card is the Greek its New Testament follows: the
+  Textus Receptus (the KJV's), the Majority Text or the modern critical text.
 - **Ask** opens a panel for questions about the history.
 
 ## Targums and Talmud

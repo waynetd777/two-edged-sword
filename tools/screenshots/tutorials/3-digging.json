@@ -3,7 +3,7 @@
   {"name": "tut3-differences", "loc": {"book": 51, "chapter": 1, "verse": 14}, "settings": {"bible": "bsb", "layout": "verse", "studyPane": false}, "scrollTo": "[data-v=\"12\"]", "click": "[data-v=\"14\"] .gut button"},
   {"name": "tut3-compare", "screen": "compare", "loc": {"book": 51, "chapter": 1, "verse": 14}, "settings": {"compare": ["kjv", "bsb", "byz+"]}, "scrollTo": "[data-v=\"13\"]"},
   {"name": "tut3-greek", "loc": {"book": 51, "chapter": 1, "verse": 14}, "settings": {"bible": "byz+", "layout": "verse", "studyPane": false}, "scrollTo": "[data-v=\"13\"]"},
-  {"name": "tut3-history", "screen": "history"},
+  {"name": "tut3-history", "screen": "history", "settings": {"historyView": "before"}},
   {"name": "tut3-hebrew", "loc": {"book": 19, "chapter": 23, "verse": 1}, "settings": {"bible": "wlc+", "layout": "verse", "studyPane": false}},
   {"name": "tut3-septuagint", "loc": {"book": 23, "chapter": 7, "verse": 14}, "settings": {"bible": "lxx_brenton+", "layout": "verse", "studyPane": false}, "scrollTo": "[data-v=\"14\"]"},
   {"name": "tut3-targum", "screen": "compare", "loc": {"book": 1, "chapter": 3, "verse": 15}, "settings": {"compare": ["kjv", "pseudojonathan_english", "pseudojonathan_aramaic+"]}, "scrollTo": "[data-v=\"15\"]"},

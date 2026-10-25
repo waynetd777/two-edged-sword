@@ -345,7 +345,13 @@
   },
   {
     "name": "kjv-history",
-    "screen": "history"
+    "screen": "history",
+    "settings": { "historyView": "before" }
+  },
+  {
+    "name": "kjv-history-after",
+    "screen": "history",
+    "settings": { "historyView": "after" }
   },
   {
     "name": "maps-place",

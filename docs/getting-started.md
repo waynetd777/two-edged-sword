@@ -494,9 +494,10 @@ Some Bibles, such as the ESV+, carry notes. In the text, small blue letters are 
 
 [Open KJV History](app:history)
 
-The KJV's family tree: the manuscripts, the printed editions the translators used, the English Bibles before it, its revisions since, and the Bibles translated afresh.
+The KJV's family tree, in two tabs: **Before the KJV** (the manuscripts, the printed editions the translators used, the English Bibles before it) and **After the KJV** (the English Bibles since, by family).
 
 - Each card's chips show what you have; click one to read it.
+- A **vs** chip opens an English Bible in Compare beside the KJV or the Bible it came from. Your own Compare columns are kept.
 - The ⓘ on a card says what the source is and what it gave the KJV.
 - Hover a card to light up what it came from and what came from it.
 

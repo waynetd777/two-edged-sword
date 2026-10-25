@@ -34,6 +34,8 @@ export interface Settings {
   layout: "verse" | "paragraph";
   bible: string;
   compare: string[];
+  /** KJV History: where the KJV came from, or the English Bibles since. */
+  historyView: "before" | "after";
   /** Up to three Bibles, for the buttons left of Paragraph and Verse in the reader. */
   favBibles: string[];
   hiddenBibles: string[];
@@ -119,6 +121,7 @@ const DEFAULTS: Settings = {
   layout: "verse",
   bible: "kjv",
   compare: ["kjv", "asv", "kjv+"],
+  historyView: "before",
   favBibles: [],
   hiddenBibles: [],
   commentaryOrder: ["barnes", "henry", "clarke", "gill", "jfb", "wesley", "darby", "meyer"],
@@ -271,6 +274,8 @@ export interface Place {
   word: string | null;
   search: string | null;
   /** The Bible being read there. */ bible?: string;
+  /** Compare's columns there, when they aren't the saved ones (Settings › compare): a pair opened from KJV History. */
+  compare?: string[];
   /** Where each scrolling area was when the user moved on (scrollsNow). */ scroll?: number[];
 }
 /** A place with what was open in it: a book's paragraph (from 1), a journal entry. */
@@ -415,6 +420,8 @@ interface Ctx {
   forward: () => void;
   /** Reads on in another Bible, as a step back can undo (the favourite translations). */
   openBible: (id: string) => void;
+  /** Compare with just these columns, without changing the saved ones; back returns to where the user was. */
+  compareWith: (ids: string[]) => void;
   canBack: boolean;
   canForward: boolean;
 
@@ -727,9 +734,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
       off.then((f) => f()).catch(() => {});
     };
   }, []);
+  // Compare's columns for the current place when they aren't the saved ones (Place.compare).
+  const [placeCompare, setPlaceCompare] = useState<string[] | null>(null);
   const view = useMemo(
-    () => (sessionBible && sessionBible !== settings.bible ? { ...settings, bible: sessionBible } : settings),
-    [settings, sessionBible],
+    () => ({
+      ...settings,
+      ...(sessionBible && sessionBible !== settings.bible ? { bible: sessionBible } : {}),
+      ...(placeCompare ? { compare: placeCompare } : {}),
+    }),
+    [settings, sessionBible, placeCompare],
   );
 
   // Each place remembers its Bible, so back after switching to a favourite translation returns to
@@ -739,6 +752,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const here = (): Place => ({ screen, loc: nav.loc, doc: nav.doc, word: wordStudy, search: searchFor, bible: bibleNow.current });
   const show = (pl: Place) => {
     curPlace.current = pl;
+    setPlaceCompare(pl.compare ?? null);
     if (pl.bible && pl.bible !== bibleNow.current && bibles.some((b) => b.id === pl.bible)) {
       bibleNow.current = pl.bible;
       setSessionBible(pl.bible === settings.bible ? null : pl.bible);
@@ -752,7 +766,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const navigate = (patch: Partial<Place>, replace = false) => {
     const h = hist.current;
     const cur = curPlace.current ?? here();
-    const next: Place = { ...cur, bible: bibleNow.current, scroll: undefined, ...patch };
+    // A one-off set of Compare columns lasts while the user stays in Compare (turning pages), not beyond.
+    const keep = cur.compare && (patch.screen ?? cur.screen) === "compare" && cur.screen === "compare";
+    const next: Place = { ...cur, bible: bibleNow.current, scroll: undefined, compare: keep ? cur.compare : undefined, ...patch };
     if (samePlace(next, h.stack[h.i] ?? cur) && samePlace(next, cur)) return;
     if (replace && h.i >= 0) h.stack[h.i] = next;
     else {
@@ -837,7 +853,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setLib(l);
     },
     settings: view,
-    set: ({ bible, ...rest }) => {
+    set: ({ bible, compare, ...other }) => {
+      const rest: Partial<Settings> = other;
+      // In a one-off Compare, its columns change, not the saved ones.
+      if (compare !== undefined && curPlace.current?.compare) {
+        setPlaceCompare(compare);
+        const h = hist.current;
+        if (h.i >= 0) h.stack[h.i] = { ...h.stack[h.i], compare };
+        curPlace.current = { ...curPlace.current, compare };
+      } else if (compare !== undefined) rest.compare = compare;
       if (bible !== undefined) {
         setSessionBible(bible);
         bibleNow.current = bible;
@@ -855,6 +879,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     screen,
     go: (s) => navigate({ screen: s }),
     // Same passage in another translation: the verse at the top of the column stays at the top.
+    compareWith: (ids) => navigate({ screen: "compare", compare: ids }),
     openBible: (id) => {
       const at = topVerse();
       navigate({ bible: id });

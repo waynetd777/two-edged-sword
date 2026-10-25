@@ -28,6 +28,9 @@ interface Source {
   have?: RegExp;
   near?: RegExp;
   nearNote?: string;
+  /** After the KJV: its first year, which places it in the tree, and the Greek its New Testament follows. */
+  year?: number;
+  nt?: "TR" | "MT" | "CT";
 }
 
 const TIERS: { name: string; hint: string; items: Source[] }[] = [
@@ -269,26 +272,80 @@ const KJV: Source = {
   have: /^King James Version( w\/ Strong's Numbers)?$/i,
 };
 
-/** After the KJV: its revisions, in their line of descent, and the English Bibles translated
- *  afresh since, with which of them the library has. */
-const AFTER: { name: string; hint: string; items: Source[] }[] = [
+/** After the KJV: the English Bibles since, in families (each a lane of the tree, oldest first), with
+ *  what each was revised from and the Greek its New Testament follows. */
+const FAMILIES: { name: string; hint: string; items: Source[] }[] = [
   {
-    name: "The KJV revised",
-    hint: "Each revising the one before it",
+    name: "The KJV kept",
+    hint: "Its Hebrew and Greek kept, its English brought up to date",
     items: [
       {
         id: "webster",
         name: "Webster's Bible",
         date: "1833",
+        year: 1833,
+        nt: "TR",
         note: "Noah Webster's light revision of the KJV, putting words that had changed their meaning into the English of his day.",
         kjv: "Keeps the KJV's text, changing only the words that had become obscure or misleading.",
         from: ["kjv"],
         have: /^Webster's Bible/i,
       },
       {
+        id: "mkjv",
+        name: "Modern King James Version",
+        date: "1962–98",
+        year: 1962,
+        nt: "TR",
+        note: "Jay P. Green's KJV in modern English, from the same Hebrew and Greek.",
+        kjv: "Keeps the KJV's underlying texts (the Textus Receptus and the Masoretic) while modernising its English.",
+        from: ["kjv"],
+        have: /Modern King James/i,
+      },
+      {
+        id: "nkjv",
+        name: "New King James Version",
+        date: "1982",
+        year: 1982,
+        nt: "TR",
+        note: "The KJV in modern English, from the same Hebrew and Greek.",
+        kjv: "A revision of the KJV itself: same Hebrew and Greek, same structure, with other texts' readings noted in the margin.",
+        from: ["kjv"],
+        have: /New King James/i,
+      },
+      {
+        id: "kj21",
+        name: "21st Century King James Version",
+        date: "1994",
+        year: 1994,
+        nt: "TR",
+        note: "The KJV with the words no longer understood replaced, checked against Webster's dictionary; its wording otherwise kept.",
+        kjv: "Keeps the KJV's text and its Textus Receptus, changing only obsolete words.",
+        from: ["kjv"],
+        have: /21st Century King James|^KJ21$/i,
+      },
+      {
+        id: "mev",
+        name: "Modern English Version",
+        date: "2014",
+        year: 2014,
+        nt: "TR",
+        note: "Translated by chaplains and scholars in the KJV's tradition, from the Textus Receptus and the Masoretic text.",
+        kjv: "A new translation that keeps the KJV's Hebrew and Greek and much of its formal style.",
+        from: ["kjv"],
+        have: /Modern English Version|^MEV$/i,
+      },
+    ],
+  },
+  {
+    name: "The revision line",
+    hint: "Each revising the one before it, from older Greek manuscripts",
+    items: [
+      {
         id: "rv",
         name: "Revised Version",
         date: "1881–85",
+        year: 1881,
+        nt: "CT",
         note: "The official British revision of the KJV, from older Greek manuscripts (Westcott and Hort's text).",
         kjv: "The first official revision of the KJV. Its New Testament changed many readings to follow older manuscripts, so it departs from the Textus Receptus.",
         from: ["kjv"],
@@ -298,8 +355,10 @@ const AFTER: { name: string; hint: string; items: Source[] }[] = [
         id: "asv",
         name: "American Standard Version",
         date: "1901",
+        year: 1901,
+        nt: "CT",
         note: "The Revised Version's American edition, as literal as English allows.",
-        kjv: "Carries the KJV's revision into American usage, and is the ancestor of the RSV, NASB and WEB.",
+        kjv: "Carries the KJV's revision into American usage, and is the ancestor of the RSV, NASB, WEB and the Living Bible.",
         from: ["rv"],
         have: /American Standard Version/i,
       },
@@ -307,51 +366,30 @@ const AFTER: { name: string; hint: string; items: Source[] }[] = [
         id: "rsv",
         name: "Revised Standard Version",
         date: "1952",
+        year: 1952,
+        nt: "CT",
         note: "The ASV revised into modern English.",
         kjv: "Continues the KJV's line of revisions in modern English, through the ASV and the RV.",
         from: ["asv"],
-        have: /Revised Standard Version/i,
+        have: /^Revised Standard Version/i,
       },
       {
-        id: "mkjv",
-        name: "Modern King James Version",
-        date: "1962–98",
-        note: "Jay P. Green's KJV in modern English, from the same Hebrew and Greek.",
-        kjv: "Keeps the KJV's underlying texts (the Textus Receptus and the Masoretic) while modernising its English.",
-        from: ["kjv"],
-        have: /Modern King James/i,
-      },
-      {
-        id: "nasb",
-        name: "New American Standard Bible",
-        date: "1971",
-        note: "The ASV revised, keeping its word-for-word method.",
-        kjv: "In the KJV's line through the ASV, but translated from the modern critical Greek text rather than the Textus Receptus.",
-        from: ["asv"],
-        have: /New American Standard/i,
-      },
-      {
-        id: "nkjv",
-        name: "New King James Version",
-        date: "1982",
-        note: "The KJV in modern English, from the same Hebrew and Greek.",
-        kjv: "A revision of the KJV itself: same Hebrew and Greek, same structure, with other texts' readings noted in the margin.",
-        from: ["kjv"],
-        have: /New King James/i,
-      },
-      {
-        id: "web",
-        name: "World English Bible",
-        date: "2000",
-        note: "The ASV revised into modern English and put into the public domain.",
-        kjv: "A modern descendant of the KJV through the ASV, and free to copy as the KJV is.",
-        from: ["asv"],
-        have: /World English Bible/i,
+        id: "nrsv",
+        name: "New Revised Standard Version",
+        date: "1989",
+        year: 1989,
+        nt: "CT",
+        note: "The RSV revised by an ecumenical committee, with readings from the Dead Sea Scrolls and inclusive language for people.",
+        kjv: "In the KJV's line of revisions through the RSV; the Bible most used in biblical scholarship.",
+        from: ["rsv"],
+        have: /New Revised Standard/i,
       },
       {
         id: "esv",
         name: "English Standard Version",
         date: "2001",
+        year: 2001,
+        nt: "CT",
         note: "The RSV revised, in a literal tradition reaching back through the ASV and the RV to the KJV.",
         kjv: "The latest step in the KJV's line of revisions: KJV, RV, ASV, RSV, ESV.",
         from: ["rsv"],
@@ -360,13 +398,54 @@ const AFTER: { name: string; hint: string; items: Source[] }[] = [
     ],
   },
   {
-    name: "Translated afresh",
-    hint: "English Bibles since, made from the Hebrew and Greek rather than from the KJV",
+    name: "From the American Standard",
+    hint: "Literal Bibles revised from the ASV",
+    items: [
+      {
+        id: "nasb",
+        name: "New American Standard Bible",
+        date: "1971",
+        year: 1971,
+        nt: "CT",
+        note: "The ASV revised, keeping its word-for-word method.",
+        kjv: "In the KJV's line through the ASV, but translated from the modern critical Greek text rather than the Textus Receptus.",
+        from: ["asv"],
+        have: /New American Standard/i,
+      },
+      {
+        id: "web",
+        name: "World English Bible",
+        date: "2000",
+        year: 2000,
+        nt: "MT",
+        note: "The ASV revised into modern English and put into the public domain; its New Testament follows the Majority Text.",
+        kjv: "A modern descendant of the KJV through the ASV, and free to copy as the KJV is.",
+        from: ["asv"],
+        have: /World English Bible/i,
+      },
+      {
+        id: "lsb",
+        name: "Legacy Standard Bible",
+        date: "2021",
+        year: 2021,
+        nt: "CT",
+        note: "The NASB of 1995 revised at The Master's Seminary, giving the divine name as Yahweh and translating a word alike wherever it can.",
+        kjv: "In the KJV's line through the ASV and the NASB.",
+        from: ["nasb"],
+        have: /Legacy Standard/i,
+      },
+    ],
+  },
+  {
+    name: "Literal, made afresh",
+    hint: "Word-for-word translations independent of the KJV",
     items: [
       {
         id: "ylt",
         name: "Young's Literal Translation",
         date: "1862; 1898",
+        year: 1862,
+        nt: "TR",
         note: "Robert Young's word-for-word translation, keeping the Hebrew and Greek tenses.",
         kjv: "Not a revision of the KJV but a fresh literal translation, mostly from the Textus Receptus; often used to check the KJV's tenses.",
         have: /Young's Literal/i,
@@ -375,47 +454,65 @@ const AFTER: { name: string; hint: string; items: Source[] }[] = [
         id: "darby",
         name: "Darby Translation",
         date: "1890",
+        year: 1890,
+        nt: "CT",
         note: "John Nelson Darby's literal translation from the best texts of his day.",
         kjv: "A fresh translation, independent of the KJV, from the critical Greek texts of the 1800s.",
         have: /^Darby/i,
       },
-      {
-        id: "gnb",
-        name: "Good News Bible",
-        date: "1976",
-        note: "A meaning-for-meaning translation in plain, everyday English.",
-        kjv: "Breaks with the KJV tradition, translating the meaning of each passage rather than word for word.",
-        have: /Good News/i,
-      },
+    ],
+  },
+  {
+    name: "New translations",
+    hint: "Made from the Hebrew and Greek by new teams, between word for word and meaning for meaning",
+    items: [
       {
         id: "niv",
         name: "New International Version",
         date: "1978",
+        year: 1978,
+        nt: "CT",
         note: "A translation balancing word and meaning, made by an international team.",
         kjv: "A new translation outside the KJV's line, from the modern critical texts; the most widely read alternative to the KJV.",
         have: /^New International Version/i,
       },
       {
-        id: "cev",
-        name: "Contemporary English Version",
-        date: "1995",
-        note: "Plain English written to be read aloud and understood at a first hearing.",
-        kjv: "Outside the KJV's line; written to be heard and understood rather than for word-for-word study.",
-        have: /Contemporary English/i,
-      },
-      {
         id: "nirv",
         name: "New International Reader's Version",
         date: "1996",
+        year: 1996,
+        nt: "CT",
         note: "The NIV in simpler words, for young and new readers.",
         kjv: "Simplified from the NIV, so outside the KJV's line.",
         from: ["niv"],
         have: /New International Reader/i,
       },
       {
+        id: "hcsb",
+        name: "Holman Christian Standard Bible",
+        date: "2004",
+        year: 2004,
+        nt: "CT",
+        note: "A new translation for Holman Bible Publishers, aiming at accuracy and readability together.",
+        kjv: "A new translation outside the KJV's line, from the modern critical texts.",
+        have: /Holman Christian Standard|^HCSB$/i,
+      },
+      {
+        id: "net",
+        name: "NET Bible",
+        date: "2005",
+        year: 2005,
+        nt: "CT",
+        note: "The New English Translation, first published online, with some 60,000 translators' notes explaining its choices.",
+        kjv: "A new translation outside the KJV's line; its notes often say where and why it differs from older versions.",
+        have: /New English Translation|^NET( Bible)?$/i,
+      },
+      {
         id: "isv",
         name: "International Standard Version",
         date: "2011",
+        year: 2011,
+        nt: "CT",
         note: "A new translation using recent manuscript finds.",
         kjv: "A new translation outside the KJV's line, from the modern critical texts.",
         have: /^International Standard Version/i,
@@ -424,14 +521,101 @@ const AFTER: { name: string; hint: string; items: Source[] }[] = [
         id: "bsb",
         name: "Berean Standard Bible",
         date: "2016–2023",
+        year: 2016,
+        nt: "CT",
         note: "A translation of the original languages, put into the public domain in 2023.",
         kjv: "A new translation outside the KJV's line; its Greek is close to the modern critical text.",
         have: /^Berean Standard Bible/i,
       },
+      {
+        id: "csb",
+        name: "Christian Standard Bible",
+        date: "2017",
+        year: 2017,
+        nt: "CT",
+        note: "The HCSB revised and renamed.",
+        kjv: "A revision of the HCSB, outside the KJV's line.",
+        from: ["hcsb"],
+        have: /^Christian Standard Bible|^CSB$/i,
+      },
+    ],
+  },
+  {
+    name: "Plain English",
+    hint: "Translated for meaning, in everyday words",
+    items: [
+      {
+        id: "lb",
+        name: "The Living Bible",
+        date: "1971",
+        year: 1971,
+        nt: "CT",
+        note: "Kenneth Taylor's paraphrase of the American Standard Version, begun for his own children.",
+        kjv: "A paraphrase of the ASV, so a distant descendant of the KJV's line.",
+        from: ["asv"],
+        have: /^(The )?Living Bible|^TLB$/i,
+      },
+      {
+        id: "gnb",
+        name: "Good News Bible",
+        date: "1976",
+        year: 1976,
+        nt: "CT",
+        note: "A meaning-for-meaning translation in plain, everyday English.",
+        kjv: "Breaks with the KJV tradition, translating the meaning of each passage rather than word for word.",
+        have: /Good News/i,
+      },
+      {
+        id: "cev",
+        name: "Contemporary English Version",
+        date: "1995",
+        year: 1995,
+        nt: "CT",
+        note: "Plain English written to be read aloud and understood at a first hearing.",
+        kjv: "Outside the KJV's line; written to be heard and understood rather than for word-for-word study.",
+        have: /Contemporary English/i,
+      },
+      {
+        id: "nlt",
+        name: "New Living Translation",
+        date: "1996",
+        year: 1996,
+        nt: "CT",
+        note: "The Living Bible translated afresh from the Hebrew and Greek by some 90 scholars.",
+        kjv: "Grew from the Living Bible's paraphrase of the ASV, but is a translation from the original languages.",
+        from: ["lb"],
+        have: /New Living Translation|^NLT$/i,
+      },
+      {
+        id: "msg",
+        name: "The Message",
+        date: "1993–2002",
+        year: 1993,
+        nt: "CT",
+        note: "Eugene Peterson's rendering of the Bible into the idiom of everyday American speech.",
+        kjv: "A paraphrase from the Hebrew and Greek, as far from the KJV's word-for-word method as an English Bible goes.",
+        have: /^The Message|^MSG$/i,
+      },
     ],
   },
 ];
-const LATER = AFTER.flatMap((t) => t.items);
+const LATER = FAMILIES.flatMap((t) => t.items);
+/** The tree's columns: each card goes in the one its year falls in. */
+const ERAS: [string, number][] = [
+  ["1800–99", 1800],
+  ["1900–49", 1900],
+  ["1950–79", 1950],
+  ["1980–99", 1980],
+  ["2000–09", 2000],
+  ["2010 on", 2010],
+];
+const era = (s: Source) => ERAS.reduce((k, [, y], i) => ((s.year ?? 0) >= y ? i : k), 0);
+/** The Greek a Bible's New Testament follows: a mark on its card in the tree. */
+const NT_TEXT: Record<NonNullable<Source["nt"]>, string> = {
+  TR: "Textus Receptus, the Greek the KJV follows",
+  MT: "Majority Text, the Greek as most manuscripts give it",
+  CT: "the modern critical text, from the oldest manuscripts",
+};
 
 /** The library's Bibles that are this text, and the others that come closest or are related. */
 function matches(s: Source, bibles: ModuleInfo[]) {
@@ -497,17 +681,71 @@ function historySummary(bibles: ModuleInfo[]): string {
     "The translators (about 47 scholars in six companies, 1604–1611) worked from printed editions, each resting on manuscript traditions, and revised the English Bibles before them.\n\n" +
     TIERS.map((t) => `${t.name} (${t.hint}):\n${t.items.map(line).join("\n")}`).join("\n\n") +
     `\n\n${line(KJV)}\n\nAfter the KJV:\n\n` +
-    AFTER.map((t) => `${t.name} (${t.hint}):\n${t.items.map(line).join("\n")}`).join("\n\n") +
+    FAMILIES.map((t) => `${t.name} (${t.hint}):\n${t.items.map(line).join("\n")}`).join("\n\n") +
     `\n\nWhen answering, the user's own library modules can be named as ones to read.`
   );
 }
 
-/** The diagram's lines: each source to what drew on it, the printed editions and English Bibles to
- *  the KJV, and the KJV down through its revisions. */
-const EDGES: [string, string][] = [
-  ...[...ALL, ...LATER].flatMap((s) => (s.from ?? []).map((f) => [f, s.id] as [string, string])),
-  ...TIERS.slice(1).flatMap((t) => t.items.map((s) => [s.id, "kjv"] as [string, string])),
-];
+/** The lines of each view: before the KJV, each source to what drew on it and the printed editions and
+ *  English Bibles to the KJV; after it, each Bible from the one it was revised from. */
+const EDGES: Record<View, [string, string][]> = {
+  before: [
+    ...ALL.flatMap((s) => (s.from ?? []).map((f) => [f, s.id] as [string, string])),
+    ...TIERS.slice(1).flatMap((t) => t.items.map((s) => [s.id, "kjv"] as [string, string])),
+  ],
+  after: LATER.flatMap((s) => (s.from ?? []).map((f) => [f, s.id] as [string, string])),
+};
+type View = "before" | "after";
+
+/** "the Revised Version", but "The Living Bible" as it is. */
+const the = (name: string) => (name.startsWith("The ") ? name : `the ${name}`);
+
+/** The English Bibles, which compare word for word with each other: those before the KJV, the KJV and those since. */
+const ENGLISH = [...TIERS[2].items, KJV, ...LATER];
+
+/** What an English Bible can be compared with: the English Bibles it came from, and the KJV. */
+const compareTargets = (s: Source) => {
+  if (s.id === "kjv" || !ENGLISH.includes(s)) return [];
+  const parents = ENGLISH.filter((x) => s.from?.includes(x.id));
+  return parents.some((x) => x.id === "kjv") ? parents : [...parents, KJV];
+};
+
+/** In the library, this text's own copy: its plain edition rather than its + one (KJV, not KJV+). */
+const copyOf = (s: Source, bibles: ModuleInfo[]) => {
+  const have = matches(s, bibles).have;
+  return have.find((m) => !m.id.endsWith("+")) ?? have[0];
+};
+
+/** The comparisons the library allows for a card: each Bible it can be set beside (`m`, for `x`) and its own copy. */
+function comparable(s: Source, bibles: ModuleInfo[]) {
+  const mine = copyOf(s, bibles);
+  if (!mine) return [];
+  return compareTargets(s).flatMap((x) => {
+    const m = copyOf(x, bibles);
+    return m ? [{ x, m, mine }] : [];
+  });
+}
+
+/** "Compare with the RSV": the Bible beside each it came from, and the KJV, in Compare; or what's missing for it. */
+function CompareButtons(p: { s: Source; bibles: ModuleInfo[]; onCompare: (ids: string[]) => void }) {
+  const targets = compareTargets(p.s);
+  if (!targets.length) return null;
+  const can = comparable(p.s, p.bibles);
+  return can.length ? (
+    <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 4 }}>
+      {can.map(({ x, m, mine }) => (
+        <button key={x.id} className="btn primary ks-compare" type="button" onClick={() => p.onCompare([m.id, mine.id])}>
+          <Icon name="compare" size={13} />
+          Compare with {the(x.name)}
+        </button>
+      ))}
+    </div>
+  ) : (
+    <p style={{ margin: "4px 0 0", fontSize: 12.5, lineHeight: 1.5, color: "var(--muted)" }}>
+      With it and {targets.map((x) => the(x.name)).join(" or ")} in your library, compare them here.
+    </p>
+  );
+}
 
 export function KjvHistoryScreen() {
   const app = useApp();
@@ -520,6 +758,9 @@ export function KjvHistoryScreen() {
   const [lines, setLines] = useState<{ a: string; b: string; d: string }[]>([]);
   const [hover, setHover] = useState<string | null>(null);
   const [about, setAbout] = useState<{ s: Source; near: boolean; rect: DOMRect } | null>(null);
+  // Before the KJV (where it came from) or after it (the Bibles since, as a family tree).
+  const view = app.settings.historyView;
+  const edges = EDGES[view];
 
   useLayoutEffect(() => {
     const el = box.current;
@@ -527,12 +768,21 @@ export function KjvHistoryScreen() {
     const draw = () => {
       const o = el.getBoundingClientRect();
       setLines(
-        EDGES.flatMap(([a, b]) => {
+        edges.flatMap(([a, b]) => {
           const ea = cards.current.get(a),
             eb = cards.current.get(b);
           if (!ea || !eb) return [];
           const ra = ea.getBoundingClientRect(),
             rb = eb.getBoundingClientRect();
+          // The tree runs left to right in time: from a card's right side to the next one's left.
+          if (view === "after") {
+            const x1 = ra.right - o.left,
+              y1 = ra.top + 22 - o.top,
+              x2 = rb.left - o.left,
+              y2 = rb.top + 22 - o.top,
+              dx = Math.max(18, (x2 - x1) / 2);
+            return [{ a, b, d: `M${x1},${y1} C${x1 + dx},${y1} ${x2 - dx},${y2} ${x2},${y2}` }];
+          }
           const x1 = ra.left + ra.width / 2 - o.left,
             y1 = ra.bottom - o.top,
             x2 = rb.left + rb.width / 2 - o.left,
@@ -554,7 +804,7 @@ export function KjvHistoryScreen() {
     ro.observe(el);
     cards.current.forEach((c) => ro.observe(c));
     return () => ro.disconnect();
-  }, []);
+  }, [view, edges]);
 
   // The hovered card's ancestors and descendants.
   const lit = new Set<string>();
@@ -563,13 +813,13 @@ export function KjvHistoryScreen() {
       if (lit.has(id + "^")) return;
       lit.add(id + "^");
       lit.add(id);
-      EDGES.filter(([, b]) => b === id).forEach(([a]) => up(a));
+      edges.filter(([, b]) => b === id).forEach(([a]) => up(a));
     };
     const down = (id: string) => {
       if (lit.has(id + "v")) return;
       lit.add(id + "v");
       lit.add(id);
-      EDGES.filter(([a]) => a === id).forEach(([, b]) => down(b));
+      edges.filter(([a]) => a === id).forEach(([, b]) => down(b));
     };
     up(hover);
     down(hover);
@@ -605,12 +855,14 @@ export function KjvHistoryScreen() {
       ? ` (${coverageText(cov[m.id])})`
       : "";
   const haveCount = ALL.filter((s) => matches(s, bibles).have.length).length;
+  const laterCount = LATER.filter((s) => matches(s, bibles).have.length).length;
   const nearCount = ALL.filter((s) => {
     const m = matches(s, bibles);
     return !m.have.length && m.near.length;
   }).length;
 
-  const card = (s: Source, wide = false) => {
+  // `narrow` for the tree after the KJV, whose columns must fit the window.
+  const card = (s: Source, wide = false, narrow = false) => {
     const { have, near } = matches(s, bibles);
     const status = have.length ? "have" : near.length ? "near" : "none";
     return (
@@ -621,12 +873,15 @@ export function KjvHistoryScreen() {
           else cards.current.delete(s.id);
         }}
         className={`ks-card ks-${status} ${wide ? "ks-main" : ""}`}
-        style={{ minWidth: wide ? 300 : 168, width: "max-content", maxWidth: 340, opacity: on(s.id) ? 1 : 0.35 }}
+        style={{
+          ...(narrow ? { width: 146 } : { minWidth: wide ? 300 : 168, width: "max-content", maxWidth: 340 }),
+          opacity: on(s.id) ? 1 : 0.35,
+        }}
         onMouseEnter={() => setHover(s.id)}
         onMouseLeave={() => setHover(null)}
       >
         <div style={{ display: "flex", alignItems: "flex-start", gap: 4 }}>
-          <b style={{ font: wide ? "500 19px/1.2 var(--display)" : "600 13px/1.25 var(--ui)", flexGrow: 1 }}>{s.name}</b>
+          <b style={{ font: wide && !narrow ? "500 19px/1.2 var(--display)" : "600 13px/1.25 var(--ui)", flexGrow: 1 }}>{s.name}</b>
           <button
             className="ibtn"
             type="button"
@@ -641,8 +896,13 @@ export function KjvHistoryScreen() {
             <Icon name="info" size={13} />
           </button>
         </div>
-        <span className="n" style={{ fontSize: 11.5 }}>
+        <span className="n" style={{ fontSize: 11.5, display: "flex", alignItems: "center", gap: 6 }}>
           {s.date}
+          {s.nt && (
+            <span className="ks-nt" title={`New Testament: ${NT_TEXT[s.nt]}`}>
+              {s.nt}
+            </span>
+          )}
         </span>
         {/* One resource to a line, but a Bible and its + edition (WLC, WLC+) side by side. */}
         <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
@@ -687,6 +947,27 @@ export function KjvHistoryScreen() {
             </div>
           ))}
           {!have.length && !near.length && <span className="ks-chip">Not in library</span>}
+          {/* Side by side in Compare with what it came from, and with the KJV. */}
+          {comparable(s, bibles).length > 0 && (
+            // As wide as the card the rest makes, wrapping, so the chips don't widen it.
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 3, width: 0, minWidth: "100%" }}>
+              {comparable(s, bibles).map(({ x, m, mine }) => (
+                <button
+                  key={x.id}
+                  type="button"
+                  className="ks-chip ks-chip-cmp"
+                  title={`Compare ${mine.abbrev} with ${the(x.name)} (${m.abbrev}), side by side`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    app.compareWith([m.id, mine.id]);
+                  }}
+                >
+                  <Icon name="compare" size={11} />
+                  vs {m.abbrev}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     );
@@ -732,33 +1013,89 @@ export function KjvHistoryScreen() {
         <div className="scroll" style={{ overflow: "auto" }}>
           <div style={{ display: "flex", alignItems: "flex-end", gap: 12, padding: "20px 28px 0", flexWrap: "wrap" }}>
             <div style={{ flexGrow: 1, minWidth: 320 }}>
-              <h1 style={{ margin: 0, font: "500 30px/1.1 var(--display)" }}>Where the King James Version came from</h1>
+              <div className="seg" role="tablist" aria-label="View" style={{ marginBottom: 12 }}>
+                {(
+                  [
+                    ["before", "Before the KJV"],
+                    ["after", "After the KJV"],
+                  ] as [View, string][]
+                ).map(([v, label]) => (
+                  <button
+                    key={v}
+                    type="button"
+                    role="tab"
+                    aria-selected={view === v}
+                    className={view === v ? "on" : ""}
+                    onClick={() => {
+                      setHover(null);
+                      setAbout(null);
+                      app.set({ historyView: v });
+                    }}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+              <h1 style={{ margin: 0, font: "500 30px/1.1 var(--display)" }}>
+                {view === "before" ? "Where the King James Version came from" : "The English Bibles since the King James"}
+              </h1>
               <div className="hint" style={{ fontSize: 12.5, marginTop: 6 }}>
-                The translators worked from printed editions, each resting on manuscript traditions. {haveCount} of {ALL.length} are in your
-                library, and the closest equivalent of {nearCount} more. Below the KJV, its revisions and the Bibles translated since. Hover
-                a card for its line of descent; click a chip to read it.
+                {view === "before" ? (
+                  <>
+                    The translators worked from printed editions, each resting on manuscript traditions. {haveCount} of {ALL.length} are in
+                    your library, and the closest equivalent of {nearCount} more. Hover a card for its line of descent; click a chip to read
+                    it, or a “vs” chip to compare two side by side.
+                  </>
+                ) : (
+                  <>
+                    By family, oldest on the left; each line runs from a Bible to one revised from it. {laterCount} of {LATER.length} are in
+                    your library. Hover a card for its line of descent; click a chip to read it, or a “vs” chip to compare two side by side.
+                  </>
+                )}
               </div>
             </div>
             <span className="ks-chip ks-chip-have" style={{ cursor: "default" }}>
               In library
             </span>
-            <span className="ks-chip ks-chip-near" style={{ cursor: "default" }}>
-              Closest
-            </span>
-            <span className="ks-chip ks-chip-rel" style={{ cursor: "default" }}>
-              Related
-            </span>
+            {view === "before" && (
+              <>
+                <span className="ks-chip ks-chip-near" style={{ cursor: "default" }}>
+                  Closest
+                </span>
+                <span className="ks-chip ks-chip-rel" style={{ cursor: "default" }}>
+                  Related
+                </span>
+              </>
+            )}
             <span className="ks-chip" style={{ cursor: "default" }}>
               Not in library
             </span>
-            <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
-              <span className="ks-apo" style={{ cursor: "default" }}>
-                A
+            {view === "before" ? (
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
+                <span className="ks-apo" style={{ cursor: "default" }}>
+                  A
+                </span>
+                <span className="n">Has the Apocrypha (hover for which)</span>
               </span>
-              <span className="n">Has the Apocrypha (hover for which)</span>
-            </span>
+            ) : (
+              (["TR", "MT", "CT"] as const).map((k) => (
+                <span key={k} style={{ display: "inline-flex", alignItems: "center", gap: 5 }} title={NT_TEXT[k]}>
+                  <span className="ks-nt">{k}</span>
+                  <span className="n">{{ TR: "Textus Receptus", MT: "Majority Text", CT: "Critical text" }[k]}</span>
+                </span>
+              ))
+            )}
           </div>
-          <div ref={box} style={{ position: "relative", padding: "22px 24px 40px", display: "flex", flexDirection: "column", gap: 44 }}>
+          <div
+            ref={box}
+            style={{
+              position: "relative",
+              padding: view === "after" ? "22px 16px 40px" : "22px 24px 40px",
+              display: "flex",
+              flexDirection: "column",
+              gap: 44,
+            }}
+          >
             <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", overflow: "visible" }}>
               {lines.map((l, i) => {
                 const hi = hover && lit.has(l.a) && lit.has(l.b);
@@ -774,9 +1111,55 @@ export function KjvHistoryScreen() {
                 );
               })}
             </svg>
-            {TIERS.map(tier)}
-            <div style={{ display: "flex", justifyContent: "center" }}>{card(KJV, true)}</div>
-            {AFTER.map(tier)}
+            {view === "before" ? (
+              <>
+                {TIERS.map(tier)}
+                <div style={{ display: "flex", justifyContent: "center" }}>{card(KJV, true)}</div>
+              </>
+            ) : (
+              // The KJV first, at the head of the families it began; a lane for each family, a column for each era.
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: `repeat(${ERAS.length + 1}, 146px)`,
+                  columnGap: 18,
+                  rowGap: 8,
+                  alignItems: "start",
+                  width: "max-content",
+                  margin: "0 auto",
+                }}
+              >
+                {[["1611"], ...ERAS].map(([name]) => (
+                  <span
+                    key={name}
+                    className="label"
+                    style={{ textAlign: "center", paddingBottom: 6, borderBottom: "1px solid var(--border)" }}
+                  >
+                    {name}
+                  </span>
+                ))}
+                <div style={{ gridColumn: 1, gridRow: 3 }}>{card(KJV, true, true)}</div>
+                {FAMILIES.flatMap((f, i) => [
+                  <div
+                    key={f.name}
+                    style={{ gridColumn: "2 / -1", gridRow: 2 + i * 2, display: "flex", gap: 10, alignItems: "baseline", marginTop: 14 }}
+                  >
+                    <span className="label">{f.name}</span>
+                    <span className="n" style={{ fontSize: 11.5 }}>
+                      {f.hint}
+                    </span>
+                  </div>,
+                  ...ERAS.map((_, k) => (
+                    <div
+                      key={`${f.name}${k}`}
+                      style={{ gridColumn: 2 + k, gridRow: 3 + i * 2, display: "flex", flexDirection: "column", gap: 10 }}
+                    >
+                      {f.items.filter((s) => era(s) === k).map((s) => card(s, false, true))}
+                    </div>
+                  )),
+                ])}
+              </div>
+            )}
           </div>
         </div>
         {asking && canAsk && (
@@ -823,6 +1206,14 @@ export function KjvHistoryScreen() {
             {about.near && about.s.nearNote && (
               <p style={{ margin: 0, fontSize: 12.5, lineHeight: 1.5, color: "var(--muted)" }}>{about.s.nearNote}</p>
             )}
+            <CompareButtons
+              s={about.s}
+              bibles={bibles}
+              onCompare={(ids) => {
+                setAbout(null);
+                app.compareWith(ids);
+              }}
+            />
           </div>
         </Popover>
       )}

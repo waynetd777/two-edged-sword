@@ -42,6 +42,7 @@ On [Translations and manuscripts](../manuscripts.md).
 - Psalm 23 in WLC+, the Hebrew read right to left, each word over its English and Strong's number: [light](interlinear-hebrew-light.png) · [dark](interlinear-hebrew-dark.png)
 - Matthew 6 in Peshitta+, the Syriac read right to left, each word over its English: [light](interlinear-syriac-light.png) · [dark](interlinear-syriac-dark.png)
 - The KJV's family tree: manuscript traditions, printed editions, earlier English Bibles, and which are in the library: [light](kjv-history-light.png) · [dark](kjv-history-dark.png)
+- The English Bibles since the KJV by family, from Webster's and the Revised Version to the ESV, NLT and CSB: [light](kjv-history-after-light.png) · [dark](kjv-history-after-dark.png)
 
 ## Ask
 
