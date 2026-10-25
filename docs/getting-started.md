@@ -181,7 +181,7 @@ Bibles with + in their name, such as KJV+, carry Strong's numbers: hover a numbe
 
 Original-language Bibles with a +, such as these, show each word over its English. Hover a word for its grammar.
 
-- WLC+ (Hebrew) and Byz+ (Greek)
+- WLC+, Ginsburg+ and MAM+ (Hebrew) and Byz+ (Greek)
 - LXX-Brenton+ (the Septuagint)
 - Vulg-C+ (the Latin Vulgate)
 - Peshitta+ (the Syriac)

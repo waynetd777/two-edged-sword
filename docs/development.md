@@ -363,9 +363,11 @@ modules folder; then press **Rescan**. "Run first" names the scripts whose outpu
 | `tools/crosswire/trplus.py` | TR 1550+, Stephanus' TR word by word, not built in | | CrossWire, STEPBible |
 | `tools/sefaria/build.py` | Targum, Targum Pseudo-Jonathan, the Babylonian Talmud (Sefaria's merged text, all versions) | | Sefaria |
 | `tools/vulgate/build.py` | Clementine Vulgate (1592) | | Clementine Vulgate Project |
-| `tools/wlc/build.py` | WLC+: the Hebrew Old Testament word by word; WLC, the same as running Hebrew, not built in | | Open Scriptures, STEPBible |
+| `tools/wlc/build.py` | WLC+: the Hebrew Old Testament word by word; WLC, the same as running Hebrew | | Open Scriptures, STEPBible |
 | `tools/ginsburg/build.py` | Ginsburg's Hebrew Bible (1894) | wlc | ahembd/Ginsburg_Hebrew_Bible |
 | `tools/ginsburg/plus.py` | Ginsburg+, word by word | ginsburg | WLC+ |
+| `tools/mam/build.py` | Miqra according to the Masorah (MAM), the Aleppo Codex's Hebrew | wlc | Hebrew Wikisource, through bdenckla/MAM-basics |
+| `tools/mam/plus.py` | MAM+, word by word (Ginsburg+'s method) | mam | WLC+ |
 | `tools/beza/build.py` | Beza's Greek New Testament (1598) | | textus-receptus.com; e-Sword's TR+ if you have it |
 | `tools/beza/plus.py` | Beza 1598+, word by word | beza | STEPBible |
 | `tools/lxx/build.py` | Brenton's Greek Septuagint, with the Apocrypha | | eBible.org |
@@ -445,7 +447,8 @@ Its docstring lists them and their licences.
   - the Clementine Vulgate (`tools/vulgate`) and the Greek Brenton (`tools/lxx/build.py`);
   - Ginsburg and Ginsburg+ (`tools/ginsburg`), shared under the GPL as the app is, since a few
     verses come from a GPL-3.0 source;
-  - WLC+ (`tools/wlc`);
+  - MAM and MAM+ (`tools/mam`), CC BY-SA, credited to Hebrew Wikisource as it asks;
+  - WLC and WLC+ (`tools/wlc`);
   - the word-by-word LXX-Brenton+ and Peshitta+ (`tools/lxx/plus.py`, `tools/syriac/build.py`),
     from open sources only;
   - Targum+ and Ps-Jon+ (`tools/targum`), from the built-in Targums. Their Jastrow glosses are
@@ -494,6 +497,8 @@ Its docstring lists them and their licences.
   **History.** after its first. They are in `tools/history.py`, by file name (a "+" edition shares
   its plain one's, the Talmud's tractates one). `modules.module()` adds it as a module is written;
   `python3 tools/history.py apply <folder>` adds or replaces it in modules already built.
+- **A new module** gets both in the same change: its cover in `tools/covers_catalog.py` (or its
+  builder's `BOOKS`) and its history in `tools/history.py`. Without them it's built bare.
 
 Nothing from e-Sword X goes into a module that could be shipped: its licence forbids passing its
 modules on. These scripts read e-Sword modules, so they build for your own library only:

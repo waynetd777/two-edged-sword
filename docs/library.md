@@ -58,6 +58,7 @@ The app comes with these, so it works with nothing else installed. All are publi
 | Syriac Peshitta New Testament (1905) | CrossWire |
 | Murdock's and Etheridge's English translations of the Peshitta New Testament | CrossWire |
 | Ginsburg's Hebrew Bible (1894), and Ginsburg+ word by word | Ginsburg Hebrew Bible project (Apache-2.0 and GPL-3.0); Ginsburg+'s English from WLC+ |
+| Miqra according to the Masorah (MAM): the Hebrew Old Testament of the Aleppo Codex, and MAM+ word by word | Hebrew Wikisource (CC BY-SA); MAM+'s English from WLC+ |
 | Targum (Aramaic): Onkelos on the Torah, Jonathan on the Prophets, the Targums of the Writings | Sefaria: Torat Emet's Onkelos, the Mikraot Gedolot, Wikisource's Chronicles |
 | Targum Pseudo-Jonathan (Aramaic) | Sefaria, from Torat Emet |
 | Targum Pseudo-Jonathan (English): Etheridge's translation (1862) | Sefaria; a verse from its Community Translation (CC0) |
@@ -67,7 +68,7 @@ The app comes with these, so it works with nothing else installed. All are publi
 | Peshitta+: the Syriac Peshitta word by word, its English and Strong's numbers from the Greek | Byz+ and STEPBible (CC BY), Murdock's and Etheridge's translations |
 | Greek NT: Byzantine Majority Text (Byz, 2018) | Robinson and Pierpont |
 | Byz+: the Byzantine Greek NT word by word | Robinson and Pierpont; English from STEPBible (CC BY) |
-| WLC+: the Hebrew Old Testament word by word | Open Scriptures and STEPBible (CC BY) |
+| The Westminster Leningrad Codex (WLC), the Hebrew Old Testament, and WLC+ word by word | Open Scriptures; WLC+'s English from STEPBible (CC BY) |
 | Webster's Bible with Strong's numbers (Webster+) | eBible.org; the numbers carried over from the KJV+ |
 | Berean Standard Bible (BSB), with the words of Christ in red | berean.bible |
 | Berean Standard Bible with Strong's numbers (BSB+) | berean.bible, from its translation tables |
@@ -151,7 +152,6 @@ Their verses are numbered like the KJV's, so they line up beside it in Compare.
 | Peshitta SEDRA: the Peshitta word by word, with SEDRA's Syriac glosses and grammar | ETCBC, SEDRA |
 | The Rheims New Testament (1582), read from the scanned book | Internet Archive |
 | Stephanus' Textus Receptus (1550), TR 1550+ word by word, and Green's Modern King James Version in its 1993 text, as MKJV 1993 (e-Sword's MKJV is his 1998 revision); each has its own differences from the KJV | CrossWire, STEPBible |
-| The Westminster Leningrad Codex as running Hebrew (WLC+ is built in) | Open Scriptures |
 
 All are public domain or openly licensed, except some Sefaria translations, SEDRA's glosses,
 Jastrow's dictionary and the Textus Receptus, which are for non-commercial use only, and the

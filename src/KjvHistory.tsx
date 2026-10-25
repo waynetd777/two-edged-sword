@@ -41,7 +41,7 @@ const TIERS: { name: string; hint: string; items: Source[] }[] = [
         date: "copies c. 900–1500",
         note: "The Hebrew Old Testament as the Masoretes fixed its letters, vowels and accents. The KJV's Old Testament follows it.",
         kjv: "The KJV's Old Testament is translated from it, through the printed Rabbinic Bible. Where the KJV's Old Testament differs from the Septuagint or the Vulgate, it is usually following the Masoretic text.",
-        have: /Westminster Leningrad|Hebrew Old Testament \(Tanach\)/i,
+        have: /Westminster Leningrad|Hebrew Old Testament \(Tanach\)|Miqra according to the Masorah/i,
       },
       {
         id: "byz",
@@ -102,8 +102,8 @@ const TIERS: { name: string; hint: string; items: Source[] }[] = [
         kjv: "The Hebrew text the translators worked from: the KJV's Old Testament is a translation of this edition or a reprint of it.",
         from: ["mt", "tg"],
         have: /^Hebrew Bible \(Ginsburg/i,
-        near: /Westminster Leningrad|Hebrew Old Testament \(Tanach\)/i,
-        nearNote: "The same Masoretic text from the Leningrad Codex.",
+        near: /Westminster Leningrad|Hebrew Old Testament \(Tanach\)|Miqra according to the Masorah/i,
+        nearNote: "The same Masoretic text from the Leningrad and Aleppo Codices.",
       },
       {
         id: "compl",

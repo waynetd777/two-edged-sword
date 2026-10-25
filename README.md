@@ -47,7 +47,7 @@ licence.
 |---|---|
 | English Bibles | KJV, Berean Standard Bible, ASV, World English Bible, Young's Literal, Darby, Webster, Revised Version, Weymouth NT, Tyndale, Geneva 1599, Douay-Rheims, Brenton's Septuagint, Murdock's and Etheridge's Peshitta, Targum Pseudo-Jonathan |
 | With Strong's numbers | KJV+, BSB+, Webster+ |
-| Hebrew, Greek, Latin, Syriac and Aramaic | WLC+ and Ginsburg (Hebrew), Byzantine NT and Brenton's Septuagint (Greek), Clementine Vulgate (Latin), Peshitta (Syriac), the Targum and Pseudo-Jonathan (Aramaic); most also word by word with English |
+| Hebrew, Greek, Latin, Syriac and Aramaic | WLC, Ginsburg and MAM (the Aleppo Codex) (Hebrew), Byzantine NT and Brenton's Septuagint (Greek), Clementine Vulgate (Latin), Peshitta (Syriac), the Targum and Pseudo-Jonathan (Aramaic); most also word by word with English |
 | Dictionaries and lexicons | Strong's Hebrew and Greek, Brown-Driver-Briggs, Abbott-Smith, King James Concordance, Easton's, Smith's, Nave's, the ISBE, Torrey's, Hitchcock's, Webster's 1828, Bible places |
 | Commentaries | Matthew Henry, Jamieson-Fausset-Brown, Adam Clarke, Barnes, Wesley, Scofield, Keil & Delitzsch, Spurgeon's Treasury of David |
 | Cross-references | Treasury of Scripture Knowledge, OpenBible.info |

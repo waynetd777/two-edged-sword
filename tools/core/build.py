@@ -8,24 +8,24 @@ Brown-Driver-Briggs Hebrew lexicon, seven more public-domain English Bibles (the
 Darby's, Webster's, the Revised Version and the Berean Standard Bible), and the BSB and Webster's with
 Strong's numbers; and Wesley's notes, Torrey's and Hitchcock's dictionaries, Abbott-Smith's Greek lexicon,
 Spurgeon's Morning and Evening and Daily Light, Weymouth's New Testament, Brenton's English Septuagint,
-the Byzantine Greek New Testament (plain and word by word), WLC+ (tools/wlc's, bundled), and
+the Byzantine Greek New Testament (plain and word by word), the WLC, plain and word by word (tools/wlc's), and
 OpenBible.info's cross-references and Bible places; and, each by its own tool, the Syriac Peshitta,
 Murdock's and Etheridge's translations of it, Tyndale, the Geneva Bible of 1599 and the Douay-Rheims
 (tools/crosswire), the Clementine Vulgate (tools/vulgate), Brenton's Greek Septuagint (tools/lxx) and
-Ginsburg's Hebrew Bible, plain and word by word (tools/ginsburg), and the Aramaic Targum, Targum
+Ginsburg's Hebrew Bible, plain and word by word (tools/ginsburg), the Aleppo Codex's Hebrew (MAM), plain and word by word (tools/mam), and the Aramaic Targum, Targum
 Pseudo-Jonathan and its English (tools/sefaria, from Sefaria's public-domain and CC0 versions only).
 
     python3 tools/core/build.py [--if-missing] [--only henry easton jfb clarke barnes smith nave isbe webster1828 bdb wesley torrey hitchcock abbott sme daily maps
-                                       byz byz+ brenton weymouth wlc+ openbible places asv web ylt darby webster rv bsb bsb+ webster+
-                                       peshitta murdock etheridge tyndale geneva1599 drc clementine lxx ginsburg ginsburg+
+                                       byz byz+ brenton weymouth wlc wlc+ openbible places asv web ylt darby webster rv bsb bsb+ webster+
+                                       peshitta murdock etheridge tyndale geneva1599 drc clementine lxx ginsburg ginsburg+ mam mam+
                                        targum_aramaic pseudojonathan_aramaic pseudojonathan_english]
 
 Writes kjv.bbli, kjv+.bbli, strong.lexi, kjc.lexi, tsk.cmti, henry.cmti, jfb.cmti, clarke.cmti,
 barnes.cmti, easton.dcti, smith.dcti, nave.dcti, isbe.dcti, webster1828.dcti, bdb_unabridged.lexi,
 wesley.cmti, torrey.dcti, hitchcock.dcti, abbott.lexi, sme.devi, daily.devi, byz.bbli, byz+.bbli, brenton.bbli,
-weymouth.bbli, wlc+.bbli, openbible_xref.cmti, places.dcti, maps.refi (tools/maps), asv.bbli, web.bbli, ylt.bbli, darby.bbli, webster.bbli, rv.bbli, bsb.bbli, bsb+.bbli, webster+.bbli,
+weymouth.bbli, wlc.bbli, wlc+.bbli, openbible_xref.cmti, places.dcti, maps.refi (tools/maps), asv.bbli, web.bbli, ylt.bbli, darby.bbli, webster.bbli, rv.bbli, bsb.bbli, bsb+.bbli, webster+.bbli,
 peshitta.bbli, murdock.bbli, etheridge.bbli, tyndale.bbli, geneva1599.bbli, drc.bbli, clementine.bbli,
-lxx_brenton.bbli, ginsburg.bbli, ginsburg+.bbli, targum_aramaic.bbli, pseudojonathan_aramaic.bbli and
+lxx_brenton.bbli, ginsburg.bbli, ginsburg+.bbli, mam.bbli, mam+.bbli, targum_aramaic.bbli, pseudojonathan_aramaic.bbli and
 pseudojonathan_english.bbli to src-tauri/modules/, which the app bundle carries in
 Contents/Resources/modules/ (and a debug build reads in place). With --if-missing, builds only the
 commentaries, dictionaries and Bibles not there yet, or everything if the KJV and what's built from
@@ -96,7 +96,7 @@ passing its modules on):
     σου G4675), which take the number TAGNT has for each form (as the KJV+ has them).
   Brenton's English Septuagint (brenton): eBible.org's eng-Brenton (public domain), with the Apocrypha,
     numbered as the KJV by tools/lxx's tables and rules, as its Greek is.
-  WLC+: tools/wlc's build, written here to be bundled (CC BY 4.0: Open Scriptures and STEPBible).
+  WLC, WLC+: tools/wlc's builds, written here to be bundled (CC BY 4.0: Open Scriptures; WLC+'s English STEPBible's).
   OpenBible.info (CC BY 4.0): its cross-references (https://a.openbible.info/data/cross-references.zip),
     those voted helpful 5 times or more (117,000 for 19,900 verses), most votes first; and its Bible
     places (https://github.com/openbibleinfo/Bible-Geocoding-Data at a fixed commit), a dictionary
@@ -169,6 +169,9 @@ syriac/sedra.py's SEDRA), but for Vulg-C+, Targum+ and Ps-Jon+ (below).
   ginsburg, ginsburg+  github.com/ahembd/Ginsburg_Hebrew_Bible (Apache-2.0), a few verses from its
             sister repository (GPL-3.0), so both are shared under the GPL, version 3, as the app is;
             Ginsburg+'s English, Strong's numbers and grammar are WLC+'s (CC BY 4.0) (tools/ginsburg).
+  mam, mam+  Miqra according to the Masorah, from Hebrew Wikisource through github.com/bdenckla/MAM-basics
+            (CC BY-SA 4.0, credited to Hebrew Wikisource as it asks); MAM+'s English, Strong's numbers and grammar
+            are WLC+'s (CC BY 4.0) (tools/mam).
   targum_aramaic, pseudojonathan_aramaic, pseudojonathan_english  Sefaria's export, named versions only, each
             checked against the licence Sefaria's API gives it (tools/sefaria's open_targum): Onkelos from Torat Emet
             ("Onkelos <book>", public domain; not the Sifsei Chachomim Chumash, CC BY-NC), Jonathan on the Prophets and
@@ -3028,6 +3031,11 @@ def write_weymouth():
     write_verses("weymouth", "Weymouth New Testament", "Weymouth", info, verses)
 
 
+def write_wlc():
+    import wlc.build as wlc
+    wlc.plain(into=BUNDLED)
+
+
 def write_wlc_plus():
     import wlc.build as wlc
     wlc.main(into=BUNDLED)
@@ -3148,9 +3156,10 @@ MORE |= {"wesley": ("wesley.cmti", write_wesley), "torrey": ("torrey.dcti", writ
          "hitchcock": ("hitchcock.dcti", write_hitchcock), "abbott": ("abbott.lexi", write_abbott),
          "sme": ("sme.devi", write_spurgeon), "daily": ("daily.devi", write_daily_light),
          "byz": ("byz.bbli", write_byz), "byz+": ("byz+.bbli", write_byz_plus), "brenton": ("brenton.bbli", write_brenton),
-         "weymouth": ("weymouth.bbli", write_weymouth), "wlc+": ("wlc+.bbli", write_wlc_plus),
+         "weymouth": ("weymouth.bbli", write_weymouth), "wlc": ("wlc.bbli", write_wlc), "wlc+": ("wlc+.bbli", write_wlc_plus),
          "openbible": ("openbible_xref.cmti", write_openbible_xref), "places": ("places.dcti", write_places)}
-MORE |= {"ginsburg": ("ginsburg.bbli", lambda: write_tool("ginsburg.build")), "ginsburg+": ("ginsburg+.bbli", lambda: write_tool("ginsburg.plus"))}
+MORE |= {"ginsburg": ("ginsburg.bbli", lambda: write_tool("ginsburg.build")), "ginsburg+": ("ginsburg+.bbli", lambda: write_tool("ginsburg.plus")),
+         "mam": ("mam.bbli", lambda: write_tool("mam.build")), "mam+": ("mam+.bbli", lambda: write_tool("mam.plus"))}
 # The word-by-word Septuagint, Vulgate and Peshitta, from open sources only: after what each reads (LXX+ the Greek
 # Brenton; Peshitta+ the Peshitta, Byz+, Murdock and Etheridge; Vulg-C+ the Clementine, WLC+, Byz+ and LXX+).
 MORE |= {"lxx+": ("lxx_brenton+.bbli", lambda: write_tool("lxx.plus")),

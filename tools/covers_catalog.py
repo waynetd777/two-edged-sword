@@ -68,6 +68,8 @@ CATALOG |= pair("ginsburg", {**HEBREW, "emblem": "menorah", "title": [("תורה
                              "sub": [("HEBREW BIBLE", 30), ("GINSBURG 1894", 24)]}, GLOSSES)
 CATALOG |= pair("wlc", {**HEBREW, "base": ("leather", (40, 34, 60)), "emblem": "tablets",
                         "title": [("תורה נביאים כתובים", 46, "hebrew")], "sub": [("WESTMINSTER", 30), ("LENINGRAD CODEX", 26)]}, STRONGS)
+CATALOG |= pair("mam", {**HEBREW, "base": ("leather", (70, 30, 34)), "emblem": "crown",  # the Crown of Aleppo
+                        "title": [("תורה נביאים כתובים", 46, "hebrew")], "sub": [("THE ALEPPO CODEX", 28), ("MIQRA AL PI HA-MASORAH", 20)]}, GLOSSES)
 TARGUM = dict(base=("cloth", (44, 50, 92)), layout="band", accent=(26, 28, 52), border="single", emblem="menorah", font="goudy")
 CATALOG |= pair("targum_aramaic", {**TARGUM, "title": [("תרגום", 60, "hebrew"), ("TARGUM", 40)], "sub": [("ONKELOS & JONATHAN", 26), ("ARAMAIC", 24)]}, GLOSSES)
 CATALOG |= pair("pseudojonathan_aramaic", {**TARGUM, "base": ("cloth", (70, 44, 84)), "accent": (40, 24, 50),

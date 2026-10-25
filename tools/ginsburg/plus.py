@@ -87,9 +87,10 @@ def pair(g, w):
     return out, exact, joined
 
 
-def main(into=None):
-    """Writes ginsburg+.bbli to the app's modules folder, or to `into`."""
-    for f in ("ginsburg.bbli", "wlc+.bbli"):
+def gloss(source):
+    """`source` (a Hebrew Bible in the KJV's numbering, "ginsburg.bbli") word by word from WLC+: its rows, and the share
+    of its words glossed. tools/mam/plus.py makes MAM+ with it too."""
+    for f in (source, "wlc+.bbli"):
         if not find(f).exists():
             sys.exit(f"no {f}; build it first")
     db = sqlite3.connect(f"file:{find('wlc+.bbli')}?mode=ro", uri=True)
@@ -97,7 +98,7 @@ def main(into=None):
     for b, c, v, t in db.execute("SELECT Book, Chapter, Verse, Scripture FROM Bible"):
         wlc[(b, c, v)] = [(m.group(1), m.group(2), m.group(3), m.group(4)) for m in DIV.finditer(t or "")]
     db.close()
-    db = sqlite3.connect(f"file:{find('ginsburg.bbli')}?mode=ro", uri=True)
+    db = sqlite3.connect(f"file:{find(source)}?mode=ro", uri=True)
     rows = db.execute("SELECT Book, Chapter, Verse, Scripture FROM Bible ORDER BY Book, Chapter, Verse").fetchall()
     db.close()
 
@@ -142,11 +143,17 @@ def main(into=None):
     low = sorted((h / max(n, 1), b) for b, (h, n) in per_book.items())[:5]
     print("  least glossed books: " + ", ".join(f"{b} {r:.1%}" for r, b in low))
     print("  worst verses: " + ", ".join(f"{b}:{c}:{v} {r:.0%}/{n}" for r, (b, c, v), n in sorted(worst)[:10]))
+    return out, (n_exact + n_near) / total
+
+
+def main(into=None):
+    """Writes ginsburg+.bbli to the app's modules folder, or to `into`."""
+    out, share = gloss("ginsburg.bbli")
 
     info = ("<p>Ginsburg's Hebrew Bible (1894), which follows Jacob ben Chayyim's text of Bomberg's second Rabbinic Bible "
             "(1524–25), word by word: each word with its English, Strong's number and grammar, taken from WLC+ by lining the "
             "two texts up by their consonants (the Open Scriptures Hebrew Bible's lemmas and morphology, CC BY 4.0; STEPBible's "
-            f"TBESH glosses, CC BY 4.0). {(n_exact + n_near) / total:.1%} of the words are glossed; a word where Ben Chayyim's "
+            f"TBESH glosses, CC BY 4.0). {share:.1%} of the words are glossed; a word where Ben Chayyim's "
             "text differs from the Leningrad Codex's is left without. Text: github.com/ahembd/Ginsburg_Hebrew_Bible (Apache-2.0), "
             "a few verses from github.com/ahembd/Ginsburg_Hebrew_Bible_w_rafe (GPL-3.0); the module is shared under the GNU GPL, version 3. "
             "Verses are numbered as in the KJV. Built by Two-edged Sword's tools/ginsburg/plus.py.</p>")
