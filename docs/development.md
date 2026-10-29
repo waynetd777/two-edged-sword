@@ -59,6 +59,24 @@ writes the journal, reads aloud and runs the AI tools for Ask. The frontend draw
     with no console window (`process::no_window`) and ends them with `taskkill /T`.
   - **Spelling**: Windows' spell checker, with Harper for grammar (`spell_win.rs`, which shares
     `kjv_words.rs` with `spell.rs`).
+  - **Title bar**: the main window has none (`decorations(false)` in `lib.rs`'s `setup`, and
+    `DECORATIONS` left out of the saved window state). `src/WindowControls.tsx` draws minimise,
+    maximise and close at the top right, and close goes through the window's close request, as
+    the native X did. Windows 11's snap layouts need the maximise button to answer the system's
+    hit-test as `HTMAXBUTTON`, which the page can't, so `snap_win.rs` puts a child window over the
+    button, placed by the `window_max_button` command; it maximises on a click and reports hover
+    as `window-controls-hover`. Edge's engine makes a CSS drag area (`-webkit-app-region`) part
+    of the title bar, everything inside it included, so on Windows only empty space drags: the top
+    bars' padding and spacer, and the sidebar's wordmark (`styles.css`). The tray window keeps
+    its own look.
+  - **One copy**: settled first thing in `run` (`single_instance_win.rs`), not by
+    tauri-plugin-single-instance alone. The plugin takes its mutex inside the builder and makes
+    its hand-over window only afterwards, so a copy started in that gap ran on as a second full
+    copy. The guard owns a second named mutex (`<identifier>-launch`); a copy that can't take it
+    waits for the plugin's window, hands its arguments over through it (payload kind 1542, as
+    2.5.4 reads it) and exits, and after a minute without an answer says so and exits. Release
+    builds only, as the plugin is. `python tools/single_instance_burst.py --exe <the .exe>` starts
+    a build eight times at once and checks one copy is left.
   - **Web view**: Edge's engine draws the page, not WebKit. Its `scrollTo` returns a promise, so
     an effect must never return a call's result. Its `execCommand` styles the whole of any
     element it covers, so `styles.css` matches the highlighter's paint on any element, not only
@@ -242,6 +260,9 @@ the app run side by side (4 by default). It needs Pillow.
   install ffmpeg`) and saves the middle frame as a PNG for the guides. The product page plays the
   MP4. The song's picture waits for the first frame; `songVisionDur` sets how many seconds it
   takes.
+- A scene with `"windows": true` shows the page as it is on Windows, from a Mac: the window's own
+  buttons, Ctrl in shortcuts and Windows' wording (`screenshot.rs` sets the user agent
+  `src/keys.ts` reads). Only the page changes; what it calls still runs on macOS.
 - A scene with `"tray": true` shows the menu-bar window alone; the main window runs hidden to send
   it what to show. Its `width` saves the image at that many pixels wide instead of 1400, the
   window's natural size.

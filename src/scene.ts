@@ -18,6 +18,7 @@ import { installSceneClock } from "./sceneClock";
 import { Picked, setSceneChapterSongs } from "./worship";
 import { setSceneUpdate, UpdateShown } from "./Update";
 import { today as startOfToday, ymd } from "./plans";
+import { isMac } from "./keys";
 
 interface Scene {
   name: string;
@@ -70,6 +71,9 @@ interface Scene {
   update?: UpdateShown;
   /** Its frames are taken on a stepped clock (sceneClock.ts): the song's picture waits for them. */
   stepped?: boolean;
+  /** The page as it is on Windows: its window buttons, Ctrl and Windows' wording (screenshot.rs
+   *  sets the user agent before the page loads). */
+  windows?: boolean;
 }
 
 let started = false;
@@ -197,7 +201,8 @@ export function runScene(app: ReturnType<typeof useApp>, still: (s: Partial<Play
           if (sc.song.vision) setSceneVision(sc.song.vision, sc.song.visionAt, false, sc.song.visionDur, !!sc.stepped);
           app.openLyrics();
         }
-        if (sc.focus) window.setTimeout(() => window.dispatchEvent(new KeyboardEvent("keydown", { key: ".", metaKey: true })), 1500);
+        if (sc.focus)
+          window.setTimeout(() => window.dispatchEvent(new KeyboardEvent("keydown", { key: ".", metaKey: isMac, ctrlKey: !isMac })), 1500);
         if (sc.update) {
           const u = sc.update;
           window.setTimeout(() => setSceneUpdate(u), 1500);

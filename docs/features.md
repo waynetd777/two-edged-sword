@@ -71,6 +71,7 @@ It works the same on Windows, except:
 | Voices | Windows' own: add more, Hebrew and Greek included, as [Better voices](reading.md#better-voices) says |
 | Spelling and grammar | Windows' spell checker, and grammar checking by Harper, which runs on your PC |
 | Worship songs | The music files in your Music folder, played by the app ([Worship music](quiet-time.md#worship-music)) |
+| The window | No title bar: minimise, maximise and close are at the top right. Drag the empty part of the top bar to move the window, and double-click it to maximise. Hover over maximise for Windows 11's snap layouts |
 | The menu bar icon | In the notification area, by the clock, with Help and Check for Updates… |
 | Ask | Each AI tool is installed in your Windows account ([Ask](ask.md#claude-code-codex-antigravity-or-copilot)) |
 <!-- /windows -->

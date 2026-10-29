@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import { invoke } from "@tauri-apps/api/core";
+import { listen, UnlistenFn } from "@tauri-apps/api/event";
 import { isDark } from "./dom";
 import { isMac } from "./keys";
 import { fileArtwork, fileControl, filePlay, fileState, fileTracks } from "./localMusic";
@@ -261,6 +262,11 @@ export const api = {
   search: (query: SearchQuery) => invoke<SearchResults>("search", { query }),
   indexProgress: () => invoke<{ building: boolean; done: number; total: number }>("index_progress"),
   hidePointer: () => invoke<void>("hide_pointer"),
+  /** Where the window's maximise button is, in physical pixels, for Windows 11's snap layouts
+   *  (src-tauri/src/snap_win.rs); null when it isn't shown. Windows only. */
+  windowMaxButton: (rect: [number, number, number, number] | null) => invoke<void>("window_max_button", { rect }),
+  /** The pointer went over (true) or off the maximise button's snap-layout window. */
+  onMaxButtonHover: (f: (over: boolean) => void): Promise<UnlistenFn> => listen<boolean>("window-controls-hover", (e) => f(e.payload)),
   storeRead: <T>(name: string) => invoke<T | null>("store_read", { name }),
   /** A translation's differences from the KJV: the list built on this Mac, else the app's. */
   variancesRead: <T>(name: string) => invoke<T | null>("variances_read", { name }),

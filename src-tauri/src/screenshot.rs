@@ -19,6 +19,16 @@ pub fn tray_scene() -> bool {
     scene().and_then(|sc| serde_json::from_str::<serde_json::Value>(&sc).ok()).is_some_and(|v| v["tray"] == true)
 }
 
+/// A scene with "windows": true shows the page as it is on Windows (src/keys.ts reads the user
+/// agent): the window's own buttons and Windows' wording, to check them from a Mac. Only the page
+/// changes; what it calls still runs on macOS.
+pub fn platform_script() -> Option<&'static str> {
+    let windows = scene().and_then(|sc| serde_json::from_str::<serde_json::Value>(&sc).ok()).is_some_and(|v| v["windows"] == true);
+    windows.then_some(
+        r#"Object.defineProperty(navigator, "userAgent", { get: () => "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Edg/130.0.0.0" });"#,
+    )
+}
+
 /// Makes a window invisible and click-through while it still draws: nothing flashes on screen.
 fn make_unseen(w: &tauri::WebviewWindow) {
     if let Ok(ns) = w.ns_window() {

@@ -38,16 +38,17 @@ libc = "0.2"
 
 # Windows: the music files' tags (music_files.rs); spelling from Windows' spell checker and
 # grammar from Harper, which runs on the PC (spell_win.rs); the media controls (media_win.rs),
-# Open at Login (login_win.rs) and keeping the display awake.
+# Open at Login (login_win.rs), keeping the display awake, and snap layouts over the window's own
+# maximise button (snap_win.rs).
 [target.'cfg(windows)'.dependencies]
 lofty = "0.25"
 harper-core = { version = "2", default-features = false, features = ["concurrent"] }
-windows = { version = "0.62", features = ["Foundation", "Media", "Win32_Foundation", "Win32_Globalization", "Win32_System_Com", "Win32_System_Power", "Win32_System_Registry", "Win32_System_WinRT"] }
+windows = { version = "0.62", features = ["Foundation", "Media", "Win32_Foundation", "Win32_Globalization", "Win32_Graphics_Gdi", "Win32_System_Com", "Win32_System_LibraryLoader", "Win32_System_Power", "Win32_System_Registry", "Win32_System_WinRT", "Win32_UI_Input_KeyboardAndMouse", "Win32_UI_WindowsAndMessaging"] }
 # Export as PDF through WebView2's PrintToPdf (pdf.rs), at tauri's own versions; the paper size
-# from the user's locale.
+# from the user's locale. One copy per session, settled before the builder (single_instance_win.rs).
 webview2-com = "0.39"
 windows-core = "0.62"
-windows-sys = { version = "0.61", features = ["Win32_Globalization"] }
+windows-sys = { version = "0.61", features = ["Win32_Foundation", "Win32_Globalization", "Win32_Security", "Win32_System_DataExchange", "Win32_System_Threading", "Win32_UI_WindowsAndMessaging"] }
 
 # AppKit and the rest: the app is macOS only. Elsewhere only the tests are built (lib.rs).
 [target.'cfg(target_os = "macos")'.dependencies]

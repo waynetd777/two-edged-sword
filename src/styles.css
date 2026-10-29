@@ -244,7 +244,7 @@ textarea,
   gap: 20px;
   overflow-y: auto;
 }
-/* Windows draws its own title bar above the page, so there are no traffic lights to clear. */
+/* Windows has no traffic lights to clear: its window buttons are at the top right (.winctl). */
 html:not(.mac) .sidebar {
   padding-top: 14px;
 }
@@ -499,8 +499,7 @@ html:not(.mac) .sidebar {
   padding: 0 16px;
   border-bottom: 1px solid var(--border);
 }
-/* Where the window can be dragged, as macOS's title bar sits over the page. Not on Windows, which
-   has a title bar of its own and treats a drag area as part of it: nothing there scrolls. */
+/* Where the window can be dragged, as macOS's title bar sits over the page. */
 .mac .drag {
   -webkit-app-region: drag;
 }
@@ -513,6 +512,64 @@ html:not(.mac) .sidebar {
 }
 .mac .topbar .spacer {
   -webkit-app-region: drag;
+}
+/* Windows has no title bar either (src/WindowControls.tsx), so the same places drag the window, and
+   a double-click there maximises it. But Edge's engine makes a drag area part of the title bar,
+   everything inside it included, so nothing there scrolls or takes a click: only empty space drags,
+   the top bars' padding and spacer, the sidebar's wordmark and the space around a lone card. */
+html:not(.mac) .drag:not(.sidebar),
+html:not(.mac) .topbar .spacer,
+html:not(.mac) .sidebar .brand {
+  -webkit-app-region: drag;
+}
+html:not(.mac) .drag > :not(.spacer, .brand) {
+  -webkit-app-region: no-drag;
+}
+/* The bars keep clear of the window's buttons. */
+html:not(.mac) .topbar {
+  padding-right: calc(16px + 3 * 46px);
+}
+
+/* The window's own buttons on Windows (src/WindowControls.tsx): as wide as the native ones (46px)
+   and as tall as the top bar above its divider, the glyph centred and the hover filling the whole
+   button. Over every screen and dialog, as the native ones are. Close turns Windows' red. */
+.winctl {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 100;
+  display: flex;
+  -webkit-app-region: no-drag;
+}
+.winctl button {
+  width: 46px;
+  height: 51px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  background: none;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  cursor: default;
+}
+/* .hover: the pointer is on the snap-layout window over maximise (src-tauri/src/snap_win.rs). */
+.winctl button:hover,
+.winctl button.hover {
+  background: var(--hover);
+  color: var(--text);
+}
+.winctl button:active {
+  background: color-mix(in srgb, var(--text) 10%, transparent);
+}
+.winctl button.close:hover {
+  background: #c42b1c;
+  color: #fff;
+}
+.winctl button.close:active {
+  background: rgb(196 43 28 / 85%);
+  color: #fff;
 }
 
 /* ---------- controls ---------- */

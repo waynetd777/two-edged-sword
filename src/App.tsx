@@ -15,6 +15,7 @@ import { PlayerBar, ReadScreen } from "./Read";
 import { DocReader } from "./DocReader";
 import { HelpDrawer } from "./Help";
 import { WebPage } from "./WebPage";
+import { WindowControls } from "./WindowControls";
 import { LyricsPage } from "./LyricsPage";
 import { StrongsHover } from "./WordLookup";
 import { QuietTime, useWorshipAhead } from "./QuietTime";
@@ -149,6 +150,7 @@ function Screens() {
           </div>
           {rescanError && <p style={{ margin: 0, color: "var(--muted)" }}>{rescanError}</p>}
         </div>
+        <WindowControls />
       </div>
     );
   }
@@ -193,6 +195,7 @@ function Screens() {
       <UpdateDialog />
       <ConfirmHost />
       <WelcomeDialog />
+      <WindowControls />
     </div>
   );
 }

@@ -40,6 +40,9 @@ pub mod screenshot {
     pub fn tray_scene() -> bool {
         false
     }
+    pub fn platform_script() -> Option<&'static str> {
+        None
+    }
     pub fn show_tray(_app: &AppHandle) {}
     pub fn prepare_main(_w: &tauri::WebviewWindow) {}
     pub fn start_snapshots(_app: &AppHandle, _tray_scene: bool) {}

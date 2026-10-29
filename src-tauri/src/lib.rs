@@ -36,6 +36,10 @@ mod process;
 #[cfg(target_os = "macos")]
 mod screenshot;
 mod search;
+#[cfg(windows)]
+mod single_instance_win;
+#[cfg(windows)]
+mod snap_win;
 #[cfg(target_os = "macos")]
 mod spell;
 #[cfg(windows)]
@@ -62,8 +66,9 @@ use tauri::{AppHandle, Emitter, Manager, State};
 use tauri_plugin_window_state::{AppHandleExt, StateFlags};
 
 /// Everything except VISIBLE: the window is created hidden and shown once its background is
-/// painted, so restoring visibility would undo that.
-const STATE_FLAGS: StateFlags = StateFlags::all().difference(StateFlags::VISIBLE);
+/// painted, so restoring visibility would undo that. Nor DECORATIONS: the main window has none on
+/// Windows (`setup`), and a state saved while it still had them would put the native title bar back.
+const STATE_FLAGS: StateFlags = StateFlags::all().difference(StateFlags::VISIBLE.union(StateFlags::DECORATIONS));
 
 struct AppState {
     /// Replaced wholesale by `rescan_library` when modules are added.
@@ -330,6 +335,15 @@ fn music_file(path: String) -> Result<tauri::ipc::Response, String> {
 fn music_file_extra(path: String) -> Result<music_files::Extra, String> {
     music_files::extra(&path)
 }
+/// Where the page's maximise button is (x, y, width, height in physical pixels of the window's
+/// client area), so Windows 11 offers its snap layouts over it (snap_win.rs); `None` when it isn't
+/// shown (src/WindowControls.tsx).
+#[cfg(windows)]
+#[tauri::command]
+fn window_max_button(window: tauri::WebviewWindow, rect: Option<(i32, i32, i32, i32)>) {
+    snap_win::set_max_button(&window, rect);
+}
+
 #[cfg(windows)]
 #[tauri::command(async)]
 fn music_file_artwork(path: String) -> Result<tauri::ipc::Response, String> {
@@ -807,6 +821,17 @@ pub(crate) fn show_main(app: &AppHandle) {
 }
 
 pub fn run() {
+    let context = tauri::generate_context!();
+    // One copy per session on Windows, settled before the data folder and the search index are
+    // touched: a second copy hands its arguments over and exits here (single_instance_win.rs). The
+    // single-instance plugin below is the channel it hands over through. Release builds only, as
+    // the plugin is.
+    #[cfg(windows)]
+    {
+        if !cfg!(debug_assertions) {
+            single_instance_win::claim(&context.config().identifier);
+        }
+    }
     let data = store::data_dir();
     // Windows' app has no console for a panic's message: it goes to crash.log instead.
     #[cfg(windows)]
@@ -846,7 +871,9 @@ pub fn run() {
     // Started again (on Windows, or with open -n on macOS, which otherwise opens an app only once),
     // the app brings the open copy's window to the front rather than running twice over the same
     // data. First, as it must be. Not in a debug build: make dev and screenshot mode's copies run
-    // beside the installed app.
+    // beside the installed app. On Windows the plugin's own check comes too late to be relied on
+    // (its mutex is taken before its window exists, and a copy started in between runs on), so
+    // `single_instance_win::claim` above has settled it by now and the plugin is the hand-over.
     if !cfg!(debug_assertions) {
         builder = builder.plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| show_main(app)));
     }
@@ -916,6 +943,8 @@ pub fn run() {
             music_file_extra,
             #[cfg(windows)]
             music_file_artwork,
+            #[cfg(windows)]
+            window_max_button,
             music_play,
             music_state,
             music_control,
@@ -954,9 +983,18 @@ pub fn run() {
             // The main window is made here rather than from the config alone, so a script can run in
             // the frames inside it: an online devotional's page (frame.js).
             if let Some(cfg) = app.config().app.windows.iter().find(|w| w.label == "main").cloned() {
-                tauri::WebviewWindowBuilder::from_config(app.handle(), &cfg)?
-                    .initialization_script_for_all_frames(include_str!("frame.js"))
-                    .build()?;
+                let b = tauri::WebviewWindowBuilder::from_config(app.handle(), &cfg)?
+                    .initialization_script_for_all_frames(include_str!("frame.js"));
+                // No native title bar on Windows either: src/WindowControls.tsx draws the window's
+                // buttons, and the top bars drag it. Tao keeps the resize borders and snapping.
+                #[cfg(windows)]
+                let b = b.decorations(false).shadow(true);
+                // A scene can show the page as Windows draws it (screenshot.rs).
+                let b = match screenshot::platform_script() {
+                    Some(js) => b.initialization_script(js),
+                    None => b,
+                };
+                b.build()?;
             }
             // Did Login Items start this, rather than someone opening the app? Asked first: the
             // answer is in the launch AppleEvent AppKit is dispatching now, and it has to be known
@@ -1056,7 +1094,7 @@ pub fn run() {
             }
             Ok(())
         })
-        .build(tauri::generate_context!())
+        .build(context)
         .expect("error while building tauri application")
         .run(|app, ev| {
             if let tauri::RunEvent::Exit = ev {
