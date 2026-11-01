@@ -23,7 +23,7 @@ tauri-build = { version = "2", features = [] }
 tauri = { version = "2", features = ["tray-icon", "image-png", "macos-private-api"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-rusqlite = { version = "0.40.2", features = ["bundled"] }
+rusqlite = { version = "0.41.1", features = ["bundled"] }
 chrono = { version = "0.4.45", default-features = false, features = ["clock", "std"] }
 tauri-plugin-window-state = "2"
 tauri-plugin-dialog = "2"
@@ -42,12 +42,12 @@ libc = "0.2"
 # maximise button (snap_win.rs).
 [target.'cfg(windows)'.dependencies]
 lofty = "0.25"
-harper-core = { version = "2", default-features = false, features = ["concurrent"] }
+harper-core = { version = "3", default-features = false, features = ["concurrent"] }
 windows = { version = "0.62", features = ["Foundation", "Media", "Win32_Foundation", "Win32_Globalization", "Win32_Graphics_Gdi", "Win32_System_Com", "Win32_System_LibraryLoader", "Win32_System_Power", "Win32_System_Registry", "Win32_System_WinRT", "Win32_UI_Input_KeyboardAndMouse", "Win32_UI_WindowsAndMessaging"] }
 # Export as PDF through WebView2's PrintToPdf (pdf.rs), at tauri's own versions; the paper size
 # from the user's locale. One copy per session, settled before the builder (single_instance_win.rs).
 webview2-com = "0.39"
-windows-core = "0.62"
+windows-core = "0.100"
 windows-sys = { version = "0.61", features = ["Win32_Foundation", "Win32_Globalization", "Win32_Security", "Win32_System_DataExchange", "Win32_System_Threading", "Win32_UI_WindowsAndMessaging"] }
 
 # AppKit and the rest: the app is macOS only. Elsewhere only the tests are built (lib.rs).
