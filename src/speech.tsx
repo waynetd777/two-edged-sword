@@ -162,8 +162,9 @@ function speechText(html: string): string {
     .join("");
 }
 
-// "read" and "lead", which the voice says "red" and "led" whatever they mean.
-const HETERONYMS = /\b(read|lead)\b/gi;
+// "read" and "lead", which the voice says "red" and "led" whatever they mean, and "person"
+// and its kin, which it says "pe-er-son".
+const HETERONYMS = /\b(read|lead|person(?=s?\b|al|ally|ality|ified|ify|age)|imperson)/gi;
 
 /** "read" as "reed" after a word that wants the present ("to read", "shall read", "did ye
  *  never read"); "lead" as "leed" unless it is the metal ("as lead", "tin, and lead"). */
@@ -171,6 +172,7 @@ function respell(t: string, m: RegExpMatchArray): string | null {
   const word = m[0],
     before = t.slice(Math.max(0, m.index! - 40), m.index).toLowerCase();
   const keepCase = (say: string) => (word[0] === word[0].toUpperCase() ? say[0].toUpperCase() + say.slice(1) : say);
+  if (/person$/i.test(word)) return word.replace(/e(?=rson$)/i, (e) => (e === "E" ? "U" : "u"));
   if (/^read$/i.test(word))
     return /\b(to|shall|shalt|will|wilt|would|should|can|canst|could|may|might|must|do|dost|doth|does|did|didst|let)(\s+(ye|you|thou|he|she|they|we|i|not|never))*\s+$/.test(before) ||
       /(^|[.!?;:"“]\s*)$/.test(before)
@@ -196,14 +198,13 @@ function speakable(text: string): { spoken: string; at: number[] } {
   };
   // References, and "v. 12" / "vv. 3–5" (said "verse", not "version"), in the order they come.
   const said = findRefs(t, true).map((h) => ({ index: h.index, length: h.length, say: sayRef(h.ref) }));
-  // A range after it ("vv. 7-9") is said "7 to 9", not "7 9".
-  for (const m of t.matchAll(/\b(vv?|vs|ver)\.\s*(\d+)(?:\s*[-\u2013]\s*(\d+))?/gi))
-    if (!said.some((h) => m.index < h.index + h.length && h.index < m.index + m[0].length))
-      said.push({
-        index: m.index,
-        length: m[0].length,
-        say: `${/^vv$/i.test(m[1]) || m[3] ? "verses" : "verse"} ${m[2]}${m[3] ? ` to ${m[3]}` : ""}`,
-      });
+  // The verses after it, a list of them and ranges ("vv. 7, 11-14"): "verses 7, 11 to 14".
+  for (const m of t.matchAll(/\b(vv?|vs|ver)\.\s*(\d+(?:\s*[-\u2013]\s*\d+)?(?:\s*,\s*\d+(?:\s*[-\u2013]\s*\d+)?)*)/gi))
+    if (!said.some((h) => m.index < h.index + h.length && h.index < m.index + m[0].length)) {
+      const list = m[2].split(/\s*,\s*/).map((p) => p.replace(/\s*[-\u2013]\s*/, " to "));
+      const many = /^vv$/i.test(m[1]) || list.length > 1 || / to /.test(list[0]);
+      said.push({ index: m.index, length: m[0].length, say: `${many ? "verses" : "verse"} ${list.join(", ")}` });
+    }
   // Words the voice says the wrong way, respelled the same length so positions hold.
   for (const m of t.matchAll(HETERONYMS)) {
     const say = respell(t, m);

@@ -262,6 +262,8 @@ export function Visions({
       placed: boolean;
       quit?: number;
       span?: [number, number];
+      /** It was made with room for its verse: one made before the verses came shows none. */
+      versed?: boolean;
     };
     // `recent`: the last few shown, never chosen next; `shown`: all shown during this song, not
     // chosen again until every picture of the lane has had its turn.
@@ -277,6 +279,7 @@ export function Visions({
       const room = roomBeside(c.clientWidth, words, other?.span ? [other.span] : []);
       a.span = undefined;
       const verse = !!live.current.verses?.has(a.v.name);
+      a.versed = verse;
       const draw = a.v.make(c.clientWidth, c.clientHeight, {
         verse,
         place: (width) => {
@@ -303,6 +306,9 @@ export function Visions({
       }
       a.draw = made.draw;
       lanes[lane].cur = a;
+      // A picture shown on its own: the other lane's fades out.
+      const other = lanes[lane === "back" ? "pass" : "back"].cur;
+      if (v.alone && other && other.quit === undefined) other.quit = clock;
       const rec = lanes[lane].recent;
       rec.push(v.name);
       if (rec.length > 4) rec.shift();
@@ -385,11 +391,13 @@ export function Visions({
       }
       for (const lane of ["back", "pass"] as Lane[]) {
         const L = lanes[lane];
+        // A scene's picture, begun before its verse came: made again with room for it.
+        if (pick && L.cur && !L.cur.versed && verses?.has(L.cur.v.name)) L.cur.draw = make(L.cur).draw;
         if (L.cur && (clock - L.cur.start >= L.cur.dur || (L.cur.quit !== undefined && clock - L.cur.quit >= QUIT))) {
           L.next = looping ? clock + 1.5 : clock + (L.cur.quit !== undefined ? rnd(1.5, 4) : lane === "back" ? rnd(4, 12) : rnd(6, 18));
           L.cur = null;
         }
-        if (!L.cur && clock >= L.next) {
+        if (!L.cur && clock >= L.next && !lanes[lane === "back" ? "pass" : "back"].cur?.v.alone) {
           weigh();
           const fit = (v: Vision) => v.lane === lane && !L.recent.includes(v.name) && !(still && v.moving);
           let choices = looping ? [pick!] : VISIONS.filter((v) => fit(v) && !L.shown.has(v.name));
@@ -421,7 +429,7 @@ export function Visions({
           ink,
           rgb,
           dot,
-          verse: verses?.get(a.v.name),
+          verse: a.versed ? verses?.get(a.v.name) : undefined,
           span: a.span,
           floor: flames ? h - FLAME_HEIGHT : h - 16,
           ceiling: (live.current.ceiling?.() ?? 0) + 16,

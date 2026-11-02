@@ -52,6 +52,9 @@ export interface Vision {
   dur: [number, number];
   /** Not with reduced motion: a picture that is all movement. */
   moving?: boolean;
+  /** Shown on its own: it fills the page's foot (the catch's sea), so the other lane's picture
+   *  fades out as it begins, and none begins while it shows. */
+  alone?: boolean;
   /**
    * What the picture is of, as words (or short phrases) a song about it would use: a picture whose
    * themes are in the song's title or words is chosen more often while it plays (Visions.tsx).
@@ -220,6 +223,23 @@ export function verse(f: Frame, b: Box) {
       top = Math.max(f.ceiling, Math.min(f.h * 0.6, f.floor - high));
     } else top = Math.max(f.ceiling, Math.min(b.bottom + gap, f.floor - high));
   }
+  // A soft shade of the page's own colour behind the words, so a picture beneath them (its own,
+  // or one that fills the page) doesn't make them hard to read.
+  const [r, g, bl] = f.dark ? [13, 17, 23] : [246, 248, 250]; // --bg
+  const bw = wide + size * 3,
+    bh = high + size * 2.4;
+  ctx.save();
+  ctx.globalCompositeOperation = "source-over";
+  ctx.globalAlpha = Math.min(1, (a / 0.35) * 0.85);
+  ctx.translate(x, top - size * 0.2 + high / 2);
+  ctx.scale(bw / 2, bh / 2);
+  const shade = ctx.createRadialGradient(0, 0, 0, 0, 0, 1);
+  shade.addColorStop(0, `rgba(${r},${g},${bl},1)`);
+  shade.addColorStop(0.6, `rgba(${r},${g},${bl},1)`);
+  shade.addColorStop(1, `rgba(${r},${g},${bl},0)`);
+  ctx.fillStyle = shade;
+  ctx.fillRect(-1, -1, 2, 2);
+  ctx.restore();
   ctx.textAlign = "center";
   ctx.textBaseline = "top";
   ctx.fillStyle = f.ink(a);

@@ -1300,6 +1300,7 @@ export const RENEWAL: Vision[] = [
     name: "the catch",
     verse: "Luke 5:6",
     lane: "pass",
+    alone: true,
     dur: [13, 20],
     themes: [
       "net",
