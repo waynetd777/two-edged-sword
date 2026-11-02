@@ -162,9 +162,9 @@ function speechText(html: string): string {
     .join("");
 }
 
-// "read" and "lead", which the voice says "red" and "led" whatever they mean, and "person"
-// and its kin, which it says "pe-er-son".
-const HETERONYMS = /\b(read|lead|person(?=s?\b|al|ally|ality|ified|ify|age)|imperson)/gi;
+// "read" and "lead", which the voice says "red" and "led" whatever they mean, and "per" before
+// a consonant (perfectly, person, perish not), which it says "pe-er".
+const HETERONYMS = /\b(read|lead)\b|per(?=[bcdfghjklmnpqstvwxz])/gi;
 
 /** "read" as "reed" after a word that wants the present ("to read", "shall read", "did ye
  *  never read"); "lead" as "leed" unless it is the metal ("as lead", "tin, and lead"). */
@@ -172,7 +172,7 @@ function respell(t: string, m: RegExpMatchArray): string | null {
   const word = m[0],
     before = t.slice(Math.max(0, m.index! - 40), m.index).toLowerCase();
   const keepCase = (say: string) => (word[0] === word[0].toUpperCase() ? say[0].toUpperCase() + say.slice(1) : say);
-  if (/person$/i.test(word)) return word.replace(/e(?=rson$)/i, (e) => (e === "E" ? "U" : "u"));
+  if (/^per$/i.test(word)) return word.replace(/e/i, (e) => (e === "E" ? "U" : "u"));
   if (/^read$/i.test(word))
     return /\b(to|shall|shalt|will|wilt|would|should|can|canst|could|may|might|must|do|dost|doth|does|did|didst|let)(\s+(ye|you|thou|he|she|they|we|i|not|never))*\s+$/.test(before) ||
       /(^|[.!?;:"“]\s*)$/.test(before)
