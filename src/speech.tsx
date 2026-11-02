@@ -108,16 +108,20 @@ export const usePlayer = () => {
   return c;
 };
 
+/** Names the voice gets wrong, spelled as it says them right. */
+const SAY_AS: [RegExp, string][] = [[/\bEcclesiastes\b/gi, "Ek-lee-zee-ass-teez"]];
+const sayAs = (s: string) => SAY_AS.reduce((x, [re, to]) => x.replace(re, to), s);
+
 /** How a chapter is announced: "Psalm 23", "First Samuel, chapter 3", "John, chapter 3, from verse 16". */
 function spokenChapter(b: number, c: number, fromVerse?: number): string {
-  const name = book(b).name.replace(/^1 /, "First ").replace(/^2 /, "Second ").replace(/^3 /, "Third ");
+  const name = sayAs(book(b).name).replace(/^1 /, "First ").replace(/^2 /, "Second ").replace(/^3 /, "Third ");
   const ch = b === 19 ? `Psalm ${c}` : book(b).chapters === 1 ? name : `${name}, chapter ${c}`;
   return fromVerse && fromVerse > 1 ? `${ch}, from verse ${fromVerse}` : ch;
 }
 
 /** A reference as it should be heard: "Exo 31:18" is "Exodus 31 18", "1 Cor 13" "First Corinthians 13". */
 function sayRef(r: Ref): string {
-  const name = psalmLabel(book(r.book).name).replace(/^1 /, "First ").replace(/^2 /, "Second ").replace(/^3 /, "Third ");
+  const name = sayAs(psalmLabel(book(r.book).name)).replace(/^1 /, "First ").replace(/^2 /, "Second ").replace(/^3 /, "Third ");
   if (!r.verse) return `${name} ${r.chapter}`;
   if (book(r.book).chapters === 1) return `${name} ${r.verse}${r.to && r.to !== r.verse ? ` to ${r.to}` : ""}`;
   if (r.toChapter && r.toChapter !== r.chapter) return `${name} ${r.chapter} ${r.verse} to ${r.toChapter} ${r.to}`;
@@ -216,6 +220,10 @@ function speakable(text: string): { spoken: string; at: number[] } {
       const many = /^vv$/i.test(m[1]) || list.length > 1 || / to /.test(list[0]);
       said.push({ index: m.index, length: m[0].length, say: `${many ? "verses" : "verse"} ${list.join(", ")}` });
     }
+  for (const [re, to] of SAY_AS)
+    for (const m of t.matchAll(re))
+      if (!said.some((h) => m.index < h.index + h.length && h.index < m.index + m[0].length))
+        said.push({ index: m.index, length: m[0].length, say: to });
   // Words the voice says the wrong way, respelled the same length so positions hold.
   for (const m of t.matchAll(HETERONYMS)) {
     const say = respell(t, m);
