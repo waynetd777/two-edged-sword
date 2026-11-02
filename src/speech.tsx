@@ -163,8 +163,11 @@ function speechText(html: string): string {
 }
 
 // "read" and "lead", which the voice says "red" and "led" whatever they mean, and "er" between
-// consonants (perfectly, servant, mercy; not perish, every, fierce), which it says "e-er".
-const HETERONYMS = /\b(read|lead)\b|(?<=[bcdfghjklmnpqstvwxz])er(?=[bcdfghjklmnpqstvwxz])/gi;
+// consonants (perfectly, servant, mercy; not perish, every, fierce), which it says "e-er". "cer"
+// is "sur" ("cur" is a hard c); "ger" is left, as its g is hard or soft by the word (fingers, danger).
+// Only where the "er" is stressed: in the word's first syllable, or the first after a prefix
+// (concerning, imperfect); not everlasting or brothers, which the voice says right.
+const HETERONYMS = /\b(read|lead)\b|(?<=[bdfhjklmnpqstvwxz])er(?=[bcdfghjklmnpqstvwxz])|cer(?=[bcdfghjklmnpqstvwxz])/gi;
 
 /** "read" as "reed" after a word that wants the present ("to read", "shall read", "did ye
  *  never read"); "lead" as "leed" unless it is the metal ("as lead", "tin, and lead"). */
@@ -172,7 +175,15 @@ function respell(t: string, m: RegExpMatchArray): string | null {
   const word = m[0],
     before = t.slice(Math.max(0, m.index! - 40), m.index).toLowerCase();
   const keepCase = (say: string) => (word[0] === word[0].toUpperCase() ? say[0].toUpperCase() + say.slice(1) : say);
-  if (/^er$/i.test(word)) return word.replace(/e/i, (e) => (e === "E" ? "U" : "u"));
+  const up = (c: string, to: string) => (c === c.toUpperCase() ? to.toUpperCase() : to);
+  if (/^c?er$/i.test(word)) {
+    const head = (t.slice(0, m.index!).match(/[A-Za-z]*$/)?.[0] ?? "") + word.slice(0, word.length - 2);
+    if (!/^(?:con|de|re|pre|ob|sub|im|dis|ex)?[^aeiouy]*$/i.test(head)) return null;
+    // Said right as they are, and worse respelled: mercy, certain, deserve (its s a z).
+    if (/m$/i.test(head) || (/^c/i.test(word) && !head.slice(0, -1)) || /^(?:con|de|re|pre|ob|sub)s$/i.test(head)) return null;
+  }
+  if (/^er$/i.test(word)) return up(word[0], "u") + word[1];
+  if (/^cer$/i.test(word)) return up(word[0], "s") + up(word[1], "u") + word[2];
   if (/^read$/i.test(word))
     return /\b(to|shall|shalt|will|wilt|would|should|can|canst|could|may|might|must|do|dost|doth|does|did|didst|let)(\s+(ye|you|thou|he|she|they|we|i|not|never))*\s+$/.test(before) ||
       /(^|[.!?;:"“]\s*)$/.test(before)
