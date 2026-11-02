@@ -109,7 +109,7 @@ export const usePlayer = () => {
 };
 
 /** Names the voice gets wrong, spelled as it says them right. */
-const SAY_AS: [RegExp, string][] = [[/\bEcclesiastes\b/gi, "Ek-lee-zee-ass-teez"]];
+const SAY_AS: [RegExp, string][] = [[/\bEcclesiastes\b/gi, "Ek-lee-zee-ass-tiz"]];
 const sayAs = (s: string) => SAY_AS.reduce((x, [re, to]) => x.replace(re, to), s);
 
 /** How a chapter is announced: "Psalm 23", "First Samuel, chapter 3", "John, chapter 3, from verse 16". */
