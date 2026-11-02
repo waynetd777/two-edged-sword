@@ -151,10 +151,17 @@ export function pickChapterSongs(n: number, about: string, text: string, model: 
   const ask = `Choose ${nSongs(n)} to play for someone reading ${about}.${opening ? `\nIt begins:\n"""\n${opening}\n"""` : ""}`;
   return kept(
     JSON.stringify(["chapter", n, about]),
-    () => choose(n, ask, ["this chapter", "this chapter"], model, new Set(), false),
+    () => choose(n, ask, ["this chapter", "this chapter"], model, new Set(), false).then((p) => {
+      if (!p.note) for (const t of p.songs) chapterPicked.add(t.id);
+      return p;
+    }),
     fresh,
   );
 }
+
+/** The songs the assistant chose for chapters this session: left out of the next chapter's
+ *  choice (while enough remain), so one song that fits most chapters isn't chosen for them all. */
+const chapterPicked = new Set<string>();
 
 /** Screenshot mode: the songs a scene gives, instead of asking the assistant. */
 let sceneChapterSongs: Picked | null = null;
@@ -171,7 +178,7 @@ async function choose(n: number, ask: string, it: [string, string], model: strin
   if (!library.length)
     throw new Error(`No worship songs in your Music ${isMac ? "library" : "folder"} (Christian, gospel or worship genres).`);
   // Leaving out what was played lately, unless that leaves too few.
-  const recent = rest ? await recentlyPlayed() : new Set<string>();
+  const recent = rest ? await recentlyPlayed() : chapterPicked;
   const rested = library.filter((t) => !recent.has(t.id) && !recent.has(songKey(t)));
   const all = rested.length >= n ? rested : library;
   const take = (xs: MusicTrack[]) => xs.slice(0, n).map(({ id, name, artist }) => ({ id, name, artist }));
@@ -179,9 +186,12 @@ async function choose(n: number, ask: string, it: [string, string], model: strin
   await assistantReady();
   const models = assistantModels();
   if (!models.length) return random("Chosen at random: no AI assistant is set up.");
-  const list = all.map((t, i) => `${i + 1}. ${t.name} — ${t.artist}`).join("\n");
+  // In a new order each time: an assistant favours what comes first in a list, so a library in a
+  // fixed order would have it choosing the same songs again and again.
+  const order = shuffled(all);
+  const list = order.map((t, i) => `${i + 1}. ${t.name} — ${t.artist}`).join("\n");
   const prompt = `${ask}
-Choose songs whose words and themes fit what ${it[0]} ${it[0] === "this chapter" ? "is" : "are"} about, and that suit worship (not upbeat rock or songs about something else). Choose only from the numbered list below, which is their own music library.
+Choose songs whose words and themes fit what ${it[0]} ${it[0] === "this chapter" ? "is" : "are"} about, and that suit worship (not upbeat rock or songs about something else). Choose only from the numbered list below, which is their own music library. Many of them fit most readings, so choose the ones that fit this one best rather than the most familiar.
 Reply with only JSON, and nothing else, in this form:
 {"intro": "one or two sentences on what ${it[1]} is about and how the songs answer it", "songs": [{"n": 12, "why": "one sentence on how this song relates to the reading"}]}
 with the songs in the order to play them. Speak to the reader as "you", warmly and plainly; name passages, not verse numbers alone.
@@ -192,10 +202,10 @@ ${list}`;
     const r = readAnswer(answer);
     const seen = new Set<number>();
     const songs = r.songs
-      .filter((x) => all[x.n - 1] && !seen.has(x.n) && seen.add(x.n))
+      .filter((x) => order[x.n - 1] && !seen.has(x.n) && seen.add(x.n))
       .slice(0, n)
       .map(({ n: k, why }) => {
-        const { id, name, artist } = all[k - 1];
+        const { id, name, artist } = order[k - 1];
         return { id, name, artist, why };
       });
     if (!songs.length) return random("Chosen at random: the assistant's answer couldn't be read.");

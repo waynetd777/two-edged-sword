@@ -162,6 +162,24 @@ function speechText(html: string): string {
     .join("");
 }
 
+// "read" and "lead", which the voice says "red" and "led" whatever they mean.
+const HETERONYMS = /\b(read|lead)\b/gi;
+
+/** "read" as "reed" after a word that wants the present ("to read", "shall read", "did ye
+ *  never read"); "lead" as "leed" unless it is the metal ("as lead", "tin, and lead"). */
+function respell(t: string, m: RegExpMatchArray): string | null {
+  const word = m[0],
+    before = t.slice(Math.max(0, m.index! - 40), m.index).toLowerCase();
+  const keepCase = (say: string) => (word[0] === word[0].toUpperCase() ? say[0].toUpperCase() + say.slice(1) : say);
+  if (/^read$/i.test(word))
+    return /\b(to|shall|shalt|will|wilt|would|should|can|canst|could|may|might|must|do|dost|doth|does|did|didst|let)(\s+(ye|you|thou|he|she|they|we|i|not|never))*\s+$/.test(before) ||
+      /(^|[.!?;:"“]\s*)$/.test(before)
+      ? keepCase("reed")
+      : null;
+  if (/\b(as|the|of|with|like)\s+$/.test(before) || /\b(tin|iron|brass|silver|gold)\b[^.;]*$/.test(before)) return null;
+  return keepCase("leed");
+}
+
 /**
  * The text to speak, with its references said in full, and for each character of it the
  * character of `text` it stands for, so the word highlight still lands on the page's words.
@@ -178,9 +196,20 @@ function speakable(text: string): { spoken: string; at: number[] } {
   };
   // References, and "v. 12" / "vv. 3–5" (said "verse", not "version"), in the order they come.
   const said = findRefs(t, true).map((h) => ({ index: h.index, length: h.length, say: sayRef(h.ref) }));
-  for (const m of t.matchAll(/\b(vv?|vs|ver)\.\s*(?=\d)/gi))
+  // A range after it ("vv. 7-9") is said "7 to 9", not "7 9".
+  for (const m of t.matchAll(/\b(vv?|vs|ver)\.\s*(\d+)(?:\s*[-\u2013]\s*(\d+))?/gi))
     if (!said.some((h) => m.index < h.index + h.length && h.index < m.index + m[0].length))
-      said.push({ index: m.index, length: m[0].length, say: /^vv$/i.test(m[1]) ? "verses " : "verse " });
+      said.push({
+        index: m.index,
+        length: m[0].length,
+        say: `${/^vv$/i.test(m[1]) || m[3] ? "verses" : "verse"} ${m[2]}${m[3] ? ` to ${m[3]}` : ""}`,
+      });
+  // Words the voice says the wrong way, respelled the same length so positions hold.
+  for (const m of t.matchAll(HETERONYMS)) {
+    const say = respell(t, m);
+    if (say && !said.some((h) => m.index < h.index + h.length && h.index < m.index + m[0].length))
+      said.push({ index: m.index, length: m[0].length, say });
+  }
   said.sort((x, y) => x.index - y.index);
   for (const h of said) {
     copy(h.index);

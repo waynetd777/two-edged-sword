@@ -169,6 +169,7 @@ suit the chapter you're reading, in the Bible or in a book or devotional.
 - **Choose again** picks different songs.
 - Quiet time leaves out songs it played in the last 14 days. Songs played from here don't count
   towards that.
+- A song chosen for one chapter isn't chosen for another until the app is next opened.
 - Without an assistant set up, songs are picked at random.
 <!-- windows -->
 - On Windows the songs come from your Music folder: see [Worship music](quiet-time.md#worship-music).
