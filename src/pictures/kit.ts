@@ -226,16 +226,17 @@ export function verse(f: Frame, b: Box) {
   // A soft shade of the page's own colour behind the words, so a picture beneath them (its own,
   // or one that fills the page) doesn't make them hard to read.
   const [r, g, bl] = f.dark ? [13, 17, 23] : [246, 248, 250]; // --bg
-  const bw = wide + size * 3,
-    bh = high + size * 2.4;
+  // An oval wide enough that the words' corners sit in its solid middle, not its fading edge.
+  const bw = wide * 1.45 + size * 4,
+    bh = high * 1.6 + size * 3.4;
   ctx.save();
   ctx.globalCompositeOperation = "source-over";
-  ctx.globalAlpha = Math.min(1, (a / 0.35) * 0.85);
+  ctx.globalAlpha = Math.min(1, (a / 0.35) * 0.7);
   ctx.translate(x, top - size * 0.2 + high / 2);
   ctx.scale(bw / 2, bh / 2);
   const shade = ctx.createRadialGradient(0, 0, 0, 0, 0, 1);
   shade.addColorStop(0, `rgba(${r},${g},${bl},1)`);
-  shade.addColorStop(0.6, `rgba(${r},${g},${bl},1)`);
+  shade.addColorStop(0.7, `rgba(${r},${g},${bl},1)`);
   shade.addColorStop(1, `rgba(${r},${g},${bl},0)`);
   ctx.fillStyle = shade;
   ctx.fillRect(-1, -1, 2, 2);

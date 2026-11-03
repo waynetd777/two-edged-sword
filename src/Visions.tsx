@@ -138,7 +138,7 @@ const QUIT = 1.2;
  * fit (to half its size at most). Failing that, a stretch beside the words regardless of what
  * stands there, and `crowded` says so (the picture then waits for another time); when none of
  * those is wide enough either, the widest, shrunk to fit (to a third at most); when the words
- * fill the page, anywhere.
+ * fill the page, anywhere, and `crowded` says so too, so no picture stands behind the words.
  */
 function roomBeside(
   w: number,
@@ -187,6 +187,8 @@ function roomBeside(
       if (found) return found;
       const best = spans.sort((p, q) => q[1] - q[0] - (p[1] - p[0]))[0];
       if (best && best[1] - best[0] >= width * 0.35) return { x: (best[0] + best[1]) / 2, scale: (best[1] - best[0]) / width };
+      // No room beside the words (focus mode's wide lines): it would stand behind them, so it waits.
+      if (words) room.crowded = true;
       return { x: rnd(Math.min(w / 2, edge + width / 2), Math.max(w / 2, w - edge - width / 2)), scale: 1 };
     },
   };
@@ -299,7 +301,7 @@ export function Visions({
       const dur = (scenePick?.name === v.name && scenePick.dur) || rnd(v.dur[0], v.dur[1]);
       const a: Active = { v, lane, draw: () => {}, start: clock - at * dur, dur, placed: false };
       const made = make(a);
-      // No room clear of the other lane's picture: none now; another try in a few seconds.
+      // No room clear of the words or the other lane's picture: none now; another try in a few seconds.
       if (made.crowded && !scenePick) {
         lanes[lane].next = clock + rnd(2, 4);
         return;

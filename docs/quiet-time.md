@@ -91,10 +91,10 @@ scroll:
   breaking, a river and over a hundred more, one or two at a time. Some are old photographs,
   engravings and paintings: the lion of Judah, Dürer's praying hands, the ark of the covenant,
   the Creation of Adam. Pictures of what the song sings about come more often (a song about
-  fire gets fire), and none comes twice in a song. The larger ones stay beside the words, in
-  focus mode too. If there's no room for one, it waits or shows smaller.
+  fire gets fire), and none comes twice in a song. The larger ones stay beside the words, never
+  behind them, in focus mode too. If there's no room for one, it shows smaller or waits.
   Settings › Listening › **While a song plays** turns them off.
-- Each picture has a verse beneath it, faint, in the Bible chosen in Settings › Listening ›
+- Each picture has a verse beneath it, faint, on a soft shade, in the Bible chosen in Settings › Listening ›
   **Verses from** (the default translation until you choose one). A verse stays beside the
   words, clear of any other picture and above the flames. A picture whose verse isn't in that
   Bible comes without one. **Show a verse beneath each picture**, in the same place, turns the
