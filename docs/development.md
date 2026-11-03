@@ -57,8 +57,8 @@ writes the journal, reads aloud and runs the AI tools for Ask. The frontend draw
     (`.local\bin`, `%LOCALAPPDATA%\<name>\bin`), in npm's packages, and with `where`. From npm it
     runs the program itself, as an npm `.cmd` shim can't pass a prompt's newlines. It runs them
     with no console window (`process::no_window`) and ends them with `taskkill /T`.
-  - **Spelling**: Windows' spell checker, with Harper for grammar (`spell_win.rs`, which shares
-    `kjv_words.rs` with `spell.rs`).
+  - **Spelling**: Windows' spell checker (`spell_win.rs`, which shares `kjv_words.rs` with
+    `spell.rs`). Grammar is Harper's on both (`grammar.rs`).
   - **Title bar**: the main window has none (`decorations(false)` in `lib.rs`'s `setup`, and
     `DECORATIONS` left out of the saved window state). `src/WindowControls.tsx` draws minimise,
     maximise and close at the top right, and close goes through the window's close request, as

@@ -4,30 +4,18 @@
 //! Spelling and grammar for the journal on Windows, as spell.rs gives them on macOS. Spelling is
 //! Windows' own spell checker (the one Edge and Office use): the misspelled words, the guesses for
 //! one, its automatic correction, and adding or ignoring a word. Windows has no grammar checker
-//! for apps, so grammar is Harper's, which runs here on the PC: nothing written leaves it.
+//! for apps; grammar is Harper's, as on macOS (grammar.rs).
 //! Offsets are UTF-16, as in JavaScript strings. Every word in the KJV counts as spelled right,
 //! and sentences in KJV English ("he maketh me", "thou art") aren't grammar-checked.
 
+pub use crate::grammar::GrammarIssue;
 pub use crate::kjv_words::kjv_ready;
 use crate::kjv_words::{in_kjv, words, KJV_MARKERS};
-use harper_core::linting::{LintGroup, LintKind, Linter, Suggestion};
-use harper_core::spell::FstDictionary;
-use harper_core::{Dialect, Document};
-use serde::Serialize;
 use windows::core::{HSTRING, PWSTR};
 use windows::Win32::Globalization::{
     GetUserDefaultLocaleName, ISpellChecker, ISpellCheckerFactory, SpellCheckerFactory, CORRECTIVE_ACTION_DELETE, CORRECTIVE_ACTION_REPLACE,
 };
 use windows::Win32::System::Com::{CoCreateInstance, CoInitializeEx, CoTaskMemFree, CLSCTX_INPROC_SERVER, COINIT_MULTITHREADED};
-
-/// A grammar problem: where it is (UTF-16, as for spelling), Harper's explanation, and its fixes.
-#[derive(Serialize)]
-pub struct GrammarIssue {
-    pub start: usize,
-    pub len: usize,
-    pub description: String,
-    pub corrections: Vec<String>,
-}
 
 thread_local! {
     /// The spell checker for the user's language, made once on each thread that asks (COM wants it
@@ -35,37 +23,20 @@ thread_local! {
     static CHECKER: Option<ISpellChecker> = make_checker();
 }
 
-/// Harper's checks: made once, as that takes a few seconds, at start with the KJV's words.
-fn harper() -> &'static std::sync::Mutex<LintGroup> {
-    static H: std::sync::OnceLock<std::sync::Mutex<LintGroup>> = std::sync::OnceLock::new();
-    H.get_or_init(|| std::sync::Mutex::new(LintGroup::new_curated(FstDictionary::curated(), dialect())))
-}
-
 /// Reads the KJV's words and sets Harper up, off the main thread.
 pub fn load_kjv(lib: &crate::library::Library) {
     crate::kjv_words::load_kjv(lib);
-    harper();
+    crate::grammar::load();
 }
 
 /// The user's language as Windows names it ("en-ZA"), or US English.
-fn locale() -> String {
+pub fn locale() -> String {
     let mut buf = [0u16; 85];
     let n = unsafe { GetUserDefaultLocaleName(&mut buf) };
     if n > 1 {
         String::from_utf16_lossy(&buf[..n as usize - 1])
     } else {
         "en-US".into()
-    }
-}
-
-/// Harper's English nearest the user's: British spelling outside North America.
-fn dialect() -> Dialect {
-    match locale().as_str() {
-        "en-US" => Dialect::American,
-        "en-CA" => Dialect::Canadian,
-        "en-AU" | "en-NZ" => Dialect::Australian,
-        "en-IN" => Dialect::Indian,
-        _ => Dialect::British,
     }
 }
 
@@ -142,82 +113,9 @@ fn kjv_sentence(sentence: &str) -> bool {
         || with(|sc| errors(sc, sentence).iter().any(|(s, l, _)| in_kjv(&utf16_slice(sentence, *s, *l)))).unwrap_or(false)
 }
 
-/// The kinds of Harper's checks that are grammar, as macOS's are: not spelling (Windows does
-/// that), and not its advice on style.
-fn is_grammar(k: &LintKind) -> bool {
-    matches!(
-        k,
-        LintKind::Agreement
-            | LintKind::BoundaryError
-            | LintKind::Capitalization
-            | LintKind::Eggcorn
-            | LintKind::Grammar
-            | LintKind::Malapropism
-            | LintKind::Punctuation
-            | LintKind::Repetition
-            | LintKind::Typo
-            | LintKind::Usage
-            | LintKind::WordChoice
-            | LintKind::WordOrder
-    )
-}
-
-/// The grammar problems. One inside a sentence in KJV English is left out.
+/// The grammar problems, from Harper. One inside a sentence in KJV English is left out.
 pub fn grammar(text: &str) -> Vec<GrammarIssue> {
-    let chars: Vec<char> = text.chars().collect();
-    // Each char's UTF-16 offset, and the end.
-    let mut at16 = Vec::with_capacity(chars.len() + 1);
-    let mut n = 0;
-    for c in &chars {
-        at16.push(n);
-        n += c.len_utf16();
-    }
-    at16.push(n);
-    // Harper doesn't know a lowercase "i" for the pronoun, so it reads it as "I" (the same length,
-    // so every offset holds), and the lowercase one is reported here.
-    let lone_i = |k: usize| {
-        chars[k] == 'i' && (k == 0 || !chars[k - 1].is_alphanumeric()) && chars.get(k + 1).is_none_or(|c| !c.is_alphanumeric() && *c != '.')
-    };
-    let lower_i: Vec<usize> = (0..chars.len()).filter(|&k| lone_i(k)).collect();
-    let fixed: String = chars.iter().enumerate().map(|(k, &c)| if lower_i.contains(&k) { 'I' } else { c }).collect();
-    let lints = harper().lock().unwrap_or_else(|e| e.into_inner()).lint(&Document::new_plain_english_curated(&fixed));
-    let sentence_of = |i: usize| {
-        let is_end = |c: char| ".!?\n".contains(c);
-        let from = chars[..i].iter().rposition(|&c| is_end(c)).map_or(0, |p| p + 1);
-        let to = chars[i..].iter().position(|&c| is_end(c)).map_or(chars.len(), |p| i + p);
-        // From the text Harper read, with its "I"s.
-        fixed.chars().skip(from).take(to - from).collect::<String>()
-    };
-    let mut out: Vec<GrammarIssue> = lower_i
-        .iter()
-        .map(|&k| GrammarIssue {
-            start: at16[k],
-            len: 1,
-            description: "“I” is always a capital letter.".into(),
-            corrections: vec!["I".into()],
-        })
-        .collect();
-    for l in lints.into_iter().filter(|l| is_grammar(&l.lint_kind)) {
-        let (s, e) = (l.span.start.min(chars.len()), l.span.end.min(chars.len()));
-        if s >= e || kjv_sentence(&sentence_of(s)) {
-            continue;
-        }
-        let here: String = chars[s..e].iter().collect();
-        let corrections = l
-            .suggestions
-            .iter()
-            .map(|g| match g {
-                Suggestion::ReplaceWith(r) => r.iter().collect(),
-                Suggestion::InsertAfter(x) => format!("{here}{}", x.iter().collect::<String>()),
-                Suggestion::Remove => String::new(),
-            })
-            .collect();
-        out.push(GrammarIssue { start: at16[s], len: at16[e] - at16[s], description: l.message, corrections });
-        if out.len() >= 500 {
-            break;
-        }
-    }
-    out
+    crate::grammar::check(text, kjv_sentence)
 }
 
 pub fn guesses(word: &str) -> Vec<String> {

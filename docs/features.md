@@ -69,7 +69,7 @@ It works the same on Windows, except:
 | e-Sword | e-Sword for Windows' modules can't be read: their text is encrypted. Modules in e-Sword X's formats work, in your modules folder ([Adding modules](library.md#adding-modules)) |
 | Your data | In `%APPDATA%\Two-edged Sword`. Uninstalling with **Delete the application data** ticked removes it; your journal in Documents stays |
 | Voices | Windows' own: add more, Hebrew and Greek included, as [Better voices](reading.md#better-voices) says |
-| Spelling and grammar | Windows' spell checker, and grammar checking by Harper, which runs on your PC |
+| Spelling | Windows' own spell checker. Grammar is checked by Harper, as on a Mac |
 | Worship songs | The music files in your Music folder, played by the app ([Worship music](quiet-time.md#worship-music)) |
 | The window | No title bar: minimise, maximise and close are at the top right. Drag the empty part of the top bar to move the window, and double-click it to maximise. Hover over maximise for Windows 11's snap layouts |
 | The menu bar icon | In the notification area, by the clock, with Help and Check for Updates… |

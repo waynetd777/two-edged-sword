@@ -75,12 +75,11 @@ Every page is numbered, and the PDF opens once it's saved.
 
 ## Spelling and grammar
 
-<!-- mac -->macOS checks<!-- /mac --><!-- github --> On a Mac, macOS checks; <!-- /github --><!-- windows -->The app checks<!-- /windows --> spelling (red underline) and grammar (blue underline). Click an underlined word for
+The app checks spelling (red underline) and grammar (blue underline). Click an underlined word for
 suggestions. Words and phrases from the KJV, such as "maketh" and "thou art", aren't marked.
 
-<!-- windows -->
-On Windows, spelling is Windows' own spell checker, and grammar is checked by Harper, which runs on the PC: nothing you write is sent anywhere.
-<!-- /windows -->
+- **Spelling**: <!-- mac -->macOS's<!-- /mac --><!-- windows -->Windows'<!-- /windows --><!-- github -->the system's (macOS's or Windows')<!-- /github --> own spell checker.
+- **Grammar**: Harper, which runs on your computer: nothing you write is sent anywhere.
 
 Grammar checking can be turned off in Settings › Journal.
 

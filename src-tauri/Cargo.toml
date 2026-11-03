@@ -37,12 +37,11 @@ tauri-plugin-single-instance = "2"
 libc = "0.2"
 
 # Windows: the music files' tags (music_files.rs); spelling from Windows' spell checker and
-# grammar from Harper, which runs on the PC (spell_win.rs); the media controls (media_win.rs),
+# grammar from Harper (grammar.rs, below); the media controls (media_win.rs),
 # Open at Login (login_win.rs), keeping the display awake, and snap layouts over the window's own
 # maximise button (snap_win.rs).
 [target.'cfg(windows)'.dependencies]
 lofty = "0.25"
-harper-core = { version = "3", default-features = false, features = ["concurrent"] }
 windows = { version = "0.62", features = ["Foundation", "Media", "Win32_Foundation", "Win32_Globalization", "Win32_Graphics_Gdi", "Win32_System_Com", "Win32_System_LibraryLoader", "Win32_System_Power", "Win32_System_Registry", "Win32_System_WinRT", "Win32_UI_Input_KeyboardAndMouse", "Win32_UI_WindowsAndMessaging"] }
 # Export as PDF through WebView2's PrintToPdf (pdf.rs), at tauri's own versions; the paper size
 # from the user's locale. One copy per session, settled before the builder (single_instance_win.rs).
@@ -50,12 +49,16 @@ webview2-com = "0.39"
 windows-core = "0.100"
 windows-sys = { version = "0.61", features = ["Win32_Foundation", "Win32_Globalization", "Win32_Security", "Win32_System_DataExchange", "Win32_System_Threading", "Win32_UI_WindowsAndMessaging"] }
 
+# Grammar for the journal, on both (grammar.rs): Harper, which runs on the computer.
+[target.'cfg(any(windows, target_os = "macos"))'.dependencies]
+harper-core = { version = "3", default-features = false, features = ["concurrent"] }
+
 # AppKit and the rest: the app is macOS only. Elsewhere only the tests are built (lib.rs).
 [target.'cfg(target_os = "macos")'.dependencies]
 objc2 = "0.6"
 block2 = "0.6"
 objc2-media-player = { version = "0.3", default-features = false, features = ["std", "block2", "MPRemoteCommandCenter", "MPRemoteCommand", "MPRemoteCommandEvent", "MPNowPlayingInfoCenter", "MPMediaItem"] }
-objc2-foundation = { version = "0.3", default-features = false, features = ["std", "NSProcessInfo", "NSString", "NSValue", "NSArray", "NSRange", "NSDictionary", "NSURL", "NSGeometry", "objc2-core-foundation"] }
+objc2-foundation = { version = "0.3", default-features = false, features = ["std", "NSProcessInfo", "NSString", "NSValue", "NSArray", "NSRange", "NSDictionary", "NSURL", "NSGeometry", "NSLocale", "objc2-core-foundation"] }
 objc2-app-kit = { version = "0.3", default-features = false, features = ["std", "NSColor", "NSSpellChecker", "NSWindow", "NSResponder", "NSAppearance", "NSCursor", "NSPrintInfo", "NSPrintOperation", "NSView"] }
 objc2-avf-audio = { version = "0.3", default-features = false, features = ["std", "AVSpeechSynthesis"] }
 

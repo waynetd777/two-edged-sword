@@ -5,18 +5,34 @@
 //! the misspelled words in a text, the guesses for one, the automatic correction for one when
 //! the user has "Correct spelling automatically" on, and learning or ignoring a word. Offsets
 //! are UTF-16, as in NSString and in JavaScript strings. Called on the main thread, where AppKit
-//! wants it. Every word in the KJV counts as spelled right,
-//! and sentences in KJV English ("he maketh me", "thou art") aren't grammar-checked.
+//! wants it. Every word in the KJV counts as spelled right. Grammar is Harper's (grammar.rs), as
+//! on Windows: macOS's own finds little more than a doubled word. A sentence in KJV English
+//! ("he maketh me", "thou art") isn't grammar-checked.
 
+pub use crate::grammar::GrammarIssue;
+pub use crate::kjv_words::kjv_ready;
 #[cfg(test)]
 use crate::kjv_words::KJV;
 use crate::kjv_words::{in_kjv, words, KJV_MARKERS};
-pub use crate::kjv_words::{kjv_ready, load_kjv};
-use objc2::runtime::AnyObject;
 use objc2_app_kit::NSSpellChecker;
-use objc2_foundation::{NSArray, NSDictionary, NSRange, NSString, NSValue};
-use serde::Serialize;
+use objc2_foundation::{NSLocale, NSRange, NSString};
 use std::sync::OnceLock;
+
+/// Reads the KJV's words and sets Harper up, off the main thread.
+pub fn load_kjv(lib: &crate::library::Library) {
+    crate::kjv_words::load_kjv(lib);
+    crate::grammar::load();
+}
+
+/// The user's locale ("en_ZA"), for Harper's English.
+pub fn locale() -> String {
+    NSLocale::currentLocale().localeIdentifier().to_string()
+}
+
+/// Whether a sentence is in KJV English, for grammar. On the main thread.
+pub fn is_kjv_sentence(sentence: &str) -> bool {
+    kjv_sentence(&NSSpellChecker::sharedSpellChecker(), sentence)
+}
 
 /// Whether a sentence is in KJV English: it has thee, thou, hath… or a KJV word macOS doesn't know.
 fn kjv_sentence(sc: &NSSpellChecker, sentence: &str) -> bool {
@@ -80,72 +96,6 @@ pub fn check(text: &str) -> Vec<(usize, usize)> {
     out
 }
 
-/// A grammar problem: where it is (UTF-16, as for spelling), macOS's explanation, and its fixes.
-#[derive(Serialize)]
-pub struct GrammarIssue {
-    pub start: usize,
-    pub len: usize,
-    pub description: String,
-    pub corrections: Vec<String>,
-}
-
-/// The grammar problems, a sentence at a time. macOS needs the language named to check grammar
-/// at all; a problem inside another one ("the" within "the the") is left to the outer one, and
-/// one that is the whole sentence (a "fragment", which a journal is full of) is left out.
-pub fn grammar(text: &str) -> Vec<GrammarIssue> {
-    let sc = NSSpellChecker::sharedSpellChecker();
-    let s = NSString::from_str(text);
-    let lang = sc.language();
-    let key = |k: &str, d: &NSDictionary<NSString, AnyObject>| d.objectForKey(&NSString::from_str(k));
-    let (len, mut at, mut out) = (s.length(), 0usize, Vec::<GrammarIssue>::new());
-    while at < len && out.len() < 500 {
-        let mut details: Option<objc2::rc::Retained<NSArray<NSDictionary<NSString, AnyObject>>>> = None;
-        let r = unsafe {
-            sc.checkGrammarOfString_startingAt_language_wrap_inSpellDocumentWithTag_details(
-                &s,
-                at as isize,
-                Some(&lang),
-                false,
-                tag(),
-                Some(&mut details),
-            )
-        };
-        if r.length == 0 || r.location >= len {
-            break;
-        }
-        let first = out.len();
-        let has_issues = details.as_ref().is_some_and(|d| d.count() > 0);
-        if has_issues && kjv_sentence(&sc, &s.substringWithRange(r).to_string()) {
-            at = r.location + r.length;
-            continue;
-        }
-        for d in details.iter().flat_map(|ds| (0..ds.count()).map(move |i| ds.objectAtIndex(i))) {
-            // The range is from the start of the sentence.
-            let Some(g) = key("NSGrammarRange", &d).and_then(|v| v.downcast::<NSValue>().ok()).and_then(|v| v.get_range()) else {
-                continue;
-            };
-            let (start, glen) = (r.location + g.location, g.length);
-            let whole = s.substringWithRange(r).to_string();
-            let body = whole.trim_end_matches(|c: char| c.is_whitespace() || ".!?".contains(c)).encode_utf16().count();
-            if g.location == 0 && glen >= body {
-                continue;
-            }
-            if glen == 0 || out[first..].iter().any(|o| o.start <= start && start + glen <= o.start + o.len) {
-                continue;
-            }
-            let description =
-                key("NSGrammarUserDescription", &d).and_then(|v| v.downcast::<NSString>().ok()).map(|v| v.to_string()).unwrap_or_default();
-            let corrections = key("NSGrammarCorrections", &d)
-                .and_then(|v| v.downcast::<NSArray>().ok())
-                .map(|a| (0..a.count()).filter_map(|i| a.objectAtIndex(i).downcast::<NSString>().ok().map(|x| x.to_string())).collect())
-                .unwrap_or_default();
-            out.push(GrammarIssue { start, len: glen, description, corrections });
-        }
-        at = r.location + r.length;
-    }
-    out
-}
-
 pub fn guesses(word: &str) -> Vec<String> {
     let sc = NSSpellChecker::sharedSpellChecker();
     let s = NSString::from_str(word);
@@ -179,19 +129,6 @@ pub fn ignore(word: &str) {
 
 #[cfg(test)]
 mod tests {
-    #[test]
-    fn grammar_finds_a_doubled_word_with_its_fix() {
-        let text = "This is fine. He went to the the store.";
-        let found = super::grammar(text);
-        let u: Vec<u16> = text.encode_utf16().collect();
-        let doubled = found.iter().find(|g| String::from_utf16_lossy(&u[g.start..g.start + g.len]) == "the the");
-        let Some(g) = doubled else { panic!("no doubled word in {:?}", found.iter().map(|g| &g.description).collect::<Vec<_>>()) };
-        assert_eq!(g.corrections, vec!["the".to_string()]);
-        assert!(!g.description.is_empty());
-        // The lone "the" inside it isn't reported separately.
-        assert_eq!(found.iter().filter(|x| x.start >= g.start && x.start < g.start + g.len).count(), 1);
-    }
-
     /// Against the modules on this Mac; skips itself where it is absent.
     #[test]
     fn kjv_spellings_and_sentences_pass() {
@@ -203,12 +140,7 @@ mod tests {
         let u: Vec<u16> = text.encode_utf16().collect();
         let flagged: Vec<String> = super::check(text).iter().map(|&(a, l)| String::from_utf16_lossy(&u[a..a + l])).collect();
         assert_eq!(flagged, vec!["Recieve".to_string()]);
-        assert!(super::grammar("Thou art my son. He maketh me to lie down in green pastures.").is_empty());
-        assert!(!super::grammar("He went to the the store.").is_empty());
-    }
-
-    #[test]
-    fn grammar_leaves_out_whole_sentence_fragments() {
-        assert!(super::grammar("Amen. A full week behind me and a fuller one ahead.").is_empty());
+        assert!(super::is_kjv_sentence("He maketh me to lie down in green pastures."));
+        assert!(!super::is_kjv_sentence("He went to the store."));
     }
 }

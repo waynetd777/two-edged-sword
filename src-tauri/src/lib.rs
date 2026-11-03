@@ -9,6 +9,8 @@ compile_error!("Two-edged Sword runs on macOS and Windows.");
 mod assistant;
 mod books;
 mod content;
+#[cfg(any(windows, target_os = "macos"))]
+mod grammar;
 mod help;
 mod index;
 mod journal;
@@ -431,8 +433,12 @@ fn spell_grammar(app: AppHandle, st: State<AppState>, text: String) -> Vec<spell
     kjv_words(&st);
     #[cfg(not(target_os = "macos"))]
     return spell::grammar(&text);
+    // Harper here, off the main thread; only asking macOS about a sentence's words goes there.
     #[cfg(target_os = "macos")]
-    on_main(&app, move || spell::grammar(&text)).unwrap_or_default()
+    grammar::check(&text, |s| {
+        let s = s.to_string();
+        on_main(&app, move || spell::is_kjv_sentence(&s)).unwrap_or(false)
+    })
 }
 /// The KJV's words, read here if a check comes before the start-up read (or waiting for it).
 fn kjv_words(st: &AppState) {
