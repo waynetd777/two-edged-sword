@@ -46,7 +46,7 @@ windows = { version = "0.62", features = ["Foundation", "Media", "Win32_Foundati
 # Export as PDF through WebView2's PrintToPdf (pdf.rs), at tauri's own versions; the paper size
 # from the user's locale. One copy per session, settled before the builder (single_instance_win.rs).
 webview2-com = "0.39"
-windows-core = "0.100"
+windows-core = "0.62"
 windows-sys = { version = "0.61", features = ["Win32_Foundation", "Win32_Globalization", "Win32_Security", "Win32_System_DataExchange", "Win32_System_Threading", "Win32_UI_WindowsAndMessaging"] }
 
 # Grammar for the journal, on both (grammar.rs): Harper, which runs on the computer.

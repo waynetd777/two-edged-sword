@@ -9,10 +9,18 @@ updates:
     groups:
       npm:
         patterns: ["*"]
+    # TypeScript waits for typescript-eslint to accept the next major version.
+    ignore:
+      - dependency-name: typescript
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: cargo
     directory: /src-tauri
     schedule:
       interval: monthly
+    # Kept at the versions webview2-com (and so tauri) uses, or pdf.rs doesn't build on Windows.
+    ignore:
+      - dependency-name: windows-core
+      - dependency-name: webview2-com
     groups:
       cargo:
         patterns: ["*"]
