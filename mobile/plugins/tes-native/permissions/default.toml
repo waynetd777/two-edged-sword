@@ -1,3 +1,11 @@
 [default]
 description = "Everything the phone app uses"
-permissions = ["allow-allow-rotation"]
+permissions = [
+  "allow-allow-rotation",
+  "allow-speak",
+  "allow-speech-pause",
+  "allow-speech-resume",
+  "allow-speech-stop",
+  "allow-register-listener",
+  "allow-remove-listener",
+]

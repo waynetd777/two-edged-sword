@@ -76,6 +76,14 @@ const PATHS = {
       <path d="M19 6a8.5 8.5 0 0 1 0 12" />
     </>
   ),
+  play: <path d="M8 5.5v13l10.5-6.5z" fill="currentColor" />,
+  pause: (
+    <>
+      <rect x="6.5" y="5" width="4" height="14" rx="1" fill="currentColor" stroke="none" />
+      <rect x="13.5" y="5" width="4" height="14" rx="1" fill="currentColor" stroke="none" />
+    </>
+  ),
+  stop: <rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor" stroke="none" />,
   back: <path d="M15 5l-7 7 7 7" />,
   forward: <path d="M9 5l7 7-7 7" />,
   up: <path d="M7 14l5-5 5 5" />,

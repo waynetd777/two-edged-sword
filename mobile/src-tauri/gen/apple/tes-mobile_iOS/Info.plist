@@ -42,5 +42,9 @@
 	</array>
 	<key>CFBundleDisplayName</key>
 	<string>2-edged Sword</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>audio</string>
+	</array>
 </dict>
 </plist>

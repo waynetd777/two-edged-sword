@@ -9,6 +9,7 @@ import { Icon } from "./icons";
 import { COMPARE_DEFAULT, CompareEdit, CompareView, useChapters } from "./Compare";
 import { bookTitles, DocView, isDevotional, setDevotionals, todayTitle } from "./DocView";
 import { GoTo } from "./GoTo";
+import { player, usePlayer } from "./player";
 import { ImageViewer } from "./ImageViewer";
 import type { Spot } from "./MapsTab";
 import { history } from "./history";
@@ -61,7 +62,10 @@ function Words({
   nums,
   active,
   onWord,
+  said,
 }: {
+  /** The word being read aloud: its offset in the verse's text. */
+  said?: number;
   tokens: Token[];
   nums: boolean;
   /** The token whose word sheet is open. */
@@ -73,7 +77,8 @@ function Words({
       {tokens.map((t, i) => {
         if (t.note) return null;
         const tagged = t.word;
-        const cls = [t.red ? "red" : "", tagged ? "w" : "", i === active ? "on" : ""].join(" ").trim() || undefined;
+        const reading = said !== undefined && t.word && said >= t.at && said < t.at + t.text.length;
+        const cls = [t.red ? "red" : "", tagged ? "w" : "", i === active ? "on" : "", reading ? "said" : ""].join(" ").trim() || undefined;
         return (
           <Fragment key={i}>
             <span
@@ -174,6 +179,8 @@ export function Read({
     if (doc) bookTitles(doc.module).then(setDocList);
   }, [doc?.module]); // eslint-disable-line react-hooks/exhaustive-deps
   const docKey = (d: { module: string; chapter: string } | null) => (d ? `${d.module}|${d.chapter}` : "");
+  const pl = usePlayer();
+  const playingHere = pl.on && pl.bible === bible && pl.book === loc.book && pl.chapter === loc.chapter && !doc;
   const docked = useWide(wideScene);
   const [wordScene, setWordScene] = useState(false);
   /** A verse to bring into view once its chapter has drawn. */
@@ -229,6 +236,7 @@ export function Read({
         setGoing(true);
       }
       if (sc.includes("compare")) setComparing(true);
+      if (sc.includes("listen")) setTimeout(() => player.play(saved("bible", "kjv+"), saved("loc", { book: 62, chapter: 1 }).book, saved("loc", { book: 62, chapter: 1 }).chapter, 1), 1500);
       if (sc.includes("wide")) setWideScene(true);
       const r = sc.find((x) => x.startsWith("at="));
       const ref = r ? parseRef(r.slice(3)) : undefined;
@@ -402,6 +410,21 @@ export function Read({
   };
 
   const pick = (v: number) => setSel(v);
+  // Listening: the reader follows, into the next chapter, with the verse being read a third of the way down.
+  useEffect(() => {
+    if (!pl.on || doc || comparing || pl.bible !== bible) return;
+    if (pl.book !== loc.book || pl.chapter !== loc.chapter) {
+      setLoc({ book: pl.book, chapter: pl.chapter });
+      return;
+    }
+    setSel(pl.verse);
+    const el = page.current?.querySelector(`[data-v="${pl.verse}"]`) as HTMLElement | null;
+    const pg = page.current;
+    if (el && pg) {
+      const top = el.getBoundingClientRect().top - pg.getBoundingClientRect().top + pg.scrollTop;
+      pg.scrollTo({ top: Math.max(0, top - pg.clientHeight / 3), behavior: "smooth" });
+    }
+  }, [pl.on, pl.book, pl.chapter, pl.verse, versesOf]); // eslint-disable-line react-hooks/exhaustive-deps
   /** Compare's next or previous verse, on into the next or previous chapter. */
   const stepVerse = (d: 1 | -1) => {
     setWord(null);
@@ -573,12 +596,18 @@ export function Read({
           ) : layout === "verse" ? (
             <div className="text verses">
               {verses.map((v) => (
-                <div key={v.v} data-v={v.v} className={`v ${v.v === sel ? "sel" : ""}`} onClick={() => pick(v.v)}>
+                <div
+                  key={v.v}
+                  data-v={v.v}
+                  className={`v ${v.v === sel ? "sel" : ""} ${playingHere && pl.verse === v.v ? "speaking" : ""}`}
+                  onClick={() => pick(v.v)}
+                >
                   <span className="vnum">{v.v}</span>
                   <Words
                     tokens={tokens.get(v.v) ?? []}
                     nums={!!bmod?.strongs}
                     active={word?.v === v.v ? word.i : undefined}
+                    said={playingHere && pl.verse === v.v && pl.at >= 0 ? pl.at : undefined}
                     onWord={(i, num) => {
                       setSel(v.v);
                       setWord({ v: v.v, i, num });
@@ -590,12 +619,18 @@ export function Read({
           ) : (
             <p className="text para">
               {verses.map((v) => (
-                <span key={v.v} data-v={v.v} className={`pv ${v.v === sel ? "sel" : ""}`} onClick={() => pick(v.v)}>
+                <span
+                  key={v.v}
+                  data-v={v.v}
+                  className={`pv ${v.v === sel ? "sel" : ""} ${playingHere && pl.verse === v.v ? "speaking" : ""}`}
+                  onClick={() => pick(v.v)}
+                >
                   <span className="vnum">{v.v}</span>
                   <Words
                     tokens={tokens.get(v.v) ?? []}
                     nums={!!bmod?.strongs}
                     active={word?.v === v.v ? word.i : undefined}
+                    said={playingHere && pl.verse === v.v && pl.at >= 0 ? pl.at : undefined}
                     onWord={(i, num) => {
                       setSel(v.v);
                       setWord({ v: v.v, i, num });
@@ -640,7 +675,28 @@ export function Read({
       )}
       </div>
 
-      {!docked && !doc && (
+      {pl.on && (
+        <div className="miniplayer" role="region" aria-label="Listening">
+          <button className="round" aria-label={pl.paused ? "Play" : "Pause"} onClick={() => (pl.paused ? player.resume() : player.pause())}>
+            <Icon name={pl.paused ? "play" : "pause"} size={20} />
+          </button>
+          <span style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
+            <span className="t">{fmtRef({ book: pl.book, chapter: pl.chapter, verse: pl.verse })}</span>
+            <span className="s">{pl.paused ? "Paused" : "Listening"}</span>
+          </span>
+          <button className="mini" aria-label="Speed" onClick={player.faster}>
+            {pl.speed}×
+          </button>
+          <button className="mini" aria-label="Sleep timer" onClick={player.sleeper}>
+            {pl.sleep === "off" ? "Sleep" : pl.sleep === "chapter" ? "End of ch." : `${pl.sleep} min`}
+          </button>
+          <button className="round" aria-label="Stop" onClick={player.stop}>
+            <Icon name="stop" size={18} />
+          </button>
+        </div>
+      )}
+      {!docked && !doc && !pl.on && (
+      <div className="studyrow">
       <button className="studybar" onClick={() => setStudy(true)}>
         <span style={{ color: "var(--accent)", display: "flex" }}>
           <Icon name="book" size={20} />
@@ -653,6 +709,14 @@ export function Read({
           <Icon name="up" size={16} />
         </span>
       </button>
+      <button
+        className="round listen"
+        aria-label={`Listen to ${fmtRef(loc)} from verse ${sel}`}
+        onClick={() => player.play(bible, loc.book, loc.chapter, sel, versesOf === `${loc.book}.${loc.chapter}` ? verses : undefined)}
+      >
+        <Icon name="play" size={20} />
+      </button>
+      </div>
       )}
 
       {study && !docked && (

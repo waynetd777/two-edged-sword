@@ -1,6 +1,8 @@
 // Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
 // SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
+import AVFoundation
+import MediaPlayer
 import ObjectiveC
 import SwiftRs
 import Tauri
@@ -11,18 +13,160 @@ class RotationArgs: Decodable {
   let allow: Bool
 }
 
+class SpeakItem: Decodable {
+  let id: Int
+  let text: String
+}
+
+class SpeakArgs: Decodable {
+  let items: [SpeakItem]
+  /// 1 is iOS's normal pace.
+  let rate: Double
+  let title: String
+}
+
 /// The orientations the app allows now: upright, but any way while a picture is open. Info.ios.plist lists
 /// every orientation for the iPhone; the web view's view controller narrows them to these.
 private var allowed: UIInterfaceOrientationMask = .portrait
 private var hooked = Set<ObjectIdentifier>()
 
-class TesNativePlugin: Plugin {
+class TesNativePlugin: Plugin, AVSpeechSynthesizerDelegate {
   private weak var webview: WKWebView?
+  private let synth = AVSpeechSynthesizer()
+  /// The app's id (a verse) for each utterance queued, and the last one's, to say when all are read.
+  private var ids: [ObjectIdentifier: Int] = [:]
+  private var lastId: Int?
+  private var remoteReady = false
 
   public override func load(webview: WKWebView) {
     super.load(webview: webview)
     self.webview = webview
+    synth.delegate = self
     DispatchQueue.main.async { self.hookViewController() }
+  }
+
+  // ---------- reading aloud ----------
+
+  /// The best English voice the phone has: premium, then enhanced, then the default; the person's own
+  /// English (en-GB, en-ZA…) before others.
+  private func voice() -> AVSpeechSynthesisVoice? {
+    let mine = AVSpeechSynthesisVoice.currentLanguageCode()
+    let en = AVSpeechSynthesisVoice.speechVoices().filter { $0.language.hasPrefix("en") }
+    func rank(_ v: AVSpeechSynthesisVoice) -> Int {
+      let q: Int
+      switch v.quality {
+      case .premium: q = 3
+      case .enhanced: q = 2
+      default: q = 1
+      }
+      return q * 2 + (v.language == mine ? 1 : 0)
+    }
+    return en.max { rank($0) < rank($1) } ?? AVSpeechSynthesisVoice(language: "en-US")
+  }
+
+  @objc public func speak(_ invoke: Invoke) throws {
+    let args = try invoke.parseArgs(SpeakArgs.self)
+    DispatchQueue.main.async {
+      // Playback, spoken audio: it carries on with the screen locked (UIBackgroundModes audio) and other
+      // audio ducks or pauses for it.
+      try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .spokenAudio, options: [])
+      try? AVAudioSession.sharedInstance().setActive(true)
+      self.ids = [:]
+      self.synth.stopSpeaking(at: .immediate)
+      let v = self.voice()
+      let rate = Float(max(0.5, min(2.0, args.rate))) * AVSpeechUtteranceDefaultSpeechRate
+      for item in args.items {
+        let u = AVSpeechUtterance(string: item.text)
+        u.voice = v
+        u.rate = max(AVSpeechUtteranceMinimumSpeechRate, min(AVSpeechUtteranceMaximumSpeechRate, rate))
+        u.postUtteranceDelay = 0.15
+        self.ids[ObjectIdentifier(u)] = item.id
+        self.synth.speak(u)
+      }
+      self.lastId = args.items.last?.id
+      self.nowPlaying(args.title, playing: true)
+      invoke.resolve()
+    }
+  }
+
+  @objc public func speechPause(_ invoke: Invoke) {
+    DispatchQueue.main.async {
+      self.synth.pauseSpeaking(at: .word)
+      self.nowPlaying(nil, playing: false)
+      invoke.resolve()
+    }
+  }
+
+  @objc public func speechResume(_ invoke: Invoke) {
+    DispatchQueue.main.async {
+      self.synth.continueSpeaking()
+      self.nowPlaying(nil, playing: true)
+      invoke.resolve()
+    }
+  }
+
+  @objc public func speechStop(_ invoke: Invoke) {
+    DispatchQueue.main.async {
+      self.ids = [:]
+      self.synth.stopSpeaking(at: .immediate)
+      MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
+      try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+      invoke.resolve()
+    }
+  }
+
+  /// The lock screen's title, and its play and pause buttons.
+  private func nowPlaying(_ title: String?, playing: Bool) {
+    let c = MPNowPlayingInfoCenter.default()
+    var info = c.nowPlayingInfo ?? [:]
+    if let title = title {
+      info[MPMediaItemPropertyTitle] = title
+      info[MPMediaItemPropertyArtist] = "Two-edged Sword"
+    }
+    info[MPNowPlayingInfoPropertyPlaybackRate] = playing ? 1.0 : 0.0
+    c.nowPlayingInfo = info
+    if remoteReady { return }
+    remoteReady = true
+    let rc = MPRemoteCommandCenter.shared()
+    rc.playCommand.addTarget { [weak self] _ in
+      self?.synth.continueSpeaking()
+      self?.nowPlaying(nil, playing: true)
+      self?.trigger("speech", data: ["kind": "resumed"])
+      return .success
+    }
+    rc.pauseCommand.addTarget { [weak self] _ in
+      self?.synth.pauseSpeaking(at: .word)
+      self?.nowPlaying(nil, playing: false)
+      self?.trigger("speech", data: ["kind": "paused"])
+      return .success
+    }
+    rc.togglePlayPauseCommand.addTarget { [weak self] _ in
+      guard let self = self else { return .commandFailed }
+      if self.synth.isPaused {
+        self.synth.continueSpeaking()
+        self.trigger("speech", data: ["kind": "resumed"])
+      } else {
+        self.synth.pauseSpeaking(at: .word)
+        self.trigger("speech", data: ["kind": "paused"])
+      }
+      self.nowPlaying(nil, playing: !self.synth.isPaused)
+      return .success
+    }
+  }
+
+  func speechSynthesizer(_ s: AVSpeechSynthesizer, willSpeakRangeOfSpeechString r: NSRange, utterance u: AVSpeechUtterance) {
+    guard let id = ids[ObjectIdentifier(u)] else { return }
+    trigger("speech", data: ["kind": "word", "id": id, "at": r.location, "len": r.length])
+  }
+
+  func speechSynthesizer(_ s: AVSpeechSynthesizer, didStart u: AVSpeechUtterance) {
+    guard let id = ids[ObjectIdentifier(u)] else { return }
+    trigger("speech", data: ["kind": "start", "id": id])
+  }
+
+  func speechSynthesizer(_ s: AVSpeechSynthesizer, didFinish u: AVSpeechUtterance) {
+    guard let id = ids.removeValue(forKey: ObjectIdentifier(u)) else { return }
+    trigger("speech", data: ["kind": id == lastId && ids.isEmpty ? "end" : "done", "id": id])
   }
 
   /// The view controller showing the web view (Tauri's) is asked which ways it may turn, every time iOS

@@ -288,6 +288,26 @@ button {
 }
 
 /* ---------- study bar and sheet ---------- */
+.studyrow {
+  flex: none;
+  display: flex;
+  gap: 8px;
+  margin: 0 12px 10px;
+  align-items: stretch;
+}
+.studyrow .studybar {
+  flex: 1;
+  margin: 0;
+  min-width: 0;
+}
+.round.listen {
+  width: 56px;
+  height: auto;
+  border-radius: 14px;
+  color: var(--accent);
+  background: var(--panel);
+  box-shadow: 0 -6px 24px var(--scrim);
+}
 .studybar {
   flex: none;
   margin: 0 12px 10px;
@@ -1325,4 +1345,38 @@ input[type="range"] {
 .row.switch {
   color: var(--text);
   font-size: 16px;
+}
+
+/* ---------- listen ---------- */
+.miniplayer {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 12px 10px;
+  padding: 8px 10px;
+  border-radius: 14px;
+  background: var(--panel);
+  border: 1px solid var(--ring);
+  box-shadow: 0 -6px 24px var(--scrim);
+}
+.miniplayer .t {
+  font-size: 15px;
+  font-weight: 600;
+}
+.miniplayer .s {
+  font-size: 12px;
+  color: var(--muted);
+}
+.miniplayer .round {
+  color: var(--accent);
+}
+.speaking {
+  background: var(--accentsoft);
+  border-radius: 6px;
+}
+.said {
+  background: var(--ring);
+  color: #ffffff;
+  border-radius: 3px;
 }
