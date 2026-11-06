@@ -110,6 +110,19 @@ function Words({
   );
 }
 
+/** An iPad in landscape: wide enough for the study pane beside the text. */
+const WIDE = "(orientation: landscape) and (min-width: 900px)";
+function useWide(force: boolean) {
+  const [wide, setWide] = useState(() => window.matchMedia(WIDE).matches);
+  useEffect(() => {
+    const m = window.matchMedia(WIDE);
+    const on = () => setWide(m.matches);
+    m.addEventListener("change", on);
+    return () => m.removeEventListener("change", on);
+  }, []);
+  return wide || force;
+}
+
 export function Read({ modules, jump }: { modules: Module[]; jump: (Jump & { n: number }) | null }) {
   const bibles = modules.filter((m) => m.kind === "bible");
   const [bible, setBible] = useState<string>(() => saved("bible", "kjv+"));
@@ -127,6 +140,8 @@ export function Read({ modules, jump }: { modules: Module[]; jump: (Jump & { n: 
   const [cmpIds, setCmpIds] = useState<string[]>(() => saved("compare", COMPARE_DEFAULT));
   const [diff, setDiff] = useState<boolean>(() => saved("compareDiff", true));
   const [editing, setEditing] = useState(false);
+  const [wideScene, setWideScene] = useState(false);
+  const docked = useWide(wideScene);
   const [wordScene, setWordScene] = useState(false);
   /** A verse to bring into view once its chapter has drawn. */
   const [scrollTo, setScrollTo] = useState<number | null>(null);
@@ -178,6 +193,7 @@ export function Read({ modules, jump }: { modules: Module[]; jump: (Jump & { n: 
       if (sc.includes("study")) setStudy(true);
       if (sc.includes("goto")) setGoing(true);
       if (sc.includes("compare")) setComparing(true);
+      if (sc.includes("wide")) setWideScene(true);
       if (sc.includes("word")) setWordScene(true);
       const b = sc.find((x) => x.startsWith("bible="));
       if (b) setBible(b.slice(6));
@@ -402,6 +418,7 @@ export function Read({ modules, jump }: { modules: Module[]; jump: (Jump & { n: 
         )}
       </header>
 
+      <div className="readbody">
       <div className="pager">
         <div
           ref={page}
@@ -489,6 +506,19 @@ export function Read({ modules, jump }: { modules: Module[]; jump: (Jump & { n: 
         </div>
       </div>
 
+      {docked && (
+        <Study
+          docked
+          at={{ ...loc, verse: sel }}
+          count={verses.length}
+          onVerse={setSel}
+          onClose={() => {}}
+          onGo={(r: Ref) => goTo(r)}
+        />
+      )}
+      </div>
+
+      {!docked && (
       <button className="studybar" onClick={() => setStudy(true)}>
         <span style={{ color: "var(--accent)", display: "flex" }}>
           <Icon name="book" size={20} />
@@ -501,8 +531,9 @@ export function Read({ modules, jump }: { modules: Module[]; jump: (Jump & { n: 
           <Icon name="up" size={16} />
         </span>
       </button>
+      )}
 
-      {study && (
+      {study && !docked && (
         <Study
           at={{ ...loc, verse: sel }}
           count={verses.length}

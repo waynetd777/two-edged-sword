@@ -43,7 +43,10 @@ export function Study({
   onVerse,
   onClose,
   onGo,
+  docked,
 }: {
+  /** Beside the text (an iPad in landscape), as the desktop's study pane, rather than a sheet. */
+  docked?: boolean;
   at: { book: number; chapter: number; verse: number };
   count: number;
   onVerse: (v: number) => void;
@@ -117,19 +120,23 @@ export function Study({
 
   return (
     <>
-      <div className="scrim" onClick={onClose} />
-      <section className="sheet tall" aria-label="Study">
-        <div className="grab" onTouchStart={gStart} onTouchEnd={gEnd} onClick={onClose}>
-          <span />
-        </div>
+      {!docked && <div className="scrim" onClick={onClose} />}
+      <section className={docked ? "dock" : "sheet tall"} aria-label="Study">
+        {!docked && (
+          <div className="grab" onTouchStart={gStart} onTouchEnd={gEnd} onClick={onClose}>
+            <span />
+          </div>
+        )}
         <div className="shead" onTouchStart={start} onTouchEnd={end}>
           <h2>{fmtRef(at)}</h2>
           <span className="m" style={{ flex: 1 }}>
-            Swipe for the next verse
+            {docked ? "Tap a verse to study it" : "Swipe for the next verse"}
           </span>
-          <button className="done" onClick={onClose}>
-            Done
-          </button>
+          {!docked && (
+            <button className="done" onClick={onClose}>
+              Done
+            </button>
+          )}
         </div>
         <div className="seg" role="tablist">
           <button role="tab" aria-selected={tab === "commentary"} onClick={() => setTab("commentary")}>
