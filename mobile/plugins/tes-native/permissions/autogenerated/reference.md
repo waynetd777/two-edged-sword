@@ -11,6 +11,7 @@ Everything the phone app uses
 - `allow-speech-stop`
 - `allow-voices`
 - `allow-bundled-dir`
+- `allow-inbox-dir`
 - `allow-say`
 - `allow-tap`
 - `allow-register-listener`
@@ -73,6 +74,32 @@ Enables the bundled_dir command without any pre-configured scope.
 <td>
 
 Denies the bundled_dir command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`tes-native:allow-inbox-dir`
+
+</td>
+<td>
+
+Enables the inbox_dir command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`tes-native:deny-inbox-dir`
+
+</td>
+<td>
+
+Denies the inbox_dir command without any pre-configured scope.
 
 </td>
 </tr>

@@ -8,6 +8,7 @@ permissions = [
   "allow-speech-stop",
   "allow-voices",
   "allow-bundled-dir",
+  "allow-inbox-dir",
   "allow-say",
   "allow-tap",
   "allow-register-listener",

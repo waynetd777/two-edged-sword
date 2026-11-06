@@ -255,6 +255,91 @@ fn remove_module(st: State<AppState>, file: String) -> Result<(), String> {
     Ok(())
 }
 
+// ---------- modules brought in from elsewhere (AirDrop, Files, Finder, Android's "open with") ----------
+
+const MODULE_EXTS: [&str; 6] = ["bbli", "cmti", "dcti", "lexi", "refi", "devi"];
+
+/// Where modules wait to be taken into the library: on iOS, the Inbox AirDrop and "Open in" copy to and
+/// Documents, which Finder shows (UIFileSharingEnabled); on Android, the Inbox the plugin copies an opened
+/// file to (`inbox`, from the plugin's inbox_dir).
+fn waiting_dirs(inbox: Option<String>) -> Vec<(std::path::PathBuf, bool)> {
+    let mut dirs: Vec<_> = inbox.map(|d| (std::path::PathBuf::from(d), true)).into_iter().collect();
+    if let Some(docs) = store::DOCS_DIR.get() {
+        dirs.push((docs.join("Inbox"), true));
+        dirs.push((docs.clone(), false));
+    }
+    dirs
+}
+
+#[derive(Serialize)]
+struct Brought {
+    /// The modules taken in, by title.
+    added: Vec<String>,
+    /// Files that looked like modules but couldn't be read as one, by name.
+    failed: Vec<String>,
+}
+
+/// Takes any modules waiting (waiting_dirs) into the app's Modules folder, replacing one of the same name,
+/// and reads the library again if any came.
+#[tauri::command(async)]
+fn import_waiting(st: State<AppState>, inbox: Option<String>) -> Brought {
+    let mut out = Brought { added: vec![], failed: vec![] };
+    let dest = library::app_dir();
+    let _ = std::fs::create_dir_all(&dest);
+    for (dir, inbox) in waiting_dirs(inbox) {
+        let Ok(entries) = std::fs::read_dir(&dir) else { continue };
+        for e in entries.flatten() {
+            let path = e.path();
+            if !path.is_file() {
+                continue;
+            }
+            let name = path.file_name().and_then(|n| n.to_str()).unwrap_or_default().to_string();
+            let ext = path.extension().and_then(|x| x.to_str()).unwrap_or_default().to_ascii_lowercase();
+            if !MODULE_EXTS.contains(&ext.as_str()) {
+                // Anything else left in an Inbox is of no use; what's in Documents is the user's own.
+                if inbox {
+                    let _ = std::fs::remove_file(&path);
+                }
+                continue;
+            }
+            // iOS names a second copy of kjv.bbli "kjv-1.bbli" in its Inbox: it's still kjv.
+            let mut stem = path.file_stem().and_then(|x| x.to_str()).unwrap_or_default().to_string();
+            if inbox {
+                if let Some((base, n)) = stem.rsplit_once('-') {
+                    if !base.is_empty() && !n.is_empty() && n.chars().all(|c| c.is_ascii_digit()) {
+                        stem = base.to_string();
+                    }
+                }
+            }
+            let file = format!("{stem}.{ext}");
+            let title = (|| -> Option<String> {
+                safe_name(&file).ok()?;
+                let c = rusqlite::Connection::open_with_flags(&path, rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY).ok()?;
+                let t: Option<String> = c.query_row("SELECT Title FROM Details LIMIT 1", [], |r| r.get(0)).ok()?;
+                Some(t.filter(|t| !t.trim().is_empty()).unwrap_or_else(|| stem.clone()))
+            })();
+            let Some(title) = title else {
+                out.failed.push(name);
+                if inbox {
+                    let _ = std::fs::remove_file(&path);
+                }
+                continue;
+            };
+            let to = dest.join(&file);
+            let moved = std::fs::rename(&path, &to).is_ok() || (std::fs::copy(&path, &to).is_ok() && std::fs::remove_file(&path).is_ok());
+            if moved {
+                out.added.push(title);
+            } else {
+                out.failed.push(name);
+            }
+        }
+    }
+    if !out.added.is_empty() {
+        *st.lib.write().unwrap() = scan();
+    }
+    out
+}
+
 // ---------- the daily reminder ----------
 
 #[derive(serde::Deserialize)]
@@ -345,10 +430,22 @@ pub fn run() {
             let _ = store::DATA_DIR.set(paths.app_data_dir()?);
             *store::RESOURCE_DIR.write().unwrap() = Some(paths.resource_dir()?);
             let _ = std::fs::create_dir_all(library::app_dir());
+            #[cfg(target_os = "ios")]
+            if let Ok(d) = paths.document_dir() {
+                let _ = store::DOCS_DIR.set(d);
+            }
             app.manage(AppState { lib: RwLock::new(scan()), cancelled: Mutex::new(HashSet::new()) });
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![log, scene, set_bundled, modules, chapter, chapter_sizes, commentary, coverage, article, strongs_for_word, search, strongs_by_book, strongs_verses, translit_search, find_topics, fetch_manifest, fetch_bytes, module_info, list_topics, reference_titles, devotion_titles, devotion, commentary_ranges, schedule_reminders, download, cancel_download, remove_module])
-        .run(tauri::generate_context!())
-        .expect("error while running the app");
+        .invoke_handler(tauri::generate_handler![log, scene, set_bundled, modules, chapter, chapter_sizes, commentary, coverage, article, strongs_for_word, search, strongs_by_book, strongs_verses, translit_search, find_topics, fetch_manifest, fetch_bytes, module_info, list_topics, reference_titles, devotion_titles, devotion, commentary_ranges, schedule_reminders, download, cancel_download, remove_module, import_waiting])
+        .build(tauri::generate_context!())
+        .expect("error while running the app")
+        .run(|app, ev| {
+            // A module AirDropped or opened from Files while the app runs: the page takes it in.
+            #[cfg(any(target_os = "ios", target_os = "android"))]
+            if let tauri::RunEvent::Opened { .. } = ev {
+                let _ = app.emit("tes-inbox", ());
+            }
+            let _ = (app, ev);
+        });
 }

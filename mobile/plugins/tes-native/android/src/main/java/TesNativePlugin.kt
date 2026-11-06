@@ -4,6 +4,9 @@
 package com.wayned.tes.plugin
 
 import android.app.Activity
+import android.content.Intent
+import android.net.Uri
+import android.provider.OpenableColumns
 import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
@@ -95,6 +98,7 @@ class TesNativePlugin(private val activity: Activity) : Plugin(activity) {
     webView.settings.builtInZoomControls = false
     upright(true)
     Thread { unpackModules(webView) }.start()
+    takeIn(activity.intent)
     // The word engine started now, so the first tap on a speaker isn't kept waiting for it.
     wordEngine {}
   }
@@ -121,6 +125,60 @@ class TesNativePlugin(private val activity: Activity) : Plugin(activity) {
       bundled = root.absolutePath
       webView.post { webView.evaluateJavascript("window.dispatchEvent(new Event('tes-bundled'))", null) }
     } catch (_: Exception) {}
+  }
+
+  /** Where a module opened in the app waits to be taken into the library (lib.rs import_waiting). */
+  private val inbox get() = File(activity.filesDir, "Inbox")
+
+  override fun onNewIntent(intent: Intent) {
+    takeIn(intent)
+  }
+
+  /** A file opened in the app (Files, Quick Share) or shared to it: copied to the Inbox under its own name,
+   *  then the page is told. Only names ending in a module's extension are kept. */
+  private fun takeIn(intent: Intent?) {
+    if (intent == null) return
+    val uris = mutableListOf<Uri>()
+    when (intent.action) {
+      Intent.ACTION_VIEW -> intent.data?.let { uris.add(it) }
+      Intent.ACTION_SEND -> intentStream(intent)?.let { uris.add(it) }
+      Intent.ACTION_SEND_MULTIPLE -> uris.addAll(intentStreams(intent))
+    }
+    if (uris.isEmpty()) return
+    // Taken once: not again if the activity is made afresh with the same intent.
+    activity.intent = Intent(Intent.ACTION_MAIN)
+    Thread {
+      inbox.mkdirs()
+      for (uri in uris) {
+        try {
+          val name = displayName(uri)?.substringAfterLast('/') ?: continue
+          if (!Regex("""(?i).+\.(bbli|cmti|dcti|lexi|refi|devi)""").matches(name)) continue
+          activity.contentResolver.openInputStream(uri)?.use { i -> File(inbox, name).outputStream().use { o -> i.copyTo(o) } }
+        } catch (_: Exception) {}
+      }
+      view?.post { view?.evaluateJavascript("window.dispatchEvent(new Event('tes-inbox'))", null) }
+    }.start()
+  }
+
+  @Suppress("DEPRECATION")
+  private fun intentStream(intent: Intent): Uri? = intent.getParcelableExtra(Intent.EXTRA_STREAM)
+
+  @Suppress("DEPRECATION")
+  private fun intentStreams(intent: Intent): List<Uri> = intent.getParcelableArrayListExtra<Uri>(Intent.EXTRA_STREAM) ?: emptyList()
+
+  private fun displayName(uri: Uri): String? {
+    if (uri.scheme == "file") return uri.lastPathSegment
+    activity.contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { c ->
+      if (c.moveToFirst()) return c.getString(0)
+    }
+    return uri.lastPathSegment
+  }
+
+  @Command
+  fun inboxDir(invoke: Invoke) {
+    val r = JSObject()
+    r.put("dir", inbox.absolutePath)
+    invoke.resolve(r)
   }
 
   @Command

@@ -58,8 +58,10 @@ export function Library({
   const [removing, setRemoving] = useState<Module | null>(null);
   /** The About open: a module on the phone (read from it) or one to download (from the manifest). */
   const [about, setAbout] = useState<{ title: string; sub: string; html: string | null } | null>(null);
+  /** Where a module on the phone came from: the app, the downloads, or brought in (AirDrop, Files). */
+  const whence = (m: Module) => (m.source === "bundled" ? "Built in" : offers.some((o) => o.file === m.file) ? "Downloaded" : "Added");
   const showAbout = (m: Module) => {
-    setAbout({ title: m.title, sub: `${m.source === "bundled" ? "Built in" : "Downloaded"} · ${mb(m.size)}`, html: null });
+    setAbout({ title: m.title, sub: `${whence(m)} · ${mb(m.size)}`, html: null });
     api
       .moduleInfo(m.kind, m.id)
       .then((html) => setAbout((a) => (a && a.title === m.title ? { ...a, html } : a)))
@@ -198,7 +200,7 @@ export function Library({
                 <span className="grow" style={{ display: "flex", flexDirection: "column", padding: "8px 0" }}>
                   <span>{m.title}</span>
                   <span className="m">
-                    {m.source === "bundled" ? "Built in" : "Downloaded"} · {mb(m.size)}
+                    {whence(m)} · {mb(m.size)}
                   </span>
                 </span>
                 <InfoButton label={m.title} onClick={() => showAbout(m)} />

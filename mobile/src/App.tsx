@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import { invoke } from "@tauri-apps/api/core";
-import { useEffect, useState } from "react";
+import { listen } from "@tauri-apps/api/event";
+import { useEffect, useRef, useState } from "react";
 import { api, libraryIs, Module, save, saved, scene } from "./api";
 import { Icon } from "./icons";
 import { Read } from "./Read";
@@ -54,8 +55,41 @@ export function App() {
         libraryIs(m.map((x) => x.file));
       })
       .catch(() => {});
+  /** What was just brought in, shown for a few seconds above the tabs. */
+  const [notice, setNotice] = useState<string | null>(null);
+  const noticeTimer = useRef<number>(0);
+  const tell = (text: string) => {
+    setNotice(text);
+    clearTimeout(noticeTimer.current);
+    noticeTimer.current = window.setTimeout(() => setNotice(null), 5000);
+  };
+  const toldFailed = useRef(new Set<string>()).current;
+  /** Modules AirDropped, opened from Files, dragged in with Finder or (Android) opened in the app: taken
+   *  into the library (lib.rs import_waiting). */
+  const takeIn = () =>
+    invoke<{ dir?: string }>("plugin:tes-native|inbox_dir")
+      .catch(() => ({}) as { dir?: string })
+      .then((r) => api.importWaiting(r.dir))
+      .then(({ added, failed: bad }) => {
+        let failed = bad;
+        if (added.length) loadModules();
+        const parts = [];
+        if (added.length) parts.push(`Added ${added.length > 2 ? `${added.length} modules` : added.join(" and ")} to the Library`);
+        // A bad file left in Documents is found every time: told once.
+        failed = failed.filter((f) => !toldFailed.has(f));
+        failed.forEach((f) => toldFailed.add(f));
+        if (failed.length) parts.push(`${failed.join(", ")} couldn't be read as ${failed.length > 1 ? "modules" : "a module"}`);
+        if (parts.length) tell(parts.join(". ") + ".");
+      })
+      .catch(() => {});
+
   useEffect(() => {
     loadModules();
+    takeIn();
+    window.addEventListener("tes-inbox", takeIn);
+    const unInbox = listen("tes-inbox", takeIn);
+    const shown = () => document.visibilityState === "visible" && takeIn();
+    document.addEventListener("visibilitychange", shown);
     // Android: the bundled modules are copied out of the APK on the first start (and after an update); the
     // library is read again once they are.
     const bundled = () =>
@@ -87,8 +121,16 @@ export function App() {
     return () => {
       off();
       unPlans();
+      window.removeEventListener("tes-inbox", takeIn);
+      unInbox.then((u) => u());
+      document.removeEventListener("visibilitychange", shown);
     };
   }, []);
+
+  // Finder can drop a module in while the app is open: looked for again whenever the Library is opened.
+  useEffect(() => {
+    if (tab === "library") takeIn();
+  }, [tab]);
 
   return (
     <div className="app">
@@ -150,6 +192,11 @@ export function App() {
           }}
           onClose={() => setDict(null)}
         />
+      )}
+      {notice && (
+        <div className="notice" role="status" onClick={() => { setNotice(null); setTab("library"); }}>
+          {notice}
+        </div>
       )}
       <nav className="tabs">
         {TABS.map((t) => (

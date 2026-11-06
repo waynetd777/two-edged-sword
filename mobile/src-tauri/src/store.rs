@@ -8,6 +8,8 @@ use std::path::PathBuf;
 use std::sync::{OnceLock, RwLock};
 
 pub static DATA_DIR: OnceLock<PathBuf> = OnceLock::new();
+/// iOS: the app's Documents folder, where AirDrop's Inbox is and what Finder shows of the app.
+pub static DOCS_DIR: OnceLock<PathBuf> = OnceLock::new();
 /// Where the app's shipped folders are. On Android they're inside the APK, which SQLite can't open, so the
 /// plugin copies them out and this is set again (lib.rs set_bundled).
 pub static RESOURCE_DIR: RwLock<Option<PathBuf>> = RwLock::new(None);

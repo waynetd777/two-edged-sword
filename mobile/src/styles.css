@@ -567,6 +567,24 @@ button {
 }
 
 /* ---------- tab bar ---------- */
+/* A word on what was just added (App.tsx), above the tabs; a tap opens the Library. */
+.notice {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: calc(var(--bottom) + 68px);
+  z-index: 20;
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: var(--panel);
+  color: var(--text);
+  border: 1px solid var(--line);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  font-size: 14px;
+  line-height: 1.4;
+}
 .tabs {
   flex: none;
   display: grid;

@@ -25,5 +25,143 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<!-- Modules brought in from elsewhere (lib.rs import_waiting): AirDrop and Files offer "Open in 2-edged
+	     Sword" for these file types, which iOS copies to Documents/Inbox; and Finder shows the app's Documents
+	     folder (Files on a Mac with the device plugged in), so a module can be dragged there. -->
+	<key>UTImportedTypeDeclarations</key>
+	<array>
+		<dict>
+			<key>UTTypeIdentifier</key>
+			<string>com.wayned.two-edged-sword.bbli</string>
+			<key>UTTypeDescription</key>
+			<string>Two-edged Sword Bible</string>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.data</string>
+				<string>public.content</string>
+			</array>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>bbli</string>
+				</array>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeIdentifier</key>
+			<string>com.wayned.two-edged-sword.cmti</string>
+			<key>UTTypeDescription</key>
+			<string>Two-edged Sword Commentary</string>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.data</string>
+				<string>public.content</string>
+			</array>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>cmti</string>
+				</array>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeIdentifier</key>
+			<string>com.wayned.two-edged-sword.dcti</string>
+			<key>UTTypeDescription</key>
+			<string>Two-edged Sword Dictionary</string>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.data</string>
+				<string>public.content</string>
+			</array>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>dcti</string>
+				</array>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeIdentifier</key>
+			<string>com.wayned.two-edged-sword.lexi</string>
+			<key>UTTypeDescription</key>
+			<string>Two-edged Sword Lexicon</string>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.data</string>
+				<string>public.content</string>
+			</array>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>lexi</string>
+				</array>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeIdentifier</key>
+			<string>com.wayned.two-edged-sword.refi</string>
+			<key>UTTypeDescription</key>
+			<string>Two-edged Sword Book</string>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.data</string>
+				<string>public.content</string>
+			</array>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>refi</string>
+				</array>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeIdentifier</key>
+			<string>com.wayned.two-edged-sword.devi</string>
+			<key>UTTypeDescription</key>
+			<string>Two-edged Sword Devotional</string>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.data</string>
+				<string>public.content</string>
+			</array>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>devi</string>
+				</array>
+			</dict>
+		</dict>
+	</array>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>Two-edged Sword module</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>LSHandlerRank</key>
+			<string>Owner</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>com.wayned.two-edged-sword.bbli</string>
+				<string>com.wayned.two-edged-sword.cmti</string>
+				<string>com.wayned.two-edged-sword.dcti</string>
+				<string>com.wayned.two-edged-sword.lexi</string>
+				<string>com.wayned.two-edged-sword.refi</string>
+				<string>com.wayned.two-edged-sword.devi</string>
+			</array>
+		</dict>
+	</array>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<false/>
+	<key>UIFileSharingEnabled</key>
+	<true/>
 </dict>
 </plist>
