@@ -152,9 +152,24 @@ async fn inbox_dir<R: Runtime>(app: AppHandle<R>) -> Result<serde_json::Value, S
     }
 }
 
+/// The Library's Add from Files: the system's file picker; what's chosen waits in the Inbox to be taken in.
+#[command]
+async fn pick_modules<R: Runtime>(app: AppHandle<R>) -> Result<serde_json::Value, String> {
+    #[cfg(mobile)]
+    {
+        use tauri::Manager;
+        return app.state::<Native<R>>().0.run_mobile_plugin::<serde_json::Value>("pickModules", ()).map_err(|e| e.to_string());
+    }
+    #[cfg(not(mobile))]
+    {
+        let _ = app;
+        Ok(serde_json::json!({ "count": 0 }))
+    }
+}
+
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
     Builder::new("tes-native")
-        .invoke_handler(tauri::generate_handler![allow_rotation, speak, speech_pause, speech_resume, speech_stop, voices, bundled_dir, inbox_dir, say, tap])
+        .invoke_handler(tauri::generate_handler![allow_rotation, speak, speech_pause, speech_resume, speech_stop, voices, bundled_dir, inbox_dir, pick_modules, say, tap])
         .setup(|_app, _api| {
             #[cfg(target_os = "ios")]
             {

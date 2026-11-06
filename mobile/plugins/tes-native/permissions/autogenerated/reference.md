@@ -12,6 +12,7 @@ Everything the phone app uses
 - `allow-voices`
 - `allow-bundled-dir`
 - `allow-inbox-dir`
+- `allow-pick-modules`
 - `allow-say`
 - `allow-tap`
 - `allow-register-listener`
@@ -100,6 +101,32 @@ Enables the inbox_dir command without any pre-configured scope.
 <td>
 
 Denies the inbox_dir command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`tes-native:allow-pick-modules`
+
+</td>
+<td>
+
+Enables the pick_modules command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`tes-native:deny-pick-modules`
+
+</td>
+<td>
+
+Denies the pick_modules command without any pre-configured scope.
 
 </td>
 </tr>

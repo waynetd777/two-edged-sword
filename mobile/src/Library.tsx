@@ -1,6 +1,7 @@
 // Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
 // SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
+import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { useEffect, useState } from "react";
 import { api, Kind, Module, Offer, save, saved, scene } from "./api";
@@ -99,6 +100,8 @@ export function Library({
     scene.then((sc) => {
       // Debug: about opens the first module's About on the phone.
       // aboutget: the About of the last module to download, with its cover fetched.
+      // pick: Add from Files tapped, the picker open.
+      if (sc.includes("pick")) setTimeout(() => [...document.querySelectorAll<HTMLButtonElement>("button")].find((b) => b.textContent === "Add from Files")?.click(), 2000);
       // aboutcover: then its cover tapped, open in the viewer.
       if (sc.includes("aboutcover")) setTimeout(() => document.querySelector<HTMLImageElement>(".prose.about img")?.click(), 3500);
       if (sc.includes("aboutget")) setTimeout(() => [...document.querySelectorAll<HTMLButtonElement>(".infobtn")].pop()?.click(), 4000);
@@ -191,9 +194,23 @@ export function Library({
         </div>
 
         <div className="card flush" style={{ marginBottom: 14 }}>
-          <p className="label" style={{ padding: "12px 14px 4px", margin: 0 }}>
-            On this phone
-          </p>
+          <div style={{ display: "flex", alignItems: "center", padding: "8px 10px 0 14px" }}>
+            <p className="label" style={{ margin: 0, flex: 1 }}>
+              On this phone
+            </p>
+            {/* A module from elsewhere (AirDropped to Downloads, iCloud Drive, a USB stick): chosen in the system's
+                picker, copied to the Inbox, and taken in by App.tsx, which says what came. */}
+            <button
+              className="mini accent"
+              onClick={() =>
+                invoke<{ count: number }>("plugin:tes-native|pick_modules")
+                  .then((r) => r.count && window.dispatchEvent(new Event("tes-inbox")))
+                  .catch((e) => invoke("log", { msg: `pick_modules: ${e}` }))
+              }
+            >
+              Add from Files
+            </button>
+          </div>
           {here.length ? (
             here.map((m) => (
               <div key={m.file} className="row">

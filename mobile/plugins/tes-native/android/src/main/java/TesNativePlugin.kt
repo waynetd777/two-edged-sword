@@ -17,6 +17,8 @@ import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.activity.result.ActivityResult
+import app.tauri.annotation.ActivityCallback
 import app.tauri.annotation.Command
 import app.tauri.annotation.InvokeArg
 import app.tauri.annotation.TauriPlugin
@@ -148,15 +150,49 @@ class TesNativePlugin(private val activity: Activity) : Plugin(activity) {
     // Taken once: not again if the activity is made afresh with the same intent.
     activity.intent = Intent(Intent.ACTION_MAIN)
     Thread {
-      inbox.mkdirs()
-      for (uri in uris) {
-        try {
-          val name = displayName(uri)?.substringAfterLast('/') ?: continue
-          if (!Regex("""(?i).+\.(bbli|cmti|dcti|lexi|refi|devi)""").matches(name)) continue
-          activity.contentResolver.openInputStream(uri)?.use { i -> File(inbox, name).outputStream().use { o -> i.copyTo(o) } }
-        } catch (_: Exception) {}
-      }
+      copyIn(uris)
       view?.post { view?.evaluateJavascript("window.dispatchEvent(new Event('tes-inbox'))", null) }
+    }.start()
+  }
+
+  /** Copies each file to the Inbox under its own name, if it's named as a module; says how many were. */
+  private fun copyIn(uris: List<Uri>): Int {
+    inbox.mkdirs()
+    var n = 0
+    for (uri in uris) {
+      try {
+        val name = displayName(uri)?.substringAfterLast('/') ?: continue
+        if (!Regex("""(?i).+\.(bbli|cmti|dcti|lexi|refi|devi)""").matches(name)) continue
+        activity.contentResolver.openInputStream(uri)?.use { i -> File(inbox, name).outputStream().use { o -> i.copyTo(o) } }
+        n++
+      } catch (_: Exception) {}
+    }
+    return n
+  }
+
+  /** The Library's Add from Files: Android's file picker, more than one at a time (any file: Android
+   *  doesn't know the module types). What's chosen is copied to the Inbox; answers with how many were. */
+  @Command
+  fun pickModules(invoke: Invoke) {
+    val i = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+      addCategory(Intent.CATEGORY_OPENABLE)
+      type = "*/*"
+      putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
+    }
+    startActivityForResult(invoke, i, "modulesPicked")
+  }
+
+  @ActivityCallback
+  fun modulesPicked(invoke: Invoke, result: ActivityResult) {
+    val data = result.data
+    val uris = mutableListOf<Uri>()
+    if (result.resultCode == Activity.RESULT_OK && data != null) {
+      data.clipData?.let { c -> for (k in 0 until c.itemCount) uris.add(c.getItemAt(k).uri) } ?: data.data?.let { uris.add(it) }
+    }
+    Thread {
+      val r = JSObject()
+      r.put("count", copyIn(uris))
+      invoke.resolve(r)
     }.start()
   }
 
