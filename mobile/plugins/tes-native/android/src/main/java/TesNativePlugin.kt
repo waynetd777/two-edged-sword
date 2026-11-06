@@ -29,6 +29,13 @@ class RotationArgs {
 }
 
 @InvokeArg
+class SayArgs {
+  var word: String = ""
+  var lang: String = ""
+  var pron: String = ""
+}
+
+@InvokeArg
 class SpeakItem {
   var id: Int = 0
   var text: String = ""
@@ -251,8 +258,37 @@ class TesNativePlugin(private val activity: Activity) : Plugin(activity) {
     }
   }
 
+  /** A word said on its own (the word sheet's speaker), apart from Listen's reading. */
+  private var wordTts: TextToSpeech? = null
+  private var wordReady = false
+
+  /** In a Hebrew or Greek voice when the phone has one, otherwise the pronunciation in an English voice,
+   *  as the desktop's SayButton does. */
+  @Command
+  fun say(invoke: Invoke) {
+    val args = invoke.parseArgs(SayArgs::class.java)
+    val go = { t: TextToSpeech ->
+      val lang = Locale(if (args.lang == "he") "iw" else args.lang)
+      val has = t.isLanguageAvailable(lang) >= TextToSpeech.LANG_AVAILABLE
+      t.language = if (has) lang else Locale.ENGLISH
+      t.setSpeechRate(if (has) 0.8f else 0.9f)
+      t.speak(if (has) args.word else args.pron.replace(Regex("[-'ʼ]"), " "), TextToSpeech.QUEUE_FLUSH, Bundle(), "word")
+    }
+    wordTts?.let { if (wordReady) go(it) } ?: run {
+      var made: TextToSpeech? = null
+      made = TextToSpeech(activity) { status ->
+        wordReady = status == TextToSpeech.SUCCESS
+        if (wordReady) made?.let(go)
+      }
+      wordTts = made
+    }
+    invoke.resolve()
+  }
+
   override fun onDestroy() {
     tts?.shutdown()
     tts = null
+    wordTts?.shutdown()
+    wordTts = null
   }
 }

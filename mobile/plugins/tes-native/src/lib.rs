@@ -101,6 +101,21 @@ fn native<R: Runtime, A: serde::Serialize>(app: &AppHandle<R>, method: &str, arg
     }
 }
 
+#[derive(serde::Serialize)]
+struct Say {
+    word: String,
+    /// "he" or "el": the word's language.
+    lang: String,
+    /// Its pronunciation in English letters, said when the phone has no voice for the language.
+    pron: String,
+}
+
+/// Says one original-language word, apart from Listen (which carries on).
+#[command]
+async fn say<R: Runtime>(app: AppHandle<R>, word: String, lang: String, pron: String) -> Result<(), String> {
+    native(&app, "say", Say { word, lang, pron })
+}
+
 /// Android: where the bundled modules were copied out of the APK, once they have been.
 #[command]
 async fn bundled_dir<R: Runtime>(app: AppHandle<R>) -> Result<serde_json::Value, String> {
@@ -118,7 +133,7 @@ async fn bundled_dir<R: Runtime>(app: AppHandle<R>) -> Result<serde_json::Value,
 
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
     Builder::new("tes-native")
-        .invoke_handler(tauri::generate_handler![allow_rotation, speak, speech_pause, speech_resume, speech_stop, voices, bundled_dir])
+        .invoke_handler(tauri::generate_handler![allow_rotation, speak, speech_pause, speech_resume, speech_stop, voices, bundled_dir, say])
         .setup(|_app, _api| {
             #[cfg(target_os = "ios")]
             {

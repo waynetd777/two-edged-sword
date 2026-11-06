@@ -11,6 +11,7 @@ Everything the phone app uses
 - `allow-speech-stop`
 - `allow-voices`
 - `allow-bundled-dir`
+- `allow-say`
 - `allow-register-listener`
 - `allow-remove-listener`
 
@@ -123,6 +124,32 @@ Enables the remove_listener command without any pre-configured scope.
 <td>
 
 Denies the remove_listener command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`tes-native:allow-say`
+
+</td>
+<td>
+
+Enables the say command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`tes-native:deny-say`
+
+</td>
+<td>
+
+Denies the say command without any pre-configured scope.
 
 </td>
 </tr>

@@ -1,41 +1,18 @@
 // Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
 // SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
+import { invoke } from "@tauri-apps/api/core";
 import { useEffect, useState } from "react";
 import { fmtRef } from "../../src/bible";
 import { headwords, lexiconParts, renderHtml, Token } from "../../src/esword";
 import { api, Article } from "./api";
 import { Icon } from "./icons";
 
-/** The phone's voices. WebKit's list is empty when first asked and fills in a moment later
- *  (voiceschanged), so it's asked for at start-up and a word waits briefly for it. */
-let voices: SpeechSynthesisVoice[] = [];
-const voicesReady: Promise<void> = new Promise((done) => {
-  const synth = window.speechSynthesis;
-  if (!synth) return done();
-  const load = () => {
-    voices = synth.getVoices();
-    if (voices.length) done();
-  };
-  load();
-  synth.addEventListener?.("voiceschanged", load);
-  setTimeout(done, 1500); // a phone with no voices at all
-});
-
-/** Says an original-language word, as the desktop's SayButton does: in a Hebrew or Greek voice when
- *  the phone has one, otherwise its pronunciation ("ray-sheeth'") in an English voice. */
-export async function say(word: string, num: string, pron: string) {
-  const synth = window.speechSynthesis;
-  if (!synth) return;
-  synth.cancel();
-  if (!voices.length) await voicesReady;
-  const lang = num.startsWith("H") ? "he" : "el";
-  const voice = voices.find((v) => v.lang.toLowerCase().startsWith(lang));
-  const u = new SpeechSynthesisUtterance(voice ? word : pron.replace(/[-'ʼ]/g, " "));
-  if (voice) u.voice = voice;
-  else u.lang = "en-US";
-  u.rate = voice ? 0.8 : 0.9;
-  synth.speak(u);
+/** Says an original-language word through the native plugin, apart from Listen (which carries on): a Hebrew
+ *  or Greek voice when the phone has one, otherwise its pronunciation ("ray-sheeth'") in English, as the
+ *  desktop's SayButton does. Android's web view has no speech of its own. */
+export function say(word: string, num: string, pron: string) {
+  invoke("plugin:tes-native|say", { word, lang: num.startsWith("H") ? "he" : "el", pron }).catch(() => {});
 }
 
 /** The words of a verse, as indexes into its tokens. */

@@ -9,6 +9,7 @@ const COMMANDS: &[&str] = &[
     "speech_stop",
     "voices",
     "bundled_dir",
+    "say",
     // addPluginListener in the app goes through these (the "speech" events).
     "register_listener",
     "remove_listener",

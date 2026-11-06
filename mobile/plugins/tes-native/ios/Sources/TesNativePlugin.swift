@@ -13,6 +13,12 @@ class RotationArgs: Decodable {
   let allow: Bool
 }
 
+class SayArgs: Decodable {
+  let word: String
+  let lang: String
+  let pron: String
+}
+
 class SpeakItem: Decodable {
   let id: Int
   let text: String
@@ -34,6 +40,8 @@ private var hooked = Set<ObjectIdentifier>()
 class TesNativePlugin: Plugin, AVSpeechSynthesizerDelegate {
   private weak var webview: WKWebView?
   private let synth = AVSpeechSynthesizer()
+  /// A word said on its own (the word sheet's speaker), apart from Listen's reading.
+  private let wordSynth = AVSpeechSynthesizer()
   /// The app's id (a verse) for each utterance queued, and the last one's, to say when all are read.
   private var ids: [ObjectIdentifier: Int] = [:]
   private var lastId: Int?
@@ -86,6 +94,22 @@ class TesNativePlugin: Plugin, AVSpeechSynthesizerDelegate {
       }
       self.lastId = args.items.last?.id
       self.nowPlaying(args.title, playing: true)
+      invoke.resolve()
+    }
+  }
+
+  /// In a Hebrew or Greek voice when the phone has one, otherwise the pronunciation in an English voice, as
+  /// the desktop's SayButton does.
+  @objc public func say(_ invoke: Invoke) throws {
+    let args = try invoke.parseArgs(SayArgs.self)
+    DispatchQueue.main.async {
+      try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .spokenAudio, options: [.mixWithOthers])
+      self.wordSynth.stopSpeaking(at: .immediate)
+      let v = AVSpeechSynthesisVoice.speechVoices().first { $0.language.hasPrefix(args.lang) }
+      let u = AVSpeechUtterance(string: v != nil ? args.word : args.pron.replacingOccurrences(of: "[-'ʼ]", with: " ", options: .regularExpression))
+      u.voice = v ?? self.voice()
+      u.rate = AVSpeechUtteranceDefaultSpeechRate * (v != nil ? 0.8 : 0.9)
+      self.wordSynth.speak(u)
       invoke.resolve()
     }
   }
