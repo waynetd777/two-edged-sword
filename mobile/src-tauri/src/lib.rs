@@ -76,8 +76,21 @@ fn article(st: State<AppState>, kind: Kind, module: String, topic: String) -> Re
     content::article(&st.lib.read().unwrap(), kind, &module, &topic)
 }
 
+#[tauri::command(async)]
+fn strongs_for_word(st: State<AppState>, bible: String, word: String) -> Result<Vec<content::WordNumber>, String> {
+    content::strongs_for_word(&st.lib.read().unwrap(), &bible, &word)
+}
+
+/// Debug builds: the UI's errors and console.error, in the app's own log (`xcrun simctl launch --console`).
+#[tauri::command]
+fn log(msg: String) {
+    if cfg!(debug_assertions) {
+        eprintln!("[ui] {msg}");
+    }
+}
+
 /// Debug builds only: a state to open in, from TES_SCENE (comma-separated: study, goto, word, verse, xrefs,
-/// picker, end), so a screenshot can show a sheet without anyone tapping. On the Simulator:
+/// picker, end, bible=<id>), so a screenshot can show a sheet without anyone tapping. On the Simulator:
 /// `SIMCTL_CHILD_TES_SCENE=study xcrun simctl launch booted com.wayned.two-edged-sword`.
 #[tauri::command]
 fn scene() -> Option<String> {
@@ -99,7 +112,7 @@ pub fn run() {
             app.manage(AppState { lib: RwLock::new(scan()) });
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![scene, modules, chapter, chapter_sizes, commentary, coverage, article])
+        .invoke_handler(tauri::generate_handler![log, scene, modules, chapter, chapter_sizes, commentary, coverage, article, strongs_for_word])
         .run(tauri::generate_context!())
         .expect("error while running the app");
 }

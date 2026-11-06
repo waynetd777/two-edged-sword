@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from "react";
 import { fmtRef } from "../../src/bible";
-import { lexiconParts, renderHtml, Token } from "../../src/esword";
+import { headwords, lexiconParts, renderHtml, Token } from "../../src/esword";
 import { api, Article } from "./api";
 import { Icon } from "./icons";
 
@@ -22,8 +22,8 @@ function say(word: string, num: string, pron: string) {
   synth.speak(u);
 }
 
-/** The words of a verse that have a Strong's number, as indexes into its tokens. */
-export const taggedWords = (tokens: Token[]) => tokens.flatMap((t, i) => (t.word && t.strongs.length ? [i] : []));
+/** The words of a verse, as indexes into its tokens. */
+export const taggedWords = (tokens: Token[]) => tokens.flatMap((t, i) => (t.word ? [i] : []));
 
 /** A tapped word or Strong's number: its lexicon entry, with the verse's previous and next words. */
 export function WordSheet({
@@ -32,9 +32,15 @@ export function WordSheet({
   index,
   num,
   onIndex,
+  guessFrom,
+  guessVerse,
   onStudy,
   onClose,
 }: {
+  /** In a Bible without Strong's numbers: the Strong's Bible to guess a word's number from. */
+  guessFrom?: string;
+  /** The same verse in that Bible: a word found there takes its numbers. */
+  guessVerse?: Token[];
   at: { book: number; chapter: number; verse: number };
   tokens: Token[];
   /** The token tapped. */
@@ -52,12 +58,47 @@ export function WordSheet({
   const next = at_ >= 0 && at_ < words.length - 1 ? words[at_ + 1] : undefined;
   // A number followed from inside an entry ("from G756") replaces the word's own.
   const [follow, setFollow] = useState<string | null>(null);
-  const shown = follow ?? num ?? t?.strongs[0];
+  // A word with no number of its own: the numbers the KJV most often uses it for, as the desktop
+  // guesses them (WordLookup.tsx). undefined while looking.
+  const [guess, setGuess] = useState<string[] | undefined>(undefined);
+  const own = t?.strongs ?? [];
+  const nums = own.length ? own : (guess ?? []);
+  const shown = follow ?? num ?? nums[0];
+  useEffect(() => {
+    let live = true;
+    setGuess(own.length || !guessFrom ? [] : undefined);
+    if (own.length || !guessFrom || !t) return;
+    const forms = headwords(t.text);
+    // First the same verse in the KJV: the word, or a form of it, with its numbers there.
+    const there = guessVerse?.find((k) => k.word && k.strongs.length && headwords(k.text).some((f) => forms.includes(f)));
+    if (there) {
+      setGuess(there.strongs);
+      return;
+    }
+    // Otherwise what the KJV most often translates it from, in this testament's language.
+    const lang = at.book >= 40 && at.book <= 66 ? "G" : "H";
+    (async () => {
+      for (const h of forms) {
+        const ns = (await api.strongsForWord(guessFrom, h).catch(() => [])).filter((n) => n.num.startsWith(lang));
+        if (ns.length) {
+          if (live) setGuess(ns.sort((a, b) => b.count - a.count).slice(0, 2).map((n) => n.num));
+          return;
+        }
+      }
+      if (live) setGuess([]);
+    })();
+    return () => {
+      live = false;
+    };
+  }, [index, guessFrom, t?.text, guessVerse?.length]); // eslint-disable-line react-hooks/exhaustive-deps
   const [entry, setEntry] = useState<Article | null | undefined>(undefined);
 
   useEffect(() => setFollow(null), [index, num]);
   useEffect(() => {
-    if (!shown) return;
+    if (!shown) {
+      setEntry(guess === undefined ? undefined : null);
+      return;
+    }
     let live = true;
     setEntry(undefined);
     api
@@ -67,7 +108,7 @@ export function WordSheet({
     return () => {
       live = false;
     };
-  }, [shown]);
+  }, [shown, guess]);
 
   const parts = entry ? lexiconParts(entry.html) : null;
   const word = (i?: number) => (i === undefined ? "" : tokens[i].text);
@@ -90,9 +131,9 @@ export function WordSheet({
             {word(next)} ›
           </button>
         </div>
-        {t && t.strongs.length > 1 && !follow && (
+        {nums.length > 1 && !follow && (
           <div className="nums">
-            {t.strongs.map((n) => (
+            {nums.map((n) => (
               <button key={n} className={n === shown ? "on" : undefined} onClick={() => setFollow(n)}>
                 {n}
               </button>
@@ -102,10 +143,17 @@ export function WordSheet({
         <div className="sbody">
           {entry === undefined ? (
             <p className="empty">Opening…</p>
+          ) : !shown ? (
+            <p className="empty">No Strong's number found for “{t?.text}”.</p>
           ) : !entry || !parts ? (
             <p className="empty">{shown} isn't in Strong's lexicon.</p>
           ) : (
             <>
+              {!own.length && !follow && !num && (
+                <p className="m" style={{ margin: "0 0 8px" }}>
+                  A guess: this Bible has no Strong's numbers, so this is how the KJV translates “{t?.text}”.
+                </p>
+              )}
               <div className="head">
                 <span className="orig" lang={shown?.startsWith("H") ? "he" : "el"}>
                   {parts.word}
@@ -124,7 +172,7 @@ export function WordSheet({
               {parts.total !== undefined && <p className="m">{parts.total} times in the KJV</p>}
               {follow && (
                 <button className="fold" onClick={() => setFollow(null)}>
-                  ‹ Back to {num ?? t?.strongs[0]}
+                  ‹ Back to {num ?? nums[0]}
                 </button>
               )}
             </>

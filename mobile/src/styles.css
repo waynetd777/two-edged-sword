@@ -552,8 +552,8 @@ button {
 .tab .alpha {
   height: 24px;
   font-family: var(--orig);
-  font-size: 21px;
-  line-height: 24px;
+  font-size: 36px;
+  line-height: 22px;
 }
 .soon {
   flex: 1;

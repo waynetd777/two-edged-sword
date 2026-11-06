@@ -47,7 +47,14 @@ export interface Article {
   html: string;
 }
 
+export interface WordNumber {
+  num: string;
+  count: number;
+  forms: [string, number][];
+}
+
 export const api = {
+  strongsForWord: (bible: string, word: string) => invoke<WordNumber[]>("strongs_for_word", { bible, word }),
   article: (kind: Kind, module: string, topic: string) => invoke<Article | null>("article", { kind, module, topic }),
   modules: () => invoke<Module[]>("modules"),
   chapter: (bible: string, book: number, chapter: number) => invoke<Verse[]>("chapter", { bible, book, chapter }),

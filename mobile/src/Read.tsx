@@ -3,7 +3,7 @@
 
 import { Fragment, TouchEvent, useEffect, useMemo, useRef, useState } from "react";
 import { book, BookSizes, fmtRef, Ref, stepChapter } from "../../src/bible";
-import { tokenize, Token } from "../../src/esword";
+import { alignStrongs, tokenize, Token } from "../../src/esword";
 import { api, Module, save, saved, scene, Verse } from "./api";
 import { Icon } from "./icons";
 import { GoTo } from "./GoTo";
@@ -65,7 +65,7 @@ function Words({
     <>
       {tokens.map((t, i) => {
         if (t.note) return null;
-        const tagged = t.word && t.strongs.length > 0;
+        const tagged = t.word;
         const cls = [t.red ? "red" : "", tagged ? "w" : "", i === active ? "on" : ""].join(" ").trim() || undefined;
         return (
           <Fragment key={i}>
@@ -127,8 +127,25 @@ export function Read({ modules }: { modules: Module[] }) {
   const [restore, setRestore] = useState<{ key: string; top: number } | null>(null);
   const page = useRef<HTMLDivElement>(null);
   const [verses, versesOf] = useChapter(bible, loc);
-  const tokens = useMemo(() => new Map(verses.map((v) => [v.v, tokenize(v.text)])), [verses]);
   const bmod = bibles.find((b) => b.id === bible);
+  // A Bible without Strong's numbers borrows them from its Strong's edition when it has one
+  // (the KJV from the KJV+), as on the desktop: the words line up one for one.
+  const strongEdition = !bmod?.strongs && bibles.some((b) => b.id === `${bible}+`) ? `${bible}+` : "";
+  const [strongVerses, strongOf] = useChapter(strongEdition || bible, loc);
+  const tokens = useMemo(() => {
+    const borrowed = strongEdition && strongOf === versesOf ? new Map(strongVerses.map((v) => [v.v, v.text])) : null;
+    return new Map(
+      verses.map((v) => {
+        const t = tokenize(v.text);
+        const s = borrowed?.get(v.v);
+        return [v.v, s ? alignStrongs(t, tokenize(s)) : t];
+      }),
+    );
+  }, [verses, strongVerses, strongEdition, strongOf, versesOf]);
+  /** The Strong's Bible to guess a word's number from, in a Bible that has none of its own. */
+  const guessFrom = bibles.find((b) => b.strongs && b.id.startsWith("kjv"))?.id ?? bibles.find((b) => b.strongs)?.id;
+  // ...and its text of this chapter, so a word can first be looked for in the same verse there.
+  const [guessVerses, guessOf] = useChapter(!bmod?.strongs && guessFrom ? guessFrom : bible, loc);
 
   useEffect(() => {
     scene.then((sc) => {
@@ -136,6 +153,8 @@ export function Read({ modules }: { modules: Module[] }) {
       if (sc.includes("study")) setStudy(true);
       if (sc.includes("goto")) setGoing(true);
       if (sc.includes("word")) setWordScene(true);
+      const b = sc.find((x) => x.startsWith("bible="));
+      if (b) setBible(b.slice(6));
       if (sc.includes("end")) setTimeout(() => page.current?.scrollTo(0, page.current.scrollHeight), 400);
     });
   }, []);
@@ -255,7 +274,7 @@ export function Read({ modules }: { modules: Module[] }) {
     // The word scene: the selected verse's first tagged word with a meaning worth showing.
     const ts = tokens.get(sel);
     if (!wordScene || !ts) return;
-    const i = ts.findIndex((t) => t.word && t.strongs.length && t.text.length > 4);
+    const i = ts.findIndex((t) => t.word && t.text.length > 5);
     if (i >= 0) setWord({ v: sel, i });
     setWordScene(false);
   }, [wordScene, tokens, sel]);
@@ -409,6 +428,10 @@ export function Read({ modules }: { modules: Module[] }) {
           index={word.i}
           num={word.num}
           onIndex={(i) => setWord({ v: word.v, i })}
+          guessFrom={bmod?.strongs ? undefined : guessFrom}
+          guessVerse={
+            !bmod?.strongs && guessOf === versesOf ? tokenize(guessVerses.find((v) => v.v === word.v)?.text ?? "") : undefined
+          }
           onStudy={() => {
             setWord(null);
             setStudy(true);
