@@ -42,10 +42,11 @@ const PATHS = {
       <circle cx="4" cy="18" r="1" fill="currentColor" />
     </>
   ),
+  // Two tall columns side by side: translations next to each other (short ones read as pause).
   compare: (
     <>
-      <rect x="3" y="4" width="7" height="16" rx="1.5" />
-      <rect x="14" y="4" width="7" height="16" rx="1.5" />
+      <rect x="4" y="1.5" width="6.5" height="21" rx="1.5" />
+      <rect x="13.5" y="1.5" width="6.5" height="21" rx="1.5" />
     </>
   ),
   trash: (
