@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from "react";
 import type { Module } from "./api";
-import { bookTitles } from "./DocView";
+import { bookTitles, todayTitle } from "./DocView";
 import { book, BOOKS, BookSizes, parseRef, Ref } from "../../src/bible";
 import { Icon } from "./icons";
 
@@ -130,7 +130,7 @@ export function GoTo({
             ) : (
               <div className="list">
                 {chapterTitles.map((t) => {
-                  const here = openDoc?.module === bk.id && openDoc.chapter === t;
+                  const here = openDoc?.module === bk.id ? openDoc.chapter === t : t === todayTitle();
                   return (
                     <button
                       key={t}
@@ -139,7 +139,7 @@ export function GoTo({
                       onClick={() => onDoc(bk.id, t)}
                     >
                       <span className="grow">{t}</span>
-                      {here && <span className="m">Reading</span>}
+                      {here && <span className="m">{openDoc?.module === bk.id ? "Reading" : "Today"}</span>}
                     </button>
                   );
                 })}

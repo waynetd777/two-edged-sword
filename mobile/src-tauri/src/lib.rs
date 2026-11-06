@@ -129,6 +129,18 @@ fn commentary_ranges(st: State<AppState>, module: String) -> Result<Vec<content:
     content::commentary_ranges(&st.lib.read().unwrap(), &module)
 }
 
+/// A devotional's days, in calendar order ("January 1").
+#[tauri::command(async)]
+fn devotion_titles(st: State<AppState>, module: String) -> Result<Vec<String>, String> {
+    content::devotion_titles(&st.lib.read().unwrap(), &module)
+}
+
+/// A devotional's reading for a day ("September 24").
+#[tauri::command(async)]
+fn devotion(st: State<AppState>, module: String, title: String) -> Result<Option<String>, String> {
+    content::devotion(&st.lib.read().unwrap(), &module, &title)
+}
+
 /// A reference book's chapters, in order.
 #[tauri::command(async)]
 fn reference_titles(st: State<AppState>, module: String) -> Result<Vec<String>, String> {
@@ -308,7 +320,7 @@ pub fn run() {
             app.manage(AppState { lib: RwLock::new(scan()), cancelled: Mutex::new(HashSet::new()) });
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![log, scene, modules, chapter, chapter_sizes, commentary, coverage, article, strongs_for_word, search, strongs_by_book, strongs_verses, translit_search, find_topics, fetch_manifest, reference_titles, commentary_ranges, schedule_reminders, download, cancel_download, remove_module])
+        .invoke_handler(tauri::generate_handler![log, scene, modules, chapter, chapter_sizes, commentary, coverage, article, strongs_for_word, search, strongs_by_book, strongs_verses, translit_search, find_topics, fetch_manifest, reference_titles, devotion_titles, devotion, commentary_ranges, schedule_reminders, download, cancel_download, remove_module])
         .run(tauri::generate_context!())
         .expect("error while running the app");
 }

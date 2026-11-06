@@ -146,7 +146,7 @@ export function Library({ modules, onChanged, onRead }: { modules: Module[]; onC
                     {m.source === "bundled" ? "Built in" : "Downloaded"} · {mb(m.size)}
                   </span>
                 </span>
-                {m.kind === "reference" && (
+                {(m.kind === "reference" || m.kind === "devotional") && (
                   <button className="mini accent" onClick={() => onRead(m.id)}>
                     Read
                   </button>

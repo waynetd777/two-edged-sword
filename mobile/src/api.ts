@@ -116,6 +116,8 @@ export interface TranslitHit {
 }
 
 export const api = {
+  devotionTitles: (module: string) => invoke<string[]>("devotion_titles", { module }),
+  devotion: (module: string, title: string) => invoke<string | null>("devotion", { module, title }),
   commentaryRanges: (module: string) => invoke<[number, number, number, number, number][]>("commentary_ranges", { module }),
   referenceTitles: (module: string) => invoke<string[]>("reference_titles", { module }),
   fetchManifest: (url: string) => invoke<string>("fetch_manifest", { url }),

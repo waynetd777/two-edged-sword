@@ -6,12 +6,23 @@ import { Ref } from "../../src/bible";
 import { renderHtml } from "../../src/esword";
 import { api, Article } from "./api";
 
-/** A reference book's chapters, asked once per book. */
+/** Which books are devotionals (their "chapters" are days), told by Read from the module list. */
+const devotionals = new Set<string>();
+export const setDevotionals = (ids: string[]) => {
+  devotionals.clear();
+  ids.forEach((i) => devotionals.add(i));
+};
+export const isDevotional = (module: string) => devotionals.has(module);
+
+/** Today as a devotional's day title: "November 6". */
+export const todayTitle = () => new Date().toLocaleDateString("en-GB", { month: "long", day: "numeric" }).split(" ").reverse().join(" ");
+
+/** A book's chapters (a devotional's days), asked once per book. */
 const titles = new Map<string, Promise<string[]>>();
 export const bookTitles = (module: string) => {
   let p = titles.get(module);
   if (!p) {
-    p = api.referenceTitles(module).catch(() => {
+    p = (isDevotional(module) ? api.devotionTitles(module) : api.referenceTitles(module)).catch(() => {
       titles.delete(module);
       return [] as string[];
     });
@@ -41,8 +52,10 @@ export function DocView({
   useEffect(() => {
     let live = true;
     setA(undefined);
-    api
-      .article("reference", module, chapter)
+    (isDevotional(module)
+      ? api.devotion(module, chapter).then((html) => (html ? { module, title, topic: chapter, html } : null))
+      : api.article("reference", module, chapter)
+    )
       .then((x) => live && setA(x))
       .catch(() => live && setA(null));
     bookTitles(module).then((t) => live && setList(t));

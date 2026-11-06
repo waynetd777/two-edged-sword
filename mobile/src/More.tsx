@@ -77,6 +77,25 @@ export function More({ modules, onJump, onLibrary }: { modules: Module[]; onJump
               </div>
             )}
 
+            {modules.some((m) => m.kind === "devotional") && (
+              <>
+                <p className="label" style={{ marginTop: 18 }}>
+                  Today's devotionals
+                </p>
+                <div className="card flush">
+                  {modules
+                    .filter((m) => m.kind === "devotional")
+                    .map((m) => (
+                      <button key={m.id} className="row" onClick={() => onJump({ book: m.id })}>
+                        <Icon name="book" size={20} />
+                        <span className="grow">{m.title}</span>
+                        <span className="m">›</span>
+                      </button>
+                    ))}
+                </div>
+              </>
+            )}
+
             <p className="label" style={{ marginTop: 18 }}>
               Plans and settings
             </p>

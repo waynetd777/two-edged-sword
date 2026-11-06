@@ -7,7 +7,7 @@ import { alignStrongs, tokenize, Token } from "../../src/esword";
 import { api, Module, save, saved, scene, Verse } from "./api";
 import { Icon } from "./icons";
 import { COMPARE_DEFAULT, CompareEdit, CompareView, useChapters } from "./Compare";
-import { bookTitles, DocView } from "./DocView";
+import { bookTitles, DocView, isDevotional, setDevotionals, todayTitle } from "./DocView";
 import { GoTo } from "./GoTo";
 import { ImageViewer } from "./ImageViewer";
 import type { Spot } from "./MapsTab";
@@ -161,7 +161,8 @@ export function Read({
   const [image, setImage] = useState<{ src: string; ring?: Spot[] } | null>(null);
   const [docList, setDocList] = useState<string[]>([]);
   const [goBooks, setGoBooks] = useState(false);
-  const bookMods = modules.filter((m) => m.kind === "reference");
+  const bookMods = modules.filter((m) => m.kind === "reference" || m.kind === "devotional");
+  setDevotionals(modules.filter((m) => m.kind === "devotional").map((m) => m.id));
   const docMod = doc ? bookMods.find((m) => m.id === doc.module) : undefined;
   useEffect(() => {
     save("doc", doc);
@@ -436,7 +437,8 @@ export function Read({
     setStudy(false);
     if (jump.book) {
       const m = jump.book;
-      const last = saved<string | null>(`docAt.${m}`, null);
+      // A devotional opens at today's reading; a book where it was left.
+      const last = isDevotional(m) ? todayTitle() : saved<string | null>(`docAt.${m}`, null);
       bookTitles(m).then((t) => {
         const c = last && t.includes(last) ? last : t[0];
         if (c) openDoc(m, c);
