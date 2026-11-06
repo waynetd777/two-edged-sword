@@ -50,7 +50,7 @@
 	<array>
 		<dict>
 			<key>UTTypeIdentifier</key>
-			<string>com.wayned.two-edged-sword.bbli</string>
+			<string>net.e-sword.bbli</string>
 			<key>UTTypeDescription</key>
 			<string>Two-edged Sword Bible</string>
 			<key>UTTypeConformsTo</key>
@@ -68,7 +68,7 @@
 		</dict>
 		<dict>
 			<key>UTTypeIdentifier</key>
-			<string>com.wayned.two-edged-sword.cmti</string>
+			<string>net.e-sword.cmti</string>
 			<key>UTTypeDescription</key>
 			<string>Two-edged Sword Commentary</string>
 			<key>UTTypeConformsTo</key>
@@ -86,7 +86,7 @@
 		</dict>
 		<dict>
 			<key>UTTypeIdentifier</key>
-			<string>com.wayned.two-edged-sword.dcti</string>
+			<string>net.e-sword.dcti</string>
 			<key>UTTypeDescription</key>
 			<string>Two-edged Sword Dictionary</string>
 			<key>UTTypeConformsTo</key>
@@ -104,7 +104,7 @@
 		</dict>
 		<dict>
 			<key>UTTypeIdentifier</key>
-			<string>com.wayned.two-edged-sword.lexi</string>
+			<string>net.e-sword.lexi</string>
 			<key>UTTypeDescription</key>
 			<string>Two-edged Sword Lexicon</string>
 			<key>UTTypeConformsTo</key>
@@ -122,7 +122,7 @@
 		</dict>
 		<dict>
 			<key>UTTypeIdentifier</key>
-			<string>com.wayned.two-edged-sword.refi</string>
+			<string>net.e-sword.refi</string>
 			<key>UTTypeDescription</key>
 			<string>Two-edged Sword Book</string>
 			<key>UTTypeConformsTo</key>
@@ -140,7 +140,7 @@
 		</dict>
 		<dict>
 			<key>UTTypeIdentifier</key>
-			<string>com.wayned.two-edged-sword.devi</string>
+			<string>net.e-sword.devi</string>
 			<key>UTTypeDescription</key>
 			<string>Two-edged Sword Devotional</string>
 			<key>UTTypeConformsTo</key>
@@ -165,15 +165,15 @@
 			<key>CFBundleTypeRole</key>
 			<string>Viewer</string>
 			<key>LSHandlerRank</key>
-			<string>Owner</string>
+			<string>Alternate</string>
 			<key>LSItemContentTypes</key>
 			<array>
-				<string>com.wayned.two-edged-sword.bbli</string>
-				<string>com.wayned.two-edged-sword.cmti</string>
-				<string>com.wayned.two-edged-sword.dcti</string>
-				<string>com.wayned.two-edged-sword.lexi</string>
-				<string>com.wayned.two-edged-sword.refi</string>
-				<string>com.wayned.two-edged-sword.devi</string>
+				<string>net.e-sword.bbli</string>
+				<string>net.e-sword.cmti</string>
+				<string>net.e-sword.dcti</string>
+				<string>net.e-sword.lexi</string>
+				<string>net.e-sword.refi</string>
+				<string>net.e-sword.devi</string>
 			</array>
 		</dict>
 	</array>
