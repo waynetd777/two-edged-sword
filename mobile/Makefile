@@ -62,6 +62,15 @@ android-emu: android-icons   ## A debug build on the running emulator (emulator 
 	adb -e install -r $(ANDROID_APK)
 	adb -e shell am start -n com.wayned.two_edged_sword/.MainActivity >/dev/null
 
+# A free personal team's provisioning profile lists only devices Xcode has registered, and Tauri's build
+# (for any iOS device) never registers one. This starts a build aimed at the device, which registers it and
+# renews the profile, then stops at Tauri's step (expected). Run it once for each new iPhone or iPad.
+ios-register:   ## make ios-register DEVICE=<udid> [TEAM=<team id>]: add a device to the team's profile
+	@test -n "$(TEAM)" -a -n "$(DEVICE)" || (echo "Give DEVICE=<udid> (xcrun devicectl list devices) and TEAM, or keep TEAM in the keychain"; exit 1)
+	-cd src-tauri/gen/apple && xcodebuild -project tes-mobile.xcodeproj -scheme tes-mobile_iOS -destination "id=$(DEVICE)" \
+	  -allowProvisioningUpdates -allowProvisioningDeviceRegistration DEVELOPMENT_TEAM=$(TEAM) CODE_SIGN_STYLE=Automatic build >/dev/null 2>&1
+	git checkout -- src-tauri/gen/apple/tes-mobile.xcodeproj/project.pbxproj
+
 icons:     ## The app icons from src-tauri/icons/source (python3 tools/icons.py makes those from design/icon.png)
 	cargo tauri icon src-tauri/icons/source/ios.png
 	rm -rf src-tauri/icons/android
@@ -78,4 +87,4 @@ modules-publish: modules-release
 	gh release view modules >/dev/null 2>&1 || gh release create modules --title "Modules for the phone app" --notes "Public-domain modules for Two-edged Sword on iPhone and Android, downloaded from the app's Library." --latest=false
 	gh release upload modules target/modules-release/* --clobber
 
-.PHONY: assets android-emu android-icons android-phone icons ios-phone ios-sim shot modules-release modules-publish
+.PHONY: assets android-emu android-icons android-phone icons ios-phone ios-register ios-sim shot modules-release modules-publish
