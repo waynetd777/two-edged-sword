@@ -293,6 +293,14 @@ fn search(st: State<AppState>, q: search::Query) -> Result<search::Results, Stri
     search::run(&st.lib.read().unwrap(), None, &q)
 }
 
+/// Android: the bundled modules, copied out of the APK by the plugin into `dir`/modules; the library is
+/// read again with them.
+#[tauri::command(async)]
+fn set_bundled(st: State<AppState>, dir: String) {
+    *store::RESOURCE_DIR.write().unwrap() = Some(std::path::PathBuf::from(dir));
+    *st.lib.write().unwrap() = scan();
+}
+
 /// Debug builds: the UI's errors and console.error, in the app's own log (`xcrun simctl launch --console`).
 #[tauri::command]
 fn log(msg: String) {
@@ -321,12 +329,12 @@ pub fn run() {
         .setup(|app| {
             let paths = app.path();
             let _ = store::DATA_DIR.set(paths.app_data_dir()?);
-            let _ = store::RESOURCE_DIR.set(paths.resource_dir()?);
+            *store::RESOURCE_DIR.write().unwrap() = Some(paths.resource_dir()?);
             let _ = std::fs::create_dir_all(library::app_dir());
             app.manage(AppState { lib: RwLock::new(scan()), cancelled: Mutex::new(HashSet::new()) });
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![log, scene, modules, chapter, chapter_sizes, commentary, coverage, article, strongs_for_word, search, strongs_by_book, strongs_verses, translit_search, find_topics, fetch_manifest, list_topics, reference_titles, devotion_titles, devotion, commentary_ranges, schedule_reminders, download, cancel_download, remove_module])
+        .invoke_handler(tauri::generate_handler![log, scene, set_bundled, modules, chapter, chapter_sizes, commentary, coverage, article, strongs_for_word, search, strongs_by_book, strongs_verses, translit_search, find_topics, fetch_manifest, list_topics, reference_titles, devotion_titles, devotion, commentary_ranges, schedule_reminders, download, cancel_download, remove_module])
         .run(tauri::generate_context!())
         .expect("error while running the app");
 }

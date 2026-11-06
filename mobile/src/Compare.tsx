@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from "react";
 import { Token } from "../../src/esword";
-import { api, Module, save, saved, Verse } from "./api";
+import { api, Module, save, saved, useLibraryKey, Verse } from "./api";
 import { Icon } from "./icons";
 
 /** The Bibles Compare starts with, as the mockups and the desktop's defaults have them. */
@@ -38,6 +38,7 @@ const words = (ts: Token[]) => ts.filter((t) => t.word).map((t) => norm(t.text))
 
 /** Each Bible's verses of a chapter, from the last copy at once and then from the module. */
 export function useChapters(ids: string[], l: { book: number; chapter: number }) {
+  const lib = useLibraryKey();
   const [map, setMap] = useState<Map<string, Verse[]>>(new Map());
   const key = ids.join(",");
   useEffect(() => {
@@ -52,7 +53,7 @@ export function useChapters(ids: string[], l: { book: number; chapter: number })
     return () => {
       live = false;
     };
-  }, [key, l.book, l.chapter]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [key, l.book, l.chapter, lib]); // eslint-disable-line react-hooks/exhaustive-deps
   return map;
 }
 

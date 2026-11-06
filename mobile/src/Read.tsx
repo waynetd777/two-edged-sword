@@ -4,7 +4,7 @@
 import { Fragment, TouchEvent, useEffect, useMemo, useRef, useState } from "react";
 import { book, BookSizes, fmtRef, parseRef, Ref, stepChapter } from "../../src/bible";
 import { alignStrongs, tokenize, Token } from "../../src/esword";
-import { api, Module, save, saved, scene, Verse } from "./api";
+import { api, Module, save, saved, scene, useLibraryKey, Verse } from "./api";
 import { Icon } from "./icons";
 import { COMPARE_DEFAULT, CompareEdit, CompareView, useChapters } from "./Compare";
 import { bookTitles, DocView, isDevotional, setDevotionals, todayTitle } from "./DocView";
@@ -38,6 +38,7 @@ const keep = (bible: string, l: Loc, vs: Verse[]) => {
 };
 
 function useChapter(bible: string, l: Loc): [Verse[], string] {
+  const lib = useLibraryKey();
   const [verses, setVerses] = useState<{ vs: Verse[]; key: string }>(() => ({ vs: cached(bible, l), key: `${l.book}.${l.chapter}` }));
   useEffect(() => {
     let live = true;
@@ -54,7 +55,7 @@ function useChapter(bible: string, l: Loc): [Verse[], string] {
     return () => {
       live = false;
     };
-  }, [bible, l.book, l.chapter]);
+  }, [bible, l.book, l.chapter, lib]);
   return [verses.vs, verses.key];
 }
 
@@ -153,6 +154,7 @@ export function Read({
   const [study, setStudy] = useState(false);
   const [choosing, setChoosing] = useState(false);
   const [sizes, setSizes] = useState<BookSizes | null>(null);
+  const libKey = useLibraryKey();
   const [counts, setCounts] = useState<Map<string, number>>(new Map());
   const [going, setGoing] = useState(false);
   /** A tapped word: in the chapter, or (bible) in one of Compare's translations. */
@@ -305,7 +307,7 @@ export function Read({
         setCounts(n);
       })
       .catch(() => setSizes(null));
-  }, [bible]);
+  }, [bible, libKey]);
 
   // Back and forward are the app's (history.ts): Read's moves are steps in it, and a step back
   // here puts the passage, the verse, Compare and the scroll back.

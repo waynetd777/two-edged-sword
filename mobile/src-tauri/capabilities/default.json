@@ -3,5 +3,5 @@
   "identifier": "default",
   "description": "The phone app's window",
   "windows": ["main"],
-  "permissions": ["core:default", "tes-native:default"]
+  "permissions": ["core:default", "tes-native:default", "notification:default"]
 }

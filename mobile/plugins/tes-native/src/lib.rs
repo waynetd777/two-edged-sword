@@ -1,7 +1,7 @@
 // Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
 // SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
-//! The phone app's native side: Swift on iOS (`ios/`). The iPhone stays upright except while a picture is
+//! The phone app's native side: Swift on iOS (`ios/`), Kotlin on Android (`android/`). The iPhone stays upright except while a picture is
 //! open full screen (allow_rotation); reading aloud with iOS's own voices, which carries on with the screen
 //! locked (speak and the rest, with "speech" events for each word). Elsewhere the commands do nothing.
 
@@ -11,7 +11,7 @@ use tauri::{command, AppHandle, Runtime};
 #[cfg(target_os = "ios")]
 tauri::ios_plugin_binding!(init_plugin_tes_native);
 
-#[cfg(target_os = "ios")]
+#[cfg(mobile)]
 struct Native<R: Runtime>(tauri::plugin::PluginHandle<R>);
 
 #[derive(serde::Serialize)]
@@ -22,12 +22,12 @@ struct Rotation {
 /// Lets the phone turn (a picture is open), or turns it back upright and keeps it there.
 #[command]
 async fn allow_rotation<R: Runtime>(app: AppHandle<R>, allow: bool) -> Result<(), String> {
-    #[cfg(target_os = "ios")]
+    #[cfg(mobile)]
     {
         use tauri::Manager;
         return app.state::<Native<R>>().0.run_mobile_plugin::<()>("allowRotation", Rotation { allow }).map_err(|e| e.to_string());
     }
-    #[cfg(not(target_os = "ios"))]
+    #[cfg(not(mobile))]
     {
         let _ = (app, Rotation { allow });
         Ok(())
@@ -55,12 +55,12 @@ struct Speak {
 /// The phone's English voices: identifier, name, language and quality.
 #[command]
 async fn voices<R: Runtime>(app: AppHandle<R>) -> Result<serde_json::Value, String> {
-    #[cfg(target_os = "ios")]
+    #[cfg(mobile)]
     {
         use tauri::Manager;
         return app.state::<Native<R>>().0.run_mobile_plugin::<serde_json::Value>("voices", ()).map_err(|e| e.to_string());
     }
-    #[cfg(not(target_os = "ios"))]
+    #[cfg(not(mobile))]
     {
         let _ = app;
         Ok(serde_json::json!({ "voices": [] }))
@@ -89,26 +89,47 @@ async fn speech_stop<R: Runtime>(app: AppHandle<R>) -> Result<(), String> {
 }
 
 fn native<R: Runtime, A: serde::Serialize>(app: &AppHandle<R>, method: &str, args: A) -> Result<(), String> {
-    #[cfg(target_os = "ios")]
+    #[cfg(mobile)]
     {
         use tauri::Manager;
         return app.state::<Native<R>>().0.run_mobile_plugin::<()>(method, args).map_err(|e| e.to_string());
     }
-    #[cfg(not(target_os = "ios"))]
+    #[cfg(not(mobile))]
     {
         let _ = (app, method, args);
         Err("reading aloud isn't on this platform yet".into())
     }
 }
 
+/// Android: where the bundled modules were copied out of the APK, once they have been.
+#[command]
+async fn bundled_dir<R: Runtime>(app: AppHandle<R>) -> Result<serde_json::Value, String> {
+    #[cfg(target_os = "android")]
+    {
+        use tauri::Manager;
+        return app.state::<Native<R>>().0.run_mobile_plugin::<serde_json::Value>("bundledDir", ()).map_err(|e| e.to_string());
+    }
+    #[cfg(not(target_os = "android"))]
+    {
+        let _ = app;
+        Ok(serde_json::json!({}))
+    }
+}
+
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
     Builder::new("tes-native")
-        .invoke_handler(tauri::generate_handler![allow_rotation, speak, speech_pause, speech_resume, speech_stop, voices])
+        .invoke_handler(tauri::generate_handler![allow_rotation, speak, speech_pause, speech_resume, speech_stop, voices, bundled_dir])
         .setup(|_app, _api| {
             #[cfg(target_os = "ios")]
             {
                 use tauri::Manager;
                 let handle = _api.register_ios_plugin(init_plugin_tes_native)?;
+                _app.manage(Native(handle));
+            }
+            #[cfg(target_os = "android")]
+            {
+                use tauri::Manager;
+                let handle = _api.register_android_plugin("com.wayned.tes.plugin", "TesNativePlugin")?;
                 _app.manage(Native(handle));
             }
             Ok(())

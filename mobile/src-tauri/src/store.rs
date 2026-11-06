@@ -5,10 +5,12 @@
 //! On a phone they come from Tauri's path resolver at start-up, not from $HOME.
 
 use std::path::PathBuf;
-use std::sync::OnceLock;
+use std::sync::{OnceLock, RwLock};
 
 pub static DATA_DIR: OnceLock<PathBuf> = OnceLock::new();
-pub static RESOURCE_DIR: OnceLock<PathBuf> = OnceLock::new();
+/// Where the app's shipped folders are. On Android they're inside the APK, which SQLite can't open, so the
+/// plugin copies them out and this is set again (lib.rs set_bundled).
+pub static RESOURCE_DIR: RwLock<Option<PathBuf>> = RwLock::new(None);
 
 /// There's no e-Sword on a phone; library.rs builds e-Sword's folder from this, and it's never read.
 pub fn home() -> PathBuf {
@@ -22,7 +24,7 @@ pub fn data_dir() -> PathBuf {
 
 /// A folder shipped in the app.
 pub fn bundled(name: &str) -> PathBuf {
-    RESOURCE_DIR.get().map(|d| d.join(name)).unwrap_or_default()
+    RESOURCE_DIR.read().unwrap().as_ref().map(|d| d.join(name)).unwrap_or_default()
 }
 
 /// A file's size and modified time (since the epoch); zeros if it can't be read.

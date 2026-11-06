@@ -2,3 +2,6 @@
 /target
 Cargo.lock
 ios/.build
+
+/android/.tauri
+/android/build

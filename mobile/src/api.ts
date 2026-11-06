@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import { invoke } from "@tauri-apps/api/core";
+import { useSyncExternalStore } from "react";
 
 export type Kind = "bible" | "commentary" | "dictionary" | "lexicon" | "reference" | "devotional";
 
@@ -145,6 +146,26 @@ export const api = {
 export const scene: Promise<string[]> = invoke<string | null>("scene")
   .then((s) => (s ? s.split(",").map((x) => x.trim()) : []))
   .catch(() => []);
+
+/** Which modules are on the phone, as a key: what's been read from them is read again when it changes
+ *  (a download, a removal, or on Android the bundled modules once they're copied out of the APK). */
+let libraryKey = "";
+const libraryWatchers = new Set<() => void>();
+export function libraryIs(files: string[]) {
+  const k = files.slice().sort().join("|");
+  if (k === libraryKey) return;
+  libraryKey = k;
+  libraryWatchers.forEach((w) => w());
+}
+export function useLibraryKey() {
+  return useSyncExternalStore(
+    (f) => {
+      libraryWatchers.add(f);
+      return () => libraryWatchers.delete(f);
+    },
+    () => libraryKey,
+  );
+}
 
 /** A value kept between launches. The UI draws from these at once and never waits on them. */
 export function saved<T>(key: string, fallback: T): T {

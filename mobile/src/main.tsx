@@ -26,4 +26,15 @@ import { invoke } from "@tauri-apps/api/core";
 }
 
 applyPrefs();
+
+// Android's web view reports env(safe-area-inset-*) as 0 though the app draws under the status and gesture
+// bars, so the plugin hands over their real heights (TesInsets) and these win (pager-system's lesson).
+function applyAndroidInsets() {
+  const i = (window as unknown as { TesInsets?: { top(): number; bottom(): number } }).TesInsets;
+  if (!i) return;
+  document.documentElement.style.setProperty("--top", `${i.top()}px`);
+  document.documentElement.style.setProperty("--bottom", `${i.bottom()}px`);
+}
+applyAndroidInsets();
+window.addEventListener("tes-insets", applyAndroidInsets);
 createRoot(document.getElementById("root")!).render(<App />);

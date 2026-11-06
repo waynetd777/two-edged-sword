@@ -1,8 +1,9 @@
 // Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
 // SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
+import { invoke } from "@tauri-apps/api/core";
 import { useEffect, useState } from "react";
-import { api, Module, save, saved, scene } from "./api";
+import { api, libraryIs, Module, save, saved, scene } from "./api";
 import { Icon } from "./icons";
 import { Read } from "./Read";
 import { Jump, Search } from "./Search";
@@ -50,10 +51,21 @@ export function App() {
       .then((m) => {
         setModules(m);
         save("modules", m);
+        libraryIs(m.map((x) => x.file));
       })
       .catch(() => {});
   useEffect(() => {
     loadModules();
+    // Android: the bundled modules are copied out of the APK on the first start (and after an update); the
+    // library is read again once they are.
+    const bundled = () =>
+      invoke<{ dir?: string }>("plugin:tes-native|bundled_dir")
+        .then((r) => {
+          if (r.dir) return invoke("set_bundled", { dir: r.dir }).then(loadModules);
+        })
+        .catch(() => {});
+    if ((window as unknown as { TesInsets?: unknown }).TesInsets) bundled();
+    window.addEventListener("tes-bundled", bundled);
     // The week's reminders, from today: again whenever a day is marked read or the plan changes.
     syncReminders().catch(() => {});
     const unPlans = plansStore.subscribe(() => syncReminders().catch(() => {}));

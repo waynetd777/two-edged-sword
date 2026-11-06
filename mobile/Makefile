@@ -37,6 +37,25 @@ ios-phone: assets   ## make ios-phone [TEAM=<team id>] [DEVICE=<udid>]: a releas
 	rm -rf target/ipa && mkdir -p target/ipa && cd target/ipa && unzip -q "../../src-tauri/gen/apple/build/arm64/Two-edged Sword.ipa"
 	xcrun devicectl device install app --device $(DEVICE) "target/ipa/Payload/Two-edged Sword.app"
 
+# Android: our launcher icons into the generated project (cargo tauri android init writes Tauri's own), and a
+# debug build on the phone plugged in (adb devices lists them), as pager-system's android-phone.
+ANDROID_APK = src-tauri/gen/android/app/build/outputs/apk/universal/debug/app-universal-debug.apk
+
+android-icons:
+	cp -R src-tauri/icons/android/ src-tauri/gen/android/app/src/main/res/
+
+android-phone: android-icons   ## make android-phone [DEVICE=<serial>]: a debug build on your Android phone over USB
+	rm -rf src-tauri/gen/android/app/src/main/assets
+	cargo tauri android build --debug --apk --target aarch64
+	adb $(if $(DEVICE),-s $(DEVICE),-d) install -r $(ANDROID_APK)
+	adb $(if $(DEVICE),-s $(DEVICE),-d) shell am start -n com.wayned.two_edged_sword/.MainActivity >/dev/null
+
+android-emu: android-icons   ## A debug build on the running emulator (emulator -avd <name>)
+	rm -rf src-tauri/gen/android/app/src/main/assets
+	cargo tauri android build --debug --apk --target aarch64
+	adb -e install -r $(ANDROID_APK)
+	adb -e shell am start -n com.wayned.two_edged_sword/.MainActivity >/dev/null
+
 icons:     ## The app icons from src-tauri/icons/source (python3 tools/icons.py makes those from design/icon.png)
 	cargo tauri icon src-tauri/icons/source/ios.png
 	rm -rf src-tauri/icons/android
@@ -53,4 +72,4 @@ modules-publish: modules-release
 	gh release view modules >/dev/null 2>&1 || gh release create modules --title "Modules for the phone app" --notes "Public-domain modules for Two-edged Sword on iPhone and Android, downloaded from the app's Library." --latest=false
 	gh release upload modules target/modules-release/* --clobber
 
-.PHONY: assets icons ios-phone ios-sim shot modules-release modules-publish
+.PHONY: assets android-emu android-icons android-phone icons ios-phone ios-sim shot modules-release modules-publish
