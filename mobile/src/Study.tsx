@@ -8,12 +8,13 @@ import { api, Commentary, Coverage, save, saved, scene } from "./api";
 import { Icon } from "./icons";
 import { useBookmarks } from "./bookmarks";
 import { MapsTab, Spot } from "./MapsTab";
+import { DictionaryPanel } from "./Dictionary";
 import type { Module } from "./api";
 
 /** Cross-references come from the Treasury, which is a commentary module; it has its own tab. */
 const XREFS = "tsk";
 
-type Tab = "commentary" | "xrefs" | "maps";
+type Tab = "commentary" | "xrefs" | "dict" | "maps";
 
 function useCommentary(module: string, at: Required<Pick<Ref, "book" | "chapter" | "verse">>) {
   const [c, setC] = useState<Commentary | null | undefined>(undefined);
@@ -51,6 +52,7 @@ export function Study({
   onChanged,
   onImage,
   bible,
+  verseText,
 }: {
   modules: Module[];
   /** The library changed (the maps were downloaded). */
@@ -58,6 +60,8 @@ export function Study({
   onImage: (src: string, ring: Spot[]) => void;
   /** The Bible being read, for a bookmark. */
   bible: string;
+  /** The verse's words, for the dictionary entries it has. */
+  verseText: string;
   /** Beside the text (an iPad in landscape), as the desktop's study pane, rather than a sheet. */
   docked?: boolean;
   at: { book: number; chapter: number; verse: number };
@@ -76,6 +80,7 @@ export function Study({
     scene.then((sc) => {
       if (sc.includes("xrefs")) setTab("xrefs");
       if (sc.includes("maps")) setTab("maps");
+      if (sc.includes("dict")) setTab("dict");
       if (sc.includes("picker")) setPicking(true);
     });
   }, []);
@@ -160,6 +165,9 @@ export function Study({
           <button role="tab" aria-selected={tab === "xrefs"} onClick={() => setTab("xrefs")}>
             Cross-refs
           </button>
+          <button role="tab" aria-selected={tab === "dict"} onClick={() => setTab("dict")}>
+            Dictionary
+          </button>
           <button role="tab" aria-selected={tab === "maps"} onClick={() => setTab("maps")}>
             Maps
           </button>
@@ -174,7 +182,13 @@ export function Study({
           </div>
         )}
         <div className="sbody">
-          {tab === "maps" ? <MapsTab at={at} modules={modules} onChanged={onChanged} onGo={go} onOpen={onImage} /> : body()}
+          {tab === "maps" ? (
+            <MapsTab at={at} modules={modules} onChanged={onChanged} onGo={go} onOpen={onImage} />
+          ) : tab === "dict" ? (
+            <DictionaryPanel modules={modules} text={verseText} onGo={go} />
+          ) : (
+            body()
+          )}
         </div>
       </section>
       {picking && (

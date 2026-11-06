@@ -26,7 +26,10 @@ export function WordStudy({
   target,
   onTarget,
   onJump,
+  onDictionary,
 }: {
+  /** Looks a word up in the dictionaries. */
+  onDictionary: (word: string) => void;
   modules: Module[];
   /** A Strong's number ("G26"), or an English word or transliteration to look up. */
   target: string;
@@ -180,6 +183,13 @@ export function WordStudy({
             <p className="empty">Looking up “{showing.q}”…</p>
           ) : (
             <>
+              <div className="list" style={{ marginBottom: 14 }}>
+                <button className="row" onClick={() => onDictionary(showing.q)}>
+                  <Icon name="book" size={20} />
+                  <span className="grow">Look up “{showing.q}” in the dictionaries</span>
+                  <span className="m">›</span>
+                </button>
+              </div>
               <p className="label">Words the KJV translates “{showing.q}”</p>
               {showing.words.length ? (
                 <div className="list">

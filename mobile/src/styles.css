@@ -1417,3 +1417,11 @@ input[type="range"] {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+/* ---------- dictionaries ---------- */
+.entry-title {
+  margin: 0 0 10px;
+  font-family: var(--read);
+  font-size: 22px;
+  font-weight: 600;
+}

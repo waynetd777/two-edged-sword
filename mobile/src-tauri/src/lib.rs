@@ -141,6 +141,12 @@ fn devotion(st: State<AppState>, module: String, title: String) -> Result<Option
     content::devotion(&st.lib.read().unwrap(), &module, &title)
 }
 
+/// A dictionary's entries starting with `prefix`, in order ("" for all of them).
+#[tauri::command(async)]
+fn list_topics(st: State<AppState>, kind: Kind, module: String, prefix: String, limit: usize) -> Result<Vec<String>, String> {
+    content::topics(&st.lib.read().unwrap(), kind, &module, &prefix, limit)
+}
+
 /// A reference book's chapters, in order.
 #[tauri::command(async)]
 fn reference_titles(st: State<AppState>, module: String) -> Result<Vec<String>, String> {
@@ -296,7 +302,7 @@ fn log(msg: String) {
 }
 
 /// Debug builds only: a state to open in, from TES_SCENE (comma-separated: study, goto, word, verse, xrefs,
-/// picker, end, listen, mark, saved, bible=<id>, more, plan=<year|nt90|gospels|ppo>, page=<plans|settings>, search, q=<words>, study=<number or word>, library, modules=<url>, get=<file>, at=<ref>, maps, doc=<module>[|chapter], image), so a screenshot can show a sheet without anyone tapping. On the Simulator:
+/// picker, dict, end, listen, mark, saved, bible=<id>, more, plan=<year|nt90|gospels|ppo>, page=<plans|settings>, search, q=<words>, study=<number or word>, library, modules=<url>, get=<file>, at=<ref>, maps, doc=<module>[|chapter], image), so a screenshot can show a sheet without anyone tapping. On the Simulator:
 /// `SIMCTL_CHILD_TES_SCENE=study xcrun simctl launch booted com.wayned.two-edged-sword`.
 #[tauri::command]
 fn scene() -> Option<String> {
@@ -320,7 +326,7 @@ pub fn run() {
             app.manage(AppState { lib: RwLock::new(scan()), cancelled: Mutex::new(HashSet::new()) });
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![log, scene, modules, chapter, chapter_sizes, commentary, coverage, article, strongs_for_word, search, strongs_by_book, strongs_verses, translit_search, find_topics, fetch_manifest, reference_titles, devotion_titles, devotion, commentary_ranges, schedule_reminders, download, cancel_download, remove_module])
+        .invoke_handler(tauri::generate_handler![log, scene, modules, chapter, chapter_sizes, commentary, coverage, article, strongs_for_word, search, strongs_by_book, strongs_verses, translit_search, find_topics, fetch_manifest, list_topics, reference_titles, devotion_titles, devotion, commentary_ranges, schedule_reminders, download, cancel_download, remove_module])
         .run(tauri::generate_context!())
         .expect("error while running the app");
 }

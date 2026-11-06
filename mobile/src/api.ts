@@ -116,6 +116,7 @@ export interface TranslitHit {
 }
 
 export const api = {
+  topics: (kind: Kind, module: string, prefix: string, limit: number) => invoke<string[]>("list_topics", { kind, module, prefix, limit }),
   devotionTitles: (module: string) => invoke<string[]>("devotion_titles", { module }),
   devotion: (module: string, title: string) => invoke<string | null>("devotion", { module, title }),
   commentaryRanges: (module: string) => invoke<[number, number, number, number, number][]>("commentary_ranges", { module }),

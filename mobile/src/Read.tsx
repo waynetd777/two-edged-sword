@@ -690,6 +690,7 @@ export function Read({
       {docked && !doc && (
         <Study
           bible={bible}
+          verseText={(tokens.get(sel) ?? []).map((t) => t.text).join("")}
           modules={modules}
           onChanged={onModulesChanged}
           onImage={(src, ring) => setImage({ src, ring })}
@@ -758,6 +759,7 @@ export function Read({
       {study && !docked && (
         <Study
           bible={bible}
+          verseText={(tokens.get(sel) ?? []).map((t) => t.text).join("")}
           modules={modules}
           onChanged={onModulesChanged}
           onImage={(src, ring) => setImage({ src, ring })}

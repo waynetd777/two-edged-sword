@@ -32,7 +32,21 @@ interface Going {
   error?: string;
 }
 
-export function Library({ modules, onChanged, onRead }: { modules: Module[]; onChanged: () => void; onRead: (module: string) => void }) {
+export function Library({
+  modules,
+  onChanged,
+  onRead,
+  onDictionary,
+  onLexicon,
+}: {
+  modules: Module[];
+  onChanged: () => void;
+  onRead: (module: string) => void;
+  /** Opens the dictionaries, at this one. */
+  onDictionary: (module: string) => void;
+  /** Opens Word Study, where every lexicon's entry for a number shows. */
+  onLexicon: () => void;
+}) {
   const [group, setGroup] = useState<Group>(() => saved("libraryGroup", "commentaries"));
   // The offer from last time draws at once; the release is asked again each time the app opens.
   const [offers, setOffers] = useState<Offer[]>(() => saved("offers", []));
@@ -146,9 +160,12 @@ export function Library({ modules, onChanged, onRead }: { modules: Module[]; onC
                     {m.source === "bundled" ? "Built in" : "Downloaded"} · {mb(m.size)}
                   </span>
                 </span>
-                {(m.kind === "reference" || m.kind === "devotional") && (
-                  <button className="mini accent" onClick={() => onRead(m.id)}>
-                    Read
+                {m.kind !== "bible" && m.kind !== "commentary" && (
+                  <button
+                    className="mini accent"
+                    onClick={() => (m.kind === "dictionary" ? onDictionary(m.id) : m.kind === "lexicon" ? onLexicon() : onRead(m.id))}
+                  >
+                    {m.kind === "reference" || m.kind === "devotional" ? "Read" : "Open"}
                   </button>
                 )}
                 {m.source === "app" && (

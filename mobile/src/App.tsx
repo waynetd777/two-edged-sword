@@ -9,6 +9,7 @@ import { Jump, Search } from "./Search";
 import { WordStudy } from "./WordStudy";
 import { Library } from "./Library";
 import { More } from "./More";
+import { DictionarySheet } from "./Dictionary";
 import { syncReminders } from "./Reminder";
 import { plansStore } from "./plansStore";
 import { history, Tab } from "./history";
@@ -34,6 +35,8 @@ export function App() {
     setWord(w);
     setTab("words");
   };
+  /** The dictionaries, over everything: a word to look up, or a dictionary to open at. */
+  const [dict, setDict] = useState<{ start?: string } | null>(null);
   const open = (j: Jump) => {
     setJump({ ...j, n: (jump?.n ?? 0) + 1 });
     setTab("read");
@@ -98,10 +101,22 @@ export function App() {
         />
       </div>
       <div className="screen" hidden={tab !== "words"}>
-        <WordStudy modules={modules} target={word} onTarget={study} onJump={open} />
+        <WordStudy modules={modules} target={word} onTarget={study} onJump={open} onDictionary={(w) => setDict({ start: w })} />
       </div>
       <div className="screen" hidden={tab !== "library"}>
-        <Library modules={modules} onChanged={loadModules} onRead={(book) => open({ book })} />
+        <Library
+          modules={modules}
+          onChanged={loadModules}
+          onRead={(book) => open({ book })}
+          onDictionary={(m) => {
+            save("dictionary", m);
+            setDict({});
+          }}
+          onLexicon={() => {
+            history.push({ tab: "words", word });
+            setTab("words");
+          }}
+        />
       </div>
       <div className="screen" hidden={tab !== "more"}>
         <More
@@ -113,6 +128,17 @@ export function App() {
           }}
         />
       </div>
+      {dict && (
+        <DictionarySheet
+          modules={modules}
+          start={dict.start}
+          onGo={(r) => {
+            setDict(null);
+            open({ ref: r });
+          }}
+          onClose={() => setDict(null)}
+        />
+      )}
       <nav className="tabs">
         {TABS.map((t) => (
           <button
