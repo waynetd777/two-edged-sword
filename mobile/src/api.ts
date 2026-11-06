@@ -33,6 +33,8 @@ export interface Offer {
   sha256: string;
   /** Its About (e-Sword's description, HTML), so it can be read before it's downloaded. */
   info?: string;
+  /** Its cover's file beside the manifest, put where the About has <img src="cover">. */
+  cover?: string;
 }
 
 export interface Verse {
@@ -126,6 +128,7 @@ export const api = {
   commentaryRanges: (module: string) => invoke<[number, number, number, number, number][]>("commentary_ranges", { module }),
   referenceTitles: (module: string) => invoke<string[]>("reference_titles", { module }),
   fetchManifest: (url: string) => invoke<string>("fetch_manifest", { url }),
+  fetchBytes: (url: string) => invoke<ArrayBuffer>("fetch_bytes", { url }),
   download: (url: string, file: string, sha256: string, size: number) => invoke<void>("download", { url, file, sha256, size }),
   cancelDownload: (file: string) => invoke<void>("cancel_download", { file }),
   removeModule: (file: string) => invoke<void>("remove_module", { file }),

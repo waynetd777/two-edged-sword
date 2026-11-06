@@ -87,8 +87,8 @@ modules-publish: modules-release
 	gh release view modules >/dev/null 2>&1 || gh release create modules --title "Modules for the phone app" --notes "Public-domain modules for Two-edged Sword on iPhone and Android, downloaded from the app's Library." --latest=false
 	gh release upload modules target/modules-release/* --clobber
 
-# Only the manifest again: for a change to what it says (titles, About), not to any module.
+# Only the manifest and covers again: for a change to what it says (titles, About), not to any module.
 modules-manifest: modules-release
-	gh release upload modules target/modules-release/manifest.json --clobber
+	gh release upload modules target/modules-release/manifest.json target/modules-release/*.cover.* --clobber
 
 .PHONY: assets android-emu android-icons android-phone icons ios-phone ios-register ios-sim shot modules-manifest modules-release modules-publish

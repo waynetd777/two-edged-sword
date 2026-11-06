@@ -12,6 +12,7 @@ Modules folder. Never put a module here that the desktop app doesn't itself ship
 third-party modules may not be passed on.
 """
 
+import base64
 import gzip
 import hashlib
 import json
@@ -57,6 +58,14 @@ def main():
         with open(gz, "wb") as f, gzip.GzipFile(filename="", mode="wb", fileobj=f, compresslevel=9, mtime=0) as z:
             z.write(data)
         title, abbrev, info = details(path)
+        # Its cover goes up as a file of its own, fetched when its About is opened: in the manifest, all of
+        # them would make it over a megabyte. The About keeps <img src="cover"> where it was.
+        cover = None
+        m = re.search(r'<img\b[^>]*src="data:image/(\w+);base64,([^"]+)"[^>]*>', info)
+        if m:
+            cover = f"{path.name}.cover.{m.group(1)}"
+            (OUT / cover).write_bytes(base64.b64decode(m.group(2)))
+            info = info[: m.start()] + '<img src="cover">' + info[m.end() :]
         entries.append(
             {
                 "id": path.stem,
@@ -67,9 +76,9 @@ def main():
                 "size": len(data),
                 "gz": gz.stat().st_size,
                 "sha256": hashlib.sha256(data).hexdigest(),
-                # Its About, so the Library can show it before it's downloaded; without its pictures (a cover
-                # is tens of kilobytes), which show once it's on the phone.
-                "info": re.sub(r"<img\b[^>]*>", "", info),
+                # Its About, so the Library can show it before it's downloaded; any other pictures are left out.
+                "info": re.sub(r'<img\b(?![^>]*src="cover")[^>]*>', "", info),
+                **({"cover": cover} if cover else {}),
             }
         )
         print(f"{path.name:36} {len(data) / 1e6:6.1f} MB -> {gz.stat().st_size / 1e6:6.1f} MB")

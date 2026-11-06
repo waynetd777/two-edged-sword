@@ -171,6 +171,14 @@ fn fetch_manifest(url: String) -> Result<String, String> {
     agent().get(&url).call().map_err(|e| e.to_string())?.into_string().map_err(|e| e.to_string())
 }
 
+/// A small file from the downloads, such as a module's cover, as bytes.
+#[tauri::command(async)]
+fn fetch_bytes(url: String) -> Result<tauri::ipc::Response, String> {
+    let mut buf = Vec::new();
+    Read::read_to_end(&mut agent().get(&url).call().map_err(|e| e.to_string())?.into_reader().take(2_000_000), &mut buf).map_err(|e| e.to_string())?;
+    Ok(tauri::ipc::Response::new(buf))
+}
+
 #[derive(Clone, Serialize)]
 struct Progress {
     file: String,
@@ -340,7 +348,7 @@ pub fn run() {
             app.manage(AppState { lib: RwLock::new(scan()), cancelled: Mutex::new(HashSet::new()) });
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![log, scene, set_bundled, modules, chapter, chapter_sizes, commentary, coverage, article, strongs_for_word, search, strongs_by_book, strongs_verses, translit_search, find_topics, fetch_manifest, module_info, list_topics, reference_titles, devotion_titles, devotion, commentary_ranges, schedule_reminders, download, cancel_download, remove_module])
+        .invoke_handler(tauri::generate_handler![log, scene, set_bundled, modules, chapter, chapter_sizes, commentary, coverage, article, strongs_for_word, search, strongs_by_book, strongs_verses, translit_search, find_topics, fetch_manifest, fetch_bytes, module_info, list_topics, reference_titles, devotion_titles, devotion, commentary_ranges, schedule_reminders, download, cancel_download, remove_module])
         .run(tauri::generate_context!())
         .expect("error while running the app");
 }

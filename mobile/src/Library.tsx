@@ -64,6 +64,23 @@ export function Library({
       .then((html) => setAbout((a) => (a && a.title === m.title ? { ...a, html } : a)))
       .catch(() => setAbout((a) => (a && a.title === m.title ? { ...a, html: "" } : a)));
   };
+  /** A download's About, from the manifest; its cover is fetched, and shown once it comes. */
+  const showOffer = (o: Offer) => {
+    const sub = `${mb(o.gz)} to download · ${mb(o.size)} on the phone`;
+    const info = o.info ?? "";
+    setAbout({ title: o.title, sub, html: info });
+    if (!o.cover || !info.includes('<img src="cover">')) return;
+    const type = `image/${o.cover.split(".").pop()}`;
+    api
+      .fetchBytes(downloadsBase() + o.cover)
+      .then((buf) => new Promise<string>((done) => {
+        const r = new FileReader();
+        r.onload = () => done(r.result as string);
+        r.readAsDataURL(new Blob([buf], { type }));
+      }))
+      .then((src) => setAbout((a) => (a && a.title === o.title ? { ...a, html: info.replace('<img src="cover">', `<img src="${src}">`) } : a)))
+      .catch(() => {});
+  };
   const InfoButton = ({ label, onClick }: { label: string; onClick: () => void }) => (
     <button className="infobtn" aria-label={`About ${label}`} onClick={onClick}>
       <Icon name="info" size={20} />
@@ -76,7 +93,9 @@ export function Library({
     // Debug builds can point at a local copy of the release: TES_SCENE=modules=http://localhost:8000/
     scene.then((sc) => {
       // Debug: about opens the first module's About on the phone.
-      if (sc.includes("about")) setTimeout(() => document.querySelector<HTMLButtonElement>(".infobtn")?.click(), 1500);
+      // aboutget: the About of the last module to download, with its cover fetched.
+      if (sc.includes("aboutget")) setTimeout(() => [...document.querySelectorAll<HTMLButtonElement>(".infobtn")].pop()?.click(), 4000);
+      else if (sc.includes("about")) setTimeout(() => document.querySelector<HTMLButtonElement>(".infobtn")?.click(), 1500);
       const grp = sc.find((x) => x.startsWith("group="))?.slice(6) as Group | undefined;
       if (grp && GROUPS.some((x) => x.id === grp)) setGroup(grp);
       // A debug build can use a local copy of the downloads (modules=<url>), and remembers it, so the app opened from the home screen keeps using it.
@@ -220,7 +239,7 @@ export function Library({
                     </span>
                   )}
                 </span>
-                <InfoButton label={o.title} onClick={() => setAbout({ title: o.title, sub: `${mb(o.gz)} to download · ${mb(o.size)} on the phone`, html: o.info ?? "" })} />
+                <InfoButton label={o.title} onClick={() => showOffer(o)} />
                 {d && !d.error ? (
                   <button className="mini" aria-label={`Stop downloading ${o.title}`} onClick={() => api.cancelDownload(o.file)}>
                     ✕
