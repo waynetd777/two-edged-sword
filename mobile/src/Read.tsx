@@ -188,7 +188,8 @@ export function Read({
     if (doc) bookmarks.visited({ doc: { ...doc, title: docMod?.title ?? doc.module } });
     else bookmarks.visited({ ref: { book: loc.book, chapter: loc.chapter, verse: sel }, bible });
   }, [loc.book, loc.chapter, doc?.module, doc?.chapter]); // eslint-disable-line react-hooks/exhaustive-deps
-  const playingHere = pl.on && pl.bible === bible && pl.book === loc.book && pl.chapter === loc.chapter && !doc;
+  const playingHere = pl.on && !pl.doc && pl.bible === bible && pl.book === loc.book && pl.chapter === loc.chapter && !doc;
+  const readingDoc = pl.on && pl.doc && doc && pl.doc.module === doc.module && pl.doc.chapter === doc.chapter ? pl.verse : undefined;
   const docked = useWide(wideScene);
   const [wordScene, setWordScene] = useState(false);
   /** A verse to bring into view once its chapter has drawn. */
@@ -244,6 +245,11 @@ export function Read({
         setGoing(true);
       }
       if (sc.includes("compare")) setComparing(true);
+      if (sc.includes("listendoc"))
+        setTimeout(() => {
+          const d = saved<{ module: string; chapter: string } | null>("doc", null);
+          if (d) player.playDoc({ ...d, title: d.module });
+        }, 2000);
       if (sc.includes("mark"))
         setTimeout(() => {
           const l = saved("loc", { book: 62, chapter: 1 });
@@ -424,8 +430,22 @@ export function Read({
 
   const pick = (v: number) => setSel(v);
   // Listening: the reader follows, into the next chapter, with the verse being read a third of the way down.
+  // ...and in a book, on to its next chapter, with the paragraph being read a third of the way down.
   useEffect(() => {
-    if (!pl.on || doc || comparing || pl.bible !== bible) return;
+    if (!pl.on || !pl.doc || !doc || pl.doc.module !== doc.module) return;
+    if (pl.doc.chapter !== doc.chapter) {
+      setDoc({ module: pl.doc.module, chapter: pl.doc.chapter });
+      return;
+    }
+    const el = page.current?.querySelector(`[data-para="${pl.verse}"]`) as HTMLElement | null;
+    const pg = page.current;
+    if (el && pg) {
+      const top = el.getBoundingClientRect().top - pg.getBoundingClientRect().top + pg.scrollTop;
+      pg.scrollTo({ top: Math.max(0, top - pg.clientHeight / 3), behavior: "smooth" });
+    }
+  }, [pl.on, pl.doc?.chapter, pl.verse]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (!pl.on || pl.doc || doc || comparing || pl.bible !== bible) return;
     if (pl.book !== loc.book || pl.chapter !== loc.chapter) {
       setLoc({ book: pl.book, chapter: pl.chapter });
       return;
@@ -525,9 +545,18 @@ export function Read({
         )}
         <span className="spacer" />
         {doc ? (
-          <button className="pill" onClick={() => visit(loc, sel)} aria-label="Back to the Bible">
-            Bible
-          </button>
+          <>
+            <button
+              className="ibtn"
+              aria-label="Listen to this chapter"
+              onClick={() => player.playDoc({ module: doc.module, chapter: doc.chapter, title: docMod?.title ?? doc.module })}
+            >
+              <Icon name="speaker" size={22} />
+            </button>
+            <button className="pill" onClick={() => visit(loc, sel)} aria-label="Back to the Bible">
+              Bible
+            </button>
+          </>
         ) : (
         <>
         <button
@@ -583,6 +612,7 @@ export function Read({
               onRef={(r) => goTo(r)}
               onImage={(src) => setImage({ src })}
               onChapter={(c) => openDoc(doc.module, c)}
+              reading={readingDoc}
             />
           ) : comparing ? (
             <CompareView
@@ -710,7 +740,7 @@ export function Read({
             <Icon name={pl.paused ? "play" : "pause"} size={20} />
           </button>
           <span style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
-            <span className="t">{fmtRef({ book: pl.book, chapter: pl.chapter, verse: pl.verse })}</span>
+            <span className="t">{pl.doc ? pl.doc.chapter : fmtRef({ book: pl.book, chapter: pl.chapter, verse: pl.verse })}</span>
             <span className="s">{pl.paused ? "Paused" : "Listening"}</span>
           </span>
           <button className="mini" aria-label="Speed" onClick={player.faster}>
@@ -751,7 +781,8 @@ export function Read({
         aria-label={`Listen to ${fmtRef(loc)} from verse ${sel}`}
         onClick={() => player.play(bible, loc.book, loc.chapter, sel, versesOf === `${loc.book}.${loc.chapter}` ? verses : undefined)}
       >
-        <Icon name="play" size={20} />
+        {/* A speaker, as the desktop's Listen; play and pause belong to the player once it's reading. */}
+        <Icon name="speaker" size={22} />
       </button>
       </div>
       )}

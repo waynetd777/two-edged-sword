@@ -1425,3 +1425,9 @@ input[type="range"] {
   font-size: 22px;
   font-weight: 600;
 }
+.miniplayer .t,
+.miniplayer .s {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

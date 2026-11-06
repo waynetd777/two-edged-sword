@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from "react";
 import { Ref } from "../../src/bible";
-import { renderHtml } from "../../src/esword";
+import { docSegments, renderHtml } from "../../src/esword";
 import { api, Article } from "./api";
 import { useBookmarks } from "./bookmarks";
 import { Icon } from "./icons";
@@ -33,6 +33,10 @@ export const bookTitles = (module: string) => {
   return p;
 };
 
+/** A book's chapter (a devotional's day) as HTML; null when it has none. */
+export const docHtml = (module: string, chapter: string): Promise<string | null> =>
+  isDevotional(module) ? api.devotion(module, chapter) : api.article("reference", module, chapter).then((a) => a?.html ?? null);
+
 /** A chapter of a book (Josephus, Larkin…) in the reading page, its pictures opening full screen. */
 export function DocView({
   module,
@@ -41,7 +45,10 @@ export function DocView({
   onRef,
   onImage,
   onChapter,
+  reading,
 }: {
+  /** The paragraph being read aloud (from 1), to mark. */
+  reading?: number;
   module: string;
   title: string;
   chapter: string;
@@ -89,7 +96,14 @@ export function DocView({
       ) : !a ? (
         <p className="loading">This chapter couldn't be read.</p>
       ) : (
-        <div className="prose doc">{renderHtml(a.html, { onRef, onImage })}</div>
+        // In paragraphs, as Listen reads it, so the one being read can be marked and followed.
+        <div className="prose doc">
+          {docSegments(a.html).map((seg, i) => (
+            <div key={i} data-para={i + 1} className={reading === i + 1 ? "speaking" : undefined}>
+              {renderHtml(seg, { onRef, onImage })}
+            </div>
+          ))}
+        </div>
       )}
       {next && a && (
         <button className="next" onClick={() => onChapter(next)}>

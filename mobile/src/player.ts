@@ -9,6 +9,8 @@ import { addPluginListener, invoke } from "@tauri-apps/api/core";
 import { useSyncExternalStore } from "react";
 import { fmtRef, stepChapter } from "../../src/bible";
 import { speakable, speechText, spokenChapter } from "../../src/spoken";
+import { docSegments, plainText } from "../../src/esword";
+import { bookTitles, docHtml, isDevotional } from "./DocView";
 import { api, save, saved, Verse } from "./api";
 
 export type Sleep = "off" | "15" | "30" | "60" | "chapter";
@@ -25,6 +27,8 @@ export interface PlayerState {
   len: number;
   speed: number;
   sleep: Sleep;
+  /** Reading a book's chapter (a devotional's day) instead of the Bible; `verse` is then the paragraph. */
+  doc?: { module: string; chapter: string; title: string };
   error?: string;
 }
 
@@ -57,10 +61,29 @@ async function speakFrom(bible: string, book: number, chapter: number, verse: nu
     });
   if (!verseItems.length) return stop();
   const items = [{ id: 0, text: spokenChapter(book, chapter, verse) }, ...verseItems];
-  set({ on: true, paused: false, bible, book, chapter, verse, at: -1, len: 0, error: undefined });
+  set({ on: true, paused: false, doc: undefined, bible, book, chapter, verse, at: -1, len: 0, error: undefined });
   await call("speak", { items, rate: state.speed, title: fmtRef({ book, chapter }), voice: saved<string | null>("listenVoice", null) }).catch((e) => {
     set({ ...IDLE, speed: state.speed, sleep: state.sleep, error: String(e) });
   });
+}
+
+/** A book's chapter, paragraph by paragraph from `from`, announced by its name (a devotional by its title and day). */
+async function speakDoc(d: { module: string; chapter: string; title: string }, from: number) {
+  const html = await docHtml(d.module, d.chapter).catch(() => null);
+  const paras = html ? docSegments(html) : [];
+  const items = paras
+    .map((p, i) => ({ id: i + 1, text: speakable(plainText(p)).spoken }))
+    .filter((x) => x.id >= from && x.text.trim());
+  if (!items.length) return stop();
+  pageAt.clear();
+  set({ on: true, paused: false, doc: d, bible: "", book: 0, chapter: 0, verse: items[0].id, at: -1, len: 0, error: undefined });
+  const announce = isDevotional(d.module) ? `${d.title}, ${d.chapter}` : d.chapter;
+  await call("speak", {
+    items: from > 1 ? items : [{ id: 0, text: announce }, ...items],
+    rate: state.speed,
+    title: `${d.title} · ${d.chapter}`,
+    voice: saved<string | null>("listenVoice", null),
+  }).catch((e) => set({ ...IDLE, speed: state.speed, sleep: state.sleep, error: String(e) }));
 }
 
 let listening = false;
@@ -71,10 +94,19 @@ function listen() {
     if (!state.on) return;
     if (e.id === 0) return; // the chapter's announcement
     if (e.kind === "start") set({ verse: e.id!, at: -1, len: 0 });
-    else if (e.kind === "word") set({ verse: e.id!, at: pageAt.get(e.id!)?.[e.at!] ?? e.at!, len: e.len! });
+    else if (e.kind === "word") set({ verse: e.id!, at: state.doc ? -1 : (pageAt.get(e.id!)?.[e.at!] ?? e.at!), len: e.len! });
     else if (e.kind === "paused") set({ paused: true });
     else if (e.kind === "resumed") set({ paused: false });
-    else if (e.kind === "end") {
+    else if (e.kind === "end" && state.doc) {
+      // A book goes on to its next chapter; a devotional stops at the end of the day.
+      const d = state.doc;
+      if (state.sleep === "chapter" || isDevotional(d.module)) return stop();
+      bookTitles(d.module).then((t) => {
+        const next = t[t.indexOf(d.chapter) + 1];
+        if (next) speakDoc({ ...d, chapter: next }, 1);
+        else stop();
+      });
+    } else if (e.kind === "end") {
       // On into the next chapter, unless the sleep timer said to stop at the end of this one.
       const next = stepChapter(state.book, state.chapter, 1, null);
       if (state.sleep === "chapter" || !next) return stop();
@@ -113,6 +145,10 @@ export const player = {
     listen();
     return speakFrom(bible, book, chapter, verse, verses);
   },
+  playDoc(d: { module: string; chapter: string; title: string }, from = 1) {
+    listen();
+    return speakDoc(d, from);
+  },
   pause() {
     set({ paused: true });
     call("speech_pause").catch(() => {});
@@ -128,7 +164,9 @@ export const player = {
     const speed = all[(all.indexOf(state.speed) + 1) % all.length] ?? 1;
     save("listenSpeed", speed);
     set({ speed });
-    if (state.on && !state.paused) speakFrom(state.bible, state.book, state.chapter, state.verse);
+    if (state.on && !state.paused)
+      if (state.doc) speakDoc(state.doc, state.verse);
+      else speakFrom(state.bible, state.book, state.chapter, state.verse);
   },
   /** The next sleep timer: off, 15, 30 or 60 minutes, or the end of the chapter. */
   sleeper() {
