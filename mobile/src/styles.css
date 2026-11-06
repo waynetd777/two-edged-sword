@@ -1130,8 +1130,9 @@ mark {
 }
 .viewer .close {
   position: absolute;
+  /* Clear of the camera cutout and corners, which sit at the side in landscape. */
   top: calc(var(--top) + 8px);
-  right: 12px;
+  right: calc(env(safe-area-inset-right) + 12px);
   width: 44px;
   height: 44px;
   border-radius: 22px;
@@ -1139,6 +1140,9 @@ mark {
   background: rgba(255, 255, 255, 0.16);
   color: #ffffff;
   font-size: 18px;
+}
+.viewer.drag {
+  transition: background 0.1s;
 }
 .vhint {
   position: absolute;
@@ -1158,7 +1162,7 @@ mark {
 .viewer .turn {
   position: absolute;
   top: calc(var(--top) + 8px);
-  left: 12px;
+  left: calc(env(safe-area-inset-left) + 12px);
   width: 44px;
   height: 44px;
   border-radius: 22px;
