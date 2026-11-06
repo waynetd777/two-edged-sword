@@ -7,14 +7,30 @@ import { headwords, lexiconParts, renderHtml, Token } from "../../src/esword";
 import { api, Article } from "./api";
 import { Icon } from "./icons";
 
+/** The phone's voices. WebKit's list is empty when first asked and fills in a moment later
+ *  (voiceschanged), so it's asked for at start-up and a word waits briefly for it. */
+let voices: SpeechSynthesisVoice[] = [];
+const voicesReady: Promise<void> = new Promise((done) => {
+  const synth = window.speechSynthesis;
+  if (!synth) return done();
+  const load = () => {
+    voices = synth.getVoices();
+    if (voices.length) done();
+  };
+  load();
+  synth.addEventListener?.("voiceschanged", load);
+  setTimeout(done, 1500); // a phone with no voices at all
+});
+
 /** Says an original-language word, as the desktop's SayButton does: in a Hebrew or Greek voice when
  *  the phone has one, otherwise its pronunciation ("ray-sheeth'") in an English voice. */
-function say(word: string, num: string, pron: string) {
+async function say(word: string, num: string, pron: string) {
   const synth = window.speechSynthesis;
   if (!synth) return;
   synth.cancel();
+  if (!voices.length) await voicesReady;
   const lang = num.startsWith("H") ? "he" : "el";
-  const voice = synth.getVoices().find((v) => v.lang.toLowerCase().startsWith(lang));
+  const voice = voices.find((v) => v.lang.toLowerCase().startsWith(lang));
   const u = new SpeechSynthesisUtterance(voice ? word : pron.replace(/[-'ʼ]/g, " "));
   if (voice) u.voice = voice;
   else u.lang = "en-US";
