@@ -55,6 +55,18 @@ const PATHS = {
       <path d="M9 7V4h6v3" />
     </>
   ),
+  calendar: (
+    <>
+      <rect x="4" y="5" width="16" height="15" rx="2" />
+      <path d="M4 10h16M9 3v4M15 3v4" />
+    </>
+  ),
+  settings: (
+    <>
+      <circle cx="12" cy="12" r="3" />
+      <path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1" />
+    </>
+  ),
   download: <path d="M12 4v11M7 10l5 5 5-5M5 20h14" />,
   down: <path d="M7 10l5 5 5-5" />,
   speaker: (

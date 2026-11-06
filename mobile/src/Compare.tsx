@@ -91,7 +91,7 @@ export function CompareView({
         <label className="switch">
           Differences from the {bibles.find((b) => b.id === base)?.abbrev || base.toUpperCase()}
           <input type="checkbox" checked={diff} onChange={(e) => onDiff(e.target.checked)} />
-          <span aria-hidden="true" />
+          <span className="knob" aria-hidden="true" />
         </label>
       </div>
       <div className="cmp">

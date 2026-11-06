@@ -27,6 +27,9 @@ ureq = { version = "2", default-features = false, features = ["tls"] }
 flate2 = "1"
 # Native bits the web view can't do (plugins/tes-native): turning with the phone while a picture is open.
 tauri-plugin-tes-native = { path = "../plugins/tes-native" }
+# The daily reminder: local notifications scheduled a week ahead (lib.rs schedule_reminders).
+tauri-plugin-notification = "2"
+time = "0.3"
 sha2 = "0.10"
 
 [profile.release]

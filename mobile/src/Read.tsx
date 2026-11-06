@@ -223,7 +223,10 @@ export function Read({
     scene.then((sc) => {
       if (sc.includes("verse")) setLayout("verse");
       if (sc.includes("study")) setStudy(true);
-      if (sc.includes("goto")) setGoing(true);
+      if (sc.includes("goto")) {
+        setGoBooks(sc.some((x) => x.startsWith("doc=")));
+        setGoing(true);
+      }
       if (sc.includes("compare")) setComparing(true);
       if (sc.includes("wide")) setWideScene(true);
       const r = sc.find((x) => x.startsWith("at="));
@@ -702,6 +705,7 @@ export function Read({
         <GoTo
           bookModules={bookMods}
           startOnBooks={goBooks}
+          openDoc={doc}
           onDoc={openDoc}
           onLibrary={() => {
             setGoing(false);

@@ -23,7 +23,7 @@
   --bottom: env(safe-area-inset-bottom);
 }
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --bg: #0d1117;
     --panel: #161b22;
     --border: #30363d;
@@ -38,6 +38,27 @@
     --scrim: rgba(1, 4, 9, 0.6);
     --red: #ff7b72;
   }
+}
+:root[data-theme="dark"] {
+    --bg: #0d1117;
+    --panel: #161b22;
+    --border: #30363d;
+    --line: #21262d;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --accent: #58a6ff;
+    --onaccent: #0d1117;
+    --accentsoft: #132339;
+    --ring: #1f6feb;
+    --bar: #010409;
+    --scrim: rgba(1, 4, 9, 0.6);
+    --red: #ff7b72;
+  }
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+:root[data-theme="light"] {
+  color-scheme: light;
 }
 
 * {
@@ -817,9 +838,12 @@ mark {
   padding: 0 1px;
 }
 @media (prefers-color-scheme: dark) {
-  mark {
+  :root:not([data-theme="light"]) mark {
     background: #3d3012;
   }
+}
+:root[data-theme="dark"] mark {
+  background: #3d3012;
 }
 
 /* ---------- compare ---------- */
@@ -854,7 +878,7 @@ mark {
   opacity: 0;
   pointer-events: none;
 }
-.switch span {
+.switch .knob {
   position: relative;
   width: 40px;
   height: 24px;
@@ -863,7 +887,7 @@ mark {
   transition: background 0.15s;
   flex: none;
 }
-.switch span::after {
+.switch .knob::after {
   content: "";
   position: absolute;
   left: 2px;
@@ -874,10 +898,10 @@ mark {
   background: #ffffff;
   transition: left 0.15s;
 }
-.switch input:checked + span {
+.switch input:checked + .knob {
   background: var(--ring);
 }
-.switch input:checked + span::after {
+.switch input:checked + .knob::after {
   left: 18px;
 }
 .cmp {
@@ -911,9 +935,12 @@ mark {
   padding: 0 1px;
 }
 @media (prefers-color-scheme: dark) {
-  .diff {
+  :root:not([data-theme="light"]) .diff {
     background: #3f3914;
   }
+}
+:root[data-theme="dark"] .diff {
+  background: #3f3914;
 }
 
 /* ---------- iPad in landscape: the study pane beside the text ---------- */
@@ -1228,4 +1255,74 @@ mark {
 }
 .round.danger {
   color: var(--red);
+}
+
+/* ---------- more: today's reading, plans, settings ---------- */
+.no-red .red {
+  color: inherit;
+}
+.tick {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  margin-left: -10px;
+  border: none;
+  background: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.tick::before {
+  content: "";
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border-radius: 11px;
+  border: 1.5px solid var(--muted);
+}
+.tick {
+  position: relative;
+}
+.tick.on::before {
+  background: #3fb950;
+  border-color: #3fb950;
+}
+.tick svg {
+  position: relative;
+  color: #0d1117;
+}
+.card.current {
+  border-color: var(--ring);
+}
+.tag.on {
+  border-color: var(--ring);
+  background: var(--accentsoft);
+  color: var(--accent);
+}
+.secondary.danger {
+  color: var(--red);
+}
+.seg.inline {
+  display: inline-flex;
+  margin: 0;
+}
+.seg.inline button {
+  height: 30px;
+  padding: 0 10px;
+}
+.time {
+  font: inherit;
+  font-size: 16px;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 10px;
+}
+input[type="range"] {
+  accent-color: var(--ring);
+}
+.row.switch {
+  color: var(--text);
+  font-size: 16px;
 }

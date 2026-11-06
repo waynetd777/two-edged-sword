@@ -16,12 +16,15 @@ export function GoTo({
   onClose,
   bookModules,
   startOnBooks,
+  openDoc,
   onDoc,
   onLibrary,
 }: {
   /** The reference books on the phone, for the Books side. */
   bookModules: Module[];
   startOnBooks?: boolean;
+  /** The book open now: its chapters show first, this one marked. */
+  openDoc?: { module: string; chapter: string } | null;
   onDoc: (module: string, chapter: string) => void;
   /** Opens the Library, for more books. */
   onLibrary: () => void;
@@ -36,7 +39,7 @@ export function GoTo({
   const [c, setC] = useState<number | null>(null);
   const [typed, setTyped] = useState("");
   const [side, setSide] = useState<"bible" | "books">(startOnBooks ? "books" : "bible");
-  const [bk, setBk] = useState<Module | null>(null);
+  const [bk, setBk] = useState<Module | null>(() => (openDoc ? (bookModules.find((m) => m.id === openDoc.module) ?? null) : null));
   const [chapterTitles, setChapterTitles] = useState<string[] | null>(null);
   useEffect(() => {
     setChapterTitles(null);
@@ -126,11 +129,20 @@ export function GoTo({
               <p className="empty">Opening…</p>
             ) : (
               <div className="list">
-                {chapterTitles.map((t) => (
-                  <button key={t} className="row" onClick={() => onDoc(bk.id, t)}>
-                    <span className="grow">{t}</span>
-                  </button>
-                ))}
+                {chapterTitles.map((t) => {
+                  const here = openDoc?.module === bk.id && openDoc.chapter === t;
+                  return (
+                    <button
+                      key={t}
+                      className={`row ${here ? "on" : ""}`}
+                      ref={here ? (el) => el?.scrollIntoView({ block: "center" }) : undefined}
+                      onClick={() => onDoc(bk.id, t)}
+                    >
+                      <span className="grow">{t}</span>
+                      {here && <span className="m">Reading</span>}
+                    </button>
+                  );
+                })}
               </div>
             )
           ) : parsed && !b ? (

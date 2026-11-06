@@ -116,6 +116,7 @@ export interface TranslitHit {
 }
 
 export const api = {
+  commentaryRanges: (module: string) => invoke<[number, number, number, number, number][]>("commentary_ranges", { module }),
   referenceTitles: (module: string) => invoke<string[]>("reference_titles", { module }),
   fetchManifest: (url: string) => invoke<string>("fetch_manifest", { url }),
   download: (url: string, file: string, sha256: string, size: number) => invoke<void>("download", { url, file, sha256, size }),

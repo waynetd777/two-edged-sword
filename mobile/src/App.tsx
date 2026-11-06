@@ -8,6 +8,9 @@ import { Read } from "./Read";
 import { Jump, Search } from "./Search";
 import { WordStudy } from "./WordStudy";
 import { Library } from "./Library";
+import { More } from "./More";
+import { syncReminders } from "./Reminder";
+import { plansStore } from "./plansStore";
 import { history, Tab } from "./history";
 
 
@@ -48,9 +51,13 @@ export function App() {
       .catch(() => {});
   useEffect(() => {
     loadModules();
+    // The week's reminders, from today: again whenever a day is marked read or the plan changes.
+    syncReminders().catch(() => {});
+    const unPlans = plansStore.subscribe(() => syncReminders().catch(() => {}));
     scene.then((sc) => {
       if (sc.includes("search")) setTab("search");
       if (sc.includes("library")) setTab("library");
+      if (sc.includes("more")) setTab("more");
       const w = sc.find((x) => x.startsWith("study="));
       if (w) {
         setWord(w.slice(6));
@@ -58,10 +65,14 @@ export function App() {
       }
     });
     // A step back or forward can land on another tab.
-    return history.onRestore((p) => {
+    const off = history.onRestore((p) => {
       setTab(p.tab);
       if (p.word) setWord(p.word);
     });
+    return () => {
+      off();
+      unPlans();
+    };
   }, []);
 
   return (
@@ -92,12 +103,16 @@ export function App() {
       <div className="screen" hidden={tab !== "library"}>
         <Library modules={modules} onChanged={loadModules} onRead={(book) => open({ book })} />
       </div>
-      {tab === "more" && (
-        <div className="soon">
-          <h1>{TABS.find((t) => t.id === tab)!.label}</h1>
-          <p>Coming next.</p>
-        </div>
-      )}
+      <div className="screen" hidden={tab !== "more"}>
+        <More
+          modules={modules}
+          onJump={open}
+          onLibrary={() => {
+            history.push({ tab: "library" });
+            setTab("library");
+          }}
+        />
+      </div>
       <nav className="tabs">
         {TABS.map((t) => (
           <button

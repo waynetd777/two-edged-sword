@@ -123,6 +123,12 @@ fn find_topics(st: State<AppState>, word: String) -> Vec<content::TopicHit> {
     content::find_topics(&st.lib.read().unwrap(), &word, 8)
 }
 
+/// Every passage a commentary comments on, in order (F. B. Meyer's plan).
+#[tauri::command(async)]
+fn commentary_ranges(st: State<AppState>, module: String) -> Result<Vec<content::VerseRange>, String> {
+    content::commentary_ranges(&st.lib.read().unwrap(), &module)
+}
+
 /// A reference book's chapters, in order.
 #[tauri::command(async)]
 fn reference_titles(st: State<AppState>, module: String) -> Result<Vec<String>, String> {
@@ -217,6 +223,51 @@ fn remove_module(st: State<AppState>, file: String) -> Result<(), String> {
     Ok(())
 }
 
+// ---------- the daily reminder ----------
+
+#[derive(serde::Deserialize)]
+struct Remind {
+    id: i32,
+    /// When, in milliseconds since the epoch.
+    at: i64,
+    title: String,
+    body: String,
+}
+
+/// The reminder's ids: one a day, a fortnight ahead at most.
+const REMINDER_IDS: std::ops::Range<i32> = 1000..1014;
+
+/// Replaces the scheduled reminders with `list` (none turns them off). Asks for permission the first
+/// time; an error says notifications are off.
+#[tauri::command(async)]
+fn schedule_reminders(app: AppHandle, list: Vec<Remind>) -> Result<(), String> {
+    use tauri_plugin_notification::{NotificationExt, PermissionState, Schedule};
+    let n = app.notification();
+    #[cfg(mobile)]
+    let _ = n.cancel(REMINDER_IDS.collect());
+    if list.is_empty() {
+        return Ok(());
+    }
+    let mut state = n.permission_state().map_err(|e| e.to_string())?;
+    if state != PermissionState::Granted {
+        state = n.request_permission().map_err(|e| e.to_string())?;
+    }
+    if state != PermissionState::Granted {
+        return Err("Notifications are off for Two-edged Sword. Turn them on in the iPhone's Settings.".into());
+    }
+    for r in list.into_iter().filter(|r| REMINDER_IDS.contains(&r.id)) {
+        let date = time::OffsetDateTime::from_unix_timestamp_nanos(r.at as i128 * 1_000_000).map_err(|e| e.to_string())?;
+        n.builder()
+            .id(r.id)
+            .title(r.title)
+            .body(r.body)
+            .schedule(Schedule::At { date, repeating: false, allow_while_idle: true })
+            .show()
+            .map_err(|e| e.to_string())?;
+    }
+    Ok(())
+}
+
 /// Bibles, commentaries and dictionaries, as the desktop searches them. No full-text index yet: the
 /// bundled commentaries are small enough to scan.
 #[tauri::command(async)]
@@ -233,7 +284,7 @@ fn log(msg: String) {
 }
 
 /// Debug builds only: a state to open in, from TES_SCENE (comma-separated: study, goto, word, verse, xrefs,
-/// picker, end, bible=<id>, search, q=<words>, study=<number or word>, library, modules=<url>, get=<file>, at=<ref>, maps, doc=<module>[|chapter], image), so a screenshot can show a sheet without anyone tapping. On the Simulator:
+/// picker, end, bible=<id>, more, plan=<year|nt90|gospels|ppo>, page=<plans|settings>, search, q=<words>, study=<number or word>, library, modules=<url>, get=<file>, at=<ref>, maps, doc=<module>[|chapter], image), so a screenshot can show a sheet without anyone tapping. On the Simulator:
 /// `SIMCTL_CHILD_TES_SCENE=study xcrun simctl launch booted com.wayned.two-edged-sword`.
 #[tauri::command]
 fn scene() -> Option<String> {
@@ -248,6 +299,7 @@ fn scene() -> Option<String> {
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_tes_native::init())
+        .plugin(tauri_plugin_notification::init())
         .setup(|app| {
             let paths = app.path();
             let _ = store::DATA_DIR.set(paths.app_data_dir()?);
@@ -256,7 +308,7 @@ pub fn run() {
             app.manage(AppState { lib: RwLock::new(scan()), cancelled: Mutex::new(HashSet::new()) });
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![log, scene, modules, chapter, chapter_sizes, commentary, coverage, article, strongs_for_word, search, strongs_by_book, strongs_verses, translit_search, find_topics, fetch_manifest, reference_titles, download, cancel_download, remove_module])
+        .invoke_handler(tauri::generate_handler![log, scene, modules, chapter, chapter_sizes, commentary, coverage, article, strongs_for_word, search, strongs_by_book, strongs_verses, translit_search, find_topics, fetch_manifest, reference_titles, commentary_ranges, schedule_reminders, download, cancel_download, remove_module])
         .run(tauri::generate_context!())
         .expect("error while running the app");
 }

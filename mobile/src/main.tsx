@@ -6,6 +6,10 @@ import "@fontsource-variable/atkinson-hyperlegible-next";
 import "@fontsource/eb-garamond/greek-400.css";
 import "./styles.css";
 import { App } from "./App";
+import { applyPrefs } from "./Settings";
+import "@fontsource-variable/literata";
+import "@fontsource-variable/source-serif-4";
+import "@fontsource-variable/inter";
 import { invoke } from "@tauri-apps/api/core";
 
 // Errors go to the app's log (lib.rs's log, which prints only in debug builds): the Simulator has
@@ -21,4 +25,5 @@ import { invoke } from "@tauri-apps/api/core";
   };
 }
 
+applyPrefs();
 createRoot(document.getElementById("root")!).render(<App />);
