@@ -12,6 +12,7 @@ Everything the phone app uses
 - `allow-voices`
 - `allow-bundled-dir`
 - `allow-say`
+- `allow-tap`
 - `allow-register-listener`
 - `allow-remove-listener`
 
@@ -254,6 +255,32 @@ Enables the speech_stop command without any pre-configured scope.
 <td>
 
 Denies the speech_stop command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`tes-native:allow-tap`
+
+</td>
+<td>
+
+Enables the tap command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`tes-native:deny-tap`
+
+</td>
+<td>
+
+Denies the tap command without any pre-configured scope.
 
 </td>
 </tr>

@@ -1,7 +1,7 @@
 // Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
 // SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
-import { invoke } from "@tauri-apps/api/core";
+import { addPluginListener, invoke } from "@tauri-apps/api/core";
 import { useEffect, useState } from "react";
 import { fmtRef } from "../../src/bible";
 import { headwords, lexiconParts, renderHtml, Token } from "../../src/esword";
@@ -12,7 +12,51 @@ import { Icon } from "./icons";
  *  or Greek voice when the phone has one, otherwise its pronunciation ("ray-sheeth'") in English, as the
  *  desktop's SayButton does. Android's web view has no speech of its own. */
 export function say(word: string, num: string, pron: string) {
-  invoke("plugin:tes-native|say", { word, lang: num.startsWith("H") ? "he" : "el", pron }).catch(() => {});
+  return invoke("plugin:tes-native|say", { word, lang: num.startsWith("H") ? "he" : "el", pron });
+}
+
+/** The plugin's "say" events (start, done), to every speaker button showing it. */
+const sayWatchers = new Set<(kind: string) => void>();
+let sayListening = false;
+function listenSay() {
+  if (sayListening) return;
+  sayListening = true;
+  addPluginListener<{ kind: string }>("tes-native", "say", (e) => sayWatchers.forEach((w) => w(e.kind))).catch(() => {
+    sayListening = false;
+  });
+}
+
+/** A speaker that says the word, and shows it was tapped: it pulses until the voice starts, stays lit while
+ *  it speaks, and goes back when it's done. */
+export function SayButton({ word, num, pron, size = 20 }: { word: string; num: string; pron: string; size?: number }) {
+  const [state, setState] = useState<"idle" | "waiting" | "speaking">("idle");
+  useEffect(() => {
+    listenSay();
+    const w = (kind: string) => setState((s) => (s === "idle" ? s : kind === "start" ? "speaking" : "idle"));
+    sayWatchers.add(w);
+    return () => {
+      sayWatchers.delete(w);
+    };
+  }, []);
+  // Never stuck lit, if an event goes missing.
+  useEffect(() => {
+    if (state === "idle") return;
+    const t = setTimeout(() => setState("idle"), state === "waiting" ? 6000 : 8000);
+    return () => clearTimeout(t);
+  }, [state]);
+  return (
+    <button
+      className={`say ${state}`}
+      aria-label={`Say ${word}`}
+      aria-busy={state !== "idle"}
+      onClick={() => {
+        setState("waiting");
+        say(word, num, pron).catch(() => setState("idle"));
+      }}
+    >
+      <Icon name="speaker" size={size} />
+    </button>
+  );
 }
 
 /** The words of a verse, as indexes into its tokens. */
@@ -158,9 +202,7 @@ export function WordSheet({
                   <i className="translit">{parts.translit}</i>
                   <span className="m">{parts.pron}</span>
                 </span>
-                <button className="say" aria-label={`Say ${parts.word}`} onClick={() => shown && say(parts.word, shown, parts.pron)}>
-                  <Icon name="speaker" size={20} />
-                </button>
+                {shown && <SayButton word={parts.word} num={shown} pron={parts.pron} />}
                 <span className="spacer" />
                 <span className="tag">{shown}</span>
               </div>

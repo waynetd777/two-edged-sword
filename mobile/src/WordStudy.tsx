@@ -10,7 +10,7 @@ import { Icon } from "./icons";
 import { NavButtons } from "./NavButtons";
 import type { Jump } from "./Search";
 import { Entry } from "./Search";
-import { say } from "./WordSheet";
+import { SayButton } from "./WordSheet";
 
 type Named = WordNumber & { word?: string; translit?: string };
 interface Other {
@@ -238,9 +238,7 @@ export function WordStudy({
                 <i className="translit">{e.translit}</i>
                 <span className="m">{e.pron}</span>
               </span>
-              <button className="say" aria-label={`Say ${e.word}`} onClick={() => say(e.word, num, e.pron)}>
-                <Icon name="speaker" size={20} />
-              </button>
+              <SayButton word={e.word} num={num} pron={e.pron} />
             </div>
             <div style={{ display: "flex", gap: 6, marginBottom: 12 }}>
               <span className="tag">{num.startsWith("H") ? "Hebrew" : "Greek"}</span>

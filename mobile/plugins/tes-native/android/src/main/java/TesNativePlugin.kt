@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
 import android.speech.tts.Voice
+import android.view.HapticFeedbackConstants
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import androidx.core.view.ViewCompat
@@ -70,7 +71,17 @@ class TesNativePlugin(private val activity: Activity) : Plugin(activity) {
   private val insets = Insets()
   private val tablet get() = activity.resources.configuration.smallestScreenWidthDp >= 600
 
+  private var view: WebView? = null
+
+  /** A light tap felt in the hand, for a button or a word tapped: Android's own key-press feedback. */
+  @Command
+  fun tap(invoke: Invoke) {
+    view?.let { v -> v.post { v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY) } }
+    invoke.resolve()
+  }
+
   override fun load(webView: WebView) {
+    view = webView
     webView.addJavascriptInterface(insets, "TesInsets")
     ViewCompat.setOnApplyWindowInsetsListener(webView) { _, wi ->
       val bars = wi.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout())
@@ -84,6 +95,8 @@ class TesNativePlugin(private val activity: Activity) : Plugin(activity) {
     webView.settings.builtInZoomControls = false
     upright(true)
     Thread { unpackModules(webView) }.start()
+    // The word engine started now, so the first tap on a speaker isn't kept waiting for it.
+    wordEngine {}
   }
 
   /** Where the bundled modules were copied to, once they have been. */
@@ -267,22 +280,44 @@ class TesNativePlugin(private val activity: Activity) : Plugin(activity) {
   @Command
   fun say(invoke: Invoke) {
     val args = invoke.parseArgs(SayArgs::class.java)
-    val go = { t: TextToSpeech ->
+    val go: (TextToSpeech) -> Unit = { t ->
       val lang = Locale(if (args.lang == "he") "iw" else args.lang)
       val has = t.isLanguageAvailable(lang) >= TextToSpeech.LANG_AVAILABLE
       t.language = if (has) lang else Locale.ENGLISH
       t.setSpeechRate(if (has) 0.8f else 0.9f)
       t.speak(if (has) args.word else args.pron.replace(Regex("[-'ʼ]"), " "), TextToSpeech.QUEUE_FLUSH, Bundle(), "word")
     }
-    wordTts?.let { if (wordReady) go(it) } ?: run {
-      var made: TextToSpeech? = null
-      made = TextToSpeech(activity) { status ->
-        wordReady = status == TextToSpeech.SUCCESS
-        if (wordReady) made?.let(go)
-      }
-      wordTts = made
-    }
+    wordEngine { it?.let(go) }
     invoke.resolve()
+  }
+
+  /** The word engine, started once, telling the page when a word starts and is done. */
+  private fun wordEngine(then: (TextToSpeech?) -> Unit) {
+    wordTts?.let { if (wordReady) return then(it) }
+    var made: TextToSpeech? = null
+    made = TextToSpeech(activity) { status ->
+      wordReady = status == TextToSpeech.SUCCESS
+      made?.setOnUtteranceProgressListener(
+        object : UtteranceProgressListener() {
+          override fun onStart(utteranceId: String) = sayEvent("start")
+
+          override fun onDone(utteranceId: String) = sayEvent("done")
+
+          override fun onStop(utteranceId: String, interrupted: Boolean) = sayEvent("done")
+
+          @Deprecated("Deprecated in Java")
+          override fun onError(utteranceId: String) = sayEvent("done")
+        }
+      )
+      then(if (wordReady) made else null)
+    }
+    wordTts = made
+  }
+
+  private fun sayEvent(kind: String) {
+    val o = JSObject()
+    o.put("kind", kind)
+    trigger("say", o)
   }
 
   override fun onDestroy() {

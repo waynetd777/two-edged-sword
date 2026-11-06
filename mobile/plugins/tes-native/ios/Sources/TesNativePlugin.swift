@@ -51,6 +51,7 @@ class TesNativePlugin: Plugin, AVSpeechSynthesizerDelegate {
     super.load(webview: webview)
     self.webview = webview
     synth.delegate = self
+    wordSynth.delegate = self
     DispatchQueue.main.async { self.hookViewController() }
   }
 
@@ -110,6 +111,17 @@ class TesNativePlugin: Plugin, AVSpeechSynthesizerDelegate {
       u.voice = v ?? self.voice()
       u.rate = AVSpeechUtteranceDefaultSpeechRate * (v != nil ? 0.8 : 0.9)
       self.wordSynth.speak(u)
+      invoke.resolve()
+    }
+  }
+
+  private let tapper = UIImpactFeedbackGenerator(style: .light)
+
+  /// A light tap felt in the hand, for a button or a word tapped.
+  @objc public func tap(_ invoke: Invoke) {
+    DispatchQueue.main.async {
+      self.tapper.impactOccurred()
+      self.tapper.prepare()
       invoke.resolve()
     }
   }
@@ -201,16 +213,23 @@ class TesNativePlugin: Plugin, AVSpeechSynthesizerDelegate {
   }
 
   func speechSynthesizer(_ s: AVSpeechSynthesizer, willSpeakRangeOfSpeechString r: NSRange, utterance u: AVSpeechUtterance) {
+    if s === wordSynth { return }
     guard let id = ids[ObjectIdentifier(u)] else { return }
     trigger("speech", data: ["kind": "word", "id": id, "at": r.location, "len": r.length])
   }
 
   func speechSynthesizer(_ s: AVSpeechSynthesizer, didStart u: AVSpeechUtterance) {
+    if s === wordSynth { return trigger("say", data: ["kind": "start"]) }
     guard let id = ids[ObjectIdentifier(u)] else { return }
     trigger("speech", data: ["kind": "start", "id": id])
   }
 
+  func speechSynthesizer(_ s: AVSpeechSynthesizer, didCancel u: AVSpeechUtterance) {
+    if s === wordSynth { trigger("say", data: ["kind": "done"]) }
+  }
+
   func speechSynthesizer(_ s: AVSpeechSynthesizer, didFinish u: AVSpeechUtterance) {
+    if s === wordSynth { return trigger("say", data: ["kind": "done"]) }
     guard let id = ids.removeValue(forKey: ObjectIdentifier(u)) else { return }
     trigger("speech", data: ["kind": id == lastId && ids.isEmpty ? "end" : "done", "id": id])
   }

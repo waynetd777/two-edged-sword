@@ -36,5 +36,15 @@ function applyAndroidInsets() {
   document.documentElement.style.setProperty("--bottom", `${i.bottom()}px`);
 }
 applyAndroidInsets();
+
+// A light tap in the hand for everything that can be tapped: buttons, links, tabs, chips, a verse, a word.
+const TAPPABLE = 'button:not(:disabled), a, [role="tab"], [role="button"], input[type="checkbox"], .w, .v, .pv, .chip, .row';
+document.addEventListener(
+  "click",
+  (e) => {
+    if ((e.target as Element | null)?.closest?.(TAPPABLE)) invoke("plugin:tes-native|tap").catch(() => {});
+  },
+  { capture: true, passive: true },
+);
 window.addEventListener("tes-insets", applyAndroidInsets);
 createRoot(document.getElementById("root")!).render(<App />);

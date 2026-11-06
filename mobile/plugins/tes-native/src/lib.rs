@@ -116,6 +116,12 @@ async fn say<R: Runtime>(app: AppHandle<R>, word: String, lang: String, pron: St
     native(&app, "say", Say { word, lang, pron })
 }
 
+/// A light tap felt in the hand, for a button or a word tapped.
+#[command]
+async fn tap<R: Runtime>(app: AppHandle<R>) -> Result<(), String> {
+    native(&app, "tap", ())
+}
+
 /// Android: where the bundled modules were copied out of the APK, once they have been.
 #[command]
 async fn bundled_dir<R: Runtime>(app: AppHandle<R>) -> Result<serde_json::Value, String> {
@@ -133,7 +139,7 @@ async fn bundled_dir<R: Runtime>(app: AppHandle<R>) -> Result<serde_json::Value,
 
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
     Builder::new("tes-native")
-        .invoke_handler(tauri::generate_handler![allow_rotation, speak, speech_pause, speech_resume, speech_stop, voices, bundled_dir, say])
+        .invoke_handler(tauri::generate_handler![allow_rotation, speak, speech_pause, speech_resume, speech_stop, voices, bundled_dir, say, tap])
         .setup(|_app, _api| {
             #[cfg(target_os = "ios")]
             {

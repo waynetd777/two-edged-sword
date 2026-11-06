@@ -9,6 +9,7 @@ permissions = [
   "allow-voices",
   "allow-bundled-dir",
   "allow-say",
+  "allow-tap",
   "allow-register-listener",
   "allow-remove-listener",
 ]

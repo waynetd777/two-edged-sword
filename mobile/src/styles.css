@@ -1481,3 +1481,19 @@ input[type="range"] {
     max-height: 50%;
   }
 }
+/* A speaker that was tapped: pulsing until the voice starts, lit while it speaks. */
+.say.waiting,
+.say.speaking {
+  color: var(--accent);
+  border-color: var(--ring);
+  background: var(--accentsoft);
+}
+.say.waiting {
+  animation: saypulse 0.8s ease-in-out infinite;
+}
+@keyframes saypulse {
+  50% {
+    transform: scale(0.9);
+    opacity: 0.6;
+  }
+}
