@@ -1463,3 +1463,21 @@ input[type="range"] {
   justify-content: center;
   gap: 6px;
 }
+
+/* ---------- iPad and other wide screens ---------- */
+/* The Bible's text keeps the full width; everything else keeps a comfortable one, centred, and sheets
+   come up as panels in the middle rather than edge to edge. */
+@media (min-width: 700px) {
+  .results {
+    width: 100%;
+    max-width: 760px;
+    margin: 0 auto;
+  }
+  .sheet {
+    left: calc(50% - min(340px, 50%));
+    right: calc(50% - min(340px, 50%));
+  }
+  .sheet.word {
+    max-height: 50%;
+  }
+}
