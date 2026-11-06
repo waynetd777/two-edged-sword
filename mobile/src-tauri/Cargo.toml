@@ -21,6 +21,11 @@ serde_json = "1"
 # The same SQLite as the desktop app: the module readers are shared with it (src/lib.rs).
 rusqlite = { version = "0.41.1", features = ["bundled"] }
 chrono = { version = "0.4.45", default-features = false, features = ["clock", "std"] }
+# Downloading modules (lib.rs): plain blocking HTTPS with rustls (the pager app's lesson: Android has no
+# OpenSSL for native-tls), gunzipped and checked as they arrive.
+ureq = { version = "2", default-features = false, features = ["tls"] }
+flate2 = "1"
+sha2 = "0.10"
 
 [profile.release]
 codegen-units = 16

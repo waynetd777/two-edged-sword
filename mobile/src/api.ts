@@ -12,6 +12,22 @@ export interface Module {
   abbrev: string;
   strongs: boolean;
   rtl: boolean;
+  file: string;
+  size: number;
+  /** "bundled": in the app; "app": downloaded. */
+  source: "bundled" | "app";
+}
+
+/** One module the downloads offer (mobile/tools/modules_release.py). */
+export interface Offer {
+  id: string;
+  file: string;
+  kind: Kind;
+  title: string;
+  abbrev: string;
+  size: number;
+  gz: number;
+  sha256: string;
 }
 
 export interface Verse {
@@ -98,6 +114,10 @@ export interface TranslitHit {
 }
 
 export const api = {
+  fetchManifest: (url: string) => invoke<string>("fetch_manifest", { url }),
+  download: (url: string, file: string, sha256: string, size: number) => invoke<void>("download", { url, file, sha256, size }),
+  cancelDownload: (file: string) => invoke<void>("cancel_download", { file }),
+  removeModule: (file: string) => invoke<void>("remove_module", { file }),
   strongsByBook: (bible: string, number: string) => invoke<[number, number][]>("strongs_by_book", { bible, number }),
   strongsVerses: (bible: string, number: string, book: number | null, limit: number) =>
     invoke<VerseHit[]>("strongs_verses", { bible, number, book, limit }),

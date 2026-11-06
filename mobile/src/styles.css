@@ -1023,3 +1023,62 @@ mark {
   color: var(--text);
   font-size: 15px;
 }
+
+/* ---------- library ---------- */
+.bartitle {
+  margin: 0 0 0 4px;
+  font-family: var(--read);
+  font-size: 22px;
+  font-weight: 600;
+}
+.mini {
+  flex: none;
+  height: 32px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: none;
+  color: var(--muted);
+  font-size: 13px;
+}
+.danger {
+  color: var(--red);
+}
+.primary.danger {
+  background: var(--red);
+  color: #ffffff;
+}
+.round {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 22px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.progress {
+  display: block;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--line);
+  overflow: hidden;
+}
+.progress span {
+  display: block;
+  height: 100%;
+  background: var(--ring);
+  transition: width 0.2s;
+}
+/* Tabs whose names differ in length: each as wide as its name needs. */
+.seg.fit {
+  display: flex;
+  gap: 2px;
+}
+.seg.fit button {
+  flex: 1 1 auto;
+  padding: 0 6px;
+}

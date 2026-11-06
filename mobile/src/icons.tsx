@@ -48,6 +48,7 @@ const PATHS = {
       <rect x="14" y="4" width="7" height="16" rx="1.5" />
     </>
   ),
+  download: <path d="M12 4v11M7 10l5 5 5-5M5 20h14" />,
   down: <path d="M7 10l5 5 5-5" />,
   speaker: (
     <>

@@ -19,11 +19,15 @@ mod store;
 
 use library::{Kind, Library, Source};
 use serde::Serialize;
-use std::sync::RwLock;
-use tauri::{Manager, State};
+use std::collections::HashSet;
+use std::io::{Read, Write};
+use std::sync::{Mutex, RwLock};
+use tauri::{AppHandle, Emitter, Manager, State};
 
 struct AppState {
     lib: RwLock<Library>,
+    /** Downloads asked to stop, by file name. */
+    cancelled: Mutex<HashSet<String>>,
 }
 
 /// What the UI needs to know of a module: not its description or path.
@@ -35,6 +39,11 @@ struct Module {
     abbrev: String,
     strongs: bool,
     rtl: bool,
+    /// Its file name ("barnes.cmti").
+    file: String,
+    size: u64,
+    /// "bundled" (in the app) or "app" (downloaded, so it can be removed).
+    source: Source,
 }
 
 fn scan() -> Library {
@@ -47,7 +56,17 @@ fn modules(st: State<AppState>) -> Vec<Module> {
     let lib = st.lib.read().unwrap();
     lib.modules
         .iter()
-        .map(|m| Module { id: m.id.clone(), kind: m.kind, title: m.title.clone(), abbrev: m.abbrev.clone(), strongs: m.strongs, rtl: m.rtl })
+        .map(|m| Module {
+            id: m.id.clone(),
+            kind: m.kind,
+            title: m.title.clone(),
+            abbrev: m.abbrev.clone(),
+            strongs: m.strongs,
+            rtl: m.rtl,
+            file: m.path.file_name().map(|f| f.to_string_lossy().into_owned()).unwrap_or_default(),
+            size: m.size,
+            source: m.source,
+        })
         .collect()
 }
 
@@ -101,6 +120,94 @@ fn find_topics(st: State<AppState>, word: String) -> Vec<content::TopicHit> {
     content::find_topics(&st.lib.read().unwrap(), &word, 8)
 }
 
+// ---------- downloads (mobile/tools/modules_release.py makes what they fetch) ----------
+
+fn agent() -> ureq::Agent {
+    ureq::AgentBuilder::new().timeout_connect(std::time::Duration::from_secs(10)).timeout_read(std::time::Duration::from_secs(30)).build()
+}
+
+/// The downloads' manifest, as text.
+#[tauri::command(async)]
+fn fetch_manifest(url: String) -> Result<String, String> {
+    agent().get(&url).call().map_err(|e| e.to_string())?.into_string().map_err(|e| e.to_string())
+}
+
+#[derive(Clone, Serialize)]
+struct Progress {
+    file: String,
+    done: u64,
+    total: u64,
+}
+
+/// A name with no folder in it: the manifest's file names go into the Modules folder and nowhere else.
+fn safe_name(file: &str) -> Result<&str, String> {
+    let ok = !file.is_empty() && !file.starts_with('.') && file.chars().all(|c| c.is_ascii_alphanumeric() || "._+-".contains(c));
+    ok.then_some(file).ok_or_else(|| format!("not a module file name: {file}"))
+}
+
+/// Downloads `url` (a gzipped module), unpacking it as it comes and checking it against `sha256`,
+/// into the Modules folder; then the library is read again. Progress goes out as "download" events.
+#[tauri::command(async)]
+fn download(app: AppHandle, st: State<AppState>, url: String, file: String, sha256: String, size: u64) -> Result<(), String> {
+    use sha2::Digest;
+    let file = safe_name(&file)?.to_string();
+    st.cancelled.lock().unwrap().remove(&file);
+    let dir = library::app_dir();
+    std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
+    let part = dir.join(format!(".{file}.part"));
+    let result = (|| -> Result<(), String> {
+        let resp = agent().get(&url).call().map_err(|e| e.to_string())?;
+        let mut gz = flate2::read::GzDecoder::new(resp.into_reader());
+        let mut out = std::io::BufWriter::new(std::fs::File::create(&part).map_err(|e| e.to_string())?);
+        let mut hash = sha2::Sha256::new();
+        let mut buf = vec![0u8; 256 * 1024];
+        let (mut done, mut told) = (0u64, 0u64);
+        loop {
+            if st.cancelled.lock().unwrap().contains(&file) {
+                return Err("cancelled".into());
+            }
+            let n = gz.read(&mut buf).map_err(|e| e.to_string())?;
+            if n == 0 {
+                break;
+            }
+            hash.update(&buf[..n]);
+            out.write_all(&buf[..n]).map_err(|e| e.to_string())?;
+            done += n as u64;
+            if done - told >= 512 * 1024 {
+                told = done;
+                let _ = app.emit("download", Progress { file: file.clone(), done, total: size });
+            }
+        }
+        out.flush().map_err(|e| e.to_string())?;
+        let got: String = hash.finalize().iter().map(|b| format!("{b:02x}")).collect();
+        if !got.eq_ignore_ascii_case(&sha256) {
+            return Err("the download was damaged; try again".into());
+        }
+        std::fs::rename(&part, dir.join(&file)).map_err(|e| e.to_string())
+    })();
+    if result.is_err() {
+        let _ = std::fs::remove_file(&part);
+        return result;
+    }
+    *st.lib.write().unwrap() = scan();
+    let _ = app.emit("download", Progress { file, done: size, total: size });
+    Ok(())
+}
+
+#[tauri::command]
+fn cancel_download(st: State<AppState>, file: String) {
+    st.cancelled.lock().unwrap().insert(file);
+}
+
+/// Removes a downloaded module (never one that ships in the app), then reads the library again.
+#[tauri::command(async)]
+fn remove_module(st: State<AppState>, file: String) -> Result<(), String> {
+    let path = library::app_dir().join(safe_name(&file)?);
+    std::fs::remove_file(&path).map_err(|e| e.to_string())?;
+    *st.lib.write().unwrap() = scan();
+    Ok(())
+}
+
 /// Bibles, commentaries and dictionaries, as the desktop searches them. No full-text index yet: the
 /// bundled commentaries are small enough to scan.
 #[tauri::command(async)]
@@ -117,7 +224,7 @@ fn log(msg: String) {
 }
 
 /// Debug builds only: a state to open in, from TES_SCENE (comma-separated: study, goto, word, verse, xrefs,
-/// picker, end, bible=<id>, search, q=<words>, study=<number or word>), so a screenshot can show a sheet without anyone tapping. On the Simulator:
+/// picker, end, bible=<id>, search, q=<words>, study=<number or word>, library, modules=<url>), so a screenshot can show a sheet without anyone tapping. On the Simulator:
 /// `SIMCTL_CHILD_TES_SCENE=study xcrun simctl launch booted com.wayned.two-edged-sword`.
 #[tauri::command]
 fn scene() -> Option<String> {
@@ -136,10 +243,10 @@ pub fn run() {
             let _ = store::DATA_DIR.set(paths.app_data_dir()?);
             let _ = store::RESOURCE_DIR.set(paths.resource_dir()?);
             let _ = std::fs::create_dir_all(library::app_dir());
-            app.manage(AppState { lib: RwLock::new(scan()) });
+            app.manage(AppState { lib: RwLock::new(scan()), cancelled: Mutex::new(HashSet::new()) });
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![log, scene, modules, chapter, chapter_sizes, commentary, coverage, article, strongs_for_word, search, strongs_by_book, strongs_verses, translit_search, find_topics])
+        .invoke_handler(tauri::generate_handler![log, scene, modules, chapter, chapter_sizes, commentary, coverage, article, strongs_for_word, search, strongs_by_book, strongs_verses, translit_search, find_topics, fetch_manifest, download, cancel_download, remove_module])
         .run(tauri::generate_context!())
         .expect("error while running the app");
 }

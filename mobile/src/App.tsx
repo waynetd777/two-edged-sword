@@ -7,6 +7,7 @@ import { Icon } from "./icons";
 import { Read } from "./Read";
 import { Jump, Search } from "./Search";
 import { WordStudy } from "./WordStudy";
+import { Library } from "./Library";
 import { history, Tab } from "./history";
 
 
@@ -37,7 +38,7 @@ export function App() {
   // The module list from last time, so Read draws before the library is asked.
   const [modules, setModules] = useState<Module[]>(() => saved("modules", []));
 
-  useEffect(() => {
+  const loadModules = () =>
     api
       .modules()
       .then((m) => {
@@ -45,8 +46,11 @@ export function App() {
         save("modules", m);
       })
       .catch(() => {});
+  useEffect(() => {
+    loadModules();
     scene.then((sc) => {
       if (sc.includes("search")) setTab("search");
+      if (sc.includes("library")) setTab("library");
       const w = sc.find((x) => x.startsWith("study="));
       if (w) {
         setWord(w.slice(6));
@@ -76,7 +80,10 @@ export function App() {
       <div className="screen" hidden={tab !== "words"}>
         <WordStudy modules={modules} target={word} onTarget={study} onJump={open} />
       </div>
-      {(tab === "library" || tab === "more") && (
+      <div className="screen" hidden={tab !== "library"}>
+        <Library modules={modules} onChanged={loadModules} />
+      </div>
+      {tab === "more" && (
         <div className="soon">
           <h1>{TABS.find((t) => t.id === tab)!.label}</h1>
           <p>Coming next.</p>

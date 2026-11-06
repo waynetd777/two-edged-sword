@@ -30,4 +30,12 @@ icons:     ## The app icons from src-tauri/icons/source (python3 tools/icons.py 
 	rm -rf target/android-icons
 	python3 tools/icons.py finish
 
-.PHONY: assets icons ios-sim shot
+modules-release:  ## The downloads: gzipped modules and manifest.json in target/modules-release
+	python3 tools/modules_release.py
+
+# Uploads the downloads to the GitHub release tagged `modules` (made the first time), replacing what's there.
+modules-publish: modules-release
+	gh release view modules >/dev/null 2>&1 || gh release create modules --title "Modules for the phone app" --notes "Public-domain modules for Two-edged Sword on iPhone and Android, downloaded from the app's Library." --latest=false
+	gh release upload modules target/modules-release/* --clobber
+
+.PHONY: assets icons ios-sim shot modules-release modules-publish
