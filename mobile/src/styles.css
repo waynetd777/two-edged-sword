@@ -1431,3 +1431,17 @@ input[type="range"] {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.round.listen.cmpbar {
+  color: var(--muted);
+}
+.round.listen.cmpbar.on {
+  color: var(--accent);
+  background: var(--accentsoft);
+  border-color: var(--ring);
+}
+/* The speaker: plain until it's reading, then blue (and a tap stops it). */
+.ibtn.speak.on {
+  color: var(--accent);
+  background: none;
+  opacity: 1;
+}

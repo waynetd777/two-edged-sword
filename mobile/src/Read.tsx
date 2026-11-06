@@ -547,9 +547,12 @@ export function Read({
         {doc ? (
           <>
             <button
-              className="ibtn"
-              aria-label="Listen to this chapter"
-              onClick={() => player.playDoc({ module: doc.module, chapter: doc.chapter, title: docMod?.title ?? doc.module })}
+              className={`ibtn speak ${pl.on && pl.doc ? "on" : ""}`}
+              aria-label={pl.on && pl.doc ? "Stop reading aloud" : "Listen to this chapter"}
+              aria-pressed={!!(pl.on && pl.doc)}
+              onClick={() =>
+                pl.on && pl.doc ? player.stop() : player.playDoc({ module: doc.module, chapter: doc.chapter, title: docMod?.title ?? doc.module })
+              }
             >
               <Icon name="speaker" size={22} />
             </button>
@@ -560,16 +563,17 @@ export function Read({
         ) : (
         <>
         <button
-          className={`ibtn ${comparing ? "on" : ""}`}
-          aria-label={comparing ? "Back to the chapter" : "Compare translations"}
-          aria-pressed={comparing}
-          onClick={() => {
-            setWord(null);
-            history.push({ comparing: !comparing });
-            setComparing(!comparing);
-          }}
+          className={`ibtn speak ${pl.on && !pl.doc ? "on" : ""}`}
+          aria-label={pl.on && !pl.doc ? "Stop reading aloud" : `Listen to ${fmtRef(loc)} from verse ${sel}`}
+          aria-pressed={pl.on && !pl.doc}
+          onClick={() =>
+            pl.on && !pl.doc
+              ? player.stop()
+              : player.play(bible, loc.book, loc.chapter, sel, versesOf === `${loc.book}.${loc.chapter}` ? verses : undefined)
+          }
         >
-          <Icon name="compare" size={22} />
+          {/* Listen is a speaker in the top bar, here and in a book, as the desktop's. */}
+          <Icon name="speaker" size={22} />
         </button>
         {comparing ? (
           <>
@@ -777,12 +781,16 @@ export function Read({
         <Icon name="bookmark" size={20} fill={marked(sel) ? "currentColor" : undefined} />
       </button>
       <button
-        className="round listen"
-        aria-label={`Listen to ${fmtRef(loc)} from verse ${sel}`}
-        onClick={() => player.play(bible, loc.book, loc.chapter, sel, versesOf === `${loc.book}.${loc.chapter}` ? verses : undefined)}
+        className={`round listen cmpbar ${comparing ? "on" : ""}`}
+        aria-label={comparing ? "Back to the chapter" : "Compare translations"}
+        aria-pressed={comparing}
+        onClick={() => {
+          setWord(null);
+          history.push({ comparing: !comparing });
+          setComparing(!comparing);
+        }}
       >
-        {/* A speaker, as the desktop's Listen; play and pause belong to the player once it's reading. */}
-        <Icon name="speaker" size={22} />
+        <Icon name="compare" size={20} />
       </button>
       </div>
       )}
