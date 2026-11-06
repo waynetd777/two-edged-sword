@@ -163,9 +163,9 @@ export const player = {
     call("speech_resume").catch(() => {});
   },
   stop,
-  /** The next speed: 0.75×, 1×, 1.25×, 1.5×, 2×; it takes effect from the next verse. */
+  /** The next speed: 0.75×, 1×, 1.1×, 1.25×, 1.5×, 2×; it takes effect from the next verse. */
   faster() {
-    const all = [0.75, 1, 1.25, 1.5, 2];
+    const all = [0.75, 1, 1.1, 1.25, 1.5, 2];
     const speed = all[(all.indexOf(state.speed) + 1) % all.length] ?? 1;
     save("listenSpeed", speed);
     set({ speed });

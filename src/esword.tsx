@@ -351,6 +351,14 @@ const BLOCK = new Set(["p", "table", "div", "h1", "h2", "h3", "h4", "h5", "h6", 
  * stand alone; loose text between them is split at blank lines (two <br>s). A single wrapping
  * element is looked through.
  */
+/** A chapter's first paragraph that is only the chapter's own title ("1. The Prophetic Word"): the reader
+ *  shows the title above it and Listen announces it, so it is neither shown nor read again. */
+export function isTitlePara(seg: string | undefined, title: string): boolean {
+  if (!seg) return false;
+  const norm = (t: string) => t.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+  return !!norm(title) && norm(plainText(seg)) === norm(title);
+}
+
 export function docSegments(html: string): string[] {
   let root: Element = parse(html);
   const meaningful = (n: Node) => n.nodeType === Node.ELEMENT_NODE || (n.textContent || "").trim() !== "";

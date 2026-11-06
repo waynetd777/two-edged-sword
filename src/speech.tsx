@@ -12,7 +12,7 @@ import { api, TtsEvent, Verse, Voice } from "./api";
 import { useKeepAwake } from "./awake";
 import { book, stepChapter } from "./bible";
 import { BLOCKS, escHtml } from "./dom";
-import { docSegments, plainText } from "./esword";
+import { docSegments, isTitlePara, plainText } from "./esword";
 import { mdToHtml } from "./md";
 import { bibleSizes } from "./sizes";
 import { useApp } from "./state";
@@ -247,11 +247,13 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
         const doc = { module, title: next, kind };
         announce.current = next;
         st.current = { ...st.current, doc, paused: false };
-        setState((p) => ({ ...p, doc, paused: false, verse: 1, count: segs.length, char: -1 }));
+        // A first paragraph that's only the chapter's title isn't read after the announcement.
+        const first = segs.length > 1 && isTitlePara(segs[0], next) ? 1 : 0;
+        setState((p) => ({ ...p, doc, paused: false, verse: first + 1, count: segs.length, char: -1 }));
         // Turn the page too, if the book is open.
         if (appRef.current.doc?.module === module && appRef.current.doc.title === title) appRef.current.openDoc(module, next, kind);
         window.setTimeout(() => {
-          if (g === gen.current) speakFrom(0);
+          if (g === gen.current) speakFrom(first);
         }, wait);
       })
       .catch(() => {
@@ -415,7 +417,8 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
               ? `${appRef.current.mod("devotional", module)?.abbrev || module}, ${title}`
               : title;
       verses.current = paragraphs.map((text, k) => ({ v: k + 1, text }));
-      const i = Math.max(0, Math.min(from, paragraphs.length - 1));
+      // From the start, a first paragraph that's only the chapter's title isn't read after the announcement.
+      const i = from === 0 && paragraphs.length > 1 && isTitlePara(paragraphs[0], title) ? 1 : Math.max(0, Math.min(from, paragraphs.length - 1));
       const next = {
         ...st.current,
         on: true,

@@ -3,7 +3,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Ref } from "../../src/bible";
-import { docSegments, plainText, renderHtml, wordRangeAt } from "../../src/esword";
+import { docSegments, isTitlePara, renderHtml, wordRangeAt } from "../../src/esword";
 import { api, Article } from "./api";
 import { useBookmarks } from "./bookmarks";
 import { Icon } from "./icons";
@@ -38,11 +38,10 @@ export const docHtml = (module: string, chapter: string): Promise<string | null>
   isDevotional(module) ? api.devotion(module, chapter) : api.article("reference", module, chapter).then((a) => a?.html ?? null);
 
 /** A chapter's paragraphs as they're shown and read: the first left out when it's only the chapter's own
- *  title ("1. The Prophetic Word"), which the page shows above it and Listen announces. */
+ *  title (esword.tsx isTitlePara), which the page shows above it and Listen announces. */
 export function docParas(html: string, chapter: string): string[] {
   const segs = docSegments(html);
-  const norm = (t: string) => t.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
-  return segs.length > 1 && norm(plainText(segs[0])) === norm(chapter) ? segs.slice(1) : segs;
+  return segs.length > 1 && isTitlePara(segs[0], chapter) ? segs.slice(1) : segs;
 }
 
 /** A chapter of a book (Josephus, Larkin…) in the reading page, its pictures opening full screen. */

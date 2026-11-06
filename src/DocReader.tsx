@@ -4,7 +4,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { api, Article, JournalEntry } from "./api";
 import { fmtRef } from "./bible";
-import { docSegments, plainText, renderHtml, wordRangeAt } from "./esword";
+import { docSegments, isTitlePara, plainText, renderHtml, wordRangeAt } from "./esword";
 import { ImageViewer } from "./ImageViewer";
 import { imagePlaces, Place, PlacePopover } from "./MapPlaces";
 import { SongsButton } from "./ChapterSongs";
@@ -661,6 +661,9 @@ export function DocReader({ focus, setFocus, openPalette }: { focus: boolean; se
                   style={{ fontSize: focus ? "calc(var(--read-size) + 2px)" : "var(--read-size)", lineHeight: focus ? 1.85 : 1.7 }}
                 >
                   {segs.map((h, k) => {
+                    // A first paragraph that's only the chapter's title, shown just above: not shown again.
+                    // It keeps its number, so the paragraphs' numbers (bookmarks, journal references) don't move.
+                    if (k === 0 && segs.length > 1 && isTitlePara(h, doc.title)) return null;
                     // Laid out as a verse row: number, text (highlighted line by line), and markers.
                     const n = k + 1;
                     const isSel = !!sel && n >= sel.from && n <= sel.to;
