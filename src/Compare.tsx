@@ -8,9 +8,10 @@ import { apocryphaName, book, BookSizes, fmtRef, isApocrypha, Ref, stepChapter }
 import { plainText, Token, tokenize } from "./esword";
 import { Icon } from "./icons";
 import { VerseText, WordPick } from "./Read";
+import { useListenKey, usePlayer } from "./speech";
 import { BibleSelect, RefButton, SearchField, Topbar } from "./Shell";
 import { useApp } from "./state";
-import { ApoPill, bibleSizes, Popover, RefPicker, SearchList, SideNav, Switch } from "./ui";
+import { ApoPill, bibleSizes, Popover, RefPicker, scrollToThird, SearchList, SideNav, Switch } from "./ui";
 import { WordLookup } from "./WordLookup";
 import { useAssistant } from "./assistant";
 
@@ -46,7 +47,10 @@ function Marked({
   showNums,
   onWord,
   activeWi,
+  speakingChar,
 }: {
+  /** Reading aloud: the character being read in this verse, to mark its word as the reader does. */
+  speakingChar?: number;
   tokens: Token[];
   diff: Set<number> | null;
   red: boolean;
@@ -57,7 +61,7 @@ function Marked({
   // Numbers are drawn here, without their G/H, whether or not the verse has differences, so every
   // verse in a column looks the same (VerseText writes them in full).
   if ((!diff || !diff.size) && !showNums)
-    return <VerseText tokens={tokens} red={red} showNums={showNums} onWord={onWord} activeWi={activeWi} />;
+    return <VerseText tokens={tokens} red={red} showNums={showNums} onWord={onWord} activeWi={activeWi} speakingChar={speakingChar} />;
   return (
     <>
       {tokens.map((t, i) => {
@@ -67,11 +71,12 @@ function Marked({
               {t.italic ? <i className="added">{t.text}</i> : t.text}
             </span>
           );
-        const d = !!diff?.has(t.wi);
+        const speaking = speakingChar !== undefined && speakingChar >= t.at && speakingChar < t.at + t.text.length;
+        const d = !!diff?.has(t.wi) && !speaking;
         return (
           <span key={i}>
             <span
-              className={`w ${t.red && red ? "red" : ""} ${activeWi === t.wi ? "on" : ""}`}
+              className={`w ${t.red && red ? "red" : ""} ${activeWi === t.wi ? "on" : ""} ${speaking ? "speaking" : ""}`}
               style={d ? { background: "var(--hl-gold)", borderRadius: 3, padding: "0 2px" } : undefined}
               onClick={(e) => {
                 e.stopPropagation();
@@ -115,6 +120,27 @@ export function CompareScreen({ openPalette }: { openPalette: () => void }) {
   const [picker, setPicker] = useState<DOMRect | null>(null);
   const [sel, setSel] = useState<number | null>(loc.verse ?? null);
   const scroller = useRef<HTMLDivElement>(null);
+  // Reading aloud, as in the reader: the reading Bible's chapter from the selected verse, the verse being
+  // read followed, its word marked in that Bible's column (the KJV's for the KJV+, the same text), and on
+  // into the next chapter.
+  const player = usePlayer();
+  const ps = player.state;
+  const readBible = settings.bible;
+  const reading = ps.on && !ps.doc && ps.bible === readBible && ps.book === loc.book && ps.chapter === loc.chapter;
+  const listen = (from?: number) => player.play(readBible, loc.book, loc.chapter, from ?? sel ?? undefined);
+  useListenKey(() => listen());
+  useEffect(() => {
+    if (!reading) return;
+    setSel(ps.verse);
+    if (!ps.paused) scrollToThird(scroller.current?.querySelector(`[data-v="${ps.verse}"]`));
+  }, [reading, ps.verse]); // eslint-disable-line react-hooks/exhaustive-deps
+  const lastPlayed = useRef<[number, number] | null>(null);
+  useEffect(() => {
+    const prev = lastPlayed.current;
+    lastPlayed.current = [ps.book, ps.chapter];
+    if (ps.on && !ps.doc && ps.bible === readBible && (ps.book !== loc.book || ps.chapter !== loc.chapter) && prev?.[0] === loc.book && prev[1] === loc.chapter)
+      app.open({ book: ps.book, chapter: ps.chapter });
+  }, [ps.book, ps.chapter]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     let dead = false;
@@ -185,7 +211,10 @@ export function CompareScreen({ openPalette }: { openPalette: () => void }) {
     nc = stepChapter(loc.book, loc.chapter, 1, sizes);
   const go = (d: 1 | -1) => {
     const n = d > 0 ? nc : pc;
-    if (n) app.open({ book: n[0], chapter: n[1] });
+    if (!n) return;
+    app.open({ book: n[0], chapter: n[1] });
+    // Turning the page while it reads reads the new one, from the top.
+    if (reading) player.play(readBible, n[0], n[1], 1);
   };
   // ← and → turn the page, as in the reader.
   const goKey = useRef(go);
@@ -240,6 +269,15 @@ export function CompareScreen({ openPalette }: { openPalette: () => void }) {
           <Switch on={nums} onChange={setNums}>
             Strong's numbers
           </Switch>
+          <button
+            type="button"
+            className={`ibtn ${reading ? "on" : ""}`}
+            aria-label={reading ? (ps.paused ? "Resume reading aloud" : "Pause reading aloud") : `Listen to ${book(loc.book).name} ${loc.chapter} in ${app.mod("bible", readBible)?.abbrev ?? readBible}`}
+            title={reading ? "Pause or resume reading aloud" : `Listen in ${app.mod("bible", readBible)?.abbrev ?? readBible}${sel ? `, from verse ${sel}` : ""}`}
+            onClick={() => (reading ? player.toggle() : listen())}
+          >
+            <Icon name="speaker" />
+          </button>
           {canAsk && (
             <button className={`btn ${ask ? "on" : ""}`} type="button" onClick={() => setAsk(!ask)}>
               <Icon name="chat" />
@@ -369,6 +407,9 @@ export function CompareScreen({ openPalette }: { openPalette: () => void }) {
                         red={settings.redLetters}
                         showNums={nums && !!app.mod("bible", c)?.strongs}
                         activeWi={word?.bible === c && word.verse === v ? word.token.wi : undefined}
+                        speakingChar={
+                          reading && ps.verse === v && settings.highlightWords && (c === readBible || `${c}+` === readBible) ? ps.char : undefined
+                        }
                         onWord={(tok, el) => setWord({ token: tok, verse: v, rect: el.getBoundingClientRect(), bible: c })}
                       />
                       {same && (
