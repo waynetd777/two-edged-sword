@@ -245,6 +245,12 @@ export function Read({
         setGoing(true);
       }
       if (sc.includes("compare")) setComparing(true);
+      // Debug: hop to the next chapter a few seconds into reading, as a swipe would.
+      if (sc.includes("hop"))
+        setTimeout(() => {
+          const l = saved("loc", { book: 62, chapter: 1 });
+          visit({ book: l.book, chapter: l.chapter + 1 }, 1);
+        }, 7000);
       if (sc.includes("listendoc"))
         setTimeout(() => {
           const d = saved<{ module: string; chapter: string } | null>("doc", null);
@@ -429,35 +435,43 @@ export function Read({
   };
 
   const pick = (v: number) => setSel(v);
-  // Listening: the reader follows, into the next chapter, with the verse being read a third of the way down.
-  // ...and in a book, on to its next chapter, with the paragraph being read a third of the way down.
+  // ---- Listening ----
+  // The player moves on by itself (the next chapter, a book's next chapter): the reader follows. `following`
+  // tells that move from one you make yourself, which starts reading the new page from the top.
+  const following = useRef(false);
+  const where = doc ? `doc:${doc.module}|${doc.chapter}` : `bible:${bible}|${loc.book}.${loc.chapter}`;
+  const reading = pl.on ? (pl.doc ? `doc:${pl.doc.module}|${pl.doc.chapter}` : `bible:${pl.bible}|${pl.book}.${pl.chapter}`) : "";
   useEffect(() => {
-    if (!pl.on || !pl.doc || !doc || pl.doc.module !== doc.module) return;
-    if (pl.doc.chapter !== doc.chapter) {
-      setDoc({ module: pl.doc.module, chapter: pl.doc.chapter });
-      return;
-    }
-    const el = page.current?.querySelector(`[data-para="${pl.verse}"]`) as HTMLElement | null;
-    const pg = page.current;
-    if (el && pg) {
-      const top = el.getBoundingClientRect().top - pg.getBoundingClientRect().top + pg.scrollTop;
-      pg.scrollTo({ top: Math.max(0, top - pg.clientHeight / 3), behavior: "smooth" });
-    }
-  }, [pl.on, pl.doc?.chapter, pl.verse]); // eslint-disable-line react-hooks/exhaustive-deps
-  useEffect(() => {
-    if (!pl.on || pl.doc || doc || comparing || pl.bible !== bible) return;
-    if (pl.book !== loc.book || pl.chapter !== loc.chapter) {
+    if (!pl.on || reading === where) return;
+    // The player went on: follow it, if it's still reading what this page was reading.
+    following.current = true;
+    if (pl.doc) setDoc({ module: pl.doc.module, chapter: pl.doc.chapter });
+    else {
+      setDoc(null);
       setLoc({ book: pl.book, chapter: pl.chapter });
+    }
+  }, [reading]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (following.current) {
+      following.current = false;
       return;
     }
-    setSel(pl.verse);
-    const el = page.current?.querySelector(`[data-v="${pl.verse}"]`) as HTMLElement | null;
+    // You moved while it was reading: carry on from the top of the new page.
+    if (!pl.on || reading === where) return;
+    if (doc) player.playDoc({ module: doc.module, chapter: doc.chapter, title: docMod?.title ?? doc.module });
+    else player.play(bible, loc.book, loc.chapter, 1, versesOf === `${loc.book}.${loc.chapter}` ? verses : undefined);
+  }, [where]); // eslint-disable-line react-hooks/exhaustive-deps
+  // The verse (or a book's paragraph) being read, a third of the way down.
+  useEffect(() => {
+    if (!pl.on || reading !== where || comparing) return;
+    if (!pl.doc) setSel(pl.verse);
+    const el = page.current?.querySelector(pl.doc ? `[data-para="${pl.verse}"]` : `[data-v="${pl.verse}"]`) as HTMLElement | null;
     const pg = page.current;
     if (el && pg) {
       const top = el.getBoundingClientRect().top - pg.getBoundingClientRect().top + pg.scrollTop;
       pg.scrollTo({ top: Math.max(0, top - pg.clientHeight / 3), behavior: "smooth" });
     }
-  }, [pl.on, pl.book, pl.chapter, pl.verse, versesOf]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [pl.on, pl.verse, reading, versesOf]); // eslint-disable-line react-hooks/exhaustive-deps
   /** Compare's next or previous verse, on into the next or previous chapter. */
   const stepVerse = (d: 1 | -1) => {
     setWord(null);
