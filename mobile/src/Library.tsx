@@ -5,6 +5,7 @@ import { listen } from "@tauri-apps/api/event";
 import { useEffect, useState } from "react";
 import { api, Kind, Module, Offer, save, saved, scene } from "./api";
 import { Icon } from "./icons";
+import { ImageViewer } from "./ImageViewer";
 import { NavButtons } from "./NavButtons";
 import { renderHtml } from "../../src/esword";
 
@@ -87,6 +88,8 @@ export function Library({
     </button>
   );
   const [toStart, setGet] = useState<Offer | null>(null);
+  /** A picture from an About (its cover), open in the viewer. */
+  const [image, setImage] = useState<string | null>(null);
 
   useEffect(() => save("libraryGroup", group), [group]);
   useEffect(() => {
@@ -94,6 +97,8 @@ export function Library({
     scene.then((sc) => {
       // Debug: about opens the first module's About on the phone.
       // aboutget: the About of the last module to download, with its cover fetched.
+      // aboutcover: then its cover tapped, open in the viewer.
+      if (sc.includes("aboutcover")) setTimeout(() => document.querySelector<HTMLImageElement>(".prose.about img")?.click(), 3500);
       if (sc.includes("aboutget")) setTimeout(() => [...document.querySelectorAll<HTMLButtonElement>(".infobtn")].pop()?.click(), 4000);
       else if (sc.includes("about")) setTimeout(() => document.querySelector<HTMLButtonElement>(".infobtn")?.click(), 1500);
       const grp = sc.find((x) => x.startsWith("group="))?.slice(6) as Group | undefined;
@@ -284,7 +289,7 @@ export function Library({
               {about.html === null ? (
                 <p className="empty">Opening…</p>
               ) : about.html.trim() ? (
-                <div className="prose about">{renderHtml(about.html)}</div>
+                <div className="prose about">{renderHtml(about.html, { onImage: setImage })}</div>
               ) : (
                 <p className="empty">It has no description.</p>
               )}
@@ -311,6 +316,7 @@ export function Library({
           </section>
         </>
       )}
+      {image && <ImageViewer src={image} onClose={() => setImage(null)} />}
     </>
   );
 }

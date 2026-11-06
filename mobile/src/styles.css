@@ -1543,3 +1543,19 @@ input[type="range"] {
   margin: 0 0 12px;
   border-radius: 6px;
 }
+/* As on the desktop: justified, and where there's room the cover sits at the top right with the text
+   running round it. */
+.prose.about {
+  text-align: justify;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+}
+@media (min-width: 380px) {
+  .prose.about > p:first-child img {
+    float: right;
+    width: 104px;
+    margin: 4px 0 10px 16px;
+    border-radius: 4px;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.35);
+  }
+}
