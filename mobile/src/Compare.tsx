@@ -66,6 +66,7 @@ export function CompareView({
   active,
   onWord,
   onEdit,
+  said,
 }: {
   bibles: Module[];
   ids: string[];
@@ -77,6 +78,8 @@ export function CompareView({
   active?: { bible: string; i: number };
   onWord: (bible: string, i: number) => void;
   onEdit: () => void;
+  /** Reading aloud: the Bible being read and the word in the verse, marked as on the other reading pages. */
+  said?: { bible: string; at: number };
 }) {
   const base = ids.includes("kjv") ? "kjv" : ids[0];
   const baseWords = words(tokensOf(base) ?? []);
@@ -100,6 +103,8 @@ export function CompareView({
           const m = bibles.find((b) => b.id === id);
           const ts = tokensOf(id);
           const d = diff && id !== base && ts ? diffWords(baseWords, words(ts)) : null;
+          // The card of the Bible being read (the KJV's for the KJV+, the same text) marks the word.
+          const reading = said && (said.bible === id || said.bible === `${id}+`) ? said.at : undefined;
           return (
             <div key={id} className="card">
               <p className={`abbr ${id === base ? "base" : ""}`}>{m?.abbrev || id.toUpperCase()}</p>
@@ -112,7 +117,10 @@ export function CompareView({
                   {ts.map((t, i) => {
                     if (t.note) return null;
                     if (!t.word) return <span key={i}>{t.italic ? <i>{t.text}</i> : t.text}</span>;
-                    const cls = [d?.has(t.wi) ? "diff" : "", active?.bible === id && active.i === i ? "w on" : ""].join(" ").trim();
+                    const now = reading !== undefined && reading >= t.at && reading < t.at + t.text.length;
+                    const cls = [d?.has(t.wi) && !now ? "diff" : "", active?.bible === id && active.i === i ? "w on" : "", now ? "said" : ""]
+                      .join(" ")
+                      .trim();
                     return (
                       <span key={i} className={cls || undefined} onClick={() => onWord(id, i)}>
                         {t.italic ? <i>{t.text}</i> : t.text}

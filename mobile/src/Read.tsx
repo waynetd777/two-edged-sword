@@ -247,6 +247,8 @@ export function Read({
         setGoing(true);
       }
       if (sc.includes("compare")) setComparing(true);
+      // Debug: Compare's › a few seconds into reading.
+      if (sc.includes("stepnext")) setTimeout(() => document.querySelector<HTMLButtonElement>('[aria-label="Next verse"]')?.click(), 7000);
       // Debug: hop to the next chapter a few seconds into reading, as a swipe would.
       if (sc.includes("hop"))
         setTimeout(() => {
@@ -465,8 +467,10 @@ export function Read({
   }, [where]); // eslint-disable-line react-hooks/exhaustive-deps
   // The verse (or a book's paragraph) being read, a third of the way down.
   useEffect(() => {
-    if (!pl.on || reading !== where || comparing) return;
+    if (!pl.on || reading !== where) return;
     if (!pl.doc) setSel(pl.verse);
+    // Compare shows the verse being read; there's no page to scroll.
+    if (comparing) return;
     const el = page.current?.querySelector(pl.doc ? `[data-para="${pl.verse}"]` : `[data-v="${pl.verse}"]`) as HTMLElement | null;
     const pg = page.current;
     if (el && pg) {
@@ -477,10 +481,21 @@ export function Read({
   /** Compare's next or previous verse, on into the next or previous chapter. */
   const stepVerse = (d: 1 | -1) => {
     setWord(null);
-    if (d > 0 && sel < verses.length) return setSel(sel + 1);
-    if (d < 0 && sel > 1) return setSel(sel - 1);
+    // Reading aloud: it moves with you, from the verse you step to.
+    const reading = pl.on && !pl.doc && playingHere;
+    if ((d > 0 && sel < verses.length) || (d < 0 && sel > 1)) {
+      const v = sel + d;
+      setSel(v);
+      if (reading) player.play(bible, loc.book, loc.chapter, v, verses);
+      return;
+    }
     const to = d > 0 ? next : prev;
-    if (to) visit(to, d > 0 ? 1 : (counts.get(`${to.book}.${to.chapter}`) ?? 1));
+    if (!to) return;
+    const v = d > 0 ? 1 : (counts.get(`${to.book}.${to.chapter}`) ?? 1);
+    // Not "you moved, so read the new page from the top": from this verse.
+    if (reading) following.current = true;
+    visit(to, v);
+    if (reading) player.play(bible, to.book, to.chapter, v);
   };
   useEffect(() => {
     // The word scene: the selected verse's first tagged word with a meaning worth showing.
@@ -644,6 +659,7 @@ export function Read({
               onDiff={setDiff}
               active={word?.bible ? { bible: word.bible, i: word.i } : undefined}
               onWord={(id, i) => setWord({ v: sel, i, bible: id })}
+              said={playingHere && pl.at >= 0 ? { bible: pl.bible, at: pl.at } : undefined}
               onEdit={() => setEditing(true)}
             />
           ) : (
