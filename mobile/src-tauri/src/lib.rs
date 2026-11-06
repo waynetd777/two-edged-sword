@@ -267,6 +267,11 @@ fn waiting_dirs(inbox: Option<String>) -> Vec<(std::path::PathBuf, bool)> {
     if let Some(docs) = store::DOCS_DIR.get() {
         dirs.push((docs.join("Inbox"), true));
         dirs.push((docs.clone(), false));
+        // Where the Files picker copies what's chosen (tmp/<bundle id>-Inbox), should the plugin not have
+        // moved it on.
+        if let Ok(rd) = std::fs::read_dir(std::env::temp_dir()) {
+            dirs.extend(rd.flatten().map(|e| e.path()).filter(|p| p.is_dir() && p.to_string_lossy().ends_with("-Inbox")).map(|p| (p, true)));
+        }
     }
     dirs
 }

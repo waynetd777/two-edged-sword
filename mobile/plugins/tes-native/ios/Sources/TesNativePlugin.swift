@@ -38,7 +38,15 @@ class SpeakArgs: Decodable {
 private var allowed: UIInterfaceOrientationMask = .portrait
 private var hooked = Set<ObjectIdentifier>()
 
-class TesNativePlugin: Plugin, AVSpeechSynthesizerDelegate, UIDocumentPickerDelegate {
+/// The Files picker's answer, passed on: the picker's delegate has to be an object of its own (as Tauri's
+/// dialog plugin has it); with the plugin itself as its delegate, iOS never called it.
+class PickerDelegate: NSObject, UIDocumentPickerDelegate {
+  var done: ([URL]) -> Void = { _ in }
+  func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) { done(urls) }
+  func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) { done([]) }
+}
+
+class TesNativePlugin: Plugin, AVSpeechSynthesizerDelegate {
   private weak var webview: WKWebView?
   private let synth = AVSpeechSynthesizer()
   /// A word said on its own (the word sheet's speaker), apart from Listen's reading.
@@ -122,38 +130,29 @@ class TesNativePlugin: Plugin, AVSpeechSynthesizerDelegate, UIDocumentPickerDele
   /// The Library's Add from Files: the Files picker, for modules only, more than one at a time. What's
   /// chosen is copied to Documents/Inbox, where the app takes it in (lib.rs import_waiting); the call
   /// answers with how many were copied (0 if the picker was closed).
-  private var picking: Invoke?
+  private let pickerDelegate = PickerDelegate()
 
   @objc public func pickModules(_ invoke: Invoke) {
     DispatchQueue.main.async {
       let types = ["bbli", "cmti", "dcti", "lexi", "refi", "devi"].compactMap { UTType(filenameExtension: $0, conformingTo: .data) }
       let picker = UIDocumentPickerViewController(forOpeningContentTypes: types, asCopy: true)
       picker.allowsMultipleSelection = true
-      picker.delegate = self
       guard let vc = self.manager.viewController else { return invoke.reject("no window") }
-      self.picking?.resolve(["count": 0])
-      self.picking = invoke
+      self.pickerDelegate.done = { urls in
+        let fm = FileManager.default
+        let inbox = fm.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent("Inbox")
+        try? fm.createDirectory(at: inbox, withIntermediateDirectories: true)
+        var n = 0
+        for url in urls {
+          let to = inbox.appendingPathComponent(url.lastPathComponent)
+          try? fm.removeItem(at: to)
+          if (try? fm.moveItem(at: url, to: to)) != nil || (try? fm.copyItem(at: url, to: to)) != nil { n += 1 }
+        }
+        invoke.resolve(["count": n])
+      }
+      picker.delegate = self.pickerDelegate
       vc.present(picker, animated: true)
     }
-  }
-
-  public func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
-    let fm = FileManager.default
-    let inbox = fm.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent("Inbox")
-    try? fm.createDirectory(at: inbox, withIntermediateDirectories: true)
-    var n = 0
-    for url in urls {
-      let to = inbox.appendingPathComponent(url.lastPathComponent)
-      try? fm.removeItem(at: to)
-      if (try? fm.moveItem(at: url, to: to)) != nil || (try? fm.copyItem(at: url, to: to)) != nil { n += 1 }
-    }
-    picking?.resolve(["count": n])
-    picking = nil
-  }
-
-  public func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
-    picking?.resolve(["count": 0])
-    picking = nil
   }
 
   @objc public func tap(_ invoke: Invoke) {
