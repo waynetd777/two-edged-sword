@@ -16,6 +16,8 @@ export interface Module {
   size: number;
   /** "bundled": in the app; "app": downloaded. */
   source: "bundled" | "app";
+  /** "Maps" for a book of maps. */
+  features: string[];
 }
 
 /** One module the downloads offer (mobile/tools/modules_release.py). */

@@ -72,6 +72,7 @@ export function App() {
           modules={modules}
           jump={jump}
           onWordStudy={study}
+          onModulesChanged={loadModules}
           onLibrary={() => {
             history.push({ tab: "library" });
             setTab("library");

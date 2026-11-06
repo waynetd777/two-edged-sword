@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import { Fragment, TouchEvent, useEffect, useMemo, useRef, useState } from "react";
-import { book, BookSizes, fmtRef, Ref, stepChapter } from "../../src/bible";
+import { book, BookSizes, fmtRef, parseRef, Ref, stepChapter } from "../../src/bible";
 import { alignStrongs, tokenize, Token } from "../../src/esword";
 import { api, Module, save, saved, scene, Verse } from "./api";
 import { Icon } from "./icons";
@@ -10,6 +10,7 @@ import { COMPARE_DEFAULT, CompareEdit, CompareView, useChapters } from "./Compar
 import { bookTitles, DocView } from "./DocView";
 import { GoTo } from "./GoTo";
 import { ImageViewer } from "./ImageViewer";
+import type { Spot } from "./MapsTab";
 import { history } from "./history";
 import { NavButtons } from "./NavButtons";
 import { WordSheet } from "./WordSheet";
@@ -130,8 +131,10 @@ export function Read({
   jump,
   onWordStudy,
   onLibrary,
+  onModulesChanged,
 }: {
   onLibrary: () => void;
+  onModulesChanged: () => void;
   modules: Module[];
   jump: (Jump & { n: number }) | null;
   onWordStudy: (num: string) => void;
@@ -155,7 +158,7 @@ export function Read({
   const [wideScene, setWideScene] = useState(false);
   /** A book open instead of the Bible. */
   const [doc, setDoc] = useState<{ module: string; chapter: string } | null>(() => saved("doc", null));
-  const [image, setImage] = useState<string | null>(null);
+  const [image, setImage] = useState<{ src: string; ring?: Spot[] } | null>(null);
   const [docList, setDocList] = useState<string[]>([]);
   const [goBooks, setGoBooks] = useState(false);
   const bookMods = modules.filter((m) => m.kind === "reference");
@@ -223,6 +226,13 @@ export function Read({
       if (sc.includes("goto")) setGoing(true);
       if (sc.includes("compare")) setComparing(true);
       if (sc.includes("wide")) setWideScene(true);
+      const r = sc.find((x) => x.startsWith("at="));
+      const ref = r ? parseRef(r.slice(3)) : undefined;
+      if (ref) {
+        setDoc(null);
+        setLoc({ book: ref.book, chapter: ref.chapter });
+        setSel(ref.verse ?? 1);
+      }
       const d = sc.find((x) => x.startsWith("doc="))?.slice(4);
       if (d) {
         const [m, c] = d.split("|");
@@ -232,7 +242,7 @@ export function Read({
       if (sc.includes("image"))
         setTimeout(() => {
           const img = page.current?.querySelector("img.zoomable") as HTMLImageElement | null;
-          if (img) setImage(img.src);
+          if (img) setImage({ src: img.src });
         }, 2500);
       if (sc.includes("word")) setWordScene(true);
       const b = sc.find((x) => x.startsWith("bible="));
@@ -530,7 +540,7 @@ export function Read({
               title={docMod?.title ?? doc.module}
               chapter={doc.chapter}
               onRef={(r) => goTo(r)}
-              onImage={setImage}
+              onImage={(src) => setImage({ src })}
               onChapter={(c) => openDoc(doc.module, c)}
             />
           ) : comparing ? (
@@ -612,6 +622,9 @@ export function Read({
 
       {docked && !doc && (
         <Study
+          modules={modules}
+          onChanged={onModulesChanged}
+          onImage={(src, ring) => setImage({ src, ring })}
           docked
           at={{ ...loc, verse: sel }}
           count={verses.length}
@@ -639,6 +652,9 @@ export function Read({
 
       {study && !docked && (
         <Study
+          modules={modules}
+          onChanged={onModulesChanged}
+          onImage={(src, ring) => setImage({ src, ring })}
           at={{ ...loc, verse: sel }}
           count={verses.length}
           onVerse={setSel}
@@ -679,7 +695,7 @@ export function Read({
         />
       )}
 
-      {image && <ImageViewer src={image} onClose={() => setImage(null)} />}
+      {image && <ImageViewer src={image.src} ring={image.ring} onClose={() => setImage(null)} />}
       {editing && <CompareEdit bibles={bibles} ids={cmpIds} onChange={setCmpIds} onClose={() => setEditing(false)} />}
 
       {going && (

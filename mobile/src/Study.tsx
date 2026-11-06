@@ -6,11 +6,13 @@ import { fmtRef, Ref } from "../../src/bible";
 import { renderHtml } from "../../src/esword";
 import { api, Commentary, Coverage, save, saved, scene } from "./api";
 import { Icon } from "./icons";
+import { MapsTab, Spot } from "./MapsTab";
+import type { Module } from "./api";
 
 /** Cross-references come from the Treasury, which is a commentary module; it has its own tab. */
 const XREFS = "tsk";
 
-type Tab = "commentary" | "xrefs";
+type Tab = "commentary" | "xrefs" | "maps";
 
 function useCommentary(module: string, at: Required<Pick<Ref, "book" | "chapter" | "verse">>) {
   const [c, setC] = useState<Commentary | null | undefined>(undefined);
@@ -44,7 +46,14 @@ export function Study({
   onClose,
   onGo,
   docked,
+  modules,
+  onChanged,
+  onImage,
 }: {
+  modules: Module[];
+  /** The library changed (the maps were downloaded). */
+  onChanged: () => void;
+  onImage: (src: string, ring: Spot[]) => void;
   /** Beside the text (an iPad in landscape), as the desktop's study pane, rather than a sheet. */
   docked?: boolean;
   at: { book: number; chapter: number; verse: number };
@@ -62,6 +71,7 @@ export function Study({
   useEffect(() => {
     scene.then((sc) => {
       if (sc.includes("xrefs")) setTab("xrefs");
+      if (sc.includes("maps")) setTab("maps");
       if (sc.includes("picker")) setPicking(true);
     });
   }, []);
@@ -145,6 +155,9 @@ export function Study({
           <button role="tab" aria-selected={tab === "xrefs"} onClick={() => setTab("xrefs")}>
             Cross-refs
           </button>
+          <button role="tab" aria-selected={tab === "maps"} onClick={() => setTab("maps")}>
+            Maps
+          </button>
         </div>
         {tab === "commentary" && (
           <div className="chooser">
@@ -155,7 +168,9 @@ export function Study({
             <span className="m">{withNotes === 1 ? "1 with notes here" : `${withNotes} with notes here`}</span>
           </div>
         )}
-        <div className="sbody">{body()}</div>
+        <div className="sbody">
+          {tab === "maps" ? <MapsTab at={at} modules={modules} onChanged={onChanged} onGo={go} onOpen={onImage} /> : body()}
+        </div>
       </section>
       {picking && (
         <Picker

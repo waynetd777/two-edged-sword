@@ -10,6 +10,12 @@ import { NavButtons } from "./NavButtons";
 /** Where the downloads live: the GitHub release tagged `modules` (mobile/tools/modules_release.py). */
 const RELEASE = "https://github.com/waynetd777/two-edged-sword/releases/download/modules/";
 
+/** Where downloads come from: the release, or (debug builds) the local copy last given as modules=<url>. */
+export function downloadsBase() {
+  const b = saved<string | null>("modulesBase", null);
+  return b ? (b.endsWith("/") ? b : b + "/") : RELEASE;
+}
+
 type Group = "bibles" | "commentaries" | "dictionaries" | "books";
 const GROUPS: { id: Group; name: string; kinds: Kind[] }[] = [
   { id: "bibles", name: "Bibles", kinds: ["bible"] },

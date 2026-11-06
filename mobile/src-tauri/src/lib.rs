@@ -44,6 +44,8 @@ struct Module {
     size: u64,
     /// "bundled" (in the app) or "app" (downloaded, so it can be removed).
     source: Source,
+    /// What it has beyond plain text: "Maps" for a book of maps.
+    features: Vec<&'static str>,
 }
 
 fn scan() -> Library {
@@ -66,6 +68,7 @@ fn modules(st: State<AppState>) -> Vec<Module> {
             file: m.path.file_name().map(|f| f.to_string_lossy().into_owned()).unwrap_or_default(),
             size: m.size,
             source: m.source,
+            features: m.features.clone(),
         })
         .collect()
 }
@@ -230,7 +233,7 @@ fn log(msg: String) {
 }
 
 /// Debug builds only: a state to open in, from TES_SCENE (comma-separated: study, goto, word, verse, xrefs,
-/// picker, end, bible=<id>, search, q=<words>, study=<number or word>, library, modules=<url>, get=<file>, doc=<module>[|chapter], image), so a screenshot can show a sheet without anyone tapping. On the Simulator:
+/// picker, end, bible=<id>, search, q=<words>, study=<number or word>, library, modules=<url>, get=<file>, at=<ref>, maps, doc=<module>[|chapter], image), so a screenshot can show a sheet without anyone tapping. On the Simulator:
 /// `SIMCTL_CHILD_TES_SCENE=study xcrun simctl launch booted com.wayned.two-edged-sword`.
 #[tauri::command]
 fn scene() -> Option<String> {

@@ -3,12 +3,14 @@
 
 import { invoke } from "@tauri-apps/api/core";
 import { TouchEvent, useEffect, useRef, useState } from "react";
+import type { Spot } from "./MapsTab";
 
 const MAX = 8;
 
 /** A picture from a book (Larkin's charts), full screen: pinch to zoom, drag to move, double-tap to
  *  zoom in or back out. The page itself can't zoom (user-scalable=no), so this does it. */
-export function ImageViewer({ src, onClose }: { src: string; onClose: () => void }) {
+export function ImageViewer({ src, ring, onClose }: { src: string; ring?: Spot[]; onClose: () => void }) {
+  const [size, setSize] = useState<[number, number] | null>(null);
   const [t, setT] = useState({ s: 1, x: 0, y: 0 });
   const [anim, setAnim] = useState(false);
   // The phone stays upright, so a wide chart turns instead, to use the screen's height.
@@ -90,13 +92,20 @@ export function ImageViewer({ src, onClose }: { src: string; onClose: () => void
       className="viewer"
       style={down ? { background: `rgba(0, 0, 0, ${Math.max(0.3, 1 - down / 400)})` } : undefined}
       onTouchStart={start} onTouchMove={move} onTouchEnd={end} onTouchCancel={end}>
-      <img
-        src={src}
-        alt=""
-        draggable={false}
-        className={[anim ? "anim" : "", turned ? "turned" : ""].join(" ").trim() || undefined}
+      <div
+        className={["vpic", anim ? "anim" : "", turned ? "turned" : ""].join(" ")}
         style={{ transform: `translate(${t.x}px, ${t.y + down}px) scale(${t.s})${turned ? " rotate(90deg)" : ""}` }}
-      />
+      >
+        <img src={src} alt="" draggable={false} onLoad={(e) => setSize([e.currentTarget.naturalWidth, e.currentTarget.naturalHeight])} />
+        {/* A map's places for the verse, ringed as in the study pane. */}
+        {ring && size && ring.length > 0 && (
+          <svg viewBox={`0 0 ${size[0]} ${size[1]}`} aria-hidden="true">
+            {ring.map((s) => (
+              <circle key={s.name + s.x} cx={s.x} cy={s.y} r={Math.max(s.r * 1.6, size[0] / 70)} />
+            ))}
+          </svg>
+        )}
+      </div>
       <button
         className="turn"
         aria-label={turned ? "Turn the picture back" : "Turn the picture sideways"}
