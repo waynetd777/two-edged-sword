@@ -8,7 +8,7 @@
 import { addPluginListener, invoke } from "@tauri-apps/api/core";
 import { useSyncExternalStore } from "react";
 import { fmtRef, stepChapter } from "../../src/bible";
-import { tokenize } from "../../src/esword";
+import { speakable, speechText, spokenChapter } from "../../src/spoken";
 import { api, save, saved, Verse } from "./api";
 
 export type Sleep = "off" | "15" | "30" | "60" | "chapter";
@@ -37,19 +37,26 @@ const set = (patch: Partial<PlayerState>) => {
 };
 let sleepTimer: ReturnType<typeof setTimeout> | null = null;
 
-/** A verse as it's read: the text of its words, which is what the word offsets count in. */
-export const spoken = (html: string) =>
-  tokenize(html)
-    .filter((t) => !t.note)
-    .map((t) => t.text)
-    .join("");
+/** For each verse being read, each spoken character's place in the verse as the page shows it: the
+ *  voice reports words in what it says ("Exodus 31 18"), the page marks them in what it shows. */
+const pageAt = new Map<number, number[]>();
 
 const call = (cmd: string, args: Record<string, unknown> = {}) => invoke(`plugin:tes-native|${cmd}`, args);
 
 async function speakFrom(bible: string, book: number, chapter: number, verse: number, verses?: Verse[]) {
   const vs = verses ?? (await api.chapter(bible, book, chapter));
-  const items = vs.filter((v) => v.v >= verse).map((v) => ({ id: v.v, text: spoken(v.text) }));
-  if (!items.length) return stop();
+  // As the desktop reads (spoken.ts): the chapter announced, then each verse with its references said in
+  // full and the words the voice gets wrong respelled.
+  pageAt.clear();
+  const verseItems = vs
+    .filter((v) => v.v >= verse)
+    .map((v) => {
+      const { spoken, at } = speakable(speechText(v.text));
+      pageAt.set(v.v, at);
+      return { id: v.v, text: spoken };
+    });
+  if (!verseItems.length) return stop();
+  const items = [{ id: 0, text: spokenChapter(book, chapter, verse) }, ...verseItems];
   set({ on: true, paused: false, bible, book, chapter, verse, at: -1, len: 0, error: undefined });
   await call("speak", { items, rate: state.speed, title: fmtRef({ book, chapter }), voice: saved<string | null>("listenVoice", null) }).catch((e) => {
     set({ ...IDLE, speed: state.speed, sleep: state.sleep, error: String(e) });
@@ -62,8 +69,9 @@ function listen() {
   listening = true;
   addPluginListener<{ kind: string; id?: number; at?: number; len?: number }>("tes-native", "speech", (e) => {
     if (!state.on) return;
+    if (e.id === 0) return; // the chapter's announcement
     if (e.kind === "start") set({ verse: e.id!, at: -1, len: 0 });
-    else if (e.kind === "word") set({ verse: e.id!, at: e.at!, len: e.len! });
+    else if (e.kind === "word") set({ verse: e.id!, at: pageAt.get(e.id!)?.[e.at!] ?? e.at!, len: e.len! });
     else if (e.kind === "paused") set({ paused: true });
     else if (e.kind === "resumed") set({ paused: false });
     else if (e.kind === "end") {
