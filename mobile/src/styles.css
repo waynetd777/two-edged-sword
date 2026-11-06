@@ -1553,16 +1553,23 @@ input[type="range"] {
 @media (min-width: 340px) {
   .prose.about > p:first-child img {
     float: right;
-    width: 104px;
+    width: 128px;
     margin: 4px 0 10px 16px;
     border-radius: 4px;
     box-shadow: 0 1px 6px rgba(0, 0, 0, 0.35);
   }
 }
+/* An iPad: bigger again. */
+@media (min-width: 600px) {
+  .prose.about > p:first-child img {
+    width: 168px;
+    margin-left: 20px;
+  }
+}
 /* A 360-point Android phone: a little smaller, so the text beside it isn't too narrow. */
 @media (min-width: 340px) and (max-width: 379px) {
   .prose.about > p:first-child img {
-    width: 88px;
+    width: 112px;
     margin-left: 12px;
   }
 }
