@@ -163,11 +163,12 @@ const DEFAULTS: Settings = {
 };
 
 /** Faces for Scripture, commentary and notes. Greek and Hebrew stay in --display. */
+// In the order Settings lists them, the default first, as the phone app does.
 export const READ_FONTS = {
+  atkinson: { label: "Atkinson", stack: '"Atkinson Hyperlegible Next Variable", -apple-system, sans-serif' },
   literata: { label: "Literata", stack: '"Literata Variable", Georgia, serif' },
   source: { label: "Source Serif", stack: '"Source Serif 4 Variable", "Source Serif 4", Georgia, serif' },
   inter: { label: "Inter", stack: '"Inter Variable", -apple-system, sans-serif' },
-  atkinson: { label: "Atkinson", stack: '"Atkinson Hyperlegible Next Variable", -apple-system, sans-serif' },
 };
 export type ReadFont = keyof typeof READ_FONTS;
 
