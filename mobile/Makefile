@@ -40,14 +40,20 @@ ios-phone: assets   ## make ios-phone [TEAM=<team id>] [DEVICE=<udid>]: a releas
 # Android: our launcher icons into the generated project (cargo tauri android init writes Tauri's own), and a
 # debug build on the phone plugged in (adb devices lists them), as pager-system's android-phone.
 ANDROID_APK = src-tauri/gen/android/app/build/outputs/apk/universal/debug/app-universal-debug.apk
+ANDROID_RELEASE_APK = src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release-unsigned.apk
+ANDROID_BUILD_TOOLS = $(lastword $(wildcard $(HOME)/Library/Android/sdk/build-tools/*))
 
 android-icons:
 	cp -R src-tauri/icons/android/ src-tauri/gen/android/app/src/main/res/
 
-android-phone: android-icons   ## make android-phone [DEVICE=<serial>]: a debug build on your Android phone over USB
+android-phone: android-icons   ## make android-phone [DEVICE=<serial>]: an optimised build on your Android phone over USB
+	@# A release build: a debug one runs the Rust side unoptimised, and search is many times slower. Signed with
+	@# this Mac's Android debug key (~/.android/debug.keystore), which is fine for your own phone.
 	rm -rf src-tauri/gen/android/app/src/main/assets
-	cargo tauri android build --debug --apk --target aarch64
-	adb $(if $(DEVICE),-s $(DEVICE),-d) install -r $(ANDROID_APK)
+	cargo tauri android build --apk --target aarch64
+	$(ANDROID_BUILD_TOOLS)/apksigner sign --ks $$HOME/.android/debug.keystore --ks-pass pass:android --key-pass pass:android \
+	  --out target/app-release.apk $(ANDROID_RELEASE_APK)
+	adb $(if $(DEVICE),-s $(DEVICE),-d) install -r target/app-release.apk
 	adb $(if $(DEVICE),-s $(DEVICE),-d) shell am start -n com.wayned.two_edged_sword/.MainActivity >/dev/null
 
 android-emu: android-icons   ## A debug build on the running emulator (emulator -avd <name>)
