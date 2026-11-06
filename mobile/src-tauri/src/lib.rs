@@ -81,6 +81,13 @@ fn strongs_for_word(st: State<AppState>, bible: String, word: String) -> Result<
     content::strongs_for_word(&st.lib.read().unwrap(), &bible, &word)
 }
 
+/// Bibles, commentaries and dictionaries, as the desktop searches them. No full-text index yet: the
+/// bundled commentaries are small enough to scan.
+#[tauri::command(async)]
+fn search(st: State<AppState>, q: search::Query) -> Result<search::Results, String> {
+    search::run(&st.lib.read().unwrap(), None, &q)
+}
+
 /// Debug builds: the UI's errors and console.error, in the app's own log (`xcrun simctl launch --console`).
 #[tauri::command]
 fn log(msg: String) {
@@ -90,7 +97,7 @@ fn log(msg: String) {
 }
 
 /// Debug builds only: a state to open in, from TES_SCENE (comma-separated: study, goto, word, verse, xrefs,
-/// picker, end, bible=<id>), so a screenshot can show a sheet without anyone tapping. On the Simulator:
+/// picker, end, bible=<id>, search, q=<words>), so a screenshot can show a sheet without anyone tapping. On the Simulator:
 /// `SIMCTL_CHILD_TES_SCENE=study xcrun simctl launch booted com.wayned.two-edged-sword`.
 #[tauri::command]
 fn scene() -> Option<String> {
@@ -112,7 +119,7 @@ pub fn run() {
             app.manage(AppState { lib: RwLock::new(scan()) });
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![log, scene, modules, chapter, chapter_sizes, commentary, coverage, article, strongs_for_word])
+        .invoke_handler(tauri::generate_handler![log, scene, modules, chapter, chapter_sizes, commentary, coverage, article, strongs_for_word, search])
         .run(tauri::generate_context!())
         .expect("error while running the app");
 }

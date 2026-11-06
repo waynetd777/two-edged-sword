@@ -53,7 +53,35 @@ export interface WordNumber {
   forms: [string, number][];
 }
 
+export type SearchMode = "phrase" | "all" | "any";
+
+export interface SearchQuery {
+  text: string;
+  mode: SearchMode;
+  wholeWords: boolean;
+  bible: string;
+  bookFrom: number;
+  bookTo: number;
+  strongsBible?: string;
+}
+
+export interface ModuleMatches<T> {
+  module: string;
+  title: string;
+  abbrev: string;
+  count: number;
+  hits: T[];
+}
+
+export interface SearchResults {
+  bible: ModuleMatches<{ book: number; chapter: number; verse: number; text: string }>;
+  commentaries: ModuleMatches<{ book: number; chapterBegin: number; verseBegin: number; chapterEnd: number; verseEnd: number; snippet: string }>[];
+  dictionaries: ModuleMatches<string>[];
+  strongs: boolean;
+}
+
 export const api = {
+  search: (q: SearchQuery) => invoke<SearchResults>("search", { q }),
   strongsForWord: (bible: string, word: string) => invoke<WordNumber[]>("strongs_for_word", { bible, word }),
   article: (kind: Kind, module: string, topic: string) => invoke<Article | null>("article", { kind, module, topic }),
   modules: () => invoke<Module[]>("modules"),

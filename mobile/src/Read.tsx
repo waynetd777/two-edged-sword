@@ -8,6 +8,7 @@ import { api, Module, save, saved, scene, Verse } from "./api";
 import { Icon } from "./icons";
 import { GoTo } from "./GoTo";
 import { WordSheet } from "./WordSheet";
+import type { Jump } from "./Search";
 import { Study } from "./Study";
 
 type Layout = "paragraph" | "verse";
@@ -106,7 +107,7 @@ function Words({
   );
 }
 
-export function Read({ modules }: { modules: Module[] }) {
+export function Read({ modules, jump }: { modules: Module[]; jump: (Jump & { n: number }) | null }) {
   const bibles = modules.filter((m) => m.kind === "bible");
   const [bible, setBible] = useState<string>(() => saved("bible", "kjv+"));
   const [loc, setLoc] = useState<Loc>(() => saved("loc", { book: 62, chapter: 1 }));
@@ -290,6 +291,17 @@ export function Read({ modules }: { modules: Module[] }) {
     visit({ book: r.book, chapter: r.chapter }, r.verse ?? 1);
     setScrollTo(r.verse ?? 1);
   };
+  // Opened from another tab (a search result): go there, with the commentary's notes when it came from one.
+  useEffect(() => {
+    if (!jump) return;
+    setWord(null);
+    setStudy(false);
+    goTo(jump.ref);
+    if (jump.commentary) {
+      save("commentary", jump.commentary);
+      setTimeout(() => setStudy(true), 0);
+    }
+  }, [jump?.n]); // eslint-disable-line react-hooks/exhaustive-deps
   const chooseBible = (id: string) => {
     setBible(id);
     setChoosing(false);
