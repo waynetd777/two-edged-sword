@@ -53,8 +53,8 @@ export function More({ modules, onJump, onLibrary }: { modules: Module[]; onJump
         {/* A page under More has its own way back: ‹ to More, not the app's back and forward. */}
         {page === "home" && <NavButtons />}
         {page !== "home" && (
-          <button className="done" style={{ fontSize: 22, padding: "0 6px" }} aria-label="Back to More" onClick={() => setPage("home")}>
-            ‹
+          <button className="nav" aria-label="Back to More" onClick={() => setPage("home")}>
+            <Icon name="back" size={22} />
           </button>
         )}
         <h1 className="bartitle">{title}</h1>
