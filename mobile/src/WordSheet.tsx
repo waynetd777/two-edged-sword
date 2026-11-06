@@ -24,7 +24,7 @@ const voicesReady: Promise<void> = new Promise((done) => {
 
 /** Says an original-language word, as the desktop's SayButton does: in a Hebrew or Greek voice when
  *  the phone has one, otherwise its pronunciation ("ray-sheeth'") in an English voice. */
-async function say(word: string, num: string, pron: string) {
+export async function say(word: string, num: string, pron: string) {
   const synth = window.speechSynthesis;
   if (!synth) return;
   synth.cancel();
@@ -51,8 +51,11 @@ export function WordSheet({
   guessFrom,
   guessVerse,
   onStudy,
+  onWordStudy,
   onClose,
 }: {
+  /** Opens the number's full Word Study. */
+  onWordStudy: (num: string) => void;
   /** In a Bible without Strong's numbers: the Strong's Bible to guess a word's number from. */
   guessFrom?: string;
   /** The same verse in that Bible: a word found there takes its numbers. */
@@ -194,7 +197,12 @@ export function WordSheet({
             </>
           )}
           <div className="actions">
-            <button className="primary" onClick={onStudy}>
+            {shown && entry && (
+              <button className="primary" onClick={() => onWordStudy(shown)}>
+                Word Study
+              </button>
+            )}
+            <button className="secondary" onClick={onStudy}>
               Study this verse
             </button>
           </div>

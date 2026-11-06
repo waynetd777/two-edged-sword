@@ -123,7 +123,15 @@ function useWide(force: boolean) {
   return wide || force;
 }
 
-export function Read({ modules, jump }: { modules: Module[]; jump: (Jump & { n: number }) | null }) {
+export function Read({
+  modules,
+  jump,
+  onWordStudy,
+}: {
+  modules: Module[];
+  jump: (Jump & { n: number }) | null;
+  onWordStudy: (num: string) => void;
+}) {
   const bibles = modules.filter((m) => m.kind === "bible");
   const [bible, setBible] = useState<string>(() => saved("bible", "kjv+"));
   const [loc, setLoc] = useState<Loc>(() => saved("loc", { book: 62, chapter: 1 }));
@@ -225,7 +233,7 @@ export function Read({ modules, jump }: { modules: Module[]; jump: (Jump & { n: 
   const live = useRef({ loc, sel, comparing });
   live.current = { loc, sel, comparing };
   useEffect(() => {
-    history.start({ tab: "read", book: loc.book, chapter: loc.chapter, verse: sel, comparing, top: 0 });
+    history.start({ tab: "read", book: loc.book, chapter: loc.chapter, verse: sel, comparing, word: "", top: 0 });
     history.setSnapshot(() => ({
       book: live.current.loc.book,
       chapter: live.current.loc.chapter,
@@ -566,6 +574,10 @@ export function Read({ modules, jump }: { modules: Module[]; jump: (Jump & { n: 
           onStudy={() => {
             setWord(null);
             setStudy(true);
+          }}
+          onWordStudy={(n) => {
+            setWord(null);
+            onWordStudy(n);
           }}
           onClose={() => setWord(null)}
         />

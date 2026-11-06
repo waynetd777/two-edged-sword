@@ -936,3 +936,90 @@ mark {
   border-left: 1px solid var(--border);
   padding-top: 12px;
 }
+
+/* ---------- word study ---------- */
+.study .card {
+  margin-bottom: 12px;
+}
+.card.flush {
+  padding: 0;
+  overflow: hidden;
+}
+.card.flush .row {
+  border-top: 1px solid var(--line);
+}
+.orig.big {
+  font-size: 58px;
+}
+.orig.small {
+  font-size: 22px;
+  min-width: 64px;
+}
+.counts {
+  display: flex;
+  gap: 18px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+  font-size: 13px;
+  color: var(--muted);
+}
+.counts b {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text);
+  margin-right: 3px;
+}
+.bars {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.bars button {
+  display: grid;
+  grid-template-columns: 44px 1fr 32px;
+  gap: 8px;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 4px;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  font-size: 12px;
+}
+.bars button.on {
+  background: var(--accentsoft);
+}
+.bars .bk {
+  color: var(--muted);
+  text-align: left;
+}
+.bars .bar {
+  height: 10px;
+  border-radius: 3px;
+  background: var(--line);
+  overflow: hidden;
+}
+.bars .bar span {
+  display: block;
+  height: 100%;
+  background: var(--ring);
+}
+.bars .n {
+  text-align: right;
+}
+.prose.fade {
+  max-height: 180px;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(#000 70%, transparent);
+  mask-image: linear-gradient(#000 70%, transparent);
+}
+.secondary {
+  flex: 1;
+  height: 44px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 15px;
+}

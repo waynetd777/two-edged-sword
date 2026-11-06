@@ -15,6 +15,8 @@ export interface Place {
   chapter: number;
   verse: number;
   comparing: boolean;
+  /** Word Study's number or word. */
+  word: string;
   /** How far down the reading page was. */
   top: number;
 }
@@ -32,7 +34,7 @@ const changed = () => {
   watchers.forEach((f) => f());
 };
 const same = (a: Place, b: Place) =>
-  a.tab === b.tab && a.book === b.book && a.chapter === b.chapter && a.verse === b.verse && a.comparing === b.comparing;
+  a.tab === b.tab && a.book === b.book && a.chapter === b.chapter && a.verse === b.verse && a.comparing === b.comparing && a.word === b.word;
 const keepCurrent = () => {
   if (at >= 0) stack[at] = { ...stack[at], ...snapshot() };
 };

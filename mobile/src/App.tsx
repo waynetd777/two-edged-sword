@@ -6,6 +6,7 @@ import { api, Module, save, saved, scene } from "./api";
 import { Icon } from "./icons";
 import { Read } from "./Read";
 import { Jump, Search } from "./Search";
+import { WordStudy } from "./WordStudy";
 import { history, Tab } from "./history";
 
 
@@ -21,6 +22,18 @@ export function App() {
   const [tab, setTab] = useState<Tab>("read");
   /** Something to open in Read, from another tab; n makes the same place twice count twice. */
   const [jump, setJump] = useState<(Jump & { n: number }) | null>(null);
+  const [word, setWord] = useState<string>(() => saved("wordStudy", "G26"));
+  useEffect(() => save("wordStudy", word), [word]);
+  /** Opens Word Study on a number or word, as a step back can return from. */
+  const study = (w: string) => {
+    history.push({ tab: "words", word: w });
+    setWord(w);
+    setTab("words");
+  };
+  const open = (j: Jump) => {
+    setJump({ ...j, n: (jump?.n ?? 0) + 1 });
+    setTab("read");
+  };
   // The module list from last time, so Read draws before the library is asked.
   const [modules, setModules] = useState<Module[]>(() => saved("modules", []));
 
@@ -32,28 +45,38 @@ export function App() {
         save("modules", m);
       })
       .catch(() => {});
-    scene.then((sc) => sc.includes("search") && setTab("search"));
+    scene.then((sc) => {
+      if (sc.includes("search")) setTab("search");
+      const w = sc.find((x) => x.startsWith("study="));
+      if (w) {
+        setWord(w.slice(6));
+        setTab("words");
+      }
+    });
     // A step back or forward can land on another tab.
-    return history.onRestore((p) => setTab(p.tab));
+    return history.onRestore((p) => {
+      setTab(p.tab);
+      if (p.word) setWord(p.word);
+    });
   }, []);
 
   return (
     <div className="app">
       {/* Every tab stays mounted, so each keeps its place while another is shown. */}
       <div className="screen" hidden={tab !== "read"}>
-        <Read modules={modules} jump={jump} />
+        <Read modules={modules} jump={jump} onWordStudy={study} />
       </div>
       <div className="screen" hidden={tab !== "search"}>
         <Search
           modules={modules}
           active={tab === "search"}
-          onJump={(j) => {
-            setJump({ ...j, n: (jump?.n ?? 0) + 1 });
-            setTab("read");
-          }}
+          onJump={open}
         />
       </div>
-      {tab !== "read" && tab !== "search" && (
+      <div className="screen" hidden={tab !== "words"}>
+        <WordStudy modules={modules} target={word} onTarget={study} onJump={open} />
+      </div>
+      {(tab === "library" || tab === "more") && (
         <div className="soon">
           <h1>{TABS.find((t) => t.id === tab)!.label}</h1>
           <p>Coming next.</p>
@@ -65,7 +88,7 @@ export function App() {
             key={t.id}
             className={`tab ${tab === t.id ? "on" : ""}`}
             onClick={() => {
-              history.push({ tab: t.id });
+              history.push({ tab: t.id, word: t.id === "words" ? word : "" });
               setTab(t.id);
             }}
           >

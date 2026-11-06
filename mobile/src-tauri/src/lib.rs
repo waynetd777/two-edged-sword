@@ -81,6 +81,26 @@ fn strongs_for_word(st: State<AppState>, bible: String, word: String) -> Result<
     content::strongs_for_word(&st.lib.read().unwrap(), &bible, &word)
 }
 
+#[tauri::command(async)]
+fn strongs_by_book(st: State<AppState>, bible: String, number: String) -> Result<Vec<(i64, i64)>, String> {
+    content::strongs_by_book(&st.lib.read().unwrap(), &bible, &number)
+}
+
+#[tauri::command(async)]
+fn strongs_verses(st: State<AppState>, bible: String, number: String, book: Option<i64>, limit: usize) -> Result<Vec<content::VerseHit>, String> {
+    content::strongs_verses(&st.lib.read().unwrap(), &bible, &number, book, limit)
+}
+
+#[tauri::command(async)]
+fn translit_search(st: State<AppState>, lexicon: String, query: String, limit: usize) -> Result<Vec<content::TranslitHit>, String> {
+    content::translit_search(&st.lib.read().unwrap(), &lexicon, &query, limit)
+}
+
+#[tauri::command(async)]
+fn find_topics(st: State<AppState>, word: String) -> Vec<content::TopicHit> {
+    content::find_topics(&st.lib.read().unwrap(), &word, 8)
+}
+
 /// Bibles, commentaries and dictionaries, as the desktop searches them. No full-text index yet: the
 /// bundled commentaries are small enough to scan.
 #[tauri::command(async)]
@@ -97,7 +117,7 @@ fn log(msg: String) {
 }
 
 /// Debug builds only: a state to open in, from TES_SCENE (comma-separated: study, goto, word, verse, xrefs,
-/// picker, end, bible=<id>, search, q=<words>), so a screenshot can show a sheet without anyone tapping. On the Simulator:
+/// picker, end, bible=<id>, search, q=<words>, study=<number or word>), so a screenshot can show a sheet without anyone tapping. On the Simulator:
 /// `SIMCTL_CHILD_TES_SCENE=study xcrun simctl launch booted com.wayned.two-edged-sword`.
 #[tauri::command]
 fn scene() -> Option<String> {
@@ -119,7 +139,7 @@ pub fn run() {
             app.manage(AppState { lib: RwLock::new(scan()) });
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![log, scene, modules, chapter, chapter_sizes, commentary, coverage, article, strongs_for_word, search])
+        .invoke_handler(tauri::generate_handler![log, scene, modules, chapter, chapter_sizes, commentary, coverage, article, strongs_for_word, search, strongs_by_book, strongs_verses, translit_search, find_topics])
         .run(tauri::generate_context!())
         .expect("error while running the app");
 }

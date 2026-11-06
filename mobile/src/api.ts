@@ -80,7 +80,29 @@ export interface SearchResults {
   strongs: boolean;
 }
 
+export interface VerseHit {
+  book: number;
+  chapter: number;
+  verse: number;
+  text: string;
+}
+export interface TopicHit {
+  module: string;
+  title: string;
+  topic: string;
+}
+export interface TranslitHit {
+  num: string;
+  word: string;
+  translit: string;
+}
+
 export const api = {
+  strongsByBook: (bible: string, number: string) => invoke<[number, number][]>("strongs_by_book", { bible, number }),
+  strongsVerses: (bible: string, number: string, book: number | null, limit: number) =>
+    invoke<VerseHit[]>("strongs_verses", { bible, number, book, limit }),
+  translitSearch: (lexicon: string, query: string) => invoke<TranslitHit[]>("translit_search", { lexicon, query, limit: 20 }),
+  findTopics: (word: string) => invoke<TopicHit[]>("find_topics", { word }),
   search: (q: SearchQuery) => invoke<SearchResults>("search", { q }),
   strongsForWord: (bible: string, word: string) => invoke<WordNumber[]>("strongs_for_word", { bible, word }),
   article: (kind: Kind, module: string, topic: string) => invoke<Article | null>("article", { kind, module, topic }),

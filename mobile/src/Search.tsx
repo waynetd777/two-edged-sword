@@ -98,7 +98,7 @@ function Choose<T extends string>({
 }
 
 /** A dictionary entry found by a search, over the results. */
-function Entry({ module, topic, onJump, onClose }: { module: string; topic: string; onJump: (j: Jump) => void; onClose: () => void }) {
+export function Entry({ module, topic, onJump, onClose }: { module: string; topic: string; onJump: (j: Jump) => void; onClose: () => void }) {
   const [a, setA] = useState<Article | null | undefined>(undefined);
   useEffect(() => {
     api
