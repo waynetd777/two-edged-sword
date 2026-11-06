@@ -23,6 +23,7 @@ class SpeakArgs: Decodable {
   /// 1 is iOS's normal pace.
   let rate: Double
   let title: String
+  let voice: String?
 }
 
 /// The orientations the app allows now: upright, but any way while a picture is open. Info.ios.plist lists
@@ -73,7 +74,7 @@ class TesNativePlugin: Plugin, AVSpeechSynthesizerDelegate {
       try? AVAudioSession.sharedInstance().setActive(true)
       self.ids = [:]
       self.synth.stopSpeaking(at: .immediate)
-      let v = self.voice()
+      let v = args.voice.flatMap { AVSpeechSynthesisVoice(identifier: $0) } ?? self.voice()
       let rate = Float(max(0.5, min(2.0, args.rate))) * AVSpeechUtteranceDefaultSpeechRate
       for item in args.items {
         let u = AVSpeechUtterance(string: item.text)
@@ -87,6 +88,27 @@ class TesNativePlugin: Plugin, AVSpeechSynthesizerDelegate {
       self.nowPlaying(args.title, playing: true)
       invoke.resolve()
     }
+  }
+
+  /// The English voices installed, best first, for choosing one in Settings.
+  @objc public func voices(_ invoke: Invoke) {
+    let q: (AVSpeechSynthesisVoice) -> String = {
+      switch $0.quality {
+      case .premium: return "premium"
+      case .enhanced: return "enhanced"
+      default: return "default"
+      }
+    }
+    let order = ["premium": 0, "enhanced": 1, "default": 2]
+    let list = AVSpeechSynthesisVoice.speechVoices()
+      .filter { v in
+        // Novelty voices (Bells, Bubbles…) aren't for reading Scripture.
+        if #available(iOS 17.0, *), v.voiceTraits.contains(.isNoveltyVoice) { return false }
+        return v.language.hasPrefix("en")
+      }
+      .sorted { (order[q($0)]!, $0.name) < (order[q($1)]!, $1.name) }
+      .map { ["id": $0.identifier, "name": $0.name, "language": $0.language, "quality": q($0)] }
+    invoke.resolve(["voices": list])
   }
 
   @objc public func speechPause(_ invoke: Invoke) {

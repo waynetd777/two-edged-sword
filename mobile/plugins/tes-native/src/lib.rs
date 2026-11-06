@@ -48,12 +48,29 @@ struct Speak {
     rate: f64,
     /// For the lock screen: "1 John 1".
     title: String,
+    /// A voice's identifier (from voices), or none for the best English one installed.
+    voice: Option<String>,
+}
+
+/// The phone's English voices: identifier, name, language and quality.
+#[command]
+async fn voices<R: Runtime>(app: AppHandle<R>) -> Result<serde_json::Value, String> {
+    #[cfg(target_os = "ios")]
+    {
+        use tauri::Manager;
+        return app.state::<Native<R>>().0.run_mobile_plugin::<serde_json::Value>("voices", ()).map_err(|e| e.to_string());
+    }
+    #[cfg(not(target_os = "ios"))]
+    {
+        let _ = app;
+        Ok(serde_json::json!({ "voices": [] }))
+    }
 }
 
 /// Reads `items` aloud one after another, replacing anything being read.
 #[command]
-async fn speak<R: Runtime>(app: AppHandle<R>, items: Vec<Item>, rate: f64, title: String) -> Result<(), String> {
-    native(&app, "speak", Speak { items, rate, title })
+async fn speak<R: Runtime>(app: AppHandle<R>, items: Vec<Item>, rate: f64, title: String, voice: Option<String>) -> Result<(), String> {
+    native(&app, "speak", Speak { items, rate, title, voice })
 }
 
 #[command]
@@ -86,7 +103,7 @@ fn native<R: Runtime, A: serde::Serialize>(app: &AppHandle<R>, method: &str, arg
 
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
     Builder::new("tes-native")
-        .invoke_handler(tauri::generate_handler![allow_rotation, speak, speech_pause, speech_resume, speech_stop])
+        .invoke_handler(tauri::generate_handler![allow_rotation, speak, speech_pause, speech_resume, speech_stop, voices])
         .setup(|_app, _api| {
             #[cfg(target_os = "ios")]
             {

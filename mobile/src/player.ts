@@ -51,7 +51,7 @@ async function speakFrom(bible: string, book: number, chapter: number, verse: nu
   const items = vs.filter((v) => v.v >= verse).map((v) => ({ id: v.v, text: spoken(v.text) }));
   if (!items.length) return stop();
   set({ on: true, paused: false, bible, book, chapter, verse, at: -1, len: 0, error: undefined });
-  await call("speak", { items, rate: state.speed, title: fmtRef({ book, chapter }) }).catch((e) => {
+  await call("speak", { items, rate: state.speed, title: fmtRef({ book, chapter }), voice: saved<string | null>("listenVoice", null) }).catch((e) => {
     set({ ...IDLE, speed: state.speed, sleep: state.sleep, error: String(e) });
   });
 }
@@ -76,6 +76,28 @@ function listen() {
     listening = false;
   });
 }
+
+export interface Voice {
+  id: string;
+  name: string;
+  language: string;
+  quality: "premium" | "enhanced" | "default";
+}
+
+/** The phone's English voices, best first. */
+export const voices = () =>
+  call("voices")
+    .then((r) => (r as { voices: Voice[] }).voices)
+    .catch(() => [] as Voice[]);
+
+/** A sentence in a voice, to hear it before choosing it. */
+export const sample = (voice: string | null) =>
+  call("speak", {
+    items: [{ id: -1, text: "In the beginning was the Word, and the Word was with God, and the Word was God." }],
+    rate: state.speed,
+    title: "Sample",
+    voice,
+  }).catch(() => {});
 
 export const player = {
   get: () => state,

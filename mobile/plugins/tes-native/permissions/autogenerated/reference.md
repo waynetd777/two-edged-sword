@@ -9,6 +9,7 @@ Everything the phone app uses
 - `allow-speech-pause`
 - `allow-speech-resume`
 - `allow-speech-stop`
+- `allow-voices`
 - `allow-register-listener`
 - `allow-remove-listener`
 
@@ -199,6 +200,32 @@ Enables the speech_stop command without any pre-configured scope.
 <td>
 
 Denies the speech_stop command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`tes-native:allow-voices`
+
+</td>
+<td>
+
+Enables the voices command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`tes-native:deny-voices`
+
+</td>
+<td>
+
+Denies the voices command without any pre-configured scope.
 
 </td>
 </tr>

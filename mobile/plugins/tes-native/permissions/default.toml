@@ -6,6 +6,7 @@ permissions = [
   "allow-speech-pause",
   "allow-speech-resume",
   "allow-speech-stop",
+  "allow-voices",
   "allow-register-listener",
   "allow-remove-listener",
 ]

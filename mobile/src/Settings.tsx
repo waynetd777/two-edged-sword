@@ -1,8 +1,10 @@
 // Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
 // SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
-import { useSyncExternalStore } from "react";
-import { Module, save, saved } from "./api";
+import { useEffect, useState, useSyncExternalStore } from "react";
+import { Icon } from "./icons";
+import { player, sample, usePlayer, Voice, voices } from "./player";
+import { Module, save, saved, scene } from "./api";
 import { Reminder } from "./Reminder";
 
 export interface Prefs {
@@ -122,6 +124,11 @@ export function Settings({ modules }: { modules: Module[] }) {
       </div>
 
       <p className="label" style={{ marginTop: 18 }}>
+        Listen
+      </p>
+      <ListenSettings />
+
+      <p className="label" style={{ marginTop: 18 }}>
         Quiet time
       </p>
       <Reminder />
@@ -137,5 +144,82 @@ export function Settings({ modules }: { modules: Module[] }) {
         </p>
       </div>
     </>
+  );
+}
+
+const QUALITY = { premium: "Premium", enhanced: "Enhanced", default: "" };
+
+function ListenSettings() {
+  const pl = usePlayer();
+  const [voice, setVoice] = useState<string | null>(() => saved("listenVoice", null));
+  const [list, setList] = useState<Voice[] | null>(null);
+  const [choosing, setChoosing] = useState(false);
+  useEffect(() => {
+    voices().then(setList);
+    scene.then((sc) => sc.includes("voices") && setChoosing(true));
+  }, []);
+  const chosen = list?.find((v) => v.id === voice);
+  const pick = (id: string | null) => {
+    setVoice(id);
+    save("listenVoice", id);
+    if (!pl.on) sample(id);
+  };
+  return (
+    <div className="card flush">
+      <button className="row" onClick={() => setChoosing(true)}>
+        <span className="grow">Voice</span>
+        <span className="m">{chosen ? chosen.name : "Automatic"} ›</span>
+      </button>
+      <button className="row" onClick={player.faster}>
+        <span className="grow">Speed</span>
+        <span className="m">{pl.speed}× ›</span>
+      </button>
+      {choosing && (
+        <>
+          <div className="scrim" onClick={() => setChoosing(false)} />
+          <section className="sheet tall" aria-label="Choose a voice">
+            <div className="grab" onClick={() => setChoosing(false)}>
+              <span />
+            </div>
+            <div className="shead">
+              <h2 style={{ flex: 1 }}>Voice</h2>
+              <button className="done" onClick={() => setChoosing(false)}>
+                Done
+              </button>
+            </div>
+            <div className="sbody">
+              <p className="m" style={{ marginTop: 0 }}>
+                Tap a voice to hear it.
+              </p>
+              <div className="list">
+                <button className={`row ${voice === null ? "on" : ""}`} onClick={() => pick(null)}>
+                  <span className="grow" style={{ display: "flex", flexDirection: "column", padding: "8px 0" }}>
+                    <span>Automatic</span>
+                    <span className="m">The best voice on this phone, in your own English where it has one</span>
+                  </span>
+                  {voice === null && <Icon name="check" size={18} />}
+                </button>
+                {list?.map((v) => (
+                  <button key={v.id} className={`row ${voice === v.id ? "on" : ""}`} onClick={() => pick(v.id)}>
+                    <span className="grow" style={{ display: "flex", flexDirection: "column", padding: "8px 0" }}>
+                      <span>{v.name}</span>
+                      <span className="m">
+                        {v.language}
+                        {QUALITY[v.quality] ? ` · ${QUALITY[v.quality]}` : ""}
+                      </span>
+                    </span>
+                    {voice === v.id && <Icon name="check" size={18} />}
+                  </button>
+                ))}
+              </div>
+              <p className="m" style={{ marginTop: 14, lineHeight: 1.5 }}>
+                More voices, and better ones (Enhanced and Premium), are free in the iPhone's Settings › Accessibility › Spoken Content › Voices ›
+                English. Once downloaded they show here.
+              </p>
+            </div>
+          </section>
+        </>
+      )}
+    </div>
   );
 }
