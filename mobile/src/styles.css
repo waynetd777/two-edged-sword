@@ -301,7 +301,8 @@ button {
   min-width: 0;
 }
 .round.listen {
-  width: 56px;
+  /* The bookmark and play buttons the same width, leaving the rest to Study. */
+  width: 48px;
   height: auto;
   border-radius: 14px;
   color: var(--accent);
@@ -1404,7 +1405,6 @@ input[type="range"] {
   vertical-align: -1px;
 }
 .round.listen.bmkbar {
-  width: 48px;
   color: var(--muted);
 }
 .round.listen.bmkbar.on {
