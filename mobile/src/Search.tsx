@@ -25,8 +25,10 @@ type Scope = "bible" | "commentary" | "dictionary";
 
 /** Where something found should open: a verse in Read, with a commentary's notes when it came from one. */
 export interface Jump {
-  ref: Ref;
+  ref?: Ref;
   commentary?: string;
+  /** A book to open instead, at the chapter last read in it. */
+  book?: string;
 }
 
 /** The last search, for the rest of the session: switching tabs and back keeps it. */

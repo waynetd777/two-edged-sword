@@ -89,7 +89,7 @@ export function App() {
         <WordStudy modules={modules} target={word} onTarget={study} onJump={open} />
       </div>
       <div className="screen" hidden={tab !== "library"}>
-        <Library modules={modules} onChanged={loadModules} />
+        <Library modules={modules} onChanged={loadModules} onRead={(book) => open({ book })} />
       </div>
       {tab === "more" && (
         <div className="soon">

@@ -26,7 +26,7 @@ interface Going {
   error?: string;
 }
 
-export function Library({ modules, onChanged }: { modules: Module[]; onChanged: () => void }) {
+export function Library({ modules, onChanged, onRead }: { modules: Module[]; onChanged: () => void; onRead: (module: string) => void }) {
   const [group, setGroup] = useState<Group>(() => saved("libraryGroup", "commentaries"));
   // The offer from last time draws at once; the release is asked again each time the app opens.
   const [offers, setOffers] = useState<Offer[]>(() => saved("offers", []));
@@ -40,7 +40,9 @@ export function Library({ modules, onChanged }: { modules: Module[]; onChanged: 
   useEffect(() => {
     // Debug builds can point at a local copy of the release: TES_SCENE=modules=http://localhost:8000/
     scene.then((sc) => {
-      // ...and a debug build remembers it, so the app opened from the home screen keeps using it.
+      const grp = sc.find((x) => x.startsWith("group="))?.slice(6) as Group | undefined;
+      if (grp && GROUPS.some((x) => x.id === grp)) setGroup(grp);
+      // A debug build can use a local copy of the downloads (modules=<url>), and remembers it, so the app opened from the home screen keeps using it.
       const b = sc.find((x) => x.startsWith("modules="))?.slice(8) ?? saved<string | null>("modulesBase", null);
       if (sc.some((x) => x.startsWith("modules="))) save("modulesBase", b);
       const url = b ? (b.endsWith("/") ? b : b + "/") : RELEASE;
@@ -138,9 +140,14 @@ export function Library({ modules, onChanged }: { modules: Module[]; onChanged: 
                     {m.source === "bundled" ? "Built in" : "Downloaded"} · {mb(m.size)}
                   </span>
                 </span>
+                {m.kind === "reference" && (
+                  <button className="mini accent" onClick={() => onRead(m.id)}>
+                    Read
+                  </button>
+                )}
                 {m.source === "app" && (
-                  <button className="mini danger" onClick={() => setRemoving(m)}>
-                    Remove
+                  <button className="round danger" aria-label={`Remove ${m.title}`} onClick={() => setRemoving(m)}>
+                    <Icon name="trash" size={18} />
                   </button>
                 )}
               </div>

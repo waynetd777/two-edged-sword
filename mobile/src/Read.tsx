@@ -160,7 +160,11 @@ export function Read({
   const [goBooks, setGoBooks] = useState(false);
   const bookMods = modules.filter((m) => m.kind === "reference");
   const docMod = doc ? bookMods.find((m) => m.id === doc.module) : undefined;
-  useEffect(() => save("doc", doc), [doc]);
+  useEffect(() => {
+    save("doc", doc);
+    // Where each book was left, for opening it again from the Library.
+    if (doc) save(`docAt.${doc.module}`, doc.chapter);
+  }, [doc]);
   useEffect(() => {
     setDocList([]);
     if (doc) bookTitles(doc.module).then(setDocList);
@@ -417,6 +421,16 @@ export function Read({
     if (!jump) return;
     setWord(null);
     setStudy(false);
+    if (jump.book) {
+      const m = jump.book;
+      const last = saved<string | null>(`docAt.${m}`, null);
+      bookTitles(m).then((t) => {
+        const c = last && t.includes(last) ? last : t[0];
+        if (c) openDoc(m, c);
+      });
+      return;
+    }
+    if (!jump.ref) return;
     goTo(jump.ref);
     if (jump.commentary) {
       save("commentary", jump.commentary);

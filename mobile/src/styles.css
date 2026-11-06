@@ -1169,3 +1169,10 @@ mark {
   align-items: center;
   justify-content: center;
 }
+.mini.accent {
+  color: var(--accent);
+  border-color: var(--ring);
+}
+.round.danger {
+  color: var(--red);
+}
