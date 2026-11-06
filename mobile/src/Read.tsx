@@ -6,7 +6,10 @@ import { book, BookSizes, fmtRef, Ref, stepChapter } from "../../src/bible";
 import { alignStrongs, tokenize, Token } from "../../src/esword";
 import { api, Module, save, saved, scene, Verse } from "./api";
 import { Icon } from "./icons";
+import { COMPARE_DEFAULT, CompareEdit, CompareView, useChapters } from "./Compare";
 import { GoTo } from "./GoTo";
+import { history } from "./history";
+import { NavButtons } from "./NavButtons";
 import { WordSheet } from "./WordSheet";
 import type { Jump } from "./Search";
 import { Study } from "./Study";
@@ -118,13 +121,16 @@ export function Read({ modules, jump }: { modules: Module[]; jump: (Jump & { n: 
   const [sizes, setSizes] = useState<BookSizes | null>(null);
   const [counts, setCounts] = useState<Map<string, number>>(new Map());
   const [going, setGoing] = useState(false);
-  const [word, setWord] = useState<{ v: number; i: number; num?: string } | null>(null);
+  /** A tapped word: in the chapter, or (bible) in one of Compare's translations. */
+  const [word, setWord] = useState<{ v: number; i: number; num?: string; bible?: string } | null>(null);
+  const [comparing, setComparing] = useState(false);
+  const [cmpIds, setCmpIds] = useState<string[]>(() => saved("compare", COMPARE_DEFAULT));
+  const [diff, setDiff] = useState<boolean>(() => saved("compareDiff", true));
+  const [editing, setEditing] = useState(false);
   const [wordScene, setWordScene] = useState(false);
   /** A verse to bring into view once its chapter has drawn. */
   const [scrollTo, setScrollTo] = useState<number | null>(null);
   /** Back and forward, as on the desktop: every move is a step, and a step back returns to how far down the page was. */
-  const hist = useRef<{ stack: { loc: Loc; verse: number; top: number }[]; i: number }>({ stack: [{ loc, verse: sel, top: 0 }], i: 0 });
-  const [, bump] = useState(0);
   const [restore, setRestore] = useState<{ key: string; top: number } | null>(null);
   const page = useRef<HTMLDivElement>(null);
   const [verses, versesOf] = useChapter(bible, loc);
@@ -148,11 +154,30 @@ export function Read({ modules, jump }: { modules: Module[]; jump: (Jump & { n: 
   // ...and its text of this chapter, so a word can first be looked for in the same verse there.
   const [guessVerses, guessOf] = useChapter(!bmod?.strongs && guessFrom ? guessFrom : bible, loc);
 
+  // ---- Compare ----
+  useEffect(() => save("compareDiff", diff), [diff]);
+  const shownIds = cmpIds.filter((id) => bibles.some((b) => b.id === id));
+  const cmpChapters = useChapters(comparing ? [...new Set([...shownIds, ...(guessFrom ? [guessFrom] : [])])] : [], loc);
+  /** A Bible's tokens for the selected verse in Compare, the KJV's with the KJV+'s numbers. */
+  const cmpTokens = useMemo(() => {
+    const out = new Map<string, Token[]>();
+    for (const id of shownIds) {
+      const vs = cmpChapters.get(id);
+      if (!vs?.length) continue;
+      const v = vs.find((x) => x.v === sel);
+      const t = v ? tokenize(v.text) : [];
+      const strong = cmpChapters.get(`${id}+`)?.find((x) => x.v === sel);
+      out.set(id, strong && v ? alignStrongs(t, tokenize(strong.text)) : t);
+    }
+    return out;
+  }, [cmpChapters, sel, shownIds.join(",")]); // eslint-disable-line react-hooks/exhaustive-deps
+
   useEffect(() => {
     scene.then((sc) => {
       if (sc.includes("verse")) setLayout("verse");
       if (sc.includes("study")) setStudy(true);
       if (sc.includes("goto")) setGoing(true);
+      if (sc.includes("compare")) setComparing(true);
       if (sc.includes("word")) setWordScene(true);
       const b = sc.find((x) => x.startsWith("bible="));
       if (b) setBible(b.slice(6));
@@ -179,30 +204,34 @@ export function Read({ modules, jump }: { modules: Module[]; jump: (Jump & { n: 
       .catch(() => setSizes(null));
   }, [bible]);
 
+  // Back and forward are the app's (history.ts): Read's moves are steps in it, and a step back
+  // here puts the passage, the verse, Compare and the scroll back.
+  const live = useRef({ loc, sel, comparing });
+  live.current = { loc, sel, comparing };
+  useEffect(() => {
+    history.start({ tab: "read", book: loc.book, chapter: loc.chapter, verse: sel, comparing, top: 0 });
+    history.setSnapshot(() => ({
+      book: live.current.loc.book,
+      chapter: live.current.loc.chapter,
+      verse: live.current.sel,
+      comparing: live.current.comparing,
+      top: page.current?.scrollTop ?? 0,
+    }));
+    return history.onRestore((p) => {
+      setWord(null);
+      setStudy(false);
+      setLoc({ book: p.book, chapter: p.chapter });
+      setSel(p.verse);
+      setComparing(p.comparing);
+      setRestore({ key: `${p.book}.${p.chapter}`, top: p.top });
+    });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   /** Moves to `to`, as a new step in the history. */
   const visit = (to: Loc, verse: number) => {
-    const h = hist.current;
-    h.stack[h.i] = { loc, verse: sel, top: page.current?.scrollTop ?? 0 };
-    h.stack = h.stack.slice(0, h.i + 1);
-    h.stack.push({ loc: to, verse, top: 0 });
-    if (h.stack.length > 100) h.stack.shift();
-    h.i = h.stack.length - 1;
+    history.push({ tab: "read", book: to.book, chapter: to.chapter, verse });
     setLoc(to);
     setSel(verse);
-    bump((x) => x + 1);
-  };
-  const travel = (d: 1 | -1) => {
-    const h = hist.current;
-    const j = h.i + d;
-    if (j < 0 || j >= h.stack.length) return;
-    h.stack[h.i] = { loc, verse: sel, top: page.current?.scrollTop ?? 0 };
-    h.i = j;
-    const e = h.stack[j];
-    setWord(null);
-    setLoc(e.loc);
-    setSel(e.verse);
-    setRestore({ key: `${e.loc.book}.${e.loc.chapter}`, top: e.top });
-    bump((x) => x + 1);
   };
   useEffect(() => {
     if (!restore || restore.key !== versesOf || !verses.length) return;
@@ -262,7 +291,11 @@ export function Read({ modules, jump }: { modules: Module[]; jump: (Jump & { n: 
     const s = touch.current;
     touch.current = null;
     if (!s?.horiz) return;
-    if (s.dx < -70 && next) go(next, 1);
+    if (comparing && Math.abs(s.dx) > 70) {
+      setAnim(true);
+      setDx(0);
+      stepVerse(s.dx < 0 ? 1 : -1);
+    } else if (s.dx < -70 && next) go(next, 1);
     else if (s.dx > 70 && prev) go(prev, -1);
     else {
       setAnim(true);
@@ -271,6 +304,14 @@ export function Read({ modules, jump }: { modules: Module[]; jump: (Jump & { n: 
   };
 
   const pick = (v: number) => setSel(v);
+  /** Compare's next or previous verse, on into the next or previous chapter. */
+  const stepVerse = (d: 1 | -1) => {
+    setWord(null);
+    if (d > 0 && sel < verses.length) return setSel(sel + 1);
+    if (d < 0 && sel > 1) return setSel(sel - 1);
+    const to = d > 0 ? next : prev;
+    if (to) visit(to, d > 0 ? 1 : (counts.get(`${to.book}.${to.chapter}`) ?? 1));
+  };
   useEffect(() => {
     // The word scene: the selected verse's first tagged word with a meaning worth showing.
     const ts = tokens.get(sel);
@@ -310,29 +351,55 @@ export function Read({ modules, jump }: { modules: Module[]; jump: (Jump & { n: 
   return (
     <>
       <header className="topbar">
-        <button className="nav" aria-label="Back" disabled={hist.current.i <= 0} onClick={() => travel(-1)}>
-          <Icon name="back" size={22} />
-        </button>
-        <button className="nav" aria-label="Forward" disabled={hist.current.i >= hist.current.stack.length - 1} onClick={() => travel(1)}>
-          <Icon name="forward" size={22} />
-        </button>
+        <NavButtons />
         <button className="pill strong" onClick={() => setGoing(true)}>
           {/* Long names shortened ("Song 8"), so the bar keeps to one line. */}
-          {book(loc.book).name.length > 10 ? fmtRef(loc, "short") : `${book(loc.book).name} ${loc.chapter}`}
+          {comparing
+            ? book(loc.book).name.length > 8
+              ? fmtRef({ ...loc, verse: sel }, "short")
+              : fmtRef({ ...loc, verse: sel })
+            : book(loc.book).name.length > 10
+              ? fmtRef(loc, "short")
+              : `${book(loc.book).name} ${loc.chapter}`}
           <Icon name="down" size={14} />
         </button>
-        <button className="pill" onClick={() => setChoosing(true)}>
-          {bmod?.abbrev || bible.toUpperCase()}
-          <Icon name="down" size={14} />
-        </button>
+        {!comparing && (
+          <button className="pill" onClick={() => setChoosing(true)}>
+            {bmod?.abbrev || bible.toUpperCase()}
+            <Icon name="down" size={14} />
+          </button>
+        )}
         <span className="spacer" />
         <button
-          className="ibtn"
-          aria-label={layout === "paragraph" ? "Show a verse per line" : "Show as paragraphs"}
-          onClick={() => setLayout(layout === "paragraph" ? "verse" : "paragraph")}
+          className={`ibtn ${comparing ? "on" : ""}`}
+          aria-label={comparing ? "Back to the chapter" : "Compare translations"}
+          aria-pressed={comparing}
+          onClick={() => {
+            setWord(null);
+            history.push({ comparing: !comparing });
+            setComparing(!comparing);
+          }}
         >
-          <Icon name={layout === "paragraph" ? "verses" : "paragraph"} size={22} />
+          <Icon name="compare" size={22} />
         </button>
+        {comparing ? (
+          <>
+            <button className="ibtn" aria-label="Previous verse" onClick={() => stepVerse(-1)}>
+              <Icon name="back" size={20} />
+            </button>
+            <button className="ibtn" aria-label="Next verse" onClick={() => stepVerse(1)}>
+              <Icon name="forward" size={20} />
+            </button>
+          </>
+        ) : (
+          <button
+            className="ibtn"
+            aria-label={layout === "paragraph" ? "Show a verse per line" : "Show as paragraphs"}
+            onClick={() => setLayout(layout === "paragraph" ? "verse" : "paragraph")}
+          >
+            <Icon name={layout === "paragraph" ? "verses" : "paragraph"} size={22} />
+          </button>
+        )}
       </header>
 
       <div className="pager">
@@ -345,6 +412,19 @@ export function Read({ modules, jump }: { modules: Module[]; jump: (Jump & { n: 
           onTouchEnd={onEnd}
           onTouchCancel={onEnd}
         >
+          {comparing ? (
+            <CompareView
+              bibles={bibles}
+              ids={shownIds}
+              tokensOf={(id) => (cmpChapters.get(id)?.length ? (cmpTokens.get(id) ?? []) : undefined)}
+              diff={diff}
+              onDiff={setDiff}
+              active={word?.bible ? { bible: word.bible, i: word.i } : undefined}
+              onWord={(id, i) => setWord({ v: sel, i, bible: id })}
+              onEdit={() => setEditing(true)}
+            />
+          ) : (
+          <>
           <h1 className="title">
             {book(loc.book).name} {loc.chapter}
           </h1>
@@ -404,6 +484,8 @@ export function Read({ modules, jump }: { modules: Module[]; jump: (Jump & { n: 
               <p className="hint">Or swipe left.{prev ? ` Swipe right for ${fmtRef(prev)}.` : ""}</p>
             </>
           )}
+          </>
+          )}
         </div>
       </div>
 
@@ -436,13 +518,19 @@ export function Read({ modules, jump }: { modules: Module[]; jump: (Jump & { n: 
       {word && (
         <WordSheet
           at={{ ...loc, verse: word.v }}
-          tokens={tokens.get(word.v) ?? []}
+          tokens={word.bible ? (cmpTokens.get(word.bible) ?? []) : (tokens.get(word.v) ?? [])}
           index={word.i}
           num={word.num}
-          onIndex={(i) => setWord({ v: word.v, i })}
-          guessFrom={bmod?.strongs ? undefined : guessFrom}
+          onIndex={(i) => setWord({ ...word, i, num: undefined })}
+          guessFrom={(word.bible ? bibles.find((b) => b.id === word.bible)?.strongs : bmod?.strongs) ? undefined : guessFrom}
           guessVerse={
-            !bmod?.strongs && guessOf === versesOf ? tokenize(guessVerses.find((v) => v.v === word.v)?.text ?? "") : undefined
+            word.bible
+              ? guessFrom
+                ? tokenize(cmpChapters.get(guessFrom)?.find((v) => v.v === word.v)?.text ?? "")
+                : undefined
+              : !bmod?.strongs && guessOf === versesOf
+                ? tokenize(guessVerses.find((v) => v.v === word.v)?.text ?? "")
+                : undefined
           }
           onStudy={() => {
             setWord(null);
@@ -451,6 +539,8 @@ export function Read({ modules, jump }: { modules: Module[]; jump: (Jump & { n: 
           onClose={() => setWord(null)}
         />
       )}
+
+      {editing && <CompareEdit bibles={bibles} ids={cmpIds} onChange={setCmpIds} onClose={() => setEditing(false)} />}
 
       {going && (
         <GoTo

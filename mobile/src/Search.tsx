@@ -6,6 +6,7 @@ import { book, fmtRef, parseRef, Ref, SECTIONS } from "../../src/bible";
 import { renderHtml, tokenize } from "../../src/esword";
 import { api, Article, Module, save, saved, scene, SearchMode, SearchResults } from "./api";
 import { Icon } from "./icons";
+import { NavButtons } from "./NavButtons";
 
 const RANGES: { name: string; from: number; to: number }[] = [
   { name: "Whole Bible", from: 1, to: 78 },
@@ -214,8 +215,10 @@ export function Search({ modules, active, onJump }: { modules: Module[]; active:
 
   return (
     <>
-      <header className="topbar" style={{ flexDirection: "column", alignItems: "stretch", gap: 10, paddingLeft: 16 }}>
-        <label className="filter search">
+      <header className="topbar" style={{ flexDirection: "column", alignItems: "stretch", gap: 10 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+        <NavButtons />
+        <label className="filter search" style={{ flex: 1 }}>
           <Icon name="search" size={16} />
           <input
             ref={input}
@@ -240,6 +243,7 @@ export function Search({ modules, active, onJump }: { modules: Module[]; active:
             </button>
           )}
         </label>
+        </div>
         <div className="chips">
           <button className="chip on" onClick={() => setChoosing("bible")}>
             {bmod?.abbrev || bible.toUpperCase()} <Icon name="down" size={12} />

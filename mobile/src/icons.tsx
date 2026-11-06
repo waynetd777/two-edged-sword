@@ -42,6 +42,12 @@ const PATHS = {
       <circle cx="4" cy="18" r="1" fill="currentColor" />
     </>
   ),
+  compare: (
+    <>
+      <rect x="3" y="4" width="7" height="16" rx="1.5" />
+      <rect x="14" y="4" width="7" height="16" rx="1.5" />
+    </>
+  ),
   down: <path d="M7 10l5 5 5-5" />,
   speaker: (
     <>

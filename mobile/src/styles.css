@@ -821,3 +821,97 @@ mark {
     background: #3d3012;
   }
 }
+
+/* ---------- compare ---------- */
+.ibtn.on {
+  color: var(--accent);
+  background: var(--accentsoft);
+  border-radius: 10px;
+  opacity: 1;
+}
+.cmpbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: -6px 0 12px;
+}
+.link {
+  border: none;
+  background: none;
+  padding: 0;
+  color: var(--accent);
+  font-size: 12px;
+}
+.switch {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text);
+}
+.switch input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.switch span {
+  position: relative;
+  width: 40px;
+  height: 24px;
+  border-radius: 12px;
+  background: var(--border);
+  transition: background 0.15s;
+  flex: none;
+}
+.switch span::after {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  background: #ffffff;
+  transition: left 0.15s;
+}
+.switch input:checked + span {
+  background: var(--ring);
+}
+.switch input:checked + span::after {
+  left: 18px;
+}
+.cmp {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+.card .abbr {
+  margin: 0 0 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.card .abbr.base {
+  color: var(--accent);
+}
+.ctext {
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.55;
+}
+.diff {
+  background: #f4ebb8;
+  border-radius: 3px;
+  padding: 0 1px;
+}
+@media (prefers-color-scheme: dark) {
+  .diff {
+    background: #3f3914;
+  }
+}

@@ -6,8 +6,8 @@ import { api, Module, save, saved, scene } from "./api";
 import { Icon } from "./icons";
 import { Read } from "./Read";
 import { Jump, Search } from "./Search";
+import { history, Tab } from "./history";
 
-type Tab = "read" | "search" | "words" | "library" | "more";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "read", label: "Read" },
@@ -33,6 +33,8 @@ export function App() {
       })
       .catch(() => {});
     scene.then((sc) => sc.includes("search") && setTab("search"));
+    // A step back or forward can land on another tab.
+    return history.onRestore((p) => setTab(p.tab));
   }, []);
 
   return (
@@ -59,7 +61,14 @@ export function App() {
       )}
       <nav className="tabs">
         {TABS.map((t) => (
-          <button key={t.id} className={`tab ${tab === t.id ? "on" : ""}`} onClick={() => setTab(t.id)}>
+          <button
+            key={t.id}
+            className={`tab ${tab === t.id ? "on" : ""}`}
+            onClick={() => {
+              history.push({ tab: t.id });
+              setTab(t.id);
+            }}
+          >
             {t.id === "words" ? <span className="alpha">α</span> : <Icon name={t.id === "read" ? "book" : t.id} />}
             {t.label}
           </button>
