@@ -1445,8 +1445,15 @@ input[type="range"] {
   background: none;
   opacity: 1;
 }
-/* The word being read aloud in a book: a CSS highlight over the text (DocView). */
-::highlight(said) {
-  background-color: var(--ring);
-  color: #ffffff;
+/* The word being read aloud in a book: a copy laid over it, styled as the Bible's .said (DocView). */
+.prose.doc {
+  position: relative;
+}
+.saidbox {
+  position: absolute;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  pointer-events: none;
 }

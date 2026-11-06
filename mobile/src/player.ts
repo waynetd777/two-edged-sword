@@ -9,8 +9,8 @@ import { addPluginListener, invoke } from "@tauri-apps/api/core";
 import { useSyncExternalStore } from "react";
 import { fmtRef, stepChapter } from "../../src/bible";
 import { speakable, speechText, spokenChapter } from "../../src/spoken";
-import { docSegments, plainText } from "../../src/esword";
-import { bookTitles, docHtml, isDevotional } from "./DocView";
+import { plainText } from "../../src/esword";
+import { bookTitles, docHtml, docParas, isDevotional } from "./DocView";
 import { api, save, saved, Verse } from "./api";
 
 export type Sleep = "off" | "15" | "30" | "60" | "chapter";
@@ -70,7 +70,7 @@ async function speakFrom(bible: string, book: number, chapter: number, verse: nu
 /** A book's chapter, paragraph by paragraph from `from`, announced by its name (a devotional by its title and day). */
 async function speakDoc(d: { module: string; chapter: string; title: string }, from: number) {
   const html = await docHtml(d.module, d.chapter).catch(() => null);
-  const paras = html ? docSegments(html) : [];
+  const paras = html ? docParas(html, d.chapter) : [];
   pageAt.clear();
   const items = paras
     .map((p, i) => {

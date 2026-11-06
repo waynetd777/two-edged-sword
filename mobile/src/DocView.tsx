@@ -3,8 +3,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Ref } from "../../src/bible";
-import { docSegments, renderHtml, wordRangeAt } from "../../src/esword";
-import { paintHighlight } from "../../src/dom";
+import { docSegments, plainText, renderHtml, wordRangeAt } from "../../src/esword";
 import { api, Article } from "./api";
 import { useBookmarks } from "./bookmarks";
 import { Icon } from "./icons";
@@ -37,6 +36,14 @@ export const bookTitles = (module: string) => {
 /** A book's chapter (a devotional's day) as HTML; null when it has none. */
 export const docHtml = (module: string, chapter: string): Promise<string | null> =>
   isDevotional(module) ? api.devotion(module, chapter) : api.article("reference", module, chapter).then((a) => a?.html ?? null);
+
+/** A chapter's paragraphs as they're shown and read: the first left out when it's only the chapter's own
+ *  title ("1. The Prophetic Word"), which the page shows above it and Listen announces. */
+export function docParas(html: string, chapter: string): string[] {
+  const segs = docSegments(html);
+  const norm = (t: string) => t.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+  return segs.length > 1 && norm(plainText(segs[0])) === norm(chapter) ? segs.slice(1) : segs;
+}
 
 /** A chapter of a book (Josephus, Larkin…) in the reading page, its pictures opening full screen. */
 export function DocView({
@@ -80,14 +87,20 @@ export function DocView({
     };
   }, [module, chapter]);
   const at = list.indexOf(chapter);
-  // The word being read, painted over the page's text as the desktop does (CSS highlights).
+  // The word being read: found on the page (wordRangeAt, as the desktop finds it), and marked by a copy of
+  // it laid over it, drawn as the Bible's marked word is (.said), so the two look the same.
   const body = useRef<HTMLDivElement>(null);
+  const [said, setSaid] = useState<{ left: number; top: number; width: number; height: number; text: string; font: string } | null>(null);
   useEffect(() => {
-    const el = reading ? body.current?.querySelector(`[data-para="${reading}"]`) : null;
+    const box = body.current;
+    const el = reading ? box?.querySelector(`[data-para="${reading}"]`) : null;
     const r = el && readingAt !== undefined && readingAt >= 0 ? wordRangeAt(el, readingAt) : null;
-    paintHighlight("said", r ? [r] : []);
+    const rect = r?.getClientRects()[0];
+    if (!box || !r || !rect) return setSaid(null);
+    const outer = box.getBoundingClientRect();
+    const cs = getComputedStyle(r.startContainer.parentElement ?? box);
+    setSaid({ left: rect.left - outer.left, top: rect.top - outer.top, width: rect.width, height: rect.height, text: r.toString(), font: cs.font });
   }, [reading, readingAt, a]);
-  useEffect(() => () => paintHighlight("said", []), []);
   const next = at >= 0 ? list[at + 1] : undefined;
 
   return (
@@ -110,7 +123,12 @@ export function DocView({
       ) : (
         // In paragraphs, as Listen reads it, so the one being read can be marked and followed.
         <div className="prose doc" ref={body}>
-          {docSegments(a.html).map((seg, i) => (
+          {said && (
+            <span className="said saidbox" aria-hidden="true" style={{ left: said.left, top: said.top, minWidth: said.width, height: said.height, font: said.font }}>
+              {said.text}
+            </span>
+          )}
+          {docParas(a.html, chapter).map((seg, i) => (
             <div key={i} data-para={i + 1} className={reading === i + 1 ? "speaking" : undefined}>
               {renderHtml(seg, { onRef, onImage })}
             </div>
