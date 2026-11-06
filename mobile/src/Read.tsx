@@ -790,7 +790,7 @@ export function Read({
           setComparing(!comparing);
         }}
       >
-        <Icon name="compare" size={20} />
+        <Icon name="compare" size={26} />
       </button>
       </div>
       )}

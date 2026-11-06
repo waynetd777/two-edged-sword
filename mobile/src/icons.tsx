@@ -42,11 +42,12 @@ const PATHS = {
       <circle cx="4" cy="18" r="1" fill="currentColor" />
     </>
   ),
-  // Two tall columns side by side: translations next to each other (short ones read as pause).
+  // Two pages of text side by side: translations next to each other.
   compare: (
     <>
-      <rect x="4" y="1.5" width="6.5" height="21" rx="1.5" />
-      <rect x="13.5" y="1.5" width="6.5" height="21" rx="1.5" />
+      <rect x="2.5" y="3" width="8.5" height="18" rx="1.5" />
+      <rect x="13" y="3" width="8.5" height="18" rx="1.5" />
+      <path d="M5 7.5h3.5M5 11h3.5M5 14.5h3.5M15.5 7.5h3.5M15.5 11h3.5M15.5 14.5h3.5" strokeWidth={1.4} />
     </>
   ),
   trash: (
