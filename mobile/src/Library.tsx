@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { api, Kind, Module, Offer, save, saved, scene } from "./api";
 import { Icon } from "./icons";
 import { NavButtons } from "./NavButtons";
+import { renderHtml } from "../../src/esword";
 
 /** Where the downloads live: the GitHub release tagged `modules` (mobile/tools/modules_release.py). */
 const RELEASE = "https://github.com/waynetd777/two-edged-sword/releases/download/modules/";
@@ -54,12 +55,28 @@ export function Library({
   const [offline, setOffline] = useState<string | null>(null);
   const [going, setGoing] = useState<Record<string, Going>>({});
   const [removing, setRemoving] = useState<Module | null>(null);
+  /** The About open: a module on the phone (read from it) or one to download (from the manifest). */
+  const [about, setAbout] = useState<{ title: string; sub: string; html: string | null } | null>(null);
+  const showAbout = (m: Module) => {
+    setAbout({ title: m.title, sub: `${m.source === "bundled" ? "Built in" : "Downloaded"} · ${mb(m.size)}`, html: null });
+    api
+      .moduleInfo(m.kind, m.id)
+      .then((html) => setAbout((a) => (a && a.title === m.title ? { ...a, html } : a)))
+      .catch(() => setAbout((a) => (a && a.title === m.title ? { ...a, html: "" } : a)));
+  };
+  const InfoButton = ({ label, onClick }: { label: string; onClick: () => void }) => (
+    <button className="infobtn" aria-label={`About ${label}`} onClick={onClick}>
+      <Icon name="info" size={20} />
+    </button>
+  );
   const [toStart, setGet] = useState<Offer | null>(null);
 
   useEffect(() => save("libraryGroup", group), [group]);
   useEffect(() => {
     // Debug builds can point at a local copy of the release: TES_SCENE=modules=http://localhost:8000/
     scene.then((sc) => {
+      // Debug: about opens the first module's About on the phone.
+      if (sc.includes("about")) setTimeout(() => document.querySelector<HTMLButtonElement>(".infobtn")?.click(), 1500);
       const grp = sc.find((x) => x.startsWith("group="))?.slice(6) as Group | undefined;
       if (grp && GROUPS.some((x) => x.id === grp)) setGroup(grp);
       // A debug build can use a local copy of the downloads (modules=<url>), and remembers it, so the app opened from the home screen keeps using it.
@@ -160,6 +177,7 @@ export function Library({
                     {m.source === "bundled" ? "Built in" : "Downloaded"} · {mb(m.size)}
                   </span>
                 </span>
+                <InfoButton label={m.title} onClick={() => showAbout(m)} />
                 {m.kind !== "bible" && m.kind !== "commentary" && (
                   <button
                     className="mini accent"
@@ -202,6 +220,7 @@ export function Library({
                     </span>
                   )}
                 </span>
+                <InfoButton label={o.title} onClick={() => setAbout({ title: o.title, sub: `${mb(o.gz)} to download · ${mb(o.size)} on the phone`, html: o.info ?? "" })} />
                 {d && !d.error ? (
                   <button className="mini" aria-label={`Stop downloading ${o.title}`} onClick={() => api.cancelDownload(o.file)}>
                     ✕
@@ -225,6 +244,35 @@ export function Library({
           Everything here is in the public domain, built for Two-edged Sword from its original sources.
         </p>
       </div>
+
+      {about && (
+        <>
+          <div className="scrim" onClick={() => setAbout(null)} />
+          <section className="sheet tall" aria-label={`About ${about.title}`}>
+            <div className="grab" onClick={() => setAbout(null)}>
+              <span />
+            </div>
+            <div className="shead">
+              <h2 style={{ flex: 1 }}>{about.title}</h2>
+              <button className="done" onClick={() => setAbout(null)}>
+                Done
+              </button>
+            </div>
+            <div className="sbody">
+              <p className="m" style={{ marginTop: 0 }}>
+                {about.sub}
+              </p>
+              {about.html === null ? (
+                <p className="empty">Opening…</p>
+              ) : about.html.trim() ? (
+                <div className="prose about">{renderHtml(about.html)}</div>
+              ) : (
+                <p className="empty">It has no description.</p>
+              )}
+            </div>
+          </section>
+        </>
+      )}
 
       {removing && (
         <>

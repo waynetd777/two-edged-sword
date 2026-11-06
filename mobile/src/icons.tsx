@@ -50,6 +50,13 @@ const PATHS = {
       <path d="M5 7.5h3.5M5 11h3.5M5 14.5h3.5M15.5 7.5h3.5M15.5 11h3.5M15.5 14.5h3.5" strokeWidth={1.4} />
     </>
   ),
+  info: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 11v6" />
+      <circle cx="12" cy="7.6" r="0.6" fill="currentColor" />
+    </>
+  ),
   trash: (
     <>
       <path d="M4 7h16M10 11v6M14 11v6" />

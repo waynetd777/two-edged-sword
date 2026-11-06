@@ -1523,3 +1523,23 @@ input[type="range"] {
     width: 28px;
   }
 }
+
+/* ---------- a module's About ---------- */
+.infobtn {
+  flex: none;
+  width: 36px;
+  height: 44px;
+  border: none;
+  background: none;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.prose.about img {
+  display: block;
+  max-width: 160px;
+  height: auto;
+  margin: 0 0 12px;
+  border-radius: 6px;
+}

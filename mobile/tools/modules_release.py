@@ -15,6 +15,7 @@ third-party modules may not be passed on.
 import gzip
 import hashlib
 import json
+import re
 import shutil
 import sqlite3
 from datetime import datetime, timezone
@@ -31,13 +32,13 @@ def bundled() -> set[str]:
     return {Path(v).name for v in conf["bundle"]["resources"].values()}
 
 
-def details(path: Path) -> tuple[str, str]:
+def details(path: Path) -> tuple[str, str, str]:
     c = sqlite3.connect(f"file:{path}?immutable=1", uri=True)
     try:
-        row = c.execute("SELECT Title, Abbreviation FROM Details LIMIT 1").fetchone() or ("", "")
+        row = c.execute("SELECT Title, Abbreviation, Information FROM Details LIMIT 1").fetchone() or ("", "", "")
     finally:
         c.close()
-    return (row[0] or path.stem).strip(), (row[1] or "").strip()
+    return (row[0] or path.stem).strip(), (row[1] or "").strip(), (row[2] or "").strip()
 
 
 def main():
@@ -55,7 +56,7 @@ def main():
         # mtime=0: the same module gives the same .gz, so an unchanged one needn't be uploaded again.
         with open(gz, "wb") as f, gzip.GzipFile(filename="", mode="wb", fileobj=f, compresslevel=9, mtime=0) as z:
             z.write(data)
-        title, abbrev = details(path)
+        title, abbrev, info = details(path)
         entries.append(
             {
                 "id": path.stem,
@@ -66,6 +67,9 @@ def main():
                 "size": len(data),
                 "gz": gz.stat().st_size,
                 "sha256": hashlib.sha256(data).hexdigest(),
+                # Its About, so the Library can show it before it's downloaded; without its pictures (a cover
+                # is tens of kilobytes), which show once it's on the phone.
+                "info": re.sub(r"<img\b[^>]*>", "", info),
             }
         )
         print(f"{path.name:36} {len(data) / 1e6:6.1f} MB -> {gz.stat().st_size / 1e6:6.1f} MB")

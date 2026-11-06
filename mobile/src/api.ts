@@ -31,6 +31,8 @@ export interface Offer {
   size: number;
   gz: number;
   sha256: string;
+  /** Its About (e-Sword's description, HTML), so it can be read before it's downloaded. */
+  info?: string;
 }
 
 export interface Verse {
@@ -117,6 +119,7 @@ export interface TranslitHit {
 }
 
 export const api = {
+  moduleInfo: (kind: Kind, id: string) => invoke<string>("module_info", { kind, id }),
   topics: (kind: Kind, module: string, prefix: string, limit: number) => invoke<string[]>("list_topics", { kind, module, prefix, limit }),
   devotionTitles: (module: string) => invoke<string[]>("devotion_titles", { module }),
   devotion: (module: string, title: string) => invoke<string | null>("devotion", { module, title }),

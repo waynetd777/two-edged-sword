@@ -147,6 +147,12 @@ fn list_topics(st: State<AppState>, kind: Kind, module: String, prefix: String, 
     content::topics(&st.lib.read().unwrap(), kind, &module, &prefix, limit)
 }
 
+/// A module's About: e-Sword's description of it, HTML.
+#[tauri::command(async)]
+fn module_info(st: State<AppState>, kind: Kind, id: String) -> Result<String, String> {
+    Ok(st.lib.read().unwrap().module(kind, &id)?.info.clone())
+}
+
 /// A reference book's chapters, in order.
 #[tauri::command(async)]
 fn reference_titles(st: State<AppState>, module: String) -> Result<Vec<String>, String> {
@@ -334,7 +340,7 @@ pub fn run() {
             app.manage(AppState { lib: RwLock::new(scan()), cancelled: Mutex::new(HashSet::new()) });
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![log, scene, set_bundled, modules, chapter, chapter_sizes, commentary, coverage, article, strongs_for_word, search, strongs_by_book, strongs_verses, translit_search, find_topics, fetch_manifest, list_topics, reference_titles, devotion_titles, devotion, commentary_ranges, schedule_reminders, download, cancel_download, remove_module])
+        .invoke_handler(tauri::generate_handler![log, scene, set_bundled, modules, chapter, chapter_sizes, commentary, coverage, article, strongs_for_word, search, strongs_by_book, strongs_verses, translit_search, find_topics, fetch_manifest, module_info, list_topics, reference_titles, devotion_titles, devotion, commentary_ranges, schedule_reminders, download, cancel_download, remove_module])
         .run(tauri::generate_context!())
         .expect("error while running the app");
 }
