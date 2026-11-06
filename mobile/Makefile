@@ -22,4 +22,12 @@ shot:      ## make shot SCENE=study [OUT=file.png]: relaunch in a scene (lib.rs'
 	sleep 4
 	xcrun simctl io "$(SIM)" screenshot "$(or $(OUT),shot.png)"
 
-.PHONY: assets ios-sim shot
+icons:     ## The app icons from src-tauri/icons/source (python3 tools/icons.py makes those from design/icon.png)
+	cargo tauri icon src-tauri/icons/source/ios.png
+	rm -rf src-tauri/icons/android
+	cargo tauri icon src-tauri/icons/source/android.png -o target/android-icons
+	mv target/android-icons/android src-tauri/icons/android
+	rm -rf target/android-icons
+	python3 tools/icons.py finish
+
+.PHONY: assets icons ios-sim shot

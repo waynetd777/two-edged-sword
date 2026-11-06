@@ -42,3 +42,4 @@ tools/screenshots/out/
 mobile/src-tauri/target
 mobile/src-tauri/gen/schemas
 mobile/src-tauri/gen/apple/assets
+mobile/target
