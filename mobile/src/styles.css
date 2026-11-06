@@ -1497,3 +1497,29 @@ input[type="range"] {
     opacity: 0.6;
   }
 }
+
+/* ---------- narrow phones (360 points: many Androids, the iPhone SE) ---------- */
+/* The top bar is tightened to fit, and the passage's button shortens its text rather than pushing the
+   buttons past the edge. */
+@media (max-width: 380px) {
+  .topbar {
+    gap: 4px;
+    padding-right: 8px;
+    padding-left: 4px;
+  }
+  .topbar .pill {
+    padding: 0 9px;
+    gap: 4px;
+    min-width: 0;
+  }
+  .topbar .pill.strong {
+    flex: 0 1 auto;
+    overflow: hidden;
+  }
+  .topbar .ibtn {
+    width: 36px;
+  }
+  .topbar .nav {
+    width: 28px;
+  }
+}
