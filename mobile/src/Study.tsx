@@ -6,6 +6,7 @@ import { fmtRef, Ref } from "../../src/bible";
 import { renderHtml } from "../../src/esword";
 import { api, Commentary, Coverage, save, saved, scene } from "./api";
 import { Icon } from "./icons";
+import { useBookmarks } from "./bookmarks";
 import { MapsTab, Spot } from "./MapsTab";
 import type { Module } from "./api";
 
@@ -49,11 +50,14 @@ export function Study({
   modules,
   onChanged,
   onImage,
+  bible,
 }: {
   modules: Module[];
   /** The library changed (the maps were downloaded). */
   onChanged: () => void;
   onImage: (src: string, ring: Spot[]) => void;
+  /** The Bible being read, for a bookmark. */
+  bible: string;
   /** Beside the text (an iPad in landscape), as the desktop's study pane, rather than a sheet. */
   docked?: boolean;
   at: { book: number; chapter: number; verse: number };
@@ -139,6 +143,7 @@ export function Study({
         )}
         <div className="shead" onTouchStart={start} onTouchEnd={end}>
           <h2>{fmtRef(at)}</h2>
+          <BookmarkButton at={at} bible={bible} />
           <span className="m" style={{ flex: 1 }}>
             {docked ? "Tap a verse to study it" : "Swipe for the next verse"}
           </span>
@@ -275,5 +280,17 @@ function Picker({
         </div>
       </section>
     </>
+  );
+}
+
+/** Bookmarks the verse, or takes the bookmark off. */
+function BookmarkButton({ at, bible }: { at: { book: number; chapter: number; verse: number }; bible: string }) {
+  const b = useBookmarks();
+  const mark = { ref: { book: at.book, chapter: at.chapter, verse: at.verse }, bible };
+  const on = b.has(mark);
+  return (
+    <button className={`bmk ${on ? "on" : ""}`} aria-label={on ? `Remove the bookmark on ${fmtRef(at)}` : `Bookmark ${fmtRef(at)}`} aria-pressed={on} onClick={() => b.toggle(mark)}>
+      <Icon name="bookmark" size={20} fill={on ? "currentColor" : undefined} />
+    </button>
   );
 }

@@ -2,8 +2,10 @@
 // SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import { useEffect, useState } from "react";
-import type { Module } from "./api";
+import { scene, type Module } from "./api";
 import { bookTitles, todayTitle } from "./DocView";
+import { Mark, useBookmarks } from "./bookmarks";
+import { fmtRef } from "../../src/bible";
 import { book, BOOKS, BookSizes, parseRef, Ref } from "../../src/bible";
 import { Icon } from "./icons";
 
@@ -38,7 +40,14 @@ export function GoTo({
   const [b, setB] = useState<number | null>(null);
   const [c, setC] = useState<number | null>(null);
   const [typed, setTyped] = useState("");
-  const [side, setSide] = useState<"bible" | "books">(startOnBooks ? "books" : "bible");
+  const [side, setSide] = useState<"bible" | "books" | "saved">(startOnBooks ? "books" : "bible");
+  const bm = useBookmarks();
+  useEffect(() => {
+    scene.then((sc) => sc.includes("saved") && setSide("saved"));
+  }, []);
+  const open = (m: Mark) => (m.doc ? onDoc(m.doc.module, m.doc.chapter) : m.ref && onGo(m.ref));
+  const label = (m: Mark) => (m.doc ? m.doc.chapter : m.ref ? fmtRef(m.ref) : "");
+  const where = (m: Mark) => (m.doc ? m.doc.title : (m.bible ?? "").toUpperCase());
   const [bk, setBk] = useState<Module | null>(() => (openDoc ? (bookModules.find((m) => m.id === openDoc.module) ?? null) : null));
   const [chapterTitles, setChapterTitles] = useState<string[] | null>(null);
   useEffect(() => {
@@ -90,6 +99,9 @@ export function GoTo({
             <button role="tab" aria-selected={side === "books"} onClick={() => setSide("books")}>
               Books
             </button>
+            <button role="tab" aria-selected={side === "saved"} onClick={() => setSide("saved")}>
+              Saved
+            </button>
           </div>
         )}
         {side === "bible" && !b && (
@@ -107,7 +119,49 @@ export function GoTo({
           </label>
         )}
         <div className="sbody" style={{ userSelect: "none", WebkitUserSelect: "none" }}>
-          {side === "books" ? (
+          {side === "saved" ? (
+            <>
+              <p className="label">Bookmarks</p>
+              {bm.list().length ? (
+                <div className="list">
+                  {bm.list().map((m) => (
+                    <div key={m.at} className="row">
+                      <button className="grow" style={{ border: "none", background: "none", textAlign: "left", minHeight: 50, padding: 0, display: "flex", flexDirection: "column", justifyContent: "center" }} onClick={() => open(m)}>
+                        <span style={{ fontSize: 16 }}>{label(m)}</span>
+                        <span className="m">{where(m)}</span>
+                      </button>
+                      <button className="mini" aria-label={`Remove the bookmark on ${label(m)}`} onClick={() => bm.remove(m)}>
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="empty">None yet. The bookmark button by a verse in the study sheet, or by a book's chapter title, adds one.</p>
+              )}
+              {bm.recent().length > 0 && (
+                <>
+                  <p className="label" style={{ marginTop: 16 }}>
+                    Recent
+                  </p>
+                  <div className="list">
+                    {bm.recent().map((m) => (
+                      <button key={m.at + label(m)} className="row" onClick={() => open(m.doc ? m : { ...m, ref: m.ref && { ...m.ref, verse: 1 } })}>
+                        <span className="grow" style={{ display: "flex", flexDirection: "column", padding: "8px 0" }}>
+                          <span>{m.doc ? m.doc.chapter : m.ref ? fmtRef({ book: m.ref.book, chapter: m.ref.chapter }) : ""}</span>
+                          <span className="m">
+                            {m.doc ? m.doc.title : ""}
+                            {m.doc ? " · " : ""}
+                            {new Date(m.at).toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" })}
+                          </span>
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+            </>
+          ) : side === "books" ? (
             !bk ? (
               <>
                 {bookModules.length > 0 && (

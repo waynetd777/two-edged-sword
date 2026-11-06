@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 import { Ref } from "../../src/bible";
 import { renderHtml } from "../../src/esword";
 import { api, Article } from "./api";
+import { useBookmarks } from "./bookmarks";
+import { Icon } from "./icons";
 
 /** Which books are devotionals (their "chapters" are days), told by Read from the module list. */
 const devotionals = new Set<string>();
@@ -49,6 +51,9 @@ export function DocView({
 }) {
   const [a, setA] = useState<Article | null | undefined>(undefined);
   const [list, setList] = useState<string[]>([]);
+  const b = useBookmarks();
+  const mark = { doc: { module, chapter, title } };
+  const marked = b.has(mark);
   useEffect(() => {
     let live = true;
     setA(undefined);
@@ -71,9 +76,14 @@ export function DocView({
       <p className="sub" style={{ margin: "0 0 4px" }}>
         {title}
       </p>
-      <h1 className="title" style={{ marginBottom: 16 }}>
-        {chapter}
-      </h1>
+      <div style={{ display: "flex", alignItems: "flex-start", gap: 8, marginBottom: 16 }}>
+        <h1 className="title" style={{ flex: 1 }}>
+          {chapter}
+        </h1>
+        <button className={`bmk ${marked ? "on" : ""}`} aria-label={marked ? "Remove the bookmark" : "Bookmark this chapter"} aria-pressed={marked} onClick={() => b.toggle(mark)}>
+          <Icon name="bookmark" size={22} fill={marked ? "currentColor" : undefined} />
+        </button>
+      </div>
       {a === undefined ? (
         <p className="loading">Opening…</p>
       ) : !a ? (

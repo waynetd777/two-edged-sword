@@ -9,6 +9,7 @@ import { Icon } from "./icons";
 import { COMPARE_DEFAULT, CompareEdit, CompareView, useChapters } from "./Compare";
 import { bookTitles, DocView, isDevotional, setDevotionals, todayTitle } from "./DocView";
 import { GoTo } from "./GoTo";
+import { bookmarks, useBookmarks } from "./bookmarks";
 import { player, usePlayer } from "./player";
 import { ImageViewer } from "./ImageViewer";
 import type { Spot } from "./MapsTab";
@@ -180,6 +181,13 @@ export function Read({
   }, [doc?.module]); // eslint-disable-line react-hooks/exhaustive-deps
   const docKey = (d: { module: string; chapter: string } | null) => (d ? `${d.module}|${d.chapter}` : "");
   const pl = usePlayer();
+  const bm = useBookmarks();
+  const marked = (v: number) => bm.has({ ref: { book: loc.book, chapter: loc.chapter, verse: v }, bible });
+  // Recent: each chapter read, once.
+  useEffect(() => {
+    if (doc) bookmarks.visited({ doc: { ...doc, title: docMod?.title ?? doc.module } });
+    else bookmarks.visited({ ref: { book: loc.book, chapter: loc.chapter, verse: sel }, bible });
+  }, [loc.book, loc.chapter, doc?.module, doc?.chapter]); // eslint-disable-line react-hooks/exhaustive-deps
   const playingHere = pl.on && pl.bible === bible && pl.book === loc.book && pl.chapter === loc.chapter && !doc;
   const docked = useWide(wideScene);
   const [wordScene, setWordScene] = useState(false);
@@ -236,6 +244,11 @@ export function Read({
         setGoing(true);
       }
       if (sc.includes("compare")) setComparing(true);
+      if (sc.includes("mark"))
+        setTimeout(() => {
+          const l = saved("loc", { book: 62, chapter: 1 });
+          bookmarks.toggle({ ref: { book: l.book, chapter: l.chapter, verse: saved("verse", 1) }, bible: saved("bible", "kjv+") });
+        }, 800);
       if (sc.includes("listen")) setTimeout(() => player.play(saved("bible", "kjv+"), saved("loc", { book: 62, chapter: 1 }).book, saved("loc", { book: 62, chapter: 1 }).chapter, 1), 1500);
       if (sc.includes("wide")) setWideScene(true);
       const r = sc.find((x) => x.startsWith("at="));
@@ -602,7 +615,14 @@ export function Read({
                   className={`v ${v.v === sel ? "sel" : ""} ${playingHere && pl.verse === v.v ? "speaking" : ""}`}
                   onClick={() => pick(v.v)}
                 >
-                  <span className="vnum">{v.v}</span>
+                  <span className="vnum">
+                    {marked(v.v) && (
+                      <span className="ribbon" aria-label="Bookmarked">
+                        <Icon name="bookmark" size={11} fill="currentColor" />
+                      </span>
+                    )}
+                    {v.v}
+                  </span>
                   <Words
                     tokens={tokens.get(v.v) ?? []}
                     nums={!!bmod?.strongs}
@@ -625,7 +645,14 @@ export function Read({
                   className={`pv ${v.v === sel ? "sel" : ""} ${playingHere && pl.verse === v.v ? "speaking" : ""}`}
                   onClick={() => pick(v.v)}
                 >
-                  <span className="vnum">{v.v}</span>
+                  <span className="vnum">
+                    {marked(v.v) && (
+                      <span className="ribbon" aria-label="Bookmarked">
+                        <Icon name="bookmark" size={11} fill="currentColor" />
+                      </span>
+                    )}
+                    {v.v}
+                  </span>
                   <Words
                     tokens={tokens.get(v.v) ?? []}
                     nums={!!bmod?.strongs}
@@ -662,6 +689,7 @@ export function Read({
 
       {docked && !doc && (
         <Study
+          bible={bible}
           modules={modules}
           onChanged={onModulesChanged}
           onImage={(src, ring) => setImage({ src, ring })}
@@ -721,6 +749,7 @@ export function Read({
 
       {study && !docked && (
         <Study
+          bible={bible}
           modules={modules}
           onChanged={onModulesChanged}
           onImage={(src, ring) => setImage({ src, ring })}

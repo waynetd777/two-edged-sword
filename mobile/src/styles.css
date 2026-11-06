@@ -1380,3 +1380,26 @@ input[type="range"] {
   color: #ffffff;
   border-radius: 3px;
 }
+
+/* ---------- bookmarks ---------- */
+.bmk {
+  flex: none;
+  width: 40px;
+  height: 36px;
+  margin: -6px 0 -6px 2px;
+  border: none;
+  background: none;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+}
+.bmk.on {
+  color: var(--accent);
+}
+.ribbon {
+  color: var(--accent);
+  margin-right: 2px;
+  vertical-align: -1px;
+}
