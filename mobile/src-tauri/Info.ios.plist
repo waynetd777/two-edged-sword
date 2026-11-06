@@ -5,5 +5,17 @@
 	<!-- The name under the icon: "Two-edged Sword" is too wide, and iOS squeezes out its space. -->
 	<key>CFBundleDisplayName</key>
 	<string>2-edged Sword</string>
+	<!-- iPhone: portrait only; every screen is laid out for it. iPad turns freely (split screen needs it). -->
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+	</array>
+	<key>UISupportedInterfaceOrientations~ipad</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
 </dict>
 </plist>
