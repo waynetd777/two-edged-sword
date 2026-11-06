@@ -100,9 +100,10 @@ export function Library({ modules, onChanged }: { modules: Module[]; onChanged: 
   };
 
   const g = GROUPS.find((x) => x.id === group)!;
-  const here = modules.filter((m) => g.kinds.includes(m.kind));
+  const byTitle = (a: { title: string }, b: { title: string }) => a.title.localeCompare(b.title, undefined, { sensitivity: "base" });
+  const here = modules.filter((m) => g.kinds.includes(m.kind)).sort(byTitle);
   const have = new Set(modules.map((m) => m.file));
-  const toGet = offers.filter((o) => g.kinds.includes(o.kind) && !have.has(o.file));
+  const toGet = offers.filter((o) => g.kinds.includes(o.kind) && !have.has(o.file)).sort(byTitle);
   const used = modules.reduce((n, m) => n + m.size, 0);
 
   return (
