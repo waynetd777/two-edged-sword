@@ -71,11 +71,16 @@ async function speakFrom(bible: string, book: number, chapter: number, verse: nu
 async function speakDoc(d: { module: string; chapter: string; title: string }, from: number) {
   const html = await docHtml(d.module, d.chapter).catch(() => null);
   const paras = html ? docSegments(html) : [];
+  pageAt.clear();
   const items = paras
-    .map((p, i) => ({ id: i + 1, text: speakable(plainText(p)).spoken }))
+    .map((p, i) => {
+      // As a book's paragraph is said, and where each spoken character is in its text on the page.
+      const { spoken, at } = speakable(plainText(p));
+      pageAt.set(i + 1, at);
+      return { id: i + 1, text: spoken };
+    })
     .filter((x) => x.id >= from && x.text.trim());
   if (!items.length) return stop();
-  pageAt.clear();
   set({ on: true, paused: false, doc: d, bible: "", book: 0, chapter: 0, verse: items[0].id, at: -1, len: 0, error: undefined });
   const announce = isDevotional(d.module) ? `${d.title}, ${d.chapter}` : d.chapter;
   await call("speak", {
@@ -94,7 +99,7 @@ function listen() {
     if (!state.on) return;
     if (e.id === 0) return; // the chapter's announcement
     if (e.kind === "start") set({ verse: e.id!, at: -1, len: 0 });
-    else if (e.kind === "word") set({ verse: e.id!, at: state.doc ? -1 : (pageAt.get(e.id!)?.[e.at!] ?? e.at!), len: e.len! });
+    else if (e.kind === "word") set({ verse: e.id!, at: pageAt.get(e.id!)?.[e.at!] ?? e.at!, len: e.len! });
     else if (e.kind === "paused") set({ paused: true });
     else if (e.kind === "resumed") set({ paused: false });
     else if (e.kind === "end" && state.doc) {

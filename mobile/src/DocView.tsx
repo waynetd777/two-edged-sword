@@ -1,9 +1,10 @@
 // Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
 // SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Ref } from "../../src/bible";
-import { docSegments, renderHtml } from "../../src/esword";
+import { docSegments, renderHtml, wordRangeAt } from "../../src/esword";
+import { paintHighlight } from "../../src/dom";
 import { api, Article } from "./api";
 import { useBookmarks } from "./bookmarks";
 import { Icon } from "./icons";
@@ -46,9 +47,12 @@ export function DocView({
   onImage,
   onChapter,
   reading,
+  readingAt,
 }: {
   /** The paragraph being read aloud (from 1), to mark. */
   reading?: number;
+  /** ...and the word in it: its character in the paragraph's plain text. */
+  readingAt?: number;
   module: string;
   title: string;
   chapter: string;
@@ -76,6 +80,14 @@ export function DocView({
     };
   }, [module, chapter]);
   const at = list.indexOf(chapter);
+  // The word being read, painted over the page's text as the desktop does (CSS highlights).
+  const body = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = reading ? body.current?.querySelector(`[data-para="${reading}"]`) : null;
+    const r = el && readingAt !== undefined && readingAt >= 0 ? wordRangeAt(el, readingAt) : null;
+    paintHighlight("said", r ? [r] : []);
+  }, [reading, readingAt, a]);
+  useEffect(() => () => paintHighlight("said", []), []);
   const next = at >= 0 ? list[at + 1] : undefined;
 
   return (
@@ -97,7 +109,7 @@ export function DocView({
         <p className="loading">This chapter couldn't be read.</p>
       ) : (
         // In paragraphs, as Listen reads it, so the one being read can be marked and followed.
-        <div className="prose doc">
+        <div className="prose doc" ref={body}>
           {docSegments(a.html).map((seg, i) => (
             <div key={i} data-para={i + 1} className={reading === i + 1 ? "speaking" : undefined}>
               {renderHtml(seg, { onRef, onImage })}

@@ -631,6 +631,7 @@ export function Read({
               onImage={(src) => setImage({ src })}
               onChapter={(c) => openDoc(doc.module, c)}
               reading={readingDoc}
+              readingAt={readingDoc ? pl.at : undefined}
             />
           ) : comparing ? (
             <CompareView

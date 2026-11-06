@@ -1445,3 +1445,8 @@ input[type="range"] {
   background: none;
   opacity: 1;
 }
+/* The word being read aloud in a book: a CSS highlight over the text (DocView). */
+::highlight(said) {
+  background-color: var(--ring);
+  color: #ffffff;
+}
