@@ -1403,3 +1403,17 @@ input[type="range"] {
   margin-right: 2px;
   vertical-align: -1px;
 }
+.round.listen.bmkbar {
+  width: 48px;
+  color: var(--muted);
+}
+.round.listen.bmkbar.on {
+  color: var(--accent);
+}
+.studybar .t,
+.studybar .s {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

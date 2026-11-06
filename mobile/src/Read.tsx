@@ -729,13 +729,21 @@ export function Read({
         <span style={{ color: "var(--accent)", display: "flex" }}>
           <Icon name="book" size={20} />
         </span>
-        <span style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+        <span style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
           <span className="t">Study {fmtRef({ ...loc, verse: sel })}</span>
-          <span className="s">Commentary and cross-references</span>
+          <span className="s">Commentary and maps</span>
         </span>
         <span style={{ color: "var(--muted)", display: "flex" }}>
           <Icon name="up" size={16} />
         </span>
+      </button>
+      <button
+        className={`round listen bmkbar ${marked(sel) ? "on" : ""}`}
+        aria-label={marked(sel) ? `Remove the bookmark on ${fmtRef({ ...loc, verse: sel })}` : `Bookmark ${fmtRef({ ...loc, verse: sel })}`}
+        aria-pressed={marked(sel)}
+        onClick={() => bookmarks.toggle({ ref: { book: loc.book, chapter: loc.chapter, verse: sel }, bible })}
+      >
+        <Icon name="bookmark" size={20} fill={marked(sel) ? "currentColor" : undefined} />
       </button>
       <button
         className="round listen"

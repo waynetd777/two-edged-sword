@@ -100,7 +100,7 @@ export function GoTo({
               Books
             </button>
             <button role="tab" aria-selected={side === "saved"} onClick={() => setSide("saved")}>
-              Saved
+              Bookmarked
             </button>
           </div>
         )}
@@ -137,7 +137,7 @@ export function GoTo({
                   ))}
                 </div>
               ) : (
-                <p className="empty">None yet. The bookmark button by a verse in the study sheet, or by a book's chapter title, adds one.</p>
+                <p className="empty">None yet. The bookmark button beside the study bar marks the selected verse; a book's chapter has one by its title.</p>
               )}
               {bm.recent().length > 0 && (
                 <>
