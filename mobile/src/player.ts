@@ -67,6 +67,45 @@ async function speakFrom(bible: string, book: number, chapter: number, verse: nu
   });
 }
 
+/** One stretch of a plan's day as read: a chapter, from a verse, to a verse; `part` is which of the
+ *  day's parts it belongs to. */
+export interface PlanStretch {
+  book: number;
+  chapter: number;
+  from: number;
+  to?: number;
+  part: number;
+}
+
+/** A day's reading being read: its stretches, and what to do as each part is finished. Its utterances'
+ *  ids are (stretch + 1) * 1000 + verse, the stretch's announcement being verse 0. */
+let plan: { stretches: PlanStretch[]; onPart: (part: number) => void; part: number } | null = null;
+
+/** The whole day's reading handed to iOS at once, so it reads all of it with the screen locked. */
+async function speakPlan(bible: string, stretches: PlanStretch[], onPart: (part: number) => void, title: string) {
+  pageAt.clear();
+  const items: { id: number; text: string }[] = [];
+  for (let i = 0; i < stretches.length; i++) {
+    const x = stretches[i];
+    const vs = await api.chapter(bible, x.book, x.chapter).catch(() => [] as Verse[]);
+    const base = (i + 1) * 1000;
+    items.push({ id: base, text: spokenChapter(x.book, x.chapter, x.from) });
+    for (const v of vs.filter((v) => v.v >= x.from && (!x.to || v.v <= x.to))) {
+      const { spoken, at } = speakable(speechText(v.text));
+      pageAt.set(base + v.v, at);
+      items.push({ id: base + v.v, text: spoken });
+    }
+  }
+  if (items.length <= 1) return stop();
+  plan = { stretches, onPart, part: stretches[0].part };
+  const f = stretches[0];
+  set({ on: true, paused: false, doc: undefined, bible, book: f.book, chapter: f.chapter, verse: f.from, at: -1, len: 0, error: undefined });
+  await call("speak", { items, rate: state.speed, title, voice: saved<string | null>("listenVoice", null) }).catch((e) => {
+    plan = null;
+    set({ ...IDLE, speed: state.speed, sleep: state.sleep, error: String(e) });
+  });
+}
+
 /** A book's chapter, paragraph by paragraph from `from`, announced by its name (a devotional by its title and day). */
 async function speakDoc(d: { module: string; chapter: string; title: string }, from: number) {
   const html = await docHtml(d.module, d.chapter).catch(() => null);
@@ -97,6 +136,23 @@ function listen() {
   listening = true;
   addPluginListener<{ kind: string; id?: number; at?: number; len?: number }>("tes-native", "speech", (e) => {
     if (!state.on) return;
+    // A day's reading: each stretch in turn, ticking off each part as the next begins, the day at the end.
+    if (plan && e.id !== undefined && e.id >= 1000) {
+      const x = plan.stretches[Math.floor(e.id / 1000) - 1];
+      const v = e.id % 1000;
+      if (!x) return;
+      if (x.part !== plan.part && e.kind === "start") {
+        plan.onPart(plan.part);
+        plan.part = x.part;
+      }
+      if (e.kind === "start") set({ book: x.book, chapter: x.chapter, verse: v || x.from, at: -1, len: 0 });
+      else if (e.kind === "word" && v) set({ book: x.book, chapter: x.chapter, verse: v, at: pageAt.get(e.id)?.[e.at!] ?? e.at!, len: e.len! });
+      else if (e.kind === "end") {
+        plan.onPart(plan.part);
+        stop();
+      }
+      if (e.kind !== "paused" && e.kind !== "resumed") return;
+    }
     if (e.id === 0) return; // the chapter's announcement
     if (e.kind === "start") set({ verse: e.id!, at: -1, len: 0 });
     else if (e.kind === "word") set({ verse: e.id!, at: pageAt.get(e.id!)?.[e.at!] ?? e.at!, len: e.len! });
@@ -148,11 +204,18 @@ export const player = {
   get: () => state,
   play(bible: string, book: number, chapter: number, verse: number, verses?: Verse[]) {
     listen();
+    plan = null;
     return speakFrom(bible, book, chapter, verse, verses);
   },
   playDoc(d: { module: string; chapter: string; title: string }, from = 1) {
     listen();
+    plan = null;
     return speakDoc(d, from);
+  },
+  /** A plan's day, all of it, in `bible`; `onPart` as each part is finished. */
+  playPlan(bible: string, stretches: PlanStretch[], onPart: (part: number) => void, title: string) {
+    listen();
+    return speakPlan(bible, stretches, onPart, title);
   },
   pause() {
     set({ paused: true });
@@ -169,7 +232,8 @@ export const player = {
     const speed = all[(all.indexOf(state.speed) + 1) % all.length] ?? 1;
     save("listenSpeed", speed);
     set({ speed });
-    if (state.on && !state.paused)
+    // A day's reading keeps its pace until it's started again; a chapter or a book changes at once.
+    if (state.on && !state.paused && !plan)
       if (state.doc) speakDoc(state.doc, state.verse);
       else speakFrom(state.bible, state.book, state.chapter, state.verse);
   },
@@ -184,6 +248,7 @@ export const player = {
 };
 
 function stop() {
+  plan = null;
   if (sleepTimer) clearTimeout(sleepTimer);
   sleepTimer = null;
   set({ ...IDLE, speed: state.speed });

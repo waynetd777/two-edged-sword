@@ -26,6 +26,8 @@ import {
 import { buildPlan, Choice, CHOICES, plansStore, startPlan, usePlans } from "./plansStore";
 import type { Jump } from "./Search";
 import { Settings } from "./Settings";
+import { player, PlanStretch, usePlayer } from "./player";
+import { Part } from "./plansShared";
 
 type Page = "home" | "plans" | "settings";
 
@@ -120,7 +122,25 @@ export function More({ modules, onJump, onLibrary }: { modules: Module[]; onJump
   );
 }
 
+/** A day's parts as stretches to read aloud: whole chapters one by one, a verse range as it runs (into a
+ *  later chapter where it does). */
+function stretches(parts: Part[]): PlanStretch[] {
+  const out: PlanStretch[] = [];
+  parts.forEach((x, part) => {
+    const last = x.c2 ?? x.c;
+    if (!x.v) for (let c = x.c; c <= last; c++) out.push({ book: x.b, chapter: c, from: 1, part });
+    else if (last === x.c) out.push({ book: x.b, chapter: x.c, from: x.v, to: x.v2 ?? x.v, part });
+    else {
+      out.push({ book: x.b, chapter: x.c, from: x.v, part });
+      for (let c = x.c + 1; c < last; c++) out.push({ book: x.b, chapter: c, from: 1, part });
+      out.push({ book: x.b, chapter: last, from: 1, to: x.v2, part });
+    }
+  });
+  return out;
+}
+
 function TodayCard({ plan, onJump }: { plan: Plan; onJump: (j: Jump) => void }) {
+  const pl = usePlayer();
   const d = today();
   const t = todayFor(plan);
   const key = progressKey(plan, d);
@@ -130,6 +150,26 @@ function TodayCard({ plan, onJump }: { plan: Plan; onJump: (j: Jump) => void }) 
   const late = plan.kind === "sequence" ? behind(plan) : 0;
   const keys = t.parts.map(partKey);
   const tick = (k: string) => plansStore.update(tickPart(plan, key, k, keys, d));
+  /** Read with audio, as the desktop's: the day's parts read one after another from the first not yet
+   *  read, each ticked off as it's finished, the reader following on the Read tab. */
+  const listen = () => {
+    const todo = t.parts.map((x, i) => ({ x, i })).filter(({ x }) => !ticked.includes(partKey(x)));
+    const parts = todo.length ? todo : t.parts.map((x, i) => ({ x, i }));
+    const all = stretches(parts.map((p) => p.x)).map((s) => ({ ...s, part: parts[s.part].i }));
+    if (!all.length) return;
+    const bible = saved("bible", "kjv+");
+    onJump({ ref: { book: all[0].book, chapter: all[0].chapter, verse: all[0].from } });
+    // Ticked against the plan as it is when each part ends, not as it was when reading began.
+    const done = (i: number) => {
+      const now = plansStore.get().find((p) => p.id === plan.id);
+      if (now) plansStore.update(tickPart(now, progressKey(now, today()), partKey(t.parts[i]), keys, today()));
+    };
+    setTimeout(() => player.playPlan(bible, all, done, `${plan.name} · ${t.label}`), 350);
+  };
+  const listening = pl.on && !pl.doc;
+  useEffect(() => {
+    scene.then((sc) => sc.includes("listenplan") && setTimeout(listen, 1500));
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="card">
@@ -172,14 +212,20 @@ function TodayCard({ plan, onJump }: { plan: Plan; onJump: (j: Jump) => void }) 
                 Read today · Undo
               </button>
             ) : (
-              <>
-                <button className="primary" onClick={() => onJump({ ref: partRef(t.parts.find((x) => !ticked.includes(partKey(x))) ?? t.parts[0]) })}>
-                  {ticked.length ? "Continue reading" : "Start reading"}
-                </button>
-                <button className="secondary" onClick={() => plansStore.update(markDayRead(plan, d))}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8, flex: 1 }}>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <button className="primary" onClick={() => onJump({ ref: partRef(t.parts.find((x) => !ticked.includes(partKey(x))) ?? t.parts[0]) })}>
+                    {ticked.length ? "Continue reading" : "Start reading"}
+                  </button>
+                  <button className="secondary listenplan" onClick={() => (listening ? player.stop() : listen())}>
+                    <Icon name="speaker" size={18} />
+                    {listening ? "Stop" : "Listen"}
+                  </button>
+                </div>
+                <button className="secondary" style={{ flex: "none" }} onClick={() => plansStore.update(markDayRead(plan, d))}>
                   Mark as read
                 </button>
-              </>
+              </div>
             )}
           </div>
         </>
