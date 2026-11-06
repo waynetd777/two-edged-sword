@@ -1550,12 +1550,19 @@ input[type="range"] {
   hyphens: auto;
   -webkit-hyphens: auto;
 }
-@media (min-width: 380px) {
+@media (min-width: 340px) {
   .prose.about > p:first-child img {
     float: right;
     width: 104px;
     margin: 4px 0 10px 16px;
     border-radius: 4px;
     box-shadow: 0 1px 6px rgba(0, 0, 0, 0.35);
+  }
+}
+/* A 360-point Android phone: a little smaller, so the text beside it isn't too narrow. */
+@media (min-width: 340px) and (max-width: 379px) {
+  .prose.about > p:first-child img {
+    width: 88px;
+    margin-left: 12px;
   }
 }
