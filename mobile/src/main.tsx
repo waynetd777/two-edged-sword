@@ -48,3 +48,17 @@ document.addEventListener(
 );
 window.addEventListener("tes-insets", applyAndroidInsets);
 createRoot(document.getElementById("root")!).render(<App />);
+
+// The opening screen goes once the app has drawn, after a moment so it's seen rather than flashed.
+const started = performance.now();
+requestAnimationFrame(() =>
+  setTimeout(
+    () => {
+      const el = document.getElementById("splash");
+      if (!el) return;
+      el.style.opacity = "0";
+      setTimeout(() => el.remove(), 350);
+    },
+    Math.max(0, 700 - (performance.now() - started)),
+  ),
+);

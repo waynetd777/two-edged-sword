@@ -1,6 +1,9 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Theme.tes_mobile" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your theme here. -->
+        <!-- Android's own splash on the app's navy, so it flows into the page's opening screen, which adds
+             the name beneath the icon (Android 12 on allows no text there). -->
+        <item name="android:windowSplashScreenBackground">#1B2532</item>
+        <item name="android:windowBackground">@color/splash_navy</item>
     </style>
 </resources>
