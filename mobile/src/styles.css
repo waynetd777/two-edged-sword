@@ -1082,3 +1082,90 @@ mark {
   flex: 1 1 auto;
   padding: 0 6px;
 }
+
+/* ---------- books and pictures ---------- */
+.prose.doc {
+  font-size: var(--read-size);
+  line-height: 1.6;
+  -webkit-user-select: text;
+  user-select: text;
+}
+.prose.doc img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 12px auto;
+  border-radius: 6px;
+}
+.prose.doc table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+.prose.doc td {
+  border: 1px solid var(--line);
+  padding: 4px 6px;
+  vertical-align: top;
+}
+.viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  background: #000000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  touch-action: none;
+  animation: fade 0.15s;
+}
+.viewer img {
+  max-width: 100%;
+  max-height: 100%;
+  will-change: transform;
+  transform-origin: center;
+}
+.viewer img.anim {
+  transition: transform 0.22s ease-out;
+}
+.viewer .close {
+  position: absolute;
+  top: calc(var(--top) + 8px);
+  right: 12px;
+  width: 44px;
+  height: 44px;
+  border-radius: 22px;
+  border: none;
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+  font-size: 18px;
+}
+.vhint {
+  position: absolute;
+  bottom: calc(var(--bottom) + 16px);
+  left: 0;
+  right: 0;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 13px;
+  margin: 0;
+  pointer-events: none;
+}
+.viewer img.turned {
+  max-width: 100vh;
+  max-height: 100vw;
+}
+.viewer .turn {
+  position: absolute;
+  top: calc(var(--top) + 8px);
+  left: 12px;
+  width: 44px;
+  height: 44px;
+  border-radius: 22px;
+  border: none;
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

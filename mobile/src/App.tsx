@@ -68,7 +68,15 @@ export function App() {
     <div className="app">
       {/* Every tab stays mounted, so each keeps its place while another is shown. */}
       <div className="screen" hidden={tab !== "read"}>
-        <Read modules={modules} jump={jump} onWordStudy={study} />
+        <Read
+          modules={modules}
+          jump={jump}
+          onWordStudy={study}
+          onLibrary={() => {
+            history.push({ tab: "library" });
+            setTab("library");
+          }}
+        />
       </div>
       <div className="screen" hidden={tab !== "search"}>
         <Search

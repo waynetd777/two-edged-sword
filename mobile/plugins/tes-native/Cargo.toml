@@ -1,0 +1,13 @@
+[package]
+name = "tauri-plugin-tes-native"
+version = "0.1.0"
+description = "What the phone app needs from iOS and Android that the web view can't do: turning with the phone"
+edition = "2021"
+links = "tauri-plugin-tes-native"
+
+[dependencies]
+tauri = { version = "2" }
+serde = { version = "1.0", features = ["derive"] }
+
+[build-dependencies]
+tauri-plugin = { version = "2", features = ["build"] }

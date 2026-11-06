@@ -114,6 +114,7 @@ export interface TranslitHit {
 }
 
 export const api = {
+  referenceTitles: (module: string) => invoke<string[]>("reference_titles", { module }),
   fetchManifest: (url: string) => invoke<string>("fetch_manifest", { url }),
   download: (url: string, file: string, sha256: string, size: number) => invoke<void>("download", { url, file, sha256, size }),
   cancelDownload: (file: string) => invoke<void>("cancel_download", { file }),

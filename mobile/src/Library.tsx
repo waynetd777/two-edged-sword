@@ -40,7 +40,9 @@ export function Library({ modules, onChanged }: { modules: Module[]; onChanged: 
   useEffect(() => {
     // Debug builds can point at a local copy of the release: TES_SCENE=modules=http://localhost:8000/
     scene.then((sc) => {
-      const b = sc.find((x) => x.startsWith("modules="))?.slice(8);
+      // ...and a debug build remembers it, so the app opened from the home screen keeps using it.
+      const b = sc.find((x) => x.startsWith("modules="))?.slice(8) ?? saved<string | null>("modulesBase", null);
+      if (sc.some((x) => x.startsWith("modules="))) save("modulesBase", b);
       const url = b ? (b.endsWith("/") ? b : b + "/") : RELEASE;
       setBase(url);
       api

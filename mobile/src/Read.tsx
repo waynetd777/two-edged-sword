@@ -7,7 +7,9 @@ import { alignStrongs, tokenize, Token } from "../../src/esword";
 import { api, Module, save, saved, scene, Verse } from "./api";
 import { Icon } from "./icons";
 import { COMPARE_DEFAULT, CompareEdit, CompareView, useChapters } from "./Compare";
+import { bookTitles, DocView } from "./DocView";
 import { GoTo } from "./GoTo";
+import { ImageViewer } from "./ImageViewer";
 import { history } from "./history";
 import { NavButtons } from "./NavButtons";
 import { WordSheet } from "./WordSheet";
@@ -127,7 +129,9 @@ export function Read({
   modules,
   jump,
   onWordStudy,
+  onLibrary,
 }: {
+  onLibrary: () => void;
   modules: Module[];
   jump: (Jump & { n: number }) | null;
   onWordStudy: (num: string) => void;
@@ -149,6 +153,19 @@ export function Read({
   const [diff, setDiff] = useState<boolean>(() => saved("compareDiff", true));
   const [editing, setEditing] = useState(false);
   const [wideScene, setWideScene] = useState(false);
+  /** A book open instead of the Bible. */
+  const [doc, setDoc] = useState<{ module: string; chapter: string } | null>(() => saved("doc", null));
+  const [image, setImage] = useState<string | null>(null);
+  const [docList, setDocList] = useState<string[]>([]);
+  const [goBooks, setGoBooks] = useState(false);
+  const bookMods = modules.filter((m) => m.kind === "reference");
+  const docMod = doc ? bookMods.find((m) => m.id === doc.module) : undefined;
+  useEffect(() => save("doc", doc), [doc]);
+  useEffect(() => {
+    setDocList([]);
+    if (doc) bookTitles(doc.module).then(setDocList);
+  }, [doc?.module]); // eslint-disable-line react-hooks/exhaustive-deps
+  const docKey = (d: { module: string; chapter: string } | null) => (d ? `${d.module}|${d.chapter}` : "");
   const docked = useWide(wideScene);
   const [wordScene, setWordScene] = useState(false);
   /** A verse to bring into view once its chapter has drawn. */
@@ -202,6 +219,17 @@ export function Read({
       if (sc.includes("goto")) setGoing(true);
       if (sc.includes("compare")) setComparing(true);
       if (sc.includes("wide")) setWideScene(true);
+      const d = sc.find((x) => x.startsWith("doc="))?.slice(4);
+      if (d) {
+        const [m, c] = d.split("|");
+        if (c) setDoc({ module: m, chapter: c });
+        else bookTitles(m).then((t) => t[0] && setDoc({ module: m, chapter: t[0] }));
+      }
+      if (sc.includes("image"))
+        setTimeout(() => {
+          const img = page.current?.querySelector("img.zoomable") as HTMLImageElement | null;
+          if (img) setImage(img.src);
+        }, 2500);
       if (sc.includes("word")) setWordScene(true);
       const b = sc.find((x) => x.startsWith("bible="));
       if (b) setBible(b.slice(6));
@@ -230,15 +258,16 @@ export function Read({
 
   // Back and forward are the app's (history.ts): Read's moves are steps in it, and a step back
   // here puts the passage, the verse, Compare and the scroll back.
-  const live = useRef({ loc, sel, comparing });
-  live.current = { loc, sel, comparing };
+  const live = useRef({ loc, sel, comparing, doc });
+  live.current = { loc, sel, comparing, doc };
   useEffect(() => {
-    history.start({ tab: "read", book: loc.book, chapter: loc.chapter, verse: sel, comparing, word: "", top: 0 });
+    history.start({ tab: "read", book: loc.book, chapter: loc.chapter, verse: sel, comparing, word: "", doc: docKey(doc), top: 0 });
     history.setSnapshot(() => ({
       book: live.current.loc.book,
       chapter: live.current.loc.chapter,
       verse: live.current.sel,
       comparing: live.current.comparing,
+      doc: docKey(live.current.doc),
       top: page.current?.scrollTop ?? 0,
     }));
     return history.onRestore((p) => {
@@ -247,17 +276,25 @@ export function Read({
       setLoc({ book: p.book, chapter: p.chapter });
       setSel(p.verse);
       setComparing(p.comparing);
+      const [m, ...c] = p.doc ? p.doc.split("|") : [];
+      setDoc(m ? { module: m, chapter: c.join("|") } : null);
       setRestore({ key: `${p.book}.${p.chapter}`, top: p.top });
     });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   /** Moves to `to`, as a new step in the history. */
   const visit = (to: Loc, verse: number) => {
-    history.push({ tab: "read", book: to.book, chapter: to.chapter, verse });
+    history.push({ tab: "read", book: to.book, chapter: to.chapter, verse, doc: "" });
+    setDoc(null);
     setLoc(to);
     setSel(verse);
   };
   useEffect(() => {
+    if (restore?.key === "doc") {
+      page.current?.scrollTo(0, 0);
+      setRestore(null);
+      return;
+    }
     if (!restore || restore.key !== versesOf || !verses.length) return;
     requestAnimationFrame(() => page.current?.scrollTo(0, restore.top));
     setRestore(null);
@@ -275,12 +312,24 @@ export function Read({
   const touch = useRef<{ x: number; y: number; dx: number; horiz: boolean | null } | null>(null);
   const [dx, setDx] = useState(0);
   const [anim, setAnim] = useState(false);
-  const go = (to: Loc, d: 1 | -1 = 1) => {
+  /** A book's chapter, as a new step. */
+  const openDoc = (module: string, chapter: string) => {
+    const d = { module, chapter };
+    history.push({ tab: "read", doc: docKey(d) });
+    setGoing(false);
+    setWord(null);
+    setComparing(false);
+    setDoc(d);
+    setRestore({ key: "doc", top: 0 });
+  };
+  const go = (to: Loc, d: 1 | -1 = 1) => slide(d, () => visit(to, 1));
+  /** Slides the page out, does `act` (the next chapter), and slides the new one in. */
+  const slide = (d: 1 | -1, act: () => void) => {
     const w = page.current?.clientWidth ?? 390;
     setAnim(true);
     setDx(-d * w);
     setTimeout(() => {
-      visit(to, 1);
+      act();
       setAnim(false);
       setDx(d * w);
       page.current?.scrollTo(0, 0);
@@ -315,7 +364,14 @@ export function Read({
     const s = touch.current;
     touch.current = null;
     if (!s?.horiz) return;
-    if (comparing && Math.abs(s.dx) > 70) {
+    const di = doc ? docList.indexOf(doc.chapter) : -1;
+    if (doc && Math.abs(s.dx) > 70 && di >= 0 && docList[di + (s.dx < 0 ? 1 : -1)]) {
+      const to = docList[di + (s.dx < 0 ? 1 : -1)];
+      slide(s.dx < 0 ? 1 : -1, () => openDoc(doc.module, to));
+    } else if (doc) {
+      setAnim(true);
+      setDx(0);
+    } else if (comparing && Math.abs(s.dx) > 70) {
       setAnim(true);
       setDx(0);
       stepVerse(s.dx < 0 ? 1 : -1);
@@ -376,9 +432,18 @@ export function Read({
     <>
       <header className="topbar">
         <NavButtons />
-        <button className="pill strong" onClick={() => setGoing(true)}>
+        <button
+          className="pill strong"
+          style={doc ? { maxWidth: "62%", overflow: "hidden" } : undefined}
+          onClick={() => {
+            setGoBooks(!!doc);
+            setGoing(true);
+          }}
+        >
           {/* Long names shortened ("Song 8"), so the bar keeps to one line. */}
-          {comparing
+          {doc ? (
+            <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{docMod?.abbrev || docMod?.title || doc.chapter}</span>
+          ) : comparing
             ? book(loc.book).name.length > 8
               ? fmtRef({ ...loc, verse: sel }, "short")
               : fmtRef({ ...loc, verse: sel })
@@ -387,13 +452,19 @@ export function Read({
               : `${book(loc.book).name} ${loc.chapter}`}
           <Icon name="down" size={14} />
         </button>
-        {!comparing && (
+        {!comparing && !doc && (
           <button className="pill" onClick={() => setChoosing(true)}>
             {bmod?.abbrev || bible.toUpperCase()}
             <Icon name="down" size={14} />
           </button>
         )}
         <span className="spacer" />
+        {doc ? (
+          <button className="pill" onClick={() => visit(loc, sel)} aria-label="Back to the Bible">
+            Bible
+          </button>
+        ) : (
+        <>
         <button
           className={`ibtn ${comparing ? "on" : ""}`}
           aria-label={comparing ? "Back to the chapter" : "Compare translations"}
@@ -424,6 +495,8 @@ export function Read({
             <Icon name={layout === "paragraph" ? "verses" : "paragraph"} size={22} />
           </button>
         )}
+        </>
+        )}
       </header>
 
       <div className="readbody">
@@ -437,7 +510,16 @@ export function Read({
           onTouchEnd={onEnd}
           onTouchCancel={onEnd}
         >
-          {comparing ? (
+          {doc ? (
+            <DocView
+              module={doc.module}
+              title={docMod?.title ?? doc.module}
+              chapter={doc.chapter}
+              onRef={(r) => goTo(r)}
+              onImage={setImage}
+              onChapter={(c) => openDoc(doc.module, c)}
+            />
+          ) : comparing ? (
             <CompareView
               bibles={bibles}
               ids={shownIds}
@@ -514,7 +596,7 @@ export function Read({
         </div>
       </div>
 
-      {docked && (
+      {docked && !doc && (
         <Study
           docked
           at={{ ...loc, verse: sel }}
@@ -526,7 +608,7 @@ export function Read({
       )}
       </div>
 
-      {!docked && (
+      {!docked && !doc && (
       <button className="studybar" onClick={() => setStudy(true)}>
         <span style={{ color: "var(--accent)", display: "flex" }}>
           <Icon name="book" size={20} />
@@ -583,10 +665,18 @@ export function Read({
         />
       )}
 
+      {image && <ImageViewer src={image} onClose={() => setImage(null)} />}
       {editing && <CompareEdit bibles={bibles} ids={cmpIds} onChange={setCmpIds} onClose={() => setEditing(false)} />}
 
       {going && (
         <GoTo
+          bookModules={bookMods}
+          startOnBooks={goBooks}
+          onDoc={openDoc}
+          onLibrary={() => {
+            setGoing(false);
+            onLibrary();
+          }}
           at={loc}
           sizes={sizes}
           verseCount={(b, c) => counts.get(`${b}.${c}`) ?? 0}

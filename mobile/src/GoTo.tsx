@@ -1,7 +1,9 @@
 // Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
 // SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import type { Module } from "./api";
+import { bookTitles } from "./DocView";
 import { book, BOOKS, BookSizes, parseRef, Ref } from "../../src/bible";
 import { Icon } from "./icons";
 
@@ -12,7 +14,17 @@ export function GoTo({
   verseCount,
   onGo,
   onClose,
+  bookModules,
+  startOnBooks,
+  onDoc,
+  onLibrary,
 }: {
+  /** The reference books on the phone, for the Books side. */
+  bookModules: Module[];
+  startOnBooks?: boolean;
+  onDoc: (module: string, chapter: string) => void;
+  /** Opens the Library, for more books. */
+  onLibrary: () => void;
   at: { book: number; chapter: number };
   sizes: BookSizes | null;
   /** Verses in a chapter, for the verse step (asked of the Bible). */
@@ -23,6 +35,13 @@ export function GoTo({
   const [b, setB] = useState<number | null>(null);
   const [c, setC] = useState<number | null>(null);
   const [typed, setTyped] = useState("");
+  const [side, setSide] = useState<"bible" | "books">(startOnBooks ? "books" : "bible");
+  const [bk, setBk] = useState<Module | null>(null);
+  const [chapterTitles, setChapterTitles] = useState<string[] | null>(null);
+  useEffect(() => {
+    setChapterTitles(null);
+    if (bk) bookTitles(bk.id).then(setChapterTitles);
+  }, [bk]);
   const parsed = typed.trim() ? parseRef(typed) : undefined;
   const books = BOOKS.filter((x) => !sizes || sizes.has(x.n));
   const chapters = b ? (sizes?.get(b) ?? book(b).chapters) : 0;
@@ -38,8 +57,9 @@ export function GoTo({
     </div>
   );
 
-  const title = c && b ? `${book(b).name} ${c}` : b ? book(b).name : "Go to";
-  const back = () => (c ? setC(null) : setB(null));
+  const title = side === "books" ? (bk ? bk.title : "Go to") : c && b ? `${book(b).name} ${c}` : b ? book(b).name : "Go to";
+  const back = () => (side === "books" ? setBk(null) : c ? setC(null) : setB(null));
+  const deep = side === "books" ? !!bk : !!b;
 
   return (
     <>
@@ -49,7 +69,7 @@ export function GoTo({
           <span />
         </div>
         <div className="shead">
-          {b ? (
+          {deep ? (
             <button className="done" onClick={back} aria-label="Back">
               ‹
             </button>
@@ -59,7 +79,17 @@ export function GoTo({
             Done
           </button>
         </div>
-        {!b && (
+        {!deep && (
+          <div className="seg" role="tablist" style={{ marginBottom: 10 }}>
+            <button role="tab" aria-selected={side === "bible"} onClick={() => setSide("bible")}>
+              Bible
+            </button>
+            <button role="tab" aria-selected={side === "books"} onClick={() => setSide("books")}>
+              Books
+            </button>
+          </div>
+        )}
+        {side === "bible" && !b && (
           <label className="filter">
             <Icon name="search" size={15} />
             <input
@@ -74,7 +104,36 @@ export function GoTo({
           </label>
         )}
         <div className="sbody" style={{ userSelect: "none", WebkitUserSelect: "none" }}>
-          {parsed && !b ? (
+          {side === "books" ? (
+            !bk ? (
+              <>
+                {bookModules.length > 0 && (
+                  <div className="list">
+                    {bookModules.map((m) => (
+                      <button key={m.id} className="row" onClick={() => setBk(m)}>
+                        <span className="grow">{m.title}</span>
+                        <span className="m">›</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {!bookModules.length && <p className="empty">No books on this phone yet.</p>}
+                <button className="fold" onClick={onLibrary}>
+                  Get {bookModules.length ? "more " : ""}books from the Library ›
+                </button>
+              </>
+            ) : chapterTitles === null ? (
+              <p className="empty">Opening…</p>
+            ) : (
+              <div className="list">
+                {chapterTitles.map((t) => (
+                  <button key={t} className="row" onClick={() => onDoc(bk.id, t)}>
+                    <span className="grow">{t}</span>
+                  </button>
+                ))}
+              </div>
+            )
+          ) : parsed && !b ? (
             <div className="list">
               <button className="row" onClick={() => onGo(parsed)}>
                 <span className="grow">

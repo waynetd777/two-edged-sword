@@ -120,6 +120,12 @@ fn find_topics(st: State<AppState>, word: String) -> Vec<content::TopicHit> {
     content::find_topics(&st.lib.read().unwrap(), &word, 8)
 }
 
+/// A reference book's chapters, in order.
+#[tauri::command(async)]
+fn reference_titles(st: State<AppState>, module: String) -> Result<Vec<String>, String> {
+    content::reference_titles(&st.lib.read().unwrap(), &module)
+}
+
 // ---------- downloads (mobile/tools/modules_release.py makes what they fetch) ----------
 
 fn agent() -> ureq::Agent {
@@ -224,7 +230,7 @@ fn log(msg: String) {
 }
 
 /// Debug builds only: a state to open in, from TES_SCENE (comma-separated: study, goto, word, verse, xrefs,
-/// picker, end, bible=<id>, search, q=<words>, study=<number or word>, library, modules=<url>), so a screenshot can show a sheet without anyone tapping. On the Simulator:
+/// picker, end, bible=<id>, search, q=<words>, study=<number or word>, library, modules=<url>, get=<file>, doc=<module>[|chapter], image), so a screenshot can show a sheet without anyone tapping. On the Simulator:
 /// `SIMCTL_CHILD_TES_SCENE=study xcrun simctl launch booted com.wayned.two-edged-sword`.
 #[tauri::command]
 fn scene() -> Option<String> {
@@ -238,6 +244,7 @@ fn scene() -> Option<String> {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_tes_native::init())
         .setup(|app| {
             let paths = app.path();
             let _ = store::DATA_DIR.set(paths.app_data_dir()?);
@@ -246,7 +253,7 @@ pub fn run() {
             app.manage(AppState { lib: RwLock::new(scan()), cancelled: Mutex::new(HashSet::new()) });
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![log, scene, modules, chapter, chapter_sizes, commentary, coverage, article, strongs_for_word, search, strongs_by_book, strongs_verses, translit_search, find_topics, fetch_manifest, download, cancel_download, remove_module])
+        .invoke_handler(tauri::generate_handler![log, scene, modules, chapter, chapter_sizes, commentary, coverage, article, strongs_for_word, search, strongs_by_book, strongs_verses, translit_search, find_topics, fetch_manifest, reference_titles, download, cancel_download, remove_module])
         .run(tauri::generate_context!())
         .expect("error while running the app");
 }

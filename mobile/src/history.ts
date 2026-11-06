@@ -17,6 +17,8 @@ export interface Place {
   comparing: boolean;
   /** Word Study's number or word. */
   word: string;
+  /** A book open in Read instead of the Bible: "module|chapter", or "". */
+  doc: string;
   /** How far down the reading page was. */
   top: number;
 }
@@ -34,7 +36,7 @@ const changed = () => {
   watchers.forEach((f) => f());
 };
 const same = (a: Place, b: Place) =>
-  a.tab === b.tab && a.book === b.book && a.chapter === b.chapter && a.verse === b.verse && a.comparing === b.comparing && a.word === b.word;
+  a.tab === b.tab && a.book === b.book && a.chapter === b.chapter && a.verse === b.verse && a.comparing === b.comparing && a.word === b.word && a.doc === b.doc;
 const keepCurrent = () => {
   if (at >= 0) stack[at] = { ...stack[at], ...snapshot() };
 };

@@ -25,6 +25,8 @@ chrono = { version = "0.4.45", default-features = false, features = ["clock", "s
 # OpenSSL for native-tls), gunzipped and checked as they arrive.
 ureq = { version = "2", default-features = false, features = ["tls"] }
 flate2 = "1"
+# Native bits the web view can't do (plugins/tes-native): turning with the phone while a picture is open.
+tauri-plugin-tes-native = { path = "../plugins/tes-native" }
 sha2 = "0.10"
 
 [profile.release]

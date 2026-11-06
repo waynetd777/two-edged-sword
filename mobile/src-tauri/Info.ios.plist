@@ -5,10 +5,13 @@
 	<!-- The name under the icon: "Two-edged Sword" is too wide, and iOS squeezes out its space. -->
 	<key>CFBundleDisplayName</key>
 	<string>2-edged Sword</string>
-	<!-- iPhone: portrait only; every screen is laid out for it. iPad turns freely (split screen needs it). -->
+	<!-- iPhone: upright, except while a picture is open full screen. Every orientation the app may use is
+	     listed here; the tes-native plugin answers iOS with the ones allowed at the moment. iPad turns freely. -->
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>
