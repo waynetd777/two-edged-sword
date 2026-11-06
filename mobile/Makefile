@@ -22,6 +22,21 @@ shot:      ## make shot SCENE=study [OUT=file.png]: relaunch in a scene (lib.rs'
 	sleep 4
 	xcrun simctl io "$(SIM)" screenshot "$(or $(OUT),shot.png)"
 
+# Your own iPhone, with your Apple team (a free personal team works: the install lasts 7 days). The team ID
+# never goes in the repo: give TEAM=, or keep it in the keychain item tes-apple-team-id
+# (security add-generic-password -a "$$USER" -s tes-apple-team-id -w <team id>).
+TEAM ?= $(shell security find-generic-password -s tes-apple-team-id -w 2>/dev/null)
+# The first iPhone plugged in or paired, unless DEVICE=<udid> says which.
+DEVICE ?= $(shell xcrun devicectl list devices 2>/dev/null | awk '/physical/ && /iPhone/ {for (i=1;i<=NF;i++) if ($$i ~ /^[0-9A-F]{8}-[0-9A-F]{16}$$/) {print $$i; exit}}')
+
+ios-phone: assets   ## make ios-phone [TEAM=<team id>] [DEVICE=<udid>]: a release build on your iPhone
+	@test -n "$(TEAM)" || (echo "Give TEAM=<your Apple team id>, or keep it in the keychain item tes-apple-team-id"; exit 1)
+	@test -n "$(DEVICE)" || (echo "No iPhone found: plug it in, or give DEVICE=<udid> (xcrun devicectl list devices)"; exit 1)
+	APPLE_DEVELOPMENT_TEAM=$(TEAM) cargo tauri ios build --export-method debugging; s=$$?; \
+	  git checkout -- src-tauri/gen/apple/tes-mobile.xcodeproj/project.pbxproj 2>/dev/null; exit $$s
+	rm -rf target/ipa && mkdir -p target/ipa && cd target/ipa && unzip -q "../../src-tauri/gen/apple/build/arm64/Two-edged Sword.ipa"
+	xcrun devicectl device install app --device $(DEVICE) "target/ipa/Payload/Two-edged Sword.app"
+
 icons:     ## The app icons from src-tauri/icons/source (python3 tools/icons.py makes those from design/icon.png)
 	cargo tauri icon src-tauri/icons/source/ios.png
 	rm -rf src-tauri/icons/android
@@ -38,4 +53,4 @@ modules-publish: modules-release
 	gh release view modules >/dev/null 2>&1 || gh release create modules --title "Modules for the phone app" --notes "Public-domain modules for Two-edged Sword on iPhone and Android, downloaded from the app's Library." --latest=false
 	gh release upload modules target/modules-release/* --clobber
 
-.PHONY: assets icons ios-sim shot modules-release modules-publish
+.PHONY: assets icons ios-phone ios-sim shot modules-release modules-publish
