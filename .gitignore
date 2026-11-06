@@ -41,3 +41,4 @@ tools/screenshots/out/
 # The phone app (mobile/)
 mobile/src-tauri/target
 mobile/src-tauri/gen/schemas
+mobile/src-tauri/gen/apple/assets

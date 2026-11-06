@@ -42,7 +42,10 @@
       "../../src-tauri/modules/tsk.cmti": "modules/tsk.cmti",
       "../../src-tauri/modules/easton.dcti": "modules/easton.dcti",
       "../../src-tauri/modules/jfb.cmti": "modules/jfb.cmti",
-      "../../src-tauri/modules/barnes.cmti": "modules/barnes.cmti"
+      "../../src-tauri/modules/kjc.lexi": "modules/kjc.lexi",
+      "../../src-tauri/modules/abbott.lexi": "modules/abbott.lexi",
+      "../../src-tauri/modules/asv.bbli": "modules/asv.bbli",
+      "../../src-tauri/modules/ylt.bbli": "modules/ylt.bbli"
     },
     "iOS": {
       "minimumSystemVersion": "16.0"

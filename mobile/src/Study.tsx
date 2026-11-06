@@ -51,7 +51,7 @@ export function Study({
   onGo: (r: Ref) => void;
 }) {
   const [tab, setTab] = useState<Tab>("commentary");
-  const [module, setModule] = useState<string>(() => saved("commentary", "barnes"));
+  const [module, setModule] = useState<string>(() => saved("commentary", "jfb"));
   const [picking, setPicking] = useState(false);
   const [coverage, setCoverage] = useState<Coverage[]>([]);
   const commentary = useCommentary(tab === "xrefs" ? XREFS : module, at);
@@ -71,6 +71,10 @@ export function Study({
   }, [at.book, at.chapter, at.verse]);
 
   const current = coverage.find((c) => c.id === module);
+  // A commentary that's gone (removed, or no longer bundled): the first with notes here instead.
+  useEffect(() => {
+    if (coverage.length && !current) setModule((coverage.find((c) => c.range) ?? coverage[0]).id);
+  }, [coverage, current]);
   const withNotes = coverage.filter((c) => c.range).length;
 
   // Swipe the heading left or right for the next or previous verse.
@@ -175,7 +179,7 @@ function Picker({
   onPick: (id: string) => void;
   onClose: () => void;
 }) {
-  const [stars, setStars] = useState<string[]>(() => saved("stars", ["barnes"]));
+  const [stars, setStars] = useState<string[]>(() => saved("stars", ["jfb"]));
   const [filter, setFilter] = useState("");
   const [showAll, setShowAll] = useState(false);
   useEffect(() => save("stars", stars), [stars]);
