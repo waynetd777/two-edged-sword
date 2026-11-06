@@ -1431,10 +1431,10 @@ input[type="range"] {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.round.listen.cmpbar {
+.round.listen.cmpbtn {
   color: var(--muted);
 }
-.round.listen.cmpbar.on {
+.round.listen.cmpbtn.on {
   color: var(--accent);
   background: var(--accentsoft);
   border-color: var(--ring);

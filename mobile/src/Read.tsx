@@ -781,7 +781,7 @@ export function Read({
         <Icon name="bookmark" size={20} fill={marked(sel) ? "currentColor" : undefined} />
       </button>
       <button
-        className={`round listen cmpbar ${comparing ? "on" : ""}`}
+        className={`round listen cmpbtn ${comparing ? "on" : ""}`}
         aria-label={comparing ? "Back to the chapter" : "Compare translations"}
         aria-pressed={comparing}
         onClick={() => {
