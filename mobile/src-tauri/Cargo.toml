@@ -1,0 +1,39 @@
+[package]
+name = "tes-mobile"
+version = "0.1.0"
+description = "Two-edged Sword for iPhone and Android"
+authors = ["Wayne Davies"]
+license = "GPL-3.0-or-later"
+edition = "2021"
+
+[lib]
+name = "tes_mobile_lib"
+# staticlib for iOS, cdylib for Android, rlib for the desktop build used in development.
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+# The same SQLite as the desktop app: the module readers are shared with it (src/lib.rs).
+rusqlite = { version = "0.41.1", features = ["bundled"] }
+chrono = { version = "0.4.45", default-features = false, features = ["clock", "std"] }
+
+[profile.release]
+codegen-units = 16
+lto = "thin"
+opt-level = 3
+panic = "abort"
+strip = true
+
+[profile.dev]
+debug = "line-tables-only"
+
+[profile.dev.package."*"]
+debug = false
+
+[profile.dev.package.libsqlite3-sys]
+opt-level = 3

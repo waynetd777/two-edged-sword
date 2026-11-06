@@ -37,3 +37,7 @@ __pycache__/
 
 # The website tutorials' demo home (tools/screenshots/demo_home.py)
 tools/screenshots/out/
+
+# The phone app (mobile/)
+mobile/src-tauri/target
+mobile/src-tauri/gen/schemas
