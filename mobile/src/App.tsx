@@ -57,6 +57,8 @@ export function App() {
       .catch(() => {});
   /** What was just brought in, shown for a few seconds above the tabs. */
   const [notice, setNotice] = useState<string | null>(null);
+  /** "Adding…", in the middle of the screen while modules picked in Files are taken in. */
+  const [adding, setAdding] = useState<string | null>(null);
   const noticeTimer = useRef<number>(0);
   const tell = (text: string) => {
     setNotice(text);
@@ -71,10 +73,7 @@ export function App() {
   const taking = useRef<"no" | "yes" | "again">("no");
   const takeIn = (e?: Event) => {
     const count = (e as CustomEvent<{ count?: number }> | undefined)?.detail?.count;
-    if (count) {
-      clearTimeout(noticeTimer.current);
-      setNotice(`Adding ${count > 1 ? `${count} modules` : "the module"}…`);
-    }
+    if (count) setAdding(`Adding ${count > 1 ? `${count} modules` : "the module"}…`);
     if (taking.current !== "no") {
       taking.current = "again";
       return;
@@ -92,10 +91,10 @@ export function App() {
         failed.forEach((f) => toldFailed.add(f));
         if (failed.length) parts.push(`${failed.join(", ")} couldn't be read as ${failed.length > 1 ? "modules" : "a module"}`);
         if (parts.length) tell(parts.join(". ") + ".");
-        else if (count) setNotice(null);
       })
-      .catch(() => setNotice(null))
+      .catch(() => {})
       .finally(() => {
+        setAdding(null);
         const again = taking.current === "again";
         taking.current = "no";
         if (again) takeIn();
@@ -131,6 +130,8 @@ export function App() {
     scene.then((sc) => {
       if (sc.includes("search")) setTab("search");
       if (sc.includes("library")) setTab("library");
+      // adding: the "Adding…" shown while picked modules are taken in.
+      if (sc.includes("adding")) setTimeout(() => setAdding("Adding 2 modules…"), 2500);
       if (sc.includes("more")) setTab("more");
       const w = sc.find((x) => x.startsWith("study="));
       if (w) {
@@ -217,6 +218,12 @@ export function App() {
           }}
           onClose={() => setDict(null)}
         />
+      )}
+      {adding && (
+        <div className="adding" role="status">
+          <span className="spin" aria-hidden />
+          {adding}
+        </div>
       )}
       {notice && (
         <div className="notice" role="status" onClick={() => { setNotice(null); setTab("library"); }}>
