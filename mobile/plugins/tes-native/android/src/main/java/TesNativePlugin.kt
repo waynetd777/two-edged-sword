@@ -163,8 +163,11 @@ class TesNativePlugin(private val activity: Activity) : Plugin(activity) {
       try {
         val name = displayName(uri)?.substringAfterLast('/') ?: continue
         if (!Regex("""(?i).+\.(bbli|cmti|dcti|lexi|refi|devi)""").matches(name)) continue
-        activity.contentResolver.openInputStream(uri)?.use { i -> File(inbox, name).outputStream().use { o -> i.copyTo(o) } }
-        n++
+        // Copied out of sight first and moved in whole: the app may look in the Inbox (coming forward as
+        // the picker closes) while a large module is still being copied.
+        val part = File(activity.filesDir, "Inbox.part").apply { mkdirs() }.let { File(it, name) }
+        activity.contentResolver.openInputStream(uri)?.use { i -> part.outputStream().use { o -> i.copyTo(o) } } ?: continue
+        if (part.renameTo(File(inbox, name))) n++
       } catch (_: Exception) {}
     }
     return n

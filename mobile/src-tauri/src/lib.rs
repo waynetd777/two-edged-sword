@@ -345,6 +345,12 @@ fn import_waiting(st: State<AppState>, inbox: Option<String>) -> Brought {
                 Some(t.filter(|t| !t.trim().is_empty()).unwrap_or_else(|| stem.clone()))
             })();
             let Some(title) = title else {
+                // Changed in the last few seconds: it may still be arriving (iOS copying a file opened in the
+                // app). Left for the next look, not thrown away.
+                let fresh = path.metadata().and_then(|m| m.modified()).ok().and_then(|t| t.elapsed().ok()).is_some_and(|d| d.as_secs() < 10);
+                if fresh {
+                    continue;
+                }
                 out.failed.push(name);
                 if inbox {
                     let _ = std::fs::remove_file(&path);

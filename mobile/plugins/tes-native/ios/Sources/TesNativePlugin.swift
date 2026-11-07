@@ -149,7 +149,14 @@ class TesNativePlugin: Plugin, AVSpeechSynthesizerDelegate {
         for url in urls {
           let to = inbox.appendingPathComponent(url.lastPathComponent)
           try? fm.removeItem(at: to)
-          if (try? fm.moveItem(at: url, to: to)) != nil || (try? fm.copyItem(at: url, to: to)) != nil { n += 1 }
+          // A move is whole at once; a copy goes out of sight first and is moved in whole, as the app may look
+          // in the Inbox meanwhile.
+          if (try? fm.moveItem(at: url, to: to)) != nil { n += 1; continue }
+          let part = fm.temporaryDirectory.appendingPathComponent("tes-picked-part")
+          try? fm.createDirectory(at: part, withIntermediateDirectories: true)
+          let p = part.appendingPathComponent(url.lastPathComponent)
+          try? fm.removeItem(at: p)
+          if (try? fm.copyItem(at: url, to: p)) != nil, (try? fm.moveItem(at: p, to: to)) != nil { n += 1 }
         }
         invoke.resolve(["count": n])
       } }
