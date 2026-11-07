@@ -1711,10 +1711,21 @@ input[type="range"] {
   --hl-teal: #133834;
   --hl-grey: #323a45;
 }
+/* A highlighted verse is tinted with its dot's colour (HL_DOT), so the two always match. */
 .v.hl,
 .pv.hl {
-  background: var(--hl);
+  background: color-mix(in srgb, var(--hl) 55%, transparent);
   border-radius: 4px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .v.hl,
+  :root:not([data-theme="light"]) .pv.hl {
+    background: color-mix(in srgb, var(--hl) 45%, transparent);
+  }
+}
+:root[data-theme="dark"] .v.hl,
+:root[data-theme="dark"] .pv.hl {
+  background: color-mix(in srgb, var(--hl) 45%, transparent);
 }
 /* The highlighter's colours, above the study bar (Read.tsx). */
 .hlstrip {

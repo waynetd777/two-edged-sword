@@ -94,8 +94,8 @@ const PATHS = {
   ),
   stop: <rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor" stroke="none" />,
   bookmark: <path d="M7 4h10v16l-5-4-5 4z" />,
-  // The desktop's highlight icon (src/icons.tsx), at this grid's scale.
-  highlighter: <path d="M6.75 17.25l9-9 3 3-9 9h-3zM3 21.75h7.5" />,
+  // The desktop's highlight icon (src/icons.tsx), at this grid's scale, raised to sit in the middle.
+  highlighter: <path d="M6.75 14.75l9-9 3 3-9 9h-3zM3 19.25h7.5" />,
   back: <path d="M15 5l-7 7 7 7" />,
   forward: <path d="M9 5l7 7-7 7" />,
   up: <path d="M7 14l5-5 5 5" />,

@@ -259,6 +259,10 @@ export function Read({
         setGoing(true);
       }
       if (sc.includes("compare")) setComparing(true);
+      // hldemo: John 3:1–8 highlighted in the eight colours, in order (the Simulator's own highlights).
+      // hldemo2: the last four colours on verses 1–4, to see them without scrolling.
+      if (sc.includes("hldemo2")) HL_COLORS.slice(4).forEach((c, i) => highlights.set(vkey(43, 3, i + 1), c));
+      else if (sc.includes("hldemo")) HL_COLORS.forEach((c, i) => highlights.set(vkey(43, 3, i + 1), c));
       // hlopen: the highlighter's colours open.
       if (sc.includes("hlopen")) setTimeout(() => setHlOpen(true), 1500);
       // Debug: Compare's › a few seconds into reading.
@@ -739,7 +743,7 @@ export function Read({
                         className={`v ${v.v === sel ? "sel" : ""} ${playingHere && pl.verse === v.v ? "speaking" : ""} ${hls[vkey(loc.book, loc.chapter, v.v)] ? "hl" : ""}`}
                         style={
                           hls[vkey(loc.book, loc.chapter, v.v)]
-                            ? ({ "--hl": `var(--hl-${hls[vkey(loc.book, loc.chapter, v.v)]})` } as CSSProperties)
+                            ? ({ "--hl": HL_DOT[hls[vkey(loc.book, loc.chapter, v.v)]] } as CSSProperties)
                             : undefined
                         }
                         onClick={() => pick(v.v)}
@@ -774,7 +778,7 @@ export function Read({
                         className={`pv ${v.v === sel ? "sel" : ""} ${playingHere && pl.verse === v.v ? "speaking" : ""} ${hls[vkey(loc.book, loc.chapter, v.v)] ? "hl" : ""}`}
                         style={
                           hls[vkey(loc.book, loc.chapter, v.v)]
-                            ? ({ "--hl": `var(--hl-${hls[vkey(loc.book, loc.chapter, v.v)]})` } as CSSProperties)
+                            ? ({ "--hl": HL_DOT[hls[vkey(loc.book, loc.chapter, v.v)]] } as CSSProperties)
                             : undefined
                         }
                         onClick={() => pick(v.v)}

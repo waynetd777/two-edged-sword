@@ -265,9 +265,11 @@ class TesNativePlugin(private val activity: Activity) : Plugin(activity) {
             val pick = usable.firstOrNull { it is java.net.Inet4Address && it.isSiteLocalAddress }
               ?: usable.firstOrNull { it is java.net.Inet4Address }
               ?: usable.firstOrNull()
-            // The address the computer puts in its announcement first (sync.rs), else one resolved.
+            // A home-network IPv4 address resolved now first (current, should the computer's have changed);
+            // else the one the computer put in its announcement (sync.rs), as Android may resolve only fe80::.
             val told = i.attributes["ip"]?.let { String(it) }?.takeIf { it.isNotBlank() }
-            val host = told ?: pick?.hostAddress
+            val v4 = usable.firstOrNull { it is java.net.Inet4Address && it.isSiteLocalAddress }?.hostAddress
+            val host = v4 ?: told ?: pick?.hostAddress
             if (host != null) out.put(JSObject().apply { put("name", i.serviceName); put("host", host.substringBefore('%')); put("port", i.port) })
             next()
           }
