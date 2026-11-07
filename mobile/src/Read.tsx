@@ -427,13 +427,13 @@ export function Read({
   // A tap that stops the page still moving after a flick, or a touch that drags a little or scrolls the
   // page, isn't a tap on a word: Android sends a click for these, which made scrolling open words.
   const scrolledAt = useRef(0);
-  const tapOk = useRef({ x: 0, y: 0, stillAt: true, scroll: 0 });
+  const tapOk = useRef({ x: 0, y: 0, stillAt: true, scroll: 0, at: 0 });
   const onScrollPage = () => {
     scrolledAt.current = Date.now();
   };
   const onStart = (e: TouchEvent) => {
     const t = e.touches[0];
-    tapOk.current = { x: t.clientX, y: t.clientY, stillAt: Date.now() - scrolledAt.current > 250, scroll: page.current?.scrollTop ?? 0 };
+    tapOk.current = { x: t.clientX, y: t.clientY, stillAt: Date.now() - scrolledAt.current > 400, scroll: page.current?.scrollTop ?? 0, at: Date.now() };
     // Away from the edges: Android's back gesture lives there.
     if (t.clientX < 24 || t.clientX > window.innerWidth - 24) return;
     touch.current = { x: t.clientX, y: t.clientY, dx: 0, horiz: null };
@@ -441,7 +441,7 @@ export function Read({
   };
   const onMove = (e: TouchEvent) => {
     const m = e.touches[0];
-    if (Math.hypot(m.clientX - tapOk.current.x, m.clientY - tapOk.current.y) > 8) tapOk.current.stillAt = false;
+    if (Math.hypot(m.clientX - tapOk.current.x, m.clientY - tapOk.current.y) > 4) tapOk.current.stillAt = false;
     const s = touch.current;
     if (!s) return;
     const t = e.touches[0];
@@ -712,7 +712,8 @@ export function Read({
             onScroll={onScrollPage}
             onClickCapture={(e) => {
               const ok = tapOk.current;
-              if (!ok.stillAt || Math.abs((page.current?.scrollTop ?? 0) - ok.scroll) > 4) {
+              // Any scroll since the finger went down, however small, makes it a scroll.
+              if (!ok.stillAt || scrolledAt.current >= ok.at || (page.current?.scrollTop ?? 0) !== ok.scroll) {
                 e.stopPropagation();
                 e.preventDefault();
               }
