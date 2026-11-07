@@ -4,6 +4,7 @@
 import { useState } from "react";
 import { useEffect } from "react";
 import { Module, saved, scene } from "./api";
+import { Help } from "./Help";
 import { Icon } from "./icons";
 import { NavButtons } from "./NavButtons";
 import {
@@ -29,7 +30,7 @@ import { Settings } from "./Settings";
 import { player, PlanStretch, usePlayer } from "./player";
 import { Part } from "./plansShared";
 
-type Page = "home" | "plans" | "settings";
+type Page = "home" | "plans" | "settings" | "help";
 
 /** A part's key among the day's ticks. */
 const partKey = (x: { b: number; c: number; v?: number }) => `${x.b}.${x.c}${x.v ? `.${x.v}` : ""}`;
@@ -48,7 +49,7 @@ export function More({ modules, onJump, onLibrary }: { modules: Module[]; onJump
   const plans = usePlans();
   const plan = current(plans);
 
-  const title = { home: "More", plans: "Plans", settings: "Settings" }[page];
+  const title = { home: "More", plans: "Plans", settings: "Settings", help: "Help" }[page];
   return (
     <>
       <header className="topbar">
@@ -112,11 +113,17 @@ export function More({ modules, onJump, onLibrary }: { modules: Module[]; onJump
                 <span className="grow">Settings</span>
                 <span className="m">›</span>
               </button>
+              <button className="row" onClick={() => setPage("help")}>
+                <Icon name="info" size={20} />
+                <span className="grow">Help</span>
+                <span className="m">›</span>
+              </button>
             </div>
           </>
         )}
         {page === "plans" && <Plans modules={modules} onLibrary={onLibrary} onStarted={() => setPage("home")} />}
         {page === "settings" && <Settings modules={modules} />}
+        {page === "help" && <Help />}
       </div>
     </>
   );

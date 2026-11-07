@@ -1613,3 +1613,57 @@ input[type="range"] {
     box-shadow: 0 1px 6px rgba(0, 0, 0, 0.35);
   }
 }
+
+/* More › Help (Help.tsx): the guide, a folding section per topic. */
+.help > .prose {
+  margin: 0 2px 14px;
+}
+.help details summary {
+  list-style: none;
+  cursor: pointer;
+}
+.help details summary::-webkit-details-marker {
+  display: none;
+}
+.help details summary::after {
+  content: "›";
+  color: var(--muted);
+  font-size: 20px;
+  transition: transform 0.15s;
+}
+.help details[open] summary::after {
+  transform: rotate(90deg);
+}
+.help details .prose {
+  padding: 0 14px 12px;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.help details + details {
+  border-top: 1px solid var(--line);
+}
+.help .prose ul {
+  padding-left: 20px;
+  margin: 6px 0;
+}
+.help .prose li {
+  margin: 4px 0;
+}
+.help .prose table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 14px;
+}
+.help .prose th,
+.help .prose td {
+  text-align: left;
+  vertical-align: top;
+  padding: 6px 6px 6px 0;
+  border-bottom: 1px solid var(--line);
+}
+.help .prose code {
+  font-size: 0.92em;
+  padding: 1px 4px;
+  border-radius: 4px;
+  background: var(--bar);
+}
