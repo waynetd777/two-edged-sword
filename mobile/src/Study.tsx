@@ -4,7 +4,7 @@
 import { TouchEvent, useEffect, useRef, useState } from "react";
 import { fmtRef, Ref } from "../../src/bible";
 import { renderHtml } from "../../src/esword";
-import { api, Commentary, Coverage, save, saved, scene } from "./api";
+import { api, Commentary, Coverage, save, saved, scene, useLibraryKey } from "./api";
 import { Icon } from "./icons";
 import { useBookmarks } from "./bookmarks";
 import { MapsTab, Spot } from "./MapsTab";
@@ -18,6 +18,7 @@ type Tab = "commentary" | "xrefs" | "dict" | "maps";
 
 function useCommentary(module: string, at: Required<Pick<Ref, "book" | "chapter" | "verse">>) {
   const [c, setC] = useState<Commentary | null | undefined>(undefined);
+  const lib = useLibraryKey();
   useEffect(() => {
     let live = true;
     setC(undefined);
@@ -28,7 +29,7 @@ function useCommentary(module: string, at: Required<Pick<Ref, "book" | "chapter"
     return () => {
       live = false;
     };
-  }, [module, at.book, at.chapter, at.verse]);
+  }, [module, at.book, at.chapter, at.verse, lib]);
   return c;
 }
 
@@ -85,12 +86,14 @@ export function Study({
     });
   }, []);
   useEffect(() => save("commentary", module), [module]);
+  // Asked again when modules are added or removed, so a new commentary is listed at once.
+  const lib = useLibraryKey();
   useEffect(() => {
     api
       .coverage(at.book, at.chapter, at.verse)
       .then((c) => setCoverage(c.filter((x) => x.id !== XREFS)))
       .catch(() => {});
-  }, [at.book, at.chapter, at.verse]);
+  }, [at.book, at.chapter, at.verse, lib]);
 
   const current = coverage.find((c) => c.id === module);
   // A commentary that's gone (removed, or no longer bundled): the first with notes here instead.
