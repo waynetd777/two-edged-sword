@@ -236,7 +236,10 @@ fn download(app: AppHandle, st: State<AppState>, url: String, file: String, sha2
         let _ = std::fs::remove_file(&part);
         return result;
     }
-    *st.lib.write().unwrap() = scan();
+    // Read before the lock is taken, so the commands reading the library (some on the main thread) wait
+    // only for the swap, not the scan.
+    let lib = scan();
+    *st.lib.write().unwrap() = lib;
     let _ = app.emit("download", Progress { file, done: size, total: size });
     Ok(())
 }
@@ -251,7 +254,10 @@ fn cancel_download(st: State<AppState>, file: String) {
 fn remove_module(st: State<AppState>, file: String) -> Result<(), String> {
     let path = library::app_dir().join(safe_name(&file)?);
     std::fs::remove_file(&path).map_err(|e| e.to_string())?;
-    *st.lib.write().unwrap() = scan();
+    // Read before the lock is taken, so the commands reading the library (some on the main thread) wait
+    // only for the swap, not the scan.
+    let lib = scan();
+    *st.lib.write().unwrap() = lib;
     Ok(())
 }
 
@@ -267,8 +273,8 @@ fn waiting_dirs(inbox: Option<String>) -> Vec<(std::path::PathBuf, bool)> {
     if let Some(docs) = store::DOCS_DIR.get() {
         dirs.push((docs.join("Inbox"), true));
         dirs.push((docs.clone(), false));
-        // Where the Files picker copies what's chosen (tmp/<bundle id>-Inbox), should the plugin not have
-        // moved it on.
+        // tmp/<bundle id>-Inbox, where iOS copies a module opened in the app and the Files picker copies what's
+        // chosen; and tmp/tes-picked-Inbox, where the plugin moves what was picked.
         if let Ok(rd) = std::fs::read_dir(std::env::temp_dir()) {
             dirs.extend(rd.flatten().map(|e| e.path()).filter(|p| p.is_dir() && p.to_string_lossy().ends_with("-Inbox")).map(|p| (p, true)));
         }
@@ -340,7 +346,10 @@ fn import_waiting(st: State<AppState>, inbox: Option<String>) -> Brought {
         }
     }
     if !out.added.is_empty() {
-        *st.lib.write().unwrap() = scan();
+        // Read before the lock is taken, so the commands reading the library (some on the main thread) wait
+        // only for the swap, not the scan.
+        let lib = scan();
+        *st.lib.write().unwrap() = lib;
     }
     out
 }
@@ -402,7 +411,10 @@ fn search(st: State<AppState>, q: search::Query) -> Result<search::Results, Stri
 #[tauri::command(async)]
 fn set_bundled(st: State<AppState>, dir: String) {
     *store::RESOURCE_DIR.write().unwrap() = Some(std::path::PathBuf::from(dir));
-    *st.lib.write().unwrap() = scan();
+    // Read before the lock is taken, so the commands reading the library (some on the main thread) wait
+    // only for the swap, not the scan.
+    let lib = scan();
+    *st.lib.write().unwrap() = lib;
 }
 
 /// Debug builds: the UI's errors and console.error, in the app's own log (`xcrun simctl launch --console`).

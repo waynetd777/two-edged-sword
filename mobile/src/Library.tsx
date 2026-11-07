@@ -204,7 +204,7 @@ export function Library({
               className="mini accent"
               onClick={() =>
                 invoke<{ count: number }>("plugin:tes-native|pick_modules")
-                  .then((r) => r.count && window.dispatchEvent(new Event("tes-inbox")))
+                  .then((r) => r.count && window.dispatchEvent(new CustomEvent("tes-inbox", { detail: { count: r.count } })))
                   .catch((e) => invoke("log", { msg: `pick_modules: ${e}` }))
               }
             >

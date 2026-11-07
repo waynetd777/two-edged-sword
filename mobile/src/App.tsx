@@ -65,30 +65,55 @@ export function App() {
   };
   const toldFailed = useRef(new Set<string>()).current;
   /** Modules AirDropped, opened from Files, dragged in with Finder or (Android) opened in the app: taken
-   *  into the library (lib.rs import_waiting). */
-  const takeIn = () =>
+   *  into the library (lib.rs import_waiting). One at a time: the Library opening, the app coming forward
+   *  and the picker closing can all ask at once, and would race for the same files; one asked for while
+   *  another runs follows it. The picker says how many it brought, so "Adding…" shows until they're in. */
+  const taking = useRef<"no" | "yes" | "again">("no");
+  const takeIn = (e?: Event) => {
+    const count = (e as CustomEvent<{ count?: number }> | undefined)?.detail?.count;
+    if (count) {
+      clearTimeout(noticeTimer.current);
+      setNotice(`Adding ${count > 1 ? `${count} modules` : "the module"}…`);
+    }
+    if (taking.current !== "no") {
+      taking.current = "again";
+      return;
+    }
+    taking.current = "yes";
     invoke<{ dir?: string }>("plugin:tes-native|inbox_dir")
       .catch(() => ({}) as { dir?: string })
       .then((r) => api.importWaiting(r.dir))
-      .then(({ added, failed: bad }) => {
-        let failed = bad;
-        if (added.length) loadModules();
+      .then(async ({ added, failed: bad }) => {
+        if (added.length) await loadModules();
         const parts = [];
         if (added.length) parts.push(`Added ${added.length > 2 ? `${added.length} modules` : added.join(" and ")} to the Library`);
         // A bad file left in Documents is found every time: told once.
-        failed = failed.filter((f) => !toldFailed.has(f));
+        const failed = bad.filter((f) => !toldFailed.has(f));
         failed.forEach((f) => toldFailed.add(f));
         if (failed.length) parts.push(`${failed.join(", ")} couldn't be read as ${failed.length > 1 ? "modules" : "a module"}`);
         if (parts.length) tell(parts.join(". ") + ".");
+        else if (count) setNotice(null);
       })
-      .catch(() => {});
+      .catch(() => setNotice(null))
+      .finally(() => {
+        const again = taking.current === "again";
+        taking.current = "no";
+        if (again) takeIn();
+      });
+  };
 
   useEffect(() => {
     loadModules();
     takeIn();
     window.addEventListener("tes-inbox", takeIn);
-    const unInbox = listen("tes-inbox", takeIn);
-    const shown = () => document.visibilityState === "visible" && takeIn();
+    const unInbox = listen("tes-inbox", () => takeIn());
+    // Coming forward: a module opened in the app (Share, AirDrop) is copied in a moment later, so looked
+    // for again shortly after too.
+    const shown = () => {
+      if (document.visibilityState !== "visible") return;
+      takeIn();
+      setTimeout(() => takeIn(), 1500);
+    };
     document.addEventListener("visibilitychange", shown);
     // Android: the bundled modules are copied out of the APK on the first start (and after an update); the
     // library is read again once they are.

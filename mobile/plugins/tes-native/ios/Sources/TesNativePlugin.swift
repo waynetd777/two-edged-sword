@@ -128,7 +128,7 @@ class TesNativePlugin: Plugin, AVSpeechSynthesizerDelegate {
 
   /// A light tap felt in the hand, for a button or a word tapped.
   /// The Library's Add from Files: the Files picker, for modules only, more than one at a time. What's
-  /// chosen is copied to Documents/Inbox, where the app takes it in (lib.rs import_waiting); the call
+  /// chosen is copied to tmp/tes-picked-Inbox, where the app takes it in (lib.rs import_waiting); the call
   /// answers with how many were copied (0 if the picker was closed).
   private let pickerDelegate = PickerDelegate()
 
@@ -138,9 +138,12 @@ class TesNativePlugin: Plugin, AVSpeechSynthesizerDelegate {
       let picker = UIDocumentPickerViewController(forOpeningContentTypes: types, asCopy: true)
       picker.allowsMultipleSelection = true
       guard let vc = self.manager.viewController else { return invoke.reject("no window") }
-      self.pickerDelegate.done = { urls in
+      // Off the main thread: a move is instant, but a copy of a large module isn't.
+      self.pickerDelegate.done = { urls in DispatchQueue.global(qos: .userInitiated).async {
         let fm = FileManager.default
-        let inbox = fm.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent("Inbox")
+        // A folder of the app's own: iOS keeps Documents/Inbox to itself (an app may only read and delete there).
+        // lib.rs import_waiting looks in every tmp/*-Inbox.
+        let inbox = fm.temporaryDirectory.appendingPathComponent("tes-picked-Inbox")
         try? fm.createDirectory(at: inbox, withIntermediateDirectories: true)
         var n = 0
         for url in urls {
@@ -149,7 +152,7 @@ class TesNativePlugin: Plugin, AVSpeechSynthesizerDelegate {
           if (try? fm.moveItem(at: url, to: to)) != nil || (try? fm.copyItem(at: url, to: to)) != nil { n += 1 }
         }
         invoke.resolve(["count": n])
-      }
+      } }
       picker.delegate = self.pickerDelegate
       vc.present(picker, animated: true)
     }
