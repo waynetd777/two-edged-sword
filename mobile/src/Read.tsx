@@ -160,7 +160,11 @@ export function Read({
   /** A tapped word: in the chapter, or (bible) in one of Compare's translations. */
   const [word, setWord] = useState<{ v: number; i: number; num?: string; bible?: string } | null>(null);
   const [comparing, setComparing] = useState(false);
-  const [cmpIds, setCmpIds] = useState<string[]>(() => saved("compare", COMPARE_DEFAULT));
+  // An empty list (saved by an older build that let every Bible be unticked) is the default again.
+  const [cmpIds, setCmpIds] = useState<string[]>(() => {
+    const ids = saved<string[]>("compare", COMPARE_DEFAULT);
+    return ids.length ? ids : COMPARE_DEFAULT;
+  });
   const [diff, setDiff] = useState<boolean>(() => saved("compareDiff", true));
   const [editing, setEditing] = useState(false);
   const [wideScene, setWideScene] = useState(false);

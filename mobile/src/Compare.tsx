@@ -81,7 +81,7 @@ export function CompareView({
   /** Reading aloud: the Bible being read and the word in the verse, marked as on the other reading pages. */
   said?: { bible: string; at: number };
 }) {
-  const base = ids.includes("kjv") ? "kjv" : ids[0];
+  const base = ids.includes("kjv") ? "kjv" : (ids[0] ?? "");
   const baseWords = words(tokensOf(base) ?? []);
   return (
     <>
@@ -93,7 +93,7 @@ export function CompareView({
           </button>
         </span>
         <label className="switch">
-          Differences from the {bibles.find((b) => b.id === base)?.abbrev || base.toUpperCase()}
+          Differences from the {bibles.find((b) => b.id === base)?.abbrev || base.toUpperCase() || "first"}
           <input type="checkbox" checked={diff} onChange={(e) => onDiff(e.target.checked)} />
           <span className="knob" aria-hidden="true" />
         </label>
@@ -142,7 +142,11 @@ export function CompareView({
 
 /** Which Bibles Compare shows, in order. */
 export function CompareEdit({ bibles, ids, onChange, onClose }: { bibles: Module[]; ids: string[]; onChange: (ids: string[]) => void; onClose: () => void }) {
-  const toggle = (id: string) => onChange(ids.includes(id) ? ids.filter((x) => x !== id) : [...ids, id]);
+  // At least one stays ticked: Compare with none has nothing to show (and a blank screen was all it gave).
+  const toggle = (id: string) => {
+    if (ids.includes(id) && ids.length === 1) return;
+    onChange(ids.includes(id) ? ids.filter((x) => x !== id) : [...ids, id]);
+  };
   useEffect(() => save("compare", ids), [ids]);
   return (
     <>
@@ -170,7 +174,7 @@ export function CompareEdit({ bibles, ids, onChange, onClose }: { bibles: Module
               ))}
           </div>
           <p className="m" style={{ marginTop: 12 }}>
-            Shown in the order you tick them. The KJV, when ticked, is the one differences are marked against.
+            Shown in the order you tick them; at least one stays ticked. The KJV, when ticked, is the one differences are marked against.
           </p>
         </div>
       </section>
