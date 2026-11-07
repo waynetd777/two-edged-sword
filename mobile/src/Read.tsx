@@ -895,7 +895,7 @@ export function Read({
             style={hls[vkey(loc.book, loc.chapter, sel)] ? { color: HL_DOT[hls[vkey(loc.book, loc.chapter, sel)]] } : undefined}
             onClick={() => setHlOpen(!hlOpen)}
           >
-            <Icon name="highlighter" size={20} />
+            <Icon name="highlighter" size={24} />
           </button>
           <button
             className={`round listen bmkbar ${marked(sel) ? "on" : ""}`}
