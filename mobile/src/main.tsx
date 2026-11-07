@@ -44,7 +44,8 @@ document.addEventListener(
   (e) => {
     if ((e.target as Element | null)?.closest?.(TAPPABLE)) invoke("plugin:tes-native|tap").catch(() => {});
   },
-  { capture: true, passive: true },
+  // After the page's own handlers, so a tap the reader ignores (one that only stopped a scroll) is silent.
+  { passive: true },
 );
 window.addEventListener("tes-insets", applyAndroidInsets);
 createRoot(document.getElementById("root")!).render(<App />);
