@@ -63,6 +63,8 @@ class SyncFinder {
   private var conns: [NWConnection] = []
   private var found: [FoundComputer] = []
   private let q = DispatchQueue(label: "tes.syncfinder")
+  /// Called when the first computer's address is known.
+  private var done: (() -> Void)?
 
   func find(_ cb: @escaping ([FoundComputer]) -> Void) {
     q.async {
@@ -89,6 +91,8 @@ class SyncFinder {
                 if let pct = h.firstIndex(of: "%") { h = String(h[..<pct]) }
                 self.found.removeAll { $0.name == name }
                 self.found.append(FoundComputer(name: name, host: h, port: Int(port.rawValue)))
+                self.done?()
+                self.done = nil
               }
               c.cancel()
             } else if case .failed = cs {
@@ -99,11 +103,18 @@ class SyncFinder {
         }
       }
       b.start(queue: self.q)
-      self.q.asyncAfter(deadline: .now() + 4) {
+      // Answered a moment after the first computer is found (others on the network have time to show),
+      // or after six seconds: longer than before, as the first search can wait on the permission prompt.
+      var answered = false
+      let answer = {
+        if answered { return }
+        answered = true
         b.cancel()
         self.conns.forEach { $0.cancel() }
         cb(self.found)
       }
+      self.done = { self.q.asyncAfter(deadline: .now() + 1) { answer() } }
+      self.q.asyncAfter(deadline: .now() + 6) { answer() }
     }
   }
 }

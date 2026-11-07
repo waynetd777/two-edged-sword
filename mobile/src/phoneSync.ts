@@ -186,10 +186,15 @@ export function startSync() {
 // ---------- the computer ----------
 
 /** Computers on this Wi-Fi with the app open, found over Bonjour for a few seconds. */
-export const discover = () =>
+const discoverOnce = () =>
   invoke<Found[] | { list: Found[] }>("plugin:tes-native|discover")
     .then((r) => (Array.isArray(r) ? r : (r?.list ?? [])))
     .catch(() => [] as Found[]);
+/** Looked for twice if need be: the first search can be lost to the "local network" permission prompt. */
+export const discover = async () => {
+  const f = await discoverOnce();
+  return f.length ? f : discoverOnce();
+};
 
 const url = (f: { host: string; port: number }) => `http://${f.host.includes(":") ? `[${f.host}]` : f.host}:${f.port}`;
 
