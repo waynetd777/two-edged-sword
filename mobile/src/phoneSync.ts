@@ -196,7 +196,9 @@ const url = (f: { host: string; port: number }) => `http://${f.host.includes(":"
 /** Pairs with a computer found, with the code its Settings shows. */
 export async function pair(f: Found, code: string, deviceName: string) {
   const r = await invoke<{ token: string; name: string }>("sync_pair", { url: url(f), code: code.trim(), name: deviceName });
-  const paired = { name: f.name, host: f.host, port: f.port, token: r.token };
+  // The computer's own name (as Bonjour announces it), so it can be found again by name even when it was
+  // paired by its address.
+  const paired = { name: r.name || f.name, host: f.host, port: f.port, token: r.token };
   save("syncPaired", paired);
   set({ paired, error: null });
   await syncNow();

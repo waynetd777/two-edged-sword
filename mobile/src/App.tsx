@@ -142,6 +142,8 @@ export function App() {
       if (sc.includes("search")) setTab("search");
       if (sc.includes("library")) setTab("library");
       // pair=<code>: pairs with the first computer found (a debug desktop build run with TES_PAIR_CODE).
+      // findmac: only looks for computers and logs them (debug.log), without pairing.
+      if (sc.includes("findmac")) discover().then((f) => invoke("log", { msg: `found ${JSON.stringify(f)}` }));
       // pairat=<host>:<port>:<code>: the same at a known address, as the Simulator doesn't find it over Bonjour.
       const pa = sc
         .find((x) => x.startsWith("pairat="))

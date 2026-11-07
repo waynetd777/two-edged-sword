@@ -3,6 +3,7 @@
 
 import AVFoundation
 import MediaPlayer
+import Network
 import ObjectiveC
 import SwiftRs
 import Tauri
@@ -54,66 +55,56 @@ struct FoundComputer: Encodable {
   let port: Int
 }
 
-class SyncFinder: NSObject, NetServiceBrowserDelegate, NetServiceDelegate {
-  private let browser = NetServiceBrowser()
-  private var services: [NetService] = []
+/// Bonjour: the computers with the desktop app open (`_tes-sync._tcp`), browsed for a few seconds with
+/// Network's NWBrowser, each then connected to once to learn its address. iOS asks once to let the app find
+/// devices on the local network.
+class SyncFinder {
+  private var browser: NWBrowser?
+  private var conns: [NWConnection] = []
   private var found: [FoundComputer] = []
-  private var done: (([FoundComputer]) -> Void)?
+  private let q = DispatchQueue(label: "tes.syncfinder")
 
   func find(_ cb: @escaping ([FoundComputer]) -> Void) {
-    done = cb
-    services = []
-    found = []
-    browser.delegate = self
-    NSLog("tes-native: Bonjour browse starting")
-    browser.searchForServices(ofType: "_tes-sync._tcp.", inDomain: "local.")
-    DispatchQueue.main.asyncAfter(deadline: .now() + 3) { self.finish() }
-  }
-
-  private func finish() {
-    browser.stop()
-    services.forEach { $0.stop() }
-    done?(found)
-    done = nil
-  }
-
-  func netServiceBrowserWillSearch(_ b: NetServiceBrowser) {
-    NSLog("tes-native: Bonjour browse will search")
-  }
-
-  func netServiceBrowser(_ b: NetServiceBrowser, didNotSearch errorDict: [String: NSNumber]) {
-    NSLog("tes-native: Bonjour browse failed: %@", errorDict)
-  }
-
-  func netService(_ s: NetService, didNotResolve errorDict: [String: NSNumber]) {
-    NSLog("tes-native: Bonjour resolve failed: %@", errorDict)
-  }
-
-  func netServiceBrowser(_ b: NetServiceBrowser, didFind s: NetService, moreComing: Bool) {
-    NSLog("tes-native: Bonjour found %@", s.name)
-    services.append(s)
-    s.delegate = self
-    s.resolve(withTimeout: 2.5)
-  }
-
-  func netServiceDidResolveAddress(_ s: NetService) {
-    guard let addrs = s.addresses else { return }
-    // An IPv4 address if there is one (simplest to reach), else IPv6.
-    var v4: String?
-    var v6: String?
-    for data in addrs {
-      data.withUnsafeBytes { (p: UnsafeRawBufferPointer) in
-        guard let sa = p.baseAddress?.assumingMemoryBound(to: sockaddr.self) else { return }
-        var host = [CChar](repeating: 0, count: Int(NI_MAXHOST))
-        if getnameinfo(sa, socklen_t(data.count), &host, socklen_t(host.count), nil, 0, NI_NUMERICHOST) == 0 {
-          let h = String(cString: host)
-          if sa.pointee.sa_family == sa_family_t(AF_INET) { v4 = v4 ?? h } else if !h.hasPrefix("fe80") { v6 = v6 ?? h }
+    q.async {
+      self.found = []
+      self.conns = []
+      let b = NWBrowser(for: .bonjour(type: "_tes-sync._tcp", domain: "local."), using: .tcp)
+      self.browser = b
+      b.stateUpdateHandler = { st in
+        if case .failed(let e) = st { NSLog("tes-native: Bonjour browse failed: %@", "\(e)") }
+        if case .waiting(let e) = st { NSLog("tes-native: Bonjour browse waiting: %@", "\(e)") }
+      }
+      b.browseResultsChangedHandler = { results, _ in
+        for r in results {
+          guard case .service(let name, _, _, _) = r.endpoint else { continue }
+          if self.conns.contains(where: { $0.endpoint == r.endpoint }) { continue }
+          NSLog("tes-native: Bonjour found %@", name)
+          // Connected to once, to learn the address it resolves to; then closed.
+          let c = NWConnection(to: r.endpoint, using: .tcp)
+          self.conns.append(c)
+          c.stateUpdateHandler = { cs in
+            if case .ready = cs {
+              if case .hostPort(let host, let port)? = c.currentPath?.remoteEndpoint {
+                var h = "\(host)"
+                if let pct = h.firstIndex(of: "%") { h = String(h[..<pct]) }
+                self.found.removeAll { $0.name == name }
+                self.found.append(FoundComputer(name: name, host: h, port: Int(port.rawValue)))
+              }
+              c.cancel()
+            } else if case .failed = cs {
+              c.cancel()
+            }
+          }
+          c.start(queue: self.q)
         }
       }
+      b.start(queue: self.q)
+      self.q.asyncAfter(deadline: .now() + 4) {
+        b.cancel()
+        self.conns.forEach { $0.cancel() }
+        cb(self.found)
+      }
     }
-    guard let host = v4 ?? v6 else { return }
-    found.removeAll { $0.name == s.name }
-    found.append(FoundComputer(name: s.name, host: host, port: s.port))
   }
 }
 
@@ -205,9 +196,7 @@ class TesNativePlugin: Plugin, AVSpeechSynthesizerDelegate {
   private let finder = SyncFinder()
 
   @objc public func discover(_ invoke: Invoke) {
-    DispatchQueue.main.async {
-      self.finder.find { found in invoke.resolve(found) }
-    }
+    finder.find { found in invoke.resolve(found) }
   }
 
   @objc public func pickModules(_ invoke: Invoke) {

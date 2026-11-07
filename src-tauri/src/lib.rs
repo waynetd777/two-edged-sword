@@ -265,8 +265,8 @@ fn variances_read(st: State<AppState>, name: String) -> Result<serde_json::Value
 
 /// Settings › Phones and tablets: a pairing code, the devices paired, and forgetting one.
 #[tauri::command]
-fn sync_pair_code(s: State<Arc<sync::Sync>>) -> (String, String, u16) {
-    (s.new_code(), sync::computer_name(), s.port())
+fn sync_pair_code(s: State<Arc<sync::Sync>>) -> (String, String, u16, String) {
+    (s.new_code(), sync::computer_name(), s.port(), sync::local_ip())
 }
 
 #[tauri::command]

@@ -1756,3 +1756,14 @@ input[type="range"] {
   background: var(--bar);
   border: 1px solid var(--line);
 }
+
+/* A text box on its own (Sync's code and address), looking like the filter boxes. */
+input.field {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 16px; /* 16px or more: iOS doesn't zoom into the field */
+  outline: none;
+}

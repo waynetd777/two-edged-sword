@@ -4,7 +4,8 @@
 // More › Settings › Sync: pairing with Two-edged Sword on a computer, and how syncing with it is going
 // (phoneSync.ts).
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { scene } from "./api";
 import { discover, pair, syncNow, unpair, useSync } from "./phoneSync";
 
 type Found = Awaited<ReturnType<typeof discover>>[number];
@@ -33,7 +34,31 @@ export function SyncSettings() {
   const [code, setCode] = useState("");
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [addr, setAddr] = useState("");
+  /** An address typed in (as the computer's pairing code shows it), for when it isn't found. */
+  const byAddress = () => {
+    const [host, port] = addr.trim().split(":");
+    if (!host) return;
+    setChosen({ name: host, host, port: Number(port) || 47615 });
+    setStep("code");
+  };
 
+  // Debug: syncnone shows "No computer found", synccode the code step.
+  useEffect(() => {
+    scene.then((sc) => {
+      if (sc.includes("syncnone") || sc.includes("synccode")) unpair();
+      if (sc.includes("syncnone")) {
+        setAddr("192,168,1,157".replace(/,/g, "."));
+        setStep("pick");
+      }
+      if (sc.includes("synccode")) {
+        setChosen({ name: "Wayne's MacBook Pro", host: "192.168.1.157", port: 47615 });
+        setCode("123456");
+        setStep("code");
+      }
+      if (sc.includes("syncnone") || sc.includes("synccode")) setTimeout(() => document.getElementById("sync")?.scrollIntoView(), 600);
+    });
+  }, []);
   const look = async () => {
     setErr(null);
     setStep("looking");
@@ -79,7 +104,7 @@ export function SyncSettings() {
     );
 
   return (
-    <div className="card">
+    <div className="card" id="sync">
       <p className="m" style={{ margin: "0 0 10px" }}>
         Keep bookmarks, highlights, reading plans, Recent and your place in each book the same as Two-edged Sword on your computer, whenever
         this device is on the same Wi-Fi.
@@ -113,6 +138,24 @@ export function SyncSettings() {
             <button className="secondary" onClick={look}>
               Try again
             </button>
+            <p className="m" style={{ margin: "14px 0 6px" }}>
+              Or enter the address the computer shows with its pairing code:
+            </p>
+            <div style={{ display: "flex", gap: 8 }}>
+              <input
+                className="field"
+                inputMode="decimal"
+                placeholder="192.168.1.20"
+                aria-label="The computer's address"
+                value={addr}
+                // The keypad's decimal key is a comma in some regions (South Africa's among them).
+                onChange={(e) => setAddr(e.target.value.replace(/,/g, ".").replace(/[^0-9.:]/g, ""))}
+                style={{ flex: 1, minWidth: 0 }}
+              />
+              <button className="secondary" style={{ flex: "none" }} disabled={!addr.trim()} onClick={byAddress}>
+                Next
+              </button>
+            </div>
           </>
         ))}
       {step === "code" && chosen && (
@@ -122,15 +165,16 @@ export function SyncSettings() {
           </p>
           <div style={{ display: "flex", gap: 8 }}>
             <input
+              className="field"
               inputMode="numeric"
               autoComplete="one-time-code"
               placeholder="123456"
               aria-label="Pairing code"
               value={code}
               onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-              style={{ flex: 1, fontSize: 20, letterSpacing: "0.15em" }}
+              style={{ flex: 1, minWidth: 0, fontSize: 20, letterSpacing: "0.15em" }}
             />
-            <button className="primary" disabled={busy || code.length !== 6} onClick={go}>
+            <button className="primary" style={{ flex: "none" }} disabled={busy || code.length !== 6} onClick={go}>
               {busy ? "Pairing…" : "Pair"}
             </button>
           </div>

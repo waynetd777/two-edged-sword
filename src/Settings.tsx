@@ -417,7 +417,7 @@ export function SettingsScreen() {
  *  one, and those paired, with when each last synced. */
 function Phones() {
   const [devices, setDevices] = useState<{ id: string; name: string; seen: number }[]>([]);
-  const [code, setCode] = useState<{ code: string; name: string } | null>(null);
+  const [code, setCode] = useState<{ code: string; name: string; at: string } | null>(null);
   const load = () =>
     invoke<{ id: string; name: string; seen: number }[]>("sync_devices")
       .then(setDevices)
@@ -458,13 +458,19 @@ function Phones() {
           <span style={{ fontSize: 13 }}>
             In the phone app, go to More › Settings › Sync and enter <b style={{ fontSize: 18, letterSpacing: "0.12em" }}>{code.code}</b>{" "}
             (for “{code.name}”). It works for 10 minutes.
+            {code.at && (
+              <>
+                {" "}
+                If the phone doesn't find this computer, enter its address: <b>{code.at}</b>
+              </>
+            )}
           </span>
         ) : (
           <button
             className="btn small"
             onClick={() =>
-              invoke<[string, string, number]>("sync_pair_code")
-                .then(([c, name]) => setCode({ code: c, name }))
+              invoke<[string, string, number, string]>("sync_pair_code")
+                .then(([c, name, port, ip]) => setCode({ code: c, name, at: ip ? `${ip}${port === 47615 ? "" : `:${port}`}` : "" }))
                 .catch(() => {})
             }
           >

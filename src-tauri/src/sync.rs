@@ -62,6 +62,15 @@ fn random_hex(bytes: usize) -> String {
     b.iter().map(|x| format!("{x:02x}")).collect()
 }
 
+/// This computer's address on the home network, for typing into a phone that doesn't find it: the one
+/// a connection out would use (connecting a UDP socket sends nothing).
+pub fn local_ip() -> String {
+    std::net::UdpSocket::bind("0.0.0.0:0")
+        .and_then(|s| s.connect("192.0.2.1:9").and_then(|_| s.local_addr()))
+        .map(|a| a.ip().to_string())
+        .unwrap_or_default()
+}
+
 /// This computer's name as people know it ("Wayne's MacBook Air").
 pub fn computer_name() -> String {
     #[cfg(target_os = "macos")]
