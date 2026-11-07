@@ -259,8 +259,12 @@ class TesNativePlugin(private val activity: Activity) : Plugin(activity) {
             @Suppress("DEPRECATION")
             val all: List<java.net.InetAddress> =
               if (android.os.Build.VERSION.SDK_INT >= 34) i.hostAddresses else listOfNotNull(i.host)
-            val pick = all.firstOrNull { it is java.net.Inet4Address }
-              ?: all.firstOrNull { !it.isLinkLocalAddress && !it.isLoopbackAddress }
+            // The computer announces every address it has, its loopback (127.0.0.1) among them, which
+            // here would be the phone itself: a home-network one (192.168…, 10…) first.
+            val usable = all.filter { !it.isLoopbackAddress && !it.isLinkLocalAddress && !it.isAnyLocalAddress }
+            val pick = usable.firstOrNull { it is java.net.Inet4Address && it.isSiteLocalAddress }
+              ?: usable.firstOrNull { it is java.net.Inet4Address }
+              ?: usable.firstOrNull()
             val host = pick?.hostAddress
             if (host != null) out.put(JSObject().apply { put("name", i.serviceName); put("host", host.substringBefore('%')); put("port", i.port) })
             next()

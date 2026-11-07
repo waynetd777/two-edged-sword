@@ -89,7 +89,7 @@ export function SyncSettings() {
         <p style={{ margin: "0 0 4px" }}>
           Syncing with <b>{s.paired.name}</b>
         </p>
-        <p className="m" style={{ margin: "0 0 10px" }}>
+        <p className="m" style={{ margin: "0 0 10px", overflowWrap: "anywhere" }}>
           {s.busy ? "Syncing…" : s.error ? s.error : s.last ? `Synced ${ago(s.last)}` : "Not synced yet"}
         </p>
         <div style={{ display: "flex", gap: 8 }}>
@@ -181,7 +181,7 @@ export function SyncSettings() {
         </>
       )}
       {err && (
-        <p className="m" style={{ color: "var(--red)", marginTop: 8 }}>
+        <p className="m" style={{ color: "var(--red)", marginTop: 8, overflowWrap: "anywhere" }}>
           {err}
         </p>
       )}

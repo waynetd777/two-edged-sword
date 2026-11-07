@@ -198,9 +198,19 @@ export const discover = async () => {
 
 const url = (f: { host: string; port: number }) => `http://${f.host.includes(":") ? `[${f.host}]` : f.host}:${f.port}`;
 
+/** A network error in plain words: the computer couldn't be reached (its own errors are already plain). */
+export function plain(e: unknown, f: { host: string }): string {
+  const m = String(e).replace(/^Error: /, "");
+  if (/os error|Connection|connect|timed out|Network|dns|resolve/i.test(m))
+    return `Couldn't reach the computer at ${f.host}. Check that Two-edged Sword is open on it and that both are on the same Wi-Fi.`;
+  return m;
+}
+
 /** Pairs with a computer found, with the code its Settings shows. */
 export async function pair(f: Found, code: string, deviceName: string) {
-  const r = await invoke<{ token: string; name: string }>("sync_pair", { url: url(f), code: code.trim(), name: deviceName });
+  const r = await invoke<{ token: string; name: string }>("sync_pair", { url: url(f), code: code.trim(), name: deviceName }).catch((e) => {
+    throw new Error(plain(e, f));
+  });
   // The computer's own name (as Bonjour announces it), so it can be found again by name even when it was
   // paired by its address.
   const paired = { name: r.name || f.name, host: f.host, port: f.port, token: r.token };
@@ -256,7 +266,7 @@ async function run() {
     set({ last, error: null, busy: false });
   } catch (e) {
     const msg = String(e).replace(/^Error: /, "");
-    set({ busy: false, error: msg.includes("not paired") ? "The computer no longer knows this device. Pair again." : msg });
+    set({ busy: false, error: msg.includes("not paired") ? "The computer no longer knows this device. Pair again." : plain(msg, p) });
   }
 }
 

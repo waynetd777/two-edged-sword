@@ -163,6 +163,8 @@ pub fn start(app: &AppHandle, data: PathBuf) {
 
 fn announce(sync: &Sync, port: u16) {
     let Ok(d) = mdns_sd::ServiceDaemon::new() else { return };
+    // IPv4 only: the server listens on IPv4, and a phone given an IPv6 address would be refused.
+    let _ = d.disable_interface(mdns_sd::IfKind::IPv6);
     let name = computer_name();
     let host = format!("tes-{}.local.", random_hex(4));
     let props = [("app", "tes"), ("v", "1")];
