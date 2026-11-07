@@ -1767,3 +1767,25 @@ input.field {
   font-size: 16px; /* 16px or more: iOS doesn't zoom into the field */
   outline: none;
 }
+
+/* iPad, docked: the highlighter and Compare beside the study pane's bookmark (Read.tsx). */
+.dockacts {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  flex: none;
+}
+.dockacts .round.listen {
+  /* Plain, as the bookmark beside them. */
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  box-shadow: none;
+  border: none;
+  background: none;
+}
+.dockacts .round.listen.on,
+.dockacts .round.listen.open {
+  background: var(--accentsoft);
+}

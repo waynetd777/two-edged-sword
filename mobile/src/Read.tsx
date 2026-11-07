@@ -568,6 +568,33 @@ export function Read({
     setChoosing(false);
   };
 
+  // The highlighter and Compare: beside the study bar, or (iPad, docked) in the study pane's header.
+  const hlButton = (
+    <button
+      className={`round listen hlbtn ${hlOpen ? "open" : ""}`}
+      aria-label={`Highlight ${fmtRef({ ...loc, verse: sel })}`}
+      aria-expanded={hlOpen}
+      style={hls[vkey(loc.book, loc.chapter, sel)] ? { color: HL_DOT[hls[vkey(loc.book, loc.chapter, sel)]] } : undefined}
+      onClick={() => setHlOpen(!hlOpen)}
+    >
+      <Icon name="highlighter" size={24} />
+    </button>
+  );
+  const cmpButton = (
+    <button
+      className={`round listen cmpbtn ${comparing ? "on" : ""}`}
+      aria-label={comparing ? "Back to the chapter" : "Compare translations"}
+      aria-pressed={comparing}
+      onClick={() => {
+        setWord(null);
+        history.push({ comparing: !comparing });
+        setComparing(!comparing);
+      }}
+    >
+      <Icon name="compare" size={26} />
+    </button>
+  );
+
   return (
     <>
       <header className="topbar">
@@ -808,6 +835,12 @@ export function Read({
             onChanged={onModulesChanged}
             onImage={(src, ring) => setImage({ src, ring })}
             docked
+            actions={
+              <>
+                {hlButton}
+                {cmpButton}
+              </>
+            }
             at={{ ...loc, verse: sel }}
             count={verses.length}
             onVerse={setSel}
@@ -841,7 +874,7 @@ export function Read({
           </button>
         </div>
       )}
-      {!docked && !doc && !pl.on && hlOpen && (
+      {!doc && !pl.on && hlOpen && (
         <div className="hlstrip" role="group" aria-label={`Highlight ${fmtRef({ ...loc, verse: sel })}`}>
           {HL_COLORS.map((c) => {
             const k = vkey(loc.book, loc.chapter, sel);
@@ -888,15 +921,7 @@ export function Read({
               <Icon name="up" size={16} />
             </span>
           </button>
-          <button
-            className={`round listen hlbtn ${hlOpen ? "open" : ""}`}
-            aria-label={`Highlight ${fmtRef({ ...loc, verse: sel })}`}
-            aria-expanded={hlOpen}
-            style={hls[vkey(loc.book, loc.chapter, sel)] ? { color: HL_DOT[hls[vkey(loc.book, loc.chapter, sel)]] } : undefined}
-            onClick={() => setHlOpen(!hlOpen)}
-          >
-            <Icon name="highlighter" size={24} />
-          </button>
+          {hlButton}
           <button
             className={`round listen bmkbar ${marked(sel) ? "on" : ""}`}
             aria-label={
@@ -907,18 +932,7 @@ export function Read({
           >
             <Icon name="bookmark" size={20} fill={marked(sel) ? "currentColor" : undefined} />
           </button>
-          <button
-            className={`round listen cmpbtn ${comparing ? "on" : ""}`}
-            aria-label={comparing ? "Back to the chapter" : "Compare translations"}
-            aria-pressed={comparing}
-            onClick={() => {
-              setWord(null);
-              history.push({ comparing: !comparing });
-              setComparing(!comparing);
-            }}
-          >
-            <Icon name="compare" size={26} />
-          </button>
+          {cmpButton}
         </div>
       )}
 

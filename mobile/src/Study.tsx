@@ -1,7 +1,7 @@
 // Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
 // SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
-import { TouchEvent, useEffect, useRef, useState } from "react";
+import { ReactNode, TouchEvent, useEffect, useRef, useState } from "react";
 import { fmtRef, Ref } from "../../src/bible";
 import { renderHtml } from "../../src/esword";
 import { api, Commentary, Coverage, save, saved, scene, useLibraryKey } from "./api";
@@ -49,6 +49,7 @@ export function Study({
   onClose,
   onGo,
   docked,
+  actions,
   modules,
   onChanged,
   onImage,
@@ -59,6 +60,8 @@ export function Study({
   /** The library changed (the maps were downloaded). */
   onChanged: () => void;
   onImage: (src: string, ring: Spot[]) => void;
+  /** More buttons for the verse beside the bookmark (docked: the highlighter and Compare). */
+  actions?: ReactNode;
   /** The Bible being read, for a bookmark. */
   bible: string;
   /** The verse's words, for the dictionary entries it has. */
@@ -151,10 +154,20 @@ export function Study({
         )}
         <div className="shead" onTouchStart={start} onTouchEnd={end}>
           <h2>{fmtRef(at)}</h2>
-          <BookmarkButton at={at} bible={bible} />
-          <span className="m" style={{ flex: 1 }}>
-            {docked ? "Tap a verse to study it" : "Swipe for the next verse"}
-          </span>
+          {actions ? (
+            // Docked: the bookmark, highlighter and Compare together on the right, without the hint.
+            <span className="dockacts">
+              <BookmarkButton at={at} bible={bible} />
+              {actions}
+            </span>
+          ) : (
+            <>
+              <BookmarkButton at={at} bible={bible} />
+              <span className="m" style={{ flex: 1 }}>
+                {docked ? "Tap a verse to study it" : "Swipe for the next verse"}
+              </span>
+            </>
+          )}
           {!docked && (
             <button className="done" onClick={onClose}>
               Done
