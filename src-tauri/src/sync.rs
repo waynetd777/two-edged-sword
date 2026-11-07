@@ -167,7 +167,9 @@ fn announce(sync: &Sync, port: u16) {
     let _ = d.disable_interface(mdns_sd::IfKind::IPv6);
     let name = computer_name();
     let host = format!("tes-{}.local.", random_hex(4));
-    let props = [("app", "tes"), ("v", "1")];
+    // Its address too: Android may be told only an IPv6 link-local one (fe80::), which can't be connected to.
+    let ip = local_ip();
+    let props = [("app", "tes"), ("v", "1"), ("ip", ip.as_str())];
     if let Ok(info) = mdns_sd::ServiceInfo::new(SERVICE, &name, &host, "", port, &props[..]) {
         let _ = d.register(info.enable_addr_auto());
     }

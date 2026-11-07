@@ -265,7 +265,9 @@ class TesNativePlugin(private val activity: Activity) : Plugin(activity) {
             val pick = usable.firstOrNull { it is java.net.Inet4Address && it.isSiteLocalAddress }
               ?: usable.firstOrNull { it is java.net.Inet4Address }
               ?: usable.firstOrNull()
-            val host = pick?.hostAddress
+            // The address the computer puts in its announcement first (sync.rs), else one resolved.
+            val told = i.attributes["ip"]?.let { String(it) }?.takeIf { it.isNotBlank() }
+            val host = told ?: pick?.hostAddress
             if (host != null) out.put(JSObject().apply { put("name", i.serviceName); put("host", host.substringBefore('%')); put("port", i.port) })
             next()
           }
