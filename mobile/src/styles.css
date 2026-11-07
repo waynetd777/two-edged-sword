@@ -1557,6 +1557,12 @@ input[type="range"] {
 /* The top bar is tightened to fit, and the passage's button shortens its text rather than pushing the
    buttons past the edge. */
 @media (max-width: 380px) {
+  .round.listen {
+    width: 42px;
+  }
+  .studyrow {
+    gap: 6px;
+  }
   .topbar {
     gap: 4px;
     padding-right: 8px;
@@ -1710,15 +1716,25 @@ input[type="range"] {
   background: var(--hl);
   border-radius: 4px;
 }
-.hlrow {
+/* The highlighter's colours, above the study bar (Read.tsx). */
+.hlstrip {
+  flex: none;
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin: 4px 0 12px;
+  gap: 10px;
+  margin: 0 12px 8px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  box-shadow: 0 -6px 24px var(--scrim);
   flex-wrap: wrap;
 }
-.hlrow .m {
-  margin-right: 4px;
+.round.listen.hlbtn {
+  color: var(--muted);
+}
+.round.listen.hlbtn.open {
+  background: var(--accentsoft);
 }
 .hldot {
   width: 26px;

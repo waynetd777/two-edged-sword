@@ -10,7 +10,7 @@ Each section below folds open. The tabs along the bottom are Read, Search, Words
 - **A word**: tap it to see its Strong's number and meaning. Tap the speaker to hear it said, or **Word Study** for more.
 - **Back and forward**: ‹ and › at the top left go back over every place you've been, as in a web browser.
 - **Bible**: tap the Bible's name at the top to change it.
-- **Highlight a verse**: tap a word in it, then a colour under **Highlight**. Tap the colour again, or ✕, to remove it.
+- **Highlight a verse**: tap the highlighter beside the study bar, then a colour. It highlights the verse the study bar names. Tap the colour again, or ✕, to remove it.
 
 ## Study a verse
 

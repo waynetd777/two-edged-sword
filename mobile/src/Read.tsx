@@ -10,7 +10,7 @@ import { COMPARE_DEFAULT, CompareEdit, CompareView, useChapters } from "./Compar
 import { bookTitles, DocView, isDevotional, setDevotionals, todayTitle } from "./DocView";
 import { GoTo } from "./GoTo";
 import { bookmarks, useBookmarks } from "./bookmarks";
-import { useHighlights, vkey } from "./highlights";
+import { HL_COLORS, HL_DOT, highlights, useHighlights, vkey } from "./highlights";
 import { player, usePlayer } from "./player";
 import { ImageViewer } from "./ImageViewer";
 import type { Spot } from "./MapsTab";
@@ -193,6 +193,9 @@ export function Read({
   const pl = usePlayer();
   const bm = useBookmarks();
   const hls = useHighlights();
+  /** The highlighter's colours, open above the study bar for the verse it names. */
+  const [hlOpen, setHlOpen] = useState(false);
+  useEffect(() => setHlOpen(false), [sel, loc.book, loc.chapter]);
   const marked = (v: number) => bm.has({ ref: { book: loc.book, chapter: loc.chapter, verse: v }, bible });
   // Recent: each chapter read, once.
   useEffect(() => {
@@ -256,6 +259,8 @@ export function Read({
         setGoing(true);
       }
       if (sc.includes("compare")) setComparing(true);
+      // hlopen: the highlighter's colours open.
+      if (sc.includes("hlopen")) setTimeout(() => setHlOpen(true), 1500);
       // Debug: Compare's › a few seconds into reading.
       if (sc.includes("stepnext")) setTimeout(() => document.querySelector<HTMLButtonElement>('[aria-label="Next verse"]')?.click(), 7000);
       // Debug: hop to the next chapter a few seconds into reading, as a swipe would.
@@ -836,6 +841,39 @@ export function Read({
           </button>
         </div>
       )}
+      {!docked && !doc && !pl.on && hlOpen && (
+        <div className="hlstrip" role="group" aria-label={`Highlight ${fmtRef({ ...loc, verse: sel })}`}>
+          {HL_COLORS.map((c) => {
+            const k = vkey(loc.book, loc.chapter, sel);
+            const on = hls[k] === c;
+            return (
+              <button
+                key={c}
+                className={`hldot ${on ? "on" : ""}`}
+                style={{ background: HL_DOT[c] }}
+                aria-label={c}
+                aria-pressed={on}
+                onClick={() => {
+                  highlights.set(k, on ? null : c);
+                  setHlOpen(false);
+                }}
+              />
+            );
+          })}
+          {hls[vkey(loc.book, loc.chapter, sel)] && (
+            <button
+              className="hlclear"
+              aria-label="Remove the highlight"
+              onClick={() => {
+                highlights.set(vkey(loc.book, loc.chapter, sel), null);
+                setHlOpen(false);
+              }}
+            >
+              ✕
+            </button>
+          )}
+        </div>
+      )}
       {!docked && !doc && !pl.on && (
         <div className="studyrow">
           <button className="studybar" onClick={() => setStudy(true)}>
@@ -849,6 +887,15 @@ export function Read({
             <span style={{ color: "var(--muted)", display: "flex" }}>
               <Icon name="up" size={16} />
             </span>
+          </button>
+          <button
+            className={`round listen hlbtn ${hlOpen ? "open" : ""}`}
+            aria-label={`Highlight ${fmtRef({ ...loc, verse: sel })}`}
+            aria-expanded={hlOpen}
+            style={hls[vkey(loc.book, loc.chapter, sel)] ? { color: HL_DOT[hls[vkey(loc.book, loc.chapter, sel)]] } : undefined}
+            onClick={() => setHlOpen(!hlOpen)}
+          >
+            <Icon name="highlighter" size={20} />
           </button>
           <button
             className={`round listen bmkbar ${marked(sel) ? "on" : ""}`}

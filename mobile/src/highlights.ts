@@ -9,6 +9,17 @@ import { save, saved } from "./api";
 
 export type HlColor = "red" | "orange" | "yellow" | "green" | "teal" | "blue" | "purple" | "grey";
 export const HL_COLORS: HlColor[] = ["yellow", "green", "teal", "blue", "purple", "red", "orange", "grey"];
+/** Each colour as a dot in the picker (the desktop's HL_DOT). */
+export const HL_DOT: Record<HlColor, string> = {
+  red: "#e59a92",
+  orange: "#efb97e",
+  yellow: "#e9d271",
+  green: "#a9cf9f",
+  teal: "#8fcfc6",
+  blue: "#9fc0e6",
+  purple: "#c1a9e3",
+  grey: "#aab3bf",
+};
 
 let all: Record<string, HlColor> = saved<Record<string, HlColor>>("highlights", {});
 const watchers = new Set<() => void>();
