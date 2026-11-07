@@ -6,5 +6,12 @@
 	<string>Two-edged Sword keeps your journal in Documents › Two-edged Sword unless you choose another folder in Settings.</string>
 	<key>NSAppleEventsUsageDescription</key>
 	<string>Two-edged Sword plays the worship songs chosen for your Quiet time in the Music app.</string>
+	<!-- Sync with the phone app (sync.rs): announced to the phones on the home network over Bonjour. -->
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Two-edged Sword lets the phone app on your Wi-Fi find it, to sync your bookmarks, highlights and reading plans.</string>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_tes-sync._tcp</string>
+	</array>
 </dict>
 </plist>
