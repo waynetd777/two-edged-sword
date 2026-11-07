@@ -109,7 +109,13 @@ fn strongs_by_book(st: State<AppState>, bible: String, number: String) -> Result
 }
 
 #[tauri::command(async)]
-fn strongs_verses(st: State<AppState>, bible: String, number: String, book: Option<i64>, limit: usize) -> Result<Vec<content::VerseHit>, String> {
+fn strongs_verses(
+    st: State<AppState>,
+    bible: String,
+    number: String,
+    book: Option<i64>,
+    limit: usize,
+) -> Result<Vec<content::VerseHit>, String> {
     content::strongs_verses(&st.lib.read().unwrap(), &bible, &number, book, limit)
 }
 
@@ -175,8 +181,51 @@ fn fetch_manifest(url: String) -> Result<String, String> {
 #[tauri::command(async)]
 fn fetch_bytes(url: String) -> Result<tauri::ipc::Response, String> {
     let mut buf = Vec::new();
-    Read::read_to_end(&mut agent().get(&url).call().map_err(|e| e.to_string())?.into_reader().take(2_000_000), &mut buf).map_err(|e| e.to_string())?;
+    Read::read_to_end(&mut agent().get(&url).call().map_err(|e| e.to_string())?.into_reader().take(2_000_000), &mut buf)
+        .map_err(|e| e.to_string())?;
     Ok(tauri::ipc::Response::new(buf))
+}
+
+// ---------- sync with the desktop app (src/phoneSync.ts; the desktop's sync.rs answers) ----------
+
+fn sync_agent() -> ureq::Agent {
+    ureq::AgentBuilder::new().timeout_connect(std::time::Duration::from_secs(4)).timeout_read(std::time::Duration::from_secs(20)).build()
+}
+
+/// The error a desktop sent ({"error": "..."}), or the network's.
+fn sync_error(e: ureq::Error) -> String {
+    match e {
+        ureq::Error::Status(401, _) => "not paired".into(),
+        ureq::Error::Status(_, r) => r
+            .into_string()
+            .ok()
+            .and_then(|t| serde_json::from_str::<serde_json::Value>(&t).ok())
+            .and_then(|v| v["error"].as_str().map(str::to_string))
+            .unwrap_or_else(|| "The computer couldn't sync.".into()),
+        ureq::Error::Transport(t) => t.to_string(),
+    }
+}
+
+fn sync_json(req: ureq::Request, body: serde_json::Value) -> Result<serde_json::Value, String> {
+    let text = req
+        .set("Content-Type", "application/json")
+        .send_string(&body.to_string())
+        .map_err(sync_error)?
+        .into_string()
+        .map_err(|e| e.to_string())?;
+    serde_json::from_str(&text).map_err(|e| e.to_string())
+}
+
+/// Pairs with the computer at `url` using the code its Settings shows; answers its token.
+#[tauri::command(async)]
+fn sync_pair(url: String, code: String, name: String) -> Result<serde_json::Value, String> {
+    sync_json(sync_agent().post(&format!("{url}/pair")), serde_json::json!({"code": code, "name": name}))
+}
+
+/// Sends what's here to the paired computer; answers the merge.
+#[tauri::command(async)]
+fn sync_post(url: String, token: String, payload: serde_json::Value) -> Result<serde_json::Value, String> {
+    sync_json(sync_agent().post(&format!("{url}/sync")).set("Authorization", &format!("Bearer {token}")), payload)
 }
 
 #[derive(Clone, Serialize)]
@@ -276,7 +325,9 @@ fn waiting_dirs(inbox: Option<String>) -> Vec<(std::path::PathBuf, bool)> {
         // tmp/<bundle id>-Inbox, where iOS copies a module opened in the app and the Files picker copies what's
         // chosen; and tmp/tes-picked-Inbox, where the plugin moves what was picked.
         if let Ok(rd) = std::fs::read_dir(std::env::temp_dir()) {
-            dirs.extend(rd.flatten().map(|e| e.path()).filter(|p| p.is_dir() && p.to_string_lossy().ends_with("-Inbox")).map(|p| (p, true)));
+            dirs.extend(
+                rd.flatten().map(|e| e.path()).filter(|p| p.is_dir() && p.to_string_lossy().ends_with("-Inbox")).map(|p| (p, true)),
+            );
         }
     }
     dirs
@@ -313,7 +364,9 @@ fn import_waiting(st: State<AppState>, inbox: Option<String>) -> Brought {
     let dest = library::app_dir();
     let _ = std::fs::create_dir_all(&dest);
     for (dir, inbox) in waiting_dirs(inbox) {
-        let Ok(entries) = std::fs::read_dir(&dir) else { continue };
+        let Ok(entries) = std::fs::read_dir(&dir) else {
+            continue;
+        };
         for e in entries.flatten() {
             let path = e.path();
             if !path.is_file() {
@@ -347,7 +400,8 @@ fn import_waiting(st: State<AppState>, inbox: Option<String>) -> Brought {
             let Some(title) = title else {
                 // Changed in the last few seconds: it may still be arriving (iOS copying a file opened in the
                 // app). Left for the next look, not thrown away.
-                let fresh = path.metadata().and_then(|m| m.modified()).ok().and_then(|t| t.elapsed().ok()).is_some_and(|d| d.as_secs() < 10);
+                let fresh =
+                    path.metadata().and_then(|m| m.modified()).ok().and_then(|t| t.elapsed().ok()).is_some_and(|d| d.as_secs() < 10);
                 if fresh {
                     continue;
                 }
@@ -443,6 +497,10 @@ fn set_bundled(st: State<AppState>, dir: String) {
 fn log(msg: String) {
     if cfg!(debug_assertions) {
         eprintln!("[ui] {msg}");
+        // Also to a file in the app's data, readable from the Simulator's container.
+        if let Ok(mut f) = std::fs::OpenOptions::new().create(true).append(true).open(store::data_dir().join("debug.log")) {
+            let _ = writeln!(f, "{msg}");
+        }
     }
 }
 
@@ -475,7 +533,39 @@ pub fn run() {
             app.manage(AppState { lib: RwLock::new(scan()), cancelled: Mutex::new(HashSet::new()) });
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![log, scene, set_bundled, modules, chapter, chapter_sizes, commentary, coverage, article, strongs_for_word, search, strongs_by_book, strongs_verses, translit_search, find_topics, fetch_manifest, fetch_bytes, module_info, list_topics, reference_titles, devotion_titles, devotion, commentary_ranges, schedule_reminders, download, cancel_download, remove_module, count_waiting, import_waiting])
+        .invoke_handler(tauri::generate_handler![
+            log,
+            scene,
+            set_bundled,
+            modules,
+            chapter,
+            chapter_sizes,
+            commentary,
+            coverage,
+            article,
+            strongs_for_word,
+            search,
+            strongs_by_book,
+            strongs_verses,
+            translit_search,
+            find_topics,
+            fetch_manifest,
+            fetch_bytes,
+            module_info,
+            list_topics,
+            reference_titles,
+            devotion_titles,
+            devotion,
+            commentary_ranges,
+            schedule_reminders,
+            download,
+            cancel_download,
+            remove_module,
+            count_waiting,
+            import_waiting,
+            sync_pair,
+            sync_post
+        ])
         .build(tauri::generate_context!())
         .expect("error while running the app")
         .run(|app, ev| {

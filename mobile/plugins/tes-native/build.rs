@@ -11,6 +11,7 @@ const COMMANDS: &[&str] = &[
     "bundled_dir",
     "inbox_dir",
     "pick_modules",
+    "discover",
     "say",
     "tap",
     // addPluginListener in the app goes through these (the "speech" events).

@@ -98,7 +98,14 @@ export interface ModuleMatches<T> {
 
 export interface SearchResults {
   bible: ModuleMatches<{ book: number; chapter: number; verse: number; text: string }>;
-  commentaries: ModuleMatches<{ book: number; chapterBegin: number; verseBegin: number; chapterEnd: number; verseEnd: number; snippet: string }>[];
+  commentaries: ModuleMatches<{
+    book: number;
+    chapterBegin: number;
+    verseBegin: number;
+    chapterEnd: number;
+    verseEnd: number;
+    snippet: string;
+  }>[];
   dictionaries: ModuleMatches<string>[];
   strongs: boolean;
 }

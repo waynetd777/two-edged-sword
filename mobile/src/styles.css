@@ -40,20 +40,20 @@
   }
 }
 :root[data-theme="dark"] {
-    --bg: #0d1117;
-    --panel: #161b22;
-    --border: #30363d;
-    --line: #21262d;
-    --text: #e6edf3;
-    --muted: #8b949e;
-    --accent: #58a6ff;
-    --onaccent: #0d1117;
-    --accentsoft: #132339;
-    --ring: #1f6feb;
-    --bar: #010409;
-    --scrim: rgba(1, 4, 9, 0.6);
-    --red: #ff7b72;
-  }
+  --bg: #0d1117;
+  --panel: #161b22;
+  --border: #30363d;
+  --line: #21262d;
+  --text: #e6edf3;
+  --muted: #8b949e;
+  --accent: #58a6ff;
+  --onaccent: #0d1117;
+  --accentsoft: #132339;
+  --ring: #1f6feb;
+  --bar: #010409;
+  --scrim: rgba(1, 4, 9, 0.6);
+  --red: #ff7b72;
+}
 :root[data-theme="dark"] {
   color-scheme: dark;
 }
@@ -232,7 +232,9 @@ button {
 }
 /* Strong's numbers, as the desktop shows them. */
 .sn {
-  font: 500 10px -apple-system, sans-serif;
+  font:
+    500 10px -apple-system,
+    sans-serif;
   color: var(--accent);
   vertical-align: super;
   margin-left: 1px;
@@ -584,7 +586,9 @@ button {
   color: var(--text);
   border: 1px solid var(--line);
   /* The second shadow dims the whole screen behind it. */
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45), 0 0 0 100vmax var(--scrim);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.45),
+    0 0 0 100vmax var(--scrim);
   font-size: 16px;
 }
 .adding {
@@ -1666,4 +1670,73 @@ input[type="range"] {
   padding: 1px 4px;
   border-radius: 4px;
   background: var(--bar);
+}
+
+/* Verse highlights (highlights.ts), the desktop's colours, synced with it. */
+:root {
+  --hl-red: #f6d6d2;
+  --hl-orange: #f8e2c8;
+  --hl-yellow: #f4ebb8;
+  --hl-green: #dcead9;
+  --hl-blue: #d8e6f5;
+  --hl-purple: #e6dcf4;
+  --hl-teal: #d4ece8;
+  --hl-grey: #d9dee6;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --hl-red: #49211f;
+    --hl-orange: #47301a;
+    --hl-yellow: #3f3914;
+    --hl-green: #1b3524;
+    --hl-blue: #172f4a;
+    --hl-purple: #2f2548;
+    --hl-teal: #133834;
+    --hl-grey: #323a45;
+  }
+}
+:root[data-theme="dark"] {
+  --hl-red: #49211f;
+  --hl-orange: #47301a;
+  --hl-yellow: #3f3914;
+  --hl-green: #1b3524;
+  --hl-blue: #172f4a;
+  --hl-purple: #2f2548;
+  --hl-teal: #133834;
+  --hl-grey: #323a45;
+}
+.v.hl,
+.pv.hl {
+  background: var(--hl);
+  border-radius: 4px;
+}
+.hlrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 0 12px;
+  flex-wrap: wrap;
+}
+.hlrow .m {
+  margin-right: 4px;
+}
+.hldot {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  padding: 0;
+}
+.hldot.on {
+  border-color: var(--text);
+}
+.hlclear {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  padding: 0;
+  font-size: 13px;
+  color: var(--muted);
+  background: var(--bar);
+  border: 1px solid var(--line);
 }

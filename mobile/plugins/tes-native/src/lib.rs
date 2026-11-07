@@ -152,6 +152,22 @@ async fn inbox_dir<R: Runtime>(app: AppHandle<R>) -> Result<serde_json::Value, S
     }
 }
 
+/// Computers with the desktop app open on this Wi-Fi, found over Bonjour (`_tes-sync._tcp`) for a few
+/// seconds: each one's name, address and port.
+#[command]
+async fn discover<R: Runtime>(app: AppHandle<R>) -> Result<serde_json::Value, String> {
+    #[cfg(mobile)]
+    {
+        use tauri::Manager;
+        return app.state::<Native<R>>().0.run_mobile_plugin::<serde_json::Value>("discover", ()).map_err(|e| e.to_string());
+    }
+    #[cfg(not(mobile))]
+    {
+        let _ = app;
+        Ok(serde_json::json!([]))
+    }
+}
+
 /// The Library's Add from Files: the system's file picker; what's chosen waits in the Inbox to be taken in.
 #[command]
 async fn pick_modules<R: Runtime>(app: AppHandle<R>) -> Result<serde_json::Value, String> {
@@ -169,7 +185,20 @@ async fn pick_modules<R: Runtime>(app: AppHandle<R>) -> Result<serde_json::Value
 
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
     Builder::new("tes-native")
-        .invoke_handler(tauri::generate_handler![allow_rotation, speak, speech_pause, speech_resume, speech_stop, voices, bundled_dir, inbox_dir, pick_modules, say, tap])
+        .invoke_handler(tauri::generate_handler![
+            allow_rotation,
+            speak,
+            speech_pause,
+            speech_resume,
+            speech_stop,
+            voices,
+            bundled_dir,
+            inbox_dir,
+            pick_modules,
+            discover,
+            say,
+            tap
+        ])
         .setup(|_app, _api| {
             #[cfg(target_os = "ios")]
             {

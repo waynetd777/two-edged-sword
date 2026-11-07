@@ -49,6 +49,7 @@ mod spell;
 mod spell;
 mod store;
 mod study;
+mod sync;
 mod tray;
 #[cfg(target_os = "macos")]
 mod tts;
@@ -260,6 +261,28 @@ fn store_read(st: State<AppState>, name: String) -> Result<serde_json::Value, St
 #[tauri::command]
 fn variances_read(st: State<AppState>, name: String) -> Result<serde_json::Value, String> {
     store::variances(&st.data, &name)
+}
+
+/// Settings › Phones and tablets: a pairing code, the devices paired, and forgetting one.
+#[tauri::command]
+fn sync_pair_code(s: State<Arc<sync::Sync>>) -> (String, String, u16) {
+    (s.new_code(), sync::computer_name(), s.port())
+}
+
+#[tauri::command]
+fn sync_devices(s: State<Arc<sync::Sync>>) -> serde_json::Value {
+    serde_json::to_value(s.infos()).unwrap_or_default()
+}
+
+#[tauri::command]
+fn sync_forget(s: State<Arc<sync::Sync>>, id: String) {
+    s.forget(&id);
+}
+
+/// The page's merge of a device's sync (src/syncHub.ts), sent back to it.
+#[tauri::command]
+fn sync_reply(s: State<Arc<sync::Sync>>, rid: u64, merged: serde_json::Value) {
+    s.reply(rid, merged);
 }
 
 #[tauri::command]
@@ -896,7 +919,12 @@ pub fn run() {
         .plugin(tauri_plugin_updater::Builder::new().build())
         .manage(state)
         .manage(tray::Tray::default())
+        .manage(Arc::new(sync::Sync::default()))
         .invoke_handler(tauri::generate_handler![
+            sync_pair_code,
+            sync_devices,
+            sync_forget,
+            sync_reply,
             library_info,
             rescan_library,
             get_chapter,
@@ -1016,6 +1044,9 @@ pub fn run() {
             updates::add_to_menu(app.handle())?;
             if scene().is_none() {
                 updates::start(app.handle(), update_busy);
+                // Sync with the phone app (sync.rs); not for a screenshot scene, which never saves.
+                let data = app.state::<AppState>().data.clone();
+                sync::start(app.handle(), data);
             }
             // The menu-bar icon and the window it opens; until the main window sends today's
             // reading, that window has its choices without the details.

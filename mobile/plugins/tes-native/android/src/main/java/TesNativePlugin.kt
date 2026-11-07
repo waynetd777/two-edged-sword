@@ -4,7 +4,12 @@
 package com.wayned.tes.plugin
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
+import android.net.nsd.NsdManager
+import android.net.nsd.NsdServiceInfo
+import android.os.Handler
+import android.os.Looper
 import android.net.Uri
 import android.provider.OpenableColumns
 import android.content.pm.ActivityInfo
@@ -211,6 +216,53 @@ class TesNativePlugin(private val activity: Activity) : Plugin(activity) {
       if (c.moveToFirst()) return c.getString(0)
     }
     return uri.lastPathSegment
+  }
+
+  /** Computers with the desktop app open on this Wi-Fi (`_tes-sync._tcp`), found over Bonjour for three
+   *  seconds, then each resolved in turn (older Androids resolve one at a time): name, address, port. */
+  @Command
+  fun discover(invoke: Invoke) {
+    val nsd = activity.getSystemService(Context.NSD_SERVICE) as NsdManager
+    val seen = mutableListOf<NsdServiceInfo>()
+    val listener = object : NsdManager.DiscoveryListener {
+      override fun onDiscoveryStarted(t: String) {}
+      override fun onDiscoveryStopped(t: String) {}
+      override fun onStartDiscoveryFailed(t: String, code: Int) {}
+      override fun onStopDiscoveryFailed(t: String, code: Int) {}
+      override fun onServiceFound(s: NsdServiceInfo) {
+        synchronized(seen) { if (seen.none { it.serviceName == s.serviceName }) seen.add(s) }
+      }
+      override fun onServiceLost(s: NsdServiceInfo) {}
+    }
+    try {
+      nsd.discoverServices("_tes-sync._tcp", NsdManager.PROTOCOL_DNS_SD, listener)
+    } catch (_: Exception) {
+      invoke.resolve(JSObject().apply { put("list", JSArray()) })
+      return
+    }
+    Handler(Looper.getMainLooper()).postDelayed({
+      try { nsd.stopServiceDiscovery(listener) } catch (_: Exception) {}
+      val todo = synchronized(seen) { seen.toMutableList() }
+      val out = JSArray()
+      fun next() {
+        val s = todo.removeFirstOrNull()
+        if (s == null) {
+          invoke.resolve(JSObject().apply { put("list", out) })
+          return
+        }
+        @Suppress("DEPRECATION")
+        nsd.resolveService(s, object : NsdManager.ResolveListener {
+          override fun onResolveFailed(i: NsdServiceInfo, code: Int) { next() }
+          override fun onServiceResolved(i: NsdServiceInfo) {
+            @Suppress("DEPRECATION")
+            val host = i.host?.hostAddress
+            if (host != null) out.put(JSObject().apply { put("name", i.serviceName); put("host", host.substringBefore('%')); put("port", i.port) })
+            next()
+          }
+        })
+      }
+      next()
+    }, 3000)
   }
 
   @Command

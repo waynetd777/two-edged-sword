@@ -13,6 +13,7 @@ Everything the phone app uses
 - `allow-bundled-dir`
 - `allow-inbox-dir`
 - `allow-pick-modules`
+- `allow-discover`
 - `allow-say`
 - `allow-tap`
 - `allow-register-listener`
@@ -75,6 +76,32 @@ Enables the bundled_dir command without any pre-configured scope.
 <td>
 
 Denies the bundled_dir command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`tes-native:allow-discover`
+
+</td>
+<td>
+
+Enables the discover command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`tes-native:deny-discover`
+
+</td>
+<td>
+
+Denies the discover command without any pre-configured scope.
 
 </td>
 </tr>

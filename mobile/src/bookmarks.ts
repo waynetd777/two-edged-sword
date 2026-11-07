@@ -8,11 +8,11 @@ import { useSyncExternalStore } from "react";
 import { save, saved } from "./api";
 
 export interface Mark {
-  /** A verse... */
-  ref?: { book: number; chapter: number; verse: number };
+  /** A verse (or, from the desktop, verses or a chapter)... */
+  ref?: { book: number; chapter: number; verse: number; to?: number };
   bible?: string;
-  /** ...or a book's chapter. */
-  doc?: { module: string; chapter: string; title: string };
+  /** ...or a book's chapter: from the desktop, a paragraph of it (`para`), and the kind of book. */
+  doc?: { module: string; chapter: string; title: string; para?: number; kind?: string };
   at: string;
 }
 
@@ -31,10 +31,26 @@ const same = (a: Mark, b: Mark) =>
     : a.ref?.book === b.ref?.book && a.ref?.chapter === b.ref?.chapter && a.ref?.verse === b.ref?.verse;
 /** The same chapter: what Recent keeps one of. */
 const sameChapter = (a: Mark, b: Mark) =>
-  a.doc || b.doc ? a.doc?.module === b.doc?.module && a.doc?.chapter === b.doc?.chapter : a.ref?.book === b.ref?.book && a.ref?.chapter === b.ref?.chapter;
+  a.doc || b.doc
+    ? a.doc?.module === b.doc?.module && a.doc?.chapter === b.doc?.chapter
+    : a.ref?.book === b.ref?.book && a.ref?.chapter === b.ref?.chapter;
 
 export const bookmarks = {
   list: () => marks,
+  /** Both lists at once, from a sync (phoneSync.ts). */
+  replace(m: Mark[], r: Mark[]) {
+    marks = m;
+    recent = r;
+    save("bookmarks", marks);
+    save("recent", recent);
+    changed();
+  },
+  subscribe(f: () => void) {
+    watchers.add(f);
+    return () => {
+      watchers.delete(f);
+    };
+  },
   recent: () => recent,
   has: (m: Omit<Mark, "at">) => marks.some((x) => same(x, { ...m, at: "" })),
   toggle(m: Omit<Mark, "at">) {

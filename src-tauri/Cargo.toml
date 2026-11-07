@@ -30,6 +30,11 @@ tauri-plugin-dialog = "2"
 tauri-plugin-opener = "2"
 tauri-plugin-notification = "2"
 tauri-plugin-updater = "2"
+# Sync with the phone app over the home network (sync.rs): a small HTTP server, its Bonjour
+# announcement, and the pairing codes and tokens.
+tiny_http = "0.12"
+mdns-sd = "0.13"
+getrandom = "0.3"
 # One copy of the app at a time (lib.rs).
 tauri-plugin-single-instance = "2"
 # Ask ends a CLI and everything it started by signalling its process group.

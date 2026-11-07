@@ -1,7 +1,7 @@
 // Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
 // SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
-import { Fragment, TouchEvent, useEffect, useMemo, useRef, useState } from "react";
+import { CSSProperties, Fragment, TouchEvent, useEffect, useMemo, useRef, useState } from "react";
 import { book, BookSizes, fmtRef, parseRef, Ref, stepChapter } from "../../src/bible";
 import { alignStrongs, tokenize, Token } from "../../src/esword";
 import { api, Module, save, saved, scene, useLibraryKey, Verse } from "./api";
@@ -10,6 +10,7 @@ import { COMPARE_DEFAULT, CompareEdit, CompareView, useChapters } from "./Compar
 import { bookTitles, DocView, isDevotional, setDevotionals, todayTitle } from "./DocView";
 import { GoTo } from "./GoTo";
 import { bookmarks, useBookmarks } from "./bookmarks";
+import { useHighlights, vkey } from "./highlights";
 import { player, usePlayer } from "./player";
 import { ImageViewer } from "./ImageViewer";
 import type { Spot } from "./MapsTab";
@@ -179,7 +180,10 @@ export function Read({
   useEffect(() => {
     save("doc", doc);
     // Where each book was left, for opening it again from the Library.
-    if (doc) save(`docAt.${doc.module}`, doc.chapter);
+    if (doc && saved<string | null>(`docAt.${doc.module}`, null) !== doc.chapter) {
+      save(`docAt.${doc.module}`, doc.chapter);
+      window.dispatchEvent(new Event("tes-docat")); // synced (phoneSync.ts)
+    }
   }, [doc]);
   useEffect(() => {
     setDocList([]);
@@ -188,6 +192,7 @@ export function Read({
   const docKey = (d: { module: string; chapter: string } | null) => (d ? `${d.module}|${d.chapter}` : "");
   const pl = usePlayer();
   const bm = useBookmarks();
+  const hls = useHighlights();
   const marked = (v: number) => bm.has({ ref: { book: loc.book, chapter: loc.chapter, verse: v }, bible });
   // Recent: each chapter read, once.
   useEffect(() => {
@@ -269,7 +274,17 @@ export function Read({
           const l = saved("loc", { book: 62, chapter: 1 });
           bookmarks.toggle({ ref: { book: l.book, chapter: l.chapter, verse: saved("verse", 1) }, bible: saved("bible", "kjv+") });
         }, 800);
-      if (sc.includes("listen")) setTimeout(() => player.play(saved("bible", "kjv+"), saved("loc", { book: 62, chapter: 1 }).book, saved("loc", { book: 62, chapter: 1 }).chapter, 1), 1500);
+      if (sc.includes("listen"))
+        setTimeout(
+          () =>
+            player.play(
+              saved("bible", "kjv+"),
+              saved("loc", { book: 62, chapter: 1 }).book,
+              saved("loc", { book: 62, chapter: 1 }).chapter,
+              1,
+            ),
+          1500,
+        );
       if (sc.includes("wide")) setWideScene(true);
       const r = sc.find((x) => x.startsWith("at="));
       const ref = r ? parseRef(r.slice(3)) : undefined;
@@ -563,13 +578,17 @@ export function Read({
           {/* Long names shortened ("Song 8"), so the bar keeps to one line. */}
           {doc ? (
             <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{docMod?.abbrev || docMod?.title || doc.chapter}</span>
-          ) : comparing
-            ? book(loc.book).name.length > 8
-              ? fmtRef({ ...loc, verse: sel }, "short")
-              : fmtRef({ ...loc, verse: sel })
-            : book(loc.book).name.length > 10
-              ? fmtRef(loc, "short")
-              : `${book(loc.book).name} ${loc.chapter}`}
+          ) : comparing ? (
+            book(loc.book).name.length > 8 ? (
+              fmtRef({ ...loc, verse: sel }, "short")
+            ) : (
+              fmtRef({ ...loc, verse: sel })
+            )
+          ) : book(loc.book).name.length > 10 ? (
+            fmtRef(loc, "short")
+          ) : (
+            `${book(loc.book).name} ${loc.chapter}`
+          )}
           <Icon name="down" size={14} />
         </button>
         {!comparing && !doc && (
@@ -586,7 +605,9 @@ export function Read({
               aria-label={pl.on && pl.doc ? "Stop reading aloud" : "Listen to this chapter"}
               aria-pressed={!!(pl.on && pl.doc)}
               onClick={() =>
-                pl.on && pl.doc ? player.stop() : player.playDoc({ module: doc.module, chapter: doc.chapter, title: docMod?.title ?? doc.module })
+                pl.on && pl.doc
+                  ? player.stop()
+                  : player.playDoc({ module: doc.module, chapter: doc.chapter, title: docMod?.title ?? doc.module })
               }
             >
               <Icon name="speaker" size={22} />
@@ -596,188 +617,208 @@ export function Read({
             </button>
           </>
         ) : (
-        <>
-        <button
-          className={`ibtn speak ${pl.on && !pl.doc ? "on" : ""}`}
-          aria-label={pl.on && !pl.doc ? "Stop reading aloud" : `Listen to ${fmtRef(loc)} from verse ${sel}`}
-          aria-pressed={pl.on && !pl.doc}
-          onClick={() =>
-            pl.on && !pl.doc
-              ? player.stop()
-              : player.play(bible, loc.book, loc.chapter, sel, versesOf === `${loc.book}.${loc.chapter}` ? verses : undefined)
-          }
-        >
-          {/* Listen is a speaker in the top bar, here and in a book, as the desktop's. */}
-          <Icon name="speaker" size={22} />
-        </button>
-        {comparing ? (
           <>
-            <button className="ibtn" aria-label="Previous verse" onClick={() => stepVerse(-1)}>
-              <Icon name="back" size={20} />
+            <button
+              className={`ibtn speak ${pl.on && !pl.doc ? "on" : ""}`}
+              aria-label={pl.on && !pl.doc ? "Stop reading aloud" : `Listen to ${fmtRef(loc)} from verse ${sel}`}
+              aria-pressed={pl.on && !pl.doc}
+              onClick={() =>
+                pl.on && !pl.doc
+                  ? player.stop()
+                  : player.play(bible, loc.book, loc.chapter, sel, versesOf === `${loc.book}.${loc.chapter}` ? verses : undefined)
+              }
+            >
+              {/* Listen is a speaker in the top bar, here and in a book, as the desktop's. */}
+              <Icon name="speaker" size={22} />
             </button>
-            <button className="ibtn" aria-label="Next verse" onClick={() => stepVerse(1)}>
-              <Icon name="forward" size={20} />
-            </button>
+            {comparing ? (
+              <>
+                <button className="ibtn" aria-label="Previous verse" onClick={() => stepVerse(-1)}>
+                  <Icon name="back" size={20} />
+                </button>
+                <button className="ibtn" aria-label="Next verse" onClick={() => stepVerse(1)}>
+                  <Icon name="forward" size={20} />
+                </button>
+              </>
+            ) : (
+              <button
+                className="ibtn"
+                aria-label={layout === "paragraph" ? "Show a verse per line" : "Show as paragraphs"}
+                onClick={() => setLayout(layout === "paragraph" ? "verse" : "paragraph")}
+              >
+                <Icon name={layout === "paragraph" ? "verses" : "paragraph"} size={22} />
+              </button>
+            )}
           </>
-        ) : (
-          <button
-            className="ibtn"
-            aria-label={layout === "paragraph" ? "Show a verse per line" : "Show as paragraphs"}
-            onClick={() => setLayout(layout === "paragraph" ? "verse" : "paragraph")}
-          >
-            <Icon name={layout === "paragraph" ? "verses" : "paragraph"} size={22} />
-          </button>
-        )}
-        </>
         )}
       </header>
 
       <div className="readbody">
-      <div className="pager">
-        <div
-          ref={page}
-          className={`page ${anim ? "anim" : ""}`}
-          style={{ transform: dx ? `translateX(${dx}px)` : undefined }}
-          onTouchStart={onStart}
-          onTouchMove={onMove}
-          onTouchEnd={onEnd}
-          onTouchCancel={onEnd}
-        >
-          {doc ? (
-            <DocView
-              module={doc.module}
-              title={docMod?.title ?? doc.module}
-              chapter={doc.chapter}
-              onRef={(r) => goTo(r)}
-              onImage={(src) => setImage({ src })}
-              onChapter={(c) => openDoc(doc.module, c)}
-              reading={readingDoc}
-              readingAt={readingDoc ? pl.at : undefined}
-            />
-          ) : comparing ? (
-            <CompareView
-              bibles={bibles}
-              ids={shownIds}
-              tokensOf={(id) => (cmpChapters.get(id)?.length ? (cmpTokens.get(id) ?? []) : undefined)}
-              diff={diff}
-              onDiff={setDiff}
-              active={word?.bible ? { bible: word.bible, i: word.i } : undefined}
-              onWord={(id, i) => setWord({ v: sel, i, bible: id })}
-              said={playingHere && pl.at >= 0 ? { bible: pl.bible, at: pl.at } : undefined}
-              onEdit={() => setEditing(true)}
-            />
-          ) : (
-          <>
-          <h1 className="title">
-            {book(loc.book).name} {loc.chapter}
-          </h1>
-          <p className="sub">
-            {bmod?.title ?? "Bible"}
-            {verses.length ? ` · ${verses.length} verses` : ""}
-          </p>
-          {!verses.length ? (
-            <p className="loading">Opening…</p>
-          ) : layout === "verse" ? (
-            <div className="text verses">
-              {verses.map((v) => (
-                <div
-                  key={v.v}
-                  data-v={v.v}
-                  className={`v ${v.v === sel ? "sel" : ""} ${playingHere && pl.verse === v.v ? "speaking" : ""}`}
-                  onClick={() => pick(v.v)}
-                >
-                  <span className="vnum">
-                    {marked(v.v) && (
-                      <span className="ribbon" aria-label="Bookmarked">
-                        <Icon name="bookmark" size={11} fill="currentColor" />
+        <div className="pager">
+          <div
+            ref={page}
+            className={`page ${anim ? "anim" : ""}`}
+            style={{ transform: dx ? `translateX(${dx}px)` : undefined }}
+            onTouchStart={onStart}
+            onTouchMove={onMove}
+            onTouchEnd={onEnd}
+            onTouchCancel={onEnd}
+          >
+            {doc ? (
+              <DocView
+                module={doc.module}
+                title={docMod?.title ?? doc.module}
+                chapter={doc.chapter}
+                onRef={(r) => goTo(r)}
+                onImage={(src) => setImage({ src })}
+                onChapter={(c) => openDoc(doc.module, c)}
+                reading={readingDoc}
+                readingAt={readingDoc ? pl.at : undefined}
+              />
+            ) : comparing ? (
+              <CompareView
+                bibles={bibles}
+                ids={shownIds}
+                tokensOf={(id) => (cmpChapters.get(id)?.length ? (cmpTokens.get(id) ?? []) : undefined)}
+                diff={diff}
+                onDiff={setDiff}
+                active={word?.bible ? { bible: word.bible, i: word.i } : undefined}
+                onWord={(id, i) => setWord({ v: sel, i, bible: id })}
+                said={playingHere && pl.at >= 0 ? { bible: pl.bible, at: pl.at } : undefined}
+                onEdit={() => setEditing(true)}
+              />
+            ) : (
+              <>
+                <h1 className="title">
+                  {book(loc.book).name} {loc.chapter}
+                </h1>
+                <p className="sub">
+                  {bmod?.title ?? "Bible"}
+                  {verses.length ? ` · ${verses.length} verses` : ""}
+                </p>
+                {!verses.length ? (
+                  <p className="loading">Opening…</p>
+                ) : layout === "verse" ? (
+                  <div className="text verses">
+                    {verses.map((v) => (
+                      <div
+                        key={v.v}
+                        data-v={v.v}
+                        className={`v ${v.v === sel ? "sel" : ""} ${playingHere && pl.verse === v.v ? "speaking" : ""} ${hls[vkey(loc.book, loc.chapter, v.v)] ? "hl" : ""}`}
+                        style={
+                          hls[vkey(loc.book, loc.chapter, v.v)]
+                            ? ({ "--hl": `var(--hl-${hls[vkey(loc.book, loc.chapter, v.v)]})` } as CSSProperties)
+                            : undefined
+                        }
+                        onClick={() => pick(v.v)}
+                      >
+                        <span className="vnum">
+                          {marked(v.v) && (
+                            <span className="ribbon" aria-label="Bookmarked">
+                              <Icon name="bookmark" size={11} fill="currentColor" />
+                            </span>
+                          )}
+                          {v.v}
+                        </span>
+                        <Words
+                          tokens={tokens.get(v.v) ?? []}
+                          nums={!!bmod?.strongs}
+                          active={word?.v === v.v ? word.i : undefined}
+                          said={playingHere && pl.verse === v.v && pl.at >= 0 ? pl.at : undefined}
+                          onWord={(i, num) => {
+                            setSel(v.v);
+                            setWord({ v: v.v, i, num });
+                          }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text para">
+                    {verses.map((v) => (
+                      <span
+                        key={v.v}
+                        data-v={v.v}
+                        className={`pv ${v.v === sel ? "sel" : ""} ${playingHere && pl.verse === v.v ? "speaking" : ""} ${hls[vkey(loc.book, loc.chapter, v.v)] ? "hl" : ""}`}
+                        style={
+                          hls[vkey(loc.book, loc.chapter, v.v)]
+                            ? ({ "--hl": `var(--hl-${hls[vkey(loc.book, loc.chapter, v.v)]})` } as CSSProperties)
+                            : undefined
+                        }
+                        onClick={() => pick(v.v)}
+                      >
+                        <span className="vnum">
+                          {marked(v.v) && (
+                            <span className="ribbon" aria-label="Bookmarked">
+                              <Icon name="bookmark" size={11} fill="currentColor" />
+                            </span>
+                          )}
+                          {v.v}
+                        </span>
+                        <Words
+                          tokens={tokens.get(v.v) ?? []}
+                          nums={!!bmod?.strongs}
+                          active={word?.v === v.v ? word.i : undefined}
+                          said={playingHere && pl.verse === v.v && pl.at >= 0 ? pl.at : undefined}
+                          onWord={(i, num) => {
+                            setSel(v.v);
+                            setWord({ v: v.v, i, num });
+                          }}
+                        />{" "}
                       </span>
-                    )}
-                    {v.v}
-                  </span>
-                  <Words
-                    tokens={tokens.get(v.v) ?? []}
-                    nums={!!bmod?.strongs}
-                    active={word?.v === v.v ? word.i : undefined}
-                    said={playingHere && pl.verse === v.v && pl.at >= 0 ? pl.at : undefined}
-                    onWord={(i, num) => {
-                      setSel(v.v);
-                      setWord({ v: v.v, i, num });
-                    }}
-                  />
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text para">
-              {verses.map((v) => (
-                <span
-                  key={v.v}
-                  data-v={v.v}
-                  className={`pv ${v.v === sel ? "sel" : ""} ${playingHere && pl.verse === v.v ? "speaking" : ""}`}
-                  onClick={() => pick(v.v)}
-                >
-                  <span className="vnum">
-                    {marked(v.v) && (
-                      <span className="ribbon" aria-label="Bookmarked">
-                        <Icon name="bookmark" size={11} fill="currentColor" />
+                    ))}
+                  </p>
+                )}
+                {next && verses.length > 0 && (
+                  <>
+                    <button className="next" onClick={() => go(next, 1)}>
+                      <span style={{ flex: 1, display: "flex", flexDirection: "column", gap: 4 }}>
+                        <span className="lab">Next chapter</span>
+                        <span className="ref">{fmtRef(next)}</span>
+                        {nextVerses[0] && (
+                          <span className="peek">
+                            {tokenize(nextVerses[0].text)
+                              .map((t) => t.text)
+                              .join("")}
+                          </span>
+                        )}
                       </span>
-                    )}
-                    {v.v}
-                  </span>
-                  <Words
-                    tokens={tokens.get(v.v) ?? []}
-                    nums={!!bmod?.strongs}
-                    active={word?.v === v.v ? word.i : undefined}
-                    said={playingHere && pl.verse === v.v && pl.at >= 0 ? pl.at : undefined}
-                    onWord={(i, num) => {
-                      setSel(v.v);
-                      setWord({ v: v.v, i, num });
-                    }}
-                  />{" "}
-                </span>
-              ))}
-            </p>
-          )}
-          {next && verses.length > 0 && (
-            <>
-              <button className="next" onClick={() => go(next, 1)}>
-                <span style={{ flex: 1, display: "flex", flexDirection: "column", gap: 4 }}>
-                  <span className="lab">Next chapter</span>
-                  <span className="ref">{fmtRef(next)}</span>
-                  {nextVerses[0] && <span className="peek">{tokenize(nextVerses[0].text).map((t) => t.text).join("")}</span>}
-                </span>
-                <span className="go" aria-hidden="true">
-                  ›
-                </span>
-              </button>
-              <p className="hint">Or swipe left.{prev ? ` Swipe right for ${fmtRef(prev)}.` : ""}</p>
-            </>
-          )}
-          </>
-          )}
+                      <span className="go" aria-hidden="true">
+                        ›
+                      </span>
+                    </button>
+                    <p className="hint">Or swipe left.{prev ? ` Swipe right for ${fmtRef(prev)}.` : ""}</p>
+                  </>
+                )}
+              </>
+            )}
+          </div>
         </div>
-      </div>
 
-      {docked && !doc && (
-        <Study
-          bible={bible}
-          verseText={(tokens.get(sel) ?? []).map((t) => t.text).join("")}
-          modules={modules}
-          onChanged={onModulesChanged}
-          onImage={(src, ring) => setImage({ src, ring })}
-          docked
-          at={{ ...loc, verse: sel }}
-          count={verses.length}
-          onVerse={setSel}
-          onClose={() => {}}
-          onGo={(r: Ref) => goTo(r)}
-        />
-      )}
+        {docked && !doc && (
+          <Study
+            bible={bible}
+            verseText={(tokens.get(sel) ?? []).map((t) => t.text).join("")}
+            modules={modules}
+            onChanged={onModulesChanged}
+            onImage={(src, ring) => setImage({ src, ring })}
+            docked
+            at={{ ...loc, verse: sel }}
+            count={verses.length}
+            onVerse={setSel}
+            onClose={() => {}}
+            onGo={(r: Ref) => goTo(r)}
+          />
+        )}
       </div>
 
       {pl.on && (
         <div className="miniplayer" role="region" aria-label="Listening">
-          <button className="round" aria-label={pl.paused ? "Play" : "Pause"} onClick={() => (pl.paused ? player.resume() : player.pause())}>
+          <button
+            className="round"
+            aria-label={pl.paused ? "Play" : "Pause"}
+            onClick={() => (pl.paused ? player.resume() : player.pause())}
+          >
             <Icon name={pl.paused ? "play" : "pause"} size={20} />
           </button>
           <span style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
@@ -796,40 +837,42 @@ export function Read({
         </div>
       )}
       {!docked && !doc && !pl.on && (
-      <div className="studyrow">
-      <button className="studybar" onClick={() => setStudy(true)}>
-        <span style={{ color: "var(--accent)", display: "flex" }}>
-          <Icon name="book" size={20} />
-        </span>
-        <span style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
-          <span className="t">Study {fmtRef({ ...loc, verse: sel })}</span>
-          <span className="s">Commentary and maps</span>
-        </span>
-        <span style={{ color: "var(--muted)", display: "flex" }}>
-          <Icon name="up" size={16} />
-        </span>
-      </button>
-      <button
-        className={`round listen bmkbar ${marked(sel) ? "on" : ""}`}
-        aria-label={marked(sel) ? `Remove the bookmark on ${fmtRef({ ...loc, verse: sel })}` : `Bookmark ${fmtRef({ ...loc, verse: sel })}`}
-        aria-pressed={marked(sel)}
-        onClick={() => bookmarks.toggle({ ref: { book: loc.book, chapter: loc.chapter, verse: sel }, bible })}
-      >
-        <Icon name="bookmark" size={20} fill={marked(sel) ? "currentColor" : undefined} />
-      </button>
-      <button
-        className={`round listen cmpbtn ${comparing ? "on" : ""}`}
-        aria-label={comparing ? "Back to the chapter" : "Compare translations"}
-        aria-pressed={comparing}
-        onClick={() => {
-          setWord(null);
-          history.push({ comparing: !comparing });
-          setComparing(!comparing);
-        }}
-      >
-        <Icon name="compare" size={26} />
-      </button>
-      </div>
+        <div className="studyrow">
+          <button className="studybar" onClick={() => setStudy(true)}>
+            <span style={{ color: "var(--accent)", display: "flex" }}>
+              <Icon name="book" size={20} />
+            </span>
+            <span style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
+              <span className="t">Study {fmtRef({ ...loc, verse: sel })}</span>
+              <span className="s">Commentary and maps</span>
+            </span>
+            <span style={{ color: "var(--muted)", display: "flex" }}>
+              <Icon name="up" size={16} />
+            </span>
+          </button>
+          <button
+            className={`round listen bmkbar ${marked(sel) ? "on" : ""}`}
+            aria-label={
+              marked(sel) ? `Remove the bookmark on ${fmtRef({ ...loc, verse: sel })}` : `Bookmark ${fmtRef({ ...loc, verse: sel })}`
+            }
+            aria-pressed={marked(sel)}
+            onClick={() => bookmarks.toggle({ ref: { book: loc.book, chapter: loc.chapter, verse: sel }, bible })}
+          >
+            <Icon name="bookmark" size={20} fill={marked(sel) ? "currentColor" : undefined} />
+          </button>
+          <button
+            className={`round listen cmpbtn ${comparing ? "on" : ""}`}
+            aria-label={comparing ? "Back to the chapter" : "Compare translations"}
+            aria-pressed={comparing}
+            onClick={() => {
+              setWord(null);
+              history.push({ comparing: !comparing });
+              setComparing(!comparing);
+            }}
+          >
+            <Icon name="compare" size={26} />
+          </button>
+        </div>
       )}
 
       {study && !docked && (

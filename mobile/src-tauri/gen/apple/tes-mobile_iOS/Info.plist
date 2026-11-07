@@ -181,5 +181,11 @@
 	<false/>
 	<key>UIFileSharingEnabled</key>
 	<true/>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>To find Two-edged Sword on your computer and sync your bookmarks, highlights and reading plans with it.</string>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_tes-sync._tcp</string>
+	</array>
 </dict>
 </plist>

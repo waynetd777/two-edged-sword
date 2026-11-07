@@ -9,6 +9,9 @@ import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, 
 import type { Song } from "./worship";
 import type { Closing } from "./closing";
 import { listen } from "@tauri-apps/api/event";
+import { invoke } from "@tauri-apps/api/core";
+import { Ledger, merge, payload as syncPayload, Payload, settle, stamp } from "./sync";
+import { fromItems, itemsOf, placesOf, Synced } from "./syncHub";
 import { api, JournalEntry, LibraryInfo, ModuleInfo } from "./api";
 import { claudeAlias } from "./assistant";
 import { Ref } from "./bible";
@@ -602,8 +605,8 @@ export const vkey = (b: number, c: number, v: number) => `${b}.${c}.${v}`;
 export function AppProvider({ children }: { children: ReactNode }) {
   const [lib, setLib] = useState<LibraryInfo | null>(null);
   const [settings, setSettings, settingsLoaded, f1] = useStored<Settings>("settings", DEFAULTS);
-  const [bookmarks, setBookmarks, , f2] = useStored<Bookmark[]>("bookmarks", []);
-  const [highlights, setHighlights, , f3] = useStored<Record<string, HlColor>>("highlights", {});
+  const [bookmarks, setBookmarks, bookmarksLoaded, f2] = useStored<Bookmark[]>("bookmarks", []);
+  const [highlights, setHighlights, highlightsLoaded, f3] = useStored<Record<string, HlColor>>("highlights", {});
   // The last word studied is kept with the place, so Word Study reopens on it.
   const [nav, setNav, navLoaded, f4] = useStored<{
     loc: Loc;
@@ -838,6 +841,56 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (readFailed) toast("Couldn't read your saved data — changes this session won't be saved");
   }, [readFailed, toast]);
+
+  // Sync with the phone app (syncHub.ts, sync.ts; the server is sync.rs). The ledger notes when each
+  // synced thing last changed here, so a newer change on a phone wins and an older one doesn't.
+  const ledger = useRef<Ledger | null>(null);
+  const synced = useRef<Synced>({ bookmarks, highlights, docAt: nav.docAt, plans, recent: nav.recent });
+  synced.current = { bookmarks, highlights, docAt: nav.docAt, plans, recent: nav.recent };
+  const syncReady = bookmarksLoaded && highlightsLoaded && navLoaded && plansLoaded;
+  const ledgerTimer = useRef<number | undefined>(undefined);
+  const saveLedger = () => {
+    window.clearTimeout(ledgerTimer.current);
+    ledgerTimer.current = window.setTimeout(() => ledger.current && api.storeWrite("sync-ledger", ledger.current).catch(() => {}), 500);
+  };
+  useEffect(() => {
+    if (!syncReady) return;
+    const stampNow = () => {
+      if (!ledger.current) return;
+      ledger.current = stamp(ledger.current, itemsOf(synced.current));
+      saveLedger();
+    };
+    if (ledger.current) stampNow();
+    else
+      api
+        .storeRead<Ledger>("sync-ledger")
+        .catch(() => null)
+        .then((l) => {
+          ledger.current = l ?? {};
+          stampNow();
+        });
+  }, [syncReady, bookmarks, highlights, nav.docAt, plans]);
+  useEffect(() => {
+    const un = listen<{ rid: number; payload: Payload }>("sync-request", ({ payload: { rid, payload: theirs } }) => {
+      if (!ledger.current) return; // not loaded yet: the phone's request times out and it tries later
+      const cur = synced.current;
+      const now = itemsOf(cur);
+      ledger.current = stamp(ledger.current, now);
+      const merged = merge(syncPayload(ledger.current, now, placesOf(cur.recent)), theirs);
+      const done = settle(merged);
+      const next = fromItems(done.now, merged.recent, cur, uid);
+      ledger.current = done.ledger;
+      saveLedger();
+      setBookmarks(() => next.bookmarks);
+      setHighlights(() => next.highlights);
+      setNav((n) => ({ ...n, docAt: next.docAt, recent: next.recent }));
+      setPlans(() => next.plans);
+      invoke("sync_reply", { rid, merged }).catch(() => {});
+    });
+    return () => {
+      un.then((u) => u());
+    };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const value: Ctx = {
     lib,

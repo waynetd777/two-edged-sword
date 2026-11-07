@@ -3,6 +3,8 @@
 
 import { ReactNode, useEffect, useState } from "react";
 import { open as openDialog } from "@tauri-apps/plugin-dialog";
+import { invoke } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
 import { api } from "./api";
 import { Icon } from "./icons";
 import { openUrl } from "@tauri-apps/plugin-opener";
@@ -403,10 +405,74 @@ export function SettingsScreen() {
               </select>
             </Row>
           </Section>
+          <Phones />
           <AppVersion />
         </div>
       </div>
     </div>
+  );
+}
+
+/** Phones and tablets with the phone app, paired to sync with this computer (sync.rs): a code to pair
+ *  one, and those paired, with when each last synced. */
+function Phones() {
+  const [devices, setDevices] = useState<{ id: string; name: string; seen: number }[]>([]);
+  const [code, setCode] = useState<{ code: string; name: string } | null>(null);
+  const load = () =>
+    invoke<{ id: string; name: string; seen: number }[]>("sync_devices")
+      .then(setDevices)
+      .catch(() => {});
+  useEffect(() => {
+    load();
+    const un = listen("sync-devices", () => {
+      load();
+      setCode(null);
+    });
+    return () => {
+      un.then((u) => u());
+    };
+  }, []);
+  const when = (t: number) =>
+    t ? `Synced ${new Date(t).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}` : "Not synced yet";
+  return (
+    <Section title="Phones and tablets">
+      {devices.map((d) => (
+        <Row key={d.id} label={d.name} hint={when(d.seen)}>
+          <button
+            className="btn small"
+            onClick={() =>
+              invoke("sync_forget", { id: d.id })
+                .then(load)
+                .catch(() => {})
+            }
+          >
+            Forget
+          </button>
+        </Row>
+      ))}
+      <Row
+        label={devices.length ? "Pair another" : "Pair a phone or tablet"}
+        hint="Bookmarks, highlights, reading plans, Recent and your place in each book sync with the phone app whenever it's on the same Wi-Fi as this computer."
+      >
+        {code ? (
+          <span style={{ fontSize: 13 }}>
+            In the phone app, go to More › Settings › Sync and enter <b style={{ fontSize: 18, letterSpacing: "0.12em" }}>{code.code}</b>{" "}
+            (for “{code.name}”). It works for 10 minutes.
+          </span>
+        ) : (
+          <button
+            className="btn small"
+            onClick={() =>
+              invoke<[string, string, number]>("sync_pair_code")
+                .then(([c, name]) => setCode({ code: c, name }))
+                .catch(() => {})
+            }
+          >
+            Show a pairing code
+          </button>
+        )}
+      </Row>
+    </Section>
   );
 }
 

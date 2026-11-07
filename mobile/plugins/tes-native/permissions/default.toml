@@ -10,6 +10,7 @@ permissions = [
   "allow-bundled-dir",
   "allow-inbox-dir",
   "allow-pick-modules",
+  "allow-discover",
   "allow-say",
   "allow-tap",
   "allow-register-listener",

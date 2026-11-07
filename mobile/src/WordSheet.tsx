@@ -1,6 +1,7 @@
 // Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
 // SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
+import { HL_COLORS, highlights, HlColor, useHighlights, vkey } from "./highlights";
 import { addPluginListener, invoke } from "@tauri-apps/api/core";
 import { useEffect, useState } from "react";
 import { fmtRef } from "../../src/bible";
@@ -121,7 +122,13 @@ export function WordSheet({
       for (const h of forms) {
         const ns = (await api.strongsForWord(guessFrom, h).catch(() => [])).filter((n) => n.num.startsWith(lang));
         if (ns.length) {
-          if (live) setGuess(ns.sort((a, b) => b.count - a.count).slice(0, 2).map((n) => n.num));
+          if (live)
+            setGuess(
+              ns
+                .sort((a, b) => b.count - a.count)
+                .slice(0, 2)
+                .map((n) => n.num),
+            );
           return;
         }
       }
@@ -161,7 +168,11 @@ export function WordSheet({
           <span />
         </div>
         <div className="wordnav">
-          <button disabled={prev === undefined} onClick={() => prev !== undefined && onIndex(prev)} aria-label={`Previous word: ${word(prev)}`}>
+          <button
+            disabled={prev === undefined}
+            onClick={() => prev !== undefined && onIndex(prev)}
+            aria-label={`Previous word: ${word(prev)}`}
+          >
             ‹ {word(prev)}
           </button>
           <span className="m">
@@ -215,6 +226,7 @@ export function WordSheet({
               )}
             </>
           )}
+          <HighlightRow at={at} />
           <div className="actions">
             {shown && entry && (
               <button className="primary" onClick={() => onWordStudy(shown)}>
@@ -228,5 +240,42 @@ export function WordSheet({
         </div>
       </section>
     </>
+  );
+}
+
+/** The verse's highlight: a colour to set it, ✕ to clear it (highlights.ts; synced with the desktop). */
+const DOT: Record<HlColor, string> = {
+  red: "#e59a92",
+  orange: "#efb97e",
+  yellow: "#e9d271",
+  green: "#a9cf9f",
+  teal: "#8fcfc6",
+  blue: "#9fc0e6",
+  purple: "#c1a9e3",
+  grey: "#aab3bf",
+};
+function HighlightRow({ at }: { at: { book: number; chapter: number; verse: number } }) {
+  const all = useHighlights();
+  const k = vkey(at.book, at.chapter, at.verse);
+  const on = all[k];
+  return (
+    <div className="hlrow" role="group" aria-label={`Highlight verse ${at.verse}`}>
+      <span className="m">Highlight</span>
+      {HL_COLORS.map((c) => (
+        <button
+          key={c}
+          className={`hldot ${on === c ? "on" : ""}`}
+          style={{ background: DOT[c] }}
+          aria-label={c}
+          aria-pressed={on === c}
+          onClick={() => highlights.set(k, on === c ? null : c)}
+        />
+      ))}
+      {on && (
+        <button className="hlclear" aria-label="Remove the highlight" onClick={() => highlights.set(k, null)}>
+          ✕
+        </button>
+      )}
+    </div>
   );
 }

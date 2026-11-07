@@ -111,8 +111,27 @@ It works the same on Windows, except:
 - **[Quiet time](app:settings#quiet-time)**: the daily reminder, and what to do when you fall behind.
 - **[AI assistant](app:settings#ai-assistant)**: which tools are installed, the default model, what Ask may read and send, and
   whether it suggests a next question ([Ask](ask.md)).
+- **[Phones and tablets](app:settings#phones-and-tablets)**: pair the phone app ([Sync with your phone](#sync-with-your-phone)),
+  and the devices paired, with when each last synced.
 - At the bottom: the app's version and build number, its licence, and **Website**, which opens
   [two-edged-sword.davies.co.za](https://two-edged-sword.davies.co.za/).
+
+## Sync with your phone
+
+The phone app (iPhone, iPad and Android) keeps these the same as on this computer:
+
+- bookmarks and highlights
+- reading plans and the days ticked
+- Recent, and the chapter you're at in each book
+
+To pair a phone or tablet:
+
+1. In [Settings › Phones and tablets](app:settings#phones-and-tablets), click **Show a pairing code**.
+2. In the phone app, go to More › Settings › Sync, tap **Pair with your computer**, and enter the code.
+
+After that it syncs by itself whenever the phone app is open on the same Wi-Fi as this computer, with
+Two-edged Sword running here. A change made on a phone reaches your other phones through this computer.
+If the same thing was changed in two places, the later change wins.
 
 ## Licence and credits
 

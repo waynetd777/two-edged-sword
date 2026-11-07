@@ -46,6 +46,77 @@ class PickerDelegate: NSObject, UIDocumentPickerDelegate {
   func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) { done([]) }
 }
 
+/// Bonjour: the computers with the desktop app open (`_tes-sync._tcp`), browsed for a few seconds and each
+/// resolved to an address. iOS asks once to let the app find devices on the local network.
+struct FoundComputer: Encodable {
+  let name: String
+  let host: String
+  let port: Int
+}
+
+class SyncFinder: NSObject, NetServiceBrowserDelegate, NetServiceDelegate {
+  private let browser = NetServiceBrowser()
+  private var services: [NetService] = []
+  private var found: [FoundComputer] = []
+  private var done: (([FoundComputer]) -> Void)?
+
+  func find(_ cb: @escaping ([FoundComputer]) -> Void) {
+    done = cb
+    services = []
+    found = []
+    browser.delegate = self
+    NSLog("tes-native: Bonjour browse starting")
+    browser.searchForServices(ofType: "_tes-sync._tcp.", inDomain: "local.")
+    DispatchQueue.main.asyncAfter(deadline: .now() + 3) { self.finish() }
+  }
+
+  private func finish() {
+    browser.stop()
+    services.forEach { $0.stop() }
+    done?(found)
+    done = nil
+  }
+
+  func netServiceBrowserWillSearch(_ b: NetServiceBrowser) {
+    NSLog("tes-native: Bonjour browse will search")
+  }
+
+  func netServiceBrowser(_ b: NetServiceBrowser, didNotSearch errorDict: [String: NSNumber]) {
+    NSLog("tes-native: Bonjour browse failed: %@", errorDict)
+  }
+
+  func netService(_ s: NetService, didNotResolve errorDict: [String: NSNumber]) {
+    NSLog("tes-native: Bonjour resolve failed: %@", errorDict)
+  }
+
+  func netServiceBrowser(_ b: NetServiceBrowser, didFind s: NetService, moreComing: Bool) {
+    NSLog("tes-native: Bonjour found %@", s.name)
+    services.append(s)
+    s.delegate = self
+    s.resolve(withTimeout: 2.5)
+  }
+
+  func netServiceDidResolveAddress(_ s: NetService) {
+    guard let addrs = s.addresses else { return }
+    // An IPv4 address if there is one (simplest to reach), else IPv6.
+    var v4: String?
+    var v6: String?
+    for data in addrs {
+      data.withUnsafeBytes { (p: UnsafeRawBufferPointer) in
+        guard let sa = p.baseAddress?.assumingMemoryBound(to: sockaddr.self) else { return }
+        var host = [CChar](repeating: 0, count: Int(NI_MAXHOST))
+        if getnameinfo(sa, socklen_t(data.count), &host, socklen_t(host.count), nil, 0, NI_NUMERICHOST) == 0 {
+          let h = String(cString: host)
+          if sa.pointee.sa_family == sa_family_t(AF_INET) { v4 = v4 ?? h } else if !h.hasPrefix("fe80") { v6 = v6 ?? h }
+        }
+      }
+    }
+    guard let host = v4 ?? v6 else { return }
+    found.removeAll { $0.name == s.name }
+    found.append(FoundComputer(name: s.name, host: host, port: s.port))
+  }
+}
+
 class TesNativePlugin: Plugin, AVSpeechSynthesizerDelegate {
   private weak var webview: WKWebView?
   private let synth = AVSpeechSynthesizer()
@@ -131,6 +202,13 @@ class TesNativePlugin: Plugin, AVSpeechSynthesizerDelegate {
   /// chosen is copied to tmp/tes-picked-Inbox, where the app takes it in (lib.rs import_waiting); the call
   /// answers with how many were copied (0 if the picker was closed).
   private let pickerDelegate = PickerDelegate()
+  private let finder = SyncFinder()
+
+  @objc public func discover(_ invoke: Invoke) {
+    DispatchQueue.main.async {
+      self.finder.find { found in invoke.resolve(found) }
+    }
+  }
 
   @objc public func pickModules(_ invoke: Invoke) {
     DispatchQueue.main.async {

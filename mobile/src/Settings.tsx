@@ -6,6 +6,7 @@ import { Icon } from "./icons";
 import { player, sample, usePlayer, Voice, voices } from "./player";
 import { Module, save, saved, scene } from "./api";
 import { Reminder } from "./Reminder";
+import { SyncSettings } from "./SyncSettings";
 
 export interface Prefs {
   theme: "system" | "light" | "dark";
@@ -53,7 +54,17 @@ export function usePrefs() {
   );
 }
 
-function Seg<T extends string>({ value, options, onPick, label }: { value: T; options: [T, string][]; onPick: (v: T) => void; label: string }) {
+function Seg<T extends string>({
+  value,
+  options,
+  onPick,
+  label,
+}: {
+  value: T;
+  options: [T, string][];
+  onPick: (v: T) => void;
+  label: string;
+}) {
   return (
     <span className="seg inline" role="radiogroup" aria-label={label}>
       {options.map(([v, l]) => (
@@ -88,7 +99,12 @@ export function Settings({ modules }: { modules: Module[] }) {
           <span className="grow">Reading font</span>
           <div className="chips" style={{ width: "100%", marginTop: 8 }}>
             {(Object.keys(FONTS) as Prefs["font"][]).map((f) => (
-              <button key={f} className={`chip ${p.font === f ? "on" : ""}`} style={{ fontFamily: FONTS[f].stack }} onClick={() => setPrefs({ font: f })}>
+              <button
+                key={f}
+                className={`chip ${p.font === f ? "on" : ""}`}
+                style={{ fontFamily: FONTS[f].stack }}
+                onClick={() => setPrefs({ font: f })}
+              >
                 {FONTS[f].label}
               </button>
             ))}
@@ -134,13 +150,18 @@ export function Settings({ modules }: { modules: Module[] }) {
       <Reminder />
 
       <p className="label" style={{ marginTop: 18 }}>
+        Sync
+      </p>
+      <SyncSettings />
+
+      <p className="label" style={{ marginTop: 18 }}>
         About
       </p>
       <div className="card">
         <p style={{ margin: "0 0 6px", fontWeight: 600 }}>Two-edged Sword</p>
         <p className="m" style={{ margin: 0, lineHeight: 1.5 }}>
-          Free software under the GNU General Public License, version 3 or later. Its Bibles, commentaries, dictionaries and books are in the public
-          domain. {modules.length} modules on this phone.
+          Free software under the GNU General Public License, version 3 or later. Its Bibles, commentaries, dictionaries and books are in
+          the public domain. {modules.length} modules on this phone.
         </p>
       </div>
     </>
@@ -213,8 +234,8 @@ function ListenSettings() {
                 ))}
               </div>
               <p className="m" style={{ marginTop: 14, lineHeight: 1.5 }}>
-                More voices, and better ones (Enhanced and Premium), are free in the iPhone's Settings › Accessibility › Spoken Content › Voices ›
-                English. Once downloaded they show here.
+                More voices, and better ones (Enhanced and Premium), are free in the iPhone's Settings › Accessibility › Spoken Content ›
+                Voices › English. Once downloaded they show here.
               </p>
             </div>
           </section>

@@ -3,6 +3,7 @@
 
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
+import { discover, pair, startSync } from "./phoneSync";
 import { useEffect, useRef, useState } from "react";
 import { api, libraryIs, Module, save, saved, scene } from "./api";
 import { Icon } from "./icons";
@@ -15,7 +16,6 @@ import { DictionarySheet } from "./Dictionary";
 import { syncReminders } from "./Reminder";
 import { plansStore } from "./plansStore";
 import { history, Tab } from "./history";
-
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "read", label: "Read" },
@@ -135,10 +135,28 @@ export function App() {
     window.addEventListener("tes-bundled", bundled);
     // The week's reminders, from today: again whenever a day is marked read or the plan changes.
     syncReminders().catch(() => {});
+    // Sync with the computer, if paired (phoneSync.ts).
+    startSync();
     const unPlans = plansStore.subscribe(() => syncReminders().catch(() => {}));
     scene.then((sc) => {
       if (sc.includes("search")) setTab("search");
       if (sc.includes("library")) setTab("library");
+      // pair=<code>: pairs with the first computer found (a debug desktop build run with TES_PAIR_CODE).
+      // pairat=<host>:<port>:<code>: the same at a known address, as the Simulator doesn't find it over Bonjour.
+      const pa = sc
+        .find((x) => x.startsWith("pairat="))
+        ?.slice(7)
+        .split(":");
+      if (pa)
+        pair({ name: "Test Mac", host: pa[0], port: Number(pa[1]) }, pa[2], "Simulator").catch((e) => invoke("log", { msg: `pair: ${e}` }));
+      const pc = sc.find((x) => x.startsWith("pair="));
+      if (pc)
+        discover().then(
+          (f) => (
+            invoke("log", { msg: `found ${JSON.stringify(f)}` }),
+            f[0] && pair(f[0], pc.slice(5), "Simulator").catch((e) => invoke("log", { msg: `pair: ${e}` }))
+          ),
+        );
       // adding: the "Adding…" shown while picked modules are taken in.
       // sweeplater: looks for waiting modules again after 8s, as the app coming forward would.
       if (sc.includes("sweeplater")) setTimeout(() => window.dispatchEvent(new Event("tes-inbox")), 8000);
@@ -185,11 +203,7 @@ export function App() {
         />
       </div>
       <div className="screen" hidden={tab !== "search"}>
-        <Search
-          modules={modules}
-          active={tab === "search"}
-          onJump={open}
-        />
+        <Search modules={modules} active={tab === "search"} onJump={open} />
       </div>
       <div className="screen" hidden={tab !== "words"}>
         <WordStudy modules={modules} target={word} onTarget={study} onJump={open} onDictionary={(w) => setDict({ start: w })} />
@@ -232,7 +246,13 @@ export function App() {
       )}
       {msg && (
         <div className="adding" role="status" onClick={() => !msg.busy && setMsg(null)}>
-          {msg.busy ? <span className="spin" aria-hidden /> : <span className={msg.ok ? "tick" : "tick bad"} aria-hidden>{msg.ok ? "✓" : "!"}</span>}
+          {msg.busy ? (
+            <span className="spin" aria-hidden />
+          ) : (
+            <span className={msg.ok ? "tick" : "tick bad"} aria-hidden>
+              {msg.ok ? "✓" : "!"}
+            </span>
+          )}
           {msg.text}
         </div>
       )}

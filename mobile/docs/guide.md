@@ -10,6 +10,7 @@ Each section below folds open. The tabs along the bottom are Read, Search, Words
 - **A word**: tap it to see its Strong's number and meaning. Tap the speaker to hear it said, or **Word Study** for more.
 - **Back and forward**: ‹ and › at the top left go back over every place you've been, as in a web browser.
 - **Bible**: tap the Bible's name at the top to change it.
+- **Highlight a verse**: tap a word in it, then a colour under **Highlight**. Tap the colour again, or ✕, to remove it.
 
 ## Study a verse
 
@@ -83,6 +84,15 @@ Modules from Two-edged Sword on your computer (files ending .bbli, .cmti, .dcti,
 
 A module you add shows as **Added** in the Library. One with the same file name as a module you already have replaces it.
 
+## Sync with your computer
+
+Bookmarks, highlights, reading plans, Recent and the chapter you're at in each book can be kept the same as Two-edged Sword on your computer.
+
+1. On the computer, open Settings › Phones and tablets and click **Show a pairing code**.
+2. Here, go to More › Settings › Sync, tap **Pair with your computer**, and enter the code.
+
+After that it syncs by itself whenever the app is open and on the same Wi-Fi as the computer, with Two-edged Sword running there. **Sync now** syncs straight away. Your other phones and tablets catch up through the computer.
+
 ## Reading plans
 
 - **More › Today's reading** shows today's passages. Tap one to read it, or **Listen** to hear them all. Tick each one as you read it.
@@ -97,3 +107,4 @@ Under More › Settings:
 - **Words of Jesus in red**.
 - **Voice** and **Speed** for Listen.
 - **Daily reminder**: a time to be reminded to read.
+- **Sync**: pairing with Two-edged Sword on your computer.
