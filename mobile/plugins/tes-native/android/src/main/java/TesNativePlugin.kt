@@ -254,8 +254,14 @@ class TesNativePlugin(private val activity: Activity) : Plugin(activity) {
         nsd.resolveService(s, object : NsdManager.ResolveListener {
           override fun onResolveFailed(i: NsdServiceInfo, code: Int) { next() }
           override fun onServiceResolved(i: NsdServiceInfo) {
+            // An IPv4 address if there is one: an IPv6 link-local one (fe80::) can't be connected to
+            // without its interface, and a connect to it fails ("invalid argument").
             @Suppress("DEPRECATION")
-            val host = i.host?.hostAddress
+            val all: List<java.net.InetAddress> =
+              if (android.os.Build.VERSION.SDK_INT >= 34) i.hostAddresses else listOfNotNull(i.host)
+            val pick = all.firstOrNull { it is java.net.Inet4Address }
+              ?: all.firstOrNull { !it.isLinkLocalAddress && !it.isLoopbackAddress }
+            val host = pick?.hostAddress
             if (host != null) out.put(JSObject().apply { put("name", i.serviceName); put("host", host.substringBefore('%')); put("port", i.port) })
             next()
           }
