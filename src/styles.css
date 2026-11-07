@@ -1601,36 +1601,57 @@ button.ks-chip {
   vertical-align: super;
   margin-inline: 2px 3px;
 }
+/* Verse and journal highlights (.hl-*): a see-through tint of each colour's dot (HL_DOT), as the phone
+   app has them, stronger on the dark theme's page. */
+:root {
+  --hl-dot-red: #e59a92;
+  --hl-dot-orange: #efb97e;
+  --hl-dot-yellow: #e9d271;
+  --hl-dot-green: #a9cf9f;
+  --hl-dot-blue: #9fc0e6;
+  --hl-dot-purple: #c1a9e3;
+  --hl-dot-teal: #8fcfc6;
+  --hl-dot-grey: #aab3bf;
+  --hl-mix: 55%;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --hl-mix: 45%;
+  }
+}
+:root[data-theme="dark"] {
+  --hl-mix: 45%;
+}
 .hl-red {
-  background: var(--hl-red);
+  background: color-mix(in srgb, var(--hl-dot-red) var(--hl-mix), transparent);
   border-radius: 3px;
 }
 .hl-orange {
-  background: var(--hl-orange);
+  background: color-mix(in srgb, var(--hl-dot-orange) var(--hl-mix), transparent);
   border-radius: 3px;
 }
 .hl-yellow {
-  background: var(--hl-yellow);
+  background: color-mix(in srgb, var(--hl-dot-yellow) var(--hl-mix), transparent);
   border-radius: 3px;
 }
 .hl-green {
-  background: var(--hl-green);
+  background: color-mix(in srgb, var(--hl-dot-green) var(--hl-mix), transparent);
   border-radius: 3px;
 }
 .hl-blue {
-  background: var(--hl-blue);
+  background: color-mix(in srgb, var(--hl-dot-blue) var(--hl-mix), transparent);
   border-radius: 3px;
 }
 .hl-purple {
-  background: var(--hl-purple);
+  background: color-mix(in srgb, var(--hl-dot-purple) var(--hl-mix), transparent);
   border-radius: 3px;
 }
 .hl-teal {
-  background: var(--hl-teal);
+  background: color-mix(in srgb, var(--hl-dot-teal) var(--hl-mix), transparent);
   border-radius: 3px;
 }
 .hl-grey {
-  background: var(--hl-grey);
+  background: color-mix(in srgb, var(--hl-dot-grey) var(--hl-mix), transparent);
   border-radius: 3px;
 }
 .vtool {
