@@ -128,6 +128,7 @@ export const api = {
   commentaryRanges: (module: string) => invoke<[number, number, number, number, number][]>("commentary_ranges", { module }),
   referenceTitles: (module: string) => invoke<string[]>("reference_titles", { module }),
   fetchManifest: (url: string) => invoke<string>("fetch_manifest", { url }),
+  countWaiting: (inbox?: string) => invoke<number>("count_waiting", { inbox }),
   importWaiting: (inbox?: string) => invoke<{ added: string[]; failed: string[] }>("import_waiting", { inbox }),
   fetchBytes: (url: string) => invoke<ArrayBuffer>("fetch_bytes", { url }),
   download: (url: string, file: string, sha256: string, size: number) => invoke<void>("download", { url, file, sha256, size }),

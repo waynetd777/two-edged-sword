@@ -282,6 +282,21 @@ fn waiting_dirs(inbox: Option<String>) -> Vec<(std::path::PathBuf, bool)> {
     dirs
 }
 
+/// How many modules are waiting to be taken in (by their names alone): quick, so the app can say
+/// "Adding…" before import_waiting does the work.
+#[tauri::command(async)]
+fn count_waiting(inbox: Option<String>) -> usize {
+    waiting_dirs(inbox)
+        .iter()
+        .filter_map(|(d, _)| std::fs::read_dir(d).ok())
+        .flat_map(|rd| rd.flatten())
+        .filter(|e| {
+            let p = e.path();
+            p.is_file() && MODULE_EXTS.contains(&p.extension().and_then(|x| x.to_str()).unwrap_or_default().to_ascii_lowercase().as_str())
+        })
+        .count()
+}
+
 #[derive(Serialize)]
 struct Brought {
     /// The modules taken in, by title.
@@ -454,7 +469,7 @@ pub fn run() {
             app.manage(AppState { lib: RwLock::new(scan()), cancelled: Mutex::new(HashSet::new()) });
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![log, scene, set_bundled, modules, chapter, chapter_sizes, commentary, coverage, article, strongs_for_word, search, strongs_by_book, strongs_verses, translit_search, find_topics, fetch_manifest, fetch_bytes, module_info, list_topics, reference_titles, devotion_titles, devotion, commentary_ranges, schedule_reminders, download, cancel_download, remove_module, import_waiting])
+        .invoke_handler(tauri::generate_handler![log, scene, set_bundled, modules, chapter, chapter_sizes, commentary, coverage, article, strongs_for_word, search, strongs_by_book, strongs_verses, translit_search, find_topics, fetch_manifest, fetch_bytes, module_info, list_topics, reference_titles, devotion_titles, devotion, commentary_ranges, schedule_reminders, download, cancel_download, remove_module, count_waiting, import_waiting])
         .build(tauri::generate_context!())
         .expect("error while running the app")
         .run(|app, ev| {

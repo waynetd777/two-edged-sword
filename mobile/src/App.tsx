@@ -57,7 +57,7 @@ export function App() {
       .catch(() => {});
   /** What was just brought in, shown for a few seconds above the tabs. */
   const [notice, setNotice] = useState<string | null>(null);
-  /** "Adding…", in the middle of the screen while modules picked in Files are taken in. */
+  /** "Adding…", in the middle of the screen while modules are taken in. */
   const [adding, setAdding] = useState<string | null>(null);
   const noticeTimer = useRef<number>(0);
   const tell = (text: string) => {
@@ -81,7 +81,12 @@ export function App() {
     taking.current = "yes";
     invoke<{ dir?: string }>("plugin:tes-native|inbox_dir")
       .catch(() => ({}) as { dir?: string })
-      .then((r) => api.importWaiting(r.dir))
+      // Anything waiting: "Adding…" while it's taken in, however it came.
+      .then(async (r) => {
+        const n = await api.countWaiting(r.dir).catch(() => 0);
+        if (n) setAdding(`Adding ${n > 1 ? `${n} modules` : "the module"}…`);
+        return api.importWaiting(r.dir);
+      })
       .then(async ({ added, failed: bad }) => {
         if (added.length) await loadModules();
         const parts = [];
