@@ -55,15 +55,18 @@ export function App() {
         libraryIs(m.map((x) => x.file));
       })
       .catch(() => {});
-  /** What was just brought in, shown for a few seconds above the tabs. */
-  const [notice, setNotice] = useState<string | null>(null);
-  /** "Adding…", in the middle of the screen while modules are taken in. */
-  const [adding, setAdding] = useState<string | null>(null);
-  const noticeTimer = useRef<number>(0);
-  const tell = (text: string) => {
-    setNotice(text);
-    clearTimeout(noticeTimer.current);
-    noticeTimer.current = window.setTimeout(() => setNotice(null), 5000);
+  /** Modules being taken in, in the middle of the screen over a dimmed page: "Adding…" with a spinner
+   *  while it runs, then what came (a tick) for a few seconds, or until tapped. */
+  const [msg, setMsg] = useState<{ text: string; busy: boolean; ok?: boolean } | null>(null);
+  const msgTimer = useRef<number>(0);
+  const setAdding = (text: string) => {
+    clearTimeout(msgTimer.current);
+    setMsg({ text, busy: true });
+  };
+  const tell = (text: string, ok: boolean) => {
+    setMsg({ text, busy: false, ok });
+    clearTimeout(msgTimer.current);
+    msgTimer.current = window.setTimeout(() => setMsg(null), 3000);
   };
   const toldFailed = useRef(new Set<string>()).current;
   /** Modules AirDropped, opened from Files, dragged in with Finder or (Android) opened in the app: taken
@@ -71,6 +74,7 @@ export function App() {
    *  and the picker closing can all ask at once, and would race for the same files; one asked for while
    *  another runs follows it. The picker says how many it brought, so "Adding…" shows until they're in. */
   const taking = useRef<"no" | "yes" | "again">("no");
+
   const takeIn = (e?: Event) => {
     const count = (e as CustomEvent<{ count?: number }> | undefined)?.detail?.count;
     if (count) setAdding(`Adding ${count > 1 ? `${count} modules` : "the module"}…`);
@@ -90,16 +94,16 @@ export function App() {
       .then(async ({ added, failed: bad }) => {
         if (added.length) await loadModules();
         const parts = [];
-        if (added.length) parts.push(`Added ${added.length > 2 ? `${added.length} modules` : added.join(" and ")} to the Library`);
+        if (added.length) parts.push(`Added ${added.length > 2 ? `${added.length} modules` : added.join(" and ")}`);
         // A bad file left in Documents is found every time: told once.
         const failed = bad.filter((f) => !toldFailed.has(f));
         failed.forEach((f) => toldFailed.add(f));
         if (failed.length) parts.push(`${failed.join(", ")} couldn't be read as ${failed.length > 1 ? "modules" : "a module"}`);
-        if (parts.length) tell(parts.join(". ") + ".");
+        if (parts.length) tell(parts.join(". ") + ".", added.length > 0);
       })
       .catch(() => {})
       .finally(() => {
-        setAdding(null);
+        setMsg((m) => (m?.busy ? null : m));
         const again = taking.current === "again";
         taking.current = "no";
         if (again) takeIn();
@@ -136,6 +140,8 @@ export function App() {
       if (sc.includes("search")) setTab("search");
       if (sc.includes("library")) setTab("library");
       // adding: the "Adding…" shown while picked modules are taken in.
+      // sweeplater: looks for waiting modules again after 8s, as the app coming forward would.
+      if (sc.includes("sweeplater")) setTimeout(() => window.dispatchEvent(new Event("tes-inbox")), 8000);
       if (sc.includes("adding")) setTimeout(() => setAdding("Adding 2 modules…"), 2500);
       if (sc.includes("more")) setTab("more");
       const w = sc.find((x) => x.startsWith("study="));
@@ -224,15 +230,10 @@ export function App() {
           onClose={() => setDict(null)}
         />
       )}
-      {adding && (
-        <div className="adding" role="status">
-          <span className="spin" aria-hidden />
-          {adding}
-        </div>
-      )}
-      {notice && (
-        <div className="notice" role="status" onClick={() => { setNotice(null); setTab("library"); }}>
-          {notice}
+      {msg && (
+        <div className="adding" role="status" onClick={() => !msg.busy && setMsg(null)}>
+          {msg.busy ? <span className="spin" aria-hidden /> : <span className={msg.ok ? "tick" : "tick bad"} aria-hidden>{msg.ok ? "✓" : "!"}</span>}
+          {msg.text}
         </div>
       )}
       <nav className="tabs">
