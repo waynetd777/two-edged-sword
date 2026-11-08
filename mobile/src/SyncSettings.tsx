@@ -6,14 +6,9 @@
 
 import { useEffect, useState } from "react";
 import { scene } from "./api";
-import { deviceName, discover, pair, PAIR_AGAIN, syncNow, unpair, useSync } from "./phoneSync";
+import { deviceName, discover, pair, PAIR_AGAIN, syncLine, syncNow, unpair, useSync } from "./phoneSync";
 
 type Found = Awaited<ReturnType<typeof discover>>[number];
-
-const ago = (t: number) => {
-  const m = Math.round((Date.now() - t) / 60000);
-  return m < 1 ? "just now" : m < 60 ? `${m} min ago` : new Date(t).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
-};
 
 export function SyncSettings() {
   const s = useSync();
@@ -45,7 +40,8 @@ export function SyncSettings() {
         setCode("123456");
         setStep("code");
       }
-      if (sc.includes("syncnone") || sc.includes("synccode")) setTimeout(() => document.getElementById("sync")?.scrollIntoView(), 600);
+      if (["syncnone", "synccode", "syncok", "syncamber", "syncred"].some((x) => sc.includes(x)))
+        setTimeout(() => document.getElementById("sync")?.scrollIntoView(), 600);
     });
   }, []);
   const look = async () => {
@@ -74,12 +70,12 @@ export function SyncSettings() {
 
   if (s.paired)
     return (
-      <div className="card">
+      <div className="card" id="sync">
         <p style={{ margin: "0 0 4px" }}>
           Syncing with <b>{s.paired.name}</b>
         </p>
         <p className="m" style={{ margin: "0 0 10px", overflowWrap: "anywhere" }}>
-          {s.busy ? "Syncing…" : s.error ? s.error : s.needsPairing ? PAIR_AGAIN : s.last ? `Synced ${ago(s.last)}` : "Not synced yet"}
+          {s.busy ? "Syncing…" : s.needsPairing ? (s.error ?? PAIR_AGAIN) : syncLine(s)}
         </p>
         <div style={{ display: "flex", gap: 8 }}>
           {s.needsPairing ? (

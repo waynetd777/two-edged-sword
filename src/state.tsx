@@ -972,6 +972,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const syncReady = bookmarksLoaded && highlightsLoaded && navLoaded && plansLoaded && journalLoaded && !readFailed;
   const syncReadyRef = useRef(false);
   syncReadyRef.current = syncReady;
+  const readFailedRef = useRef(readFailed);
+  readFailedRef.current = readFailed;
   const journalDirRef = useRef(journalDir);
   journalDirRef.current = journalDir;
   const ledgerTimer = useRef<number | undefined>(undefined);
@@ -1042,7 +1044,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     );
   }, [syncReady, bookmarks, highlights, nav.docAt, plans, journal]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
-    const fail = (rid: number, error: string) => invoke("sync_reply", { rid, merged: { error } }).catch(() => {});
+    /** A sync that didn't happen, and why; `red` when it needs the user rather than another try (shown so in
+     *  Settings and on the phone). */
+    const fail = (rid: number, error: string, red = false) => invoke("sync_reply", { rid, merged: { error, red } }).catch(() => {});
     // One at a time, and in turn with the journal's saves: a copy of the bookmarks, highlights and plans
     // files first (once a day), then the answer.
     const un = listen<{ rid: number; payload: unknown }>("sync-request", ({ payload: { rid, payload: theirs } }) => {
@@ -1068,7 +1072,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         items: clamp(checked.payload.items, at),
         recent: checked.payload.recent.map((p) => (p.at > at ? { ...p, at } : p)),
       };
-      if (ledgerFailed.current) return fail(rid, "The computer couldn't read its sync records, so nothing was synced.");
+      if (ledgerFailed.current) return fail(rid, "The computer couldn't read its sync records, so nothing was synced.", true);
+      if (readFailedRef.current) return fail(rid, "The computer couldn't read its saved data, so nothing was synced.", true);
       if (!ledger.current || !syncReadyRef.current)
         return fail(rid, "Two-edged Sword on the computer is still starting. Try again in a moment.");
       // Changed in another app while the window was hidden (and so not checked): read again first, so the
@@ -1083,10 +1088,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
           journalStamp.current = st;
         } catch (e) {
           console.error("sync: reading the journal", e);
-          return fail(rid, "The computer couldn't read its journal, so nothing was synced.");
+          return fail(rid, "The computer couldn't read its journal, so nothing was synced.", true);
         }
       }
-      if (!stampRef.current() || !ledger.current) return fail(rid, "The computer couldn't read its journal, so nothing was synced.");
+      if (!stampRef.current() || !ledger.current) return fail(rid, "The computer couldn't read its journal, so nothing was synced.", true);
       const cur = syncedNow();
       const now = itemsOf(cur);
       const mine = syncPayload(ledger.current, now, placesOf(cur.recent));
@@ -1141,7 +1146,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
           console.error("sync: writing the journal", e);
           reloadAfter.current = true;
           await noteStamp(dir);
-          return fail(rid, `The computer couldn't save its journal, so the sync wasn't finished: ${String(e).replace(/^Error: /, "")}`);
+          return fail(
+            rid,
+            `The computer couldn't save its journal, so the sync wasn't finished: ${String(e).replace(/^Error: /, "")}`,
+            true,
+          );
         }
         ++journalSeq.current;
         await noteStamp(dir);
@@ -1160,7 +1169,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
       putJournal(() => next.journal);
       // Seen by the next answer at once, before React renders.
       synced.current = { ...next };
-      const out: Payload = { ...merged, serverNow: Date.now() + 1 };
+      // What changed each way, for Settings (sync.rs keeps it) and the phone's own line.
+      const differ = (a: Record<string, unknown>, b: Record<string, unknown>) =>
+        new Set([...Object.keys(a), ...Object.keys(b)].filter((k) => stable(a[k]) !== stable(b[k]))).size;
+      const theyHad = Object.fromEntries(Object.entries(theirs.items).flatMap(([k, e]): [string, unknown][] => (e.del ? [] : [[k, e.v]])));
+      const theyGet = theirs.journal ? done.now : Object.fromEntries(Object.entries(done.now).filter(([k]) => !k.startsWith("j|")));
+      const stats = { sent: differ(theyHad, theyGet), received: differ(now, seen.current) };
+      const out: Payload = { ...merged, serverNow: Date.now() + 1, stats };
       const reply: Payload = theirs.journal ? { ...out, journal: true } : { ...out, items: withoutJournal(out.items) };
       invoke("sync_reply", { rid, merged: reply }).catch(() => {});
     };

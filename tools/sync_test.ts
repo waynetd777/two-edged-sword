@@ -90,3 +90,25 @@ test("what comes in is checked by kind", () => {
   assert.equal(checkPayload({ v: 2, items: {}, recent: [] }), null);
   assert.equal(checkPayload({ v: 1, items: [], recent: [] }), null);
 });
+
+test("sync status: a dot only when something isn't right", async () => {
+  const { deviceLevel, deviceLine, lastLine, worst, DAY } = await import("../src/syncStatus.ts");
+  const now = 100 * DAY;
+  const d = { id: "a", name: "Phone", paired: now - 30 * DAY, seen: now - 60_000, ok: now - 120_000, sent: 3, received: 1, err: "", errAt: 0, red: false };
+  assert.equal(deviceLevel(d, now), "ok");
+  assert.equal(deviceLine(d, now), "Synced 2 min ago · 3 sent, 1 received");
+  // A failure since the last that worked: amber, or red when it needs the user; an older one doesn't count.
+  const failed = { ...d, err: "The app on the computer didn't answer.", errAt: now - 300_000 };
+  assert.equal(deviceLevel(failed, now), "ok");
+  const later = { ...d, err: "The app on the computer didn't answer.", errAt: now - 60_000 };
+  assert.equal(deviceLevel(later, now), "amber");
+  assert.equal(deviceLevel({ ...later, red: true }, now), "red");
+  assert.equal(deviceLine(later, now), "Failed 1 min ago: The app on the computer didn't answer.");
+  // Not synced for over a week.
+  const quiet = { ...d, ok: now - 9 * DAY, seen: now - 9 * DAY };
+  assert.equal(deviceLevel(quiet, now), "amber");
+  assert.equal(deviceLine(quiet, now), "Not synced for 9 days");
+  assert.equal(worst(["ok", "amber", "red"]), "red");
+  assert.equal(worst([]), "ok");
+  assert.equal(lastLine({ ok: 0, sent: 0, received: 0, err: "", errAt: 0 }, now), "Not synced yet");
+});

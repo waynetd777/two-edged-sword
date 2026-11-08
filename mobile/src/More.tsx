@@ -27,6 +27,7 @@ import {
 import { buildPlan, Choice, CHOICES, plansStore, startPlan, usePlans } from "./plansStore";
 import type { Jump } from "./Search";
 import { Settings } from "./Settings";
+import { phoneProblem, syncNow, useSync, useSyncLevel } from "./phoneSync";
 import { player, PlanStretch, usePlayer } from "./player";
 import { Part } from "./plansShared";
 
@@ -37,6 +38,8 @@ const partKey = (x: { b: number; c: number; v?: number }) => `${x.b}.${x.c}${x.v
 
 export function More({ modules, onJump, onWords }: { modules: Module[]; onJump: (j: Jump) => void; onWords: () => void }) {
   const [page, setPage] = useState<Page>("home");
+  const sync = useSync();
+  const syncLevel = useSyncLevel();
   useEffect(() => {
     // Debug: page=<settings|help> opens a page.
     scene.then((sc) => {
@@ -60,6 +63,29 @@ export function More({ modules, onJump, onWords }: { modules: Module[]; onJump: 
       <div className="results">
         {page === "home" && (
           <>
+            {syncLevel !== "ok" && (
+              // Sync with the computer isn't right: what's wrong, and what to do.
+              <div className="card" style={{ marginBottom: 18 }}>
+                <p className={`syncnote sync-${syncLevel}`} style={{ margin: "0 0 10px", overflowWrap: "anywhere" }}>
+                  {phoneProblem(sync)}
+                </p>
+                {sync.needsPairing ? (
+                  <button
+                    className="secondary"
+                    onClick={() => {
+                      setPage("settings");
+                      setTimeout(() => document.getElementById("sync")?.scrollIntoView(), 100);
+                    }}
+                  >
+                    Pair again
+                  </button>
+                ) : (
+                  <button className="secondary" disabled={sync.busy} onClick={() => syncNow().catch(() => {})}>
+                    {sync.busy ? "Syncing…" : "Sync now"}
+                  </button>
+                )}
+              </div>
+            )}
             {modules.some((m) => m.kind === "devotional") && (
               <>
                 <p className="label">Today's devotionals</p>

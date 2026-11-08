@@ -16,6 +16,7 @@
   --bar: #eef1f4;
   --scrim: rgba(31, 35, 40, 0.34);
   --red: #cf222e;
+  --amber: #bf8700;
   --read: "Atkinson Hyperlegible Next Variable", -apple-system, sans-serif;
   --orig: "EB Garamond", Garamond, Georgia, serif;
   --read-size: 19px;
@@ -37,6 +38,7 @@
     --bar: #010409;
     --scrim: rgba(1, 4, 9, 0.6);
     --red: #ff7b72;
+    --amber: #d29922;
   }
 }
 :root[data-theme="dark"] {
@@ -53,6 +55,7 @@
   --bar: #010409;
   --scrim: rgba(1, 4, 9, 0.6);
   --red: #ff7b72;
+  --amber: #d29922;
 }
 :root[data-theme="dark"] {
   color-scheme: dark;
@@ -2239,4 +2242,37 @@ h2.jtitle {
 }
 .jprose mark.hl-grey {
   --hl: #aab3bf;
+}
+
+/* Sync with the computer isn't right (phoneSync.ts phoneLevel): a dot on the More tab's icon, amber when
+   syncs have been failing for over a day, red when it needs the user; and the same dot on More's line. */
+.tab .ticon {
+  position: relative;
+  display: inline-flex;
+}
+.syncdot {
+  position: absolute;
+  top: -1px;
+  right: -3px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px var(--bar);
+}
+.syncdot.sync-amber,
+.syncnote.sync-amber::before {
+  background: var(--amber);
+}
+.syncdot.sync-red,
+.syncnote.sync-red::before {
+  background: var(--red);
+}
+.syncnote::before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 7px;
+  border-radius: 50%;
+  vertical-align: 1px;
 }

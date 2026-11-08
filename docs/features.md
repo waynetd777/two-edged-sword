@@ -147,6 +147,14 @@ Something is removed by sync only when it was deleted in the app. A journal entr
 app, or a journal file that's missing for a while, isn't removed from your phones: it comes back.
 If the journal's folder changes in Settings, the phones' entries are saved into the new folder.
 
+Settings › Phones and tablets shows each device's last sync: "Synced 2 min ago · 3 sent, 1 received", or why it failed.
+When something isn't right, a dot shows on **Settings** in the sidebar. Its tooltip says which device; clicking it opens Phones and tablets.
+
+| Dot | Means |
+| --- | --- |
+| Amber | A device's last sync failed, or it hasn't synced for over a week. |
+| Red | It needs you: the journal couldn't be saved here, or the journal, saved data or sync's records couldn't be read. |
+
 ## Licence and credits
 
 Two-edged Sword is free software under the GNU General Public License, version 3 or later.

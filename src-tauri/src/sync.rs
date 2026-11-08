@@ -53,6 +53,22 @@ pub struct Device {
     /// The highest request counter taken from it: a request with one no higher is a replay.
     #[serde(default)]
     ctr: u64,
+    /// How its syncs are going, for Settings and the status dot (src/syncStatus.ts): when one last
+    /// worked, and then how many items this computer sent it (`sent`) and took from it (`received`);
+    /// the last failure since, if any, when, and whether it needs the user (`red`: the journal couldn't
+    /// be saved, say) rather than only another try.
+    #[serde(default)]
+    ok: u64,
+    #[serde(default)]
+    sent: u64,
+    #[serde(default)]
+    received: u64,
+    #[serde(default)]
+    err: String,
+    #[serde(default)]
+    err_at: u64,
+    #[serde(default)]
+    red: bool,
 }
 
 impl Device {
@@ -62,11 +78,18 @@ impl Device {
 }
 
 #[derive(Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct DeviceInfo {
     id: String,
     name: String,
     paired: u64,
     seen: u64,
+    ok: u64,
+    sent: u64,
+    received: u64,
+    err: String,
+    err_at: u64,
+    red: bool,
 }
 
 /// The pairing code showing in Settings: until when (ms), wrong tries so far, and the pairings begun with
@@ -186,7 +209,21 @@ impl Sync {
     }
 
     pub fn infos(&self) -> Vec<DeviceInfo> {
-        self.devices().into_iter().map(|d| DeviceInfo { id: d.id, name: d.name, paired: d.paired, seen: d.seen }).collect()
+        self.devices()
+            .into_iter()
+            .map(|d| DeviceInfo {
+                id: d.id,
+                name: d.name,
+                paired: d.paired,
+                seen: d.seen,
+                ok: d.ok,
+                sent: d.sent,
+                received: d.received,
+                err: d.err,
+                err_at: d.err_at,
+                red: d.red,
+            })
+            .collect()
     }
 
     pub fn forget(self: &Arc<Self>, id: &str) {
@@ -433,6 +470,12 @@ fn handle(app: &AppHandle, sync: &Arc<Sync>, mut req: tiny_http::Request) {
                 paired: now_ms(),
                 seen: 0,
                 ctr: 0,
+                ok: 0,
+                sent: 0,
+                received: 0,
+                err: String::new(),
+                err_at: 0,
+                red: false,
             };
             sync.with_devices(|ds| {
                 ds.push(d);
@@ -489,12 +532,25 @@ fn sealed(app: &AppHandle, sync: &Arc<Sync>, mut req: tiny_http::Request, path: 
     sync.busy.lock().unwrap().remove(&id);
     match out {
         Ok(merged) => reply(req, merged),
-        Err((status, msg)) => error(req, status, &msg),
+        Err((status, msg, red)) => {
+            // Noted for Settings (not for a device forgotten meanwhile, which has no entry).
+            sync.with_devices(|ds| match ds.iter_mut().find(|d| d.id == id) {
+                Some(d) => {
+                    (d.err, d.err_at, d.red) = (msg.clone(), now_ms(), red);
+                    ((), true)
+                }
+                None => ((), false),
+            });
+            let _ = app.emit("sync-devices", ());
+            // One that needs the user is marked for the phone too: its own status shows it the same way.
+            respond(req, status, serde_json::json!({ "error": msg, "red": red }))
+        }
     }
 }
 
 /// Passes a device's sync to the page and waits for its merge.
-fn sync_one(app: &AppHandle, sync: &Arc<Sync>, id: &str, payload: serde_json::Value) -> Result<serde_json::Value, (u16, String)> {
+/// A failure is its status, its message, and whether it needs the user.
+fn sync_one(app: &AppHandle, sync: &Arc<Sync>, id: &str, payload: serde_json::Value) -> Result<serde_json::Value, (u16, String, bool)> {
     let rid = {
         let mut n = sync.next.lock().unwrap();
         *n += 1;
@@ -506,7 +562,7 @@ fn sync_one(app: &AppHandle, sync: &Arc<Sync>, id: &str, payload: serde_json::Va
     let _ = app.emit("sync-request", serde_json::json!({"rid": rid, "device": name, "payload": payload}));
     let gave_up = || {
         sync.waiting.lock().unwrap().remove(&rid);
-        Err((503, "The app on the computer didn't answer.".to_string()))
+        Err((503, "The app on the computer didn't answer.".to_string(), false))
     };
     let merged = match rx.recv_timeout(UNCLAIMED_WAIT) {
         Ok(m) => m,
@@ -525,7 +581,7 @@ fn sync_one(app: &AppHandle, sync: &Arc<Sync>, id: &str, payload: serde_json::Va
                 }
             };
             if !claimed {
-                return Err((503, "The app on the computer didn't answer.".to_string()));
+                return Err((503, "The app on the computer didn't answer.".to_string(), false));
             }
             match rx.recv_timeout(CLAIMED_WAIT) {
                 Ok(m) => m,
@@ -534,18 +590,23 @@ fn sync_one(app: &AppHandle, sync: &Arc<Sync>, id: &str, payload: serde_json::Va
         }
     };
     if let Some(e) = merged.get("error").and_then(|e| e.as_str()) {
-        return Err((503, e.to_string()));
+        return Err((503, e.to_string(), merged.get("red").and_then(|r| r.as_bool()).unwrap_or(false)));
     }
+    // What this sync changed each way (the page counts them), for Settings.
+    let count = |k: &str| merged.get("stats").and_then(|s| s.get(k)).and_then(|n| n.as_u64()).unwrap_or(0);
+    let (sent, received) = (count("sent"), count("received"));
     // Only this device's own entry is touched, as it is now: forgotten meanwhile, it gets nothing.
     let known = sync.with_devices(|ds| match ds.iter_mut().find(|d| d.id == id) {
         Some(d) => {
-            d.seen = now_ms();
+            let now = now_ms();
+            (d.seen, d.ok, d.sent, d.received) = (now, now, sent, received);
+            (d.err, d.err_at, d.red) = (String::new(), 0, false);
             (true, true)
         }
         None => (false, false),
     });
     if !known {
-        return Err((401, "not paired".into()));
+        return Err((401, "not paired".into(), false));
     }
     let _ = app.emit("sync-devices", ());
     Ok(merged)

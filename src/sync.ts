@@ -47,6 +47,9 @@ export interface Payload {
   changed?: string[];
   /** From the computer: its clock when it merged (ms). The phone sends it back as `since`. */
   serverNow?: number;
+  /** From the computer: how many items its merge changed on the phone (`sent`) and on the computer
+   *  (`received`), for each side's "last sync" line. */
+  stats?: { sent: number; received: number };
   /** Set by a side that syncs the journal. Journal items only go to a side that sets it: one without
    *  the journal would take every entry for removed on its next sync and delete them everywhere. */
   journal?: true;
@@ -343,6 +346,7 @@ export function checkPayload(p: unknown): { payload: Payload; dropped: string[] 
   if (isStr(p.from)) out.from = p.from.slice(0, 60);
   if (Array.isArray(p.changed)) out.changed = p.changed.filter(isStr);
   if (isNum(p.serverNow)) out.serverNow = p.serverNow;
+  if (isObj(p.stats) && isNum(p.stats.sent) && isNum(p.stats.received)) out.stats = { sent: p.stats.sent, received: p.stats.received };
   if (p.journal === true) out.journal = true;
   return { payload: out, dropped };
 }

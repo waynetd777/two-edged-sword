@@ -18,6 +18,7 @@
   --accentsoft: #ddf4ff;
   --ring: #80ccff;
   --red: #cf222e;
+  --amber: #bf8700;
   --hl-gold: #f3e2b3;
   --hl-red: #f6d6d2;
   --hl-orange: #f8e2c8;
@@ -73,6 +74,7 @@
     --accentsoft: #132339;
     --ring: #1f6feb;
     --red: #ff7b72;
+    --amber: #d29922;
     --hl-gold: #3d3012;
     --hl-red: #49211f;
     --hl-orange: #47301a;
@@ -122,6 +124,7 @@
   --accentsoft: #132339;
   --ring: #1f6feb;
   --red: #ff7b72;
+  --amber: #d29922;
   --hl-gold: #3d3012;
   --hl-red: #49211f;
   --hl-orange: #47301a;
@@ -3335,4 +3338,42 @@ html.tray-view #root {
 .hl-teal .red,
 .hl-grey .red {
   color: var(--red-on-hl);
+}
+
+/* Sync with a phone isn't right (syncDevices.ts): a dot on the sidebar's Settings gear. Amber: syncs
+   failing for a while; red: it needs the user. Also on Settings › Phones and tablets' lines. */
+.navicon {
+  position: relative;
+  display: inline-flex;
+}
+.syncdot {
+  position: absolute;
+  top: -2px;
+  right: -3px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px var(--sidebar);
+}
+.syncdot.sync-amber,
+.syncline.sync-amber::before {
+  background: var(--amber);
+}
+.syncdot.sync-red,
+.syncline.sync-red::before {
+  background: var(--red);
+}
+.syncline.sync-amber,
+.syncline.sync-red {
+  color: var(--text);
+}
+.syncline.sync-amber::before,
+.syncline.sync-red::before {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 6px;
+  border-radius: 50%;
+  vertical-align: 1px;
 }

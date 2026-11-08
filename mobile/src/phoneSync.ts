@@ -8,7 +8,7 @@
 // change here, and from Settings.
 
 import { invoke } from "@tauri-apps/api/core";
-import { useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import {
   checkPayload,
   clamp,
@@ -31,7 +31,8 @@ import {
   vanished,
   withoutJournal,
 } from "../../src/sync";
-import { save, saved, type Module } from "./api";
+import { save, saved, scene, type Module } from "./api";
+import { ago, DAY, lastLine, type Level } from "../../src/syncStatus";
 import { bookmarks, Mark } from "./bookmarks";
 import { highlights, HlColor } from "./highlights";
 import { Entry, journal } from "./journal";
@@ -61,17 +62,38 @@ export interface SyncState {
   busy: boolean;
   /** It must be paired again: paired before sync was encrypted, or forgotten by the computer. */
   needsPairing: boolean;
+  /** How the last sync that worked went: what it changed here and on the computer. */
+  sent: number;
+  received: number;
+  /** Syncs that have failed in a row, when the last one did, and whether its failure needs the user
+   *  (the computer couldn't save its journal, this phone's sync records can't be read). */
+  fails: number;
+  errAt: number;
+  red: boolean;
+  /** When it was paired, for a pairing that has never synced. */
+  pairedAt: number;
+  /** Something of the person's couldn't be saved here: the app's storage is full. */
+  storageFull: boolean;
 }
 
 const pairedNow = saved<Paired | null>("syncPaired", null);
 const oldPairing = !!pairedNow && (!pairedNow.id || !pairedNow.key);
+const lastFail = saved<{ error: string; at: number; red: boolean } | null>("syncFail", null);
 let state: SyncState = {
   paired: pairedNow,
   last: saved("syncLast", 0),
-  error: null,
+  error: lastFail?.error ?? null,
   busy: false,
   needsPairing: oldPairing,
+  ...saved("syncStats", { sent: 0, received: 0 }),
+  fails: saved("syncFails", 0),
+  errAt: lastFail?.at ?? 0,
+  red: lastFail?.red ?? false,
+  pairedAt: saved("syncPairedAt", 0),
+  storageFull: false,
 };
+// The person's own things not kept (api.ts save): sync's status shows it until a sync is kept again.
+window.addEventListener("tes-save-failed", () => set({ storageFull: true }));
 const watchers = new Set<() => void>();
 const set = (s: Partial<SyncState>) => {
   state = { ...state, ...s };
@@ -242,6 +264,7 @@ function changed() {
 
 /** Starts watching for changes, and syncs now; again whenever the app comes forward. */
 export function startSync() {
+  scene.then(sceneStatus);
   look();
   journal.load().then(note, () => {});
   bookmarks.subscribe(changed);
@@ -297,7 +320,10 @@ export async function pair(f: Found, code: string, deviceName: string) {
   // A new pairing starts afresh: the computer's clock and this one's as of the last sync.
   save("syncSince", 0);
   save("syncSentAt", 0);
-  set({ paired, error: null, needsPairing: false });
+  save("syncPairedAt", Date.now());
+  save("syncFails", 0);
+  save("syncFail", null);
+  set({ paired, error: null, needsPairing: false, fails: 0, red: false, errAt: 0, pairedAt: Date.now() });
   await syncNow();
 }
 
@@ -305,7 +331,9 @@ export function unpair() {
   save("syncPaired", null);
   save("syncJournal", false);
   save("syncLast", 0);
-  set({ paired: null, last: 0, error: null, needsPairing: false });
+  save("syncFails", 0);
+  save("syncFail", null);
+  set({ paired: null, last: 0, error: null, needsPairing: false, fails: 0, red: false, errAt: 0 });
 }
 
 let running: Promise<void> | null = null;
@@ -313,7 +341,7 @@ let running: Promise<void> | null = null;
 let again = false;
 /** One sync with the paired computer; found again (by name) if it has moved on the network. */
 export function syncNow(): Promise<void> {
-  if (!state.paired) return Promise.resolve();
+  if (!state.paired || sceneOnly) return Promise.resolve();
   if (running) {
     again = true;
     return running;
@@ -365,16 +393,18 @@ async function run() {
     return;
   }
   if (!ledger) {
-    set({ error: "This device's sync records couldn't be read, so nothing was synced." });
+    failed("This device's sync records couldn't be read, so nothing was synced.", true);
     return;
   }
   set({ busy: true });
+  const fullBefore = state.storageFull;
+  set({ storageFull: false });
   try {
     await journal.load().catch(() => {
       throw new Error("The journal couldn't be read, so nothing was synced.");
     });
     note();
-    if (!ledger) return;
+    if (!ledger) throw new Error("This device's sync records couldn't be read, so nothing was synced.");
     const sentAt = Date.now();
     // The journal only goes to a computer that has said it syncs it (an older one would delete it).
     const all = payload(ledger, itemsNow(), placesNow());
@@ -419,7 +449,12 @@ async function run() {
     save("syncSentAt", sentAt);
     const last = Date.now();
     save("syncLast", last);
-    set({ last, error: null, busy: false, needsPairing: false });
+    // The computer counts from its side: what it sent is what this phone received.
+    const stats = { sent: merged.stats?.received ?? 0, received: merged.stats?.sent ?? 0 };
+    save("syncStats", stats);
+    save("syncFails", 0);
+    save("syncFail", null);
+    set({ last, error: null, busy: false, needsPairing: false, ...stats, fails: 0, red: false, errAt: 0 });
     // Changes made while it was under way go next.
     if (late) {
       window.clearTimeout(soon);
@@ -431,11 +466,93 @@ async function run() {
       window.setTimeout(() => syncNow().catch(() => {}), 500);
     }
   } catch (e) {
-    const msg = String(e).replace(/^Error: /, "");
+    // The computer marks a failure that needs the user with "!" (its journal couldn't be saved).
+    const raw = String(e).replace(/^Error: /, "");
+    const msg = raw.replace(/^!/, "");
     const forgotten = msg.includes("not paired");
-    set({ busy: false, error: forgotten ? FORGOTTEN : plain(msg, p), needsPairing: forgotten });
+    const red = raw.startsWith("!") || /^(The journal couldn't be|This device's sync records)/.test(msg);
+    set({ needsPairing: forgotten });
+    failed(forgotten ? FORGOTTEN : plain(msg, p), red || forgotten);
+  } finally {
+    // Full before, and nothing kept failing since: still full (a sync that worked has said otherwise).
+    if (fullBefore && state.error) set({ storageFull: true });
   }
 }
+
+/** A sync that failed, noted for the status (phoneLevel) and the Sync settings line. */
+function failed(error: string, red: boolean) {
+  const at = Date.now();
+  const fails = state.fails + 1;
+  save("syncFails", fails);
+  save("syncFail", { error, at, red });
+  set({ busy: false, error, fails, errAt: at, red });
+}
+
+/** How sync is going, for the dot on More (App.tsx) and the line at the top of More: nothing to show
+ *  when all is well, or nothing is paired; amber when syncs have failed a few times and none has worked
+ *  for over a day (a computer that's only off for a while isn't a problem); red when it needs the user. */
+export function phoneLevel(s: SyncState, now = Date.now()): Level {
+  if (!s.paired) return "ok";
+  if (s.needsPairing || s.storageFull || (s.red && s.errAt >= s.last) || journal.error()) return "red";
+  if (s.fails >= 3 && now - Math.max(s.last, s.pairedAt) > DAY) return "amber";
+  return "ok";
+}
+
+/** The problem, in words, when phoneLevel isn't "ok". */
+export function phoneProblem(s: SyncState): string {
+  if (s.needsPairing) return s.error ?? PAIR_AGAIN;
+  if (s.storageFull) return "Your latest changes couldn't be kept: the app's storage on this device is full.";
+  if (s.red && s.error) return s.error;
+  const j = journal.error();
+  if (j) return j;
+  const name = s.paired?.name ?? "the computer";
+  const since = s.last ? `Last synced with ${name} ${ago(s.last)}.` : `Not synced with ${name} since it was paired.`;
+  return `${since} ${s.error ?? ""}`.trim();
+}
+
+/** phoneLevel, kept up to date: with sync's state, the journal's errors, and the clock (for "over a day"). */
+export function useSyncLevel(): Level {
+  const s = useSync();
+  const [, tick] = useState(0);
+  useEffect(() => {
+    const un = journal.subscribe(() => tick((n) => n + 1));
+    const t = window.setInterval(() => tick((n) => n + 1), 10 * 60_000);
+    return () => {
+      un();
+      window.clearInterval(t);
+    };
+  }, []);
+  return phoneLevel(s);
+}
+
+/** Debug: a sync status shown without pairing, for screenshots (syncok, syncamber, syncred). Nothing is
+ *  saved, and nothing syncs while it shows. */
+let sceneOnly = false;
+function sceneStatus(sc: string[]) {
+  const kind = sc.find((x) => ["syncok", "syncamber", "syncred"].includes(x));
+  if (!kind) return;
+  sceneOnly = true;
+  const paired: Paired = { name: "MacBook Pro", host: "192.168.1.20", port: 47615, id: "scene", key: "" };
+  const now = Date.now();
+  if (kind === "syncok") set({ paired, last: now - 2 * 60_000, sent: 1, received: 3, error: null, fails: 0, needsPairing: false });
+  if (kind === "syncamber")
+    set({
+      paired,
+      last: now - 3 * DAY,
+      sent: 0,
+      received: 2,
+      fails: 6,
+      errAt: now - 5 * 60_000,
+      red: false,
+      needsPairing: false,
+      error: plain("Connection refused", paired),
+    });
+  if (kind === "syncred") set({ paired, last: now - DAY, fails: 1, errAt: now - 60_000, needsPairing: true, error: PAIR_AGAIN });
+}
+
+/** The last sync as a line for Sync settings (syncStatus.ts's lastLine). */
+export const syncLine = (s: SyncState, now = Date.now()) =>
+  lastLine({ ok: s.last, sent: s.sent, received: s.received, err: s.error ?? "", errAt: s.errAt }, now);
 
 /** The merged result, kept here: each store replaced, and the ledger matched to it so nothing is
  *  taken for a change. What changed here while the sync was under way is kept over it, and synced next

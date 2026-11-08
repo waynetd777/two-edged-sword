@@ -113,6 +113,14 @@ After that it syncs by itself whenever the app is open and on the same Wi-Fi as 
 - Sync is encrypted: nothing sent over the Wi-Fi can be read by anyone else on it.
 - Something is removed by sync only when it was deleted in the app, here or on the computer. An entry missing for any other reason comes back.
 - **Pair again**: devices paired before sync was encrypted need pairing once more. The phone app and the computer's app must both be up to date.
+- More › Settings › Sync shows the last sync: "Synced 2 min ago · 1 sent, 3 received", or why it failed.
+
+When sync isn't right, a dot shows on **More**, and More says what's wrong, with **Sync now** or **Pair again**.
+
+| Dot | Means |
+| --- | --- |
+| Amber | Syncs have failed several times and none has worked for over a day. A computer that's only off for a while doesn't count. |
+| Red | It needs you: pair again, the computer couldn't save the journal, sync's records couldn't be read, or the app's storage is full. |
 
 ## Reading plans
 

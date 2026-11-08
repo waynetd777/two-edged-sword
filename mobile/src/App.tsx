@@ -3,7 +3,7 @@
 
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
-import { discover, pair, startSync } from "./phoneSync";
+import { discover, pair, startSync, useSyncLevel } from "./phoneSync";
 import { useEffect, useRef, useState } from "react";
 import { api, libraryIs, Module, save, saved, scene } from "./api";
 import { Icon } from "./icons";
@@ -29,6 +29,8 @@ const TABS: { id: Exclude<Tab, "words">; label: string }[] = [
 
 export function App() {
   const [tab, setTab] = useState<Tab>("read");
+  // A dot on More when sync with the computer isn't right (phoneSync.ts).
+  const syncLevel = useSyncLevel();
   /** Something to open in Read, from another tab; n makes the same place twice count twice. */
   const [jump, setJump] = useState<(Jump & { n: number }) | null>(null);
   const [word, setWord] = useState<string>(() => saved("wordStudy", "G26"));
@@ -303,7 +305,12 @@ export function App() {
               setTab(t.id);
             }}
           >
-            <Icon name={t.id === "read" ? "book" : t.id === "plans" ? "calendar" : t.id} />
+            <span className="ticon">
+              <Icon name={t.id === "read" ? "book" : t.id === "plans" ? "calendar" : t.id} />
+              {t.id === "more" && syncLevel !== "ok" && (
+                <span className={`syncdot sync-${syncLevel}`} aria-label={syncLevel === "red" ? "Sync needs you" : "Sync isn't working"} />
+              )}
+            </span>
             {t.label}
           </button>
         ))}

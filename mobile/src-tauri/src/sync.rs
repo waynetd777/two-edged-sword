@@ -19,11 +19,13 @@ fn sync_error(e: ureq::Error) -> String {
         ureq::Error::Status(401, _) => "not paired".into(),
         // A computer with the app from before sync was encrypted.
         ureq::Error::Status(404, _) => "Two-edged Sword on the computer needs updating before this device can sync with it.".into(),
+        // One that needs the user (the computer couldn't save its journal) starts with "!", for
+        // phoneSync.ts to show as such.
         ureq::Error::Status(_, r) => r
             .into_string()
             .ok()
             .and_then(|t| serde_json::from_str::<serde_json::Value>(&t).ok())
-            .and_then(|v| v["error"].as_str().map(str::to_string))
+            .and_then(|v| v["error"].as_str().map(|e| if v["red"] == true { format!("!{e}") } else { e.to_string() }))
             .unwrap_or_else(|| "The computer couldn't sync.".into()),
         ureq::Error::Transport(t) => t.to_string(),
     }

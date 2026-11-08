@@ -10,6 +10,8 @@ import { todayReading } from "./plans";
 import { useRefPreview } from "./StudyPane";
 import { confirmDelete, Popover, SearchList } from "./ui";
 import { shortcut } from "./keys";
+import { deviceLevel, deviceLine, worst } from "./syncStatus";
+import { openAtPhones, useSyncDevices } from "./syncDevices";
 
 const NAV: { s: Screen; label: string; icon: string; key: string; tip: string }[] = [
   { s: "read", label: "Read", icon: "read", key: "1", tip: "Read the Bible beside the study pane" },
@@ -40,8 +42,19 @@ function ago(iso: string) {
   return d.toLocaleDateString(undefined, { month: "short" });
 }
 
+/** A dot on Settings when sync with a phone isn't right (syncStatus.ts), with each device's state as its
+ *  tooltip; nothing when all is well or nothing is paired. */
+function useSyncDot() {
+  const { devices, now } = useSyncDevices();
+  const level = worst(devices.map((d) => deviceLevel(d, now)));
+  if (level === "ok") return null;
+  const tip = devices.map((d) => `${d.name}: ${deviceLine(d, now)}`).join("\n");
+  return { level, tip };
+}
+
 export function Sidebar() {
   const app = useApp();
+  const syncDot = useSyncDot();
   const today = todayReading(app);
   const { onRefHover, onDocHover, preview, hide } = useRefPreview(app.settings.bible, "right");
   const leave = () => onRefHover(null, null);
@@ -225,10 +238,21 @@ export function Sidebar() {
           type="button"
           className={`nav ${app.screen === "settings" ? "on" : ""}`}
           style={{ marginTop: 8 }}
-          title="Theme, reading, voice and the AI assistant"
-          onClick={() => app.go("settings")}
+          title={syncDot ? `Sync with phones and tablets:\n${syncDot.tip}` : "Theme, reading, voice and the AI assistant"}
+          onClick={() => {
+            if (syncDot) openAtPhones();
+            app.go("settings");
+          }}
         >
-          <Icon name="settings" />
+          <span className="navicon">
+            <Icon name="settings" />
+            {syncDot && (
+              <span
+                className={`syncdot sync-${syncDot.level}`}
+                aria-label={syncDot.level === "red" ? "Sync needs you" : "Sync isn't working"}
+              />
+            )}
+          </span>
           Settings<span className="k">{shortcut("⌘,")}</span>
         </button>
       </div>

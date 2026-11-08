@@ -4,7 +4,7 @@
 import { ReactNode, useEffect, useRef, useState } from "react";
 import { open as openDialog } from "@tauri-apps/plugin-dialog";
 import { invoke } from "@tauri-apps/api/core";
-import { listen } from "@tauri-apps/api/event";
+import { emit, listen } from "@tauri-apps/api/event";
 import { api } from "./api";
 import { Icon } from "./icons";
 import { openUrl } from "@tauri-apps/plugin-opener";
@@ -16,6 +16,8 @@ import { confirmDelete, Popover, SearchList, Seg, Switch } from "./ui";
 import { WEBSITE } from "./website";
 import { slug } from "./guides";
 import { isMac, MACHINE, OS, shortcut } from "./keys";
+import { deviceLevel, deviceLine } from "./syncStatus";
+import { takeOpenAtPhones, useSyncDevices } from "./syncDevices";
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -29,7 +31,7 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
     </div>
   );
 }
-function Row({ label, hint, children }: { label: string; hint?: string; children: ReactNode }) {
+function Row({ label, hint, children }: { label: string; hint?: ReactNode; children: ReactNode }) {
   return (
     <div
       style={{
@@ -416,21 +418,22 @@ export function SettingsScreen() {
 /** Phones and tablets with the phone app, paired to sync with this computer (sync.rs): a code to pair
  *  one, and those paired, with when each last synced. */
 function Phones() {
-  const [devices, setDevices] = useState<{ id: string; name: string; seen: number }[]>([]);
+  const { devices, now } = useSyncDevices();
   const [code, setCode] = useState<{ code: string; name: string; at: string } | null>(null);
   const [note, setNote] = useState<string | null>(null);
   const showing = useRef(false);
   showing.current = !!code;
-  const load = () =>
-    invoke<{ id: string; name: string; seen: number }[]>("sync_devices")
-      .then(setDevices)
-      .catch(() => {});
   useEffect(() => {
-    load();
-    const un = listen("sync-devices", () => {
-      load();
-      setCode(null);
-    });
+    // Paired: the code is used up.
+    const un = listen("sync-devices", () => setCode(null));
+    // Opened from the sidebar's sync dot: here, in view.
+    const toHere = () => document.querySelector('[data-help="phones-and-tablets"]')?.scrollIntoView({ block: "start" });
+    if (takeOpenAtPhones()) window.setTimeout(toHere, 50);
+    const asked = () => {
+      takeOpenAtPhones();
+      toHere();
+    };
+    window.addEventListener("tes-open-phones", asked);
     // Five wrong tries: the code stops working.
     const gone = listen("sync-code", () => {
       setCode(null);
@@ -439,6 +442,7 @@ function Phones() {
     return () => {
       un.then((u) => u());
       gone.then((u) => u());
+      window.removeEventListener("tes-open-phones", asked);
       // A code works only while it's showing here.
       if (showing.current) invoke("sync_cancel_code").catch(() => {});
     };
@@ -452,17 +456,15 @@ function Phones() {
     }, 120_000);
     return () => window.clearTimeout(t);
   }, [code]);
-  const when = (t: number) =>
-    t ? `Synced ${new Date(t).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}` : "Not synced yet";
   return (
     <Section title="Phones and tablets">
       {devices.map((d) => (
-        <Row key={d.id} label={d.name} hint={when(d.seen)}>
+        <Row key={d.id} label={d.name} hint={<span className={`syncline sync-${deviceLevel(d, now)}`}>{deviceLine(d, now)}</span>}>
           <button
             className="btn small"
             onClick={() =>
               invoke("sync_forget", { id: d.id })
-                .then(load)
+                .then(() => emit("sync-devices"))
                 .catch(() => {})
             }
           >

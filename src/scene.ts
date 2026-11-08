@@ -18,6 +18,8 @@ import { installSceneClock } from "./sceneClock";
 import { Picked, setSceneChapterSongs } from "./worship";
 import { setSceneUpdate, UpdateShown } from "./Update";
 import { today as startOfToday, ymd } from "./plans";
+import { setSceneDevices } from "./syncDevices";
+import type { Device } from "./syncStatus";
 import { isMac } from "./keys";
 
 interface Scene {
@@ -74,6 +76,9 @@ interface Scene {
   /** The page as it is on Windows: its window buttons, Ctrl and Windows' wording (screenshot.rs
    *  sets the user agent before the page loads). */
   windows?: boolean;
+  /** Phones and tablets paired, and how their syncs went (sync.rs's sync_devices), instead of the user's:
+   *  none unless given. A time below zero is that many ms before now. */
+  syncDevices?: Device[];
 }
 
 let started = false;
@@ -92,6 +97,7 @@ export function runScene(app: ReturnType<typeof useApp>, still: (s: Partial<Play
       if (sc.entries) setSceneJournal(sc.entries);
       if (sc.variances) setSceneVariances(sc.variances);
       if (sc.chapterSongs) setSceneChapterSongs(sc.chapterSongs);
+      setSceneDevices(sc.syncDevices ?? []);
       // Give the stored settings and place a moment to load, so the scene is applied on top of them.
       window.setTimeout(() => {
         if (sc.chat) {
