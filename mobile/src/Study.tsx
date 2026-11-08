@@ -106,13 +106,19 @@ export function Study({
   // Asked again when modules are added or removed, so a new commentary is listed at once.
   const lib = useLibraryKey();
   useEffect(() => {
+    // Only the verse still shown: an answer for one swiped past is dropped.
+    let live = true;
     api
       .coverage(at.book, at.chapter, at.verse)
       .then((c) => {
+        if (!live) return;
         setCoverage(c.filter((x) => !isXref(x)));
         setXrefs(c.filter(isXref).sort((a, b) => Number(b.id === "tsk") - Number(a.id === "tsk")));
       })
       .catch(() => {});
+    return () => {
+      live = false;
+    };
   }, [at.book, at.chapter, at.verse, lib]);
 
   const current = coverage.find((c) => c.id === module);

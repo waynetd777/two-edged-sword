@@ -111,6 +111,9 @@ export function SearchScreen() {
     setErr(null);
     setPick(null);
     scrollTop.current = 0;
+    // A search still under way is dropped: its results mustn't come back to the cleared page.
+    runId.current++;
+    setBusy(false);
   };
   // How the library's index is coming on, while it is being built.
   useEffect(() => {

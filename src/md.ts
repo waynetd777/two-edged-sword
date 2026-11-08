@@ -102,7 +102,9 @@ export function mdToHtml(md: string, links = true): string {
 
 /** The editor's DOM back to Markdown. One paragraph is one line: no hard wrapping. */
 export function htmlToMd(root: HTMLElement): string {
+  let skip: Node | null = null;
   const inl = (n: Node): string => {
+    if (n === skip) return "";
     // Marks typed as text are escaped, so they read back as text; a _ inside a word needs none.
     if (n.nodeType === Node.TEXT_NODE)
       return highlighted(
@@ -133,16 +135,17 @@ export function htmlToMd(root: HTMLElement): string {
     const tag = e.tagName.toLowerCase();
     if (/^h[1-6]$/.test(tag)) blocks.push(`### ${inl(e).trim()}`);
     else if (tag === "blockquote") {
+      // The cite is left out of the quote's text, not taken out of the live editor (read on every keystroke).
       const cite = e.querySelector("cite");
       const citeText = cite ? inl(cite).trim() : "";
-      cite?.remove();
+      skip = cite;
       const lines = inl(e)
         .split("\n")
         .map((x) => x.trim())
         .filter(Boolean);
+      skip = null;
       if (citeText) lines.push(`— ${citeText}`);
       blocks.push(lines.map((x) => `> ${x}`).join("\n"));
-      if (cite) e.appendChild(cite);
     } else if (tag === "ul" || tag === "ol") {
       const items = Array.from(e.children).filter((c) => c.tagName === "LI");
       blocks.push(items.map((li, k) => `${tag === "ol" ? `${k + 1}.` : "-"} ${inl(li).replace(/\n+/g, " ").trim()}`).join("\n"));

@@ -50,6 +50,7 @@ mod spell;
 mod store;
 mod study;
 mod sync;
+mod sync_crypto;
 mod tray;
 #[cfg(target_os = "macos")]
 mod tts;
@@ -152,17 +153,17 @@ async fn rescan_library(st: State<'_, AppState>, esword: Option<bool>, esword_co
     Ok(LibraryInfo::of(&fresh))
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 fn get_chapter(st: State<AppState>, bible: String, book: i64, chapter: i64) -> Result<Vec<content::Verse>, String> {
     content::chapter(&st.lib(), &bible, book, chapter)
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 fn bible_notes(st: State<AppState>, bible: String, book: i64, chapter: i64) -> Result<Vec<content::BibleNote>, String> {
     content::bible_notes(&st.lib(), &bible, book, chapter)
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 fn get_passages(st: State<AppState>, bible: String, ranges: Vec<content::Range>) -> Result<Vec<content::Passage>, String> {
     content::passages(&st.lib(), &bible, &ranges)
 }
@@ -172,12 +173,12 @@ fn chapter_sizes(st: State<AppState>, bible: String) -> Result<Vec<(i64, i64, i6
     content::chapter_sizes(&st.lib(), &bible)
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 fn commentary_ranges(st: State<AppState>, module: String) -> Result<Vec<content::VerseRange>, String> {
     content::commentary_ranges(&st.lib(), &module)
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 fn get_commentary(st: State<AppState>, module: String, book: i64, chapter: i64, verse: i64) -> Result<content::Commentary, String> {
     content::commentary(&st.lib(), &module, book, chapter, verse)
 }
@@ -187,7 +188,7 @@ fn get_coverage(st: State<AppState>, book: i64, chapter: i64, verse: i64) -> Vec
     content::coverage(&st.lib(), book, chapter, verse)
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 fn get_article(st: State<AppState>, kind: Kind, module: String, topic: String) -> Result<Option<content::Article>, String> {
     content::article(&st.lib(), kind, &module, &topic)
 }
@@ -197,12 +198,12 @@ fn find_topics(st: State<AppState>, word: String) -> Vec<content::TopicHit> {
     content::find_topics(&st.lib(), &word, 8)
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 fn list_topics(st: State<AppState>, kind: Kind, module: String, prefix: String, limit: usize) -> Result<Vec<String>, String> {
     content::topics(&st.lib(), kind, &module, &prefix, limit)
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 fn reference_titles(st: State<AppState>, module: String) -> Result<Vec<String>, String> {
     content::reference_titles(&st.lib(), &module)
 }
@@ -253,20 +254,29 @@ fn hide_pointer(app: AppHandle) {
     let _ = app.run_on_main_thread(|| objc2_app_kit::NSCursor::setHiddenUntilMouseMoves(true));
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 fn store_read(st: State<AppState>, name: String) -> Result<serde_json::Value, String> {
+    // After the page's writes sent before it (store_write).
+    store::writes_done();
     store::read(&st.data, &name)
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 fn variances_read(st: State<AppState>, name: String) -> Result<serde_json::Value, String> {
     store::variances(&st.data, &name)
 }
 
 /// Settings › Phones and tablets: a pairing code, the devices paired, and forgetting one.
 #[tauri::command]
-fn sync_pair_code(s: State<Arc<sync::Sync>>) -> (String, String, u16, String) {
-    (s.new_code(), sync::computer_name(), s.port(), sync::local_ip())
+fn sync_pair_code(s: State<Arc<sync::Sync>>) -> Result<(String, String, u16, String), String> {
+    let code = s.inner().new_code()?;
+    Ok((code, sync::computer_name(), s.port(), sync::local_ip()))
+}
+
+/// The pairing code no longer shown (Settings closed): it stops working at once.
+#[tauri::command]
+fn sync_cancel_code(s: State<Arc<sync::Sync>>) {
+    s.inner().cancel_code();
 }
 
 #[tauri::command]
@@ -276,7 +286,14 @@ fn sync_devices(s: State<Arc<sync::Sync>>) -> serde_json::Value {
 
 #[tauri::command]
 fn sync_forget(s: State<Arc<sync::Sync>>, id: String) {
-    s.forget(&id);
+    s.inner().forget(&id);
+}
+
+/// The page takes up a device's sync before changing anything: false if it's too late (the device was
+/// told it failed, or has been forgotten), and then it changes nothing.
+#[tauri::command]
+fn sync_claim(s: State<Arc<sync::Sync>>, rid: u64) -> bool {
+    s.claim(rid)
 }
 
 /// The page's merge of a device's sync (src/syncHub.ts), sent back to it.
@@ -285,9 +302,11 @@ fn sync_reply(s: State<Arc<sync::Sync>>, rid: u64, merged: serde_json::Value) {
     s.reply(rid, merged);
 }
 
+/// Queued for the store's writer thread rather than written here, on the window's thread: in the
+/// order sent, which running each write on a thread of its own wouldn't keep.
 #[tauri::command]
 fn store_write(st: State<AppState>, name: String, value: serde_json::Value) -> Result<(), String> {
-    store::write(&st.data, &name, &value)
+    store::write_queued(&st.data, &name, &value)
 }
 
 /// The app's version and build number (the Makefile's, the same as CFBundleVersion and the Help
@@ -341,6 +360,7 @@ fn journal_list(dir: String) -> Result<Vec<journal::Entry>, String> {
 
 #[tauri::command(async)]
 fn journal_save(dir: String, entry: journal::Entry) -> Result<(), String> {
+    let _saving = store::saving();
     journal::save(&chosen_dir(&dir)?, &entry)
 }
 
@@ -521,20 +541,27 @@ fn journal_backup(dir: String, force: bool) -> Result<Option<String>, String> {
     Ok(journal::backup(&chosen_dir(&dir)?, &store::data_dir().join("journal-backups"), force)?.map(|p| p.to_string_lossy().to_string()))
 }
 
-#[tauri::command(async)]
-/// An export the user saved from a dialog: only a document of a known kind, in a folder that is
-/// already there (as the dialog's always is), never in a hidden folder or as a dotfile.
-fn write_text_file(path: String, text: String) -> Result<(), String> {
-    let p = chosen_dir(&path)?;
+/// A file the user named in a save dialog, for an export: only a document of one of the `kinds`
+/// (extensions), in a folder that is already there (as the dialog's always is), never in a hidden
+/// folder or as a dotfile, nor in the app's data folder.
+pub(crate) fn chosen_file(path: &str, kinds: &[&str]) -> Result<PathBuf, String> {
+    let p = chosen_dir(path)?;
     let name = p.file_name().and_then(|n| n.to_str()).unwrap_or("");
     let ext = p.extension().and_then(|e| e.to_str()).unwrap_or("").to_ascii_lowercase();
-    if !["md", "txt", "html", "json"].contains(&ext.as_str()) {
-        return Err(format!("won't write {name}: only .md, .txt, .html or .json files"));
+    if !kinds.contains(&ext.as_str()) {
+        let kinds: Vec<String> = kinds.iter().map(|k| format!(".{k}")).collect();
+        return Err(format!("won't write {name}: only {} files", kinds.join(", ")));
     }
     if p.components().any(|c| c.as_os_str().to_string_lossy().starts_with('.')) || !p.parent().is_some_and(|d| d.is_dir()) {
         return Err(format!("won't write {}: not a folder for documents", p.display()));
     }
-    store::write_text_atomic(&p, &text)
+    Ok(p)
+}
+
+/// An export the user saved from a dialog (JournalPrint.tsx).
+#[tauri::command(async)]
+fn write_text_file(path: String, text: String) -> Result<(), String> {
+    store::write_text_atomic(&chosen_file(&path, &["md", "txt", "html", "json"])?, &text)
 }
 
 #[tauri::command]
@@ -559,7 +586,7 @@ fn ask(
     let root = study::root(&st.data);
     // Canonical first, so `..` can't lead out of them.
     let inside = |d: Option<String>, top: PathBuf| {
-        let (d, top) = (std::fs::canonicalize(d?).ok()?, std::fs::canonicalize(top).ok()?);
+        let (d, top) = (plain_path(std::fs::canonicalize(d?).ok()?), plain_path(std::fs::canonicalize(top).ok()?));
         d.starts_with(&top).then_some(d)
     };
     let folder = match (
@@ -574,9 +601,18 @@ fn ask(
     };
     // A chat in use keeps its folder: study::prune goes by when it was last touched.
     if let assistant::Folder::Study(d) | assistant::Folder::Journal(d) = &folder {
-        let _ = std::fs::File::open(d).and_then(|f| f.set_modified(std::time::SystemTime::now()));
+        study::touch(d);
     }
     assistant::ask(app, st.running.clone(), &st.data, folder, chat_id, prompt, model, session)
+}
+
+/// A canonical path as Windows' own programs write it: canonicalize gives `\\?\C:\…` there, which
+/// a CLI run in that folder may not understand. Unchanged elsewhere, and for network paths.
+fn plain_path(p: PathBuf) -> PathBuf {
+    match p.to_str().and_then(|s| s.strip_prefix(r"\\?\")) {
+        Some(rest) if !rest.starts_with("UNC\\") => PathBuf::from(rest),
+        _ => p,
+    }
 }
 
 /// Writes out the library's material on a passage for a chat; returns the folder.
@@ -611,12 +647,12 @@ async fn doc_export(st: State<'_, AppState>, module: String, kind: Option<librar
     tauri::async_runtime::spawn_blocking(move || books::export(&lib, &root, &module, kind)).await.map_err(|e| e.to_string())?
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 fn devotion_titles(st: State<AppState>, module: String) -> Result<Vec<String>, String> {
     content::devotion_titles(&st.lib(), &module)
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 fn devotion(st: State<AppState>, module: String, title: String) -> Result<Option<String>, String> {
     content::devotion(&st.lib(), &module, &title)
 }
@@ -940,6 +976,8 @@ pub fn run() {
             sync_pair_code,
             sync_devices,
             sync_forget,
+            sync_cancel_code,
+            sync_claim,
             sync_reply,
             library_info,
             rescan_library,
@@ -1018,7 +1056,8 @@ pub fn run() {
             tray::tray_info,
             tray::tray_do,
             updates::update_answer,
-            updates::update_offered
+            updates::update_offered,
+            updates::flush_done
         ])
         .on_menu_event(|app, ev| {
             if ev.id() == help::MENU_ID {

@@ -139,7 +139,9 @@ pub struct Library {
     pub modules: Vec<ModuleInfo>,
     /// Idle connections per module. A query takes one out (or opens another) and puts it back,
     /// so a long export or index build on one module never holds up reading another, or the same one.
-    conns: Mutex<HashMap<String, Vec<Connection>>>,
+    /// Each with the file's stamp when it was opened: one opened before the file changed (a module
+    /// copied over another) isn't used again.
+    conns: Mutex<HashMap<String, Vec<(Connection, Stamp)>>>,
 }
 
 /// Where e-Sword X keeps its modules.
@@ -174,10 +176,14 @@ pub fn dirs(esword: bool) -> Vec<(Source, PathBuf)> {
     d
 }
 
+type Stamp = (u64, std::time::Duration);
+
 pub fn open_readonly(path: &Path) -> rusqlite::Result<Connection> {
-    // immutable=1: SQLite assumes nobody changes the file, so it never creates a journal or
-    // takes a lock. e-Sword only ever reads its modules, so that holds.
-    let uri = format!("file:{}?immutable=1", url_escape(&path.to_string_lossy()));
+    // immutable=1 for the modules inside the app: SQLite assumes nobody changes the file, so it
+    // never creates a journal or takes a lock. The user can copy a module over one in the app's
+    // folder or e-Sword's while it is open, so those are opened read-only, with locks as usual.
+    let immutable = if path.starts_with(bundled_dir()) { "?immutable=1" } else { "" };
+    let uri = format!("file:{}{immutable}", url_escape(&path.to_string_lossy()));
     Connection::open_with_flags(uri, OpenFlags::SQLITE_OPEN_READ_ONLY | OpenFlags::SQLITE_OPEN_URI | OpenFlags::SQLITE_OPEN_NO_MUTEX)
 }
 
@@ -274,16 +280,23 @@ impl Library {
     pub fn with<T>(&self, kind: Kind, id: &str, f: impl FnOnce(&Connection) -> rusqlite::Result<T>) -> Result<T, String> {
         let m = self.module(kind, id)?;
         let key = format!("{kind:?}/{id}");
-        let idle = self.conns.lock().map_err(|e| e.to_string())?.get_mut(&key).and_then(Vec::pop);
-        let c = match idle {
+        let now = crate::store::file_stamp(&m.path);
+        let idle = {
+            let mut conns = self.conns.lock().map_err(|e| e.to_string())?;
+            let pool = conns.entry(key.clone()).or_default();
+            // The file has changed since these were opened: they go.
+            pool.retain(|(_, s)| *s == now);
+            pool.pop()
+        };
+        let (c, stamp) = match idle {
             Some(c) => c,
-            None => open_readonly(&m.path).map_err(|e| e.to_string())?,
+            None => (open_readonly(&m.path).map_err(|e| e.to_string())?, now),
         };
         let r = f(&c).map_err(|e| e.to_string());
         if let Ok(mut conns) = self.conns.lock() {
             let pool = conns.entry(key).or_default();
             if pool.len() < 4 {
-                pool.push(c);
+                pool.push((c, stamp));
             }
         }
         r

@@ -9,6 +9,7 @@ Everything the phone app uses
 - `allow-speech-pause`
 - `allow-speech-resume`
 - `allow-speech-stop`
+- `allow-speech-sleep`
 - `allow-voices`
 - `allow-bundled-dir`
 - `allow-inbox-dir`
@@ -310,6 +311,32 @@ Enables the speech_resume command without any pre-configured scope.
 <td>
 
 Denies the speech_resume command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`tes-native:allow-speech-sleep`
+
+</td>
+<td>
+
+Enables the speech_sleep command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`tes-native:deny-speech-sleep`
+
+</td>
+<td>
+
+Denies the speech_sleep command without any pre-configured scope.
 
 </td>
 </tr>

@@ -113,10 +113,16 @@ export function Entry({
 }) {
   const [a, setA] = useState<Article | null | undefined>(undefined);
   useEffect(() => {
+    // Only the entry still asked for: one tapped before it is dropped if it answers late.
+    let live = true;
+    setA(undefined);
     api
       .article("dictionary", module, topic)
-      .then(setA)
-      .catch(() => setA(null));
+      .then((r) => live && setA(r))
+      .catch(() => live && setA(null));
+    return () => {
+      live = false;
+    };
   }, [module, topic]);
   return (
     <>

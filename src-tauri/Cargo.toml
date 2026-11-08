@@ -30,11 +30,21 @@ tauri-plugin-dialog = "2"
 tauri-plugin-opener = "2"
 tauri-plugin-notification = "2"
 tauri-plugin-updater = "2"
+# Waiting in async commands without holding a thread (Tauri's runtime is tokio).
+tokio = { version = "1", features = ["time"] }
 # Sync with the phone app over the home network (sync.rs): a small HTTP server, its Bonjour
 # announcement, and the pairing codes and tokens.
 tiny_http = "0.12"
 mdns-sd = "0.13"
 getrandom = "0.3"
+# Sync's encryption (sync_crypto.rs, shared with the phone app): SPAKE2 pairing with the code, then
+# AES-GCM with a key derived by HKDF.
+spake2 = "0.4"
+aes-gcm = "0.10"
+hkdf = "0.12"
+hmac = "0.12"
+base64 = "0.22"
+sha2 = "0.10"
 # One copy of the app at a time (lib.rs).
 tauri-plugin-single-instance = "2"
 # Ask ends a CLI and everything it started by signalling its process group.

@@ -1,7 +1,7 @@
 // Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
 // SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { api, Verse } from "./api";
 import { fmtRef, Ref } from "./bible";
 import { plainText } from "./esword";
@@ -56,8 +56,12 @@ export function useVariances(module: string, book: number, chapter: number) {
       live = false;
     };
   }, [module]);
-  const byVerse = new Map<number, Variance>();
-  for (const r of file?.records ?? []) if (r.book === book && r.chapter === chapter) byVerse.set(r.verse, r);
+  // Once per chapter, not on each render (the reader draws again for every word read aloud).
+  const byVerse = useMemo(() => {
+    const m = new Map<number, Variance>();
+    for (const r of file?.records ?? []) if (r.book === book && r.chapter === chapter) m.set(r.verse, r);
+    return m;
+  }, [file, book, chapter]);
   return { base: file?.base ?? null, byVerse };
 }
 

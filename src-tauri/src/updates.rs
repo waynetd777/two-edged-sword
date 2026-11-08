@@ -18,10 +18,11 @@
 //! picks it up with update_offered. Native dialogs are left for when there is no main window.
 //!
 //! Before restarting it does what quitting does (crate::before_quit) and has the main window write
-//! its waiting saves, since AppHandle::restart doesn't go through Quit.
+//! its waiting saves, since AppHandle::restart doesn't go through Quit: it emits "flush" and waits
+//! (5 seconds at most) for the page's flush_done and for the saves to be written.
 
 use std::path::PathBuf;
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::Mutex;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
@@ -118,11 +119,34 @@ fn load() -> Saved {
 
 fn save(s: &Saved) {
     let Some(p) = saved_path() else { return };
-    if let Some(dir) = p.parent() {
-        let _ = std::fs::create_dir_all(dir);
+    if let Ok(text) = serde_json::to_string_pretty(s) {
+        let _ = crate::store::write_text_atomic(&p, &text);
     }
-    if let Ok(b) = serde_json::to_vec_pretty(s) {
-        let _ = std::fs::write(p, b);
+}
+
+/// How long a restart into an update waits for the main window's saves.
+const FLUSH_WAIT: Duration = Duration::from_secs(5);
+
+/// How many times the main window has answered "flush" (flush_done).
+static FLUSHED: AtomicUsize = AtomicUsize::new(0);
+
+/// The main window has sent the saves it was holding back, after a "flush" (src/state.tsx).
+#[tauri::command]
+pub fn flush_done() {
+    FLUSHED.fetch_add(1, Ordering::SeqCst);
+}
+
+/// Has the main window send the saves it is holding back, and waits for it to say they're sent
+/// and for them to be written (store.rs's queue, journal saves), for FLUSH_WAIT at most.
+fn flush_and_wait(app: &AppHandle) {
+    let before = FLUSHED.load(Ordering::SeqCst);
+    let start = Instant::now();
+    let asked = app.get_webview_window("main").is_some() && app.emit_to("main", "flush", ()).is_ok();
+    while asked && FLUSHED.load(Ordering::SeqCst) == before && start.elapsed() < FLUSH_WAIT {
+        std::thread::sleep(Duration::from_millis(25));
+    }
+    while crate::store::saves_under_way() > 0 && start.elapsed() < FLUSH_WAIT {
+        std::thread::sleep(Duration::from_millis(25));
     }
 }
 
@@ -196,7 +220,7 @@ pub fn check_now(app: &AppHandle) {
 /// The main window gained focus: offer an update a background check found.
 pub fn focused(app: &AppHandle) {
     let Some(state) = app.try_state::<Updates>() else { return };
-    let Some(update) = state.pending.lock().unwrap().take() else { return };
+    let Some(update) = state.pending.lock().unwrap_or_else(|e| e.into_inner()).take() else { return };
     let app = app.clone();
     tauri::async_runtime::spawn(async move { offer(&app, update).await });
 }
@@ -218,7 +242,7 @@ async fn check(app: &AppHandle, asked: bool) {
                 if focused {
                     offer(app, update).await;
                 } else if let Some(state) = app.try_state::<Updates>() {
-                    *state.pending.lock().unwrap() = Some(update);
+                    *state.pending.lock().unwrap_or_else(|e| e.into_inner()) = Some(update);
                 }
             }
         }
@@ -270,16 +294,16 @@ async fn offer(app: &AppHandle, update: Update) {
         notes: update.body.as_deref().map(str::trim).filter(|n| !n.is_empty()).map(String::from),
         date: update.raw_json["pub_date"].as_str().map(String::from),
     };
-    *state.offered.lock().unwrap() = Some(update);
+    *state.offered.lock().unwrap_or_else(|e| e.into_inner()) = Some(update);
     if main_window(app).is_some() {
-        *state.showing.lock().unwrap() = Some(Shown { offer: shown.clone(), progress: None });
+        *state.showing.lock().unwrap_or_else(|e| e.into_inner()) = Some(Shown { offer: shown.clone(), progress: None });
         if app.emit_to("main", "update-offer", &shown).is_ok() {
             return;
         }
-        *state.showing.lock().unwrap() = None;
+        *state.showing.lock().unwrap_or_else(|e| e.into_inner()) = None;
     }
     // No window to show it in: a native dialog instead.
-    let Some(update) = state.offered.lock().unwrap().take() else { return };
+    let Some(update) = state.offered.lock().unwrap_or_else(|e| e.into_inner()).take() else { return };
     let answer = ask_natively(app, &shown).await;
     answered(app, update, answer).await
 }
@@ -309,14 +333,14 @@ async fn ask_natively(app: &AppHandle, shown: &Offer) -> Answer {
 /// just loaded: one sent before it loaded is still waiting for an answer.
 #[tauri::command]
 pub fn update_offered(app: AppHandle) -> Option<Shown> {
-    app.try_state::<Updates>()?.showing.lock().unwrap().clone()
+    app.try_state::<Updates>()?.showing.lock().unwrap_or_else(|e| e.into_inner()).clone()
 }
 
 /// The main window's answer to update-offer; Esc or closing the dialog is Later.
 #[tauri::command]
 pub async fn update_answer(app: AppHandle, answer: Answer) {
     let Some(state) = app.try_state::<Updates>() else { return };
-    let Some(update) = state.offered.lock().unwrap().take() else { return };
+    let Some(update) = state.offered.lock().unwrap_or_else(|e| e.into_inner()).take() else { return };
     answered(&app, update, answer).await;
 }
 
@@ -332,7 +356,7 @@ async fn answered(app: &AppHandle, update: Update, answer: Answer) {
     }
     // Here unless it restarted.
     let state = app.state::<Updates>();
-    *state.showing.lock().unwrap() = None;
+    *state.showing.lock().unwrap_or_else(|e| e.into_inner()) = None;
     state.asking.store(false, Ordering::SeqCst);
 }
 
@@ -347,7 +371,7 @@ async fn install(app: &AppHandle, update: Update) {
     let _ = app.emit_to("main", "flush", ());
     let progress = |stage, got, total| {
         let p = Progress { stage, got, total };
-        if let Some(shown) = state.showing.lock().unwrap().as_mut() {
+        if let Some(shown) = state.showing.lock().unwrap_or_else(|e| e.into_inner()).as_mut() {
             shown.progress = Some(p.clone());
         }
         let _ = app.emit_to("main", "update-progress", p);
@@ -370,8 +394,7 @@ async fn install(app: &AppHandle, update: Update) {
                 // quitting does is done now, as the restart below won't be reached there.
                 #[cfg(windows)]
                 {
-                    let _ = app.emit_to("main", "flush", ());
-                    std::thread::sleep(Duration::from_millis(500));
+                    flush_and_wait(app);
                     crate::before_quit(app);
                 }
             },
@@ -380,9 +403,9 @@ async fn install(app: &AppHandle, update: Update) {
     match done {
         Ok(()) => {
             progress("restarting", 0, None);
-            let _ = app.emit_to("main", "flush", ());
+            let a = app.clone();
+            let _ = tauri::async_runtime::spawn_blocking(move || flush_and_wait(&a)).await;
             crate::before_quit(app);
-            std::thread::sleep(Duration::from_millis(500));
             app.restart()
         }
         Err(e) => tell(app, "The update didn't install", &e.to_string()).await,

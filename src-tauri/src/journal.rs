@@ -90,27 +90,73 @@ fn weekday_line(created: &str) -> String {
     }
 }
 
+/// A line break taken out: verses, tags and the title are one line each in the file.
+fn one_line(v: &str) -> String {
+    v.replace(['\n', '\r'], " ")
+}
+
+/// A body line that would read as our hidden comment, escaped with a backslash (taken off again by
+/// `parse_at`), so text written or synced into an entry can't make an entry of its own.
+const COMMENT: &str = "<!-- tes ";
+
+fn escape_body(body: &str) -> String {
+    if !body.contains(COMMENT) {
+        return body.to_string();
+    }
+    body.lines()
+        .map(|l| {
+            let t = l.trim_start();
+            if t.starts_with(COMMENT) || t.starts_with(&format!("\\{COMMENT}")) {
+                format!("{}\\{t}", &l[..l.len() - t.len()])
+            } else {
+                l.to_string()
+            }
+        })
+        .collect::<Vec<_>>()
+        .join("\n")
+}
+
+fn unescape_body(body: &str) -> String {
+    if !body.contains(&format!("\\{COMMENT}")) {
+        return body.to_string();
+    }
+    body.lines()
+        .map(|l| {
+            let t = l.trim_start();
+            match t.strip_prefix('\\') {
+                Some(rest) if rest.starts_with(COMMENT) || rest.starts_with(&format!("\\{COMMENT}")) => {
+                    format!("{}{rest}", &l[..l.len() - t.len()])
+                }
+                _ => l.to_string(),
+            }
+        })
+        .collect::<Vec<_>>()
+        .join("\n")
+}
+
 pub fn render_entry(e: &Entry) -> String {
     let mut s = String::new();
-    s.push_str(&format!("## {}\n", e.title.replace('\n', " ").trim()));
+    let verses: Vec<String> = e.verses.iter().map(|v| one_line(v)).collect();
+    let tags: Vec<String> = e.tags.iter().map(|t| one_line(t)).collect();
+    s.push_str(&format!("## {}\n", one_line(&e.title).trim()));
     s.push_str(&format!(
         "<!-- tes id=\"{}\" created=\"{}\" updated=\"{}\" verses=\"{}\" tags=\"{}\" -->\n",
         esc(&e.id),
         esc(&e.created),
         esc(&e.updated),
-        esc(&e.verses.join("|")),
-        esc(&e.tags.join(","))
+        esc(&verses.join("|")),
+        esc(&tags.join(","))
     ));
-    let mut meta = format!("*{}*", weekday_line(&e.created));
-    if !e.verses.is_empty() {
-        meta.push_str(&format!(" · {}", e.verses.join(", ")));
+    let mut meta = format!("*{}*", weekday_line(&one_line(&e.created)));
+    if !verses.is_empty() {
+        meta.push_str(&format!(" · {}", verses.join(", ")));
     }
-    if !e.tags.is_empty() {
-        meta.push_str(&format!(" · {}", e.tags.iter().map(|t| format!("#{t}")).collect::<Vec<_>>().join(" ")));
+    if !tags.is_empty() {
+        meta.push_str(&format!(" · {}", tags.iter().map(|t| format!("#{t}")).collect::<Vec<_>>().join(" ")));
     }
     s.push_str(&meta);
     s.push_str("\n\n");
-    s.push_str(e.body.trim_end());
+    s.push_str(&escape_body(e.body.trim_end()));
     s.push_str("\n\n");
     s
 }
@@ -160,7 +206,7 @@ fn after_heading(lines: &[&str], i: usize) -> usize {
 }
 
 fn has_comment(lines: &[&str], i: usize) -> bool {
-    lines.get(after_heading(lines, i)).is_some_and(|l| l.trim_start().starts_with("<!-- tes "))
+    lines.get(after_heading(lines, i)).is_some_and(|l| l.trim_start().starts_with(COMMENT))
 }
 
 /// Where entries start: a "## " heading whose next line is our comment, or our meta line if the
@@ -181,11 +227,11 @@ fn parse_at(lines: &[&str], i: usize, end: usize) -> Entry {
         let meta = after_heading(lines, i);
         let (created, verses, tags) = lines.get(meta).and_then(|l| from_meta_line(l)).unwrap_or_default();
         let id = created.replace(['-', ':'], "").replace('T', "-");
-        let body = lines[(meta + 1).min(end)..end].join("\n").trim().to_string();
+        let body = unescape_body(lines[(meta + 1).min(end)..end].join("\n").trim());
         return Entry { id, title, updated: created.clone(), created, verses, tags, body };
     }
     let c = after_heading(lines, i);
-    let comment = lines[c].trim().trim_start_matches("<!-- tes ").trim_end_matches("-->");
+    let comment = lines[c].trim().trim_start_matches(COMMENT).trim_end_matches("-->");
     let mut e = Entry {
         id: String::new(),
         title,
@@ -211,7 +257,7 @@ fn parse_at(lines: &[&str], i: usize, end: usize) -> Entry {
     if lines.get(m).is_some_and(|l| l.starts_with(&format!("*{}*", weekday_line(&e.created)))) {
         body_start = m + 1;
     }
-    e.body = lines[body_start.min(end)..end].join("\n").trim().to_string();
+    e.body = unescape_body(lines[body_start.min(end)..end].join("\n").trim());
     e
 }
 
@@ -277,21 +323,26 @@ fn month_path(dir: &Path, key: &str) -> std::path::PathBuf {
     dir.join(format!("Me. Journal - {key}.md"))
 }
 
-fn month_files(dir: &Path) -> Vec<(String, std::path::PathBuf)> {
+/// The month files in the folder. A folder not made yet (no entry saved) has none, but one that can't
+/// be read is an error: taken for empty, its journal would look deleted.
+fn month_files(dir: &Path) -> Result<Vec<(String, std::path::PathBuf)>, String> {
     let mut v = Vec::new();
-    if let Ok(rd) = std::fs::read_dir(dir) {
-        for f in rd.flatten() {
-            let p = f.path();
-            if let Some(stem) = p.file_stem().and_then(|s| s.to_str()) {
-                let key = stem.strip_prefix("Me. Journal - ").unwrap_or("");
-                if p.extension().is_some_and(|e| e == "md") && key.len() == 7 && month_key(key).is_some() {
-                    v.push((key.to_string(), p.clone()));
-                }
+    let rd = match std::fs::read_dir(dir) {
+        Ok(rd) => rd,
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound && dir.parent().is_some_and(|p| p.is_dir()) => return Ok(v),
+        Err(e) => return Err(format!("{}: {e}", dir.display())),
+    };
+    for f in rd {
+        let p = f.map_err(|e| format!("{}: {e}", dir.display()))?.path();
+        if let Some(stem) = p.file_stem().and_then(|s| s.to_str()) {
+            let key = stem.strip_prefix("Me. Journal - ").unwrap_or("");
+            if p.extension().is_some_and(|e| e == "md") && key.len() == 7 && month_key(key).is_some() {
+                v.push((key.to_string(), p.clone()));
             }
         }
     }
     v.sort();
-    v
+    Ok(v)
 }
 
 /// A fingerprint of the month files (names, sizes, modified times), cheap enough to poll: it
@@ -299,6 +350,7 @@ fn month_files(dir: &Path) -> Vec<(String, std::path::PathBuf)> {
 /// the cloud is downloaded.
 pub fn stamp(dir: &Path) -> String {
     month_files(dir)
+        .unwrap_or_default()
         .iter()
         .map(|(k, p)| {
             let (len, t) = crate::store::file_stamp(p);
@@ -319,17 +371,31 @@ fn month_of(dir: &Path, f: impl FnOnce(&mut std::collections::HashMap<String, St
     f(m.get_or_insert_with(Default::default).entry(dir.to_path_buf()).or_default());
 }
 
+/// Every entry, newest first. A month file that can't be read (not downloaded from a cloud drive, not
+/// UTF-8) is left out and logged, rather than failing the whole journal; saving into it fails, as
+/// `read_month` does. An id in two months (a file copied by hand) is listed once, the newer edit.
 pub fn list(dir: &Path) -> Result<Vec<Entry>, String> {
-    let mut all = Vec::new();
-    let mut seen = std::collections::HashMap::new();
-    for (k, p) in month_files(dir) {
-        let text = std::fs::read_to_string(&p).map_err(|e| format!("{}: {e}", p.display()))?;
-        let es = parse(&text);
-        seen.extend(es.iter().map(|e| (e.id.clone(), k.clone())));
-        all.extend(es);
+    let mut by_id: std::collections::HashMap<String, (Entry, String)> = std::collections::HashMap::new();
+    for (k, p) in month_files(dir)? {
+        let text = match std::fs::read_to_string(&p) {
+            Ok(t) => t,
+            Err(e) => {
+                eprintln!("journal: couldn't read {}: {e}; left out", p.display());
+                continue;
+            }
+        };
+        for e in parse(&text) {
+            match by_id.get(&e.id) {
+                Some((was, _)) if was.updated >= e.updated => {}
+                _ => {
+                    by_id.insert(e.id.clone(), (e, k.clone()));
+                }
+            }
+        }
     }
-    month_of(dir, |m| *m = seen);
-    all.sort_by(|a, b| b.created.cmp(&a.created));
+    month_of(dir, |m| *m = by_id.iter().map(|(id, (_, k))| (id.clone(), k.clone())).collect());
+    let mut all: Vec<Entry> = by_id.into_values().map(|(e, _)| e).collect();
+    all.sort_by(|a, b| b.created.cmp(&a.created).then_with(|| a.id.cmp(&b.id)));
     Ok(all)
 }
 
@@ -349,8 +415,11 @@ fn write_month(dir: &Path, key: &str, text: Option<String>) -> Result<(), String
         Some(t) => {
             let was = std::fs::metadata(&p).and_then(|m| m.modified()).ok();
             write_text_atomic(&p, &t)?;
+            // Only a nicety: the entry is saved either way.
             if let Some(was) = was {
-                std::fs::File::options().write(true).open(&p).and_then(|f| f.set_modified(was)).map_err(|e| e.to_string())?;
+                if let Err(e) = std::fs::File::options().write(true).open(&p).and_then(|f| f.set_modified(was)) {
+                    eprintln!("journal: couldn't keep {}'s modified time: {e}", p.display());
+                }
             }
             Ok(())
         }
@@ -376,18 +445,30 @@ pub fn save(dir: &Path, entry: &Entry) -> Result<(), String> {
     // Only once it is safely written, out of whichever month held it before (its date may have
     // changed): the one it was last seen in, or every other month for an entry not seen yet.
     let mut was = None;
-    month_of(dir, |m| was = m.insert(entry.id.clone(), key.clone()));
-    let others: Vec<String> = match was {
-        Some(k) if k == key => vec![],
-        Some(k) => vec![k],
-        None => month_files(dir).into_iter().map(|(k, _)| k).filter(|k| *k != key).collect(),
+    month_of(dir, |m| was = m.get(&entry.id).cloned());
+    let (others, known): (Vec<String>, bool) = match was {
+        Some(k) if k == key => (vec![], true),
+        Some(k) => (vec![k], true),
+        None => (month_files(dir)?.into_iter().map(|(k, _)| k).filter(|k| *k != key).collect(), false),
     };
     for k in others {
-        let text = read_month(dir, &k)?;
+        let text = match read_month(dir, &k) {
+            Ok(t) => t,
+            // Looking through every month for a copy: one that can't be read is passed over.
+            Err(e) if !known => {
+                eprintln!("journal: {e}; not looked in");
+                continue;
+            }
+            Err(e) => return Err(e),
+        };
         if parse(&text).iter().any(|e| e.id == entry.id) {
             write_month(dir, &k, splice(&text, &k, &entry.id, None))?;
         }
     }
+    // Noted once it is out of the old month, so a failure there leaves it known to be in both.
+    month_of(dir, |m| {
+        m.insert(entry.id.clone(), key.clone());
+    });
     Ok(())
 }
 
@@ -396,7 +477,7 @@ pub fn save(dir: &Path, entry: &Entry) -> Result<(), String> {
 pub fn backup(dir: &Path, into: &Path, force: bool) -> Result<Option<std::path::PathBuf>, String> {
     let lock = crate::store::dir_lock(dir);
     let _held = lock.lock().unwrap_or_else(|e| e.into_inner());
-    let files: Vec<std::path::PathBuf> = month_files(dir).into_iter().map(|(_, p)| p).collect();
+    let files: Vec<std::path::PathBuf> = month_files(dir)?.into_iter().map(|(_, p)| p).collect();
     crate::store::backup(&files, into, force)
 }
 
@@ -406,11 +487,25 @@ pub fn delete(dir: &Path, id: &str) -> Result<(), String> {
     }
     let lock = crate::store::dir_lock(dir);
     let _held = lock.lock().unwrap_or_else(|e| e.into_inner());
-    for (k, _) in month_files(dir) {
-        let text = read_month(dir, &k)?;
+    // Every month, as a copy may be in more than one. One that can't be read is passed over, unless the
+    // entry is found in none of the others: then it may be in that one, and isn't known to be deleted.
+    let (mut found, mut unread) = (false, None);
+    for (k, _) in month_files(dir)? {
+        let text = match read_month(dir, &k) {
+            Ok(t) => t,
+            Err(e) => {
+                eprintln!("journal: {e}; not looked in");
+                unread = Some(e);
+                continue;
+            }
+        };
         if parse(&text).iter().any(|e| e.id == id) {
             write_month(dir, &k, splice(&text, &k, id, None))?;
+            found = true;
         }
+    }
+    if let (false, Some(e)) = (found, unread) {
+        return Err(e);
     }
     month_of(dir, |m| {
         m.remove(id);
@@ -572,6 +667,63 @@ mod tests {
         let after = std::fs::read_to_string(dir.join("Me. Journal - 2026-09.md")).unwrap();
         assert!(after.contains("A note of my own.") && after.contains(damaged));
         assert_eq!(list(&dir).unwrap(), vec![e]);
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn body_cant_make_an_entry() {
+        let mut e = sample();
+        e.body = "Before.\n## Not an entry\n<!-- tes id=\"x\" created=\"2026-09-01T06:00\" -->\n  \\<!-- tes kept -->\nAfter.".into();
+        e.verses = vec!["John 3:16\nJohn 3:17".into()];
+        e.tags = vec!["one\rtwo".into()];
+        let text = render_month("2026-09", std::slice::from_ref(&e));
+        let back = parse(&text);
+        assert_eq!(back.len(), 1);
+        assert_eq!(back[0].body, e.body);
+        assert_eq!(back[0].verses, vec!["John 3:16 John 3:17".to_string()]);
+        assert_eq!(back[0].tags, vec!["one two".to_string()]);
+    }
+
+    #[test]
+    fn unreadable_folder_and_months() {
+        let base = std::env::temp_dir().join(format!("tes-journal-unread-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&base);
+        // Not made yet, in a folder that is there: empty. Its folder gone too: an error, not empty.
+        std::fs::create_dir_all(&base).unwrap();
+        assert_eq!(list(&base.join("Journal")).unwrap(), vec![]);
+        assert!(list(&base.join("gone").join("Journal")).is_err());
+        // A month that isn't UTF-8 is left out; the others are listed, and saving into it fails.
+        let dir = base.join("Journal");
+        let e = sample();
+        save(&dir, &e).unwrap();
+        std::fs::write(dir.join("Me. Journal - 2026-08.md"), [0xff, 0xfe, 0x00]).unwrap();
+        assert_eq!(list(&dir).unwrap(), vec![e.clone()]);
+        let mut aug = sample();
+        aug.id = "20260801-0600".into();
+        aug.created = "2026-08-01T06:00".into();
+        assert!(save(&dir, &aug).is_err());
+        // Deleting what's in a readable month works; what's in none of them isn't known to be deleted.
+        let mut moved = e.clone();
+        moved.created = "2026-10-01T06:00".into();
+        save(&dir, &moved).unwrap();
+        assert_eq!(list(&dir).unwrap(), vec![moved.clone()]);
+        delete(&dir, &moved.id).unwrap();
+        assert!(delete(&dir, "nowhere").is_err());
+        let _ = std::fs::remove_dir_all(&base);
+    }
+
+    #[test]
+    fn an_id_in_two_months_is_listed_once() {
+        let dir = std::env::temp_dir().join(format!("tes-journal-twice-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).unwrap();
+        let old = sample();
+        let mut newer = sample();
+        newer.created = "2026-10-01T06:00".into();
+        newer.updated = "2026-10-02T06:00".into();
+        std::fs::write(dir.join("Me. Journal - 2026-09.md"), render_month("2026-09", std::slice::from_ref(&old))).unwrap();
+        std::fs::write(dir.join("Me. Journal - 2026-10.md"), render_month("2026-10", std::slice::from_ref(&newer))).unwrap();
+        assert_eq!(list(&dir).unwrap(), vec![newer]);
         let _ = std::fs::remove_dir_all(&dir);
     }
 }

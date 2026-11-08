@@ -42,9 +42,9 @@ pub fn ask(
     // A follow-up resumes the session, which has the instructions already.
     let prompt = if session.is_some() { prompt } else { format!("<instructions>\n{SYSTEM}\n\n{extra}\n</instructions>\n\n{prompt}") };
     let mut cmd = Command::new(bin);
+    // Attached to the flag, so a prompt that starts with a dash is never read as an option.
     cmd.current_dir(&cwd)
-        .arg("-p")
-        .arg(&prompt)
+        .arg(format!("--prompt={prompt}"))
         .args(["--model", model.strip_prefix(PREFIX).unwrap_or(&model), "--output-format", "json", "--stream", "on"])
         .args(["--no-custom-instructions", "--disable-builtin-mcps", "--no-auto-update", "--disallow-temp-dir"]);
     cmd.arg(format!("--available-tools={}", tools.join(",")));

@@ -31,7 +31,7 @@ pub fn ask(
 ) -> Result<(), String> {
     let bin = installed(find(), "Claude Code")?;
     let mut cmd = Command::new(bin);
-    cmd.current_dir(&cwd).arg("-p").arg(&prompt).args([
+    cmd.current_dir(&cwd).arg("-p").args([
         "--model",
         model.strip_prefix(PREFIX).unwrap_or(&model),
         "--output-format",
@@ -53,6 +53,8 @@ pub fn ask(
     if let Some(s) = &session {
         cmd.args(["--resume", s]);
     }
+    // Last, after `--`, so a prompt that starts with a dash is never read as an option.
+    cmd.arg("--").arg(&prompt);
     let run = spawn(&mut cmd, &running, &chat_id, "claude")?;
     stream(app, running, chat_id, "Claude", false, run, |a, v| match v.get("type").and_then(|t| t.as_str()) {
         Some("stream_event") => {

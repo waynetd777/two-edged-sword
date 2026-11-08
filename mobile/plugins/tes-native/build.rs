@@ -7,6 +7,7 @@ const COMMANDS: &[&str] = &[
     "speech_pause",
     "speech_resume",
     "speech_stop",
+    "speech_sleep",
     "voices",
     "bundled_dir",
     "inbox_dir",

@@ -5,32 +5,41 @@
 //! (no print panel), as Brainstead does: by WebKit on a Mac, WebView2 on Windows. It prints with no
 //! margins: the page (journalDoc.ts) lays out each sheet itself, margins and footer included.
 
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use tauri::{AppHandle, Manager};
 
 /// Prints the main window's page to a PDF at `dest` (from the save dialog), waits for it, and opens it.
+/// It is printed to a hidden file beside `dest` and moved over it only once complete, so a failed
+/// export leaves the file that was there.
 #[tauri::command]
 pub async fn export_pdf(app: AppHandle, dest: String) -> Result<(), String> {
-    let dest = PathBuf::from(dest);
-    if dest.exists() {
-        std::fs::remove_file(&dest).map_err(|e| e.to_string())?;
-    }
+    let dest = crate::chosen_file(&dest, &["pdf"])?;
+    let name = dest.file_name().and_then(|n| n.to_str()).unwrap_or("export.pdf");
+    let tmp = dest.with_file_name(format!(".{name}.{}.tmp.pdf", std::process::id()));
+    let _ = std::fs::remove_file(&tmp);
     let w = app.get_webview_window("main").ok_or("The main window isn't open.")?;
-    let d = dest.clone();
-    tauri::async_runtime::spawn_blocking(move || print_to_pdf(&w, &d)).await.map_err(|e| e.to_string())??;
-    // Done when the file is there and has stopped growing.
-    let mut last = None;
-    for _ in 0..240 {
-        sleep(250).await;
-        let size = std::fs::metadata(&dest).ok().map(|m| m.len()).filter(|n| *n > 0);
-        if size.is_some() && size == last {
-            // Opened in the PDF viewer, to look at straight away.
-            let _ = tauri_plugin_opener::open_path(&dest, None::<&str>);
-            return Ok(());
+    let t = tmp.clone();
+    let printed = async {
+        tauri::async_runtime::spawn_blocking(move || print_to_pdf(&w, &t)).await.map_err(|e| e.to_string())??;
+        // Done when the file is there and has stopped growing.
+        let mut last = None;
+        for _ in 0..240 {
+            tokio::time::sleep(std::time::Duration::from_millis(250)).await;
+            let size = std::fs::metadata(&tmp).ok().map(|m| m.len()).filter(|n| *n > 0);
+            if size.is_some() && size == last {
+                return crate::store::rename_retrying(&tmp, &dest).map_err(|e| e.to_string());
+            }
+            last = size;
         }
-        last = size;
+        Err("The PDF didn't finish in time.".to_string())
+    };
+    if let Err(e) = printed.await {
+        let _ = std::fs::remove_file(&tmp);
+        return Err(e);
     }
-    Err("The PDF didn't finish in time.".into())
+    // Opened in the PDF viewer, to look at straight away.
+    let _ = tauri_plugin_opener::open_path(&dest, None::<&str>);
+    Ok(())
 }
 
 /// The paper a PDF is printed on, in points: the one the user's locale uses (A4, or Letter).
@@ -53,10 +62,6 @@ pub fn pdf_paper_size() -> (f64, f64) {
     {
         (595.28, 841.89)
     }
-}
-
-async fn sleep(ms: u64) {
-    let _ = tauri::async_runtime::spawn_blocking(move || std::thread::sleep(std::time::Duration::from_millis(ms))).await;
 }
 
 /// Starts printing the window's page to `dest`. Returns once the printing has started; the file

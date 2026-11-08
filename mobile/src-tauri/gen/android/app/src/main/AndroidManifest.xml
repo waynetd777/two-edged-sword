@@ -2,10 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.INTERNET" />
 
-    <!-- AndroidTV support -->
-    <uses-feature android:name="android.software.leanback" android:required="false" />
-
+    <!-- No backup to the cloud: a journal and sync's state restored on another phone, out of date, would
+         sync back over what's newer. The desktop app is where things are kept. -->
     <application
+        android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/Theme.tes_mobile"
@@ -20,18 +20,15 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
-                <!-- AndroidTV support -->
-                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
             </intent-filter>
             <!-- A module opened from Files or Quick Share, or shared to the app: the tes-native plugin copies
                  it to the Inbox, and the app takes it into the library (lib.rs import_waiting). Android
-                 doesn't know .bbli and the rest, so they come as plain data. -->
+                 doesn't know .bbli and the rest, so they come as plain data. Content URIs only: no app may
+                 hand another a file:// one since Android 7. -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="content" />
-                <data android:scheme="file" />
                 <data android:mimeType="application/octet-stream" />
             </intent-filter>
             <intent-filter>
@@ -41,15 +38,5 @@
                 <data android:mimeType="application/octet-stream" />
             </intent-filter>
         </activity>
-
-        <provider
-          android:name="androidx.core.content.FileProvider"
-          android:authorities="${applicationId}.fileprovider"
-          android:exported="false"
-          android:grantUriPermissions="true">
-          <meta-data
-            android:name="android.support.FILE_PROVIDER_PATHS"
-            android:resource="@xml/file_paths" />
-        </provider>
     </application>
 </manifest>

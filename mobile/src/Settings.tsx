@@ -24,11 +24,25 @@ export const FONTS: Record<Prefs["font"], { label: string; stack: string }> = {
 };
 
 const DEFAULTS: Prefs = { theme: "system", font: "atkinson", size: 19, red: true };
-let prefs: Prefs = { ...DEFAULTS, ...saved<Partial<Prefs>>("prefs", {}) };
+
+/** Settings as saved, each one checked: a font this version doesn't have (or anything else unknown) is
+ *  the default, rather than a blank screen at launch. */
+function checked(p: Partial<Prefs> | null): Prefs {
+  const q = (p && typeof p === "object" ? p : {}) as Partial<Record<keyof Prefs, unknown>>;
+  return {
+    theme: q.theme === "light" || q.theme === "dark" || q.theme === "system" ? q.theme : DEFAULTS.theme,
+    font: typeof q.font === "string" && Object.prototype.hasOwnProperty.call(FONTS, q.font) ? (q.font as Prefs["font"]) : DEFAULTS.font,
+    size: typeof q.size === "number" && Number.isFinite(q.size) ? Math.min(28, Math.max(15, q.size)) : DEFAULTS.size,
+    red: typeof q.red === "boolean" ? q.red : DEFAULTS.red,
+  };
+}
+
+let prefs: Prefs = checked(saved<Partial<Prefs>>("prefs", {}));
 const watchers = new Set<() => void>();
 
 /** Puts the settings on the page: the theme, the reading font and size, the red letters. */
-export function applyPrefs(p = prefs) {
+export function applyPrefs(given = prefs) {
+  const p = checked(given);
   const root = document.documentElement;
   if (p.theme === "system") root.removeAttribute("data-theme");
   else root.setAttribute("data-theme", p.theme);
@@ -38,7 +52,7 @@ export function applyPrefs(p = prefs) {
 }
 
 export function setPrefs(patch: Partial<Prefs>) {
-  prefs = { ...prefs, ...patch };
+  prefs = checked({ ...prefs, ...patch });
   save("prefs", prefs);
   applyPrefs();
   watchers.forEach((w) => w());

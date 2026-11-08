@@ -1,7 +1,7 @@
 // Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
 // SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
-import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api, Verse, Voice } from "./api";
 import { apocryphaName, book, BookSizes, fmtRef, isApocrypha, mentionsPassage, Ref, sectionOf, stepChapter, testament } from "./bible";
 import { alignStrongs, EDITIONS, isOriginal, kjvGloss, plainText, Token, tokenize, variantSource } from "./esword";
@@ -41,7 +41,9 @@ function useNotedVerses(b: number, chapter: number, verses: Verse[]) {
   }, [journal, b, chapter, verses]);
 }
 
-export function VerseText({
+/** A verse's words. Drawn again only when its props change: while a chapter is read aloud, only
+ *  the verse being read (its handlers are kept the same from one word to the next). */
+export const VerseText = memo(function VerseText({
   tokens,
   red,
   speakingChar,
@@ -180,7 +182,8 @@ export function VerseText({
       })}
     </>
   );
-}
+});
+const NO_TOKENS: Token[] = [];
 
 /** The chapter's verses, with a placeholder for each verse the translation leaves out that has a variance record. */
 function withMissing(verses: Verse[], byVerse: Map<number, Variance>): (Verse & { missing?: true })[] {
@@ -246,8 +249,20 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
   const [notePick, setNotePick] = useState<{ v: number; id: string; rect: DOMRect } | null>(null);
   // The Bible's own notes (the ESV+'s): markers in the text open them; none in focus mode.
   const bnotes = useBibleNotes(bible, !!bmod?.features.includes("Notes"), loc.book, loc.chapter);
-  const onNote = (v: number) =>
-    bnotes.size && !focus ? (id: string, el: HTMLElement) => setNotePick({ v, id, rect: el.getBoundingClientRect() }) : undefined;
+  // A word's, a variance's or a note's popover belongs to the chapter it was opened on.
+  useEffect(() => {
+    setWord(null);
+    setVarPick(null);
+    setNotePick(null);
+  }, [bible, loc.book, loc.chapter]);
+  // Each verse's handlers made once, so its VerseText isn't drawn again for a new one on every render.
+  const [noteFns] = useState(() => new Map<number, (id: string, el: HTMLElement) => void>());
+  const onNote = (v: number) => {
+    if (!bnotes.size || focus) return undefined;
+    let f = noteFns.get(v);
+    if (!f) noteFns.set(v, (f = (id: string, el: HTMLElement) => setNotePick({ v, id, rect: el.getBoundingClientRect() })));
+    return f;
+  };
 
   // Another screen asked for a dictionary article, a commentary or a question here.
   useEffect(() => {
@@ -464,10 +479,15 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
   };
   useCopySelection(selectionCopy, app.toast);
 
-  const isBookmarked = (v: number) =>
-    app.bookmarks.some(
-      (b) => b.ref.book === loc.book && b.ref.chapter === loc.chapter && (b.ref.verse ?? 0) <= v && v <= (b.ref.to ?? b.ref.verse ?? 0),
-    );
+  // The chapter's bookmarked verses, worked out once rather than per verse on every render.
+  const bookmarked = useMemo(() => {
+    const on = new Set<number>();
+    for (const b of app.bookmarks)
+      if (b.ref.book === loc.book && b.ref.chapter === loc.chapter)
+        for (let v = b.ref.verse ?? 0; v <= (b.ref.to ?? b.ref.verse ?? 0); v++) on.add(v);
+    return on;
+  }, [app.bookmarks, loc.book, loc.chapter]);
+  const isBookmarked = (v: number) => bookmarked.has(v);
   const selBookmarked =
     !!sel &&
     app.bookmarks.some(
@@ -483,6 +503,16 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
   const pickWord = (t: Token, v: number, el: HTMLElement) => {
     setWord({ token: t, verse: v, rect: el.getBoundingClientRect() });
     if (follow) setStudyVerse(v);
+  };
+  const pickLatest = useRef(pickWord);
+  useEffect(() => {
+    pickLatest.current = pickWord;
+  });
+  const [wordFns] = useState(() => new Map<number, (t: Token, el: HTMLElement) => void>());
+  const onWordOf = (v: number) => {
+    let f = wordFns.get(v);
+    if (!f) wordFns.set(v, (f = (t: Token, el: HTMLElement) => pickLatest.current(t, v, el)));
+    return f;
   };
 
   const toolbar = sel && selRef && (
@@ -661,10 +691,10 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
             <div className="vt selectable">
               <span className={hl ? `hl-${hlName(hl)}` : undefined}>
                 <VerseText
-                  tokens={tokens.get(v.v) ?? []}
+                  tokens={tokens.get(v.v) ?? NO_TOKENS}
                   red={settings.redLetters}
                   speakingChar={reading && player.state.verse === v.v && settings.highlightWords ? player.state.char : undefined}
-                  onWord={(t, el) => pickWord(t, v.v, el)}
+                  onWord={onWordOf(v.v)}
                   activeWi={word?.verse === v.v ? word.token.wi : undefined}
                   showNums={!!bmod?.strongs}
                   variantFrom={variantSource(bmod?.info ?? "")}
@@ -719,10 +749,10 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
               <span className="vnum">{v.v}</span>
               <span className={hl ? `hl-${hlName(hl)}` : undefined}>
                 <VerseText
-                  tokens={tokens.get(v.v) ?? []}
+                  tokens={tokens.get(v.v) ?? NO_TOKENS}
                   red={settings.redLetters}
                   speakingChar={reading && player.state.verse === v.v && settings.highlightWords ? player.state.char : undefined}
-                  onWord={(t, el) => pickWord(t, v.v, el)}
+                  onWord={onWordOf(v.v)}
                   activeWi={word?.verse === v.v ? word.token.wi : undefined}
                   showNums={!!bmod?.strongs && !focus}
                   variantFrom={variantSource(bmod?.info ?? "")}

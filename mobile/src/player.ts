@@ -40,6 +40,11 @@ const set = (patch: Partial<PlayerState>) => {
   watchers.forEach((w) => w());
 };
 let sleepTimer: ReturnType<typeof setTimeout> | null = null;
+/** When the sleep timer stops the reading (ms since the epoch), or null. The phone stops it then itself
+ *  (speak's stopAt): the page sleeps with the screen locked, and its own timer with it. */
+let sleepAt: number | null = null;
+/** An "end" heard this long after it happened was heard on waking: the reading isn't carried on then. */
+const STALE_MS = 15_000;
 
 /** For each verse being read, each spoken character's place in the verse as the page shows it: the
  *  voice reports words in what it says ("Exodus 31 18"), the page marks them in what it shows. */
@@ -67,6 +72,7 @@ async function speakFrom(bible: string, book: number, chapter: number, verse: nu
     rate: state.speed,
     title: fmtRef({ book, chapter }),
     voice: saved<string | null>("listenVoice", null),
+    stopAt: sleepAt,
   }).catch((e) => {
     set({ ...IDLE, speed: state.speed, sleep: state.sleep, error: String(e) });
   });
@@ -116,7 +122,7 @@ async function speakPlan(bible: string, stretches: PlanStretch[], onPart: (part:
     len: 0,
     error: undefined,
   });
-  await call("speak", { items, rate: state.speed, title, voice: saved<string | null>("listenVoice", null) }).catch((e) => {
+  await call("speak", { items, rate: state.speed, title, voice: saved<string | null>("listenVoice", null), stopAt: sleepAt }).catch((e) => {
     plan = null;
     set({ ...IDLE, speed: state.speed, sleep: state.sleep, error: String(e) });
   });
@@ -143,6 +149,7 @@ async function speakDoc(d: { module: string; chapter: string; title: string }, f
     rate: state.speed,
     title: `${d.title} · ${d.chapter}`,
     voice: saved<string | null>("listenVoice", null),
+    stopAt: sleepAt,
   }).catch((e) => set({ ...IDLE, speed: state.speed, sleep: state.sleep, error: String(e) }));
 }
 
@@ -150,8 +157,16 @@ let listening = false;
 function listen() {
   if (listening) return;
   listening = true;
-  addPluginListener<{ kind: string; id?: number; at?: number; len?: number }>("tes-native", "speech", (e) => {
+  // Back from the lock screen after the sleep timer's end: stopped, whatever the page heard meanwhile.
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible" && state.on && sleepAt !== null && Date.now() >= sleepAt) stop();
+  });
+  addPluginListener<{ kind: string; id?: number; at?: number; len?: number; t?: number }>("tes-native", "speech", (e) => {
     if (!state.on) return;
+    // The phone stopped it at the sleep timer's end.
+    if (e.kind === "slept") return stop();
+    /** Not to be carried on from: the sleep timer is up, or the end was long ago (heard on waking). */
+    const over = () => (sleepAt !== null && Date.now() >= sleepAt) || (e.t !== undefined && Date.now() - e.t > STALE_MS);
     // A day's reading: each stretch in turn, ticking off each part as the next begins, the day at the end.
     if (plan && e.id !== undefined && e.id >= 1000) {
       const x = plan.stretches[Math.floor(e.id / 1000) - 1];
@@ -178,7 +193,7 @@ function listen() {
     else if (e.kind === "end" && state.doc) {
       // A book goes on to its next chapter; a devotional stops at the end of the day.
       const d = state.doc;
-      if (state.sleep === "chapter" || isDevotional(d.module)) return stop();
+      if (state.sleep === "chapter" || isDevotional(d.module) || over()) return stop();
       bookTitles(d.module).then((t) => {
         const next = t[t.indexOf(d.chapter) + 1];
         if (next) speakDoc({ ...d, chapter: next }, 1);
@@ -187,7 +202,7 @@ function listen() {
     } else if (e.kind === "end") {
       // On into the next chapter, unless the sleep timer said to stop at the end of this one.
       const next = stepChapter(state.book, state.chapter, 1, null);
-      if (state.sleep === "chapter" || !next) return stop();
+      if (state.sleep === "chapter" || !next || over()) return stop();
       speakFrom(state.bible, next[0], next[1], 1);
     }
   }).catch(() => {
@@ -259,7 +274,10 @@ export const player = {
     const all: Sleep[] = ["off", "15", "30", "60", "chapter"];
     const sleep = all[(all.indexOf(state.sleep) + 1) % all.length];
     if (sleepTimer) clearTimeout(sleepTimer);
-    sleepTimer = sleep === "off" || sleep === "chapter" ? null : setTimeout(stop, +sleep * 60_000);
+    const timed = sleep !== "off" && sleep !== "chapter";
+    sleepTimer = timed ? setTimeout(stop, +sleep * 60_000) : null;
+    sleepAt = timed ? Date.now() + +sleep * 60_000 : null;
+    if (state.on) call("speech_sleep", { stopAt: sleepAt }).catch(() => {});
     set({ sleep });
   },
 };
@@ -268,6 +286,7 @@ function stop() {
   plan = null;
   if (sleepTimer) clearTimeout(sleepTimer);
   sleepTimer = null;
+  sleepAt = null;
   set({ ...IDLE, speed: state.speed });
   call("speech_stop").catch(() => {});
 }

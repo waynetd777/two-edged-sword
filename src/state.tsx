@@ -11,6 +11,8 @@ import type { Closing } from "./closing";
 import { listen } from "@tauri-apps/api/event";
 import { invoke } from "@tauri-apps/api/core";
 import {
+  checkPayload,
+  clamp,
   entryKey,
   forget,
   keepBoth,
@@ -19,6 +21,7 @@ import {
   payload as syncPayload,
   Payload,
   refuseMassRemoval,
+  removedKeys,
   settle,
   SYNC_LIMIT,
   stable,
@@ -30,8 +33,6 @@ import {
 /** The most journal entries one sync may delete; a phone that removes more is refused. */
 const MAX_SYNC_DELETES = SYNC_LIMIT;
 
-/** The journal is empty but the ledger knows many entries in it: taken for unreadable rather than
- *  emptied, so nothing is stamped removed and nothing syncs until it reads again. */
 /** Bookmarks, highlights or plans empty here though the ledger knew many: their ledger entries are
  *  forgotten, so nothing is taken for removed and a phone sends them back. (The journal is stricter:
  *  journalVanished stops sync, rather than refill a journal folder.) */
@@ -42,6 +43,8 @@ const forgetVanished = (l: Ledger, now: Record<string, unknown>) => {
   return forget(l, gone);
 };
 
+/** The journal is empty but the ledger knows many entries in it: taken for unreadable rather than
+ *  emptied, so nothing is stamped and nothing syncs until it reads again. */
 const journalVanished = (l: Ledger, journal: unknown[]) =>
   journal.length === 0 && Object.entries(l).filter(([k, e]) => k.startsWith("j|") && !e.del).length > MAX_SYNC_DELETES;
 import { fromItems, itemsOf, placesOf, Synced } from "./syncHub";
@@ -490,6 +493,8 @@ interface Ctx {
 
   journal: JournalEntry[];
   journalDir: string;
+  /** Why the journal can't be read or saved (Settings or its folder unreadable); null when it can. */
+  journalError: string | null;
   saveEntry: (e: JournalEntry) => Promise<void>;
   deleteEntry: (id: string) => Promise<void>;
 
@@ -536,11 +541,17 @@ export const useApp = () => {
 
 // Saves waiting on their debounce, written at once when the window hides, loses focus or unloads
 // (closing only hides it, and Quit exits without warning the page), or before the app restarts
-// into an update (the "flush" event, from updates.rs).
-const flushers = new Set<() => void>();
-const flushAll = () => flushers.forEach((f) => f());
+// into an update (the "flush" event, from updates.rs). A flusher may answer its write's promise, which
+// flushAll waits for, and then for the journal's writes queued by them.
+const flushers = new Set<() => unknown>();
+/** The journal's writes queued so far (the provider's journalWrite), finished. */
+let journalWritten: () => Promise<unknown> = () => Promise.resolve();
+const flushAll = async () => {
+  await Promise.allSettled([...flushers].map((f) => f()));
+  await journalWritten().catch(() => {});
+};
 /** Adds a pending save to those written at once; returns its removal. */
-export const onFlush = (f: () => void) => {
+export const onFlush = (f: () => unknown) => {
   flushers.add(f);
   return () => {
     flushers.delete(f);
@@ -551,7 +562,8 @@ window.addEventListener("blur", flushAll);
 document.addEventListener("visibilitychange", () => {
   if (document.visibilityState === "hidden") flushAll();
 });
-void listen("flush", flushAll);
+// Before a restart into an update: updates.rs waits for flush_done (a few seconds at most).
+void listen("flush", () => flushAll().finally(() => invoke("flush_done").catch(() => {})));
 
 /** A JSON document in the store, loaded once and written back (debounced) on change. Nothing is
  *  written until the read has succeeded, so a failed read never overwrites the file with defaults;
@@ -568,7 +580,7 @@ function useStored<T>(name: string, initial: T): [T, (f: (v: T) => T) => void, b
     window.clearTimeout(timer.current);
     const d = due.current;
     due.current = null;
-    if (d) api.storeWrite(name, d.v).catch((e) => console.error(name, e));
+    return d ? api.storeWrite(name, d.v).catch((e) => console.error(name, e)) : undefined;
   }, [name]);
   const save = useCallback(
     (next: T) => {
@@ -694,24 +706,79 @@ export function AppProvider({ children }: { children: ReactNode }) {
     document.documentElement.classList.toggle("hide-hl", settings.showHighlights === false);
   }, [settings.showHighlights]);
 
-  const journalDir = settings.journalDir || defaultDir;
+  // Settings couldn't be read: the folder it names isn't known, so the journal is neither read nor
+  // written (the default folder would be the wrong one, and a journal there would start afresh).
+  const settingsFailed = f1;
+  const journalDir = settingsFailed ? "" : settings.journalDir || defaultDir;
+  const [journalReadError, setJournalReadError] = useState<string | null>(null);
+  const journalError = settingsFailed
+    ? "Couldn't read Settings, so the journal's folder isn't known. The journal isn't shown or saved until the app is restarted."
+    : journalReadError;
+  /** The journal as it is now, ahead of React's state: a save changes it at once, and sync reads it. */
+  const journalNow = useRef<JournalEntry[]>([]);
+  const putJournal = useCallback((f: (js: JournalEntry[]) => JournalEntry[]) => {
+    journalNow.current = f(journalNow.current);
+    setJournal(journalNow.current);
+  }, []);
   // Only the latest listing is kept: at startup the default folder's can arrive after the chosen one's.
   const journalSeq = useRef(0);
   /** The journal files' fingerprint as last seen, so a save made here isn't mistaken for an edit elsewhere. */
   const journalStamp = useRef<string | null>(null);
+  /** Bumped when a write here notes the new fingerprint, so a check begun before it can't put back an older one. */
+  const stampSeq = useRef(0);
+  /** Journal writes waiting or under way (saves, deletes, a sync's): the files aren't read back meanwhile. */
+  const journalWriting = useRef(0);
+  const reloadAfter = useRef(false);
+  const journalQueue = useRef<Promise<unknown>>(Promise.resolve());
   const reloadJournal = useCallback(async () => {
     if (!journalDir) return;
+    // Not while writing: the listing could miss a write under way. Once, after.
+    if (journalWriting.current) {
+      reloadAfter.current = true;
+      return;
+    }
     const n = ++journalSeq.current;
     try {
       const js = await api.journalList(journalDir);
-      if (n === journalSeq.current) {
-        setJournal(js);
+      if (journalWriting.current) reloadAfter.current = true;
+      else if (n === journalSeq.current) {
+        putJournal(() => js);
         setJournalLoadedFor(journalDir);
+        setJournalReadError(null);
       }
     } catch (e) {
       console.error(e);
+      if (n === journalSeq.current) setJournalReadError(`Couldn't read the journal: ${String(e).replace(/^Error: /, "")}`);
     }
-  }, [journalDir]);
+  }, [journalDir, putJournal]);
+  const reloadRef = useRef(reloadJournal);
+  reloadRef.current = reloadJournal;
+  /** Runs a journal write after those before it, so a save and a sync's writes never cross. */
+  const journalWrite = useCallback(<T,>(f: () => Promise<T>): Promise<T> => {
+    journalWriting.current++;
+    const run = journalQueue.current.then(f).finally(() => {
+      if (--journalWriting.current === 0 && reloadAfter.current) {
+        reloadAfter.current = false;
+        reloadRef.current();
+      }
+    });
+    journalQueue.current = run.catch(() => {});
+    return run;
+  }, []);
+  journalWritten = () => journalQueue.current;
+  /** Before a write here: if the files changed elsewhere since last seen (the window was hidden, so they
+   *  weren't checked), they're read again once the writes are done, as the write's own fingerprint would
+   *  otherwise hide that change. */
+  const changedElsewhere = async (dir: string) => {
+    const st = await api.journalStamp(dir).catch(() => null);
+    if (st !== null && journalStamp.current !== null && st !== journalStamp.current) reloadAfter.current = true;
+  };
+  /** The files' fingerprint after a write here, so it isn't taken for an edit elsewhere. */
+  const noteStamp = async (dir: string) => {
+    const n = ++stampSeq.current;
+    const st = await api.journalStamp(dir).catch(() => null);
+    if (st !== null && n === stampSeq.current) journalStamp.current = st;
+  };
   useEffect(() => {
     reloadJournal();
   }, [reloadJournal]);
@@ -722,10 +789,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     let dead = false;
     journalStamp.current = null;
     const check = async () => {
-      if (document.visibilityState === "hidden") return;
+      if (document.visibilityState === "hidden" || journalWriting.current) return;
+      const n = stampSeq.current;
       try {
         const s = await api.journalStamp(journalDir);
-        if (dead) return;
+        // A write here since began: its own fingerprint is the newer one.
+        if (dead || n !== stampSeq.current || journalWriting.current) return;
         if (journalStamp.current !== null && s !== journalStamp.current) reloadJournal();
         journalStamp.current = s;
       } catch {
@@ -885,8 +954,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // Sync with the phone app (syncHub.ts, sync.ts; the server is sync.rs). The ledger notes when each
   // synced thing last changed here, so a newer change on a phone wins and an older one doesn't.
   const ledger = useRef<Ledger | null>(null);
+  const ledgerLoading = useRef(false);
+  /** The ledger couldn't be read: nothing syncs until it can, rather than start afresh over it. */
+  const ledgerFailed = useRef(false);
+  /** The journal folder the ledger's journal entries are from; they're forgotten when it changes. */
+  const ledgerDir = useRef<string | null>(null);
+  /** What was here at the last stamp: something gone since was removed here (a sync's own changes reset it). */
+  const seen = useRef<Record<string, unknown> | null>(null);
+  /** Removed here on purpose since the last stamp; only these are synced as removed (the journal's from
+   *  deleteEntry alone, as an entry missing from the files may only be unread). */
+  const removedHere = useRef(new Set<string>());
   const synced = useRef<Synced>({ bookmarks, highlights, docAt: nav.docAt, plans, recent: nav.recent, journal });
   synced.current = { bookmarks, highlights, docAt: nav.docAt, plans, recent: nav.recent, journal };
+  const syncedNow = (): Synced => ({ ...synced.current, journal: journalNow.current });
   const journalLoaded = settingsLoaded && !!journalDir && journalLoadedFor === journalDir;
   // Not when saved data couldn't be read: what's here would be taken for everything removed.
   const syncReady = bookmarksLoaded && highlightsLoaded && navLoaded && plansLoaded && journalLoaded && !readFailed;
@@ -895,43 +975,120 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const journalDirRef = useRef(journalDir);
   journalDirRef.current = journalDir;
   const ledgerTimer = useRef<number | undefined>(undefined);
+  const writeLedger = useCallback(async () => {
+    window.clearTimeout(ledgerTimer.current);
+    ledgerTimer.current = undefined;
+    if (ledger.current) await api.storeWrite("sync-ledger", ledger.current).catch((e) => console.error("sync ledger", e));
+  }, []);
   const saveLedger = () => {
     window.clearTimeout(ledgerTimer.current);
-    ledgerTimer.current = window.setTimeout(() => ledger.current && api.storeWrite("sync-ledger", ledger.current).catch(() => {}), 500);
+    ledgerTimer.current = window.setTimeout(writeLedger, 500);
   };
+  useEffect(() => onFlush(() => (ledgerTimer.current !== undefined ? writeLedger() : undefined)), [writeLedger]);
+  /** Brings the ledger up to date with what's here; false if it can't be (not read, or the journal unread). */
+  const stampNow = (): boolean => {
+    const l = ledger.current;
+    if (!l || ledgerFailed.current) return false;
+    const cur = syncedNow();
+    const now = itemsOf(cur);
+    let base = l;
+    const dir = journalDirRef.current;
+    if (ledgerDir.current !== dir) {
+      // Another journal folder: the entries the ledger knew are another journal's, so they're forgotten
+      // (neither removed here nor sent), and this folder's are new.
+      if (ledgerDir.current !== null) {
+        base = Object.fromEntries(Object.entries(l).filter(([k]) => !k.startsWith("j|")));
+        console.error("sync: the journal's folder changed; its entries are taken as new");
+      }
+      ledgerDir.current = dir;
+      api.storeWrite("sync-ledger-dir", dir).catch((e) => console.error("sync ledger", e));
+    }
+    if (journalVanished(base, cur.journal)) return false;
+    if (seen.current) for (const k of removedKeys(seen.current, now, (k) => k.startsWith("j|"))) removedHere.current.add(k);
+    seen.current = now;
+    ledger.current = stamp(forgetVanished(base, now), now, removedHere.current);
+    removedHere.current.clear();
+    saveLedger();
+    return true;
+  };
+  const stampRef = useRef(stampNow);
+  stampRef.current = stampNow;
   useEffect(() => {
     if (!syncReady) return;
-    const stampNow = () => {
-      if (!ledger.current || journalVanished(ledger.current, synced.current.journal)) return;
-      const now = itemsOf(synced.current);
-      ledger.current = stamp(forgetVanished(ledger.current, now), now);
-      saveLedger();
-    };
-    if (ledger.current) stampNow();
-    else
-      api
-        .storeRead<Ledger>("sync-ledger")
-        .catch(() => null)
-        .then((l) => {
-          ledger.current = l ?? {};
-          stampNow();
-        });
-  }, [syncReady, bookmarks, highlights, nav.docAt, plans, journal]);
+    if (ledger.current || ledgerFailed.current) {
+      stampNow();
+      return;
+    }
+    if (ledgerLoading.current) return;
+    ledgerLoading.current = true;
+    Promise.all([api.storeRead<Ledger>("sync-ledger"), api.storeRead<string>("sync-ledger-dir").catch(() => null)]).then(
+      ([l, d]) => {
+        ledgerDir.current = typeof d === "string" ? d : null;
+        if (l && typeof l === "object") ledger.current = l;
+        else {
+          // Never synced: what's here is stamped as of long ago, so a phone's own values win the first sync.
+          const now = itemsOf(syncedNow());
+          seen.current = now;
+          ledger.current = stamp({}, now, new Set(), 0);
+        }
+        stampRef.current();
+      },
+      (e) => {
+        // Not taken for empty: that would send everything here as new and lose nothing, but a ledger that
+        // can't be read may be one a retry reads, and its removals would be lost.
+        ledgerFailed.current = true;
+        console.error("sync: couldn't read the sync ledger; not syncing", e);
+      },
+    );
+  }, [syncReady, bookmarks, highlights, nav.docAt, plans, journal]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
-    // A copy of the bookmarks, highlights and plans files first (once a day), then the answer.
-    const un = listen<{ rid: number; payload: Payload }>("sync-request", ({ payload: { rid, payload: theirs } }) => {
-      api
-        .dataBackup()
-        .catch((e) => console.error("sync backup", e))
-        .finally(() => answer(rid, theirs));
+    const fail = (rid: number, error: string) => invoke("sync_reply", { rid, merged: { error } }).catch(() => {});
+    // One at a time, and in turn with the journal's saves: a copy of the bookmarks, highlights and plans
+    // files first (once a day), then the answer.
+    const un = listen<{ rid: number; payload: unknown }>("sync-request", ({ payload: { rid, payload: theirs } }) => {
+      journalWrite(() =>
+        api
+          .dataBackup()
+          .catch((e) => console.error("sync backup", e))
+          .then(() => answer(rid, theirs)),
+      ).catch((e) => {
+        console.error("sync", e);
+        fail(rid, "The computer couldn't sync.");
+      });
     });
-    const answer = (rid: number, theirs: Payload) => {
-      // Not loaded yet: the phone's request times out and it tries later.
-      if (!ledger.current || !syncReadyRef.current) return;
-      const cur = synced.current;
-      if (journalVanished(ledger.current, cur.journal)) return;
+    const answer = async (rid: number, raw: unknown) => {
+      const checked = checkPayload(raw);
+      if (!checked) return fail(rid, "The computer couldn't read what the phone sent.");
+      if (checked.dropped.length)
+        console.error(`sync: dropped ${checked.dropped.length} malformed items from a phone (${checked.dropped.slice(0, 5).join(", ")})`);
+      // A phone whose clock is ahead can't stamp its changes later than now.
+      const at = Date.now();
+      const theirs: Payload = {
+        ...checked.payload,
+        items: clamp(checked.payload.items, at),
+        recent: checked.payload.recent.map((p) => (p.at > at ? { ...p, at } : p)),
+      };
+      if (ledgerFailed.current) return fail(rid, "The computer couldn't read its sync records, so nothing was synced.");
+      if (!ledger.current || !syncReadyRef.current)
+        return fail(rid, "Two-edged Sword on the computer is still starting. Try again in a moment.");
+      // Changed in another app while the window was hidden (and so not checked): read again first, so the
+      // sync goes from what's in the files.
+      const jdir = journalDirRef.current;
+      const st = jdir ? await api.journalStamp(jdir).catch(() => null) : null;
+      if (jdir && st !== null && journalStamp.current !== null && st !== journalStamp.current) {
+        try {
+          const js = await api.journalList(jdir);
+          ++journalSeq.current;
+          putJournal(() => js);
+          journalStamp.current = st;
+        } catch (e) {
+          console.error("sync: reading the journal", e);
+          return fail(rid, "The computer couldn't read its journal, so nothing was synced.");
+        }
+      }
+      if (!stampRef.current() || !ledger.current) return fail(rid, "The computer couldn't read its journal, so nothing was synced.");
+      const cur = syncedNow();
       const now = itemsOf(cur);
-      ledger.current = stamp(forgetVanished(ledger.current, now), now);
       const mine = syncPayload(ledger.current, now, placesOf(cur.recent));
       // A phone without the journal neither sends entries nor gets them; the computer's stay as they are.
       // A result that would remove many of one kind (a phone that lost them) is refused, and they go back.
@@ -946,8 +1103,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       // the phone itself removed is deleted here, never one this computer's own ledger had down as
       // removed, and never more than a few in one sync: anything else is kept, and syncs back as it is.
       const dir = journalDirRef.current;
+      const was = new Map(cur.journal.map((e) => [e.id, e]));
+      const writes: { id: string; run: () => Promise<void> }[] = [];
       if (dir) {
-        const was = new Map(cur.journal.map((e) => [e.id, e]));
         const ids = new Set(next.journal.map((e) => e.id));
         const gone = cur.journal.filter((e) => !ids.has(e.id));
         const theyRemoved = gone.filter((e) => theirs.journal && theirs.items[entryKey(e.id)]?.del);
@@ -956,30 +1114,54 @@ export function AppProvider({ children }: { children: ReactNode }) {
           console.error(`sync: a phone removed ${theyRemoved.length} journal entries; none were deleted`);
         const kept = gone.filter((e) => !removing.includes(e));
         next.journal = [...next.journal, ...kept].sort((a, b) => b.created.localeCompare(a.created));
-        const writes = [
-          ...next.journal.filter((e) => stable(was.get(e.id)) !== stable(e)).map((e) => () => api.journalSave(dir, e)),
-          ...removing.map((e) => () => api.journalDelete(dir, e.id)),
-        ];
-        if (writes.length) {
-          ++journalSeq.current;
+        for (const e of next.journal)
+          if (stable(was.get(e.id)) !== stable(e)) writes.push({ id: e.id, run: () => api.journalSave(dir, e) });
+        for (const e of removing) writes.push({ id: e.id, run: () => api.journalDelete(dir, e.id) });
+      }
+      // Only if sync.rs is still waiting for this answer: once it has told the phone the sync failed,
+      // nothing here changes (the phone tries again, and would otherwise get a second copy of its edits).
+      if (!(await invoke<boolean>("sync_claim", { rid }).catch(() => false))) return;
+      // The files first, then what's kept here: if a write fails, the ledger stays as it was and the phone
+      // is told, so it tries again rather than take the sync for done.
+      const skipped = new Set<string>();
+      if (writes.length) {
+        ++journalSeq.current;
+        try {
           // A copy of the files first (journal-backups in the app's data folder): once a day, and always
           // before a sync that changes many entries. If it can't be made, nothing is written.
-          api
-            .journalBackup(dir, writes.length > 20)
-            .then(() => Promise.all(writes.map((w) => w())))
-            .catch((e) => console.error(e))
-            .then(() => api.journalStamp(dir).then((st) => (journalStamp.current = st)))
-            .catch(() => {});
+          await changedElsewhere(dir);
+          await api.journalBackup(dir, writes.length > 20);
+          for (const w of writes) {
+            // Changed here since this sync began (a save can't be under way, but a reload can have landed):
+            // what's here now is kept, and syncs as the newer.
+            if (journalNow.current.find((e) => e.id === w.id) !== was.get(w.id)) skipped.add(w.id);
+            else await w.run();
+          }
+        } catch (e) {
+          console.error("sync: writing the journal", e);
+          reloadAfter.current = true;
+          await noteStamp(dir);
+          return fail(rid, `The computer couldn't save its journal, so the sync wasn't finished: ${String(e).replace(/^Error: /, "")}`);
         }
+        ++journalSeq.current;
+        await noteStamp(dir);
       }
+      if (skipped.size)
+        next.journal = [...next.journal.filter((e) => !skipped.has(e.id)), ...journalNow.current.filter((e) => skipped.has(e.id))].sort(
+          (a, b) => b.created.localeCompare(a.created),
+        );
       ledger.current = done.ledger;
-      saveLedger();
+      seen.current = itemsOf(next);
+      await writeLedger();
       setBookmarks(() => next.bookmarks);
       setHighlights(() => next.highlights);
       setNav((n) => ({ ...n, docAt: next.docAt, recent: next.recent }));
       setPlans(() => next.plans);
-      setJournal(next.journal);
-      const reply: Payload = theirs.journal ? { ...merged, journal: true } : { ...merged, items: withoutJournal(merged.items) };
+      putJournal(() => next.journal);
+      // Seen by the next answer at once, before React renders.
+      synced.current = { ...next };
+      const out: Payload = { ...merged, serverNow: Date.now() + 1 };
+      const reply: Payload = theirs.journal ? { ...out, journal: true } : { ...out, items: withoutJournal(out.items) };
       invoke("sync_reply", { rid, merged: reply }).catch(() => {});
     };
     return () => {
@@ -1094,19 +1276,35 @@ export function AppProvider({ children }: { children: ReactNode }) {
     },
     journal,
     journalDir,
+    journalError,
     // A save or delete updates the one entry here rather than reading the whole journal again
-    // (thousands of entries, on every pause in typing), and notes the files' new fingerprint.
-    saveEntry: async (e) => {
-      await api.journalSave(journalDir, e);
-      ++journalSeq.current; // a reload already under way would bring back the old copy
-      setJournal((js) => [e, ...js.filter((x) => x.id !== e.id)].sort((a, b) => b.created.localeCompare(a.created)));
-      journalStamp.current = await api.journalStamp(journalDir).catch(() => journalStamp.current);
+    // (thousands of entries, on every pause in typing), and notes the files' new fingerprint. Both wait
+    // their turn with the other journal writes (journalWrite).
+    saveEntry: (e) => {
+      const dir = journalDir;
+      if (!dir) return Promise.reject(new Error(journalError ?? "The journal's folder isn't known yet."));
+      return journalWrite(async () => {
+        ++journalSeq.current; // a reload already under way would bring back the old copy
+        await changedElsewhere(dir);
+        await api.journalSave(dir, e);
+        ++journalSeq.current;
+        putJournal((js) => [e, ...js.filter((x) => x.id !== e.id)].sort((a, b) => b.created.localeCompare(a.created)));
+        await noteStamp(dir);
+      });
     },
-    deleteEntry: async (id) => {
-      await api.journalDelete(journalDir, id);
-      ++journalSeq.current;
-      setJournal((js) => js.filter((x) => x.id !== id));
-      journalStamp.current = await api.journalStamp(journalDir).catch(() => journalStamp.current);
+    deleteEntry: (id) => {
+      const dir = journalDir;
+      if (!dir) return Promise.reject(new Error(journalError ?? "The journal's folder isn't known yet."));
+      return journalWrite(async () => {
+        ++journalSeq.current;
+        await changedElsewhere(dir);
+        await api.journalDelete(dir, id);
+        ++journalSeq.current;
+        // Deleted on purpose: the one way a journal entry is synced as removed.
+        removedHere.current.add(entryKey(id));
+        putJournal((js) => js.filter((x) => x.id !== id));
+        await noteStamp(dir);
+      });
     },
     plans,
     setPlans,

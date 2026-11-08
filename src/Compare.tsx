@@ -1,7 +1,7 @@
 // Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
 // SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api, Verse } from "./api";
 import { AskPanel, useAskOpener, withheld } from "./Ask";
 import { apocryphaName, book, BookSizes, fmtRef, isApocrypha, Ref, stepChapter } from "./bible";
@@ -40,12 +40,15 @@ function diffWords(a: string[], b: string[]): Set<number> {
   return out;
 }
 
-function Marked({
+/** A verse in one column; drawn again only when its props change (not for every word read aloud elsewhere). */
+const Marked = memo(function Marked({
   tokens,
   diff,
   red,
   showNums,
-  onWord,
+  onPick,
+  verse,
+  bible,
   activeWi,
   speakingChar,
 }: {
@@ -55,9 +58,13 @@ function Marked({
   diff: Set<number> | null;
   red: boolean;
   showNums: boolean;
-  onWord: (t: Token, el: HTMLElement) => void;
+  /** A word clicked, with the verse and Bible it is in. */
+  onPick: (t: Token, el: HTMLElement, verse: number, bible: string) => void;
+  verse: number;
+  bible: string;
   activeWi?: number;
 }) {
+  const onWord = useCallback((t: Token, el: HTMLElement) => onPick(t, el, verse, bible), [onPick, verse, bible]);
   // Numbers are drawn here, without their G/H, whether or not the verse has differences, so every
   // verse in a column looks the same (VerseText writes them in full).
   if ((!diff || !diff.size) && !showNums)
@@ -101,7 +108,7 @@ function Marked({
       })}
     </>
   );
-}
+});
 
 export function CompareScreen({ openPalette }: { openPalette: () => void }) {
   const app = useApp();
@@ -117,6 +124,10 @@ export function CompareScreen({ openPalette }: { openPalette: () => void }) {
   useAskOpener(() => setAsk(true));
   const canAsk = useAssistant().available;
   const [word, setWord] = useState<(WordPick & { bible: string }) | null>(null);
+  const pickWord = useCallback(
+    (tok: Token, el: HTMLElement, verse: number, bible: string) => setWord({ token: tok, verse, rect: el.getBoundingClientRect(), bible }),
+    [],
+  );
   const [picker, setPicker] = useState<DOMRect | null>(null);
   const [sel, setSel] = useState<number | null>(loc.verse ?? null);
   const scroller = useRef<HTMLDivElement>(null);
@@ -429,7 +440,9 @@ export function CompareScreen({ openPalette }: { openPalette: () => void }) {
                             ? ps.char
                             : undefined
                         }
-                        onWord={(tok, el) => setWord({ token: tok, verse: v, rect: el.getBoundingClientRect(), bible: c })}
+                        onPick={pickWord}
+                        verse={v}
+                        bible={c}
                       />
                       {same && (
                         <div style={{ marginTop: 4 }}>

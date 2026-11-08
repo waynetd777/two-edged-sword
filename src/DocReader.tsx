@@ -46,7 +46,12 @@ export function DocReader({ focus, setFocus, openPalette }: { focus: boolean; se
   const [loaded, setLoaded] = useState<{ module: string; titles: string[] }>({ module: "", titles: [] });
   const titles = useMemo(() => (loaded.module === doc.module ? loaded.titles : []), [loaded, doc.module]);
   const i = titles.indexOf(doc.title);
-  const [art, setArt] = useState<Article | null>(null);
+  // The chapter as last fetched, with which one it is: until the one open arrives, nothing is shown
+  // (nor read aloud, nor scrolled to) from the one before. `art` null once it has come: not found, or `err`.
+  const artKey = `${doc.module}\n${doc.title}`;
+  const [got, setGot] = useState<{ key: string; art: Article | null; err?: string }>({ key: "", art: null });
+  const art = got.key === artKey ? got.art : null;
+  const artLoading = !!doc.title && got.key !== artKey;
   const [filter, setFilter] = useState("");
   const scroller = useRef<HTMLElement>(null);
   const list = useRef<HTMLDivElement>(null);
@@ -107,7 +112,10 @@ export function DocReader({ focus, setFocus, openPalette }: { focus: boolean; se
   // A word clicked in the text, looked up as a Bible word is; and a question it seeds for Ask.
   const [word, setWord] = useState<WordPick | null>(null);
   const [askSeed, setAskSeed] = useState<string | null>(null);
-  useEffect(() => setAsking(null), [doc.module, doc.title]);
+  useEffect(() => {
+    setAsking(null);
+    setWord(null);
+  }, [doc.module, doc.title]);
   const exported = useRef<{ module: string; p: Promise<{ dir: string; files: string[] }> } | null>(null);
   const exportBook = () => {
     if (exported.current?.module !== doc.module) {
@@ -350,22 +358,20 @@ export function DocReader({ focus, setFocus, openPalette }: { focus: boolean; se
   }, [doc.title, doc.module, titles, app, devo, kind]);
 
   useEffect(() => {
-    if (!doc.title) {
-      setArt(null);
-      return;
-    }
+    if (!doc.title) return;
     const module = doc.module,
-      title = doc.title;
+      title = doc.title,
+      key = `${module}\n${title}`;
     let dead = false;
     (devo
       ? api.devotion(module, title).then((html) => (html ? { module, title: mod?.title ?? module, topic: title, html } : null))
       : api.article("reference", module, title)
     )
       .then((a) => {
-        if (!dead) setArt(a);
+        if (!dead) setGot({ key, art: a });
       })
-      .catch(() => {
-        if (!dead) setArt(null);
+      .catch((e) => {
+        if (!dead) setGot({ key, art: null, err: String(e) });
       });
     scroller.current?.scrollTo({ top: 0 });
     list.current?.querySelector<HTMLElement>("[aria-current=true]")?.scrollIntoView({ block: "nearest" });
@@ -709,7 +715,11 @@ export function DocReader({ focus, setFocus, openPalette }: { focus: boolean; se
                   })}
                 </div>
               ) : (
-                doc.title && <div className="n">Loading…</div>
+                doc.title && (
+                  <div className="n">
+                    {artLoading ? "Loading…" : got.err ? `This ${unit} couldn’t be opened: ${got.err}` : `This ${unit} isn’t in the book.`}
+                  </div>
+                )
               )}
             </div>
           </main>

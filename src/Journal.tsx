@@ -47,6 +47,13 @@ const hay = (e: JournalEntry) => {
   }
   return t;
 };
+/** The journal's copy is the one being typed, as saved (its title trimmed): nothing to show from it. */
+const sameAsSaved = (j: JournalEntry, d: JournalEntry) =>
+  j.title === (d.title.trim() || "Untitled") &&
+  j.body === d.body &&
+  j.created === d.created &&
+  j.verses.join("\n") === d.verses.join("\n") &&
+  j.tags.join("\n") === d.tags.join("\n");
 
 /** One entry in the list; drawn again only when it or its selection changes. */
 const EntryRow = memo(function EntryRow({ e, selected, onSelect }: { e: JournalEntry; selected: boolean; onSelect: (id: string) => void }) {
@@ -145,8 +152,9 @@ export function JournalScreen({
   // Once the journal has a copy of this entry that wasn't saved from here (a change in the vault)
   // and no save is waiting, show the file's copy, so a change made elsewhere appears.
   useEffect(() => {
+    // Not while a save is being written either: a reload landing mid-save brings the older copy.
     const j = draft && app.journal.find((e) => e.id === draft.id);
-    if (j && !pendingSave.current && j !== lastSaved.current) setDraft(null);
+    if (j && !pendingSave.current && !saving.current && j !== lastSaved.current && !sameAsSaved(j, draft)) setDraft(null);
   }, [app.journal]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const entries = useMemo(() => {
@@ -212,7 +220,8 @@ export function JournalScreen({
   const remove = async () => {
     if (!cur) return;
     if (!(await confirmDelete(`“${cur.title || "Untitled"}”`))) return;
-    if (pendingSave.current?.id === cur.id) {
+    const cancelled = pendingSave.current?.id === cur.id ? pendingSave.current : null;
+    if (cancelled) {
       window.clearTimeout(saveTimer.current);
       pendingSave.current = null;
     }
@@ -221,6 +230,11 @@ export function JournalScreen({
       if (app.journal.some((e) => e.id === cur.id) || lastSaved.current?.id === cur.id) await app.deleteEntry(cur.id);
     } catch (x) {
       setErr(String(x));
+      // Not deleted: the edit it cancelled is still to be saved.
+      if (cancelled && !pendingSave.current) {
+        pendingSave.current = cancelled;
+        saveTimer.current = window.setTimeout(cancelled.run, 600);
+      }
       return;
     }
     setDraft(null);
@@ -293,6 +307,13 @@ export function JournalScreen({
       >
         <SearchField onOpen={openPalette} />
       </Topbar>
+      {/* Settings unreadable, or the journal's folder can't be listed: entries can't be shown or saved. */}
+      {app.journalError && (
+        <div className="missing" role="alert" style={{ margin: "12px 16px 0" }}>
+          <Icon name="info" />
+          <span>{app.journalError}</span>
+        </div>
+      )}
       <div
         style={{
           flexGrow: 1,
@@ -438,6 +459,20 @@ function Editor({
   // What the editor holds. A body arriving that isn't it was changed elsewhere (in the vault):
   // show it. While typing, the entry shown is the unsaved copy, so this never replaces an edit.
   const shown = useRef(entry.body);
+  // The editor's own Markdown as last filled or saved. A body written elsewhere (Obsidian's soft
+  // breaks, `1)` lists, code fences) needn't read back the same, so only a change from this is saved.
+  const baseline = useRef(entry.body);
+  // The entry and its onChange as last drawn, for what finishes after an await.
+  const latest = useRef({ entry, onChange });
+  useEffect(() => {
+    latest.current = { entry, onChange };
+  });
+  /** Saves a body read from the editor (with any other changes). */
+  const putBody = (body: string, more: Partial<JournalEntry> = {}) => {
+    shown.current = body;
+    baseline.current = body;
+    latest.current.onChange({ ...more, body });
+  };
   const [verseAt, setVerseAt] = useState<DOMRect | null>(null);
   const [linkAt, setLinkAt] = useState<DOMRect | null>(null);
   const [tagAt, setTagAt] = useState<DOMRect | null>(null);
@@ -453,7 +488,10 @@ function Editor({
     // Every line is a <p>, so Enter, lists and quotes act on one line at a time.
     document.execCommand("defaultParagraphSeparator", false, "p");
     // References are links (htmlToMd reads them back as their text); ones typed now link next time.
-    if (ed.current) ed.current.innerHTML = mdToHtml(entry.body) || "<p><br></p>";
+    if (ed.current) {
+      ed.current.innerHTML = mdToHtml(entry.body) || "<p><br></p>";
+      baseline.current = htmlToMd(ed.current);
+    }
     shown.current = entry.body;
   }, [entry.id]); // eslint-disable-line react-hooks/exhaustive-deps
   // Only a real change is saved: clicking in and out must not write back a copy made before the
@@ -461,15 +499,13 @@ function Editor({
   const sync = () => {
     if (!ed.current) return;
     const body = htmlToMd(ed.current);
-    if (body !== entry.body) {
-      shown.current = body;
-      onChange({ body });
-    }
+    if (body !== baseline.current) putBody(body);
   };
   useEffect(() => {
     if (entry.body === shown.current || !ed.current) return;
     shown.current = entry.body;
     ed.current.innerHTML = mdToHtml(entry.body) || "<p><br></p>";
+    baseline.current = htmlToMd(ed.current);
     spell.recheck(50);
   }, [entry.body]); // eslint-disable-line react-hooks/exhaustive-deps
   const spell = useSpelling(ed, entry.id, () => sync(), app.settings.journalGrammar ?? true);
@@ -519,7 +555,8 @@ function Editor({
     if (!r) return false;
     const bible = app.settings.bible;
     const [p] = await api.passages(bible, [{ book: r.book, chapter: r.chapter, from: r.verse ?? 1, to: r.to ?? r.verse ?? 999 }]);
-    if (!p.verses.length) return false;
+    // Another entry opened while the verses were fetched: not put in that one.
+    if (!p.verses.length || latest.current.entry.id !== entry.id || !ed.current) return false;
     const txt = p.verses.map((v) => plainText(v.text)).join(" ");
     const html = `<blockquote class="verse" dir="auto">${escHtml(txt)}<cite>${escHtml(fmtRef(r))} ${escHtml(app.mod("bible", bible)?.abbrev ?? "")}</cite></blockquote><p><br></p>`;
     ed.current?.focus();
@@ -529,7 +566,8 @@ function Editor({
       s?.addRange(saved_range.current);
     }
     document.execCommand("insertHTML", false, html);
-    if (!entry.verses.includes(fmtRef(r))) onChange({ verses: [...entry.verses, fmtRef(r)], body: htmlToMd(ed.current!) });
+    const now = latest.current.entry;
+    if (!now.verses.includes(fmtRef(r))) putBody(htmlToMd(ed.current), { verses: [...now.verses, fmtRef(r)] });
     else sync();
     return true;
   };
@@ -556,7 +594,7 @@ function Editor({
     document.execCommand("insertHTML", false, mdToHtml(md));
     // The themes Ask named for the answer join the entry's tags.
     const add = tags.filter((t) => !entry.tags.includes(t));
-    if (add.length) onChange({ tags: [...entry.tags, ...add], body: htmlToMd(root) });
+    if (add.length) putBody(htmlToMd(root), { tags: [...entry.tags, ...add] });
     else sync();
     spell.recheck();
   };
@@ -610,10 +648,7 @@ function Editor({
     sync();
   };
   // Typing # in the entry offers tags; the one picked joins the entry's tags and the #text goes.
-  const hashTag = useHashTag(ed, entry, themes, tagCounts, tagIdx, setTagIdx, (body, tags) => {
-    shown.current = body;
-    onChange({ body, tags });
-  });
+  const hashTag = useHashTag(ed, entry, themes, tagCounts, tagIdx, setTagIdx, (body, tags) => putBody(body, { tags }));
   const words = mdPlain(entry.body).split(/\s+/).filter(Boolean).length;
 
   const { reading, wrap, boxes } = useReadAloud(ed, entry.id, sync);

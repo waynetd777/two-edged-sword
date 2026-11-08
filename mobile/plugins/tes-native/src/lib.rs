@@ -50,6 +50,16 @@ struct Speak {
     title: String,
     /// A voice's identifier (from voices), or none for the best English one installed.
     voice: Option<String>,
+    /// The sleep timer's end, in ms since the epoch: the reading stops then, natively, as the page sleeps
+    /// with the screen locked.
+    #[serde(rename = "stopAt")]
+    stop_at: Option<f64>,
+}
+
+#[derive(serde::Serialize)]
+struct Sleep {
+    #[serde(rename = "stopAt")]
+    stop_at: Option<f64>,
 }
 
 /// The phone's English voices: identifier, name, language and quality.
@@ -69,8 +79,21 @@ async fn voices<R: Runtime>(app: AppHandle<R>) -> Result<serde_json::Value, Stri
 
 /// Reads `items` aloud one after another, replacing anything being read.
 #[command]
-async fn speak<R: Runtime>(app: AppHandle<R>, items: Vec<Item>, rate: f64, title: String, voice: Option<String>) -> Result<(), String> {
-    native(&app, "speak", Speak { items, rate, title, voice })
+async fn speak<R: Runtime>(
+    app: AppHandle<R>,
+    items: Vec<Item>,
+    rate: f64,
+    title: String,
+    voice: Option<String>,
+    stop_at: Option<f64>,
+) -> Result<(), String> {
+    native(&app, "speak", Speak { items, rate, title, voice, stop_at })
+}
+
+/// The sleep timer changed while reading: when to stop (ms since the epoch), or none.
+#[command]
+async fn speech_sleep<R: Runtime>(app: AppHandle<R>, stop_at: Option<f64>) -> Result<(), String> {
+    native(&app, "speechSleep", Sleep { stop_at })
 }
 
 #[command]
@@ -191,6 +214,7 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
             speech_pause,
             speech_resume,
             speech_stop,
+            speech_sleep,
             voices,
             bundled_dir,
             inbox_dir,

@@ -32,6 +32,12 @@ class SpeakArgs: Decodable {
   let rate: Double
   let title: String
   let voice: String?
+  /// The sleep timer's end, in ms since the epoch: the reading stops then.
+  let stopAt: Double?
+}
+
+class SleepArgs: Decodable {
+  let stopAt: Double?
 }
 
 /// The orientations the app allows now: upright, but any way while a picture is open. Info.ios.plist lists
@@ -128,6 +134,10 @@ class TesNativePlugin: Plugin, AVSpeechSynthesizerDelegate {
   private var ids: [ObjectIdentifier: Int] = [:]
   private var lastId: Int?
   private var remoteReady = false
+  /// Listen was paused by an interruption (a call, an alarm), so carries on when it ends if iOS says to.
+  private var interrupted = false
+  /// The sleep timer: the reading stops at its end, here, as the page sleeps with the screen locked.
+  private var sleep: DispatchWorkItem?
 
   public override func load(webview: WKWebView) {
     super.load(webview: webview)
@@ -135,6 +145,9 @@ class TesNativePlugin: Plugin, AVSpeechSynthesizerDelegate {
     synth.delegate = self
     wordSynth.delegate = self
     DispatchQueue.main.async { self.hookViewController() }
+    let nc = NotificationCenter.default
+    nc.addObserver(self, selector: #selector(audioInterrupted(_:)), name: AVAudioSession.interruptionNotification, object: nil)
+    nc.addObserver(self, selector: #selector(routeChanged(_:)), name: AVAudioSession.routeChangeNotification, object: nil)
   }
 
   // ---------- reading aloud ----------
@@ -159,10 +172,9 @@ class TesNativePlugin: Plugin, AVSpeechSynthesizerDelegate {
   @objc public func speak(_ invoke: Invoke) throws {
     let args = try invoke.parseArgs(SpeakArgs.self)
     DispatchQueue.main.async {
-      // Playback, spoken audio: it carries on with the screen locked (UIBackgroundModes audio) and other
-      // audio ducks or pauses for it.
-      try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .spokenAudio, options: [])
-      try? AVAudioSession.sharedInstance().setActive(true)
+      self.listenAudio()
+      self.interrupted = false
+      self.sleepAt(args.stopAt)
       self.ids = [:]
       self.synth.stopSpeaking(at: .immediate)
       let v = args.voice.flatMap { AVSpeechSynthesisVoice(identifier: $0) } ?? self.voice()
@@ -186,7 +198,12 @@ class TesNativePlugin: Plugin, AVSpeechSynthesizerDelegate {
   @objc public func say(_ invoke: Invoke) throws {
     let args = try invoke.parseArgs(SayArgs.self)
     DispatchQueue.main.async {
-      try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .spokenAudio, options: [.mixWithOthers])
+      // Mixed with what else is playing, unless Listen is reading (or paused): then its audio is left as
+      // it is, so it still carries on with the screen locked and still pauses other apps.
+      if !self.synth.isSpeaking {
+        try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .spokenAudio, options: [.mixWithOthers])
+        try? AVAudioSession.sharedInstance().setActive(true)
+      }
       self.wordSynth.stopSpeaking(at: .immediate)
       let v = AVSpeechSynthesisVoice.speechVoices().first { $0.language.hasPrefix(args.lang) }
       let u = AVSpeechUtterance(string: v != nil ? args.word : args.pron.replacingOccurrences(of: "[-'ʼ]", with: " ", options: .regularExpression))
@@ -204,18 +221,31 @@ class TesNativePlugin: Plugin, AVSpeechSynthesizerDelegate {
   /// chosen is copied to tmp/tes-picked-Inbox, where the app takes it in (lib.rs import_waiting); the call
   /// answers with how many were copied (0 if the picker was closed).
   private let pickerDelegate = PickerDelegate()
-  private let finder = SyncFinder()
+  /// The picker is open: one at a time, as there's one delegate to answer.
+  private var picking = false
+  /// Each search for computers its own finder, kept until it answers, so two at once don't share one.
+  private var finders: [ObjectIdentifier: SyncFinder] = [:]
 
   @objc public func discover(_ invoke: Invoke) {
-    finder.find { found in invoke.resolve(found) }
+    DispatchQueue.main.async {
+      let f = SyncFinder()
+      let key = ObjectIdentifier(f)
+      self.finders[key] = f
+      f.find { found in
+        invoke.resolve(found)
+        DispatchQueue.main.async { self.finders[key] = nil }
+      }
+    }
   }
 
   @objc public func pickModules(_ invoke: Invoke) {
     DispatchQueue.main.async {
+      if self.picking { return invoke.reject("the Files picker is already open") }
       let types = ["bbli", "cmti", "dcti", "lexi", "refi", "devi"].compactMap { UTType(filenameExtension: $0, conformingTo: .data) }
       let picker = UIDocumentPickerViewController(forOpeningContentTypes: types, asCopy: true)
       picker.allowsMultipleSelection = true
       guard let vc = self.manager.viewController else { return invoke.reject("no window") }
+      self.picking = true
       // Off the main thread: a move is instant, but a copy of a large module isn't.
       self.pickerDelegate.done = { urls in DispatchQueue.global(qos: .userInitiated).async {
         let fm = FileManager.default
@@ -237,6 +267,7 @@ class TesNativePlugin: Plugin, AVSpeechSynthesizerDelegate {
           if (try? fm.copyItem(at: url, to: p)) != nil, (try? fm.moveItem(at: p, to: to)) != nil { n += 1 }
         }
         invoke.resolve(["count": n])
+        DispatchQueue.main.async { self.picking = false }
       } }
       picker.delegate = self.pickerDelegate
       vc.present(picker, animated: true)
@@ -274,6 +305,7 @@ class TesNativePlugin: Plugin, AVSpeechSynthesizerDelegate {
 
   @objc public func speechPause(_ invoke: Invoke) {
     DispatchQueue.main.async {
+      self.interrupted = false
       self.synth.pauseSpeaking(at: .word)
       self.nowPlaying(nil, playing: false)
       invoke.resolve()
@@ -282,6 +314,8 @@ class TesNativePlugin: Plugin, AVSpeechSynthesizerDelegate {
 
   @objc public func speechResume(_ invoke: Invoke) {
     DispatchQueue.main.async {
+      self.interrupted = false
+      self.listenAudio()
       self.synth.continueSpeaking()
       self.nowPlaying(nil, playing: true)
       invoke.resolve()
@@ -290,50 +324,18 @@ class TesNativePlugin: Plugin, AVSpeechSynthesizerDelegate {
 
   @objc public func speechStop(_ invoke: Invoke) {
     DispatchQueue.main.async {
-      self.ids = [:]
-      self.synth.stopSpeaking(at: .immediate)
-      MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
-      try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+      self.sleepAt(nil)
+      self.stopHere()
       invoke.resolve()
     }
   }
 
-  /// The lock screen's title, and its play and pause buttons.
-  private func nowPlaying(_ title: String?, playing: Bool) {
-    let c = MPNowPlayingInfoCenter.default()
-    var info = c.nowPlayingInfo ?? [:]
-    if let title = title {
-      info[MPMediaItemPropertyTitle] = title
-      info[MPMediaItemPropertyArtist] = "Two-edged Sword"
-    }
-    info[MPNowPlayingInfoPropertyPlaybackRate] = playing ? 1.0 : 0.0
-    c.nowPlayingInfo = info
-    if remoteReady { return }
-    remoteReady = true
-    let rc = MPRemoteCommandCenter.shared()
-    rc.playCommand.addTarget { [weak self] _ in
-      self?.synth.continueSpeaking()
-      self?.nowPlaying(nil, playing: true)
-      self?.trigger("speech", data: ["kind": "resumed"])
-      return .success
-    }
-    rc.pauseCommand.addTarget { [weak self] _ in
-      self?.synth.pauseSpeaking(at: .word)
-      self?.nowPlaying(nil, playing: false)
-      self?.trigger("speech", data: ["kind": "paused"])
-      return .success
-    }
-    rc.togglePlayPauseCommand.addTarget { [weak self] _ in
-      guard let self = self else { return .commandFailed }
-      if self.synth.isPaused {
-        self.synth.continueSpeaking()
-        self.trigger("speech", data: ["kind": "resumed"])
-      } else {
-        self.synth.pauseSpeaking(at: .word)
-        self.trigger("speech", data: ["kind": "paused"])
-      }
-      self.nowPlaying(nil, playing: !self.synth.isPaused)
-      return .success
+  /// The sleep timer changed while reading.
+  @objc public func speechSleep(_ invoke: Invoke) throws {
+    let args = try invoke.parseArgs(SleepArgs.self)
+    DispatchQueue.main.async {
+      self.sleepAt(args.stopAt)
+      invoke.resolve()
     }
   }
 
@@ -356,7 +358,8 @@ class TesNativePlugin: Plugin, AVSpeechSynthesizerDelegate {
   func speechSynthesizer(_ s: AVSpeechSynthesizer, didFinish u: AVSpeechUtterance) {
     if s === wordSynth { return trigger("say", data: ["kind": "done"]) }
     guard let id = ids.removeValue(forKey: ObjectIdentifier(u)) else { return }
-    trigger("speech", data: ["kind": id == lastId && ids.isEmpty ? "end" : "done", "id": id])
+    // When it happened: an "end" the page hears only on waking (it sleeps with the screen locked) is old news.
+    trigger("speech", data: ["kind": id == lastId && ids.isEmpty ? "end" : "done", "id": id, "t": Date().timeIntervalSince1970 * 1000])
   }
 
   /// The view controller showing the web view (Tauri's) is asked which ways it may turn, every time iOS
@@ -404,6 +407,120 @@ class TesNativePlugin: Plugin, AVSpeechSynthesizerDelegate {
       if turnUpright {
         scene.requestGeometryUpdate(.iOS(interfaceOrientations: .portrait)) { _ in }
       }
+    }
+  }
+}
+
+// MARK: - Listen's audio: the session, interruptions, the lock screen and the sleep timer
+
+extension TesNativePlugin {
+  /// Listen's audio: playback, spoken audio, so it carries on with the screen locked (UIBackgroundModes
+  /// audio) and other audio pauses for it. Set again whenever it starts or resumes, as a word said meanwhile
+  /// may have changed it.
+  private func listenAudio() {
+    try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .spokenAudio, options: [])
+    try? AVAudioSession.sharedInstance().setActive(true)
+  }
+
+  private var reading: Bool { synth.isSpeaking && !synth.isPaused }
+
+  /// Paused from here (not by the page): the lock screen shows it, and the page is told.
+  private func pauseHere() {
+    synth.pauseSpeaking(at: .word)
+    nowPlaying(nil, playing: false)
+    trigger("speech", data: ["kind": "paused"])
+  }
+
+  private func resumeHere() {
+    listenAudio()
+    synth.continueSpeaking()
+    nowPlaying(nil, playing: true)
+    trigger("speech", data: ["kind": "resumed"])
+  }
+
+  /// A call or an alarm: Listen pauses, and carries on after it when iOS says it should.
+  @objc private func audioInterrupted(_ n: Notification) {
+    guard let raw = n.userInfo?[AVAudioSessionInterruptionTypeKey] as? UInt,
+          let type = AVAudioSession.InterruptionType(rawValue: raw) else { return }
+    DispatchQueue.main.async {
+      switch type {
+      case .began:
+        if self.reading {
+          self.interrupted = true
+          self.pauseHere()
+        }
+      case .ended:
+        let opts = (n.userInfo?[AVAudioSessionInterruptionOptionKey] as? UInt).map(AVAudioSession.InterruptionOptions.init) ?? []
+        if self.interrupted, opts.contains(.shouldResume), self.synth.isPaused { self.resumeHere() }
+        self.interrupted = false
+      @unknown default:
+        break
+      }
+    }
+  }
+
+  /// Headphones unplugged (or a Bluetooth speaker gone): Listen pauses rather than reading out loud.
+  @objc private func routeChanged(_ n: Notification) {
+    guard let raw = n.userInfo?[AVAudioSessionRouteChangeReasonKey] as? UInt,
+          AVAudioSession.RouteChangeReason(rawValue: raw) == .oldDeviceUnavailable else { return }
+    DispatchQueue.main.async {
+      self.interrupted = false
+      if self.reading { self.pauseHere() }
+    }
+  }
+
+  /// Stops the reading at `stopAt` (ms since the epoch), or never; the page is told ("slept").
+  private func sleepAt(_ stopAt: Double?) {
+    sleep?.cancel()
+    sleep = nil
+    guard let stopAt = stopAt else { return }
+    let item = DispatchWorkItem { [weak self] in
+      guard let self = self else { return }
+      self.sleep = nil
+      self.stopHere()
+      self.trigger("speech", data: ["kind": "slept"])
+    }
+    sleep = item
+    let wait = max(0, stopAt / 1000 - Date().timeIntervalSince1970)
+    DispatchQueue.main.asyncAfter(wallDeadline: .now() + wait, execute: item)
+  }
+
+  private func stopHere() {
+    ids = [:]
+    interrupted = false
+    synth.stopSpeaking(at: .immediate)
+    MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
+    try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+  }
+
+  /// The lock screen's title, and its play and pause buttons.
+  private func nowPlaying(_ title: String?, playing: Bool) {
+    let c = MPNowPlayingInfoCenter.default()
+    var info = c.nowPlayingInfo ?? [:]
+    if let title = title {
+      info[MPMediaItemPropertyTitle] = title
+      info[MPMediaItemPropertyArtist] = "Two-edged Sword"
+    }
+    info[MPNowPlayingInfoPropertyPlaybackRate] = playing ? 1.0 : 0.0
+    c.nowPlayingInfo = info
+    if remoteReady { return }
+    remoteReady = true
+    let rc = MPRemoteCommandCenter.shared()
+    rc.playCommand.addTarget { [weak self] _ in
+      self?.interrupted = false
+      self?.resumeHere()
+      return .success
+    }
+    rc.pauseCommand.addTarget { [weak self] _ in
+      self?.interrupted = false
+      self?.pauseHere()
+      return .success
+    }
+    rc.togglePlayPauseCommand.addTarget { [weak self] _ in
+      guard let self = self else { return .commandFailed }
+      self.interrupted = false
+      if self.synth.isPaused { self.resumeHere() } else { self.pauseHere() }
+      return .success
     }
   }
 }

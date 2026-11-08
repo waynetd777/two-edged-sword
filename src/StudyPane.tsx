@@ -756,7 +756,8 @@ export function DictionaryTab({
         ).then((has) => {
           if (!dead) setHits(new Set(dicts.filter((_, i) => has[i]).map((d) => d.id)));
         }),
-      120,
+      // A search in every dictionary: once typing pauses, not on each key.
+      300,
     );
     return () => {
       dead = true;

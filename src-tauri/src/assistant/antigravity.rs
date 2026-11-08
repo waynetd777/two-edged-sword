@@ -59,7 +59,10 @@ pub fn ask(
     let bin = installed(find(), "Antigravity CLI")?;
     write_agent(&cwd, &folder)?;
     let mut cmd = Command::new(bin);
-    cmd.current_dir(&cwd).arg("-p").arg(&prompt).args([
+    // Attached to the flag: agy reads `-p <prompt>` that starts with a dash as an option, and won't
+    // take a prompt that starts with one even attached, so a space goes before it.
+    let prompt = if prompt.starts_with('-') { format!(" {prompt}") } else { prompt };
+    cmd.current_dir(&cwd).arg(format!("--print={prompt}")).args([
         "--agent",
         AGENT,
         "--model",

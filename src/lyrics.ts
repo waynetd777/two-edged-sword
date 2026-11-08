@@ -64,11 +64,14 @@ const plain = (text: string): Lyrics["lines"] => text.split(/\r?\n/).map((l) => 
 export class LrclibBusy extends Error {}
 
 async function get(path: string): Promise<unknown> {
-  let r = await fetch(`${API}/${path}`);
+  // Each try given 10 s: a server that never answers mustn't leave the song's lyrics waiting for good.
+  let r = await fetch(`${API}/${path}`, { signal: AbortSignal.timeout(10000) });
   // It is often briefly busy (429) or unavailable (5xx): twice more, after the wait it asks for.
   for (let tries = 0; (r.status === 429 || r.status >= 500) && tries < 2; tries++) {
     const wait = Math.min(Math.max(+(r.headers.get("retry-after") ?? 0) || 0.8, 0.8), 5) * 1000;
-    r = await new Promise((ok) => setTimeout(ok, wait * (tries + 1))).then(() => fetch(`${API}/${path}`));
+    r = await new Promise((ok) => setTimeout(ok, wait * (tries + 1))).then(() =>
+      fetch(`${API}/${path}`, { signal: AbortSignal.timeout(10000) }),
+    );
   }
   if (r.status === 404) return null;
   if (r.status === 429 || r.status >= 500) throw new LrclibBusy(`LRCLIB: ${r.status}`);
@@ -128,8 +131,8 @@ export function lyricsFor(name: string, artist: string, album: string, duration:
       if (f?.plainLyrics) return { lines: plain(f.plainLyrics), timed: false, source: "lrclib" };
       return null;
     });
-    // A failed lookup (offline) is tried again next time.
-    p.catch(() => cache.delete(key));
+    // A failed lookup (offline, or no answer in time) is tried again next time.
+    p.catch(() => cache.get(key) === p && cache.delete(key));
     cache.set(key, p);
   }
   return p;
@@ -170,13 +173,13 @@ export function artworkFor(name: string, artist: string, album: string): Promise
         const now = bytes.byteLength ? await api.musicState().catch(() => null) : null;
         if (now && now.name === name && now.artist === artist) return blobOf(key, bytes);
         const q = new URLSearchParams({ term: `${bare(name)} ${artist}`, entity: "song", limit: "10" });
-        const r = await fetch(`https://itunes.apple.com/search?${q}`);
+        const r = await fetch(`https://itunes.apple.com/search?${q}`, { signal: AbortSignal.timeout(10000) });
         if (!r.ok) throw new Error(`iTunes: ${r.status}`);
         const found = ((await r.json()) as { results: ItunesSong[] }).results.filter((x) => x.artworkUrl100);
         const hit = found.find((x) => album && x.collectionName === album) ?? found[0];
         return hit ? hit.artworkUrl100!.replace(/\/\d+x\d+bb\./, "/600x600bb.") : null;
       });
-    p.catch(() => art.delete(key));
+    p.catch(() => art.get(key) === p && art.delete(key));
     art.set(key, p);
   }
   return p;

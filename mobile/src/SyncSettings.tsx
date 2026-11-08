@@ -6,7 +6,7 @@
 
 import { useEffect, useState } from "react";
 import { scene } from "./api";
-import { deviceName, discover, pair, syncNow, unpair, useSync } from "./phoneSync";
+import { deviceName, discover, pair, PAIR_AGAIN, syncNow, unpair, useSync } from "./phoneSync";
 
 type Found = Awaited<ReturnType<typeof discover>>[number];
 
@@ -79,12 +79,24 @@ export function SyncSettings() {
           Syncing with <b>{s.paired.name}</b>
         </p>
         <p className="m" style={{ margin: "0 0 10px", overflowWrap: "anywhere" }}>
-          {s.busy ? "Syncing…" : s.error ? s.error : s.last ? `Synced ${ago(s.last)}` : "Not synced yet"}
+          {s.busy ? "Syncing…" : s.error ? s.error : s.needsPairing ? PAIR_AGAIN : s.last ? `Synced ${ago(s.last)}` : "Not synced yet"}
         </p>
         <div style={{ display: "flex", gap: 8 }}>
-          <button className="secondary" disabled={s.busy} onClick={() => syncNow()}>
-            Sync now
-          </button>
+          {s.needsPairing ? (
+            <button
+              className="secondary"
+              onClick={() => {
+                unpair();
+                look();
+              }}
+            >
+              Pair again
+            </button>
+          ) : (
+            <button className="secondary" disabled={s.busy} onClick={() => syncNow()}>
+              Sync now
+            </button>
+          )}
           <button className="secondary" onClick={unpair}>
             Stop syncing
           </button>

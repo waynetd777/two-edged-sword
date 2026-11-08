@@ -1,7 +1,7 @@
 // Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
 // SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import { open as openDialog } from "@tauri-apps/plugin-dialog";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
@@ -418,6 +418,9 @@ export function SettingsScreen() {
 function Phones() {
   const [devices, setDevices] = useState<{ id: string; name: string; seen: number }[]>([]);
   const [code, setCode] = useState<{ code: string; name: string; at: string } | null>(null);
+  const [note, setNote] = useState<string | null>(null);
+  const showing = useRef(false);
+  showing.current = !!code;
   const load = () =>
     invoke<{ id: string; name: string; seen: number }[]>("sync_devices")
       .then(setDevices)
@@ -428,10 +431,27 @@ function Phones() {
       load();
       setCode(null);
     });
+    // Five wrong tries: the code stops working.
+    const gone = listen("sync-code", () => {
+      setCode(null);
+      setNote("That code was entered wrongly too many times, so it no longer works. Show a new one to try again.");
+    });
     return () => {
       un.then((u) => u());
+      gone.then((u) => u());
+      // A code works only while it's showing here.
+      if (showing.current) invoke("sync_cancel_code").catch(() => {});
     };
   }, []);
+  // It works for two minutes.
+  useEffect(() => {
+    if (!code) return;
+    const t = window.setTimeout(() => {
+      setCode(null);
+      setNote("The pairing code has run out. Show a new one to pair.");
+    }, 120_000);
+    return () => window.clearTimeout(t);
+  }, [code]);
   const when = (t: number) =>
     t ? `Synced ${new Date(t).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}` : "Not synced yet";
   return (
@@ -457,7 +477,7 @@ function Phones() {
         {code ? (
           <span style={{ fontSize: 13 }}>
             In the phone app, go to More › Settings › Sync and enter <b style={{ fontSize: 18, letterSpacing: "0.12em" }}>{code.code}</b>{" "}
-            (for “{code.name}”). It works for 10 minutes.
+            (for “{code.name}”). It works for 2 minutes, while this is open.
             {code.at && (
               <>
                 {" "}
@@ -466,16 +486,22 @@ function Phones() {
             )}
           </span>
         ) : (
-          <button
-            className="btn small"
-            onClick={() =>
-              invoke<[string, string, number, string]>("sync_pair_code")
-                .then(([c, name, port, ip]) => setCode({ code: c, name, at: ip ? `${ip}${port === 47615 ? "" : `:${port}`}` : "" }))
-                .catch(() => {})
-            }
-          >
-            Show a pairing code
-          </button>
+          <span style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+            {note && <span style={{ fontSize: 13 }}>{note}</span>}
+            <button
+              className="btn small"
+              onClick={() =>
+                invoke<[string, string, number, string]>("sync_pair_code")
+                  .then(([c, name, port, ip]) => {
+                    setNote(null);
+                    setCode({ code: c, name, at: ip ? `${ip}${port === 47615 ? "" : `:${port}`}` : "" });
+                  })
+                  .catch((e) => setNote(String(e).replace(/^Error: /, "")))
+              }
+            >
+              Show a pairing code
+            </button>
+          </span>
         )}
       </Row>
     </Section>

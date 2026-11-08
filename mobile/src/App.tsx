@@ -93,7 +93,7 @@ export function App() {
         if (n) setAdding(`Adding ${n > 1 ? `${n} modules` : "the module"}…`);
         return api.importWaiting(r.dir);
       })
-      .then(async ({ added, failed: bad }) => {
+      .then(async ({ added, failed: bad, badName }) => {
         if (added.length) await loadModules();
         const parts = [];
         if (added.length) parts.push(`Added ${added.length > 2 ? `${added.length} modules` : added.join(" and ")}`);
@@ -101,6 +101,10 @@ export function App() {
         const failed = bad.filter((f) => !toldFailed.has(f));
         failed.forEach((f) => toldFailed.add(f));
         if (failed.length) parts.push(`${failed.join(", ")} couldn't be read as ${failed.length > 1 ? "modules" : "a module"}`);
+        if (badName?.length)
+          parts.push(
+            `${badName.join(", ")} can't be added under ${badName.length > 1 ? "those names" : "that name"}: rename it with letters and numbers`,
+          );
         if (parts.length) tell(parts.join(". ") + ".", added.length > 0);
       })
       .catch(() => {})
@@ -128,8 +132,10 @@ export function App() {
     // Android: the bundled modules are copied out of the APK on the first start (and after an update); the
     // library is read again once they are.
     const bundled = () =>
-      invoke<{ dir?: string }>("plugin:tes-native|bundled_dir")
+      invoke<{ dir?: string; error?: string }>("plugin:tes-native|bundled_dir")
         .then((r) => {
+          // Copying them out failed before the page was listening: Read says so (tes-bundled-error).
+          if (r.error) window.dispatchEvent(new CustomEvent("tes-bundled-error", { detail: r.error }));
           if (r.dir) return invoke("set_bundled", { dir: r.dir }).then(loadModules);
         })
         .catch(() => {});
@@ -176,6 +182,15 @@ export function App() {
         setTab("words");
       }
     });
+    // Highlights, bookmarks or a plan that couldn't be kept (the phone's storage for the app is full): said,
+    // once a minute at most, rather than lost without a word.
+    let saidFull = 0;
+    const saveFailed = () => {
+      if (Date.now() - saidFull < 60_000) return;
+      saidFull = Date.now();
+      tell("Your changes couldn't be saved: the app's storage is full.", false);
+    };
+    window.addEventListener("tes-save-failed", saveFailed);
     // A step back or forward can land on another tab.
     const off = history.onRestore((p) => {
       setTab(p.tab);
@@ -185,6 +200,7 @@ export function App() {
       off();
       unPlans();
       window.removeEventListener("tes-inbox", takeIn);
+      window.removeEventListener("tes-save-failed", saveFailed);
       unInbox.then((u) => u());
       document.removeEventListener("visibilitychange", shown);
     };

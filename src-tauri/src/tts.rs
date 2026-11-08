@@ -70,7 +70,7 @@ mod mac {
 
             #[unsafe(method(speechSynthesizer:didCancelSpeechUtterance:))]
             fn did_cancel(&self, _s: &AVSpeechSynthesizer, u: &AVSpeechUtterance) {
-                self.ivars().ids.lock().unwrap().remove(&(u as *const _ as usize));
+                self.ivars().ids.lock().unwrap_or_else(|e| e.into_inner()).remove(&(u as *const _ as usize));
             }
         }
     );
@@ -78,7 +78,7 @@ mod mac {
     impl Delegate {
         fn send(&self, u: &AVSpeechUtterance, kind: &'static str, char: usize, len: usize, last: bool) {
             let key = u as *const _ as usize;
-            let mut ids = self.ivars().ids.lock().unwrap();
+            let mut ids = self.ivars().ids.lock().unwrap_or_else(|e| e.into_inner());
             let id = if last { ids.remove(&key) } else { ids.get(&key).copied() };
             drop(ids);
             if let Some(id) = id {
@@ -143,7 +143,7 @@ mod mac {
             if std::env::var_os("TES_SCENE").is_some() {
                 u.setVolume(0.0);
             }
-            del.ivars().ids.lock().unwrap().insert(Retained::as_ptr(&u) as usize, id);
+            del.ivars().ids.lock().unwrap_or_else(|e| e.into_inner()).insert(Retained::as_ptr(&u) as usize, id);
             synth.speakUtterance(&u);
         });
     }

@@ -40,7 +40,12 @@ On an iPad held sideways the study pane stays open beside the text.
 - While it plays: tap the speed (0.75× to 2×), the sleep timer (15, 30 or 60 minutes, or the end of the chapter), or Stop.
 <!-- ios -->
 - It carries on with the screen locked, and the lock screen has pause and play.
+- It pauses for a phone call, an alarm or unplugged headphones, and carries on after a call or alarm.
 <!-- /ios -->
+<!-- android -->
+- Other sound pauses while it reads. It pauses for a phone call and carries on afterwards.
+<!-- /android -->
+- The sleep timer stops it even with the screen locked.
 - **Voice**: choose it under More › Settings.
 - In Compare, Listen reads the Bible you're reading. Compare follows the verse being read and marks the word in that Bible's card; ‹ › or a swipe moves the reading to another verse.
 
@@ -103,6 +108,11 @@ Bookmarks, highlights, the journal, reading plans, Recent and the chapter you're
 2. Here, go to More › Settings › Sync, tap **Pair with your computer**, and enter the code.
 
 After that it syncs by itself whenever the app is open and on the same Wi-Fi as the computer, with Two-edged Sword running there. **Sync now** syncs straight away. Your other phones and tablets catch up through the computer.
+
+- The code works for 2 minutes, while Settings is open on the computer. Entered wrongly five times, it stops working: show a new one.
+- Sync is encrypted: nothing sent over the Wi-Fi can be read by anyone else on it.
+- Something is removed by sync only when it was deleted in the app, here or on the computer. An entry missing for any other reason comes back.
+- **Pair again**: devices paired before sync was encrypted need pairing once more. The phone app and the computer's app must both be up to date.
 
 ## Reading plans
 

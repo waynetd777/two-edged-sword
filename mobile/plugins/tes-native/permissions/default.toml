@@ -6,6 +6,7 @@ permissions = [
   "allow-speech-pause",
   "allow-speech-resume",
   "allow-speech-stop",
+  "allow-speech-sleep",
   "allow-voices",
   "allow-bundled-dir",
   "allow-inbox-dir",

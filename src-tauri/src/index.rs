@@ -27,6 +27,8 @@ pub struct Index {
     next: Mutex<Option<Arc<Library>>>,
     /// The connection searches read through, opened on the first.
     reader: Mutex<Option<Connection>>,
+    /// A search found the file damaged: the next update makes it again.
+    corrupt: AtomicBool,
 }
 
 #[derive(Serialize)]
@@ -48,7 +50,38 @@ fn stamp(path: &Path) -> String {
     format!("2-{len}-{mtime}")
 }
 
+/// The file is damaged (a crash or full disk mid-write) or isn't a database at all.
+fn is_corrupt(e: &rusqlite::Error) -> bool {
+    matches!(e.sqlite_error_code(), Some(rusqlite::ErrorCode::DatabaseCorrupt | rusqlite::ErrorCode::NotADatabase))
+}
+
+/// The same from an error already made text (build_one's).
+fn says_corrupt(e: &str) -> bool {
+    e.contains("malformed") || e.contains("not a database")
+}
+
+/// Deletes the index and its WAL files, so the next open starts a new one.
+fn delete_files(path: &Path) {
+    for end in ["", "-wal", "-shm"] {
+        let mut p = path.as_os_str().to_owned();
+        p.push(end);
+        let _ = std::fs::remove_file(PathBuf::from(p));
+    }
+}
+
+/// Opens the index, made again from nothing if the file is damaged: it holds nothing that can't be rebuilt.
 fn open(path: &Path) -> rusqlite::Result<Connection> {
+    match open_once(path) {
+        Err(e) if is_corrupt(&e) => {
+            eprintln!("search index damaged ({e}); making it again");
+            delete_files(path);
+            open_once(path)
+        }
+        r => r,
+    }
+}
+
+fn open_once(path: &Path) -> rusqlite::Result<Connection> {
     if let Some(p) = path.parent() {
         let _ = std::fs::create_dir_all(p);
     }
@@ -111,13 +144,33 @@ impl Index {
         }
     }
 
+    /// Deletes a damaged index, closing the searches' connection to it first.
+    fn start_over(&self) {
+        *self.reader.lock().unwrap_or_else(|e| e.into_inner()) = None;
+        eprintln!("search index damaged; making it again");
+        delete_files(&self.path);
+    }
+
     fn update_inner(&self, lib: &Library) -> Result<(), String> {
+        if self.corrupt.swap(false, Ordering::SeqCst) {
+            self.start_over();
+        }
         let mut c = open(&self.path).map_err(|e| e.to_string())?;
         let want = indexed_kinds(lib);
-        let have: HashMap<String, String> = {
-            let mut st = c.prepare("SELECT key, stamp FROM modules").map_err(|e| e.to_string())?;
-            let rows = st.query_map([], |r| Ok((r.get::<_, String>(0)?, r.get::<_, String>(1)?))).map_err(|e| e.to_string())?;
-            rows.filter_map(Result::ok).collect()
+        let stamps = |c: &Connection| -> rusqlite::Result<HashMap<String, String>> {
+            let mut st = c.prepare("SELECT key, stamp FROM modules")?;
+            let rows = st.query_map([], |r| Ok((r.get::<_, String>(0)?, r.get::<_, String>(1)?)))?;
+            Ok(rows.filter_map(Result::ok).collect())
+        };
+        let have = match stamps(&c) {
+            Ok(h) => h,
+            Err(e) if is_corrupt(&e) => {
+                drop(c);
+                self.start_over();
+                c = open(&self.path).map_err(|e| e.to_string())?;
+                stamps(&c).map_err(|e| e.to_string())?
+            }
+            Err(e) => return Err(e.to_string()),
         };
         let mut todo = Vec::new();
         {
@@ -143,6 +196,11 @@ impl Index {
             let k = key(kind, &id);
             if let Err(e) = build_one(&mut c, lib, kind, &id, &path) {
                 eprintln!("index {k}: {e}");
+                if says_corrupt(&e) {
+                    // Made again from nothing on the next update (the next launch, or modules added).
+                    self.corrupt.store(true, Ordering::SeqCst);
+                    break;
+                }
             } else if let Ok(mut ready) = self.ready.lock() {
                 ready.insert(k, true);
             }
@@ -160,11 +218,26 @@ impl Index {
             Some(c) => c,
             None => reader.insert(open(&self.path).map_err(|e| e.to_string())?),
         };
-        let mut st = c
-            .prepare_cached("SELECT map.src FROM docs JOIN map ON map.rowid = docs.rowid WHERE docs MATCH ?1 AND map.key = ?2")
-            .map_err(|e| e.to_string())?;
-        let rows = st.query_map(params![fts_query, key(kind, id)], |r| r.get::<_, i64>(0)).map_err(|e| e.to_string())?;
-        let mut v: Vec<i64> = rows.filter_map(Result::ok).collect();
+        let found = (|| -> rusqlite::Result<Vec<i64>> {
+            let mut st =
+                c.prepare_cached("SELECT map.src FROM docs JOIN map ON map.rowid = docs.rowid WHERE docs MATCH ?1 AND map.key = ?2")?;
+            let rows = st.query_map(params![fts_query, key(kind, id)], |r| r.get::<_, i64>(0))?;
+            rows.collect()
+        })();
+        let mut v = match found {
+            Ok(v) => v,
+            Err(e) => {
+                if is_corrupt(&e) {
+                    // Searches read the modules directly until it is made again.
+                    self.corrupt.store(true, Ordering::SeqCst);
+                    *reader = None;
+                    if let Ok(mut ready) = self.ready.lock() {
+                        ready.clear();
+                    }
+                }
+                return Err(e.to_string());
+            }
+        };
         v.sort_unstable();
         Ok(v)
     }
@@ -223,6 +296,18 @@ pub fn fts_query(terms: &[String], phrase: &str, mode: crate::search::Mode, pref
 mod tests {
     use super::*;
     use crate::search::Mode;
+
+    #[test]
+    fn a_damaged_index_is_made_again() {
+        let dir = std::env::temp_dir().join(format!("tes-index-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let path = dir.join("search-index.sqlite");
+        std::fs::write(&path, vec![0x5au8; 8192]).unwrap();
+        let c = open(&path).unwrap();
+        assert_eq!(c.query_row("SELECT count(*) FROM modules", [], |r| r.get::<_, i64>(0)).unwrap(), 0);
+        drop(c);
+        let _ = std::fs::remove_dir_all(&dir);
+    }
 
     #[test]
     fn builds_queries() {

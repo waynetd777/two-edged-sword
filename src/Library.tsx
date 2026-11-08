@@ -143,6 +143,8 @@ function Ordered({
 }
 
 /** A tractate of the Talmud (tools/sefaria builds them as "Talmud: Berakhot"). */
+/** A fieldset's own box taken away: it's there only to disable its buttons together. */
+const unboxed = { border: 0, padding: 0, margin: 0, minWidth: 0 } as const;
 const isTalmud = (m: ModuleInfo) => m.kind === "reference" && m.title.startsWith("Talmud:");
 
 export function LibraryScreen() {
@@ -227,12 +229,14 @@ export function LibraryScreen() {
               after a rescan.
             </span>
           </div>
-          <span style={{ whiteSpace: "nowrap", flexShrink: 0 }}>
+          {/* Not while a rescan is under way: it would start another, which could finish first. */}
+          <fieldset disabled={busy} style={{ ...unboxed, whiteSpace: "nowrap", flexShrink: 0, opacity: busy ? 0.5 : 1 }}>
             {/* e-Sword for Windows' modules are encrypted: there is no e-Sword X library to read there. */}
             {isMac && (
               <Switch
                 on={app.settings.readEsword}
                 onChange={(v) => {
+                  if (busy) return;
                   app.set({ readEsword: v });
                   rescan(v);
                 }}
@@ -240,7 +244,7 @@ export function LibraryScreen() {
                 Read e-Sword X
               </Switch>
             )}
-          </span>
+          </fieldset>
           <button
             className="btn"
             type="button"
@@ -284,7 +288,7 @@ export function LibraryScreen() {
                   >
                     {m.title}
                   </span>
-                  <span style={{ flexShrink: 0, whiteSpace: "nowrap" }}>
+                  <fieldset disabled={busy} style={{ ...unboxed, flexShrink: 0, whiteSpace: "nowrap", opacity: busy ? 0.5 : 1 }}>
                     <Seg
                       value={m.source === "esword" ? "esword" : "tes"}
                       options={[
@@ -293,7 +297,7 @@ export function LibraryScreen() {
                       ]}
                       onChange={(v) => v !== (m.source === "esword" ? "esword" : "tes") && !busy && choose(m, v === "esword")}
                     />
-                  </span>
+                  </fieldset>
                   <button
                     className="ibtn"
                     type="button"

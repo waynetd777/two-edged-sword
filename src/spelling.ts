@@ -103,6 +103,8 @@ export function useSpelling(ed: RefObject<HTMLDivElement | null>, key: string, o
   const gram = useRef<GrammarHit[]>([]);
   const fixed = useRef<{ range: Range; was: string }[]>([]);
   const timer = useRef<number | undefined>(undefined);
+  // Only the latest check paints: one answered late (another entry since, or more typed) is left.
+  const seq = useRef(0);
   const [menu, setMenu] = useState<SpellMenu | null>(null);
 
   const paint = () => {
@@ -114,6 +116,7 @@ export function useSpelling(ed: RefObject<HTMLDivElement | null>, key: string, o
   };
 
   const check = async () => {
+    const n = ++seq.current;
     const root = ed.current;
     if (!root) return;
     const paras = blocks(textNodes(root));
@@ -148,6 +151,7 @@ export function useSpelling(ed: RefObject<HTMLDivElement | null>, key: string, o
         got[k].grammar!.push({ ...g, start: g.start - starts[k] });
       }
       need.forEach((t, k) => remember(t, got[k]));
+      if (n !== seq.current || root !== ed.current) return; // the text it read may have changed since
     }
     const sel = window.getSelection();
     const caret = sel?.rangeCount && sel.isCollapsed && document.activeElement === root ? sel.getRangeAt(0) : null;
@@ -185,6 +189,7 @@ export function useSpelling(ed: RefObject<HTMLDivElement | null>, key: string, o
   useEffect(() => {
     fixed.current = [];
     setMenu(null);
+    seq.current++;
     recheck(50);
     return () => {
       window.clearTimeout(timer.current);
@@ -195,6 +200,7 @@ export function useSpelling(ed: RefObject<HTMLDivElement | null>, key: string, o
   // Turning grammar off in Settings takes its underlines away; on, checks again.
   useEffect(() => {
     if (!grammarOn) {
+      seq.current++;
       gram.current = [];
       paint();
     } else recheck(50);

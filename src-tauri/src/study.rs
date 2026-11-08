@@ -537,13 +537,25 @@ pub fn export_dictionaries(lib: &Library, root: &Path) {
     }
 }
 
+/// The file in a chat's folder that `touch` writes: a folder's own time can't be set on Windows
+/// (File::open fails on a folder there), so a file inside it says when it was last used.
+const USED: &str = ".used";
+
+/// Marks a chat's folder as in use now, so `prune` keeps it.
+pub fn touch(dir: &Path) {
+    let _ = std::fs::write(dir.join(USED), "");
+}
+
 /// Study and journal folders of chats not asked in for 60 days (`ask` touches them); the chat
-/// itself may be long gone.
+/// itself may be long gone. Last used: the newer of the folder's time and its USED file's.
 pub fn prune(root: &Path) {
     let old = std::time::SystemTime::now() - std::time::Duration::from_secs(60 * 86400);
+    let modified = |p: &Path| std::fs::metadata(p).and_then(|m| m.modified()).ok();
     for e in [studies_root(root), journal_root(root)].iter().filter_map(|d| std::fs::read_dir(d).ok()).flat_map(|rd| rd.flatten()) {
-        if e.metadata().and_then(|m| m.modified()).is_ok_and(|t| t < old) {
-            let _ = std::fs::remove_dir_all(e.path());
+        let p = e.path();
+        let used = modified(&p).max(modified(&p.join(USED)));
+        if p.is_dir() && used.is_some_and(|t| t < old) {
+            let _ = std::fs::remove_dir_all(&p);
         }
     }
 }

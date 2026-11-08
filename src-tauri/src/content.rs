@@ -121,6 +121,14 @@ pub fn num_like(number: &str) -> String {
     format!("%<num>{number}</num>%")
 }
 
+/// Text matched literally by `LIKE … ESCAPE '\'`: its own % and _ are not wildcards.
+pub fn like_escape(s: &str) -> String {
+    s.replace('\\', "\\\\").replace('%', "\\%").replace('_', "\\_")
+}
+
+/// The most rows a list the page asks for can have, whatever limit it sends.
+const MAX_LIMIT: usize = 5000;
+
 /// A chapter's or book's introduction, None where the module has none (or no table for them).
 fn intro(r: rusqlite::Result<Option<Option<String>>>) -> rusqlite::Result<Option<String>> {
     match r {
@@ -266,8 +274,9 @@ pub fn topics(lib: &Library, kind: Kind, module: &str, prefix: &str, limit: usiz
     let (table, _) = table_for(kind);
     let key = key_col(kind);
     lib.with(kind, module, |c| {
-        let mut st = c.prepare(&format!("SELECT {key} FROM {table} WHERE {key} LIKE ?1 ORDER BY {key} COLLATE NOCASE LIMIT ?2"))?;
-        let rows = st.query_map(params![format!("{prefix}%"), limit as i64], |r| r.get::<_, String>(0))?;
+        let mut st =
+            c.prepare(&format!("SELECT {key} FROM {table} WHERE {key} LIKE ?1 ESCAPE '\\' ORDER BY {key} COLLATE NOCASE LIMIT ?2"))?;
+        let rows = st.query_map(params![format!("{}%", like_escape(prefix)), limit.min(MAX_LIMIT) as i64], |r| r.get::<_, String>(0))?;
         rows.collect()
     })
 }
@@ -284,8 +293,8 @@ pub fn reference_titles(lib: &Library, module: &str) -> Result<Vec<String>, Stri
 /// Verses in the Strong's Bible containing the number, counted per book.
 pub fn strongs_by_book(lib: &Library, bible: &str, number: &str) -> Result<Vec<(i64, i64)>, String> {
     lib.with(Kind::Bible, bible, |c| {
-        let mut st = c.prepare("SELECT Book, count(*) FROM Bible WHERE Scripture LIKE ?1 GROUP BY Book ORDER BY Book")?;
-        let rows = st.query_map(params![num_like(number)], |r| Ok((r.get(0)?, r.get(1)?)))?;
+        let mut st = c.prepare("SELECT Book, count(*) FROM Bible WHERE Scripture LIKE ?1 ESCAPE '\\' GROUP BY Book ORDER BY Book")?;
+        let rows = st.query_map(params![num_like(&like_escape(number))], |r| Ok((r.get(0)?, r.get(1)?)))?;
         rows.collect()
     })
 }
@@ -300,8 +309,8 @@ pub struct VerseHit {
 
 pub fn strongs_verses(lib: &Library, bible: &str, number: &str, book: Option<i64>, limit: usize) -> Result<Vec<VerseHit>, String> {
     lib.with(Kind::Bible, bible, |c| {
-        let mut st = c.prepare("SELECT Book, Chapter, Verse, Scripture FROM Bible WHERE Scripture LIKE ?1 AND (?2 IS NULL OR Book = ?2) ORDER BY Book, Chapter, Verse LIMIT ?3")?;
-        let rows = st.query_map(params![num_like(number), book, limit as i64], |r| Ok(VerseHit { book: r.get(0)?, chapter: r.get(1)?, verse: r.get(2)?, text: r.get::<_, Option<String>>(3)?.unwrap_or_default() }))?;
+        let mut st = c.prepare("SELECT Book, Chapter, Verse, Scripture FROM Bible WHERE Scripture LIKE ?1 ESCAPE '\\' AND (?2 IS NULL OR Book = ?2) ORDER BY Book, Chapter, Verse LIMIT ?3")?;
+        let rows = st.query_map(params![num_like(&like_escape(number)), book, limit.min(MAX_LIMIT) as i64], |r| Ok(VerseHit { book: r.get(0)?, chapter: r.get(1)?, verse: r.get(2)?, text: r.get::<_, Option<String>>(3)?.unwrap_or_default() }))?;
         rows.collect()
     })
 }
@@ -499,7 +508,7 @@ pub fn translit_search(lib: &Library, lexicon: &str, query: &str, limit: usize) 
     }
     starts.sort_by_key(|h| h.translit.chars().count());
     exact.extend(starts);
-    exact.truncate(limit);
+    exact.truncate(limit.min(MAX_LIMIT));
     Ok(exact)
 }
 

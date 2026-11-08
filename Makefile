@@ -17,6 +17,7 @@ export APPLE_SIGNING_IDENTITY := $(if $(SIGN_ID),$(SIGN_ID),-)
 check:
 	cd src-tauri && cargo test --lib
 	npx tsc --noEmit -p tsconfig.json
+	node --experimental-strip-types tools/sync_test.ts
 
 test: check
 

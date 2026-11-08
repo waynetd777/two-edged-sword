@@ -31,6 +31,13 @@ tauri-plugin-tes-native = { path = "../plugins/tes-native" }
 tauri-plugin-notification = "2"
 time = "0.3"
 sha2 = "0.10"
+# Sync's encryption (sync_crypto.rs, shared with the phone app): SPAKE2 pairing with the code, then
+# AES-GCM with a key derived by HKDF.
+spake2 = "0.4"
+aes-gcm = "0.10"
+hkdf = "0.12"
+hmac = "0.12"
+base64 = "0.22"
 
 [profile.release]
 codegen-units = 16

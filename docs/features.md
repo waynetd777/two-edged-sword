@@ -130,6 +130,11 @@ To pair a phone or tablet:
 1. In [Settings › Phones and tablets](app:settings#phones-and-tablets), click **Show a pairing code**.
 2. In the phone app, go to More › Settings › Sync, tap **Pair with your computer**, and enter the code.
 
+The code works for 2 minutes, while Settings is open. Entered wrongly five times, it stops working: show a new one.
+Until a device is paired or a code is showing, this computer doesn't listen for phones at all.
+Sync is encrypted, so nothing sent over the Wi-Fi can be read by anyone else on it.
+Devices paired before sync was encrypted need pairing again, with the phone app up to date.
+
 After that it syncs by itself whenever the phone app is open on the same Wi-Fi as this computer, with
 Two-edged Sword running here. A change made on a phone reaches your other phones through this computer.
 If the same thing was changed in two places, the later change wins. A journal entry changed in two places
@@ -138,6 +143,9 @@ Before a sync changes the journal's files, a copy of them is kept in the app's d
 (`journal-backups`, the last 14), and once a day a copy of the bookmarks, highlights and plans
 (`backups`). A sync never removes more than 10 bookmarks, highlights, journal entries or a plan's
 ticked days at once: if a device seems to have lost them, they're sent back to it instead.
+Something is removed by sync only when it was deleted in the app. A journal entry deleted in another notes
+app, or a journal file that's missing for a while, isn't removed from your phones: it comes back.
+If the journal's folder changes in Settings, the phones' entries are saved into the new folder.
 
 ## Licence and credits
 

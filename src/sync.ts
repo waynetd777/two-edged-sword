@@ -6,9 +6,10 @@
 //
 // Each side turns what it keeps into items, one per thing that can change on its own: a bookmark, a
 // highlight, a plan's settings, each day of a plan read. A ledger remembers each item's value as last seen
-// and when it changed; an item gone since is kept as removed (with when), so a removal spreads too. A sync
-// sends the items, the Mac keeps the newer of each, and both take the result. Recent is a list merged by
-// when each place was read.
+// and when it changed. An item is kept as removed (with when) only when it was deleted here on purpose, so
+// a removal spreads too; one merely missing (a file not read, a folder changed) is unknown: its ledger
+// entry stays as it was and nothing is sent for it. A sync sends the items, the Mac keeps the newer of
+// each, and both take the result. Recent is a list merged by when each place was read.
 
 import type { Plan } from "./plans";
 
@@ -37,10 +38,15 @@ export interface Place {
 /** What a sync carries each way. */
 export interface Payload {
   v: 1;
-  /** From a phone: when it last synced (ms), and what it's called; for journal entries changed on both
-   *  sides since then, which are both kept (keepBoth). */
+  /** From a phone: the computer's clock when they last synced (its serverNow then), and what the phone is
+   *  called; for journal entries changed on both sides since then, which are both kept (keepBoth). */
   since?: number;
   from?: string;
+  /** From a phone: the keys it changed since it last synced, by its own clock; for keepBoth, which
+   *  doesn't compare the phone's clock with the computer's. */
+  changed?: string[];
+  /** From the computer: its clock when it merged (ms). The phone sends it back as `since`. */
+  serverNow?: number;
   /** Set by a side that syncs the journal. Journal items only go to a side that sets it: one without
    *  the journal would take every entry for removed on its next sync and delete them everywhere. */
   journal?: true;
@@ -87,9 +93,10 @@ export function fingerprint(v: unknown): string {
 /** A removal is remembered this long, for a device that syncs rarely. */
 const KEEP_REMOVED = 180 * 86_400_000;
 
-/** The ledger brought up to date with what the side has now: a new or changed item is stamped `now`,
- *  one gone is marked removed at `now`. */
-export function stamp(ledger: Ledger, now: Record<string, unknown>, at = Date.now()): Ledger {
+/** The ledger brought up to date with what the side has now: a new or changed item is stamped `at`. Of
+ *  the items gone, only those in `removed` (deleted here on purpose) are marked removed at `at`; any other
+ *  is unknown, and its entry stays as it was. */
+export function stamp(ledger: Ledger, now: Record<string, unknown>, removed: ReadonlySet<string> = new Set(), at = Date.now()): Ledger {
   const out: Ledger = {};
   for (const [k, v] of Object.entries(now)) {
     const h = fingerprint(v);
@@ -100,16 +107,31 @@ export function stamp(ledger: Ledger, now: Record<string, unknown>, at = Date.no
     if (k in now) continue;
     if (was.del) {
       if (at - was.t < KEEP_REMOVED) out[k] = was;
-    } else out[k] = { t: at, del: true };
+    } else out[k] = removed.has(k) ? { t: at, del: true } : was;
   }
   return out;
 }
 
-/** What to send: each item's value, or that it was removed. */
+/** What to send: each item's value, or that it was removed. An item the ledger knows but that isn't
+ *  here now (unknown, not removed) isn't sent: the other side keeps its own. */
 export function payload(ledger: Ledger, now: Record<string, unknown>, recent: Place[]): Payload {
   const items: Items = {};
-  for (const [k, e] of Object.entries(ledger)) items[k] = e.del ? { t: e.t, del: true } : { t: e.t, v: now[k] };
+  for (const [k, e] of Object.entries(ledger))
+    if (e.del) items[k] = { t: e.t, del: true };
+    else if (k in now) items[k] = { t: e.t, v: now[k] };
   return { v: 1, items, recent };
+}
+
+/** The keys in `before` that aren't in `after`: what a change made here removed. */
+export function removedKeys(before: Record<string, unknown>, after: Record<string, unknown>, skip?: (k: string) => boolean): string[] {
+  return Object.keys(before).filter((k) => !(k in after) && !skip?.(k));
+}
+
+/** Items with no time later than `max`: a device whose clock is ahead can't make its changes win for ever. */
+export function clamp(items: Items, max: number): Items {
+  const out: Items = {};
+  for (const [k, e] of Object.entries(items)) out[k] = e.t > max ? { ...e, t: max } : e;
+  return out;
 }
 
 /** Two sides' items: the newer of each. */
@@ -229,14 +251,17 @@ export const withoutJournal = (items: Items): Items => Object.fromEntries(Object
 const copyId = (id: string) => `${id}-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 5)}`;
 
 /** On the computer, before merging a phone's items with its own: a journal entry changed on both since
- *  the phone last synced is kept twice rather than one edit lost. The computer's keeps its id and is
+ *  they last synced is kept twice rather than one edit lost. Each side's "changed" is by its own clock:
+ *  the phone lists the keys it changed (`changed`), and the computer's are those stamped after `since`
+ *  (its own clock when they last synced, which the phone sends back). The computer's keeps its id and is
  *  stamped newest, so it wins everywhere; the phone's comes back as a new entry, "Title (from iPhone)". */
 export function keepBoth(mine: Items, theirs: Payload): Items {
   const since = theirs.since ?? 0;
+  const changed = new Set(theirs.changed ?? []);
   const out: Items = { ...theirs.items };
   for (const [k, e] of Object.entries(theirs.items)) {
     const m = mine[k];
-    if (!k.startsWith("j|") || !m || m.del || e.del || m.t <= since || e.t <= since) continue;
+    if (!k.startsWith("j|") || !m || m.del || e.del || m.t <= since || !changed.has(k)) continue;
     if (stable(m.v) === stable(e.v)) continue;
     const v = e.v as Entry;
     const id = copyId(v.id);
@@ -246,6 +271,80 @@ export function keepBoth(mine: Items, theirs: Payload): Items {
     mine[k] = { ...m, t: Math.max(m.t, e.t) + 1 };
   }
   return out;
+}
+
+// ---------- what comes in is checked ----------
+// Items from the other side are checked by kind before they're merged: one that isn't what its key says
+// (a newer app's, a damaged file's) is dropped, with a line in the log, rather than kept or written out.
+
+const isStr = (v: unknown): v is string => typeof v === "string";
+const isNum = (v: unknown): v is number => typeof v === "number" && Number.isFinite(v);
+const isObj = (v: unknown): v is Record<string, unknown> => !!v && typeof v === "object" && !Array.isArray(v);
+const optNum = (v: unknown) => v === undefined || isNum(v);
+const optStr = (v: unknown) => v === undefined || isStr(v);
+const strs = (v: unknown) => Array.isArray(v) && v.every(isStr);
+const COLOURS = new Set(["red", "orange", "yellow", "green", "teal", "blue", "purple", "grey"]);
+
+/** Whether an item's value is what its key says it is. */
+export function validValue(k: string, v: unknown): boolean {
+  if (k.startsWith("bm|")) {
+    if (!isObj(v) || !isStr(v.created)) return false;
+    const ok =
+      "module" in v
+        ? isStr(v.module) && isStr(v.title) && isNum(v.para) && optStr(v.kind)
+        : isNum(v.book) && isNum(v.chapter) && optNum(v.verse) && optNum(v.to) && isStr(v.bible);
+    return ok && markKey(v as Mark) === k;
+  }
+  if (k.startsWith("hl|")) return isStr(v) && COLOURS.has(v);
+  if (k.startsWith("at|")) return isStr(v);
+  if (k.startsWith("plan|")) return isObj(v) && v.id === k.slice(5) && isStr(v.kind) && isStr(v.start);
+  if (k.startsWith("pd|")) return isNum(v);
+  if (k.startsWith("j|"))
+    return (
+      isObj(v) &&
+      v.id === k.slice(2) &&
+      isStr(v.title) &&
+      isStr(v.created) &&
+      /^\d{4}-\d{2}-/.test(v.created) &&
+      isStr(v.updated) &&
+      isStr(v.body) &&
+      strs(v.verses) &&
+      strs(v.tags)
+    );
+  return false;
+}
+
+const validPlace = (p: unknown): p is Place =>
+  isObj(p) &&
+  isNum(p.at) &&
+  optNum(p.book) &&
+  optNum(p.chapter) &&
+  optNum(p.verse) &&
+  optNum(p.to) &&
+  optStr(p.bible) &&
+  optStr(p.module) &&
+  optStr(p.title) &&
+  optStr(p.kind);
+
+/** A payload from the other side with anything malformed dropped, and why; null if it isn't one at all. */
+export function checkPayload(p: unknown): { payload: Payload; dropped: string[] } | null {
+  if (!isObj(p) || p.v !== 1 || !isObj(p.items) || !Array.isArray(p.recent)) return null;
+  const dropped: string[] = [];
+  const items: Items = {};
+  for (const [k, e] of Object.entries(p.items)) {
+    const ok = isObj(e) && isNum(e.t) && e.t >= 0 && (e.del === true ? e.v === undefined : e.del === undefined && validValue(k, e.v));
+    if (ok) items[k] = e.del ? { t: e.t as number, del: true } : { t: e.t as number, v: e.v };
+    else dropped.push(k);
+  }
+  const recent = p.recent.slice(0, 50).filter(validPlace);
+  if (recent.length < Math.min(p.recent.length, 50)) dropped.push("recent");
+  const out: Payload = { v: 1, items, recent };
+  if (isNum(p.since)) out.since = p.since;
+  if (isStr(p.from)) out.from = p.from.slice(0, 60);
+  if (Array.isArray(p.changed)) out.changed = p.changed.filter(isStr);
+  if (isNum(p.serverNow)) out.serverNow = p.serverNow;
+  if (p.journal === true) out.journal = true;
+  return { payload: out, dropped };
 }
 
 /** After a sync: the values to keep (removed ones left out), and the ledger that matches them. */

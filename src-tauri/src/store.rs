@@ -108,13 +108,115 @@ fn tmp_beside(p: &std::path::Path) -> PathBuf {
     p.with_file_name(format!(".{name}.{}.{}.tmp", std::process::id(), N.fetch_add(1, Ordering::Relaxed)))
 }
 
+/// Writes `text` to a temporary file beside `p`, flushed to the disk, then renames it over `p`, so
+/// a crash or power cut leaves the old file or the new one, never half of one. The temporary file
+/// is removed if anything fails.
 pub fn write_text_atomic(p: &std::path::Path, text: &str) -> Result<(), String> {
+    use std::io::Write;
     if let Some(parent) = p.parent() {
         std::fs::create_dir_all(parent).map_err(|e| e.to_string())?;
     }
     let tmp = tmp_beside(p);
-    std::fs::write(&tmp, text).map_err(|e| e.to_string())?;
-    std::fs::rename(&tmp, p).map_err(|e| e.to_string())
+    let done = std::fs::File::create(&tmp)
+        .and_then(|mut f| {
+            f.write_all(text.as_bytes())?;
+            f.sync_all()
+        })
+        .and_then(|_| rename_retrying(&tmp, p));
+    if let Err(e) = done {
+        let _ = std::fs::remove_file(&tmp);
+        return Err(e.to_string());
+    }
+    // The rename itself made lasting too (a folder can be synced on a Mac, not on Windows).
+    #[cfg(unix)]
+    if let Some(dir) = p.parent().and_then(|d| std::fs::File::open(d).ok()) {
+        let _ = dir.sync_all();
+    }
+    Ok(())
+}
+
+/// A rename, tried again a few times on Windows while something else (an antivirus scanner, the
+/// search indexer, OneDrive) has the file open: access denied, or a sharing or lock violation.
+pub fn rename_retrying(from: &std::path::Path, to: &std::path::Path) -> std::io::Result<()> {
+    let mut wait = std::time::Duration::from_millis(20);
+    let mut tries = 0;
+    loop {
+        match std::fs::rename(from, to) {
+            Err(e) if cfg!(windows) && tries < 5 && matches!(e.raw_os_error(), Some(5 | 32 | 33)) => {
+                std::thread::sleep(wait);
+                wait *= 2;
+                tries += 1;
+            }
+            r => return r,
+        }
+    }
+}
+
+/// Saves under way (the page's store writes waiting in the queue, journal saves), which a restart
+/// into an update waits for (updates.rs).
+static IN_FLIGHT: std::sync::atomic::AtomicUsize = std::sync::atomic::AtomicUsize::new(0);
+
+/// Counts as a save under way until dropped.
+pub struct Saving(());
+
+impl Drop for Saving {
+    fn drop(&mut self) {
+        IN_FLIGHT.fetch_sub(1, std::sync::atomic::Ordering::SeqCst);
+    }
+}
+
+pub fn saving() -> Saving {
+    IN_FLIGHT.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+    Saving(())
+}
+
+pub fn saves_under_way() -> usize {
+    IN_FLIGHT.load(std::sync::atomic::Ordering::SeqCst)
+}
+
+enum Job {
+    Write(PathBuf, String, Saving),
+    Wait(std::sync::mpsc::Sender<()>),
+}
+
+/// One thread writes the page's documents, in the order they were sent, so the window's thread
+/// never waits on the disk and a later save of a document can't be overtaken by an earlier one.
+fn queue() -> &'static std::sync::mpsc::Sender<Job> {
+    static Q: std::sync::OnceLock<std::sync::mpsc::Sender<Job>> = std::sync::OnceLock::new();
+    Q.get_or_init(|| {
+        let (tx, rx) = std::sync::mpsc::channel::<Job>();
+        std::thread::spawn(move || {
+            for job in rx {
+                match job {
+                    Job::Write(p, text, _saving) => {
+                        if let Err(e) = write_text_atomic(&p, &text) {
+                            eprintln!("{}: {e}", p.display());
+                        }
+                    }
+                    Job::Wait(done) => {
+                        let _ = done.send(());
+                    }
+                }
+            }
+        });
+        tx
+    })
+}
+
+/// `write`, done in the background, after any writes queued before it. Fails at once only for a
+/// bad name or value; a failure to write is logged.
+pub fn write_queued(dir: &std::path::Path, name: &str, value: &Value) -> Result<(), String> {
+    let p = path_for(dir, name)?;
+    let text = serde_json::to_string_pretty(value).map_err(|e| e.to_string())?;
+    queue().send(Job::Write(p, text, saving())).map_err(|e| e.to_string())
+}
+
+/// Returns once every write queued before it is done, so a read after a write sees it.
+pub fn writes_done() {
+    let (tx, rx) = std::sync::mpsc::channel();
+    if queue().send(Job::Wait(tx)).is_ok() {
+        let _ = rx.recv();
+    }
 }
 
 /// One lock per exported folder, so overlapping exports of the same thing take turns.
@@ -131,6 +233,10 @@ pub fn replace_dir<T>(dir: &std::path::Path, build: impl FnOnce(&std::path::Path
     use std::fs;
     let name = dir.file_name().and_then(|n| n.to_str()).ok_or("bad folder name")?;
     let (new, old) = (dir.with_file_name(format!(".{name}.new")), dir.with_file_name(format!(".{name}.old")));
+    // Stopped between the two renames last time: the old copy is the only one, so it goes back first.
+    if !dir.exists() && old.exists() {
+        fs::rename(&old, dir).map_err(|e| e.to_string())?;
+    }
     let _ = fs::remove_dir_all(&new);
     let _ = fs::remove_dir_all(&old);
     fs::create_dir_all(&new).map_err(|e| e.to_string())?;
@@ -200,7 +306,26 @@ mod tests {
         assert_eq!(read(&dir, "bookmarks").unwrap(), v);
         assert_eq!(read(&dir, "missing").unwrap(), Value::Null);
         assert!(write(&dir, "../x", &v).is_err());
+        let w = serde_json::json!({"b": 3});
+        write_queued(&dir, "queued", &v).unwrap();
+        write_queued(&dir, "queued", &w).unwrap();
+        writes_done();
+        assert_eq!(read(&dir, "queued").unwrap(), w, "queued writes land in order");
+        assert!(std::fs::read_dir(&dir).unwrap().flatten().all(|e| !e.file_name().to_string_lossy().ends_with(".tmp")));
         let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn replace_dir_recovers_an_interrupted_swap() {
+        let base = std::env::temp_dir().join(format!("tes-recover-{}", std::process::id()));
+        let dir = base.join("book");
+        // As if it stopped after moving the old folder aside and before moving the new one in.
+        std::fs::create_dir_all(base.join(".book.old")).unwrap();
+        std::fs::write(base.join(".book.old/a.txt"), "1").unwrap();
+        let r: Result<(), String> = replace_dir(&dir, |_| Err("failed".into()));
+        assert!(r.is_err());
+        assert!(dir.join("a.txt").exists(), "the only copy is put back, not deleted");
+        let _ = std::fs::remove_dir_all(&base);
     }
 
     #[test]

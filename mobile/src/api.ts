@@ -136,7 +136,7 @@ export const api = {
   referenceTitles: (module: string) => invoke<string[]>("reference_titles", { module }),
   fetchManifest: (url: string) => invoke<string>("fetch_manifest", { url }),
   countWaiting: (inbox?: string) => invoke<number>("count_waiting", { inbox }),
-  importWaiting: (inbox?: string) => invoke<{ added: string[]; failed: string[] }>("import_waiting", { inbox }),
+  importWaiting: (inbox?: string) => invoke<{ added: string[]; failed: string[]; badName: string[] }>("import_waiting", { inbox }),
   fetchBytes: (url: string) => invoke<ArrayBuffer>("fetch_bytes", { url }),
   download: (url: string, file: string, sha256: string, size: number) => invoke<void>("download", { url, file, sha256, size }),
   cancelDownload: (file: string) => invoke<void>("cancel_download", { file }),
@@ -192,10 +192,37 @@ export function saved<T>(key: string, fallback: T): T {
   }
 }
 
-export function save<T>(key: string, value: T) {
+/** What's kept only to draw sooner, and can be read again: the chapters last read, the module list and the
+ *  downloads on offer. Everything else is the person's own (highlights, bookmarks, plans, sync's ledger). */
+const isCache = (key: string) => key.startsWith("ch.") || key === "modules" || key === "offers";
+
+/** Makes room by forgetting the caches (all but `keep`); says whether there was any to forget. */
+function evictCaches(keep: string): boolean {
+  const gone: string[] = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k?.startsWith("tes.") && isCache(k.slice(4)) && k !== `tes.${keep}`) gone.push(k);
+  }
+  gone.forEach((k) => localStorage.removeItem(k));
+  return gone.length > 0;
+}
+
+/** Saved, or told why not: the person's own things not being kept is said (a "tes-save-failed" event the
+ *  app shows), a cache not being kept isn't. On a full store the caches make way first. */
+export function save<T>(key: string, value: T): void {
+  const text = JSON.stringify(value);
   try {
-    localStorage.setItem(`tes.${key}`, JSON.stringify(value));
-  } catch {
-    // Storage unavailable: it just isn't remembered.
+    localStorage.setItem(`tes.${key}`, text);
+    return;
+  } catch (e) {
+    try {
+      if (evictCaches(key)) {
+        localStorage.setItem(`tes.${key}`, text);
+        return;
+      }
+    } catch {
+      // Still no room: said below.
+    }
+    if (!isCache(key)) window.dispatchEvent(new CustomEvent("tes-save-failed", { detail: { key, error: String(e) } }));
   }
 }

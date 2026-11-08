@@ -247,8 +247,15 @@ export function Read({
     }
   }, [doc]);
   useEffect(() => {
+    let live = true;
     setDocList([]);
-    if (doc) bookTitles(doc.module).then(setDocList);
+    if (doc)
+      bookTitles(doc.module)
+        .then((t) => live && setDocList(t))
+        .catch(() => {});
+    return () => {
+      live = false;
+    };
   }, [doc?.module]); // eslint-disable-line react-hooks/exhaustive-deps
   const docKey = (d: { module: string; chapter: string } | null) => (d ? `${d.module}|${d.chapter}` : "");
   const pl = usePlayer();
@@ -398,13 +405,31 @@ export function Read({
     });
   }, []);
   useEffect(() => save("bible", bible), [bible]);
+  // Android: the Bibles in the app couldn't be copied out of it (the phone full, say). Said in place of
+  // "Opening…", which would otherwise wait for ever.
+  const [bundledError, setBundledError] = useState<string | null>(null);
+  useEffect(() => {
+    const on = (e: Event) => setBundledError(String((e as CustomEvent).detail ?? "unknown error"));
+    window.addEventListener("tes-bundled-error", on);
+    return () => window.removeEventListener("tes-bundled-error", on);
+  }, []);
+  // A Bible that isn't here (removed, or saved on another phone): the KJV+, the KJV or the first there is,
+  // once the library's list is in, rather than a blank page. (Android lists the bundled modules only once
+  // they're copied out of the APK: until then the list isn't the whole library.)
+  useEffect(() => {
+    if (!bibles.length || bibles.some((b) => b.id === bible) || !modules.some((m) => m.source === "bundled")) return;
+    setBible((["kjv+", "kjv"].find((id) => bibles.some((b) => b.id === id)) ?? bibles[0].id) as string);
+  }, [modules.map((m) => m.id).join("|"), bible]); // eslint-disable-line react-hooks/exhaustive-deps -- the ids, not the array made anew each render
   useEffect(() => save("loc", loc), [loc]);
   useEffect(() => save("layout", layout), [layout]);
   useEffect(() => save("verse", sel), [sel]);
   useEffect(() => {
+    // Only the Bible still chosen: a slow answer for the one before it is dropped.
+    let live = true;
     api
       .chapterSizes(bible)
       .then((rows) => {
+        if (!live) return;
         const m: BookSizes = new Map();
         const n = new Map<string, number>();
         for (const [b, c, v] of rows) {
@@ -414,7 +439,10 @@ export function Read({
         setSizes(m);
         setCounts(n);
       })
-      .catch(() => setSizes(null));
+      .catch(() => live && setSizes(null));
+    return () => {
+      live = false;
+    };
   }, [bible, libKey]);
 
   // Back and forward are the app's (history.ts): Read's moves are steps in it, and a step back
@@ -648,10 +676,12 @@ export function Read({
       const m = jump.book;
       // A devotional opens at today's reading; a book where it was left.
       const last = isDevotional(m) ? todayTitle() : saved<string | null>(`docAt.${m}`, null);
-      bookTitles(m).then((t) => {
-        const c = last && t.includes(last) ? last : t[0];
-        if (c) openDoc(m, c);
-      });
+      bookTitles(m)
+        .then((t) => {
+          const c = last && t.includes(last) ? last : t[0];
+          if (c) openDoc(m, c);
+        })
+        .catch(() => {});
       return;
     }
     if (!jump.ref) return;
@@ -919,7 +949,11 @@ export function Read({
                   {verses.length ? ` · ${verses.length} verses` : ""}
                 </p>
                 {!verses.length ? (
-                  <p className="loading">Opening…</p>
+                  <p className="loading">
+                    {bundledError && !bmod
+                      ? `The Bibles in the app couldn't be set up (${bundledError}). Free some space and open the app again.`
+                      : "Opening…"}
+                  </p>
                 ) : layout === "verse" ? (
                   <div className="text verses" dir={bmod?.rtl ? "rtl" : undefined}>
                     {verses.map((v) => (

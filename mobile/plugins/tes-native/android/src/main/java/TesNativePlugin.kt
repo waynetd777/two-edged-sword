@@ -7,6 +7,9 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ActivityInfo
+import android.media.AudioAttributes
+import android.media.AudioFocusRequest
+import android.media.AudioManager
 import android.net.Uri
 import android.net.nsd.NsdManager
 import android.net.nsd.NsdServiceInfo
@@ -31,6 +34,7 @@ import app.tauri.plugin.Invoke
 import app.tauri.plugin.JSArray
 import app.tauri.plugin.JSObject
 import app.tauri.plugin.Plugin
+import org.json.JSONObject
 import java.io.File
 import java.util.Locale
 
@@ -60,6 +64,14 @@ class SpeakArgs {
   var rate: Double = 1.0
   var title: String = ""
   var voice: String? = null
+
+  /** The sleep timer's end, in ms since the epoch: the reading stops then. */
+  var stopAt: Double? = null
+}
+
+@InvokeArg
+class SleepArgs {
+  var stopAt: Double? = null
 }
 
 /**
@@ -124,17 +136,32 @@ class TesNativePlugin(private val activity: Activity) : Plugin(activity) {
     val version = activity.packageManager.getPackageInfo(activity.packageName, 0).lastUpdateTime.toString()
     try {
       if (!(stamp.exists() && stamp.readText() == version && dst.isDirectory)) {
-        dst.deleteRecursively()
-        dst.mkdirs()
+        // Copied beside the old ones and swapped in whole: a copy cut short (the phone full, the app closed)
+        // leaves the modules there were, never half of them.
+        val tmp = File(root, "modules.tmp")
+        tmp.deleteRecursively()
+        if (!tmp.mkdirs()) throw java.io.IOException("couldn't make ${tmp.name}")
         for (name in activity.assets.list("modules") ?: arrayOf()) {
-          activity.assets.open("modules/$name").use { i -> File(dst, name).outputStream().use { o -> i.copyTo(o) } }
+          activity.assets.open("modules/$name").use { i -> File(tmp, name).outputStream().use { o -> i.copyTo(o) } }
         }
+        stamp.delete()
+        dst.deleteRecursively()
+        if (!tmp.renameTo(dst)) throw java.io.IOException("couldn't move the modules into place")
         stamp.writeText(version)
       }
       bundled = root.absolutePath
       webView.post { webView.evaluateJavascript("window.dispatchEvent(new Event('tes-bundled'))", null) }
-    } catch (_: Exception) {}
+    } catch (e: Exception) {
+      // Said on the page (Read shows it), and kept for bundledDir in case the page wasn't listening yet.
+      val msg = e.message ?: e.javaClass.simpleName
+      bundledError = msg
+      val js = "window.dispatchEvent(new CustomEvent('tes-bundled-error', {detail: ${JSONObject.quote(msg)}}))"
+      webView.post { webView.evaluateJavascript(js, null) }
+    }
   }
+
+  /** Why the bundled modules couldn't be copied out, if they couldn't. */
+  @Volatile private var bundledError: String? = null
 
   /** Where a module opened in the app waits to be taken into the library (lib.rs import_waiting). */
   private val inbox get() = File(activity.filesDir, "Inbox")
@@ -309,6 +336,7 @@ class TesNativePlugin(private val activity: Activity) : Plugin(activity) {
   fun bundledDir(invoke: Invoke) {
     val r = JSObject()
     bundled?.let { r.put("dir", it) }
+    bundledError?.let { r.put("error", it) }
     invoke.resolve(r)
   }
 
@@ -329,26 +357,69 @@ class TesNativePlugin(private val activity: Activity) : Plugin(activity) {
 
   // ---------- reading aloud ----------
 
-  private var tts: TextToSpeech? = null
-  private var ready = false
+  private val main = Handler(Looper.getMainLooper())
+
+  /** Speech, as Android plays it and as Listen asks for the audio: spoken words, for media. */
+  private val speechAudio: AudioAttributes =
+    AudioAttributes
+      .Builder()
+      .setUsage(AudioAttributes.USAGE_MEDIA)
+      .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+      .build()
+
+  /**
+   * A text-to-speech engine, started once. Anything asked of it while it starts waits for it, rather than
+   * starting another; one that fails to start is shut down, and the next ask tries again. Used on the main
+   * thread only.
+   */
+  private inner class Engine(private val listener: UtteranceProgressListener) {
+    var tts: TextToSpeech? = null
+      private set
+    private var ready = false
+    private val waiting = mutableListOf<(TextToSpeech?) -> Unit>()
+
+    fun use(then: (TextToSpeech?) -> Unit) {
+      main.post {
+        val t = tts
+        if (t != null && ready) return@post then(t)
+        waiting.add(then)
+        if (t != null) return@post // starting: it answers everyone waiting
+        var made: TextToSpeech? = null
+        made =
+          TextToSpeech(activity) { status ->
+            val m = made
+            ready = status == TextToSpeech.SUCCESS && m != null
+            if (ready) {
+              m!!.setOnUtteranceProgressListener(listener)
+              m.setAudioAttributes(speechAudio)
+            } else {
+              m?.shutdown()
+              if (tts === m) tts = null
+            }
+            val all = waiting.toList()
+            waiting.clear()
+            all.forEach { it(if (ready) m else null) }
+          }
+        tts = made
+      }
+    }
+
+    fun shutdown() {
+      tts?.shutdown()
+      tts = null
+      ready = false
+    }
+  }
 
   /** What's being read, so pause can stop and resume can start again from the verse it was on. */
-  private var queue: List<SpeakItem> = listOf()
-  private var at = 0
+  @Volatile private var queue: List<SpeakItem> = listOf()
+
+  @Volatile private var at = 0
   private var rate = 1.0
   private var voiceName: String? = null
 
-  /** The engine, started once; `then` runs when it's ready. */
-  private fun engine(then: (TextToSpeech?) -> Unit) {
-    tts?.let { if (ready) return then(it) }
-    var made: TextToSpeech? = null
-    made = TextToSpeech(activity) { status ->
-      ready = status == TextToSpeech.SUCCESS
-      if (ready) made?.setOnUtteranceProgressListener(progress)
-      then(if (ready) made else null)
-    }
-    tts = made
-  }
+  /** When the sleep timer stops the reading (ms since the epoch), done here as the page may be asleep. */
+  private var sleep: Runnable? = null
 
   private fun event(kind: String, id: Int? = null, at: Int? = null, len: Int? = null) {
     val o = JSObject()
@@ -356,6 +427,8 @@ class TesNativePlugin(private val activity: Activity) : Plugin(activity) {
     id?.let { o.put("id", it) }
     at?.let { o.put("at", it) }
     len?.let { o.put("len", it) }
+    // When it happened: an "end" the page hears only on waking (it sleeps with the screen locked) is old news.
+    o.put("t", System.currentTimeMillis())
     trigger("speech", o)
   }
 
@@ -374,12 +447,67 @@ class TesNativePlugin(private val activity: Activity) : Plugin(activity) {
 
       override fun onDone(utteranceId: String) {
         val id = utteranceId.toIntOrNull() ?: return
-        event(if (id == queue.lastOrNull()?.id) "end" else "done", id)
+        val last = id == queue.lastOrNull()?.id
+        if (last) main.post { letGo() }
+        event(if (last) "end" else "done", id)
       }
 
       @Deprecated("Deprecated in Java")
       override fun onError(utteranceId: String) {}
     }
+
+  private val listen = Engine(progress)
+
+  // ---- audio focus: other audio pauses for Listen, and Listen pauses for a call or another app ----
+
+  private val audio get() = activity.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+
+  /** Listen was paused by another sound taking the audio for a while (a call), so carries on after it. */
+  private var lostForAWhile = false
+
+  private val focus =
+    AudioFocusRequest
+      .Builder(AudioManager.AUDIOFOCUS_GAIN)
+      .setAudioAttributes(speechAudio)
+      // Speech can't be heard quietly under something else: it pauses rather than ducks.
+      .setWillPauseWhenDucked(true)
+      .setOnAudioFocusChangeListener({ change ->
+        when (change) {
+          AudioManager.AUDIOFOCUS_LOSS -> {
+            lostForAWhile = false
+            if (queue.isNotEmpty()) pauseHere()
+          }
+
+          AudioManager.AUDIOFOCUS_LOSS_TRANSIENT, AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> {
+            if (queue.isNotEmpty() && listen.tts?.isSpeaking == true) {
+              lostForAWhile = true
+              pauseHere()
+            }
+          }
+
+          AudioManager.AUDIOFOCUS_GAIN -> {
+            if (lostForAWhile && queue.isNotEmpty()) {
+              lostForAWhile = false
+              speakFrom(at)
+              event("resumed")
+            }
+          }
+        }
+      }, main)
+      .build()
+
+  private fun takeAudio() = audio.requestAudioFocus(focus) == AudioManager.AUDIOFOCUS_REQUEST_GRANTED
+
+  private fun letGo() {
+    lostForAWhile = false
+    audio.abandonAudioFocusRequest(focus)
+  }
+
+  /** Paused here rather than by the page: the page is told, as when the lock screen pauses it on iOS. */
+  private fun pauseHere() {
+    listen.tts?.stop()
+    event("paused")
+  }
 
   /** The voice chosen, or the best English one installed that doesn't need the network. */
   private fun voiceFor(t: TextToSpeech): Voice? {
@@ -390,8 +518,8 @@ class TesNativePlugin(private val activity: Activity) : Plugin(activity) {
   }
 
   private fun speakFrom(i: Int) {
-    engine { t ->
-      if (t == null) return@engine
+    listen.use { t ->
+      if (t == null) return@use
       t.stop()
       voiceFor(t)?.let { t.voice = it }
       t.setSpeechRate(rate.toFloat())
@@ -402,6 +530,25 @@ class TesNativePlugin(private val activity: Activity) : Plugin(activity) {
     }
   }
 
+  /** The sleep timer's end, or none: the reading stops then, and the page is told ("slept"). */
+  private fun sleepAt(stopAt: Double?) {
+    main.post {
+      sleep?.let { main.removeCallbacks(it) }
+      sleep = null
+      if (stopAt == null) return@post
+      val r =
+        Runnable {
+          sleep = null
+          queue = listOf()
+          listen.tts?.stop()
+          letGo()
+          event("slept")
+        }
+      sleep = r
+      main.postDelayed(r, (stopAt.toLong() - System.currentTimeMillis()).coerceAtLeast(0))
+    }
+  }
+
   @Command
   fun speak(invoke: Invoke) {
     val args = invoke.parseArgs(SpeakArgs::class.java)
@@ -409,19 +556,30 @@ class TesNativePlugin(private val activity: Activity) : Plugin(activity) {
     rate = args.rate
     voiceName = args.voice
     at = 0
+    main.post { takeAudio() }
+    sleepAt(args.stopAt)
     speakFrom(0)
+    invoke.resolve()
+  }
+
+  /** The sleep timer changed while reading. */
+  @Command
+  fun speechSleep(invoke: Invoke) {
+    sleepAt(invoke.parseArgs(SleepArgs::class.java).stopAt)
     invoke.resolve()
   }
 
   /** Android's engine can't pause in a sentence: it stops, and resume starts that verse again. */
   @Command
   fun speechPause(invoke: Invoke) {
-    tts?.stop()
+    main.post { lostForAWhile = false }
+    listen.tts?.stop()
     invoke.resolve()
   }
 
   @Command
   fun speechResume(invoke: Invoke) {
+    main.post { takeAudio() }
     speakFrom(at)
     invoke.resolve()
   }
@@ -429,15 +587,18 @@ class TesNativePlugin(private val activity: Activity) : Plugin(activity) {
   @Command
   fun speechStop(invoke: Invoke) {
     queue = listOf()
-    tts?.stop()
+    listen.tts?.stop()
+    sleepAt(null)
+    main.post { letGo() }
     invoke.resolve()
   }
 
   @Command
   fun voices(invoke: Invoke) {
-    engine { t ->
+    listen.use { t ->
       val list = JSArray()
-      t?.voices
+      t
+        ?.voices
         ?.filter { it.locale.language == "en" && !it.isNetworkConnectionRequired }
         ?.sortedWith(compareByDescending<Voice> { it.quality }.thenBy { it.locale.toLanguageTag() })
         ?.forEach {
@@ -447,9 +608,7 @@ class TesNativePlugin(private val activity: Activity) : Plugin(activity) {
           o.put("language", it.locale.toLanguageTag())
           o.put(
             "quality",
-            if (it.quality >=
-              Voice.QUALITY_VERY_HIGH
-            ) {
+            if (it.quality >= Voice.QUALITY_VERY_HIGH) {
               "premium"
             } else if (it.quality >= Voice.QUALITY_HIGH) {
               "enhanced"
@@ -465,9 +624,24 @@ class TesNativePlugin(private val activity: Activity) : Plugin(activity) {
     }
   }
 
-  /** A word said on its own (the word sheet's speaker), apart from Listen's reading. */
-  private var wordTts: TextToSpeech? = null
-  private var wordReady = false
+  /** A word said on its own (the word sheet's speaker), apart from Listen's reading, telling the page when
+   *  it starts and is done. */
+  private val word =
+    Engine(
+      object : UtteranceProgressListener() {
+        override fun onStart(utteranceId: String) = sayEvent("start")
+
+        override fun onDone(utteranceId: String) = sayEvent("done")
+
+        override fun onStop(utteranceId: String, interrupted: Boolean) = sayEvent("done")
+
+        @Deprecated("Deprecated in Java")
+        override fun onError(utteranceId: String) = sayEvent("done")
+      },
+    )
+
+  /** The word engine started now, so the first tap on a speaker isn't kept waiting for it. */
+  private fun wordEngine(then: (TextToSpeech?) -> Unit) = word.use(then)
 
   /** In a Hebrew or Greek voice when the phone has one, otherwise the pronunciation in an English voice,
    *  as the desktop's SayButton does. */
@@ -485,29 +659,6 @@ class TesNativePlugin(private val activity: Activity) : Plugin(activity) {
     invoke.resolve()
   }
 
-  /** The word engine, started once, telling the page when a word starts and is done. */
-  private fun wordEngine(then: (TextToSpeech?) -> Unit) {
-    wordTts?.let { if (wordReady) return then(it) }
-    var made: TextToSpeech? = null
-    made = TextToSpeech(activity) { status ->
-      wordReady = status == TextToSpeech.SUCCESS
-      made?.setOnUtteranceProgressListener(
-        object : UtteranceProgressListener() {
-          override fun onStart(utteranceId: String) = sayEvent("start")
-
-          override fun onDone(utteranceId: String) = sayEvent("done")
-
-          override fun onStop(utteranceId: String, interrupted: Boolean) = sayEvent("done")
-
-          @Deprecated("Deprecated in Java")
-          override fun onError(utteranceId: String) = sayEvent("done")
-        },
-      )
-      then(if (wordReady) made else null)
-    }
-    wordTts = made
-  }
-
   private fun sayEvent(kind: String) {
     val o = JSObject()
     o.put("kind", kind)
@@ -515,9 +666,9 @@ class TesNativePlugin(private val activity: Activity) : Plugin(activity) {
   }
 
   override fun onDestroy() {
-    tts?.shutdown()
-    tts = null
-    wordTts?.shutdown()
-    wordTts = null
+    sleep?.let { main.removeCallbacks(it) }
+    letGo()
+    listen.shutdown()
+    word.shutdown()
   }
 }

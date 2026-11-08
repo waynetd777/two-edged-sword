@@ -100,6 +100,21 @@ function useDark(): boolean {
   return dark;
 }
 
+// What the page (another site's) may send. Its paragraphs to read: a list of text, within bounds.
+const pickedParas = (v: unknown): string[] | null =>
+  Array.isArray(v) && v.length <= 5000 && v.every((p) => typeof p === "string" && p.length <= 50000) ? (v as string[]) : null;
+// The keys passed on from it: Space, Esc, the arrows, and ⌘ (Ctrl) with one of the app's shortcut keys.
+const CMD_KEYS = new Set([..."123456789kK,.[]=+-0pP\\"]);
+const pageKey = (k: unknown) => {
+  if (!k || typeof k !== "object") return null;
+  const o = k as Record<string, unknown>;
+  const key = typeof o.key === "string" ? o.key : "";
+  const mods = { metaKey: !!o.metaKey, ctrlKey: !!o.ctrlKey, shiftKey: !!o.shiftKey, altKey: !!o.altKey };
+  const ok =
+    key === " " || key === "Escape" || key === "ArrowLeft" || key === "ArrowRight" || ((mods.metaKey || mods.ctrlKey) && CMD_KEYS.has(key));
+  return ok ? { key, ...mods } : null;
+};
+
 export function WebPage({ focus, setFocus }: { focus: boolean; setFocus: (f: boolean) => void }) {
   const app = useApp();
   const doc = app.doc!;
@@ -176,15 +191,17 @@ export function WebPage({ focus, setFocus }: { focus: boolean; setFocus: (f: boo
         const auto = m.auto && autoRead?.id === doc.module ? autoRead : null;
         if (m.auto && !auto) return;
         autoRead = null;
-        if (Array.isArray(m.picked) && m.picked.length)
-          player.playDoc(doc.module, doc.title, m.picked.map(String), 0, "devotional", { url, onEnd: auto?.onEnd });
+        const paras = pickedParas(m.picked);
+        if (paras?.length) player.playDoc(doc.module, doc.title, paras, 0, "devotional", { url, onEnd: auto?.onEnd });
       } else if (m.cancel) {
         setPicking(false);
         if (m.auto) autoRead = null;
       } else if (m.key) {
-        // A key pressed in the page: the app's shortcuts work there too.
-        if (m.key.key === "Escape" && picking) setPicking(false);
-        else window.dispatchEvent(new KeyboardEvent("keydown", { ...m.key, bubbles: true, cancelable: true }));
+        // A key pressed in the page: the app's shortcuts work there too (only those: the page is another site's).
+        const key = pageKey(m.key);
+        if (!key) return;
+        if (key.key === "Escape" && picking) setPicking(false);
+        else window.dispatchEvent(new KeyboardEvent("keydown", { ...key, bubbles: true, cancelable: true }));
       }
     };
     window.addEventListener("message", onMsg);
@@ -252,6 +269,8 @@ export function WebPage({ focus, setFocus }: { focus: boolean; setFocus: (f: boo
             key={`${url}#${reload}`}
             src={url}
             title={doc.title}
+            // Scripts (and frame.js) run and the site keeps its own origin, but it can't take the app's window elsewhere.
+            sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
             onLoad={() => {
               setLoaded(`${url}#${reload}`);
               post({ zoom, pick: picking, colors: readingColors(invert, dark), invert, follow, start: start(), still: !!site?.still });

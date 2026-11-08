@@ -61,7 +61,25 @@ async function start(i: number) {
   shown(t);
   await audio.play();
 }
-audio.addEventListener("ended", () => void start(at + 1).catch(() => stop()));
+/** Plays song `i`, or, where a file won't play (gone, unreadable), the first after it that will. */
+async function play(i: number) {
+  for (;;) {
+    const t = queue[i];
+    if (!t) return stop();
+    try {
+      return await start(i);
+    } catch (e) {
+      if (queue[at] !== t) return; // stopped, or something else asked for meanwhile
+      console.error("music", t.id, e);
+      i++;
+    }
+  }
+}
+audio.addEventListener("ended", () => void play(at + 1));
+// A file that fails part-way through: on to the next.
+audio.addEventListener("error", () => {
+  if (url && audio.src === url && queue[at]) void play(at + 1);
+});
 
 // Windows' media controls (the keys, the panel by the volume) show the page's own session while a
 // song plays: it says which song, with its artwork, and takes next and previous as Music would.
@@ -83,7 +101,7 @@ function shown(t: FileTrack) {
 /** Back to the start of the song, or, near its start, the song before. */
 const previous = () => {
   if (audio.currentTime > 3 || at <= 0) audio.currentTime = 0;
-  else void start(at - 1).catch(() => stop());
+  else void play(at - 1);
 };
 session?.setActionHandler("play", () => void fileControl("play"));
 session?.setActionHandler("pause", () => void fileControl("pause"));
@@ -99,6 +117,8 @@ function stop() {
   audio.load();
   URL.revokeObjectURL(url);
   url = "";
+  URL.revokeObjectURL(cover);
+  cover = "";
   if (session) session.metadata = null;
 }
 
@@ -106,7 +126,7 @@ function stop() {
 export async function filePlay(ids: string[]): Promise<number> {
   if (!known.size) await fileTracks();
   queue = ids.map((id) => known.get(id)).filter((t): t is FileTrack => !!t);
-  if (queue.length) await start(0);
+  if (queue.length) await play(0);
   else stop();
   return queue.length;
 }
@@ -130,7 +150,7 @@ export function fileState(): MusicState {
 export async function fileControl(cmd: "pause" | "play" | "next" | "stop" | "show") {
   if (cmd === "pause") audio.pause();
   else if (cmd === "play" && queue[at]) await audio.play();
-  else if (cmd === "next" && queue[at]) await start(at + 1);
+  else if (cmd === "next" && queue[at]) await play(at + 1);
   else if (cmd === "stop") stop();
 }
 

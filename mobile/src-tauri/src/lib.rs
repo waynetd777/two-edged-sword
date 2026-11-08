@@ -16,16 +16,22 @@ mod library;
 #[path = "../../../src-tauri/src/search.rs"]
 mod search;
 mod store;
+// Sync with the desktop app: pairing and encrypted requests (sync.rs), with the desktop's own encryption.
+mod sync;
+#[path = "../../../src-tauri/src/sync_crypto.rs"]
+mod sync_crypto;
 
 use library::{Kind, Library, Source};
 use serde::Serialize;
 use std::collections::HashSet;
 use std::io::{Read, Write};
-use std::sync::{Mutex, RwLock};
+use std::sync::{Arc, Mutex, RwLock};
 use tauri::{AppHandle, Emitter, Manager, State};
 
 struct AppState {
-    lib: RwLock<Library>,
+    /// The library as last read. Each command takes its own handle (lib_of) and lets go of the lock at once,
+    /// so a long search doesn't hold up a module being added, nor that the commands queued behind it.
+    lib: RwLock<Arc<Library>>,
     /** Downloads asked to stop, by file name. */
     cancelled: Mutex<HashSet<String>>,
 }
@@ -48,14 +54,19 @@ struct Module {
     features: Vec<&'static str>,
 }
 
+/// The library as it is now, held for as long as the caller needs it without keeping the lock.
+fn lib_of(st: &AppState) -> Arc<Library> {
+    st.lib.read().unwrap().clone()
+}
+
 fn scan() -> Library {
     // No e-Sword on a phone: the app's downloads first, then what ships in the app.
     Library::scan_choosing(vec![(Source::App, library::app_dir()), (Source::Bundled, library::bundled_dir())], &Default::default())
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 fn modules(st: State<AppState>) -> Vec<Module> {
-    let lib = st.lib.read().unwrap();
+    let lib = lib_of(&st);
     lib.modules
         .iter()
         .map(|m| Module {
@@ -75,37 +86,37 @@ fn modules(st: State<AppState>) -> Vec<Module> {
 
 #[tauri::command(async)]
 fn chapter(st: State<AppState>, bible: String, book: i64, chapter: i64) -> Result<Vec<content::Verse>, String> {
-    content::chapter(&st.lib.read().unwrap(), &bible, book, chapter)
+    content::chapter(&lib_of(&st), &bible, book, chapter)
 }
 
 #[tauri::command(async)]
 fn chapter_sizes(st: State<AppState>, bible: String) -> Result<Vec<(i64, i64, i64)>, String> {
-    content::chapter_sizes(&st.lib.read().unwrap(), &bible)
+    content::chapter_sizes(&lib_of(&st), &bible)
 }
 
 #[tauri::command(async)]
 fn commentary(st: State<AppState>, module: String, book: i64, chapter: i64, verse: i64) -> Result<content::Commentary, String> {
-    content::commentary(&st.lib.read().unwrap(), &module, book, chapter, verse)
+    content::commentary(&lib_of(&st), &module, book, chapter, verse)
 }
 
 #[tauri::command(async)]
 fn coverage(st: State<AppState>, book: i64, chapter: i64, verse: i64) -> Vec<content::Coverage> {
-    content::coverage(&st.lib.read().unwrap(), book, chapter, verse)
+    content::coverage(&lib_of(&st), book, chapter, verse)
 }
 
 #[tauri::command(async)]
 fn article(st: State<AppState>, kind: Kind, module: String, topic: String) -> Result<Option<content::Article>, String> {
-    content::article(&st.lib.read().unwrap(), kind, &module, &topic)
+    content::article(&lib_of(&st), kind, &module, &topic)
 }
 
 #[tauri::command(async)]
 fn strongs_for_word(st: State<AppState>, bible: String, word: String) -> Result<Vec<content::WordNumber>, String> {
-    content::strongs_for_word(&st.lib.read().unwrap(), &bible, &word)
+    content::strongs_for_word(&lib_of(&st), &bible, &word)
 }
 
 #[tauri::command(async)]
 fn strongs_by_book(st: State<AppState>, bible: String, number: String) -> Result<Vec<(i64, i64)>, String> {
-    content::strongs_by_book(&st.lib.read().unwrap(), &bible, &number)
+    content::strongs_by_book(&lib_of(&st), &bible, &number)
 }
 
 #[tauri::command(async)]
@@ -116,53 +127,53 @@ fn strongs_verses(
     book: Option<i64>,
     limit: usize,
 ) -> Result<Vec<content::VerseHit>, String> {
-    content::strongs_verses(&st.lib.read().unwrap(), &bible, &number, book, limit)
+    content::strongs_verses(&lib_of(&st), &bible, &number, book, limit)
 }
 
 #[tauri::command(async)]
 fn translit_search(st: State<AppState>, lexicon: String, query: String, limit: usize) -> Result<Vec<content::TranslitHit>, String> {
-    content::translit_search(&st.lib.read().unwrap(), &lexicon, &query, limit)
+    content::translit_search(&lib_of(&st), &lexicon, &query, limit)
 }
 
 #[tauri::command(async)]
 fn find_topics(st: State<AppState>, word: String) -> Vec<content::TopicHit> {
-    content::find_topics(&st.lib.read().unwrap(), &word, 8)
+    content::find_topics(&lib_of(&st), &word, 8)
 }
 
 /// Every passage a commentary comments on, in order (F. B. Meyer's plan).
 #[tauri::command(async)]
 fn commentary_ranges(st: State<AppState>, module: String) -> Result<Vec<content::VerseRange>, String> {
-    content::commentary_ranges(&st.lib.read().unwrap(), &module)
+    content::commentary_ranges(&lib_of(&st), &module)
 }
 
 /// A devotional's days, in calendar order ("January 1").
 #[tauri::command(async)]
 fn devotion_titles(st: State<AppState>, module: String) -> Result<Vec<String>, String> {
-    content::devotion_titles(&st.lib.read().unwrap(), &module)
+    content::devotion_titles(&lib_of(&st), &module)
 }
 
 /// A devotional's reading for a day ("September 24").
 #[tauri::command(async)]
 fn devotion(st: State<AppState>, module: String, title: String) -> Result<Option<String>, String> {
-    content::devotion(&st.lib.read().unwrap(), &module, &title)
+    content::devotion(&lib_of(&st), &module, &title)
 }
 
 /// A dictionary's entries starting with `prefix`, in order ("" for all of them).
 #[tauri::command(async)]
 fn list_topics(st: State<AppState>, kind: Kind, module: String, prefix: String, limit: usize) -> Result<Vec<String>, String> {
-    content::topics(&st.lib.read().unwrap(), kind, &module, &prefix, limit)
+    content::topics(&lib_of(&st), kind, &module, &prefix, limit)
 }
 
 /// A module's About: e-Sword's description of it, HTML.
 #[tauri::command(async)]
 fn module_info(st: State<AppState>, kind: Kind, id: String) -> Result<String, String> {
-    Ok(st.lib.read().unwrap().module(kind, &id)?.info.clone())
+    Ok(lib_of(&st).module(kind, &id)?.info.clone())
 }
 
 /// A reference book's chapters, in order.
 #[tauri::command(async)]
 fn reference_titles(st: State<AppState>, module: String) -> Result<Vec<String>, String> {
-    content::reference_titles(&st.lib.read().unwrap(), &module)
+    content::reference_titles(&lib_of(&st), &module)
 }
 
 // ---------- downloads (mobile/tools/modules_release.py makes what they fetch) ----------
@@ -186,40 +197,6 @@ fn fetch_bytes(url: String) -> Result<tauri::ipc::Response, String> {
     Ok(tauri::ipc::Response::new(buf))
 }
 
-// ---------- sync with the desktop app (src/phoneSync.ts; the desktop's sync.rs answers) ----------
-
-fn sync_agent() -> ureq::Agent {
-    ureq::AgentBuilder::new().timeout_connect(std::time::Duration::from_secs(4)).timeout_read(std::time::Duration::from_secs(20)).build()
-}
-
-/// The error a desktop sent ({"error": "..."}), or the network's.
-fn sync_error(e: ureq::Error) -> String {
-    match e {
-        ureq::Error::Status(401, _) => "not paired".into(),
-        ureq::Error::Status(_, r) => r
-            .into_string()
-            .ok()
-            .and_then(|t| serde_json::from_str::<serde_json::Value>(&t).ok())
-            .and_then(|v| v["error"].as_str().map(str::to_string))
-            .unwrap_or_else(|| "The computer couldn't sync.".into()),
-        ureq::Error::Transport(t) => t.to_string(),
-    }
-}
-
-fn sync_json(req: ureq::Request, body: serde_json::Value) -> Result<serde_json::Value, String> {
-    use std::io::Read;
-    let mut text = String::new();
-    // Read as a stream: into_string stops at 10 MB, and a sync carries the whole journal.
-    req.set("Content-Type", "application/json")
-        .send_string(&body.to_string())
-        .map_err(sync_error)?
-        .into_reader()
-        .take(64_000_000)
-        .read_to_string(&mut text)
-        .map_err(|e| e.to_string())?;
-    serde_json::from_str(&text).map_err(|e| e.to_string())
-}
-
 // ---------- the journal (src/journal.ts): its entries as JSON in the app's data folder ----------
 
 fn journal_path() -> std::path::PathBuf {
@@ -236,28 +213,40 @@ fn journal_read() -> Result<String, String> {
     }
 }
 
-/// Replaces the journal with `text`, written beside it first so a crash can't leave half a file.
+/// Replaces the journal with `text`, written beside it first (under a name of its own, flushed to disk)
+/// and then renamed over it, so a crash can't leave half a file; one write at a time.
 #[tauri::command(async)]
 fn journal_write(text: String) -> Result<(), String> {
+    static ONE_AT_A_TIME: Mutex<()> = Mutex::new(());
+    static N: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
+    let _held = ONE_AT_A_TIME.lock().unwrap_or_else(|e| e.into_inner());
     let path = journal_path();
-    let tmp = path.with_extension("json.tmp");
     if let Some(d) = path.parent() {
         std::fs::create_dir_all(d).map_err(|e| e.to_string())?;
     }
-    std::fs::write(&tmp, text).map_err(|e| e.to_string())?;
-    std::fs::rename(&tmp, &path).map_err(|e| e.to_string())
+    let n = N.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+    let tmp = path.with_extension(format!("json.{}-{n}.tmp", std::process::id()));
+    let written = std::fs::File::create(&tmp).and_then(|mut f| {
+        f.write_all(text.as_bytes())?;
+        f.sync_all()
+    });
+    match written.and_then(|_| std::fs::rename(&tmp, &path)) {
+        Ok(()) => Ok(()),
+        Err(e) => {
+            let _ = std::fs::remove_file(&tmp);
+            Err(e.to_string())
+        }
+    }
 }
 
-/// Pairs with the computer at `url` using the code its Settings shows; answers its token.
+/// A journal file that can't be read is moved aside (journal.json.bad-<time>), kept for recovery, so
+/// the journal can start again without writing over it. Answers its new name.
 #[tauri::command(async)]
-fn sync_pair(url: String, code: String, name: String) -> Result<serde_json::Value, String> {
-    sync_json(sync_agent().post(&format!("{url}/pair")), serde_json::json!({"code": code, "name": name}))
-}
-
-/// Sends what's here to the paired computer; answers the merge.
-#[tauri::command(async)]
-fn sync_post(url: String, token: String, payload: serde_json::Value) -> Result<serde_json::Value, String> {
-    sync_json(sync_agent().post(&format!("{url}/sync")).set("Authorization", &format!("Bearer {token}")), payload)
+fn journal_set_aside() -> Result<String, String> {
+    let path = journal_path();
+    let to = path.with_extension(format!("json.bad-{}", chrono::Local::now().format("%Y%m%d-%H%M%S")));
+    std::fs::rename(&path, &to).map_err(|e| e.to_string())?;
+    Ok(to.file_name().map(|n| n.to_string_lossy().to_string()).unwrap_or_default())
 }
 
 #[derive(Clone, Serialize)]
@@ -320,7 +309,7 @@ fn download(app: AppHandle, st: State<AppState>, url: String, file: String, sha2
     // Read before the lock is taken, so the commands reading the library (some on the main thread) wait
     // only for the swap, not the scan.
     let lib = scan();
-    *st.lib.write().unwrap() = lib;
+    *st.lib.write().unwrap() = Arc::new(lib);
     let _ = app.emit("download", Progress { file, done: size, total: size });
     Ok(())
 }
@@ -338,7 +327,7 @@ fn remove_module(st: State<AppState>, file: String) -> Result<(), String> {
     // Read before the lock is taken, so the commands reading the library (some on the main thread) wait
     // only for the swap, not the scan.
     let lib = scan();
-    *st.lib.write().unwrap() = lib;
+    *st.lib.write().unwrap() = Arc::new(lib);
     Ok(())
 }
 
@@ -386,13 +375,55 @@ struct Brought {
     added: Vec<String>,
     /// Files that looked like modules but couldn't be read as one, by name.
     failed: Vec<String>,
+    /// Files whose names have nothing the app can use as a module's file name.
+    #[serde(rename = "badName")]
+    bad_name: Vec<String>,
+}
+
+/// The file name a module brought in is kept under: a copy's number dropped ("kjv-1", "kjv (1)": iOS and
+/// browsers name second copies so, but it's still kjv), lower case, and anything but letters, digits and
+/// `._+-` made `_` ("King James" → "king_james"), as safe_name allows no more.
+fn module_stem(stem: &str, inbox: bool) -> String {
+    let mut s = stem.trim().to_string();
+    if let Some(base) = s
+        .strip_suffix(')')
+        .and_then(|t| t.rsplit_once(" ("))
+        .filter(|(_, n)| !n.is_empty() && n.chars().all(|c| c.is_ascii_digit()))
+        .map(|(b, _)| b)
+    {
+        s = base.trim_end().to_string();
+    }
+    if inbox {
+        if let Some((base, n)) = s.rsplit_once('-') {
+            if !base.is_empty() && !n.is_empty() && n.chars().all(|c| c.is_ascii_digit()) {
+                s = base.to_string();
+            }
+        }
+    }
+    let s: String = s.chars().map(|c| if c.is_ascii_alphanumeric() || "._+-".contains(c) { c.to_ascii_lowercase() } else { '_' }).collect();
+    s.trim_start_matches('.').to_string()
+}
+
+#[cfg(test)]
+mod module_stem_tests {
+    use super::module_stem;
+
+    #[test]
+    fn names_brought_in() {
+        assert_eq!(module_stem("kjv (1)", false), "kjv");
+        assert_eq!(module_stem("kjv-1", true), "kjv");
+        assert_eq!(module_stem("kjv-1", false), "kjv-1");
+        assert_eq!(module_stem("King James", true), "king_james");
+        assert_eq!(module_stem("Matthew Henry (2)", true), "matthew_henry");
+        assert_eq!(module_stem("..", true), "");
+    }
 }
 
 /// Takes any modules waiting (waiting_dirs) into the app's Modules folder, replacing one of the same name,
 /// and reads the library again if any came.
 #[tauri::command(async)]
 fn import_waiting(st: State<AppState>, inbox: Option<String>) -> Brought {
-    let mut out = Brought { added: vec![], failed: vec![] };
+    let mut out = Brought { added: vec![], failed: vec![], bad_name: vec![] };
     let dest = library::app_dir();
     let _ = std::fs::create_dir_all(&dest);
     for (dir, inbox) in waiting_dirs(inbox) {
@@ -413,18 +444,17 @@ fn import_waiting(st: State<AppState>, inbox: Option<String>) -> Brought {
                 }
                 continue;
             }
-            // iOS names a second copy of kjv.bbli "kjv-1.bbli" in its Inbox: it's still kjv.
-            let mut stem = path.file_stem().and_then(|x| x.to_str()).unwrap_or_default().to_string();
-            if inbox {
-                if let Some((base, n)) = stem.rsplit_once('-') {
-                    if !base.is_empty() && !n.is_empty() && n.chars().all(|c| c.is_ascii_digit()) {
-                        stem = base.to_string();
-                    }
-                }
-            }
+            let stem = module_stem(path.file_stem().and_then(|x| x.to_str()).unwrap_or_default(), inbox);
             let file = format!("{stem}.{ext}");
+            if safe_name(&file).is_err() {
+                // Nothing usable left of its name (all dots, say): said apart from a file that isn't a module.
+                out.bad_name.push(name);
+                if inbox {
+                    let _ = std::fs::remove_file(&path);
+                }
+                continue;
+            }
             let title = (|| -> Option<String> {
-                safe_name(&file).ok()?;
                 let c = rusqlite::Connection::open_with_flags(&path, rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY).ok()?;
                 let t: Option<String> = c.query_row("SELECT Title FROM Details LIMIT 1", [], |r| r.get(0)).ok()?;
                 Some(t.filter(|t| !t.trim().is_empty()).unwrap_or_else(|| stem.clone()))
@@ -456,7 +486,7 @@ fn import_waiting(st: State<AppState>, inbox: Option<String>) -> Brought {
         // Read before the lock is taken, so the commands reading the library (some on the main thread) wait
         // only for the swap, not the scan.
         let lib = scan();
-        *st.lib.write().unwrap() = lib;
+        *st.lib.write().unwrap() = Arc::new(lib);
     }
     out
 }
@@ -494,7 +524,11 @@ fn schedule_reminders(app: AppHandle, list: Vec<Remind>) -> Result<(), String> {
         state = n.request_permission().map_err(|e| e.to_string())?;
     }
     if state != PermissionState::Granted {
-        return Err("Notifications are off for Two-edged Sword. Turn them on in the iPhone's Settings.".into());
+        #[cfg(target_os = "android")]
+        let msg = "Notifications are off for Two-edged Sword. Turn them on in the phone's Settings, under Apps.";
+        #[cfg(not(target_os = "android"))]
+        let msg = "Notifications are off for Two-edged Sword. Turn them on in the iPhone's Settings.";
+        return Err(msg.into());
     }
     for r in list.into_iter().filter(|r| REMINDER_IDS.contains(&r.id)) {
         // The plugin's iOS side reads the time's digits as the phone's local time (its date format has
@@ -519,7 +553,7 @@ fn schedule_reminders(app: AppHandle, list: Vec<Remind>) -> Result<(), String> {
 /// bundled commentaries are small enough to scan.
 #[tauri::command(async)]
 fn search(st: State<AppState>, q: search::Query) -> Result<search::Results, String> {
-    search::run(&st.lib.read().unwrap(), None, &q)
+    search::run(&lib_of(&st), None, &q)
 }
 
 /// Android: the bundled modules, copied out of the APK by the plugin into `dir`/modules; the library is
@@ -530,7 +564,7 @@ fn set_bundled(st: State<AppState>, dir: String) {
     // Read before the lock is taken, so the commands reading the library (some on the main thread) wait
     // only for the swap, not the scan.
     let lib = scan();
-    *st.lib.write().unwrap() = lib;
+    *st.lib.write().unwrap() = Arc::new(lib);
 }
 
 /// Debug builds: the UI's errors and console.error, in the app's own log (`xcrun simctl launch --console`).
@@ -571,7 +605,7 @@ pub fn run() {
             if let Ok(d) = paths.document_dir() {
                 let _ = store::DOCS_DIR.set(d);
             }
-            app.manage(AppState { lib: RwLock::new(scan()), cancelled: Mutex::new(HashSet::new()) });
+            app.manage(AppState { lib: RwLock::new(Arc::new(scan())), cancelled: Mutex::new(HashSet::new()) });
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -604,10 +638,11 @@ pub fn run() {
             remove_module,
             count_waiting,
             import_waiting,
-            sync_pair,
-            sync_post,
+            sync::sync_pair,
+            sync::sync_call,
             journal_read,
-            journal_write
+            journal_write,
+            journal_set_aside
         ])
         .build(tauri::generate_context!())
         .expect("error while running the app")

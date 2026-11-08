@@ -51,7 +51,13 @@ async function applyTheme() {
   const saved = await api.storeRead<{ theme?: string; readFont?: ReadFont }>("settings").catch(() => null);
   // A screenshot scene's settings (its theme), which aren't saved.
   const sc = await api.scene().catch(() => null);
-  const s = { ...saved, ...(sc ? JSON.parse(sc).settings : {}) };
+  let scene: { settings?: object } = {};
+  try {
+    scene = sc ? JSON.parse(sc) : {};
+  } catch {
+    // not a scene this window can use: the saved settings stand
+  }
+  const s = { ...saved, ...scene?.settings };
   const t = s?.theme ?? "auto";
   if (t === "auto") document.documentElement.removeAttribute("data-theme");
   else document.documentElement.setAttribute("data-theme", t);
@@ -68,7 +74,11 @@ export function TrayWindow() {
       void api
         .trayInfo()
         .then(setInfo)
-        .catch((e) => console.error("tray", e)),
+        .catch((e) => {
+          console.error("tray", e);
+          // Still something to show: the window's choices work without the plan's state.
+          setInfo((i) => i ?? { state: null, loginAvailable: false, login: false });
+        }),
     [],
   );
 
@@ -80,10 +90,15 @@ export function TrayWindow() {
         refresh();
       }),
       listen("tray-state", refresh),
-    ];
+    ].map((p) =>
+      p.catch((e) => {
+        console.error("tray", e);
+        return null;
+      }),
+    );
     // Read once both are listening, so a state sent meanwhile isn't missed.
     void Promise.all(offs).then(refresh);
-    return () => offs.forEach((o) => void o.then((f) => f()));
+    return () => offs.forEach((o) => void o.then((f) => f?.()));
   }, [refresh]);
 
   // Its keys while it's open.

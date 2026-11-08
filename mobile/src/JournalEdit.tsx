@@ -9,7 +9,7 @@ import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "reac
 import { fmtRef, parseRef, Ref } from "../../src/bible";
 import { mdToHtml } from "../../src/md";
 import { Icon } from "./icons";
-import { Entry, entriesOn, journal, newId, nowLocal, useJournal } from "./journal";
+import { Entry, entriesOn, journal, newId, nowLocal, useJournal, useJournalError } from "./journal";
 
 // ---------- which entry is open: one editor for the whole app (App.tsx) ----------
 
@@ -108,20 +108,39 @@ function JournalEdit({ id, verse, onClose, onGo }: { id?: string; verse?: string
   const timer = useRef<number | undefined>(undefined);
   const latest = useRef(entry);
   latest.current = entry;
+  /** Changed since it was last kept. */
+  const dirty = useRef(false);
   const keep = () => {
     window.clearTimeout(timer.current);
+    if (!dirty.current) return;
     const e = latest.current;
     if (isNew.current && !e.title.trim() && !e.body.trim()) return;
     isNew.current = false;
+    dirty.current = false;
     journal.save(e);
   };
   const change = (p: Partial<Entry>) => {
     setEntry((e) => ({ ...e, ...p, updated: nowLocal() }));
+    dirty.current = true;
     window.clearTimeout(timer.current);
     timer.current = window.setTimeout(keep, 700);
   };
-  // Kept when the editor closes, however it closes.
-  useEffect(() => () => keep(), []);
+  // Kept when the editor closes, however it closes; and written at once when the app goes to the
+  // background, where it may be closed without another word.
+  useEffect(() => {
+    const away = (ev: Event) => {
+      if (ev.type === "visibilitychange" && document.visibilityState === "visible") return;
+      keep();
+      journal.flush().catch(() => {});
+    };
+    document.addEventListener("visibilitychange", away);
+    window.addEventListener("pagehide", away);
+    return () => {
+      document.removeEventListener("visibilitychange", away);
+      window.removeEventListener("pagehide", away);
+      keep();
+    };
+  }, []);
   // Writing starts in the text.
   useEffect(() => {
     if (!editing) return;
@@ -145,6 +164,7 @@ function JournalEdit({ id, verse, onClose, onGo }: { id?: string; verse?: string
     if (r) onGo(r);
   };
   const html = useMemo(() => (editing ? "" : mdToHtml(entry.body)), [editing, entry.body]);
+  const journalError = useJournalError();
 
   return (
     <>
@@ -164,6 +184,11 @@ function JournalEdit({ id, verse, onClose, onGo }: { id?: string; verse?: string
           </button>
         </div>
         <div className="jbody" style={{ paddingBottom: `calc(${keyboard ? `${keyboard}px` : "var(--bottom)"} + 16px)` }}>
+          {journalError && (
+            <p className="m" role="alert" style={{ color: "var(--red)", margin: "0 0 10px", overflowWrap: "anywhere" }}>
+              {journalError}
+            </p>
+          )}
           {editing ? (
             <input
               className="jtitle"
@@ -325,11 +350,18 @@ export function VerseNotes({ at, onClose }: { at: Ref; onClose: () => void }) {
 /** The whole journal, newest first, under More. */
 export function JournalList() {
   const all = useJournal();
+  // The journal couldn't be read (set aside) or saved: said over the list too, not only in an entry.
+  const journalError = useJournalError();
   const [q, setQ] = useState("");
   const f = q.trim().toLowerCase();
   const shown = f ? all.filter((e) => [e.title, e.body, ...e.verses, ...e.tags].some((x) => x.toLowerCase().includes(f))) : all;
   return (
     <>
+      {journalError && (
+        <p className="m" role="alert" style={{ color: "var(--red)", margin: "0 0 10px", overflowWrap: "anywhere" }}>
+          {journalError}
+        </p>
+      )}
       <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
         <label className="filter" style={{ flex: 1, margin: 0 }}>
           <Icon name="search" size={15} />
