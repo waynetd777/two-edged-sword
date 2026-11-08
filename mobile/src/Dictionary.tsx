@@ -6,6 +6,7 @@ import { Ref } from "../../src/bible";
 import { renderHtml } from "../../src/esword";
 import { api, Article, Module, save, saved } from "./api";
 import { Icon } from "./icons";
+import { Picker } from "./Picker";
 
 /** A dictionary's entries by name, lower-cased, with plurals and "A; B" entries under each part: the
  *  desktop's topicNames (StudyPane.tsx). */
@@ -98,6 +99,9 @@ export function DictionaryPanel({
   const [art, setArt] = useState<Article | null | undefined>(undefined);
   const [suggest, setSuggest] = useState<{ word: string; module: string; topic: string }[] | null>(null);
   const [names, setNames] = useState<Map<string, string> | null>(null);
+  const [picking, setPicking] = useState(false);
+  /** The dictionaries with something here: the entry being read, or else the verse's words. */
+  const [haveIt, setHaveIt] = useState<Set<string>>(new Set());
 
   useEffect(() => save("dictionary", module), [module]);
   useEffect(() => {
@@ -119,6 +123,23 @@ export function DictionaryPanel({
       live = false;
     };
   }, [text, dicts]);
+  const lookingAt = entry?.topic ?? missing?.topic ?? null;
+  useEffect(() => {
+    let live = true;
+    if (lookingAt)
+      Promise.all(
+        dicts.map((d) =>
+          topicIndex(d.id).then(
+            (n) => (n.has(lookingAt.toLowerCase()) ? d.id : null),
+            () => null,
+          ),
+        ),
+      ).then((ids) => live && setHaveIt(new Set(ids.filter((x): x is string => !!x))));
+    else setHaveIt(new Set((suggest ?? []).map((x) => x.module)));
+    return () => {
+      live = false;
+    };
+  }, [lookingAt, suggest, dicts]);
   // Typing: the dictionary's entries starting with it.
   useEffect(() => {
     const w = q.trim();
@@ -192,6 +213,7 @@ export function DictionaryPanel({
       ? "‹ This verse's words"
       : "‹ Look up another";
   const title = dicts.find((d) => d.id === entry?.module)?.title;
+  const current = dicts.find((d) => d.id === module);
 
   return (
     <>
@@ -208,13 +230,33 @@ export function DictionaryPanel({
           autoCapitalize="off"
         />
       </label>
-      <div className="chips" style={{ marginBottom: 10 }}>
-        {dicts.map((d) => (
-          <button key={d.id} className={`chip ${module === d.id ? "on" : ""}`} onClick={() => switchTo(d.id)}>
-            {d.abbrev || d.title}
-          </button>
-        ))}
+      <div className="chooser" style={{ padding: "0 0 10px" }}>
+        <button className="pill" onClick={() => setPicking(true)} aria-label={`Dictionary: ${current?.title ?? ""}. Choose another`}>
+          {current?.abbrev || current?.title || module}
+          <Icon name="down" size={14} />
+        </button>
+        {(entry || missing) && dicts.length > 1 && (
+          <span className="m">{haveIt.size === 1 ? "1 has this entry" : `${haveIt.size} have this entry`}</span>
+        )}
       </div>
+      {picking && (
+        <Picker
+          heading="Dictionaries"
+          noun="dictionaries"
+          starsKey="dictStars"
+          starred={["easton"]}
+          items={dicts.map((d) => ({ id: d.id, title: d.title, abbrev: d.abbrev, has: haveIt.has(d.id) }))}
+          module={module}
+          hasLabel={lookingAt ? `With “${lookingAt}”` : text !== undefined ? "With this verse's words" : "Dictionaries"}
+          noneLabel={lookingAt || text !== undefined ? "The others" : "Dictionaries"}
+          emptyLabel={lookingAt ? `None of your dictionaries has “${lookingAt}”.` : "None has an entry for this verse's words."}
+          onPick={(id) => {
+            switchTo(id);
+            setPicking(false);
+          }}
+          onClose={() => setPicking(false)}
+        />
+      )}
 
       {q.trim() ? (
         found.length ? (

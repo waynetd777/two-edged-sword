@@ -1058,10 +1058,10 @@ export function Read({
             docked
             actions={
               <>
+                {viewSeg}
                 {hlButton}
                 {bmkButton}
                 {noteButton}
-                {viewSeg}
               </>
             }
             tray={popup}
@@ -1101,10 +1101,10 @@ export function Read({
       {!docked && !doc && !pl.on && popup}
       {!docked && !doc && !pl.on && (
         <div className="studyrow">
+          {viewSeg}
           {hlButton}
           {bmkButton}
           {noteButton}
-          {viewSeg}
         </div>
       )}
 

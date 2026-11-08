@@ -16,20 +16,20 @@ Each section below folds open. The tabs along the bottom are Read, Plans, Search
 
 ## Study a verse
 
-Tap a word in a verse to choose the verse, then tap Study (the graduation cap) in the switch at the end of the row under the text, or **Study this verse** on the word. Study takes the text's place; tap the book beside it to go back to the chapter. Swipe its heading left or right for the next or previous verse.
+Tap a word in a verse to choose the verse, then tap Study (the graduation cap) in the switch at the start of the row under the text, or **Study this verse** on the word. Study takes the text's place; tap the book beside it to go back to the chapter. Swipe its heading left or right for the next or previous verse.
 
 | Tab | What it shows |
 |---|---|
 | **Commentary** | One commentary at a time. Tap its name to choose another; those with notes on the verse come first |
 | **Cross-refs** | Related verses, from the Treasury of Scripture Knowledge or OpenBible.info. Tap **TSK** or **OpenBible** to switch, and a verse to go there |
-| **Dictionary** | The verse's words that have a dictionary entry, to tap; or look up any word or name. The lit dictionary is the one you're reading; tap another to read the same entry there. **‹ Back** returns to the last entry |
+| **Dictionary** | The verse's words that have a dictionary entry, to tap; or look up any word or name. The pill names the dictionary you're reading; tap it to choose another (those with the entry first, starred ones first among them). **‹ Back** returns to the last entry |
 | **Maps** | Maps for the book. Tap a map to see it full screen |
 
 On an iPad held sideways the study pane stays open beside the text.
 
 ## Compare
 
-- Tap Compare in the switch at the end of the row under the text (the book goes back to the chapter) to see the verse in several Bibles, one under another.
+- Tap Compare in the switch at the start of the row under the text (the book goes back to the chapter) to see the verse in several Bibles, one under another.
 - **Differences**: words that differ from the KJV (or the first Bible) are marked. Turn it off with the switch.
 - **Edit** chooses the Bibles and their order. At least one stays ticked.
 - Swipe, or tap ‹ ›, for the next verse.
