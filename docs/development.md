@@ -599,7 +599,7 @@ reference, and images inline as `data:` URLs.
 
 ## The phone app
 
-`mobile/` is Two-edged Sword for iPhone, iPad and Android: Tauri 2, React and Vite, on the `mobile` branch. Its guide for users is `mobile/docs/guide.md`, shown in More › Help.
+`mobile/` is Two-edged Sword for iPhone, iPad and Android: Tauri 2, React and Vite. Its guide for users is `mobile/docs/guide.md`, shown in More › Help.
 
 **What it shares with the desktop**
 
