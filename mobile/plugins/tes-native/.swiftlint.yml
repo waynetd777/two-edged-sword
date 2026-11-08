@@ -1,0 +1,15 @@
+# SwiftLint for the plugin's Swift (`make lint`). Short names (i, x, ok) are this code's style.
+included:
+  - ios/Sources
+  - ios/Package.swift
+excluded:
+  - ios/.build
+  - ios/.tauri
+identifier_name:
+  min_length: 1
+  max_length: 60
+line_length:
+  warning: 160
+  error: 200
+file_length:
+  warning: 600

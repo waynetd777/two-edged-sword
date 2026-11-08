@@ -123,6 +123,7 @@ The phone app (iPhone, iPad and Android) keeps these the same as on this compute
 - bookmarks and highlights
 - reading plans and the days ticked
 - Recent, and the chapter you're at in each book
+- the journal: entries written or changed on a phone are saved in your journal files here
 
 To pair a phone or tablet:
 
@@ -131,7 +132,12 @@ To pair a phone or tablet:
 
 After that it syncs by itself whenever the phone app is open on the same Wi-Fi as this computer, with
 Two-edged Sword running here. A change made on a phone reaches your other phones through this computer.
-If the same thing was changed in two places, the later change wins.
+If the same thing was changed in two places, the later change wins. A journal entry changed in two places
+is kept twice: this computer's, and the phone's as a copy titled "(from iPhone)".
+Before a sync changes the journal's files, a copy of them is kept in the app's data folder
+(`journal-backups`, the last 14), and once a day a copy of the bookmarks, highlights and plans
+(`backups`). A sync never removes more than 10 bookmarks, highlights, journal entries or a plan's
+ticked days at once: if a device seems to have lost them, they're sent back to it instead.
 
 ## Licence and credits
 

@@ -63,7 +63,17 @@ async function verseEntries(text: string, dicts: Module[]): Promise<{ word: stri
 
 /** Dictionaries: the verse's words with entries, a look-up box, the dictionaries to switch between,
  *  and the entry. In the study sheet (with `text`, the verse) and on its own (Library, Words). */
-export function DictionaryPanel({ modules, text, start, onGo }: { modules: Module[]; text?: string; start?: string; onGo: (r: Ref) => void }) {
+export function DictionaryPanel({
+  modules,
+  text,
+  start,
+  onGo,
+}: {
+  modules: Module[];
+  text?: string;
+  start?: string;
+  onGo: (r: Ref) => void;
+}) {
   const dicts = useMemo(() => modules.filter((m) => m.kind === "dictionary"), [modules]);
   const [module, setModule] = useState<string>(() => {
     const s = saved<string>("dictionary", "easton");
@@ -71,7 +81,20 @@ export function DictionaryPanel({ modules, text, start, onGo }: { modules: Modul
   });
   const [q, setQ] = useState(start ?? "");
   const [found, setFound] = useState<string[]>([]);
-  const [entry, setEntry] = useState<{ module: string; topic: string } | null>(null);
+  const [entry, setEntryRaw] = useState<{ module: string; topic: string } | null>(null);
+  /** The entries read before this one, for ‹ Back. */
+  const [trail, setTrail] = useState<{ module: string; topic: string }[]>([]);
+  /** A dictionary switched to that hasn't the entry being read: "Grace" isn't in Smith's. */
+  const [missing, setMissing] = useState<{ topic: string; title: string } | null>(null);
+  /** Shows an entry, keeping the one it came from for ‹ Back. */
+  const setEntry = (e: { module: string; topic: string } | null, push = true) => {
+    setMissing(null);
+    if (push && entry && e && (e.module !== entry.module || e.topic !== entry.topic)) setTrail((t) => [...t, entry]);
+    if (!e) setTrail([]);
+    setEntryRaw(e);
+    // The lit dictionary is always the one being read.
+    if (e) setModule(e.module);
+  };
   const [art, setArt] = useState<Article | null | undefined>(undefined);
   const [suggest, setSuggest] = useState<{ word: string; module: string; topic: string }[] | null>(null);
   const [names, setNames] = useState<Map<string, string> | null>(null);
@@ -88,7 +111,9 @@ export function DictionaryPanel({ modules, text, start, onGo }: { modules: Modul
     if (text === undefined) return;
     let live = true;
     setSuggest(null);
-    setEntry(null);
+    setEntryRaw(null);
+    setTrail([]);
+    setMissing(null);
     verseEntries(text, dicts).then((s) => live && setSuggest(s));
     return () => {
       live = false;
@@ -137,15 +162,35 @@ export function DictionaryPanel({ modules, text, start, onGo }: { modules: Modul
     setQ("");
     setFound([]);
   };
-  // Switching dictionary keeps the entry when the other one has it too.
+  // Switching dictionary keeps the entry when the other one has it too, and says so when it hasn't.
   const switchTo = (id: string) => {
     setModule(id);
-    if (entry)
-      topicIndex(id).then((n) => {
-        const t = n.get(entry.topic.toLowerCase());
-        if (t) setEntry({ module: id, topic: t });
-      });
+    const was = entry ?? (missing ? { module: "", topic: missing.topic } : null);
+    if (!was) return;
+    topicIndex(id).then((n) => {
+      const t = n.get(was.topic.toLowerCase());
+      if (t) setEntry({ module: id, topic: t }, false);
+      else {
+        // ‹ Back returns to the entry being read, in its own dictionary.
+        if (entry) setTrail((tr) => [...tr, entry]);
+        setEntryRaw(null);
+        setMissing({ topic: was.topic, title: dicts.find((d) => d.id === id)?.title ?? "this dictionary" });
+      }
+    });
   };
+  /** ‹ Back: the entry before, or where it all started (the verse's words, or the look-up). */
+  const back = () => {
+    setMissing(null);
+    const prev = trail[trail.length - 1];
+    setTrail((t) => t.slice(0, -1));
+    setEntryRaw(prev ?? null);
+    if (prev) setModule(prev.module);
+  };
+  const backLabel = trail.length
+    ? "‹ Back"
+    : text !== undefined && (suggest?.length ?? 0) > 0
+      ? "‹ This verse's words"
+      : "‹ Look up another";
   const title = dicts.find((d) => d.id === entry?.module)?.title;
 
   return (
@@ -183,6 +228,15 @@ export function DictionaryPanel({ modules, text, start, onGo }: { modules: Modul
         ) : (
           <p className="empty">Nothing in this dictionary starts “{q.trim()}”.</p>
         )
+      ) : missing ? (
+        <>
+          <button className="link" style={{ marginBottom: 8, fontSize: 13 }} onClick={back}>
+            {backLabel}
+          </button>
+          <p className="empty">
+            “{missing.topic}” isn't in {missing.title}.
+          </p>
+        </>
       ) : entry ? (
         art === undefined ? (
           <p className="empty">Opening…</p>
@@ -190,11 +244,9 @@ export function DictionaryPanel({ modules, text, start, onGo }: { modules: Modul
           <p className="empty">This entry couldn't be read.</p>
         ) : (
           <>
-            {(suggest?.length ?? 0) > 0 && (
-              <button className="link" style={{ marginBottom: 8, fontSize: 13 }} onClick={() => setEntry(null)}>
-                ‹ This verse's words
-              </button>
-            )}
+            <button className="link" style={{ marginBottom: 8, fontSize: 13 }} onClick={back}>
+              {backLabel}
+            </button>
             <p className="label">{title}</p>
             <h3 className="entry-title">{art.topic}</h3>
             <div className="prose">
@@ -231,7 +283,17 @@ export function DictionaryPanel({ modules, text, start, onGo }: { modules: Modul
 }
 
 /** The dictionaries over everything: from the Library's Read, or Words' look-up. */
-export function DictionarySheet({ modules, start, onGo, onClose }: { modules: Module[]; start?: string; onGo: (r: Ref) => void; onClose: () => void }) {
+export function DictionarySheet({
+  modules,
+  start,
+  onGo,
+  onClose,
+}: {
+  modules: Module[];
+  start?: string;
+  onGo: (r: Ref) => void;
+  onClose: () => void;
+}) {
   return (
     <>
       <div className="scrim" onClick={onClose} />

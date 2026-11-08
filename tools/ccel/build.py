@@ -26,85 +26,161 @@ The files are taken as they were when this was written, checked against their sh
 versions, so a changed file stops the build until it's looked at. Downloads are cached in
 ~/Library/Caches/Two-edged Sword/ccel. Writes to the app's modules folder, or to `into`.
 """
-import base64, re, sys, urllib.parse
+
+import base64
+import re
+import sys
+import urllib.parse
 import xml.etree.ElementTree as ET
 from html import escape
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+import covers  # noqa: E402
 from books import ABBR, OSIS  # noqa: E402
 from modules import CACHES, fetch, module  # noqa: E402
-import covers  # noqa: E402
 
 CACHE = CACHES / "ccel"
 BOOKS = {
     "josephus": dict(
         url="https://www.ccel.org/ccel/josephus/complete.xml",
         sha256="b7cff7c4a88f7a9b0daf293696f38a66964d81d0e87802a18be0f3a50f1548a3",
-        cover=dict(title=[("THE WORKS OF", 40), ("FLAVIUS", 78), ("JOSEPHUS", 78)], author=[("TRANSLATED BY", 22), ("WILLIAM WHISTON", 34)],
-                   rgb=(28, 42, 78), ornament="star"),
-        title="The Works of Flavius Josephus", abbrev="Josephus",
+        cover=dict(
+            title=[("THE WORKS OF", 40), ("FLAVIUS", 78), ("JOSEPHUS", 78)],
+            author=[("TRANSLATED BY", 22), ("WILLIAM WHISTON", 34)],
+            rgb=(28, 42, 78),
+            ornament="star",
+        ),
+        title="The Works of Flavius Josephus",
+        abbrev="Josephus",
         about="The works of Flavius Josephus (37–c. 100), the Jewish historian, in William Whiston's translation (1737): "
-              "his Life, the Antiquities of the Jews, the Wars of the Jews, Against Apion and the Discourse to the Greeks "
-              "concerning Hades, with Whiston's notes."),
+        "his Life, the Antiquities of the Jews, the Wars of the Jews, Against Apion and the Discourse to the Greeks "
+        "concerning Hades, with Whiston's notes.",
+    ),
     "edersheim": dict(
         url="https://www.ccel.org/ccel/edersheim/lifetimes.xml",
         sha256="aa20f33d57f0f1d780886840c2d1ac523bb7004e9ff7f7f23a536c5c56150334",
-        cover=dict(title=[("THE LIFE AND TIMES", 40), ("OF", 30), ("JESUS", 78), ("THE MESSIAH", 56)], author=[("ALFRED EDERSHEIM", 36)],
-                   rgb=(32, 72, 52), ornament="cross"),
-        title="The Life and Times of Jesus the Messiah", abbrev="Edersheim",
+        cover=dict(
+            title=[("THE LIFE AND TIMES", 40), ("OF", 30), ("JESUS", 78), ("THE MESSIAH", 56)],
+            author=[("ALFRED EDERSHEIM", 36)],
+            rgb=(32, 72, 52),
+            ornament="cross",
+        ),
+        title="The Life and Times of Jesus the Messiah",
+        abbrev="Edersheim",
         about="Alfred Edersheim's The Life and Times of Jesus the Messiah (1883; third edition, 1886): the Gospel story "
-              "told against the Jewish life, worship and teaching of its time, with the author's notes and appendices."),
+        "told against the Jewish life, worship and teaching of its time, with the author's notes and appendices.",
+    ),
     "pilgrim": dict(
         url="https://www.ccel.org/ccel/bunyan/pilgrim.xml",
         sha256="1ebdfd4db68990f3cb26cb81305f0a32f2eb9ec0faedf33e2ee54414f9414353",
-        cover=dict(title=[("THE", 36), ("PILGRIM’S", 78), ("PROGRESS", 78)], author=[("JOHN BUNYAN", 40)], rgb=(186, 160, 118),
-                   stamp=(58, 34, 22), ornament="diamonds"),
-        title="The Pilgrim's Progress", abbrev="Pilgrim",
+        cover=dict(
+            title=[("THE", 36), ("PILGRIM’S", 78), ("PROGRESS", 78)],
+            author=[("JOHN BUNYAN", 40)],
+            rgb=(186, 160, 118),
+            stamp=(58, 34, 22),
+            ornament="diamonds",
+        ),
+        title="The Pilgrim's Progress",
+        abbrev="Pilgrim",
         about="John Bunyan's The Pilgrim's Progress from This World to That Which Is to Come (Part I, 1678; Part II, "
-              "1684): Christian's journey, and then Christiana's, told as a dream, with the Bible verses Bunyan set in "
-              "its margins."),
+        "1684): Christian's journey, and then Christiana's, told as a dream, with the Bible verses Bunyan set in "
+        "its margins.",
+    ),
     "lawrence": dict(
         url="https://www.ccel.org/ccel/lawrence/practice.xml",
         sha256="05149b19c169d3f148add4a75f90a84fce96a75ba776b919f8c4fc59d78b3c6d",
         skip=("The Practice of the Presence of God: The Best Rule of Holy Life", "Appendix to electronic edition"),
-        cover=dict(title=[("THE PRACTICE", 54), ("OF THE", 34), ("PRESENCE", 70), ("OF GOD", 54)], author=[("BROTHER LAWRENCE", 36)],
-                   rgb=(64, 86, 112), ornament="lamp"),
-        title="The Practice of the Presence of God", abbrev="Br Lawrence",
+        cover=dict(
+            title=[("THE PRACTICE", 54), ("OF THE", 34), ("PRESENCE", 70), ("OF GOD", 54)],
+            author=[("BROTHER LAWRENCE", 36)],
+            rgb=(64, 86, 112),
+            ornament="lamp",
+        ),
+        title="The Practice of the Presence of God",
+        abbrev="Br Lawrence",
         about="The conversations and letters of Brother Lawrence (Nicolas Herman, c. 1614–1691), a lay brother of the "
-              "Carmelites in Paris, on living every moment in the presence of God."),
+        "Carmelites in Paris, on living every moment in the presence of God.",
+    ),
     "bounds": dict(
         parts=[  # (CCEL's name, its sha256, the book's title in chapter names)
             ("power", "3db594d5db6ed1051807e9135a9cc186db79bb0e29320b80d6e1a08ab747d130", "Power Through Prayer"),
             ("purpose", "ca459b635fbf8503985fada4e4e477966d68035a4a526d20f8e77800ae958158", "Purpose in Prayer"),
-            ("prayingmen", "cb76e71624d98570f49ec2d98db7e559f66826b81474227eb69cda088b171996", "Prayer and Praying Men"),
+            (
+                "prayingmen",
+                "cb76e71624d98570f49ec2d98db7e559f66826b81474227eb69cda088b171996",
+                "Prayer and Praying Men",
+            ),
             ("reality", "4105d0e12a05c8217a966ca372b16f5451ab0c0f4dd2ad8dc749f987fe6c91c1", "The Reality of Prayer"),
-            ("essentials", "9a23ce9261e2cc5606ff6e14b01eb9dbc830128097539d57d123f7997bebf218", "The Essentials of Prayer"),
-            ("necessity", "ce64dd0f86d175fc470e955c69c6fdf3ef0a2d1ec8f2741a42ea1ba9ba780f93", "The Necessity of Prayer"),
+            (
+                "essentials",
+                "9a23ce9261e2cc5606ff6e14b01eb9dbc830128097539d57d123f7997bebf218",
+                "The Essentials of Prayer",
+            ),
+            (
+                "necessity",
+                "ce64dd0f86d175fc470e955c69c6fdf3ef0a2d1ec8f2741a42ea1ba9ba780f93",
+                "The Necessity of Prayer",
+            ),
             ("weapon", "f67928a78e0a6d773e7a45fecb66adf918ca2a11de20175bb083d0e13f6f5bc5", "The Weapon of Prayer"),
         ],
         skip=("Title Page",),
-        cover=dict(title=[("E. M. BOUNDS", 50), ("ON", 34), ("PRAYER", 86)], author=[("SEVEN BOOKS", 30)], rgb=(84, 40, 72),
-                   picture="hands-bitmap"),  # Dürer's Praying Hands, as the music player shows them
-        title="E. M. Bounds on Prayer", abbrev="Bounds",
+        cover=dict(
+            title=[("E. M. BOUNDS", 50), ("ON", 34), ("PRAYER", 86)],
+            author=[("SEVEN BOOKS", 30)],
+            rgb=(84, 40, 72),
+            picture="hands-bitmap",
+        ),  # Dürer's Praying Hands, as the music player shows them
+        title="E. M. Bounds on Prayer",
+        abbrev="Bounds",
         about="Seven books on prayer by Edward McKendree Bounds (1835–1913), a Methodist minister: Power Through Prayer, "
-              "Purpose in Prayer, Prayer and Praying Men, The Reality of Prayer, The Essentials of Prayer, The Necessity "
-              "of Prayer and The Weapon of Prayer, most of them edited from his papers by Homer W. Hodge after his death."),
+        "Purpose in Prayer, Prayer and Praying Men, The Reality of Prayer, The Essentials of Prayer, The Necessity "
+        "of Prayer and The Weapon of Prayer, most of them edited from his papers by Homer W. Hodge after his death.",
+    ),
     "sheldon": dict(
         url="https://www.ccel.org/ccel/sheldon/ihsteps.xml",
         sha256="f3202342cc40e304659f9e0ccb4b712c9d557efcae2dda636b2ab606bf95fcfb",
         skip=("Title Page",),
-        cover=dict(title=[("IN", 40), ("HIS", 78), ("STEPS", 78)], author=[("CHARLES M. SHELDON", 34)],
-                   rgb=(96, 62, 34), ornament="cross"),
-        title="In His Steps", abbrev="In His Steps",
+        cover=dict(
+            title=[("IN", 40), ("HIS", 78), ("STEPS", 78)],
+            author=[("CHARLES M. SHELDON", 34)],
+            rgb=(96, 62, 34),
+            ornament="cross",
+        ),
+        title="In His Steps",
+        abbrev="In His Steps",
         about="Charles M. Sheldon's In His Steps (1896), the novel behind the question “What would Jesus do?”: the members "
-              "of First Church in the town of Raymond pledge for a year to ask it before everything they do, and act on the answer."),
+        "of First Church in the town of Raymond pledge for a year to ask it before everything they do, and act on the answer.",
+    ),
 }
 # Josephus's works by their CCEL titles, as the chapters are named.
-WORKS = {"Life Of Flavius Josephus": "Life", "Antiquities of the Jews": "Antiquities", "The Wars of the Jews": "Wars",
-         "Flavius Josephus Against Apion": "Against Apion",
-         "An Extract Out Of Josephus's Discourse To The Greeks Concerning Hades": "Discourse on Hades"}
-SMALL = {"a", "an", "and", "as", "at", "but", "by", "for", "from", "in", "into", "of", "on", "or", "the", "to", "with", "upon"}
+WORKS = {
+    "Life Of Flavius Josephus": "Life",
+    "Antiquities of the Jews": "Antiquities",
+    "The Wars of the Jews": "Wars",
+    "Flavius Josephus Against Apion": "Against Apion",
+    "An Extract Out Of Josephus's Discourse To The Greeks Concerning Hades": "Discourse on Hades",
+}
+SMALL = {
+    "a",
+    "an",
+    "and",
+    "as",
+    "at",
+    "but",
+    "by",
+    "for",
+    "from",
+    "in",
+    "into",
+    "of",
+    "on",
+    "or",
+    "the",
+    "to",
+    "with",
+    "upon",
+}
 ROMAN = {"i": 1, "v": 5, "x": 10, "l": 50, "c": 100}
 
 
@@ -255,13 +331,17 @@ def straightened(path):
     is the one, within 4°, at which the rows of ink are most sharply divided (the lines of text and the
     trees' rules lie flat), found in steps of 0.05°."""
     import io
+
     import numpy as np
     from PIL import Image, ImageOps
+
     im = Image.open(path).convert("L")
     ink = Image.fromarray(((np.asarray(im) < 128) * 255).astype(np.uint8))
+
     def sharpness(d):
         rows = np.asarray(ink.rotate(d, resample=Image.BILINEAR, expand=True, fillcolor=0), dtype=np.float32).sum(1)
         return float(((rows[1:] - rows[:-1]) ** 2).sum())
+
     d = max(np.arange(-4, 4.001, 0.05), key=sharpness)
     im = im.rotate(float(d), resample=Image.BICUBIC, expand=True, fillcolor=255)
     box = ImageOps.invert(im).point(lambda v: 255 if v > 60 else 0).getbbox()
@@ -335,7 +415,11 @@ def chapters_edersheim(body):
         if not appendix:
             book += 1
         for i, d2 in enumerate(d2s, 1):
-            h = short(title_case(re.sub(r"^(CHAPTER|APPENDIX)\s+[\dIVXLC]+\.?\s*", "", d2.get("title", "").strip(), flags=re.I)))
+            h = short(
+                title_case(
+                    re.sub(r"^(CHAPTER|APPENDIX)\s+[\dIVXLC]+\.?\s*", "", d2.get("title", "").strip(), flags=re.I)
+                )
+            )
             yield (f"Appendix {i}: {h}" if appendix else f"Book {book}, Chapter {i}: {h}"), d2
 
 
@@ -392,16 +476,33 @@ def chapters_plain(body, skip, book=""):
 def build(name, into=None):
     b = BOOKS[name]
     if "parts" in b:
-        bodies = [(fetch(f"https://www.ccel.org/ccel/{name}/{part}.xml", CACHE / f"{name}_{part}.xml", sha256=sha), book)
-                  for part, sha, book in b["parts"]]
+        bodies = [
+            (fetch(f"https://www.ccel.org/ccel/{name}/{part}.xml", CACHE / f"{name}_{part}.xml", sha256=sha), book)
+            for part, sha, book in b["parts"]
+        ]
     else:
-        bodies = [(fetch(b["url"], CACHE / f"{name}.xml" if name in ("josephus", "edersheim", "pilgrim") else CACHE / f"{name}_{b['url'].rsplit('/', 1)[1][:-4]}.xml", sha256=b["sha256"]), "")]
+        bodies = [
+            (
+                fetch(
+                    b["url"],
+                    CACHE / f"{name}.xml"
+                    if name in ("josephus", "edersheim", "pilgrim")
+                    else CACHE / f"{name}_{b['url'].rsplit('/', 1)[1][:-4]}.xml",
+                    sha256=b["sha256"],
+                ),
+                "",
+            )
+        ]
     rows, refs = [], 0
     chapters = []
     for src, book in bodies:
         body = ET.parse(src).getroot().find("ThML.body")
         if name in ("josephus", "edersheim", "pilgrim"):
-            chapters += list({"josephus": chapters_josephus, "edersheim": chapters_edersheim, "pilgrim": chapters_pilgrim}[name](body))
+            chapters += list(
+                {"josephus": chapters_josephus, "edersheim": chapters_edersheim, "pilgrim": chapters_pilgrim}[name](
+                    body
+                )
+            )
         else:
             chapters += list(chapters_plain(body, b.get("skip", ()), book))
     for title, div in chapters:
@@ -418,9 +519,11 @@ def build(name, into=None):
             rows[i] = (f"{t} ({seen[t]})", h)
     front, thumb = covers.html(covers.design(**b["cover"]))  # a cover drawn for it (tools/covers)
     rows[0] = (rows[0][0], front + rows[0][1])
-    info = (f"{thumb}<p>{escape(b['about'])}</p><p>From the Christian Classics Ethereal Library's edition (ccel.org), "
-            f"public domain. {len(rows)} chapters; {refs} Bible reference{'s' * (refs != 1)}, each linked. "
-            "Built by Two-edged Sword's tools/ccel.</p>")
+    info = (
+        f"{thumb}<p>{escape(b['about'])}</p><p>From the Christian Classics Ethereal Library's edition (ccel.org), "
+        f"public domain. {len(rows)} chapters; {refs} Bible reference{'s' * (refs != 1)}, each linked. "
+        "Built by Two-edged Sword's tools/ccel.</p>"
+    )
     with module(f"{name}.refi", b["title"], b["abbrev"], info, into=into) as db:
         db.executemany("INSERT INTO Reference VALUES (?,?)", rows)
     print(f"{name}.refi: {len(rows)} chapters, {refs} references linked")

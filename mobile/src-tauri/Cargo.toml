@@ -36,7 +36,10 @@ sha2 = "0.10"
 codegen-units = 16
 lto = "thin"
 opt-level = 3
-panic = "abort"
+# Not "abort": wry catches WKWebView's exception when it answers a request the web view has already
+# dropped (after iOS stops the page in the background), and that catch only works if it can unwind
+# through Rust frames. With abort, the app closed as it came back to the front.
+panic = "unwind"
 strip = true
 
 [profile.dev]

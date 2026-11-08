@@ -391,6 +391,15 @@ pub fn save(dir: &Path, entry: &Entry) -> Result<(), String> {
     Ok(())
 }
 
+/// Copies the journal's month files into a dated folder under `into` (store::backup), so a sync that goes
+/// wrong can be undone. Unless `force`, only when the newest backup is more than a day old.
+pub fn backup(dir: &Path, into: &Path, force: bool) -> Result<Option<std::path::PathBuf>, String> {
+    let lock = crate::store::dir_lock(dir);
+    let _held = lock.lock().unwrap_or_else(|e| e.into_inner());
+    let files: Vec<std::path::PathBuf> = month_files(dir).into_iter().map(|(_, p)| p).collect();
+    crate::store::backup(&files, into, force)
+}
+
 pub fn delete(dir: &Path, id: &str) -> Result<(), String> {
     if id.is_empty() {
         return Ok(());
@@ -496,6 +505,24 @@ mod tests {
         assert!(std::fs::read_to_string(&p).unwrap().contains("Changed."));
         assert_eq!(std::fs::metadata(&p).unwrap().modified().unwrap(), old);
         let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn backs_up_at_most_daily_unless_forced() {
+        let base = std::env::temp_dir().join(format!("tes-journal-backup-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&base);
+        let (dir, into) = (base.join("journal"), base.join("backups"));
+        std::fs::create_dir_all(&base).unwrap();
+        save(&dir, &sample()).unwrap();
+        let first = backup(&dir, &into, false).unwrap().expect("a first backup");
+        assert!(first.join("Me. Journal - 2026-09.md").exists());
+        assert!(backup(&dir, &into, false).unwrap().is_none(), "not again the same day");
+        assert!(backup(&dir, &into, true).unwrap().is_some(), "forced");
+        for _ in 0..crate::store::BACKUPS_KEPT + 3 {
+            backup(&dir, &into, true).unwrap();
+        }
+        assert_eq!(std::fs::read_dir(&into).unwrap().count(), crate::store::BACKUPS_KEPT);
+        let _ = std::fs::remove_dir_all(&base);
     }
 
     #[test]

@@ -100,7 +100,17 @@ function Choose<T extends string>({
 }
 
 /** A dictionary entry found by a search, over the results. */
-export function Entry({ module, topic, onJump, onClose }: { module: string; topic: string; onJump: (j: Jump) => void; onClose: () => void }) {
+export function Entry({
+  module,
+  topic,
+  onJump,
+  onClose,
+}: {
+  module: string;
+  topic: string;
+  onJump: (j: Jump) => void;
+  onClose: () => void;
+}) {
   const [a, setA] = useState<Article | null | undefined>(undefined);
   useEffect(() => {
     api
@@ -219,32 +229,32 @@ export function Search({ modules, active, onJump }: { modules: Module[]; active:
     <>
       <header className="topbar" style={{ flexDirection: "column", alignItems: "stretch", gap: 10 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-        <NavButtons />
-        <label className="filter search" style={{ flex: 1 }}>
-          <Icon name="search" size={16} />
-          <input
-            ref={input}
-            type="search"
-            enterKeyHint="search"
-            placeholder="Search, or type a reference like rom 8 28"
-            aria-label="Search, or type a reference"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key !== "Enter") return;
-              if (asRef && !/\s(and|or)\s/i.test(q)) onJump({ ref: asRef });
-              else run();
-            }}
-            autoCorrect="off"
-            autoCapitalize="off"
-            spellCheck={false}
-          />
-          {q && (
-            <button className="clear" aria-label="Clear" onClick={() => (setQ(""), input.current?.focus())}>
-              ✕
-            </button>
-          )}
-        </label>
+          <NavButtons />
+          <label className="filter search" style={{ flex: 1 }}>
+            <Icon name="search" size={16} />
+            <input
+              ref={input}
+              type="search"
+              enterKeyHint="search"
+              placeholder="Search, or type a reference like rom 8 28"
+              aria-label="Search, or type a reference"
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key !== "Enter") return;
+                if (asRef && !/\s(and|or)\s/i.test(q)) onJump({ ref: asRef });
+                else run();
+              }}
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck={false}
+            />
+            {q && (
+              <button className="clear" aria-label="Clear" onClick={() => (setQ(""), input.current?.focus())}>
+                ✕
+              </button>
+            )}
+          </label>
         </div>
         <div className="chips">
           <button className="chip on" onClick={() => setChoosing("bible")}>
@@ -254,8 +264,7 @@ export function Search({ modules, active, onJump }: { modules: Module[]; active:
             {range} <Icon name="down" size={12} />
           </button>
           <button className="chip" onClick={() => setChoosing("mode")}>
-            {{ all: "All words", phrase: "Phrase", any: "Any word" }[mode]}{" "}
-            <Icon name="down" size={12} />
+            {{ all: "All words", phrase: "Phrase", any: "Any word" }[mode]} <Icon name="down" size={12} />
           </button>
           <button className={`chip ${whole ? "on" : ""}`} aria-pressed={whole} onClick={() => setWhole(!whole)}>
             Whole words
@@ -394,7 +403,9 @@ export function Search({ modules, active, onJump }: { modules: Module[]; active:
           onClose={() => setChoosing(null)}
         />
       )}
-      {entry && <Entry module={entry.module} topic={entry.topic} onJump={(j) => (setEntry(null), onJump(j))} onClose={() => setEntry(null)} />}
+      {entry && (
+        <Entry module={entry.module} topic={entry.topic} onJump={(j) => (setEntry(null), onJump(j))} onClose={() => setEntry(null)} />
+      )}
     </>
   );
 }

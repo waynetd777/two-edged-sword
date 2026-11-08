@@ -21,21 +21,55 @@ STEPBible asks that the data itself is passed on only from their repository: bui
 redistribute the downloaded files. The files are the repository's at a fixed commit. Downloads are
 cached in ~/Library/Caches/Two-edged Sword/stepbible.
 """
-import re, urllib.parse
+
+import re
+import urllib.parse
 from dataclasses import dataclass
 from functools import lru_cache
 
-from modules import CACHES, fetch as fetch_to
+from modules import CACHES
+from modules import fetch as fetch_to
 
 CACHE = CACHES / "stepbible"
 REPO = "https://raw.githubusercontent.com/STEPBible/STEPBible-Data/aca7d691414e00b0d669157d98bfd68195e64e1e/"
 BASE = REPO + "Translators%20Amalgamated%20OT%2BNT/"
-LEXICONS = {"TBESG": "Lexicons/TBESG - Translators Brief lexicon of Extended Strongs for Greek - STEPBible.org CC BY.txt",
-            "TBESH": "Lexicons/TBESH - Translators Brief lexicon of Extended Strongs for Hebrew - STEPBible.org CC BY.txt"}
-FILES = ["TAGNT Mat-Jhn - Translators Amalgamated Greek NT - STEPBible.org CC-BY.txt",
-         "TAGNT Act-Rev - Translators Amalgamated Greek NT - STEPBible.org CC-BY.txt"]
-BOOKS = ["Mat", "Mrk", "Luk", "Jhn", "Act", "Rom", "1Co", "2Co", "Gal", "Eph", "Php", "Col", "1Th", "2Th", "1Ti", "2Ti",
-         "Tit", "Phm", "Heb", "Jas", "1Pe", "2Pe", "1Jn", "2Jn", "3Jn", "Jud", "Rev"]
+LEXICONS = {
+    "TBESG": "Lexicons/TBESG - Translators Brief lexicon of Extended Strongs for Greek - STEPBible.org CC BY.txt",
+    "TBESH": "Lexicons/TBESH - Translators Brief lexicon of Extended Strongs for Hebrew - STEPBible.org CC BY.txt",
+}
+FILES = [
+    "TAGNT Mat-Jhn - Translators Amalgamated Greek NT - STEPBible.org CC-BY.txt",
+    "TAGNT Act-Rev - Translators Amalgamated Greek NT - STEPBible.org CC-BY.txt",
+]
+BOOKS = [
+    "Mat",
+    "Mrk",
+    "Luk",
+    "Jhn",
+    "Act",
+    "Rom",
+    "1Co",
+    "2Co",
+    "Gal",
+    "Eph",
+    "Php",
+    "Col",
+    "1Th",
+    "2Th",
+    "1Ti",
+    "2Ti",
+    "Tit",
+    "Phm",
+    "Heb",
+    "Jas",
+    "1Pe",
+    "2Pe",
+    "1Jn",
+    "2Jn",
+    "3Jn",
+    "Jud",
+    "Rev",
+]
 # "Jhn.3.16#01=NKO"; where the KJV numbers the verse otherwise, its number follows in [ ]
 # ("Php.1.16[1.17]#01"); ( ) and { } give other editions' numbers.
 # ἐγώ, με, σύ, εἰμί: the headwords whose forms Strong numbers separately.
@@ -45,25 +79,29 @@ LINE = re.compile(r"^([0-9A-Za-z]{3})\.(\d+)\.(\d+)((?:[\[({][\d.]+[\])}])*)#\d+
 
 @dataclass(frozen=True)
 class Word:
-    greek: str       # as printed, with its punctuation: "κόσμον,"
+    greek: str  # as printed, with its punctuation: "κόσμον,"
     num: str | None  # "G2889"
-    code: str        # "N-ASM"
+    code: str  # "N-ASM"
     editions: frozenset
 
 
 def has(w: Word, edition: str) -> bool:
     """Whether an edition ("TR", "Byz", "NA28", …) has the word; TR1, TR2… (word-order variants) count as TR."""
-    return any(e == edition or (e.startswith(edition) and e[len(edition):].isdigit()) for e in w.editions)
+    return any(e == edition or (e.startswith(edition) and e[len(edition) :].isdigit()) for e in w.editions)
 
 
 def fetch(file):
-    return fetch_to(BASE + urllib.parse.quote(file), CACHE / file, log=True, timeout=300).read_text(encoding="utf-8-sig")
+    return fetch_to(BASE + urllib.parse.quote(file), CACHE / file, log=True, timeout=300).read_text(
+        encoding="utf-8-sig"
+    )
 
 
 @lru_cache(maxsize=2)
 def lexicon(name) -> str:
     """STEPBible's TBESG or TBESH, as text."""
-    return fetch_to(REPO + urllib.parse.quote(LEXICONS[name]), CACHE / f"{name}.txt", log=True, timeout=300).read_text(encoding="utf-8-sig")
+    return fetch_to(REPO + urllib.parse.quote(LEXICONS[name]), CACHE / f"{name}.txt", log=True, timeout=300).read_text(
+        encoding="utf-8-sig"
+    )
 
 
 @lru_cache(maxsize=1)
@@ -77,7 +115,7 @@ def tagnt() -> dict:
                 continue
             col = line.split("\t")
             greek = re.sub(r"\s*\([^)]*\)\s*$", "", col[1]).strip()  # "κόσμον, (kosmon)"
-            first = col[3].split("+")[0].strip()                     # "G1473=P-1NS + G2532=CONJ"
+            first = col[3].split("+")[0].strip()  # "G1473=P-1NS + G2532=CONJ"
             num, _, code = first.partition("=")
             n = re.match(r"G0*(\d+)", num)
             eds = frozenset(e.strip() for e in col[5].split("+") if e.strip()) if len(col) > 5 else frozenset()
@@ -94,26 +132,81 @@ def tagnt() -> dict:
 
 # ---------- Robinson's grammar codes ----------
 
-POS = {"N": "noun", "V": "verb", "A": "adjective", "T": "article", "P": "pronoun", "R": "relative pronoun", "C": "reciprocal pronoun",
-       "D": "demonstrative pronoun", "K": "correlative pronoun", "I": "interrogative pronoun", "X": "indefinite pronoun",
-       "Q": "correlative pronoun", "F": "reflexive pronoun", "S": "possessive pronoun", "RI": "relative pronoun", "M": "numeral"}
-WORDS = {"PREP": "preposition", "CONJ": "conjunction", "ADV": "adverb", "PRT": "particle", "INJ": "interjection", "COND": "conjunction",
-         "HEB": "Hebrew word", "ARAM": "Aramaic word", "PRT-N": "particle · negative", "CONJ-N": "conjunction · negative",
-         "ADV-N": "adverb · negative", "ADV-I": "adverb · interrogative", "ADV-C": "adverb · comparative", "ADV-S": "adverb · superlative",
-         "ADV-K": "adverb · with crasis", "PRT-I": "particle · interrogative", "COND-K": "conjunction · with crasis"}
+POS = {
+    "N": "noun",
+    "V": "verb",
+    "A": "adjective",
+    "T": "article",
+    "P": "pronoun",
+    "R": "relative pronoun",
+    "C": "reciprocal pronoun",
+    "D": "demonstrative pronoun",
+    "K": "correlative pronoun",
+    "I": "interrogative pronoun",
+    "X": "indefinite pronoun",
+    "Q": "correlative pronoun",
+    "F": "reflexive pronoun",
+    "S": "possessive pronoun",
+    "RI": "relative pronoun",
+    "M": "numeral",
+}
+WORDS = {
+    "PREP": "preposition",
+    "CONJ": "conjunction",
+    "ADV": "adverb",
+    "PRT": "particle",
+    "INJ": "interjection",
+    "COND": "conjunction",
+    "HEB": "Hebrew word",
+    "ARAM": "Aramaic word",
+    "PRT-N": "particle · negative",
+    "CONJ-N": "conjunction · negative",
+    "ADV-N": "adverb · negative",
+    "ADV-I": "adverb · interrogative",
+    "ADV-C": "adverb · comparative",
+    "ADV-S": "adverb · superlative",
+    "ADV-K": "adverb · with crasis",
+    "PRT-I": "particle · interrogative",
+    "COND-K": "conjunction · with crasis",
+}
 CASE = {"N": "nom.", "G": "gen.", "D": "dat.", "A": "acc.", "V": "voc."}
 NUMBER = {"S": "sing.", "P": "plur."}
 GENDER = {"M": "masc.", "F": "fem.", "N": "neut."}
 TENSE = {"P": "present", "I": "imperfect", "F": "future", "A": "aorist", "R": "perfect", "L": "pluperfect", "X": ""}
-VOICE = {"A": "active", "M": "middle", "P": "passive", "E": "middle or passive", "D": "middle", "O": "passive", "N": "middle or passive",
-         "Q": "active", "X": ""}
-MOOD = {"I": "indicative", "S": "subjunctive", "O": "optative", "M": "imperative", "N": "infinitive", "P": "participle", "R": "imperative"}
+VOICE = {
+    "A": "active",
+    "M": "middle",
+    "P": "passive",
+    "E": "middle or passive",
+    "D": "middle",
+    "O": "passive",
+    "N": "middle or passive",
+    "Q": "active",
+    "X": "",
+}
+MOOD = {
+    "I": "indicative",
+    "S": "subjunctive",
+    "O": "optative",
+    "M": "imperative",
+    "N": "infinitive",
+    "P": "participle",
+    "R": "imperative",
+}
 # What a code's last part adds: "A-NSM-C", "ADV-ATT".
-SUFFIX = {"C": "comparative", "S": "superlative", "N": "negative", "I": "interrogative", "K": "with crasis", "ATT": "Attic", "ABB": "abbreviated"}
+SUFFIX = {
+    "C": "comparative",
+    "S": "superlative",
+    "N": "negative",
+    "I": "interrogative",
+    "K": "with crasis",
+    "ATT": "Attic",
+    "ABB": "abbreviated",
+}
 
 
 def cng(s):
-    """"NSM" -> "nom. masc. sing."; a person first for pronouns ("1GS" -> "1 gen. sing.")."""
+    """ "NSM" -> "nom. masc. sing."; a person first for pronouns ("1GS" -> "1 gen. sing.")."""
     person = ""
     if s[:1] in "123":
         person, s = s[0], s[1:]
@@ -146,10 +239,20 @@ def robinson(code, unknown=None):
         second = tvm.startswith("2")
         tvm = tvm.lstrip("2")
         t, v, m = (tvm + "   ")[:3]
-        desc = " ".join(x for x in [("second " if second else "") + TENSE.get(t, ""), VOICE.get(v, ""), MOOD.get(m, "")] if x.strip())
+        desc = " ".join(
+            x
+            for x in [("second " if second else "") + TENSE.get(t, ""), VOICE.get(v, ""), MOOD.get(m, "")]
+            if x.strip()
+        )
         out = ["verb", desc]
         if len(rest) > 1:
-            out.append(cng(rest[1]) if m == "P" else " ".join(x for x in [rest[1][:1] if rest[1][:1] in "123" else "", NUMBER.get(rest[1][-1:], "")] if x))
+            out.append(
+                cng(rest[1])
+                if m == "P"
+                else " ".join(
+                    x for x in [rest[1][:1] if rest[1][:1] in "123" else "", NUMBER.get(rest[1][-1:], "")] if x
+                )
+            )
         out += [SUFFIX[r] for r in rest[2:] if r in SUFFIX]
         return " · ".join(x for x in out if x)
     if head in POS:

@@ -14,7 +14,13 @@ Refuses to start without NOTES, or while the working tree has changes other than
 earlier try, so what's released is what's committed. After a failure, run it again: a version with
 no release yet is kept, so it carries on with the same one.
 """
-import json, os, shlex, subprocess, sys, zipfile
+
+import json
+import os
+import shlex
+import subprocess
+import sys
+import zipfile
 from pathlib import Path
 
 from bump_version import released
@@ -24,7 +30,13 @@ NAME = json.loads((ROOT / "src-tauri/tauri.conf.json").read_text(encoding="utf-8
 OUT = "src-tauri/target/release/bundle/dmg"
 INSTALLED = f"/Applications/{NAME}.app"
 # What tools/bump_version.py changes, and all the release commits.
-BUMPED = ["src-tauri/tauri.conf.json", "package.json", "package-lock.json", "src-tauri/Cargo.toml", "src-tauri/Cargo.lock"]
+BUMPED = [
+    "src-tauri/tauri.conf.json",
+    "package.json",
+    "package-lock.json",
+    "src-tauri/Cargo.toml",
+    "src-tauri/Cargo.lock",
+]
 DRY_RUN = os.environ.get("DRY_RUN", "") not in ("", "0")
 # Under each release's notes, for someone downloading it: the first-run warnings and how past them
 # (docs/features.md › First run). Not in the update offer, which only people already past them see.
@@ -81,7 +93,9 @@ def main():
         sys.exit('release: say what\'s new: make release NOTES="…" (the update offer and the release show it)')
     changed = [line[3:] for line in output("git", "status", "--porcelain").splitlines() if line[3:] not in BUMPED]
     if changed:
-        sys.exit("release: commit or stash these first, so what's released is what's committed:\n  " + "\n  ".join(changed))
+        sys.exit(
+            "release: commit or stash these first, so what's released is what's committed:\n  " + "\n  ".join(changed)
+        )
     run("make", "--no-print-directory", "app")
     run("make", "--no-print-directory", "dmg")  # which gives NOTES to tools/update_files.py
     v = version()
@@ -93,7 +107,19 @@ def main():
     dash = NAME.replace(" ", "-")
     pack_modules(f"{OUT}/{dash}-modules.zip")
     files = [f"{OUT}/{dash}.dmg", f"{OUT}/{dash}.app.tar.gz", f"{OUT}/latest.json", f"{OUT}/{dash}-modules.zip"]
-    run("gh", "release", "create", f"v{v}", *files, "--target", head, "--title", title, "--notes", notes + "\n" + FIRST_RUN)
+    run(
+        "gh",
+        "release",
+        "create",
+        f"v{v}",
+        *files,
+        "--target",
+        head,
+        "--title",
+        title,
+        "--notes",
+        notes + "\n" + FIRST_RUN,
+    )
     if os.environ.get("INSTALL", "1") != "0":
         was_running = running()
         run("make", "--no-print-directory", "-o", "app", "install-app")

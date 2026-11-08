@@ -200,8 +200,20 @@ text drift apart, the phrases not found are printed).
 
 Downloads are cached in ~/Library/Caches/Two-edged Sword/core.
 """
-import csv, gzip, html as html_, io, json, re, sqlite3, struct, sys, unicodedata, zipfile, zlib
+
+import csv
+import gzip
+import html as html_
+import io
+import json
+import re
+import sqlite3
+import struct
+import sys
+import unicodedata
 import xml.etree.ElementTree as ET
+import zipfile
+import zlib
 from collections import Counter, defaultdict
 from difflib import SequenceMatcher
 from pathlib import Path
@@ -209,11 +221,14 @@ from pathlib import Path
 
 class html:
     """html.escape without quotes: the text goes in elements, never attributes."""
+
     escape = staticmethod(lambda s: html_.escape(s, quote=False))
+
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from books import BOOKS  # noqa: E402
-from modules import BUNDLED, CACHES, chapter_lengths, fetch as fetch_to, greek_key, mend_verses, module, shipping  # noqa: E402
+from modules import BUNDLED, CACHES, chapter_lengths, greek_key, mend_verses, module, shipping  # noqa: E402
+from modules import fetch as fetch_to  # noqa: E402
 
 CACHE = CACHES / "core"
 KJV_URL = "https://ebible.org/Scriptures/eng-kjv2006_usfm.zip"
@@ -222,9 +237,11 @@ GREEK_URL = STRONGS + "greek/StrongsGreekDictionaryXML_1.4.zip"
 HEBREW_URL = STRONGS + "hebrew/StrongHebrewG.xml"
 TSK_URL = "https://raw.githubusercontent.com/man4christ/Treasury-of-Scripture-Knowledge/ea69f732e1b680db08a8a2c47009ff52d2f077cd/data/tsk.imp.gz"
 CROSSWIRE = "https://www.crosswire.org/ftpmirror/pub/sword/packages/rawzip/{}.zip"
-SHA256 = {GREEK_URL: "fe91d26bf97d9c6d5ccf4384a580543a2dea46ee4383ccd984c612ab78439d1e",
-          HEBREW_URL: "1f9659ea208f4c498843a0280dacb1448627c33ca77712642d8705793ab66061",
-          TSK_URL: "cd8250ee59901ebc6cc3bc13ef4310a80850f77cbb2fe4e99370cbaa9d9c15a2"}
+SHA256 = {
+    GREEK_URL: "fe91d26bf97d9c6d5ccf4384a580543a2dea46ee4383ccd984c612ab78439d1e",
+    HEBREW_URL: "1f9659ea208f4c498843a0280dacb1448627c33ca77712642d8705793ab66061",
+    TSK_URL: "cd8250ee59901ebc6cc3bc13ef4310a80850f77cbb2fe4e99370cbaa9d9c15a2",
+}
 FILES = ["kjv.bbli", "kjv+.bbli", "strong.lexi", "kjc.lexi", "tsk.cmti", "henry.cmti", "easton.dcti"]
 # The KJV and what is built from it, in one go; the rest can be built one at a time.
 CORE = list(FILES)
@@ -240,12 +257,13 @@ def fetch(url):
 
 
 def num(n):
-    """"G0025" or "25" (with a language) → "G25"."""
+    """ "G0025" or "25" (with a language) → "G25"."""
     m = re.match(r"([GH])?0*(\d+)([a-z]?)$", n.strip())
     return f"{m[1] or ''}{m[2]}" if m else n
 
 
 # ---- the KJV --------------------------------------------------------------------------------
+
 
 def kjv():
     """{(book, chapter, verse): (plain, tagged)} and [(book, chapter, verse, rendering, number)]."""
@@ -260,14 +278,20 @@ def kjv():
             continue
         chapter, title, heading, title_words = 0, "", "", []
         # One marker and what follows it up to the next paragraph-level marker.
-        for m in re.finditer(r"\\(c|v|d|s1|s2|mt1|mt2|toc\d|h|id|p|q\d?|b|m|pi\d?|li\d?|nb)\b ?(.*?)(?=\\(?:c|v|d|s1|s2|mt\d|toc\d|h|id|p|q\d?|b|m|pi\d?|li\d?|nb)\b(?![a-z*])|\Z)", text, re.S):
+        for m in re.finditer(
+            r"\\(c|v|d|s1|s2|mt1|mt2|toc\d|h|id|p|q\d?|b|m|pi\d?|li\d?|nb)\b ?(.*?)(?=\\(?:c|v|d|s1|s2|mt\d|toc\d|h|id|p|q\d?|b|m|pi\d?|li\d?|nb)\b(?![a-z*])|\Z)",
+            text,
+            re.S,
+        ):
             tag, body = m[1], m[2]
             if tag == "c":
                 subscription(verses, book, chapter, heading)
                 chapter, title, heading = int(body.split()[0]), "", ""
             elif tag == "d":
                 title = inline(body)
-                title_words = re.findall(r"\\\+?w ([^|\\]+)\|strong=\"([^\"]+)\"", body)  # counted with verse 1, which it opens
+                title_words = re.findall(
+                    r"\\\+?w ([^|\\]+)\|strong=\"([^\"]+)\"", body
+                )  # counted with verse 1, which it opens
             elif tag == "s1":
                 # Psalm 119's letters, and the epistles' subscriptions after their last verse.
                 heading = re.sub(r"[\u0590-\u05ff]", "", inline(body)[0]).strip()
@@ -305,7 +329,7 @@ def kjv():
         old = f"{word}<num>{has}</num>"
         at = tagged.rfind(old)
         assert at >= 0, f"KJV_ADDED_STRONGS: no {old} in {key}"
-        verses[key] = (plain, f"{tagged[:at]}{old}<num>{add}</num>{tagged[at + len(old):]}")
+        verses[key] = (plain, f"{tagged[:at]}{old}<num>{add}</num>{tagged[at + len(old) :]}")
         words.append((*key, word, add))
     return verses, words
 
@@ -328,7 +352,7 @@ SPLIT = {"can": ("not",), "what": ("soever",), "where": ("unto", "in")}
 
 
 def join_split(m):
-    """"can not" → "cannot" (with Strong's numbers, "can<num>G1410</num> not<num>G3756</num>" → "cannot<num>G1410</num><num>G3756</num>")."""
+    """ "can not" → "cannot" (with Strong's numbers, "can<num>G1410</num> not<num>G3756</num>" → "cannot<num>G1410</num><num>G3756</num>")."""
     first, nums, second = m[1], m[2], m[3]
     return f"{first}{second}{nums}" if second in SPLIT[first.lower()] else m[0]
 
@@ -353,7 +377,7 @@ def inline(s):
         t = re.sub(r"\\\+?(nd|tl|sc|bk|qs|k|pn|em|it|bd|no)\*", "", t)
         t = re.sub(r"\\\+?(nd|tl|sc|bk|qs|k|pn|em|it|bd|no)(?: |(?=\\)|$)", "", t)
         t = re.sub(r"\\[^\s\\*]+\*", "", t)  # anything else left: closing markers,
-        t = re.sub(r"\\[^\s\\]+ ?", "", t)    # then opening ones
+        t = re.sub(r"\\[^\s\\]+ ?", "", t)  # then opening ones
         # e-Sword's spellings, so a search for "Caesar" or "God's" finds them.
         t = t.replace("æ", "ae").replace("Æ", "Ae").replace("œ", "oe").replace("’", "'")
         t = re.sub(r"\s+", " ", t).strip()
@@ -361,7 +385,9 @@ def inline(s):
         t = re.sub(r"(</red>|</i>)\s+([,.;:?!)])", r"\1\2", t)
         # Words the source splits in a few verses where the 1769 text has one ("can not" in Acts 4:16):
         # cannot, whatsoever, whereunto, wherein; but "every where in" (1 Cor 4:17) is two.
-        t = re.sub(r"(?<!every )\b([Cc]an|[Ww]hat|[Ww]here)((?:<num>[^<]*</num>)*) (not|soever|unto|in)\b", join_split, t)
+        t = re.sub(
+            r"(?<!every )\b([Cc]an|[Ww]hat|[Ww]here)((?:<num>[^<]*</num>)*) (not|soever|unto|in)\b", join_split, t
+        )
         return t.strip()
 
     return conv(False), conv(True)
@@ -369,29 +395,38 @@ def inline(s):
 
 def write_kjv(verses):
     rows = sorted(verses.items())
-    info = ("<p>The 1769 King James Version of the Holy Bible (the Authorized Version), with the words of Christ in red.</p>"
-            "<p>Public domain (outside the United Kingdom, where the Crown's patent applies). From eBible.org's eng-kjv2006, "
-            "courtesy of the CrossWire Bible Society and eBible.org. Built by Two-edged Sword's tools/core.</p>")
+    info = (
+        "<p>The 1769 King James Version of the Holy Bible (the Authorized Version), with the words of Christ in red.</p>"
+        "<p>Public domain (outside the United Kingdom, where the Crown's patent applies). From eBible.org's eng-kjv2006, "
+        "courtesy of the CrossWire Bible Society and eBible.org. Built by Two-edged Sword's tools/core.</p>"
+    )
     with module("kjv.bbli", "King James Version", "KJV", info, into=BUNDLED) as db:
         db.executemany("INSERT INTO Bible VALUES (?,?,?,?)", [(b, c, v, p) for (b, c, v), (p, _) in rows])
-    info_plus = ("<p>The 1769 King James Version of the Holy Bible (the Authorized Version), with the words of Christ in red "
-                 "and Strong's numbers for looking up the Hebrew or Greek behind each word.</p>"
-                 "<p>Public domain (outside the United Kingdom, where the Crown's patent applies). Text and Strong's numbers "
-                 "from eBible.org's eng-kjv2006, courtesy of the CrossWire Bible Society and eBible.org. "
-                 "Built by Two-edged Sword's tools/core.</p>")
-    with module("kjv+.bbli", "King James Version w/ Strong's Numbers", "KJV+", info_plus, strongs=True, into=BUNDLED) as db:
+    info_plus = (
+        "<p>The 1769 King James Version of the Holy Bible (the Authorized Version), with the words of Christ in red "
+        "and Strong's numbers for looking up the Hebrew or Greek behind each word.</p>"
+        "<p>Public domain (outside the United Kingdom, where the Crown's patent applies). Text and Strong's numbers "
+        "from eBible.org's eng-kjv2006, courtesy of the CrossWire Bible Society and eBible.org. "
+        "Built by Two-edged Sword's tools/core.</p>"
+    )
+    with module(
+        "kjv+.bbli", "King James Version w/ Strong's Numbers", "KJV+", info_plus, strongs=True, into=BUNDLED
+    ) as db:
         db.executemany("INSERT INTO Bible VALUES (?,?,?,?)", [(b, c, v, t) for (b, c, v), (_, t) in rows])
     print(f"kjv.bbli, kjv+.bbli: {len(rows)} verses")
 
 
 # ---- Strong's -----------------------------------------------------------------------------
 
+
 def greek_text(el, lang="G"):
     """An element's text with its markup as e-Sword's."""
     out = [html.escape(el.text or "")]
     for c in el:
         if c.tag == "greek":
-            out.append(f"<grk>{html.escape(c.get('unicode', ''))}</grk> <lat>{html.escape(c.get('translit', ''))}</lat>")
+            out.append(
+                f"<grk>{html.escape(c.get('unicode', ''))}</grk> <lat>{html.escape(c.get('translit', ''))}</lat>"
+            )
         elif c.tag == "strongsref":
             out.append(f"<num>{'H' if c.get('language') == 'HEBREW' else 'G'}{num(c.get('strongs'))}</num>")
         elif c.tag == "pronunciation":
@@ -428,9 +463,12 @@ def greek():
         text = re.sub(r"\s+([,.;:)])", r"\1", text)
         if not text:
             continue  # the numbers Strong left unused (3203–3302)
-        out[n] = dict(word=f"<grk>{html.escape(g.get('unicode', '')) if g is not None else ''}</grk>",
-                      translit=html.escape(g.get("translit", "")) if g is not None else "",
-                      pron=html.escape(pron.get("strongs", "")) if pron is not None else "", text=text)
+        out[n] = dict(
+            word=f"<grk>{html.escape(g.get('unicode', '')) if g is not None else ''}</grk>",
+            translit=html.escape(g.get("translit", "")) if g is not None else "",
+            pron=html.escape(pron.get("strongs", "")) if pron is not None else "",
+            text=text,
+        )
     return out
 
 
@@ -475,8 +513,12 @@ def hebrew():
         if notes.get("translation"):
             text += f": - {notes['translation']}"
         text = text.replace("[idiom]", "X").replace("[phrase]", "+")
-        out[num(w.get("ID"))] = dict(word=f"<heb>{html.escape(w.get('lemma', ''))}</heb>", translit=html.escape(w.get("xlit", "")),
-                                    pron=html.escape(w.get("POS", "")), text=re.sub(r"\s+", " ", text).strip())
+        out[num(w.get("ID"))] = dict(
+            word=f"<heb>{html.escape(w.get('lemma', ''))}</heb>",
+            translit=html.escape(w.get("xlit", "")),
+            pron=html.escape(w.get("POS", "")),
+            text=re.sub(r"\s+", " ", text).strip(),
+        )
     return out
 
 
@@ -485,6 +527,7 @@ def tbesg_extra(have):
     the NT's variants), as strong.lexi's other entries are: [(number, definition)]. A number TBESG splits by
     meaning (G2424G, G2424I) is one entry here, its first."""
     from stepbible import lexicon
+
     rows, seen = [], set(have)
     for line in lexicon("TBESG").split("\n"):
         f = line.split("\t")
@@ -498,30 +541,45 @@ def tbesg_extra(have):
         d = re.sub(r"<br\s*/?>", "<br>", d, flags=re.I).replace("__", "")
         d = re.sub(r"<(?!/?(?:b|i|br)\b)[^>]*>", "", d).strip()
         gloss = html.escape(f[6].strip())
-        rows.append((n, f"<p><grk>{html.escape(f[3])}</grk></p><p><lat>{html.escape(f[4])}</lat></p><p><b>{gloss}</b></p>"
-                        f"<p>{d}</p><p><i>STEPBible's TBESG (CC BY 4.0).</i></p>"))
+        rows.append(
+            (
+                n,
+                f"<p><grk>{html.escape(f[3])}</grk></p><p><lat>{html.escape(f[4])}</lat></p><p><b>{gloss}</b></p>"
+                f"<p>{d}</p><p><i>STEPBible's TBESG (CC BY 4.0).</i></p>",
+            )
+        )
     print(f"  strong.lexi: {len(rows)} entries from STEPBible's TBESG for numbers beyond Strong's")
     return rows
 
 
 def write_strong(entries, counts):
-    info = ("<p>Strong's Hebrew and Greek dictionaries, from James Strong's Exhaustive Concordance of the Bible (1890).</p>"
-            "<p>Public domain. The Greek is Ulrik Petersen's XML edition (1.4, 2007), the Hebrew David Troidl's and "
-            "David Instone-Brewer's, both from the Open Scriptures project (github.com/openscriptures/strongs). "
-            "The occurrences are counted in the KJV's Strong's numbers. Built by Two-edged Sword's tools/core.</p>"
-            "<p>+ (addition) marks a rendering with other words; X (multiplication) a rendering from an idiom; "
-            "( ) a word sometimes given with the main one; [ ] a word added.</p>"
-            "<p>The Greek numbers beyond Strong's (G5625 on, the Septuagint's words and the New Testament's variants, which "
-            "LXX-Brenton+ uses) are STEPBible's extended Strong's numbers, with the entries of their brief lexicon, TBESG "
-            "(Translators Brief lexicon of Extended Strongs for Greek, Tyndale House, www.STEPBible.org, CC BY 4.0, "
-            "https://creativecommons.org/licenses/by/4.0/), its references given as text.</p>")
+    info = (
+        "<p>Strong's Hebrew and Greek dictionaries, from James Strong's Exhaustive Concordance of the Bible (1890).</p>"
+        "<p>Public domain. The Greek is Ulrik Petersen's XML edition (1.4, 2007), the Hebrew David Troidl's and "
+        "David Instone-Brewer's, both from the Open Scriptures project (github.com/openscriptures/strongs). "
+        "The occurrences are counted in the KJV's Strong's numbers. Built by Two-edged Sword's tools/core.</p>"
+        "<p>+ (addition) marks a rendering with other words; X (multiplication) a rendering from an idiom; "
+        "( ) a word sometimes given with the main one; [ ] a word added.</p>"
+        "<p>The Greek numbers beyond Strong's (G5625 on, the Septuagint's words and the New Testament's variants, which "
+        "LXX-Brenton+ uses) are STEPBible's extended Strong's numbers, with the entries of their brief lexicon, TBESG "
+        "(Translators Brief lexicon of Extended Strongs for Greek, Tyndale House, www.STEPBible.org, CC BY 4.0, "
+        "https://creativecommons.org/licenses/by/4.0/), its references given as text.</p>"
+    )
     rows = []
     for n, e in entries.items():
         total = f"<p><b>Total KJV occurrences: {counts[n]}</b></p>" if counts.get(n) else ""
-        text = re.sub(r";\s*,", ";", re.sub(r"\s+,", ",", e["text"])).replace("\ufffd", "").strip()  # "multitude; , the same as"
-        text = re.sub(r"<i>([^<]*?[a-z])</i>([a-z]+)", r"<i>\1\2</i>", text).replace("<heb></heb>", "")  # "<i>to have affection f</i>or"
-        text = re.sub(r"\s+", " ", re.sub(r",?\s*<lat></lat>\s*;", ";", text))  # H595's "sometimes, <lat></lat>;", a form lost
-        rows.append((n, f"<p>{e['word']}</p><p><lat>{e['translit']}</lat></p><p><i>{e['pron']}</i></p><p>{text}</p>{total}"))
+        text = (
+            re.sub(r";\s*,", ";", re.sub(r"\s+,", ",", e["text"])).replace("\ufffd", "").strip()
+        )  # "multitude; , the same as"
+        text = re.sub(r"<i>([^<]*?[a-z])</i>([a-z]+)", r"<i>\1\2</i>", text).replace(
+            "<heb></heb>", ""
+        )  # "<i>to have affection f</i>or"
+        text = re.sub(
+            r"\s+", " ", re.sub(r",?\s*<lat></lat>\s*;", ";", text)
+        )  # H595's "sometimes, <lat></lat>;", a form lost
+        rows.append(
+            (n, f"<p>{e['word']}</p><p><lat>{e['translit']}</lat></p><p><i>{e['pron']}</i></p><p>{text}</p>{total}")
+        )
     rows += tbesg_extra(set(entries))
     rows.sort(key=lambda r: (r[0][0], int(re.match(r"\d+", r[0][1:])[0])))
     with module("strong.lexi", "Strong's Hebrew and Greek Dictionaries", "Strong", info, into=BUNDLED) as db:
@@ -544,19 +602,25 @@ def write_kjc(entries, words):
         """A rendering as the KJV writes it most often: God and Jesus with their capitals, "come" without the one it
         has starting a sentence."""
         return forms[(n, key)].most_common(1)[0][0]
+
     rows = []
     for n, renderings in by.items():
         e = entries.get(n, {"word": "", "translit": ""})
         total = sum(sum(x.values()) for x in renderings.values())
         parts = [f"<p>{e['word']}</p><p><lat>{e['translit']}</lat></p><p><b>Total KJV Occurrences:</b> {total}</p>"]
         for r, where in sorted(renderings.items(), key=lambda x: (-sum(x[1].values()), x[0])):
-            refs = ", ".join(f"<ref>{BOOK_ABBR[b - 1]} {c}:{v}</ref>" + (f" ({k})" if k > 1 else "") for (b, c, v), k in sorted(where.items()))
+            refs = ", ".join(
+                f"<ref>{BOOK_ABBR[b - 1]} {c}:{v}</ref>" + (f" ({k})" if k > 1 else "")
+                for (b, c, v), k in sorted(where.items())
+            )
             parts.append(f"<p><b>{html.escape(shown(n, r))}, {sum(where.values())}</b></p><p>{refs}</p>")
         rows.append((n, "".join(parts)))
     rows.sort(key=lambda r: (r[0][0], int(re.match(r"\d+", r[0][1:])[0])))
-    info = ("<p>A King James concordance by Strong's number: every English word the KJV uses for each Hebrew and Greek word, "
-            "how often, and where.</p><p>Counted from the Strong's numbers in eBible.org's eng-kjv2006 (public domain). "
-            "Built by Two-edged Sword's tools/core.</p>")
+    info = (
+        "<p>A King James concordance by Strong's number: every English word the KJV uses for each Hebrew and Greek word, "
+        "how often, and where.</p><p>Counted from the Strong's numbers in eBible.org's eng-kjv2006 (public domain). "
+        "Built by Two-edged Sword's tools/core.</p>"
+    )
     with module("kjc.lexi", "King James Concordance", "KJC", info, into=BUNDLED) as db:
         db.executemany("INSERT INTO Lexicon VALUES (?,?)", rows)
     print(f"kjc.lexi: {len(rows)} entries")
@@ -564,8 +628,9 @@ def write_kjc(entries, words):
 
 # ---- the Treasury of Scripture Knowledge ------------------------------------------------------
 
+
 def ref(osis):
-    """"John.1.1-John.1.3" → "Joh 1:1-3"; "Gen.1.1-Gen.2.3" → "Gen 1:1-2:3"; "Ps.23" → "Psa 23"."""
+    """ "John.1.1-John.1.3" → "Joh 1:1-3"; "Gen.1.1-Gen.2.3" → "Gen 1:1-2:3"; "Ps.23" → "Psa 23"."""
     a, _, b = osis.partition("-")
     pa = a.split(".")
     s = f"{ABBR.get(pa[0], pa[0])} {pa[1]}" + (f":{pa[2]}" if len(pa) > 2 else "")
@@ -587,7 +652,9 @@ def tsk_html(s):
     s = s.replace("<lb/>", "<br>")  # a line break in a quoted hymn (Lev 19:5)
     s = re.sub(r" -par(?=[A-Z])", "</p><p>", s)  # an RTF paragraph mark left in the text (Num 7:73)
     # A catchword opens its paragraph, in italics: e-Sword's TSK shows it bold with a colon.
-    s = re.sub(r'<p>\s*<hi type="italic">([^<]{1,100})</hi>', r"<p><b>\1:</b>", s)  # not a long quotation (1Sa 14:41's Latin)
+    s = re.sub(
+        r'<p>\s*<hi type="italic">([^<]{1,100})</hi>', r"<p><b>\1:</b>", s
+    )  # not a long quotation (1Sa 14:41's Latin)
     s = re.sub(r'<hi type="italic">([^<]*)</hi>', r"<i>\1</i>", s)
     s = re.sub(r"<p>\s*</p>", "", s)
     s = re.sub(r"\s+", " ", s).strip()
@@ -604,6 +671,7 @@ HEBREW_1255 = re.compile(r"<i>([^<]*[\u0370-\u03ff][^<]*)</i>(?=\s*<num>H\d+)|<i
 def tsk_hebrew(s):
     """The TSK's Hebrew words that CrossWire's text has in the Windows Greek code page ("ΰω�ψΰμδ", before H841): the
     same bytes read as Windows Hebrew (אשראלה). The letters the conversion lost (�) are dropped."""
+
     def one(m):
         w = (m[1] or m[2]).replace("\ufffd", "")
         try:
@@ -611,6 +679,7 @@ def tsk_hebrew(s):
         except (UnicodeEncodeError, UnicodeDecodeError):
             return m[0]
         return f"<heb>{heb.strip()}</heb>"
+
     s = HEBREW_1255.sub(one, s)
 
     def run(m):  # a run of such letters outside <i> (the Exodus introduction's "εΰμδ ωׁξεϊ")
@@ -618,16 +687,27 @@ def tsk_hebrew(s):
         if not (re.search("ΰ|[\u05b0-\u05c7]|ς(?=[\u0370-\u03ff])", w)):
             return w
         try:
-            return "<heb>" + "".join(ch if "\u05b0" <= ch <= "\u05c7" else ch.encode("cp1253").decode("cp1255")
-                                     for ch in w.replace("\ufffd", "")) + "</heb>"
+            return (
+                "<heb>"
+                + "".join(
+                    ch if "\u05b0" <= ch <= "\u05c7" else ch.encode("cp1253").decode("cp1255")
+                    for ch in w.replace("\ufffd", "")
+                )
+                + "</heb>"
+            )
         except (UnicodeEncodeError, UnicodeDecodeError):
             return w
+
     parts = re.split(r"(<heb>.*?</heb>|<[^>]+>)", s)
-    s = "".join(x if x.startswith("<") else re.sub(r"[\u0370-\u03ff\u05b0-\u05c7]+(?: [\u0370-\u03ff\u05b0-\u05c7]+)*", run, x)
-                for x in parts)
+    s = "".join(
+        x if x.startswith("<") else re.sub(r"[\u0370-\u03ff\u05b0-\u05c7]+(?: [\u0370-\u03ff\u05b0-\u05c7]+)*", run, x)
+        for x in parts
+    )
     # Latin words with letters in the Greek code page too: æ as ζ ("prζtorium"), ê as κ ("grκle"); æ as e-Sword's "ae".
     latin = {"ζ": "ae", "Ζ": "Ae", "κ": "ê"}
-    s = re.sub(r"\b[A-Za-zΖζκ]*(?:[a-z][Ζζκ]|[Ζζκ][a-z])[A-Za-zΖζκ]*\b", lambda m: "".join(latin.get(ch, ch) for ch in m[0]), s)
+    s = re.sub(
+        r"\b[A-Za-zΖζκ]*(?:[a-z][Ζζκ]|[Ζζκ][a-z])[A-Za-zΖζκ]*\b", lambda m: "".join(latin.get(ch, ch) for ch in m[0]), s
+    )
     return re.sub(r"(\w|</i>)\s+,", r"\1,", s)  # "the land , Am haaretz"
 
 
@@ -647,11 +727,13 @@ def write_tsk():
             chapter_rows.append((b, c, body))
         else:
             verse_rows.append((b, c, v, c, v, body))
-    info = ("<p>The Treasury of Scripture Knowledge: some 500,000 cross-references for every verse, from the margins of "
-            "Canne, Browne, Blayney, Scott and others, published by Samuel Bagster (about 1834), with an introduction by "
-            "R. A. Torrey in later editions.</p>"
-            "<p>Public domain. CrossWire's TSK module (1.5, 2008), as exported in "
-            "github.com/man4christ/Treasury-of-Scripture-Knowledge. Built by Two-edged Sword's tools/core.</p>")
+    info = (
+        "<p>The Treasury of Scripture Knowledge: some 500,000 cross-references for every verse, from the margins of "
+        "Canne, Browne, Blayney, Scott and others, published by Samuel Bagster (about 1834), with an introduction by "
+        "R. A. Torrey in later editions.</p>"
+        "<p>Public domain. CrossWire's TSK module (1.5, 2008), as exported in "
+        "github.com/man4christ/Treasury-of-Scripture-Knowledge. Built by Two-edged Sword's tools/core.</p>"
+    )
     with module("tsk.cmti", "Treasury of Scripture Knowledge", "TSK", info, into=BUNDLED) as db:
         db.executemany("INSERT INTO BookCommentary VALUES (?,?)", book_rows)
         db.executemany("INSERT INTO ChapterCommentary VALUES (?,?,?)", chapter_rows)
@@ -667,14 +749,17 @@ OSIS_BOOK = {b[1]: i + 1 for i, b in enumerate(BOOKS)}
 def crosswire(name):
     """A CrossWire module's zip, and its versification (from tools/crosswire, which reads SWORD's canon tables)."""
     import crosswire.build as cw
+
     return zipfile.ZipFile(io.BytesIO(fetch(CROSSWIRE.format(name)))), cw.canon
 
 
 def zcom4(z, test):
     """Every slot of a zCom4 testament as (where it's stored, text): slots stored in the same place
     are one entry linked to a run of verses."""
+
     def f(ext):
         return z.read(next(n for n in z.namelist() if n.endswith(f"/{test}.{ext}")))
+
     bzs, bzv, bzz = f("bzs"), f("bzv"), f("bzz")
     blocks, out = {}, []
     for i in range(len(bzv) // 12):
@@ -684,8 +769,8 @@ def zcom4(z, test):
             continue
         if block not in blocks:
             start, length, _ = struct.unpack_from("<III", bzs, block * 12)
-            blocks[block] = zlib.decompress(bzz[start:start + length])
-        out.append(((block, offset), blocks[block][offset:offset + size].decode("utf-8")))
+            blocks[block] = zlib.decompress(bzz[start : start + length])
+        out.append(((block, offset), blocks[block][offset : offset + size].decode("utf-8")))
     return out
 
 
@@ -736,7 +821,11 @@ def henry_refs(s, book, chapter):
                 pa = (book, chapter, pa[2])
                 pb = (book, chapter, pb[2]) if pb else None
             # A link to no real verse ("Jas 9:7" in Genesis 9) is usually the passage in hand; if not, it's left as text.
-            for fix in ((pa, pb), ((book, *pa[1:]), pb and (book, *pb[1:])), ((book, chapter, pa[2]), pb and (book, chapter, pb[2]))):
+            for fix in (
+                (pa, pb),
+                ((book, *pa[1:]), pb and (book, *pb[1:])),
+                ((book, chapter, pa[2]), pb and (book, chapter, pb[2])),
+            ):
                 if real(*fix):
                     pa, pb = fix
                     break
@@ -761,6 +850,7 @@ def henry_html(s, book, chapter):
     s = henry_refs(rtf_escapes(s), book, chapter)
     s = re.sub(r"<note\b.*?</note>", "", s, flags=re.S)  # the editors' footnotes
     s = re.sub(r"(&lt;){3,}[^<]*", "", s)  # "<<< Unabridged", a marker left in the text
+
     def title(m):
         """A heading, in bold; but a "heading" holding a whole note (JFB's "Gen 49:5-7. Simeon and Levi were associate
         in wickedness…") is the note: only its opening reference is bold."""
@@ -768,7 +858,8 @@ def henry_html(s, book, chapter):
             return f"<p><b>{m[1]}</b></p>"
         lead = re.match(r"\s*((?:<ref>[^<]*</ref>[,;]?\s*)+\.?)(.*)", m[1], re.S)
         return f"<p><b>{lead[1].strip()}</b> {lead[2].strip()}</p>" if lead else f"<p>{m[1]}</p>"
-    s = re.sub(r'<title[^>]*>(.*?)</title>', title, s, flags=re.S)
+
+    s = re.sub(r"<title[^>]*>(.*?)</title>", title, s, flags=re.S)
     s = re.sub(r'<div\b[^>]*sID="[^"]*"[^>]*type="x-p"[^>]*/>', "<p>", s)
     s = re.sub(r'<div\b[^>]*eID="[^"]*"[^>]*type="x-p"[^>]*/>', "</p>", s)
     s = re.sub(r"<lg\b[^>]*>", "<p>", s).replace("</lg>", "</p>")
@@ -780,6 +871,7 @@ def henry_html(s, book, chapter):
         if kind == "small-caps":  # a chapter's opening word, or "b. c." and "a. d." after a date
             return text.upper() if text == text.lower() else text
         return f"<{tags[kind]}>{text}</{tags[kind]}>" if kind in tags else text
+
     for _ in range(3):  # nested
         s = re.sub(r'<hi type="([^"]+)">((?:(?!<hi\b).)*?)</hi>', hi, s, flags=re.S)
     s = re.sub(r"<(?!/?(p|b|i|u|sup|br|ref)>)[^>]*>", " ", s)  # milestones, chapter and div markers
@@ -787,7 +879,11 @@ def henry_html(s, book, chapter):
     s = re.sub(r"\s+([,.;:?!)\]])", r"\1", s)
     s = re.sub(r"<sup>\s*</sup>", "", s)
     # Spaces the source lost: "Egypt.Note", "Testimony;Self-Denial", "judgment,that", "theValley".
-    s = re.sub(r"([a-z])((?:</[ib]>)?)([.;,])((?:</?[ib]>)?)([A-Za-z])", lambda m: m[0] if m[3] != "," and m[5].islower() else f"{m[1]}{m[2]}{m[3]} {m[4]}{m[5]}", s)
+    s = re.sub(
+        r"([a-z])((?:</[ib]>)?)([.;,])((?:</?[ib]>)?)([A-Za-z])",
+        lambda m: m[0] if m[3] != "," and m[5].islower() else f"{m[1]}{m[2]}{m[3]} {m[4]}{m[5]}",
+        s,
+    )
     s = re.sub(r"\b(the|of|and)((?:<[ib]>)?)([A-Z][a-z])", r"\1 \2\3", s)
     s = re.sub(r"<b>(?:&lt;|[^\w<])*</b>", "", s)  # a title that is only a stray "<"
 
@@ -799,9 +895,10 @@ def henry_html(s, book, chapter):
             return m[0]
         cut = t.find("--")
         if 0 <= cut < 150:
-            return f"<b>{t[:cut + 2]}</b>{t[cut + 2:]}"
+            return f"<b>{t[: cut + 2]}</b>{t[cut + 2 :]}"
         label = re.match(r"\d+(?:[-,]\s*\d+)?\.\s*", t)
-        return f"<b>{label[0].strip()}</b> {t[label.end():]}" if label else t
+        return f"<b>{label[0].strip()}</b> {t[label.end() :]}" if label else t
+
     s = re.sub(r"<b>((?:(?!</?b>).)*)</b>", run_on, s, flags=re.S)
     # Paragraphs: a stretch of the source can start or end inside one, so they're rebuilt from the breaks.
     paras = (re.sub(r"^(<br>|\s)+|(<br>|\s)+$", "", x) for x in re.split(r"</?p>", s))
@@ -833,7 +930,7 @@ def write_henry():
             for c, n in enumerate(lengths, 1):
                 head = slots[i][1]
                 i += 1
-                run = slots[i:i + n]
+                run = slots[i : i + n]
                 i += n
                 # Runs of verses linked to one entry.
                 entries = []
@@ -847,9 +944,13 @@ def write_henry():
                 # The book's introduction (and a volume's preface) comes before the first chapter's
                 # introduction, and the chapter's introduction before its first section.
                 first = head + entries[0][3]
-                intro = re.search(r'<div\b[^>]*sID="[^"]*"[^>]*type="introduction"[^>]*/>(.*?)<div\b[^>]*eID="[^"]*"[^>]*type="introduction"[^>]*/>', first, re.S)
+                intro = re.search(
+                    r'<div\b[^>]*sID="[^"]*"[^>]*type="introduction"[^>]*/>(.*?)<div\b[^>]*eID="[^"]*"[^>]*type="introduction"[^>]*/>',
+                    first,
+                    re.S,
+                )
                 if intro:
-                    before, after = first[:intro.start()], first[intro.end():]
+                    before, after = first[: intro.start()], first[intro.end() :]
                     if c == 1 and re.sub(r"<[^>]+>|\s", "", before):
                         books.append((b, correct(henry_html(before, b, c), HENRY_TYPOS)))
                     ch = correct(henry_html(intro[1], b, c), HENRY_TYPOS)
@@ -878,12 +979,16 @@ def write_henry():
                     verses[-1] = (*verses[-1][:4], n, verses[-1][5])
         if i != len(slots):
             sys.exit(f"MHC {test}: {len(slots)} slots, the versification has {i}")
-    info = ("<p>Matthew Henry's Complete Commentary on the Whole Bible (1706–1721), finished from Romans to Revelation "
-            "by his fellow ministers after his death.</p>"
-            "<p>Public domain. CrossWire's MHC module (2.2), prepared from the Christian Classics Ethereal Library's text "
-            "(ccel.org). The Bible text each section opens with is left out, as it is beside it in the Bible. "
-            "Built by Two-edged Sword's tools/core.</p>")
-    with module("henry.cmti", "Matthew Henry's Commentary on the Whole Bible", "Matthew Henry", info, into=BUNDLED) as db:
+    info = (
+        "<p>Matthew Henry's Complete Commentary on the Whole Bible (1706–1721), finished from Romans to Revelation "
+        "by his fellow ministers after his death.</p>"
+        "<p>Public domain. CrossWire's MHC module (2.2), prepared from the Christian Classics Ethereal Library's text "
+        "(ccel.org). The Bible text each section opens with is left out, as it is beside it in the Bible. "
+        "Built by Two-edged Sword's tools/core.</p>"
+    )
+    with module(
+        "henry.cmti", "Matthew Henry's Commentary on the Whole Bible", "Matthew Henry", info, into=BUNDLED
+    ) as db:
         db.executemany("INSERT INTO BookCommentary VALUES (?,?)", books)
         db.executemany("INSERT INTO ChapterCommentary VALUES (?,?,?)", chapters)
         db.executemany("INSERT INTO VerseCommentary VALUES (?,?,?,?,?,?)", verses)
@@ -893,20 +998,22 @@ def write_henry():
 def zld(z):
     """[(key, entry)] from a zLD dictionary: .idx points into .dat, which holds each key and where
     its entry is in the zlib blocks of .zdt (indexed by .zdx)."""
+
     def f(ext):  # the module's own files, or dict.* where those are its name (Nave's)
         names = [n for n in z.namelist() if n.endswith(f".{ext}")]
         return z.read(next((n for n in names if "/dict." not in n), names[0]))
+
     idx, dat, zdx, zdt = f("idx"), f("dat"), f("zdx"), f("zdt")
     blocks, out = {}, []
     for i in range(len(idx) // 8):
         off, size = struct.unpack_from("<II", idx, i * 8)
-        key, _, rest = dat[off:off + size].partition(b"\n")
+        key, _, rest = dat[off : off + size].partition(b"\n")
         block, entry = struct.unpack_from("<II", rest)
         if block not in blocks:
             bo, bs = struct.unpack_from("<II", zdx, block * 8)
-            blocks[block] = zlib.decompress(zdt[bo:bo + bs])
+            blocks[block] = zlib.decompress(zdt[bo : bo + bs])
         eo, es = struct.unpack_from("<II", blocks[block], 4 + entry * 8)
-        out.append((key.rstrip(b"\r").decode("utf-8"), blocks[block][eo:eo + es].decode("utf-8")))
+        out.append((key.rstrip(b"\r").decode("utf-8"), blocks[block][eo : eo + es].decode("utf-8")))
     return out
 
 
@@ -934,10 +1041,15 @@ def real(a, b=None):
 
 # Book names as Easton writes them in running text, where it names a book but links only the
 # chapter and verse after it: "Daniel (11:31)", "Canticles (2:3, 5)", "Acts of the Apostles (2:38-41)".
-BOOK_NAMES = {n.replace("_", " ").replace("III ", "3 ").replace("II ", "2 ").replace("I ", "1 "): i + 1 for i, n in enumerate(b[3] for b in BOOKS)}
+BOOK_NAMES = {
+    n.replace("_", " ").replace("III ", "3 ").replace("II ", "2 ").replace("I ", "1 "): i + 1
+    for i, n in enumerate(b[3] for b in BOOKS)
+}
 BOOK_NAMES |= {"Revelation": 66, "Canticles": 22, "Cant": 22, "Song": 22, "Psalm": 19, "Acts of the Apostles": 44}
 PLAIN_REF = re.compile(r"(?<![\w:.])(\d{1,3}):(\d{1,3})(?:[-–](\d{1,3}))?((?:,\s*\d{1,3}(?:[-–]\d{1,3})?(?![\d:]))*)")
-SHOWN = re.compile(r"\s*(?:((?:[1-3]\s*)?[A-Za-z][A-Za-z. ]*?)\.?\s+)?(\d+)(?::(\d+))?(?:\s*[-–]\s*(\d+)(?::(\d+))?)?\s*[.,;]?\s*$")
+SHOWN = re.compile(
+    r"\s*(?:((?:[1-3]\s*)?[A-Za-z][A-Za-z. ]*?)\.?\s+)?(\d+)(?::(\d+))?(?:\s*[-–]\s*(\d+)(?::(\d+))?)?\s*[.,;]?\s*$"
+)
 
 
 def easton_refs(s, names):
@@ -949,7 +1061,11 @@ def easton_refs(s, names):
     still isn't a real verse is left as text."""
     # Links the source split: "8:33-9" then ":6"; "2" then "Chr." then "20:14".
     s = re.sub(r'(<ref osisRef="[^"]*">[^<]*?)</ref>:(\d+)', r"\1:\2</ref>", s)
-    s = re.sub(r'<ref osisRef="[^"]*">([1-3])</ref>\s*([A-Z][a-z]+\.?)\s*<ref osisRef="([^"]*)">([^<]*)</ref>', r'<ref osisRef="\3">\1 \2 \4</ref>', s)
+    s = re.sub(
+        r'<ref osisRef="[^"]*">([1-3])</ref>\s*([A-Z][a-z]+\.?)\s*<ref osisRef="([^"]*)">([^<]*)</ref>',
+        r'<ref osisRef="\3">\1 \2 \4</ref>',
+        s,
+    )
     out, last = [], {"book": None, "chapter": None, "chapters": False}
     tail = re.compile(r"\b(" + "|".join(sorted(map(re.escape, BOOK_NAMES), key=len, reverse=True)) + r")\.?\s*\(?\s*$")
 
@@ -963,6 +1079,7 @@ def easton_refs(s, names):
             last.update(book=BOOK_NAMES[m[1]], chapter=None, chapters=False)
         if not last["book"]:
             return t
+
         def one(m):
             refs = [link(last["book"], int(m[1]), int(m[2]), v2=int(m[3]) if m[3] else None)]
             for x in re.findall(r"\d{1,3}(?:[-–]\d{1,3})?", m[4] or ""):
@@ -972,11 +1089,12 @@ def easton_refs(s, names):
                 return m[0]
             last.update(chapter=int(m[1]), chapters=False)
             return ", ".join(refs)
+
         return PLAIN_REF.sub(one, t)
 
     pos = 0
     for m in re.finditer(r'<ref osisRef="(?:Bible:)?([^"]+)">(.*?)</ref>', s, re.S):
-        out.append(plain(s[pos:m.start()]))
+        out.append(plain(s[pos : m.start()]))
         pos = m.end()
         osis, shown = m[1], m[2]
         p = SHOWN.match(shown)
@@ -1032,6 +1150,7 @@ def easton_html(s, names):
         # "_" marks where the italics stop and start again inside a run: "anathema_ or _herem".
         parts = m[1].split("_")
         return "".join(f"<i>{p}</i>" if k % 2 == 0 else p for k, p in enumerate(parts) if p)
+
     s = re.sub(r"<foreign\b[^>]*>(.*?)</foreign>", foreign, s, flags=re.S)
     s = easton_refs(s, names)
     s = re.sub(r"<(?!/?(p|i|ref)>)[^>]*>", "", s)
@@ -1048,25 +1167,119 @@ def easton_html(s, names):
 # Misspellings in CrossWire's Easton, each checked in context (e-Sword's Easton has them corrected).
 # Easton's British spellings (defence, travelled) are his own and stay.
 EASTON_TYPOS = {
-    "Isarael": "Israel", "isreal": "Israel", "preceeding": "preceding", "peristed": "persisted", "humilating": "humiliating", "wordly": "worldly",
-    "nothern": "northern", "saluated": "saluted", "breat": "breast", "eigth": "eighth", "firmanent": "firmament", "hailstrom": "hailstorm",
-    "condounding": "confounding", "orginally": "originally", "neglet": "neglect", "adultry": "adultery", "posibly": "possibly", "stict": "strict",
-    "anoter": "another", "heros": "heroes", "rightenousness": "righteousness", "wildernes": "wilderness", "seond": "second", "brethen": "brethren",
-    "ethiopans": "Ethiopians", "solem": "solemn", "partriarchal": "patriarchal", "occured": "occurred", "patriach": "patriarch", "familes": "families",
-    "fullfilled": "fulfilled", "earlies": "earliest", "soverign": "sovereign", "foureen": "fourteen", "coloquial": "colloquial", "betwen": "between",
-    "mediterraanean": "Mediterranean", "magnificient": "magnificent", "symbolcal": "symbolical", "labyrith": "labyrinth", "occuptaion": "occupation", "autmnal": "autumnal",
-    "adapated": "adapted", "irresistable": "irresistible", "subterrean": "subterranean", "christain": "Christian", "ninteen": "nineteen", "regins": "reigns",
-    "proppitatory": "propitiatory", "sacrifical": "sacrificial", "apear": "appear", "proetorium": "praetorium", "annointed": "anointed", "conspicious": "conspicuous",
-    "conspicous": "conspicuous", "beseieging": "besieging", "rightousness": "righteousness", "eunchs": "eunuchs", "burnden": "burden", "fictious": "fictitious",
-    "repleished": "replenished", "sucide": "suicide", "seritude": "servitude", "calamites": "calamities", "serveral": "several", "prevading": "pervading",
-    "jersalem": "Jerusalem", "knowlege": "knowledge", "conforting": "comforting", "prosperty": "prosperity", "civilzation": "civilization", "refered": "referred",
-    "sacrifies": "sacrifices", "strategem": "stratagem", "opression": "oppression", "unijured": "uninjured", "alloted": "allotted", "patriachs": "patriarchs",
-    "patriachal": "patriarchal", "appered": "appeared", "acquinted": "acquainted", "promotory": "promontory", "knowning": "knowing", "insturcting": "instructing",
-    "propitation": "propitiation", "beliver": "believer", "uncleaness": "uncleanness", "cermonial": "ceremonial", "hestitate": "hesitate", "rememberancer": "remembrancer",
-    "presevation": "preservation", "isiah": "Isaiah", "agreable": "agreeable", "sancturary": "sanctuary", "pomegrante": "pomegranate", "burried": "buried",
-    "conquerer": "conqueror", "thankgiving": "thanksgiving", "ezekel": "Ezekiel", "exteremity": "extremity", "pecularities": "peculiarities", "blosoms": "blossoms",
-    "outght": "ought", "jodan": "Jordan", "afficted": "afflicted", "strengh": "strength", "nutured": "nurtured", "superintendant": "superintendent",
-    "curel": "cruel", "mosiac": "Mosaic", "lewdwoman": "lewd woman", "fellowprisoner": "fellow-prisoner", "Wadyes": "Wady es",
+    "Isarael": "Israel",
+    "isreal": "Israel",
+    "preceeding": "preceding",
+    "peristed": "persisted",
+    "humilating": "humiliating",
+    "wordly": "worldly",
+    "nothern": "northern",
+    "saluated": "saluted",
+    "breat": "breast",
+    "eigth": "eighth",
+    "firmanent": "firmament",
+    "hailstrom": "hailstorm",
+    "condounding": "confounding",
+    "orginally": "originally",
+    "neglet": "neglect",
+    "adultry": "adultery",
+    "posibly": "possibly",
+    "stict": "strict",
+    "anoter": "another",
+    "heros": "heroes",
+    "rightenousness": "righteousness",
+    "wildernes": "wilderness",
+    "seond": "second",
+    "brethen": "brethren",
+    "ethiopans": "Ethiopians",
+    "solem": "solemn",
+    "partriarchal": "patriarchal",
+    "occured": "occurred",
+    "patriach": "patriarch",
+    "familes": "families",
+    "fullfilled": "fulfilled",
+    "earlies": "earliest",
+    "soverign": "sovereign",
+    "foureen": "fourteen",
+    "coloquial": "colloquial",
+    "betwen": "between",
+    "mediterraanean": "Mediterranean",
+    "magnificient": "magnificent",
+    "symbolcal": "symbolical",
+    "labyrith": "labyrinth",
+    "occuptaion": "occupation",
+    "autmnal": "autumnal",
+    "adapated": "adapted",
+    "irresistable": "irresistible",
+    "subterrean": "subterranean",
+    "christain": "Christian",
+    "ninteen": "nineteen",
+    "regins": "reigns",
+    "proppitatory": "propitiatory",
+    "sacrifical": "sacrificial",
+    "apear": "appear",
+    "proetorium": "praetorium",
+    "annointed": "anointed",
+    "conspicious": "conspicuous",
+    "conspicous": "conspicuous",
+    "beseieging": "besieging",
+    "rightousness": "righteousness",
+    "eunchs": "eunuchs",
+    "burnden": "burden",
+    "fictious": "fictitious",
+    "repleished": "replenished",
+    "sucide": "suicide",
+    "seritude": "servitude",
+    "calamites": "calamities",
+    "serveral": "several",
+    "prevading": "pervading",
+    "jersalem": "Jerusalem",
+    "knowlege": "knowledge",
+    "conforting": "comforting",
+    "prosperty": "prosperity",
+    "civilzation": "civilization",
+    "refered": "referred",
+    "sacrifies": "sacrifices",
+    "strategem": "stratagem",
+    "opression": "oppression",
+    "unijured": "uninjured",
+    "alloted": "allotted",
+    "patriachs": "patriarchs",
+    "patriachal": "patriarchal",
+    "appered": "appeared",
+    "acquinted": "acquainted",
+    "promotory": "promontory",
+    "knowning": "knowing",
+    "insturcting": "instructing",
+    "propitation": "propitiation",
+    "beliver": "believer",
+    "uncleaness": "uncleanness",
+    "cermonial": "ceremonial",
+    "hestitate": "hesitate",
+    "rememberancer": "remembrancer",
+    "presevation": "preservation",
+    "isiah": "Isaiah",
+    "agreable": "agreeable",
+    "sancturary": "sanctuary",
+    "pomegrante": "pomegranate",
+    "burried": "buried",
+    "conquerer": "conqueror",
+    "thankgiving": "thanksgiving",
+    "ezekel": "Ezekiel",
+    "exteremity": "extremity",
+    "pecularities": "peculiarities",
+    "blosoms": "blossoms",
+    "outght": "ought",
+    "jodan": "Jordan",
+    "afficted": "afflicted",
+    "strengh": "strength",
+    "nutured": "nurtured",
+    "superintendant": "superintendent",
+    "curel": "cruel",
+    "mosiac": "Mosaic",
+    "lewdwoman": "lewd woman",
+    "fellowprisoner": "fellow-prisoner",
+    "Wadyes": "Wady es",
 }
 HENRY_TYPOS = {"concecrate": "consecrate", "tallents": "talents"}
 
@@ -1077,11 +1290,13 @@ def correct(s, typos):
     if not typos:
         return s
     pat = re.compile(r"\b(" + "|".join(map(re.escape, typos)) + r")\b", re.I)
+
     def fix(m):
         w = typos.get(m[0]) or typos.get(m[0].lower()) or typos.get(m[0][0].upper() + m[0][1:].lower())
         if w is None:
             return m[0]
         return w[0].upper() + w[1:] if m[0][0].isupper() else w
+
     return pat.sub(fix, s)
 
 
@@ -1098,10 +1313,12 @@ def write_easton():
     for t, b in rows:  # Kadesh and Salmon twice: one topic each, numbered
         joined.setdefault(t, []).append(b)
     rows = [(t, numbered(b)) for t, b in joined.items()]
-    info = ("<p>Easton's Bible Dictionary: M. G. Easton's Illustrated Bible Dictionary, third edition (Thomas Nelson, 1897), "
-            "without its illustrations.</p>"
-            "<p>Public domain. CrossWire's Easton module (2.0.1), from the Christian Classics Ethereal Library. "
-            "Built by Two-edged Sword's tools/core.</p>")
+    info = (
+        "<p>Easton's Bible Dictionary: M. G. Easton's Illustrated Bible Dictionary, third edition (Thomas Nelson, 1897), "
+        "without its illustrations.</p>"
+        "<p>Public domain. CrossWire's Easton module (2.0.1), from the Christian Classics Ethereal Library. "
+        "Built by Two-edged Sword's tools/core.</p>"
+    )
     with module("easton.dcti", "Easton's Bible Dictionary", "Easton", info, into=BUNDLED) as db:
         db.executemany("INSERT INTO Dictionary VALUES (?,?)", rows)
     print(f"easton.dcti: {len(rows)} topics")
@@ -1109,17 +1326,20 @@ def write_easton():
 
 # ---- More of CrossWire's commentaries and dictionaries ------------------------------------------
 
+
 def utf8_or_1252(raw):
     """A slot's text: UTF-8, but for single bytes in Windows-1252 among it (Barnes' "30° 50'" and "(†)" beside UTF-8 Greek)."""
     t = raw.decode("utf-8", "surrogateescape")
-    return re.sub(r"[\udc80-\udcff]", lambda m: bytes([ord(m[0]) - 0xdc00]).decode("cp1252", "replace"), t)
+    return re.sub(r"[\udc80-\udcff]", lambda m: bytes([ord(m[0]) - 0xDC00]).decode("cp1252", "replace"), t)
 
 
 def zcom(z, test):
     """Every slot of a zCom testament, as zcom4 gives them: the same format with a 2-byte size in
     the verse index. A module blocked by chapter (Barnes) names its files .czs, .czv and .czz."""
+
     def f(ext):
         return z.read(next(n for n in z.namelist() if re.search(rf"/{test}\.[bcv]{ext}$", n)))
+
     bzs, bzv, bzz = f("zs"), f("zv"), f("zz")
     blocks, out = {}, []
     for i in range(len(bzv) // 10):
@@ -1129,8 +1349,8 @@ def zcom(z, test):
             continue
         if block not in blocks:
             start, length, _ = struct.unpack_from("<III", bzs, block * 12)
-            blocks[block] = zlib.decompress(bzz[start:start + length])
-        out.append(((block, offset), utf8_or_1252(blocks[block][offset:offset + size])))
+            blocks[block] = zlib.decompress(bzz[start : start + length])
+        out.append(((block, offset), utf8_or_1252(blocks[block][offset : offset + size])))
     return out
 
 
@@ -1151,7 +1371,7 @@ def sword_chapters(z, canon, reader):
                 head = (book_head if c == 1 else "") + slots[i][1]
                 i += 1
                 entries = []
-                for v, (where, text) in enumerate(slots[i:i + n], 1):
+                for v, (where, text) in enumerate(slots[i : i + n], 1):
                     if entries and where and where == entries[-1][0]:
                         entries[-1][2] = v
                     elif text.strip():
@@ -1166,17 +1386,79 @@ def sword_chapters(z, canon, reader):
 # "nu 26:59", osisRef "1Jn.3.1"): each name's books, the likeliest first; a reference takes the first
 # with the verse it names.
 ABBREVS = {
-    "ge": "Gen", "ex": "Exod", "le": "Lev", "nu": "Num", "de": "Deut", "jos": "Josh", "jdg": "Judg", "ju": "Judg",
-    "jud": "Judg Jude", "ru": "Ruth", "es": "Esth", "est": "Esth", "ne": "Neh", "ps": "Ps", "pss": "Ps", "pr": "Prov",
-    "ec": "Eccl", "so": "Song", "song": "Song", "cant": "Song", "is": "Isa", "je": "Jer", "la": "Lam", "eze": "Ezek",
-    "ezk": "Ezek", "ez": "Ezek", "da": "Dan", "ho": "Hos", "joe": "Joel", "am": "Amos", "ob": "Obad", "jon": "Jonah",
-    "mi": "Mic", "na": "Nah", "zep": "Zeph", "ze": "Zech", "mt": "Matt", "mk": "Mark", "mr": "Mark", "lk": "Luke",
-    "lu": "Luke", "jn": "John", "ca": "Song", "jno": "John", "joh": "John", "ac": "Acts", "ro": "Rom", "rm": "Rom", "ga": "Gal",
-    "ep": "Eph", "ph": "Phil Phlm", "phi": "Phil Phlm", "php": "Phil", "co": "Col", "phm": "Phlm Phil", "philem": "Phlm",
-    "he": "Heb", "jas": "Jas", "jam": "Jas", "re": "Rev", "1jo": "1John", "2jo": "2John", "3jo": "3John",
-    "1jn": "1John", "2jn": "2John", "3jn": "3John", "1joh": "1John", "2joh": "2John", "3joh": "3John",
+    "ge": "Gen",
+    "ex": "Exod",
+    "le": "Lev",
+    "nu": "Num",
+    "de": "Deut",
+    "jos": "Josh",
+    "jdg": "Judg",
+    "ju": "Judg",
+    "jud": "Judg Jude",
+    "ru": "Ruth",
+    "es": "Esth",
+    "est": "Esth",
+    "ne": "Neh",
+    "ps": "Ps",
+    "pss": "Ps",
+    "pr": "Prov",
+    "ec": "Eccl",
+    "so": "Song",
+    "song": "Song",
+    "cant": "Song",
+    "is": "Isa",
+    "je": "Jer",
+    "la": "Lam",
+    "eze": "Ezek",
+    "ezk": "Ezek",
+    "ez": "Ezek",
+    "da": "Dan",
+    "ho": "Hos",
+    "joe": "Joel",
+    "am": "Amos",
+    "ob": "Obad",
+    "jon": "Jonah",
+    "mi": "Mic",
+    "na": "Nah",
+    "zep": "Zeph",
+    "ze": "Zech",
+    "mt": "Matt",
+    "mk": "Mark",
+    "mr": "Mark",
+    "lk": "Luke",
+    "lu": "Luke",
+    "jn": "John",
+    "ca": "Song",
+    "jno": "John",
+    "joh": "John",
+    "ac": "Acts",
+    "ro": "Rom",
+    "rm": "Rom",
+    "ga": "Gal",
+    "ep": "Eph",
+    "ph": "Phil Phlm",
+    "phi": "Phil Phlm",
+    "php": "Phil",
+    "co": "Col",
+    "phm": "Phlm Phil",
+    "philem": "Phlm",
+    "he": "Heb",
+    "jas": "Jas",
+    "jam": "Jas",
+    "re": "Rev",
+    "1jo": "1John",
+    "2jo": "2John",
+    "3jo": "3John",
+    "1jn": "1John",
+    "2jn": "2John",
+    "3jn": "3John",
+    "1joh": "1John",
+    "2joh": "2John",
+    "3joh": "3John",
 }
-BOOK_KEYS = [(i + 1, [x.lower() for x in (b[1], b[2], n.replace(" ", ""))]) for i, (b, n) in enumerate(zip(BOOKS, BOOK_NAMES))]
+BOOK_KEYS = [
+    (i + 1, [x.lower() for x in (b[1], b[2], n.replace(" ", ""))]) for i, (b, n) in enumerate(zip(BOOKS, BOOK_NAMES))
+]
 
 
 def books_named(name):
@@ -1190,7 +1472,9 @@ def books_named(name):
         p = k[:n]
         if p in ABBREVS:
             return [OSIS_BOOK[x] for x in ABBREVS[p].split()]
-        found = [b for b, keys in BOOK_KEYS if any(x == p for x in keys)] or [b for b, keys in BOOK_KEYS if any(x.startswith(p) for x in keys)]
+        found = [b for b, keys in BOOK_KEYS if any(x == p for x in keys)] or [
+            b for b, keys in BOOK_KEYS if any(x.startswith(p) for x in keys)
+        ]
         if found:
             return found
     return []
@@ -1198,6 +1482,7 @@ def books_named(name):
 
 def fix_osis_books(s):
     """osisRefs with a book that isn't OSIS's ("1Jn.3.1" in Clarke) given the book it means."""
+
     def one(m):
         def part(p):
             bits = p.split(".")
@@ -1208,11 +1493,15 @@ def fix_osis_books(s):
                 if len(q) == 1 or real(tuple((q + [0, 0])[:3])):
                     return ".".join([BOOKS[b - 1][1]] + bits[1:])
             return p
+
         return f'osisRef="{" ".join("-".join(part(x) for x in r.split("-")) for r in m[1].split())}"'
+
     return re.sub(r'osisRef="([^"]*)"', one, s)
 
 
-PASSAGE = re.compile(r"\s*((?:[1-3]|I{1,3})?\s*[A-Za-z][A-Za-z.]*)?\.?\s*(\d+)(?:\s*[:.]\s*(\d+))?(?:\s*[-–]\s*(\d+)(?:\s*[:.]\s*(\d+))?)?\s*$")
+PASSAGE = re.compile(
+    r"\s*((?:[1-3]|I{1,3})?\s*[A-Za-z][A-Za-z.]*)?\.?\s*(\d+)(?:\s*[:.]\s*(\d+))?(?:\s*[-–]\s*(\d+)(?:\s*[:.]\s*(\d+))?)?\s*$"
+)
 
 
 def passage_refs(p, book=None, chapter=None):
@@ -1262,6 +1551,7 @@ def thml_refs(s):
                 last[:] = r[1:]
                 return r[0]
         return shown
+
     return re.sub(r'<scripRef\b(?:[^>]*?\bpassage="([^"]*)")?[^>]*>(.*?)</scripRef>', one, s, flags=re.S)
 
 
@@ -1283,7 +1573,10 @@ def has_text(s):
 CLARKE_LABEL = re.compile(r'<hi type="bold">\s*Verses?\s+(\d+)')
 JFB_LABEL = re.compile(r'<hi type="bold">\s*(\d+)(?:[-,]\s*\d+)?\.')
 # The start of a chapter's own introduction, in the text before its first note.
-CHAPTER_START = re.compile(r'<title[^>]*>\s*CHAPTER\s+[\dIVXLC]+\b|<title type="x-s">Introduction</title>\s*<div\b[^>]*\bsID="[^"]*"[^>]*type="introduction"', re.I)
+CHAPTER_START = re.compile(
+    r'<title[^>]*>\s*CHAPTER\s+[\dIVXLC]+\b|<title type="x-s">Introduction</title>\s*<div\b[^>]*\bsID="[^"]*"[^>]*type="introduction"',
+    re.I,
+)
 
 
 def shown_refs(s, book, chapter):
@@ -1308,6 +1601,7 @@ def shown_refs(s, book, chapter):
         if p:
             last[:] = [p[0], p[1]]
         return m[0]
+
     return re.sub(r'<reference osisRef="([^"]*)">(.*?)</reference>', one, s, flags=re.S)
 
 
@@ -1324,6 +1618,7 @@ def osis_commentary(name, typos, label):
     references are repaired as in Matthew Henry's."""
     z, canon = crosswire(name)
     from crosswire.build import conf
+
     reader = zcom4 if conf(z)["ModDrv"] == "zCom4" else zcom
     books, chapters, verses = [], [], []
     for b, c, n, head, entries in sword_chapters(z, canon, reader):
@@ -1374,9 +1669,19 @@ def osis_commentary(name, typos, label):
 # Letters the sources' scans read as brackets, found by checking that each module's brackets match. Each is
 # looked for, and the build stops if one is no longer there, so a changed source is noticed.
 MENDS = {
-    "barnes.cmti": [('"seek)"', '"seek,"'), ("a]tar", "altar"), ("one another]", "one another"), ("on]y", "only"),
-                    ("man)'", "many"), ("o( Jesus", "of Jesus"), ("o( the", "of the"), ("of[ice", "office"),
-                    ("genera]", "general"), ("re]apse", "relapse"), ("the]lying", "the living")],
+    "barnes.cmti": [
+        ('"seek)"', '"seek,"'),
+        ("a]tar", "altar"),
+        ("one another]", "one another"),
+        ("on]y", "only"),
+        ("man)'", "many"),
+        ("o( Jesus", "of Jesus"),
+        ("o( the", "of the"),
+        ("of[ice", "office"),
+        ("genera]", "general"),
+        ("re]apse", "relapse"),
+        ("the]lying", "the living"),
+    ],
     "clarke.cmti": [("on)y", "only")],
     "wesley.cmti": [("o[ all", "of all"), ("al] for me", "all for me"), ("al] work", "all work")],
     "webster1828.dcti": [("[coronet[", "[coronet]"), ("MIRTH['FULLY", "MIRTH'FULLY")],
@@ -1396,7 +1701,7 @@ def mend(file, *tables):
                 if old in t:
                     found[old] += 1
                     t = t.replace(old, new)
-            done.append(tuple(r[:col]) + (t,) + tuple(r[col + 1:]))
+            done.append(tuple(r[:col]) + (t,) + tuple(r[col + 1 :]))
         out.append(done)
     gone = [old for old, n in found.items() if not n]
     if gone:
@@ -1429,21 +1734,35 @@ def write_commentary(file, title, abbrev, info, tables):
         db.executemany("INSERT INTO BookCommentary VALUES (?,?)", books)
         db.executemany("INSERT INTO ChapterCommentary VALUES (?,?,?)", chapters)
         db.executemany("INSERT INTO VerseCommentary VALUES (?,?,?,?,?,?)", verses)
-    print(f"{file}: {len(verses)} notes, {len(chapters)} chapters, {len(books)} books, {(BUNDLED / file).stat().st_size / 1e6:.1f} MB")
+    print(
+        f"{file}: {len(verses)} notes, {len(chapters)} chapters, {len(books)} books, {(BUNDLED / file).stat().st_size / 1e6:.1f} MB"
+    )
 
 
 def write_jfb():
-    info = ("<p>A Commentary, Critical and Explanatory, on the Old and New Testaments, by Robert Jamieson, A. R. Fausset "
-            "and David Brown (1871).</p>"
-            "<p>Public domain. CrossWire's JFB module (3.0), from the Christian Classics Ethereal Library's text (ccel.org). "
-            "Built by Two-edged Sword's tools/core.</p>")
-    write_commentary("jfb.cmti", "Jamieson, Fausset & Brown Commentary", "JFB", info, osis_commentary("JFB", {}, JFB_LABEL))
+    info = (
+        "<p>A Commentary, Critical and Explanatory, on the Old and New Testaments, by Robert Jamieson, A. R. Fausset "
+        "and David Brown (1871).</p>"
+        "<p>Public domain. CrossWire's JFB module (3.0), from the Christian Classics Ethereal Library's text (ccel.org). "
+        "Built by Two-edged Sword's tools/core.</p>"
+    )
+    write_commentary(
+        "jfb.cmti", "Jamieson, Fausset & Brown Commentary", "JFB", info, osis_commentary("JFB", {}, JFB_LABEL)
+    )
 
 
 def write_clarke():
-    info = ("<p>Adam Clarke's Commentary and Critical Notes on the Holy Bible (1810–1826).</p>"
-            "<p>Public domain. CrossWire's Clarke module (2.0), from Wikisource's text. Built by Two-edged Sword's tools/core.</p>")
-    write_commentary("clarke.cmti", "Adam Clarke's Commentary on the Bible", "Clarke", info, osis_commentary("Clarke", {}, CLARKE_LABEL))
+    info = (
+        "<p>Adam Clarke's Commentary and Critical Notes on the Holy Bible (1810–1826).</p>"
+        "<p>Public domain. CrossWire's Clarke module (2.0), from Wikisource's text. Built by Two-edged Sword's tools/core.</p>"
+    )
+    write_commentary(
+        "clarke.cmti",
+        "Adam Clarke's Commentary on the Bible",
+        "Clarke",
+        info,
+        osis_commentary("Clarke", {}, CLARKE_LABEL),
+    )
 
 
 def write_scofield():
@@ -1455,24 +1774,41 @@ def write_scofield():
     for v in verses:
         m = re.match(r"<p><b>Book Introduction\b[^<]*</b></p>(?:<p>(?:<ref>[^<]*</ref>(?:; )?)+</p>)?", v[5])
         if m:
-            books.append((v[0], v[5][m.end():]))
+            books.append((v[0], v[5][m.end() :]))
         else:
             notes.append(v)
     import covers
-    thumb = covers.html(covers.design([("THE", 34), ("SCOFIELD", 76), ("REFERENCE", 54), ("NOTES", 54)],
-                                      [("C. I. SCOFIELD", 34), ("1917", 26)], (26, 26, 30), ornament="diamonds"))[1]
-    info = (thumb + "<p>The notes of the Scofield Reference Bible, by C. I. Scofield, in the edition of 1917.</p>"
-            "<p>Public domain. CrossWire's Scofield module (2.1), from Wikisource's text. Built by Two-edged Sword's tools/core.</p>")
+
+    thumb = covers.html(
+        covers.design(
+            [("THE", 34), ("SCOFIELD", 76), ("REFERENCE", 54), ("NOTES", 54)],
+            [("C. I. SCOFIELD", 34), ("1917", 26)],
+            (26, 26, 30),
+            ornament="diamonds",
+        )
+    )[1]
+    info = (
+        thumb + "<p>The notes of the Scofield Reference Bible, by C. I. Scofield, in the edition of 1917.</p>"
+        "<p>Public domain. CrossWire's Scofield module (2.1), from Wikisource's text. Built by Two-edged Sword's tools/core.</p>"
+    )
     write_commentary("scofield.cmti", "Scofield Reference Notes (1917)", "Scofield", info, (books, chapters, notes))
 
 
 SHA256[CROSSWIRE.format("TDavid")] = "d0081cba094f399ceb95f372e13068a4d76814de4529bc6794eab0f2ed6e89cc"
 # Treasury of David's three parts, as its headings name them ("HINTS TO PREACHERS." in Psalm 119), and the heading each has here.
-TDAVID_PARTS = {"EXPOSITION": "EXPOSITION", "EXPLANATORY NOTES": "EXPLANATORY NOTES AND QUAINT SAYINGS", "HINTS TO": "HINTS TO THE VILLAGE PREACHER"}
+TDAVID_PARTS = {
+    "EXPOSITION": "EXPOSITION",
+    "EXPLANATORY NOTES": "EXPLANATORY NOTES AND QUAINT SAYINGS",
+    "HINTS TO": "HINTS TO THE VILLAGE PREACHER",
+}
 # A paragraph's verse label: "<b>Verse 1.</b>", "<b>Ver. 3.</b>", "Verses 70-72.", "Verses 1 <i>and</i> 2.", "Verse 1 (<i>second clause</i>)".
-TDAVID_LABEL = re.compile(r"<p>(?:<b>)?\s*(?:Verses?|Vers?\.)\s*(\d+(?:\s*(?:[-–,]|and|to|<i>and</i>)\s*\d+)*)(?=\s*(?:</b>)?\s*(?:[.(<]|$))")
+TDAVID_LABEL = re.compile(
+    r"<p>(?:<b>)?\s*(?:Verses?|Vers?\.)\s*(\d+(?:\s*(?:[-–,]|and|to|<i>and</i>)\s*\d+)*)(?=\s*(?:</b>)?\s*(?:[.(<]|$))"
+)
 # An introduction's heading run into its paragraph: "TITLE. MICHTAM OF DAVID.", "TITLE and SUBJECT.", "GENERAL, REMARKS.".
-TDAVID_HEAD = re.compile(r"^<p>((?:TITLE|Title|SUBJECT|DIVISION|AUTHOR|OCCASION|GENERAL,? REMARKS)(?:(?:,| AND| and) (?:TITLE|SUBJECT|DIVISION|AUTHOR|OCCASION|ETC|&amp;c))*)\.\s*")
+TDAVID_HEAD = re.compile(
+    r"^<p>((?:TITLE|Title|SUBJECT|DIVISION|AUTHOR|OCCASION|GENERAL,? REMARKS)(?:(?:,| AND| and) (?:TITLE|SUBJECT|DIVISION|AUTHOR|OCCASION|ETC|&amp;c))*)\.\s*"
+)
 
 
 def tdavid_range(label, n):
@@ -1493,26 +1829,43 @@ def tdavid_psalm(c, n, osis):
     under their headings; what is on the psalm as a whole (its title, division, notes on "Whole Psalm." or the title,
     the books on it, Psalm 68's translation) is its introduction."""
     # A heading that holds the text after it (Psalm 2's "HINTS TO THE VILLAGE PREACHER <hi>Whole Psalm.</hi> Shows us …").
-    osis = re.sub(r'<title type="x-s">(HINTS TO THE VILLAGE PREACHER)\s+(.+?)</title>',
-                  r'<title type="x-s">\1</title><div sID="t" type="x-p"/>\2<div eID="t" type="x-p"/>', osis, flags=re.S)
+    osis = re.sub(
+        r'<title type="x-s">(HINTS TO THE VILLAGE PREACHER)\s+(.+?)</title>',
+        r'<title type="x-s">\1</title><div sID="t" type="x-p"/>\2<div eID="t" type="x-p"/>',
+        osis,
+        flags=re.S,
+    )
     osis = re.sub(r"<l\b[^>]*\beID=[^>]*/>", "<br>", osis)  # a line of verse
     osis = re.sub(r"<item\b[^>]*>", "<p>", osis).replace("</item>", "</p>")
     # Psalm 119 is a verse at a time, each opening "Psalms 119:3*"; one (122) has no EXPOSITION heading after it.
     osis = re.sub(r"Psalms 119:\d+\*", '<title type="x-s">EXPOSITION</title>', osis)
-    osis = re.sub(r"[\x80-\x9f]", lambda m: bytes([ord(m[0])]).decode("cp437"), osis)  # "quotidi\x8a": letters in DOS's code page (è)
+    osis = re.sub(
+        r"[\x80-\x9f]", lambda m: bytes([ord(m[0])]).decode("cp437"), osis
+    )  # "quotidi\x8a": letters in DOS's code page (è)
     osis = re.sub(r"\{(\d)\}", r'<hi type="super">\1</hi>', osis)  # the footnotes' "{1}"
     if c == 119:  # its own verses, written "Psalms 114:129" (and one, "114:48", that isn't either)
         osis = re.sub(r"Psalms 114:(91|128|129|158)\b", r"Psalms 119:\1", osis)
     if c == 110:  # "verses 1-3 … 5-7", linked to Psalm 106
-        osis = re.sub(r'<reference osisRef="Ps\.106\.(\d+)-Ps\.106\.(\d+)">Ps 106:', r'<reference osisRef="Ps.110.\1-Ps.110.\2">Ps 110:', osis)
+        osis = re.sub(
+            r'<reference osisRef="Ps\.106\.(\d+)-Ps\.106\.(\d+)">Ps 106:',
+            r'<reference osisRef="Ps.110.\1-Ps.110.\2">Ps 110:',
+            osis,
+        )
     intro = {"": [], "aside": [], "EXPLANATORY NOTES": [], "HINTS TO": [], "works": []}
     notes, part, verses, pending, at = [], "", None, [], None
     for p in re.findall(r"<p>.*?</p>", commentary_html(osis, 19, c, {})):
         plain = re.sub(r"<[^>]+>", "", p).strip()
-        if 'See Psalms on "' in plain or 'See Psalms "' in plain:  # a link to a page of the e-text the module hasn't (Psalm 68:1's long note)
+        if (
+            'See Psalms on "' in plain or 'See Psalms "' in plain
+        ):  # a link to a page of the e-text the module hasn't (Psalm 68:1's long note)
             continue
-        heading = re.fullmatch(r"<p><b>(.*)</b></p>", p) and "</b>" not in p[6:-8] or \
-            re.fullmatch(r"EXPOSITION\.?|EXPLANATORY NOTES AND QUAINT SAYINGS\.?|HINTS TO (?:THE VILLAGE )?PREACHERS?\.?", plain)
+        heading = (
+            re.fullmatch(r"<p><b>(.*)</b></p>", p)
+            and "</b>" not in p[6:-8]
+            or re.fullmatch(
+                r"EXPOSITION\.?|EXPLANATORY NOTES AND QUAINT SAYINGS\.?|HINTS TO (?:THE VILLAGE )?PREACHERS?\.?", plain
+            )
+        )
         if re.fullmatch(r"WORKS? UPON THE .*PSALM\.?", plain):
             part = "works"
             intro[part].append(f"<p><b>{plain}</b></p>")
@@ -1527,29 +1880,37 @@ def tdavid_psalm(c, n, osis):
                 if c == 119 and at:  # Psalm 119's notes and hints are on the verse in hand, labelled or not
                     verses = (at, at)
                     notes.append([part, at, at, []])
-                rest = plain[len(kind):].lstrip(".").strip() if kind == "EXPOSITION" else ""
-                if rest:  # Psalm 70's "EXPOSITION (The Reader is referred for full Exposition and Notes to Ps 40:13-17 …)"
-                    intro[""].append(f"<p>{p[6:-8][p[6:-8].find('('):]}</p>")
+                rest = plain[len(kind) :].lstrip(".").strip() if kind == "EXPOSITION" else ""
+                if (
+                    rest
+                ):  # Psalm 70's "EXPOSITION (The Reader is referred for full Exposition and Notes to Ps 40:13-17 …)"
+                    intro[""].append(f"<p>{p[6:-8][p[6:-8].find('(') :]}</p>")
                 continue
             p = f"<p><b>{p[6:-8].rstrip('. ')}</b></p>"
             if part in ("EXPLANATORY NOTES", "HINTS TO") and re.match(r"TITLE\b", plain):  # notes on the title
                 verses = None
-            elif part == "EXPOSITION":  # a heading in the exposition, as Psalm 68's NEW TRANSLATION: on the psalm, up to the next verse
+            elif (
+                part == "EXPOSITION"
+            ):  # a heading in the exposition, as Psalm 68's NEW TRANSLATION: on the psalm, up to the next verse
                 part = "aside"
         m = TDAVID_LABEL.match(p)
         if m and part in ("EXPOSITION", "aside", "EXPLANATORY NOTES", "HINTS TO"):
             part = "EXPOSITION" if part == "aside" else part
             verses = tdavid_range(m[1], n)
             if not p.startswith("<p><b>"):  # in bold, as most are
-                end = m.end() + (p[m.end():m.end() + 1] == ".")
+                end = m.end() + (p[m.end() : m.end() + 1] == ".")
                 p = f"<p><b>{p[3:end].strip()}</b>{p[end:]}"
-            if c == 119:  # a verse at a time, some of its headings missing: what follows the exposition is notes, on its verse
+            if (
+                c == 119
+            ):  # a verse at a time, some of its headings missing: what follows the exposition is notes, on its verse
                 if at and part == "EXPOSITION":
                     part = "EXPLANATORY NOTES"
                 at = at or verses[0]
                 verses = (at, at)
             if part == "EXPOSITION":
-                if pending and not any(x[0] == "EXPOSITION" for x in notes):  # the first verse, unlabelled ("How amiable", Psalm 84)
+                if pending and not any(
+                    x[0] == "EXPOSITION" for x in notes
+                ):  # the first verse, unlabelled ("How amiable", Psalm 84)
                     verses = (1, verses[1])
                 notes.append([part, *verses, pending + [p]])
                 pending = []
@@ -1564,7 +1925,13 @@ def tdavid_psalm(c, n, osis):
             notes[-1][3].append(p)
         else:
             if part == "":  # a heading, as the others are
-                p = re.sub(TDAVID_HEAD, lambda m: f"<p><b>{m[1].upper().replace('GENERAL,', 'GENERAL').replace('&AMP;C', 'ETC')}</b></p><p>", p)
+                p = re.sub(
+                    TDAVID_HEAD,
+                    lambda m: (
+                        f"<p><b>{m[1].upper().replace('GENERAL,', 'GENERAL').replace('&AMP;C', 'ETC')}</b></p><p>"
+                    ),
+                    p,
+                )
             intro[part].append(p)
     if pending:
         intro[""] += pending
@@ -1572,10 +1939,12 @@ def tdavid_psalm(c, n, osis):
     # hints go with the note on their first verse, or are one of their own where the exposition has none.
     exposition = [x for x in notes if x[0] == "EXPOSITION"]
     for a, b in zip(exposition, exposition[1:]):
-        if a[1] == b[1] and a[2] > b[2]:  # "Verses 4-19." over a stretch the verses after it take one by one: with the first
+        if (
+            a[1] == b[1] and a[2] > b[2]
+        ):  # "Verses 4-19." over a stretch the verses after it take one by one: with the first
             b[3][:0], a[3] = a[3], []
     groups = []
-    for part, v1, v2, paras in exposition:
+    for _part, v1, v2, paras in exposition:
         if not paras:
             continue
         if groups and v1 <= groups[-1][1]:
@@ -1587,7 +1956,7 @@ def tdavid_psalm(c, n, osis):
             groups.append([v1, v2, {"EXPOSITION": paras, "EXPLANATORY NOTES": [], "HINTS TO": []}])
     for a, b in zip(groups, groups[1:] + [[n + 1]]):
         a[1] = max(a[1], b[0] - 1)
-    for part, v1, v2, paras in notes:
+    for part, v1, _v2, paras in notes:
         if part == "EXPOSITION":
             continue
         if v1 > n:  # a note filed by a misprinted label (Psalm 13's "Verse 8", which is Psalm 20:8's): with the last
@@ -1625,70 +1994,150 @@ def write_tdavid():
         chapters.append((b, c, intro))
         verses += notes
     import covers
-    thumb = covers.html(covers.design([("THE", 36), ("TREASURY", 76), ("OF DAVID", 76)],
-                                      [("C. H. SPURGEON", 36)], (92, 58, 36), ornament="harp"))[1]
-    info = (thumb + "<p>The Treasury of David, by C. H. Spurgeon (seven volumes, 1869–1885): his exposition of each psalm, "
-            "with Explanatory Notes and Quaint Sayings gathered from other writers, and Hints to the Village Preacher.</p>"
-            "<p>Each verse's note has the three parts under their headings; what is on a psalm as a whole (its title, "
-            "its division, the notes on the whole psalm and the books on it) is the psalm's introduction.</p>"
-            "<p>Public domain. CrossWire's TDavid module (2.1), from the Spurgeon Archive's text (archive.spurgeon.org). "
-            "Built by Two-edged Sword's tools/core.</p>")
-    write_commentary("tdavid.cmti", "Spurgeon's Treasury of David", "TDavid", info, (books, chapters, verses))
 
+    thumb = covers.html(
+        covers.design(
+            [("THE", 36), ("TREASURY", 76), ("OF DAVID", 76)], [("C. H. SPURGEON", 36)], (92, 58, 36), ornament="harp"
+        )
+    )[1]
+    info = (
+        thumb + "<p>The Treasury of David, by C. H. Spurgeon (seven volumes, 1869–1885): his exposition of each psalm, "
+        "with Explanatory Notes and Quaint Sayings gathered from other writers, and Hints to the Village Preacher.</p>"
+        "<p>Each verse's note has the three parts under their headings; what is on a psalm as a whole (its title, "
+        "its division, the notes on the whole psalm and the books on it) is the psalm's introduction.</p>"
+        "<p>Public domain. CrossWire's TDavid module (2.1), from the Spurgeon Archive's text (archive.spurgeon.org). "
+        "Built by Two-edged Sword's tools/core.</p>"
+    )
+    write_commentary("tdavid.cmti", "Spurgeon's Treasury of David", "TDavid", info, (books, chapters, verses))
 
 
 SHA256[CROSSWIRE.format("KD")] = "ca3bdb6a04c0b717ee2faed71b432d58195db96f217f490ce6f7d9c36a2876f7"
 # Greek and Hebrew the e-text has in a font's encoding (BibleWorks' Bwhebb and Bwgrkl, or Greek read as Latin-1 or
 # Hebrew), a few references it gets wrong, and some of its typos.
 MENDS["kd.cmti"] = [
-    ("JwH and the noun RˆANA", "הוּא and the noun נַעַר"), ("JYHI and HRFˆáNA", "הִיא and נַעֲרָה"),
+    ("JwH and the noun RˆANA", "הוּא and the noun נַעַר"),
+    ("JYHI and HRFˆáNA", "הִיא and נַעֲרָה"),
     ("spelt LJ˜HF, afterwards HlEJ˜HF", "spelt הָאֵל, afterwards הָאֵלֶּה"),
     ("verbs H›L is often written HO or WO without T, as WVOˆá", "verbs ל״ה is often written הֹ or וֹ without ת, as עֲשׂוֹ"),
-    ("wHVOˆá", "עֲשׂהוּ"), ("HJORi", "רְאֹה"), ("full form†w", "full form וּן"), ("softened into w.", "softened into וּ."),
-    ("BYBIJF", "אָבִיב"), ("TXAtAMiJA", "אַמְתַּחַת"), ("RTAbF", "בָּתַר"), ("RTEbE", "בֶּתֶר"), ("LZFWgO", "גּוֹזָל"),
-    ("DBEZE", "זֶבֶד"), ("DBAZF", "זָבַד"), ("ŠM˜RiXE", "חֶרְמֵשׁ"), ("JNE‹E", "טֶנֶא"), ("„wQYiHA", "הַיְקוּם"),
-    ("HWESiMA", "מַסְוֶה"), ("RQEˆ˜a sprout", "עֵקֶר a sprout"), ("RJ˜Ši", "שְׁאֵר"), ("RwKZF for RKFZF", "זָכוּר for זָכָר"),
-    ("BVEkE for VBEkE", "כֶּשֶׂב for כֶּבֶשׂ"), ("WYmFˆA‰LJE ‡SAJåNE", "נֶאֱסַף אֶל־עַמָּיו"),
+    ("wHVOˆá", "עֲשׂהוּ"),
+    ("HJORi", "רְאֹה"),
+    ("full form†w", "full form וּן"),
+    ("softened into w.", "softened into וּ."),
+    ("BYBIJF", "אָבִיב"),
+    ("TXAtAMiJA", "אַמְתַּחַת"),
+    ("RTAbF", "בָּתַר"),
+    ("RTEbE", "בֶּתֶר"),
+    ("LZFWgO", "גּוֹזָל"),
+    ("DBEZE", "זֶבֶד"),
+    ("DBAZF", "זָבַד"),
+    ("ŠM˜RiXE", "חֶרְמֵשׁ"),
+    ("JNE‹E", "טֶנֶא"),
+    ("„wQYiHA", "הַיְקוּם"),
+    ("HWESiMA", "מַסְוֶה"),
+    ("RQEˆ˜a sprout", "עֵקֶר a sprout"),
+    ("RJ˜Ši", "שְׁאֵר"),
+    ("RwKZF for RKFZF", "זָכוּר for זָכָר"),
+    ("BVEkE for VBEkE", "כֶּשֶׂב for כֶּבֶשׂ"),
+    ("WYmFˆA‰LJE ‡SAJåNE", "נֶאֱסַף אֶל־עַמָּיו"),
     ("TJzOHA HRFWtOHA HNEŠiMI TJE", "אֶת מִשְׁנֶה הַתּוֹרָה הַזֹּאת"),
-    ("„YNŠJR „YJYBN", "נביאים ראשׁנים"), ("„YN§JR „YJYBN", "נביאים ראשׁנים"),
-    ("name of „YJIYBINi", "name of נְבִיאִים"), ("„YNI ŠOJRIHF „YJIYBINi", "נְבִיאִים הָרִאשֹׁנִים"),
-    ("„YNIOERXáJÁHF", "הָאַחֲרוֹנִים"), ("JTfMiLEŠiJÁ", "אַשְׁלֶמְתָא"), ("JTFYiMFDiQA JTMLŠJ", "אשׁלמתא קַדְמָיְתָא"),
-    ("JNFYFNiTI JTMLŠJ", "אשׁלמתא תִנְיָנָא"), ("JyFNARFKidF‰LJA JnFMÁMi", "מְמַנָּא עַל־דָּכְרָנַיָּא"), ("YRBD‰Lˆ", "על־דברי"),
-    ("HOEFHYi „JUNi", "נְאֻם יְהוָה"), ("RŠEJá †JAYA", "יַעַן אֲשֶׁר"), ("SYˆKH, JY‹XH, DYB †TN", "הכעיס, החטיא, נתן ביד"),
-    ("RVFˆF „YN˜Ši", "שְׁנֵים עָשָׂר"), ("RSAYR˜Ti = RVFˆF YR˜ti", "תְרֵיסַר = תְּרֵי עָשָׂר"), ("qêtanniÝm, minores)on", "qĕtannîm, minores) on"),
-    ("grafeiÚa", "γραφεῖα"), ("oÎ aÏrxiereuÃj... aÏnaginwskeÂtw touÃj noÂmouj paÚsi", "ὁ ἀρχιερεὺς... ἀναγινωσκέτω τοὺς νόμους πᾶσι"),
-    ("eÏpiÂpnoia profhtikhÃ", "ἐπίπνοια προφητικὴ"), ("uÎpomnhmatoÂgrafoj", "ὑπομνηματογράφος"),
-    ("eÏpiÃ twÌn uÎpomnhmaÂtwn", "ἐπὶ τῶν ὑπομνημάτων"), ("twÌn dwÂdeka profhtwÌn", "τῶν δώδεκα προφητῶν"),
-    ("monoÂbibloj, toÃ dwdekaproÂfhton", "μονόβιβλος, τὸ δωδεκαπρόφητον"), ("êù́ìç Öáñá̀í", "κώμη Φαρὰν"),
-    ("ïé̓͂êïí èṍåéí åõ̓ù÷é́áò å̔́íåêá", "οἶκον θύειν εὐωχίας ἕνεκα"), ("הב́לבכיע", "δάμαλις"), ("ו̓פץכש́טחףבם", "ἐτυλώθησαν"),
+    ("„YNŠJR „YJYBN", "נביאים ראשׁנים"),
+    ("„YN§JR „YJYBN", "נביאים ראשׁנים"),
+    ("name of „YJIYBINi", "name of נְבִיאִים"),
+    ("„YNI ŠOJRIHF „YJIYBINi", "נְבִיאִים הָרִאשֹׁנִים"),
+    ("„YNIOERXáJÁHF", "הָאַחֲרוֹנִים"),
+    ("JTfMiLEŠiJÁ", "אַשְׁלֶמְתָא"),
+    ("JTFYiMFDiQA JTMLŠJ", "אשׁלמתא קַדְמָיְתָא"),
+    ("JNFYFNiTI JTMLŠJ", "אשׁלמתא תִנְיָנָא"),
+    ("JyFNARFKidF‰LJA JnFMÁMi", "מְמַנָּא עַל־דָּכְרָנַיָּא"),
+    ("YRBD‰Lˆ", "על־דברי"),
+    ("HOEFHYi „JUNi", "נְאֻם יְהוָה"),
+    ("RŠEJá †JAYA", "יַעַן אֲשֶׁר"),
+    ("SYˆKH, JY‹XH, DYB †TN", "הכעיס, החטיא, נתן ביד"),
+    ("RVFˆF „YN˜Ši", "שְׁנֵים עָשָׂר"),
+    ("RSAYR˜Ti = RVFˆF YR˜ti", "תְרֵיסַר = תְּרֵי עָשָׂר"),
+    ("qêtanniÝm, minores)on", "qĕtannîm, minores) on"),
+    ("grafeiÚa", "γραφεῖα"),
+    ("oÎ aÏrxiereuÃj... aÏnaginwskeÂtw touÃj noÂmouj paÚsi", "ὁ ἀρχιερεὺς... ἀναγινωσκέτω τοὺς νόμους πᾶσι"),
+    ("eÏpiÂpnoia profhtikhÃ", "ἐπίπνοια προφητικὴ"),
+    ("uÎpomnhmatoÂgrafoj", "ὑπομνηματογράφος"),
+    ("eÏpiÃ twÌn uÎpomnhmaÂtwn", "ἐπὶ τῶν ὑπομνημάτων"),
+    ("twÌn dwÂdeka profhtwÌn", "τῶν δώδεκα προφητῶν"),
+    ("monoÂbibloj, toÃ dwdekaproÂfhton", "μονόβιβλος, τὸ δωδεκαπρόφητον"),
+    ("êù́ìç Öáñá̀í", "κώμη Φαρὰν"),
+    ("ïé̓͂êïí èṍåéí åõ̓ù÷é́áò å̔́íåêá", "οἶκον θύειν εὐωχίας ἕνεκα"),
+    ("הב́לבכיע", "δάμαλις"),
+    ("ו̓פץכש́טחףבם", "ἐτυλώθησαν"),
     ("וץ ירצוּ את־עונם̓הןךח́פב ףןץףי̀ב ע̓לבספי́בץ בע̓פש͂ם", "ירצוּ את־עונם, εὐδοκήσουσι τὰς ἁμαρτίας αὐτῶν"),
-    ("εἰς ἁÌρματα", "εἰς ἅρματα"), ("Σουβηìμ (<i>l</i>. Σουληìμ) κληìρου Ισσαìχαρ καιÌ νῦν ἐστιÌ κωìμη ΣουληÌμ",
-                                     "Σουβήμ (<i>l</i>. Σουλήμ) κλήρου Ἰσσάχαρ καὶ νῦν ἐστὶ κώμη Σουλήμ"),
-    ("fגּבהאheb&gt;, an Aramean mode of spelling for גּבהה heb&gt;; and asרעפּתheb&gt;", "גּבהא, an Aramean mode of spelling for גּבהה; and as רעפּת"),
-    ("<p>2 Sa22:14-16</p>", "<p><ref>2Sa 22:14-16</ref></p>"), ("commences with w (<i>and</i>)", "commences with ו (<i>and</i>)"),
-    ("κατ’ ̓ξοχήν", "κατ’ ἐξοχήν"), ("̓́Εσμουνον", "Ἔσμουνον"), ("̓́Αδωδος", "Ἄδωδος"), ("̓́Ελαμος γὰρ’Ελαμαίους", "Ἔλαμος γὰρ Ἐλαμαίους"),
-    ("(אלים( sdog)", "(אלים, gods)"), ("στερέωα", "στερέωμα"), ("(οπφὴμία)", "(μορφὴ μία)"), ("“to cut, or new,”", "“to cut, or hew,”"),
-    ("synonymous with איך, non-existence", "synonymous with אין, non-existence"), ("headed תיקרא in", "headed ויקרא in"),
-    ("<p><b>Israel has attained in the midst of the peoples out of deep humiliation.</b></p><p>", " Israel has attained in the midst of the peoples out of deep humiliation. "),
+    ("εἰς ἁÌρματα", "εἰς ἅρματα"),
+    (
+        "Σουβηìμ (<i>l</i>. Σουληìμ) κληìρου Ισσαìχαρ καιÌ νῦν ἐστιÌ κωìμη ΣουληÌμ",
+        "Σουβήμ (<i>l</i>. Σουλήμ) κλήρου Ἰσσάχαρ καὶ νῦν ἐστὶ κώμη Σουλήμ",
+    ),
+    (
+        "fגּבהאheb&gt;, an Aramean mode of spelling for גּבהה heb&gt;; and asרעפּתheb&gt;",
+        "גּבהא, an Aramean mode of spelling for גּבהה; and as רעפּת",
+    ),
+    ("<p>2 Sa22:14-16</p>", "<p><ref>2Sa 22:14-16</ref></p>"),
+    ("commences with w (<i>and</i>)", "commences with ו (<i>and</i>)"),
+    ("κατ’ ̓ξοχήν", "κατ’ ἐξοχήν"),
+    ("̓́Εσμουνον", "Ἔσμουνον"),
+    ("̓́Αδωδος", "Ἄδωδος"),
+    ("̓́Ελαμος γὰρ’Ελαμαίους", "Ἔλαμος γὰρ Ἐλαμαίους"),
+    ("(אלים( sdog)", "(אלים, gods)"),
+    ("στερέωα", "στερέωμα"),
+    ("(οπφὴμία)", "(μορφὴ μία)"),
+    ("“to cut, or new,”", "“to cut, or hew,”"),
+    ("synonymous with איך, non-existence", "synonymous with אין, non-existence"),
+    ("headed תיקרא in", "headed ויקרא in"),
+    (
+        "<p><b>Israel has attained in the midst of the peoples out of deep humiliation.</b></p><p>",
+        " Israel has attained in the midst of the peoples out of deep humiliation. ",
+    ),
     ("<p><ref>Exo 1:1-9</ref> Moses now started", "<p><ref>Exo 4:1-9</ref> Moses now started"),
     ("<p><ref>2Sa 22:3</ref> The God", "<p><ref>2Sa 23:3</ref> The God"),
 ]
 # A note's label, at the start of its slot: "<reference osisRef="Gen.1.2-Gen.1.5">Gen 1:2-5</reference>", "1Ki 1:1-2",
 # "2 Sa22:14-16", "<reference …>Gen 50:1</reference>-3.", "Vers. 8-21.".
-KD_LABEL = re.compile(r'\s*(?:<div\b[^>]*/>\s*)*(?:(?:<reference osisRef="[^"]*">\s*)?[1-3]?\s?[A-Z][a-z]{1,3}\.?\s?(\d+):(\d+)'
-                      r'(?:\s?[-–]\s?(?:(\d+):)?(\d+))?(?:\s*</reference>)?(?:[-–](\d+)\b)?|Vers?\.\s*(\d+)(?:\s?[-–]\s?(\d+))?)')
+KD_LABEL = re.compile(
+    r'\s*(?:<div\b[^>]*/>\s*)*(?:(?:<reference osisRef="[^"]*">\s*)?[1-3]?\s?[A-Z][a-z]{1,3}\.?\s?(\d+):(\d+)'
+    r"(?:\s?[-–]\s?(?:(\d+):)?(\d+))?(?:\s*</reference>)?(?:[-–](\d+)\b)?|Vers?\.\s*(\d+)(?:\s?[-–]\s?(\d+))?)"
+)
 # The headings where, in a book's first slot, its introduction ends and the first section's begins.
-KD_SECTION = ("The Creation of the World", "I. Laws and Ordinances", "I. Preparations", "I. History of the People",
-              "I. David King", "I. History Of Solomon", "I. Genealogies", "I. The Return", "I. Nehemiah", "I. Israel’s",
-              "I. The Judgment of God", "I. The Approaching", "Ruth Goes", "Ahaziah", "III. History of Solomon", "The Opening",
-              "FIRST BOOK OF THE PSALTER", "SUPERSCRIPTION AND MOTTO", "EXPOSITION OF THE SONG", "First Half",
-              "Historico-Biographical", "Mission of Jonah", "Judgment upon", "God’s Love", "The Banquet")
+KD_SECTION = (
+    "The Creation of the World",
+    "I. Laws and Ordinances",
+    "I. Preparations",
+    "I. History of the People",
+    "I. David King",
+    "I. History Of Solomon",
+    "I. Genealogies",
+    "I. The Return",
+    "I. Nehemiah",
+    "I. Israel’s",
+    "I. The Judgment of God",
+    "I. The Approaching",
+    "Ruth Goes",
+    "Ahaziah",
+    "III. History of Solomon",
+    "The Opening",
+    "FIRST BOOK OF THE PSALTER",
+    "SUPERSCRIPTION AND MOTTO",
+    "EXPOSITION OF THE SONG",
+    "First Half",
+    "Historico-Biographical",
+    "Mission of Jonah",
+    "Judgment upon",
+    "God’s Love",
+    "The Banquet",
+)
 
 # A heading run into the end of a paragraph, what it heads following: often the next chapter's, at the end of the last
 # note on this one ("… both cycles touch. Penitential Prayer and intercession for Restoration to Favour", Psalm 51's).
-KD_RUN_IN = re.compile(r'(?<=[.!?”)])\s+([A-Z“](?:[^.!?<>]|</?reference\b[^>]*>){3,200}?)\s*(<div eID="[^"]*" type="x-p"/>\s*(?:<div sID="[^"]*" type="x-p"/>|(?=<title)))')
+KD_RUN_IN = re.compile(
+    r'(?<=[.!?”)])\s+([A-Z“](?:[^.!?<>]|</?reference\b[^>]*>){3,200}?)\s*(<div eID="[^"]*" type="x-p"/>\s*(?:<div sID="[^"]*" type="x-p"/>|(?=<title)))'
+)
 # Headings in a chapter's last slot that begin the next chapter's introduction.
-KD_NEXT = re.compile(r'<title[^>]*>((?:Belshazzar’s Feast|III\. Sights or Visions)[^<]*)</title>')
+KD_NEXT = re.compile(r"<title[^>]*>((?:Belshazzar’s Feast|III\. Sights or Visions)[^<]*)</title>")
 
 # Psalm 13's introduction is in Psalm 140's place, and Psalm 140's here.
 KD_MOVED = {(19, 13): (19, 140)}
@@ -1704,17 +2153,22 @@ def kd_run_in(text, b):
         words = re.sub(r"<[^>]+>", "", m[1]).split()
         if re.search(r":(?!\d)", m[1]) or re.search("[\u0590-\u05ff]", m[1]):
             continue
-        if len(words) >= 3 and sum(w[0].isupper() for w in words) >= 0.6 * len(words) or \
-                b == 19 and re.search(r"\b[Tt]his Psalm\b|\bThe Psalm\b|\bPs(?:a|alm)?\.? \d", text[m.end():m.end() + 3000]):
+        if (
+            len(words) >= 3
+            and sum(w[0].isupper() for w in words) >= 0.6 * len(words)
+            or b == 19
+            and re.search(r"\b[Tt]his Psalm\b|\bThe Psalm\b|\bPs(?:a|alm)?\.? \d", text[m.end() : m.end() + 3000])
+        ):
             start = m.start(1)
             # Its first part, if it has a full stop: "Guilt and Punishment of Israel. Its Future Restoration - Mic 2:1-13"
             while True:
-                p = re.search(r'(?:[.!?”)]|^)\s+([A-Z][^.!?<>]{0,120}[.])\s*$', text[:start])
+                p = re.search(r"(?:[.!?”)]|^)\s+([A-Z][^.!?<>]{0,120}[.])\s*$", text[:start])
                 if not p or sum(w[0].isupper() for w in p[1].split()) < 0.5 * len(p[1].split()):
                     break
                 start = p.start(1)
-            return start, text[start:m.end(1)].strip(), m.end(1)
+            return start, text[start : m.end(1)].strip(), m.end(1)
     return None
+
 
 # The books whose Hebrew phrases the e-text has backwards ("שׁמות ואלה" for ואלה שׁמות): its older text, from BibleWorks.
 # Phrases with vowels (from the newer text, Wikisource's) are the right way round.
@@ -1723,17 +2177,23 @@ KD_BACKWARDS = {*range(1, 18), 23, 27}
 
 def kd_hebrew(s):
     """Each phrase of more than one Hebrew word in s, outside tags, with its words in order."""
+
     def run(m):
         return m[0] if re.search("[\u0591-\u05bb]", m[0]) else " ".join(reversed(m[0].split(" ")))
-    return "".join(x if x.startswith("<") else re.sub(r"[\u0590-\u05ff]+(?: [\u0590-\u05ff]+)+", run, x)
-                   for x in re.split(r"(<[^>]+>)", s))
+
+    return "".join(
+        x if x.startswith("<") else re.sub(r"[\u0590-\u05ff]+(?: [\u0590-\u05ff]+)+", run, x)
+        for x in re.split(r"(<[^>]+>)", s)
+    )
 
 
 def kd_greek(s):
     """Breathings the e-text set loose: "ου ̓ μή" (οὐ μή), "ἀλλ ̓" (ἀλλ’), "̓αμβακούμ" (ἀμβακούμ)."""
     s = re.sub(r"([αεηιουωΑΕΗΙΟΥΩ]) ?([\u0313\u0314])", lambda m: unicodedata.normalize("NFC", m[1] + m[2]), s)
     s = re.sub(r"(?<=[\u0370-\u03ff\u1f00-\u1fff]) ?\u0313", "’", s)
-    return re.sub(r"(?<=[\s(])([\u0313\u0314])([αεηιουωΑΕΗΙΟΥΩ])", lambda m: unicodedata.normalize("NFC", m[2] + m[1]), s)
+    return re.sub(
+        r"(?<=[\s(])([\u0313\u0314])([αεηιουωΑΕΗΙΟΥΩ])", lambda m: unicodedata.normalize("NFC", m[2] + m[1]), s
+    )
 
 
 def kd_label(text, c):
@@ -1758,15 +2218,21 @@ def kd_osis(s):
     def note(m):
         notes.append(m[1].strip())
         return f'<hi type="super">{len(notes)}</hi>'
+
     s = re.sub(r"<note\b[^>]*>(.*?)</note>", note, s, flags=re.S)
     if notes:
         s += '<div sID="n" type="x-p"/><hi type="bold">Notes</hi><div eID="n" type="x-p"/>'
-        s += "".join(f'<div sID="n" type="x-p"/><hi type="super">{n}</hi> {t}<div eID="n" type="x-p"/>' for n, t in enumerate(notes, 1))
+        s += "".join(
+            f'<div sID="n" type="x-p"/><hi type="super">{n}</hi> {t}<div eID="n" type="x-p"/>'
+            for n, t in enumerate(notes, 1)
+        )
     s = re.sub(r"\s*\(&lt;\)|,?\s*&lt;(?=[,;)\s])", "", s)
     s = re.sub(r"<l\b[^>]*eID=[^>]*/>", "<br>", s)
     s = re.sub(r"\bRth\b", "Ruth", s)
     s = re.sub(r"<item\b[^>]*>", '<div sID="i" type="x-p"/>', s).replace("</item>", '<div eID="i" type="x-p"/>')
-    s = re.sub(r"<table\b[^>]*>", '<div sID="t" type="x-p"/>⟦table⟧', s).replace("</table>", '⟦/table⟧<div eID="t" type="x-p"/>')
+    s = re.sub(r"<table\b[^>]*>", '<div sID="t" type="x-p"/>⟦table⟧', s).replace(
+        "</table>", '⟦/table⟧<div eID="t" type="x-p"/>'
+    )
     s = re.sub(r"<row\b[^>]*>", "⟦tr⟧", s).replace("</row>", "⟦/tr⟧")
     s = re.sub(r"<cell\b[^>]*>", "⟦td⟧", s).replace("</cell>", "⟦/td⟧")
     return s
@@ -1781,10 +2247,12 @@ def kd_html(s, b, c):
     s = re.sub(r"⟦/table⟧\s*</p>", "</table>", s)
     s = re.sub(r"\s*⟦(/?t[rd])⟧\s*", r"<\1>", s)
     s = re.sub(r"^<p><ref>([^<]*)</ref>\s*<ref>\1</ref>", r"<p><ref>\1</ref>", s)  # "Ver. 4 describes", after its label
+
     # Ranges the linking cut short: "<ref>Gen 5:1-6</ref>:8" (Gen 5:1-6:8), "<ref>Gen 50:1</ref>-3".
     def whole(m):
         r = passage_refs(f"{m[1]}-{m[2]}")
         return r[0] if r else m[0]
+
     s = re.sub(r"<ref>(\S+ \d+:\d+)-(\d+)</ref>(:\d+)", lambda m: whole([m[0], m[1], m[2] + m[3]]), s)
     s = re.sub(r"<ref>(\S+ \d+:\d+)</ref>[-–](\d+(?::\d+)?)\b", whole, s)
     return s.replace("Hebrew_Bible_", "Hebrew ")
@@ -1807,22 +2275,37 @@ def write_kd():
             start, title, _ = m
             # To the chapter the heading names ("The Preamble - Jos 1:1-9", at the end of Joshua 19), or the next; a psalm's
             # heading may name another ("Elohimic Variation of the Jahve - Psa 14:1-7", Psalm 53's).
-            named = re.search(r"-\s*(?:[1-3]\s?)?[A-Z][a-z]+\.?\s+(\d+)(?::\d+)?(?:[-–]\d+(?::\d+)?)?\s*$", re.sub(r"<[^>]+>", "", title))
+            named = re.search(
+                r"-\s*(?:[1-3]\s?)?[A-Z][a-z]+\.?\s+(\d+)(?::\d+)?(?:[-–]\d+(?::\d+)?)?\s*$",
+                re.sub(r"<[^>]+>", "", title),
+            )
             to = KD_MOVED.get((b, c), (b, int(named[1]) if named and b != 19 else c + 1))
-            if i == len(entries) - 1 and to[1] in counts[b]:  # the next chapter's heading and introduction: with that chapter
-                chapters.append((*to, kd_html(f"<title>{title}</title>{e[2][m[2]:]}", *to)))
+            if (
+                i == len(entries) - 1 and to[1] in counts[b]
+            ):  # the next chapter's heading and introduction: with that chapter
+                chapters.append((*to, kd_html(f"<title>{title}</title>{e[2][m[2] :]}", *to)))
                 e[2] = e[2][:start]
             else:
-                e[2] = f"{e[2][:start]}<title>{title}</title>{e[2][m[2]:]}"
+                e[2] = f"{e[2][:start]}<title>{title}</title>{e[2][m[2] :]}"
         first = head + entries[0][2]
         if not kd_label(entries[0][2], c):
             # The introduction runs to the first label for this chapter at a paragraph's start, or is the whole slot.
-            m = re.search(rf'<div [se]ID="[^"]*" type="x-p"/>\s*(?=(?:<div [se]ID="[^"]*" type="x-p"/>\s*)*(?:<reference osisRef="[^"]*">)?[1-3]?\s?[A-Z][a-z]{{1,3}}\.?\s?{c}:\d)', first)
+            m = re.search(
+                rf'<div [se]ID="[^"]*" type="x-p"/>\s*(?=(?:<div [se]ID="[^"]*" type="x-p"/>\s*)*(?:<reference osisRef="[^"]*">)?[1-3]?\s?[A-Z][a-z]{{1,3}}\.?\s?{c}:\d)',
+                first,
+            )
             if m or re.match(r"(?:\s|<(?!title)[^>]*>)*<title", first):
                 end = m.end() if m else len(first)
                 pre, rest = first[:end], first[end:]
                 if c == 1:
-                    cut = next((t.start() for t in re.finditer(r"<title[^>]*>([^<]*)", pre) if t[1].strip().startswith(KD_SECTION)), len(pre))
+                    cut = next(
+                        (
+                            t.start()
+                            for t in re.finditer(r"<title[^>]*>([^<]*)", pre)
+                            if t[1].strip().startswith(KD_SECTION)
+                        ),
+                        len(pre),
+                    )
                     intro = kd_html(pre[:cut], b, c)
                     if has_text(re.sub(r"<p><b>.*?</b></p>", "", intro)):
                         books.append((b, intro))
@@ -1868,26 +2351,51 @@ def write_kd():
         merged[(b, c)] = merged.get((b, c), "") + t
     chapters = [(*k, t) for k, t in sorted(merged.items())]
     import covers
-    thumb = covers.html(covers.design([("BIBLICAL", 46), ("COMMENTARY", 46), ("ON THE", 30), ("OLD TESTAMENT", 46)],
-                                      [("C. F. KEIL", 34), ("F. DELITZSCH", 34)], (70, 74, 36), ornament="lamp"))[1]
-    info = (thumb + "<p>Biblical Commentary on the Old Testament, by C. F. Keil and F. Delitzsch, in the English translation "
-            "of T. &amp; T. Clark's Foreign Theological Library (1866–1891).</p>"
-            "<p>Public domain. CrossWire's KD module (2.0), from Wikisource's text and an earlier BibleWorks module. Built by Two-edged Sword's tools/core.</p>")
-    write_commentary("kd.cmti", "Keil & Delitzsch Commentary on the Old Testament", "K&D", info, (books, chapters, verses))
+
+    thumb = covers.html(
+        covers.design(
+            [("BIBLICAL", 46), ("COMMENTARY", 46), ("ON THE", 30), ("OLD TESTAMENT", 46)],
+            [("C. F. KEIL", 34), ("F. DELITZSCH", 34)],
+            (70, 74, 36),
+            ornament="lamp",
+        )
+    )[1]
+    info = (
+        thumb
+        + "<p>Biblical Commentary on the Old Testament, by C. F. Keil and F. Delitzsch, in the English translation "
+        "of T. &amp; T. Clark's Foreign Theological Library (1866–1891).</p>"
+        "<p>Public domain. CrossWire's KD module (2.0), from Wikisource's text and an earlier BibleWorks module. Built by Two-edged Sword's tools/core.</p>"
+    )
+    write_commentary(
+        "kd.cmti", "Keil & Delitzsch Commentary on the Old Testament", "K&D", info, (books, chapters, verses)
+    )
 
 
-BARNES_LABEL = re.compile(r"(?:^|<br\s*/?>|<blockquote>)\s*(?:(?:[1-3]\s?)?[A-Z][A-Za-z]+\s+)?(?:Verses?|Ver)\.?\s*(\d+)(?:\s*(?:[-–,]|and)\s*(\d+))*\b[.:]?")
-BARNES_NONE = re.compile(r"No (?:specific (?:Barnes text|notes from Barnes) on|entry from BARNES for) this verse\.?\s*(?:<scripRef[^>]*>[^<]*</scripRef>\.?)?", re.I)
+BARNES_LABEL = re.compile(
+    r"(?:^|<br\s*/?>|<blockquote>)\s*(?:(?:[1-3]\s?)?[A-Z][A-Za-z]+\s+)?(?:Verses?|Ver)\.?\s*(\d+)(?:\s*(?:[-–,]|and)\s*(\d+))*\b[.:]?"
+)
+BARNES_NONE = re.compile(
+    r"No (?:specific (?:Barnes text|notes from Barnes) on|entry from BARNES for) this verse\.?\s*(?:<scripRef[^>]*>[^<]*</scripRef>\.?)?",
+    re.I,
+)
 
 
 def link_continuations(s):
     """Verses after a link that the source left bare ("<ref>Pro 1:11</ref>, 17, 18"): each linked, in the same chapter."""
+
     def more(m):
         book, ch = m[2], m[3]
-        rest = re.sub(r"(?<=[,;] )(\d{1,3})(?:[-–](\d{1,3}))?(?![\d:])",
-                      lambda n: f"<ref>{book} {ch}:{n[1]}{'-' + n[2] if n[2] else ''}</ref>"
-                      if passage_refs(f"{book} {ch}:{n[1]}") else n[0], m[4])
+        rest = re.sub(
+            r"(?<=[,;] )(\d{1,3})(?:[-–](\d{1,3}))?(?![\d:])",
+            lambda n: (
+                f"<ref>{book} {ch}:{n[1]}{'-' + n[2] if n[2] else ''}</ref>"
+                if passage_refs(f"{book} {ch}:{n[1]}")
+                else n[0]
+            ),
+            m[4],
+        )
         return m[1] + rest
+
     return re.sub(r"(<ref>(\w+) (\d+):\d+(?:-\d+)?</ref>)((?:[,;] \d{1,3}(?:[-–]\d{1,3})?(?![\d:]))+)", more, s)
 
 
@@ -1895,8 +2403,12 @@ def barnes_html(s):
     """Barnes' ThML as e-Sword's HTML: a blank line or a block quotation is a paragraph."""
     s = s.replace('Greek, "\ufffde are the sons', 'Greek, "Ye are the sons')  # Act 3:25, a letter lost in the source
     # The e-text's notes on itself ("Due to the length of Introductory Material, please find it starting in …"), whose links go nowhere.
-    s = re.sub(r"(?:Note: )?Due to the length of [^<]*?please find it starting in <scripRef[^>]*>[^<]*</scripRef>\.?|"
-               r"Also, [Ss]ee an Outline of the Entire Book <scripRef[^>]*>[^<]*</scripRef>\.?", "", s)
+    s = re.sub(
+        r"(?:Note: )?Due to the length of [^<]*?please find it starting in <scripRef[^>]*>[^<]*</scripRef>\.?|"
+        r"Also, [Ss]ee an Outline of the Entire Book <scripRef[^>]*>[^<]*</scripRef>\.?",
+        "",
+        s,
+    )
     s = thml_refs(BARNES_NONE.sub("", s))
     s = re.sub(r"(?<=[a-z,;])\s*<br\s*/?>\s*(?=[a-z])", " ", s)  # a line break inside a sentence
     s = re.sub(r"(?:<br\s*/?>\s*){2,}|</?blockquote>", "</p><p>", s)
@@ -1910,20 +2422,22 @@ def write_barnes():
     the books' prefaces in the first verses' slots, and notes a slot or two from their verses."""
     z, canon = crosswire("Barnes")
     books, chapters, verses = [], [], []
-    for b, c, n, head, entries in sword_chapters(z, canon, zcom):
+    for b, c, n, _head, entries in sword_chapters(z, canon, zcom):
         # A chapter's own slot holds a stray copy of a note from the chapter before, so it's left out.
         text = "<br /><br />".join(t for _, _, t in entries)
         marks = [m for m in BARNES_LABEL.finditer(text) if 1 <= int(m[1]) <= n]
-        pre = text[:marks[0].start()] if marks else text
+        pre = text[: marks[0].start()] if marks else text
         pre = re.sub(r"^\s*(?:[A-Z]+\s+)*CHAPTER\s+[\w.]+\.?", "", pre.strip(), flags=re.I)
         pre = re.sub(r"^\s*(?:<br\s*/?>\s*)*INTRO:", "", pre)
-        intro = re.sub(r"<p>(?:[A-Z]+\s+)*CHAPTER\s+[\w.]+\.?</p>", "", barnes_html(pre), flags=re.I)  # the heading alone
+        intro = re.sub(
+            r"<p>(?:[A-Z]+\s+)*CHAPTER\s+[\w.]+\.?</p>", "", barnes_html(pre), flags=re.I
+        )  # the heading alone
         if has_text(intro):
             (books.append((b, intro)) if c == 1 else chapters.append((b, c, intro)))
         for k, m in enumerate(marks):
-            body = text[m.start():marks[k + 1].start() if k + 1 < len(marks) else len(text)]
+            body = text[m.start() : marks[k + 1].start() if k + 1 < len(marks) else len(text)]
             v1 = int(m[1])
-            v2 = max(int(x) for x in re.findall(r"\d+", m[0][m.start(1) - m.start():]))
+            v2 = max(int(x) for x in re.findall(r"\d+", m[0][m.start(1) - m.start() :]))
             v2 = v2 if v1 <= v2 <= n else v1
             html = barnes_html(body)
             if not has_text(re.sub(r"^<p>[^<]*?(Verses?|Ver)\.?\s*[\d\s,–-]*\.?", "", html)):
@@ -1932,8 +2446,10 @@ def write_barnes():
                 verses[-1] = (b, c, v1, c, max(v2, verses[-1][4]), verses[-1][5] + html)
             else:
                 verses.append((b, c, v1, c, v2, html))
-    info = ("<p>Albert Barnes' Notes on the New Testament, Explanatory and Practical (1832–1851).</p>"
-            "<p>Public domain. CrossWire's Barnes module (1.1); only the New Testament. Built by Two-edged Sword's tools/core.</p>")
+    info = (
+        "<p>Albert Barnes' Notes on the New Testament, Explanatory and Practical (1832–1851).</p>"
+        "<p>Public domain. CrossWire's Barnes module (1.1); only the New Testament. Built by Two-edged Sword's tools/core.</p>"
+    )
     # A verse noted more than once (CrossWire's Luke 11:14-23 has the same note in each verse's slot): one note, each paragraph once.
     merged = {}
     for b, c, v1, c2, v2, body in verses:
@@ -1949,18 +2465,22 @@ def write_barnes():
 def rawld(z):
     """[(key, entry)] from a RawLD dictionary: .idx gives each entry's place and size in .dat, which
     holds its key, a line break and the entry. Old modules are in Latin-1 (Windows-1252)."""
+
     def f(ext):
         return z.read(next(n for n in z.namelist() if n.endswith(f".{ext}")))
+
     idx, dat = f("idx"), f("dat")
     out = []
     for i in range(len(idx) // 6):
         off, size = struct.unpack_from("<IH", idx, i * 6)
-        key, _, body = dat[off:off + size].partition(b"\n")
+        key, _, body = dat[off : off + size].partition(b"\n")
+
         def dec(x):
             try:
                 return x.decode("utf-8")
             except UnicodeDecodeError:
                 return x.decode("cp1252", "replace")
+
         out.append((dec(key.rstrip(b"\r")), dec(body)))
     return out
 
@@ -1969,7 +2489,7 @@ SMALL = {"a", "an", "and", "as", "at", "by", "for", "from", "in", "into", "of", 
 
 
 def topic_case(key):
-    """"LOVE, BROTHERLY" → "Love, Brotherly"; "AARON'S ROD" → "Aaron's Rod"; "JOHN, GOSPEL OF" →
+    """ "LOVE, BROTHERLY" → "Love, Brotherly"; "AARON'S ROD" → "Aaron's Rod"; "JOHN, GOSPEL OF" →
     "John, Gospel of", as e-Sword's dictionaries have them."""
     words = re.split(r"(\W+)", key.strip().lower())
     out = []
@@ -1986,7 +2506,9 @@ def topic_case(key):
 def osis_dict_refs(s):
     """TEI <ref osisRef> → <ref>, each checked against the KJV, and "See <ref target>NAME</ref>" →
     the name, which the app links. One to no real verse is left as text."""
-    s = re.sub(r'<ref osisRef="(?:Bible:)?([^".]+)\.1\.1">([^<]*)</ref>:(\d+)', r'<ref osisRef="\1.1.\3">\2:\3</ref>', s)  # "2Jo 1</ref>:6"
+    s = re.sub(
+        r'<ref osisRef="(?:Bible:)?([^".]+)\.1\.1">([^<]*)</ref>:(\d+)', r'<ref osisRef="\1.1.\3">\2:\3</ref>', s
+    )  # "2Jo 1</ref>:6"
     s = fix_osis_books(s)
 
     def one(m):
@@ -1999,6 +2521,7 @@ def osis_dict_refs(s):
                 return m[2]
             refs.append(f"<ref>{esword_ref(pa, pb)}</ref>")
         return "; ".join(refs)
+
     s = re.sub(r'<ref osisRef="(?:Bible:)?([^"]+)">(.*?)</ref>', one, s, flags=re.S)
     s = re.sub(r"<ref\s[^>]*>(.*?)</ref>", r"\1", s, flags=re.S)
     return s.replace("</ref>,<ref>", "</ref>, <ref>")
@@ -2008,7 +2531,9 @@ def tei_html(s):
     """A TEI dictionary entry (Nave's, ISBE) as e-Sword's HTML: lines (<lb/>) and list items are paragraphs."""
     s = re.sub(r"</?entryFree\b[^>]*>|</?def>|</?list>", "", s)
     s = osis_dict_refs(s)
-    s = re.sub(r'<hi rend="(bold|italic|underline)">(.*?)</hi>', lambda m: f"<{m[1][0]}>{m[2]}</{m[1][0]}>", s, flags=re.S)
+    s = re.sub(
+        r'<hi rend="(bold|italic|underline)">(.*?)</hi>', lambda m: f"<{m[1][0]}>{m[2]}</{m[1][0]}>", s, flags=re.S
+    )
     s = re.sub(r"<lb\s*/>|</?item>", "</p><p>", s)
     s = re.sub(r"<(?!/?(p|b|i|u|ref)>)[^>]*>", "", s)
     return tidy(s)
@@ -2022,6 +2547,7 @@ def thml_dict_html(s):
     def item(m):
         k[0] += 1
         return f"</p><p>{k[0]}. "
+
     s = re.sub(r"<ol\b[^>]*>", lambda m: (k.__setitem__(0, 0), "</p>")[1], s)
     s = re.sub(r"<li\b[^>]*>", item, s)
     s = re.sub(r"</li>|</ol>", "</p><p>", s)
@@ -2062,24 +2588,32 @@ def write_dictionary(file, title, abbrev, info, entries, to_html, topics=None):
 
 def write_smith():
     z, _ = crosswire("Smith")
-    info = ("<p>Smith's Bible Dictionary, by William Smith (1884 edition).</p>"
-            "<p>Public domain. CrossWire's Smith module (1.3). Built by Two-edged Sword's tools/core.</p>")
+    info = (
+        "<p>Smith's Bible Dictionary, by William Smith (1884 edition).</p>"
+        "<p>Public domain. CrossWire's Smith module (1.3). Built by Two-edged Sword's tools/core.</p>"
+    )
     write_dictionary("smith.dcti", "Smith's Bible Dictionary", "Smith", info, rawld(z), smith_html, SMITH_TOPICS)
 
 
 # Smith's topics the source names wrongly.
 SMITH_TOPICS = {"High Places6813 Priest": "High Priest"}
 # Lapidoth has Laodiceans' text in the source; Smith's own: "the husband of Deborah the prophetess. (Judg 4:4)".
-SMITH_TEXT = [("(<i>torches</i>), the inhabitants of Laodicea.",
-               '(<i>torches</i>), the husband of Deborah the prophetess. (<scripRef passage="jud 4:4">Judges 4:4</scripRef>)')]
+SMITH_TEXT = [
+    (
+        "(<i>torches</i>), the inhabitants of Laodicea.",
+        '(<i>torches</i>), the husband of Deborah the prophetess. (<scripRef passage="jud 4:4">Judges 4:4</scripRef>)',
+    )
+]
 
 
 def smith_html(s):
     """Smith's ThML, its cross-references ("[ABILENE]", "[ZARETAN, OR ZARTHAN]") written as "See ABILENE", which the
     app links; a name the source doubled ("THREE TAVERNS TAVERNS") once."""
+
     def see(m):
         name = re.sub(r"\b(\w+) \1\b", r"\1", m[1].split(",")[0].strip())
         return f"See {name}."
+
     s = re.sub(r"\[((?:<term>)?[A-Z][^\]<]*(?:</term>)?(?:[^\]]*))\]", lambda m: f"[{re.sub(r'<[^>]+>', '', m[1])}]", s)
     s = re.sub(r"\[([A-Z][A-Z '-]{2,}(?:, [A-Z ,'-]+)?)\]", see, s)
     for wrong, right in SMITH_TEXT:  # an entry the source has another's text for
@@ -2090,9 +2624,11 @@ def smith_html(s):
 
 def write_nave():
     z, _ = crosswire("Nave")
-    info = ("<p>Nave's Topical Bible: some 20,000 topics and subtopics with the verses on each, by Orville J. Nave (1896).</p>"
-            "<p>Public domain. CrossWire's Nave module (3.0), from the Christian Classics Ethereal Library. "
-            "Built by Two-edged Sword's tools/core.</p>")
+    info = (
+        "<p>Nave's Topical Bible: some 20,000 topics and subtopics with the verses on each, by Orville J. Nave (1896).</p>"
+        "<p>Public domain. CrossWire's Nave module (3.0), from the Christian Classics Ethereal Library. "
+        "Built by Two-edged Sword's tools/core.</p>"
+    )
     write_dictionary("nave.dcti", "Nave's Topical Bible", "Nave", info, zld(z), nave_html)
 
 
@@ -2104,8 +2640,10 @@ def nave_html(s):
 
 def write_isbe():
     z, _ = crosswire("ISBE")
-    info = ("<p>The International Standard Bible Encyclopedia, edited by James Orr (1915).</p>"
-            "<p>Public domain. CrossWire's ISBE module (2.2). Built by Two-edged Sword's tools/core.</p>")
+    info = (
+        "<p>The International Standard Bible Encyclopedia, edited by James Orr (1915).</p>"
+        "<p>Public domain. CrossWire's ISBE module (2.2). Built by Two-edged Sword's tools/core.</p>"
+    )
     write_dictionary("isbe.dcti", "International Standard Bible Encyclopedia", "ISBE", info, zld(z), isbe_html)
 
 
@@ -2121,54 +2659,77 @@ def isbe_html(s):
 
 
 # A verse after a comma is the same chapter's ("Lu 6:1, 3"), unless a book's name follows it ("Eze 48:1-7, 1 Cor 2:11").
-PLAIN_PASSAGE = re.compile(r"\b((?:[1-3] ?)?[A-Z][a-z]{1,15}\.?) (\d{1,3}):(\d{1,3})(?:[-–]\d{1,3})?(?:, ?\d{1,3}(?![\d:]| ?[A-Z][a-z]*\.? \d))*")
+PLAIN_PASSAGE = re.compile(
+    r"\b((?:[1-3] ?)?[A-Z][a-z]{1,15}\.?) (\d{1,3}):(\d{1,3})(?:[-–]\d{1,3})?(?:, ?\d{1,3}(?![\d:]| ?[A-Z][a-z]*\.? \d))*"
+)
 
 
 def link_plain_refs(s):
     """References written as text ("Philippians 1:27", "Lu 6:1, 3") as <ref>s, where each is a real verse; text
     in tags and in <ref>s already is left alone."""
+
     def one(m):
         r = passage_refs(m[0])
         return r[0] if r else m[0]
+
     parts = re.split(r"(<ref\b.*?</ref>|<[^>]+>)", s, flags=re.S)
     return "".join(x if x.startswith("<") else PLAIN_PASSAGE.sub(one, x) for x in parts)
 
 
 def write_webster1828():
     z, _ = crosswire("Webster1828")
-    info = ("<p>An American Dictionary of the English Language, by Noah Webster (1828): English words as they were "
-            "used in his day, close to the King James Version's English.</p>"
-            "<p>The dictionary is public domain. This edition is Akai Tsurugi's (https://github.com/akaitsurugi/webster1828), "
-            "as CrossWire's Webster1828 module (1.2), licensed CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/). "
-            "Built by Two-edged Sword's tools/core, and shared under the same licence.</p>")
-    write_dictionary("webster1828.dcti", "Webster's Dictionary (1828)", "Webster 1828", info, zld(z), lambda e: link_plain_refs(re.sub(r"\brn(?=(?:[1-3] ?)?[A-Z][a-z]{1,3} \d)", "", tei_html(e))))
+    info = (
+        "<p>An American Dictionary of the English Language, by Noah Webster (1828): English words as they were "
+        "used in his day, close to the King James Version's English.</p>"
+        "<p>The dictionary is public domain. This edition is Akai Tsurugi's (https://github.com/akaitsurugi/webster1828), "
+        "as CrossWire's Webster1828 module (1.2), licensed CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/). "
+        "Built by Two-edged Sword's tools/core, and shared under the same licence.</p>"
+    )
+    write_dictionary(
+        "webster1828.dcti",
+        "Webster's Dictionary (1828)",
+        "Webster 1828",
+        info,
+        zld(z),
+        lambda e: link_plain_refs(re.sub(r"\brn(?=(?:[1-3] ?)?[A-Z][a-z]{1,3} \d)", "", tei_html(e))),
+    )
 
 
 # ---- Brown-Driver-Briggs, unabridged ---------------------------------------------------------------
 
-BDB_URL = ("https://raw.githubusercontent.com/eliranwong/unabridged-BDB-Hebrew-lexicon/"
-           "6e8326c6884f8ef1399c7a365d660da9bb9e2d01/unabridged-BDB-Hebrew-lexicon.csv.zip")
+BDB_URL = (
+    "https://raw.githubusercontent.com/eliranwong/unabridged-BDB-Hebrew-lexicon/"
+    "6e8326c6884f8ef1399c7a365d660da9bb9e2d01/unabridged-BDB-Hebrew-lexicon.csv.zip"
+)
 SHA256[BDB_URL] = "056276bd606cb394a8b5026dfd3401c3a8e27e9d3f858e45a20a48ce520a98e6"
 BDB_SIGLA = {"ᵐ5": "LXX", "ᵑ7": "Tg", "ᵑ6": "Syr", "ᵑ0": "MT", "ᵑ9": "Vg"}
-BDB_REF = re.compile(r'(<checkingNeeded/>\s*)?<ref ref="[^"]*" b="(\d+)" cBegin="(\d+)" vBegin="(\d+)" cEnd="(\d+)" vEnd="(\d+)"[^>]*>(.*?)</ref>', re.S)
+BDB_REF = re.compile(
+    r'(<checkingNeeded/>\s*)?<ref ref="[^"]*" b="(\d+)" cBegin="(\d+)" vBegin="(\d+)" cEnd="(\d+)" vEnd="(\d+)"[^>]*>(.*?)</ref>',
+    re.S,
+)
 
 
 def bdb_html(s, vmap):
     """An entry of Eliran Wong's BDB as e-Sword's HTML. Its references are in the Hebrew Bible's
     numbering: each links to the KJV's verse (`vmap`, the WLC's to the KJV's) and shows BDB's own. One
     its editor marked for checking (<checkingNeeded/>), or that is no verse in the KJV, is left as text."""
-    s = re.sub(r"<h1>.*?</h1>|<div class=\"navigation\">.*?</div>|<wrongReferenceRemoved/>|«[^»]*»|\\&emsp;", "", s, flags=re.S)
+    s = re.sub(
+        r"<h1>.*?</h1>|<div class=\"navigation\">.*?</div>|<wrongReferenceRemoved/>|«[^»]*»|\\&emsp;", "", s, flags=re.S
+    )
 
     def ref(m):
         flagged, (b, c, v, c2, v2), shown = m[1], map(int, m.group(2, 3, 4, 5, 6)), m[7]
         kjv = vmap.get((b, c, v), {}).get(None, (b, c, v)) if b <= 39 else (b, c, v)
-        if flagged:  # its book, which the source's parser guessed, is often wrong ("only Psalm Eccl 139:9"): the verse alone
+        if (
+            flagged
+        ):  # its book, which the source's parser guessed, is often wrong ("only Psalm Eccl 139:9"): the verse alone
             return re.sub(r"^.*?(\d+:\d+(?:[-–]\d+)?)\s*$", r"\1", shown)
         if not 1 <= b <= 66 or not real(kjv):
             return shown
         end = vmap.get((b, c2, v2), {}).get(None, (b, c2, v2)) if b <= 39 else (b, c2, v2)
         to = f"-{end[2]}" if end[:2] == kjv[:2] and end[2] > kjv[2] and real(end) else ""
         return f'<ref v="{BOOK_ABBR[kjv[0] - 1]} {kjv[1]}:{kjv[2]}{to}">{shown}</ref>'
+
     s = BDB_REF.sub(ref, s)
     s = re.sub(r"<checkingNeeded/>", "", s)
     # The ancient versions, which the source writes with stand-ins for BDB's signs: the Septuagint, Targum and so on.
@@ -2212,8 +2773,11 @@ def hebrew_key(w, level):
     """A Hebrew headword for matching, at three levels: 0 its letters and vowels (no accents; holam on vav one
     way), 1 its letters, 2 its letters but for ו and י (מָקוֹם and מָקֹם alike). Final forms count as the others."""
     t = unicodedata.normalize("NFD", w or "").replace("\u05ba", "\u05b9")
-    keep = (lambda ch: "\u05d0" <= ch <= "\u05ea" or "\u05b0" <= ch <= "\u05bc" or ch in "\u05c1\u05c2") if level == 0 else \
-        (lambda ch: "\u05d0" <= ch <= "\u05ea")
+    keep = (
+        (lambda ch: "\u05d0" <= ch <= "\u05ea" or "\u05b0" <= ch <= "\u05bc" or ch in "\u05c1\u05c2")
+        if level == 0
+        else (lambda ch: "\u05d0" <= ch <= "\u05ea")
+    )
     t = "".join(ch for ch in t if keep(ch)).translate(str.maketrans("ךםןףץ", "כמנפצ"))
     return t.replace("ו", "").replace("י", "") if level == 2 else t
 
@@ -2233,11 +2797,15 @@ def write_bdb():
     BDB treats under הָלַךְ) has those articles again. A root ("√ of following"), and an article with no
     number and no headword of its own, goes before the next article that is filed."""
     import wlc.build as wlc
+
     vmap = wlc.verse_map()
     z = zipfile.ZipFile(io.BytesIO(fetch(BDB_URL)))
     text = z.read(next(n for n in z.namelist() if n.endswith(".csv") and "__MACOSX" not in n)).decode("utf-8-sig")
     sdb = sqlite3.connect(f"file:{BUNDLED / 'strong.lexi'}?mode=ro", uri=True)
-    strong = {t: (re.search(r"<heb>(.*?)</heb>", d) or [None, ""])[1] for t, d in sdb.execute("SELECT Topic, Definition FROM Lexicon WHERE Topic LIKE 'H%'")}
+    strong = {
+        t: (re.search(r"<heb>(.*?)</heb>", d) or [None, ""])[1]
+        for t, d in sdb.execute("SELECT Topic, Definition FROM Lexicon WHERE Topic LIKE 'H%'")
+    }
     sdb.close()
     by_key = [defaultdict(list) for _ in range(3)]
     for n, w in strong.items():
@@ -2248,7 +2816,12 @@ def write_bdb():
         if not line.strip():
             continue
         bdb_id, nums, content = line.split("\t", 2)
-        head = (re.search(r"<bdbheb>(.*?)</bdbheb>", re.sub(r"<h1>.*?</h1>|<div class=\"navigation\">.*?</div>", "", content)) or [None, ""])[1]
+        head = (
+            re.search(
+                r"<bdbheb>(.*?)</bdbheb>", re.sub(r"<h1>.*?</h1>|<div class=\"navigation\">.*?</div>", "", content)
+            )
+            or [None, ""]
+        )[1]
         nums = [num(n) for n in nums.split("_") if n.strip() and num(n) != "H0"]
         articles.append((nums, bdb_html(content, vmap), re.sub(r"<[^>]+>", "", head), bdb_id))
 
@@ -2262,6 +2835,7 @@ def write_bdb():
             if len(c) == 1 and not root:
                 return c
         return nums
+
     filed = [BDB_NUMBERS.get(a[3]) or file_under(a[0], a[2], a[1]) for a in articles]
     have = {n for f in filed for n in f}
     for k, (nums, *_) in enumerate(articles):
@@ -2277,48 +2851,86 @@ def write_bdb():
     moved = sum(1 for (n, *_), f in zip(articles, filed, strict=True) if set(n) != set(f))
     print(f"  bdb: {moved} articles filed otherwise than the source lists them")
     unplaced = len(pending) > 0
-    info = ("<p>A Hebrew and English Lexicon of the Old Testament, by Francis Brown, S. R. Driver and Charles A. Briggs "
-            "(1906), unabridged, with its Biblical Aramaic, under the Strong's numbers of its words.</p>"
-            "<p>Its references are BDB's, in the Hebrew Bible's numbering, and open the same verse in the KJV's. "
-            "Arabic, Syriac and Ethiopic words, pictures in the source, are shown as …</p>"
-            "<p>Public domain. Eliran Wong's edition (https://github.com/eliranwong/unabridged-BDB-Hebrew-lexicon), "
-            "from Tim Morton's text for Bible Analyzer, with references parsed by Stephen Ku. "
-            "Built by Two-edged Sword's tools/core.</p>")
+    info = (
+        "<p>A Hebrew and English Lexicon of the Old Testament, by Francis Brown, S. R. Driver and Charles A. Briggs "
+        "(1906), unabridged, with its Biblical Aramaic, under the Strong's numbers of its words.</p>"
+        "<p>Its references are BDB's, in the Hebrew Bible's numbering, and open the same verse in the KJV's. "
+        "Arabic, Syriac and Ethiopic words, pictures in the source, are shown as …</p>"
+        "<p>Public domain. Eliran Wong's edition (https://github.com/eliranwong/unabridged-BDB-Hebrew-lexicon), "
+        "from Tim Morton's text for Bible Analyzer, with references parsed by Stephen Ku. "
+        "Built by Two-edged Sword's tools/core.</p>"
+    )
     rows = dict(mend("bdb_unabridged.lexi", ([(k, bdb_parens(v)) for k, v in rows.items()], 1))[0])
-    with module("bdb_unabridged.lexi", "Brown-Driver-Briggs Hebrew Lexicon (unabridged)", "BDB", info, into=BUNDLED) as db:
+    with module(
+        "bdb_unabridged.lexi", "Brown-Driver-Briggs Hebrew Lexicon (unabridged)", "BDB", info, into=BUNDLED
+    ) as db:
         db.executemany("INSERT INTO Lexicon VALUES (?,?)", sorted(rows.items(), key=lambda r: (len(r[0]), r[0])))
-    print(f"bdb_unabridged.lexi: {len(rows)} numbers{', a root at the end left out' if unplaced else ''}, "
-          f"{(BUNDLED / 'bdb_unabridged.lexi').stat().st_size / 1e6:.1f} MB")
+    print(
+        f"bdb_unabridged.lexi: {len(rows)} numbers{', a root at the end left out' if unplaced else ''}, "
+        f"{(BUNDLED / 'bdb_unabridged.lexi').stat().st_size / 1e6:.1f} MB"
+    )
 
 
 # The commentaries and dictionaries beyond Matthew Henry and Easton: id → (file, builder).
-MORE = {"jfb": ("jfb.cmti", write_jfb), "clarke": ("clarke.cmti", write_clarke), "scofield": ("scofield.cmti", write_scofield), "barnes": ("barnes.cmti", write_barnes),
-        "smith": ("smith.dcti", write_smith), "nave": ("nave.dcti", write_nave), "isbe": ("isbe.dcti", write_isbe),
-        "webster1828": ("webster1828.dcti", write_webster1828), "bdb": ("bdb_unabridged.lexi", write_bdb)}
+MORE = {
+    "jfb": ("jfb.cmti", write_jfb),
+    "clarke": ("clarke.cmti", write_clarke),
+    "scofield": ("scofield.cmti", write_scofield),
+    "barnes": ("barnes.cmti", write_barnes),
+    "smith": ("smith.dcti", write_smith),
+    "nave": ("nave.dcti", write_nave),
+    "isbe": ("isbe.dcti", write_isbe),
+    "webster1828": ("webster1828.dcti", write_webster1828),
+    "bdb": ("bdb_unabridged.lexi", write_bdb),
+}
 # ---- other public-domain English Bibles, from eBible.org ------------------------------------------
 
 EBIBLE = "https://ebible.org/Scriptures/{}_usfm.zip"
 # id: (eBible's id, title, abbreviation, what it is). The ids are e-Sword's, so its copies take their place.
 BIBLES = {
-    "asv": ("eng-asv", "American Standard Version", "ASV",
-            "The American Standard Version of 1901, the American edition of the Revised Version."),
-    "web": ("engwebp", "World English Bible", "WEB",
-            "The World English Bible, a modern English update of the American Standard Version, with the words of Christ in red. "
-            "This edition has the 66 books of the Old and New Testaments, without the Deuterocanon. Romans 14:24-26, the "
-            "doxology where the Majority Text has it, are at 16:25-27, as in the KJV."),
-    "ylt": ("engylt", "Young's Literal Translation", "YLT",
-            "Robert Young's Literal Translation of the Holy Bible (revised edition, 1898), translated word for word from the Hebrew and Greek. "
-            "Words in brackets were supplied by the translator."),
-    "darby": ("engDBY", "Darby Translation", "Darby",
-              "The Holy Scriptures, a New Translation from the Original Languages, by J. N. Darby (1890). "
-              "Words in bold are emphasised in the original, words in brackets were supplied by the translator."),
-    "webster": ("engwebster", "Webster's Bible", "Webster",
-                "The Holy Bible in the Common Version, with Amendments of the Language, by Noah Webster (1833): "
-                "the King James Version with its archaic words and spellings updated, the translators' supplied words in italics."),
-    "rv": ("eng-rv", "Revised Version", "RV",
-           "The Revised Version (New Testament 1881, Old Testament 1885, Apocrypha 1895), the English revision of the "
-           "King James Version. The Rest of Esther is Esther 10:4-16:24, Susanna and Bel Daniel 13 and 14, and the Song "
-           "of the Three Children is part of Daniel 3:23."),
+    "asv": (
+        "eng-asv",
+        "American Standard Version",
+        "ASV",
+        "The American Standard Version of 1901, the American edition of the Revised Version.",
+    ),
+    "web": (
+        "engwebp",
+        "World English Bible",
+        "WEB",
+        "The World English Bible, a modern English update of the American Standard Version, with the words of Christ in red. "
+        "This edition has the 66 books of the Old and New Testaments, without the Deuterocanon. Romans 14:24-26, the "
+        "doxology where the Majority Text has it, are at 16:25-27, as in the KJV.",
+    ),
+    "ylt": (
+        "engylt",
+        "Young's Literal Translation",
+        "YLT",
+        "Robert Young's Literal Translation of the Holy Bible (revised edition, 1898), translated word for word from the Hebrew and Greek. "
+        "Words in brackets were supplied by the translator.",
+    ),
+    "darby": (
+        "engDBY",
+        "Darby Translation",
+        "Darby",
+        "The Holy Scriptures, a New Translation from the Original Languages, by J. N. Darby (1890). "
+        "Words in bold are emphasised in the original, words in brackets were supplied by the translator.",
+    ),
+    "webster": (
+        "engwebster",
+        "Webster's Bible",
+        "Webster",
+        "The Holy Bible in the Common Version, with Amendments of the Language, by Noah Webster (1833): "
+        "the King James Version with its archaic words and spellings updated, the translators' supplied words in italics.",
+    ),
+    "rv": (
+        "eng-rv",
+        "Revised Version",
+        "RV",
+        "The Revised Version (New Testament 1881, Old Testament 1885, Apocrypha 1895), the English revision of the "
+        "King James Version. The Rest of Esther is Esther 10:4-16:24, Susanna and Bel Daniel 13 and 14, and the Song "
+        "of the Three Children is part of Daniel 3:23.",
+    ),
 }
 # Paragraph-level markers: what follows one up to the next. Text after a paragraph marker carries on
 # the verse before it; headings, speakers' names, introductions and the like are left out.
@@ -2331,7 +2943,9 @@ def pd_inline(s):
     """USFM character markup → e-Sword's, for a Bible without Strong's numbers: the words of Christ
     (\\wj) <red>, supplied words (\\add) <i>, emphasis (\\bd) <b>; notes and cross-references left out.
     A verse that is only a note ("Many authorities ... insert v. 21") keeps the note, in brackets."""
-    notes = [re.sub(r"\\f[rk] [^\\]*", "", n) for n in re.findall(r"\\fe? \S+ (.*?)\\fe?\*", s, re.S)]  # without the caller (+)
+    notes = [
+        re.sub(r"\\f[rk] [^\\]*", "", n) for n in re.findall(r"\\fe? \S+ (.*?)\\fe?\*", s, re.S)
+    ]  # without the caller (+)
     t = re.sub(r"\\(fe?|x) .*?\\(fe?|x)\*", " ", s, flags=re.S)  # a space where it was: "sons:\\f…\\f*This"
     t = re.sub(r"\\\+?w ([^|\\]*)(?:\|[^\\]*)?\\\+?w\*", r"\1", t)
     t = re.sub(r"\\\+?wj\*", "</red>", t)
@@ -2341,7 +2955,7 @@ def pd_inline(s):
     t = re.sub(r"\\\+?bd ", "<b>", t)
     t = re.sub(r"\\\+?bd\*", "</b>", t)
     t = re.sub(r"\\[^\s\\*]+\*", "", t)  # any other closing markers,
-    t = re.sub(r"\\[^\s\\]+ ?", "", t)    # then opening ones
+    t = re.sub(r"\\[^\s\\]+ ?", "", t)  # then opening ones
     if not re.sub(r"<[^>]+>", "", t).strip() and notes:
         t = "[" + re.sub(r"\\[^\s\\]+ ?", "", " ".join(notes)).strip() + "]"
     # e-Sword's spellings and plain quotes, so a search for "Caesar" or "God's" finds them.
@@ -2354,7 +2968,9 @@ def pd_inline(s):
     t = re.sub(r"\s+([,.;:?!)])", r"\1", t)
     t = re.sub(r"<(red|i|b)></\1>", "", t)
     t = re.sub(r"</(red|i|b)>(\s*)<\1>", r"\2", t)  # one run of red, not one per sentence
-    t = re.sub(r"\[(['\"]+)\]", "", t)  # the BSB's closing quotes in brackets ("exposed on it.'['']"), uncertain in the Greek
+    t = re.sub(
+        r"\[(['\"]+)\]", "", t
+    )  # the BSB's closing quotes in brackets ("exposed on it.'['']"), uncertain in the Greek
     t = re.sub(r"\(\s+", "(", t)
     t = re.sub(r"(?<=\s)\*(?=\w)", "", t)  # Darby's note mark ("thy *word")
     # Words the sources doubled ("for the the lambs", "shall shall stand", "carried the <i>the people"): never meant.
@@ -2392,9 +3008,13 @@ def pd_bible(ebible_id, url=None, more=None):
                 title = pd_inline(body)  # a psalm's title: <b> at the start of verse 1, as in the KJV
                 titled = not body.strip()  # the BSB's "\d \v 1 A Psalm of David.": the title is verse 1's first line
             elif tag == "v" and chapter:
-                vn, _, rest = body.lstrip().partition(" ")  # its end kept: a marker there ("\\wj " before the next \\v) opens the next verse's words
+                vn, _, rest = body.lstrip().partition(
+                    " "
+                )  # its end kept: a marker there ("\\wj " before the next \\v) opens the next verse's words
                 last = (book, *at) if len(at) == 2 else (book, chapter, int(re.match(r"\d+", vn)[0]))
-                t = re.sub(r"<(red|i|b)>\s+", r"<\1>", f"{lead} {pd_inline(rest)}".strip())  # a marker before a chapter's first verse ("\\p \\wj \\v 1") opens it
+                t = re.sub(
+                    r"<(red|i|b)>\s+", r"<\1>", f"{lead} {pd_inline(rest)}".strip()
+                )  # a marker before a chapter's first verse ("\\p \\wj \\v 1") opens it
                 lead = ""
                 if title:
                     t, title = f"<b>{title}</b> {t}".strip(), ""
@@ -2426,8 +3046,11 @@ def red_by_verse(verses, tag="red"):
     return out
 
 
-TITLE_WORDS = re.compile(r"\b(Psalm|Song|Musician|Maschil|Michtam|Prayer|David|Asaph|Korah|Moses|Solomon|Heman|Ethan|"
-                         r"Jeduthun|Shiggaion|Neginoth|Gittith|Alamoth|Sheminith|Muth-?labben|Aijeleth|Shoshannim|degrees|ascents)\b", re.I)
+TITLE_WORDS = re.compile(
+    r"\b(Psalm|Song|Musician|Maschil|Michtam|Prayer|David|Asaph|Korah|Moses|Solomon|Heman|Ethan|"
+    r"Jeduthun|Shiggaion|Neginoth|Gittith|Alamoth|Sheminith|Muth-?labben|Aijeleth|Shoshannim|degrees|ascents)\b",
+    re.I,
+)
 
 
 def bold_psalm_titles(verses):
@@ -2435,17 +3058,25 @@ def bold_psalm_titles(verses):
     (Webster's, Young's, Brenton's): where the KJV's psalm has a title, the sentence of this verse 1 that ends
     nearest to the KJV title's length, if it reads as a title ("A Psalm of David.")."""
     kdb = sqlite3.connect(f"file:{BUNDLED / 'kjv.bbli'}?immutable=1", uri=True)
-    kjv_titles = {c: len(m[1]) for c, t in kdb.execute("SELECT Chapter, Scripture FROM Bible WHERE Book=19 AND Verse=1")
-                  if (m := re.match(r"<b>(.*?)</b>", t))}
+    kjv_titles = {
+        c: len(m[1])
+        for c, t in kdb.execute("SELECT Chapter, Scripture FROM Bible WHERE Book=19 AND Verse=1")
+        if (m := re.match(r"<b>(.*?)</b>", t))
+    }
     kdb.close()
     out = dict(verses)
     for c, n in kjv_titles.items():
         t = out.get((19, c, 1), "")
         if not t or t.startswith("<b>"):
             continue
-        ends = [m.end() for m in re.finditer(r"[.:](?=\s+\S)", t[:2 * n + 30])]
-        ends = [e for e in ends if TITLE_WORDS.search(t[:e]) and "<b>" not in t[:e]
-                and all(t[:e].count(f"<{x}>") == t[:e].count(f"</{x}>") for x in ("i", "red", "num"))]
+        ends = [m.end() for m in re.finditer(r"[.:](?=\s+\S)", t[: 2 * n + 30])]
+        ends = [
+            e
+            for e in ends
+            if TITLE_WORDS.search(t[:e])
+            and "<b>" not in t[:e]
+            and all(t[:e].count(f"<{x}>") == t[:e].count(f"</{x}>") for x in ("i", "red", "num"))
+        ]
         if ends:
             e = min(ends, key=lambda e: abs(e - n))
             out[(19, c, 1)] = f"<b>{t[:e]}</b>{t[e:]}"
@@ -2459,8 +3090,24 @@ UNTITLED = {"webster", "ylt"}  # psalm titles not marked (\\d) in the source: fo
 # The Apocrypha of the Bibles that have it, as e-Sword numbers it (src/bible.ts): the Rest of Esther is
 # Esther 10:4-16:24, as in the Vulgate; Susanna and Bel are Daniel 13 and 14; the Song of the Three
 # Children is joined to Daniel 3:23, where it is read, as tools/lxx joins it; Baruch 6 is the Epistle of Jeremy.
-APOCRYPHA = {"rv": {"TOB": 67, "JDT": 68, "WIS": 69, "SIR": 70, "BAR": 71, "1MA": 72, "2MA": 73, "1ES": 74, "2ES": 75,
-                    "MAN": 78, "ESG": 17, "SUS": (27, 13), "BEL": (27, 14), "S3Y": (27, 3, 23)}}
+APOCRYPHA = {
+    "rv": {
+        "TOB": 67,
+        "JDT": 68,
+        "WIS": 69,
+        "SIR": 70,
+        "BAR": 71,
+        "1MA": 72,
+        "2MA": 73,
+        "1ES": 74,
+        "2ES": 75,
+        "MAN": 78,
+        "ESG": 17,
+        "SUS": (27, 13),
+        "BEL": (27, 14),
+        "S3Y": (27, 3, 23),
+    }
+}
 
 
 def write_bible(bid):
@@ -2472,9 +3119,11 @@ def write_bible(bid):
     for (b, c, v0, v1), (c2, v2) in MOVES.get(bid, []):
         for v in range(v0, v1 + 1):
             verses[(b, c2, v2 + v - v0)] = verses.pop((b, c, v))
-    info = (f"<p>{html.escape(about)}</p>"
-            f"<p>Public domain. From eBible.org's {ebible_id} (https://ebible.org/{ebible_id}/), courtesy of eBible.org. "
-            "Built by Two-edged Sword's tools/core.</p>")
+    info = (
+        f"<p>{html.escape(about)}</p>"
+        f"<p>Public domain. From eBible.org's {ebible_id} (https://ebible.org/{ebible_id}/), courtesy of eBible.org. "
+        "Built by Two-edged Sword's tools/core.</p>"
+    )
     write_verses(bid, title, abbrev, info, verses)
 
 
@@ -2483,7 +3132,10 @@ def write_bible(bid):
 # did; it reads as plain Selah.
 VERSE_MENDS = {
     "webster": {(42, 8, 42): [("(But as", "But as")]},
-    "rv": {(11, 11, 39): [("not for over", "not for ever")], (27, 12, 7): [("liveth fear ever", "liveth for ever")]},  # typing errors
+    "rv": {
+        (11, 11, 39): [("not for over", "not for ever")],
+        (27, 12, 7): [("liveth fear ever", "liveth for ever")],
+    },  # typing errors
     "ylt": {(5, 17, 10): [("doth choose;", "doth choose);")]},
 }
 
@@ -2496,13 +3148,20 @@ def write_verses(bid, title, abbrev, info, verses, strongs=False):
     vc = verse_counts()
     ot, nt = any(b <= 39 for b, _, _ in verses), any(40 <= b <= 66 for b, _, _ in verses)
     apocrypha = any(b > 66 or c > len(vc.get(b, {})) for b, c, _ in verses)
-    kjv_refs = {(b, c, v) for b, chs in vc.items() for c, n in chs.items() for v in range(1, n + 1) if (ot if b <= 39 else nt)}
+    kjv_refs = {
+        (b, c, v) for b, chs in vc.items() for c, n in chs.items() for v in range(1, n + 1) if (ot if b <= 39 else nt)
+    }
     extra, missing = sorted(k for k in set(verses) - kjv_refs if k[0] <= 66), sorted(kjv_refs - set(verses))
     empty = sorted(k for k, t in verses.items() if not t)
     for what, refs in (("not in the KJV", extra), ("missing", missing), ("empty", empty)):
         if refs:
-            print(f"  {bid}: {len(refs)} verses {what}: " + ", ".join(f"{BOOK_ABBR[b - 1]} {c}:{v}" for b, c, v in refs[:12]))
-    with module(f"{bid}.bbli", title, abbrev, info, ot=ot, nt=nt, apocrypha=apocrypha, strongs=strongs, into=BUNDLED) as db:
+            print(
+                f"  {bid}: {len(refs)} verses {what}: "
+                + ", ".join(f"{BOOK_ABBR[b - 1]} {c}:{v}" for b, c, v in refs[:12])
+            )
+    with module(
+        f"{bid}.bbli", title, abbrev, info, ot=ot, nt=nt, apocrypha=apocrypha, strongs=strongs, into=BUNDLED
+    ) as db:
         db.executemany("INSERT INTO Bible VALUES (?,?,?,?)", [(b, c, v, t) for (b, c, v), t in sorted(verses.items())])
     print(f"{bid}.bbli: {len(verses)} verses")
 
@@ -2511,19 +3170,26 @@ def write_verses(bid, title, abbrev, info, verses, strongs=False):
 
 BSB_URL = "https://bereanbible.com/bsb_usfm.zip"
 BSB_TABLES_URL = "https://bereanbible.com/bsb_tables.tsv"
-BSB_ABOUT = ("The Berean Standard Bible (2023, third printing), a modern English translation from the Hebrew, Aramaic "
-             "and Greek, with the words of Christ in red.")
-BSB_INFO = ("<p>Public domain: the Berean Bible texts were dedicated to the public domain on April 30, 2023 "
-            "(https://berean.bible/terms.htm). The Holy Bible, Berean Standard Bible, BSB is produced in cooperation "
-            "with Bible Hub, Discovery Bible, OpenBible.com, and the Berean Bible Translation Committee. "
-            "From https://berean.bible/downloads.htm. Built by Two-edged Sword's tools/core.</p>")
+BSB_ABOUT = (
+    "The Berean Standard Bible (2023, third printing), a modern English translation from the Hebrew, Aramaic "
+    "and Greek, with the words of Christ in red."
+)
+BSB_INFO = (
+    "<p>Public domain: the Berean Bible texts were dedicated to the public domain on April 30, 2023 "
+    "(https://berean.bible/terms.htm). The Holy Bible, Berean Standard Bible, BSB is produced in cooperation "
+    "with Bible Hub, Discovery Bible, OpenBible.com, and the Berean Bible Translation Committee. "
+    "From https://berean.bible/downloads.htm. Built by Two-edged Sword's tools/core.</p>"
+)
 WORD = re.compile(r"[A-Za-z0-9]+(?:['’][A-Za-z]+)*")
 
 
 def words_at(t):
     """[(word, where it ends)] of e-Sword text's words, its tags and numbers skipped."""
-    return [(m[0].lower().replace("’", "'"), m.end()) for m in re.finditer(r"<num>[^<]*</num>|<[^>]+>|" + WORD.pattern, t)
-            if not m[0].startswith("<")]
+    return [
+        (m[0].lower().replace("’", "'"), m.end())
+        for m in re.finditer(r"<num>[^<]*</num>|<[^>]+>|" + WORD.pattern, t)
+        if not m[0].startswith("<")
+    ]
 
 
 def put_numbers(t, at):
@@ -2547,7 +3213,9 @@ def bsb_tables():
     out, ref, carry = {}, None, []
     rows = fetch(BSB_TABLES_URL).decode("utf-8-sig").split("\n")
     head = rows[0].split("\t")
-    col = {k: head.index(k) for k in ("Str Heb", "Str Grk", "VerseId")} | {"eng": [h.strip() for h in head].index("BSB version")}
+    col = {k: head.index(k) for k in ("Str Heb", "Str Grk", "VerseId")} | {
+        "eng": [h.strip() for h in head].index("BSB version")
+    }
     for line in rows[1:]:
         row = line.split("\t")
         if len(row) <= col["eng"]:
@@ -2581,7 +3249,7 @@ def tag_bsb(text, phrases):
     words, at, i, missed = words_at(text), {}, 0, 0
     for ws, upto, nums in phrases:
         k = len(ws)
-        j = next((j for j in range(i, min(i + 8, len(words) - k + 1)) if [w for w, _ in words[j:j + k]] == ws), None)
+        j = next((j for j in range(i, min(i + 8, len(words) - k + 1)) if [w for w, _ in words[j : j + k]] == ws), None)
         if j is None:
             missed += 1
             continue
@@ -2601,11 +3269,15 @@ def write_bsb_plus():
     for k, t in pd_bible(None, BSB_URL).items():
         verses[k], missed[k] = tag_bsb(t, tables.get(k, []))
     phrases = sum(len(p) for k, p in tables.items() if k in verses)
-    print(f"  bsb+: {sum(missed.values())} of {phrases} phrases of the tables not found in the text: "
-          + ", ".join(f"{BOOK_ABBR[b - 1]} {c}:{v}" for (b, c, v), n in sorted(missed.items()) if n))
-    info = (f"<p>{BSB_ABOUT} With Strong's numbers for looking up the Hebrew or Greek behind each word, from the "
-            "Berean Bible's translation tables (bsb_tables), which give each Hebrew and Greek word with the English it is "
-            "translated by.</p>" + BSB_INFO)
+    print(
+        f"  bsb+: {sum(missed.values())} of {phrases} phrases of the tables not found in the text: "
+        + ", ".join(f"{BOOK_ABBR[b - 1]} {c}:{v}" for (b, c, v), n in sorted(missed.items()) if n)
+    )
+    info = (
+        f"<p>{BSB_ABOUT} With Strong's numbers for looking up the Hebrew or Greek behind each word, from the "
+        "Berean Bible's translation tables (bsb_tables), which give each Hebrew and Greek word with the English it is "
+        "translated by.</p>" + BSB_INFO
+    )
     write_verses("bsb+", "Berean Standard Bible w/ Strong's Numbers", "BSB+", info, verses, strongs=True)
 
 
@@ -2639,7 +3311,7 @@ def carry_numbers(tagged, text):
         elif op == "replace" and "".join(kw[i1:i2]) == "".join(w for w, _ in words[j1:j2]):  # "firstborn", "first-born"
             to[i2 - 1] = j2 - 1
     at, last, left = {}, -1, 0
-    for r, (i, nums) in sorted(runs.items()):
+    for _r, (i, nums) in sorted(runs.items()):
         j = to.get(i)
         if j is None or j <= last:
             left += 1
@@ -2656,19 +3328,26 @@ def write_webster_plus():
         verses[k], l, n = carry_numbers(tagged[k], t) if k in tagged else (t, 0, 0)
         left, runs = left + l, runs + n
     print(f"  webster+: {runs - left} of the KJV+'s {runs} runs of Strong's numbers carried over, {left} left out")
-    info = (f"<p>{html.escape(BIBLES['webster'][3])} With the KJV+'s Strong's numbers, carried over to the words Webster "
-            "kept or changed one for one; where he reworded a phrase, its numbers are left out.</p>"
-            "<p>Public domain. Text from eBible.org's engwebster (https://ebible.org/engwebster/), courtesy of eBible.org; "
-            "Strong's numbers from the KJV+ (eBible.org's eng-kjv2006, courtesy of the CrossWire Bible Society and eBible.org). "
-            "Built by Two-edged Sword's tools/core.</p>")
+    info = (
+        f"<p>{html.escape(BIBLES['webster'][3])} With the KJV+'s Strong's numbers, carried over to the words Webster "
+        "kept or changed one for one; where he reworded a phrase, its numbers are left out.</p>"
+        "<p>Public domain. Text from eBible.org's engwebster (https://ebible.org/engwebster/), courtesy of eBible.org; "
+        "Strong's numbers from the KJV+ (eBible.org's eng-kjv2006, courtesy of the CrossWire Bible Society and eBible.org). "
+        "Built by Two-edged Sword's tools/core.</p>"
+    )
     write_verses("webster+", "Webster's Bible w/ Strong's Numbers", "Webster+", info, verses, strongs=True)
 
 
 # Bibles built one at a time, beyond BIBLES: id → (file, builder).
-MORE |= {"bsb": ("bsb.bbli", write_bsb), "bsb+": ("bsb+.bbli", write_bsb_plus), "webster+": ("webster+.bbli", write_webster_plus)}
+MORE |= {
+    "bsb": ("bsb.bbli", write_bsb),
+    "bsb+": ("bsb+.bbli", write_bsb_plus),
+    "webster+": ("webster+.bbli", write_webster_plus),
+}
 
 
 # ---- more commentaries, dictionaries, lexicons and devotionals from CrossWire ------------------------
+
 
 def write_wesley():
     """Wesley's notes, a ThML zCom. Each note names the words it is on before " - ", at the start of a sentence:
@@ -2677,9 +3356,13 @@ def write_wesley():
     books, chapters, verses = [], [], []
 
     def note(s):
-        s = re.sub(r"(?<=\w) - (?=[a-z])", "-", s)  # its hyphens spaced as its dashes: "high - priest", "pre - existent"
+        s = re.sub(
+            r"(?<=\w) - (?=[a-z])", "-", s
+        )  # its hyphens spaced as its dashes: "high - priest", "pre - existent"
         s = link_continuations(link_plain_refs(barnes_html(s)))
-        if "<br>" not in s:  # braces the source has for parentheses ("{mentioned by St. Paul, Php 2:6,7,}"), not in its tables
+        if (
+            "<br>" not in s
+        ):  # braces the source has for parentheses ("{mentioned by St. Paul, Php 2:6,7,}"), not in its tables
             s = s.replace("{", "(").replace("}", ")")
         return re.sub(r"(<p>|[.?!;] )([A-Z][^<.?!;:]{0,80}?) - (?=[A-Z(\"'])", r"\1<b>\2</b> - ", s)
 
@@ -2694,26 +3377,33 @@ def write_wesley():
                 seen.add(where)
             prev = where
         return out
+
     seen = set()  # Wesley wrote no note twice: one seen already is CrossWire linking a slot to it
-    for b, c, n, head, entries in sword_chapters(z, canon, once):
+    for b, c, _n, head, entries in sword_chapters(z, canon, once):
         intro = note(head)
-        if has_text(intro) and not any(re.sub(r"^<p>|</p>$", "", x) in intro for x in seen):  # a copy, or two copies, of one
+        if has_text(intro) and not any(
+            re.sub(r"^<p>|</p>$", "", x) in intro for x in seen
+        ):  # a copy, or two copies, of one
             (books.append((b, intro)) if c == 1 else chapters.append((b, c, intro)))
             seen.add(intro)
         for v1, v2, t in entries:
             if has_text(note(t)) and note(t) not in seen:
                 verses.append((b, c, v1, c, v2, note(t)))
                 seen.add(note(t))
-    info = ("<p>Explanatory Notes upon the Old and New Testaments, by John Wesley (1754–1765).</p>"
-            "<p>Public domain. CrossWire's Wesley module (1.1), from Sulu Kelley's and Bill Brown's electronic edition. "
-            "Built by Two-edged Sword's tools/core.</p>")
+    info = (
+        "<p>Explanatory Notes upon the Old and New Testaments, by John Wesley (1754–1765).</p>"
+        "<p>Public domain. CrossWire's Wesley module (1.1), from Sulu Kelley's and Bill Brown's electronic edition. "
+        "Built by Two-edged Sword's tools/core.</p>"
+    )
     write_commentary("wesley.cmti", "Wesley's Explanatory Notes", "Wesley", info, (books, chapters, verses))
 
 
 def write_torrey():
     z, _ = crosswire("Torrey")
-    info = ("<p>The New Topical Text Book, by R. A. Torrey (1897): some 620 topics, each with the verses on it, by subtopic.</p>"
-            "<p>Public domain. CrossWire's Torrey module (1.3). Built by Two-edged Sword's tools/core.</p>")
+    info = (
+        "<p>The New Topical Text Book, by R. A. Torrey (1897): some 620 topics, each with the verses on it, by subtopic.</p>"
+        "<p>Public domain. CrossWire's Torrey module (1.3). Built by Two-edged Sword's tools/core.</p>"
+    )
     write_dictionary("torrey.dcti", "Torrey's Topical Textbook", "Torrey", info, rawld(z), torrey_html)
 
 
@@ -2738,10 +3428,12 @@ def torrey_html(s):
 
 def write_hitchcock():
     z, _ = crosswire("Hitchcock")
-    info = ("<p>Hitchcock's Bible Names Dictionary: the meanings of some 2,600 names in the Bible, from Roswell D. Hitchcock's "
-            "New and Complete Analysis of the Holy Bible (1869).</p>"
-            "<p>Public domain. CrossWire's Hitchcock module (2.0), from the Christian Classics Ethereal Library. "
-            "Built by Two-edged Sword's tools/core.</p>")
+    info = (
+        "<p>Hitchcock's Bible Names Dictionary: the meanings of some 2,600 names in the Bible, from Roswell D. Hitchcock's "
+        "New and Complete Analysis of the Holy Bible (1869).</p>"
+        "<p>Public domain. CrossWire's Hitchcock module (2.0), from the Christian Classics Ethereal Library. "
+        "Built by Two-edged Sword's tools/core.</p>"
+    )
     write_dictionary("hitchcock.dcti", "Hitchcock's Bible Names", "Hitchcock", info, zld(z), tei_html)
 
 
@@ -2767,7 +3459,18 @@ FORM_OF = re.compile(r"^(?:(?!from\b|origin\b)[^<]){0,100}?\bof\s+<num>(G\d+)</n
 FORMS = {n: "G1473" for n in ("G3165", "G3427", "G3450", "G1691", "G1698", "G1700", "G2248", "G2249", "G2254", "G2257")}
 FORMS |= {"G2036": "G3004", "G2046": "G3004", "G4483": "G3004"}
 # CrossWire's keys that open another word's entry: σύ's forms open αὐτός, ἐκκόπτω ἐκκοπή, συμβασιλεύω συμβουλεύω, …
-ABBOTT_WRONG = {"G4571", "G4671", "G4675", "G5209", "G5210", "G5213", "G1581", "G4821", "G4347", "G4776"}  # εἶπον, ἐρῶ, ῥέω: the tenses of λέγω, which Abbott-Smith gives under it
+ABBOTT_WRONG = {
+    "G4571",
+    "G4671",
+    "G4675",
+    "G5209",
+    "G5210",
+    "G5213",
+    "G1581",
+    "G4821",
+    "G4347",
+    "G4776",
+}  # εἶπον, ἐρῶ, ῥέω: the tenses of λέγω, which Abbott-Smith gives under it
 
 
 def write_abbott():
@@ -2791,9 +3494,15 @@ def write_abbott():
             if body:
                 keyed[f"G{int(k)}"] = body
     sdb = sqlite3.connect(f"file:{BUNDLED / 'strong.lexi'}?mode=ro", uri=True)
-    strong = {t: (re.search(r"<grk>(.*?)</grk>", d) or [None, ""])[1] for t, d in sdb.execute("SELECT Topic, Definition FROM Lexicon WHERE Topic LIKE 'G%'")}
-    form_of = {t: m[1] for t, d in sdb.execute("SELECT Topic, Definition FROM Lexicon WHERE Topic LIKE 'G%'")
-               if (m := FORM_OF.search(re.sub(r"^(?:<p>.*?</p>){3}<p>", "", d)))}
+    strong = {
+        t: (re.search(r"<grk>(.*?)</grk>", d) or [None, ""])[1]
+        for t, d in sdb.execute("SELECT Topic, Definition FROM Lexicon WHERE Topic LIKE 'G%'")
+    }
+    form_of = {
+        t: m[1]
+        for t, d in sdb.execute("SELECT Topic, Definition FROM Lexicon WHERE Topic LIKE 'G%'")
+        if (m := FORM_OF.search(re.sub(r"^(?:<p>.*?</p>){3}<p>", "", d)))
+    }
     sdb.close()
 
     def own(n):
@@ -2801,9 +3510,14 @@ def write_abbott():
         "treasure" keyed to Gaza); else the entry whose headword is Strong's."""
         body = keyed.get(n)
         listed = re.search(r'<entry n="[^"|]*\|?([^"]*)"', body or "")
-        if body and n not in ABBOTT_WRONG and (not listed or not listed[1] or n in {f"G{int(x)}" for x in re.findall(r"\d+", listed[1])}):
+        if (
+            body
+            and n not in ABBOTT_WRONG
+            and (not listed or not listed[1] or n in {f"G{int(x)}" for x in re.findall(r"\d+", listed[1])})
+        ):
             return body
         return by_word.get(accented_form(strong.get(n, "")))
+
     rows, how = {}, Counter()
     for n in strong:
         body = own(n)
@@ -2815,20 +3529,23 @@ def write_abbott():
         if body:
             rows[n] = abbott_html(body)
     wrong = sum(1 for n, b in keyed.items() if n in rows and abbott_html(b) != rows[n])
-    print(f"  abbott: {how['own']} numbers keyed right, {wrong} keyed wrongly and moved, {how['by headword']} by headword, "
-          f"{how['form of another']} as a form of another word")
-    info = ("<p>A Manual Greek Lexicon of the New Testament, by G. Abbott-Smith (1922), under the Strong's numbers of its words: "
-            "each word's meanings, with the Hebrew it translates in the Septuagint.</p>"
-            "<p>Its marks: * before a word, not found in the Septuagint or the other Greek versions of the Old Testament "
-            "and Apocrypha; ** found only in the Apocrypha or the later Greek versions; * after a list of Septuagint passages, "
-            "found nowhere else in it; † before a word, not found in the classical Greek writers; † at the end, every "
-            "occurrence in the New Testament is cited.</p>"
-            "<p>Public domain. CrossWire's AbbottSmithStrongs module (4.1), from the TEI edition at "
-            "https://github.com/translatable-exegetical-tools/Abbott-Smith. Built by Two-edged Sword's tools/core.</p>")
+    print(
+        f"  abbott: {how['own']} numbers keyed right, {wrong} keyed wrongly and moved, {how['by headword']} by headword, "
+        f"{how['form of another']} as a form of another word"
+    )
+    info = (
+        "<p>A Manual Greek Lexicon of the New Testament, by G. Abbott-Smith (1922), under the Strong's numbers of its words: "
+        "each word's meanings, with the Hebrew it translates in the Septuagint.</p>"
+        "<p>Its marks: * before a word, not found in the Septuagint or the other Greek versions of the Old Testament "
+        "and Apocrypha; ** found only in the Apocrypha or the later Greek versions; * after a list of Septuagint passages, "
+        "found nowhere else in it; † before a word, not found in the classical Greek writers; † at the end, every "
+        "occurrence in the New Testament is cited.</p>"
+        "<p>Public domain. CrossWire's AbbottSmithStrongs module (4.1), from the TEI edition at "
+        "https://github.com/translatable-exegetical-tools/Abbott-Smith. Built by Two-edged Sword's tools/core.</p>"
+    )
     with module("abbott.lexi", "Abbott-Smith's Manual Greek Lexicon", "Abbott-Smith", info, into=BUNDLED) as db:
         db.executemany("INSERT INTO Lexicon VALUES (?,?)", sorted(rows.items(), key=lambda r: (len(r[0]), r[0])))
-    print(f"abbott.lexi: {len(rows)} numbers, "
-          f"{(BUNDLED / 'abbott.lexi').stat().st_size / 1e6:.1f} MB")
+    print(f"abbott.lexi: {len(rows)} numbers, {(BUNDLED / 'abbott.lexi').stat().st_size / 1e6:.1f} MB")
 
 
 def write_devotional(file, title, abbrev, info, days):
@@ -2853,8 +3570,12 @@ def write_spurgeon():
         for wrong, right in SME_FIXES.get(key, []):
             s = s.replace(wrong, right)
         # Each reference by what it shows ("Jude 1"): the source's own code has Jude as Judges (Jul 12, Oct 8-10).
-        s = re.sub(r'<reference osisRef="([^"]+)">(.*?)</reference>',
-                   lambda m: (passage_refs(re.sub(r"<[^>]+>", "", m[2])) or [f'<ref osisRef="{m[1]}">{m[2]}</ref>'])[0], s, flags=re.S)
+        s = re.sub(
+            r'<reference osisRef="([^"]+)">(.*?)</reference>',
+            lambda m: (passage_refs(re.sub(r"<[^>]+>", "", m[2])) or [f'<ref osisRef="{m[1]}">{m[2]}</ref>'])[0],
+            s,
+            flags=re.S,
+        )
         s = osis_dict_refs(s)
         s = re.sub(r"<title>(.*?)</title>", r"</p><p><b>\1</b></p><p>", s, flags=re.S)
         s = re.sub(r'<hi type="italic">(.*?)</hi>', r"<i>\1</i>", s, flags=re.S)
@@ -2862,9 +3583,11 @@ def write_spurgeon():
         s = re.sub(r"<lb\s*/>", "<br>", s)
         s = re.sub(r"<(?!/?(p|b|i|br|ref)>)[^>]*>", "", s)
         days[(int(m[1]), int(m[2]))] = tidy(s)
-    info = ("<p>Morning and Evening: Daily Readings, by C. H. Spurgeon (1865): a reading for each morning and evening of the year.</p>"
-            "<p>Public domain. CrossWire's SME module (1.7), from the Christian Classics Ethereal Library. "
-            "Built by Two-edged Sword's tools/core.</p>")
+    info = (
+        "<p>Morning and Evening: Daily Readings, by C. H. Spurgeon (1865): a reading for each morning and evening of the year.</p>"
+        "<p>Public domain. CrossWire's SME module (1.7), from the Christian Classics Ethereal Library. "
+        "Built by Two-edged Sword's tools/core.</p>"
+    )
     write_devotional("sme.devi", "Morning and Evening", "Spurgeon M&E", info, days)
 
 
@@ -2879,9 +3602,12 @@ def write_daily_light():
         if not m:
             continue
 
-        def refs(m):  # "Isa 38:17 Mic 7:18,19", "Ps 37:23,24 73:23,24": a part per book, or per chapter of the same book
+        def refs(
+            m,
+        ):  # "Isa 38:17 Mic 7:18,19", "Ps 37:23,24 73:23,24": a part per book, or per chapter of the same book
             parts = re.split(r"\s+(?=(?:[1-3])?[A-Z][a-z]+\.? \d)|(?<=[\d,])\s+(?=\d+:\d)", m[1].strip())
             return "; ".join(f'<scripRef passage="{p}">{p}</scripRef>' for p in parts)
+
         s = re.sub(r"<scripRef[^>]*>(.*?)</scripRef>", refs, s, flags=re.S)
         s = thml_refs(s)
         out, heading = [], False
@@ -2897,19 +3623,50 @@ def write_daily_light():
             heading = bool(re.fullmatch(r"<i>(Morning|Evening)</i>:", text))
             out.append(text)
         days[(int(m[1]), int(m[2]))] = tidy("".join(f"<p>{x}</p>" for x in out))
-    info = ("<p>Daily Light on the Daily Path, by Jonathan Bagster and his family (1875): for each morning and evening, "
-            "verses on one theme in the words of the King James Version.</p>"
-            "<p>Public domain. CrossWire's Daily module (1.0), from the Bible Foundation. Built by Two-edged Sword's tools/core.</p>")
+    info = (
+        "<p>Daily Light on the Daily Path, by Jonathan Bagster and his family (1875): for each morning and evening, "
+        "verses on one theme in the words of the King James Version.</p>"
+        "<p>Public domain. CrossWire's Daily module (1.0), from the Bible Foundation. Built by Two-edged Sword's tools/core.</p>"
+    )
     write_devotional("daily.devi", "Daily Light on the Daily Path", "Daily Light", info, days)
 
 
 # ---- more Bibles: the Byzantine Greek NT, Brenton's English Septuagint, Weymouth ---------------------
 
 BYZ = "https://raw.githubusercontent.com/byztxt/byzantine-majority-text/27a45ff1b7be6c17ccbfeac414f3f55732ae8e28/csv-unicode/{}/{}.csv"
-BYZ_BOOKS = ["MAT", "MAR", "LUK", "JOH", "ACT", "ROM", "1CO", "2CO", "GAL", "EPH", "PHP", "COL", "1TH", "2TH", "1TI", "2TI",
-             "TIT", "PHM", "HEB", "JAM", "1PE", "2PE", "1JO", "2JO", "3JO", "JUD", "REV"]
-BYZ_INFO = ("Maurice A. Robinson and William G. Pierpont, The New Testament in the Original Greek: Byzantine Textform (2018), "
-            "public domain, from https://github.com/byztxt/byzantine-majority-text")
+BYZ_BOOKS = [
+    "MAT",
+    "MAR",
+    "LUK",
+    "JOH",
+    "ACT",
+    "ROM",
+    "1CO",
+    "2CO",
+    "GAL",
+    "EPH",
+    "PHP",
+    "COL",
+    "1TH",
+    "2TH",
+    "1TI",
+    "2TI",
+    "TIT",
+    "PHM",
+    "HEB",
+    "JAM",
+    "1PE",
+    "2PE",
+    "1JO",
+    "2JO",
+    "3JO",
+    "JUD",
+    "REV",
+]
+BYZ_INFO = (
+    "Maurice A. Robinson and William G. Pierpont, The New Testament in the Original Greek: Byzantine Textform (2018), "
+    "public domain, from https://github.com/byztxt/byzantine-majority-text"
+)
 
 
 def byz():
@@ -2917,10 +3674,12 @@ def byz():
     text (ccat/no-variants) and the parsed one (strongs/with-parsing) have the same words, verse by verse."""
     out = {}
     for i, code in enumerate(BYZ_BOOKS):
+
         def rows(kind, code=code):
             name = f"byz-{kind.replace('/', '-')}-{code}.csv"  # each book's two files have the same name
             text = fetch_to(BYZ.format(kind, code), CACHE / name, log=True).read_text(encoding="utf-8-sig")
             return {(int(r["chapter"]), int(r["verse"])): r["text"] for r in csv.DictReader(io.StringIO(text))}
+
         acc, parsed = rows("ccat/no-variants"), rows("strongs/with-parsing")
         for (c, v), t in parsed.items():
             tagged = re.findall(r"(\S+) (\d+)(?: \d+)? \{([^}]+)\}", t)
@@ -2936,9 +3695,14 @@ def byz():
 
 def write_byz():
     # Without its ¶ marks, as the KJV; its dash, a hyphen on the word before ("ἁμαρτίας-"), as a dash.
-    verses = {k: html.escape(re.sub(r"(?<=\w)-(?=\s|$)", "—", re.sub(r"\s*¶\s*", " ", t)).strip()) for k, (t, _) in byz().items()}
-    info = (f"<p>The Greek New Testament in the Byzantine (Majority) text, accented. {BYZ_INFO}. "
-            "Built by Two-edged Sword's tools/core.</p>")
+    verses = {
+        k: html.escape(re.sub(r"(?<=\w)-(?=\s|$)", "—", re.sub(r"\s*¶\s*", " ", t)).strip())
+        for k, (t, _) in byz().items()
+    }
+    info = (
+        f"<p>The Greek New Testament in the Byzantine (Majority) text, accented. {BYZ_INFO}. "
+        "Built by Two-edged Sword's tools/core.</p>"
+    )
     write_verses("byz", "Greek NT: Byzantine Majority Text (2018)", "Byz 2018", info, verses)
 
 
@@ -2956,6 +3720,7 @@ def write_byz_plus():
     number TAGNT has for it most often, where that is at least 90% of its uses and not Robinson's."""
     import beza.plus as bp
     from stepbible import robinson, tagnt
+
     G, tag = bp.glosses(), tagnt()
     forms = defaultdict(Counter)
     for ws in tag.values():
@@ -2979,36 +3744,56 @@ def write_byz_plus():
             g = bp.gloss_for(n, code, G)
             w = w.replace("¶", "")  # a paragraph mark, before the word
             w = re.sub(r"(?<=\w)-$", "—", w)  # the source's dash, a hyphen on the word before it
-            s.append(f"<div><grk>{html.escape(w)}</grk><num>{n}</num><tvm>{html.escape(robinson(code))}</tvm>"
-                     f"<gra>{html.escape(g) or '—'}</gra></div>")
+            s.append(
+                f"<div><grk>{html.escape(w)}</grk><num>{n}</num><tvm>{html.escape(robinson(code))}</tvm>"
+                f"<gra>{html.escape(g) or '—'}</gra></div>"
+            )
         verses[k] = "".join(s)
-    print(f"  byz+: {sum(changed.values())} words given Strong's form numbers from TAGNT, commonest "
-          + ", ".join(f"{a}→{b} {n}" for (a, b), n in changed.most_common(8)))
-    info = (f"<p>The Byzantine Greek New Testament word by word: each word with its Strong's number and grammar (Robinson's "
-            f"own, from his parsed text; ἐγώ, σύ and εἰμί numbered by form, as Strong and the KJV+ number them, from STEPBible's "
-            f"TAGNT, CC BY 4.0) and the English of STEPBible's TBESG (Tyndale House, CC BY 4.0, "
-            f"https://github.com/STEPBible/STEPBible-Data). The English is the dictionary sense, not a translation of the verse. "
-            f"{BYZ_INFO}. Built by Two-edged Sword's tools/core.</p>")
+    print(
+        f"  byz+: {sum(changed.values())} words given Strong's form numbers from TAGNT, commonest "
+        + ", ".join(f"{a}→{b} {n}" for (a, b), n in changed.most_common(8))
+    )
+    info = (
+        f"<p>The Byzantine Greek New Testament word by word: each word with its Strong's number and grammar (Robinson's "
+        f"own, from his parsed text; ἐγώ, σύ and εἰμί numbered by form, as Strong and the KJV+ number them, from STEPBible's "
+        f"TAGNT, CC BY 4.0) and the English of STEPBible's TBESG (Tyndale House, CC BY 4.0, "
+        f"https://github.com/STEPBible/STEPBible-Data). The English is the dictionary sense, not a translation of the verse. "
+        f"{BYZ_INFO}. Built by Two-edged Sword's tools/core.</p>"
+    )
     write_verses("byz+", "Greek NT: Byzantine (2018) w/ glosses", "Byz 2018+", info, verses, strongs=True)
 
 
 def write_brenton():
     """Brenton's English Septuagint, eBible's eng-Brenton, numbered as the KJV with tools/lxx's tables and rules."""
     import lxx.build as lxx
+
     with shipping():  # its tables check against the KJV: the built-in one, never the user's or e-Sword's
         rows, _, joined, _ = lxx.build("https://ebible.org/Scriptures/eng-Brenton_usfm.zip")
     # e-Sword's spellings and plain quotes, as the other Bibles ("Mardochaeus", so a search finds it in each)
-    plain = {(b, c, v): html.escape(t).replace("’", "'").replace("‘", "'").replace("“", '"').replace("”", '"')
-             .replace("æ", "ae").replace("Æ", "Ae").replace("œ", "oe") for b, c, v, t in rows}
+    plain = {
+        (b, c, v): html.escape(t)
+        .replace("’", "'")
+        .replace("‘", "'")
+        .replace("“", '"')
+        .replace("”", '"')
+        .replace("æ", "ae")
+        .replace("Æ", "Ae")
+        .replace("œ", "oe")
+        for b, c, v, t in rows
+    }
     rows = [(b, c, v, t) for (b, c, v), t in sorted(bold_psalm_titles(plain).items())]
-    info = ("<p>The Septuagint in English, translated by Sir Lancelot C. L. Brenton (1844), with the Apocrypha: the Greek "
-            "Old Testament the apostles quoted.</p><p>Public domain. From eBible.org's eng-Brenton, courtesy of eBible.org. "
-            "The verses are numbered as the KJV's: a Psalm's title opens its verse 1, the Septuagint's added verses are "
-            "joined to the verse before them, and where the Septuagint orders a passage otherwise (Exodus 36–39, "
-            "Numbers 26, 1 Kings 7 and others) each verse is at the KJV verse it translates. The Apocrypha is numbered as in the Revised Version: the additions to Esther "
-            "are Esther 10:4–16:24, Sirach 30–36 in the Latin order, Susanna and Bel Daniel 13–14, the Letter of Jeremiah "
-            "Baruch 6, Psalm 151 its own; Sirach's prologue opens 1:1. Built by Two-edged Sword's tools/core.</p>")
-    with module("brenton.bbli", "Brenton's English Septuagint", "Brenton", info, nt=False, apocrypha=True, into=BUNDLED) as db:
+    info = (
+        "<p>The Septuagint in English, translated by Sir Lancelot C. L. Brenton (1844), with the Apocrypha: the Greek "
+        "Old Testament the apostles quoted.</p><p>Public domain. From eBible.org's eng-Brenton, courtesy of eBible.org. "
+        "The verses are numbered as the KJV's: a Psalm's title opens its verse 1, the Septuagint's added verses are "
+        "joined to the verse before them, and where the Septuagint orders a passage otherwise (Exodus 36–39, "
+        "Numbers 26, 1 Kings 7 and others) each verse is at the KJV verse it translates. The Apocrypha is numbered as in the Revised Version: the additions to Esther "
+        "are Esther 10:4–16:24, Sirach 30–36 in the Latin order, Susanna and Bel Daniel 13–14, the Letter of Jeremiah "
+        "Baruch 6, Psalm 151 its own; Sirach's prologue opens 1:1. Built by Two-edged Sword's tools/core.</p>"
+    )
+    with module(
+        "brenton.bbli", "Brenton's English Septuagint", "Brenton", info, nt=False, apocrypha=True, into=BUNDLED
+    ) as db:
         db.executemany("INSERT INTO Bible VALUES (?,?,?,?)", rows)
     print(f"brenton.bbli: {len(rows)} verses, {joined} joined to the verse before them")
 
@@ -3016,28 +3801,37 @@ def write_brenton():
 def write_weymouth():
     """Weymouth's New Testament, CrossWire's Weymouth (GBF zText, KJV versification)."""
     import crosswire.build as cw
+
     c, books, _ = cw.read("Weymouth")
-    verses = {(OSIS_BOOK[b], ch, v): cw.text(t, c.get("SourceType", "GBF")) for b, rows in books.items() for ch, v, t in rows}
+    verses = {
+        (OSIS_BOOK[b], ch, v): cw.text(t, c.get("SourceType", "GBF")) for b, rows in books.items() for ch, v, t in rows
+    }
+
     def tidy_gbf(t):
         """Its plain-text conventions as the other Bibles': `quote' (an opening single quote), -- (a dash), *word* (emphasis)."""
         t = re.sub(r"\*([^*<]+)\*", r"<i>\1</i>", t.replace("`", "'"))
         return re.sub(r"\s*--\s*", "—", t)
+
     verses = {k: html.escape(tidy_gbf(t)).replace("&lt;", "<").replace("&gt;", ">") for k, t in verses.items() if t}
     verses = red_by_verse(red_by_verse(verses, "i"))  # Mar 16:9-20, Joh 7:53-8:11 in italics throughout
-    info = ("<p>The New Testament in Modern Speech, by Richard Francis Weymouth (third edition, 1912, revised by Ernest Hampden-Cook).</p>"
-            "<p>Public domain. CrossWire's Weymouth module (1.1), https://www.crosswire.org/sword/modules/ModInfo.jsp?modName=Weymouth. "
-            "Where Weymouth joins verses, the joined text is under the first; his emphasis is in italics. "
-            "Built by Two-edged Sword's tools/core.</p>")
+    info = (
+        "<p>The New Testament in Modern Speech, by Richard Francis Weymouth (third edition, 1912, revised by Ernest Hampden-Cook).</p>"
+        "<p>Public domain. CrossWire's Weymouth module (1.1), https://www.crosswire.org/sword/modules/ModInfo.jsp?modName=Weymouth. "
+        "Where Weymouth joins verses, the joined text is under the first; his emphasis is in italics. "
+        "Built by Two-edged Sword's tools/core.</p>"
+    )
     write_verses("weymouth", "Weymouth New Testament", "Weymouth", info, verses)
 
 
 def write_wlc():
     import wlc.build as wlc
+
     wlc.plain(into=BUNDLED)
 
 
 def write_wlc_plus():
     import wlc.build as wlc
+
     wlc.main(into=BUNDLED)
 
 
@@ -3049,7 +3843,7 @@ XREF_VOTES = 5  # below this, the long tail: links only a few readers agreed wit
 
 
 def osis_range(s):
-    """"Gen.1.1" or "1Tim.1.15-1Tim.1.16" as e-Sword's reference ("1Ti 1:15-16"), or None if it's no KJV verse."""
+    """ "Gen.1.1" or "1Tim.1.15-1Tim.1.16" as e-Sword's reference ("1Ti 1:15-16"), or None if it's no KJV verse."""
     a, _, b = s.partition("-")
     pa = osis_part(a, None, None)
     pb = osis_part(b, None, pa[0]) if b and pa else None
@@ -3071,12 +3865,16 @@ def write_openbible_xref():
             bad += 1
             continue
         by_verse[frm].append((int(f[2]), to))
-    rows = [(b, c, v, c, v, "<p>" + "; ".join(f"<ref>{r}</ref>" for _, r in sorted(refs, key=lambda x: -x[0])) + "</p>")
-            for (b, c, v), refs in sorted(by_verse.items())]
-    info = (f"<p>Cross-references for {len(rows):,} verses, most agreed first: the links that OpenBible.info's readers voted "
-            f"helpful at least {XREF_VOTES} times, from some 340,000 drawn mainly from the Treasury of Scripture Knowledge.</p>"
-            "<p>© OpenBible.info, CC BY 4.0 (https://www.openbible.info/labs/cross-references/). "
-            "Built by Two-edged Sword's tools/core.</p>")
+    rows = [
+        (b, c, v, c, v, "<p>" + "; ".join(f"<ref>{r}</ref>" for _, r in sorted(refs, key=lambda x: -x[0])) + "</p>")
+        for (b, c, v), refs in sorted(by_verse.items())
+    ]
+    info = (
+        f"<p>Cross-references for {len(rows):,} verses, most agreed first: the links that OpenBible.info's readers voted "
+        f"helpful at least {XREF_VOTES} times, from some 340,000 drawn mainly from the Treasury of Scripture Knowledge.</p>"
+        "<p>© OpenBible.info, CC BY 4.0 (https://www.openbible.info/labs/cross-references/). "
+        "Built by Two-edged Sword's tools/core.</p>"
+    )
     write_commentary("openbible_xref.cmti", "OpenBible.info Cross-References", "OpenBible", info, ([], [], rows))
     if bad:
         print(f"  {bad} cross-references to no KJV verse left out")
@@ -3087,13 +3885,17 @@ def write_places():
     OpenBible's confidence out of 1000 and its coordinates) and the verses that name it. Coordinates taken from
     OpenStreetMap (ODbL, not CC BY) are left out; so are the shapes and pictures."""
     ancient = [json.loads(x) for x in fetch(GEO.format("ancient")).decode("utf-8").splitlines() if x.strip()]
-    modern = {m["id"]: m for m in (json.loads(x) for x in fetch(GEO.format("modern")).decode("utf-8").splitlines() if x.strip())}
+    modern = {
+        m["id"]: m
+        for m in (json.loads(x) for x in fetch(GEO.format("modern")).decode("utf-8").splitlines() if x.strip())
+    }
 
     def where(m):
         if not m or (m.get("coordinates_source") or {}).get("type") == "osm" or not m.get("lonlat"):
             return ""
         lon, lat = map(float, m["lonlat"].split(","))
         return f" ({abs(lat):.4f}° {'N' if lat >= 0 else 'S'}, {abs(lon):.4f}° {'E' if lon >= 0 else 'W'})"
+
     rows = []
     for p in ancient:
         out = []
@@ -3101,7 +3903,9 @@ def write_places():
         if types:
             out.append(f"<p><i>{html.escape(types)}</i></p>")
         score = lambda i: (i.get("score") or {}).get("time_total", 0)
-        ids = sorted((i for i in p.get("identifications", []) if score(i) > 0), key=lambda i: -score(i))  # 0 or less: one OpenBible rejects
+        ids = sorted(
+            (i for i in p.get("identifications", []) if score(i) > 0), key=lambda i: -score(i)
+        )  # 0 or less: one OpenBible rejects
         if ids:
             lines = []
             for i in ids[:5]:
@@ -3111,13 +3915,19 @@ def write_places():
             out.append("<p><b>Identified as:</b> " + "; ".join(lines) + ".</p>")
         refs = [r for r in (osis_range(v["osis"]) for v in p.get("verses", [])) if r]
         if refs:
-            out.append(f"<p><b>{len(refs)} verse{'s' if len(refs) != 1 else ''}:</b> " + "; ".join(f"<ref>{r}</ref>" for r in refs) + "</p>")
+            out.append(
+                f"<p><b>{len(refs)} verse{'s' if len(refs) != 1 else ''}:</b> "
+                + "; ".join(f"<ref>{r}</ref>" for r in refs)
+                + "</p>"
+            )
         rows.append((p["friendly_id"], "".join(out)))
-    info = ("<p>The places of the Bible: what each is (a settlement, a mountain, a region…), the sites it is identified with, "
-            "likeliest first, each with OpenBible.info's confidence (out of 1000) and coordinates, and the verses that name it.</p>"
-            "<p>© OpenBible.info, CC BY 4.0 (https://github.com/openbibleinfo/Bible-Geocoding-Data). Coordinates OpenBible took "
-            "from OpenStreetMap are left out (their licence is the ODbL), and so are the maps and pictures. "
-            "Built by Two-edged Sword's tools/core.</p>")
+    info = (
+        "<p>The places of the Bible: what each is (a settlement, a mountain, a region…), the sites it is identified with, "
+        "likeliest first, each with OpenBible.info's confidence (out of 1000) and coordinates, and the verses that name it.</p>"
+        "<p>© OpenBible.info, CC BY 4.0 (https://github.com/openbibleinfo/Bible-Geocoding-Data). Coordinates OpenBible took "
+        "from OpenStreetMap are left out (their licence is the ODbL), and so are the maps and pictures. "
+        "Built by Two-edged Sword's tools/core.</p>"
+    )
     with module("places.dcti", "Bible Places (OpenBible.info)", "Places", info, into=BUNDLED) as db:
         db.executemany("INSERT INTO Dictionary VALUES (?,?)", sorted(rows, key=lambda r: r[0].lower()))
     print(f"places.dcti: {len(rows)} places")
@@ -3125,6 +3935,7 @@ def write_places():
 
 def write_maps():
     import maps.build as maps
+
     maps.build(into=BUNDLED)
 
 
@@ -3135,8 +3946,10 @@ MORE |= {"maps": ("maps.refi", write_maps)}
 # Each built by its own tool into the bundle, inside shipping(), so it reads only the built-in modules
 # (the KJV's verses, the RV, WLC+, Ginsburg), never the user's library or e-Sword X's.
 
+
 def write_crosswire(name):
     import crosswire.build as cw
+
     with shipping():
         cw.build(name, into=BUNDLED)
 
@@ -3144,44 +3957,72 @@ def write_crosswire(name):
 def write_tool(path):
     """Runs tools/<path>'s main into the bundle: "vulgate.build", "lxx.build", "ginsburg.build", "ginsburg.plus"."""
     import importlib
+
     with shipping():
         importlib.import_module(path).main(into=BUNDLED)
 
 
-MORE |= {"peshitta": ("peshitta.bbli", lambda: write_crosswire("Peshitta")), "murdock": ("murdock.bbli", lambda: write_crosswire("Murdock")),
-         "etheridge": ("etheridge.bbli", lambda: write_crosswire("Etheridge")), "tyndale": ("tyndale.bbli", lambda: write_crosswire("Tyndale")),
-         "geneva1599": ("geneva1599.bbli", lambda: write_crosswire("Geneva1599")), "drc": ("drc.bbli", lambda: write_crosswire("DRC")),
-         "clementine": ("clementine.bbli", lambda: write_tool("vulgate.build")), "lxx": ("lxx_brenton.bbli", lambda: write_tool("lxx.build"))}
-MORE |= {"wesley": ("wesley.cmti", write_wesley), "torrey": ("torrey.dcti", write_torrey),
-         "hitchcock": ("hitchcock.dcti", write_hitchcock), "abbott": ("abbott.lexi", write_abbott),
-         "sme": ("sme.devi", write_spurgeon), "daily": ("daily.devi", write_daily_light),
-         "byz": ("byz.bbli", write_byz), "byz+": ("byz+.bbli", write_byz_plus), "brenton": ("brenton.bbli", write_brenton),
-         "weymouth": ("weymouth.bbli", write_weymouth), "wlc": ("wlc.bbli", write_wlc), "wlc+": ("wlc+.bbli", write_wlc_plus),
-         "openbible": ("openbible_xref.cmti", write_openbible_xref), "places": ("places.dcti", write_places)}
-MORE |= {"ginsburg": ("ginsburg.bbli", lambda: write_tool("ginsburg.build")), "ginsburg+": ("ginsburg+.bbli", lambda: write_tool("ginsburg.plus")),
-         "mam": ("mam.bbli", lambda: write_tool("mam.build")), "mam+": ("mam+.bbli", lambda: write_tool("mam.plus"))}
+MORE |= {
+    "peshitta": ("peshitta.bbli", lambda: write_crosswire("Peshitta")),
+    "murdock": ("murdock.bbli", lambda: write_crosswire("Murdock")),
+    "etheridge": ("etheridge.bbli", lambda: write_crosswire("Etheridge")),
+    "tyndale": ("tyndale.bbli", lambda: write_crosswire("Tyndale")),
+    "geneva1599": ("geneva1599.bbli", lambda: write_crosswire("Geneva1599")),
+    "drc": ("drc.bbli", lambda: write_crosswire("DRC")),
+    "clementine": ("clementine.bbli", lambda: write_tool("vulgate.build")),
+    "lxx": ("lxx_brenton.bbli", lambda: write_tool("lxx.build")),
+}
+MORE |= {
+    "wesley": ("wesley.cmti", write_wesley),
+    "torrey": ("torrey.dcti", write_torrey),
+    "hitchcock": ("hitchcock.dcti", write_hitchcock),
+    "abbott": ("abbott.lexi", write_abbott),
+    "sme": ("sme.devi", write_spurgeon),
+    "daily": ("daily.devi", write_daily_light),
+    "byz": ("byz.bbli", write_byz),
+    "byz+": ("byz+.bbli", write_byz_plus),
+    "brenton": ("brenton.bbli", write_brenton),
+    "weymouth": ("weymouth.bbli", write_weymouth),
+    "wlc": ("wlc.bbli", write_wlc),
+    "wlc+": ("wlc+.bbli", write_wlc_plus),
+    "openbible": ("openbible_xref.cmti", write_openbible_xref),
+    "places": ("places.dcti", write_places),
+}
+MORE |= {
+    "ginsburg": ("ginsburg.bbli", lambda: write_tool("ginsburg.build")),
+    "ginsburg+": ("ginsburg+.bbli", lambda: write_tool("ginsburg.plus")),
+    "mam": ("mam.bbli", lambda: write_tool("mam.build")),
+    "mam+": ("mam+.bbli", lambda: write_tool("mam.plus")),
+}
 # The word-by-word Septuagint, Vulgate and Peshitta, from open sources only: after what each reads (LXX+ the Greek
 # Brenton; Peshitta+ the Peshitta, Byz+, Murdock and Etheridge; Vulg-C+ the Clementine, WLC+, Byz+ and LXX+).
-MORE |= {"lxx+": ("lxx_brenton+.bbli", lambda: write_tool("lxx.plus")),
-         "peshitta+": ("peshitta+.bbli", lambda: write_tool("syriac.build")),
-         "clementine+": ("clementine+.bbli", lambda: write_tool("latin.clementine"))}
+MORE |= {
+    "lxx+": ("lxx_brenton+.bbli", lambda: write_tool("lxx.plus")),
+    "peshitta+": ("peshitta+.bbli", lambda: write_tool("syriac.build")),
+    "clementine+": ("clementine+.bbli", lambda: write_tool("latin.clementine")),
+}
 
 
 def write_targum(name):
     """A Targum from Sefaria's openly licensed versions only (tools/sefaria's open_targum)."""
     import sefaria.build as sf
+
     with shipping():
         sf.open_targum(name, into=BUNDLED)
 
 
 # The Targums from public-domain and CC0 versions only (each checked against Sefaria's own licence for it);
 # they read only the KJV's chapter lengths. Targum (English) is left out (NC versions).
-MORE |= {n: (f"{n}.bbli", lambda n=n: write_targum(n)) for n in ("targum_aramaic", "pseudojonathan_aramaic", "pseudojonathan_english")}
+MORE |= {
+    n: (f"{n}.bbli", lambda n=n: write_targum(n))
+    for n in ("targum_aramaic", "pseudojonathan_aramaic", "pseudojonathan_english")
+}
 
 
 def write_ccel(name):
     """A book from CCEL's public-domain ThML (tools/ccel)."""
     import ccel.build as cb
+
     with shipping():
         cb.main(into=BUNDLED, names=[name])
 
@@ -3189,6 +4030,7 @@ def write_ccel(name):
 def write_gutenberg(name):
     """A book from Project Gutenberg's public-domain HTML (tools/gutenberg)."""
     import gutenberg.build as gb
+
     with shipping():
         gb.main(into=BUNDLED, names=[name])
 
@@ -3196,6 +4038,7 @@ def write_gutenberg(name):
 def write_larkin(name):
     """One of Larkin's books, from the Internet Archive's public-domain scans (tools/larkin)."""
     import larkin.build as lb
+
     with shipping():
         lb.main(into=BUNDLED, names=[name])
 
@@ -3203,21 +4046,33 @@ def write_larkin(name):
 def write_targum_plus(name):
     """Targum+ or Ps-Jon+ from the built-in Targum and WLC+, with Jastrow's glosses (CC BY-NC, so non-commercial)."""
     import targum.build as tg
+
     with shipping():
         tg.main(into=BUNDLED, names=[name])
 
 
 # Public-domain books: Josephus (Whiston), Edersheim's Life and Times and The Pilgrim's Progress from CCEL's ThML
 # editions (tools/ccel), and Fox's Book of Martyrs from Project Gutenberg's (tools/gutenberg).
-MORE |= {n: (f"{n}.refi", lambda n=n: write_ccel(n)) for n in ("josephus", "edersheim", "pilgrim", "lawrence", "bounds", "sheldon")}
-MORE |= {"foxe": ("foxe.refi", lambda: write_gutenberg("foxe")), "strong_theology": ("strong_theology.refi", lambda: write_gutenberg("strong_theology"))}
+MORE |= {
+    n: (f"{n}.refi", lambda n=n: write_ccel(n))
+    for n in ("josephus", "edersheim", "pilgrim", "lawrence", "bounds", "sheldon")
+}
+MORE |= {
+    "foxe": ("foxe.refi", lambda: write_gutenberg("foxe")),
+    "strong_theology": ("strong_theology.refi", lambda: write_gutenberg("strong_theology")),
+}
 MORE |= {"tdavid": ("tdavid.cmti", write_tdavid), "kd": ("kd.cmti", write_kd)}
 # Clarence Larkin's books with their charts, from the Internet Archive's scans (tools/larkin).
-MORE |= {f"larkin_{n}": (f"larkin_{n}.refi", lambda n=n: write_larkin(n)) for n in ("dispensational_truth", "revelation", "daniel", "second_coming", "spirit_world", "rightly_dividing")}
+MORE |= {
+    f"larkin_{n}": (f"larkin_{n}.refi", lambda n=n: write_larkin(n))
+    for n in ("dispensational_truth", "revelation", "daniel", "second_coming", "spirit_world", "rightly_dividing")
+}
 
 
 # After the Targums they read.
-MORE |= {f"{n}+": (f"{n}+.bbli", lambda n=n: write_targum_plus(n)) for n in ("targum_aramaic", "pseudojonathan_aramaic")}
+MORE |= {
+    f"{n}+": (f"{n}+.bbli", lambda n=n: write_targum_plus(n)) for n in ("targum_aramaic", "pseudojonathan_aramaic")
+}
 
 
 def main():
@@ -3232,10 +4087,12 @@ def main():
                 build()
         return
     if "--only" in sys.argv:  # --only henry easton asv: just those
-        names = sys.argv[sys.argv.index("--only") + 1:]
+        names = sys.argv[sys.argv.index("--only") + 1 :]
         known = {"henry", "easton", *MORE} | set(BIBLES)
         if not names or set(names) - known:
-            sys.exit(f"--only takes {', '.join(sorted(known))}, not {' '.join(sorted(set(names) - known)) or 'nothing'}")
+            sys.exit(
+                f"--only takes {', '.join(sorted(known))}, not {' '.join(sorted(set(names) - known)) or 'nothing'}"
+            )
         if not (BUNDLED / "kjv.bbli").is_file():
             write_kjv(kjv()[0])  # what's built is checked against its verses
         if "henry" in names:

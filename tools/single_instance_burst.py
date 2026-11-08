@@ -24,7 +24,10 @@ PS = ["powershell", "-NoProfile", "-Command"]
 def copies(exe: Path) -> list[int]:
     """The ids of the processes running `exe`."""
     out = subprocess.run(
-        PS + [f"Get-CimInstance Win32_Process -Filter \"Name='{exe.name}'\" | ForEach-Object {{ \"$($_.ProcessId)`t$($_.ExecutablePath)\" }}"],
+        PS
+        + [
+            f'Get-CimInstance Win32_Process -Filter "Name=\'{exe.name}\'" | ForEach-Object {{ "$($_.ProcessId)`t$($_.ExecutablePath)" }}'
+        ],
         capture_output=True,
         text=True,
         check=False,

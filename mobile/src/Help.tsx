@@ -13,7 +13,9 @@ const android = !!(window as unknown as { TesInsets?: unknown }).TesInsets;
 
 /** The guide for this platform: the other platform's parts taken out. */
 const forPlatform = (md: string) =>
-  md.replace(android ? /<!-- ios -->[\s\S]*?<!-- \/ios -->\n?/g : /<!-- android -->[\s\S]*?<!-- \/android -->\n?/g, "").replace(/<!-- \/?(ios|android) -->\n?/g, "");
+  md
+    .replace(android ? /<!-- ios -->[\s\S]*?<!-- \/ios -->\n?/g : /<!-- android -->[\s\S]*?<!-- \/android -->\n?/g, "")
+    .replace(/<!-- \/?(ios|android) -->\n?/g, "");
 
 /** Bold and `code`. */
 const inline = (t: string) =>
@@ -43,7 +45,14 @@ function toHtml(md: string): string {
       out.push(
         `<table><thead><tr>${cells(rows[0])
           .map((c) => `<th>${inline(c)}</th>`)
-          .join("")}</tr></thead><tbody>${body.map((r) => `<tr>${cells(r).map((c) => `<td>${inline(c)}</td>`).join("")}</tr>`).join("")}</tbody></table>`,
+          .join("")}</tr></thead><tbody>${body
+          .map(
+            (r) =>
+              `<tr>${cells(r)
+                .map((c) => `<td>${inline(c)}</td>`)
+                .join("")}</tr>`,
+          )
+          .join("")}</tbody></table>`,
       );
     } else if (/^\s*[-*]\s/.test(l)) {
       const items: string[] = [];
@@ -80,7 +89,11 @@ export function Help() {
       <div className="prose" dangerouslySetInnerHTML={{ __html: INTRO }} />
       <div className="card flush">
         {SECTIONS.map((s) => (
-          <details key={s.title} open={open === s.title} onToggle={(e) => (e.currentTarget.open ? setOpen(s.title) : open === s.title && setOpen(null))}>
+          <details
+            key={s.title}
+            open={open === s.title}
+            onToggle={(e) => (e.currentTarget.open ? setOpen(s.title) : open === s.title && setOpen(null))}
+          >
             <summary className="row">
               <span className="grow">{s.title}</span>
             </summary>

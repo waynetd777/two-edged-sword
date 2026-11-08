@@ -9,12 +9,13 @@ import { dirname, resolve } from "node:path";
 const here = dirname(fileURLToPath(import.meta.url));
 const desktop = resolve(here, "../src");
 
-/** The phone shares the desktop's pure helpers (bible.ts, esword.tsx). Two of esword.tsx's imports
- *  reach into the desktop app (its invoke wrappers and the map pictures); they're swapped for small
- *  phone versions here, so the rest of the desktop app isn't pulled in. */
+/** The phone shares the desktop's pure helpers (bible.ts, esword.tsx, md.ts). A few of their imports
+ *  reach into the desktop app (its invoke wrappers, the map pictures, state.tsx's highlight colours);
+ *  they're swapped for small phone versions here, so the rest of the desktop app isn't pulled in. */
 const SHIMS: Record<string, string> = {
   "./api": resolve(here, "src/shims/desktopApi.ts"),
   "./MapPlaces": resolve(here, "src/shims/mapPlaces.tsx"),
+  "./state": resolve(here, "src/shims/desktopState.ts"),
 };
 function desktopShims(): Plugin {
   return {

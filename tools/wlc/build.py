@@ -30,7 +30,9 @@ and the paragraph markers pe and samekh, are left out.
 morphhb is taken at a fixed commit. Downloads are cached in ~/Library/Caches/Two-edged Sword/wlc
 (STEPBible's, in tools/stepbible's cache).
 """
-import re, sys
+
+import re
+import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
@@ -38,6 +40,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from books import OSIS  # noqa: E402
 from modules import CACHES, fetch, module  # noqa: E402
 from stepbible import lexicon  # noqa: E402
+
 CACHE = CACHES / "wlc"
 SRC = "https://raw.githubusercontent.com/openscriptures/morphhb/3d15126fb1ef74867fc1434be1942e837932691f/wlc/{}.xml"
 NS = "{http://www.bibletechnologies.net/2003/OSIS/namespace}"
@@ -85,40 +88,136 @@ def gloss_for(lemma):
 
 # morphhb's lemma prefixes, in English.
 PREFIX = {"b": "in", "c": "and", "d": "the", "i": "?", "k": "like", "l": "to", "m": "from", "s": "which"}
-POSSESSIVE = {"1s": "my", "1p": "our", "2s": "your", "2p": "your", "3ms": "his", "3fs": "her", "3mp": "their", "3fp": "their", "3cp": "their", "3bs": "its"}
+POSSESSIVE = {
+    "1s": "my",
+    "1p": "our",
+    "2s": "your",
+    "2p": "your",
+    "3ms": "his",
+    "3fs": "her",
+    "3mp": "their",
+    "3fp": "their",
+    "3cp": "their",
+    "3bs": "its",
+}
 OBJECT = {"my": "me", "our": "us", "your": "you", "his": "him", "her": "her", "their": "them", "its": "it"}
 
 # OSHB morphology codes, https://hb.openscriptures.org/parsing/HebrewMorphologyCodes.html
-POS = {"A": "adjective", "C": "conjunction", "D": "adverb", "N": "noun", "P": "pronoun", "R": "preposition", "S": "suffix", "T": "particle", "V": "verb"}
-STEM_H = {"q": "qal", "N": "niphal", "p": "piel", "P": "pual", "h": "hiphil", "H": "hophal", "t": "hithpael", "o": "polel", "O": "polal",
-          "r": "hithpolel", "m": "poel", "M": "poal", "k": "palel", "K": "pulal", "Q": "qal passive", "l": "pilpel", "L": "polpal",
-          "f": "hithpalpel", "D": "nithpael", "j": "pealal", "i": "pilel", "u": "hothpaal", "c": "tiphil", "v": "hishtaphel",
-          "w": "nithpalel", "y": "nithpoel", "z": "hithpoel"}
-STEM_A = {"q": "peal", "Q": "peil", "u": "hithpeel", "p": "pael", "P": "ithpaal", "M": "hithpaal", "a": "aphel", "h": "haphel",
-          "s": "saphel", "e": "shaphel", "H": "hophal", "i": "ithpeel", "t": "hishtaphel", "v": "ishtaphel", "w": "hithaphel",
-          "o": "polel", "z": "ithpoel", "r": "hithpolel", "f": "hithpalpel", "b": "hephal", "c": "tiphel", "m": "poel",
-          "l": "palpel", "L": "ithpalpel", "O": "ithpolel", "G": "ittaphal"}
-CONJ = {"p": "perfect", "q": "sequential perfect", "i": "imperfect", "w": "sequential imperfect", "h": "cohortative",
-        "j": "jussive", "v": "imperative", "r": "participle", "s": "passive participle", "a": "infinitive absolute", "c": "infinitive construct"}
+POS = {
+    "A": "adjective",
+    "C": "conjunction",
+    "D": "adverb",
+    "N": "noun",
+    "P": "pronoun",
+    "R": "preposition",
+    "S": "suffix",
+    "T": "particle",
+    "V": "verb",
+}
+STEM_H = {
+    "q": "qal",
+    "N": "niphal",
+    "p": "piel",
+    "P": "pual",
+    "h": "hiphil",
+    "H": "hophal",
+    "t": "hithpael",
+    "o": "polel",
+    "O": "polal",
+    "r": "hithpolel",
+    "m": "poel",
+    "M": "poal",
+    "k": "palel",
+    "K": "pulal",
+    "Q": "qal passive",
+    "l": "pilpel",
+    "L": "polpal",
+    "f": "hithpalpel",
+    "D": "nithpael",
+    "j": "pealal",
+    "i": "pilel",
+    "u": "hothpaal",
+    "c": "tiphil",
+    "v": "hishtaphel",
+    "w": "nithpalel",
+    "y": "nithpoel",
+    "z": "hithpoel",
+}
+STEM_A = {
+    "q": "peal",
+    "Q": "peil",
+    "u": "hithpeel",
+    "p": "pael",
+    "P": "ithpaal",
+    "M": "hithpaal",
+    "a": "aphel",
+    "h": "haphel",
+    "s": "saphel",
+    "e": "shaphel",
+    "H": "hophal",
+    "i": "ithpeel",
+    "t": "hishtaphel",
+    "v": "ishtaphel",
+    "w": "hithaphel",
+    "o": "polel",
+    "z": "ithpoel",
+    "r": "hithpolel",
+    "f": "hithpalpel",
+    "b": "hephal",
+    "c": "tiphel",
+    "m": "poel",
+    "l": "palpel",
+    "L": "ithpalpel",
+    "O": "ithpolel",
+    "G": "ittaphal",
+}
+CONJ = {
+    "p": "perfect",
+    "q": "sequential perfect",
+    "i": "imperfect",
+    "w": "sequential imperfect",
+    "h": "cohortative",
+    "j": "jussive",
+    "v": "imperative",
+    "r": "participle",
+    "s": "passive participle",
+    "a": "infinitive absolute",
+    "c": "infinitive construct",
+}
 PERSON = {"1": "1", "2": "2", "3": "3"}
 GENDER = {"m": "masc.", "f": "fem.", "b": "masc./fem.", "c": "common"}
 NUMBER = {"s": "sing.", "p": "plur.", "d": "dual"}
 STATE = {"a": "absolute", "c": "construct", "d": "determined"}
-TYPES = {"N": {"c": "", "g": "gentilic", "p": "proper"}, "A": {"a": "", "c": "cardinal", "g": "gentilic", "o": "ordinal"},
-         "P": {"d": "demonstrative", "f": "indefinite", "i": "interrogative", "p": "personal", "r": "relative"},
-         "T": {"a": "affirmation", "d": "article", "e": "exhortation", "i": "interrogative", "j": "interjection", "m": "demonstrative",
-               "n": "negative", "o": "object marker", "r": "relative"},
-         "S": {"d": "directional", "h": "paragogic he", "n": "paragogic nun", "p": "pronominal"}, "R": {"d": "with article"}}
+TYPES = {
+    "N": {"c": "", "g": "gentilic", "p": "proper"},
+    "A": {"a": "", "c": "cardinal", "g": "gentilic", "o": "ordinal"},
+    "P": {"d": "demonstrative", "f": "indefinite", "i": "interrogative", "p": "personal", "r": "relative"},
+    "T": {
+        "a": "affirmation",
+        "d": "article",
+        "e": "exhortation",
+        "i": "interrogative",
+        "j": "interjection",
+        "m": "demonstrative",
+        "n": "negative",
+        "o": "object marker",
+        "r": "relative",
+    },
+    "S": {"d": "directional", "h": "paragogic he", "n": "paragogic nun", "p": "pronominal"},
+    "R": {"d": "with article"},
+}
 
 
 def pgn(code, person=True):
     """Person, gender, number (and state) from the rest of a code: "3ms" -> "3 masc. sing."."""
     out, i = [], 0
     if person and i < len(code) and code[i] in PERSON:
-        out.append(code[i]); i += 1
+        out.append(code[i])
+        i += 1
     for table in (GENDER, NUMBER, STATE):
         if i < len(code) and code[i] in table:
-            out.append(table[code[i]]); i += 1
+            out.append(table[code[i]])
+            i += 1
     return " ".join(out)
 
 
@@ -130,7 +229,11 @@ def grammar_segment(seg, aramaic):
     if seg[0] == "V":
         stem = (STEM_A if aramaic else STEM_H).get(rest[:1], "")
         conj = CONJ.get(rest[1:2], "")
-        return " · ".join(x for x in (pos, f"{stem} {conj}".strip(), pgn(rest[2:], conj not in ("participle", "passive participle"))) if x)
+        return " · ".join(
+            x
+            for x in (pos, f"{stem} {conj}".strip(), pgn(rest[2:], conj not in ("participle", "passive participle")))
+            if x
+        )
     kind = TYPES.get(seg[0], {}).get(rest[:1], None) if rest else None
     if kind is not None:
         rest = rest[1:]
@@ -163,7 +266,7 @@ def english(lemma, morph):
     # A noun, adjective or participle owns its suffix ("my shepherd"); a verb or preposition takes it as object.
     owns = main[:1] in ("N", "A") or (main[:1] == "V" and main[2:3] in ("r", "s"))
     after = []
-    for seg in segs[len(prefixes) + (1 if has_main else 0):]:
+    for seg in segs[len(prefixes) + (1 if has_main else 0) :]:
         if seg.startswith("Sp"):
             code = seg[2:]
             pos = POSSESSIVE.get(code) or POSSESSIVE.get(code[:1] + code[-1:])
@@ -174,7 +277,9 @@ def english(lemma, morph):
         elif seg == "Sd":
             words.append("toward")
     out = " ".join(words + ([base] if base else []) + after).split()
-    return " ".join(w for k, w in enumerate(out) if k == 0 or w != out[k - 1])  # "with me me": the gloss had the pronoun
+    return " ".join(
+        w for k, w in enumerate(out) if k == 0 or w != out[k - 1]
+    )  # "with me me": the gloss had the pronoun
 
 
 def ref(osis):
@@ -199,7 +304,12 @@ def word(w):
     lemma, morph = w.get("lemma") or "", w.get("morph") or ""
     nums = [f"H{m.group(1)}" for part in lemma.split("/") if (m := re.match(r"(\d+)", part.strip()))]
     # All its text: a large, small or suspended letter is an element inside it (Deu 6:4's ע and ד).
-    return {"text": "".join(w.itertext()).replace("/", ""), "nums": nums, "grammar": grammar(morph), "english": english(lemma, morph)}
+    return {
+        "text": "".join(w.itertext()).replace("/", ""),
+        "nums": nums,
+        "grammar": grammar(morph),
+        "english": english(lemma, morph),
+    }
 
 
 def esc(t):
@@ -212,7 +322,10 @@ def render(w):
 
 
 # Verses the KJV divides at a lesser pause than the atnach: how many words go in the first half.
-SPLIT = {"Ps.13.6": 6, "1Kgs.20.3": 6}  # "...in thy salvation." | "I will sing"; "...Thus saith Ben-hadad," | "Thy silver"
+SPLIT = {
+    "Ps.13.6": 6,
+    "1Kgs.20.3": 6,
+}  # "...in thy salvation." | "I will sing"; "...Thus saith Ben-hadad," | "Thy silver"
 
 
 def verse(v):
@@ -244,7 +357,11 @@ def read():
             first, second = verse(v)
             # A verse the KJV divides differently is split at its main pause; a half the map doesn't
             # move keeps the verse's number.
-            parts = [(m.get("a", k), first), (m.get("b", k), second)] if "a" in m or "b" in m else [(m.get(None, k), first + second)]
+            parts = (
+                [(m.get("a", k), first), (m.get("b", k), second)]
+                if "a" in m or "b" in m
+                else [(m.get(None, k), first + second)]
+            )
             for key, text in parts:
                 if text:
                     verses[key] = verses.get(key, []) + text
@@ -257,13 +374,24 @@ def main(into=None, verses=None):
     """Writes wlc+.bbli to the modules folder, or to `into` (tools/core bundles it with the app)."""
     verses = verses or read()
     rows = [(b, c, v, f"<heb>{''.join(map(render, ws))}</heb>") for (b, c, v), ws in sorted(verses.items())]
-    info = ("<p>The Westminster Leningrad Codex, the Hebrew text of the Leningrad Codex (1008) as in BHS, word by word: each "
-            "word with its English, Strong's number and grammar. Text, Strong's numbers and grammar from the Open Scriptures "
-            "Hebrew Bible (morphhb), CC BY 4.0, https://github.com/openscriptures/morphhb; English from STEPBible's TBESH "
-            "(Tyndale House), CC BY 4.0, https://github.com/STEPBible/STEPBible-Data. The English is the dictionary sense, "
-            "not a translation in context. Verses are numbered as in the KJV (psalm titles are part of verse 1); "
-            "where the margin corrects the text (ketiv/qere), the reading is given. Built by Two-edged Sword's tools/wlc.</p>")
-    with module("wlc+.bbli", "Westminster Leningrad Codex w/ Strong's", "WLC+", info, nt=False, strongs=True, rtl=True, into=into) as db:
+    info = (
+        "<p>The Westminster Leningrad Codex, the Hebrew text of the Leningrad Codex (1008) as in BHS, word by word: each "
+        "word with its English, Strong's number and grammar. Text, Strong's numbers and grammar from the Open Scriptures "
+        "Hebrew Bible (morphhb), CC BY 4.0, https://github.com/openscriptures/morphhb; English from STEPBible's TBESH "
+        "(Tyndale House), CC BY 4.0, https://github.com/STEPBible/STEPBible-Data. The English is the dictionary sense, "
+        "not a translation in context. Verses are numbered as in the KJV (psalm titles are part of verse 1); "
+        "where the margin corrects the text (ketiv/qere), the reading is given. Built by Two-edged Sword's tools/wlc.</p>"
+    )
+    with module(
+        "wlc+.bbli",
+        "Westminster Leningrad Codex w/ Strong's",
+        "WLC+",
+        info,
+        nt=False,
+        strongs=True,
+        rtl=True,
+        into=into,
+    ) as db:
         db.executemany("INSERT INTO Bible VALUES (?,?,?,?)", rows)
     print(f"wlc+.bbli: {len(rows)} verses")
 
@@ -277,10 +405,12 @@ def plain(into=None, verses=None):
     """Writes wlc.bbli, the same text as running Hebrew, to the modules folder or to `into`."""
     verses = verses or read()
     rows = [(b, c, v, f"<heb>{esc(running(ws))}</heb>") for (b, c, v), ws in sorted(verses.items())]
-    info = ("<p>The Westminster Leningrad Codex, the Hebrew text of the Leningrad Codex (1008) as in BHS, from the Open "
-            "Scriptures Hebrew Bible (morphhb), CC BY 4.0, https://github.com/openscriptures/morphhb. WLC+ has it word by "
-            "word. Verses are numbered as in the KJV (psalm titles are part of verse 1); where the margin corrects the text "
-            "(ketiv/qere), the reading is given. Built by Two-edged Sword's tools/wlc.</p>")
+    info = (
+        "<p>The Westminster Leningrad Codex, the Hebrew text of the Leningrad Codex (1008) as in BHS, from the Open "
+        "Scriptures Hebrew Bible (morphhb), CC BY 4.0, https://github.com/openscriptures/morphhb. WLC+ has it word by "
+        "word. Verses are numbered as in the KJV (psalm titles are part of verse 1); where the margin corrects the text "
+        "(ketiv/qere), the reading is given. Built by Two-edged Sword's tools/wlc.</p>"
+    )
     with module("wlc.bbli", "Westminster Leningrad Codex", "WLC", info, nt=False, rtl=True, into=into) as db:
         db.executemany("INSERT INTO Bible VALUES (?,?,?,?)", rows)
     print(f"wlc.bbli: {len(rows)} verses")

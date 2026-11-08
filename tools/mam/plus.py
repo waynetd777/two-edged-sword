@@ -18,6 +18,7 @@ consonants and take the matching word's Strong's number, grammar and English, ke
 pointing. The Aleppo Codex and the Leningrad Codex differ in few words; a word with no counterpart stays as it is,
 without English.
 """
+
 import sys
 from pathlib import Path
 
@@ -30,15 +31,26 @@ from modules import module  # noqa: E402
 def main(into=None):
     """Writes mam+.bbli to the app's modules folder, or to `into`."""
     out, share = gloss("mam.bbli")
-    info = ("<p>Miqra according to the Masorah (MAM), the Hebrew Old Testament of the Aleppo Codex, word by word: each word "
-            "with its English, Strong's number and grammar, taken from WLC+ by lining the two texts up by their consonants "
-            "(the Open Scriptures Hebrew Bible's lemmas and morphology, CC BY 4.0; STEPBible's TBESH glosses, CC BY 4.0). "
-            f"{share:.1%} of the words are glossed; a word where the Aleppo Codex's text differs from the Leningrad Codex's "
-            f'is left without. Text from <a href="{LINK}">Hebrew Wikisource</a>, through Ben Denckla\'s MAM-simple '
-            "(github.com/bdenckla/MAM-basics), under the Creative Commons Attribution-ShareAlike 4.0 licence (CC BY-SA 4.0), "
-            "https://creativecommons.org/licenses/by-sa/4.0/, as this module is. Verses are numbered as in the KJV. "
-            "Built by Two-edged Sword's tools/mam/plus.py.</p>")
-    with module("mam+.bbli", "Miqra according to the Masorah (Aleppo Codex) w/ glosses", "MAM+", info, nt=False, strongs=True, rtl=True, into=into) as db:
+    info = (
+        "<p>Miqra according to the Masorah (MAM), the Hebrew Old Testament of the Aleppo Codex, word by word: each word "
+        "with its English, Strong's number and grammar, taken from WLC+ by lining the two texts up by their consonants "
+        "(the Open Scriptures Hebrew Bible's lemmas and morphology, CC BY 4.0; STEPBible's TBESH glosses, CC BY 4.0). "
+        f"{share:.1%} of the words are glossed; a word where the Aleppo Codex's text differs from the Leningrad Codex's "
+        f'is left without. Text from <a href="{LINK}">Hebrew Wikisource</a>, through Ben Denckla\'s MAM-simple '
+        "(github.com/bdenckla/MAM-basics), under the Creative Commons Attribution-ShareAlike 4.0 licence (CC BY-SA 4.0), "
+        "https://creativecommons.org/licenses/by-sa/4.0/, as this module is. Verses are numbered as in the KJV. "
+        "Built by Two-edged Sword's tools/mam/plus.py.</p>"
+    )
+    with module(
+        "mam+.bbli",
+        "Miqra according to the Masorah (Aleppo Codex) w/ glosses",
+        "MAM+",
+        info,
+        nt=False,
+        strongs=True,
+        rtl=True,
+        into=into,
+    ) as db:
         db.executemany("INSERT INTO Bible VALUES (?,?,?,?)", out)
     print(f"mam+.bbli: {len(out)} verses")
 

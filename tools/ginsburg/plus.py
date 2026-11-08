@@ -25,12 +25,18 @@ match. A word with no counterpart stays as it is, without English.
 The markup is INT+'s, as WLC+'s: <div><grk>word</grk><num>H…</num><tvm>grammar</tvm><gra>English</gra></div>;
 maqaf and sof pasuq stay on the word before them, as in WLC+.
 """
-import html, re, sqlite3, sys
+
+import html
+import re
+import sqlite3
+import sys
 from difflib import SequenceMatcher
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from modules import find, hebrew_consonants as consonants, module, similar  # noqa: E402
+from modules import find, module, similar  # noqa: E402
+from modules import hebrew_consonants as consonants
+
 DIV = re.compile(r"<div><grk>(.*?)</grk>((?:<num>[^<]*</num>)*)<tvm>(.*?)</tvm><gra>(.*?)</gra></div>")
 
 
@@ -138,8 +144,10 @@ def gloss(source):
             worst.append((verse_hits / verse_words, (b, c, v), verse_words))
 
     total = n_exact + n_near + n_bare
-    print(f"{len(out)} verses, {total} words: {n_exact} ({n_exact / total:.1%}) matched exactly, {n_near} ({n_near / total:.1%}) "
-          f"near-matched, {n_bare} ({n_bare / total:.1%}) left bare")
+    print(
+        f"{len(out)} verses, {total} words: {n_exact} ({n_exact / total:.1%}) matched exactly, {n_near} ({n_near / total:.1%}) "
+        f"near-matched, {n_bare} ({n_bare / total:.1%}) left bare"
+    )
     low = sorted((h / max(n, 1), b) for b, (h, n) in per_book.items())[:5]
     print("  least glossed books: " + ", ".join(f"{b} {r:.1%}" for r, b in low))
     print("  worst verses: " + ", ".join(f"{b}:{c}:{v} {r:.0%}/{n}" for r, (b, c, v), n in sorted(worst)[:10]))
@@ -150,14 +158,25 @@ def main(into=None):
     """Writes ginsburg+.bbli to the app's modules folder, or to `into`."""
     out, share = gloss("ginsburg.bbli")
 
-    info = ("<p>Ginsburg's Hebrew Bible (1894), which follows Jacob ben Chayyim's text of Bomberg's second Rabbinic Bible "
-            "(1524–25), word by word: each word with its English, Strong's number and grammar, taken from WLC+ by lining the "
-            "two texts up by their consonants (the Open Scriptures Hebrew Bible's lemmas and morphology, CC BY 4.0; STEPBible's "
-            f"TBESH glosses, CC BY 4.0). {share:.1%} of the words are glossed; a word where Ben Chayyim's "
-            "text differs from the Leningrad Codex's is left without. Text: github.com/ahembd/Ginsburg_Hebrew_Bible (Apache-2.0), "
-            "a few verses from github.com/ahembd/Ginsburg_Hebrew_Bible_w_rafe (GPL-3.0); the module is shared under the GNU GPL, version 3. "
-            "Verses are numbered as in the KJV. Built by Two-edged Sword's tools/ginsburg/plus.py.</p>")
-    with module("ginsburg+.bbli", "Hebrew Bible (Ginsburg 1894, Ben Chayyim) w/ glosses", "Ginsburg+", info, nt=False, strongs=True, rtl=True, into=into) as db:
+    info = (
+        "<p>Ginsburg's Hebrew Bible (1894), which follows Jacob ben Chayyim's text of Bomberg's second Rabbinic Bible "
+        "(1524–25), word by word: each word with its English, Strong's number and grammar, taken from WLC+ by lining the "
+        "two texts up by their consonants (the Open Scriptures Hebrew Bible's lemmas and morphology, CC BY 4.0; STEPBible's "
+        f"TBESH glosses, CC BY 4.0). {share:.1%} of the words are glossed; a word where Ben Chayyim's "
+        "text differs from the Leningrad Codex's is left without. Text: github.com/ahembd/Ginsburg_Hebrew_Bible (Apache-2.0), "
+        "a few verses from github.com/ahembd/Ginsburg_Hebrew_Bible_w_rafe (GPL-3.0); the module is shared under the GNU GPL, version 3. "
+        "Verses are numbered as in the KJV. Built by Two-edged Sword's tools/ginsburg/plus.py.</p>"
+    )
+    with module(
+        "ginsburg+.bbli",
+        "Hebrew Bible (Ginsburg 1894, Ben Chayyim) w/ glosses",
+        "Ginsburg+",
+        info,
+        nt=False,
+        strongs=True,
+        rtl=True,
+        into=into,
+    ) as db:
         db.executemany("INSERT INTO Bible VALUES (?,?,?,?)", out)
     print(f"ginsburg+.bbli: {len(out)} verses")
 

@@ -7,7 +7,7 @@
 
 import { useSyncExternalStore } from "react";
 
-export type Tab = "read" | "search" | "words" | "library" | "more";
+export type Tab = "read" | "plans" | "search" | "words" | "library" | "more";
 
 export interface Place {
   tab: Tab;
@@ -36,7 +36,13 @@ const changed = () => {
   watchers.forEach((f) => f());
 };
 const same = (a: Place, b: Place) =>
-  a.tab === b.tab && a.book === b.book && a.chapter === b.chapter && a.verse === b.verse && a.comparing === b.comparing && a.word === b.word && a.doc === b.doc;
+  a.tab === b.tab &&
+  a.book === b.book &&
+  a.chapter === b.chapter &&
+  a.verse === b.verse &&
+  a.comparing === b.comparing &&
+  a.word === b.word &&
+  a.doc === b.doc;
 const keepCurrent = () => {
   if (at >= 0) stack[at] = { ...stack[at], ...snapshot() };
 };

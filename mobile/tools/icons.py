@@ -11,6 +11,7 @@ transparent margin). Run from mobile/: python3 tools/icons.py, then `make icons`
 """
 
 from pathlib import Path
+
 from PIL import Image
 
 HERE = Path(__file__).resolve().parent.parent

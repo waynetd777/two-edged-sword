@@ -183,8 +183,8 @@ fn respond(req: tiny_http::Request, status: u16, body: serde_json::Value) {
 
 fn handle(app: &AppHandle, sync: &Sync, mut req: tiny_http::Request) {
     let mut body = String::new();
-    // A sync is a few hundred kilobytes at most.
-    if req.as_reader().take(8_000_000).read_to_string(&mut body).is_err() {
+    // A sync carries the whole journal: a few megabytes for years of entries.
+    if req.as_reader().take(64_000_000).read_to_string(&mut body).is_err() {
         return respond(req, 400, serde_json::json!({"error": "unreadable"}));
     }
     let token =

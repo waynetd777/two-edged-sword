@@ -58,7 +58,9 @@ def to_srgb(im):
     if icc:
         alpha = im.getchannel("A") if im.mode == "RGBA" else None
         src = ImageCms.ImageCmsProfile(io.BytesIO(icc))
-        im = ImageCms.profileToProfile(im.convert("RGB"), src, ImageCms.createProfile("sRGB"), renderingIntent=ImageCms.Intent.PERCEPTUAL)
+        im = ImageCms.profileToProfile(
+            im.convert("RGB"), src, ImageCms.createProfile("sRGB"), renderingIntent=ImageCms.Intent.PERCEPTUAL
+        )
         if alpha:
             im.putalpha(alpha)
     im.info.pop("icc_profile", None)
@@ -72,7 +74,12 @@ def dev_server():
         return None
     except OSError:
         pass
-    p = subprocess.Popen(["npx", "vite", "--port", "1430", "--strictPort"], cwd=ROOT, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    p = subprocess.Popen(
+        ["npx", "vite", "--port", "1430", "--strictPort"],
+        cwd=ROOT,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
     for _ in range(60):
         time.sleep(0.5)
         try:
@@ -92,8 +99,35 @@ def capture(scene, theme):
     """Launches the app on the scene, unseen, and returns its webview's snapshots as sRGB images
     (one, or the scene's "frames" of them), or None."""
     # A fixture from a file beside scenes.json: "chatFile" becomes "chat", and so on.
-    files = {"chatFile": "chat", "sessionFile": "session", "entriesFile": "entries", "variancesFile": "variances", "songFile": "song", "chapterSongsFile": "chapterSongs"}
-    sc = {k: v for k, v in scene.items() if k not in files and k not in ("crop", "width", "settle", "songVision", "songVisionAt", "songVisionDur", "frames", "every", "step", "darkOnly", "home", "site", "card")}
+    files = {
+        "chatFile": "chat",
+        "sessionFile": "session",
+        "entriesFile": "entries",
+        "variancesFile": "variances",
+        "songFile": "song",
+        "chapterSongsFile": "chapterSongs",
+    }
+    sc = {
+        k: v
+        for k, v in scene.items()
+        if k not in files
+        and k
+        not in (
+            "crop",
+            "width",
+            "settle",
+            "songVision",
+            "songVisionAt",
+            "songVisionDur",
+            "frames",
+            "every",
+            "step",
+            "darkOnly",
+            "home",
+            "site",
+            "card",
+        )
+    }
     for f, k in files.items():
         if f in scene:
             sc[k] = json.loads((HERE / scene[f]).read_text(encoding="utf-8"))
@@ -111,12 +145,22 @@ def capture(scene, theme):
     # No favourite translations unless the scene names them: the user's own could be licensed Bibles.
     # On the demo home, its own settings: favourites all public domain, and its colours' names (a
     # scene clears the user's).
-    sc["settings"] = {**(demo_home.settings() if scene.get("home") else {"favBibles": []}), **sc.get("settings", {}), "theme": theme}
+    sc["settings"] = {
+        **(demo_home.settings() if scene.get("home") else {"favBibles": []}),
+        **sc.get("settings", {}),
+        "theme": theme,
+    }
     with tempfile.TemporaryDirectory() as tmp:
         shot = pathlib.Path(tmp) / "shot.tiff"
         frames, every = scene.get("frames", 1), scene.get("every", 0.1)
-        env = {**os.environ, "TES_SCENE": json.dumps(sc), "TES_SNAPSHOT": str(shot), "TES_SNAPSHOT_AFTER": str(scene.get("settle", SETTLE)),
-               "TES_SNAPSHOT_FRAMES": str(frames), "TES_SNAPSHOT_EVERY": str(every)}
+        env = {
+            **os.environ,
+            "TES_SCENE": json.dumps(sc),
+            "TES_SNAPSHOT": str(shot),
+            "TES_SNAPSHOT_AFTER": str(scene.get("settle", SETTLE)),
+            "TES_SNAPSHOT_FRAMES": str(frames),
+            "TES_SNAPSHOT_EVERY": str(every),
+        }
         # "step": the page's clock moved on this many seconds before each frame, in place of "every"
         # (src/sceneClock.ts): evenly spaced frames, however slowly WebKit draws them.
         if "step" in scene:
@@ -129,7 +173,9 @@ def capture(scene, theme):
             env["TES_SNAPSHOT_WIDTH"] = "720"
         # An animated scene's frames are shot-000.tiff, shot-001.tiff and so on.
         shots = [shot] if frames == 1 else [shot.with_name(f"shot-{i:03}.tiff") for i in range(frames)]
-        app = subprocess.Popen([str(BIN)], cwd=ROOT / "src-tauri", env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        app = subprocess.Popen(
+            [str(BIN)], cwd=ROOT / "src-tauri", env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+        )
         try:
             # The app writes the file whole (atomically) once WebKit has drawn it.
             # The last thing written: the snapshot, or an animation's list of when each frame was taken.
@@ -168,7 +214,12 @@ def chrome(im, theme):
     fill, rim = ((224, 225, 226), (219, 220, 222)) if theme == "light" else ((129, 131, 132), (136, 137, 139))
     for cx in (15, 37.5, 60):
         cy, r = 16, 6.75
-        d.ellipse([(cx - r) * s * k, (cy - r) * s * k, (cx + r) * s * k, (cy + r) * s * k], fill=fill + (255,), outline=rim + (255,), width=round(k * s))
+        d.ellipse(
+            [(cx - r) * s * k, (cy - r) * s * k, (cx + r) * s * k, (cy + r) * s * k],
+            fill=fill + (255,),
+            outline=rim + (255,),
+            width=round(k * s),
+        )
     im = Image.alpha_composite(im.convert("RGBA"), over.resize((w, h), Image.LANCZOS))
     mask = Image.new("L", (w * k, h * k))
     ImageDraw.Draw(mask).rounded_rectangle([0, 0, w * k - 1, h * k - 1], radius=round(16 * s * k), fill=255)
@@ -218,15 +269,42 @@ def shoot(scene, theme):
         with tempfile.TemporaryDirectory() as tmp:
             for i, f in enumerate(ims):
                 f.convert("RGB").save(pathlib.Path(tmp) / f"{i:04}.png")
-            subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-framerate", str(round(1 / scene["step"], 3)), "-i", str(pathlib.Path(tmp) / "%04d.png"),
-                            "-vf", "pad=ceil(iw/2)*2:ceil(ih/2)*2",  # H.264 wants an even width and height
-                            "-c:v", "libx264", "-preset", "slow", "-crf", "16", "-tune", "film", "-pix_fmt", "yuv420p",
-                            "-movflags", "+faststart", "-an", str(out)], check=True)
+            subprocess.run(
+                [
+                    "ffmpeg",
+                    "-y",
+                    "-loglevel",
+                    "error",
+                    "-framerate",
+                    str(round(1 / scene["step"], 3)),
+                    "-i",
+                    str(pathlib.Path(tmp) / "%04d.png"),
+                    "-vf",
+                    "pad=ceil(iw/2)*2:ceil(ih/2)*2",  # H.264 wants an even width and height
+                    "-c:v",
+                    "libx264",
+                    "-preset",
+                    "slow",
+                    "-crf",
+                    "16",
+                    "-tune",
+                    "film",
+                    "-pix_fmt",
+                    "yuv420p",
+                    "-movflags",
+                    "+faststart",
+                    "-an",
+                    str(out),
+                ],
+                check=True,
+            )
     elif scene.get("frames", 1) > 1:
         # Animated: a looping WebP, each frame shown for as long as it was on screen.
         out = OUT / f"{scene['name']}-{theme}.webp"
         at = [i.info["at"] for i in ims]
-        durations = [max(20, round((b - a) * 1000)) for a, b in zip(at, at[1:])] + [round(scene.get("every", 0.1) * 1000)]
+        durations = [max(20, round((b - a) * 1000)) for a, b in zip(at, at[1:])] + [
+            round(scene.get("every", 0.1) * 1000)
+        ]
         im.save(out, save_all=True, append_images=ims[1:], duration=durations, loop=0, quality=80, method=6)
     else:
         out = OUT / f"{scene['name']}-{theme}.png"
@@ -266,7 +344,11 @@ def main():
     a = ap.parse_args()
     docs = json.loads((HERE / "scenes.json").read_text(encoding="utf-8"))
     # The tutorials' scenes: on the demo home, for the site, in its dark theme.
-    tuts = [{"home": "demo", "site": True, "darkOnly": True, **s} for f in sorted((HERE / "tutorials").glob("*.json")) for s in json.loads(f.read_text(encoding="utf-8"))]
+    tuts = [
+        {"home": "demo", "site": True, "darkOnly": True, **s}
+        for f in sorted((HERE / "tutorials").glob("*.json"))
+        for s in json.loads(f.read_text(encoding="utf-8"))
+    ]
     scenes = tuts if a.tutorials else docs
     if a.names:
         everything = docs + tuts

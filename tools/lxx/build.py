@@ -52,13 +52,21 @@ Lamentations 1:1. Where the Septuagint lacks a verse the KJV has, there is none.
 SIL's tables are taken at a fixed commit (eBible.org's zip has no fixed version to take).
 Downloads are cached in ~/Library/Caches/Two-edged Sword/lxx.
 """
-import html, io, math, re, sqlite3, sys, zipfile
+
+import html
+import io
+import math
+import re
+import sqlite3
+import sys
+import zipfile
 from functools import lru_cache
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from books import USFM as BOOK_CODES  # noqa: E402
 from modules import BUNDLED, CACHES, LIBRARY, chapter_lengths, fetch, find, module  # noqa: E402
+
 CACHE = CACHES / "lxx"
 USFM = "https://ebible.org/Scriptures/grcbrent_usfm.zip"
 VRS = "https://raw.githubusercontent.com/sillsdev/libpalaso/0e913f4b4ee64c9d42b1891254513b83dbb4906c/SIL.Scripture/Resources/{}.vrs.txt"
@@ -66,7 +74,19 @@ VRS = "https://raw.githubusercontent.com/sillsdev/libpalaso/0e913f4b4ee64c9d42b1
 # The canon's Paratext codes in e-Sword's order (1–39).
 CANON = BOOK_CODES[:39]
 # The Apocrypha as e-Sword (and the library's Brenton, Latin and Douay-Rheims) numbers them.
-APOCRYPHA = {"TOB": 67, "JDT": 68, "WIS": 69, "SIR": 70, "BAR": 71, "1MA": 72, "2MA": 73, "1ES": 74, "3MA": 76, "4MA": 77, "MAN": 78}
+APOCRYPHA = {
+    "TOB": 67,
+    "JDT": 68,
+    "WIS": 69,
+    "SIR": 70,
+    "BAR": 71,
+    "1MA": 72,
+    "2MA": 73,
+    "1ES": 74,
+    "3MA": 76,
+    "4MA": 77,
+    "MAN": 78,
+}
 
 
 def get(url, name):
@@ -118,39 +138,88 @@ ENG = "https://ebible.org/Scriptures/eng-Brenton_usfm.zip"
 PLACES = [
     # Exodus 36-39: the priests' garments first (36:8-38, the KJV's 39:1-31), then the tabernacle and its court
     # (37), the ark, table, candlestick and altars (38), the metals and the finished work (39).
-    ("EXO", 36, "8", 39, 1), ("EXO", 36, "9-38", 39, 2),
-    ("EXO", 37, "1-2", 36, 8), ("EXO", 37, "3-6", 36, 35), ("EXO", 37, "7-21", 38, 9),
-    ("EXO", 38, "1-3", 37, 1), ("EXO", 38, "4", 37, 5), ("EXO", 38, "5-9", 37, 6), ("EXO", 38, "10", 37, 13),
-    ("EXO", 38, "11-12", 37, 15), ("EXO", 38, "13-16", 37, 17), ("EXO", 38, "17", 37, 23),
+    ("EXO", 36, "8", 39, 1),
+    ("EXO", 36, "9-38", 39, 2),
+    ("EXO", 37, "1-2", 36, 8),
+    ("EXO", 37, "3-6", 36, 35),
+    ("EXO", 37, "7-21", 38, 9),
+    ("EXO", 38, "1-3", 37, 1),
+    ("EXO", 38, "4", 37, 5),
+    ("EXO", 38, "5-9", 37, 6),
+    ("EXO", 38, "10", 37, 13),
+    ("EXO", 38, "11-12", 37, 15),
+    ("EXO", 38, "13-16", 37, 17),
+    ("EXO", 38, "17", 37, 23),
     ("EXO", 38, "18,19,20", 36, 34),  # the posts gilded, and rings and chapiters the Hebrew hasn't
-    ("EXO", 38, "21", 38, 20), ("EXO", 38, "22", 38, 1), ("EXO", 38, "23", 38, 3), ("EXO", 38, "24", 38, 4),
-    ("EXO", 38, "25", 37, 29), ("EXO", 38, "26,27", 38, 8),  # the laver, and what it was for
-    ("EXO", 39, "1-4", 38, 24), ("EXO", 39, "5", 38, 27), ("EXO", 39, "6-9", 38, 28), ("EXO", 39, "10", 38, 30),
-    ("EXO", 39, "11", 39, 32), ("EXO", 39, "12,13", 39, 1),  # the gold and the blue that were left
-    ("EXO", 39, "14", 39, 33), ("EXO", 39, "15", 39, 35), ("EXO", 39, "16", 39, 38), ("EXO", 39, "17", 39, 37),
-    ("EXO", 39, "18", 39, 36), ("EXO", 39, "19", 39, 41), ("EXO", 39, "20", 39, 40), ("EXO", 39, "21", 39, 34),
+    ("EXO", 38, "21", 38, 20),
+    ("EXO", 38, "22", 38, 1),
+    ("EXO", 38, "23", 38, 3),
+    ("EXO", 38, "24", 38, 4),
+    ("EXO", 38, "25", 37, 29),
+    ("EXO", 38, "26,27", 38, 8),  # the laver, and what it was for
+    ("EXO", 39, "1-4", 38, 24),
+    ("EXO", 39, "5", 38, 27),
+    ("EXO", 39, "6-9", 38, 28),
+    ("EXO", 39, "10", 38, 30),
+    ("EXO", 39, "11", 39, 32),
+    ("EXO", 39, "12,13", 39, 1),  # the gold and the blue that were left
+    ("EXO", 39, "14", 39, 33),
+    ("EXO", 39, "15", 39, 35),
+    ("EXO", 39, "16", 39, 38),
+    ("EXO", 39, "17", 39, 37),
+    ("EXO", 39, "18", 39, 36),
+    ("EXO", 39, "19", 39, 41),
+    ("EXO", 39, "20", 39, 40),
+    ("EXO", 39, "21", 39, 34),
     ("EXO", 39, "22-23", 39, 42),
     # Numbers: the ark's setting out before the cloud; the stations to Pisgah in one verse; the tribes counted in
     # another order (Judah, Issachar and Zebulun before Gad, Asher before Manasseh); the daughters' plea in one verse.
-    ("NUM", 10, "34-35", 10, 35), ("NUM", 10, "36", 10, 34),
-    ("NUM", 21, "20-21", 21, 21), ("NUM", 21, "22", 21, 22),
-    ("NUM", 26, "15-18", 26, 19), ("NUM", 26, "19-21", 26, 23), ("NUM", 26, "22-23", 26, 26), ("NUM", 26, "24-27", 26, 15),
-    ("NUM", 26, "28-31", 26, 44), ("NUM", 26, "32-38", 26, 28), ("NUM", 26, "39-41", 26, 35), ("NUM", 26, "42-45", 26, 38),
+    ("NUM", 10, "34-35", 10, 35),
+    ("NUM", 10, "36", 10, 34),
+    ("NUM", 21, "20-21", 21, 21),
+    ("NUM", 21, "22", 21, 22),
+    ("NUM", 26, "15-18", 26, 19),
+    ("NUM", 26, "19-21", 26, 23),
+    ("NUM", 26, "22-23", 26, 26),
+    ("NUM", 26, "24-27", 26, 15),
+    ("NUM", 26, "28-31", 26, 44),
+    ("NUM", 26, "32-38", 26, 28),
+    ("NUM", 26, "39-41", 26, 35),
+    ("NUM", 26, "42-45", 26, 38),
     ("NUM", 26, "46-47", 26, 42),
-    ("NUM", 27, "4-7", 27, 5), ("NUM", 27, "8", 27, 8),
+    ("NUM", 27, "4-7", 27, 5),
+    ("NUM", 27, "8", 27, 8),
     # Joshua's people serving the Lord before his death and burial, and the knives buried with him.
-    ("JOS", 24, "29", 24, 31), ("JOS", 24, "30-31", 24, 29), ("JOS", 24, "31a", 24, 30),
+    ("JOS", 24, "29", 24, 31),
+    ("JOS", 24, "30-31", 24, 29),
+    ("JOS", 24, "31a", 24, 30),
     # 3 Kingdoms 6:1a-d: the foundation stones (the KJV's 5:17-18) and the years of the building (6:37-38).
-    ("1KI", 6, "1a", 5, 17), ("1KI", 6, "1b", 5, 18), ("1KI", 6, "1c", 6, 37), ("1KI", 6, "1d", 6, 38),
+    ("1KI", 6, "1a", 5, 17),
+    ("1KI", 6, "1b", 5, 18),
+    ("1KI", 6, "1c", 6, 37),
+    ("1KI", 6, "1d", 6, 38),
     # 3 Kingdoms 7: Hiram and the temple's furnishings (the KJV's 7:13-51) before Solomon's house (7:1-12).
-    ("1KI", 7, "1-2", 7, 13), ("1KI", 7, "3-6", 7, 15), ("1KI", 7, "7", 7, 21), ("1KI", 7, "8", 7, 19),
-    ("1KI", 7, "9", 7, 20), ("1KI", 7, "10-11", 7, 23), ("1KI", 7, "12", 7, 26), ("1KI", 7, "13", 7, 25), ("1KI", 7, "14-17", 7, 27),
-    ("1KI", 7, "18-31", 7, 32), ("1KI", 7, "32", 7, 47), ("1KI", 7, "33", 7, 46), ("1KI", 7, "34-37", 7, 48),
-    ("1KI", 7, "38-49", 7, 1), ("1KI", 7, "50", 7, 1),  # "and Solomon finished all his house", the end of the KJV's 7:1
+    ("1KI", 7, "1-2", 7, 13),
+    ("1KI", 7, "3-6", 7, 15),
+    ("1KI", 7, "7", 7, 21),
+    ("1KI", 7, "8", 7, 19),
+    ("1KI", 7, "9", 7, 20),
+    ("1KI", 7, "10-11", 7, 23),
+    ("1KI", 7, "12", 7, 26),
+    ("1KI", 7, "13", 7, 25),
+    ("1KI", 7, "14-17", 7, 27),
+    ("1KI", 7, "18-31", 7, 32),
+    ("1KI", 7, "32", 7, 47),
+    ("1KI", 7, "33", 7, 46),
+    ("1KI", 7, "34-37", 7, 48),
+    ("1KI", 7, "38-49", 7, 1),
+    ("1KI", 7, "50", 7, 1),  # "and Solomon finished all his house", the end of the KJV's 7:1
     # The good wife's household (the KJV's 31:27) before her mouth opened in wisdom (31:26).
-    ("PRO", 31, "26", 31, 27), ("PRO", 31, "27", 31, 26),
+    ("PRO", 31, "26", 31, 27),
+    ("PRO", 31, "27", 31, 26),
     # Ezekiel 7: "the end is come" (the KJV's 7:6-9) before "now is the end come upon thee" (7:3-5).
-    ("EZK", 7, "3-6", 7, 6), ("EZK", 7, "7-9", 7, 3),
+    ("EZK", 7, "3-6", 7, 6),
+    ("EZK", 7, "7-9", 7, 3),
 ]
 
 
@@ -174,10 +243,15 @@ def places():
 # with the RV's Apocrypha (Sirach 30-36, where the Greek has two sections the other way round; Esther's additions,
 # at Esther 10:4-16:24, as the Vulgate and the RV number them). The Greek numbers its verses as the English does, so
 # the same places serve it.
-ALIGN = [("LEV", range(8, 9), "kjv.bbli", 3, range(8, 9)),
-         ("SIR", range(30, 37), "rv.bbli", 70, range(30, 37)), ("ESG", range(1, 11), "rv.bbli", 17, range(1, 17))]
-STOP = set("the and of to in that he his him they them a for i is be it unto with was shall all not which their thou "
-           "thee thy ye you your my me we our upon by from as but this were are so have had an at on or who".split())
+ALIGN = [
+    ("LEV", range(8, 9), "kjv.bbli", 3, range(8, 9)),
+    ("SIR", range(30, 37), "rv.bbli", 70, range(30, 37)),
+    ("ESG", range(1, 11), "rv.bbli", 17, range(1, 17)),
+]
+STOP = set(
+    "the and of to in that he his him they them a for i is be it unto with was shall all not which their thou "
+    "thee thy ye you your my me we our upon by from as but this were are so have had an at on or who".split()
+)
 
 
 def words(t):
@@ -192,13 +266,27 @@ def aligned():
     eng, _ = usfm(ENG)
     out = {}
     for code, chs, ref_file, book, ref_chs in ALIGN:
-        path = BUNDLED / ref_file if (BUNDLED / ref_file).is_file() else find(ref_file)  # the built-in RV has the Apocrypha; e-Sword's hasn't
+        path = (
+            BUNDLED / ref_file if (BUNDLED / ref_file).is_file() else find(ref_file)
+        )  # the built-in RV has the Apocrypha; e-Sword's hasn't
         db = sqlite3.connect(f"file:{path}?immutable=1", uri=True)
-        ref = {(c, v): words(t) for c, v, t in db.execute("SELECT Chapter, Verse, Scripture FROM Bible WHERE Book=?", (book,)) if c in ref_chs}
+        ref = {
+            (c, v): words(t)
+            for c, v, t in db.execute("SELECT Chapter, Verse, Scripture FROM Bible WHERE Book=?", (book,))
+            if c in ref_chs
+        }
         db.close()
         src = [(c, label, words(t)) for c, label, t in eng.get(code, []) if c in chs]
-        scores = sorted(((len(w & rw) / math.sqrt(len(w) * len(rw)), i, k) for i, (_, _, w) in enumerate(src) if w
-                         for k, rw in ref.items() if rw and w & rw), reverse=True)
+        scores = sorted(
+            (
+                (len(w & rw) / math.sqrt(len(w) * len(rw)), i, k)
+                for i, (_, _, w) in enumerate(src)
+                if w
+                for k, rw in ref.items()
+                if rw and w & rw
+            ),
+            reverse=True,
+        )
         got, taken = {}, set()
         for score, i, k in scores:
             if score >= 0.3 and i not in got and k not in taken:
@@ -216,8 +304,14 @@ def fill_gaps(vs):
         run = k + 1
         while run < len(out) and out[run][0] == c and re.fullmatch(rf"{re.escape(label)}[a-z]", out[run][1]):
             run += 1
-        if label.isdigit() and run > k + 1 and run < len(out) and out[run][0] == c and out[run][1].isdigit() \
-                and int(out[run][1]) - int(label) - 1 == run - k - 1:
+        if (
+            label.isdigit()
+            and run > k + 1
+            and run < len(out)
+            and out[run][0] == c
+            and out[run][1].isdigit()
+            and int(out[run][1]) - int(label) - 1 == run - k - 1
+        ):
             for j in range(k + 1, run):
                 out[j] = (c, str(int(label) + j - k), out[j][2])
         k = run
@@ -337,7 +431,11 @@ def build(url=USFM):
             return APOCRYPHA[code], c, base, "own"
         o = proverbs(c, label) if code == "PRO" else None
         if code == "MAL" and c == 3 and base in (22, 23, 24):
-            o = ("MAL", 3, {22: 23, 23: 24, 24: 22}[base])  # Elijah (the Hebrew 3:23–24) before "Remember the law of Moses" (3:22)
+            o = (
+                "MAL",
+                3,
+                {22: 23, 23: 24, 24: 22}[base],
+            )  # Elijah (the Hebrew 3:23–24) before "Remember the law of Moses" (3:22)
         if code == "NEH":  # the English's Nehemiah, beside 2 Esdras 11-23 (left out), is numbered as the KJV
             return 16, c, base, "own"
         if code == "EZR" and c == 17 and base >= 69:
@@ -384,8 +482,13 @@ def build(url=USFM):
         if v == 0:
             v = 1  # a Psalm's title opens verse 1
         key = (b, ch, v)
-        extra = bool(re.search(r"[a-z]", label)) and how not in ("rule", "aligned")  # a lettered verse a rule places isn't an addition
-        homeless = b <= 39 and how not in ("own", "aligned") and key not in kjv_verses()  # Esther 10:4-16:24 are the additions' own
+        extra = bool(re.search(r"[a-z]", label)) and how not in (
+            "rule",
+            "aligned",
+        )  # a lettered verse a rule places isn't an addition
+        homeless = (
+            b <= 39 and how not in ("own", "aligned") and key not in kjv_verses()
+        )  # Esther 10:4-16:24 are the additions' own
         if (extra or homeless or (how == "same" and key in claimed)) and last and last[0] == b:
             key = last  # joined to the verse before it
             joined += 1
@@ -423,12 +526,20 @@ def main(into=None):
     have = {(b, c, v) for b, c, v, _ in rows}
     missing = sorted(k for k in kjv_verses() if k[0] <= 39 and k not in have)
     print(f"{len(rows)} verses; {joined} Greek verses joined to the verse before them")
-    print(f"  canon: {sum(1 for r in rows if r[0] <= 39)} of the KJV's {sum(1 for k in kjv_verses() if k[0] <= 39)} Old Testament verses; apocrypha: {sum(1 for r in rows if r[0] > 39)}")
+    print(
+        f"  canon: {sum(1 for r in rows if r[0] <= 39)} of the KJV's {sum(1 for k in kjv_verses() if k[0] <= 39)} Old Testament verses; apocrypha: {sum(1 for r in rows if r[0] > 39)}"
+    )
     if missing:
         by = {}
         for b, c, v in missing:
             by.setdefault((b, c), []).append(v)
-        print(f"  KJV verses with no Greek: {len(missing)}: " + "; ".join(f"{CANON[b - 1]} {c}:{','.join(map(str, vs[:8]))}{'…' if len(vs) > 8 else ''}" for (b, c), vs in list(by.items())[:40]))
+        print(
+            f"  KJV verses with no Greek: {len(missing)}: "
+            + "; ".join(
+                f"{CANON[b - 1]} {c}:{','.join(map(str, vs[:8]))}{'…' if len(vs) > 8 else ''}"
+                for (b, c), vs in list(by.items())[:40]
+            )
+        )
     # Greek verses with no KJV verse, in runs: "DAG 3:24–90 -> 27:3:23".
     runs = []
     for n in notes:
@@ -439,19 +550,26 @@ def main(into=None):
         else:
             runs.append([code, c, v, v, to])
     if runs:
-        print("  Greek verses with no KJV verse, joined to the one before: " + "; ".join(f"{a} {c}:{v}{'–' + str(w) if w != v else ''} → {t}" for a, c, v, w, t in runs))
+        print(
+            "  Greek verses with no KJV verse, joined to the one before: "
+            + "; ".join(f"{a} {c}:{v}{'–' + str(w) if w != v else ''} → {t}" for a, c, v, w, t in runs)
+        )
 
     dated = re.search(r"source files dated ([^<\n]+)", about)
-    info = ("<p>The Greek Septuagint with Apocrypha, compiled by Sir Lancelot C. L. Brenton (1844), from eBible.org's "
-            "grcbrent: public domain. Brenton printed the Vatican text as Valpy's edition had it, which is the Sixtine "
-            "edition's (Rome, 1587), the Septuagint the KJV's translators had.</p><p>The verses are moved to the KJV's "
-            "numbering with SIL's versification tables (lxx.vrs, eng.vrs), and where the Septuagint orders a passage otherwise "
-            "(Exodus 36–39, Numbers 26, 1 Kings 7, Sirach 30–36 and others) each verse is at the verse it is; a Psalm's "
-            "title opens its verse 1, and the Septuagint's added verses and Daniel 3's are joined to the verse before them. "
-            "The additions to Esther are Esther 10:4–16:24, as in the Vulgate and the Revised Version; Susanna and Bel are Daniel 13–14, the Letter of "
-            "Jeremiah Baruch 6. Built by Two-edged Sword's tools/lxx.</p>"
-            + (f"<p>eBible.org's text of {html.escape(dated.group(1).strip())}.</p>" if dated else ""))
-    with module("lxx_brenton.bbli", "Septuagint (Greek, Brenton 1844)", "LXX-Brenton", info, nt=False, apocrypha=True, into=into) as db:
+    info = (
+        "<p>The Greek Septuagint with Apocrypha, compiled by Sir Lancelot C. L. Brenton (1844), from eBible.org's "
+        "grcbrent: public domain. Brenton printed the Vatican text as Valpy's edition had it, which is the Sixtine "
+        "edition's (Rome, 1587), the Septuagint the KJV's translators had.</p><p>The verses are moved to the KJV's "
+        "numbering with SIL's versification tables (lxx.vrs, eng.vrs), and where the Septuagint orders a passage otherwise "
+        "(Exodus 36–39, Numbers 26, 1 Kings 7, Sirach 30–36 and others) each verse is at the verse it is; a Psalm's "
+        "title opens its verse 1, and the Septuagint's added verses and Daniel 3's are joined to the verse before them. "
+        "The additions to Esther are Esther 10:4–16:24, as in the Vulgate and the Revised Version; Susanna and Bel are Daniel 13–14, the Letter of "
+        "Jeremiah Baruch 6. Built by Two-edged Sword's tools/lxx.</p>"
+        + (f"<p>eBible.org's text of {html.escape(dated.group(1).strip())}.</p>" if dated else "")
+    )
+    with module(
+        "lxx_brenton.bbli", "Septuagint (Greek, Brenton 1844)", "LXX-Brenton", info, nt=False, apocrypha=True, into=into
+    ) as db:
         db.executemany("INSERT INTO Bible VALUES (?,?,?,?)", rows)
     print(f"lxx_brenton.bbli: {len(rows)} verses")
 

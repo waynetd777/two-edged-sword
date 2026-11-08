@@ -6,7 +6,6 @@
 
 import { book, findBook, Ref } from "./bible";
 
-
 // "John 3:16", "1 John 4:9-10", "Joh 3:16", "Num 21:8–9", "Ps 23:1"; as spoken, "1 John 5, verse 4"
 // and "Job 19, verses 25 to 27", "Genesis chapter 3:1 - 5"; a whole chapter, "Hebrews 11"; and a
 // range into a later chapter, "Mat 5:3-7:29".
@@ -63,4 +62,3 @@ export function findRefs(text: string, loose = false): { index: number; length: 
   }
   return out;
 }
-

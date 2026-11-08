@@ -37,6 +37,13 @@ export interface Place {
 /** What a sync carries each way. */
 export interface Payload {
   v: 1;
+  /** From a phone: when it last synced (ms), and what it's called; for journal entries changed on both
+   *  sides since then, which are both kept (keepBoth). */
+  since?: number;
+  from?: string;
+  /** Set by a side that syncs the journal. Journal items only go to a side that sets it: one without
+   *  the journal would take every entry for removed on its next sync and delete them everywhere. */
+  journal?: true;
   items: Items;
   recent: Place[];
 }
@@ -56,6 +63,27 @@ export function stable(v: unknown): string {
   return JSON.stringify(v);
 }
 
+/** A short fingerprint of a long text (cyrb53), so the ledger doesn't keep a copy of every journal entry. */
+function hash(s: string): string {
+  let h1 = 0xdeadbeef,
+    h2 = 0x41c6ce57;
+  for (let i = 0; i < s.length; i++) {
+    const c = s.charCodeAt(i);
+    h1 = Math.imul(h1 ^ c, 2654435761);
+    h2 = Math.imul(h2 ^ c, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36) + s.length.toString(36);
+}
+
+/** What the ledger keeps of a value to know it again: the value as text, or (a long one) its hash. Short
+ *  values stay as they were, so ledgers written before this read the same. */
+export function fingerprint(v: unknown): string {
+  const s = stable(v);
+  return s.length > 200 ? `#${hash(s)}` : s;
+}
+
 /** A removal is remembered this long, for a device that syncs rarely. */
 const KEEP_REMOVED = 180 * 86_400_000;
 
@@ -64,7 +92,7 @@ const KEEP_REMOVED = 180 * 86_400_000;
 export function stamp(ledger: Ledger, now: Record<string, unknown>, at = Date.now()): Ledger {
   const out: Ledger = {};
   for (const [k, v] of Object.entries(now)) {
-    const h = stable(v);
+    const h = fingerprint(v);
     const was = ledger[k];
     out[k] = was && !was.del && was.h === h ? was : { t: at, h };
   }
@@ -108,6 +136,118 @@ export function merge(a: Payload, b: Payload): Payload {
   return { v: 1, items: mergeItems(a.items, b.items), recent: mergeRecent(a.recent, b.recent) };
 }
 
+// ---------- guards against a mistake spreading ----------
+// A side that reads something as empty by mistake (a file it couldn't read, a store not loaded yet) would
+// otherwise take every item in it for removed and spread that to every device. Both sides apply these.
+
+/** The most items of one group a sync may remove, or one side may find gone before taking it for empty. */
+export const SYNC_LIMIT = 10;
+
+/** The group an item's removals are counted in: its kind (bm, hl, at, j, plan), a plan's days by plan. */
+export function groupOf(k: string): string {
+  if (k.startsWith("pd|")) return k.slice(0, k.indexOf("|", 3));
+  return k.slice(0, k.indexOf("|"));
+}
+/** For "empty by mistake": plans and their days together, as a plan has few items of its own. */
+const vanishGroup = (k: string) => (k.startsWith("pd|") || k.startsWith("plan|") ? "plans" : groupOf(k));
+
+/** The groups that are empty here now although the ledger knew more than SYNC_LIMIT items in them:
+ *  taken for unread or lost, not emptied on purpose. */
+export function vanished(ledger: Ledger, now: Record<string, unknown>): Set<string> {
+  const known = new Map<string, number>();
+  for (const [k, e] of Object.entries(ledger)) if (!e.del) known.set(vanishGroup(k), (known.get(vanishGroup(k)) ?? 0) + 1);
+  const here = new Set(Object.keys(now).map(vanishGroup));
+  return new Set([...known].filter(([g, n]) => n > SYNC_LIMIT && !here.has(g)).map(([g]) => g));
+}
+
+/** The ledger with the given groups forgotten: nothing in them is then taken for removed, and the other
+ *  side sends them back. */
+export const forget = (ledger: Ledger, groups: Set<string>): Ledger =>
+  groups.size ? Object.fromEntries(Object.entries(ledger).filter(([k]) => !groups.has(vanishGroup(k)))) : ledger;
+
+/** The groups in which a sync's result would remove more than SYNC_LIMIT of the items here. A plan's days
+ *  don't count when the plan itself goes too (a plan deleted). */
+export function overRemoved(here: Record<string, unknown>, next: Record<string, unknown>): Set<string> {
+  const n = new Map<string, number>();
+  for (const k of Object.keys(here)) {
+    if (k in next) continue;
+    if (k.startsWith("pd|")) {
+      const plan = `plan|${k.split("|")[1]}`;
+      if (plan in here && !(plan in next)) continue;
+    }
+    n.set(groupOf(k), (n.get(groupOf(k)) ?? 0) + 1);
+  }
+  return new Set([...n].filter(([, c]) => c > SYNC_LIMIT).map(([g]) => g));
+}
+
+/** A sync's result with what's here kept for the given groups (their removals refused, additions kept). */
+export function keepGroups(here: Record<string, unknown>, next: Record<string, unknown>, groups: Set<string>): Record<string, unknown> {
+  if (!groups.size) return next;
+  const out = { ...next };
+  for (const [k, v] of Object.entries(here)) if (groups.has(groupOf(k)) && !(k in out)) out[k] = v;
+  return out;
+}
+
+/** A sync's merged result with any mass removal refused: in each group where it would remove more than
+ *  SYNC_LIMIT of what's here, what's here goes back in, stamped now, so it wins and syncs back to the other
+ *  side too. Answers the groups refused. */
+export function refuseMassRemoval(
+  here: Record<string, unknown>,
+  merged: Payload,
+  at = Date.now(),
+): { merged: Payload; refused: Set<string> } {
+  const next = settle(merged).now;
+  const refused = overRemoved(here, next);
+  if (!refused.size) return { merged, refused };
+  const items = { ...merged.items };
+  for (const [k, v] of Object.entries(here)) if (refused.has(groupOf(k)) && !(k in next)) items[k] = { t: at, v };
+  return { merged: { ...merged, items }, refused };
+}
+
+// ---------- the journal ----------
+
+/** A journal entry as both sides keep it (the desktop's journal.rs Entry). */
+export interface Entry {
+  id: string;
+  title: string;
+  /** Local time, "2026-09-23T07:02". */
+  created: string;
+  updated: string;
+  /** References as written, "John 3:1-8". */
+  verses: string[];
+  tags: string[];
+  /** Markdown. */
+  body: string;
+}
+
+export const entryKey = (id: string) => `j|${id}`;
+
+/** The items without the journal's, for a side that doesn't sync it. */
+export const withoutJournal = (items: Items): Items => Object.fromEntries(Object.entries(items).filter(([k]) => !k.startsWith("j|")));
+
+/** An entry's id for a copy: unique, and close to the desktop's own (state.tsx uid). */
+const copyId = (id: string) => `${id}-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 5)}`;
+
+/** On the computer, before merging a phone's items with its own: a journal entry changed on both since
+ *  the phone last synced is kept twice rather than one edit lost. The computer's keeps its id and is
+ *  stamped newest, so it wins everywhere; the phone's comes back as a new entry, "Title (from iPhone)". */
+export function keepBoth(mine: Items, theirs: Payload): Items {
+  const since = theirs.since ?? 0;
+  const out: Items = { ...theirs.items };
+  for (const [k, e] of Object.entries(theirs.items)) {
+    const m = mine[k];
+    if (!k.startsWith("j|") || !m || m.del || e.del || m.t <= since || e.t <= since) continue;
+    if (stable(m.v) === stable(e.v)) continue;
+    const v = e.v as Entry;
+    const id = copyId(v.id);
+    out[entryKey(id)] = { t: e.t, v: { ...v, id, title: `${v.title || "Untitled"} (from ${theirs.from || "phone"})` } };
+    // The computer's own wins: theirs is dropped and its own stamped newer than either.
+    delete out[k];
+    mine[k] = { ...m, t: Math.max(m.t, e.t) + 1 };
+  }
+  return out;
+}
+
 /** After a sync: the values to keep (removed ones left out), and the ledger that matches them. */
 export function settle(p: Payload): { now: Record<string, unknown>; ledger: Ledger } {
   const now: Record<string, unknown> = {};
@@ -116,7 +256,7 @@ export function settle(p: Payload): { now: Record<string, unknown>; ledger: Ledg
     if (e.del) ledger[k] = { t: e.t, del: true };
     else {
       now[k] = e.v;
-      ledger[k] = { t: e.t, h: stable(e.v) };
+      ledger[k] = { t: e.t, h: fingerprint(e.v) };
     }
   }
   return { now, ledger };

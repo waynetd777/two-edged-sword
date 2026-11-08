@@ -30,7 +30,11 @@ src/esword.tsx): each word a <div><grk>word</grk><num>G…</num><tvm>grammar</tv
 STEPBible's files are cached in ~/Library/Caches/Two-edged Sword/stepbible (tools/stepbible.py).
 The grammar is spelled out as the other interlinears spell it (stepbible.robinson).
 """
-import html, re, sqlite3, sys
+
+import html
+import re
+import sqlite3
+import sys
 from collections import Counter
 from difflib import SequenceMatcher
 from pathlib import Path
@@ -39,6 +43,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from books import NAMES  # noqa: E402
 from modules import find, greek_key, module, similar  # noqa: E402
 from stepbible import has, lexicon, robinson, tagnt  # noqa: E402
+
 BOOKS = NAMES[39:]
 
 
@@ -50,12 +55,16 @@ def key(w):
 
 def rows(name):
     db = sqlite3.connect(f"file:{find(name)}?mode=ro", uri=True)
-    out = {(b, c, v): t or "" for b, c, v, t in db.execute("SELECT Book, Chapter, Verse, Scripture FROM Bible WHERE Book BETWEEN 40 AND 66")}
+    out = {
+        (b, c, v): t or ""
+        for b, c, v, t in db.execute("SELECT Book, Chapter, Verse, Scripture FROM Bible WHERE Book BETWEEN 40 AND 66")
+    }
     db.close()
     return out
 
 
 # ---------- TAGNT: words with their numbers and codes ----------
+
 
 def words(ws, edition=None):
     """[(key, number, code)] for TAGNT's words, or those of one edition."""
@@ -78,7 +87,9 @@ def glosses():
         f = line.split("\t")
         if len(f) > 6 and re.match(r"G\d{4}[a-zA-Z]?$", f[0]) and (f[0] not in out or out[f[0]].endswith(" of")):
             g = f[6].split(":")[0].strip()  # "lord: God" is the word lord in its sense God
-            g = re.sub(r"\(-\w+\)", "", re.sub(r"^(?:to|an?|\d+)\s+", "", g)).strip()  # "thus(-ly)", "a siren", "1 winter yearling"
+            g = re.sub(
+                r"\(-\w+\)", "", re.sub(r"^(?:to|an?|\d+)\s+", "", g)
+            ).strip()  # "thus(-ly)", "a siren", "1 winter yearling"
             out[f[0]] = g
     for n, g in GLOSS_FIX.items():
         for k in [k for k in out if k[:5] == f"G{int(n[1:]):04d}"]:
@@ -86,25 +97,161 @@ def glosses():
     return out
 
 
-PLURAL = {"man": "men", "woman": "women", "child": "children", "foot": "feet", "tooth": "teeth", "mouse": "mice", "person": "people",
-          "sheep": "sheep", "fish": "fish", "ox": "oxen", "brother": "brothers", "wife": "wives", "life": "lives", "knife": "knives",
-          "leaf": "leaves", "loaf": "loaves", "thief": "thieves", "wolf": "wolves", "calf": "calves", "half": "halves"}
+PLURAL = {
+    "man": "men",
+    "woman": "women",
+    "child": "children",
+    "foot": "feet",
+    "tooth": "teeth",
+    "mouse": "mice",
+    "person": "people",
+    "sheep": "sheep",
+    "fish": "fish",
+    "ox": "oxen",
+    "brother": "brothers",
+    "wife": "wives",
+    "life": "lives",
+    "knife": "knives",
+    "leaf": "leaves",
+    "loaf": "loaves",
+    "thief": "thieves",
+    "wolf": "wolves",
+    "calf": "calves",
+    "half": "halves",
+}
 
 
 # Glosses left as they are in the plural: already plural (stairs, loins), mass and abstract nouns, and the
 # words TBESG glosses a noun with that aren't nouns ("which").
-SINGULAR = {"which", "who", "whom", "what", "this", "that", "these", "those", "each", "all", "every", "much", "many", "other",
-            "same", "one", "none", "nothing", "something", "anything", "everything", "both", "few", "several", "such",
-            "the", "and", "or", "if", "not", "no", "yes", "very", "more", "most", "less", "least", "above", "below",
-            "between", "behind", "before", "after", "here", "there", "near", "far", "outside", "inside",
-            "gold", "silver", "bronze", "copper", "iron", "lead", "tin", "wool", "linen", "flax", "cotton", "silk", "wheat",
-            "barley", "grain", "flour", "bread", "meat", "flesh", "blood", "milk", "honey", "wine", "oil", "salt",
-            "incense", "frankincense", "myrrh", "dust", "ash", "ashes", "clay", "mud", "sand", "smoke",
-            "darkness", "news", "people", "cattle", "clothing", "livestock", "offspring", "advice",
-            "information", "knowledge", "wisdom", "understanding", "righteousness", "justice", "mercy", "grace", "peace",
-            "joy", "glory", "honour", "honor", "shame", "anger", "wrath", "fear", "love", "hope", "faith", "strength",
-            "might", "lawlessness", "wickedness", "truth",
-            "money", "wealth", "property", "baggage", "equipment", "furniture", "deer", "fish", "sheep", "swine"}
+SINGULAR = {
+    "which",
+    "who",
+    "whom",
+    "what",
+    "this",
+    "that",
+    "these",
+    "those",
+    "each",
+    "all",
+    "every",
+    "much",
+    "many",
+    "other",
+    "same",
+    "one",
+    "none",
+    "nothing",
+    "something",
+    "anything",
+    "everything",
+    "both",
+    "few",
+    "several",
+    "such",
+    "the",
+    "and",
+    "or",
+    "if",
+    "not",
+    "no",
+    "yes",
+    "very",
+    "more",
+    "most",
+    "less",
+    "least",
+    "above",
+    "below",
+    "between",
+    "behind",
+    "before",
+    "after",
+    "here",
+    "there",
+    "near",
+    "far",
+    "outside",
+    "inside",
+    "gold",
+    "silver",
+    "bronze",
+    "copper",
+    "iron",
+    "lead",
+    "tin",
+    "wool",
+    "linen",
+    "flax",
+    "cotton",
+    "silk",
+    "wheat",
+    "barley",
+    "grain",
+    "flour",
+    "bread",
+    "meat",
+    "flesh",
+    "blood",
+    "milk",
+    "honey",
+    "wine",
+    "oil",
+    "salt",
+    "incense",
+    "frankincense",
+    "myrrh",
+    "dust",
+    "ash",
+    "ashes",
+    "clay",
+    "mud",
+    "sand",
+    "smoke",
+    "darkness",
+    "news",
+    "people",
+    "cattle",
+    "clothing",
+    "livestock",
+    "offspring",
+    "advice",
+    "information",
+    "knowledge",
+    "wisdom",
+    "understanding",
+    "righteousness",
+    "justice",
+    "mercy",
+    "grace",
+    "peace",
+    "joy",
+    "glory",
+    "honour",
+    "honor",
+    "shame",
+    "anger",
+    "wrath",
+    "fear",
+    "love",
+    "hope",
+    "faith",
+    "strength",
+    "might",
+    "lawlessness",
+    "wickedness",
+    "truth",
+    "money",
+    "wealth",
+    "property",
+    "baggage",
+    "equipment",
+    "furniture",
+    "deer",
+    "fish",
+    "sheep",
+    "swine",
+}
 
 
 def plural(g):
@@ -124,13 +271,40 @@ def plural(g):
 
 
 # The personal pronouns of the 1st and 2nd person by case and number (P-1GP: "our").
-PERSONAL = {"1NS": "I", "1GS": "my", "1DS": "to me", "1AS": "me", "1NP": "we", "1GP": "our", "1DP": "to us", "1AP": "us",
-            "2NS": "you", "2GS": "your", "2DS": "to you", "2AS": "you", "2NP": "you", "2GP": "your", "2DP": "to you", "2AP": "you"}
+PERSONAL = {
+    "1NS": "I",
+    "1GS": "my",
+    "1DS": "to me",
+    "1AS": "me",
+    "1NP": "we",
+    "1GP": "our",
+    "1DP": "to us",
+    "1AP": "us",
+    "2NS": "you",
+    "2GS": "your",
+    "2DS": "to you",
+    "2AS": "you",
+    "2NP": "you",
+    "2GP": "your",
+    "2DP": "to you",
+    "2AP": "you",
+}
 
 # αὐτός by case, gender and number (P-GSM: "his").
-AUTOS = {("N", "S", "M"): "he", ("N", "S", "F"): "she", ("N", "S", "N"): "it", ("G", "S", "M"): "his", ("G", "S", "F"): "her",
-         ("G", "S", "N"): "its", ("D", "S", "M"): "to him", ("D", "S", "F"): "to her", ("D", "S", "N"): "to it", ("A", "S", "M"): "him",
-         ("A", "S", "F"): "her", ("A", "S", "N"): "it"}
+AUTOS = {
+    ("N", "S", "M"): "he",
+    ("N", "S", "F"): "she",
+    ("N", "S", "N"): "it",
+    ("G", "S", "M"): "his",
+    ("G", "S", "F"): "her",
+    ("G", "S", "N"): "its",
+    ("D", "S", "M"): "to him",
+    ("D", "S", "F"): "to her",
+    ("D", "S", "N"): "to it",
+    ("A", "S", "M"): "him",
+    ("A", "S", "F"): "her",
+    ("A", "S", "N"): "it",
+}
 AUTOS_P = {"N": "they", "G": "their", "D": "to them", "A": "them"}
 
 
@@ -160,6 +334,7 @@ def gloss_for(num, code, G):
 
 
 # ---------- lining up ----------
+
 
 def line_up(bk, cand, got):
     """Fills got[i] = (number, code) for Beza's words bk that cand's words match, in order."""
@@ -239,22 +414,31 @@ def main():
             elif g and word[:1].islower() and g[:1].isupper() and g != "God" and "PRI" not in code:
                 g = g[:1].lower() + g[1:]
             stats["glossed"] += bool(g)
-            s.append(f"<div><grk>{html.escape(t)}</grk>" + (f"<num>{num}</num>" if num else "")
-                     + f"<tvm>{html.escape(robinson(code))}</tvm><gra>{html.escape(g) or '—'}</gra></div>")
+            s.append(
+                f"<div><grk>{html.escape(t)}</grk>"
+                + (f"<num>{num}</num>" if num else "")
+                + f"<tvm>{html.escape(robinson(code))}</tvm><gra>{html.escape(g) or '—'}</gra></div>"
+            )
         out.append((b, c, v, "".join(s)))
 
     w = stats["words"]
-    print(f"{len(out)} verses, {w} words: numbered from the verse's own TAGNT words {stats['verse'] / w:.1%}, "
-          f"from the same form elsewhere {stats['elsewhere'] / w:.1%}, none {stats['none'] / w:.2%}; glossed {stats['glossed'] / w:.1%}")
+    print(
+        f"{len(out)} verses, {w} words: numbered from the verse's own TAGNT words {stats['verse'] / w:.1%}, "
+        f"from the same form elsewhere {stats['elsewhere'] / w:.1%}, none {stats['none'] / w:.2%}; glossed {stats['glossed'] / w:.1%}"
+    )
     print("  by book: " + ", ".join(f"{BOOKS[b - 40]} {n / max(t, 1):.1%}" for b, (n, t) in sorted(by_book.items())))
     worst.sort()
-    print("  least matched in the verse: " + ", ".join(f"{BOOKS[b - 40]} {c}:{v} {s:.0%}" for s, (b, c, v) in worst[:10]))
+    print(
+        "  least matched in the verse: " + ", ".join(f"{BOOKS[b - 40]} {c}:{v} {s:.0%}" for s, (b, c, v) in worst[:10])
+    )
 
-    info = ("<p>Theodore Beza's Greek New Testament of 1598 word by word: each word with its Strong's number and grammar (Robinson's "
-            "codes, from STEPBible's TAGNT, Tyndale House, CC BY 4.0, lining Beza's words up with Scrivener's TR, the Byzantine text and the other editions) and the English of "
-            "STEPBible's TBESG (Tyndale House, CC BY 4.0, https://github.com/STEPBible/STEPBible-Data). The English is the "
-            "dictionary sense, not a translation of the verse. The Greek is tools/beza's text of the textus-receptus.com "
-            "transcription. Built by Two-edged Sword's tools/beza/plus.py.</p>")
+    info = (
+        "<p>Theodore Beza's Greek New Testament of 1598 word by word: each word with its Strong's number and grammar (Robinson's "
+        "codes, from STEPBible's TAGNT, Tyndale House, CC BY 4.0, lining Beza's words up with Scrivener's TR, the Byzantine text and the other editions) and the English of "
+        "STEPBible's TBESG (Tyndale House, CC BY 4.0, https://github.com/STEPBible/STEPBible-Data). The English is the "
+        "dictionary sense, not a translation of the verse. The Greek is tools/beza's text of the textus-receptus.com "
+        "transcription. Built by Two-edged Sword's tools/beza/plus.py.</p>"
+    )
     with module("beza1598+.bbli", "Greek NT: Beza (1598) w/ glosses", "Beza 1598+", info, ot=False, strongs=True) as db:
         db.executemany("INSERT INTO Bible VALUES (?,?,?,?)", out)
     print(f"beza1598+.bbli: {len(out)} verses")

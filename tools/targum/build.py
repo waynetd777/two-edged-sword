@@ -26,11 +26,18 @@ tooltip says which: "Hebrew בָּרָא" or "Jastrow אַרְעָא".
 
 Jastrow is taken at a fixed commit. Downloads are cached in ~/Library/Caches/Two-edged Sword/targum.
 """
-import html, json, re, sqlite3, sys
+
+import html
+import json
+import re
+import sqlite3
+import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from modules import CACHES, FINAL, fetch, find, hebrew_consonants as consonants, module  # noqa: E402
+from modules import CACHES, FINAL, fetch, find, module  # noqa: E402
+from modules import hebrew_consonants as consonants
+
 CACHE = CACHES / "targum"
 JASTROW = "https://raw.githubusercontent.com/UniquePixels/jastrow/05c8a79bbf2408f3909151d08d71a6f3e33e9ead/data/jastrow-part{}.jsonl"
 MODULES = {
@@ -41,18 +48,329 @@ MODULES = {
 SAME = {("ד", "ז"), ("ת", "ש"), ("ט", "צ"), ("ע", "צ"), ("א", "ה"), ("ש", "ש"), ("ס", "ש")}
 PREFIX = {"ו": "and", "ד": "of", "ב": "in", "ל": "to", "מ": "from", "כ": "as"}
 # Aramaic words and the Hebrew they stand for, where the two aren't cognate.
-EQUIV = {"ית": "את", "יי": ("יהוה", "אלהימ", "אדני"), "ארי": "כי", "דין": "זה", "הא": "הנה", "כען": "עתה", "לות": "אל", "קדם": "לפני", "ארום": "כי",
-         "אתא": "בא", "אזל": "הלך", "חזא": "ראה", "סגי": "רב", "חד": "אחד", "תרין": "שנים", "אנש": "איש", "גבר": "איש",
-         "לא": "לא", "כל": "כל", "על": "על", "עם": "עם", "מן": "מן", "אנא": "אני", "אנת": "אתה", "הוא": "הוא", "אמר": "אמר"}
+EQUIV = {
+    "ית": "את",
+    "יי": ("יהוה", "אלהימ", "אדני"),
+    "ארי": "כי",
+    "דין": "זה",
+    "הא": "הנה",
+    "כען": "עתה",
+    "לות": "אל",
+    "קדם": "לפני",
+    "ארום": "כי",
+    "אתא": "בא",
+    "אזל": "הלך",
+    "חזא": "ראה",
+    "סגי": "רב",
+    "חד": "אחד",
+    "תרין": "שנים",
+    "אנש": "איש",
+    "גבר": "איש",
+    "לא": "לא",
+    "כל": "כל",
+    "על": "על",
+    "עם": "עם",
+    "מן": "מן",
+    "אנא": "אני",
+    "אנת": "אתה",
+    "הוא": "הוא",
+    "אמר": "אמר",
+}
 
 
 # The commonest words, whose first gloss in Jastrow is some other word's (אמר: "join" for "say").
-COMMON = {"מן": "from", "קדם": "before", "על": "on", "אמר": "say", "די": "which", "לא": "not", "ישראל": "Israel", "ליה": "to him", "ית": "[obj.]", "ארום": "for", "להון": "to them", "מלכא": "the king", "בני": "sons of", "כל": "all", "הוה": "was", "בית": "house of", "הוא": "he", "בר": "son", "עם": "with", "הדין": "this", "אנא": "I", "כד": "when", "עד": "until", "ארעא": "the land", "יתיה": "him", "לכון": "to you", "עמא": "the people", "קדמי": "before me", "למימר": "saying", "יתהון": "them", "לך": "to you", "עממיא": "the nations", "משה": "Moses", "קרבא": "battle", "לי": "to me", "דין": "this", "מקדשא": "the sanctuary", "יהי": "let be", "בהון": "in them", "חד": "one", "בתר": "after", "ביה": "in him", "כדנן": "thus", "כן": "so", "הא": "behold", "לית": "there is not", "סחור": "around", "רבא": "great", "בכן": "then", "מטול": "because", "גברא": "the man", "עבד": "do", "עלמא": "the world", "עמיה": "his people", "אף": "also", "יהודה": "Judah", "אין": "if", "היך": "how", "מימרא": "the Word", "מימרי": "my Word", "מימריה": "his Word", "שמיא": "heaven", "דוד": "David", "זמנא": "time", "לה": "to her", "למעבד": "to do", "כען": "now", "יתי": "me", "כהנא": "the priest", "כהניא": "the priests", "מליל": "speak", "יתכון": "you", "לחדא": "very", "תמן": "there", "חדא": "one", "ברם": "but", "מנהון": "from them", "עמי": "my people", "פתגמא": "the word", "פתגם": "word", "פתגמי": "words of", "פתגמיא": "the words", "אתון": "you", "מניה": "from him", "הדא": "this", "אלין": "these", "האלין": "these", "מה": "what", "יתה": "her", "קדמך": "before you", "מצרים": "Egypt", "היא": "she", "קדמוהי": "before him", "קדמוי": "before him", "בדיל": "because of", "דינא": "judgment", "קרתא": "the city", "נביא": "prophet", "נביאה": "the prophet", "קרא": "call", "למהוי": "to be", "אינון": "they", "עליהון": "upon them", "נבואה": "prophecy", "חזור": "around", "אוריתא": "the Law", "אלהא": "God", "אלהי": "God of", "אלהכון": "your God", "אלהך": "your God", "יומא": "day", "יומין": "days", "ארי": "for", "בגו": "inside", "עלי": "upon me", "שנין": "years", "שנא": "year", "ימא": "sea", "עמך": "with you", "אזל": "go", "בגין": "because of", "אתא": "come", "לחוד": "only", "קים": "covenant", "כנשתא": "congregation", "ההוא": "that", "ההיא": "that", "כדון": "now", "ירושלם": "Jerusalem", "היכמא": "as", "כמא": "as", "כי": "for", "הוו": "were", "הלא": "is not", "כדין": "so", "אחד": "one", "מאה": "hundred", "משכן": "tabernacle", "משכנא": "the tabernacle", "נסיב": "take", "יהב": "give", "גבר": "man", "מדבחא": "the altar", "חילא": "might", "רב": "great", "קודשיא": "holy things", "אתיב": "answer", "עלוהי": "upon him", "עלוי": "upon him", "כחדא": "together", "מני": "from me", "נפק": "go out", "יעקב": "Jacob", "קם": "arise", "אנון": "they", "הינון": "they", "בנוי": "his sons", "ביתא": "the house", "מלכותא": "the kingdom", "פקיד": "command", "נטלו": "set out", "תחות": "under", "מסאב": "unclean", "צבאות": "hosts", "תרין": "two", "או": "or", "בישתא": "evil", "עוד": "again", "בגלל": "because of", "הות": "was", "יקרא": "glory", "קביל": "receive", "שבטא": "tribe", "שבטיא": "the tribes", "נשא": "women", "תקיף": "strong", "פרעה": "Pharaoh", "מלך": "king", "טב": "good", "יהון": "be", "אנשא": "mankind", "אנש": "man", "יד": "hand", "עדנא": "time", "ביני": "between", "בין": "between", "דהבא": "gold", "שבע": "seven", "חלף": "instead of", "מתמן": "from there", "רבוני": "my lord", "אבהתהון": "their fathers", "אבוהי": "his father", "אבא": "father", "יוסף": "Joseph", "אלהן": "except", "בנין": "sons", "עלך": "upon you", "עליה": "upon him", "עלה": "upon her", "בנך": "your son", "בריה": "his son", "אמיה": "his mother", "אחוהי": "his brother", "אתתא": "the woman", "אתתיה": "his wife", "ארחא": "the way", "אורח": "way", "טורא": "the mountain", "מיא": "water", "נורא": "fire", "רוחא": "spirit", "קודשא": "holy", "צלותא": "prayer", "חובא": "sin", "חובין": "sins", "זכו": "merit", "שלמא": "peace", "רחמין": "mercy", "מלאכא": "the angel", "מלאכיא": "the angels", "עבדא": "servant", "עבדך": "your servant", "עבדוהי": "his servants", "כולא": "all", "כולהון": "all of them", "כלהון": "all of them", "לות": "to", "ואזלו": "and went", "אזלו": "went", "אמרו": "said", "ואמרו": "and said", "אמרת": "said", "אמרית": "I said", "שמע": "hear", "שמעו": "hear", "חזא": "see", "חזו": "see", "ידע": "know", "ידעון": "know", "אתו": "came", "יתיב": "dwell", "שרא": "dwell", "מית": "die", "מיתו": "died", "חיי": "life", "חיין": "life", "נפשא": "soul", "נפשיה": "his soul", "לבא": "heart", "ליבא": "heart", "ליביה": "his heart", "אנפי": "face of", "אפי": "face of", "אפיה": "his face", "עינוהי": "his eyes", "עיני": "eyes of", "קל": "voice", "קלא": "the voice", "שום": "name", "שמיה": "his name", "שמא": "the name", "דא": "this", "דנא": "this", "כדנא": "thus", "ארבע": "four", "תלת": "three", "חמש": "five", "עסר": "ten", "אלף": "thousand", "רבו": "myriad", "חויא": "serpent", "אילן": "tree", "אילנא": "the tree", "בעיר": "cattle", "בעירא": "the cattle", "אלהים": "God", "נש": "man", "גינתא": "the garden", "גנתא": "the garden", "חיות": "beasts of", "חיותא": "the beast"}
+COMMON = {
+    "מן": "from",
+    "קדם": "before",
+    "על": "on",
+    "אמר": "say",
+    "די": "which",
+    "לא": "not",
+    "ישראל": "Israel",
+    "ליה": "to him",
+    "ית": "[obj.]",
+    "ארום": "for",
+    "להון": "to them",
+    "מלכא": "the king",
+    "בני": "sons of",
+    "כל": "all",
+    "הוה": "was",
+    "בית": "house of",
+    "הוא": "he",
+    "בר": "son",
+    "עם": "with",
+    "הדין": "this",
+    "אנא": "I",
+    "כד": "when",
+    "עד": "until",
+    "ארעא": "the land",
+    "יתיה": "him",
+    "לכון": "to you",
+    "עמא": "the people",
+    "קדמי": "before me",
+    "למימר": "saying",
+    "יתהון": "them",
+    "לך": "to you",
+    "עממיא": "the nations",
+    "משה": "Moses",
+    "קרבא": "battle",
+    "לי": "to me",
+    "דין": "this",
+    "מקדשא": "the sanctuary",
+    "יהי": "let be",
+    "בהון": "in them",
+    "חד": "one",
+    "בתר": "after",
+    "ביה": "in him",
+    "כדנן": "thus",
+    "כן": "so",
+    "הא": "behold",
+    "לית": "there is not",
+    "סחור": "around",
+    "רבא": "great",
+    "בכן": "then",
+    "מטול": "because",
+    "גברא": "the man",
+    "עבד": "do",
+    "עלמא": "the world",
+    "עמיה": "his people",
+    "אף": "also",
+    "יהודה": "Judah",
+    "אין": "if",
+    "היך": "how",
+    "מימרא": "the Word",
+    "מימרי": "my Word",
+    "מימריה": "his Word",
+    "שמיא": "heaven",
+    "דוד": "David",
+    "זמנא": "time",
+    "לה": "to her",
+    "למעבד": "to do",
+    "כען": "now",
+    "יתי": "me",
+    "כהנא": "the priest",
+    "כהניא": "the priests",
+    "מליל": "speak",
+    "יתכון": "you",
+    "לחדא": "very",
+    "תמן": "there",
+    "חדא": "one",
+    "ברם": "but",
+    "מנהון": "from them",
+    "עמי": "my people",
+    "פתגמא": "the word",
+    "פתגם": "word",
+    "פתגמי": "words of",
+    "פתגמיא": "the words",
+    "אתון": "you",
+    "מניה": "from him",
+    "הדא": "this",
+    "אלין": "these",
+    "האלין": "these",
+    "מה": "what",
+    "יתה": "her",
+    "קדמך": "before you",
+    "מצרים": "Egypt",
+    "היא": "she",
+    "קדמוהי": "before him",
+    "קדמוי": "before him",
+    "בדיל": "because of",
+    "דינא": "judgment",
+    "קרתא": "the city",
+    "נביא": "prophet",
+    "נביאה": "the prophet",
+    "קרא": "call",
+    "למהוי": "to be",
+    "אינון": "they",
+    "עליהון": "upon them",
+    "נבואה": "prophecy",
+    "חזור": "around",
+    "אוריתא": "the Law",
+    "אלהא": "God",
+    "אלהי": "God of",
+    "אלהכון": "your God",
+    "אלהך": "your God",
+    "יומא": "day",
+    "יומין": "days",
+    "ארי": "for",
+    "בגו": "inside",
+    "עלי": "upon me",
+    "שנין": "years",
+    "שנא": "year",
+    "ימא": "sea",
+    "עמך": "with you",
+    "אזל": "go",
+    "בגין": "because of",
+    "אתא": "come",
+    "לחוד": "only",
+    "קים": "covenant",
+    "כנשתא": "congregation",
+    "ההוא": "that",
+    "ההיא": "that",
+    "כדון": "now",
+    "ירושלם": "Jerusalem",
+    "היכמא": "as",
+    "כמא": "as",
+    "כי": "for",
+    "הוו": "were",
+    "הלא": "is not",
+    "כדין": "so",
+    "אחד": "one",
+    "מאה": "hundred",
+    "משכן": "tabernacle",
+    "משכנא": "the tabernacle",
+    "נסיב": "take",
+    "יהב": "give",
+    "גבר": "man",
+    "מדבחא": "the altar",
+    "חילא": "might",
+    "רב": "great",
+    "קודשיא": "holy things",
+    "אתיב": "answer",
+    "עלוהי": "upon him",
+    "עלוי": "upon him",
+    "כחדא": "together",
+    "מני": "from me",
+    "נפק": "go out",
+    "יעקב": "Jacob",
+    "קם": "arise",
+    "אנון": "they",
+    "הינון": "they",
+    "בנוי": "his sons",
+    "ביתא": "the house",
+    "מלכותא": "the kingdom",
+    "פקיד": "command",
+    "נטלו": "set out",
+    "תחות": "under",
+    "מסאב": "unclean",
+    "צבאות": "hosts",
+    "תרין": "two",
+    "או": "or",
+    "בישתא": "evil",
+    "עוד": "again",
+    "בגלל": "because of",
+    "הות": "was",
+    "יקרא": "glory",
+    "קביל": "receive",
+    "שבטא": "tribe",
+    "שבטיא": "the tribes",
+    "נשא": "women",
+    "תקיף": "strong",
+    "פרעה": "Pharaoh",
+    "מלך": "king",
+    "טב": "good",
+    "יהון": "be",
+    "אנשא": "mankind",
+    "אנש": "man",
+    "יד": "hand",
+    "עדנא": "time",
+    "ביני": "between",
+    "בין": "between",
+    "דהבא": "gold",
+    "שבע": "seven",
+    "חלף": "instead of",
+    "מתמן": "from there",
+    "רבוני": "my lord",
+    "אבהתהון": "their fathers",
+    "אבוהי": "his father",
+    "אבא": "father",
+    "יוסף": "Joseph",
+    "אלהן": "except",
+    "בנין": "sons",
+    "עלך": "upon you",
+    "עליה": "upon him",
+    "עלה": "upon her",
+    "בנך": "your son",
+    "בריה": "his son",
+    "אמיה": "his mother",
+    "אחוהי": "his brother",
+    "אתתא": "the woman",
+    "אתתיה": "his wife",
+    "ארחא": "the way",
+    "אורח": "way",
+    "טורא": "the mountain",
+    "מיא": "water",
+    "נורא": "fire",
+    "רוחא": "spirit",
+    "קודשא": "holy",
+    "צלותא": "prayer",
+    "חובא": "sin",
+    "חובין": "sins",
+    "זכו": "merit",
+    "שלמא": "peace",
+    "רחמין": "mercy",
+    "מלאכא": "the angel",
+    "מלאכיא": "the angels",
+    "עבדא": "servant",
+    "עבדך": "your servant",
+    "עבדוהי": "his servants",
+    "כולא": "all",
+    "כולהון": "all of them",
+    "כלהון": "all of them",
+    "לות": "to",
+    "ואזלו": "and went",
+    "אזלו": "went",
+    "אמרו": "said",
+    "ואמרו": "and said",
+    "אמרת": "said",
+    "אמרית": "I said",
+    "שמע": "hear",
+    "שמעו": "hear",
+    "חזא": "see",
+    "חזו": "see",
+    "ידע": "know",
+    "ידעון": "know",
+    "אתו": "came",
+    "יתיב": "dwell",
+    "שרא": "dwell",
+    "מית": "die",
+    "מיתו": "died",
+    "חיי": "life",
+    "חיין": "life",
+    "נפשא": "soul",
+    "נפשיה": "his soul",
+    "לבא": "heart",
+    "ליבא": "heart",
+    "ליביה": "his heart",
+    "אנפי": "face of",
+    "אפי": "face of",
+    "אפיה": "his face",
+    "עינוהי": "his eyes",
+    "עיני": "eyes of",
+    "קל": "voice",
+    "קלא": "the voice",
+    "שום": "name",
+    "שמיה": "his name",
+    "שמא": "the name",
+    "דא": "this",
+    "דנא": "this",
+    "כדנא": "thus",
+    "ארבע": "four",
+    "תלת": "three",
+    "חמש": "five",
+    "עסר": "ten",
+    "אלף": "thousand",
+    "רבו": "myriad",
+    "חויא": "serpent",
+    "אילן": "tree",
+    "אילנא": "the tree",
+    "בעיר": "cattle",
+    "בעירא": "the cattle",
+    "אלהים": "God",
+    "נש": "man",
+    "גינתא": "the garden",
+    "גנתא": "the garden",
+    "חיות": "beasts of",
+    "חיותא": "the beast",
+}
 
 
 # The tables are written with final letters; words are compared without them.
 COMMON = {k.translate(FINAL): v for k, v in COMMON.items()}
-EQUIV = {k.translate(FINAL): tuple(x.translate(FINAL) for x in v) if isinstance(v, tuple) else v.translate(FINAL) for k, v in EQUIV.items()}
+EQUIV = {
+    k.translate(FINAL): tuple(x.translate(FINAL) for x in v) if isinstance(v, tuple) else v.translate(FINAL)
+    for k, v in EQUIV.items()
+}
 
 
 def jastrow():
@@ -93,12 +411,41 @@ def gloss_of(e):
             g = re.sub(r"<[^>]+>|\[.*?\]|\(.*?\)", "", m.group(1))
             g = re.split(r"[,;:]", g)[0].strip().strip(".").strip()
             g = re.sub(r"^(?:to |a |an |the )", "", g)
-            if re.search(r"[a-z]{3}", g) and len(g) <= 28 and "." not in g and "." not in m.group(1)[:6] and g.lower() not in ("pl", "sing", "part", "adj", "adv"):
+            if (
+                re.search(r"[a-z]{3}", g)
+                and len(g) <= 28
+                and "." not in g
+                and "." not in m.group(1)[:6]
+                and g.lower() not in ("pl", "sing", "part", "adj", "adv")
+            ):
                 return g
     return None
 
 
-SUFFIXES = ["יהון", "יכון", "הון", "כון", "והי", "יהא", "יה", "יך", "הא", "נא", "נן", "תא", "יא", "ין", "ון", "יי", "ה", "ך", "י", "ת", "ו", "א"]
+SUFFIXES = [
+    "יהון",
+    "יכון",
+    "הון",
+    "כון",
+    "והי",
+    "יהא",
+    "יה",
+    "יך",
+    "הא",
+    "נא",
+    "נן",
+    "תא",
+    "יא",
+    "ין",
+    "ון",
+    "יי",
+    "ה",
+    "ך",
+    "י",
+    "ת",
+    "ו",
+    "א",
+]
 VERB_PREFIX = ["אית", "את", "אי", "י", "ת", "נ", "א", "מ"]
 
 
@@ -120,7 +467,7 @@ def candidates(c):
         out += [(pre, rest), (pre, rest + "א")]
     for pre, rest in prefixed(c):
         for sfx in SUFFIXES:
-            st = rest[:-len(sfx)] if rest.endswith(sfx) else None
+            st = rest[: -len(sfx)] if rest.endswith(sfx) else None
             if st and len(st) >= 3:
                 out += [(pre, st), (pre, st + "א")]
             elif st and len(st) == 2:
@@ -128,9 +475,9 @@ def candidates(c):
     for pre, rest in prefixed(c):
         for vp in VERB_PREFIX:
             if rest.startswith(vp):
-                st = rest[len(vp):]
+                st = rest[len(vp) :]
                 for sfx in [""] + SUFFIXES:
-                    t = st[:-len(sfx)] if sfx and st.endswith(sfx) else (st if not sfx else None)
+                    t = st[: -len(sfx)] if sfx and st.endswith(sfx) else (st if not sfx else None)
                     if t and len(t) >= 3:
                         out.append((pre, t))
                     elif t and len(t) == 2:
@@ -160,7 +507,7 @@ def stem(c, aramaic):
     ends = ["יא", "ין", "ון", "תא", "א", "ה"] if aramaic else ["ים", "ות", "ה", "ת"]
     for e in ends:
         if c.endswith(e) and len(c) - len(e) >= 2:
-            return c[:-len(e)]
+            return c[: -len(e)]
     return c
 
 
@@ -187,7 +534,7 @@ def like(a, h):
             dp[i + 1][j + 1] = dp[i][j] + 1 if eq else max(dp[i][j + 1], dp[i + 1][j])
     l = dp[n][m]
     score = l / max(n, m)
-    if sa[:1] != sh[:1] and not (sa[:1], sh[:1]) in SAME:
+    if sa[:1] != sh[:1] and (sa[:1], sh[:1]) not in SAME:
         score *= 0.8
     return score if l >= 2 or (n <= 2 and m <= 2 and l >= 1 and score == 1) else 0
 
@@ -225,7 +572,10 @@ def hebrew():
     db = sqlite3.connect(f"file:{find('wlc+.bbli')}?mode=ro", uri=True)
     out = {}
     for b, c, v, t in db.execute("SELECT Book, Chapter, Verse, Scripture FROM Bible"):
-        words = [(m.group(1), re.findall(r"<num>(.*?)</num>", m.group(2)), html.unescape(m.group(3))) for m in DIV.finditer(t or "")]
+        words = [
+            (m.group(1), re.findall(r"<num>(.*?)</num>", m.group(2)), html.unescape(m.group(3)))
+            for m in DIV.finditer(t or "")
+        ]
         out[(b, c, v)] = words
         for w, _, g in words:
             HEB_GLOSS.setdefault(consonants(w).lstrip("ודבלכמה") or consonants(w), g)
@@ -257,29 +607,38 @@ def build(name, heb, jas, into=None):
                 h, nums, g = hw[pairs[k]]
                 paired += 1
                 nums_html = "".join(f"<num>{n}</num>" for n in nums)
-                s.append(f"<div><grk>{w}</grk>{nums_html}<tvm>Hebrew {html.escape(h)}</tvm><gra>{html.escape(g)}</gra></div>")
+                s.append(
+                    f"<div><grk>{w}</grk>{nums_html}<tvm>Hebrew {html.escape(h)}</tvm><gra>{html.escape(g)}</gra></div>"
+                )
                 continue
             j = look_up(w, jas)
             if j:
                 looked += 1
-                s.append(f"<div><grk>{w}</grk><tvm>Jastrow {html.escape(j[0])}</tvm><gra>{html.escape(j[1])}</gra></div>")
+                s.append(
+                    f"<div><grk>{w}</grk><tvm>Jastrow {html.escape(j[0])}</tvm><gra>{html.escape(j[1])}</gra></div>"
+                )
             else:
                 s.append(w)
         s.append(text[last:])
         out.append((b, c, v, "".join(s).strip()))
-    print(f"  {total} words: {paired} ({paired / total:.0%}) paired with the Hebrew, {looked} ({looked / total:.0%}) from Jastrow, "
-          f"{total - paired - looked} ({(total - paired - looked) / total:.0%}) without English")
+    print(
+        f"  {total} words: {paired} ({paired / total:.0%}) paired with the Hebrew, {looked} ({looked / total:.0%}) from Jastrow, "
+        f"{total - paired - looked} ({(total - paired - looked) / total:.0%}) without English"
+    )
 
     m = MODULES[name]
-    about = (info + "<p>This edition shows English under each Aramaic word. Where a word renders a word of the Hebrew, it is paired "
-             "with it (by their consonants, the Targum being close to the Hebrew and its words mostly cognate) and has that "
-             "word's English (STEPBible's TBESH, CC BY 4.0) and Strong's number; otherwise the English is the first gloss of "
-             "the headword it seems to be in Jastrow's Dictionary of the Targumim (1903; Sefaria's digitisation, CC BY-NC). "
-             f"{paired / total:.0%} of the words are paired and {looked / total:.0%} from Jastrow. The pairing and the "
-             "look-ups are a program's, so some are wrong; the tooltip says which each is. Built by Two-edged Sword's tools/targum.</p>"
-             "<p><b>Licence: non-commercial use only.</b> Because its look-ups come from Jastrow's digitisation (CC BY-NC), "
-             "this module is shared under the Creative Commons Attribution-NonCommercial 4.0 licence "
-             "(creativecommons.org/licenses/by-nc/4.0).</p>")
+    about = (
+        info
+        + "<p>This edition shows English under each Aramaic word. Where a word renders a word of the Hebrew, it is paired "
+        "with it (by their consonants, the Targum being close to the Hebrew and its words mostly cognate) and has that "
+        "word's English (STEPBible's TBESH, CC BY 4.0) and Strong's number; otherwise the English is the first gloss of "
+        "the headword it seems to be in Jastrow's Dictionary of the Targumim (1903; Sefaria's digitisation, CC BY-NC). "
+        f"{paired / total:.0%} of the words are paired and {looked / total:.0%} from Jastrow. The pairing and the "
+        "look-ups are a program's, so some are wrong; the tooltip says which each is. Built by Two-edged Sword's tools/targum.</p>"
+        "<p><b>Licence: non-commercial use only.</b> Because its look-ups come from Jastrow's digitisation (CC BY-NC), "
+        "this module is shared under the Creative Commons Attribution-NonCommercial 4.0 licence "
+        "(creativecommons.org/licenses/by-nc/4.0).</p>"
+    )
     with module(f"{name}+.bbli", m["title"], m["abbrev"], about, nt=False, strongs=True, rtl=True, into=into) as db:
         db.executemany("INSERT INTO Bible VALUES (?,?,?,?)", out)
     print(f"{name}+.bbli: {len(out)} verses")

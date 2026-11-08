@@ -31,18 +31,46 @@ read by its type (text() stops on one it doesn't know), as MAM-simple's consumer
     are spaces.
 The marks are left in MAM's order (it isn't Unicode's normal order).
 """
-import json, re, sys
+
+import json
+import re
+import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import wlc.build as wlc  # noqa: E402  (the WLC -> KJV verse map)
-from modules import CACHES, LIBRARY, fetch, module  # noqa: E402
 from ginsburg.build import halves  # noqa: E402
+from modules import CACHES, LIBRARY, fetch, module  # noqa: E402
+
 CACHE = CACHES / "mam"
 SRC = "https://raw.githubusercontent.com/bdenckla/MAM-basics/926a6e785be4236673ac4a5c8c34afe63ed417f4/MAM-simple/{}/{}.json"
 # The 24 books' files, and the six MAM-simple has in the BHS's numbering (the rest are the same in both).
-GROUPS = ["Gen", "Exod", "Lev", "Num", "Deut", "Josh", "Judg", "1Sam-2Sam", "1Kgs-2Kgs", "Isa", "Jer", "Ezek", "Hos-Mal",
-          "Ps", "Prov", "Job", "Song", "Ruth", "Lam", "Eccl", "Esth", "Dan", "Ezra-Neh", "1Chr-2Chr"]
+GROUPS = [
+    "Gen",
+    "Exod",
+    "Lev",
+    "Num",
+    "Deut",
+    "Josh",
+    "Judg",
+    "1Sam-2Sam",
+    "1Kgs-2Kgs",
+    "Isa",
+    "Jer",
+    "Ezek",
+    "Hos-Mal",
+    "Ps",
+    "Prov",
+    "Job",
+    "Song",
+    "Ruth",
+    "Lam",
+    "Eccl",
+    "Esth",
+    "Dan",
+    "Ezra-Neh",
+    "1Chr-2Chr",
+]
 BHS = {"1Sam-2Sam", "Deut", "Exod", "Jer", "Josh", "Num"}
 LINK = "https://en.wikisource.org/wiki/User:Dovi/Miqra_according_to_the_Masorah#beginning"
 PASEQ = " ׀ "
@@ -63,7 +91,16 @@ def kids(n):
 def text(n):
     """An element of a verse as running text."""
     t = n["type"]
-    if t in ("text", "kq-trivial", "kq-q-velo-k", "silluq-before-meteg", "letter-large", "letter-small", "letter-hung", "cant-combined"):
+    if t in (
+        "text",
+        "kq-trivial",
+        "kq-q-velo-k",
+        "silluq-before-meteg",
+        "letter-large",
+        "letter-small",
+        "letter-hung",
+        "cant-combined",
+    ):
         return n["text"] if "text" in n else kids(n)
     if t in ("slh-word", "kq-q", "sdt-target"):
         return n["text"] if "text" in n else kids(n)
@@ -111,12 +148,14 @@ def read():
     return out
 
 
-INFO = ("<p>Miqra according to the Masorah (MAM): the Hebrew Old Testament as Seth (Avi) Kadish edited it at Hebrew "
-        "Wikisource, following the Aleppo Codex (about 930) and, where its leaves are lost, the manuscripts closest to it. "
-        f'From <a href="{LINK}">Hebrew Wikisource</a>, through Ben Denckla\'s MAM-simple (github.com/bdenckla/MAM-basics), '
-        "under the Creative Commons Attribution-ShareAlike 4.0 licence (CC BY-SA 4.0), https://creativecommons.org/licenses/by-sa/4.0/. "
-        "With vowels and accents; verses are numbered as in the KJV (psalm titles are part of verse 1); where the margin "
-        "corrects the text (ketiv/qere), the reading is given. Joshua 21:36–37 are not in this tradition. Built by Two-edged Sword's tools/mam.</p>")
+INFO = (
+    "<p>Miqra according to the Masorah (MAM): the Hebrew Old Testament as Seth (Avi) Kadish edited it at Hebrew "
+    "Wikisource, following the Aleppo Codex (about 930) and, where its leaves are lost, the manuscripts closest to it. "
+    f'From <a href="{LINK}">Hebrew Wikisource</a>, through Ben Denckla\'s MAM-simple (github.com/bdenckla/MAM-basics), '
+    "under the Creative Commons Attribution-ShareAlike 4.0 licence (CC BY-SA 4.0), https://creativecommons.org/licenses/by-sa/4.0/. "
+    "With vowels and accents; verses are numbered as in the KJV (psalm titles are part of verse 1); where the margin "
+    "corrects the text (ketiv/qere), the reading is given. Joshua 21:36–37 are not in this tradition. Built by Two-edged Sword's tools/mam.</p>"
+)
 
 
 def main(into=None):
@@ -132,7 +171,9 @@ def main(into=None):
             if part:
                 verses[key] = f"{verses[key]} {part}" if key in verses else part
     rows = [(b, c, v, f"<heb>{wlc.esc(t)}</heb>") for (b, c, v), t in sorted(verses.items())]
-    with module("mam.bbli", "Miqra according to the Masorah (Aleppo Codex)", "MAM", INFO, nt=False, rtl=True, into=into) as db:
+    with module(
+        "mam.bbli", "Miqra according to the Masorah (Aleppo Codex)", "MAM", INFO, nt=False, rtl=True, into=into
+    ) as db:
         db.executemany("INSERT INTO Bible VALUES (?,?,?,?)", rows)
     print(f"mam.bbli: {len(rows)} verses")
 

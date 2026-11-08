@@ -11,3 +11,10 @@ tools
 *.json
 *.html
 _sift/
+mobile/dist
+mobile/node_modules
+mobile/src-tauri/gen
+mobile/src-tauri/target
+mobile/plugins/*/android/build
+mobile/plugins/*/ios/.build
+mobile/target

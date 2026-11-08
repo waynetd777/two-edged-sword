@@ -5,8 +5,9 @@
 // the desktop keeps, as sync's items and places, and back.
 
 import type { Plan } from "./plans";
+import type { JournalEntry } from "./api";
 import type { Bookmark, HlColor, Recent } from "./state";
-import { Mark, markKey, Place, planItems, plansFrom, under } from "./sync";
+import { Entry, entryKey, Mark, markKey, Place, planItems, plansFrom, under } from "./sync";
 
 export interface Synced {
   bookmarks: Bookmark[];
@@ -14,6 +15,7 @@ export interface Synced {
   docAt: Record<string, string>;
   plans: Plan[];
   recent: Recent[];
+  journal: JournalEntry[];
 }
 
 const toMark = (b: Bookmark): Mark =>
@@ -38,8 +40,20 @@ export function itemsOf(s: Synced): Record<string, unknown> {
   for (const [k, c] of Object.entries(s.highlights)) out[`hl|${k}`] = c;
   for (const [m, t] of Object.entries(s.docAt)) out[`at|${m}`] = t;
   for (const p of s.plans) Object.assign(out, planItems(p));
+  for (const e of s.journal) out[entryKey(e.id)] = toEntry(e);
   return out;
 }
+
+/** Just the entry's own fields, in a set order, so the same entry always reads the same. */
+const toEntry = (e: JournalEntry): Entry => ({
+  id: e.id,
+  title: e.title,
+  created: e.created,
+  updated: e.updated,
+  verses: e.verses,
+  tags: e.tags,
+  body: e.body,
+});
 
 /** Recent as places: an online devotional or the song words (which have no module chapter) stay here. */
 export function placesOf(recent: Recent[]): Place[] {
@@ -99,5 +113,8 @@ export function fromItems(now: Record<string, unknown>, places: Place[], was: Sy
   ]
     .sort((a, b) => b.at.localeCompare(a.at))
     .slice(0, 50);
-  return { bookmarks, highlights, docAt, plans: plansFrom(now), recent };
+  const journal = under(now, "j|")
+    .map(([, v]) => v as JournalEntry)
+    .sort((a, b) => b.created.localeCompare(a.created));
+  return { bookmarks, highlights, docAt, plans: plansFrom(now), recent, journal };
 }

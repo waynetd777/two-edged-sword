@@ -39,7 +39,9 @@ export function WordStudy({
   const isNum = /^[GH]\d+$/i.test(target);
   const lexicon = modules.find((m) => m.kind === "lexicon" && m.id === "strong")?.id ?? modules.find((m) => m.kind === "lexicon")?.id;
   const concordance = modules.find((m) => m.kind === "lexicon" && (m.id === "kjc" || /concordance/i.test(m.title)))?.id;
-  const sb = modules.find((m) => m.kind === "bible" && m.strongs && m.id.startsWith("kjv"))?.id ?? modules.find((m) => m.kind === "bible" && m.strongs)?.id;
+  const sb =
+    modules.find((m) => m.kind === "bible" && m.strongs && m.id.startsWith("kjv"))?.id ??
+    modules.find((m) => m.kind === "bible" && m.strongs)?.id;
   const [num, setNum] = useState(isNum ? target.toUpperCase() : "G26");
   const [q, setQ] = useState(target);
   const [lookup, setLookup] = useState<{ q: string; words: Named[]; translit: TranslitHit[] } | null>(null);
@@ -197,7 +199,13 @@ export function WordStudy({
                     <button key={w.num} className="row" onClick={() => onTarget(w.num)}>
                       <span className="orig small">{w.word}</span>
                       <span className="grow">
-                        {w.translit} <span className="m">{w.forms.slice(0, 3).map(([f, n]) => `${f} ${n}`).join(" · ")}</span>
+                        {w.translit}{" "}
+                        <span className="m">
+                          {w.forms
+                            .slice(0, 3)
+                            .map(([f, n]) => `${f} ${n}`)
+                            .join(" · ")}
+                        </span>
                       </span>
                       <span className="m">{w.num}</span>
                     </button>
@@ -246,7 +254,9 @@ export function WordStudy({
             </div>
 
             <div className="card">
-              <div className="prose">{renderHtml(e.rest, { inlineNums: true, onStrongs: (n) => onTarget(n), onRef: (r) => onJump({ ref: r }) })}</div>
+              <div className="prose">
+                {renderHtml(e.rest, { inlineNums: true, onStrongs: (n) => onTarget(n), onRef: (r) => onJump({ ref: r }) })}
+              </div>
               {(kjvTotal || verseTotal > 0) && (
                 <div className="counts">
                   {kjvTotal ? (
@@ -313,7 +323,9 @@ export function WordStudy({
 
             <p className="label" style={{ marginTop: 18 }}>
               {onlyBook ? `${book(onlyBook).name}: ` : ""}
-              {verses === null ? "Verses…" : `${verses.length}${verses.length === 300 ? "+" : ""} ${verses.length === 1 ? "verse" : "verses"} with ${num}`}
+              {verses === null
+                ? "Verses…"
+                : `${verses.length}${verses.length === 300 ? "+" : ""} ${verses.length === 1 ? "verse" : "verses"} with ${num}`}
               {onlyBook && (
                 <button className="link" style={{ marginLeft: 8 }} onClick={() => setOnlyBook(null)}>
                   All books
@@ -335,7 +347,9 @@ export function WordStudy({
           </div>
         )}
       </div>
-      {entry && <Entry module={entry.module} topic={entry.topic} onJump={(j) => (setEntry(null), onJump(j))} onClose={() => setEntry(null)} />}
+      {entry && (
+        <Entry module={entry.module} topic={entry.topic} onJump={(j) => (setEntry(null), onJump(j))} onClose={() => setEntry(null)} />
+      )}
     </>
   );
 }

@@ -17,6 +17,15 @@ export interface Place {
 
 export const imagePlaces = (_img: Element): Place[] => [];
 
-export function MapPicture({ src, onImage }: { src: string; places: Place[]; onImage?: (src: string) => void; onPick: unknown; picked?: Place | null }) {
+export function MapPicture({
+  src,
+  onImage,
+}: {
+  src: string;
+  places: Place[];
+  onImage?: (src: string) => void;
+  onPick: unknown;
+  picked?: Place | null;
+}) {
   return <img src={src} alt="" style={{ maxWidth: "100%" }} onClick={() => onImage?.(src)} />;
 }

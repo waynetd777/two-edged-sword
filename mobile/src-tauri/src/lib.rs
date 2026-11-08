@@ -207,13 +207,45 @@ fn sync_error(e: ureq::Error) -> String {
 }
 
 fn sync_json(req: ureq::Request, body: serde_json::Value) -> Result<serde_json::Value, String> {
-    let text = req
-        .set("Content-Type", "application/json")
+    use std::io::Read;
+    let mut text = String::new();
+    // Read as a stream: into_string stops at 10 MB, and a sync carries the whole journal.
+    req.set("Content-Type", "application/json")
         .send_string(&body.to_string())
         .map_err(sync_error)?
-        .into_string()
+        .into_reader()
+        .take(64_000_000)
+        .read_to_string(&mut text)
         .map_err(|e| e.to_string())?;
     serde_json::from_str(&text).map_err(|e| e.to_string())
+}
+
+// ---------- the journal (src/journal.ts): its entries as JSON in the app's data folder ----------
+
+fn journal_path() -> std::path::PathBuf {
+    store::data_dir().join("journal.json")
+}
+
+/// The journal's entries as JSON text, "[]" before there are any.
+#[tauri::command(async)]
+fn journal_read() -> Result<String, String> {
+    match std::fs::read_to_string(journal_path()) {
+        Ok(t) => Ok(t),
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok("[]".into()),
+        Err(e) => Err(e.to_string()),
+    }
+}
+
+/// Replaces the journal with `text`, written beside it first so a crash can't leave half a file.
+#[tauri::command(async)]
+fn journal_write(text: String) -> Result<(), String> {
+    let path = journal_path();
+    let tmp = path.with_extension("json.tmp");
+    if let Some(d) = path.parent() {
+        std::fs::create_dir_all(d).map_err(|e| e.to_string())?;
+    }
+    std::fs::write(&tmp, text).map_err(|e| e.to_string())?;
+    std::fs::rename(&tmp, &path).map_err(|e| e.to_string())
 }
 
 /// Pairs with the computer at `url` using the code its Settings shows; answers its token.
@@ -438,6 +470,9 @@ struct Remind {
     at: i64,
     title: String,
     body: String,
+    /// The phone's offset from UTC at that time, in minutes east.
+    #[serde(default)]
+    tz: i32,
 }
 
 /// The reminder's ids: one a day, a fortnight ahead at most.
@@ -462,7 +497,13 @@ fn schedule_reminders(app: AppHandle, list: Vec<Remind>) -> Result<(), String> {
         return Err("Notifications are off for Two-edged Sword. Turn them on in the iPhone's Settings.".into());
     }
     for r in list.into_iter().filter(|r| REMINDER_IDS.contains(&r.id)) {
-        let date = time::OffsetDateTime::from_unix_timestamp_nanos(r.at as i128 * 1_000_000).map_err(|e| e.to_string())?;
+        // The plugin's iOS side reads the time's digits as the phone's local time (its date format has
+        // a literal 'Z' and no time zone), so iOS is sent the local clock time; Android reads it as UTC.
+        #[cfg(target_os = "ios")]
+        let at = r.at + r.tz as i64 * 60_000;
+        #[cfg(not(target_os = "ios"))]
+        let at = r.at;
+        let date = time::OffsetDateTime::from_unix_timestamp_nanos(at as i128 * 1_000_000).map_err(|e| e.to_string())?;
         n.builder()
             .id(r.id)
             .title(r.title)
@@ -564,7 +605,9 @@ pub fn run() {
             count_waiting,
             import_waiting,
             sync_pair,
-            sync_post
+            sync_post,
+            journal_read,
+            journal_write
         ])
         .build(tauri::generate_context!())
         .expect("error while running the app")

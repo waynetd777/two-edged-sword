@@ -1612,15 +1612,15 @@ button.ks-chip {
   --hl-dot-purple: #c1a9e3;
   --hl-dot-teal: #8fcfc6;
   --hl-dot-grey: #aab3bf;
-  --hl-mix: 55%;
+  --hl-mix: 25%;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --hl-mix: 45%;
+    --hl-mix: 22%;
   }
 }
 :root[data-theme="dark"] {
-  --hl-mix: 45%;
+  --hl-mix: 22%;
 }
 /* Drawn like a highlighter pen: a band over the lower part of the line, slanted chisel ends, the ink
    heavier where the stroke starts and thinner along it, each wrapped line its own stroke. */
@@ -1634,7 +1634,15 @@ button.ks-chip {
 .hl-grey {
   --hlx: color-mix(in srgb, var(--hlc) calc(var(--hl-mix) * 1.6), transparent);
   --hly: color-mix(in srgb, var(--hlc) var(--hl-mix), transparent);
-  background: linear-gradient(100deg, transparent 0.05em, var(--hlx) 0.3em, var(--hly) 30%, var(--hlx) 85%, var(--hly) calc(100% - 0.3em), transparent calc(100% - 0.05em))
+  background: linear-gradient(
+      100deg,
+      transparent 0.05em,
+      var(--hlx) 0.3em,
+      var(--hly) 30%,
+      var(--hlx) 85%,
+      var(--hly) calc(100% - 0.3em),
+      transparent calc(100% - 0.05em)
+    )
     0 62% / 100% 78% no-repeat;
   margin: 0 -0.35em;
   padding: 0.05em 0.35em;
@@ -3303,4 +3311,28 @@ html.tray-view #root {
 .help-none {
   color: var(--muted);
   margin: 0;
+}
+
+/* Red letters in a highlighted verse: a deeper red (a lighter one on dark), so they stand out from the
+   highlighter's ink, the warm colours especially. */
+:root {
+  --red-on-hl: #9a0b1f;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --red-on-hl: #ffb0a9;
+  }
+}
+:root[data-theme="dark"] {
+  --red-on-hl: #ffb0a9;
+}
+.hl-red .red,
+.hl-orange .red,
+.hl-yellow .red,
+.hl-green .red,
+.hl-blue .red,
+.hl-purple .red,
+.hl-teal .red,
+.hl-grey .red {
+  color: var(--red-on-hl);
 }

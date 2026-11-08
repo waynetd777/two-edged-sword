@@ -138,7 +138,14 @@ export function CompareScreen({ openPalette }: { openPalette: () => void }) {
   useEffect(() => {
     const prev = lastPlayed.current;
     lastPlayed.current = [ps.book, ps.chapter];
-    if (ps.on && !ps.doc && ps.bible === readBible && (ps.book !== loc.book || ps.chapter !== loc.chapter) && prev?.[0] === loc.book && prev[1] === loc.chapter)
+    if (
+      ps.on &&
+      !ps.doc &&
+      ps.bible === readBible &&
+      (ps.book !== loc.book || ps.chapter !== loc.chapter) &&
+      prev?.[0] === loc.book &&
+      prev[1] === loc.chapter
+    )
       app.open({ book: ps.book, chapter: ps.chapter });
   }, [ps.book, ps.chapter]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -272,8 +279,18 @@ export function CompareScreen({ openPalette }: { openPalette: () => void }) {
           <button
             type="button"
             className={`ibtn ${reading ? "on" : ""}`}
-            aria-label={reading ? (ps.paused ? "Resume reading aloud" : "Pause reading aloud") : `Listen to ${book(loc.book).name} ${loc.chapter} in ${app.mod("bible", readBible)?.abbrev ?? readBible}`}
-            title={reading ? "Pause or resume reading aloud" : `Listen in ${app.mod("bible", readBible)?.abbrev ?? readBible}${sel ? `, from verse ${sel}` : ""}`}
+            aria-label={
+              reading
+                ? ps.paused
+                  ? "Resume reading aloud"
+                  : "Pause reading aloud"
+                : `Listen to ${book(loc.book).name} ${loc.chapter} in ${app.mod("bible", readBible)?.abbrev ?? readBible}`
+            }
+            title={
+              reading
+                ? "Pause or resume reading aloud"
+                : `Listen in ${app.mod("bible", readBible)?.abbrev ?? readBible}${sel ? `, from verse ${sel}` : ""}`
+            }
             onClick={() => (reading ? player.toggle() : listen())}
           >
             <Icon name="speaker" />
@@ -408,7 +425,9 @@ export function CompareScreen({ openPalette }: { openPalette: () => void }) {
                         showNums={nums && !!app.mod("bible", c)?.strongs}
                         activeWi={word?.bible === c && word.verse === v ? word.token.wi : undefined}
                         speakingChar={
-                          reading && ps.verse === v && settings.highlightWords && (c === readBible || `${c}+` === readBible) ? ps.char : undefined
+                          reading && ps.verse === v && settings.highlightWords && (c === readBible || `${c}+` === readBible)
+                            ? ps.char
+                            : undefined
                         }
                         onWord={(tok, el) => setWord({ token: tok, verse: v, rect: el.getBoundingClientRect(), bible: c })}
                       />

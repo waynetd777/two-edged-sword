@@ -40,13 +40,21 @@ record how many verses there are and how closely they follow Challoner's.
 Writes to the app's modules folder, where the app finds it after Library → Rescan. The scans and
 each page's readings are cached in ~/Library/Caches/Two-edged Sword/rheims.
 """
-import html, os, re, sqlite3, subprocess, sys, zipfile
+
+import html
+import os
+import re
+import sqlite3
+import subprocess
+import sys
+import zipfile
 from concurrent.futures import ProcessPoolExecutor
 from difflib import SequenceMatcher
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from modules import CACHES, WINDOWS, english_words, fetch, find, module, similar  # noqa: E402
+
 CACHE = CACHES / "rheims"
 ITEM = "vulgatenewtestam00lond"
 SCANS = f"https://archive.org/download/{ITEM}/{ITEM}_jp2.zip"
@@ -61,6 +69,8 @@ OCR = Path(__file__).resolve().parent / "ocr.swift"  # macOS's Vision
 OCR_WINDOWS = Path(__file__).resolve().parent / "ocr.ps1"  # Windows' own OCR (Windows.Media.Ocr)
 
 TOKEN = re.compile(r"[A-Za-z][A-Za-z'’]*|\d+|[^\sA-Za-z\d]+")
+
+
 def norm(t):
     return re.sub(r"[^a-z]", "", t.lower())
 
@@ -78,10 +88,69 @@ def ocr_tool():
 
 
 # Common words of each language, to tell the page's English column from its Latin one.
-LATIN = {"et", "est", "qui", "non", "ad", "cum", "ut", "quod", "enim", "autem", "eius", "ejus", "eum", "vos", "nos", "sunt",
-         "quia", "sed", "de", "ab", "ex", "super", "nobis", "vobis", "erat", "ego", "dixit", "illi"}
-ENGLISH = {"the", "and", "of", "to", "that", "he", "is", "not", "for", "him", "his", "them", "they", "which", "with", "you",
-           "unto", "be", "shall", "was", "it", "said", "have", "all", "as", "but", "we", "this", "from", "our", "your"}
+LATIN = {
+    "et",
+    "est",
+    "qui",
+    "non",
+    "ad",
+    "cum",
+    "ut",
+    "quod",
+    "enim",
+    "autem",
+    "eius",
+    "ejus",
+    "eum",
+    "vos",
+    "nos",
+    "sunt",
+    "quia",
+    "sed",
+    "de",
+    "ab",
+    "ex",
+    "super",
+    "nobis",
+    "vobis",
+    "erat",
+    "ego",
+    "dixit",
+    "illi",
+}
+ENGLISH = {
+    "the",
+    "and",
+    "of",
+    "to",
+    "that",
+    "he",
+    "is",
+    "not",
+    "for",
+    "him",
+    "his",
+    "them",
+    "they",
+    "which",
+    "with",
+    "you",
+    "unto",
+    "be",
+    "shall",
+    "was",
+    "it",
+    "said",
+    "have",
+    "all",
+    "as",
+    "but",
+    "we",
+    "this",
+    "from",
+    "our",
+    "your",
+}
 
 
 _server = None  # this worker's ocr.ps1, on Windows
@@ -92,7 +161,9 @@ def ocr(exe, files):
     (each start of PowerShell costs a second), on a Mac by running the tool once for them all."""
     global _server
     if not WINDOWS:
-        return subprocess.run([*exe, *map(str, files)], capture_output=True, text=True, encoding="utf-8", check=True).stdout
+        return subprocess.run(
+            [*exe, *map(str, files)], capture_output=True, text=True, encoding="utf-8", check=True
+        ).stdout
     if _server is None or _server.poll() is not None:
         _server = subprocess.Popen(exe, stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True, encoding="utf-8")
     _server.stdin.write("\t".join(map(str, files)) + "\n")
@@ -114,15 +185,16 @@ def english_column(im, exe, work, known):
         x0, x1 = known.read_text().split()
         return int(x0), int(x1)
     import numpy as np
+
     a = np.asarray(im) < 128
     h, w = a.shape
-    ink = a[int(h * .1):int(h * .95)].sum(0)
-    lo, hi = int(w * .35), int(w * .65)
+    ink = a[int(h * 0.1) : int(h * 0.95)].sum(0)
+    lo, hi = int(w * 0.35), int(w * 0.65)
     g = lo + int(np.argmin(np.convolve(ink[lo:hi], np.ones(15), "same")))
     score = []
     for k, (x0, x1) in enumerate(((0, g), (g, w))):
         f = work / f"side-{k}-{os.getpid()}.png"
-        im.crop((x0, int(h * .4), x1, int(h * .5))).save(f)
+        im.crop((x0, int(h * 0.4), x1, int(h * 0.5))).save(f)
         words = re.findall(r"[a-z]+", ocr(exe, [f]).lower())
         f.unlink()
         score.append(sum(x in ENGLISH for x in words) - sum(x in LATIN for x in words))
@@ -135,11 +207,14 @@ def english_column(im, exe, work, known):
 def read_page(args):
     """One scanned page's English column as text, by one reading's settings: the column cut into strips at the gaps
     between lines (Vision shrinks a large image and loses the small type), each read in turn."""
-    from PIL import Image, ImageFilter
     import numpy as np
+    from PIL import Image, ImageFilter
+
     page, name, strip, blur, scale, pad, exe, work = args
     im = Image.open(page).convert("L")
-    x0, x1 = english_column(im, exe, work, CACHE / ("columns-windows" if WINDOWS else "columns") / f"{Path(page).stem}.txt")
+    x0, x1 = english_column(
+        im, exe, work, CACHE / ("columns-windows" if WINDOWS else "columns") / f"{Path(page).stem}.txt"
+    )
     col = im.crop((x0, 0, x1, im.height))
     ink = (np.asarray(col) < 128).sum(1)
     cuts, y = [0], 0
@@ -210,7 +285,9 @@ def tokens(text, known=()):
 
 def challoner():
     db = sqlite3.connect(f"file:{find('drc.bbli')}?mode=ro", uri=True)
-    rows = db.execute("SELECT Book, Chapter, Verse, Scripture FROM Bible WHERE Book BETWEEN 40 AND 66 ORDER BY Book, Chapter, Verse").fetchall()
+    rows = db.execute(
+        "SELECT Book, Chapter, Verse, Scripture FROM Bible WHERE Book BETWEEN 40 AND 66 ORDER BY Book, Chapter, Verse"
+    ).fetchall()
     db.close()
     out = []
     for b, c, v, t in rows:
@@ -236,7 +313,7 @@ def align(ref, ocr):
     anchors, i, j = [], 0, 0
     CH = 2500
     while i < len(ref) and j < len(ow):
-        a, b = ref[i:i + CH], ow[j:j + int(CH * 1.4)]
+        a, b = ref[i : i + CH], ow[j : j + int(CH * 1.4)]
         blocks = [m for m in SequenceMatcher(None, a, b, autojunk=False).get_matching_blocks() if m.size >= 3]
         if not blocks:
             i += CH // 2
@@ -250,7 +327,7 @@ def align(ref, ocr):
     pairs = list(anchors)
     for (r1, o1), (r2, o2) in zip(anchors, anchors[1:]):
         if r2 - r1 > 1 and o2 - o1 > 1 and o2 - o1 < 4 * (r2 - r1) + 20:
-            for m in SequenceMatcher(None, ref[r1 + 1:r2], ow[o1 + 1:o2], autojunk=False).get_matching_blocks():
+            for m in SequenceMatcher(None, ref[r1 + 1 : r2], ow[o1 + 1 : o2], autojunk=False).get_matching_blocks():
                 pairs += [(r1 + 1 + m.a + k, o1 + 1 + m.b + k) for k in range(m.size)]
     return {r: words[o][0] for r, o in pairs}
 
@@ -273,7 +350,7 @@ def verses(ref_verses, ocr, known, counts):
     for ri, oi in m.items():
         found.setdefault(owner[ri], []).append(oi)
         vi = owner[ri]
-        lead[vi] = min(lead.get(vi, 10 ** 9), ri - verse_at[vi])
+        lead[vi] = min(lead.get(vi, 10**9), ri - verse_at[vi])
     # A match far from the rest of its verse's is a common word matched by chance elsewhere.
     first, last, hits = {}, {}, {}
     for vi, ois in found.items():
@@ -306,7 +383,7 @@ def verses(ref_verses, ocr, known, counts):
     if lost:
         where = {}
         on = [(k, norm(t)) for k, t in enumerate(ocr) if norm(t)]
-        for n, (k, w) in enumerate(on):
+        for n, (_k, w) in enumerate(on):
             where.setdefault(w, []).append(n)
         pos = {k: n for n, (k, _) in enumerate(on)}
         for vi in lost:
@@ -314,7 +391,7 @@ def verses(ref_verses, ocr, known, counts):
             before = max((last[k] for k in order if k < vi), default=0)
             after = min((first[k] for k in order if k > vi), default=len(ocr))
             lo_ok, hi_ok = pos.get(before, 0) - 600, pos.get(after, len(on)) + 600
-            rare = sorted(set(ws), key=lambda w: len(where.get(w, [])) or 10 ** 9)[:3]
+            rare = sorted(set(ws), key=lambda w: len(where.get(w, [])) or 10**9)[:3]
             best = None
             for w in rare:
                 for n in where.get(w, []):
@@ -322,13 +399,15 @@ def verses(ref_verses, ocr, known, counts):
                         continue
                     lo, hi = max(0, n - 2 * len(ws)), n + 2 * len(ws)
                     window = [x for _, x in on[lo:hi]]
-                    blocks = [b for b in SequenceMatcher(None, ws, window, autojunk=False).get_matching_blocks() if b.size]
+                    blocks = [
+                        b for b in SequenceMatcher(None, ws, window, autojunk=False).get_matching_blocks() if b.size
+                    ]
                     got = sum(b.size for b in blocks)
                     if blocks and (not best or got > best[0]):
                         best = (got, on[lo + blocks[0].b][0], on[lo + blocks[-1].b + blocks[-1].size - 1][0])
             if best and best[0] >= 0.7 * len(ws):
                 got, a, z = best
-                out[key] = (clean(mend(ocr[a:z + 1], ws, known, counts, key)), got / len(ws))
+                out[key] = (clean(mend(ocr[a : z + 1], ws, known, counts, key)), got / len(ws))
     for n, vi in enumerate(order):
         key, ws = ref_verses[vi]
         nxt = start[order[n + 1]] if n + 1 < len(order) else len(ocr)
@@ -337,20 +416,48 @@ def verses(ref_verses, ocr, known, counts):
         end = last[vi] + 1
         while end < nxt and end < last[vi] + 26 and not re.fullmatch(r"\d+|[°*\"“”§#&|}{]+.*", ocr[end]):
             end += 1
-        toks = mend(ocr[start[vi]:end], ws, known, counts, key)
+        toks = mend(ocr[start[vi] : end], ws, known, counts, key)
         # A first word cut at the column's edge, leaving its last letters ("d wisdom is justified"),
         # is Challoner's first word when that ends with them ("And").
         words = [k for k, t in enumerate(toks) if norm(t)]
         fw = FIRST.get(key, "")
-        if words and len(norm(toks[words[0]])) <= 2 and norm(toks[words[0]]) not in ("a", "i", "o") and len(fw) > 2 and fw.lower().endswith(norm(toks[words[0]])):
-            toks = [fw] + toks[words[0] + 1:]
+        if (
+            words
+            and len(norm(toks[words[0]])) <= 2
+            and norm(toks[words[0]]) not in ("a", "i", "o")
+            and len(fw) > 2
+            and fw.lower().endswith(norm(toks[words[0]]))
+        ):
+            toks = [fw] + toks[words[0] + 1 :]
         out[key] = (clean(toks), hits[vi] / max(len(ws), 1))
     return out
 
 
 # Letters the reading confuses: "tliat" for that, "yas" for was, "sor" for for, "rn" for m.
-CONFUSIONS = [("li", "h"), ("y", "w"), ("s", "f"), ("f", "s"), ("rn", "m"), ("cl", "d"), ("ii", "u"), ("c", "e"), ("e", "c"),
-              ("l", "i"), ("i", "l"), ("ri", "n"), ("vv", "w"), ("h", "b"), ("b", "h"), ("o", "e"), ("u", "n"), ("n", "u"), ("q", "o"), ("i", "ll"), ("ii", "ll"), ("y", "v")]
+CONFUSIONS = [
+    ("li", "h"),
+    ("y", "w"),
+    ("s", "f"),
+    ("f", "s"),
+    ("rn", "m"),
+    ("cl", "d"),
+    ("ii", "u"),
+    ("c", "e"),
+    ("e", "c"),
+    ("l", "i"),
+    ("i", "l"),
+    ("ri", "n"),
+    ("vv", "w"),
+    ("h", "b"),
+    ("b", "h"),
+    ("o", "e"),
+    ("u", "n"),
+    ("n", "u"),
+    ("q", "o"),
+    ("i", "ll"),
+    ("ii", "ll"),
+    ("y", "v"),
+]
 # Not a for o, nor m for n anywhere but a short word's first letter ("mot"): a word cut short at a
 # column's edge (brin[g], cam[e], hat[h]) would be made into another word (brim, can, hot).
 
@@ -370,7 +477,7 @@ def confused(w, counts, known):
     for a, b in CONFUSIONS:
         k = lw.find(a)
         while k >= 0:
-            c = lw[:k] + b + lw[k + len(a):]
+            c = lw[:k] + b + lw[k + len(a) :]
             if counts.get(c, 0) >= floor and (not best or counts[c] > counts[best]):
                 best = c
             k = lw.find(a, k + 1)
@@ -449,13 +556,19 @@ def mend(toks, ref, known, counts=None, key=None):
                 continue
             t = toks[idx[a1 + k]]
             lead = re.match(r"[^A-Za-z]*", t).group()
-            fixed = r.capitalize() if t[len(lead):][:1].isupper() or CAPS.get(r, 0) > (counts or {}).get(r, 0) else r
-            out[idx[a1 + k]] = lead + fixed + t[len(lead) + len(re.match(r"[A-Za-z'’]*", t[len(lead):]).group()):]
+            fixed = r.capitalize() if t[len(lead) :][:1].isupper() or CAPS.get(r, 0) > (counts or {}).get(r, 0) else r
+            out[idx[a1 + k]] = lead + fixed + t[len(lead) + len(re.match(r"[A-Za-z'’]*", t[len(lead) :]).group()) :]
     out = rejoin(out)
     for k, t in enumerate(out):
         m = re.fullmatch(r"([^A-Za-z]*)([A-Za-z]+)([^A-Za-z]*)", t)
         # A speck read as a capital before a word: "FAnd" for And.
-        if m and len(m.group(2)) >= 3 and m.group(2)[:2].isupper() and m.group(2)[2:].islower() and m.group(2)[1:].lower() in BIBLE:
+        if (
+            m
+            and len(m.group(2)) >= 3
+            and m.group(2)[:2].isupper()
+            and m.group(2)[2:].islower()
+            and m.group(2)[1:].lower() in BIBLE
+        ):
             out[k] = t = m.group(1) + m.group(2)[1:] + m.group(3)
             m = re.fullmatch(r"([^A-Za-z]*)([A-Za-z]+)([^A-Za-z]*)", t)
         if counts and m and norm(m.group(2)) == m.group(2).lower():
@@ -481,7 +594,11 @@ def mend(toks, ref, known, counts=None, key=None):
     out = [t for n, t in enumerate(out) if n not in drop]
     # What is left of a word cut short, three letters or fewer and no word any Bible has ("jo",
     # "il", "ls"), goes.
-    return [t for t in out if not (re.fullmatch(r"[A-Za-z]{1,3}", t) and norm(t) not in BIBLE and t not in ("I", "O", "a", "A"))]
+    return [
+        t
+        for t in out
+        if not (re.fullmatch(r"[A-Za-z]{1,3}", t) and norm(t) not in BIBLE and t not in ("I", "O", "a", "A"))
+    ]
 
 
 def rejoin(toks):
@@ -500,8 +617,10 @@ def rejoin(toks):
             joined = a + b
             if joined in BIBLE and (a not in BIBLE or b not in BIBLE):  # "seek: ing", "judg ment"
                 lead = re.match(r"[^A-Za-z]*", t).group()
-                word = re.match(r"[A-Za-z'’]*", t[len(lead):]).group() + re.match(r"[^A-Za-z]*([A-Za-z'’]*)", toks[nxt]).group(1)
-                tail = toks[nxt][len(re.match(r"[^A-Za-z]*[A-Za-z'’]*", toks[nxt]).group()):]
+                word = re.match(r"[A-Za-z'’]*", t[len(lead) :]).group() + re.match(
+                    r"[^A-Za-z]*([A-Za-z'’]*)", toks[nxt]
+                ).group(1)
+                tail = toks[nxt][len(re.match(r"[^A-Za-z]*[A-Za-z'’]*", toks[nxt]).group()) :]
                 out.append(lead + word + tail)
                 k = nxt + 1
                 continue
@@ -533,7 +652,7 @@ def clean(toks):
                 t = t.lower()
         if out and re.fullmatch(r"[.,:;!?)]+", t):
             out[-1] += t
-        elif out and t == "-" :
+        elif out and t == "-":
             out[-1] += "-"
         elif out and out[-1].endswith("-") and out[-1] != "-":
             out[-1] += t
@@ -590,7 +709,9 @@ def main():
     readings = []
     for r in READINGS_WINDOWS if WINDOWS else READINGS:
         got = verses(ref, tokens(scanned(r), known), known, counts)
-        print(f"reading {r[0]}: {len(got)} verses, {sum(s for _, s in got.values()) / max(len(got), 1):.0%} of Challoner's words matched on average")
+        print(
+            f"reading {r[0]}: {len(got)} verses, {sum(s for _, s in got.values()) / max(len(got), 1):.0%} of Challoner's words matched on average"
+        )
         readings.append(got)
     best, taken = {}, [0] * len(readings)
     for key, _ in ref:
@@ -600,24 +721,36 @@ def main():
             taken[-i] += 1
     shares = [s for _, s in best.values()]
     weak = sum(s < 0.5 for s in shares)
-    print(f"kept: {len(best)} verses (" + ", ".join(f"{n} from {r[0]}" for r, n in zip(READINGS_WINDOWS if WINDOWS else READINGS, taken)) + f"), "
-          f"{sum(shares) / len(shares):.0%} matched on average, {weak} under half")
+    print(
+        f"kept: {len(best)} verses ("
+        + ", ".join(f"{n} from {r[0]}" for r, n in zip(READINGS_WINDOWS if WINDOWS else READINGS, taken))
+        + f"), "
+        f"{sum(shares) / len(shares):.0%} matched on average, {weak} under half"
+    )
     rows = [(*k, t) for k, (t, _) in sorted(best.items()) if t]
     print(f"  {sum(FILLED.values())} lost words put back from Challoner")
     if os.environ.get("RHEIMS_REPORT"):
-        Path(os.environ["RHEIMS_REPORT"] + ".filled").write_text("\n".join(f"{n}\t{w}" for w, n in sorted(FILLED.items(), key=lambda x: -x[1])), encoding="utf-8")
-        Path(os.environ["RHEIMS_REPORT"]).write_text("\n".join(f"{n}\t{a}\t{b}" for (a, b), n in sorted(FIXED.items(), key=lambda x: -x[1])), encoding="utf-8")
+        Path(os.environ["RHEIMS_REPORT"] + ".filled").write_text(
+            "\n".join(f"{n}\t{w}" for w, n in sorted(FILLED.items(), key=lambda x: -x[1])), encoding="utf-8"
+        )
+        Path(os.environ["RHEIMS_REPORT"]).write_text(
+            "\n".join(f"{n}\t{a}\t{b}" for (a, b), n in sorted(FIXED.items(), key=lambda x: -x[1])), encoding="utf-8"
+        )
     missing = [k for k, _ in ref if k not in best]
     if missing:
-        print(f"  none for {len(missing)} verses: {', '.join(f'{b}:{c}:{v}' for b, c, v in missing[:12])}{'…' if len(missing) > 12 else ''}")
+        print(
+            f"  none for {len(missing)} verses: {', '.join(f'{b}:{c}:{v}' for b, c, v in missing[:12])}{'…' if len(missing) > 12 else ''}"
+        )
 
-    info = ("<p>The Rheims New Testament of 1582, the English College's Catholic translation from the Vulgate, which the KJV's "
-            "translators consulted. The text is Bagster's 1872 parallel edition (The Vulgate New Testament, with the Douay "
-            "version of 1582), whose spelling is modernised, read by machine (OCR) from the Internet Archive's scan of the University of "
-            "Toronto's copy (archive.org/details/vulgatenewtestam00lond), public domain; verses are divided by lining "
-            f"it up with Challoner's revision. {len(rows)} verses; on average {sum(shares) / len(shares):.0%} of each verse's words "
-            "are Challoner's too, so much of the rest is the 1582 wording, but some is misreading, and words lost at the edge of "
-            "a column are missing. Built by Two-edged Sword's tools/rheims.</p>")
+    info = (
+        "<p>The Rheims New Testament of 1582, the English College's Catholic translation from the Vulgate, which the KJV's "
+        "translators consulted. The text is Bagster's 1872 parallel edition (The Vulgate New Testament, with the Douay "
+        "version of 1582), whose spelling is modernised, read by machine (OCR) from the Internet Archive's scan of the University of "
+        "Toronto's copy (archive.org/details/vulgatenewtestam00lond), public domain; verses are divided by lining "
+        f"it up with Challoner's revision. {len(rows)} verses; on average {sum(shares) / len(shares):.0%} of each verse's words "
+        "are Challoner's too, so much of the rest is the 1582 wording, but some is misreading, and words lost at the edge of "
+        "a column are missing. Built by Two-edged Sword's tools/rheims.</p>"
+    )
     with module("rheims1582.bbli", "Rheims New Testament (1582)", "Rheims 1582", info, ot=False) as db:
         db.executemany("INSERT INTO Bible VALUES (?,?,?,?)", rows)
     print(f"rheims1582.bbli: {len(rows)} verses")

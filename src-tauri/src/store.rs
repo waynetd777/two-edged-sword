@@ -148,6 +148,46 @@ pub fn replace_dir<T>(dir: &std::path::Path, build: impl FnOnce(&std::path::Path
     Ok(r)
 }
 
+/// How many backups of each kind are kept (the newest).
+pub const BACKUPS_KEPT: usize = 14;
+
+/// Copies `files` into a new dated folder under `into` ("2026-11-08 215012"), unless (not `force`) the
+/// newest there is less than a day old. Keeps the newest BACKUPS_KEPT. Answers the folder made, if one was.
+/// Used before sync changes the journal (journal.rs) and the bookmarks, highlights and plans (lib.rs).
+pub fn backup(files: &[PathBuf], into: &std::path::Path, force: bool) -> Result<Option<PathBuf>, String> {
+    let mut olds: Vec<PathBuf> =
+        std::fs::read_dir(into).map(|rd| rd.flatten().map(|e| e.path()).filter(|p| p.is_dir()).collect()).unwrap_or_default();
+    olds.sort();
+    let recent = olds
+        .last()
+        .and_then(|p| std::fs::metadata(p).and_then(|m| m.modified()).ok())
+        .and_then(|t| t.elapsed().ok())
+        .is_some_and(|age| age < std::time::Duration::from_secs(86_400));
+    let files: Vec<&PathBuf> = files.iter().filter(|p| p.is_file()).collect();
+    if (recent && !force) || files.is_empty() {
+        return Ok(None);
+    }
+    let stamp = chrono::Local::now().format("%Y-%m-%d %H%M%S").to_string();
+    let mut to = into.join(&stamp);
+    let mut n = 1;
+    while to.exists() {
+        n += 1;
+        to = into.join(format!("{stamp} {n:02}"));
+    }
+    std::fs::create_dir_all(&to).map_err(|e| e.to_string())?;
+    for p in files {
+        if let Some(name) = p.file_name() {
+            std::fs::copy(p, to.join(name)).map_err(|e| format!("making a backup: {e}"))?;
+        }
+    }
+    olds.push(to.clone());
+    olds.sort();
+    while olds.len() > BACKUPS_KEPT {
+        let _ = std::fs::remove_dir_all(olds.remove(0));
+    }
+    Ok(Some(to))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

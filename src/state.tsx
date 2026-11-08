@@ -10,7 +10,40 @@ import type { Song } from "./worship";
 import type { Closing } from "./closing";
 import { listen } from "@tauri-apps/api/event";
 import { invoke } from "@tauri-apps/api/core";
-import { Ledger, merge, payload as syncPayload, Payload, settle, stamp } from "./sync";
+import {
+  entryKey,
+  forget,
+  keepBoth,
+  Ledger,
+  merge,
+  payload as syncPayload,
+  Payload,
+  refuseMassRemoval,
+  settle,
+  SYNC_LIMIT,
+  stable,
+  stamp,
+  vanished,
+  withoutJournal,
+} from "./sync";
+
+/** The most journal entries one sync may delete; a phone that removes more is refused. */
+const MAX_SYNC_DELETES = SYNC_LIMIT;
+
+/** The journal is empty but the ledger knows many entries in it: taken for unreadable rather than
+ *  emptied, so nothing is stamped removed and nothing syncs until it reads again. */
+/** Bookmarks, highlights or plans empty here though the ledger knew many: their ledger entries are
+ *  forgotten, so nothing is taken for removed and a phone sends them back. (The journal is stricter:
+ *  journalVanished stops sync, rather than refill a journal folder.) */
+const forgetVanished = (l: Ledger, now: Record<string, unknown>) => {
+  const gone = vanished(l, now);
+  gone.delete("j");
+  if (gone.size) console.error(`sync: ${[...gone].join(", ")} empty here but known before; taken from the phone`);
+  return forget(l, gone);
+};
+
+const journalVanished = (l: Ledger, journal: unknown[]) =>
+  journal.length === 0 && Object.entries(l).filter(([k, e]) => k.startsWith("j|") && !e.del).length > MAX_SYNC_DELETES;
 import { fromItems, itemsOf, placesOf, Synced } from "./syncHub";
 import { api, JournalEntry, LibraryInfo, ModuleInfo } from "./api";
 import { claudeAlias } from "./assistant";
@@ -626,6 +659,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const curPlace = useRef<Place | null>(null);
   const [, bump] = useState(0);
   const [journal, setJournal] = useState<JournalEntry[]>([]);
+  /** The folder whose journal has been read. Sync waits until it is the folder Settings names: before
+   *  that the journal is empty only because it hasn't been read, and an empty journal would be taken for
+   *  every entry deleted (which happened once, on a hot reload in development). */
+  const [journalLoadedFor, setJournalLoadedFor] = useState<string | null>(null);
   const [defaultDir, setDefaultDir] = useState("");
   const wordStudy = nav.word ?? null;
   const [journalSeed, setJournalSeed] = useState<JournalSeed | null>(null);
@@ -667,7 +704,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const n = ++journalSeq.current;
     try {
       const js = await api.journalList(journalDir);
-      if (n === journalSeq.current) setJournal(js);
+      if (n === journalSeq.current) {
+        setJournal(js);
+        setJournalLoadedFor(journalDir);
+      }
     } catch (e) {
       console.error(e);
     }
@@ -845,9 +885,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // Sync with the phone app (syncHub.ts, sync.ts; the server is sync.rs). The ledger notes when each
   // synced thing last changed here, so a newer change on a phone wins and an older one doesn't.
   const ledger = useRef<Ledger | null>(null);
-  const synced = useRef<Synced>({ bookmarks, highlights, docAt: nav.docAt, plans, recent: nav.recent });
-  synced.current = { bookmarks, highlights, docAt: nav.docAt, plans, recent: nav.recent };
-  const syncReady = bookmarksLoaded && highlightsLoaded && navLoaded && plansLoaded;
+  const synced = useRef<Synced>({ bookmarks, highlights, docAt: nav.docAt, plans, recent: nav.recent, journal });
+  synced.current = { bookmarks, highlights, docAt: nav.docAt, plans, recent: nav.recent, journal };
+  const journalLoaded = settingsLoaded && !!journalDir && journalLoadedFor === journalDir;
+  // Not when saved data couldn't be read: what's here would be taken for everything removed.
+  const syncReady = bookmarksLoaded && highlightsLoaded && navLoaded && plansLoaded && journalLoaded && !readFailed;
+  const syncReadyRef = useRef(false);
+  syncReadyRef.current = syncReady;
+  const journalDirRef = useRef(journalDir);
+  journalDirRef.current = journalDir;
   const ledgerTimer = useRef<number | undefined>(undefined);
   const saveLedger = () => {
     window.clearTimeout(ledgerTimer.current);
@@ -856,8 +902,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!syncReady) return;
     const stampNow = () => {
-      if (!ledger.current) return;
-      ledger.current = stamp(ledger.current, itemsOf(synced.current));
+      if (!ledger.current || journalVanished(ledger.current, synced.current.journal)) return;
+      const now = itemsOf(synced.current);
+      ledger.current = stamp(forgetVanished(ledger.current, now), now);
       saveLedger();
     };
     if (ledger.current) stampNow();
@@ -869,24 +916,72 @@ export function AppProvider({ children }: { children: ReactNode }) {
           ledger.current = l ?? {};
           stampNow();
         });
-  }, [syncReady, bookmarks, highlights, nav.docAt, plans]);
+  }, [syncReady, bookmarks, highlights, nav.docAt, plans, journal]);
   useEffect(() => {
+    // A copy of the bookmarks, highlights and plans files first (once a day), then the answer.
     const un = listen<{ rid: number; payload: Payload }>("sync-request", ({ payload: { rid, payload: theirs } }) => {
-      if (!ledger.current) return; // not loaded yet: the phone's request times out and it tries later
+      api
+        .dataBackup()
+        .catch((e) => console.error("sync backup", e))
+        .finally(() => answer(rid, theirs));
+    });
+    const answer = (rid: number, theirs: Payload) => {
+      // Not loaded yet: the phone's request times out and it tries later.
+      if (!ledger.current || !syncReadyRef.current) return;
       const cur = synced.current;
+      if (journalVanished(ledger.current, cur.journal)) return;
       const now = itemsOf(cur);
-      ledger.current = stamp(ledger.current, now);
-      const merged = merge(syncPayload(ledger.current, now, placesOf(cur.recent)), theirs);
+      ledger.current = stamp(forgetVanished(ledger.current, now), now);
+      const mine = syncPayload(ledger.current, now, placesOf(cur.recent));
+      // A phone without the journal neither sends entries nor gets them; the computer's stay as they are.
+      // A result that would remove many of one kind (a phone that lost them) is refused, and they go back.
+      const { merged, refused } = refuseMassRemoval(
+        now,
+        merge(mine, { ...theirs, items: theirs.journal ? keepBoth(mine.items, theirs) : withoutJournal(theirs.items) }),
+      );
+      if (refused.size) console.error(`sync: a phone would have removed many ${[...refused].join(", ")}; kept`);
       const done = settle(merged);
       const next = fromItems(done.now, merged.recent, cur, uid);
+      // Journal entries the phone added, changed or removed, written to the journal's files. Only an entry
+      // the phone itself removed is deleted here, never one this computer's own ledger had down as
+      // removed, and never more than a few in one sync: anything else is kept, and syncs back as it is.
+      const dir = journalDirRef.current;
+      if (dir) {
+        const was = new Map(cur.journal.map((e) => [e.id, e]));
+        const ids = new Set(next.journal.map((e) => e.id));
+        const gone = cur.journal.filter((e) => !ids.has(e.id));
+        const theyRemoved = gone.filter((e) => theirs.journal && theirs.items[entryKey(e.id)]?.del);
+        const removing = theyRemoved.length <= MAX_SYNC_DELETES ? theyRemoved : [];
+        if (theyRemoved.length > MAX_SYNC_DELETES)
+          console.error(`sync: a phone removed ${theyRemoved.length} journal entries; none were deleted`);
+        const kept = gone.filter((e) => !removing.includes(e));
+        next.journal = [...next.journal, ...kept].sort((a, b) => b.created.localeCompare(a.created));
+        const writes = [
+          ...next.journal.filter((e) => stable(was.get(e.id)) !== stable(e)).map((e) => () => api.journalSave(dir, e)),
+          ...removing.map((e) => () => api.journalDelete(dir, e.id)),
+        ];
+        if (writes.length) {
+          ++journalSeq.current;
+          // A copy of the files first (journal-backups in the app's data folder): once a day, and always
+          // before a sync that changes many entries. If it can't be made, nothing is written.
+          api
+            .journalBackup(dir, writes.length > 20)
+            .then(() => Promise.all(writes.map((w) => w())))
+            .catch((e) => console.error(e))
+            .then(() => api.journalStamp(dir).then((st) => (journalStamp.current = st)))
+            .catch(() => {});
+        }
+      }
       ledger.current = done.ledger;
       saveLedger();
       setBookmarks(() => next.bookmarks);
       setHighlights(() => next.highlights);
       setNav((n) => ({ ...n, docAt: next.docAt, recent: next.recent }));
       setPlans(() => next.plans);
-      invoke("sync_reply", { rid, merged }).catch(() => {});
-    });
+      setJournal(next.journal);
+      const reply: Payload = theirs.journal ? { ...merged, journal: true } : { ...merged, items: withoutJournal(merged.items) };
+      invoke("sync_reply", { rid, merged: reply }).catch(() => {});
+    };
     return () => {
       un.then((u) => u());
     };

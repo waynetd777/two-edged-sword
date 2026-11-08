@@ -59,12 +59,20 @@ Greek entry. A small word with English of its own has no number, grammar or Gree
 All of it is deterministic. The alignments are the slow part (half a minute); it is cached in
 ~/Library/Caches/Two-edged Sword/syriac, keyed on the token streams aligned and ALGORITHM.
 """
-import hashlib, html, json, math, re, sqlite3, sys
+
+import hashlib
+import html
+import json
+import math
+import re
+import sqlite3
+import sys
 from collections import Counter, defaultdict
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from modules import CACHES, find, module, write_whole  # noqa: E402
+
 CACHE = CACHES / "syriac"
 ALGORITHM = "ibm2-both-ways/6/4.0 stems-v5"  # change to throw the cached alignment away
 
@@ -78,45 +86,139 @@ ENDINGS = ("ܗܘܢ", "ܟܘܢ", "ܝܗܝ", "ܘܗܝ", "ܝܢ", "ܘܢ", "ܢ", "ܟ", "
 ARTICLE = "G3588"
 # Greek words only a small Syriac word may render (any pronoun too): the article, and, but, for, therefore,
 # that (ἵνα, ὅτι, which the proclitic ܕ renders).
-SMALL_GREEK = {ARTICLE, "G2532", "G1161", "G1063", "G3767", "G2443", "G3754", "G302", "G1487", "G1437", "G3756", "G3361",
-               "G3704", "G5613", "G5618", "G2531"}  # … ἄν, εἰ, ἐάν, οὐ, μή, ὅπως, ὡς, ὥσπερ, καθώς
+SMALL_GREEK = {
+    ARTICLE,
+    "G2532",
+    "G1161",
+    "G1063",
+    "G3767",
+    "G2443",
+    "G3754",
+    "G302",
+    "G1487",
+    "G1437",
+    "G3756",
+    "G3361",
+    "G3704",
+    "G5613",
+    "G5618",
+    "G2531",
+}  # … ἄν, εἰ, ἐάν, οὐ, μή, ὅπως, ὡς, ὥσπερ, καθώς
 # Pronouns and demonstratives, which may render the Greek article (ܗܘ ὁ, ܗܝ ἡ), and what they then mean.
-PRONOUNS = {"ܗܘ": "that", "ܗܝ": "that", "ܗܢܘܢ": "those", "ܗܢܝܢ": "those", "ܗܢܐ": "this", "ܗܕܐ": "this", "ܐܝܠܝܢ": "those",
-            "ܐܝܢܐ": "which", "ܐܝܕܐ": "which", "ܡܐ": "what"}
+PRONOUNS = {
+    "ܗܘ": "that",
+    "ܗܝ": "that",
+    "ܗܢܘܢ": "those",
+    "ܗܢܝܢ": "those",
+    "ܗܢܐ": "this",
+    "ܗܕܐ": "this",
+    "ܐܝܠܝܢ": "those",
+    "ܐܝܢܐ": "which",
+    "ܐܝܕܐ": "which",
+    "ܡܐ": "what",
+}
 # A preposition with a pronoun suffix (ܠܟܘܢ to you, ܒܗ in him, ܡܢܗ from him, ܕܝܠܟ your own): a pronoun.
-BASES = {"ܠ": "to", "ܒ": "in", "ܡܢ": "from", "ܥܠ": "on", "ܥܡ": "with", "ܠܘܬ": "to", "ܩܕܡ": "before", "ܕܝܠ": "own", "ܒܝܢܬ": "among",
-         "ܒܬܪ": "after", "ܡܛܠܬ": "because of", "ܠܘܩܒܠ": "against", "ܚܠܦ": "for", "ܒܠܥܕ": "without"}
-OBJECTS = {"ܝ": "me", "ܟ": "you", "ܗ": "him", "ܢ": "us", "ܟܝ": "you", "ܟܘܢ": "you", "ܟܝܢ": "you", "ܗܘܢ": "them",
-           "ܗܝܢ": "them", "ܘܗܝ": "him", "ܝܗ": "her", "ܝܟ": "you", "ܝܟܝ": "you", "ܝܢ": "us", "ܝܢܢ": "us", "ܝܗܘܢ": "them",
-           "ܝܗܝܢ": "them", "ܝܟܘܢ": "you", "ܝܟܝܢ": "you"}
-SUFFIXED = re.compile(f"^({'|'.join(sorted(BASES, key=len, reverse=True))})({'|'.join(sorted(OBJECTS, key=len, reverse=True))})$")
+BASES = {
+    "ܠ": "to",
+    "ܒ": "in",
+    "ܡܢ": "from",
+    "ܥܠ": "on",
+    "ܥܡ": "with",
+    "ܠܘܬ": "to",
+    "ܩܕܡ": "before",
+    "ܕܝܠ": "own",
+    "ܒܝܢܬ": "among",
+    "ܒܬܪ": "after",
+    "ܡܛܠܬ": "because of",
+    "ܠܘܩܒܠ": "against",
+    "ܚܠܦ": "for",
+    "ܒܠܥܕ": "without",
+}
+OBJECTS = {
+    "ܝ": "me",
+    "ܟ": "you",
+    "ܗ": "him",
+    "ܢ": "us",
+    "ܟܝ": "you",
+    "ܟܘܢ": "you",
+    "ܟܝܢ": "you",
+    "ܗܘܢ": "them",
+    "ܗܝܢ": "them",
+    "ܘܗܝ": "him",
+    "ܝܗ": "her",
+    "ܝܟ": "you",
+    "ܝܟܝ": "you",
+    "ܝܢ": "us",
+    "ܝܢܢ": "us",
+    "ܝܗܘܢ": "them",
+    "ܝܗܝܢ": "them",
+    "ܝܟܘܢ": "you",
+    "ܝܟܝܢ": "you",
+}
+SUFFIXED = re.compile(
+    f"^({'|'.join(sorted(BASES, key=len, reverse=True))})({'|'.join(sorted(OBJECTS, key=len, reverse=True))})$"
+)
 # The pronoun suffixes a Syriac word ends with when it has a Greek genitive pronoun's sense in it.
-SUFFIX = {"my": ("ܝ",), "your": ("ܟ", "ܟܝ", "ܟܘܢ", "ܟܝܢ"), "his": ("ܗ", "ܘܗܝ", "ܝܗܝ"), "her": ("ܗ",), "its": ("ܗ", "ܘܗܝ"),
-          "our": ("ܢ",), "their": ("ܗܘܢ", "ܗܝܢ")}
+SUFFIX = {
+    "my": ("ܝ",),
+    "your": ("ܟ", "ܟܝ", "ܟܘܢ", "ܟܝܢ"),
+    "his": ("ܗ", "ܘܗܝ", "ܝܗܝ"),
+    "her": ("ܗ",),
+    "its": ("ܗ", "ܘܗܝ"),
+    "our": ("ܢ",),
+    "their": ("ܗܘܢ", "ܗܝܢ"),
+}
 # The commonest small words, in English, with the Strong's numbers of the Greek words they render (a
 # word lined up with another Greek word keeps its English but has no number). A gloss of None: the
 # Greek's English, when it is one of these numbers (ܡܢ is "from" or "who").
 FIXED = {
-    "ܕܝܢ": ("but", {"G1161", "G235"}), "ܓܝܪ": ("for", {"G1063"}), "ܠܐ": ("not", {"G3756", "G3361", "G3762", "G3367"}),
-    "ܐܦ": ("also", {"G2532", "G1161"}), "ܐܢ": ("if", {"G1437", "G1487"}), "ܐܠܐ": ("but", {"G235", "G1508", "G4133"}),
+    "ܕܝܢ": ("but", {"G1161", "G235"}),
+    "ܓܝܪ": ("for", {"G1063"}),
+    "ܠܐ": ("not", {"G3756", "G3361", "G3762", "G3367"}),
+    "ܐܦ": ("also", {"G2532", "G1161"}),
+    "ܐܢ": ("if", {"G1437", "G1487"}),
+    "ܐܠܐ": ("but", {"G235", "G1508", "G4133"}),
     "ܐܝܟ": ("as", {"G5613", "G5618", "G2531", "G2509", "G2526", "G3704", "G3664", "G5616"}),
-    "ܐܝܟܢܐ": ("as", {"G5613", "G5618", "G2531", "G4459", "G3704"}), "ܗܟܢܐ": ("thus", {"G3779", "G5615", "G3668", "G3634"}),
-    "ܗܟܝܠ": ("therefore", {"G3767", "G686", "G5106"}), "ܡܛܠ": ("because", {"G1223", "G3754", "G1752", "G4012", "G1360"}),
-    "ܟܕ": ("when", {"G3753", "G5613", "G2259"}), "ܥܕܡܐ": ("until", {"G2193", "G891", "G3360"}),
-    "ܗܫܐ": ("now", {"G3568", "G737", "G3570"}), "ܬܘܒ": ("again", {"G3825"}), "ܐܝܬ": ("there is", set()),
-    "ܠܝܬ": ("there is not", set()), "ܗܐ": ("behold", {"G2400", "G2396"}), "ܐܘ": ("or", {"G2228"}),
-    "ܥܠ": ("on", {"G1909", "G4012", "G5228", "G2596"}), "ܥܡ": ("with", {"G3326", "G4862", "G3844", "G4314"}),
-    "ܠܘܬ": ("to", {"G4314", "G1519", "G3844", "G1722"}), "ܩܕܡ": ("before", {"G1715", "G1799", "G4253", "G1726", "G1725", "G3936"}),
-    "ܒܬܪ": ("after", {"G3326", "G3694", "G3693"}), "ܡܢ": (None, {"G575", "G1537", "G3844", "G5259", "G5101", "G3739"}),
-    "ܗܘ": ("he", {"G846", "G3778", "G1565", "G3588"}), "ܗܝ": ("she", {"G846", "G3778", "G1565", "G3588"}),
-    "ܗܢܘܢ": ("they", {"G846", "G3778", "G1565", "G3588"}), "ܗܢܝܢ": ("they", {"G846", "G3778", "G1565", "G3588"}),
-    "ܗܢܐ": ("this", {"G3778", "G5124", "G3592"}), "ܗܕܐ": ("this", {"G3778", "G5124", "G3592"}),
-    "ܐܢܐ": ("I", {"G1473", "G2504"}), "ܐܢܬ": ("you", {"G4771", "G4675"}), "ܐܢܬܘܢ": ("you", {"G5210", "G5216"}),
-    "ܚܢܢ": ("we", {"G2249", "G2257"}), "ܐܝܠܝܢ": ("those", {"G3588", "G3739", "G3745", "G3778", "G1565"}),
-    "ܡܢܘ": ("who?", {"G5101"}), "ܡܢܐ": ("what?", {"G5101", "G5100", "G3739"}), "ܐܡܬܝ": ("when", {"G3752", "G4219"}),
-    "ܠܡܢܐ": ("why?", {"G5101", "G2444"}), "ܐܝܟܐ": ("where", {"G4226", "G3699", "G3757"}), "ܟܠ": ("all", {"G3956", "G3650", "G537"}),
-    "ܗܘܐ": ("was", {"G1096", "G2258", "G1510", "G5225"}), "ܗܘܘ": ("were", {"G1096", "G2258", "G1510", "G5225"}),
-    "ܗܪܟܐ": ("here", {"G5602", "G1759"}), "ܬܡܢ": ("there", {"G1563", "G1564"}), "ܐܡܝܢ": ("amen", {"G281"}),
+    "ܐܝܟܢܐ": ("as", {"G5613", "G5618", "G2531", "G4459", "G3704"}),
+    "ܗܟܢܐ": ("thus", {"G3779", "G5615", "G3668", "G3634"}),
+    "ܗܟܝܠ": ("therefore", {"G3767", "G686", "G5106"}),
+    "ܡܛܠ": ("because", {"G1223", "G3754", "G1752", "G4012", "G1360"}),
+    "ܟܕ": ("when", {"G3753", "G5613", "G2259"}),
+    "ܥܕܡܐ": ("until", {"G2193", "G891", "G3360"}),
+    "ܗܫܐ": ("now", {"G3568", "G737", "G3570"}),
+    "ܬܘܒ": ("again", {"G3825"}),
+    "ܐܝܬ": ("there is", set()),
+    "ܠܝܬ": ("there is not", set()),
+    "ܗܐ": ("behold", {"G2400", "G2396"}),
+    "ܐܘ": ("or", {"G2228"}),
+    "ܥܠ": ("on", {"G1909", "G4012", "G5228", "G2596"}),
+    "ܥܡ": ("with", {"G3326", "G4862", "G3844", "G4314"}),
+    "ܠܘܬ": ("to", {"G4314", "G1519", "G3844", "G1722"}),
+    "ܩܕܡ": ("before", {"G1715", "G1799", "G4253", "G1726", "G1725", "G3936"}),
+    "ܒܬܪ": ("after", {"G3326", "G3694", "G3693"}),
+    "ܡܢ": (None, {"G575", "G1537", "G3844", "G5259", "G5101", "G3739"}),
+    "ܗܘ": ("he", {"G846", "G3778", "G1565", "G3588"}),
+    "ܗܝ": ("she", {"G846", "G3778", "G1565", "G3588"}),
+    "ܗܢܘܢ": ("they", {"G846", "G3778", "G1565", "G3588"}),
+    "ܗܢܝܢ": ("they", {"G846", "G3778", "G1565", "G3588"}),
+    "ܗܢܐ": ("this", {"G3778", "G5124", "G3592"}),
+    "ܗܕܐ": ("this", {"G3778", "G5124", "G3592"}),
+    "ܐܢܐ": ("I", {"G1473", "G2504"}),
+    "ܐܢܬ": ("you", {"G4771", "G4675"}),
+    "ܐܢܬܘܢ": ("you", {"G5210", "G5216"}),
+    "ܚܢܢ": ("we", {"G2249", "G2257"}),
+    "ܐܝܠܝܢ": ("those", {"G3588", "G3739", "G3745", "G3778", "G1565"}),
+    "ܡܢܘ": ("who?", {"G5101"}),
+    "ܡܢܐ": ("what?", {"G5101", "G5100", "G3739"}),
+    "ܐܡܬܝ": ("when", {"G3752", "G4219"}),
+    "ܠܡܢܐ": ("why?", {"G5101", "G2444"}),
+    "ܐܝܟܐ": ("where", {"G4226", "G3699", "G3757"}),
+    "ܟܠ": ("all", {"G3956", "G3650", "G537"}),
+    "ܗܘܐ": ("was", {"G1096", "G2258", "G1510", "G5225"}),
+    "ܗܘܘ": ("were", {"G1096", "G2258", "G1510", "G5225"}),
+    "ܗܪܟܐ": ("here", {"G5602", "G1759"}),
+    "ܬܡܢ": ("there", {"G1563", "G1564"}),
+    "ܐܡܝܢ": ("amen", {"G281"}),
     "ܚܕ": ("one", {"G1520", "G3391", "G5100", "G240"}),
 }
 # Words with a sense of their own unless lined up with one of these Greek words (ܒܝܬ ܡܝܬܐ "among the dead",
@@ -126,29 +228,86 @@ OR_ELSE = {"ܒܝܬ": ("among", {"G3624", "G3614"}), "ܐܬܪܐ": ("place", {"G511
 # "debt", ܐܬܐ "came" and "sign", ܥܡ- "with" and "people", ܣܥܪܐ "hair" and "barley", ܒܪܟ "bless" and "kneel", ܕܡ-
 # "blood" and "be low", ܕܡܝܐ "price" and ܡܝܐ "water", ܐܬܪܐ "place", ܥܢܐ "flock" and "answer", ܫܢܐ "year", "tooth"
 # and "change", ܦܠܚܐ "farmer" and "serve", ܨܒܘܬ "thing" and "will".
-HOMOGRAPHS = {"ܚܘܒܝܢ", "ܚܘܒܐ", "ܚܘܒܗ", "ܚܘܒܢ", "ܚܘܒܝܟ", "ܚܘܒܝܗܘܢ", "ܚܘܒܝܟܘܢ", "ܐܬܐ", "ܐܬܘܬܐ", "ܣܥܪܐ", "ܒܪܟܘ", "ܒܪܟ",
-              "ܕܡܟ", "ܕܡܝܐ", "ܡܝܐ", "ܐܬܪܐ", "ܥܢܐ", "ܫܢܐ", "ܦܠܚܐ", "ܨܒܘܬ"}
+HOMOGRAPHS = {
+    "ܚܘܒܝܢ",
+    "ܚܘܒܐ",
+    "ܚܘܒܗ",
+    "ܚܘܒܢ",
+    "ܚܘܒܝܟ",
+    "ܚܘܒܝܗܘܢ",
+    "ܚܘܒܝܟܘܢ",
+    "ܐܬܐ",
+    "ܐܬܘܬܐ",
+    "ܣܥܪܐ",
+    "ܒܪܟܘ",
+    "ܒܪܟ",
+    "ܕܡܟ",
+    "ܕܡܝܐ",
+    "ܡܝܐ",
+    "ܐܬܪܐ",
+    "ܥܢܐ",
+    "ܫܢܐ",
+    "ܦܠܚܐ",
+    "ܨܒܘܬ",
+}
 # The senses of those homographs, as the Greek words that render them: one left without English takes the Greek of its
 # verse that is one of these, when no other word of the verse has it (or one has it only by chance), with that Greek's
 # English, or the English given here. ܫܢܐ is ܠܫܢܐ "tongue" too, with its ܠ taken for a proclitic.
 _LOVE_DEBT = {"G26": None, "G5360": None, "G3783": None, "G3782": None, "G1156": None, "G266": None, "G3900": None}
 _DEBT = {"G3783": None, "G3782": None, "G1156": None, "G266": None, "G3900": None}
-_COME = {g: "come" for g in ("G2064", "G2240", "G3854", "G2658", "G2186", "G3918", "G4334", "G1904", "G4905", "G2597", "G2718")}
+_COME = {
+    g: "come"
+    for g in ("G2064", "G2240", "G3854", "G2658", "G2186", "G3918", "G4334", "G1904", "G4905", "G2597", "G2718")
+}
 SENSES = {
-    "ܚܘܒ": _LOVE_DEBT, "ܚܘܒܬ": _DEBT,  # ܚܘܒܐ "love" or "debt", ܚܘܒܬܐ "debt"; and their suffixed forms (see sense)
-    "ܐܬܐ": {**_COME, "G4592": None}, "ܐܬܘܬܐ": {"G4592": None, "G5039": "signs"},
+    "ܚܘܒ": _LOVE_DEBT,
+    "ܚܘܒܬ": _DEBT,  # ܚܘܒܐ "love" or "debt", ܚܘܒܬܐ "debt"; and their suffixed forms (see sense)
+    "ܐܬܐ": {**_COME, "G4592": None},
+    "ܐܬܘܬܐ": {"G4592": None, "G5039": "signs"},
     "ܣܥܪܐ": {"G2359": None, "G2915": None, "G2916": None},
-    "ܒܪܟ": {"G2127": None, "G2128": None, "G2168": None, "G1120": None, "G2578": "kneel", "G5207": None, "G3816": None, "G5043": None},
+    "ܒܪܟ": {
+        "G2127": None,
+        "G2128": None,
+        "G2168": None,
+        "G1120": None,
+        "G2578": "kneel",
+        "G5207": None,
+        "G3816": None,
+        "G5043": None,
+    },
     "ܒܪܟܘ": {"G2127": None, "G2128": None, "G2168": None, "G1120": None, "G2578": "kneel"},
     "ܕܡܟ": {"G2518": None, "G2837": None, "G879": "sleep", "G129": None},
     "ܕܡܝܐ": {"G5092": "price", "G4185": None, "G927": None, "G5204": None, "G3664": None, "G3666": None, "G3667": None},
-    "ܡܝܐ": {"G5204": None, "G5202": None}, "ܥܢܐ": {"G4263": None, "G4167": None, "G4168": None, "G611": None},
+    "ܡܝܐ": {"G5204": None, "G5202": None},
+    "ܥܢܐ": {"G4263": None, "G4167": None, "G4168": None, "G611": None},
     "ܫܢܐ": {"G2094": None, "G1763": None, "G3599": None, "G236": None, "G3105": None, "G1100": None},
-    "ܦܠܚܐ": {"G1092": None, "G289": None, "G2040": None, "G4904": None, "G3000": None, "G1398": None, "G4757": None, "G4961": None},
+    "ܦܠܚܐ": {
+        "G1092": None,
+        "G289": None,
+        "G2040": None,
+        "G4904": None,
+        "G3000": None,
+        "G1398": None,
+        "G4757": None,
+        "G4961": None,
+    },
     "ܨܒܘܬ": {"G4229": None, "G2307": None},
 }
-SENSE_OWNER = {"ܗ": "his", "ܢ": "our", "ܝ": "my", "ܟ": "your", "ܝܢ": "our", "ܝܟ": "your", "ܝܗ": "her", "ܘܗܝ": "his",
-               "ܝܗܝ": "his", "ܟܘܢ": "your", "ܗܘܢ": "their", "ܝܟܘܢ": "your", "ܝܗܘܢ": "their"}
+SENSE_OWNER = {
+    "ܗ": "his",
+    "ܢ": "our",
+    "ܝ": "my",
+    "ܟ": "your",
+    "ܝܢ": "our",
+    "ܝܟ": "your",
+    "ܝܗ": "her",
+    "ܘܗܝ": "his",
+    "ܝܗܝ": "his",
+    "ܟܘܢ": "your",
+    "ܗܘܢ": "their",
+    "ܝܟܘܢ": "your",
+    "ܝܗܘܢ": "their",
+}
 _SENSE_FORM = re.compile(f"^(ܚܘܒܬ|ܚܘܒ)(ܐ|{'|'.join(sorted(SENSE_OWNER, key=len, reverse=True))})$")
 
 
@@ -166,12 +325,37 @@ def sense(pre, rest):
             return None
         pre, rest = pre + rest[0], rest[1:]
     return None
+
+
 # Nouns that end in ܝ "my" (ܒܢܝ "sons of" and many others don't).
-MINE = {"ܒܪܝ": "son", "ܐܒܝ": "father", "ܐܡܝ": "mother", "ܠܒܝ": "heart", "ܢܦܫܝ": "soul", "ܐܠܗܝ": "God", "ܡܪܝ": "lord",
-        "ܪܚܡܝ": "friend", "ܒܪܬܝ": "daughter", "ܐܚܬܝ": "sister", "ܪܘܚܝ": "spirit", "ܦܓܪܝ": "body", "ܫܡܝ": "name"}
+MINE = {
+    "ܒܪܝ": "son",
+    "ܐܒܝ": "father",
+    "ܐܡܝ": "mother",
+    "ܠܒܝ": "heart",
+    "ܢܦܫܝ": "soul",
+    "ܐܠܗܝ": "God",
+    "ܡܪܝ": "lord",
+    "ܪܚܡܝ": "friend",
+    "ܒܪܬܝ": "daughter",
+    "ܐܚܬܝ": "sister",
+    "ܪܘܚܝ": "spirit",
+    "ܦܓܪܝ": "body",
+    "ܫܡܝ": "name",
+}
 # Noun suffixes that are a pronoun whatever the word: "your", "their", "his".
-OWN_SUFFIX = (("ܝܟܘܢ", "your"), ("ܟܘܢ", "your"), ("ܝܗܘܢ", "their"), ("ܗܘܢ", "their"), ("ܝܗܝܢ", "their"), ("ܗܝܢ", "their"),
-              ("ܝܟܝܢ", "your"), ("ܟܝܢ", "your"), ("ܘܗܝ", "his"), ("ܝܗܝ", "his"))
+OWN_SUFFIX = (
+    ("ܝܟܘܢ", "your"),
+    ("ܟܘܢ", "your"),
+    ("ܝܗܘܢ", "their"),
+    ("ܗܘܢ", "their"),
+    ("ܝܗܝܢ", "their"),
+    ("ܗܝܢ", "their"),
+    ("ܝܟܝܢ", "your"),
+    ("ܟܝܢ", "your"),
+    ("ܘܗܝ", "his"),
+    ("ܝܗܝ", "his"),
+)
 POSSESSIVE = {"my": "me", "our": "us", "your": "you", "his": "him", "her": "her", "its": "it", "their": "them"}
 OWNER = {"me": "my", "us": "our", "you": "your", "him": "his", "her": "her", "them": "their"}
 
@@ -179,7 +363,12 @@ OWNER = {"me": "my", "us": "our", "you": "your", "him": "his", "her": "her", "th
 def verses(name):
     db = sqlite3.connect(f"file:{find(name)}?immutable=1", uri=True)
     try:
-        return {(b, c, v): t or "" for b, c, v, t in db.execute("SELECT Book, Chapter, Verse, Scripture FROM Bible ORDER BY Book, Chapter, Verse")}
+        return {
+            (b, c, v): t or ""
+            for b, c, v, t in db.execute(
+                "SELECT Book, Chapter, Verse, Scripture FROM Bible ORDER BY Book, Chapter, Verse"
+            )
+        }
     finally:
         db.close()
 
@@ -211,6 +400,7 @@ class Corpus:
             while len(w) > 2 and w[0] in PROCLITICS and freq.get(w[1:], 0) >= 2 and len(pre) < 3:
                 pre, w = pre + w[0], w[1:]
             return pre, w
+
         self.seg = {w: seg(w) for w in freq}
         self.S, self.owner, self.G = {}, {}, {}
         for k in self.keys:
@@ -274,7 +464,9 @@ def links(c):
         s, g = c.S[k], c.G[k]
         a1, a2 = viterbi(t_sg, s, g), viterbi(t_gs, g, s)
         inter = {(i, j) for j, i in enumerate(a1) if i is not None and a2[i] == j}
-        union = {(i, j) for j, i in enumerate(a1) if i is not None} | {(i, j) for i, j in enumerate(a2) if j is not None}
+        union = {(i, j) for j, i in enumerate(a1) if i is not None} | {
+            (i, j) for i, j in enumerate(a2) if j is not None
+        }
         got = set(inter)
         for i, j in sorted(union - inter):
             if not any(x == i for x, _ in got):
@@ -346,7 +538,24 @@ def choose(c, L):
     return out
 
 
-PREPOSITIONS = {"in", "to", "into", "through", "from", "with", "on", "by", "at", "for", "of", "upon", "toward", "among", "before", "after"}
+PREPOSITIONS = {
+    "in",
+    "to",
+    "into",
+    "through",
+    "from",
+    "with",
+    "on",
+    "by",
+    "at",
+    "for",
+    "of",
+    "upon",
+    "toward",
+    "among",
+    "before",
+    "after",
+}
 
 
 def english(c, k, wi, w, chosen, used, seg=None, j=None, gloss_as=None):
@@ -392,7 +601,12 @@ def english(c, k, wi, w, chosen, used, seg=None, j=None, gloss_as=None):
         jj = c.G[k].index("G2992")
         g2 = c.grk[k][jj]
         used.add(jj)
-        num, greek, tvm, gloss = g2[1], re.sub(r"[^\w]", "", g2[0]), g2[2], f"{OWNER[OBJECTS[m.group(2)]]} {bare(g2[3])}"
+        num, greek, tvm, gloss = (
+            g2[1],
+            re.sub(r"[^\w]", "", g2[0]),
+            g2[2],
+            f"{OWNER[OBJECTS[m.group(2)]]} {bare(g2[3])}",
+        )
     elif m := SUFFIXED.match(rest):
         base, obj = BASES[m.group(1)], OBJECTS[m.group(2)]
         if not tvm.startswith(("pronoun", "preposition")):
@@ -416,12 +630,19 @@ def english(c, k, wi, w, chosen, used, seg=None, j=None, gloss_as=None):
                 continue
             if tvm.startswith("verb") and g2[3] in ("my", "our"):
                 continue  # ܢ and ܝ end verbs of the first person too
-            gloss = f"{g2[3]} {bare(gloss)}" if tvm.startswith(("noun", "adjective")) else f"{gloss} {POSSESSIVE[g2[3]]}"
+            gloss = (
+                f"{g2[3]} {bare(gloss)}" if tvm.startswith(("noun", "adjective")) else f"{gloss} {POSSESSIVE[g2[3]]}"
+            )
             used.add(jj)
             break
     # A homograph's own suffix, where the Greek has no pronoun: ܘܚܘܒܬܗ "and his debt".
-    if (seg and tvm.startswith("noun") and (m := _SENSE_FORM.match(rest)) and m.group(2) in SENSE_OWNER
-            and not {x.lower() for x in gloss.split()} & set(POSSESSIVE)):
+    if (
+        seg
+        and tvm.startswith("noun")
+        and (m := _SENSE_FORM.match(rest))
+        and m.group(2) in SENSE_OWNER
+        and not {x.lower() for x in gloss.split()} & set(POSSESSIVE)
+    ):
         gloss = f"{SENSE_OWNER[m.group(2)]} {bare(gloss)}"
     return num, greek, tvm, suffixed(rest, pre, tvm, gloss)
 
@@ -437,7 +658,20 @@ def suffixed(rest, pre, tvm, gloss, prefix=True):
     own: ܒܥܐ "seek"). `tvm`: the Greek's grammar, or "" when not known."""
     words = gloss.split()
     have = {w.lower() for w in words}
-    if not small(rest) and not have & {"my", "your", "his", "her", "its", "our", "their", "me", "you", "him", "us", "them"}:
+    if not small(rest) and not have & {
+        "my",
+        "your",
+        "his",
+        "her",
+        "its",
+        "our",
+        "their",
+        "me",
+        "you",
+        "him",
+        "us",
+        "them",
+    }:
         if tvm.startswith("noun") and rest in MINE and MINE[rest] == words[-1].lower():
             words = ["my"] + bare(" ".join(words)).split()
         elif tvm.startswith("noun"):
@@ -445,7 +679,12 @@ def suffixed(rest, pre, tvm, gloss, prefix=True):
                 if rest.endswith(suf) and len(rest) - len(suf) >= 2:
                     words = [who] + bare(" ".join(words)).split()
                     break
-        elif tvm.startswith("verb") and rest.endswith(("ܘܗܝ", "ܝܗܝ")) and len(rest) >= 5 and not rest.startswith(("ܐܝܬ", "ܠܝܬ")):
+        elif (
+            tvm.startswith("verb")
+            and rest.endswith(("ܘܗܝ", "ܝܗܝ"))
+            and len(rest) >= 5
+            and not rest.startswith(("ܐܝܬ", "ܠܝܬ"))
+        ):
             words.append("him")
     if prefix and not (tvm.startswith("preposition") or words[0].lower() in PREPOSITIONS):
         for ch in reversed(pre):
@@ -458,11 +697,13 @@ def suffixed(rest, pre, tvm, gloss, prefix=True):
 
 
 # English words the translations' alignment leaves out: they render Syriac small words, prefixes and suffixes.
-STOP = set("""a an the of to and in on at by for with from that this these those is are was were be been being am it its
+STOP = set(
+    """a an the of to and in on at by for with from that this these those is are was were be been being am it its
 he him his himself she her herself they them their themselves we us our ourselves you your yourselves ye thy thee thou thine
 i me my mine myself not no nor as so but or if then there which who whom whose what when where why how shall will would
 should may might can could must have has had hath having do does did doth done also unto upon into out up all any every
-one ones own very even yet now than too say said saith let lo behold o oh because therefore though while whoever whatever""".split())
+one ones own very even yet now than too say said saith let lo behold o oh because therefore though while whoever whatever""".split()
+)
 TRANSLATIONS = {"murdock.bbli": "Murdock", "etheridge.bbli": "Etheridge"}
 
 
@@ -480,7 +721,10 @@ def cached_english(c, name, text):
         h.update(f"{k}\t{' '.join(c.S[k])}\t{text.get(k, '')}\n".encode())
     p = CACHE / f"english-{h.hexdigest()[:16]}.json"
     if p.is_file():
-        return {tuple(map(int, k.split("."))): {int(i): e for i, e in v.items()} for k, v in json.loads(p.read_text(encoding="utf-8")).items()}
+        return {
+            tuple(map(int, k.split("."))): {int(i): e for i, e in v.items()}
+            for k, v in json.loads(p.read_text(encoding="utf-8")).items()
+        }
     print(f"  aligning {TRANSLATIONS[name]}'s English (both ways)")
     keys, S, E, own, surf = [], {}, {}, {}, {}
     for k in c.keys:
@@ -496,7 +740,9 @@ def cached_english(c, name, text):
     for k in keys:
         a1, a2 = viterbi(t_se, S[k], E[k]), viterbi(t_es, E[k], S[k])
         out[k] = {own[k][i]: surf[k][j] for j, i in enumerate(a1) if i is not None and a2[i] == j}
-    write_whole(p, json.dumps({".".join(map(str, k)): v for k, v in out.items()}, separators=(",", ":"), ensure_ascii=False))
+    write_whole(
+        p, json.dumps({".".join(map(str, k)): v for k, v in out.items()}, separators=(",", ":"), ensure_ascii=False)
+    )
     return out
 
 
@@ -507,7 +753,9 @@ def main(into=None):
             sys.exit(f"no {find(name)}; build it first (tools/core/build.py {name.split('.')[0]})")
     pesh, byz = verses("peshitta.bbli"), verses("byz+.bbli")
     c = Corpus(pesh, byz)
-    print(f"  {len(c.keys)} verses, {sum(len(c.syr[k]) for k in c.keys)} Syriac words, {sum(len(c.G[k]) for k in c.keys)} Greek")
+    print(
+        f"  {len(c.keys)} verses, {sum(len(c.syr[k]) for k in c.keys)} Syriac words, {sum(len(c.G[k]) for k in c.keys)} Greek"
+    )
     L = cached_links(c)
     chosen = choose(c, L)
 
@@ -558,7 +806,9 @@ def main(into=None):
                 stats["homograph took the Greek of a word that had it by chance"] += 1
             used[k].add(j)
             held[(k, j)] = wi
-            num, greek, tvm, gloss = english(c, k, wi, w, chosen[k], used[k], seg=(pre, rest), j=j, gloss_as=senses[g[j]])
+            num, greek, tvm, gloss = english(
+                c, k, wi, w, chosen[k], used[k], seg=(pre, rest), j=j, gloss_as=senses[g[j]]
+            )
             res[(k, wi)] = (num, greek, tvm, gloss, "greek")
             stats["homograph's sense from its verse's Greek"] += 1
 
@@ -581,7 +831,7 @@ def main(into=None):
     def sure(key, at_least, share):
         if key not in linked:
             return None
-        (num, n), = linked[key].most_common(1)
+        ((num, n),) = linked[key].most_common(1)
         total = sum(linked[key].values())
         return num if n >= at_least and n / total >= share and total / occurs[key] >= 0.4 else None
 
@@ -594,17 +844,31 @@ def main(into=None):
                 continue
             key = ("form", rest)
             num = sure(key, 3, 0.6)
-            if not num or rest in HOMOGRAPHS or sense(pre, rest) or num in c.G[k]:  # where the verse's Greek has it, another word renders it
+            if (
+                not num or rest in HOMOGRAPHS or sense(pre, rest) or num in c.G[k]
+            ):  # where the verse's Greek has it, another word renders it
                 continue
             # A content word of the verse's Greek left over near this word's place: what it renders, most likely.
             g, n = c.G[k], len(c.syr[k])
-            near = [j for j in range(len(g)) if j not in used[k] and abs(j / len(g) - wi / n) <= 0.15
-                    and g[j] not in SMALL_GREEK and not c.grk[k][j][2].startswith(("pronoun", "preposition", "article"))]
+            near = [
+                j
+                for j in range(len(g))
+                if j not in used[k]
+                and abs(j / len(g) - wi / n) <= 0.15
+                and g[j] not in SMALL_GREEK
+                and not c.grk[k][j][2].startswith(("pronoun", "preposition", "article"))
+            ]
             if near:
                 stats["left: Greek left over near it"] += 1
                 continue
             (gl, tv), _ = glosses[(key, num)].most_common(1)[0]
-            res[(k, wi)] = (num, "", "not in this verse's Greek: as the word is elsewhere", suffixed(rest, pre, tv, gl), "elsewhere")
+            res[(k, wi)] = (
+                num,
+                "",
+                "not in this verse's Greek: as the word is elsewhere",
+                suffixed(rest, pre, tv, gl),
+                "elsewhere",
+            )
             stats["Greek elsewhere"] += 1
 
     # 3. Still without English: the English of Murdock's and Etheridge's translations of the Peshitta, where it is
@@ -651,14 +915,16 @@ def main(into=None):
             w = m.group()
             if not LETTERS.search(w):
                 continue
-            parts.append(html.escape(text[last:m.start()], quote=False))
+            parts.append(html.escape(text[last : m.start()], quote=False))
             num, greek, tvm, gloss, _ = res[(k, wi)]
             words += 1
             if gloss:
                 glossed += 1
                 numbered += bool(num)
                 esc = lambda x: html.escape(x, quote=False)  # noqa: E731
-                inner = "".join(f"<{tag}>{esc(x)}</{tag}>" for tag, x in (("num", num), ("tvm", tvm), ("grk", greek)) if x)
+                inner = "".join(
+                    f"<{tag}>{esc(x)}</{tag}>" for tag, x in (("num", num), ("tvm", tvm), ("grk", greek)) if x
+                )
                 if not (tvm or greek) and num:
                     inner = f"<num>{num}</num>"
                 if not tvm and greek:  # the lemma's <grk> must follow the word's: a <tvm> between them, even empty
@@ -674,20 +940,34 @@ def main(into=None):
         if "<div>" in s and "<tvm>" not in s:  # the app reads a verse as interlinear by its <tvm>
             s = s.replace("<gra>", "<tvm></tvm><gra>", 1)
         out.append((*k, s))
-    print(f"  {glossed} of {words} words with English ({glossed / words:.1%}), {numbered} with a Strong's number ({numbered / words:.1%})")
+    print(
+        f"  {glossed} of {words} words with English ({glossed / words:.1%}), {numbered} with a Strong's number ({numbered / words:.1%})"
+    )
 
     info = verses_info().replace("<p>Public Domain.</p>", "")  # the module's About already says so
-    about = (info + "<p>This edition shows each Syriac word with the Strong's number, grammar and English of the Greek word it "
-             "translates, in Robinson and Pierpont's Byzantine text (public domain) as Byz+ has it: Strong's numbers from "
-             "STEPBible's TAGNT and English from STEPBible's TBESG (Tyndale House, CC BY 4.0, "
-             "https://github.com/STEPBible/STEPBible-Data). The words were lined up with the Greek by a statistical word "
-             "alignment over the whole New Testament, so the English is the Greek's, not a Syriac dictionary's; the grammar "
-             "shown is the Greek word's. A word the verse's Greek doesn't render takes the Greek it renders elsewhere in the "
-             "New Testament, or else the English of James Murdock's (1852) or John Wesley Etheridge's (1846–49) translations of "
-             "the Peshitta (public domain), lined up with it in the same way; its tooltip says so. Most words are right, some "
-             "are not, and a word with no clear counterpart is left without English "
-             f"({glossed / words:.0%} of the words have it). Built by Two-edged Sword's tools/syriac.</p>")
-    with module("peshitta+.bbli", "Syriac Peshitta w/ Greek glosses", "Peshitta+", about, ot=False, strongs=True, rtl=True, into=into) as db:
+    about = (
+        info
+        + "<p>This edition shows each Syriac word with the Strong's number, grammar and English of the Greek word it "
+        "translates, in Robinson and Pierpont's Byzantine text (public domain) as Byz+ has it: Strong's numbers from "
+        "STEPBible's TAGNT and English from STEPBible's TBESG (Tyndale House, CC BY 4.0, "
+        "https://github.com/STEPBible/STEPBible-Data). The words were lined up with the Greek by a statistical word "
+        "alignment over the whole New Testament, so the English is the Greek's, not a Syriac dictionary's; the grammar "
+        "shown is the Greek word's. A word the verse's Greek doesn't render takes the Greek it renders elsewhere in the "
+        "New Testament, or else the English of James Murdock's (1852) or John Wesley Etheridge's (1846–49) translations of "
+        "the Peshitta (public domain), lined up with it in the same way; its tooltip says so. Most words are right, some "
+        "are not, and a word with no clear counterpart is left without English "
+        f"({glossed / words:.0%} of the words have it). Built by Two-edged Sword's tools/syriac.</p>"
+    )
+    with module(
+        "peshitta+.bbli",
+        "Syriac Peshitta w/ Greek glosses",
+        "Peshitta+",
+        about,
+        ot=False,
+        strongs=True,
+        rtl=True,
+        into=into,
+    ) as db:
         db.executemany("INSERT INTO Bible VALUES (?,?,?,?)", out)
     print(f"peshitta+.bbli: {len(out)} verses")
 

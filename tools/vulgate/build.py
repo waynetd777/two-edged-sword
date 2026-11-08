@@ -29,20 +29,95 @@ differ from the KJV are printed.
 
 The text is the project's at a fixed commit. Downloads are cached in ~/Library/Caches/Two-edged Sword/vulgate.
 """
-import io, re, sys, zipfile
+
+import io
+import re
+import sys
+import zipfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from modules import CACHES, LIBRARY, chapter_lengths, fetch, module  # noqa: E402
+
 CACHE = CACHES / "vulgate"
 SOURCE = "https://bitbucket.org/clementinetextproject/text/get/edc85da058be630183d26e4deb6714ade80e600c.zip"
 
 # The project's file names, in e-Sword's book order: 1–66, then the deuterocanon as latin.bbli numbers it.
-BOOKS = ["Gn", "Ex", "Lv", "Nm", "Dt", "Jos", "Jdc", "Rt", "1Rg", "2Rg", "3Rg", "4Rg", "1Par", "2Par", "Esr", "Neh", "Est", "Job", "Ps",
-         "Pr", "Ecl", "Ct", "Is", "Jr", "Lam", "Ez", "Dn", "Os", "Joel", "Am", "Abd", "Jon", "Mch", "Nah", "Hab", "Soph", "Agg", "Zach",
-         "Mal", "Mt", "Mc", "Lc", "Jo", "Act", "Rom", "1Cor", "2Cor", "Gal", "Eph", "Phlp", "Col", "1Thes", "2Thes", "1Tim", "2Tim",
-         "Tit", "Phlm", "Hbr", "Jac", "1Ptr", "2Ptr", "1Jo", "2Jo", "3Jo", "Jud", "Apc",
-         "Tob", "Jdt", "Sap", "Sir", "Bar", "1Mcc", "2Mcc"]
+BOOKS = [
+    "Gn",
+    "Ex",
+    "Lv",
+    "Nm",
+    "Dt",
+    "Jos",
+    "Jdc",
+    "Rt",
+    "1Rg",
+    "2Rg",
+    "3Rg",
+    "4Rg",
+    "1Par",
+    "2Par",
+    "Esr",
+    "Neh",
+    "Est",
+    "Job",
+    "Ps",
+    "Pr",
+    "Ecl",
+    "Ct",
+    "Is",
+    "Jr",
+    "Lam",
+    "Ez",
+    "Dn",
+    "Os",
+    "Joel",
+    "Am",
+    "Abd",
+    "Jon",
+    "Mch",
+    "Nah",
+    "Hab",
+    "Soph",
+    "Agg",
+    "Zach",
+    "Mal",
+    "Mt",
+    "Mc",
+    "Lc",
+    "Jo",
+    "Act",
+    "Rom",
+    "1Cor",
+    "2Cor",
+    "Gal",
+    "Eph",
+    "Phlp",
+    "Col",
+    "1Thes",
+    "2Thes",
+    "1Tim",
+    "2Tim",
+    "Tit",
+    "Phlm",
+    "Hbr",
+    "Jac",
+    "1Ptr",
+    "2Ptr",
+    "1Jo",
+    "2Jo",
+    "3Jo",
+    "Jud",
+    "Apc",
+    "Tob",
+    "Jdt",
+    "Sap",
+    "Sir",
+    "Bar",
+    "1Mcc",
+    "2Mcc",
+]
 
 # Where the Vulgate's verses go in the KJV's numbering. Verses are taken in order; each goes to
 # the verse after the one before it (running on into the KJV's next chapter), and a new Vulgate
@@ -81,14 +156,30 @@ RULES = {
     "Apc": ["12:18 > 13:1", "13:1 +"],
 }
 # The Psalms: where each run of Vulgate verses starts (psalm, verse) and the KJV verse it starts at.
-PSALMS = ([(p, 1, p, 1) for p in range(1, 10)] + [(9, 22, 10, 1)]
-          + [(p, 1, p + 1, 1) for p in range(10, 113)] + [(113, 1, 114, 1), (113, 9, 115, 1), (114, 1, 116, 1), (115, 1, 116, 10)]
-          + [(p, 1, p + 1, 1) for p in range(116, 146)] + [(146, 1, 147, 1), (147, 1, 147, 12)]
-          + [(p, 1, p, 1) for p in range(148, 151)])
+PSALMS = (
+    [(p, 1, p, 1) for p in range(1, 10)]
+    + [(9, 22, 10, 1)]
+    + [(p, 1, p + 1, 1) for p in range(10, 113)]
+    + [(113, 1, 114, 1), (113, 9, 115, 1), (114, 1, 116, 1), (115, 1, 116, 10)]
+    + [(p, 1, p + 1, 1) for p in range(116, 146)]
+    + [(146, 1, 147, 1), (147, 1, 147, 12)]
+    + [(p, 1, p, 1) for p in range(148, 151)]
+)
 # Further rules for the Psalms, after those made from PSALMS.
-PSALM_RULES = ["2:13 +", "4:10 +", "15:10 / Notas mihi", "43:22 / Quoniam propter te", "52:2 +",
-               "55:11 / In Deo speravi", "71:2 +/ judicare populum", "99:2 +/ servite Domino", "108:2 +/ quia os peccatoris",
-               "145:2 +/ Laudabo Dominum", "12:3 +", "12:6 / Cantabo Domino"]
+PSALM_RULES = [
+    "2:13 +",
+    "4:10 +",
+    "15:10 / Notas mihi",
+    "43:22 / Quoniam propter te",
+    "52:2 +",
+    "55:11 / In Deo speravi",
+    "71:2 +/ judicare populum",
+    "99:2 +/ servite Domino",
+    "108:2 +/ quia os peccatoris",
+    "145:2 +/ Laudabo Dominum",
+    "12:3 +",
+    "12:6 / Cantabo Domino",
+]
 
 
 def get(url, name):
@@ -159,10 +250,12 @@ def move(rows, rules, kjv, b):
         return (c, v + 1) if n is None or v < n or (b, c + 1) not in kjv else (c + 1, 1)
 
     out, pos, chapter, follow = {}, None, None, False
+
     def put(p, text, join=False):
         if p in out and not join:
             print(f"  {BOOKS[b - 1]} {c}:{v} runs into KJV {p[0]}:{p[1]}, which already has a verse")
         out[p] = f"{out[p]} {text}".replace("</b> <b>", " ") if p in out else text
+
     for c, v, t in rows:
         if c != chapter:
             chapter, follow = c, False
@@ -182,7 +275,7 @@ def move(rows, rules, kjv, b):
             head, tail = t[:i].strip(), t[i:]
             m = re.search(r"\s*<i>[^<]*</i>$", head)  # a speaker's name goes with the words that follow it
             if m:
-                head, tail = head[:m.start()], f"{m[0].strip()} {tail}"
+                head, tail = head[: m.start()], f"{m[0].strip()} {tail}"
             if op == "+/":
                 put(pos, head, True)
                 target = after(pos)
@@ -217,23 +310,28 @@ def main(into=None):
     mine = {}
     for b, c, v, _ in verses:
         mine.setdefault((b, c), set()).add(v)
-    for (b, c) in sorted(set(mine) | set(kjv)):
+    for b, c in sorted(set(mine) | set(kjv)):
         if b > 66:
             continue
         have, want = mine.get((b, c), set()), set(range(1, kjv.get((b, c), 0) + 1))
         if have != want:
             miss, extra = sorted(want - have), sorted(have - want)
-            print(f"  {BOOKS[b - 1]} {c}: {len(have)} verses, KJV {len(want)}"
-                  + (f"; none for KJV {miss[:12]}" if miss else "") + (f"; beyond the KJV {extra[:3]}{'…' if len(extra) > 3 else ''}" if extra else ""))
+            print(
+                f"  {BOOKS[b - 1]} {c}: {len(have)} verses, KJV {len(want)}"
+                + (f"; none for KJV {miss[:12]}" if miss else "")
+                + (f"; beyond the KJV {extra[:3]}{'…' if len(extra) > 3 else ''}" if extra else "")
+            )
 
-    info = ("<p>The Clementine Vulgate (Vulgata Clementina), the Latin Bible of Pope Clement VIII's edition of 1592, the Catholic Church's "
-            "standard text until 1979. Unlike the modern critical Vulgate it has the Comma Johanneum (1 John 5:7), Acts 8:37 and the "
-            "Clementine's spelling; the Psalms are the Gallican Psalter. With the deuterocanonical books (Tobit, Judith, Wisdom, Sirach, "
-            "Baruch, 1–2 Maccabees) and the additions to Esther (10:4–16:24) and Daniel (3:24–90, 13–14).</p>"
-            "<p>Text of the Clementine Vulgate Project (vulsearch.sourceforge.net; bitbucket.org/clementinetextproject/text), "
-            "entered 2002–2005 from a later printing of the Clementine and checked against older ones. Verses are numbered as in the "
-            "KJV: the Psalms by the Hebrew numbering, their titles part of verse 1. Built by Two-edged Sword's tools/vulgate.</p>"
-            "<p>Public domain.</p>")
+    info = (
+        "<p>The Clementine Vulgate (Vulgata Clementina), the Latin Bible of Pope Clement VIII's edition of 1592, the Catholic Church's "
+        "standard text until 1979. Unlike the modern critical Vulgate it has the Comma Johanneum (1 John 5:7), Acts 8:37 and the "
+        "Clementine's spelling; the Psalms are the Gallican Psalter. With the deuterocanonical books (Tobit, Judith, Wisdom, Sirach, "
+        "Baruch, 1–2 Maccabees) and the additions to Esther (10:4–16:24) and Daniel (3:24–90, 13–14).</p>"
+        "<p>Text of the Clementine Vulgate Project (vulsearch.sourceforge.net; bitbucket.org/clementinetextproject/text), "
+        "entered 2002–2005 from a later printing of the Clementine and checked against older ones. Verses are numbered as in the "
+        "KJV: the Psalms by the Hebrew numbering, their titles part of verse 1. Built by Two-edged Sword's tools/vulgate.</p>"
+        "<p>Public domain.</p>"
+    )
     with module("clementine.bbli", "Latin Vulgate (Clementine)", "Vulg-C", info, apocrypha=True, into=into) as c:
         c.executemany("INSERT INTO Bible VALUES (?,?,?,?)", verses)
     print(f"clementine.bbli: {len(verses)} verses")

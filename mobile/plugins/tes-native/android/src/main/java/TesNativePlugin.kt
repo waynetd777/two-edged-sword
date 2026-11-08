@@ -6,23 +6,23 @@ package com.wayned.tes.plugin
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ActivityInfo
+import android.net.Uri
 import android.net.nsd.NsdManager
 import android.net.nsd.NsdServiceInfo
+import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.net.Uri
 import android.provider.OpenableColumns
-import android.content.pm.ActivityInfo
-import android.os.Bundle
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
 import android.speech.tts.Voice
 import android.view.HapticFeedbackConstants
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
+import androidx.activity.result.ActivityResult
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.activity.result.ActivityResult
 import app.tauri.annotation.ActivityCallback
 import app.tauri.annotation.Command
 import app.tauri.annotation.InvokeArg
@@ -55,6 +55,7 @@ class SpeakItem {
 @InvokeArg
 class SpeakArgs {
   var items: Array<SpeakItem> = arrayOf()
+
   /** 1 is the engine's normal pace. */
   var rate: Double = 1.0
   var title: String = ""
@@ -71,6 +72,7 @@ class TesNativePlugin(private val activity: Activity) : Plugin(activity) {
   /** The status and gesture bars' heights in CSS pixels (pager-system's lesson). */
   private class Insets {
     @Volatile var top = 0.0
+
     @Volatile var bottom = 0.0
 
     @JavascriptInterface fun top(): Double = top
@@ -241,7 +243,9 @@ class TesNativePlugin(private val activity: Activity) : Plugin(activity) {
       return
     }
     Handler(Looper.getMainLooper()).postDelayed({
-      try { nsd.stopServiceDiscovery(listener) } catch (_: Exception) {}
+      try {
+        nsd.stopServiceDiscovery(listener)
+      } catch (_: Exception) {}
       val todo = synchronized(seen) { seen.toMutableList() }
       val out = JSArray()
       fun next() {
@@ -251,29 +255,44 @@ class TesNativePlugin(private val activity: Activity) : Plugin(activity) {
           return
         }
         @Suppress("DEPRECATION")
-        nsd.resolveService(s, object : NsdManager.ResolveListener {
-          override fun onResolveFailed(i: NsdServiceInfo, code: Int) { next() }
-          override fun onServiceResolved(i: NsdServiceInfo) {
-            // An IPv4 address if there is one: an IPv6 link-local one (fe80::) can't be connected to
-            // without its interface, and a connect to it fails ("invalid argument").
-            @Suppress("DEPRECATION")
-            val all: List<java.net.InetAddress> =
-              if (android.os.Build.VERSION.SDK_INT >= 34) i.hostAddresses else listOfNotNull(i.host)
-            // The computer announces every address it has, its loopback (127.0.0.1) among them, which
-            // here would be the phone itself: a home-network one (192.168…, 10…) first.
-            val usable = all.filter { !it.isLoopbackAddress && !it.isLinkLocalAddress && !it.isAnyLocalAddress }
-            val pick = usable.firstOrNull { it is java.net.Inet4Address && it.isSiteLocalAddress }
-              ?: usable.firstOrNull { it is java.net.Inet4Address }
-              ?: usable.firstOrNull()
-            // A home-network IPv4 address resolved now first (current, should the computer's have changed);
-            // else the one the computer put in its announcement (sync.rs), as Android may resolve only fe80::.
-            val told = i.attributes["ip"]?.let { String(it) }?.takeIf { it.isNotBlank() }
-            val v4 = usable.firstOrNull { it is java.net.Inet4Address && it.isSiteLocalAddress }?.hostAddress
-            val host = v4 ?: told ?: pick?.hostAddress
-            if (host != null) out.put(JSObject().apply { put("name", i.serviceName); put("host", host.substringBefore('%')); put("port", i.port) })
-            next()
-          }
-        })
+        nsd.resolveService(
+          s,
+          object : NsdManager.ResolveListener {
+            override fun onResolveFailed(i: NsdServiceInfo, code: Int) {
+              next()
+            }
+            override fun onServiceResolved(i: NsdServiceInfo) {
+              // An IPv4 address if there is one: an IPv6 link-local one (fe80::) can't be connected to
+              // without its interface, and a connect to it fails ("invalid argument").
+              @Suppress("DEPRECATION")
+              val all: List<java.net.InetAddress> =
+                if (android.os.Build.VERSION.SDK_INT >= 34) i.hostAddresses else listOfNotNull(i.host)
+              // The computer announces every address it has, its loopback (127.0.0.1) among them, which
+              // here would be the phone itself: a home-network one (192.168…, 10…) first.
+              val usable = all.filter { !it.isLoopbackAddress && !it.isLinkLocalAddress && !it.isAnyLocalAddress }
+              val pick = usable.firstOrNull { it is java.net.Inet4Address && it.isSiteLocalAddress }
+                ?: usable.firstOrNull { it is java.net.Inet4Address }
+                ?: usable.firstOrNull()
+              // A home-network IPv4 address resolved now first (current, should the computer's have changed);
+              // else the one the computer put in its announcement (sync.rs), as Android may resolve only fe80::.
+              val told = i.attributes["ip"]?.let { String(it) }?.takeIf { it.isNotBlank() }
+              val v4 = usable.firstOrNull { it is java.net.Inet4Address && it.isSiteLocalAddress }?.hostAddress
+              val host = v4 ?: told ?: pick?.hostAddress
+              if (host !=
+                null
+              ) {
+                out.put(
+                  JSObject().apply {
+                    put("name", i.serviceName)
+                    put("host", host.substringBefore('%'))
+                    put("port", i.port)
+                  },
+                )
+              }
+              next()
+            }
+          },
+        )
       }
       next()
     }, 3000)
@@ -312,6 +331,7 @@ class TesNativePlugin(private val activity: Activity) : Plugin(activity) {
 
   private var tts: TextToSpeech? = null
   private var ready = false
+
   /** What's being read, so pause can stop and resume can start again from the verse it was on. */
   private var queue: List<SpeakItem> = listOf()
   private var at = 0
@@ -425,7 +445,18 @@ class TesNativePlugin(private val activity: Activity) : Plugin(activity) {
           o.put("id", it.name)
           o.put("name", "${it.locale.displayCountry.ifEmpty { "English" }} (${it.name.substringAfterLast('-').take(8)})")
           o.put("language", it.locale.toLanguageTag())
-          o.put("quality", if (it.quality >= Voice.QUALITY_VERY_HIGH) "premium" else if (it.quality >= Voice.QUALITY_HIGH) "enhanced" else "default")
+          o.put(
+            "quality",
+            if (it.quality >=
+              Voice.QUALITY_VERY_HIGH
+            ) {
+              "premium"
+            } else if (it.quality >= Voice.QUALITY_HIGH) {
+              "enhanced"
+            } else {
+              "default"
+            },
+          )
           list.put(o)
         }
       val r = JSObject()
@@ -470,7 +501,7 @@ class TesNativePlugin(private val activity: Activity) : Plugin(activity) {
 
           @Deprecated("Deprecated in Java")
           override fun onError(utteranceId: String) = sayEvent("done")
-        }
+        },
       )
       then(if (wordReady) made else null)
     }

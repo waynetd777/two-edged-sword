@@ -16,7 +16,16 @@ the app ships.
 fetch(url, path) is a cached download: written whole or not at all, retried, and checked against
 a sha256 when one is given. CACHES / "<tool>" is where each tool keeps its downloads.
 """
-import hashlib, http.client, os, sqlite3, sys, time, unicodedata, urllib.error, urllib.request
+
+import hashlib
+import http.client
+import os
+import sqlite3
+import sys
+import time
+import unicodedata
+import urllib.error
+import urllib.request
 from contextlib import contextmanager
 from difflib import SequenceMatcher
 from pathlib import Path
@@ -26,6 +35,7 @@ from pathlib import Path
 # (archive.org's GoDaddy root, on a fresh Windows).
 try:
     import truststore
+
     truststore.inject_into_ssl()
 except ImportError:
     pass
@@ -33,8 +43,12 @@ except ImportError:
 HOME = Path.home()
 # Windows keeps an app's caches and data under %LOCALAPPDATA% and %APPDATA% (store.rs), macOS under ~/Library.
 WINDOWS = sys.platform == "win32"
-CACHES = Path(os.environ["LOCALAPPDATA"]) / "Two-edged Sword/Caches" if WINDOWS else HOME / "Library/Caches/Two-edged Sword"
-APP_DATA = Path(os.environ["APPDATA"]) / "Two-edged Sword" if WINDOWS else HOME / "Library/Application Support/Two-edged Sword"
+CACHES = (
+    Path(os.environ["LOCALAPPDATA"]) / "Two-edged Sword/Caches" if WINDOWS else HOME / "Library/Caches/Two-edged Sword"
+)
+APP_DATA = (
+    Path(os.environ["APPDATA"]) / "Two-edged Sword" if WINDOWS else HOME / "Library/Application Support/Two-edged Sword"
+)
 LIBRARY = Path(os.environ.get("TES_LIBRARY") or os.environ.get("ESWORD_LIBRARY") or APP_DATA / "Modules")
 ESWORD = HOME / "Library/Containers/net.e-sword.e-Sword-X/Data/Library/Application Support"
 BUNDLED = Path(__file__).resolve().parent.parent / "src-tauri/modules"
@@ -42,9 +56,16 @@ LIBRARY.mkdir(parents=True, exist_ok=True)
 # A private copy of every source the builders download, kept where neither a cleared cache nor a site gone down can
 # lose it: the caches' files at the same paths, in OneDrive (or $TES_SOURCES). Never committed or shared, as some
 # sources may not be passed on. None (and nothing kept) where there is no OneDrive.
-_ONEDRIVE = Path(os.environ.get("OneDrive", HOME / "OneDrive")) if WINDOWS else HOME / "Library/CloudStorage/OneDrive-Personal"
-ARCHIVE = (Path(os.environ["TES_SOURCES"]) if os.environ.get("TES_SOURCES")
-           else _ONEDRIVE / "Two-edged Sword Sources" if _ONEDRIVE.is_dir() else None)
+_ONEDRIVE = (
+    Path(os.environ.get("OneDrive", HOME / "OneDrive")) if WINDOWS else HOME / "Library/CloudStorage/OneDrive-Personal"
+)
+ARCHIVE = (
+    Path(os.environ["TES_SOURCES"])
+    if os.environ.get("TES_SOURCES")
+    else _ONEDRIVE / "Two-edged Sword Sources"
+    if _ONEDRIVE.is_dir()
+    else None
+)
 # What isn't kept: things made, not downloaded, that can be made again (WebKit's cache, Stanza's Python environment, the
 # compiled OCR tool and the Rheims scans unzipped, whose zip is kept).
 ARCHIVE_SKIP = ("WebKit", "latin/venv", "rheims/ocr", "rheims/vulgatenewtestam00lond")
@@ -114,7 +135,19 @@ def mend_verses(name, verses, fixes):
 
 
 @contextmanager
-def module(file: str, title: str, abbrev: str, info: str, *, ot=True, nt=True, apocrypha=False, strongs=False, rtl=False, into: Path | None = None):
+def module(
+    file: str,
+    title: str,
+    abbrev: str,
+    info: str,
+    *,
+    ot=True,
+    nt=True,
+    apocrypha=False,
+    strongs=False,
+    rtl=False,
+    into: Path | None = None,
+):
     """Writes the module `file` ("kjv+.bbli") into LIBRARY (or `into`): yields a connection to a new,
     empty module with its Details row; fill its table, and on leaving it replaces any old file
     whole. The flags are for Bibles only. If the block raises, nothing is replaced (and the
@@ -124,6 +157,7 @@ def module(file: str, title: str, abbrev: str, info: str, *, ot=True, nt=True, a
         raise ValueError(f"unknown module format: {file}")
     from covers import with_cover  # its cover, at the start of its description (tools/covers)
     from history import with_history  # a short history of the work, after its first paragraph (tools/history)
+
     info = with_history(file, with_cover(file, info))
     p = (into or LIBRARY) / file
     p.parent.mkdir(parents=True, exist_ok=True)
@@ -133,7 +167,9 @@ def module(file: str, title: str, abbrev: str, info: str, *, ot=True, nt=True, a
     try:
         db.executescript(SCHEMA[ext])
         if ext == "bbli":
-            db.execute("INSERT INTO Details VALUES (?,?,?,1,?,?,?,?,?)", (title, abbrev, info, ot, nt, apocrypha, strongs, rtl))
+            db.execute(
+                "INSERT INTO Details VALUES (?,?,?,1,?,?,?,?,?)", (title, abbrev, info, ot, nt, apocrypha, strongs, rtl)
+            )
         elif ext == "refi":
             db.execute("INSERT INTO Details VALUES (?,?,?,1,0)", (title, abbrev, info))
         else:
@@ -159,7 +195,9 @@ def chapter_lengths(name, *, required=True) -> dict:
         return {}
     db = sqlite3.connect(f"file:{p}?immutable=1", uri=True)
     try:
-        return {(b, ch): n for b, ch, n in db.execute("SELECT Book, Chapter, MAX(Verse) FROM Bible GROUP BY Book, Chapter")}
+        return {
+            (b, ch): n for b, ch, n in db.execute("SELECT Book, Chapter, MAX(Verse) FROM Bible GROUP BY Book, Chapter")
+        }
     finally:
         db.close()
 
@@ -193,7 +231,11 @@ def fetch(url, path, *, sha256=None, log=False, **kw) -> Path:
     leaves nothing behind. Each is kept in ARCHIVE too, and taken from there when the download
     fails or no longer matches `sha256`; with no copy there, a mismatch stops the build."""
     path = Path(path)
-    if path.is_file() and path.stat().st_size and (not sha256 or hashlib.sha256(path.read_bytes()).hexdigest() == sha256):
+    if (
+        path.is_file()
+        and path.stat().st_size
+        and (not sha256 or hashlib.sha256(path.read_bytes()).hexdigest() == sha256)
+    ):
         keep(path)
         return path
     if log:
@@ -228,6 +270,7 @@ def keep(path):
     """Copies a downloaded file from CACHES into ARCHIVE, unless it's there already. A different copy there before (the
     source has changed) is kept beside it, dated, not replaced."""
     import shutil
+
     a = _archived(path)
     if a is None or not Path(path).is_file():
         return
@@ -245,6 +288,7 @@ def restore(path, sha256=None) -> bool:
     """Copies a file back into CACHES from ARCHIVE, the copy with `sha256` if given (the newest, or one of the dated
     ones the source has had); whether there was one."""
     import shutil
+
     a = _archived(path)
     if a is None:
         return False
@@ -307,8 +351,10 @@ def greek_key(w, nu_from=2) -> str:
 
 # Webster's Second International word list (1934, public domain), as macOS has it in /usr/share/dict/words, from
 # FreeBSD's source, for where there's no system list (Windows): it differs from macOS's in 44 entries.
-WEB2 = ("https://raw.githubusercontent.com/freebsd/freebsd-src/4a65e12dfbaba7193e37fcd2e14fbc20776a78b9/share/dict/web2",
-        "92165d95d72a67377e80052b1b9c3d63a4ac402ccd71690c89d949e809738238")
+WEB2 = (
+    "https://raw.githubusercontent.com/freebsd/freebsd-src/4a65e12dfbaba7193e37fcd2e14fbc20776a78b9/share/dict/web2",
+    "92165d95d72a67377e80052b1b9c3d63a4ac402ccd71690c89d949e809738238",
+)
 
 
 def english_words() -> set:

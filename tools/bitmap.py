@@ -14,7 +14,12 @@ the fade clears a subject that fills its photo; `--channel r` (or g or b) takes 
 place of grey, for a subject its ground's grey would hide (a tan horn on grey-blue). Keep a dark
 subject's ground: without it, it shows as light on the dark page, like a negative.
 """
-import argparse, base64, io, pathlib
+
+import argparse
+import base64
+import io
+import pathlib
+
 from PIL import Image, ImageFilter, ImageOps
 
 ap = argparse.ArgumentParser()
@@ -24,9 +29,17 @@ ap.add_argument("name")
 ap.add_argument("--crop", default="0,0,1,1", help="left,top,right,bottom as fractions")
 ap.add_argument("--width", type=int, default=160)
 ap.add_argument("--fade", type=float, default=0.18, help="how far in from the edge the fade runs, of the width")
-ap.add_argument("--pad", default="0", help="add this much (of each side; or across,down) of the picture's edge colour round it, so the fade clears the subject")
+ap.add_argument(
+    "--pad",
+    default="0",
+    help="add this much (of each side; or across,down) of the picture's edge colour round it, so the fade clears the subject",
+)
 ap.add_argument("--seam", default="0", help="how wide (of the picture's shorter side) the padding blends into it")
-ap.add_argument("--channel", default="grey", help="grey, or r, g or b: one colour, for a subject its ground's grey would hide (a tan horn on grey-blue)")
+ap.add_argument(
+    "--channel",
+    default="grey",
+    help="grey, or r, g or b: one colour, for a subject its ground's grey would hide (a tan horn on grey-blue)",
+)
 ap.add_argument("--source", default="", help="where it came from, and its licence, for the comment")
 a = ap.parse_args()
 
@@ -38,7 +51,9 @@ pads = [float(v) for v in a.pad.split(",")] * 2
 if pads[0] or pads[1]:
     # The ground carried out past the edges: the border's mean colour, the seam blurred into it.
     w0, h0 = rgb.size
-    edge = [rgb.getpixel((x, y)) for x in range(w0) for y in (0, h0 - 1)] + [rgb.getpixel((x, y)) for y in range(h0) for x in (0, w0 - 1)]
+    edge = [rgb.getpixel((x, y)) for x in range(w0) for y in (0, h0 - 1)] + [
+        rgb.getpixel((x, y)) for y in range(h0) for x in (0, w0 - 1)
+    ]
     mean = tuple(sum(c[i] for c in edge) // len(edge) for i in range(3))
     px, py = round(w0 * pads[0]), round(h0 * pads[1])
     big = Image.new("RGB", (w0 + 2 * px, h0 + 2 * py), mean)
@@ -70,6 +85,7 @@ pathlib.Path(a.out).write_text(
     "// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.\n\n"
     f"// Made by tools/bitmap.py: a {w}x{h} grey bitmap with its edges faded, from\n"
     f"// {a.source or a.image}\n\n"
-    f"export const {a.name} = \"{uri}\";\n"
-, encoding="utf-8")
+    f'export const {a.name} = "{uri}";\n',
+    encoding="utf-8",
+)
 print(f"  {a.out}  {w}x{h}  {len(uri) // 1024} KB")

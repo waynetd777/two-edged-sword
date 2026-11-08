@@ -23,20 +23,70 @@ The app's own copies of targum_aramaic, pseudojonathan_aramaic and pseudojonatha
 by tools/core (open_targum) from named versions only (OPEN_VERSIONS), each checked against the
 licence Sefaria's API gives it (public domain, CC0, CC BY or CC BY-SA, or the build stops).
 """
-import csv, html, io, itertools, json, re, sys, time, urllib.error, urllib.parse, urllib.request
+
+import csv
+import html
+import io
+import itertools
+import json
+import re
+import sys
+import time
+import urllib.error
+import urllib.parse
+import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from modules import CACHES, LIBRARY, chapter_lengths, english_words as words, fetch, keep, module, restore, write_whole  # noqa: E402
+from modules import CACHES, LIBRARY, chapter_lengths, fetch, keep, module, restore, write_whole  # noqa: E402
+from modules import english_words as words
+
 CACHE = CACHES / "sefaria"
 EXPORT = "https://storage.googleapis.com/sefaria-export/json/"
 LINKS = "https://storage.googleapis.com/sefaria-export/links/links{}.csv"
 
-BOOKS = ["Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy", "Joshua", "Judges", "Ruth", "I Samuel", "II Samuel", "I Kings", "II Kings",
-         "I Chronicles", "II Chronicles", "Ezra", "Nehemiah", "Esther", "Job", "Psalms", "Proverbs", "Ecclesiastes", "Song of Songs", "Isaiah",
-         "Jeremiah", "Lamentations", "Ezekiel", "Daniel", "Hosea", "Joel", "Amos", "Obadiah", "Jonah", "Micah", "Nahum", "Habakkuk", "Zephaniah",
-         "Haggai", "Zechariah", "Malachi"]
+BOOKS = [
+    "Genesis",
+    "Exodus",
+    "Leviticus",
+    "Numbers",
+    "Deuteronomy",
+    "Joshua",
+    "Judges",
+    "Ruth",
+    "I Samuel",
+    "II Samuel",
+    "I Kings",
+    "II Kings",
+    "I Chronicles",
+    "II Chronicles",
+    "Ezra",
+    "Nehemiah",
+    "Esther",
+    "Job",
+    "Psalms",
+    "Proverbs",
+    "Ecclesiastes",
+    "Song of Songs",
+    "Isaiah",
+    "Jeremiah",
+    "Lamentations",
+    "Ezekiel",
+    "Daniel",
+    "Hosea",
+    "Joel",
+    "Amos",
+    "Obadiah",
+    "Jonah",
+    "Micah",
+    "Nahum",
+    "Habakkuk",
+    "Zephaniah",
+    "Haggai",
+    "Zechariah",
+    "Malachi",
+]
 
 
 def get(url, name):
@@ -46,12 +96,14 @@ def get(url, name):
 def toc():
     """Sefaria's table of contents: every text's title and its category path."""
     out = {}
+
     def walk(n, path):
         for c in n.get("contents", []):
             if "contents" in c:
                 walk(c, path + [c["category"]])
             elif "title" in c:
                 out[c["title"]] = path
+
     for n in json.loads(get("https://www.sefaria.org/api/index", "index.json")):
         walk(n, [n["category"]])
     return out
@@ -100,31 +152,76 @@ def write_bible(file, title, abbrev, info, rtl, verses, into=None):
 # (book, Hebrew chapter, first verse, last verse, KJV chapter, KJV verse of the first). A range whose
 # KJV verse is the same for every verse (a half verse) is joined onto that verse.
 HEB_TO_KJV = [
-    (1, 32, 1, 1, 31, 55), (1, 32, 2, 33, 32, 1),
+    (1, 32, 1, 1, 31, 55),
+    (1, 32, 2, 33, 32, 1),
     # The Ten Commandments: Sefaria's texts keep "not murder … not bear false witness" as one verse.
-    (2, 20, 14, 23, 20, 17), (5, 5, 18, 30, 5, 21),
-    (2, 7, 26, 29, 8, 1), (2, 8, 1, 28, 8, 5), (2, 21, 37, 37, 22, 1), (2, 22, 1, 30, 22, 2),
-    (3, 5, 20, 26, 6, 1), (3, 6, 1, 23, 6, 8),
-    (4, 17, 1, 15, 16, 36), (4, 17, 16, 28, 17, 1), (4, 25, 19, 19, 26, 1), (4, 30, 1, 1, 29, 40), (4, 30, 2, 17, 30, 1),
-    (5, 13, 1, 1, 12, 32), (5, 13, 2, 19, 13, 1), (5, 23, 1, 1, 22, 30), (5, 23, 2, 26, 23, 1), (5, 28, 69, 69, 29, 1), (5, 29, 1, 28, 29, 2),
-    (9, 21, 1, 1, 20, 42), (9, 21, 2, 16, 21, 1), (9, 24, 1, 1, 23, 29), (9, 24, 2, 23, 24, 1),
-    (10, 19, 1, 1, 18, 33), (10, 19, 2, 44, 19, 1),
-    (11, 5, 1, 14, 4, 21), (11, 5, 15, 32, 5, 1), (11, 22, 44, 44, 22, 43), (11, 22, 45, 54, 22, 44),
-    (12, 12, 1, 1, 11, 21), (12, 12, 2, 22, 12, 1),
-    (13, 5, 27, 41, 6, 1), (13, 6, 1, 66, 6, 16), (13, 12, 5, 41, 12, 4),
-    (14, 1, 18, 18, 2, 1), (14, 2, 1, 17, 2, 2), (14, 13, 23, 23, 14, 1), (14, 14, 1, 14, 14, 2),
-    (18, 40, 25, 32, 41, 1), (18, 41, 1, 26, 41, 9),
-    (21, 4, 17, 17, 5, 1), (21, 5, 1, 19, 5, 2),
-    (22, 7, 1, 1, 6, 13), (22, 7, 2, 14, 7, 1),
-    (23, 8, 23, 23, 9, 1), (23, 9, 1, 20, 9, 2), (23, 64, 1, 11, 64, 2),
-    (24, 8, 23, 23, 9, 1), (24, 9, 1, 25, 9, 2),
-    (26, 21, 1, 5, 20, 45), (26, 21, 6, 37, 21, 1),
-    (28, 2, 1, 2, 1, 10), (28, 2, 3, 25, 2, 1), (28, 12, 1, 1, 11, 12), (28, 12, 2, 15, 12, 1), (28, 14, 1, 1, 13, 16), (28, 14, 2, 10, 14, 1),
-    (29, 3, 1, 5, 2, 28), (29, 4, 1, 21, 3, 1),
-    (32, 2, 1, 1, 1, 17), (32, 2, 2, 11, 2, 1),
-    (33, 4, 14, 14, 5, 1), (33, 5, 1, 14, 5, 2),
-    (34, 2, 1, 1, 1, 15), (34, 2, 2, 14, 2, 1),
-    (38, 2, 1, 4, 1, 18), (38, 2, 5, 17, 2, 1),
+    (2, 20, 14, 23, 20, 17),
+    (5, 5, 18, 30, 5, 21),
+    (2, 7, 26, 29, 8, 1),
+    (2, 8, 1, 28, 8, 5),
+    (2, 21, 37, 37, 22, 1),
+    (2, 22, 1, 30, 22, 2),
+    (3, 5, 20, 26, 6, 1),
+    (3, 6, 1, 23, 6, 8),
+    (4, 17, 1, 15, 16, 36),
+    (4, 17, 16, 28, 17, 1),
+    (4, 25, 19, 19, 26, 1),
+    (4, 30, 1, 1, 29, 40),
+    (4, 30, 2, 17, 30, 1),
+    (5, 13, 1, 1, 12, 32),
+    (5, 13, 2, 19, 13, 1),
+    (5, 23, 1, 1, 22, 30),
+    (5, 23, 2, 26, 23, 1),
+    (5, 28, 69, 69, 29, 1),
+    (5, 29, 1, 28, 29, 2),
+    (9, 21, 1, 1, 20, 42),
+    (9, 21, 2, 16, 21, 1),
+    (9, 24, 1, 1, 23, 29),
+    (9, 24, 2, 23, 24, 1),
+    (10, 19, 1, 1, 18, 33),
+    (10, 19, 2, 44, 19, 1),
+    (11, 5, 1, 14, 4, 21),
+    (11, 5, 15, 32, 5, 1),
+    (11, 22, 44, 44, 22, 43),
+    (11, 22, 45, 54, 22, 44),
+    (12, 12, 1, 1, 11, 21),
+    (12, 12, 2, 22, 12, 1),
+    (13, 5, 27, 41, 6, 1),
+    (13, 6, 1, 66, 6, 16),
+    (13, 12, 5, 41, 12, 4),
+    (14, 1, 18, 18, 2, 1),
+    (14, 2, 1, 17, 2, 2),
+    (14, 13, 23, 23, 14, 1),
+    (14, 14, 1, 14, 14, 2),
+    (18, 40, 25, 32, 41, 1),
+    (18, 41, 1, 26, 41, 9),
+    (21, 4, 17, 17, 5, 1),
+    (21, 5, 1, 19, 5, 2),
+    (22, 7, 1, 1, 6, 13),
+    (22, 7, 2, 14, 7, 1),
+    (23, 8, 23, 23, 9, 1),
+    (23, 9, 1, 20, 9, 2),
+    (23, 64, 1, 11, 64, 2),
+    (24, 8, 23, 23, 9, 1),
+    (24, 9, 1, 25, 9, 2),
+    (26, 21, 1, 5, 20, 45),
+    (26, 21, 6, 37, 21, 1),
+    (28, 2, 1, 2, 1, 10),
+    (28, 2, 3, 25, 2, 1),
+    (28, 12, 1, 1, 11, 12),
+    (28, 12, 2, 15, 12, 1),
+    (28, 14, 1, 1, 13, 16),
+    (28, 14, 2, 10, 14, 1),
+    (29, 3, 1, 5, 2, 28),
+    (29, 4, 1, 21, 3, 1),
+    (32, 2, 1, 1, 1, 17),
+    (32, 2, 2, 11, 2, 1),
+    (33, 4, 14, 14, 5, 1),
+    (33, 5, 1, 14, 5, 2),
+    (34, 2, 1, 1, 1, 15),
+    (34, 2, 2, 14, 2, 1),
+    (38, 2, 1, 4, 1, 18),
+    (38, 2, 5, 17, 2, 1),
     (39, 3, 19, 24, 4, 1),
 ]
 
@@ -140,8 +237,10 @@ def to_kjv(verses, counts):
     for b, c, v, t in verses:
         heb.setdefault((b, c), {})[v] = t
     out = {}
+
     def put(k, t):
         out[k] = out[k] + " " + t if k in out else t
+
     for (b, c), vs in heb.items():
         top = max(vs)
         extra = top - counts.get((b, c), top) if b == 19 else 0
@@ -173,7 +272,11 @@ def targum_bible(tocmap, file, title, abbrev, parts, lang, blurb, *, wanted=None
                     verses.append((book, ci, vi, s))
     counts = kjv_counts()
     verses = to_kjv(verses, counts)
-    off = [f"{b}.{c}" for b, c in sorted({(v[0], v[1]) for v in verses}) if max(x[2] for x in verses if x[0] == b and x[1] == c) > counts.get((b, c), 0)]
+    off = [
+        f"{b}.{c}"
+        for b, c in sorted({(v[0], v[1]) for v in verses})
+        if max(x[2] for x in verses if x[0] == b and x[1] == c) > counts.get((b, c), 0)
+    ]
     if off:
         print(f"  {file}: chapters longer than the KJV's: {' '.join(off)}")
     books = sorted({v[0] for v in verses})
@@ -184,14 +287,23 @@ def targum_bible(tocmap, file, title, abbrev, parts, lang, blurb, *, wanted=None
             for vt, lic, where in docs[t]["versions"]:
                 # A version named as its book ("Onkelos Genesis") is one per book: they're listed together.
                 key = (f"The text from {where}" if vt == t else vt, lic)
-                used.setdefault(key, []).append(re.sub(r"^(Onkelos|Targum Jonathan on|Aramaic Targum to|Targum of) ", "", t))
-        src = "".join(f"<li>{html.escape(vt)} ({html.escape(LICENCE_NAMES[lic])}): {html.escape(', '.join(ts))}</li>" for (vt, lic), ts in used.items())
-        info = (head + f"<p>Sources, each Sefaria's version of that name, with its licence:</p><ul>{src}</ul>"
-                "<p>Only these openly licensed versions are used. Thanks to Sefaria, which digitised and published them.</p>")
+                used.setdefault(key, []).append(
+                    re.sub(r"^(Onkelos|Targum Jonathan on|Aramaic Targum to|Targum of) ", "", t)
+                )
+        src = "".join(
+            f"<li>{html.escape(vt)} ({html.escape(LICENCE_NAMES[lic])}): {html.escape(', '.join(ts))}</li>"
+            for (vt, lic), ts in used.items()
+        )
+        info = (
+            head + f"<p>Sources, each Sefaria's version of that name, with its licence:</p><ul>{src}</ul>"
+            "<p>Only these openly licensed versions are used. Thanks to Sefaria, which digitised and published them.</p>"
+        )
     else:
         src = "".join(f"<li>{html.escape(s)}</li>" for s in sources(docs.values()))
-        info = (head + f"<p>Sources:</p><ul>{src}</ul>"
-                "<p>Licences vary by source (public domain, CC0, CC-BY, CC-BY-NC); see each on Sefaria. For personal study.</p>")
+        info = (
+            head + f"<p>Sources:</p><ul>{src}</ul>"
+            "<p>Licences vary by source (public domain, CC0, CC-BY, CC-BY-NC); see each on Sefaria. For personal study.</p>"
+        )
     write_bible(file, title, abbrev, info, lang == "Hebrew", verses, into)
 
 
@@ -201,7 +313,9 @@ LICENCE_NAMES = {"Public Domain": "public domain", "CC0": "CC0", "CC-BY": "CC BY
 
 def versions(title):
     """Sefaria's versions of a text, each with its "license" (its API), cached."""
-    return json.loads(get("https://www.sefaria.org/api/texts/versions/" + urllib.parse.quote(title), f"versions/{title}.json"))
+    return json.loads(
+        get("https://www.sefaria.org/api/texts/versions/" + urllib.parse.quote(title), f"versions/{title}.json")
+    )
 
 
 def open_text(tocmap, title, lang, wanted):
@@ -220,7 +334,9 @@ def open_text(tocmap, title, lang, wanted):
         doc = json.loads(get(EXPORT + urllib.parse.quote(path), path))
         for lic in (meta[0].get("license"), doc.get("license")):
             if (lic or "").strip() not in LICENCE_NAMES:
-                sys.exit(f"{title}: version {want!r} is licensed {lic!r}, not one of {', '.join(LICENCE_NAMES)}; it can't go in a module the app ships")
+                sys.exit(
+                    f"{title}: version {want!r} is licensed {lic!r}, not one of {', '.join(LICENCE_NAMES)}; it can't go in a module the app ships"
+                )
         n = 0
         for ci, ch in enumerate(doc.get("text", [])):
             while len(out) <= ci:
@@ -232,7 +348,13 @@ def open_text(tocmap, title, lang, wanted):
                 if not clean(out[ci][vi]) and clean(s):
                     out[ci][vi], n = s, n + 1
         if n:
-            used.append((want, meta[0]["license"].strip(), re.sub(r"^https?://|/$", "", meta[0].get("versionSource") or "sefaria.org")))
+            used.append(
+                (
+                    want,
+                    meta[0]["license"].strip(),
+                    re.sub(r"^https?://|/$", "", meta[0].get("versionSource") or "sefaria.org"),
+                )
+            )
     if not used:
         sys.exit(f"{title}: none of {', '.join(wanted)} on Sefaria in {lang}")
     return {"text": out, "versions": used}
@@ -242,9 +364,19 @@ def targums(tocmap):
     main, pj = targum_parts(tocmap)
     blurb = TARGUM_BLURB
     targum_bible(tocmap, "targum_aramaic", "Targum (Aramaic)", "Targum", main, "Hebrew", blurb)
-    targum_bible(tocmap, "targum_english", "Targum (English)", "Targum-E", main, "English", blurb + " English is missing where Sefaria has no translation.")
+    targum_bible(
+        tocmap,
+        "targum_english",
+        "Targum (English)",
+        "Targum-E",
+        main,
+        "English",
+        blurb + " English is missing where Sefaria has no translation.",
+    )
     targum_bible(tocmap, "pseudojonathan_aramaic", "Targum Pseudo-Jonathan (Aramaic)", "Ps-Jon", pj, "Hebrew", PJ_BLURB)
-    targum_bible(tocmap, "pseudojonathan_english", "Targum Pseudo-Jonathan (English)", "Ps-Jon-E", pj, "English", PJ_BLURB)
+    targum_bible(
+        tocmap, "pseudojonathan_english", "Targum Pseudo-Jonathan (English)", "Ps-Jon-E", pj, "English", PJ_BLURB
+    )
 
 
 # The versions the app's own Targums are built from (all public domain or CC0, as Sefaria's API gives
@@ -268,19 +400,41 @@ def open_versions(name, title):
 def targum_parts(tocmap):
     """(Sefaria title, e-Sword book) of the Targum (Onkelos, Jonathan on the Prophets, the Writings') and of Pseudo-Jonathan."""
     torah = [(f"Onkelos {b}", i + 1) for i, b in enumerate(BOOKS[:5])]
-    writings = {"Psalms": 19, "Proverbs": 20, "Job": 18, "Song of Songs": 22, "Ruth": 8, "Lamentations": 25, "Ecclesiastes": 21, "Esther": 17}
-    prophets = [(f"Targum Jonathan on {b}", BOOKS.index(b) + 1) for b in BOOKS if f"Targum Jonathan on {b}" in tocmap and BOOKS.index(b) >= 5]
-    main = torah + prophets + [(f"Aramaic Targum to {b}", n) for b, n in writings.items()] + [("Targum of I Chronicles", 13), ("Targum of II Chronicles", 14)]
+    writings = {
+        "Psalms": 19,
+        "Proverbs": 20,
+        "Job": 18,
+        "Song of Songs": 22,
+        "Ruth": 8,
+        "Lamentations": 25,
+        "Ecclesiastes": 21,
+        "Esther": 17,
+    }
+    prophets = [
+        (f"Targum Jonathan on {b}", BOOKS.index(b) + 1)
+        for b in BOOKS
+        if f"Targum Jonathan on {b}" in tocmap and BOOKS.index(b) >= 5
+    ]
+    main = (
+        torah
+        + prophets
+        + [(f"Aramaic Targum to {b}", n) for b, n in writings.items()]
+        + [("Targum of I Chronicles", 13), ("Targum of II Chronicles", 14)]
+    )
     main.sort(key=lambda x: x[1])
     return main, [(t, i + 1) for i, t in enumerate(TORAH_PJ)]
 
 
-TARGUM_BLURB = ("The Targum: the Aramaic paraphrase read in the synagogue beside the Hebrew. Torah: Targum Onkelos; Prophets: Targum Jonathan; "
-                "Writings: the Targums to Psalms, Proverbs, Job, the five scrolls and Chronicles. Ezra, Nehemiah and Daniel have no Targum.")
+TARGUM_BLURB = (
+    "The Targum: the Aramaic paraphrase read in the synagogue beside the Hebrew. Torah: Targum Onkelos; Prophets: Targum Jonathan; "
+    "Writings: the Targums to Psalms, Proverbs, Job, the five scrolls and Chronicles. Ezra, Nehemiah and Daniel have no Targum."
+)
 PJ_BLURB = "Targum Pseudo-Jonathan (also called Targum Yerushalmi I): an expansive Aramaic paraphrase of the Torah, rich in tradition and interpretation."
-OPEN_TARGUMS = {"targum_aramaic": ("Targum (Aramaic)", "Targum", "Hebrew"),
-                "pseudojonathan_aramaic": ("Targum Pseudo-Jonathan (Aramaic)", "Ps-Jon", "Hebrew"),
-                "pseudojonathan_english": ("Targum Pseudo-Jonathan (English)", "Ps-Jon-E", "English")}
+OPEN_TARGUMS = {
+    "targum_aramaic": ("Targum (Aramaic)", "Targum", "Hebrew"),
+    "pseudojonathan_aramaic": ("Targum Pseudo-Jonathan (Aramaic)", "Ps-Jon", "Hebrew"),
+    "pseudojonathan_english": ("Targum Pseudo-Jonathan (English)", "Ps-Jon-E", "English"),
+}
 
 
 def open_targum(name, into=None):
@@ -380,8 +534,13 @@ WORDS = None
 
 def is_word(w):
     w = w.lower().replace("’", "'")
-    stems = [w, w[:-1] if w.endswith("s") else None, w[:-2] if w.endswith(("es", "ed", "'s")) else None,
-             w[:-3] if w.endswith("ing") else None, w[:-1] if w.endswith("d") else None]
+    stems = [
+        w,
+        w[:-1] if w.endswith("s") else None,
+        w[:-2] if w.endswith(("es", "ed", "'s")) else None,
+        w[:-3] if w.endswith("ing") else None,
+        w[:-1] if w.endswith("d") else None,
+    ]
     return any(x and x in WORDS for x in stems)
 
 
@@ -403,6 +562,7 @@ def spaced(t):
         if WORDS and not is_word(a + b) and (is_word(a) or "’" in a) and is_word(b):
             return f"{a}{tag} {b}"
         return m[0]
+
     return re.sub(r"([A-Za-z’']+)(</(?:b|i)>)([a-z][A-Za-z’']*)", join, t)
 
 
@@ -432,29 +592,48 @@ def tractate(tocmap, title, links, heb, kjv):
         chapters.setdefault(daf, []).extend(body)
     order = tocmap[title][2] if len(tocmap[title]) > 2 else ""
     src = "".join(f"<li>{html.escape(s)}</li>" for s in sources([en, he]))
-    info = (f"<p>Babylonian Talmud, tractate {html.escape(title)} ({html.escape(order)}): each daf in English with the Aramaic beneath each passage.</p>"
-            f"<p>From Sefaria (sefaria.org), built by Two-edged Sword's tools/sefaria.</p><p>Sources:</p><ul>{src}</ul>"
-            "<p>The William Davidson Talmud (Koren, Rabbi Adin Even-Israel Steinsaltz) is CC-BY-NC: for personal study.</p>")
+    info = (
+        f"<p>Babylonian Talmud, tractate {html.escape(title)} ({html.escape(order)}): each daf in English with the Aramaic beneath each passage.</p>"
+        f"<p>From Sefaria (sefaria.org), built by Two-edged Sword's tools/sefaria.</p><p>Sources:</p><ul>{src}</ul>"
+        "<p>The William Davidson Talmud (Koren, Rabbi Adin Even-Israel Steinsaltz) is CC-BY-NC: for personal study.</p>"
+    )
     file = f"talmud_{re.sub(r'[^a-z0-9]+', '_', title.lower()).strip('_')}.refi"
     rows = set()
     with module(file, f"Talmud: {title}", title, info) as c:
-        c.executemany("INSERT INTO Reference VALUES (?,?)", [(f"{title} {d}", "\n".join(b)) for d, b in sorted(chapters.items())])
+        c.executemany(
+            "INSERT INTO Reference VALUES (?,?)", [(f"{title} {d}", "\n".join(b)) for d, b in sorted(chapters.items())]
+        )
         # The cited segments with one on either side, for context.
         c.executescript("""CREATE TABLE VerseLinks (Book INT, Chapter INT, Verse INT, Ref TEXT, Segment TEXT, Excerpt TEXT);
             CREATE INDEX VerseLinksIndex ON VerseLinks (Book, Chapter, Verse);""")
         for i, lo, hi, (b, ch, v) in links:
             segs = ent[i] if i < len(ent) else []
-            excerpt = " ".join(clean(x) for x in segs[max(0, lo - 2):hi + 1] if isinstance(x, str))
+            excerpt = " ".join(clean(x) for x in segs[max(0, lo - 2) : hi + 1] if isinstance(x, str))
             if excerpt:
                 daf, side = amud(i)
-                rows.add((*kjv_verse(b, ch, v, heb, kjv), f"{title} {daf}", f"{daf}{side}:{lo}" + (f"-{hi}" if hi > lo else ""), excerpt))
+                rows.add(
+                    (
+                        *kjv_verse(b, ch, v, heb, kjv),
+                        f"{title} {daf}",
+                        f"{daf}{side}:{lo}" + (f"-{hi}" if hi > lo else ""),
+                        excerpt,
+                    )
+                )
         c.executemany("INSERT INTO VerseLinks VALUES (?,?,?,?,?,?)", sorted(rows))
     return f"{file}: {len(chapters)} dafs, {len(rows)} verse links"
 
 
 def talmud(tocmap):
-    titles = [t for t, path in tocmap.items() if path[:2] == ["Talmud", "Bavli"] and len(path) > 2 and path[2].startswith("Seder")]
-    links, heb, kjv = links_by_tractate(titles), chapter_lengths("wlc.bbli", required=False), chapter_lengths("kjv.bbli", required=False)
+    titles = [
+        t
+        for t, path in tocmap.items()
+        if path[:2] == ["Talmud", "Bavli"] and len(path) > 2 and path[2].startswith("Seder")
+    ]
+    links, heb, kjv = (
+        links_by_tractate(titles),
+        chapter_lengths("wlc.bbli", required=False),
+        chapter_lengths("kjv.bbli", required=False),
+    )
     with ThreadPoolExecutor(8) as pool:
         for line in pool.map(lambda t: tractate(tocmap, t, links[t], heb, kjv), titles):
             if line:

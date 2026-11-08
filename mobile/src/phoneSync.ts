@@ -10,6 +10,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import { useSyncExternalStore } from "react";
 import {
+  entryKey,
   Ledger,
   Mark as SyncMark,
   markKey,
@@ -20,12 +21,17 @@ import {
   planItems,
   plansFrom,
   settle,
+  forget,
+  refuseMassRemoval,
   stamp,
   under,
+  vanished,
+  withoutJournal,
 } from "../../src/sync";
 import { save, saved, type Module } from "./api";
 import { bookmarks, Mark } from "./bookmarks";
 import { highlights, HlColor } from "./highlights";
+import { Entry, journal } from "./journal";
 import { plansStore } from "./plansStore";
 
 /** The computer paired with: its name (as announced), where it was last found, and this phone's token. */
@@ -121,23 +127,34 @@ function itemsNow(): Record<string, unknown> {
   for (const [k, c] of Object.entries(highlights.get())) out[`hl|${k}`] = c;
   for (const [m, t] of Object.entries(docAtNow())) out[`at|${m}`] = t;
   for (const p of plansStore.get()) Object.assign(out, planItems(p));
+  for (const e of journal.get()) out[entryKey(e.id)] = e;
   return out;
 }
 
+/** What this device is called on the computer, and on a journal entry kept from both sides. */
+export const deviceName = () => {
+  const ua = navigator.userAgent;
+  return /iPad|Macintosh/.test(ua) && navigator.maxTouchPoints > 1
+    ? "iPad"
+    : /iPhone/.test(ua)
+      ? "iPhone"
+      : /Android/.test(ua)
+        ? "Android phone"
+        : "Phone";
+};
+
 const placesNow = (): Place[] =>
-  bookmarks
-    .recent()
-    .map((m) =>
-      m.doc
-        ? { at: Date.parse(m.at) || 0, module: m.doc.module, title: m.doc.chapter, ...(m.doc.kind ? { kind: m.doc.kind } : {}) }
-        : {
-            at: Date.parse(m.at) || 0,
-            book: m.ref!.book,
-            chapter: m.ref!.chapter,
-            ...(m.ref!.verse ? { verse: m.ref!.verse } : {}),
-            ...(m.bible ? { bible: m.bible } : {}),
-          },
-    );
+  bookmarks.recent().map((m) =>
+    m.doc
+      ? { at: Date.parse(m.at) || 0, module: m.doc.module, title: m.doc.chapter, ...(m.doc.kind ? { kind: m.doc.kind } : {}) }
+      : {
+          at: Date.parse(m.at) || 0,
+          book: m.ref!.book,
+          chapter: m.ref!.chapter,
+          ...(m.ref!.verse ? { verse: m.ref!.verse } : {}),
+          ...(m.bible ? { bible: m.bible } : {}),
+        },
+  );
 
 const fromPlace = (p: Place): Mark =>
   p.module
@@ -154,9 +171,14 @@ const fromPlace = (p: Place): Mark =>
 // ---------- the ledger: when each thing last changed here ----------
 
 let ledger: Ledger = saved<Ledger>("syncLedger", {});
-/** Notes what changed here since last time, and when. */
+/** Notes what changed here since last time, and when. Not before the journal has been read: its
+ *  entries would be taken for removed. */
 function note() {
-  ledger = stamp(ledger, itemsNow());
+  if (!journal.loaded()) return;
+  const now = itemsNow();
+  // Something empty here that wasn't (a store reset, the journal's file lost) isn't taken for removed:
+  // it's forgotten, and the computer sends it back.
+  ledger = stamp(forget(ledger, vanished(ledger, now)), now);
   save("syncLedger", ledger);
 }
 let soon: number | undefined;
@@ -172,10 +194,11 @@ function changed() {
 
 /** Starts watching for changes, and syncs now; again whenever the app comes forward. */
 export function startSync() {
-  note();
+  journal.load().then(note, () => {});
   bookmarks.subscribe(changed);
   highlights.subscribe(changed);
   plansStore.subscribe(changed);
+  journal.subscribe(changed);
   window.addEventListener("tes-docat", changed);
   document.addEventListener("visibilitychange", () => document.visibilityState === "visible" && syncNow().catch(() => {}));
   // While it's open, every five minutes too, for changes made on the computer.
@@ -221,6 +244,7 @@ export async function pair(f: Found, code: string, deviceName: string) {
 
 export function unpair() {
   save("syncPaired", null);
+  save("syncJournal", false);
   save("syncLast", 0);
   set({ paired: null, last: 0, error: null });
 }
@@ -245,8 +269,20 @@ async function run() {
   if (!p) return;
   set({ busy: true });
   try {
+    await journal.load().catch(() => {
+      throw new Error("The journal couldn't be read, so nothing was synced.");
+    });
     note();
-    const mine = payload(ledger, itemsNow(), placesNow());
+    // The journal only goes to a computer that has said it syncs it (an older one would delete it).
+    const all = payload(ledger, itemsNow(), placesNow());
+    const withJ = saved("syncJournal", false);
+    const mine: Payload = {
+      ...all,
+      items: withJ ? all.items : withoutJournal(all.items),
+      since: state.last,
+      from: deviceName(),
+      journal: true,
+    };
     let merged: Payload;
     try {
       merged = await post(p, mine);
@@ -254,16 +290,23 @@ async function run() {
       if (String(e).includes("not paired")) throw e;
       // Not where it was: look for it again by name.
       const f = (await discover()).find((x) => x.name === p.name);
-      if (!f) throw new Error(`${p.name} isn't on this Wi-Fi, or Two-edged Sword isn't open on it.`);
+      if (!f) throw new Error(`${p.name} isn't on this Wi-Fi, or Two-edged Sword isn't open on it.`, { cause: e });
       const moved = { ...p, host: f.host, port: f.port };
       save("syncPaired", moved);
       set({ paired: moved });
       merged = await post(moved, mine);
     }
-    apply(merge(mine, merged));
+    // The journal is only taken from the reply when this sync sent it too: otherwise the reply has the
+    // computer's entries and not this phone's, and they'd be lost.
+    apply(merge(mine, merged), !!merged.journal && withJ);
     const last = Date.now();
     save("syncLast", last);
     set({ last, error: null, busy: false });
+    // The computer syncs the journal: from now on it goes too, starting straight away.
+    if (merged.journal && !withJ) {
+      save("syncJournal", true);
+      window.setTimeout(() => syncNow().catch(() => {}), 500);
+    }
   } catch (e) {
     const msg = String(e).replace(/^Error: /, "");
     set({ busy: false, error: msg.includes("not paired") ? "The computer no longer knows this device. Pair again." : plain(msg, p) });
@@ -272,9 +315,17 @@ async function run() {
 
 /** The merged result, kept here: each store replaced, and the ledger matched to it so nothing is
  *  taken for a change. */
-function apply(m: Payload) {
-  const done = settle(m);
-  ledger = done.ledger;
+function apply(m0: Payload, withJournal: boolean) {
+  // A result that would remove many of one kind here (the computer lost them) is refused: they're kept,
+  // and sync back to it.
+  const here = withJournal ? itemsNow() : Object.fromEntries(Object.entries(itemsNow()).filter(([k]) => !k.startsWith("j|")));
+  const { merged: m, refused } = refuseMassRemoval(here, m0);
+  if (refused.size) invoke("log", { msg: `sync: would remove many ${[...refused].join(", ")}; kept` }).catch(() => {});
+  const done = settle(withJournal ? m : { ...m, items: withoutJournal(m.items) });
+  // Without the journal, its ledger entries stay as they were here.
+  ledger = withJournal
+    ? done.ledger
+    : { ...done.ledger, ...Object.fromEntries(Object.entries(ledger).filter(([k]) => k.startsWith("j|"))) };
   save("syncLedger", ledger);
   const marks = under(done.now, "bm|")
     .map(([, v]) => fromSync(v as SyncMark))
@@ -288,6 +339,8 @@ function apply(m: Payload) {
     for (const k of Object.keys(docAtNow())) if (!(k in at)) localStorage.removeItem(DOC_AT + k);
     for (const [k, t] of Object.entries(at)) save(`docAt.${k}`, t);
     plansStore.set(() => plansFrom(done.now));
+    // Only from a sync that carried the journal both ways; otherwise what's here stays as it is.
+    if (withJournal) journal.replace(under(done.now, "j|").map(([, v]) => v as Entry));
   } finally {
     applying = false;
   }

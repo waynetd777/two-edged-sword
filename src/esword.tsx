@@ -355,7 +355,11 @@ const BLOCK = new Set(["p", "table", "div", "h1", "h2", "h3", "h4", "h5", "h6", 
  *  shows the title above it and Listen announces it, so it is neither shown nor read again. */
 export function isTitlePara(seg: string | undefined, title: string): boolean {
   if (!seg) return false;
-  const norm = (t: string) => t.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+  const norm = (t: string) =>
+    t
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, " ")
+      .trim();
   return !!norm(title) && norm(plainText(seg)) === norm(title);
 }
 

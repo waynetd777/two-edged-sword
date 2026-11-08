@@ -151,10 +151,11 @@ export function pickChapterSongs(n: number, about: string, text: string, model: 
   const ask = `Choose ${nSongs(n)} to play for someone reading ${about}.${opening ? `\nIt begins:\n"""\n${opening}\n"""` : ""}`;
   return kept(
     JSON.stringify(["chapter", n, about]),
-    () => choose(n, ask, ["this chapter", "this chapter"], model, new Set(), false).then((p) => {
-      if (!p.note) for (const t of p.songs) chapterPicked.add(t.id);
-      return p;
-    }),
+    () =>
+      choose(n, ask, ["this chapter", "this chapter"], model, new Set(), false).then((p) => {
+        if (!p.note) for (const t of p.songs) chapterPicked.add(t.id);
+        return p;
+      }),
     fresh,
   );
 }

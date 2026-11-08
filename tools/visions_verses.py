@@ -19,14 +19,23 @@ from books import NAMES  # noqa: E402
 ROOT = Path(__file__).resolve().parent.parent
 names = [n.lower() for n in NAMES]
 
-refs = sorted({r for p in (ROOT / "src/pictures").glob("*.ts") for r in re.findall(r'^\s+verse: "([^"]+)",$', p.read_text(encoding="utf-8"), re.M)})
+refs = sorted(
+    {
+        r
+        for p in (ROOT / "src/pictures").glob("*.ts")
+        for r in re.findall(r'^\s+verse: "([^"]+)",$', p.read_text(encoding="utf-8"), re.M)
+    }
+)
 db = sqlite3.connect(f"file:{ROOT / 'src-tauri/modules/kjv.bbli'}?mode=ro", uri=True)
 out = {}
 for ref in refs:
     m = re.fullmatch(r"(.+) (\d+):(\d+)", ref)
     book = m[1].lower()
     book = "psalms" if book == "psalm" else book
-    row = db.execute("select Scripture from Bible where Book=? and Chapter=? and Verse=?", (names.index(book) + 1, int(m[2]), int(m[3]))).fetchone()
+    row = db.execute(
+        "select Scripture from Bible where Book=? and Chapter=? and Verse=?",
+        (names.index(book) + 1, int(m[2]), int(m[3])),
+    ).fetchone()
     if not row:
         sys.exit(f"{ref}: not in the KJV")
     out[ref] = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", row[0])).strip()
@@ -36,6 +45,7 @@ body = "".join(f"  {json.dumps(k)}: {json.dumps(v, ensure_ascii=False)},\n" for 
     "// Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.\n"
     "// SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.\n\n"
     "// Made by tools/visions_verses.py: each picture's verse in the KJV, for the pictures viewer only.\n\n"
-    f"export const KJV_VERSES: Record<string, string> = {{\n{body}}};\n"
-, encoding="utf-8")
+    f"export const KJV_VERSES: Record<string, string> = {{\n{body}}};\n",
+    encoding="utf-8",
+)
 print(f"{len(out)} verses")

@@ -126,7 +126,20 @@ export function GoTo({
                 <div className="list">
                   {bm.list().map((m) => (
                     <div key={m.at} className="row">
-                      <button className="grow" style={{ border: "none", background: "none", textAlign: "left", minHeight: 50, padding: 0, display: "flex", flexDirection: "column", justifyContent: "center" }} onClick={() => open(m)}>
+                      <button
+                        className="grow"
+                        style={{
+                          border: "none",
+                          background: "none",
+                          textAlign: "left",
+                          minHeight: 50,
+                          padding: 0,
+                          display: "flex",
+                          flexDirection: "column",
+                          justifyContent: "center",
+                        }}
+                        onClick={() => open(m)}
+                      >
                         <span style={{ fontSize: 16 }}>{label(m)}</span>
                         <span className="m">{where(m)}</span>
                       </button>
@@ -137,7 +150,9 @@ export function GoTo({
                   ))}
                 </div>
               ) : (
-                <p className="empty">None yet. The bookmark button beside the study bar marks the selected verse; a book's chapter has one by its title.</p>
+                <p className="empty">
+                  None yet. The bookmark button beside the study bar marks the selected verse; a book's chapter has one by its title.
+                </p>
               )}
               {bm.recent().length > 0 && (
                 <>
@@ -146,7 +161,11 @@ export function GoTo({
                   </p>
                   <div className="list">
                     {bm.recent().map((m) => (
-                      <button key={m.at + label(m)} className="row" onClick={() => open(m.doc ? m : { ...m, ref: m.ref && { ...m.ref, verse: 1 } })}>
+                      <button
+                        key={m.at + label(m)}
+                        className="row"
+                        onClick={() => open(m.doc ? m : { ...m, ref: m.ref && { ...m.ref, verse: 1 } })}
+                      >
                         <span className="grow" style={{ display: "flex", flexDirection: "column", padding: "8px 0" }}>
                           <span>{m.doc ? m.doc.chapter : m.ref ? fmtRef({ book: m.ref.book, chapter: m.ref.chapter }) : ""}</span>
                           <span className="m">

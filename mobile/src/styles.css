@@ -1711,21 +1711,43 @@ input[type="range"] {
   --hl-teal: #133834;
   --hl-grey: #323a45;
 }
-/* A highlighted verse is tinted with its dot's colour (HL_DOT), so the two always match. */
-.v.hl,
-.pv.hl {
-  background: color-mix(in srgb, var(--hl) 55%, transparent);
-  border-radius: 4px;
+/* A highlighted verse, drawn like a highlighter pen in its dot's colour (HL_DOT), as the desktop's: a
+   band over the lower part of each line, slanted chisel ends, the ink heavier where the stroke starts.
+   A verse per line has it on its words (.vt), so each wrapped line is its own stroke. */
+:root {
+  --hl-mix: 25%;
 }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .v.hl,
-  :root:not([data-theme="light"]) .pv.hl {
-    background: color-mix(in srgb, var(--hl) 45%, transparent);
+  :root:not([data-theme="light"]) {
+    --hl-mix: 22%;
   }
 }
-:root[data-theme="dark"] .v.hl,
-:root[data-theme="dark"] .pv.hl {
-  background: color-mix(in srgb, var(--hl) 45%, transparent);
+:root[data-theme="dark"] {
+  --hl-mix: 22%;
+}
+.v.hl > .vt,
+.pv.hl {
+  --hlx: color-mix(in srgb, var(--hl) calc(var(--hl-mix) * 1.6), transparent);
+  --hly: color-mix(in srgb, var(--hl) var(--hl-mix), transparent);
+  background: linear-gradient(
+      100deg,
+      transparent 0.05em,
+      var(--hlx) 0.3em,
+      var(--hly) 30%,
+      var(--hlx) 85%,
+      var(--hly) calc(100% - 0.3em),
+      transparent calc(100% - 0.05em)
+    )
+    0 62% / 100% 78% no-repeat;
+  margin: 0 -0.3em;
+  padding: 0.05em 0.3em;
+  border-radius: 0.7em 0.25em 0.8em 0.3em;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+/* A verse's number stays clear of a stroke that starts at its first word. */
+.v.hl > .vt {
+  margin-inline-start: -0.15em;
 }
 /* The highlighter's colours, above the study bar (Read.tsx). */
 .hlstrip {
@@ -1799,4 +1821,422 @@ input.field {
 .dockacts .round.listen.on,
 .dockacts .round.listen.open {
   background: var(--accentsoft);
+}
+
+/* Paragraphs set justified, as the desktop's focus mode. */
+.text.para {
+  text-align: justify;
+  -webkit-hyphens: auto;
+  hyphens: auto;
+}
+.text[dir="rtl"] .vnum {
+  margin-right: 0;
+  margin-left: 5px;
+}
+
+/* Study: a button in the row under the text, lit while Study is shown in place of the text. */
+.round.listen.studybtn {
+  color: var(--muted);
+}
+.round.listen.studybtn.on {
+  color: var(--accent);
+  background: var(--accentsoft);
+}
+.studyrow {
+  justify-content: center;
+}
+.studyrow .round.listen {
+  height: 48px;
+  flex: 1;
+  max-width: 88px;
+  width: auto;
+}
+.readbody {
+  position: relative;
+}
+.dock.screen {
+  position: absolute;
+  inset: 0;
+  width: auto;
+  max-width: none;
+  border-left: none;
+  z-index: 3;
+  padding-top: 4px;
+}
+/* Cross-references' sources (Study.tsx): the chosen one lit, as the commentary's pill. */
+.chooser .pill[role="radio"]:not(.on) {
+  border-color: var(--border);
+  background: var(--panel);
+  color: var(--text);
+  font-weight: 400;
+}
+
+/* Interlinear Bibles: each original word over its English and Strong's number, as the desktop's. */
+.il {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  vertical-align: top;
+  margin: 0 0 8px 0;
+  margin-inline-end: 6px;
+  line-height: 1.35;
+}
+.il > .w {
+  font-family: var(--orig);
+  font-size: 1.15em;
+}
+.il-g {
+  font:
+    500 12px/1.3 -apple-system,
+    sans-serif;
+  color: var(--muted);
+  text-transform: lowercase;
+  font-variant: small-caps;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+.il-n {
+  font:
+    500 10px/1.2 -apple-system,
+    sans-serif;
+  color: var(--accent);
+}
+.il-n .sn {
+  vertical-align: baseline;
+  padding: 4px 1px;
+}
+.il-p {
+  vertical-align: top;
+}
+.text.para:has(.il) {
+  text-align: start;
+}
+
+/* Red letters in a highlighted verse: a deeper red (a lighter one on dark), so they stand out from the
+   highlighter's ink, the warm colours especially. */
+:root {
+  --red-on-hl: #9a0b1f;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --red-on-hl: #ffb0a9;
+  }
+}
+:root[data-theme="dark"] {
+  --red-on-hl: #ffb0a9;
+}
+.v.hl .red,
+.pv.hl .red {
+  color: var(--red-on-hl);
+}
+
+/* ---------- the journal (JournalEdit.tsx) ---------- */
+.round.listen.notebtn {
+  color: var(--muted);
+}
+.round.listen.notebtn.has {
+  color: var(--accent);
+}
+.round.listen.notebtn.open {
+  background: var(--accentsoft);
+}
+/* What the header's buttons open, docked on an iPad: under them, in the study pane. */
+.docktray {
+  flex: none;
+  padding: 0 4px;
+}
+.docktray .hlstrip,
+.docktray .notestrip {
+  margin: 0 8px 8px;
+  box-shadow: none;
+}
+.notestrip {
+  flex: none;
+  margin: 0 12px 8px;
+  border-radius: 14px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  box-shadow: 0 -6px 24px var(--scrim);
+  overflow: hidden;
+}
+.notestrip .list {
+  max-height: 40vh;
+  overflow-y: auto;
+}
+.notestrip .row + .row,
+.notestrip .jnew {
+  border-top: 1px solid var(--line);
+}
+.jnew {
+  color: var(--accent);
+}
+.jrow {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+.jrow .t {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.jrow .p {
+  font-size: 13px;
+  color: var(--muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.jlist .row + .row {
+  border-top: 1px solid var(--line);
+}
+.jedit {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 15;
+  display: flex;
+  flex-direction: column;
+  background: var(--panel);
+  padding-top: var(--top);
+  animation: rise 0.2s ease-out;
+}
+@media (min-width: 700px) {
+  .jedit {
+    left: calc(50% - 340px);
+    right: calc(50% - 340px);
+    top: 40px;
+    max-height: calc(100% - 80px);
+    border-radius: 16px;
+    padding-top: 6px;
+    box-shadow: 0 10px 40px var(--scrim);
+  }
+}
+.jbody {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 4px 16px calc(var(--bottom) + 16px);
+}
+.jbody > * {
+  flex: none;
+}
+h2.jtitle {
+  margin: 0;
+  line-height: 1.25;
+}
+.jtitle {
+  flex: none;
+  border: none;
+  background: none;
+  color: var(--text);
+  font: 600 22px var(--read);
+  padding: 4px 0;
+  outline: none;
+}
+.jverses {
+  flex: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+.jverse {
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  border-radius: 16px;
+  border: 1px solid var(--ring);
+  background: var(--accentsoft);
+  color: var(--accent);
+  overflow: hidden;
+}
+.jverse button {
+  border: none;
+  background: none;
+  color: inherit;
+  height: 32px;
+  font-size: 14px;
+}
+.jverse .go {
+  padding: 0 4px 0 12px;
+  font-weight: 600;
+}
+.jverse .x {
+  padding: 0 10px 0 6px;
+  font-size: 12px;
+  opacity: 0.7;
+}
+.jtag {
+  font-size: 13px;
+  color: var(--muted);
+}
+.jadd {
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  border-radius: 16px;
+  border: 1px dashed var(--border);
+  padding: 0 4px 0 12px;
+}
+.jadd.bad {
+  border-color: var(--red);
+}
+.jadd input {
+  width: 110px;
+  border: none;
+  background: none;
+  color: var(--text);
+  font-size: 14px;
+  outline: none;
+}
+.jadd button {
+  border: none;
+  background: none;
+  color: var(--accent);
+  font-size: 20px;
+  padding: 0 8px;
+}
+.jtext {
+  min-height: 160px;
+  overflow: hidden;
+  resize: none;
+  border: none;
+  background: none;
+  color: var(--text);
+  font: 17px/1.55 var(--read);
+  outline: none;
+  padding: 4px 0;
+}
+.jdel {
+  flex: none;
+  color: var(--red);
+}
+
+/* The view: the chapter, Study or Compare (Read.tsx viewSeg). Joined, the current one filled. */
+.viewseg {
+  flex: none;
+  display: flex;
+  height: 48px;
+  padding: 3px;
+  gap: 2px;
+  border-radius: 14px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  box-shadow: 0 -6px 24px var(--scrim);
+}
+.viewseg button {
+  width: 44px;
+  border: none;
+  border-radius: 11px;
+  background: none;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.viewseg button.on {
+  background: var(--accent);
+  color: var(--onaccent);
+}
+.dockacts .viewseg {
+  height: 36px;
+  padding: 2px;
+  border-radius: 10px;
+  box-shadow: none;
+  margin-left: 4px;
+}
+.dockacts .viewseg button {
+  width: 36px;
+  border-radius: 8px;
+}
+@media (max-width: 380px) {
+  .viewseg button {
+    width: 38px;
+  }
+}
+/* The highlighter: the pen over a bar of the colour it highlights in. */
+.hlpen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.hlbar {
+  width: 20px;
+  height: 4px;
+  border-radius: 2px;
+}
+
+/* An entry read as the desktop shows it (md.ts): the reading font, and highlights drawn like a
+   highlighter pen in their colours, as the verses' (.pv.hl). */
+.jprose {
+  font: 17px/1.6 var(--read);
+}
+.jprose h3 {
+  font-size: 18px;
+  margin: 18px 0 6px;
+}
+.jprose blockquote {
+  margin: 10px 0;
+  padding-left: 12px;
+  border-left: 3px solid var(--line);
+  color: var(--muted);
+}
+.jprose a.ref {
+  color: var(--accent);
+  text-decoration: none;
+}
+/* :root to outrank Search's plain mark (and its dark version). */
+:root .jprose mark {
+  color: inherit;
+  --hlx: color-mix(in srgb, var(--hl) calc(var(--hl-mix) * 1.6), transparent);
+  --hly: color-mix(in srgb, var(--hl) var(--hl-mix), transparent);
+  background: linear-gradient(
+      100deg,
+      transparent 0.05em,
+      var(--hlx) 0.3em,
+      var(--hly) 30%,
+      var(--hlx) 85%,
+      var(--hly) calc(100% - 0.3em),
+      transparent calc(100% - 0.05em)
+    )
+    0 62% / 100% 78% no-repeat;
+  margin: 0 -0.3em;
+  padding: 0.05em 0.3em;
+  border-radius: 0.7em 0.25em 0.8em 0.3em;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+.jprose mark.hl-red {
+  --hl: #e59a92;
+}
+.jprose mark.hl-orange {
+  --hl: #efb97e;
+}
+.jprose mark.hl-yellow,
+.jprose mark:not([class]) {
+  --hl: #e9d271;
+}
+.jprose mark.hl-green {
+  --hl: #a9cf9f;
+}
+.jprose mark.hl-teal {
+  --hl: #8fcfc6;
+}
+.jprose mark.hl-blue {
+  --hl: #9fc0e6;
+}
+.jprose mark.hl-purple {
+  --hl: #c1a9e3;
+}
+.jprose mark.hl-grey {
+  --hl: #aab3bf;
 }

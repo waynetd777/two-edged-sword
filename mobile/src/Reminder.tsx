@@ -19,7 +19,7 @@ const get = () => saved<Setting>("reminder", { on: false, time: "07:00" });
  *  is already done. Called when the setting changes, when the app opens and when a day is marked. */
 export function syncReminders(): Promise<void> {
   const s = get();
-  const list: { id: number; at: number; title: string; body: string }[] = [];
+  const list: { id: number; at: number; tz: number; title: string; body: string }[] = [];
   const plan = current(plansStore.get());
   if (s.on && plan) {
     const [h, m] = s.time.split(":").map(Number);
@@ -34,6 +34,7 @@ export function syncReminders(): Promise<void> {
       list.push({
         id: 1000 + i,
         at: at.getTime(),
+        tz: -at.getTimezoneOffset(),
         title: "Time for your Bible reading",
         body: body ? `Today: ${psalmLabel(body)}` : plan.name,
       });

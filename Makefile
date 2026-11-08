@@ -20,16 +20,28 @@ check:
 
 test: check
 
-## Check the code: rustfmt, clippy, Prettier and ESLint. Fails on any warning.
+PLUGIN := mobile/plugins/tes-native
+
+## Check the code, desktop and phone: rustfmt and clippy (the phone's for iOS too), Prettier and ESLint,
+## ruff (the Python tools), SwiftLint and ktlint (the phone plugin). Fails on any warning.
 lint:
 	cd src-tauri && cargo fmt --check && cargo clippy --all-targets -- -D warnings
+	cd mobile/src-tauri && cargo fmt --check && cargo clippy --all-targets -- -D warnings
+	cd mobile/src-tauri && cargo clippy --target aarch64-apple-ios -- -D warnings
+	cd $(PLUGIN) && cargo fmt --check && cargo clippy --all-targets -- -D warnings
 	npx prettier --check .
 	npx eslint . --max-warnings 0
+	ruff check . && ruff format --check .
+	cd $(PLUGIN) && swiftlint lint --strict --quiet && ktlint "android/src/main/**/*.kt"
 
-## Format the Rust and TypeScript.
+## Format the Rust, TypeScript, Python, Swift and Kotlin.
 fmt:
 	cd src-tauri && cargo fmt
+	cd mobile/src-tauri && cargo fmt
+	cd $(PLUGIN) && cargo fmt
 	npx prettier --write .
+	ruff format . && ruff check --fix .
+	cd $(PLUGIN) && swiftlint --fix --quiet && ktlint -F "android/src/main/**/*.kt"
 
 # Release builds strip the builder's home directory out of the binary (Rust bakes absolute
 # paths into panic metadata). Debug builds skip this so `make dev` keeps its incremental cache.

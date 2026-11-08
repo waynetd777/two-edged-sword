@@ -149,7 +149,7 @@ export function MapsTab({
       .filter((x) => x.s > 0)
       .sort((a, b) => b.s - a.s)
       .map((x) => x.p);
-  }, [maps, at.book, at.chapter, at.verse]);
+  }, [maps, at.book, at.chapter, at.verse]); // eslint-disable-line react-hooks/exhaustive-deps -- at's fields, not the object made anew each render
 
   if (!books.length) return <GetMaps onChanged={onChanged} />;
   if (!maps) return <p className="empty">Opening the maps…</p>;
@@ -255,7 +255,11 @@ function GetMaps({ onChanged }: { onChanged: () => void }) {
           Download the maps
         </button>
       )}
-      {err && <p className="m" style={{ color: "var(--red)", marginTop: 8 }}>Couldn't download: {err}</p>}
+      {err && (
+        <p className="m" style={{ color: "var(--red)", marginTop: 8 }}>
+          Couldn't download: {err}
+        </p>
+      )}
     </div>
   );
 }

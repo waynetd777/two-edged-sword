@@ -37,15 +37,22 @@ PIN = (180, 138, 62)
 
 def quad(p0, p1, p2, n=40):
     """Points along a quadratic Bezier curve."""
-    return [((1 - t) ** 2 * p0[0] + 2 * (1 - t) * t * p1[0] + t * t * p2[0], (1 - t) ** 2 * p0[1] + 2 * (1 - t) * t * p1[1] + t * t * p2[1]) for t in (i / n for i in range(n + 1))]
+    return [
+        (
+            (1 - t) ** 2 * p0[0] + 2 * (1 - t) * t * p1[0] + t * t * p2[0],
+            (1 - t) ** 2 * p0[1] + 2 * (1 - t) * t * p1[1] + t * t * p2[1],
+        )
+        for t in (i / n for i in range(n + 1))
+    ]
 
 
 def sword(d, k, fill=None):
     """Draw the sword in 1024-space scaled by k. With `fill`, every part is that one colour."""
+
     def P(pts):
         return [(x * k, y * k) for x, y in pts]
 
-    c = (lambda col: fill or col)
+    c = lambda col: fill or col
     d.polygon(P([(512, 176), (470, 262), (470, 640), (512, 640)]), fill=c(BLADE_LIGHT))
     d.polygon(P([(512, 176), (554, 262), (554, 640), (512, 640)]), fill=c(BLADE_DARK))
     if not fill:

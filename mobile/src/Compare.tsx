@@ -118,7 +118,11 @@ export function CompareView({
                     if (t.note) return null;
                     if (!t.word) return <span key={i}>{t.italic ? <i>{t.text}</i> : t.text}</span>;
                     const now = reading !== undefined && reading >= t.at && reading < t.at + t.text.length;
-                    const cls = [d?.has(t.wi) && !now ? "diff" : "", active?.bible === id && active.i === i ? "w on" : "", now ? "said" : ""]
+                    const cls = [
+                      d?.has(t.wi) && !now ? "diff" : "",
+                      active?.bible === id && active.i === i ? "w on" : "",
+                      now ? "said" : "",
+                    ]
                       .join(" ")
                       .trim();
                     return (
@@ -141,7 +145,17 @@ export function CompareView({
 }
 
 /** Which Bibles Compare shows, in order. */
-export function CompareEdit({ bibles, ids, onChange, onClose }: { bibles: Module[]; ids: string[]; onChange: (ids: string[]) => void; onClose: () => void }) {
+export function CompareEdit({
+  bibles,
+  ids,
+  onChange,
+  onClose,
+}: {
+  bibles: Module[];
+  ids: string[];
+  onChange: (ids: string[]) => void;
+  onClose: () => void;
+}) {
   // At least one stays ticked: Compare with none has nothing to show (and a blank screen was all it gave).
   const toggle = (id: string) => {
     if (ids.includes(id) && ids.length === 1) return;
@@ -169,7 +183,9 @@ export function CompareEdit({ bibles, ids, onChange, onClose }: { bibles: Module
                 <button key={b.id} className={`row ${ids.includes(b.id) ? "on" : ""}`} onClick={() => toggle(b.id)}>
                   <span className="grow">{b.title}</span>
                   <span className="m">{b.abbrev}</span>
-                  <span style={{ width: 18, color: "var(--accent)", display: "flex" }}>{ids.includes(b.id) && <Icon name="check" size={18} />}</span>
+                  <span style={{ width: 18, color: "var(--accent)", display: "flex" }}>
+                    {ids.includes(b.id) && <Icon name="check" size={18} />}
+                  </span>
                 </button>
               ))}
           </div>

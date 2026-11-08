@@ -1,0 +1,12 @@
+# Ruff for the Python tools (tools/, mobile/tools/): `make lint` checks, `make fmt` formats.
+# _sift/ is sift's own runtime, kept as it ships.
+line-length = 120
+target-version = "py311"
+extend-exclude = ["_sift", "**/node_modules", "**/target", "**/gen", "dist", "*.md"]
+
+[lint]
+# The usual checks (pyflakes, pycodestyle errors), likely bugs (bugbear), import order, and old syntax.
+select = ["E", "F", "W", "B", "I", "UP"]
+# Long lines are the formatter's (a long string or URL is left as it is); lambdas kept as named one-liners,
+# l as a name and zip() without strict= are this code's style.
+ignore = ["E501", "E731", "E741", "B905"]

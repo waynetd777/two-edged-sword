@@ -29,7 +29,14 @@ marker (H853) are never given.
 
 The alignment is cached in ~/Library/Caches/Two-edged Sword/latin/strongs, keyed on the texts and ALGORITHM.
 """
-import hashlib, html, json, math, re, sqlite3, sys
+
+import hashlib
+import html
+import json
+import math
+import re
+import sqlite3
+import sys
 from collections import Counter, defaultdict
 from difflib import SequenceMatcher
 from pathlib import Path
@@ -47,15 +54,43 @@ GRA = re.compile(r"<gra>(.*?)</gra>")
 
 # The kinds of original word each of Stanza's parts of speech may render.
 RENDERS = {
-    "NOUN": {"noun", "adj", "verb"}, "PROPN": {"name", "adj"}, "VERB": {"verb", "adj", "noun"}, "AUX": {"verb"},
-    "ADJ": {"adj", "noun", "pron", "verb"}, "NUM": {"adj", "noun"}, "DET": {"pron", "adj"}, "PRON": {"pron", "prep", "adj"},
-    "ADP": {"prep", "adv"}, "ADV": {"adv", "conj", "prep", "pron", "adj"}, "PART": {"adv", "conj", "prep", "pron"},
-    "CCONJ": {"conj", "adv", "pron"}, "SCONJ": {"conj", "adv", "pron"}, "INTJ": {"adv", "conj"},
+    "NOUN": {"noun", "adj", "verb"},
+    "PROPN": {"name", "adj"},
+    "VERB": {"verb", "adj", "noun"},
+    "AUX": {"verb"},
+    "ADJ": {"adj", "noun", "pron", "verb"},
+    "NUM": {"adj", "noun"},
+    "DET": {"pron", "adj"},
+    "PRON": {"pron", "prep", "adj"},
+    "ADP": {"prep", "adv"},
+    "ADV": {"adv", "conj", "prep", "pron", "adj"},
+    "PART": {"adv", "conj", "prep", "pron"},
+    "CCONJ": {"conj", "adv", "pron"},
+    "SCONJ": {"conj", "adv", "pron"},
+    "INTJ": {"adv", "conj"},
 }
-KIND = [("proper noun", "name"), ("name", "name"), ("hebrew word", "name"), ("aramaic word", "name"), ("pronoun", "pron"),
-        ("relative", "pron"), ("interrogative", "pron"), ("adverb", "adv"), ("adjective", "adj"), ("numeral", "adj"),
-        ("noun", "noun"), ("verb", "verb"), ("article", "art"), ("preposition", "prep"), ("conjunction", "conj"),
-        ("negative", "adv"), ("particle", "adv"), ("interjection", "adv"), ("object marker", "marker"), ("letter", "name")]
+KIND = [
+    ("proper noun", "name"),
+    ("name", "name"),
+    ("hebrew word", "name"),
+    ("aramaic word", "name"),
+    ("pronoun", "pron"),
+    ("relative", "pron"),
+    ("interrogative", "pron"),
+    ("adverb", "adv"),
+    ("adjective", "adj"),
+    ("numeral", "adj"),
+    ("noun", "noun"),
+    ("verb", "verb"),
+    ("article", "art"),
+    ("preposition", "prep"),
+    ("conjunction", "conj"),
+    ("negative", "adv"),
+    ("particle", "adv"),
+    ("interjection", "adv"),
+    ("object marker", "marker"),
+    ("letter", "name"),
+]
 
 
 def kind(tvm, gloss):
@@ -94,7 +129,15 @@ def numbers(name):
 
 
 def name_key(s):
-    s = s.lower().replace("j", "i").replace("y", "i").replace("v", "u").replace("ph", "f").replace("k", "c").replace("z", "s")
+    s = (
+        s.lower()
+        .replace("j", "i")
+        .replace("y", "i")
+        .replace("v", "u")
+        .replace("ph", "f")
+        .replace("k", "c")
+        .replace("z", "s")
+    )
     return re.sub(r"[^a-z]", "", s).replace("h", "")
 
 
@@ -153,7 +196,9 @@ def links(L, O, keys):
         s, g = L[k], O[k]
         a1, a2 = viterbi(t_lo, s, g), viterbi(t_ol, g, s)
         inter = {(i, j) for j, i in enumerate(a1) if i is not None and a2[i] == j}
-        union = {(i, j) for j, i in enumerate(a1) if i is not None} | {(i, j) for i, j in enumerate(a2) if j is not None}
+        union = {(i, j) for j, i in enumerate(a1) if i is not None} | {
+            (i, j) for i, j in enumerate(a2) if j is not None
+        }
         got = set(inter)
         for i, j in sorted(union - inter):
             if not any(x == i for x, _ in got):
@@ -168,7 +213,10 @@ def cached_links(name, L, O, keys):
         h.update(f"{k}\t{' '.join(L[k])}\t{' '.join(O[k])}\n".encode())
     p = CACHE / f"{name}-{h.hexdigest()[:16]}.json"
     if p.is_file():
-        return {tuple(int(x) if x.isdigit() else x for x in k.split(".")): [tuple(x) for x in v] for k, v in json.loads(p.read_text(encoding="utf-8")).items()}
+        return {
+            tuple(int(x) if x.isdigit() else x for x in k.split(".")): [tuple(x) for x in v]
+            for k, v in json.loads(p.read_text(encoding="utf-8")).items()
+        }
     print(f"  aligning the Latin with the {name} (both ways; once, then cached)")
     out = links(L, O, keys)
     print()
@@ -197,7 +245,11 @@ def assign(latin, upos):
     corpora = {"hebrew": {}, "greek": {}}
     for k, (corpus, ns) in src.items():
         corpora[corpus][k] = [x for x, _, _ in ns]
-    extra = {("lxx",) + k: [x for x, _, _ in lxx[k]] for k in latin if k[0] <= 39 and src.get(k, ("",))[0] == "hebrew" and k in lxx}
+    extra = {
+        ("lxx",) + k: [x for x, _, _ in lxx[k]]
+        for k in latin
+        if k[0] <= 39 and src.get(k, ("",))[0] == "hebrew" and k in lxx
+    }
     D, tot, best, both = {}, {}, {}, {}
     for name, O in (("hebrew", corpora["hebrew"]), ("greek", {**corpora["greek"], **extra})):
         L = {k: latin[k[1:] if k[0] == "lxx" else k] for k in O}
@@ -215,7 +267,10 @@ def assign(latin, upos):
         by_lemma = defaultdict(Counter)
         for (l, x), c in d.items():
             by_lemma[l][x] += c
-        best[name] = {l: (cs.most_common(1)[0][0], cs.most_common(1)[0][1] / t[l], cs.most_common(1)[0][1]) for l, cs in by_lemma.items()}
+        best[name] = {
+            l: (cs.most_common(1)[0][0], cs.most_common(1)[0][1] / t[l], cs.most_common(1)[0][1])
+            for l, cs in by_lemma.items()
+        }
 
     out = {}
     for k, (corpus, ns) in src.items():
@@ -231,11 +286,16 @@ def assign(latin, upos):
                 for j, (x, kd, g) in enumerate(lxx.get((b, c, v + d), [])):
                     cands.append((j, x, kd, g, d))
         m = max(len(ns), 1)
-        deut = b >= 67 or greek_part(*k)  # the Vulgate's deuterocanon is often another text than the Greek: surer links only
+        # The Vulgate's deuterocanon is often another text than the Greek: surer links only.
+        deut = b >= 67 or greek_part(*k)
 
-        def fits(i, kd, x):
+        def fits(i, kd, x, pos=pos):
             ok = RENDERS.get(pos[i])
-            return x not in NEVER and (ok is None or kd in ok or kd == "other") and not (kd == "name" and pos[i] not in ("PROPN", "ADJ", "X"))
+            return (
+                x not in NEVER
+                and (ok is None or kd in ok or kd == "other")
+                and not (kd == "name" and pos[i] not in ("PROPN", "ADJ", "X"))
+            )
 
         pick, scored = {}, {}
         for i, li in enumerate(s):
@@ -245,7 +305,11 @@ def assign(latin, upos):
             for j, x, kd, g, d in cands:
                 if not fits(i, kd, x):
                     continue
-                if kd == "name" and pos[i] == "PROPN" and SequenceMatcher(None, name_key(li), name_key(g)).ratio() < 0.4:
+                if (
+                    kd == "name"
+                    and pos[i] == "PROPN"
+                    and SequenceMatcher(None, name_key(li), name_key(g)).ratio() < 0.4
+                ):
                     continue  # a name for a name spelt somewhat like it (Theodotius is not Mattathias)
                 share = (Dc[(li, x)] + 0.01) / (tc[li] + 1)
                 rare = d == 0 and (i, j) in sure and pos[i] in ("NOUN", "PROPN", "VERB", "ADJ")
@@ -289,8 +353,14 @@ def assign(latin, upos):
         for i, li in enumerate(s):
             if i in nums or pos[i] != "PROPN":
                 continue
-            best_name = max(((SequenceMatcher(None, name_key(li), name_key(g)).ratio(), x) for _, x, kd, g, d in cands
-                             if kd == "name" and d == 0 and x not in used and g), default=None)
+            best_name = max(
+                (
+                    (SequenceMatcher(None, name_key(li), name_key(g)).ratio(), x)
+                    for _, x, kd, g, d in cands
+                    if kd == "name" and d == 0 and x not in used and g
+                ),
+                default=None,
+            )
             if best_name and best_name[0] >= 0.6:
                 nums[i] = best_name[1]
                 used.add(best_name[1])

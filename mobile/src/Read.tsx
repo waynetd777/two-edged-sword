@@ -19,6 +19,8 @@ import { NavButtons } from "./NavButtons";
 import { WordSheet } from "./WordSheet";
 import type { Jump } from "./Search";
 import { Study } from "./Study";
+import { entriesOn, useJournal } from "./journal";
+import { newEntry, VerseNotes } from "./JournalEdit";
 
 type Layout = "paragraph" | "verse";
 interface Loc {
@@ -56,7 +58,7 @@ function useChapter(bible: string, l: Loc): [Verse[], string] {
     return () => {
       live = false;
     };
-  }, [bible, l.book, l.chapter, lib]);
+  }, [bible, l.book, l.chapter, lib]); // eslint-disable-line react-hooks/exhaustive-deps -- l's fields, not the object made anew each render
   return [verses.vs, verses.key];
 }
 
@@ -75,6 +77,65 @@ function Words({
   active?: number;
   onWord: (i: number, num?: string) => void;
 }) {
+  // An interlinear Bible: each original word over its English and Strong's number, as the desktop's.
+  if (tokens.some((t) => t.gloss !== undefined)) {
+    const boxed = (t?: Token) => !!t?.word && (t.gloss !== undefined || t.strongs.length > 0);
+    // Punctuation straight after a word goes in its box, or the box's margin puts a space before it.
+    const trailing = (i: number) =>
+      !tokens[i].word && !tokens[i].note && /^[^\s\p{L}\p{N}]+$/u.test(tokens[i].text) && boxed(tokens[i - 1]) ? tokens[i].text : "";
+    return (
+      <>
+        {tokens.map((t, i) => {
+          if (t.note || trailing(i)) return null;
+          if (!boxed(t))
+            return t.text.trim() ? (
+              <span key={i} className="il-p">
+                {t.text}
+              </span>
+            ) : (
+              <Fragment key={i}> </Fragment>
+            );
+          const reading = said !== undefined && said >= t.at && said < t.at + t.text.length;
+          return (
+            <span
+              key={i}
+              className="il"
+              onClick={(e) => {
+                e.stopPropagation();
+                onWord(i);
+              }}
+            >
+              <span className={["w", i === active ? "on" : "", reading ? "said" : ""].join(" ").trim()}>
+                {t.text}
+                {i + 1 < tokens.length ? trailing(i + 1) : ""}
+              </span>
+              <span className="il-g">{t.gloss ?? "\u00a0"}</span>
+              {nums && (
+                <span className="il-n">
+                  {t.strongs.length
+                    ? t.strongs.map((n, k) => (
+                        <Fragment key={n}>
+                          {k ? " " : ""}
+                          <span
+                            className="sn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onWord(i, n);
+                            }}
+                          >
+                            {n}
+                          </span>
+                        </Fragment>
+                      ))
+                    : "\u00a0"}
+                </span>
+              )}
+            </span>
+          );
+        })}
+      </>
+    );
+  }
   return (
     <>
       {tokens.map((t, i) => {
@@ -150,7 +211,7 @@ export function Read({
   const bibles = modules.filter((m) => m.kind === "bible");
   const [bible, setBible] = useState<string>(() => saved("bible", "kjv+"));
   const [loc, setLoc] = useState<Loc>(() => saved("loc", { book: 62, chapter: 1 }));
-  const [layout, setLayout] = useState<Layout>(() => saved("layout", "paragraph"));
+  const [layout, setLayout] = useState<Layout>(() => saved("layout", "verse"));
   const [sel, setSel] = useState<number>(() => saved("verse", 1));
   const [study, setStudy] = useState(false);
   const [choosing, setChoosing] = useState(false);
@@ -194,9 +255,26 @@ export function Read({
   const bm = useBookmarks();
   const hls = useHighlights();
   /** The highlighter's colours, open above the study bar for the verse it names. */
-  const [hlOpen, setHlOpen] = useState(false);
-  useEffect(() => setHlOpen(false), [sel, loc.book, loc.chapter]);
+  const [hlOpen, setHlOpenRaw] = useState(false);
+  /** The verse's journal entries, open in the same place. One of the two at a time. */
+  const [notesOpen, setNotesOpenRaw] = useState(false);
+  const setHlOpen = (o: boolean) => {
+    setHlOpenRaw(o);
+    if (o) setNotesOpenRaw(false);
+  };
+  const setNotesOpen = (o: boolean) => {
+    setNotesOpenRaw(o);
+    if (o) setHlOpenRaw(false);
+  };
+  useEffect(() => {
+    setHlOpenRaw(false);
+    setNotesOpenRaw(false);
+  }, [sel, loc.book, loc.chapter]);
   const marked = (v: number) => bm.has({ ref: { book: loc.book, chapter: loc.chapter, verse: v }, bible });
+  // The chapter's verses that journal entries are on, for their note marks.
+  const jes = useJournal();
+  const onChapter = useMemo(() => entriesOn(jes, { book: loc.book, chapter: loc.chapter }), [jes, loc.book, loc.chapter]);
+  const noted = (v: number) => onChapter.length > 0 && entriesOn(onChapter, { book: loc.book, chapter: loc.chapter, verse: v }).length > 0;
   // Recent: each chapter read, once.
   useEffect(() => {
     if (doc) bookmarks.visited({ doc: { ...doc, title: docMod?.title ?? doc.module } });
@@ -433,7 +511,13 @@ export function Read({
   };
   const onStart = (e: TouchEvent) => {
     const t = e.touches[0];
-    tapOk.current = { x: t.clientX, y: t.clientY, stillAt: Date.now() - scrolledAt.current > 400, scroll: page.current?.scrollTop ?? 0, at: Date.now() };
+    tapOk.current = {
+      x: t.clientX,
+      y: t.clientY,
+      stillAt: Date.now() - scrolledAt.current > 400,
+      scroll: page.current?.scrollTop ?? 0,
+      at: Date.now(),
+    };
     // Away from the edges: Android's back gesture lives there.
     if (t.clientX < 24 || t.clientX > window.innerWidth - 24) return;
     touch.current = { x: t.clientX, y: t.clientY, dx: 0, horiz: null };
@@ -549,7 +633,7 @@ export function Read({
     if (el) el.scrollIntoView({ block: scrollTo === 1 ? "end" : "start" });
     if (scrollTo === 1) page.current?.scrollTo(0, 0);
     setScrollTo(null);
-  }, [scrollTo, verses, versesOf]);
+  }, [scrollTo, verses, versesOf, loc.book, loc.chapter]);
   const goTo = (r: Ref) => {
     setGoing(false);
     visit({ book: r.book, chapter: r.chapter }, r.verse ?? 1);
@@ -583,31 +667,114 @@ export function Read({
   };
 
   // The highlighter and Compare: beside the study bar, or (iPad, docked) in the study pane's header.
+  // The pen with a bar beneath, as Word's: in the verse's colour, or the pen's own when it has none.
+  const hlNow = hls[vkey(loc.book, loc.chapter, sel)];
   const hlButton = (
     <button
       className={`round listen hlbtn ${hlOpen ? "open" : ""}`}
       aria-label={`Highlight ${fmtRef({ ...loc, verse: sel })}`}
       aria-expanded={hlOpen}
-      style={hls[vkey(loc.book, loc.chapter, sel)] ? { color: HL_DOT[hls[vkey(loc.book, loc.chapter, sel)]] } : undefined}
       onClick={() => setHlOpen(!hlOpen)}
     >
-      <Icon name="highlighter" size={24} />
+      <span className="hlpen">
+        <Icon name="highlighter" size={22} />
+        <span className="hlbar" style={{ background: hlNow ? HL_DOT[hlNow] : "currentColor" }} />
+      </span>
     </button>
   );
-  const cmpButton = (
+  const bmkButton = (
     <button
-      className={`round listen cmpbtn ${comparing ? "on" : ""}`}
-      aria-label={comparing ? "Back to the chapter" : "Compare translations"}
-      aria-pressed={comparing}
-      onClick={() => {
-        setWord(null);
-        history.push({ comparing: !comparing });
-        setComparing(!comparing);
-      }}
+      className={`round listen bmkbar ${marked(sel) ? "on" : ""}`}
+      aria-label={marked(sel) ? `Remove the bookmark on ${fmtRef({ ...loc, verse: sel })}` : `Bookmark ${fmtRef({ ...loc, verse: sel })}`}
+      aria-pressed={marked(sel)}
+      onClick={() => bookmarks.toggle({ ref: { book: loc.book, chapter: loc.chapter, verse: sel }, bible })}
     >
-      <Icon name="compare" size={26} />
+      <Icon name="bookmark" size={20} fill={marked(sel) ? "currentColor" : undefined} />
     </button>
   );
+  const hasNotes = noted(sel);
+  const noteButton = (
+    <button
+      className={`round listen notebtn ${notesOpen ? "open" : ""} ${hasNotes ? "has" : ""}`}
+      aria-label={
+        hasNotes ? `Journal entries on ${fmtRef({ ...loc, verse: sel })}` : `Write in the journal on ${fmtRef({ ...loc, verse: sel })}`
+      }
+      aria-expanded={hasNotes ? notesOpen : undefined}
+      onClick={() => (hasNotes ? setNotesOpen(!notesOpen) : newEntry({ ...loc, verse: sel }))}
+    >
+      <Icon name="note" size={22} />
+    </button>
+  );
+  // What's shown in place of the text: the chapter, Study (a phone; an iPad has it beside the text) or
+  // Compare. One control with the current one lit, so it reads as a choice of view, not three buttons.
+  const view = comparing ? "compare" : study && !docked ? "study" : "text";
+  const setView = (v: "text" | "study" | "compare") => {
+    setWord(null);
+    if ((v === "compare") !== comparing) {
+      history.push({ comparing: v === "compare" });
+      setComparing(v === "compare");
+    }
+    if (!docked) setStudy(v === "study");
+  };
+  const views: { id: "text" | "study" | "compare"; icon: "book" | "study" | "compare"; label: string }[] = [
+    { id: "text", icon: "book", label: "The chapter" },
+    ...(docked ? [] : [{ id: "study" as const, icon: "study" as const, label: `Study ${fmtRef({ ...loc, verse: sel })}` }]),
+    { id: "compare", icon: "compare", label: "Compare translations" },
+  ];
+  const viewSeg = (
+    <div className="viewseg" role="radiogroup" aria-label="Show">
+      {views.map((o) => (
+        <button
+          key={o.id}
+          role="radio"
+          aria-checked={view === o.id}
+          aria-label={o.label}
+          className={view === o.id ? "on" : undefined}
+          onClick={() => setView(o.id)}
+        >
+          <Icon name={o.icon} size={o.id === "text" ? 20 : 22} />
+        </button>
+      ))}
+    </div>
+  );
+
+  // The highlighter's colours or the verse's journal entries: above the buttons under the text, or
+  // (iPad, docked) under the buttons in the study pane.
+  const popup = hlOpen ? (
+    <div className="hlstrip" role="group" aria-label={`Highlight ${fmtRef({ ...loc, verse: sel })}`}>
+      {HL_COLORS.map((c) => {
+        const k = vkey(loc.book, loc.chapter, sel);
+        const on = hls[k] === c;
+        return (
+          <button
+            key={c}
+            className={`hldot ${on ? "on" : ""}`}
+            style={{ background: HL_DOT[c] }}
+            aria-label={c}
+            aria-pressed={on}
+            onClick={() => {
+              highlights.set(k, on ? null : c);
+              setHlOpen(false);
+            }}
+          />
+        );
+      })}
+      {hls[vkey(loc.book, loc.chapter, sel)] && (
+        <button
+          className="hlclear"
+          aria-label="Remove the highlight"
+          onClick={() => {
+            highlights.set(vkey(loc.book, loc.chapter, sel), null);
+            setHlOpen(false);
+          }}
+        >
+          ✕
+        </button>
+      )}
+    </div>
+  ) : notesOpen ? (
+    <VerseNotes at={{ ...loc, verse: sel }} onClose={() => setNotesOpen(false)} />
+  ) : null;
 
   return (
     <>
@@ -754,7 +921,7 @@ export function Read({
                 {!verses.length ? (
                   <p className="loading">Opening…</p>
                 ) : layout === "verse" ? (
-                  <div className="text verses">
+                  <div className="text verses" dir={bmod?.rtl ? "rtl" : undefined}>
                     {verses.map((v) => (
                       <div
                         key={v.v}
@@ -773,23 +940,31 @@ export function Read({
                               <Icon name="bookmark" size={11} fill="currentColor" />
                             </span>
                           )}
+                          {noted(v.v) && (
+                            <span className="ribbon" aria-label="In the journal">
+                              <Icon name="note" size={11} />
+                            </span>
+                          )}
                           {v.v}
                         </span>
-                        <Words
-                          tokens={tokens.get(v.v) ?? []}
-                          nums={!!bmod?.strongs}
-                          active={word?.v === v.v ? word.i : undefined}
-                          said={playingHere && pl.verse === v.v && pl.at >= 0 ? pl.at : undefined}
-                          onWord={(i, num) => {
-                            setSel(v.v);
-                            setWord({ v: v.v, i, num });
-                          }}
-                        />
+                        {/* The words in a run of their own, so a highlight is drawn line by line over them. */}
+                        <span className="vt">
+                          <Words
+                            tokens={tokens.get(v.v) ?? []}
+                            nums={!!bmod?.strongs}
+                            active={word?.v === v.v ? word.i : undefined}
+                            said={playingHere && pl.verse === v.v && pl.at >= 0 ? pl.at : undefined}
+                            onWord={(i, num) => {
+                              setSel(v.v);
+                              setWord({ v: v.v, i, num });
+                            }}
+                          />
+                        </span>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text para">
+                  <p className="text para" dir={bmod?.rtl ? "rtl" : undefined}>
                     {verses.map((v) => (
                       <span
                         key={v.v}
@@ -806,6 +981,11 @@ export function Read({
                           {marked(v.v) && (
                             <span className="ribbon" aria-label="Bookmarked">
                               <Icon name="bookmark" size={11} fill="currentColor" />
+                            </span>
+                          )}
+                          {noted(v.v) && (
+                            <span className="ribbon" aria-label="In the journal">
+                              <Icon name="note" size={11} />
                             </span>
                           )}
                           {v.v}
@@ -850,6 +1030,24 @@ export function Read({
           </div>
         </div>
 
+        {study && !docked && !doc && (
+          <Study
+            bible={bible}
+            verseText={(tokens.get(sel) ?? []).map((t) => t.text).join("")}
+            modules={modules}
+            onChanged={onModulesChanged}
+            onImage={(src, ring) => setImage({ src, ring })}
+            screen
+            at={{ ...loc, verse: sel }}
+            count={verses.length}
+            onVerse={setSel}
+            onClose={() => setStudy(false)}
+            onGo={(r: Ref) => {
+              setStudy(false);
+              goTo(r);
+            }}
+          />
+        )}
         {docked && !doc && (
           <Study
             bible={bible}
@@ -861,9 +1059,12 @@ export function Read({
             actions={
               <>
                 {hlButton}
-                {cmpButton}
+                {bmkButton}
+                {noteButton}
+                {viewSeg}
               </>
             }
+            tray={popup}
             at={{ ...loc, verse: sel }}
             count={verses.length}
             onVerse={setSel}
@@ -897,84 +1098,14 @@ export function Read({
           </button>
         </div>
       )}
-      {!doc && !pl.on && hlOpen && (
-        <div className="hlstrip" role="group" aria-label={`Highlight ${fmtRef({ ...loc, verse: sel })}`}>
-          {HL_COLORS.map((c) => {
-            const k = vkey(loc.book, loc.chapter, sel);
-            const on = hls[k] === c;
-            return (
-              <button
-                key={c}
-                className={`hldot ${on ? "on" : ""}`}
-                style={{ background: HL_DOT[c] }}
-                aria-label={c}
-                aria-pressed={on}
-                onClick={() => {
-                  highlights.set(k, on ? null : c);
-                  setHlOpen(false);
-                }}
-              />
-            );
-          })}
-          {hls[vkey(loc.book, loc.chapter, sel)] && (
-            <button
-              className="hlclear"
-              aria-label="Remove the highlight"
-              onClick={() => {
-                highlights.set(vkey(loc.book, loc.chapter, sel), null);
-                setHlOpen(false);
-              }}
-            >
-              ✕
-            </button>
-          )}
-        </div>
-      )}
+      {!docked && !doc && !pl.on && popup}
       {!docked && !doc && !pl.on && (
         <div className="studyrow">
-          <button className="studybar" onClick={() => setStudy(true)}>
-            <span style={{ color: "var(--accent)", display: "flex" }}>
-              <Icon name="book" size={20} />
-            </span>
-            <span style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
-              <span className="t">Study {fmtRef({ ...loc, verse: sel })}</span>
-              <span className="s">Commentary and maps</span>
-            </span>
-            <span style={{ color: "var(--muted)", display: "flex" }}>
-              <Icon name="up" size={16} />
-            </span>
-          </button>
           {hlButton}
-          <button
-            className={`round listen bmkbar ${marked(sel) ? "on" : ""}`}
-            aria-label={
-              marked(sel) ? `Remove the bookmark on ${fmtRef({ ...loc, verse: sel })}` : `Bookmark ${fmtRef({ ...loc, verse: sel })}`
-            }
-            aria-pressed={marked(sel)}
-            onClick={() => bookmarks.toggle({ ref: { book: loc.book, chapter: loc.chapter, verse: sel }, bible })}
-          >
-            <Icon name="bookmark" size={20} fill={marked(sel) ? "currentColor" : undefined} />
-          </button>
-          {cmpButton}
+          {bmkButton}
+          {noteButton}
+          {viewSeg}
         </div>
-      )}
-
-      {study && !docked && (
-        <Study
-          bible={bible}
-          verseText={(tokens.get(sel) ?? []).map((t) => t.text).join("")}
-          modules={modules}
-          onChanged={onModulesChanged}
-          onImage={(src, ring) => setImage({ src, ring })}
-          at={{ ...loc, verse: sel }}
-          count={verses.length}
-          onVerse={setSel}
-          onClose={() => setStudy(false)}
-          onGo={(r: Ref) => {
-            setStudy(false);
-            goTo(r);
-          }}
-        />
       )}
 
       {word && (

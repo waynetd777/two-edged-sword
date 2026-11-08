@@ -46,13 +46,21 @@ are taken at a fixed revision of its repository and checked against their sha256
 module zips have no fixed version to take, so they aren't. The Douay-Rheims also reads the
 Clementine Vulgate through tools/vulgate, for which verses of the Psalms are titles.
 """
-import html, io, re, struct, sys, zipfile, zlib
+
+import html
+import io
+import re
+import struct
+import sys
+import zipfile
+import zlib
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import vulgate.build as vulgate  # noqa: E402  (its rules and the Clementine's text)
 from books import OSIS as BOOKS66  # noqa: E402
 from modules import CACHES, LIBRARY, chapter_lengths, fetch, mend_verses, module  # noqa: E402
+
 CACHE = CACHES / "crosswire"
 RAWZIP = "https://www.crosswire.org/ftpmirror/pub/sword/packages/rawzip/{}.zip"
 CANON = "https://crosswire.org/svn/sword/trunk/include/{}?p=3915"
@@ -82,64 +90,149 @@ CANON_SHA256 = {
 OSIS = BOOKS66 + ["Tob", "Jdt", "Wis", "Sir", "Bar", "1Macc", "2Macc"]
 
 MODULES = {
-    "Peshitta": dict(file="peshitta", title="Syriac Peshitta", abbrev="Peshitta", rtl=True,
-                     about="The Peshitta, the standard Bible of the churches of the Syriac tradition: the New Testament in the text published by the British and Foreign Bible Society in 1905. All 27 books are here: 2 Peter, 2–3 John, Jude and Revelation, which the Peshitta itself lacks, from later Syriac versions. There is no Old Testament."),
-    "Murdock": dict(file="murdock", title="Murdock's Peshitta (English)", abbrev="Murdock",
-                    about="James Murdock's literal translation of the Syriac Peshitta New Testament (1852). Words he supplied are in italics; Acts 8:37 and 1 John 5:7, which the Peshitta lacks, are in italics too, as he printed them."),
-    "Etheridge": dict(file="etheridge", title="Etheridge's Peshitta (English)", abbrev="Etheridge",
-                      about="J. W. Etheridge's translation of the Syriac Peshitta New Testament: the Gospels (1846) and the Acts and Epistles (1849), with 2 Peter, 2–3 John, Jude and Revelation from a later Syriac text. It follows the Peshitta in leaving out John 7:53–8:11, Acts 8:37, 15:34 and 28:29, and the Comma Johanneum (1 John 5:7); Romans 7:24 and Revelation 20:9 are missing from the module."),
-    "Tyndale": dict(file="tyndale", title="Tyndale Bible (1525/1530)", abbrev="Tyndale",
-                    about="William Tyndale's translation from the Hebrew and Greek, never completed: the New Testament (1526, revised 1534), the Pentateuch (1530) and Jonah (1531), in his own spelling."),
-    "Geneva1599": dict(file="geneva1599", title="Geneva Bible (1599)", abbrev="Geneva",
-                       about="The Geneva Bible in its 1599 printing, the English Bible of Shakespeare, the Puritans and the Pilgrims, in its own spelling; the epistles' subscriptions are shown after their last verses. Mark Langley's electronic edition, without the notes and without the Apocrypha."),
-    "DRC": dict(file="drc", title="Douay-Rheims (Challoner)", abbrev="DRC",
-                about="The Douay-Rheims Bible, the English Catholic translation from the Latin Vulgate (New Testament Rheims 1582, Old Testament Douay 1609–1610), in Bishop Richard Challoner's revision of 1749–1752. With the deuterocanonical books (Tobit, Judith, Wisdom, Sirach, Baruch with the Letter of Jeremiah as chapter 6, 1–2 Maccabees) and the additions to Esther (10:4–16:24) and Daniel (3:24–90, 13–14)."),
+    "Peshitta": dict(
+        file="peshitta",
+        title="Syriac Peshitta",
+        abbrev="Peshitta",
+        rtl=True,
+        about="The Peshitta, the standard Bible of the churches of the Syriac tradition: the New Testament in the text published by the British and Foreign Bible Society in 1905. All 27 books are here: 2 Peter, 2–3 John, Jude and Revelation, which the Peshitta itself lacks, from later Syriac versions. There is no Old Testament.",
+    ),
+    "Murdock": dict(
+        file="murdock",
+        title="Murdock's Peshitta (English)",
+        abbrev="Murdock",
+        about="James Murdock's literal translation of the Syriac Peshitta New Testament (1852). Words he supplied are in italics; Acts 8:37 and 1 John 5:7, which the Peshitta lacks, are in italics too, as he printed them.",
+    ),
+    "Etheridge": dict(
+        file="etheridge",
+        title="Etheridge's Peshitta (English)",
+        abbrev="Etheridge",
+        about="J. W. Etheridge's translation of the Syriac Peshitta New Testament: the Gospels (1846) and the Acts and Epistles (1849), with 2 Peter, 2–3 John, Jude and Revelation from a later Syriac text. It follows the Peshitta in leaving out John 7:53–8:11, Acts 8:37, 15:34 and 28:29, and the Comma Johanneum (1 John 5:7); Romans 7:24 and Revelation 20:9 are missing from the module.",
+    ),
+    "Tyndale": dict(
+        file="tyndale",
+        title="Tyndale Bible (1525/1530)",
+        abbrev="Tyndale",
+        about="William Tyndale's translation from the Hebrew and Greek, never completed: the New Testament (1526, revised 1534), the Pentateuch (1530) and Jonah (1531), in his own spelling.",
+    ),
+    "Geneva1599": dict(
+        file="geneva1599",
+        title="Geneva Bible (1599)",
+        abbrev="Geneva",
+        about="The Geneva Bible in its 1599 printing, the English Bible of Shakespeare, the Puritans and the Pilgrims, in its own spelling; the epistles' subscriptions are shown after their last verses. Mark Langley's electronic edition, without the notes and without the Apocrypha.",
+    ),
+    "DRC": dict(
+        file="drc",
+        title="Douay-Rheims (Challoner)",
+        abbrev="DRC",
+        about="The Douay-Rheims Bible, the English Catholic translation from the Latin Vulgate (New Testament Rheims 1582, Old Testament Douay 1609–1610), in Bishop Richard Challoner's revision of 1749–1752. With the deuterocanonical books (Tobit, Judith, Wisdom, Sirach, Baruch with the Letter of Jeremiah as chapter 6, 1–2 Maccabees) and the additions to Esther (10:4–16:24) and Daniel (3:24–90, 13–14).",
+    ),
     # Not built into the app: the TR is CC BY-NC-SA and the MKJV in copyright (CrossWire may distribute it).
-    "TR": dict(file="tr1550", title="Greek NT: Textus Receptus (Stephanus 1550)", abbrev="TR1550", variant="x-2",
-               about="Robert Estienne's (Stephanus') Greek New Testament of 1550, the Textus Receptus the KJV is most often compared with, from Maurice Robinson's electronic edition, accented and punctuated as STEPBible's TAGNT (Tyndale House, CC BY 4.0) prints the same words; a word no edition there spells so is unaccented. Where Scrivener's 1894 text (the Greek the KJV's translators chose) differs, this has the 1550's reading."),
+    "TR": dict(
+        file="tr1550",
+        title="Greek NT: Textus Receptus (Stephanus 1550)",
+        abbrev="TR1550",
+        variant="x-2",
+        about="Robert Estienne's (Stephanus') Greek New Testament of 1550, the Textus Receptus the KJV is most often compared with, from Maurice Robinson's electronic edition, accented and punctuated as STEPBible's TAGNT (Tyndale House, CC BY 4.0) prints the same words; a word no edition there spells so is unaccented. Where Scrivener's 1894 text (the Greek the KJV's translators chose) differs, this has the 1550's reading.",
+    ),
     # Its own name, as e-Sword's MKJV (mkjv.bbli) is Green's 1998 revision, which the app's MKJV variance notes follow.
-    "MKJV": dict(file="mkjv1993", title="Modern King James Version (1993)", abbrev="MKJV 1993",
-                 about="Jay P. Green Sr.'s Modern King James Version, in its 1993 text: the KJV's Hebrew and Greek texts in modern English. Green revised it in 1998 (e-Sword's MKJV), using \"Jehovah\" for the LORD among other changes. Copyright Jay P. Green Sr.; distributed by CrossWire with his son's permission (2002)."),
+    "MKJV": dict(
+        file="mkjv1993",
+        title="Modern King James Version (1993)",
+        abbrev="MKJV 1993",
+        about="Jay P. Green Sr.'s Modern King James Version, in its 1993 text: the KJV's Hebrew and Greek texts in modern English. Green revised it in 1998 (e-Sword's MKJV), using \"Jehovah\" for the LORD among other changes. Copyright Jay P. Green Sr.; distributed by CrossWire with his son's permission (2002).",
+    ),
 }
 
 # Modules taken from an earlier version of CrossWire's, as the Wayback Machine kept it, pinned by sha256: CrossWire's
 # MKJV 2.0 (2026) is mkjv.org's Illustrated Modern King James Version, another work, though its conf still calls it
 # Green's; 1.4 (2009) is Green's text.
 ARCHIVED = {
-    "MKJV": ("https://web.archive.org/web/20160425044622id_/http://www.crosswire.org/ftpmirror/pub/sword/packages/rawzip/MKJV.zip",
-             "47a5c8b0aec093bca9ef2d9411610635ae5cf16ccbfc98762ee0f61cc4150499"),
+    "MKJV": (
+        "https://web.archive.org/web/20160425044622id_/http://www.crosswire.org/ftpmirror/pub/sword/packages/rawzip/MKJV.zip",
+        "47a5c8b0aec093bca9ef2d9411610635ae5cf16ccbfc98762ee0f61cc4150499",
+    ),
 }
 
 # Brackets the sources left unpaired, mended from the sense (found by checking each Bible's brackets match
 # within a chapter), and a misread letter beside one: by SWORD module name, then (book, chapter, verse).
 MENDS = {
-    "DRC": {(9, 14, 42): [("said: (Cast", "said: Cast")], (9, 20, 2): [("him: (God", "him: God")],
-            # Words and verses missing from the module, as Challoner's text has them (the Clementine has them all).
-            (11, 17, 19): [("", "And Elias said to her: Give me thy son. And he took him out of her bosom, and carried him into the upper chamber where he abode, and laid him upon his own bed.")],
-            (20, 30, 19): [("There are three things, which go well, and the fourth that walketh happily:", "The way of an eagle in the air, the way of a serpent upon a rock, the way of a ship in the midst of the sea, and the way of a man in youth.")],
-            (20, 30, 29): [("", "There are three things, which go well, and the fourth that walketh happily:")],
-            (43, 8, 14): [("whence I came and whither I go.", "whence I came and whither I go: but you know not whence I come, or whither I go.")],
-            (43, 17, 1): [("he said: the hour is come.", "he said: Father, the hour is come.")],
-            (55, 2, 1): [("be strong in Christ Jesus:", "be strong in the grace which is in Christ Jesus:")],
-            (14, 32, 32): [("are written in the book of the kings", "are written in the vision of Isaias the son of Amos the prophet, and in the book of the kings")]},
-    "Geneva1599": {(2, 11, 3): [("And the Lord gaue", "(And the Lord gaue")], (5, 5, 5): [("into the mount, and he said", "into the mount) and he said")]},
-    "Tyndale": {(3, 14, 28): [("righte fote:", "righte fote):")], (46, 1, 5): [("thinges ve are", "thinges ye are")],
-                (46, 1, 6): [("even as", "(even as")], (46, 13, 8): [("shall cease) or", "shall cease or")],
-                (47, 12, 1): [("me (no dout", "me no dout")], (58, 9, 15): [("which chaunsed for", "(which chaunsed for")]},
-    "MKJV": {(14, 20, 34): [("the /Book of", "the Book of")], (20, 24, 29): [("Do not `say", "Do not say")],
-             # Words doubled in the module.
-             (5, 23, 11): [("into the the middle", "into the middle")], (11, 10, 15): [("men, and and from", "men, and from")],
-             (23, 66, 3): [("an ox is is as", "an ox is as")], (26, 21, 11): [("and it it polished", "and it is polished")]},
-    "Murdock": {(66, 18, 17): [("by sea) stood", "by sea, stood")],
-                # Letters lost in the module's text.
-                (42, 13, 5): [("except ye resent", "except ye repent")], (42, 14, 3): [("And Jews answered", "And Jesus answered")],
-                (44, 1, 10): [("toward heav,", "toward heaven,")], (40, 1, 25): [("called is name", "called his name")],
-                # Verse 18 of the Syriac's numbering, which the KJV's begins chapter 13 with, left in brackets.
-                (66, 12, 17): [(" [ (Revelation of John 12:18) And he stood on the sand of the sea. ]", " And he stood on the sand of the sea.")],
-                # The module repeats Titus 2:15 here; Murdock's own words, from his 1852 printing (archive.org,
-                # newtestamentorbo1852murd).
-                (57, 1, 1): [("These things speak thou, and exhort, and inculcate, with all authority; and let no one despise thee.",
-                              "Paul, a prisoner of Jesus the Messiah, and Timothy a brother; to the beloved Philemon, a laborer with us,")]},
+    "DRC": {
+        (9, 14, 42): [("said: (Cast", "said: Cast")],
+        (9, 20, 2): [("him: (God", "him: God")],
+        # Words and verses missing from the module, as Challoner's text has them (the Clementine has them all).
+        (11, 17, 19): [
+            (
+                "",
+                "And Elias said to her: Give me thy son. And he took him out of her bosom, and carried him into the upper chamber where he abode, and laid him upon his own bed.",
+            )
+        ],
+        (20, 30, 19): [
+            (
+                "There are three things, which go well, and the fourth that walketh happily:",
+                "The way of an eagle in the air, the way of a serpent upon a rock, the way of a ship in the midst of the sea, and the way of a man in youth.",
+            )
+        ],
+        (20, 30, 29): [("", "There are three things, which go well, and the fourth that walketh happily:")],
+        (43, 8, 14): [
+            (
+                "whence I came and whither I go.",
+                "whence I came and whither I go: but you know not whence I come, or whither I go.",
+            )
+        ],
+        (43, 17, 1): [("he said: the hour is come.", "he said: Father, the hour is come.")],
+        (55, 2, 1): [("be strong in Christ Jesus:", "be strong in the grace which is in Christ Jesus:")],
+        (14, 32, 32): [
+            (
+                "are written in the book of the kings",
+                "are written in the vision of Isaias the son of Amos the prophet, and in the book of the kings",
+            )
+        ],
+    },
+    "Geneva1599": {
+        (2, 11, 3): [("And the Lord gaue", "(And the Lord gaue")],
+        (5, 5, 5): [("into the mount, and he said", "into the mount) and he said")],
+    },
+    "Tyndale": {
+        (3, 14, 28): [("righte fote:", "righte fote):")],
+        (46, 1, 5): [("thinges ve are", "thinges ye are")],
+        (46, 1, 6): [("even as", "(even as")],
+        (46, 13, 8): [("shall cease) or", "shall cease or")],
+        (47, 12, 1): [("me (no dout", "me no dout")],
+        (58, 9, 15): [("which chaunsed for", "(which chaunsed for")],
+    },
+    "MKJV": {
+        (14, 20, 34): [("the /Book of", "the Book of")],
+        (20, 24, 29): [("Do not `say", "Do not say")],
+        # Words doubled in the module.
+        (5, 23, 11): [("into the the middle", "into the middle")],
+        (11, 10, 15): [("men, and and from", "men, and from")],
+        (23, 66, 3): [("an ox is is as", "an ox is as")],
+        (26, 21, 11): [("and it it polished", "and it is polished")],
+    },
+    "Murdock": {
+        (66, 18, 17): [("by sea) stood", "by sea, stood")],
+        # Letters lost in the module's text.
+        (42, 13, 5): [("except ye resent", "except ye repent")],
+        (42, 14, 3): [("And Jews answered", "And Jesus answered")],
+        (44, 1, 10): [("toward heav,", "toward heaven,")],
+        (40, 1, 25): [("called is name", "called his name")],
+        # Verse 18 of the Syriac's numbering, which the KJV's begins chapter 13 with, left in brackets.
+        (66, 12, 17): [
+            (
+                " [ (Revelation of John 12:18) And he stood on the sand of the sea. ]",
+                " And he stood on the sand of the sea.",
+            )
+        ],
+        # The module repeats Titus 2:15 here; Murdock's own words, from his 1852 printing (archive.org,
+        # newtestamentorbo1852murd).
+        (57, 1, 1): [
+            (
+                "These things speak thou, and exhort, and inculcate, with all authority; and let no one despise thee.",
+                "Paul, a prisoner of Jesus the Messiah, and Timothy a brother; to the beloved Philemon, a laborer with us,",
+            )
+        ],
+    },
 }
 
 # Rules for moving each module to the KJV's numbering, as tools/vulgate's RULES: by SWORD book name.
@@ -153,22 +246,43 @@ RULES = {
     },
     "Etheridge": {},
     "Tyndale": {
-        "Gen": ["9:28 / So that all the dayes"], "Exod": ["40:14 > 40:15"], "Lev": ["27:17 / But and if he halowe"],
-        "Num": ["7:22 > 7:23"], "Matt": ["5:48 / ye shall therfore be perfecte"], "Luke": ["17:36 > 17:37"],
-        "Rom": ["1:23 / and turned the glory"], "1Cor": ["3:22 / whether it be Paul"], "Gal": ["5:20 / envyinge murther"],
-        "Heb": ["11:39 / God provydinge"], "Rev": ["21:26 > 21:27"],
+        "Gen": ["9:28 / So that all the dayes"],
+        "Exod": ["40:14 > 40:15"],
+        "Lev": ["27:17 / But and if he halowe"],
+        "Num": ["7:22 > 7:23"],
+        "Matt": ["5:48 / ye shall therfore be perfecte"],
+        "Luke": ["17:36 > 17:37"],
+        "Rom": ["1:23 / and turned the glory"],
+        "1Cor": ["3:22 / whether it be Paul"],
+        "Gal": ["5:20 / envyinge murther"],
+        "Heb": ["11:39 / God provydinge"],
+        "Rev": ["21:26 > 21:27"],
     },
     "Geneva1599": {
-        "Num": ["13:1 > 12:16", "30:1 > 29:40"], "1Sam": ["20:43 +", "24:1 > 23:29"], "2Sam": ["1:26 / howe are the mightie"],
-        "Esth": ["2:22 / and when inquisition was"], "Job": ["6:29 / Is there iniquitie", "39:1 > 38:39", "40:1 > 40:6", "41:1 > 41:10"],
-        "Ps": ["13:5 / I will sing to", "72:19 / HERE END THE"], "Prov": ["8:33 / blessed is the man"],
-        "Eccl": ["5:1 > 5:2", "7:1 > 6:11"], "Song": ["1:1 > 1:2", "6:1 > 6:2"], "Isa": ["52:14 / so shall hee sprinkle"],
-        "Jer": ["49:38 / but in the latter"], "Ezek": ["1:29 +", "20:48 / Then saide I"], "Dan": ["4:1 > 4:4"],
-        "Hos": ["14:1 > 13:16"], "Hag": ["2:1 > 1:15"], "Luke": ["15:31 / It was meete that"], "Rom": ["1:30 / without vnderstanding"],
-        "2Cor": ["13:12 / All the Saintes salute"], "Gal": ["1:21 / for I was vnknowen"], "Heb": ["13:6 +", "13:8 / Iesus Christ yesterday"],
+        "Num": ["13:1 > 12:16", "30:1 > 29:40"],
+        "1Sam": ["20:43 +", "24:1 > 23:29"],
+        "2Sam": ["1:26 / howe are the mightie"],
+        "Esth": ["2:22 / and when inquisition was"],
+        "Job": ["6:29 / Is there iniquitie", "39:1 > 38:39", "40:1 > 40:6", "41:1 > 41:10"],
+        "Ps": ["13:5 / I will sing to", "72:19 / HERE END THE"],
+        "Prov": ["8:33 / blessed is the man"],
+        "Eccl": ["5:1 > 5:2", "7:1 > 6:11"],
+        "Song": ["1:1 > 1:2", "6:1 > 6:2"],
+        "Isa": ["52:14 / so shall hee sprinkle"],
+        "Jer": ["49:38 / but in the latter"],
+        "Ezek": ["1:29 +", "20:48 / Then saide I"],
+        "Dan": ["4:1 > 4:4"],
+        "Hos": ["14:1 > 13:16"],
+        "Hag": ["2:1 > 1:15"],
+        "Luke": ["15:31 / It was meete that"],
+        "Rom": ["1:30 / without vnderstanding"],
+        "2Cor": ["13:12 / All the Saintes salute"],
+        "Gal": ["1:21 / for I was vnknowen"],
+        "Heb": ["13:6 +", "13:8 / Iesus Christ yesterday"],
         "2John": ["1:11 / Although I had many"],
         # The NRSV's numbering, which SWORD gives the module: 3 John 1:15 and Revelation 12:18 are the KJV's 1:14 and 13:1.
-        "3John": ["1:15 +"], "Rev": ["12:18 > 13:1", "13:1 +"],
+        "3John": ["1:15 +"],
+        "Rev": ["12:18 > 13:1", "13:1 +"],
     },
     "DRC": {},
     "TR": {},
@@ -218,9 +332,11 @@ def conf(z):
 
 def ztext(z, test):
     """Every slot of one testament's index, as text ("" where empty)."""
+
     def f(ext):
         n = [x for x in z.namelist() if x.endswith(f"/{test}.{ext}")]
         return z.read(n[0]) if n else b""
+
     bzs, bzv, bzz = f("bzs"), f("bzv"), f("bzz")
     blocks, out = {}, []
     for i in range(len(bzv) // 10):
@@ -230,8 +346,8 @@ def ztext(z, test):
             continue
         if block not in blocks:
             start, length, _ = struct.unpack_from("<III", bzs, block * 12)
-            blocks[block] = zlib.decompress(bzz[start:start + length])
-        raw = blocks[block][offset:offset + size]
+            blocks[block] = zlib.decompress(bzz[start : start + length])
+        raw = blocks[block][offset : offset + size]
         try:
             out.append(raw.decode("utf-8"))
         except UnicodeDecodeError:
@@ -284,7 +400,9 @@ def text(t, source):
         t = re.sub(r"<note\b[^>]*/>|<note\b.*?</note>", "", t, flags=re.S)
         t = re.sub(r"<title\b[^>]*/>|<title\b.*?</title>", "", t, flags=re.S)
         t = re.sub(r"<closer\b[^>]*sID[^>]*/>(.*?)<closer\b[^>]*eID[^>]*/>", r"<blu>\1</blu>", t, flags=re.S)
-        t = re.sub(r"<(transChange\b[^>]*added|hi\b[^>]*italic)[^>]*>(.*?)</(transChange|hi)>", r"<i>\2</i>", t, flags=re.S)
+        t = re.sub(
+            r"<(transChange\b[^>]*added|hi\b[^>]*italic)[^>]*>(.*?)</(transChange|hi)>", r"<i>\2</i>", t, flags=re.S
+        )
         t = re.sub(r'<q\b[^>]*who="Jesus"[^>]*>(.*?)</q>', r"<red>\1</red>", t, flags=re.S)
         t = re.sub(r"<(?!/?(i|red|blu)>)[^>]*>", " ", t)
     t = html.unescape(t)
@@ -302,7 +420,10 @@ def units(rows):
         parts = [p for p in re.split(r'<lb type="x-unparagraphed"/>', t) if re.sub(r"<[^>]+>", "", p).strip()]
         if len(parts) > 1:
             # A closer after the last verse belongs to it.
-            if re.fullmatch(r"\s*(<[^>]+>\s*)*<closer.*", parts[-1], re.S) and not re.sub(r"<closer.*?</?closer[^>]*>|<[^>]+>", "", parts[-1]).strip():
+            if (
+                re.fullmatch(r"\s*(<[^>]+>\s*)*<closer.*", parts[-1], re.S)
+                and not re.sub(r"<closer.*?</?closer[^>]*>|<[^>]+>", "", parts[-1]).strip()
+            ):
                 parts[-2:] = [parts[-2] + parts[-1]]
         out += [(c, v + k, p) for k, p in enumerate(parts or [""])]
     return out
@@ -315,7 +436,7 @@ def numbered(rows):
         n = str(v + 1).replace("1", "[1lI]")  # Murdock's OCR reads 1 as l
         m = re.search(rf"\s\(?{n}\)? ", t) if text.get((c, v + 1)) == "" else None
         if m:
-            text[(c, v)], text[(c, v + 1)] = t[:m.start()].strip(), t[m.end():]
+            text[(c, v)], text[(c, v + 1)] = t[: m.start()].strip(), t[m.end() :]
     return [(c, v, text[(c, v)]) for c, v, _ in rows]
 
 
@@ -359,24 +480,47 @@ def drc_rules():
 # Where tools/vulgate divides a Latin verse at a phrase, the Douay-Rheims' words for it; and further rules.
 # (The Douay-Rheims has the Clementine's 15:10 as two verses, 10 and 11, so it is not divided.)
 DRC_PHRASES = {
-    "Gen 5:31": "And Noe, when", "Gen 50:22": "And he saw the children", "Lev 26:45": "These are the judgments",
-    "Num 11:34": "And departing from", "Josh 21:36": "and Jethson", "Josh 21:37": "and Hesebon", "Judg 21:24": "In those days",
-    "1Chr 11:46": "Eliel, and Obed", "1Chr 20:7": "These were the sons", "Neh 3:30": "After him Melcias", "Neh 12:33": "Judas",
-    "Job 42:16": "and he died", "Song 7:1": "How beautiful are thy steps", "Jer 37:4": "And the army of Pharao",
-    "Ezek 2:9": "and he spread it", "Mic 5:11": "and I will take away sorceries", "Matt 17:14": "Lord, have pity",
-    "Mark 4:40": "And they feared exceedingly", "John 11:56": "And the chief priests", "Acts 7:55": "And he said: Behold",
-    "Acts 14:6": "and were there preaching", "Acts 19:40": "And when he had said", "2Cor 1:23": "not because we exercise",
+    "Gen 5:31": "And Noe, when",
+    "Gen 50:22": "And he saw the children",
+    "Lev 26:45": "These are the judgments",
+    "Num 11:34": "And departing from",
+    "Josh 21:36": "and Jethson",
+    "Josh 21:37": "and Hesebon",
+    "Judg 21:24": "In those days",
+    "1Chr 11:46": "Eliel, and Obed",
+    "1Chr 20:7": "These were the sons",
+    "Neh 3:30": "After him Melcias",
+    "Neh 12:33": "Judas",
+    "Job 42:16": "and he died",
+    "Song 7:1": "How beautiful are thy steps",
+    "Jer 37:4": "And the army of Pharao",
+    "Ezek 2:9": "and he spread it",
+    "Mic 5:11": "and I will take away sorceries",
+    "Matt 17:14": "Lord, have pity",
+    "Mark 4:40": "And they feared exceedingly",
+    "John 11:56": "And the chief priests",
+    "Acts 7:55": "And he said: Behold",
+    "Acts 14:6": "and were there preaching",
+    "Acts 19:40": "And when he had said",
+    "2Cor 1:23": "not because we exercise",
     "2Cor 13:12": "All the saints salute you",
-    "Ps 43:22": "Because for thy sake", "Ps 55:11": "In God have I hoped", "Ps 71:2": "To judge thy people",
-    "Ps 99:2": "serve ye the Lord", "Ps 108:2": "for the mouth of the wicked", "Ps 145:2": "in my life I will praise",
+    "Ps 43:22": "Because for thy sake",
+    "Ps 55:11": "In God have I hoped",
+    "Ps 71:2": "To judge thy people",
+    "Ps 99:2": "serve ye the Lord",
+    "Ps 108:2": "for the mouth of the wicked",
+    "Ps 145:2": "in my life I will praise",
     "Ps 12:6": "I will sing to the Lord",
 }
 # Where the Douay-Rheims module divides verses otherwise than the Clementine (its 1 Kings 17:19,
 # Proverbs 30:29 and Baruch 6:37 are empty: the verse is missing from the module).
 DRC_RULES = {
-    "2Sam": ["13:38 / And king David ceased"], "Ps": ["42:6 +", "125:7 +", "135:27 +", "150:5 / let every spirit praise"],
-    "Isa": ["45:24 +", "46:11 / Hear me, O ye hardhearted"], "1Thess": ["4:11 / and that you walk honestly"],
-    "2Thess": ["2:10 / Therefore God shall send"], "Sir": ["29:17 > 29:18"],
+    "2Sam": ["13:38 / And king David ceased"],
+    "Ps": ["42:6 +", "125:7 +", "135:27 +", "150:5 / let every spirit praise"],
+    "Isa": ["45:24 +", "46:11 / Hear me, O ye hardhearted"],
+    "1Thess": ["4:11 / and that you walk honestly"],
+    "2Thess": ["2:10 / Therefore God shall send"],
+    "Sir": ["29:17 > 29:18"],
 }
 
 
@@ -396,9 +540,13 @@ def variant(t, keep):
     """A slot's markup with one edition's readings where the module gives two (the TR's x-1, Scrivener's, and x-2,
     Stephanus'). A word the module left untagged, its number in the reading and its grammar after it (John 9:21's
     αυτου 846 {P-GSM}), is tagged as the others are."""
-    t = re.sub(r'([^\s<>]+) (\d+) </seg> \{([^}\s]+)\}', r'<w lemma="strong:G\2" morph="robinson:\3">\1</w> </seg>', t)
-    return re.sub(r'<seg\b[^>]*subType="([^"]*)"[^>]*type="x-variant"[^>]*>(.*?)</seg>',
-                  lambda x: x[2] if x[1] == keep else "", t, flags=re.S)
+    t = re.sub(r"([^\s<>]+) (\d+) </seg> \{([^}\s]+)\}", r'<w lemma="strong:G\2" morph="robinson:\3">\1</w> </seg>', t)
+    return re.sub(
+        r'<seg\b[^>]*subType="([^"]*)"[^>]*type="x-variant"[^>]*>(.*?)</seg>',
+        lambda x: x[2] if x[1] == keep else "",
+        t,
+        flags=re.S,
+    )
 
 
 def build(name, into=None):
@@ -422,9 +570,14 @@ def build(name, into=None):
         if m.get("variant"):
             rows = [(ch, v, variant(t, m["variant"])) for ch, v, t in rows]
         rows = [(ch, v, text(t, source)) for ch, v, t in rows]
-        if name == "MKJV":  # words Green supplied, in braces in four verses (the rest have none): italics, as elsewhere;
+        if (
+            name == "MKJV"
+        ):  # words Green supplied, in braces in four verses (the rest have none): italics, as elsewhere;
             # and Luke 3's "son of", marked as supplied but followed by the "of" again ("son of of Matthat")
-            rows = [(ch, v, re.sub(r"\bson of of\b", "son of", re.sub(r"\{([^}]*)\}", r"<i>\1</i>", t))) for ch, v, t in rows]
+            rows = [
+                (ch, v, re.sub(r"\bson of of\b", "son of", re.sub(r"\{([^}]*)\}", r"<i>\1</i>", t)))
+                for ch, v, t in rows
+            ]
         if b == "Ps" and titles:
             rows = [(ch, v, f"<b>{t}</b>" if (ch, v) in titles and t else t) for ch, v, t in rows]
         if b == "Sir" and prologue:
@@ -433,38 +586,59 @@ def build(name, into=None):
         if n <= 66 or rs:
             rows = vulgate.move(rows, rs, kjv, n)
         verses += [(n, ch, v, t.strip()) for ch, v, t in rows if t.strip()]
-    verses = sorted((b, ch, v, t) for (b, ch, v), t in mend_verses(name, {(b, ch, v): t for b, ch, v, t in verses}, MENDS.get(name, {})).items())
+    verses = sorted(
+        (b, ch, v, t)
+        for (b, ch, v), t in mend_verses(name, {(b, ch, v): t for b, ch, v, t in verses}, MENDS.get(name, {})).items()
+    )
     if name == "Peshitta":
         verses = [(b, ch, v, syriac(t, f"{OSIS[b - 1]} {ch}:{v}")) for b, ch, v, t in verses]
     if name == "TR":  # the module's Greek has no accents or punctuation: TR 1550+'s words, which TAGNT's give them
         from crosswire.trplus import accented
+
         words = accented()
-        verses = [(b, ch, v, " ".join(w for w, _, _ in words[(b, ch, v)]) if (b, ch, v) in words else t) for b, ch, v, t in verses]
+        verses = [
+            (b, ch, v, " ".join(w for w, _, _ in words[(b, ch, v)]) if (b, ch, v) in words else t)
+            for b, ch, v, t in verses
+        ]
 
     mine = {}
     for b, ch, v, _ in verses:
         mine.setdefault((b, ch), set()).add(v)
     ot = nt = False
-    for (b, ch) in sorted(set(mine) | {k for k in kjv if any(k[0] == b for b, _ in mine)}):
+    for b, ch in sorted(set(mine) | {k for k in kjv if any(k[0] == b for b, _ in mine)}):
         if b > 66 or (b, ch) not in kjv:
             continue
         have, want = mine.get((b, ch), set()), set(range(1, kjv.get((b, ch), 0) + 1))
         if have != want:
             miss, extra = sorted(want - have), sorted(have - want)
-            print(f"  {OSIS[b - 1]} {ch}: {len(have)} verses, KJV {len(want)}"
-                  + (f"; none for KJV {miss[:12]}{'…' if len(miss) > 12 else ''}" if miss else "")
-                  + (f"; beyond the KJV {extra[:6]}{'…' if len(extra) > 6 else ''}" if extra else ""))
+            print(
+                f"  {OSIS[b - 1]} {ch}: {len(have)} verses, KJV {len(want)}"
+                + (f"; none for KJV {miss[:12]}{'…' if len(miss) > 12 else ''}" if miss else "")
+                + (f"; beyond the KJV {extra[:6]}{'…' if len(extra) > 6 else ''}" if extra else "")
+            )
     ot = any(b <= 39 for b, *_ in verses)
     nt = any(40 <= b <= 66 for b, *_ in verses)
     apoc = any(b > 66 for b, *_ in verses)
 
     about = re.sub(r"\s*\\par\s*", "<br>", html.escape(c.get("About", ""), quote=False))
-    info = (f"<p>{m['about']}</p>"
-            f"<p>From CrossWire's SWORD module {name} ({c.get('Description', '')}), version {c.get('Version', '?')}"
-            + (f"; text from {html.escape(c['TextSource'])}" if c.get("TextSource") else "")
-            + f". Verses are numbered as in the KJV. Built by Two-edged Sword's tools/crosswire.</p>"
-            f"<p>{about}</p><p>{html.escape(c.get('DistributionLicense', 'Public domain'))}.</p>")
-    with module(f"{m['file']}.bbli", m["title"], m["abbrev"], info, ot=ot, nt=nt, apocrypha=apoc, rtl=int(m.get("rtl", False)), into=into) as db:
+    info = (
+        f"<p>{m['about']}</p>"
+        f"<p>From CrossWire's SWORD module {name} ({c.get('Description', '')}), version {c.get('Version', '?')}"
+        + (f"; text from {html.escape(c['TextSource'])}" if c.get("TextSource") else "")
+        + f". Verses are numbered as in the KJV. Built by Two-edged Sword's tools/crosswire.</p>"
+        f"<p>{about}</p><p>{html.escape(c.get('DistributionLicense', 'Public domain'))}.</p>"
+    )
+    with module(
+        f"{m['file']}.bbli",
+        m["title"],
+        m["abbrev"],
+        info,
+        ot=ot,
+        nt=nt,
+        apocrypha=apoc,
+        rtl=int(m.get("rtl", False)),
+        into=into,
+    ) as db:
         db.executemany("INSERT INTO Bible VALUES (?,?,?,?)", sorted(verses))
     print(f"{m['file']}.bbli: {len(verses)} verses")
 

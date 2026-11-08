@@ -28,7 +28,10 @@ export function spokenChapter(b: number, c: number, fromVerse?: number): string 
 
 /** A reference as it should be heard: "Exo 31:18" is "Exodus 31 18", "1 Cor 13" "First Corinthians 13". */
 export function sayRef(r: Ref): string {
-  const name = sayAs(psalmLabel(book(r.book).name)).replace(/^1 /, "First ").replace(/^2 /, "Second ").replace(/^3 /, "Third ");
+  const name = sayAs(psalmLabel(book(r.book).name))
+    .replace(/^1 /, "First ")
+    .replace(/^2 /, "Second ")
+    .replace(/^3 /, "Third ");
   if (!r.verse) return `${name} ${r.chapter}`;
   if (book(r.book).chapters === 1) return `${name} ${r.verse}${r.to && r.to !== r.verse ? ` to ${r.to}` : ""}`;
   if (r.toChapter && r.toChapter !== r.chapter) return `${name} ${r.chapter} ${r.verse} to ${r.toChapter} ${r.to}`;
@@ -96,8 +99,9 @@ export function respell(t: string, m: RegExpMatchArray): string | null {
   if (/^er$/i.test(word)) return up(word[0], "u") + word[1];
   if (/^cer$/i.test(word)) return up(word[0], "s") + up(word[1], "u") + word[2];
   if (/^read$/i.test(word))
-    return /\b(to|shall|shalt|will|wilt|would|should|can|canst|could|may|might|must|do|dost|doth|does|did|didst|let)(\s+(ye|you|thou|he|she|they|we|i|not|never))*\s+$/.test(before) ||
-      /(^|[.!?;:"“]\s*)$/.test(before)
+    return /\b(to|shall|shalt|will|wilt|would|should|can|canst|could|may|might|must|do|dost|doth|does|did|didst|let)(\s+(ye|you|thou|he|she|they|we|i|not|never))*\s+$/.test(
+      before,
+    ) || /(^|[.!?;:"“]\s*)$/.test(before)
       ? keepCase("reed")
       : null;
   if (/\b(as|the|of|with|like)\s+$/.test(before) || /\b(tin|iron|brass|silver|gold)\b[^.;]*$/.test(before)) return null;

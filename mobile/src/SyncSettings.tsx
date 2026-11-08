@@ -6,20 +6,9 @@
 
 import { useEffect, useState } from "react";
 import { scene } from "./api";
-import { discover, pair, syncNow, unpair, useSync } from "./phoneSync";
+import { deviceName, discover, pair, syncNow, unpair, useSync } from "./phoneSync";
 
 type Found = Awaited<ReturnType<typeof discover>>[number];
-
-const deviceName = () => {
-  const ua = navigator.userAgent;
-  return /iPad|Macintosh/.test(ua) && navigator.maxTouchPoints > 1
-    ? "iPad"
-    : /iPhone/.test(ua)
-      ? "iPhone"
-      : /Android/.test(ua)
-        ? "Android phone"
-        : "Phone";
-};
 
 const ago = (t: number) => {
   const m = Math.round((Date.now() - t) / 60000);

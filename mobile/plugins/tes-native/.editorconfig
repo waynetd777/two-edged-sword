@@ -1,0 +1,8 @@
+# ktlint for the plugin's Kotlin (`make lint`): two-space indents, as Tauri's plugin template has them.
+root = true
+
+[*.{kt,kts}]
+indent_size = 2
+indent_style = space
+max_line_length = 140
+ktlint_code_style = intellij_idea

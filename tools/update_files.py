@@ -11,7 +11,14 @@ plugins.updater) and only installs a package whose signature matches the public 
 Signs with the private key in ~/.tauri/waynetd777-updater.key, or TAURI_SIGNING_PRIVATE_KEY_PATH.
 Keep that key safe: without it no installed copy will accept another update.
 """
-import argparse, datetime, json, os, subprocess, sys, tarfile
+
+import argparse
+import datetime
+import json
+import os
+import subprocess
+import sys
+import tarfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -35,20 +42,26 @@ def main():
     archive = OUT / f"{NAME.replace(' ', '-')}.app.tar.gz"
     with tarfile.open(archive, "w:gz") as tar:
         tar.add(APP, arcname=APP.name)
-    env = {**os.environ, "TAURI_SIGNING_PRIVATE_KEY_PATH": str(KEY),
-           "TAURI_SIGNING_PRIVATE_KEY_PASSWORD": os.environ.get("TAURI_SIGNING_PRIVATE_KEY_PASSWORD", "")}
+    env = {
+        **os.environ,
+        "TAURI_SIGNING_PRIVATE_KEY_PATH": str(KEY),
+        "TAURI_SIGNING_PRIVATE_KEY_PASSWORD": os.environ.get("TAURI_SIGNING_PRIVATE_KEY_PASSWORD", ""),
+    }
     env.pop("TAURI_SIGNING_PRIVATE_KEY", None)
-    subprocess.run(["npx", "tauri", "signer", "sign", str(archive)], cwd=ROOT, env=env, check=True,
-                   stdout=subprocess.DEVNULL)
+    subprocess.run(
+        ["npx", "tauri", "signer", "sign", str(archive)], cwd=ROOT, env=env, check=True, stdout=subprocess.DEVNULL
+    )
     signature = Path(f"{archive}.sig").read_text(encoding="utf-8").strip()
     latest = {
         "version": VERSION,
         "notes": notes,
-        "pub_date": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "platforms": {"darwin-aarch64": {
-            "signature": signature,
-            "url": f"https://github.com/{REPO}/releases/download/v{VERSION}/{archive.name}",
-        }},
+        "pub_date": datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "platforms": {
+            "darwin-aarch64": {
+                "signature": signature,
+                "url": f"https://github.com/{REPO}/releases/download/v{VERSION}/{archive.name}",
+            }
+        },
     }
     (OUT / "latest.json").write_text(json.dumps(latest, indent=2) + "\n", encoding="utf-8")
     for f in (archive, Path(f"{archive}.sig"), OUT / "latest.json"):

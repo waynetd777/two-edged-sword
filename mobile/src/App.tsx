@@ -11,16 +11,18 @@ import { Read } from "./Read";
 import { Jump, Search } from "./Search";
 import { WordStudy } from "./WordStudy";
 import { Library } from "./Library";
-import { More } from "./More";
+import { More, PlansTab } from "./More";
+import { JournalHost, newEntry, openEntry } from "./JournalEdit";
+import { journal } from "./journal";
 import { DictionarySheet } from "./Dictionary";
 import { syncReminders } from "./Reminder";
 import { plansStore } from "./plansStore";
 import { history, Tab } from "./history";
 
-const TABS: { id: Tab; label: string }[] = [
+const TABS: { id: Exclude<Tab, "words">; label: string }[] = [
   { id: "read", label: "Read" },
+  { id: "plans", label: "Plans" },
   { id: "search", label: "Search" },
-  { id: "words", label: "Words" },
   { id: "library", label: "Library" },
   { id: "more", label: "More" },
 ];
@@ -164,6 +166,10 @@ export function App() {
       if (sc.includes("sweeplater")) setTimeout(() => window.dispatchEvent(new Event("tes-inbox")), 8000);
       if (sc.includes("adding")) setTimeout(() => setAdding("Adding 2 modules…"), 2500);
       if (sc.includes("more")) setTab("more");
+      // entry=<id>: a journal entry open to read; newentry: a new one open to write.
+      const en = sc.find((x) => x.startsWith("entry="));
+      if (en) journal.load().then(() => openEntry(en.slice(6)));
+      if (sc.includes("newentry")) newEntry({ book: 43, chapter: 3, verse: 16 });
       const w = sc.find((x) => x.startsWith("study="));
       if (w) {
         setWord(w.slice(6));
@@ -182,12 +188,13 @@ export function App() {
       unInbox.then((u) => u());
       document.removeEventListener("visibilitychange", shown);
     };
-  }, []);
+    // Once, at start: what it sets up is taken down when the app closes.
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Finder can drop a module in while the app is open: looked for again whenever the Library is opened.
   useEffect(() => {
     if (tab === "library") takeIn();
-  }, [tab]);
+  }, [tab]); // eslint-disable-line react-hooks/exhaustive-deps -- only when the tab changes
 
   return (
     <div className="app">
@@ -225,13 +232,23 @@ export function App() {
           }}
         />
       </div>
-      <div className="screen" hidden={tab !== "more"}>
-        <More
+      <div className="screen" hidden={tab !== "plans"}>
+        <PlansTab
           modules={modules}
           onJump={open}
           onLibrary={() => {
             history.push({ tab: "library" });
             setTab("library");
+          }}
+        />
+      </div>
+      <div className="screen" hidden={tab !== "more"}>
+        <More
+          modules={modules}
+          onJump={open}
+          onWords={() => {
+            history.push({ tab: "words", word });
+            setTab("words");
           }}
         />
       </div>
@@ -246,6 +263,7 @@ export function App() {
           onClose={() => setDict(null)}
         />
       )}
+      <JournalHost onGo={(r) => open({ ref: r })} />
       {msg && (
         <div className="adding" role="status" onClick={() => !msg.busy && setMsg(null)}>
           {msg.busy ? (
@@ -262,13 +280,14 @@ export function App() {
         {TABS.map((t) => (
           <button
             key={t.id}
-            className={`tab ${tab === t.id ? "on" : ""}`}
+            // Word Study is reached from More, so More stays lit there.
+            className={`tab ${tab === t.id || (t.id === "more" && tab === "words") ? "on" : ""}`}
             onClick={() => {
-              history.push({ tab: t.id, word: t.id === "words" ? word : "" });
+              history.push({ tab: t.id });
               setTab(t.id);
             }}
           >
-            {t.id === "words" ? <span className="alpha">α</span> : <Icon name={t.id === "read" ? "book" : t.id} />}
+            <Icon name={t.id === "read" ? "book" : t.id === "plans" ? "calendar" : t.id} />
             {t.label}
           </button>
         ))}

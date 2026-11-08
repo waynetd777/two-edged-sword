@@ -62,7 +62,12 @@ async function speakFrom(bible: string, book: number, chapter: number, verse: nu
   if (!verseItems.length) return stop();
   const items = [{ id: 0, text: spokenChapter(book, chapter, verse) }, ...verseItems];
   set({ on: true, paused: false, doc: undefined, bible, book, chapter, verse, at: -1, len: 0, error: undefined });
-  await call("speak", { items, rate: state.speed, title: fmtRef({ book, chapter }), voice: saved<string | null>("listenVoice", null) }).catch((e) => {
+  await call("speak", {
+    items,
+    rate: state.speed,
+    title: fmtRef({ book, chapter }),
+    voice: saved<string | null>("listenVoice", null),
+  }).catch((e) => {
     set({ ...IDLE, speed: state.speed, sleep: state.sleep, error: String(e) });
   });
 }
@@ -99,7 +104,18 @@ async function speakPlan(bible: string, stretches: PlanStretch[], onPart: (part:
   if (items.length <= 1) return stop();
   plan = { stretches, onPart, part: stretches[0].part };
   const f = stretches[0];
-  set({ on: true, paused: false, doc: undefined, bible, book: f.book, chapter: f.chapter, verse: f.from, at: -1, len: 0, error: undefined });
+  set({
+    on: true,
+    paused: false,
+    doc: undefined,
+    bible,
+    book: f.book,
+    chapter: f.chapter,
+    verse: f.from,
+    at: -1,
+    len: 0,
+    error: undefined,
+  });
   await call("speak", { items, rate: state.speed, title, voice: saved<string | null>("listenVoice", null) }).catch((e) => {
     plan = null;
     set({ ...IDLE, speed: state.speed, sleep: state.sleep, error: String(e) });
@@ -146,7 +162,8 @@ function listen() {
         plan.part = x.part;
       }
       if (e.kind === "start") set({ book: x.book, chapter: x.chapter, verse: v || x.from, at: -1, len: 0 });
-      else if (e.kind === "word" && v) set({ book: x.book, chapter: x.chapter, verse: v, at: pageAt.get(e.id)?.[e.at!] ?? e.at!, len: e.len! });
+      else if (e.kind === "word" && v)
+        set({ book: x.book, chapter: x.chapter, verse: v, at: pageAt.get(e.id)?.[e.at!] ?? e.at!, len: e.len! });
       else if (e.kind === "end") {
         plan.onPart(plan.part);
         stop();

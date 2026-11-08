@@ -304,6 +304,11 @@ export const api = {
   /** Pauses, resumes or skips, but only while the app's playlist is what's playing; "show" brings Music to the front. */
   musicControl: (cmd: "pause" | "play" | "next" | "stop" | "show") =>
     readOnly ? Promise.resolve() : isMac ? invoke<void>("music_control", { cmd }) : fileControl(cmd),
+  /** A copy of the bookmarks, highlights and plans files before a sync changes them (at most daily). */
+  dataBackup: () => (readOnly ? Promise.resolve(null) : invoke<string | null>("data_backup")),
+  /** A copy of the journal's files before a sync changes them (at most daily unless forced); its folder, if made. */
+  journalBackup: (dir: string, force: boolean) =>
+    readOnly ? Promise.resolve(null) : invoke<string | null>("journal_backup", { dir, force }),
   journalSave: (dir: string, entry: JournalEntry) => (readOnly ? Promise.resolve() : invoke<void>("journal_save", { dir, entry })),
   journalDelete: (dir: string, id: string) => (readOnly ? Promise.resolve() : invoke<void>("journal_delete", { dir, id })),
   writeTextFile: (path: string, text: string) => invoke<void>("write_text_file", { path, text }),

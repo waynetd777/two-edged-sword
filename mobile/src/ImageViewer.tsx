@@ -17,7 +17,17 @@ export function ImageViewer({ src, ring, onClose }: { src: string; ring?: Spot[]
   const [turned, setTurned] = useState(false);
   /** Swiping down, unzoomed, to close: how far it has gone. */
   const [down, setDown] = useState(0);
-  const g = useRef<{ d0: number; s0: number; mx: number; my: number; x0: number; y0: number; tx: number; ty: number; moved: boolean } | null>(null);
+  const g = useRef<{
+    d0: number;
+    s0: number;
+    mx: number;
+    my: number;
+    x0: number;
+    y0: number;
+    tx: number;
+    ty: number;
+    moved: boolean;
+  } | null>(null);
   const lastTap = useRef(0);
   // The one screen the iPhone may turn on (plugins/tes-native); upright again when it closes.
   useEffect(() => {
@@ -91,7 +101,11 @@ export function ImageViewer({ src, ring, onClose }: { src: string; ring?: Spot[]
     <div
       className="viewer"
       style={down ? { background: `rgba(0, 0, 0, ${Math.max(0.3, 1 - down / 400)})` } : undefined}
-      onTouchStart={start} onTouchMove={move} onTouchEnd={end} onTouchCancel={end}>
+      onTouchStart={start}
+      onTouchMove={move}
+      onTouchEnd={end}
+      onTouchCancel={end}
+    >
       <div
         className={["vpic", anim ? "anim" : "", turned ? "turned" : ""].join(" ")}
         style={{ transform: `translate(${t.x}px, ${t.y + down}px) scale(${t.s})${turned ? " rotate(90deg)" : ""}` }}
@@ -117,12 +131,28 @@ export function ImageViewer({ src, ring, onClose }: { src: string; ring?: Spot[]
           setTurned(!turned);
         }}
       >
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <svg
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
           <path d="M20 12a8 8 0 1 1-2.3-5.6" />
           <path d="M20 4v4h-4" />
         </svg>
       </button>
-      <button className="close" aria-label="Close" onTouchStart={(e) => e.stopPropagation()} onTouchEnd={(e) => e.stopPropagation()} onClick={onClose}>
+      <button
+        className="close"
+        aria-label="Close"
+        onTouchStart={(e) => e.stopPropagation()}
+        onTouchEnd={(e) => e.stopPropagation()}
+        onClick={onClose}
+      >
         ✕
       </button>
       {t.s === 1 && !down && <p className="vhint">Pinch or double-tap to zoom · swipe down to close</p>}

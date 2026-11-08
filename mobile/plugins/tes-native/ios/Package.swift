@@ -5,13 +5,13 @@ import PackageDescription
 let package = Package(
     name: "tauri-plugin-tes-native",
     platforms: [
-        .iOS(.v15),
+        .iOS(.v15)
     ],
     products: [
         .library(
             name: "tauri-plugin-tes-native",
             type: .static,
-            targets: ["tauri-plugin-tes-native"]),
+            targets: ["tauri-plugin-tes-native"])
     ],
     dependencies: [
         .package(name: "Tauri", path: "../.tauri/tauri-api")

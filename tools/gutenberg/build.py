@@ -26,41 +26,64 @@ The file is taken as it was when this was written, checked against its sha256: G
 versions, so a changed one stops the build until it's looked at. Downloads are cached in
 ~/Library/Caches/Two-edged Sword/gutenberg. Writes to the app's modules folder, or to `into`.
 """
-import re, sys
+
+import re
+import sys
 from html import escape, unescape
 from html.parser import HTMLParser
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from modules import CACHES, fetch, module  # noqa: E402
 import covers  # noqa: E402
 from ccel.build import SMALL, roman, short, title_case  # noqa: E402
+from modules import CACHES, fetch, module  # noqa: E402
 
 CACHE = CACHES / "gutenberg"
 BOOKS = {
     "foxe": dict(
         url="https://www.gutenberg.org/cache/epub/22400/pg22400-images.html",
         sha256="2d6d9403042e3c9db9a9fc89d505e0e551190c1e8f2b376a8fadbf98b74ff5a4",
-        cover=dict(title=[("FOX’S", 60), ("BOOK OF", 60), ("MARTYRS", 78)], author=[("JOHN FOXE", 36), ("EDITED BY", 20), ("WILLIAM BYRON FORBUSH", 26)],
-                   rgb=(34, 32, 36), ornament="cross"),
-        title="Fox's Book of Martyrs", abbrev="Foxe",
+        cover=dict(
+            title=[("FOX’S", 60), ("BOOK OF", 60), ("MARTYRS", 78)],
+            author=[("JOHN FOXE", 36), ("EDITED BY", 20), ("WILLIAM BYRON FORBUSH", 26)],
+            rgb=(34, 32, 36),
+            ornament="cross",
+        ),
+        title="Fox's Book of Martyrs",
+        abbrev="Foxe",
         about="John Foxe's history of the Christian martyrs, from Stephen to the persecutions of the Protestants, "
-              "in William Byron Forbush's edition (1926), which carries the story on to the Quakers, John Bunyan and "
-              "the missions of the nineteenth century."),
+        "in William Byron Forbush's edition (1926), which carries the story on to the Quakers, John Bunyan and "
+        "the missions of the nineteenth century.",
+    ),
     "strong_theology": dict(
         parts=[  # the three volumes: (url, sha256)
-            ("https://www.gutenberg.org/cache/epub/44035/pg44035-images.html", "23342053eed80c91f35582f1576c0496af1792a7cc9ef7ced514005b007e465c"),
-            ("https://www.gutenberg.org/cache/epub/44555/pg44555-images.html", "248f5027938c64e1c6a5a73abd187a0a824b2ebb2928231741a3fa83cdd33011"),
-            ("https://www.gutenberg.org/cache/epub/45283/pg45283-images.html", "4a512d54af499e298164758f38aee976901bbe97844453ccb024fa30e56d419e"),
+            (
+                "https://www.gutenberg.org/cache/epub/44035/pg44035-images.html",
+                "23342053eed80c91f35582f1576c0496af1792a7cc9ef7ced514005b007e465c",
+            ),
+            (
+                "https://www.gutenberg.org/cache/epub/44555/pg44555-images.html",
+                "248f5027938c64e1c6a5a73abd187a0a824b2ebb2928231741a3fa83cdd33011",
+            ),
+            (
+                "https://www.gutenberg.org/cache/epub/45283/pg45283-images.html",
+                "4a512d54af499e298164758f38aee976901bbe97844453ccb024fa30e56d419e",
+            ),
         ],
         chapters="strong",
-        cover=dict(title=[("SYSTEMATIC", 62), ("THEOLOGY", 78)], author=[("AUGUSTUS HOPKINS", 30), ("STRONG", 44)],
-                   rgb=(74, 50, 34), ornament="cross"),
-        title="Systematic Theology", abbrev="Strong",
+        cover=dict(
+            title=[("SYSTEMATIC", 62), ("THEOLOGY", 78)],
+            author=[("AUGUSTUS HOPKINS", 30), ("STRONG", 44)],
+            rgb=(74, 50, 34),
+            ornament="cross",
+        ),
+        title="Systematic Theology",
+        abbrev="Strong",
         about="Augustus Hopkins Strong's Systematic Theology (revised and enlarged edition, 1907–1909), its three "
-              "volumes in one: The Doctrine of God, The Doctrine of Man and The Doctrine of Salvation. Strong "
-              "(1836–1921), a Baptist, was president of the Rochester Theological Seminary; each doctrine is stated, "
-              "proved from Scripture and defended, with his notes and quotations from the theologians in small print."),
+        "volumes in one: The Doctrine of God, The Doctrine of Man and The Doctrine of Salvation. Strong "
+        "(1836–1921), a Baptist, was president of the Rochester Theological Seminary; each doctrine is stated, "
+        "proved from Scripture and defended, with his notes and quotations from the theologians in small print.",
+    ),
 }
 KEEP = {"i": "i", "em": "i", "b": "b", "strong": "b", "sup": "sup", "sub": "sub"}
 
@@ -115,7 +138,7 @@ def chapters(html):
     start = html.find('id="pg-header"')
     end = html.find('id="pg-footer"')
     head_end = html.find("</header>", start) if start >= 0 else -1
-    body = html[head_end if head_end >= 0 else 0:end if end >= 0 else None]
+    body = html[head_end if head_end >= 0 else 0 : end if end >= 0 else None]
     parts = re.split(r"(<h2[^>]*>.*?</h2>)", body, flags=re.S)
     n = 0
     for head, text in zip(parts[1::2], parts[2::2]):
@@ -125,7 +148,7 @@ def chapters(html):
         m = re.search(r"<h3[^>]*>(.*?)</h3>", text, re.S)
         name = short(title_case(plain(m[1]))) if m else ""
         if m:
-            text = text[:m.start()] + text[m.end():]
+            text = text[: m.start()] + text[m.end() :]
         p = Text()
         p.feed(text)
         p.close()
@@ -135,11 +158,13 @@ def chapters(html):
 
 # ---- Strong's Systematic Theology: Gutenberg's pages made from TEI --------------------------------------------
 
+
 class Tei(HTMLParser):
     """A page made from TEI as a list of blocks: ("h", level, html) for a heading, ("p", html, indent) for a
     paragraph (indent 1 in a quotation block: Strong's small print), ("table", html). Italic and bold come
     from the spans' styles; the page numbers (span.tei-pb) are dropped; the lines of a group (div.tei-lg)
     are one paragraph, a line to each; Greek and Hebrew are marked <grk> and <heb>."""
+
     VOID = {"br", "img", "hr", "meta", "link", "col", "input"}
 
     def __init__(self):
@@ -260,8 +285,16 @@ def scripts(s):
 
 
 # The parts of Strong's work as the chapters are named.
-STRONG_PARTS = {1: "Prolegomena", 2: "Existence of God", 3: "Scriptures", 4: "God", 5: "Anthropology", 6: "Soteriology",
-                7: "Ecclesiology", 8: "Eschatology"}
+STRONG_PARTS = {
+    1: "Prolegomena",
+    2: "Existence of God",
+    3: "Scriptures",
+    4: "God",
+    5: "Anthropology",
+    6: "Soteriology",
+    7: "Ecclesiology",
+    8: "Eschatology",
+}
 
 
 def heading_case(s):
@@ -269,7 +302,9 @@ def heading_case(s):
     the small words in lower case and the stop at the end dropped."""
     s = re.sub(r"\s+", " ", s.replace("(Continued)", "")).strip().rstrip(".")
     w = s.split(" ")
-    return " ".join(x.lower() if i and x.lower() in SMALL and not w[i - 1].endswith((":", "—", ".")) else x for i, x in enumerate(w))
+    return " ".join(
+        x.lower() if i and x.lower() in SMALL and not w[i - 1].endswith((":", "—", ".")) else x for i, x in enumerate(w)
+    )
 
 
 def chapters_strong(pages):
@@ -287,9 +322,10 @@ def chapters_strong(pages):
         if title and any(not x.startswith("<p><b>") for x in out):
             rows.append((title, "".join(out)))
             out = []
+
     for html in pages:
         p = Tei()
-        p.feed(html[html.find("</header>"):html.find('id="pg-footer"')])
+        p.feed(html[html.find("</header>") : html.find('id="pg-footer"')])
         p.close()
         blocks = p.blocks
         start = next(i for i, b in enumerate(blocks) if b[0] == "h" and b[1] == 1 and plain(b[2]) == "Contents")
@@ -334,15 +370,28 @@ def chapters_strong(pages):
 
 # Bible references as Strong writes them: "Gen. 1:1", "1 Cor. 15:22-28", "Rom. 5:12, 18; 6:23", "Is. 53:5". The book
 # is a book's name, or the start of one (not a month's, "Jan. 1885:48", nor a journal's), checked against the KJV.
-REF = re.compile(r"\b((?:[1-3] ?)?[A-Z][a-z]{1,13})(\.?) ?(\d{1,3}):(\d{1,3})(?:([-–])(\d{1,3})(?::(\d{1,3}))?)?(?![\d:])")
+REF = re.compile(
+    r"\b((?:[1-3] ?)?[A-Z][a-z]{1,13})(\.?) ?(\d{1,3}):(\d{1,3})(?:([-–])(\d{1,3})(?::(\d{1,3}))?)?(?![\d:])"
+)
 MORE = re.compile(r"([,;] ?)(?:(\d{1,3}):)?(\d{1,3})(?:[-–](\d{1,3}))?(?![\d:]| ?[A-Z])")
 BARE = re.compile(r"(?:(\d{1,3}):)?(\d{1,3})(?:[-–](\d{1,3}))?—")
-ALIASES = {"cant": 22, "zach": 38, "canticles": 22, "jas": 59, "phil": 50, "ez": 26, "psalm": 19, "matt": 40, "apoc": 66}
+ALIASES = {
+    "cant": 22,
+    "zach": 38,
+    "canticles": 22,
+    "jas": 59,
+    "phil": 50,
+    "ez": 26,
+    "psalm": 19,
+    "matt": 40,
+    "apoc": 66,
+}
 
 
 def book_of(name):
     """The book (1–66) a name or abbreviation is ("Is" Isaiah, "1 Cor" 1 Corinthians), or None."""
     from books import NAMES
+
     k = re.sub(r"\s", "", name).lower()
     if k in ALIASES:
         return ALIASES[k]
@@ -356,6 +405,7 @@ def linked(s):
     …; <i>18—</i> …; <i>3:16—</i>"), is in that book (and chapter)."""
     from books import ABBR
     from core.build import real
+
     last = [None, None]
 
     def ref(b, c, v, end=None):
@@ -370,26 +420,26 @@ def linked(s):
         end = (b, int(m[6]), int(m[7])) if m[7] else (b, c, int(m[6])) if m[6] else None
         if not real((b, c, v), end):
             return m[0]
-        out, rest = f'<ref v="{ref(b, c, v, end)}">{m[0]}</ref>', m.string[m.end():]
+        out, rest = f'<ref v="{ref(b, c, v, end)}">{m[0]}</ref>', m.string[m.end() :]
         # the verses and chapters after it in the same book: ", 18", "; 6:23", ", 7:1-4"
         while (n := MORE.match(rest)) and (n[2] or n[1][0] == ","):  # after a semicolon, only a chapter and verse
             c2, v2, e2 = int(n[2]) if n[2] else c, int(n[3]), int(n[4]) if n[4] else None
             if not real((b, c2, v2), (b, c2, e2) if e2 else None):
                 break
             c = c2
-            out += f'{n[1]}<ref v="{ref(b, c, v2, (b, c, e2) if e2 else None)}">{n[0][len(n[1]):]}</ref>'
-            rest = rest[n.end():]
+            out += f'{n[1]}<ref v="{ref(b, c, v2, (b, c, e2) if e2 else None)}">{n[0][len(n[1]) :]}</ref>'
+            rest = rest[n.end() :]
         return out, len(m.string) - len(rest)
 
     def text(t):
         out, i = [], 0
-        while (m := REF.search(t, i)):
+        while m := REF.search(t, i):
             r = one(m)
             if isinstance(r, str):
-                out.append(t[i:m.end()])
+                out.append(t[i : m.end()])
                 i = m.end()
             else:
-                out.append(t[i:m.start()] + r[0])
+                out.append(t[i : m.start()] + r[0])
                 i = r[1]
         return "".join(out) + t[i:]
 
@@ -399,7 +449,12 @@ def linked(s):
             return None
         b, c, v = last[0], int(m[1]) if m[1] else last[1], int(m[2])
         end = (b, c, int(m[3])) if m[3] else None
-        return f'<ref v="{ref(b, c, v, end)}">{m[0].rstrip("—")}</ref>' + "—" * m[0].endswith("—") if real((b, c, v), end) else None
+        return (
+            f'<ref v="{ref(b, c, v, end)}">{m[0].rstrip("—")}</ref>' + "—" * m[0].endswith("—")
+            if real((b, c, v), end)
+            else None
+        )
+
     parts = re.split(r"(<[^>]+>)", s)
     for k, x in enumerate(parts):
         if not x.startswith("<"):
@@ -413,7 +468,10 @@ CHAPTERS = {"strong": chapters_strong}
 def build(name, into=None):
     b = BOOKS[name]
     if "parts" in b:
-        pages = [fetch(url, CACHE / f"{name}_{i}.html", sha256=sha).read_text(encoding="utf-8") for i, (url, sha) in enumerate(b["parts"], 1)]
+        pages = [
+            fetch(url, CACHE / f"{name}_{i}.html", sha256=sha).read_text(encoding="utf-8")
+            for i, (url, sha) in enumerate(b["parts"], 1)
+        ]
         rows = CHAPTERS[b["chapters"]](pages)
     else:
         src = fetch(b["url"], CACHE / f"{name}.html", sha256=b["sha256"])
@@ -426,9 +484,12 @@ def build(name, into=None):
     refs = sum(h.count("<ref ") for _, h in rows)
     front, thumb = covers.html(covers.design(**b["cover"]))  # a cover drawn for it (tools/covers)
     rows[0] = (rows[0][0], front + rows[0][1])
-    info = (f"{thumb}<p>{escape(b['about'])}</p><p>From Project Gutenberg's edition (gutenberg.org), public domain. "
-            f"{len(rows)} chapters" + (f"; {refs} Bible references, each linked" if refs else "") +
-            ". Built by Two-edged Sword's tools/gutenberg.</p>")
+    info = (
+        f"{thumb}<p>{escape(b['about'])}</p><p>From Project Gutenberg's edition (gutenberg.org), public domain. "
+        f"{len(rows)} chapters"
+        + (f"; {refs} Bible references, each linked" if refs else "")
+        + ". Built by Two-edged Sword's tools/gutenberg.</p>"
+    )
     with module(f"{name}.refi", b["title"], b["abbrev"], info, into=into) as db:
         db.executemany("INSERT INTO Reference VALUES (?,?)", rows)
     print(f"{name}.refi: {len(rows)} chapters" + (f", {refs} references linked" if refs else ""))

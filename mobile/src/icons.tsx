@@ -64,6 +64,22 @@ const PATHS = {
       <path d="M9 7V4h6v3" />
     </>
   ),
+  // A journal entry: a page with lines.
+  note: (
+    <>
+      <path d="M6 3.5h8.5l3.5 3.5v13.5H6z" />
+      <path d="M14.5 3.5V7H18M9 11.5h6M9 15h6" />
+    </>
+  ),
+  plus: <path d="M12 5v14M5 12h14" />,
+  // Study: a graduation cap.
+  study: (
+    <>
+      <path d="M2.5 9.5L12 5l9.5 4.5L12 14z" />
+      <path d="M6.5 11.8v4c0 1.5 2.5 3 5.5 3s5.5-1.5 5.5-3v-4" />
+      <path d="M21.5 9.5v5.5" />
+    </>
+  ),
   calendar: (
     <>
       <rect x="4" y="5" width="16" height="15" rx="2" />
@@ -94,8 +110,8 @@ const PATHS = {
   ),
   stop: <rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor" stroke="none" />,
   bookmark: <path d="M7 4h10v16l-5-4-5 4z" />,
-  // The desktop's highlight icon (src/icons.tsx), at this grid's scale, raised to sit in the middle.
-  highlighter: <path d="M6.75 14.75l9-9 3 3-9 9h-3zM3 19.25h7.5" />,
+  // The pen alone: the button draws the bar of colour beneath it (Read.tsx hlButton).
+  highlighter: <path d="M5.5 16l9.5-9.5 3 3L8.5 19h-3z" />,
   back: <path d="M15 5l-7 7 7 7" />,
   forward: <path d="M9 5l7 7-7 7" />,
   up: <path d="M7 14l5-5 5 5" />,

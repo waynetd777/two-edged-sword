@@ -84,7 +84,8 @@ export function DocView({
     return () => {
       live = false;
     };
-  }, [module, chapter]);
+    // The title goes with the module, so it doesn't ask again on its own.
+  }, [module, chapter]); // eslint-disable-line react-hooks/exhaustive-deps
   const at = list.indexOf(chapter);
   // The word being read: found on the page (wordRangeAt, as the desktop finds it), and marked by a copy of
   // it laid over it, drawn as the Bible's marked word is (.said), so the two look the same.
@@ -98,7 +99,14 @@ export function DocView({
     if (!box || !r || !rect) return setSaid(null);
     const outer = box.getBoundingClientRect();
     const cs = getComputedStyle(r.startContainer.parentElement ?? box);
-    setSaid({ left: rect.left - outer.left, top: rect.top - outer.top, width: rect.width, height: rect.height, text: r.toString(), font: cs.font });
+    setSaid({
+      left: rect.left - outer.left,
+      top: rect.top - outer.top,
+      width: rect.width,
+      height: rect.height,
+      text: r.toString(),
+      font: cs.font,
+    });
   }, [reading, readingAt, a]);
   const next = at >= 0 ? list[at + 1] : undefined;
 
@@ -111,7 +119,12 @@ export function DocView({
         <h1 className="title" style={{ flex: 1 }}>
           {chapter}
         </h1>
-        <button className={`bmk ${marked ? "on" : ""}`} aria-label={marked ? "Remove the bookmark" : "Bookmark this chapter"} aria-pressed={marked} onClick={() => b.toggle(mark)}>
+        <button
+          className={`bmk ${marked ? "on" : ""}`}
+          aria-label={marked ? "Remove the bookmark" : "Bookmark this chapter"}
+          aria-pressed={marked}
+          onClick={() => b.toggle(mark)}
+        >
           <Icon name="bookmark" size={22} fill={marked ? "currentColor" : undefined} />
         </button>
       </div>
@@ -123,7 +136,11 @@ export function DocView({
         // In paragraphs, as Listen reads it, so the one being read can be marked and followed.
         <div className="prose doc" ref={body}>
           {said && (
-            <span className="said saidbox" aria-hidden="true" style={{ left: said.left, top: said.top, minWidth: said.width, height: said.height, font: said.font }}>
+            <span
+              className="said saidbox"
+              aria-hidden="true"
+              style={{ left: said.left, top: said.top, minWidth: said.width, height: said.height, font: said.font }}
+            >
               {said.text}
             </span>
           )}

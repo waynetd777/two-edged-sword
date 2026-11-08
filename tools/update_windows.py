@@ -10,7 +10,11 @@ release's latest.json, which installed copies read (tauri.conf.json, plugins.upd
 Signs with TAURI_SIGNING_PRIVATE_KEY (the key's contents, a repository secret) and
 TAURI_SIGNING_PRIVATE_KEY_PASSWORD; uploads with gh, which needs GH_TOKEN.
 """
-import json, shutil, subprocess, sys
+
+import json
+import shutil
+import subprocess
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent

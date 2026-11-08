@@ -11,12 +11,24 @@ or locally when origin can't be reached) is kept, so local builds don't use up n
 `make app` runs it before every release build. The build number (CFBundleVersion) is separate: the
 Makefile stamps one per build on the app and the binary.
 """
-import json, re, subprocess, sys
+
+import json
+import re
+import subprocess
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-CONF, PACKAGE, NPMLOCK, CARGO, LOCK = (ROOT / p for p in ("src-tauri/tauri.conf.json", "package.json", "package-lock.json",
-                                                            "src-tauri/Cargo.toml", "src-tauri/Cargo.lock"))
+CONF, PACKAGE, NPMLOCK, CARGO, LOCK = (
+    ROOT / p
+    for p in (
+        "src-tauri/tauri.conf.json",
+        "package.json",
+        "package-lock.json",
+        "src-tauri/Cargo.toml",
+        "src-tauri/Cargo.lock",
+    )
+)
 
 
 def replace(path, pattern, new, count=1):

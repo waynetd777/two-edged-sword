@@ -505,6 +505,22 @@ fn journal_delete(dir: String, id: String) -> Result<(), String> {
     journal::delete(&chosen_dir(&dir)?, &id)
 }
 
+/// A copy of what sync changes besides the journal (bookmarks, highlights, plans, the place in each book,
+/// and the sync ledger) in the app's data folder (backups), at most once a day.
+#[tauri::command(async)]
+fn data_backup(st: State<AppState>) -> Result<Option<String>, String> {
+    let files: Vec<PathBuf> =
+        ["bookmarks", "highlights", "plans", "place", "sync-ledger"].iter().map(|n| st.data.join(format!("{n}.json"))).collect();
+    Ok(store::backup(&files, &st.data.join("backups"), false)?.map(|p| p.to_string_lossy().to_string()))
+}
+
+/// A copy of the journal's files in the app's data folder (journal-backups), before a sync changes them:
+/// always when `force` (a device's first journal sync), otherwise at most once a day.
+#[tauri::command(async)]
+fn journal_backup(dir: String, force: bool) -> Result<Option<String>, String> {
+    Ok(journal::backup(&chosen_dir(&dir)?, &store::data_dir().join("journal-backups"), force)?.map(|p| p.to_string_lossy().to_string()))
+}
+
 #[tauri::command(async)]
 /// An export the user saved from a dialog: only a document of a known kind, in a folder that is
 /// already there (as the dialog's always is), never in a hidden folder or as a dotfile.
@@ -959,6 +975,8 @@ pub fn run() {
             journal_list,
             journal_save,
             journal_delete,
+            journal_backup,
+            data_backup,
             journal_stamp,
             journal_export,
             spell_check,

@@ -19,13 +19,20 @@ import json
 import re
 import shutil
 import sqlite3
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent.parent
 MODULES = HERE.parent / "src-tauri" / "modules"
 OUT = HERE / "target" / "modules-release"
-KINDS = {".bbli": "bible", ".cmti": "commentary", ".dcti": "dictionary", ".lexi": "lexicon", ".refi": "reference", ".devi": "devotional"}
+KINDS = {
+    ".bbli": "bible",
+    ".cmti": "commentary",
+    ".dcti": "dictionary",
+    ".lexi": "lexicon",
+    ".refi": "reference",
+    ".devi": "devotional",
+}
 
 
 def bundled() -> set[str]:
@@ -82,7 +89,7 @@ def main():
             }
         )
         print(f"{path.name:36} {len(data) / 1e6:6.1f} MB -> {gz.stat().st_size / 1e6:6.1f} MB")
-    manifest = {"generated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), "modules": entries}
+    manifest = {"generated": datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"), "modules": entries}
     (OUT / "manifest.json").write_text(json.dumps(manifest, indent=1, ensure_ascii=False) + "\n")
     total = sum(e["gz"] for e in entries)
     print(f"{len(entries)} modules, {total / 1e6:.0f} MB to upload, in {OUT}")

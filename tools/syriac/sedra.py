@@ -30,17 +30,48 @@ The markup is INT+'s (see tokenize in src/esword.tsx): each word a
 syrnt is taken at a fixed commit. Downloads are cached in ~/Library/Caches/Two-edged Sword/syriac
 (SEDRA's answers in sedra/).
 """
-import html, json, re, sqlite3, sys, time, unicodedata, urllib.error, urllib.parse
+
+import html
+import json
+import re
+import sqlite3
+import sys
+import time
+import unicodedata
+import urllib.error
+import urllib.parse
 from concurrent.futures import ThreadPoolExecutor
 from difflib import SequenceMatcher
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from modules import CACHES, fetch, find, module, write_whole  # noqa: E402
+
 CACHE = CACHES / "syriac"
 TF = "https://raw.githubusercontent.com/ETCBC/syrnt/dae3eb6ff62b9b272fb503646796c25d248175ce/tf/0.1/{}.tf"
 SEDRA = "https://sedra.bethmardutho.org/api/word/{}.json"
-FEATURES = ["otype", "oslots", "book", "chapter", "verse", "word", "lexeme", "root", "prefix", "suffix", "sp", "st", "gn", "nu", "ps", "vs", "vt", "sfps", "sfgn", "sfnu"]
+FEATURES = [
+    "otype",
+    "oslots",
+    "book",
+    "chapter",
+    "verse",
+    "word",
+    "lexeme",
+    "root",
+    "prefix",
+    "suffix",
+    "sp",
+    "st",
+    "gn",
+    "nu",
+    "ps",
+    "vs",
+    "vt",
+    "sfps",
+    "sfgn",
+    "sfnu",
+]
 
 
 def get(url, path):
@@ -52,7 +83,7 @@ def tf(name):
     without a node it is the one after the last. An empty line is an empty value."""
     out, n = {}, 0
     lines = get(TF.format(name), CACHE / f"{name}.tf").decode().split("\n")
-    body = lines[lines.index("") + 1:]
+    body = lines[lines.index("") + 1 :]
     if body and body[-1] == "":
         body.pop()
     for line in body:
@@ -78,15 +109,52 @@ def ranges(s):
     return out
 
 
-BOOKS = ["Matt", "Mark", "Luke", "John", "Acts", "Rom", "1Cor", "2Cor", "Gal", "Eph", "Phil", "Col", "1Thess", "2Thess",
-         "1Tim", "2Tim", "Titus", "Phlm", "Heb", "James", "1Peter", "2Peter", "1John", "2John", "3John", "Jude", "Rev"]
+BOOKS = [
+    "Matt",
+    "Mark",
+    "Luke",
+    "John",
+    "Acts",
+    "Rom",
+    "1Cor",
+    "2Cor",
+    "Gal",
+    "Eph",
+    "Phil",
+    "Col",
+    "1Thess",
+    "2Thess",
+    "1Tim",
+    "2Tim",
+    "Titus",
+    "Phlm",
+    "Heb",
+    "James",
+    "1Peter",
+    "2Peter",
+    "1John",
+    "2John",
+    "3John",
+    "Jude",
+    "Rev",
+]
 
 # Proclitics, each a letter of the prefix, in English.
 PREFIX = {"ܘ": "and", "ܕ": "of", "ܠ": "to", "ܒ": "in", "ܟ": "as"}
 # A noun's pronoun suffix, by person, gender and number (syrnt writes NA for common gender and
 # for the singular).
-POSSESSIVE = {("1", "NA"): "my", ("1", "p"): "our", ("2", "m", "NA"): "your", ("2", "f", "NA"): "your", ("2", "m", "p"): "your",
-              ("2", "f", "p"): "your", ("3", "m", "NA"): "his", ("3", "f", "NA"): "her", ("3", "m", "p"): "their", ("3", "f", "p"): "their"}
+POSSESSIVE = {
+    ("1", "NA"): "my",
+    ("1", "p"): "our",
+    ("2", "m", "NA"): "your",
+    ("2", "f", "NA"): "your",
+    ("2", "m", "p"): "your",
+    ("2", "f", "p"): "your",
+    ("3", "m", "NA"): "his",
+    ("3", "f", "NA"): "her",
+    ("3", "m", "p"): "their",
+    ("3", "f", "p"): "their",
+}
 OBJECT = {"my": "me", "our": "us", "your": "you", "his": "him", "her": "her", "their": "them"}
 GENDER = {"m": "masc.", "f": "fem.", "c": "common"}
 NUMBER = {"s": "sing.", "p": "plur."}
@@ -169,20 +237,67 @@ def sedra(lexeme):
     return []
 
 
-CATEGORY = {"noun": "noun", "verb": "verb", "adjective": "adjective", "particle": "particle", "pronoun": "pronoun",
-            "numeral": "numeral", "adverb": "adverb", "idiom": "idiom"}
+CATEGORY = {
+    "noun": "noun",
+    "verb": "verb",
+    "adjective": "adjective",
+    "particle": "particle",
+    "pronoun": "pronoun",
+    "numeral": "numeral",
+    "adverb": "adverb",
+    "idiom": "idiom",
+}
 
 
 # syrnt's parts of speech, and the SEDRA IV categories each may be (None: SEDRA doesn't say).
-FITS = {"particle": {"particle", "preposition", "conjunction", "adverb", "interjection"}, "noun": {"noun", "adjective", None},
-        "adjective": {"adjective", "noun", None}, "numeral": {"numeral", "noun", "adjective", None}}
+FITS = {
+    "particle": {"particle", "preposition", "conjunction", "adverb", "interjection"},
+    "noun": {"noun", "adjective", None},
+    "adjective": {"adjective", "noun", None},
+    "numeral": {"numeral", "noun", "adjective", None},
+}
 # The commonest little words, whose lexicon glosses are long lists of senses.
-COMMON = {"ܒ": "in", "ܠ": "to", "ܕ": "of", "ܘ": "and", "ܡܢ": "from", "ܥܠ": "on", "ܥܡ": "with", "ܠܘܬ": "to", "ܐܝܟ": "as",
-          "ܠܐ": "not", "ܐܠܐ": "but", "ܓܝܪ": "for", "ܕܝܢ": "but", "ܐܦ": "also", "ܐܢ": "if", "ܗܘܐ": "be", "ܐܝܬ": "there is",
-          "ܠܝܬ": "there is not", "ܟܠ": "all", "ܗܕܐ": "this", "ܗܢܐ": "this", "ܗܘ": "he", "ܗܝ": "she", "ܗܢܘܢ": "they",
-          "ܐܢܐ": "I", "ܐܢܬ": "you", "ܚܢܢ": "we", "ܐܢܬܘܢ": "you", "ܡܢܘ": "who", "ܡܢܐ": "what", "ܡܛܠ": "because",
-          "ܗܟܢܐ": "thus", "ܗܫܐ": "now", "ܬܘܒ": "again", "ܟܕ": "when", "ܥܕܡܐ": "until", "ܩܕܡ": "before", "ܒܬܪ": "after",
-          "ܫܘܒܚܐ": "glory"}
+COMMON = {
+    "ܒ": "in",
+    "ܠ": "to",
+    "ܕ": "of",
+    "ܘ": "and",
+    "ܡܢ": "from",
+    "ܥܠ": "on",
+    "ܥܡ": "with",
+    "ܠܘܬ": "to",
+    "ܐܝܟ": "as",
+    "ܠܐ": "not",
+    "ܐܠܐ": "but",
+    "ܓܝܪ": "for",
+    "ܕܝܢ": "but",
+    "ܐܦ": "also",
+    "ܐܢ": "if",
+    "ܗܘܐ": "be",
+    "ܐܝܬ": "there is",
+    "ܠܝܬ": "there is not",
+    "ܟܠ": "all",
+    "ܗܕܐ": "this",
+    "ܗܢܐ": "this",
+    "ܗܘ": "he",
+    "ܗܝ": "she",
+    "ܗܢܘܢ": "they",
+    "ܐܢܐ": "I",
+    "ܐܢܬ": "you",
+    "ܚܢܢ": "we",
+    "ܐܢܬܘܢ": "you",
+    "ܡܢܘ": "who",
+    "ܡܢܐ": "what",
+    "ܡܛܠ": "because",
+    "ܗܟܢܐ": "thus",
+    "ܗܫܐ": "now",
+    "ܬܘܒ": "again",
+    "ܟܕ": "when",
+    "ܥܕܡܐ": "until",
+    "ܩܕܡ": "before",
+    "ܒܬܪ": "after",
+    "ܫܘܒܚܐ": "glory",
+}
 
 
 def meaning(entries, sp, lexeme=""):
@@ -194,10 +309,12 @@ def meaning(entries, sp, lexeme=""):
     fit = fit or [e for e in entries if e.get("glosses", {}).get("eng")]
     if not fit:
         return ""
+
     # Homographs: the lexeme with the most forms is the common one; one with only cross-references loses.
     def score(lex):
         es = [e for e in fit if e["lexeme"]["id"] == lex]
         return (bool(pick([g for e in es for g in e["glosses"]["eng"]])), len(es))
+
     lex = max({e["lexeme"]["id"] for e in fit}, key=score)
     return pick([g for e in fit if e["lexeme"]["id"] == lex for g in e["glosses"]["eng"]])
 
@@ -250,7 +367,7 @@ def split(text):
         if not SYRIAC_LETTERS.search(m.group()):
             continue
         if m.start() > last:
-            out.append((False, text[last:m.start()]))
+            out.append((False, text[last : m.start()]))
         out.append((True, m.group()))
         last = m.end()
     if last < len(text):
@@ -301,7 +418,9 @@ def main():
                 w = hit.get((i, j)) if isw else None
                 if w:
                     g = gloss(w, means.get((w["lexeme"], w["sp"]), ""))
-                    s.append(f"<div><grk>{t}</grk><tvm>{html.escape(grammar(w))}</tvm><grk>{w['lexeme']}</grk><gra>{html.escape(g) or '—'}</gra></div>")
+                    s.append(
+                        f"<div><grk>{t}</grk><tvm>{html.escape(grammar(w))}</tvm><grk>{w['lexeme']}</grk><gra>{html.escape(g) or '—'}</gra></div>"
+                    )
                     prev_div = True
                 elif not isw and prev_div and not t.strip() and j + 1 < len(parts) and hit.get((i, j + 1)):
                     continue  # a div is followed by its own space
@@ -313,15 +432,19 @@ def main():
             print(f"  {BOOKS[b - 40]} {c}: {len(hit)} of {len(mine)} words matched")
     print(f"  {tagged} of {total} words matched ({tagged / total:.1%})")
 
-    about = (info + "<p>This edition shows each word with its English meaning, dictionary form, root and grammar, from "
-             "ETCBC's syrnt (the SEDRA 3 database of George A. Kiraz and James W. Bennett) and the glosses of "
-             "SEDRA IV (Beth Mardutho, the Syriac Institute). This work makes use of the Syriac Electronic Data Retrieval "
-             "Archive (SEDRA) by George A. Kiraz, distributed by the Syriac Computing Institute; SEDRA's terms allow its use "
-             "for personal and academic purposes only, so this module is for personal study and is not to be passed on. "
-             "Meanings are of the dictionary word, not translations in context. "
-             f"{tagged / total:.0%} of the words are matched; the rest, where SEDRA's text differs, are left as they are. "
-             "Built by Two-edged Sword's tools/syriac/sedra.py.</p>")
-    with module("peshitta_sedra.bbli", "Syriac Peshitta w/ SEDRA glosses", "Peshitta SEDRA", about, ot=False, rtl=True) as db:
+    about = (
+        info + "<p>This edition shows each word with its English meaning, dictionary form, root and grammar, from "
+        "ETCBC's syrnt (the SEDRA 3 database of George A. Kiraz and James W. Bennett) and the glosses of "
+        "SEDRA IV (Beth Mardutho, the Syriac Institute). This work makes use of the Syriac Electronic Data Retrieval "
+        "Archive (SEDRA) by George A. Kiraz, distributed by the Syriac Computing Institute; SEDRA's terms allow its use "
+        "for personal and academic purposes only, so this module is for personal study and is not to be passed on. "
+        "Meanings are of the dictionary word, not translations in context. "
+        f"{tagged / total:.0%} of the words are matched; the rest, where SEDRA's text differs, are left as they are. "
+        "Built by Two-edged Sword's tools/syriac/sedra.py.</p>"
+    )
+    with module(
+        "peshitta_sedra.bbli", "Syriac Peshitta w/ SEDRA glosses", "Peshitta SEDRA", about, ot=False, rtl=True
+    ) as db:
         db.executemany("INSERT INTO Bible VALUES (?,?,?,?)", out)
     print(f"peshitta_sedra.bbli: {len(out)} verses")
 

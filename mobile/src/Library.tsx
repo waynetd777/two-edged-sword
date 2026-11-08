@@ -77,12 +77,17 @@ export function Library({
     const type = `image/${o.cover.split(".").pop()}`;
     api
       .fetchBytes(downloadsBase() + o.cover)
-      .then((buf) => new Promise<string>((done) => {
-        const r = new FileReader();
-        r.onload = () => done(r.result as string);
-        r.readAsDataURL(new Blob([buf], { type }));
-      }))
-      .then((src) => setAbout((a) => (a && a.title === o.title ? { ...a, html: info.replace('<img src="cover">', `<img src="${src}">`) } : a)))
+      .then(
+        (buf) =>
+          new Promise<string>((done) => {
+            const r = new FileReader();
+            r.onload = () => done(r.result as string);
+            r.readAsDataURL(new Blob([buf], { type }));
+          }),
+      )
+      .then((src) =>
+        setAbout((a) => (a && a.title === o.title ? { ...a, html: info.replace('<img src="cover">', `<img src="${src}">`) } : a)),
+      )
       .catch(() => {});
   };
   const InfoButton = ({ label, onClick }: { label: string; onClick: () => void }) => (
@@ -101,7 +106,11 @@ export function Library({
       // Debug: about opens the first module's About on the phone.
       // aboutget: the About of the last module to download, with its cover fetched.
       // pick: Add from Files tapped, the picker open.
-      if (sc.includes("pick")) setTimeout(() => [...document.querySelectorAll<HTMLButtonElement>("button")].find((b) => b.textContent === "Add from Files")?.click(), 2000);
+      if (sc.includes("pick"))
+        setTimeout(
+          () => [...document.querySelectorAll<HTMLButtonElement>("button")].find((b) => b.textContent === "Add from Files")?.click(),
+          2000,
+        );
       // aboutcover: then its cover tapped, open in the viewer.
       if (sc.includes("aboutcover")) setTimeout(() => document.querySelector<HTMLImageElement>(".prose.about img")?.click(), 3500);
       if (sc.includes("aboutget")) setTimeout(() => [...document.querySelectorAll<HTMLButtonElement>(".infobtn")].pop()?.click(), 4000);
@@ -282,7 +291,11 @@ export function Library({
             </p>
           )}
         </div>
-        {offline && offers.length > 0 && <p className="m" style={{ marginTop: 10 }}>Offline: this is the list from last time.</p>}
+        {offline && offers.length > 0 && (
+          <p className="m" style={{ marginTop: 10 }}>
+            Offline: this is the list from last time.
+          </p>
+        )}
         <p className="m" style={{ marginTop: 12, lineHeight: 1.5 }}>
           Everything here is in the public domain, built for Two-edged Sword from its original sources.
         </p>

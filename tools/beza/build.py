@@ -44,13 +44,23 @@ from it.
 Enclitics (μου, τις) and elided words (δι᾽) are left unaccented. These corrections need TR+ (e-Sword's,
 for personal use); without it the transcription is kept as it is.
 """
-import html, json, re, sqlite3, sys, time, unicodedata, urllib.parse
+
+import html
+import json
+import re
+import sqlite3
+import sys
+import time
+import unicodedata
+import urllib.parse
 from difflib import SequenceMatcher
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from books import NAMES  # noqa: E402
-from modules import CACHES, download, fetch as fetch_to, find, keep, module, restore, write_whole  # noqa: E402
+from modules import CACHES, download, find, keep, module, restore, write_whole  # noqa: E402
+from modules import fetch as fetch_to
+
 CACHE = CACHES / "beza"
 API = "https://textus-receptus.com/api.php"
 SCRIVENER = "https://raw.githubusercontent.com/byztxt/greektext-scrivener/6049a43b135ed870f843b83eb6a04764fc796678/textonly/{}.SCV"
@@ -58,8 +68,35 @@ UA = "Two-edged Sword (tools/beza; personal Bible study app)"
 SUFFIX = "Greek NT: Beza's Textus Receptus (1598)"
 
 BOOKS = NAMES[39:]
-SCV = ["MT", "MR", "LU", "JOH", "AC", "RO", "1CO", "2CO", "GA", "EPH", "PHP", "COL", "1TH", "2TH", "1TI", "2TI", "TIT", "PHM", "HEB", "JAS",
-       "1PE", "2PE", "1JO", "2JO", "3JO", "JUDE", "RE"]
+SCV = [
+    "MT",
+    "MR",
+    "LU",
+    "JOH",
+    "AC",
+    "RO",
+    "1CO",
+    "2CO",
+    "GA",
+    "EPH",
+    "PHP",
+    "COL",
+    "1TH",
+    "2TH",
+    "1TI",
+    "2TI",
+    "TIT",
+    "PHM",
+    "HEB",
+    "JAS",
+    "1PE",
+    "2PE",
+    "1JO",
+    "2JO",
+    "3JO",
+    "JUDE",
+    "RE",
+]
 
 
 def fetch(url):
@@ -78,9 +115,18 @@ def pages(titles):
         else:
             todo.append(t)
     for k in range(0, len(todo), 50):
-        batch = todo[k:k + 50]
-        q = urllib.parse.urlencode({"action": "query", "prop": "revisions", "rvprop": "content", "rvslots": "main", "redirects": 1,
-                                    "titles": "|".join(batch), "format": "json"})
+        batch = todo[k : k + 50]
+        q = urllib.parse.urlencode(
+            {
+                "action": "query",
+                "prop": "revisions",
+                "rvprop": "content",
+                "rvslots": "main",
+                "redirects": 1,
+                "titles": "|".join(batch),
+                "format": "json",
+            }
+        )
         d = json.loads(fetch(f"{API}?{q}"))["query"]
         # Asked title -> the page it resolves to (normalised, then redirected).
         where = {t: t for t in batch}
@@ -88,7 +134,10 @@ def pages(titles):
             where = {a: (n["to"] if b == n["from"] else b) for a, b in where.items()}
         for r in d.get("redirects", []):
             where = {a: (r["to"] if b == r["from"] else b) for a, b in where.items()}
-        text = {p["title"]: (None if "missing" in p else p["revisions"][0]["slots"]["main"]["*"]) for p in d["pages"].values()}
+        text = {
+            p["title"]: (None if "missing" in p else p["revisions"][0]["slots"]["main"]["*"])
+            for p in d["pages"].values()
+        }
         for t in batch:
             w = text.get(where[t])
             out[t] = w
@@ -117,7 +166,11 @@ def strip(w):
     w = re.sub(r"<[^>]+>", " ", w)
     w = html.unescape(w)
     # Latin letters typed for their Greek look-alikes ("ἸΗΣΟΥN").
-    return re.sub(r"[ABEHIKMNOPTXYZov](?=[\u0370-\u03ff\u1f00-\u1fff])|(?<=[\u0370-\u03ff\u1f00-\u1fff])[ABEHIKMNOPTXYZov]", lambda m: LOOKALIKE[m.group()], w)
+    return re.sub(
+        r"[ABEHIKMNOPTXYZov](?=[\u0370-\u03ff\u1f00-\u1fff])|(?<=[\u0370-\u03ff\u1f00-\u1fff])[ABEHIKMNOPTXYZov]",
+        lambda m: LOOKALIKE[m.group()],
+        w,
+    )
 
 
 LOOKALIKE = dict(zip("ABEHIKMNOPTXYZov", "ΑΒΕΗΙΚΜΝΟΡΤΧΥΖον"))
@@ -134,7 +187,7 @@ def verses(w):
         if not last < v <= last + 3:
             raise ValueError(f"verse {v} after {last}")
         end = marks[n + 1].start() if n + 1 < len(marks) else len(t)
-        out[v] = tidy(t[m.end():end])
+        out[v] = tidy(t[m.end() : end])
         last = v
     return out
 
@@ -193,7 +246,9 @@ def accented(words, ref_tokens):
     sm = SequenceMatcher(None, ["".join(plain_greek(w)) for w in words], plain, autojunk=False)
     for m in sm.get_matching_blocks():
         for k in range(m.size):
-            out[m.a + k] = re.sub(r"[^\u0370-\u03ff\u1f00-\u1fff]", "", ref_tokens[m.b + k]) + re.sub(r"[\u0370-\u03ff\u1f00-\u1fff]", "", words[m.a + k])
+            out[m.a + k] = re.sub(r"[^\u0370-\u03ff\u1f00-\u1fff]", "", ref_tokens[m.b + k]) + re.sub(
+                r"[\u0370-\u03ff\u1f00-\u1fff]", "", words[m.a + k]
+            )
     return out
 
 
@@ -229,7 +284,10 @@ def tr_reference():
     if find("greeknttr+.bbli").exists():
         return {(b, c, v): t for b, c, v, t in library_chapters("greeknttr+.bbli")}, "TR+"
     from stepbible import has, tagnt
-    return {k: " ".join(w.greek for w in ws if has(w, "TR")) for k, ws in tagnt().items()}, "STEPBible's TR (Scrivener 1894)"
+
+    return {
+        k: " ".join(w.greek for w in ws if has(w, "TR")) for k, ws in tagnt().items()
+    }, "STEPBible's TR (Scrivener 1894)"
 
 
 def library_chapters(name):
@@ -251,7 +309,9 @@ def plain_greek(t):
 
 
 def alike(a, b):
-    return sum(m.size for m in SequenceMatcher(None, a, b, autojunk=False).get_matching_blocks()) / max(len(a), len(b), 1)
+    return sum(m.size for m in SequenceMatcher(None, a, b, autojunk=False).get_matching_blocks()) / max(
+        len(a), len(b), 1
+    )
 
 
 def tr_tokens(t, other=False):
@@ -278,7 +338,10 @@ def scrivener_pages(chapters):
     titles = {}
     for b, c in chapters:
         name = BOOKS[b - 40]
-        titles[(b, c)] = [f"{name} {c} Greek NT: Scrivener's Textus Receptus (1894)", f"{name} Greek NT: Scrivener's Textus Receptus (1894)"]
+        titles[(b, c)] = [
+            f"{name} {c} Greek NT: Scrivener's Textus Receptus (1894)",
+            f"{name} Greek NT: Scrivener's Textus Receptus (1894)",
+        ]
     got = pages([t for ts in titles.values() for t in ts])
     out = {}
     for (b, c), ts in titles.items():
@@ -316,7 +379,9 @@ def correct(rows, trraw, scriv):
     best = {k: max(v, key=v.get) for k, v in forms.items()}
     # Words rightly written without an accent (enclitics: μου, σου, τις; elided: δι᾽) as Scrivener
     # writes them; and the words Beza's own text writes with a capital (names), as it writes them.
-    bare_ok = {PUNCT.sub("", x) for t in scriv.values() for x in re.findall(r"\S+", t) if not accented(PUNCT.sub("", x))}
+    bare_ok = {
+        PUNCT.sub("", x) for t in scriv.values() for x in re.findall(r"\S+", t) if not accented(PUNCT.sub("", x))
+    }
     caps = {}
     for r in rows:
         for n, x in enumerate(re.findall(r"\S+", r[3])):
@@ -365,7 +430,9 @@ def correct(rows, trraw, scriv):
                     edits.append((lb, rb, new))
                     counts["readings"] += 1
                     if len(samples) < 12:
-                        samples.append(f"{BOOKS[b - 40]} {c}:{v} {' '.join(btok[lb:rb]) or '—'} → {' '.join(ctok[j1:j2]) or '—'}")
+                        samples.append(
+                            f"{BOOKS[b - 40]} {c}:{v} {' '.join(btok[lb:rb]) or '—'} → {' '.join(ctok[j1:j2]) or '—'}"
+                        )
         # Modern spellings, where Stephanus and Scrivener agree on the older form.
         for op, i1, i2, j1, j2 in SequenceMatcher(None, bk, sk, autojunk=False).get_opcodes():
             if op != "replace" or i2 - i1 != j2 - j1:
@@ -374,16 +441,31 @@ def correct(rows, trraw, scriv):
                 a, o = bk[i1 + k], sk[j1 + k]
                 if any(e[0] <= i1 + k < e[1] for e in edits):
                     continue
-                if a.replace("λημψ", "ληψ").replace("λημφ", "ληφ") == o or (a.endswith("αν") and o.endswith("ον") and a[:-2] == o[:-2]):
+                if a.replace("λημψ", "ληψ").replace("λημφ", "ληφ") == o or (
+                    a.endswith("αν") and o.endswith("ον") and a[:-2] == o[:-2]
+                ):
                     tail = PUNCT.search(btok[i1 + k])
-                    edits.append((i1 + k, i1 + k + 1, [best.get(o, PUNCT.sub("", stok[j1 + k])) + (tail.group() if tail else "")]))
+                    edits.append(
+                        (
+                            i1 + k,
+                            i1 + k + 1,
+                            [best.get(o, PUNCT.sub("", stok[j1 + k])) + (tail.group() if tail else "")],
+                        )
+                    )
                     counts["spellings"] += 1
                 # A slip in the typing (σονετέλεσεν, ἀκωύειν, πάντεε) or a later edition's form (Μαθθαῖος,
                 # Ἰσκαριώτου): found nowhere else in Beza, and in its place both Stephanus and Scrivener
                 # (who follows Beza) have the same word, a letter or two from it.
-                elif (a.rstrip("ν") != o.rstrip("ν") and freq.get(a, 0) <= 2 and a not in {key(x) for x in wiki}
-                      and o in {key(x) for x in wiki} and o in best and not btok[i1 + k].isupper()
-                      and SequenceMatcher(None, a, o).ratio() >= 0.75 and abs(len(a) - len(o)) <= 2):
+                elif (
+                    a.rstrip("ν") != o.rstrip("ν")
+                    and freq.get(a, 0) <= 2
+                    and a not in {key(x) for x in wiki}
+                    and o in {key(x) for x in wiki}
+                    and o in best
+                    and not btok[i1 + k].isupper()
+                    and SequenceMatcher(None, a, o).ratio() >= 0.75
+                    and abs(len(a) - len(o)) <= 2
+                ):
                     tail = PUNCT.search(btok[i1 + k])
                     fixed = best[o]
                     if btok[i1 + k][:1].isupper():
@@ -414,9 +496,15 @@ def correct(rows, trraw, scriv):
             w = PUNCT.sub("", x)
             if re.search(r"[()]", w):
                 continue  # "σου)": left as it is
-            if (len(w) >= 3 and not accented(w) and not re.search(r"[᾽’'ʼ\u1fbd]", w) and w not in bare_ok and w.lower() not in bare_ok
-                    and best.get(key(w), w) != w):
-                btok[k] = best[key(w)] + x[len(w):]
+            if (
+                len(w) >= 3
+                and not accented(w)
+                and not re.search(r"[᾽’'ʼ\u1fbd]", w)
+                and w not in bare_ok
+                and w.lower() not in bare_ok
+                and best.get(key(w), w) != w
+            ):
+                btok[k] = best[key(w)] + x[len(w) :]
                 counts["spellings"] += 1
         text = " ".join(btok)
         # Beza didn't write -λημψ-/-λημφ- (παραλημφθήσεται, at Luke 17:36 where Stephanus has no verse).
@@ -435,7 +523,9 @@ def main():
     titles = {}
     for b, c in chapters:
         name = BOOKS[b - 40]
-        titles[(b, c)] = [f"{name} {c} {SUFFIX}"] + ([f"{name} {SUFFIX}"] if max(cc for bb, cc in chapters if bb == b) == 1 else [])
+        titles[(b, c)] = [f"{name} {c} {SUFFIX}"] + (
+            [f"{name} {SUFFIX}"] if max(cc for bb, cc in chapters if bb == b) == 1 else []
+        )
     got = pages([t for ts in titles.values() for t in ts])
     trraw, source = tr_reference()
     print(f"reference text: {source}")
@@ -476,23 +566,34 @@ def main():
             vs = {}
             for (cc, v), t in sc.items():
                 if cc == c:
-                    toks = re.findall(r"\S+", re.sub(r"<[^>]+>|\|[^|]*\|[^|]*\||<num>.*?</num>|<tvm>.*?</tvm>", " ", trraw.get((b, c, v), "")))
+                    toks = re.findall(
+                        r"\S+",
+                        re.sub(
+                            r"<[^>]+>|\|[^|]*\|[^|]*\||<num>.*?</num>|<tvm>.*?</tvm>", " ", trraw.get((b, c, v), "")
+                        ),
+                    )
                     vs[v] = " ".join(accented(t.split(), [x for x in toks if plain_greek(x)]))
             from_scrivener.append(name)
         have, want = set(vs), kjv[(b, c)]
         if have != want:
-            problems.append(f"{name}: {len(have)} verses, KJV {len(want)}; none for {sorted(want - have)[:8]}, beyond {sorted(have - want)[:8]}")
+            problems.append(
+                f"{name}: {len(have)} verses, KJV {len(want)}; none for {sorted(want - have)[:8]}, beyond {sorted(have - want)[:8]}"
+            )
         rows += [(b, c, v, t) for v, t in sorted(vs.items()) if t]
     if source == "TR+":
         rows, fixed, samples = correct(rows, trraw, scrivener_pages(chapters))
         print(f"typing slips and later editions' forms put right: {fixed['slips']}; e.g. " + "; ".join(SLIPS[:14]))
-        print(f"put back as Beza printed it: {fixed['readings']} readings the wiki took from Stephanus, {fixed['spellings']} modern spellings; "
-              f"{fixed['punctuated']} verses typed without punctuation given Scrivener's")
+        print(
+            f"put back as Beza printed it: {fixed['readings']} readings the wiki took from Stephanus, {fixed['spellings']} modern spellings; "
+            f"{fixed['punctuated']} verses typed without punctuation given Scrivener's"
+        )
         for x in samples:
             print("  " + x)
     else:
         print("no Greek NT TR+ in the library: the transcription is not corrected (that needs Stephanus' readings)")
-    print(f"{len(chapters)} chapters, {len(rows)} verses; divided again by {source}: {len(redivided)} ({', '.join(redivided)}); from Scrivener: {', '.join(from_scrivener) or 'none'}")
+    print(
+        f"{len(chapters)} chapters, {len(rows)} verses; divided again by {source}: {len(redivided)} ({', '.join(redivided)}); from Scrivener: {', '.join(from_scrivener) or 'none'}"
+    )
     for p in problems:
         print("  " + p)
 
@@ -508,7 +609,9 @@ def main():
             x = by_ch.setdefault((b, c), [0, 0])
             x[0] += m
             x[1] += max(len(a), len(s))
-        print(f"agreement with {'Stephanus 1550 (TR+)' if source == 'TR+' else source}: {same / max(total, 1):.1%} of words")
+        print(
+            f"agreement with {'Stephanus 1550 (TR+)' if source == 'TR+' else source}: {same / max(total, 1):.1%} of words"
+        )
         worst = sorted(by_ch.items(), key=lambda kv: kv[1][0] / max(kv[1][1], 1))[:6]
         print("  least alike: " + ", ".join(f"{BOOKS[b - 40]} {c} {m / max(n, 1):.0%}" for (b, c), (m, n) in worst))
 
@@ -516,11 +619,17 @@ def main():
     if odd:
         print(f"  {len(odd)} verses with Latin letters, digits or markup, e.g. {odd[0][:3]}: {odd[0][3][:80]}")
 
-    info = ("<p>Theodore Beza's Greek New Testament of 1598 (his fourth folio edition), the Greek text the KJV's translators "
-            "had most in hand, as transcribed on the textus-receptus.com wiki (the 1598 text is public domain; the wiki states no "
-            "licence for its transcription). Accented; verses numbered as in the KJV."
-            + (f" Where the wiki's page is missing or holds another chapter, the chapter is Scrivener's 1894 text, which follows Beza except in some 190 places: {', '.join(from_scrivener)}." if from_scrivener else "")
-            + " Built by Two-edged Sword's tools/beza.</p>")
+    info = (
+        "<p>Theodore Beza's Greek New Testament of 1598 (his fourth folio edition), the Greek text the KJV's translators "
+        "had most in hand, as transcribed on the textus-receptus.com wiki (the 1598 text is public domain; the wiki states no "
+        "licence for its transcription). Accented; verses numbered as in the KJV."
+        + (
+            f" Where the wiki's page is missing or holds another chapter, the chapter is Scrivener's 1894 text, which follows Beza except in some 190 places: {', '.join(from_scrivener)}."
+            if from_scrivener
+            else ""
+        )
+        + " Built by Two-edged Sword's tools/beza.</p>"
+    )
     with module("beza1598.bbli", "Greek NT: Beza (1598)", "Beza 1598", info, ot=False) as db:
         db.executemany("INSERT INTO Bible VALUES (?,?,?,?)", rows)
     print(f"beza1598.bbli: {len(rows)} verses")

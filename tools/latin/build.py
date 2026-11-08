@@ -34,15 +34,25 @@ Words in <i> (the Hebrew letters heading Psalm 119's stanzas) are left as they a
 
 WORDS is taken at a fixed commit. Downloads are cached in ~/Library/Caches/Two-edged Sword/latin.
 """
-import html, os, re, sqlite3, subprocess, sys, unicodedata
+
+import html
+import os
+import re
+import sqlite3
+import subprocess
+import sys
+import unicodedata
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from modules import CACHES, chapter_lengths, fetch, find, module  # noqa: E402
+from modules import CACHES, fetch, find, module  # noqa: E402
+
 CACHE = CACHES / "latin"
 VENV = CACHE / "venv"
 STANZA = "1.14.0"  # the Stanza the virtual environment gets (its Latin model is its version's)
-DICTLINE = "https://raw.githubusercontent.com/mk270/whitakers-words/1f2f0fb0867a896d7b9284a03d615ed635d6f992/DICTLINE.GEN"
+DICTLINE = (
+    "https://raw.githubusercontent.com/mk270/whitakers-words/1f2f0fb0867a896d7b9284a03d615ed635d6f992/DICTLINE.GEN"
+)
 MODULES = {
     "latin": dict(title="Latin Vulgate w/ glosses", abbrev="Latin+"),
 }
@@ -52,6 +62,7 @@ def venv():
     """Re-runs this script in the virtual environment that has Stanza, making it if need be."""
     try:
         import stanza  # noqa: F401
+
         return
     except ImportError:
         pass
@@ -60,48 +71,222 @@ def venv():
         print("making a virtual environment for Stanza (once)")
         subprocess.run([sys.executable, "-m", "venv", str(VENV)], check=True)
         subprocess.run([str(py), "-m", "pip", "install", "-q", f"stanza=={STANZA}"], check=True)
-    if subprocess.run([str(py), "-c", "import PIL"], capture_output=True).returncode:  # for the module's cover (tools/covers)
+    if subprocess.run(
+        [str(py), "-c", "import PIL"], capture_output=True
+    ).returncode:  # for the module's cover (tools/covers)
         subprocess.run([str(py), "-m", "pip", "install", "-q", "pillow"], check=True)
     os.execv(str(py), [str(py), *sys.argv])
 
 
 # Stanza's parts of speech and the Whitaker ones each may be.
-POS = {"NOUN": {"N"}, "PROPN": {"N"}, "VERB": {"V"}, "AUX": {"V"}, "ADJ": {"ADJ", "NUM", "PRON"}, "ADV": {"ADV"}, "ADP": {"PREP"},
-       "CCONJ": {"CONJ"}, "SCONJ": {"CONJ", "ADV"}, "PRON": {"PRON", "ADJ"}, "DET": {"ADJ", "PRON"}, "NUM": {"NUM", "ADJ"},
-       "INTJ": {"INTERJ"}, "PART": {"ADV", "CONJ"}, "X": set()}
+POS = {
+    "NOUN": {"N"},
+    "PROPN": {"N"},
+    "VERB": {"V"},
+    "AUX": {"V"},
+    "ADJ": {"ADJ", "NUM", "PRON"},
+    "ADV": {"ADV"},
+    "ADP": {"PREP"},
+    "CCONJ": {"CONJ"},
+    "SCONJ": {"CONJ", "ADV"},
+    "PRON": {"PRON", "ADJ"},
+    "DET": {"ADJ", "PRON"},
+    "NUM": {"NUM", "ADJ"},
+    "INTJ": {"INTERJ"},
+    "PART": {"ADV", "CONJ"},
+    "X": set(),
+}
 FREQ = {c: i for i, c in enumerate("ABCDEF")}
 
 # Lemma: English, where Whitaker's first sense isn't the Biblical one or Whitaker hasn't the word.
 MEANINGS = {
-    "ego": "I", "tu": "you", "nos": "we", "uos": "you", "is": "he", "ille": "that", "hic": "this", "iste": "that", "ipse": "himself",
-    "idem": "the same", "qui": "who", "quis": "who", "quid": "what", "aliquis": "someone", "quisque": "each", "nemo": "no one",
-    "nihil": "nothing", "sui": "himself", "se": "himself", "meus": "my", "tuus": "your", "suus": "his", "noster": "our",
-    "uester": "your", "omnis": "all", "sum": "be", "possum": "be able", "eo": "go", "fero": "bear", "uolo": "want", "nolo": "be unwilling",
-    "fio": "become", "et": "and", "in": "in", "ab": "from", "ad": "to", "de": "from", "ex": "out of", "cum": "with", "non": "not",
-    "ut": "that", "quia": "because", "sed": "but", "enim": "for", "autem": "but", "uero": "truly", "ergo": "therefore", "si": "if",
-    "nec": "nor", "neque": "nor", "aut": "or", "uel": "or", "atque": "and", "ac": "and", "etiam": "also", "quoque": "also",
-    "super": "over", "per": "through", "pro": "for", "sine": "without", "sub": "under", "ante": "before", "post": "after",
-    "inter": "among", "apud": "with", "propter": "because of", "usque": "as far as", "coram": "before", "contra": "against",
-    "caro": "flesh", "spiritus": "spirit", "gratia": "grace", "uerbum": "word", "dominus": "Lord", "deus": "God", "caelum": "heaven",
-    "caelus": "heaven", "anima": "soul", "gloria": "glory", "peccatum": "sin", "fides": "faith", "salus": "salvation", "gens": "nation",
-    "saeculum": "age", "uirtus": "power", "iustitia": "righteousness", "misericordia": "mercy", "sanctus": "holy", "benedico": "bless",
-    "unigenitus": "only-begotten", "ecclesia": "church", "euangelium": "gospel", "apostolus": "apostle", "propheta": "prophet",
-    "angelus": "angel", "baptizo": "baptize", "sacerdos": "priest", "templum": "temple", "populus": "people", "rex": "king",
-    "filius": "son", "pater": "father", "mater": "mother", "frater": "brother", "uir": "man", "mulier": "woman", "homo": "man",
-    "dico": "say", "facio": "make", "uideo": "see", "uenio": "come", "do": "give", "habeo": "have", "audio": "hear", "loquor": "speak",
-    "terra": "earth", "dies": "day", "facies": "face", "orbis": "world", "desum": "be lacking", "tenebrae": "darkness",
-    "saluator": "saviour", "crux": "cross", "regnum": "kingdom", "mundus": "world", "lux": "light", "uita": "life",
-    "mors": "death", "cor": "heart", "oculus": "eye", "manus": "hand", "lex": "law", "uox": "voice", "nomen": "name", "ecce": "behold", "amen": "amen", "alleluia": "alleluia", "iesus": "Jesus", "christus": "Christ",
+    "ego": "I",
+    "tu": "you",
+    "nos": "we",
+    "uos": "you",
+    "is": "he",
+    "ille": "that",
+    "hic": "this",
+    "iste": "that",
+    "ipse": "himself",
+    "idem": "the same",
+    "qui": "who",
+    "quis": "who",
+    "quid": "what",
+    "aliquis": "someone",
+    "quisque": "each",
+    "nemo": "no one",
+    "nihil": "nothing",
+    "sui": "himself",
+    "se": "himself",
+    "meus": "my",
+    "tuus": "your",
+    "suus": "his",
+    "noster": "our",
+    "uester": "your",
+    "omnis": "all",
+    "sum": "be",
+    "possum": "be able",
+    "eo": "go",
+    "fero": "bear",
+    "uolo": "want",
+    "nolo": "be unwilling",
+    "fio": "become",
+    "et": "and",
+    "in": "in",
+    "ab": "from",
+    "ad": "to",
+    "de": "from",
+    "ex": "out of",
+    "cum": "with",
+    "non": "not",
+    "ut": "that",
+    "quia": "because",
+    "sed": "but",
+    "enim": "for",
+    "autem": "but",
+    "uero": "truly",
+    "ergo": "therefore",
+    "si": "if",
+    "nec": "nor",
+    "neque": "nor",
+    "aut": "or",
+    "uel": "or",
+    "atque": "and",
+    "ac": "and",
+    "etiam": "also",
+    "quoque": "also",
+    "super": "over",
+    "per": "through",
+    "pro": "for",
+    "sine": "without",
+    "sub": "under",
+    "ante": "before",
+    "post": "after",
+    "inter": "among",
+    "apud": "with",
+    "propter": "because of",
+    "usque": "as far as",
+    "coram": "before",
+    "contra": "against",
+    "caro": "flesh",
+    "spiritus": "spirit",
+    "gratia": "grace",
+    "uerbum": "word",
+    "dominus": "Lord",
+    "deus": "God",
+    "caelum": "heaven",
+    "caelus": "heaven",
+    "anima": "soul",
+    "gloria": "glory",
+    "peccatum": "sin",
+    "fides": "faith",
+    "salus": "salvation",
+    "gens": "nation",
+    "saeculum": "age",
+    "uirtus": "power",
+    "iustitia": "righteousness",
+    "misericordia": "mercy",
+    "sanctus": "holy",
+    "benedico": "bless",
+    "unigenitus": "only-begotten",
+    "ecclesia": "church",
+    "euangelium": "gospel",
+    "apostolus": "apostle",
+    "propheta": "prophet",
+    "angelus": "angel",
+    "baptizo": "baptize",
+    "sacerdos": "priest",
+    "templum": "temple",
+    "populus": "people",
+    "rex": "king",
+    "filius": "son",
+    "pater": "father",
+    "mater": "mother",
+    "frater": "brother",
+    "uir": "man",
+    "mulier": "woman",
+    "homo": "man",
+    "dico": "say",
+    "facio": "make",
+    "uideo": "see",
+    "uenio": "come",
+    "do": "give",
+    "habeo": "have",
+    "audio": "hear",
+    "loquor": "speak",
+    "terra": "earth",
+    "dies": "day",
+    "facies": "face",
+    "orbis": "world",
+    "desum": "be lacking",
+    "tenebrae": "darkness",
+    "saluator": "saviour",
+    "crux": "cross",
+    "regnum": "kingdom",
+    "mundus": "world",
+    "lux": "light",
+    "uita": "life",
+    "mors": "death",
+    "cor": "heart",
+    "oculus": "eye",
+    "manus": "hand",
+    "lex": "law",
+    "uox": "voice",
+    "nomen": "name",
+    "ecce": "behold",
+    "amen": "amen",
+    "alleluia": "alleluia",
+    "iesus": "Jesus",
+    "christus": "Christ",
 }
 QUE = {"que"}
-NOT_QUE = {"quoque", "atque", "itaque", "neque", "quisque", "usque", "ubique", "denique", "utique", "undique", "quique", "quaeque",
-           "quodque", "quemque", "quamque", "cuiusque", "cuique", "plerique", "uterque", "utraque", "utrumque", "absque",
-           "quacumque", "quicumque", "quaecumque", "quodcumque", "undecumque", "namque", "peraeque", "quinque", "utrobique"}
+NOT_QUE = {
+    "quoque",
+    "atque",
+    "itaque",
+    "neque",
+    "quisque",
+    "usque",
+    "ubique",
+    "denique",
+    "utique",
+    "undique",
+    "quique",
+    "quaeque",
+    "quodque",
+    "quemque",
+    "quamque",
+    "cuiusque",
+    "cuique",
+    "plerique",
+    "uterque",
+    "utraque",
+    "utrumque",
+    "absque",
+    "quacumque",
+    "quicumque",
+    "quaecumque",
+    "quodcumque",
+    "undecumque",
+    "namque",
+    "peraeque",
+    "quinque",
+    "utrobique",
+}
 
 
 def spell(w):
     """A word as the tagger knows it: PROIEL's spelling, with v kept."""
-    return w.replace("æ", "ae").replace("Æ", "Ae").replace("œ", "oe").replace("Œ", "Oe").replace("ë", "e").replace("j", "i").replace("J", "I")
+    return (
+        w.replace("æ", "ae")
+        .replace("Æ", "Ae")
+        .replace("œ", "oe")
+        .replace("Œ", "Oe")
+        .replace("ë", "e")
+        .replace("j", "i")
+        .replace("J", "I")
+    )
 
 
 def norm(w):
@@ -115,7 +300,7 @@ def whitaker():
     p = fetch(DICTLINE, CACHE / "DICTLINE.GEN")
     out = {}
     for line in p.read_text(encoding="latin-1").splitlines():
-        stems = [line[i * 19:(i + 1) * 19].strip() for i in range(4)]
+        stems = [line[i * 19 : (i + 1) * 19].strip() for i in range(4)]
         m = re.match(r"(\S+)\s+(.*?)\s+([A-Z]) ([A-Z]) ([A-Z]) ([A-Z]) ([A-Z]) (.*)$", line[76:])
         if not m or not stems[0] or stems[0] == "zzz":
             continue
@@ -128,8 +313,13 @@ def whitaker():
         s1 = norm(stems[0])
         forms = {s1}
         if pos == "N" and codes:
-            d, v = codes[0], codes[1] if len(codes) > 1 else "0"
-            forms |= {s1 + e for e in {"1": ["a", "ae"], "2": ["us", "um", "ius", "", "i", "a"], "4": ["us", "u"], "5": ["es"]}.get(d, ["", "es", "a"])}
+            d = codes[0]
+            forms |= {
+                s1 + e
+                for e in {"1": ["a", "ae"], "2": ["us", "um", "ius", "", "i", "a"], "4": ["us", "u"], "5": ["es"]}.get(
+                    d, ["", "es", "a"]
+                )
+            }
         elif pos == "ADJ":
             forms |= {s1 + e for e in ("us", "is", "er", "")}
         elif pos == "V":
@@ -155,9 +345,23 @@ PRONOUNS = {
     "uos": {"Nom": "you", "Gen": "of you", "Dat": "to you", "Acc": "you", "Abl": "you"},
     "sui": {"Gen": "of himself", "Dat": "to himself", "Acc": "himself", "Abl": "himself"},
 }
-IS = {("Nom", "Masc"): "he", ("Nom", "Fem"): "she", ("Nom", "Neut"): "it", ("Gen", "Masc"): "his", ("Gen", "Fem"): "her",
-      ("Gen", "Neut"): "its", ("Dat", "Masc"): "to him", ("Dat", "Fem"): "to her", ("Dat", "Neut"): "to it", ("Acc", "Masc"): "him",
-      ("Acc", "Fem"): "her", ("Acc", "Neut"): "it", ("Abl", "Masc"): "him", ("Abl", "Fem"): "her", ("Abl", "Neut"): "it"}
+IS = {
+    ("Nom", "Masc"): "he",
+    ("Nom", "Fem"): "she",
+    ("Nom", "Neut"): "it",
+    ("Gen", "Masc"): "his",
+    ("Gen", "Fem"): "her",
+    ("Gen", "Neut"): "its",
+    ("Dat", "Masc"): "to him",
+    ("Dat", "Fem"): "to her",
+    ("Dat", "Neut"): "to it",
+    ("Acc", "Masc"): "him",
+    ("Acc", "Fem"): "her",
+    ("Acc", "Neut"): "it",
+    ("Abl", "Masc"): "him",
+    ("Abl", "Fem"): "her",
+    ("Abl", "Neut"): "it",
+}
 IS_PLUR = {"Nom": "they", "Gen": "their", "Dat": "to them", "Acc": "them", "Abl": "them"}
 
 
@@ -185,9 +389,22 @@ GEND = {"Masc": "masc.", "Fem": "fem.", "Neut": "neut."}
 NUMB = {"Sing": "sing.", "Plur": "plur."}
 TENSE = {"Pres": "present", "Past": "perfect", "Fut": "future", "Pqp": "pluperfect", "Imp": "imperfect"}
 MOOD = {"Ind": "indicative", "Sub": "subjunctive", "Imp": "imperative"}
-UPOS = {"NOUN": "noun", "PROPN": "name", "VERB": "verb", "AUX": "verb", "ADJ": "adjective", "ADV": "adverb", "ADP": "preposition",
-        "CCONJ": "conjunction", "SCONJ": "conjunction", "PRON": "pronoun", "DET": "determiner", "NUM": "numeral", "INTJ": "interjection",
-        "PART": "particle"}
+UPOS = {
+    "NOUN": "noun",
+    "PROPN": "name",
+    "VERB": "verb",
+    "AUX": "verb",
+    "ADJ": "adjective",
+    "ADV": "adverb",
+    "ADP": "preposition",
+    "CCONJ": "conjunction",
+    "SCONJ": "conjunction",
+    "PRON": "pronoun",
+    "DET": "determiner",
+    "NUM": "numeral",
+    "INTJ": "interjection",
+    "PART": "particle",
+}
 
 
 def grammar(upos, feats):
@@ -195,16 +412,34 @@ def grammar(upos, feats):
     parts = [UPOS.get(upos, upos.lower())]
     if upos in ("VERB", "AUX"):
         if f.get("VerbForm") == "Fin":
-            tense = "imperfect" if f.get("Aspect") == "Imp" and f.get("Tense") == "Past" else TENSE.get(f.get("Tense"), "")
-            parts.append(" ".join(x for x in (tense, "passive" if f.get("Voice") == "Pass" else "", MOOD.get(f.get("Mood"), "")) if x))
+            tense = (
+                "imperfect" if f.get("Aspect") == "Imp" and f.get("Tense") == "Past" else TENSE.get(f.get("Tense"), "")
+            )
+            parts.append(
+                " ".join(
+                    x for x in (tense, "passive" if f.get("Voice") == "Pass" else "", MOOD.get(f.get("Mood"), "")) if x
+                )
+            )
             parts.append(" ".join(x for x in (f.get("Person"), NUMB.get(f.get("Number"))) if x))
         else:
-            form = {"Inf": "infinitive", "Part": "participle", "Ger": "gerund", "Gdv": "gerundive", "Sup": "supine"}.get(f.get("VerbForm"), "")
+            form = {
+                "Inf": "infinitive",
+                "Part": "participle",
+                "Ger": "gerund",
+                "Gdv": "gerundive",
+                "Sup": "supine",
+            }.get(f.get("VerbForm"), "")
             tense = {"Pres": "present", "Past": "perfect", "Fut": "future"}.get(f.get("Tense"), "")
             parts.append(" ".join(x for x in (tense, "passive" if f.get("Voice") == "Pass" else "", form) if x))
-            parts.append(" ".join(x for x in (CASE.get(f.get("Case")), GEND.get(f.get("Gender")), NUMB.get(f.get("Number"))) if x))
+            parts.append(
+                " ".join(
+                    x for x in (CASE.get(f.get("Case")), GEND.get(f.get("Gender")), NUMB.get(f.get("Number"))) if x
+                )
+            )
     else:
-        parts.append(" ".join(x for x in (CASE.get(f.get("Case")), GEND.get(f.get("Gender")), NUMB.get(f.get("Number"))) if x))
+        parts.append(
+            " ".join(x for x in (CASE.get(f.get("Case")), GEND.get(f.get("Gender")), NUMB.get(f.get("Number"))) if x)
+        )
     return " · ".join(p for p in parts if p)
 
 
@@ -225,7 +460,7 @@ def pieces(verse):
         last = 0
         for m in WORD.finditer(part):
             if m.start() > last:
-                out.append(("text", part[last:m.start()]))
+                out.append(("text", part[last : m.start()]))
             out.append(("i" if italic else "word", m.group()))
             last = m.end()
         if last < len(part):
@@ -255,7 +490,9 @@ def read(name):
 
 def words_of(t):
     """A verse's words as compared across Vulgates: lower case, without tags or punctuation, one spelling (æ ae, j i, v u)."""
-    t = unicodedata.normalize("NFD", re.sub(r"<[^>]+>|\(\d+-\d+\)", " ", t).lower().replace("æ", "ae").replace("œ", "oe"))
+    t = unicodedata.normalize(
+        "NFD", re.sub(r"<[^>]+>|\(\d+-\d+\)", " ", t).lower().replace("æ", "ae").replace("œ", "oe")
+    )
     t = "".join(ch for ch in t if not unicodedata.combining(ch)).replace("j", "i").replace("v", "u")
     return set(re.findall(r"[a-z]+", t))
 
@@ -268,10 +505,16 @@ def to_kjv(rows):
     verses that go to one verse joined; a title, a verse of its own, joins verse 1 and is bold, as in the KJV."""
     clem = read("clementine")[0]
     if clem is None:
-        sys.exit("to number the Psalms as the KJV's, latin+ needs clementine.bbli (built in, or tools/vulgate/build.py)")
+        sys.exit(
+            "to number the Psalms as the KJV's, latin+ needs clementine.bbli (built in, or tools/vulgate/build.py)"
+        )
     for book in (18, 19):
-        rows = [r for r in rows if r[0] != book] + [(book, c, v, t) for c, v, t in line_up(
-            [(c, v, t) for b, c, v, t in rows if b == book], [((c, v), t) for b, c, v, t in clem if b == book])]
+        rows = [r for r in rows if r[0] != book] + [
+            (book, c, v, t)
+            for c, v, t in line_up(
+                [(c, v, t) for b, c, v, t in rows if b == book], [((c, v), t) for b, c, v, t in clem if b == book]
+            )
+        ]
     return sorted(rows)
 
 
@@ -283,6 +526,7 @@ def line_up(mine, theirs):
     def sim(i, j):
         a, b = mw[i], tw[j]
         return len(a & b) / max(len(a | b), 1)
+
     # best[i][j]: the best total with mine[i] at theirs[j]; each verse goes 0 to 2 of theirs on from the one before
     best, back = [dict() for _ in range(n)], [dict() for _ in range(n)]
     for i in range(n):
@@ -301,7 +545,7 @@ def line_up(mine, theirs):
         place[i] = j
         j = back[i].get(j, j)
     out = {}
-    for i, ((c, v, t), j) in enumerate(zip(mine, place)):
+    for i, ((_c, _v, t), j) in enumerate(zip(mine, place)):
         (kc, kv), clem_t = theirs[j]
         # A title: a verse of mine joined to another at verse 1, where the Clementine's verse 1 starts with its title.
         if kv == 1 and clem_t.startswith("<b>") and i + 1 < n and place[i + 1] == j:
@@ -327,8 +571,8 @@ def tag(rows, nlp):
     tagged = {}
     step = 2000
     for k in range(0, len(batch), step):
-        doc = nlp(batch[k:k + step])
-        for (vi, toks), sent in zip(where[k:k + step], doc.sentences):
+        doc = nlp(batch[k : k + step])
+        for (vi, toks), sent in zip(where[k : k + step], doc.sentences):
             for (pi, que, _), w in zip(toks, sent.words):
                 tagged[(vi, pi)] = (w.lemma or w.text, w.upos, w.feats, que)
         print(f"  {min(k + step, len(batch))} verses", end="\r", flush=True)
@@ -344,8 +588,9 @@ def lemma_key(lemma):
 def numbers(rows, tagged):
     """{(verse index, piece index): Strong's number} for the tagged words, from tools/latin/strongs (rows in the KJV's numbering)."""
     from latin import strongs
+
     order = {}
-    for (vi, pi) in sorted(tagged):
+    for vi, pi in sorted(tagged):
         order.setdefault(vi, []).append(pi)
     refs = [(b, c, v) for b, c, v, _ in rows]
     latin = {refs[vi]: [lemma_key(tagged[(vi, pi)][0]) for pi in order.get(vi, [])] for vi in range(len(rows))}
@@ -371,8 +616,11 @@ def render(rows, verses, tagged, dic, nums=None):
                 g = f"and {g}".strip()
             nxt = ps[pi + 1] if pi + 1 < len(ps) else None
             num = (nums or {}).get((vi, pi))
-            s.append(f"<div><grk>{html.escape(text)}</grk>" + (f"<num>{num}</num>" if num else "") +
-                     f"<tvm>{html.escape(grammar(upos, feats))}</tvm><grk>{html.escape(lemma)}</grk><gra>{html.escape(g) or '—'}</gra></div>")
+            s.append(
+                f"<div><grk>{html.escape(text)}</grk>"
+                + (f"<num>{num}</num>" if num else "")
+                + f"<tvm>{html.escape(grammar(upos, feats))}</tvm><grk>{html.escape(lemma)}</grk><gra>{html.escape(g) or '—'}</gra></div>"
+            )
             if nxt and nxt[0] == "text" and not nxt[1].strip():
                 ps[pi + 1] = ("text", "")  # a div brings its own space
         out.append((b, c, v, "".join(s).strip()))
@@ -384,10 +632,18 @@ def render(rows, verses, tagged, dic, nums=None):
 def pipeline():
     """Stanza's Latin pipeline with its PROIEL model, downloaded once into the cache."""
     import stanza
+
     d = str(CACHE / "stanza")
     stanza.download("la", model_dir=d, package="proiel", processors="tokenize,pos,lemma", verbose=False)
-    return stanza.Pipeline("la", dir=d, package="proiel", processors="tokenize,pos,lemma", tokenize_pretokenized=True,
-                           download_method=None, verbose=False)
+    return stanza.Pipeline(
+        "la",
+        dir=d,
+        package="proiel",
+        processors="tokenize,pos,lemma",
+        tokenize_pretokenized=True,
+        download_method=None,
+        verbose=False,
+    )
 
 
 def build(name, nlp, dic):
@@ -402,15 +658,18 @@ def build(name, nlp, dic):
     print(f"  {len(nums)} of {len(tagged)} words have a Strong's number ({len(nums) / max(len(tagged), 1):.1%})")
     out = render(rows, verses, tagged, dic, nums)
     m = MODULES[name]
-    about = (info + "<p>This edition shows each word with its English meaning, Strong's number, dictionary form and grammar. The dictionary "
-             "form and grammar are from Stanza's Latin tagger (Stanford NLP, trained on the PROIEL treebank), which reads each "
-             "word in its sentence; the English is the first sense in William Whitaker's WORDS dictionary. The Strong's numbers "
-             "are the Hebrew or Greek word's each Latin word renders, found by lining the verses up with WLC+, Byz+ and LXX+ "
-             "(tools/latin/strongs.py); a word with no clear counterpart has none. The verses are numbered as the KJV's (the "
-             "Psalms by the Hebrew numbering, their titles part of verse 1). All are the "
-             "work of a program, so some words will be wrong. Built by Two-edged Sword's tools/latin.</p>"
-             "<p><b>For personal study only.</b> Its text is the e-Sword module it was built from, whose licence doesn't allow "
-             "passing it on, and its tagging comes from a model trained on the PROIEL treebank (CC BY-NC-SA).</p>")
+    about = (
+        info
+        + "<p>This edition shows each word with its English meaning, Strong's number, dictionary form and grammar. The dictionary "
+        "form and grammar are from Stanza's Latin tagger (Stanford NLP, trained on the PROIEL treebank), which reads each "
+        "word in its sentence; the English is the first sense in William Whitaker's WORDS dictionary. The Strong's numbers "
+        "are the Hebrew or Greek word's each Latin word renders, found by lining the verses up with WLC+, Byz+ and LXX+ "
+        "(tools/latin/strongs.py); a word with no clear counterpart has none. The verses are numbered as the KJV's (the "
+        "Psalms by the Hebrew numbering, their titles part of verse 1). All are the "
+        "work of a program, so some words will be wrong. Built by Two-edged Sword's tools/latin.</p>"
+        "<p><b>For personal study only.</b> Its text is the e-Sword module it was built from, whose licence doesn't allow "
+        "passing it on, and its tagging comes from a model trained on the PROIEL treebank (CC BY-NC-SA).</p>"
+    )
     ot, nt, apoc = (any(lo <= r[0] <= hi for r in rows) for lo, hi in ((1, 39), (40, 66), (67, 99)))
     with module(f"{name}+.bbli", m["title"], m["abbrev"], about, ot=ot, nt=nt, apocrypha=apoc, strongs=True) as db:
         db.executemany("INSERT INTO Bible VALUES (?,?,?,?)", out)

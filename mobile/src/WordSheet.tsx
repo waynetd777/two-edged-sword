@@ -166,6 +166,17 @@ export function WordSheet({
         <div className="grab" onClick={onClose}>
           <span />
         </div>
+        <div className="shead">
+          <h2 style={{ flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            “{t?.text}”{" "}
+            <span className="m" style={{ fontWeight: 400, fontSize: 14 }}>
+              {fmtRef(at)}
+            </span>
+          </h2>
+          <button className="done" onClick={onClose}>
+            Done
+          </button>
+        </div>
         <div className="wordnav">
           <button
             disabled={prev === undefined}
@@ -174,9 +185,7 @@ export function WordSheet({
           >
             ‹ {word(prev)}
           </button>
-          <span className="m">
-            {fmtRef(at)} · “{t?.text}”
-          </span>
+          <span className="spacer" />
           <button disabled={next === undefined} onClick={() => next !== undefined && onIndex(next)} aria-label={`Next word: ${word(next)}`}>
             {word(next)} ›
           </button>
@@ -228,7 +237,7 @@ export function WordSheet({
           <div className="actions">
             {shown && entry && (
               <button className="primary" onClick={() => onWordStudy(shown)}>
-                Word Study
+                Study this word
               </button>
             )}
             <button className="secondary" onClick={onStudy}>

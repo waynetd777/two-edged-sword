@@ -418,7 +418,8 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
               : title;
       verses.current = paragraphs.map((text, k) => ({ v: k + 1, text }));
       // From the start, a first paragraph that's only the chapter's title isn't read after the announcement.
-      const i = from === 0 && paragraphs.length > 1 && isTitlePara(paragraphs[0], title) ? 1 : Math.max(0, Math.min(from, paragraphs.length - 1));
+      const i =
+        from === 0 && paragraphs.length > 1 && isTitlePara(paragraphs[0], title) ? 1 : Math.max(0, Math.min(from, paragraphs.length - 1));
       const next = {
         ...st.current,
         on: true,

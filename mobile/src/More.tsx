@@ -1,10 +1,10 @@
 // Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
 // SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
-import { useState } from "react";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Module, saved, scene } from "./api";
 import { Help } from "./Help";
+import { JournalList } from "./JournalEdit";
 import { Icon } from "./icons";
 import { NavButtons } from "./NavButtons";
 import {
@@ -30,26 +30,21 @@ import { Settings } from "./Settings";
 import { player, PlanStretch, usePlayer } from "./player";
 import { Part } from "./plansShared";
 
-type Page = "home" | "plans" | "settings" | "help";
+type Page = "home" | "journal" | "settings" | "help";
 
 /** A part's key among the day's ticks. */
 const partKey = (x: { b: number; c: number; v?: number }) => `${x.b}.${x.c}${x.v ? `.${x.v}` : ""}`;
 
-export function More({ modules, onJump, onLibrary }: { modules: Module[]; onJump: (j: Jump) => void; onLibrary: () => void }) {
+export function More({ modules, onJump, onWords }: { modules: Module[]; onJump: (j: Jump) => void; onWords: () => void }) {
   const [page, setPage] = useState<Page>("home");
   useEffect(() => {
-    // Debug: plan=<choice> starts a plan; page=<plans|settings> opens a page.
+    // Debug: page=<settings|help> opens a page.
     scene.then((sc) => {
-      const c = sc.find((x) => x.startsWith("plan="))?.slice(5) as Choice | undefined;
-      if (c && !plansStore.get().length) buildPlan(c, "kjv").then(startPlan);
       const pg = sc.find((x) => x.startsWith("page="))?.slice(5) as Page | undefined;
       if (pg) setPage(pg);
     });
   }, []);
-  const plans = usePlans();
-  const plan = current(plans);
-
-  const title = { home: "More", plans: "Plans", settings: "Settings", help: "Help" }[page];
+  const title = { home: "More", journal: "Journal", settings: "Settings", help: "Help" }[page];
   return (
     <>
       <header className="topbar">
@@ -65,26 +60,9 @@ export function More({ modules, onJump, onLibrary }: { modules: Module[]; onJump
       <div className="results">
         {page === "home" && (
           <>
-            <p className="label" style={{ display: "flex", justifyContent: "space-between" }}>
-              <span>Today's reading</span>
-              <span style={{ textTransform: "none", letterSpacing: 0, fontWeight: 400 }}>{fmtLong(today()).replace(/ \d{4}$/, "")}</span>
-            </p>
-            {plan ? (
-              <TodayCard plan={plan} onJump={onJump} />
-            ) : (
-              <div className="card">
-                <p style={{ margin: "0 0 12px" }}>Choose a reading plan, and today's reading shows here each day.</p>
-                <button className="primary" style={{ width: "100%" }} onClick={() => setPage("plans")}>
-                  Choose a plan
-                </button>
-              </div>
-            )}
-
             {modules.some((m) => m.kind === "devotional") && (
               <>
-                <p className="label" style={{ marginTop: 18 }}>
-                  Today's devotionals
-                </p>
+                <p className="label">Today's devotionals</p>
                 <div className="card flush">
                   {modules
                     .filter((m) => m.kind === "devotional")
@@ -99,14 +77,24 @@ export function More({ modules, onJump, onLibrary }: { modules: Module[]; onJump
               </>
             )}
 
-            <p className="label" style={{ marginTop: 18 }}>
-              Plans and settings
+            <p className="label" style={{ marginTop: modules.some((m) => m.kind === "devotional") ? 18 : undefined }}>
+              Study, journal and settings
             </p>
             <div className="card flush">
-              <button className="row" onClick={() => setPage("plans")}>
-                <Icon name="calendar" size={20} />
-                <span className="grow">Plans</span>
-                <span className="m">{plans.length ? `${plans.length} ›` : "›"}</span>
+              <button className="row" onClick={onWords}>
+                <span
+                  aria-hidden="true"
+                  style={{ width: 20, textAlign: "center", fontFamily: "var(--orig)", fontSize: 26, lineHeight: "20px" }}
+                >
+                  α
+                </span>
+                <span className="grow">Word Study</span>
+                <span className="m">›</span>
+              </button>
+              <button className="row" onClick={() => setPage("journal")}>
+                <Icon name="note" size={20} />
+                <span className="grow">Journal</span>
+                <span className="m">›</span>
               </button>
               <button className="row" onClick={() => setPage("settings")}>
                 <Icon name="settings" size={20} />
@@ -121,9 +109,46 @@ export function More({ modules, onJump, onLibrary }: { modules: Module[]; onJump
             </div>
           </>
         )}
-        {page === "plans" && <Plans modules={modules} onLibrary={onLibrary} onStarted={() => setPage("home")} />}
+        {page === "journal" && <JournalList />}
         {page === "settings" && <Settings modules={modules} />}
         {page === "help" && <Help />}
+      </div>
+    </>
+  );
+}
+
+/** The Plans tab: today's reading from the current plan, then the plans to keep or start. */
+export function PlansTab({ modules, onJump, onLibrary }: { modules: Module[]; onJump: (j: Jump) => void; onLibrary: () => void }) {
+  useEffect(() => {
+    // Debug: plan=<choice> starts a plan.
+    scene.then((sc) => {
+      const c = sc.find((x) => x.startsWith("plan="))?.slice(5) as Choice | undefined;
+      if (c && !plansStore.get().length) buildPlan(c, "kjv").then(startPlan);
+    });
+  }, []);
+  const plan = current(usePlans());
+  const top = useRef<HTMLDivElement>(null);
+  return (
+    <>
+      <header className="topbar">
+        <NavButtons />
+        <h1 className="bartitle">Plans</h1>
+      </header>
+      <div className="results" ref={top}>
+        <p className="label" style={{ display: "flex", justifyContent: "space-between" }}>
+          <span>Today's reading</span>
+          <span style={{ textTransform: "none", letterSpacing: 0, fontWeight: 400 }}>{fmtLong(today()).replace(/ \d{4}$/, "")}</span>
+        </p>
+        {plan ? (
+          <TodayCard plan={plan} onJump={onJump} />
+        ) : (
+          <div className="card">
+            <p style={{ margin: 0 }}>Choose a reading plan below, and today's reading shows here each day.</p>
+          </div>
+        )}
+        <div style={{ marginTop: 18 }}>
+          <Plans modules={modules} onLibrary={onLibrary} onStarted={() => top.current?.scrollTo({ top: 0, behavior: "smooth" })} />
+        </div>
       </div>
     </>
   );
@@ -187,7 +212,11 @@ function TodayCard({ plan, onJump }: { plan: Plan; onJump: (j: Jump) => void }) 
       <div className="progress" style={{ margin: "10px 0 4px" }}>
         <span style={{ width: `${t.pct}%` }} />
       </div>
-      {late > 0 && <p className="m" style={{ margin: "6px 0 0" }}>{late === 1 ? "A day behind" : `${late} days behind`}</p>}
+      {late > 0 && (
+        <p className="m" style={{ margin: "6px 0 0" }}>
+          {late === 1 ? "A day behind" : `${late} days behind`}
+        </p>
+      )}
       {finished ? (
         <p style={{ margin: "12px 0 0" }}>Finished. Well done! Choose a new plan under Plans.</p>
       ) : (
@@ -198,12 +227,25 @@ function TodayCard({ plan, onJump }: { plan: Plan; onJump: (j: Jump) => void }) 
               const on = read || ticked.includes(k);
               return (
                 <div key={k} className="row" style={{ padding: 0, borderTop: "1px solid var(--line)" }}>
-                  <button className={`tick ${on ? "on" : ""}`} aria-label={on ? `${partLabel(x)} read` : `Mark ${partLabel(x)} read`} onClick={() => !on && tick(k)}>
+                  <button
+                    className={`tick ${on ? "on" : ""}`}
+                    aria-label={on ? `${partLabel(x)} read` : `Mark ${partLabel(x)} read`}
+                    onClick={() => !on && tick(k)}
+                  >
                     {on && <Icon name="check" size={14} />}
                   </button>
                   <button
                     className="grow"
-                    style={{ border: "none", background: "none", textAlign: "left", minHeight: 48, fontSize: 17, fontFamily: "var(--read)", color: on ? "var(--muted)" : "var(--text)", textDecoration: on ? "line-through" : "none" }}
+                    style={{
+                      border: "none",
+                      background: "none",
+                      textAlign: "left",
+                      minHeight: 48,
+                      fontSize: 17,
+                      fontFamily: "var(--read)",
+                      color: on ? "var(--muted)" : "var(--text)",
+                      textDecoration: on ? "line-through" : "none",
+                    }}
                     onClick={() => onJump({ ref: partRef(x) })}
                   >
                     {psalmLabel(partLabel(x))}
@@ -221,7 +263,10 @@ function TodayCard({ plan, onJump }: { plan: Plan; onJump: (j: Jump) => void }) 
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: 8, flex: 1 }}>
                 <div style={{ display: "flex", gap: 8 }}>
-                  <button className="primary" onClick={() => onJump({ ref: partRef(t.parts.find((x) => !ticked.includes(partKey(x))) ?? t.parts[0]) })}>
+                  <button
+                    className="primary"
+                    onClick={() => onJump({ ref: partRef(t.parts.find((x) => !ticked.includes(partKey(x))) ?? t.parts[0]) })}
+                  >
                     {ticked.length ? "Continue reading" : "Start reading"}
                   </button>
                   <button className="secondary listenplan" onClick={() => (listening ? player.stop() : listen())}>
@@ -283,7 +328,10 @@ function Plans({ modules, onLibrary, onStarted }: { modules: Module[]; onLibrary
                 </div>
                 <div className="actions">
                   {p.active ? (
-                    <button className="secondary" onClick={() => plansStore.set((ps) => ps.map((x) => (x.id === p.id ? { ...x, active: false } : x)))}>
+                    <button
+                      className="secondary"
+                      onClick={() => plansStore.set((ps) => ps.map((x) => (x.id === p.id ? { ...x, active: false } : x)))}
+                    >
                       Pause
                     </button>
                   ) : (
@@ -325,7 +373,11 @@ function Plans({ modules, onLibrary, onStarted }: { modules: Module[]; onLibrary
           ),
         )}
       </div>
-      {err && <p className="m" style={{ color: "var(--red)", marginTop: 8 }}>Couldn't make the plan: {err}</p>}
+      {err && (
+        <p className="m" style={{ color: "var(--red)", marginTop: 8 }}>
+          Couldn't make the plan: {err}
+        </p>
+      )}
       <p className="m" style={{ marginTop: 10, lineHeight: 1.5 }}>
         A plan starts today, in the Bible you're reading. Starting one pauses the current plan; it keeps its place.
       </p>

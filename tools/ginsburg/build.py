@@ -32,7 +32,12 @@ moved to the KJV's numbering with the same map as WLC+ (morphhb's VerseMap.xml, 
 verse the KJV divides is split at its main pause (the atnach). The repositories are taken at a
 fixed commit. Downloads are cached in ~/Library/Caches/Two-edged Sword/ginsburg.
 """
-import re, shutil, subprocess, sys, unicodedata
+
+import re
+import shutil
+import subprocess
+import sys
+import unicodedata
 import xml.etree.ElementTree as ET
 from difflib import SequenceMatcher
 from pathlib import Path
@@ -40,6 +45,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import wlc.build as wlc  # noqa: E402  (the WLC -> KJV verse map)
 from modules import CACHES, LIBRARY, hebrew_consonants, module  # noqa: E402
+
 CACHE = CACHES / "ginsburg"
 REPO = ("https://github.com/ahembd/Ginsburg_Hebrew_Bible", "8fccfa9c0a9bd98fc4f9431e838b84e67eff2b6d")
 REPO_RAFE = ("https://github.com/ahembd/Ginsburg_Hebrew_Bible_w_rafe", "0d024bd3683c3592299e44920562bad1373f29c1")
@@ -47,12 +53,57 @@ REPO_RAFE = ("https://github.com/ahembd/Ginsburg_Hebrew_Bible_w_rafe", "0d024bd3
 ALIYAH = re.compile(r"\[\u200f?(?:שני|שלישי|רביעי|חמישי|ששי|שביעי|מפטיר)\]\s*")
 
 # The files' names, in e-Sword's book order.
-FILES = ["Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy", "Joshua", "Judges", "Ruth", "1Samuel", "2Samuel", "1Kings", "2Kings",
-         "1Chronicles", "2Chronicles", "Ezra", "Nehemiah", "Esther", "Job", "Psalms", "Proverbs", "Ecclesiastes", "Song_of_Solomon",
-         "Isaiah", "Jeremiah", "Lamentations", "Ezekiel", "Daniel", "Hosea", "Joel", "Amos", "Obadiah", "Jonah", "Micah", "Nahum",
-         "Habakkuk", "Zephaniah", "Haggai", "Zechariah", "Malachi"]
-LETTERS = {**{c: i + 1 for i, c in enumerate("אבגדהוזחט")}, **{c: (i + 1) * 10 for i, c in enumerate("יכלמנסעפצ")},
-           **{c: (i + 1) * 100 for i, c in enumerate("קרשת")}, "ך": 20, "ם": 40, "ן": 50, "ף": 80, "ץ": 90}
+FILES = [
+    "Genesis",
+    "Exodus",
+    "Leviticus",
+    "Numbers",
+    "Deuteronomy",
+    "Joshua",
+    "Judges",
+    "Ruth",
+    "1Samuel",
+    "2Samuel",
+    "1Kings",
+    "2Kings",
+    "1Chronicles",
+    "2Chronicles",
+    "Ezra",
+    "Nehemiah",
+    "Esther",
+    "Job",
+    "Psalms",
+    "Proverbs",
+    "Ecclesiastes",
+    "Song_of_Solomon",
+    "Isaiah",
+    "Jeremiah",
+    "Lamentations",
+    "Ezekiel",
+    "Daniel",
+    "Hosea",
+    "Joel",
+    "Amos",
+    "Obadiah",
+    "Jonah",
+    "Micah",
+    "Nahum",
+    "Habakkuk",
+    "Zephaniah",
+    "Haggai",
+    "Zechariah",
+    "Malachi",
+]
+LETTERS = {
+    **{c: i + 1 for i, c in enumerate("אבגדהוזחט")},
+    **{c: (i + 1) * 10 for i, c in enumerate("יכלמנסעפצ")},
+    **{c: (i + 1) * 100 for i, c in enumerate("קרשת")},
+    "ך": 20,
+    "ם": 40,
+    "ן": 50,
+    "ף": 80,
+    "ץ": 90,
+}
 MARKS = re.compile("[‌‍‎‏‪-‮]")
 
 
@@ -69,7 +120,11 @@ def repo(source=REPO, name="repo"):
         tmp = CACHE / f"{name}.part"
         shutil.rmtree(tmp, ignore_errors=True)
         tmp.mkdir(parents=True)
-        for cmd in (["git", "init", "-q"], ["git", "fetch", "-q", "--depth", "1", url, commit], ["git", "checkout", "-q", "FETCH_HEAD"]):
+        for cmd in (
+            ["git", "init", "-q"],
+            ["git", "fetch", "-q", "--depth", "1", url, commit],
+            ["git", "checkout", "-q", "FETCH_HEAD"],
+        ):
             subprocess.run(cmd, cwd=tmp, check=True)
         tmp.rename(d)
     return {re.sub(r"^\d+\)|\.txt$", "", p.name): p for p in d.glob("*.txt")}
@@ -89,7 +144,7 @@ def qere(text):
         seg = parts[k]
         m = LABEL.match(seg)
         if m and m.group(1) in ("כתיב", "כת׳"):
-            written = seg[m.end():].strip()
+            written = seg[m.end() :].strip()
             k += 1
             if not written and k < len(parts):
                 written, k = parts[k].strip(), k + 1
@@ -136,7 +191,7 @@ def book(path):
         m = re.match(r"\[([א-ת]+)\]\s*|\*\*(\d+)\s+", line)
         if m:
             v = int(m.group(2)) if m.group(2) else number(m.group(1))
-            line = line[m.end():]
+            line = line[m.end() :]
             verses[(ch, v)] = line
         elif v:
             verses[(ch, v)] += " " + line  # a verse carried onto another line
@@ -205,10 +260,14 @@ def renumber(n, verses):
     for i in range(len(toks)):
         if tok_key[i] is None:
             nxt = next((j for j in range(i + 1, len(toks)) if tok_key[j] is not None), None)
-            tok_key[i] = tok_key[nxt] if nxt is not None and toks[nxt][0] == toks[i][0] else (last or (tok_key[nxt] if nxt is not None else toks[i][0]))
+            tok_key[i] = (
+                tok_key[nxt]
+                if nxt is not None and toks[nxt][0] == toks[i][0]
+                else (last or (tok_key[nxt] if nxt is not None else toks[i][0]))
+            )
         last = tok_key[i]
     out = {}
-    for (k, t), key in zip(toks, tok_key):
+    for (_k, t), key in zip(toks, tok_key):
         out[key] = f"{out[key]} {t}" if key in out else t
     SHARE.append((n, sum(1 for w in where if w), len(pieces)))
     return out
@@ -235,20 +294,26 @@ def main(into=None):
             k = (n, c, v)
             m = moves.get(k, {})
             first, second = halves(text)
-            parts = [(m.get("a", k), first), (m.get("b", k), second)] if "a" in m or "b" in m else [(m.get(None, k), text)]
+            parts = (
+                [(m.get("a", k), first), (m.get("b", k), second)] if "a" in m or "b" in m else [(m.get(None, k), text)]
+            )
             for key, t in parts:
                 if t:
                     verses[key] = f"{verses[key]} {t}" if key in verses else t
     rows = [(b, c, v, f"<heb>{t}</heb>") for (b, c, v), t in sorted(verses.items())]
-    info = ("<p>The Hebrew Old Testament as Christian David Ginsburg edited it for the Trinitarian Bible Society (1894), "
-            "following Jacob ben Chayyim's text of Daniel Bomberg's second Rabbinic Bible (Venice, 1524–25), the Hebrew the "
-            "KJV's translators used. From github.com/ahembd/Ginsburg_Hebrew_Bible (Apache-2.0), with vowels and accents; "
-            "the verses its files lost (Daniel 11:26 to the end, Ezra 8–10 and a few more) are from its sister, "
-            "github.com/ahembd/Ginsburg_Hebrew_Bible_w_rafe (GPL-3.0), so the module is shared under the GNU GPL, version 3. "
-            "Verses are numbered as in the KJV (psalm titles are part of verse 1); where the margin corrects the text "
-            "(ketiv/qere), the reading is given. 1 Kings 22:52–53, Job 42:17 and Micah 7:20 are missing from the source files; "
-            "Nehemiah 7:68 is not in the Masoretic text. Built by Two-edged Sword's tools/ginsburg.</p>")
-    with module("ginsburg.bbli", "Hebrew Bible (Ginsburg 1894, Ben Chayyim)", "Ginsburg", info, nt=False, rtl=True, into=into) as db:
+    info = (
+        "<p>The Hebrew Old Testament as Christian David Ginsburg edited it for the Trinitarian Bible Society (1894), "
+        "following Jacob ben Chayyim's text of Daniel Bomberg's second Rabbinic Bible (Venice, 1524–25), the Hebrew the "
+        "KJV's translators used. From github.com/ahembd/Ginsburg_Hebrew_Bible (Apache-2.0), with vowels and accents; "
+        "the verses its files lost (Daniel 11:26 to the end, Ezra 8–10 and a few more) are from its sister, "
+        "github.com/ahembd/Ginsburg_Hebrew_Bible_w_rafe (GPL-3.0), so the module is shared under the GNU GPL, version 3. "
+        "Verses are numbered as in the KJV (psalm titles are part of verse 1); where the margin corrects the text "
+        "(ketiv/qere), the reading is given. 1 Kings 22:52–53, Job 42:17 and Micah 7:20 are missing from the source files; "
+        "Nehemiah 7:68 is not in the Masoretic text. Built by Two-edged Sword's tools/ginsburg.</p>"
+    )
+    with module(
+        "ginsburg.bbli", "Hebrew Bible (Ginsburg 1894, Ben Chayyim)", "Ginsburg", info, nt=False, rtl=True, into=into
+    ) as db:
         db.executemany("INSERT INTO Bible VALUES (?,?,?,?)", rows)
     matched = sum(m for _, m, _ in SHARE) / max(sum(t for _, _, t in SHARE), 1)
     print(f"{len(FILLED)} verses from the edition with the rafe; {matched:.1%} of the words match the WLC's")

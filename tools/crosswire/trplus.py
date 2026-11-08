@@ -21,7 +21,11 @@ Sources:
 
 The markup is INT+'s: each word a <div><grk>word</grk><num>G…</num><tvm>grammar</tvm><gra>gloss</gra></div>.
 """
-import html, re, sys, unicodedata
+
+import html
+import re
+import sys
+import unicodedata
 from collections import Counter
 from difflib import SequenceMatcher
 from pathlib import Path
@@ -33,9 +37,16 @@ from modules import greek_key, module  # noqa: E402
 from stepbible import has, robinson, tagnt  # noqa: E402
 
 # The TR's spellings that no edition in TAGNT has (it spells David Δαυίδ, Moses Μωϋσῆς), accented as Stephanus prints them.
-SPELT = {"δαβιδ": "Δαβίδ", "μωσης": "Μωσῆς", "μωσεως": "Μωσέως", "μωση": "Μωσῇ", "μωσην": "Μωσῆν", "τεσσαρακοντα": "τεσσαράκοντα"}
+SPELT = {
+    "δαβιδ": "Δαβίδ",
+    "μωσης": "Μωσῆς",
+    "μωσεως": "Μωσέως",
+    "μωση": "Μωσῇ",
+    "μωσην": "Μωσῆν",
+    "τεσσαρακοντα": "τεσσαράκοντα",
+}
 
-W = re.compile(r'<w\b([^>]*)>(.*?)</w>', re.S)
+W = re.compile(r"<w\b([^>]*)>(.*?)</w>", re.S)
 
 
 def letters(w):
@@ -57,7 +68,7 @@ def tr1550():
             for attrs, word in W.findall(t):
                 if not word.strip():  # a second parsing of the word before (Matt 4:15 γη, N-NSF and N-VSF)
                     continue
-                num = re.search(r'strong:(G\d+)', attrs)
+                num = re.search(r"strong:(G\d+)", attrs)
                 code = re.search(r'robinson:([^"\s]+)', attrs)
                 ws.append((word.strip(), num and f"G{int(num[1][1:])}", code[1] if code else ""))
             if ws:
@@ -128,19 +139,26 @@ def main():
             stats["words"] += 1
             stats["accented"] += any(unicodedata.combining(x) for x in unicodedata.normalize("NFD", word))
             stats["glossed"] += bool(g)
-            s.append(f"<div><grk>{html.escape(word)}</grk>" + (f"<num>{num}</num>" if num else "")
-                     + f"<tvm>{html.escape(robinson(code))}</tvm><gra>{html.escape(g) or '—'}</gra></div>")
+            s.append(
+                f"<div><grk>{html.escape(word)}</grk>"
+                + (f"<num>{num}</num>" if num else "")
+                + f"<tvm>{html.escape(robinson(code))}</tvm><gra>{html.escape(g) or '—'}</gra></div>"
+            )
         out.append((b, c, v, "".join(s)))
     w = stats["words"]
     print(f"{len(out)} verses, {w} words: accented {stats['accented'] / w:.1%}, glossed {stats['glossed'] / w:.1%}")
 
-    info = ("<p>Robert Estienne's (Stephanus') Greek New Testament of 1550 word by word: each word with its Strong's number and "
-            "grammar (Robinson's codes) from CrossWire's TR module (Maurice Robinson's electronic edition, CC BY-NC-SA 4.0), "
-            "accented and punctuated as STEPBible's TAGNT prints the same words (Tyndale House, CC BY 4.0), with the English "
-            "of STEPBible's TBESG (Tyndale House, CC BY 4.0, https://github.com/STEPBible/STEPBible-Data). The English is the "
-            "dictionary sense, not a translation of the verse. Where Scrivener's 1894 text differs, this has the 1550's reading. "
-            "Built by Two-edged Sword's tools/crosswire/trplus.py.</p>")
-    with module("tr1550+.bbli", "Greek NT: Textus Receptus (Stephanus 1550) w/ glosses", "TR1550+", info, ot=False, strongs=True) as db:
+    info = (
+        "<p>Robert Estienne's (Stephanus') Greek New Testament of 1550 word by word: each word with its Strong's number and "
+        "grammar (Robinson's codes) from CrossWire's TR module (Maurice Robinson's electronic edition, CC BY-NC-SA 4.0), "
+        "accented and punctuated as STEPBible's TAGNT prints the same words (Tyndale House, CC BY 4.0), with the English "
+        "of STEPBible's TBESG (Tyndale House, CC BY 4.0, https://github.com/STEPBible/STEPBible-Data). The English is the "
+        "dictionary sense, not a translation of the verse. Where Scrivener's 1894 text differs, this has the 1550's reading. "
+        "Built by Two-edged Sword's tools/crosswire/trplus.py.</p>"
+    )
+    with module(
+        "tr1550+.bbli", "Greek NT: Textus Receptus (Stephanus 1550) w/ glosses", "TR1550+", info, ot=False, strongs=True
+    ) as db:
         db.executemany("INSERT INTO Bible VALUES (?,?,?,?)", out)
     print(f"tr1550+.bbli: {len(out)} verses")
 
