@@ -13,7 +13,9 @@ import type { Module } from "./api";
 
 /** Cross-references are commentary modules (the Treasury, OpenBible's), found as the desktop finds
  *  them (state.tsx xrefs); they have their own tab rather than being among the commentaries. */
-const isXref = (c: { id: string; title: string }) => c.id === "tsk" || c.id === "openbible_xref" || /treasury|cross-ref/i.test(c.title);
+// Not "treasury" alone: Spurgeon's Treasury of David is a commentary.
+const isXref = (c: { id: string; title: string }) =>
+  c.id === "tsk" || c.id === "openbible_xref" || /treasury of scripture|cross-ref/i.test(c.title);
 
 type Tab = "commentary" | "xrefs" | "dict" | "maps";
 
