@@ -1622,37 +1622,50 @@ button.ks-chip {
 :root[data-theme="dark"] {
   --hl-mix: 45%;
 }
+/* Drawn like a highlighter pen: a band over the lower part of the line, slanted chisel ends, the ink
+   heavier where the stroke starts and thinner along it, each wrapped line its own stroke. */
+.hl-red,
+.hl-orange,
+.hl-yellow,
+.hl-green,
+.hl-blue,
+.hl-purple,
+.hl-teal,
+.hl-grey {
+  --hlx: color-mix(in srgb, var(--hlc) calc(var(--hl-mix) * 1.6), transparent);
+  --hly: color-mix(in srgb, var(--hlc) var(--hl-mix), transparent);
+  background: linear-gradient(100deg, transparent 0.05em, var(--hlx) 0.3em, var(--hly) 30%, var(--hlx) 85%, var(--hly) calc(100% - 0.3em), transparent calc(100% - 0.05em))
+    0 62% / 100% 78% no-repeat;
+  margin: 0 -0.35em;
+  padding: 0.05em 0.35em;
+  border-radius: 0.7em 0.25em 0.8em 0.3em;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  color: inherit;
+}
 .hl-red {
-  background: color-mix(in srgb, var(--hl-dot-red) var(--hl-mix), transparent);
-  border-radius: 3px;
+  --hlc: var(--hl-dot-red);
 }
 .hl-orange {
-  background: color-mix(in srgb, var(--hl-dot-orange) var(--hl-mix), transparent);
-  border-radius: 3px;
+  --hlc: var(--hl-dot-orange);
 }
 .hl-yellow {
-  background: color-mix(in srgb, var(--hl-dot-yellow) var(--hl-mix), transparent);
-  border-radius: 3px;
+  --hlc: var(--hl-dot-yellow);
 }
 .hl-green {
-  background: color-mix(in srgb, var(--hl-dot-green) var(--hl-mix), transparent);
-  border-radius: 3px;
+  --hlc: var(--hl-dot-green);
 }
 .hl-blue {
-  background: color-mix(in srgb, var(--hl-dot-blue) var(--hl-mix), transparent);
-  border-radius: 3px;
+  --hlc: var(--hl-dot-blue);
 }
 .hl-purple {
-  background: color-mix(in srgb, var(--hl-dot-purple) var(--hl-mix), transparent);
-  border-radius: 3px;
+  --hlc: var(--hl-dot-purple);
 }
 .hl-teal {
-  background: color-mix(in srgb, var(--hl-dot-teal) var(--hl-mix), transparent);
-  border-radius: 3px;
+  --hlc: var(--hl-dot-teal);
 }
 .hl-grey {
-  background: color-mix(in srgb, var(--hl-dot-grey) var(--hl-mix), transparent);
-  border-radius: 3px;
+  --hlc: var(--hl-dot-grey);
 }
 .vtool {
   position: absolute;
