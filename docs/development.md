@@ -4,7 +4,7 @@ The app is built with Tauri 2: a React and TypeScript frontend, built by Vite, a
 The Rust side reads the modules (e-Sword X's SQLite formats, read-only), keeps the search index,
 writes the journal, reads aloud and runs the AI tools for Ask. The frontend draws every screen.
 
-**Contents:** [Commands](#commands) · [Security checks](#security-checks) · [Where things live](#where-things-live) · [Signing and Full Disk Access](#signing-and-full-disk-access) · [Open at Login](#open-at-login) · [Help](#help) · [Writing the docs](#writing-the-docs) · [Screenshots](#screenshots) · [The product page](#the-product-page) · [Differences from the KJV](#differences-from-the-kjv) · [Building modules](#building-modules) · [Writing modules](#writing-modules) · [Reference book format](#reference-book-format) · [The code](#the-code) · [Licensed Bibles](#licensed-bibles)
+**Contents:** [Commands](#commands) · [Security checks](#security-checks) · [Where things live](#where-things-live) · [Signing and Full Disk Access](#signing-and-full-disk-access) · [Open at Login](#open-at-login) · [Help](#help) · [Writing the docs](#writing-the-docs) · [Screenshots](#screenshots) · [The product page](#the-product-page) · [Differences from the KJV](#differences-from-the-kjv) · [Building modules](#building-modules) · [Writing modules](#writing-modules) · [Reference book format](#reference-book-format) · [The code](#the-code) · [The phone app](#the-phone-app) · [Licensed Bibles](#licensed-bibles)
 
 ## Commands
 
@@ -596,6 +596,41 @@ reference, and images inline as `data:` URLs.
   are clippy's defaults and `eslint.config.js`. Run `make lint` before committing.
 - Design decisions and known bugs are logged in `_sift/`; `python3 _sift/bin/sift.py decisions`
   lists the decisions.
+
+## The phone app
+
+`mobile/` is Two-edged Sword for iPhone, iPad and Android: Tauri 2, React and Vite, on the `mobile` branch. Its guide for users is `mobile/docs/guide.md`, shown in More › Help.
+
+**What it shares with the desktop**
+
+- Rust: `mobile/src-tauri/src/lib.rs` includes the desktop's `library.rs`, `content.rs`, `search.rs` and `index.rs` with `#[path]`; `store.rs` there gives them the phone's folders.
+- TypeScript: it imports `bible.ts`, `esword.tsx`, `lexicon.ts`, `plans.ts`, `spoken.ts`, `refs.ts`, `dom.ts` and `sync.ts` from `src/`. `vite.config.ts` (`desktopShims`) swaps what those import from the desktop's `api` and `MapPlaces` for `mobile/src/shims`.
+- Its Rust is formatted with the desktop's `rustfmt.toml` (copied into `mobile/src-tauri` and the plugin): formatting with the default width rewraps the shared desktop files.
+
+**The native plugin** (`mobile/plugins/tes-native`; Swift for iOS, Kotlin for Android): rotation (only the image viewer turns on iPhone), reading aloud and the word speaker, haptics, the lock screen's controls, Android's bundled modules (copied out of the APK, which SQLite can't open), Add from Files and opened files, and finding the computer for sync over Bonjour.
+
+**Commands** (run from `mobile/`; `make help` lists them all)
+
+| Command | What it does |
+|---|---|
+| `make ios-sim [SIM="iPad Pro 11-inch (M5)"] [SCENE=…]` | Build for the Simulator, install and launch |
+| `make ios-phone TEAM=<team id> DEVICE=<udid>` | A release build on an iPhone or iPad (free personal team; the team id is kept out of the repo) |
+| `make ios-register DEVICE=<udid> TEAM=<team id>` | Add a new iPhone or iPad to the team's profile |
+| `make android-phone DEVICE=<serial>` | A release build signed with this Mac's debug key, over USB |
+| `make modules-release`, `modules-publish`, `modules-manifest` | The downloads: the GitHub release `modules` (`tools/modules_release.py`) |
+| `make icons` | The app icons |
+
+**Debug scenes**: a debug build reads `TES_SCENE` (from `SIMCTL_CHILD_TES_SCENE` in the Simulator), comma-separated: `study`, `goto`, `word`, `compare`, `wide`, `library`, `about`, `more`, `page=settings`, `at=john 3:16`, `hlopen`, `pair=…` and more (the list is at `scene` in `lib.rs`, and each screen's own `sc.includes(...)`). The app's `log` command writes to `debug.log` in its data folder in a debug build, readable from the Simulator's container.
+
+**Things learnt the hard way**
+
+- iOS keeps `Documents/Inbox` to itself: an app may only read and delete there. What's picked or opened goes to `tmp/<…>-Inbox`, which `import_waiting` checks.
+- A file being copied into the Inbox can be seen half-written: copy out of sight, then move it in.
+- The Simulator can't find the desktop over Bonjour (`PolicyDenied`; it borrows the Mac's permission): pair with `pairat=`.
+- The desktop app needs macOS's Local Network permission for its Bonjour announcement to leave the Mac; incoming connections work without it.
+- Android may resolve the computer to only an IPv6 link-local address, which can't be connected to: the computer puts its IPv4 address in its announcement (`ip=`).
+- Android's number keypad types a comma for a dot in some regions.
+- Android sends a click when a tap stops a scroll: the reader ignores taps just after or during scrolling.
 
 ## Licensed Bibles
 
