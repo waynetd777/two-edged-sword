@@ -111,14 +111,14 @@ It works the same on Windows, except:
 - **[Quiet time](app:settings#quiet-time)**: the daily reminder, and what to do when you fall behind.
 - **[AI assistant](app:settings#ai-assistant)**: which tools are installed, the default model, what Ask may read and send, and
   whether it suggests a next question ([Ask](ask.md)).
-- **[Phones and tablets](app:settings#phones-and-tablets)**: pair the phone app ([Sync with your phone](#sync-with-your-phone)),
-  and the devices paired, with when each last synced.
+- **[Phones and tablets](app:settings#phones-and-tablets)**: for the phone app, coming soon ([Sync with your phone](#sync-with-your-phone)):
+  pairing, and the devices paired, with when each last synced.
 - At the bottom: the app's version and build number, its licence, and **Website**, which opens
   [two-edged-sword.davies.co.za](https://two-edged-sword.davies.co.za/).
 
 ## Sync with your phone
 
-The phone app (iPhone, iPad and Android) keeps these the same as on this computer:
+The phone app, for iPhone, iPad and Android, is coming soon. Once it's out, it keeps these the same as on this computer:
 
 - bookmarks and highlights
 - reading plans and the days ticked
@@ -133,7 +133,6 @@ To pair a phone or tablet:
 The code works for 2 minutes, while Settings is open. Entered wrongly five times, it stops working: show a new one.
 Until a device is paired or a code is showing, this computer doesn't listen for phones at all.
 Sync is encrypted, so nothing sent over the Wi-Fi can be read by anyone else on it.
-Devices paired before sync was encrypted need pairing again, with the phone app up to date.
 
 After that it syncs by itself whenever the phone app is open on the same Wi-Fi as this computer, with
 Two-edged Sword running here. A change made on a phone reaches your other phones through this computer.
