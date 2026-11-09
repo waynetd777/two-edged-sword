@@ -342,7 +342,9 @@ def main():
     ap.add_argument("-j", type=int, default=4, metavar="N", help="apps to run side by side (default 4)")
     ap.add_argument("--tutorials", action="store_true", help="the website tutorials' scenes (tutorials/*.json)")
     a = ap.parse_args()
-    docs = json.loads((HERE / "scenes.json").read_text(encoding="utf-8"))
+    # The docs' scenes run on the demo home too: they go on the website, so they show only the
+    # modules the app ships with, never the user's own library or e-Sword's.
+    docs = [{"home": "demo", **s} for s in json.loads((HERE / "scenes.json").read_text(encoding="utf-8"))]
     # The tutorials' scenes: on the demo home, for the site, in its dark theme.
     tuts = [
         {"home": "demo", "site": True, "darkOnly": True, **s}

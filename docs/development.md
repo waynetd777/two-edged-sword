@@ -245,6 +245,9 @@ the app run side by side (4 by default). It needs Pillow.
   corners back on, and retakes any shot that comes out blank.
 - Each scene is in `tools/screenshots/scenes.json`. `src/scene.ts` sets it up, and nothing is
   saved.
+- They run on the tutorials' demo home (below), as they go on the website: only the built-in
+  modules show, never your own library or e-Sword's, and none of your highlights, bookmarks or
+  plans. A scene can name only modules in `src-tauri/modules`.
 - The Ask, Worship, Songs for the chapter, Closing verse, Lyrics and Journal shots use fixtures in
   `tools/screenshots/`. No model or service is asked, and your journal stays private. The Lyrics
   shot is a public-domain hymn with the app's icon as its artwork.

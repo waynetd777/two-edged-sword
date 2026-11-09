@@ -24,7 +24,7 @@ Bible (or the whole New Testament). A list is used only when you have that trans
 
 ## Greek and Hebrew
 
-<a href="images/index.md#translations-and-manuscripts"><picture><source media="(prefers-color-scheme: dark)" srcset="images/interlinear-dark.png"><img alt="Luke 17 in Beza's Greek New Testament of 1598, word by word: each Greek word over its English and its Strong's number" src="images/interlinear-light.png"></picture></a>
+<a href="images/index.md#translations-and-manuscripts"><picture><source media="(prefers-color-scheme: dark)" srcset="images/interlinear-dark.png"><img alt="Luke 17 in the Byzantine Greek New Testament, word by word: each Greek word over its English and its Strong's number" src="images/interlinear-light.png"></picture></a>
 
 Word-by-word Bibles show each original word over its English and its Strong's number.
 

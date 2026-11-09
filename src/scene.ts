@@ -94,7 +94,12 @@ export function runScene(app: ReturnType<typeof useApp>, still: (s: Partial<Play
       const sc: Scene = JSON.parse(json);
       setReadOnly(true);
       installSceneClock();
-      if (sc.entries) setSceneJournal(sc.entries);
+      if (sc.entries) {
+        setSceneJournal(sc.entries);
+        // The journal reads them on its next check for changes, which a focus starts: don't wait the
+        // 3 seconds between checks, or a slow start opens the entry before they're there.
+        for (const ms of [300, 1000, 2000]) window.setTimeout(() => window.dispatchEvent(new Event("focus")), ms);
+      }
       if (sc.variances) setSceneVariances(sc.variances);
       if (sc.chapterSongs) setSceneChapterSongs(sc.chapterSongs);
       setSceneDevices(sc.syncDevices ?? []);
