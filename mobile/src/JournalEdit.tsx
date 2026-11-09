@@ -30,14 +30,20 @@ export const entryDate = (s: string) => {
   return isNaN(d.getTime()) ? s.slice(0, 10) : d.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
 };
 /** The first words of an entry's text, without Markdown's marks. */
-export const entryPeek = (e: Entry) =>
-  e.body
-    .replace(/<[^>]+>/g, "")
-    // Any < or > left over too (e.g. "<<b>>"): this is shown as text, but nothing tag-like should survive.
+export const entryPeek = (e: Entry) => {
+  // Tags out, again until none is left (removing one can join the pieces of another, as "<<b>b>"); then
+  // any stray < or > too. It's shown as text, but nothing tag-like should survive.
+  let s = e.body;
+  for (let prev = ""; prev !== s;) {
+    prev = s;
+    s = s.replace(/<[^>]*>/g, "");
+  }
+  return s
     .replace(/[#*_=<>`[\]]/g, "")
     .replace(/\s+/g, " ")
     .trim()
     .slice(0, 140);
+};
 
 /** The editor, over everything, while an entry is open. */
 export function JournalHost({ onGo }: { onGo: (r: Ref) => void }) {
