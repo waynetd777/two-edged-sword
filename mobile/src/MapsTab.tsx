@@ -115,7 +115,7 @@ export function MapsTab({
   onChanged: () => void;
   onGo: (r: Ref) => void;
   /** Full screen, with the rings. */
-  onOpen: (src: string, ring: Spot[]) => void;
+  onOpen: (src: string, ring: Spot[], spots: Spot[]) => void;
 }) {
   const books = modules.filter((m) => m.kind === "reference" && m.features.includes("Maps"));
   const [maps, setMaps] = useState<MapPage[] | null>(null);
@@ -179,9 +179,9 @@ export function MapsTab({
         </button>
       </div>
       {!ranked.length && !all && <p className="m">No map marks a place in {book(at.book).name}; here's the first.</p>}
-      <RingedMap page={page} ring={place ? [place] : here} onTap={() => onOpen(page.src, place ? [place] : here)} />
+      <RingedMap page={page} ring={place ? [place] : here} onTap={() => onOpen(page.src, place ? [place] : here, page.spots)} />
       <p className="m" style={{ margin: "6px 0 12px" }}>
-        Tap the map to zoom in.
+        Tap the map to zoom in, then tap a dot to see its verses.
       </p>
       <p className="label">{here.length ? `Places in ${fmtRef(at)}` : `No place on this map is in ${fmtRef(at)}`}</p>
       {here.length > 0 && (

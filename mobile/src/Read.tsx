@@ -232,7 +232,7 @@ export function Read({
   const [wideScene, setWideScene] = useState(false);
   /** A book open instead of the Bible. */
   const [doc, setDoc] = useState<{ module: string; chapter: string } | null>(() => saved("doc", null));
-  const [image, setImage] = useState<{ src: string; ring?: Spot[] } | null>(null);
+  const [image, setImage] = useState<{ src: string; ring?: Spot[]; spots?: Spot[] } | null>(null);
   const [docList, setDocList] = useState<string[]>([]);
   const [goBooks, setGoBooks] = useState(false);
   const bookMods = modules.filter((m) => m.kind === "reference" || m.kind === "devotional");
@@ -1070,7 +1070,7 @@ export function Read({
             verseText={(tokens.get(sel) ?? []).map((t) => t.text).join("")}
             modules={modules}
             onChanged={onModulesChanged}
-            onImage={(src, ring) => setImage({ src, ring })}
+            onImage={(src, ring, spots) => setImage({ src, ring, spots })}
             screen
             at={{ ...loc, verse: sel }}
             count={verses.length}
@@ -1088,7 +1088,7 @@ export function Read({
             verseText={(tokens.get(sel) ?? []).map((t) => t.text).join("")}
             modules={modules}
             onChanged={onModulesChanged}
-            onImage={(src, ring) => setImage({ src, ring })}
+            onImage={(src, ring, spots) => setImage({ src, ring, spots })}
             docked
             actions={
               <>
@@ -1171,7 +1171,19 @@ export function Read({
         />
       )}
 
-      {image && <ImageViewer src={image.src} ring={image.ring} onClose={() => setImage(null)} />}
+      {image && (
+        <ImageViewer
+          src={image.src}
+          ring={image.ring}
+          spots={image.spots}
+          onGo={(r) => {
+            setImage(null);
+            setStudy(false);
+            goTo(r);
+          }}
+          onClose={() => setImage(null)}
+        />
+      )}
       {editing && <CompareEdit bibles={bibles} ids={cmpIds} onChange={setCmpIds} onClose={() => setEditing(false)} />}
 
       {going && (

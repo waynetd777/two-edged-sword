@@ -23,7 +23,7 @@ Tap a word in a verse to choose the verse, then tap Study (the graduation cap) i
 | **Commentary** | One commentary at a time. Tap its name to choose another; those with notes on the verse come first |
 | **Cross-refs** | Related verses, from the Treasury of Scripture Knowledge or OpenBible.info. Tap **TSK** or **OpenBible** to switch, and a verse to go there |
 | **Dictionary** | The verse's words that have a dictionary entry, to tap; or look up any word or name. The pill names the dictionary you're reading; tap it to choose another (those with the entry first, starred ones first among them). **‹ Back** returns to the last entry |
-| **Maps** | Maps for the book. Tap a map to see it full screen |
+| **Maps** | Maps for the book. Tap a map to see it full screen, then tap a dot on a place to see the verses that name it |
 
 On an iPad held sideways the study pane stays open beside the text.
 

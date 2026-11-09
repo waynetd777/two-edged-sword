@@ -3,14 +3,31 @@
 
 import { invoke } from "@tauri-apps/api/core";
 import { TouchEvent, useEffect, useRef, useState } from "react";
+import { fmtRef, Ref } from "../../src/bible";
 import type { Spot } from "./MapsTab";
 
 const MAX = 8;
 
 /** A picture from a book (Larkin's charts), full screen: pinch to zoom, drag to move, double-tap to
  *  zoom in or back out. The page itself can't zoom (user-scalable=no), so this does it. */
-export function ImageViewer({ src, ring, onClose }: { src: string; ring?: Spot[]; onClose: () => void }) {
+export function ImageViewer({
+  src,
+  ring,
+  spots,
+  onGo,
+  onClose,
+}: {
+  src: string;
+  ring?: Spot[];
+  /** A map's places, each a dot to tap for a card of its verses (as the desktop's map). */
+  spots?: Spot[];
+  /** A verse on a place's card was tapped. */
+  onGo?: (r: Ref) => void;
+  onClose: () => void;
+}) {
   const [size, setSize] = useState<[number, number] | null>(null);
+  const [picked, setPicked] = useState<Spot | null>(null);
+  const img = useRef<HTMLImageElement>(null);
   const [t, setT] = useState({ s: 1, x: 0, y: 0 });
   const [anim, setAnim] = useState(false);
   // The phone stays upright, so a wide chart turns instead, to use the screen's height.
@@ -84,6 +101,7 @@ export function ImageViewer({ src, ring, onClose }: { src: string; ring?: Spot[]
       setT({ s: 1, x: 0, y: 0 });
     }
     if (s && !s.moved) {
+      if (spots?.length) setPicked(nearest(s.tx, s.ty));
       const now = Date.now();
       if (now - lastTap.current < 300) {
         lastTap.current = 0;
@@ -95,6 +113,32 @@ export function ImageViewer({ src, ring, onClose }: { src: string; ring?: Spot[]
         }
       } else lastTap.current = now;
     }
+  };
+
+  /** The place whose dot is nearest a tap, within a fingertip of it, or none. */
+  const nearest = (cx: number, cy: number): Spot | null => {
+    const el = img.current;
+    if (!el || !size || !spots) return null;
+    const b = el.getBoundingClientRect();
+    // Where the tap is on the picture, 0 to 1 each way. Turned a quarter clockwise, its top edge is on the right.
+    let u = (cx - b.left) / b.width;
+    let v = (cy - b.top) / b.height;
+    if (turned) [u, v] = [v, 1 - u];
+    const perPx = (turned ? b.height : b.width) / size[0];
+    let best: Spot | null = null;
+    let bestD = 26;
+    for (const p of spots) {
+      const d = Math.hypot(p.x - u * size[0], p.y - v * size[1]) * perPx;
+      if (d < bestD) [best, bestD] = [p, d];
+    }
+    return best;
+  };
+  // A dot's radius in the picture's pixels, so it stays the same size on screen however far it's zoomed.
+  const dotR = size && img.current?.clientWidth ? (4.5 * size[0]) / (img.current.clientWidth * t.s) : 0;
+  const stop = {
+    onTouchStart: (e: TouchEvent) => e.stopPropagation(),
+    onTouchMove: (e: TouchEvent) => e.stopPropagation(),
+    onTouchEnd: (e: TouchEvent) => e.stopPropagation(),
   };
 
   return (
@@ -110,12 +154,31 @@ export function ImageViewer({ src, ring, onClose }: { src: string; ring?: Spot[]
         className={["vpic", anim ? "anim" : "", turned ? "turned" : ""].join(" ")}
         style={{ transform: `translate(${t.x}px, ${t.y + down}px) scale(${t.s})${turned ? " rotate(90deg)" : ""}` }}
       >
-        <img src={src} alt="" draggable={false} onLoad={(e) => setSize([e.currentTarget.naturalWidth, e.currentTarget.naturalHeight])} />
+        <img
+          ref={img}
+          src={src}
+          alt=""
+          draggable={false}
+          onLoad={(e) => setSize([e.currentTarget.naturalWidth, e.currentTarget.naturalHeight])}
+        />
         {/* A map's places for the verse, ringed as in the study pane. */}
         {ring && size && ring.length > 0 && (
           <svg viewBox={`0 0 ${size[0]} ${size[1]}`} aria-hidden="true">
             {ring.map((s) => (
               <circle key={s.name + s.x} cx={s.x} cy={s.y} r={Math.max(s.r * 1.6, size[0] / 70)} />
+            ))}
+          </svg>
+        )}
+        {spots && size && dotR > 0 && (
+          <svg className="dots" viewBox={`0 0 ${size[0]} ${size[1]}`} aria-hidden="true">
+            {spots.map((p) => (
+              <circle
+                key={p.name + p.x + "," + p.y}
+                className={p === picked ? "on" : ""}
+                cx={p.x}
+                cy={p.y}
+                r={p === picked ? dotR * 1.8 : dotR}
+              />
             ))}
           </svg>
         )}
@@ -155,7 +218,34 @@ export function ImageViewer({ src, ring, onClose }: { src: string; ring?: Spot[]
       >
         ✕
       </button>
-      {t.s === 1 && !down && <p className="vhint">Pinch or double-tap to zoom · swipe down to close</p>}
+      {picked && (
+        <div className="place-card" {...stop}>
+          <button className="x" aria-label="Close the place" onClick={() => setPicked(null)}>
+            ✕
+          </button>
+          <p className="label">
+            {picked.name} · {picked.refs.length} {picked.refs.length === 1 ? "verse" : "verses"}
+          </p>
+          <div className="prose">
+            {picked.refs.slice(0, 80).map((r, i) => (
+              <span key={i}>
+                {i > 0 && " · "}
+                <a className="ref" onClick={() => onGo?.(r)}>
+                  {fmtRef(r, "short")}
+                </a>
+              </span>
+            ))}
+            {picked.refs.length > 80 && <span className="m"> and {picked.refs.length - 80} more</span>}
+          </div>
+        </div>
+      )}
+      {t.s === 1 && !down && !picked && (
+        <p className="vhint">
+          {spots?.length
+            ? "Tap a dot for its verses · pinch to zoom · swipe down to close"
+            : "Pinch or double-tap to zoom · swipe down to close"}
+        </p>
+      )}
     </div>
   );
 }

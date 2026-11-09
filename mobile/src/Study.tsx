@@ -65,7 +65,7 @@ export function Study({
   modules: Module[];
   /** The library changed (the maps were downloaded). */
   onChanged: () => void;
-  onImage: (src: string, ring: Spot[]) => void;
+  onImage: (src: string, ring: Spot[], spots: Spot[]) => void;
   /** More buttons for the verse beside the bookmark (docked: the highlighter and Compare). */
   actions?: ReactNode;
   /** Docked: what the buttons in the header open (the highlighter's colours), under them. */
