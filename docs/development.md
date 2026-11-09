@@ -627,6 +627,8 @@ reference, and images inline as `data:` URLs.
 
 **Things learnt the hard way**
 
+- The plugin's commands go through Rust (`plugins/tes-native/src/lib.rs`), which re-serialises their arguments: a field the page sends but `lib.rs` doesn't declare (as `lang` on a spoken item once was) is dropped silently before Swift or Kotlin sees it. A new command goes in `lib.rs` (and its `generate_handler!`), `build.rs` and `permissions/default.toml`.
+- Listen gives each spoken item a `lang` ("he", "el", "la"; `player.ts` `langOf`, from `src/spoken.ts` `scriptOf` and `isLatin`): iOS and Android pick that language's voice per item (Latin an Italian one; Syriac is turned into Hebrew letters by `speakable`). Android's engine takes its voice as each item is queued. `voice_for` asks whether there's one, for the once-only message (`App.tsx` `noVoice`); Android's Google voices list some as `notInstalled`, which `download` reports.
 - iOS keeps `Documents/Inbox` to itself: an app may only read and delete there. What's picked or opened goes to `tmp/<…>-Inbox`, which `import_waiting` checks.
 - A file being copied into the Inbox can be seen half-written: copy out of sight, then move it in.
 - The Simulator can't find the desktop over Bonjour (`PolicyDenied`; it borrows the Mac's permission): pair with `pairat=`.
