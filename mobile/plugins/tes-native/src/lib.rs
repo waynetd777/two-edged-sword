@@ -39,6 +39,9 @@ async fn allow_rotation<R: Runtime>(app: AppHandle<R>, allow: bool) -> Result<()
 struct Item {
     id: i64,
     text: String,
+    /// "he", "el" or "la" for a verse in Hebrew, Greek or Latin, read in that language's voice; none for English.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    lang: Option<String>,
 }
 
 #[derive(serde::Serialize)]
@@ -133,6 +136,33 @@ struct Say {
     pron: String,
 }
 
+#[derive(serde::Serialize)]
+struct Lang {
+    lang: String,
+}
+
+/// Whether the phone has a voice for "he", "el" or "la" (Italian): { has, download }, download being
+/// that one is listed but not yet downloaded (Android).
+#[command]
+async fn voice_for<R: Runtime>(app: AppHandle<R>, lang: String) -> Result<serde_json::Value, String> {
+    #[cfg(mobile)]
+    {
+        use tauri::Manager;
+        return app.state::<Native<R>>().0.run_mobile_plugin::<serde_json::Value>("voiceFor", Lang { lang }).map_err(|e| e.to_string());
+    }
+    #[cfg(not(mobile))]
+    {
+        let _ = (app, Lang { lang });
+        Ok(serde_json::json!({ "has": true, "download": false }))
+    }
+}
+
+/// Android: the phone's text-to-speech settings, to add a voice.
+#[command]
+async fn speech_settings<R: Runtime>(app: AppHandle<R>) -> Result<(), String> {
+    native(&app, "speechSettings", ())
+}
+
 /// Says one original-language word, apart from Listen (which carries on).
 #[command]
 async fn say<R: Runtime>(app: AppHandle<R>, word: String, lang: String, pron: String) -> Result<(), String> {
@@ -210,6 +240,8 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
     Builder::new("tes-native")
         .invoke_handler(tauri::generate_handler![
             allow_rotation,
+            voice_for,
+            speech_settings,
             speak,
             speech_pause,
             speech_resume,

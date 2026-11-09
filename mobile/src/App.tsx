@@ -18,6 +18,15 @@ import { DictionarySheet } from "./Dictionary";
 import { syncReminders } from "./Reminder";
 import { plansStore } from "./plansStore";
 import { history, Tab } from "./history";
+import { MissingVoice, onMissingVoice } from "./player";
+
+/** The voice each language is read in, and what it reads, for the message when the phone has none. */
+const VOICE: Record<string, { voice: string; what: string }> = {
+  el: { voice: "Greek", what: "Greek" },
+  he: { voice: "Hebrew", what: "Hebrew and Syriac" },
+  la: { voice: "Italian", what: "Latin" },
+};
+const ANDROID = /Android/.test(navigator.userAgent);
 
 const TABS: { id: Exclude<Tab, "words">; label: string }[] = [
   { id: "read", label: "Read" },
@@ -73,6 +82,9 @@ export function App() {
     msgTimer.current = window.setTimeout(() => setMsg(null), 3000);
   };
   const toldFailed = useRef(new Set<string>()).current;
+  /** A language Listen read in English for want of a voice: said once (player.ts checkVoices). */
+  const [noVoice, setNoVoice] = useState<MissingVoice | null>(null);
+  useEffect(() => onMissingVoice(setNoVoice), []);
   /** Modules AirDropped, opened from Files, dragged in with Finder or (Android) opened in the app: taken
    *  into the library (lib.rs import_waiting). One at a time: the Library opening, the app coming forward
    *  and the picker closing can all ask at once, and would race for the same files; one asked for while
@@ -282,6 +294,38 @@ export function App() {
         />
       )}
       <JournalHost onGo={(r) => open({ ref: r })} />
+      {noVoice && (
+        <div className="adding" role="alertdialog" aria-label="No voice for this language">
+          <span className="tick bad" aria-hidden>
+            !
+          </span>
+          <span>
+            This {/iPad/.test(navigator.userAgent) ? "iPad" : "phone"} has no {VOICE[noVoice.lang]?.voice} voice, so{" "}
+            {VOICE[noVoice.lang]?.what} is read in English.
+          </span>
+          <span className="m">
+            {ANDROID
+              ? `${noVoice.download ? "One can be downloaded" : "Add one"} in Settings › Text-to-speech output › Google › Install voice data.`
+              : "Add one in Settings › Accessibility › Spoken Content › Voices."}
+          </span>
+          <div className="btns">
+            {ANDROID && (
+              <button
+                className="primary"
+                onClick={() => {
+                  setNoVoice(null);
+                  invoke("plugin:tes-native|speech_settings").catch(() => {});
+                }}
+              >
+                Open settings
+              </button>
+            )}
+            <button className={ANDROID ? "" : "primary"} onClick={() => setNoVoice(null)}>
+              OK
+            </button>
+          </div>
+        </div>
+      )}
       {msg && (
         <div className="adding" role="status" onClick={() => !msg.busy && setMsg(null)}>
           {msg.busy ? (

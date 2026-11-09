@@ -130,7 +130,9 @@ On a Mac the app uses the voices installed on it. The **Premium** ones sound far
 3. Choose it in the player's voice menu or in Settings › Listening.
 
 Hebrew, Greek and Latin Bibles are read in a Hebrew, Greek or Italian voice. Better ones download
-the same way.
+the same way. The Syriac Peshitta is read in the Hebrew voice, as no computer has a Syriac one: its letters
+match Hebrew's one for one.
+If the computer has no voice for one of them, it's read in your English voice, and the app says so the first time.
 <!-- /mac -->
 
 <!-- windows -->
@@ -148,7 +150,8 @@ On Windows the app uses Windows' voices. To add more, including Hebrew, Greek an
 
 3. Restart the app, then choose them in Settings › Listening.
 
-Windows' "natural" voices are only for Narrator, so the app can't use them.
+Windows' "natural" voices are only for Narrator, so the app can't use them. The Syriac Peshitta is read in the
+Hebrew voice. A language with no voice is read in your English voice, and the app says so the first time.
 <!-- /windows -->
 
 The speaker beside a Hebrew or Greek word uses the voice chosen for that language in Settings › Listening.

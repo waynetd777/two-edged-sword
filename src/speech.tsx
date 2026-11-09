@@ -6,7 +6,7 @@
 // drive the highlight in the text; at the end of a chapter it carries on into the next one when
 // Settings says so.
 
-import { createContext, ReactNode, useCallback, useContext, useEffect, useRef, useState } from "react";
+import { createContext, ReactNode, useCallback, useContext, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { listen } from "@tauri-apps/api/event";
 import { api, TtsEvent, Verse, Voice } from "./api";
 import { useKeepAwake } from "./awake";
@@ -17,7 +17,8 @@ import { mdToHtml } from "./md";
 import { bibleSizes } from "./sizes";
 import { useApp } from "./state";
 import { Icon } from "./icons";
-import { cmdKey } from "./keys";
+import { Dialog } from "./ui";
+import { cmdKey, isMac } from "./keys";
 import { isLatin, scriptOf, speakable, speechText, spokenChapter, voicesFor } from "./spoken";
 export { voicesFor } from "./spoken";
 
@@ -126,6 +127,72 @@ const IDLE: PlayerState = {
   doc: null,
 };
 
+/** A language Listen is reading in the reading voice for want of its own (NoVoiceHost says so, once
+ *  per language on this computer), or null. */
+let noVoice: "he" | "el" | "la" | null = null;
+const noVoiceSubs = new Set<() => void>();
+const TOLD = "tes.voiceTold";
+function sayNoVoice(lang: "he" | "el" | "la") {
+  let told: string[] = [];
+  try {
+    told = JSON.parse(localStorage.getItem(TOLD) ?? "[]");
+  } catch {
+    /* none told, or no storage */
+  }
+  if (told.includes(lang) || noVoice === lang) return;
+  try {
+    localStorage.setItem(TOLD, JSON.stringify([...told, lang]));
+  } catch {
+    /* said again next time */
+  }
+  noVoice = lang;
+  noVoiceSubs.forEach((f) => f());
+}
+
+const NO_VOICE = { he: ["Hebrew", "Hebrew and Syriac"], el: ["Greek", "Greek"], la: ["Italian", "Latin"] } as const;
+
+/** Says, once, that a language is being read in the reading voice as the computer has none of its
+ *  own, and where to add one. Rendered once, in App. */
+export function NoVoiceHost() {
+  const lang = useSyncExternalStore(
+    (f) => {
+      noVoiceSubs.add(f);
+      return () => noVoiceSubs.delete(f);
+    },
+    () => noVoice,
+  );
+  if (!lang) return null;
+  const close = () => {
+    noVoice = null;
+    noVoiceSubs.forEach((f) => f());
+  };
+  const [voice, what] = NO_VOICE[lang];
+  return (
+    <Dialog onClose={close} width={420} label={`No ${voice} voice`}>
+      <div className="confirm">
+        <span className="confirm-icon" aria-hidden>
+          <Icon name="speaker" />
+        </span>
+        <div>
+          <div className="confirm-title">
+            This computer has no {voice} voice, so {what} is read in your English voice.
+          </div>
+          <div className="confirm-detail">
+            {isMac
+              ? `Add one in System Settings › Accessibility › Spoken Content › System Voice › Manage Voices, then choose it in Settings › Listening.`
+              : `Add one in Windows Settings › Time & language › Speech › Add voices, then choose it in Settings › Listening.`}
+          </div>
+        </div>
+      </div>
+      <div className="foot">
+        <button className="btn primary" type="button" style={{ marginLeft: "auto" }} onClick={close} autoFocus>
+          OK
+        </button>
+      </div>
+    </Dialog>
+  );
+}
+
 export function PlayerProvider({ children }: { children: ReactNode }) {
   const app = useApp();
   const [state, setState] = useState<PlayerState>(IDLE);
@@ -194,6 +261,8 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       const lang = latin ? "la" : scriptOf(text);
       const v = lang && langVoice(lang);
       if (v) return v;
+      // None for it (once the voices are known): said, once, rather than seeming to be a fault.
+      if (lang && text && voicesRef.current.length) sayNoVoice(lang);
       const all = voicesRef.current.filter((v) => v.lang.startsWith("en")),
         want = settings.current.voice;
       return (

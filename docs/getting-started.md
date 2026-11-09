@@ -289,7 +289,7 @@ The Premium voices sound far more natural:
 2. Under English, download a voice marked (Premium), such as Zoe or Ava (US), or Jamie (UK).
 3. Choose it in the player's voice menu or in Settings › Listening.
 
-Hebrew, Greek and Latin Bibles use a Hebrew, Greek or Italian voice; better ones download the same way.
+Hebrew, Greek and Latin Bibles use a Hebrew, Greek or Italian voice (Syriac the Hebrew one); better ones download the same way.
 <!-- /mac -->
 <!-- windows -->
 1. Open Windows Settings › Time & language › Speech, and click **Add voices**.

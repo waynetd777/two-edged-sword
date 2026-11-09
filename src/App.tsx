@@ -20,7 +20,7 @@ import { LyricsPage } from "./LyricsPage";
 import { StrongsHover } from "./WordLookup";
 import { QuietTime, useWorshipAhead } from "./QuietTime";
 import { SCREEN_KEYS, Sidebar } from "./Shell";
-import { PlayerProvider, usePlayer } from "./speech";
+import { NoVoiceHost, PlayerProvider, usePlayer } from "./speech";
 import { runScene } from "./scene";
 import { AppProvider, useApp } from "./state";
 import { useKeepAwake } from "./awake";
@@ -194,6 +194,7 @@ function Screens() {
       <QuietTime focus={focus && screen === "read"} />
       <UpdateDialog />
       <ConfirmHost />
+      <NoVoiceHost />
       <WelcomeDialog />
       <WindowControls />
     </div>

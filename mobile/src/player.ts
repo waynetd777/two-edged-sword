@@ -8,7 +8,7 @@
 import { addPluginListener, invoke } from "@tauri-apps/api/core";
 import { useSyncExternalStore } from "react";
 import { fmtRef, stepChapter } from "../../src/bible";
-import { speakable, speechText, spokenChapter } from "../../src/spoken";
+import { isLatin, scriptOf, speakable, speechText, spokenChapter } from "../../src/spoken";
 import { plainText } from "../../src/esword";
 import { bookTitles, docHtml, docParas, isDevotional } from "./DocView";
 import { api, save, saved, Verse } from "./api";
@@ -52,20 +52,64 @@ const pageAt = new Map<number, number[]>();
 
 const call = (cmd: string, args: Record<string, unknown> = {}) => invoke(`plugin:tes-native|${cmd}`, args);
 
+/** Whether a Bible is a Latin one (told by its name, as Latin looks like any text), asked once each. */
+const latin = new Map<string, Promise<boolean>>();
+const isLatinBible = (bible: string) => {
+  if (!latin.has(bible))
+    latin.set(
+      bible,
+      api
+        .modules()
+        .then((ms) => isLatin(ms.find((m) => m.id === bible)))
+        .catch(() => false),
+    );
+  return latin.get(bible)!;
+};
+/** The language a verse is read in, as the desktop reads it (speech.tsx): Hebrew or Greek by its letters,
+ *  Latin by the Bible's name; none (the English voice) otherwise. The phone uses its best voice for it,
+ *  or the English one when it has none. */
+const langOf = (text: string, la: boolean) => (la ? "la" : (scriptOf(text) ?? undefined));
+
+/** A language the phone has no voice for, said once (see App's message), and whether one is there to download. */
+export interface MissingVoice {
+  lang: string;
+  download: boolean;
+}
+const missingWatchers = new Set<(m: MissingVoice) => void>();
+export const onMissingVoice = (f: (m: MissingVoice) => void) => {
+  missingWatchers.add(f);
+  return () => {
+    missingWatchers.delete(f);
+  };
+};
+/** The languages being read that the phone has no voice for, each said once on this phone: read in
+ *  English, which sounds like a fault unless it's said why. */
+async function checkVoices(items: { lang?: string }[]) {
+  const told = saved<string[]>("voiceTold", []);
+  for (const lang of new Set(items.map((i) => i.lang).filter((l): l is string => !!l && !told.includes(l)))) {
+    const r = (await call("voice_for", { lang }).catch(() => null)) as { has: boolean; download: boolean } | null;
+    if (!r || r.has) continue;
+    save("voiceTold", [...saved<string[]>("voiceTold", []), lang]);
+    missingWatchers.forEach((f) => f({ lang, download: r.download }));
+  }
+}
+
 async function speakFrom(bible: string, book: number, chapter: number, verse: number, verses?: Verse[]) {
   const vs = verses ?? (await api.chapter(bible, book, chapter));
   // As the desktop reads (spoken.ts): the chapter announced, then each verse with its references said in
   // full and the words the voice gets wrong respelled.
   pageAt.clear();
+  const la = await isLatinBible(bible);
   const verseItems = vs
     .filter((v) => v.v >= verse)
     .map((v) => {
       const { spoken, at } = speakable(speechText(v.text));
       pageAt.set(v.v, at);
-      return { id: v.v, text: spoken };
+      return { id: v.v, text: spoken, lang: langOf(spoken, la) };
     });
   if (!verseItems.length) return stop();
   const items = [{ id: 0, text: spokenChapter(book, chapter, verse) }, ...verseItems];
+  void checkVoices(verseItems);
   set({ on: true, paused: false, doc: undefined, bible, book, chapter, verse, at: -1, len: 0, error: undefined });
   await call("speak", {
     items,
@@ -95,7 +139,8 @@ let plan: { stretches: PlanStretch[]; onPart: (part: number) => void; part: numb
 /** The whole day's reading handed to iOS at once, so it reads all of it with the screen locked. */
 async function speakPlan(bible: string, stretches: PlanStretch[], onPart: (part: number) => void, title: string) {
   pageAt.clear();
-  const items: { id: number; text: string }[] = [];
+  const la = await isLatinBible(bible);
+  const items: { id: number; text: string; lang?: string }[] = [];
   for (let i = 0; i < stretches.length; i++) {
     const x = stretches[i];
     const vs = await api.chapter(bible, x.book, x.chapter).catch(() => [] as Verse[]);
@@ -104,10 +149,11 @@ async function speakPlan(bible: string, stretches: PlanStretch[], onPart: (part:
     for (const v of vs.filter((v) => v.v >= x.from && (!x.to || v.v <= x.to))) {
       const { spoken, at } = speakable(speechText(v.text));
       pageAt.set(base + v.v, at);
-      items.push({ id: base + v.v, text: spoken });
+      items.push({ id: base + v.v, text: spoken, lang: langOf(spoken, la) });
     }
   }
   if (items.length <= 1) return stop();
+  void checkVoices(items);
   plan = { stretches, onPart, part: stretches[0].part };
   const f = stretches[0];
   set({

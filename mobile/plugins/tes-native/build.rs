@@ -14,6 +14,8 @@ const COMMANDS: &[&str] = &[
     "pick_modules",
     "discover",
     "say",
+    "voice_for",
+    "speech_settings",
     "tap",
     // addPluginListener in the app goes through these (the "speech" events).
     "register_listener",

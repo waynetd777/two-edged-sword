@@ -16,6 +16,8 @@ Everything the phone app uses
 - `allow-pick-modules`
 - `allow-discover`
 - `allow-say`
+- `allow-voice-for`
+- `allow-speech-settings`
 - `allow-tap`
 - `allow-register-listener`
 - `allow-remove-listener`
@@ -318,6 +320,32 @@ Denies the speech_resume command without any pre-configured scope.
 <tr>
 <td>
 
+`tes-native:allow-speech-settings`
+
+</td>
+<td>
+
+Enables the speech_settings command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`tes-native:deny-speech-settings`
+
+</td>
+<td>
+
+Denies the speech_settings command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
 `tes-native:allow-speech-sleep`
 
 </td>
@@ -389,6 +417,32 @@ Enables the tap command without any pre-configured scope.
 <td>
 
 Denies the tap command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`tes-native:allow-voice-for`
+
+</td>
+<td>
+
+Enables the voice_for command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`tes-native:deny-voice-for`
+
+</td>
+<td>
+
+Denies the voice_for command without any pre-configured scope.
 
 </td>
 </tr>

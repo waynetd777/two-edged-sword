@@ -24,6 +24,13 @@ class SayArgs: Decodable {
 class SpeakItem: Decodable {
   let id: Int
   let text: String
+  /// "he", "el" or "la" for a verse in Hebrew, Greek or Latin: read in that language's voice when the
+  /// phone has one. None: the English voice.
+  let lang: String?
+}
+
+class LangArgs: Decodable {
+  let lang: String
 }
 
 class SpeakArgs: Decodable {
@@ -179,9 +186,15 @@ class TesNativePlugin: Plugin, AVSpeechSynthesizerDelegate {
       self.synth.stopSpeaking(at: .immediate)
       let v = args.voice.flatMap { AVSpeechSynthesisVoice(identifier: $0) } ?? self.voice()
       let rate = Float(max(0.5, min(2.0, args.rate))) * AVSpeechUtteranceDefaultSpeechRate
+      var others: [String: AVSpeechSynthesisVoice?] = [:]
       for item in args.items {
         let u = AVSpeechUtterance(string: item.text)
-        u.voice = v
+        if let lang = item.lang {
+          if others[lang] == nil { others[lang] = .some(self.voice(for: lang)) }
+          u.voice = others[lang]! ?? v
+        } else {
+          u.voice = v
+        }
         u.rate = max(AVSpeechUtteranceMinimumSpeechRate, min(AVSpeechUtteranceMaximumSpeechRate, rate))
         u.postUtteranceDelay = 0.15
         self.ids[ObjectIdentifier(u)] = item.id
@@ -522,6 +535,33 @@ extension TesNativePlugin {
       if self.synth.isPaused { self.resumeHere() } else { self.pauseHere() }
       return .success
     }
+  }
+}
+
+extension TesNativePlugin {
+  /// The best voice for Hebrew, Greek or Latin, or nil when the phone has none. Latin has no voice of its
+  /// own: an Italian one says Church Latin as it's said (as the desktop does).
+  func voice(for lang: String) -> AVSpeechSynthesisVoice? {
+    let code = lang == "la" ? "it" : lang
+    func q(_ v: AVSpeechSynthesisVoice) -> Int {
+      switch v.quality {
+      case .premium: return 3
+      case .enhanced: return 2
+      default: return 1
+      }
+    }
+    return AVSpeechSynthesisVoice.speechVoices().filter { $0.language.hasPrefix(code) }.max { q($0) < q($1) }
+  }
+
+  /// Whether there's a voice for Hebrew, Greek or Latin (Italian). iOS lists only the voices it has.
+  @objc public func voiceFor(_ invoke: Invoke) throws {
+    let args = try invoke.parseArgs(LangArgs.self)
+    invoke.resolve(["has": voice(for: args.lang) != nil, "download": false])
+  }
+
+  /// Android's alone: iOS has no way to open its voice settings from an app.
+  @objc public func speechSettings(_ invoke: Invoke) {
+    invoke.resolve()
   }
 }
 

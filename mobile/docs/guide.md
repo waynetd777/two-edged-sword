@@ -47,6 +47,7 @@ On an iPad held sideways the study pane stays open beside the text.
 <!-- /android -->
 - The sleep timer stops it even with the screen locked.
 - **Voice**: choose it under More › Settings.
+- A Greek or Hebrew Bible is read in a Greek or Hebrew voice, the Syriac Peshitta in the Hebrew one (no phone has a Syriac voice), and a Latin one in an Italian voice, when the phone has one (add one in the phone's own settings, under its spoken content or text-to-speech voices). Without one, it's read in your English voice, and the app says so the first time, with where to add one.
 - In Compare, Listen reads the Bible you're reading. Compare follows the verse being read and marks the word in that Bible's card; ‹ › or a swipe moves the reading to another verse.
 
 ## Bookmarks

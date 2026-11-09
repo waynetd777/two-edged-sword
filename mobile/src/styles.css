@@ -598,6 +598,16 @@ button {
   text-align: center;
   max-width: calc(100vw - 64px);
 }
+/* The message when the phone has no voice for a language: what to do, and its buttons. */
+.adding .m {
+  font-size: 14px;
+  color: var(--muted);
+}
+.adding .btns {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
 .adding .tick {
   width: 32px;
   height: 32px;

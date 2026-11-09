@@ -216,6 +216,8 @@ export function Read({
   const [study, setStudy] = useState(false);
   const [choosing, setChoosing] = useState(false);
   const [sizes, setSizes] = useState<BookSizes | null>(null);
+  const locNow = useRef(loc);
+  locNow.current = loc;
   const libKey = useLibraryKey();
   const [counts, setCounts] = useState<Map<string, number>>(new Map());
   const [going, setGoing] = useState(false);
@@ -438,6 +440,12 @@ export function Read({
         }
         setSizes(m);
         setCounts(n);
+        // A Bible without this book (an Old or New Testament alone): open it where it starts, in place
+        // of an empty chapter, without a step back to it (as the desktop does).
+        if (m.size && !m.has(locNow.current.book)) {
+          setLoc({ book: Math.min(...m.keys()), chapter: 1 });
+          setSel(1);
+        }
       })
       .catch(() => live && setSizes(null));
     return () => {

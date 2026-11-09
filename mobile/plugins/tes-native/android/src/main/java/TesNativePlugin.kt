@@ -20,6 +20,7 @@ import android.provider.OpenableColumns
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
 import android.speech.tts.Voice
+import android.util.Log
 import android.view.HapticFeedbackConstants
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
@@ -54,6 +55,15 @@ class SayArgs {
 class SpeakItem {
   var id: Int = 0
   var text: String = ""
+
+  /** "he", "el" or "la" for a verse in Hebrew, Greek or Latin: read in that language's voice when the
+   *  phone has one. None: the English voice. */
+  var lang: String? = null
+}
+
+@InvokeArg
+class LangArgs {
+  var lang: String = ""
 }
 
 @InvokeArg
@@ -517,14 +527,48 @@ class TesNativePlugin(private val activity: Activity) : Plugin(activity) {
     return all.maxByOrNull { it.quality * 2 + if (it.locale.country == mine.country) 1 else 0 }
   }
 
+  /** The best voice for Hebrew, Greek or Latin, or null: one on the phone, else one of Google's online
+   *  voices (often all a phone has for Greek until its voice is downloaded). Latin has no voice of its
+   *  own: an Italian one says Church Latin as it's said (as the desktop does). */
+  private fun voiceFor(t: TextToSpeech, lang: String): Voice? {
+    val any = voicesIn(t, lang)
+    val all = any.filter { !it.features.contains("notInstalled") }
+    val v = all.filter { !it.isNetworkConnectionRequired }.maxByOrNull { it.quality } ?: all.maxByOrNull { it.quality }
+    Log.i("tes-native", "voice for $lang: ${v?.name ?: "none"} (${all.size} usable, ${any.size - all.size} not downloaded)")
+    return v
+  }
+
+  /** Every voice listed for Hebrew, Greek or Latin (Italian), downloaded or not. */
+  private fun voicesIn(t: TextToSpeech, lang: String): List<Voice> {
+    val code =
+      when (lang) {
+        "la" -> "it"
+        "he" -> "iw"
+        else -> lang
+      }
+    // Hebrew is "iw" to older Android, "he" to newer.
+    return t.voices?.filter { it.locale.language == code || it.locale.language == lang } ?: listOf()
+  }
+
+  /** A voice for the language is listed, to download. */
+  private fun voiceListed(t: TextToSpeech, lang: String) = voicesIn(t, lang).any { it.features.contains("notInstalled") }
+
   private fun speakFrom(i: Int) {
     listen.use { t ->
       if (t == null) return@use
       t.stop()
-      voiceFor(t)?.let { t.voice = it }
+      val english = voiceFor(t)
+      val others = mutableMapOf<String, Voice?>()
+      val voiceOf = { l: String ->
+        if (!others.containsKey(l)) others[l] = voiceFor(t, l)
+        others[l]
+      }
       t.setSpeechRate(rate.toFloat())
       for (k in i until queue.size) {
         val item = queue[k]
+        // The voice is taken as each verse is queued, so a verse in Greek, say, gets the Greek one.
+        val v = item.lang?.let(voiceOf) ?: english
+        v?.let { t.voice = it }
         t.speak(item.text, TextToSpeech.QUEUE_ADD, Bundle(), item.id.toString())
       }
     }
@@ -642,6 +686,30 @@ class TesNativePlugin(private val activity: Activity) : Plugin(activity) {
 
   /** The word engine started now, so the first tap on a speaker isn't kept waiting for it. */
   private fun wordEngine(then: (TextToSpeech?) -> Unit) = word.use(then)
+
+  /** Whether there's a voice for Hebrew, Greek or Latin (Italian): `has`, and `download` when one is
+   *  listed but not yet downloaded. */
+  @Command
+  fun voiceFor(invoke: Invoke) {
+    val lang = invoke.parseArgs(LangArgs::class.java).lang
+    listen.use { t ->
+      val r = JSObject()
+      r.put("has", t == null || voiceFor(t, lang) != null)
+      r.put("download", t != null && voiceListed(t, lang))
+      invoke.resolve(r)
+    }
+  }
+
+  /** The phone's text-to-speech settings, where a voice is added. */
+  @Command
+  fun speechSettings(invoke: Invoke) {
+    try {
+      activity.startActivity(Intent("com.android.settings.TTS_SETTINGS").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+    } catch (e: Exception) {
+      activity.startActivity(Intent(android.provider.Settings.ACTION_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+    }
+    invoke.resolve()
+  }
 
   /** In a Hebrew or Greek voice when the phone has one, otherwise the pronunciation in an English voice,
    *  as the desktop's SayButton does. */

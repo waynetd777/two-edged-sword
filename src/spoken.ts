@@ -54,9 +54,10 @@ export const voicesFor = (all: Voice[], lang: "he" | "el" | "la") =>
 /** A Latin Bible: the Vulgates (Latin, Latin+, Vulg-C, Vulg-C+). */
 export const isLatin = (m?: { title: string; abbrev: string }) => !!m && /\b(latin|vulg)/i.test(`${m.title} ${m.abbrev}`);
 
-/** "he" for a text mostly in Hebrew letters, "el" for Greek, else null. */
+/** "he" for a text mostly in Hebrew letters (or Syriac's, which are read as Hebrew: speakable), "el" for
+ *  Greek, else null. */
 export function scriptOf(text: string): "he" | "el" | null {
-  const he = (text.match(/[\u0590-\u05FF]/g) ?? []).length,
+  const he = (text.match(/[\u0590-\u05FF\u0710-\u072F]/g) ?? []).length,
     el = (text.match(/[\u0370-\u03FF\u1F00-\u1FFF]/g) ?? []).length;
   const en = (text.match(/[A-Za-z]/g) ?? []).length;
   if (he > en && he >= el) return "he";
@@ -151,5 +152,59 @@ export function speakable(text: string): { spoken: string; at: number[] } {
     last = h.index + h.length;
   }
   copy(t.length);
-  return { spoken, at };
+  return SYRIAC.test(spoken) ? asHebrew(spoken, at) : { spoken, at };
+}
+
+const SYRIAC = /[\u0710-\u072F]/;
+/** Syriac's letters, ܐ to ܬ, and the Hebrew letter each one is (the two alphabets match one for one). */
+const SYRIAC_LETTERS: Record<string, string> = {
+  "\u0710": "א",
+  "\u0712": "ב",
+  "\u0713": "ג",
+  "\u0714": "ג",
+  "\u0715": "ד",
+  "\u0716": "ד",
+  "\u0717": "ה",
+  "\u0718": "ו",
+  "\u0719": "ז",
+  "\u071A": "ח",
+  "\u071B": "ט",
+  "\u071C": "ט",
+  "\u071D": "י",
+  "\u071E": "י",
+  "\u071F": "כ",
+  "\u0720": "ל",
+  "\u0721": "מ",
+  "\u0722": "נ",
+  "\u0723": "ס",
+  "\u0724": "ס",
+  "\u0725": "ע",
+  "\u0726": "פ",
+  "\u0727": "פ",
+  "\u0728": "צ",
+  "\u0729": "ק",
+  "\u072A": "ר",
+  "\u072B": "ש",
+  "\u072C": "ת",
+};
+/** Hebrew's final forms, which its voice expects at the end of a word. */
+const FINAL: Record<string, string> = { כ: "ך", מ: "ם", נ: "ן", פ: "ף", צ: "ץ" };
+
+/**
+ * Syriac in Hebrew letters, for the Hebrew voice: no computer or phone has a Syriac one, and the
+ * English voice says nothing at all for it. Its vowel marks are left out and its punctuation is a
+ * full stop; `at` is kept in step, so the word being read is still marked.
+ */
+function asHebrew(text: string, at: number[]): { spoken: string; at: number[] } {
+  let spoken = "";
+  const out: number[] = [];
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    const he = SYRIAC_LETTERS[c] ?? (c >= "\u0700" && c <= "\u070D" ? "." : c >= "\u0700" && c <= "\u074F" ? "" : c);
+    if (!he) continue;
+    spoken += he;
+    out.push(at[i]);
+  }
+  spoken = spoken.replace(/[כמנפצ](?![\u05D0-\u05EA])/g, (c) => FINAL[c]);
+  return { spoken, at: out };
 }

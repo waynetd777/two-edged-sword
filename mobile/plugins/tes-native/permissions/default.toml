@@ -13,6 +13,8 @@ permissions = [
   "allow-pick-modules",
   "allow-discover",
   "allow-say",
+  "allow-voice-for",
+  "allow-speech-settings",
   "allow-tap",
   "allow-register-listener",
   "allow-remove-listener",
