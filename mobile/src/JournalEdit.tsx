@@ -33,7 +33,8 @@ export const entryDate = (s: string) => {
 export const entryPeek = (e: Entry) =>
   e.body
     .replace(/<[^>]+>/g, "")
-    .replace(/[#*_=>`[\]]/g, "")
+    // Any < or > left over too (e.g. "<<b>>"): this is shown as text, but nothing tag-like should survive.
+    .replace(/[#*_=<>`[\]]/g, "")
     .replace(/\s+/g, " ")
     .trim()
     .slice(0, 140);
