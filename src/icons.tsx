@@ -42,7 +42,8 @@ const P: Record<string, string> = {
   moon: "M13 9.5A5.5 5.5 0 1 1 6.5 3a4.5 4.5 0 0 0 6.5 6.5z",
   prev: "M4 3.5v9M12.5 3.5L6.5 8l6 4.5z",
   next: "M12 3.5v9M3.5 3.5l6 4.5-6 4.5z",
-  highlight: "M4.5 11.5l6-6 2 2-6 6h-2zM2 14.5h5",
+  // The pen alone: buttons draw the bar of colour beneath it, as the phone app does.
+  highlight: "M4.5 11.5l6-6 2 2-6 6h-2z",
   list: "M6 4h8M6 8h8M6 12h8M2.5 4h.5M2.5 8h.5M2.5 12h.5",
   olist: "M6.5 4h7.5M6.5 8h7.5M6.5 12h7.5M2.5 3l1-.5V6",
   quote: "M3 9.5h3v3.5H3zM3 9.5C3 6 4.5 4.5 6 4M9.5 9.5h3v3.5h-3zM9.5 9.5c0-3.5 1.5-5 3-5.5",

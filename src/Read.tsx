@@ -1083,8 +1083,10 @@ export function HighlightsButton() {
       aria-pressed={on}
       title={on ? "Hide highlights" : "Show highlights"}
       onClick={() => app.set({ showHighlights: !on })}
+      style={{ flexDirection: "column", gap: 1 }}
     >
       <Icon name="highlight" />
+      <span style={{ width: 14, height: 3, borderRadius: 2, background: "currentColor" }} />
     </button>
   );
 }
