@@ -13,7 +13,7 @@
 Read shows the chapter beside a study pane, which follows the verse you select.
 
 The screensaver and lock don't come on while the app's window is in front showing [Read](app:read) or
-[Compare](app:compare), at any time during Quiet time, or while anything is being read aloud.
+[Compare](app:compare), at any time during Quiet time, or while anything is being read aloud. On Read and Compare this stops after 10 minutes without using the mouse or keyboard.
 
 ### The study pane
 

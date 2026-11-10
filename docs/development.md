@@ -562,7 +562,7 @@ reference, and images inline as `data:` URLs.
 | `src/ReaderTools.tsx`, `src/ReadingColumn.tsx` | Pieces shared by Read, the book reader, Lyrics, the web devotional and Journal: highlight dots, copy, focus-mode hints and the top bar |
 | `src/lexicon.ts` | Cached lexicon and concordance lookups for Word Study and the word popover |
 | `src/speech.tsx` | Reading aloud: word highlighting, sleep timer |
-| `src/awake.ts`, `keep_awake` in `lib.rs` | Keeping the screen awake (with `caffeinate`) while reading aloud, in Quiet time, or while Read or Compare is in front |
+| `src/awake.ts`, `keep_awake` in `lib.rs` | Keeping the screen awake (with `caffeinate`) while reading aloud, in Quiet time, or while Read or Compare is in front and used in the last 10 minutes |
 | `src/Ask.tsx`, `src/assistant.ts` | The Ask panels, and which AI tools and models are available |
 | `src-tauri/src/library.rs`, `content.rs` | Finding modules and reading text out of them |
 | `src-tauri/src/search.rs`, `index.rs` | Search and its index |

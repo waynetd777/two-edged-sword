@@ -49,7 +49,27 @@ function Screens() {
     };
   }, []);
   useKeepAwake("Quiet time", !!app.session);
-  useKeepAwake("reading", front && (app.screen === "read" || app.screen === "compare"));
+  // On Read and Compare, only until ten minutes pass with no mouse, keys or scrolling, so a window
+  // left in front overnight lets the Mac sleep. Reading aloud keeps it awake on its own (speech.tsx).
+  const [idle, setIdle] = useState(false);
+  useEffect(() => {
+    let t = 0;
+    const poke = () => {
+      setIdle(false);
+      window.clearTimeout(t);
+      t = window.setTimeout(() => setIdle(true), 10 * 60_000);
+    };
+    const evs = ["pointermove", "pointerdown", "keydown", "wheel", "touchstart"];
+    evs.forEach((e) => window.addEventListener(e, poke, { capture: true, passive: true }));
+    window.addEventListener("focus", poke);
+    poke();
+    return () => {
+      window.clearTimeout(t);
+      evs.forEach((e) => window.removeEventListener(e, poke, { capture: true }));
+      window.removeEventListener("focus", poke);
+    };
+  }, []);
+  useKeepAwake("reading", front && !idle && (app.screen === "read" || app.screen === "compare"));
   const [focus, setFocus] = useState(false);
   // In focus mode on Read (a chapter, a book), and on the Lyrics page always, the pointer goes when
   // the mouse is still. Not over an online devotional: its page is a frame, whose mouse moves
