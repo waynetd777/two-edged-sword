@@ -507,6 +507,7 @@ export const SIGNS: Vision[] = [
     verse: "Psalm 96:1",
     themes: ["sing", "song", "music", "melody", "voice", "praise", "shout", "new song", "rejoice", "joyful noise", "singing", "choir"],
     lane: "pass",
+    kind: "ambient",
     dur: [12, 18],
     moving: true,
     make: (w, h, room) => {
@@ -564,6 +565,7 @@ export const SIGNS: Vision[] = [
       "fire fall",
     ],
     lane: "pass",
+    kind: "ambient",
     dur: [12, 18],
     make: (w, h, room) => {
       const { x: vx, scale: vk } = room.verse ? room.place(verseWidth(w, h)) : { x: 0, scale: 0 };
@@ -591,6 +593,7 @@ export const SIGNS: Vision[] = [
     verse: "James 1:17",
     themes: ["light", "shine", "dust", "quiet", "sanctuary", "still", "holy", "presence", "sacred"],
     lane: "pass",
+    kind: "ambient",
     dur: [12, 20],
     moving: true,
     make: (w, h, room) => {
@@ -637,6 +640,7 @@ export const SIGNS: Vision[] = [
     verse: "Matthew 5:16",
     themes: ["light", "lamp", "night", "hope", "lantern", "shine", "lift", "darkness", "carry"],
     lane: "pass",
+    kind: "ambient",
     dur: [14, 22],
     moving: true,
     make: (w, h, room) => {
@@ -681,6 +685,7 @@ export const SIGNS: Vision[] = [
     verse: "John 1:5",
     themes: ["light", "night", "little", "shine", "dark", "wonder", "glow", "lights"],
     lane: "pass",
+    kind: "ambient",
     dur: [14, 22],
     moving: true,
     make: (w, h, room) => {

@@ -23,6 +23,7 @@ export const LAND: Vision[] = [
       "the heights",
     ],
     lane: "back",
+    kind: "scene",
     dur: [24, 40],
     make: (w, h, room) => {
       const { x: vx, scale: vk } = room.verse ? room.place(verseWidth(w, h)) : { x: 0, scale: 0 };
@@ -47,6 +48,7 @@ export const LAND: Vision[] = [
     verse: "Psalm 23:2",
     themes: ["still", "peace", "quiet", "rest", "waters", "shepherd", "still waters", "restores my soul", "be still", "calm"],
     lane: "back",
+    kind: "scene",
     dur: [20, 34],
     make: (w, h, room) => {
       const { x: vx, scale: vk } = room.verse ? room.place(verseWidth(w, h)) : { x: 0, scale: 0 };
@@ -91,6 +93,7 @@ export const LAND: Vision[] = [
     verse: "Revelation 22:14",
     themes: ["tree", "root", "roots", "branch", "planted", "grow", "fruit", "life", "leaves", "rooted", "like a tree"],
     lane: "back",
+    kind: "scene",
     dur: [24, 40],
     make: (_w, h, room) => {
       const { x: x0, scale } = room.place(h * 0.85);
@@ -226,6 +229,7 @@ export const LAND: Vision[] = [
     verse: "Revelation 22:1",
     themes: ["river", "stream", "flow", "living water", "rivers", "flowing", "water of life", "flows"],
     lane: "back",
+    kind: "scene",
     dur: [22, 36],
     make: (w, h, room) => {
       const { x: cx, scale } = room.place(w * 0.3),
@@ -276,6 +280,7 @@ export const LAND: Vision[] = [
       "green pastures",
     ],
     lane: "back",
+    kind: "scene",
     dur: [22, 36],
     make: (w, h, room) => {
       const { x: vx, scale: vk } = room.verse ? room.place(verseWidth(w, h)) : { x: 0, scale: 0 };
@@ -398,6 +403,7 @@ export const LAND: Vision[] = [
     verse: "Matthew 7:14",
     themes: ["path", "way", "road", "walk", "follow", "journey", "lead", "narrow", "guide me", "lead me", "footsteps", "walk with"],
     lane: "back",
+    kind: "scene",
     dur: [22, 36],
     make: (w, h, room) => {
       const hz = h * 0.56,
@@ -435,6 +441,7 @@ export const LAND: Vision[] = [
     verse: "John 15:5",
     themes: ["vine", "branch", "branches", "fruit", "abide", "harvest", "vineyard", "bear fruit", "remain in me", "grapes"],
     lane: "back",
+    kind: "scene",
     dur: [22, 36],
     make: (w, h, room) => {
       const { x: vx, scale: vk } = room.verse ? room.place(verseWidth(w, h)) : { x: 0, scale: 0 };
@@ -517,6 +524,7 @@ export const LAND: Vision[] = [
       "water",
     ],
     lane: "back",
+    kind: "scene",
     dur: [22, 36],
     make: (w, h, room) => {
       const sea = h * 0.74;
@@ -600,6 +608,7 @@ export const LAND: Vision[] = [
     verse: "John 12:24",
     themes: ["harvest", "field", "fields", "wheat", "bread", "seed", "reap", "sow", "white unto harvest", "grain", "labourers", "laborers"],
     lane: "pass",
+    kind: "scene",
     dur: [14, 22],
     make: (w, h, room) => {
       const { x: vx, scale: vk } = room.verse ? room.place(verseWidth(w, h)) : { x: 0, scale: 0 };

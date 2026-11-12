@@ -115,7 +115,9 @@ export function respell(t: string, m: RegExpMatchArray): string | null {
  */
 export function speakable(text: string): { spoken: string; at: number[] } {
   // e-Sword writes references "Psa_82:1"; the same length with a space, so positions hold.
-  const t = text.replace(/([A-Za-z])_(\d)/g, "$1 $2");
+  // An em dash as an en dash, which sounds the same: after a long clause ending in an em dash,
+  // macOS's premium voices report the rest of the verse as one stretch, and the highlight stops.
+  const t = text.replace(/([A-Za-z])_(\d)/g, "$1 $2").replace(/[\u2014\u2015]/g, "\u2013");
   let spoken = "",
     last = 0;
   const at: number[] = [];

@@ -188,6 +188,7 @@ export const DELIVERANCE: Vision[] = [
     name: "torn veil",
     verse: "Mark 15:38",
     lane: "back",
+    kind: "scene",
     dur: [22, 36],
     themes: [
       "veil",
@@ -422,6 +423,7 @@ export const DELIVERANCE: Vision[] = [
     name: "red sea",
     verse: "Exodus 15:11",
     lane: "back",
+    kind: "scene",
     dur: [24, 40],
     themes: [
       "sea",
@@ -706,6 +708,7 @@ export const DELIVERANCE: Vision[] = [
     name: "dry bones",
     verse: "Ezekiel 37:5",
     lane: "back",
+    kind: "scene",
     dur: [24, 40],
     themes: [
       "bones",
@@ -1128,6 +1131,7 @@ export const DELIVERANCE: Vision[] = [
     name: "peace be still",
     verse: "Mark 4:39",
     lane: "back",
+    kind: "scene",
     dur: [24, 40],
     themes: [
       "peace",

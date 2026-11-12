@@ -12,6 +12,7 @@ export const CREATURES: Vision[] = [
     verse: "John 1:32",
     themes: ["dove", "spirit", "holy spirit", "peace", "descend", "holy ghost", "comforter", "rest on me", "gentle", "come down"],
     lane: "pass",
+    kind: "ambient",
     dur: [11, 16],
     moving: true,
     make: (w, h, room) => {
@@ -160,6 +161,7 @@ export const CREATURES: Vision[] = [
     verse: "Matthew 10:31",
     themes: ["sparrow", "sparrows", "bird", "birds", "his eye is on", "care", "fly", "watches", "worry", "little"],
     lane: "pass",
+    kind: "ambient",
     dur: [10, 15],
     moving: true,
     make: (w, h, room) => {
@@ -234,6 +236,7 @@ export const CREATURES: Vision[] = [
     verse: "2 Corinthians 5:17",
     themes: ["new", "new creation", "change", "transform", "transformed", "wings", "free", "old has gone", "born again", "made new"],
     lane: "pass",
+    kind: "ambient",
     dur: [12, 18],
     moving: true,
     make: (w, h, room) => {
@@ -369,6 +372,7 @@ export const CREATURES: Vision[] = [
     verse: "Isaiah 40:8",
     themes: ["flower", "flowers", "petal", "petals", "bloom", "beauty", "garden", "rose", "blossom", "fragrance"],
     lane: "pass",
+    kind: "ambient",
     dur: [12, 20],
     moving: true,
     make: (w, h, room) => {
@@ -409,6 +413,7 @@ export const CREATURES: Vision[] = [
     verse: "Psalm 52:8",
     themes: ["olive", "peace", "dove", "branch", "gethsemane", "oil", "garden", "anoint"],
     lane: "pass",
+    kind: "ambient",
     dur: [12, 18],
     moving: true,
     make: (w, h, room) => {
@@ -501,6 +506,7 @@ export const CREATURES: Vision[] = [
     verse: "Luke 8:11",
     themes: ["seed", "seeds", "sow", "plant", "grow", "faith", "mustard", "scattered", "harvest", "small"],
     lane: "pass",
+    kind: "ambient",
     dur: [12, 20],
     moving: true,
     make: (w, h, room) => {
@@ -555,6 +561,7 @@ export const CREATURES: Vision[] = [
     verse: "Psalm 51:7",
     themes: ["snow", "white", "whiter than snow", "wash", "clean", "pure", "winter", "spotless", "washed", "cleanse"],
     lane: "pass",
+    kind: "ambient",
     dur: [12, 20],
     moving: true,
     make: (w, h, room) => {
@@ -618,6 +625,7 @@ export const CREATURES: Vision[] = [
       "send the rain",
     ],
     lane: "pass",
+    kind: "ambient",
     dur: [10, 16],
     moving: true,
     make: (w, h, room) => {
@@ -662,6 +670,7 @@ export const CREATURES: Vision[] = [
     verse: "Acts 2:2",
     themes: ["wind", "breath", "breathe", "blow", "spirit", "fresh wind", "mighty wind", "rushing", "breath of god", "winds"],
     lane: "pass",
+    kind: "ambient",
     dur: [10, 15],
     moving: true,
     make: (w, h, room) => {

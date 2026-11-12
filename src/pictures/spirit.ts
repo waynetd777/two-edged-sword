@@ -227,6 +227,7 @@ export const SPIRIT: Vision[] = [
     name: "pillar of fire",
     verse: "Psalm 78:14",
     lane: "back",
+    kind: "scene",
     dur: [22, 36],
     themes: [
       "pillar",
@@ -278,6 +279,7 @@ export const SPIRIT: Vision[] = [
     name: "shekinah",
     verse: "Exodus 40:34",
     lane: "back",
+    kind: "ambient",
     dur: [24, 40],
     themes: [
       "glory",
@@ -332,6 +334,7 @@ export const SPIRIT: Vision[] = [
     name: "open heaven",
     verse: "Acts 7:56",
     lane: "back",
+    kind: "scene",
     dur: [22, 36],
     themes: [
       "heaven",
@@ -717,6 +720,7 @@ export const SPIRIT: Vision[] = [
     name: "fire from heaven",
     verse: "1 Kings 18:39",
     lane: "back",
+    kind: "scene",
     dur: [22, 36],
     themes: [
       "fire",
@@ -946,6 +950,7 @@ export const SPIRIT: Vision[] = [
     name: "palm branches",
     verse: "John 12:13",
     lane: "pass",
+    kind: "ambient",
     dur: [13, 20],
     themes: [
       "hosanna",

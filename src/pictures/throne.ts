@@ -312,6 +312,7 @@ export const THRONE: Vision[] = [
     name: "sea of glass",
     verse: "Psalm 93:4",
     lane: "back",
+    kind: "scene",
     dur: [24, 40],
     themes: [
       "glass",
@@ -579,6 +580,7 @@ export const THRONE: Vision[] = [
     name: "lightnings",
     verse: "Psalm 97:4",
     lane: "back",
+    kind: "ambient",
     dur: [18, 30],
     moving: true,
     themes: [
@@ -888,6 +890,7 @@ export const THRONE: Vision[] = [
     name: "heavenly host",
     verse: "Luke 2:14",
     lane: "back",
+    kind: "scene",
     dur: [24, 40],
     themes: [
       "angels",

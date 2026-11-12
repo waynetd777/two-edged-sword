@@ -11,6 +11,7 @@ export const SKY: Vision[] = [
     verse: "Psalm 84:11",
     themes: ["light", "shine", "glory", "heaven", "radiance", "sun", "light of the world", "shine on", "brighter", "glorious light"],
     lane: "back",
+    kind: "ambient",
     dur: [20, 36],
     make: (w, h, room) => {
       const { x: vx, scale: vk } = room.verse ? room.place(verseWidth(w, h)) : { x: 0, scale: 0 };
@@ -42,6 +43,7 @@ export const SKY: Vision[] = [
     verse: "Psalm 147:4",
     themes: ["star", "stars", "night", "sky", "heavens", "universe", "shining", "bright morning star", "constellation"],
     lane: "back",
+    kind: "ambient",
     dur: [24, 40],
     make: (w, h, room) => {
       const stars = Array.from({ length: Math.round((w * h) / 6000) }, () => ({
@@ -93,6 +95,7 @@ export const SKY: Vision[] = [
     verse: "Psalm 57:5",
     themes: ["glory", "glorious", "heaven", "splendour", "splendor", "majesty", "radiant", "shine", "unveiled"],
     lane: "back",
+    kind: "ambient",
     dur: [24, 40],
     make: (w, h, room) => {
       const { x: vx, scale: vk } = room.verse ? room.place(verseWidth(w, h)) : { x: 0, scale: 0 };
@@ -139,6 +142,7 @@ export const SKY: Vision[] = [
       "light of day",
     ],
     lane: "back",
+    kind: "scene",
     dur: [24, 40],
     make: (w, h, room) => {
       const { x, scale } = room.place(h * 0.6);
@@ -166,6 +170,7 @@ export const SKY: Vision[] = [
     verse: "Genesis 9:13",
     themes: ["rainbow", "promise", "covenant", "storm", "after the rain", "faithful", "promises"],
     lane: "back",
+    kind: "ambient",
     dur: [18, 30],
     make: (w, h, room) => {
       const { x: vx, scale: vk } = room.verse ? room.place(verseWidth(w, h)) : { x: 0, scale: 0 };
@@ -231,6 +236,7 @@ export const SKY: Vision[] = [
     verse: "Psalm 36:5",
     themes: ["cloud", "clouds", "sky", "heaven", "above", "carried", "on the clouds"],
     lane: "back",
+    kind: "ambient",
     dur: [24, 40],
     make: (w, h, room) => {
       const { x: vx, scale: vk } = room.verse ? room.place(verseWidth(w, h)) : { x: 0, scale: 0 };
@@ -396,6 +402,7 @@ export const SKY: Vision[] = [
     verse: "Daniel 12:3",
     themes: ["star", "stars", "night", "sky", "heavens", "falling"],
     lane: "pass",
+    kind: "ambient",
     dur: [10, 16],
     moving: true,
     make: (w, h, room) => {

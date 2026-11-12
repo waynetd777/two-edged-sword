@@ -81,6 +81,7 @@ export const WORSHIP: Vision[] = [
     name: "raised hands",
     verse: "Psalm 134:2",
     lane: "back",
+    kind: "scene",
     dur: [22, 36],
     themes: [
       "hands",
@@ -558,6 +559,7 @@ export const WORSHIP: Vision[] = [
     name: "holy mountain",
     verse: "Psalm 99:9",
     lane: "back",
+    kind: "scene",
     dur: [24, 40],
     themes: [
       "mountain",
@@ -886,6 +888,7 @@ export const WORSHIP: Vision[] = [
     name: "lights held high",
     verse: "Matthew 5:14",
     lane: "back",
+    kind: "scene",
     dur: [22, 36],
     themes: [
       "light",

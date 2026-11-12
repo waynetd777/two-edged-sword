@@ -83,6 +83,7 @@ export const PLACES: Vision[] = [
     verse: "Isaiah 53:5",
     themes: ["calvary", "cross", "golgotha", "hill", "crucified", "died", "it is finished", "the hill", "three crosses", "paid"],
     lane: "back",
+    kind: "scene",
     dur: [22, 36],
     make: (w, h, room) => {
       const { x: x0, scale } = room.place(w * 0.3);
@@ -688,6 +689,7 @@ export const PLACES: Vision[] = [
     verse: "Genesis 28:16",
     themes: ["ladder", "angel", "angels", "heaven", "dream", "bethel", "climb", "ascend", "higher", "gate of heaven", "stairway"],
     lane: "back",
+    kind: "scene",
     dur: [22, 36],
     make: (w, h, room) => {
       const { x: bx, scale } = placeBeside(room, w, h, w * 0.16);
@@ -774,6 +776,7 @@ export const PLACES: Vision[] = [
       "city of god",
     ],
     lane: "back",
+    kind: "scene",
     dur: [24, 40],
     make: (w, h, room) => {
       const { x: cx, scale } = room.place(w * 0.5);

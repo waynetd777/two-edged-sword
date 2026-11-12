@@ -32,6 +32,8 @@ export interface Frame {
   ceiling: number;
   /** The stretch of the page the picture stands in (its first `room.place`), which its verse keeps within. */
   span?: [number, number];
+  /** Where the picture says it stands, set by `verse` for its verse. */
+  box?: Box;
 }
 
 /**
@@ -56,6 +58,14 @@ export interface Vision {
    *  fades out as it begins, and none begins while it shows. */
   alone?: boolean;
   /**
+   * What sort of picture it is, which says what else may show with it (Visions.tsx): `ambient`,
+   * light or weather over the whole page (rays, stars, rain, a dove passing), which may show
+   * with anything; `scene`, a landscape filling much of the page (hills, the Red Sea); or a
+   * thing (the default: a cross, a lamp, a painting) standing beside the words. A scene or a
+   * thing shows only with an ambient picture, never with another scene or thing.
+   */
+  kind?: "ambient" | "scene";
+  /**
    * What the picture is of, as words (or short phrases) a song about it would use: a picture whose
    * themes are in the song's title or words is chosen more often while it plays (Visions.tsx).
    */
@@ -69,6 +79,16 @@ export const TAU = Math.PI * 2;
 /** Math.random, unless a scene (screenshot mode) has seeded it, so its pictures come out the same each time. */
 let rand = Math.random;
 export const random = () => rand();
+/** `fn` run with `random` giving the numbers of `seed`, and `random` as it was afterwards. */
+export function withRandom<T>(seed: number, fn: () => T): T {
+  const was = rand;
+  seedRandom(seed);
+  try {
+    return fn();
+  } finally {
+    rand = was;
+  }
+}
 /** From now on, the same numbers from `random` each time for the same `seed` (mulberry32). */
 export function seedRandom(seed: number) {
   let s = seed >>> 0;
@@ -170,30 +190,46 @@ export interface Box {
   bottom: number;
   width: number;
 }
+/** The page's own colour (--bg). */
+const pageRGB = (dark: boolean): RGB => (dark ? [13, 17, 23] : [246, 248, 250]);
 let verseFont = "";
 /** How high a verse's words are: a little under 2% of the page's shorter side. */
 export const verseSize = (w: number, h: number) => Math.max(13, Math.min(w, h) * 0.019);
 /** How wide a verse is at most, and so the stretch a picture that fills the page places for it. */
 export const verseWidth = (w: number, h: number) => verseSize(w, h) * 17;
 /**
- * The picture's verse, if it has one and verses are on: its words in a faint italic, wrapped, with
- * the reference smaller beneath. Under the picture (`b`), or over it when there isn't room under
- * it above `f.floor` (the page's foot, or the flames'), or failing both (a picture as tall as the
- * page, `placeBeside`) beside it; always within the stretch the picture was placed in, so it never
- * runs onto the words or the other picture beside them. It comes in once the picture is well in
- * view, and goes with it.
+ * The picture's verse, if it has one and verses are on: `b` is where the picture stands, as the
+ * picture itself knows it. The verse isn't drawn here but by Visions.tsx once the picture has
+ * drawn (`spotVerse`, `drawVerse`), so that it can stand by what the picture actually drew.
  */
 export function verse(f: Frame, b: Box) {
-  if (!f.verse) return;
-  const [words, ref] = f.verse;
+  if (f.verse) f.box = b;
+}
+
+/** Where a verse is drawn: its lines, their middle across, the top of the first, and how wide and high they come out. */
+export interface Spot {
+  lines: string[];
+  x: number;
+  top: number;
+  wide: number;
+  high: number;
+}
+
+/**
+ * Where a picture's verse goes: under the picture (`b`), or over it when there isn't room under it
+ * above `f.floor` (the page's foot, or the flames'), or failing both (a picture as tall as the
+ * page) beside it, level with its middle; always within the stretch the picture was placed in
+ * (`f.span`), so it never runs onto the words or another picture's stretch. A picture wider than
+ * its stretch (a landscape) has its verse in the middle of the stretch.
+ */
+export function spotVerse(f: Frame, b: Box): Spot | null {
+  if (!f.verse) return null;
+  const [words] = f.verse;
   const { ctx } = f;
-  const a = 0.35 * f.env * smooth(f.k * 3 - 1);
-  if (a <= 0.002) return;
   const size = verseSize(f.w, f.h),
-    gap = size;
+    gap = size * 0.9;
   verseFont ||= displayFont();
   ctx.save();
-  ctx.globalAlpha = 1; // whatever the picture left it at
   ctx.font = `italic 400 ${Math.round(size)}px ${verseFont}`;
   // The words in lines no wider than `most`, and how wide and high they come out.
   const lay = (most: number) => {
@@ -206,48 +242,76 @@ export function verse(f: Frame, b: Box) {
     return { lines, wide: Math.max(...lines.map((l) => ctx.measureText(l).width)), high: lines.length * size * 1.3 + size * 1.1 };
   };
   const [s0, s1] = f.span ?? [b.x - b.width / 2, b.x + b.width / 2];
+  const mid = b.width > s1 - s0 + 1 ? (s0 + s1) / 2 : b.x;
   let { lines, wide, high } = lay(Math.min(verseWidth(f.w, f.h), s1 - s0));
-  let x = Math.max(s0 + wide / 2, Math.min(s1 - wide / 2, b.x)),
+  let x = Math.max(s0 + wide / 2, Math.min(s1 - wide / 2, mid)),
     top: number;
   if (b.bottom + gap + high <= f.floor) top = b.bottom + gap;
   else if (b.top - gap - high >= f.ceiling) top = b.top - gap - high;
   else {
-    // Beside it, on the side with more room, low on the page; or, with no room there either, as
-    // low as it can go.
+    // Beside it, on the side with more room, level with its middle; or, with no room there
+    // either, as low as it can go.
     const left = b.x - b.width / 2 - gap - s0,
       right = s1 - (b.x + b.width / 2 + gap);
     const room = Math.max(left, right);
     if (room >= size * 8) {
       ({ lines, wide, high } = lay(Math.min(verseWidth(f.w, f.h), room)));
       x = left > right ? b.x - b.width / 2 - gap - wide / 2 : b.x + b.width / 2 + gap + wide / 2;
-      top = Math.max(f.ceiling, Math.min(f.h * 0.6, f.floor - high));
+      top = Math.max(f.ceiling, Math.min((b.top + b.bottom) / 2 - high / 2, f.floor - high));
     } else top = Math.max(f.ceiling, Math.min(b.bottom + gap, f.floor - high));
   }
-  // A soft shade of the page's own colour behind the words, so a picture beneath them (its own,
-  // or one that fills the page) doesn't make them hard to read.
-  const [r, g, bl] = f.dark ? [13, 17, 23] : [246, 248, 250]; // --bg
-  // An oval wide enough that the words' corners sit in its solid middle, not its fading edge.
-  const bw = wide * 1.45 + size * 4,
-    bh = high * 1.6 + size * 3.4;
-  ctx.save();
-  ctx.globalCompositeOperation = "source-over";
-  ctx.globalAlpha = Math.min(1, (a / 0.35) * 0.7);
-  ctx.translate(x, top - size * 0.2 + high / 2);
-  ctx.scale(bw / 2, bh / 2);
-  const shade = ctx.createRadialGradient(0, 0, 0, 0, 0, 1);
-  shade.addColorStop(0, `rgba(${r},${g},${bl},1)`);
-  shade.addColorStop(0.7, `rgba(${r},${g},${bl},1)`);
-  shade.addColorStop(1, `rgba(${r},${g},${bl},0)`);
-  ctx.fillStyle = shade;
-  ctx.fillRect(-1, -1, 2, 2);
   ctx.restore();
+  return { lines, x, top, wide, high };
+}
+
+/** How far a verse has come in: from a tenth of the way through its picture's while, fully by a third. */
+export const verseIn = (f: Frame) => smooth((f.k - 0.1) * 4.3);
+
+/**
+ * The verse at `s`, `show` strong (0–1): its words in a faint italic, the reference smaller
+ * beneath, on a soft wash of the page's own colour that follows the lines, so a picture beneath
+ * them doesn't make them hard to read. It comes in once the picture is well in view, and goes with it.
+ */
+export function drawVerse(f: Frame, s: Spot, show = 1) {
+  if (!f.verse) return;
+  const a = 0.36 * f.env * verseIn(f) * show;
+  if (a <= 0.002) return;
+  const [, ref] = f.verse;
+  const { ctx } = f;
+  const size = verseSize(f.w, f.h),
+    line = size * 1.3;
+  verseFont ||= displayFont();
+  ctx.save();
+  ctx.globalAlpha = 1; // whatever the picture left it at
+  ctx.globalCompositeOperation = "source-over";
   ctx.textAlign = "center";
   ctx.textBaseline = "top";
+  ctx.font = `italic 400 ${Math.round(size)}px ${verseFont}`;
+  const widths = s.lines.map((l) => ctx.measureText(l).width);
+  ctx.font = `400 ${Math.round(size * 0.78)}px ${verseFont}`;
+  const refWide = ctx.measureText(ref).width;
+  // The wash: a rounded band behind each line (and the reference), all filled as one shape so
+  // where they meet isn't doubled, its edge softened.
+  const [r, g, bl] = pageRGB(f.dark);
+  const padX = size * 0.55,
+    padY = size * 0.2,
+    rad = size * 0.5;
+  ctx.beginPath();
+  widths.forEach((wd, i) => ctx.roundRect(s.x - wd / 2 - padX, s.top + i * line - padY, wd + padX * 2, line + padY, rad));
+  const refTop = s.top + s.lines.length * line + size * 0.25;
+  ctx.roundRect(s.x - refWide / 2 - padX, refTop - padY, refWide + padX * 2, size * 0.78 + padY * 2.5, rad);
+  ctx.fillStyle = `rgba(${r},${g},${bl},${Math.min(1, (a / 0.36) * (f.dark ? 0.5 : 0.6))})`;
+  ctx.shadowColor = `rgba(${r},${g},${bl},${Math.min(1, (a / 0.36) * 0.5)})`;
+  ctx.shadowBlur = size * 0.9;
+  ctx.fill();
+  ctx.shadowColor = "transparent";
+  ctx.shadowBlur = 0;
+  ctx.font = `italic 400 ${Math.round(size)}px ${verseFont}`;
   ctx.fillStyle = f.ink(a);
-  lines.forEach((l, i) => ctx.fillText(l, x, top + i * size * 1.3));
+  s.lines.forEach((l, i) => ctx.fillText(l, s.x, s.top + i * line));
   ctx.font = `400 ${Math.round(size * 0.78)}px ${verseFont}`;
   ctx.fillStyle = f.ink(a * 0.8);
-  ctx.fillText(ref, x, top + lines.length * size * 1.3 + size * 0.25);
+  ctx.fillText(ref, s.x, refTop);
   ctx.restore();
 }
 
@@ -314,8 +378,6 @@ export function grow(len: number, ang: number, depth: number, max: number, sprea
 }
 
 /** The page's own colour (as in styles.css), which solid shapes are mixed from. */
-const pageRGB = (dark: boolean): RGB => (dark ? [13, 17, 23] : [246, 248, 250]);
-
 /**
  * Solid colours mixed from the page's own and the ink: `k` 0 is the page, 1 the ink. For shapes
  * drawn whole on a layer (see `layering`), so their parts don't add up where they overlap and

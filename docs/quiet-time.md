@@ -93,11 +93,14 @@ scroll:
   the Creation of Adam. Pictures of what the song sings about come more often (a song about
   fire gets fire), and none comes twice in a song. The larger ones stay beside the words, never
   behind them, in focus mode too. If there's no room for one, it shows smaller or waits.
+- Only one picture of a thing or a place shows at a time. Light and weather (rays, stars, rain,
+  a dove passing over) can show with it.
   Settings › Listening › **While a song plays** turns them off.
-- Each picture has a verse beneath it, faint, on a soft shade, in the Bible chosen in Settings › Listening ›
-  **Verses from** (the default translation until you choose one). A verse stays beside the
-  words, clear of any other picture and above the flames. A picture whose verse isn't in that
-  Bible comes without one. **Show a verse beneath each picture**, in the same place, turns the
+- Each picture has a verse beneath it (or above or beside it, if there's no room), faint, on a
+  soft shade behind its lines, in the Bible chosen in Settings › Listening › **Verses from** (the
+  default translation until you choose one). A verse stays beside the words, clear of any other
+  picture and above the flames. When light or weather shows with another picture, only the other
+  picture's verse shows. A picture whose verse isn't in that Bible comes without one. **Show a verse beneath each picture**, in the same place, turns the
   verses off.
 - The Quiet time bar shows how far through the song Music is, with the time gone and the time left.
 - The Lyrics page is always dark below its top bar, in the light theme too. In focus mode the

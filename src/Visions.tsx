@@ -8,16 +8,35 @@
 // words is chosen more often than the rest, so a song about fire gets fire; a song whose words
 // aren't known gets them all alike. They swell a little on the beat, as the flames do; paused,
 // they fade away and wait. A picture placed beside the words keeps clear of the other lane's
-// picture too, so a passing picture doesn't land on a backdrop's. Their colours are the
+// picture too, and only an ambient picture (light, weather) shows with another (`goesWith`). Their colours are the
 // artwork's (the page's background), lightened in the dark theme and deepened on paper. Each
-// has its verse beneath it (`verses`, from the Bible chosen in Settings), kept within the stretch
-// the picture stands in and above the flames. Settings › Listening turns them off, or the verses.
+// has its verse beneath it (`verses`, from the Bible chosen in Settings), by where the picture
+// really is (`measure`), kept within the stretch it stands in and above the flames; an ambient
+// picture's verse gives way to the other picture's. Settings › Listening turns them off, or the verses.
 
 import { useEffect, useRef } from "react";
 import { beatAt, useCanvasLoop } from "./canvasLoop";
 import { FLAME_HEIGHT } from "./Flames";
 import { sceneStepping } from "./sceneClock";
-import { Frame, Lane, random, RGB, rnd, Room, seedRandom, smooth, Verse, verseWidth, Vision } from "./pictures/kit";
+import {
+  Box,
+  drawVerse,
+  Frame,
+  Lane,
+  random,
+  RGB,
+  rnd,
+  Room,
+  seedRandom,
+  smooth,
+  Spot,
+  spotVerse,
+  Verse,
+  verseIn,
+  verseWidth,
+  Vision,
+  withRandom,
+} from "./pictures/kit";
 import { VISIONS } from "./pictures";
 
 type Pair = { dark: RGB; light: RGB };
@@ -266,6 +285,80 @@ export function Visions({
       span?: [number, number];
       /** It was made with room for its verse: one made before the verses came shows none. */
       versed?: boolean;
+      /** Where its verse is drawn, fixed when it first shows so it doesn't wander with the picture. */
+      spot?: Spot | null;
+      /** How strongly its verse shows (0–1): an ambient picture's goes when a picture with its own verse comes. */
+      say: number;
+      hushed?: boolean;
+      /** The seed its making was given, and where it was placed, to make a copy of it to measure. */
+      seed: number;
+      places: { x: number; scale: number }[];
+    };
+    /** May `v` show while `other` does? Only when one of them is ambient (light, weather, a bird passing). */
+    const goesWith = (v: Vision, other: Active | null) => !other || v.kind === "ambient" || other.v.kind === "ambient";
+
+    // Where a picture really is: drawn small on a canvas of the page's colour, as it will be
+    // at a few moments ahead, and the part that stands out from the page found. A picture's own
+    // box is generous (its glow, room to move), which left verses far from what they belong to.
+    const M = 8;
+    const mc = document.createElement("canvas");
+    const mx = mc.getContext("2d", { willReadFrequently: true })!;
+    // The copy is made with the same numbers and placings as the picture, and drawn ahead on its
+    // own: drawing the picture itself ahead would upset what it keeps from frame to frame (the
+    // throne's lightning, made "later", stayed lit).
+    const measure = (a: Active, f: Frame): Box | null => {
+      let n = 0;
+      const copy = withRandom(a.seed, () =>
+        a.v.make(f.w, f.h, { verse: !!a.versed, place: () => a.places[n++] ?? a.places[a.places.length - 1] ?? { x: f.w / 2, scale: 1 } }),
+      );
+      const W = Math.max(1, Math.ceil(f.w / M)),
+        H = Math.max(1, Math.ceil(f.h / M));
+      if (mc.width !== W || mc.height !== H) {
+        mc.width = W;
+        mc.height = H;
+      }
+      const page = f.dark ? [13, 17, 23] : [246, 248, 250];
+      let l = W,
+        r = -1,
+        t = H,
+        b = -1;
+      for (const k of [Math.max(f.k, 0.35), 0.55, 0.75]) {
+        mx.setTransform(1, 0, 0, 1, 0, 0);
+        mx.globalAlpha = 1;
+        mx.globalCompositeOperation = "source-over";
+        mx.fillStyle = `rgb(${page.join(",")})`;
+        mx.fillRect(0, 0, W, H);
+        mx.setTransform(1 / M, 0, 0, 1 / M, 0, 0);
+        mx.globalCompositeOperation = f.dark ? "lighter" : "source-over";
+        mx.save();
+        try {
+          withRandom(a.seed + 1, () => copy({ ...f, ctx: mx, dt: 0, t: k * a.dur, k, env: 1, verse: undefined, box: undefined }));
+        } catch {
+          for (let i = 0; i < 64; i++) mx.restore();
+          return null;
+        }
+        mx.restore();
+        const px = mx.getImageData(0, 0, W, H).data;
+        const d = new Float32Array(W * H);
+        let most = 0;
+        for (let i = 0; i < W * H; i++) {
+          const v = Math.max(Math.abs(px[i * 4] - page[0]), Math.abs(px[i * 4 + 1] - page[1]), Math.abs(px[i * 4 + 2] - page[2]));
+          d[i] = v;
+          if (v > most) most = v;
+        }
+        // What stands out: well above the faint glow round most pictures.
+        const enough = Math.max(6, most * 0.3);
+        for (let y = 0; y < H; y++)
+          for (let x = 0; x < W; x++)
+            if (d[y * W + x] >= enough) {
+              if (x < l) l = x;
+              if (x > r) r = x;
+              if (y < t) t = y;
+              if (y > b) b = y;
+            }
+      }
+      if (r < 0) return null;
+      return { x: ((l + r + 1) / 2) * M, top: t * M, bottom: (b + 1) * M, width: (r - l + 1) * M };
     };
     // `recent`: the last few shown, never chosen next; `shown`: all shown during this song, not
     // chosen again until every picture of the lane has had its turn.
@@ -278,28 +371,46 @@ export function Visions({
       looked = 0;
     const make = (a: Active) => {
       const other = lanes[a.lane === "back" ? "pass" : "back"].cur;
-      const room = roomBeside(c.clientWidth, words, other?.span ? [other.span] : []);
+      // An ambient picture's verse gives way to this one's, so only its picture need be kept clear of.
+      const keep = other?.span && !(other.v.kind === "ambient" && a.v.kind !== "ambient" && other.versed);
+      const room = roomBeside(c.clientWidth, words, keep ? [other.span!] : []);
       a.span = undefined;
+      a.spot = undefined;
+      a.places = [];
       const verse = !!live.current.verses?.has(a.v.name);
       a.versed = verse;
-      const draw = a.v.make(c.clientWidth, c.clientHeight, {
-        verse,
-        place: (width) => {
-          a.placed = true;
-          // The first placing is the picture's own; later ones are parts of it, within that. One
-          // with a verse takes a stretch wide enough for it to read well, the picture as it was.
-          const first = !a.span;
-          const want = first && verse ? Math.max(width, verseWidth(c.clientWidth, c.clientHeight) * 0.8) : width;
-          const at = room.place(want);
-          if (first) a.span = [at.x - (want * at.scale) / 2, at.x + (want * at.scale) / 2];
-          return { x: at.x, scale: Math.min(1, (want * at.scale) / width) };
-        },
-      });
+      const draw = withRandom(a.seed, () =>
+        a.v.make(c.clientWidth, c.clientHeight, {
+          verse,
+          place: (width) => {
+            a.placed = true;
+            // The first placing is the picture's own; later ones are parts of it, within that. One
+            // with a verse takes a stretch wide enough for it to read well, the picture as it was.
+            const first = !a.span;
+            const want = first && verse ? Math.max(width, verseWidth(c.clientWidth, c.clientHeight) * 0.8) : width;
+            const at = room.place(want);
+            if (first) a.span = [at.x - (want * at.scale) / 2, at.x + (want * at.scale) / 2];
+            const out = { x: at.x, scale: Math.min(1, (want * at.scale) / width) };
+            a.places.push(out);
+            return out;
+          },
+        }),
+      );
       return { draw, crowded: room.crowded };
     };
     const begin = (lane: Lane, v: Vision, clock: number, at = 0) => {
       const dur = (scenePick?.name === v.name && scenePick.dur) || rnd(v.dur[0], v.dur[1]);
-      const a: Active = { v, lane, draw: () => {}, start: clock - at * dur, dur, placed: false };
+      const a: Active = {
+        v,
+        lane,
+        draw: () => {},
+        start: clock - at * dur,
+        dur,
+        placed: false,
+        say: 1,
+        seed: Math.floor(random() * 2 ** 31),
+        places: [],
+      };
       const made = make(a);
       // No room clear of the words or the other lane's picture: none now; another try in a few seconds.
       if (made.crowded && !scenePick) {
@@ -391,6 +502,8 @@ export function Visions({
             else a.quit = clock;
           }
       }
+      // The verses, drawn once both pictures are, so neither picture is drawn over a verse.
+      const said: (() => void)[] = [];
       for (const lane of ["back", "pass"] as Lane[]) {
         const L = lanes[lane];
         // A scene's picture, begun before its verse came: made again with room for it.
@@ -399,16 +512,19 @@ export function Visions({
           L.next = looping ? clock + 1.5 : clock + (L.cur.quit !== undefined ? rnd(1.5, 4) : lane === "back" ? rnd(4, 12) : rnd(6, 18));
           L.cur = null;
         }
-        if (!L.cur && clock >= L.next && !lanes[lane === "back" ? "pass" : "back"].cur?.v.alone) {
+        const across = lanes[lane === "back" ? "pass" : "back"].cur;
+        if (!L.cur && clock >= L.next && !across?.v.alone) {
           weigh();
-          const fit = (v: Vision) => v.lane === lane && !L.recent.includes(v.name) && !(still && v.moving);
+          const fit = (v: Vision) => v.lane === lane && !L.recent.includes(v.name) && !(still && v.moving) && goesWith(v, across);
           let choices = looping ? [pick!] : VISIONS.filter((v) => fit(v) && !L.shown.has(v.name));
           if (!choices.length && !looping) {
-            // Every picture of the lane has been shown this song: begin again.
-            L.shown.clear();
+            // Every picture of the lane that may show now has been shown this song: begin again.
+            for (const v of VISIONS) if (fit(v)) L.shown.delete(v.name);
             choices = VISIONS.filter(fit);
           }
           if (choices.length) begin(lane, choose(choices), clock);
+          // Nothing may show with what's showing now: another look in a few seconds.
+          else L.next = clock + rnd(2, 4);
         }
         const a = L.cur;
         if (!a) continue;
@@ -439,6 +555,24 @@ export function Visions({
         ctx.save();
         try {
           a.draw(f);
+          ctx.restore();
+          ctx.save();
+          // Its verse, where it was first put, or (the first time it shows) by where the picture
+          // is: an ambient picture's in the stretch it placed for it, any other's by what it drew.
+          if (f.verse && f.box && verseIn(f) * f.env > 0.002) {
+            if (a.spot === undefined) {
+              const seen = a.v.kind === "ambient" ? null : measure(a, f);
+              a.spot = spotVerse(f, seen ?? f.box);
+            }
+            // An ambient picture's verse gives way to a picture with its own (or an earlier ambient one's).
+            const by = lanes[lane === "back" ? "pass" : "back"].cur;
+            if (a.v.kind === "ambient" && by && by.quit === undefined && by.versed && (by.v.kind !== "ambient" || by.start < a.start))
+              a.hushed = true;
+            a.say += ((a.hushed ? 0 : 1) - a.say) * Math.min(1, dt * 1.5);
+            const spot = a.spot,
+              say = a.say;
+            if (spot) said.push(() => drawVerse(f, spot, say));
+          }
         } catch (e) {
           // A picture that fails is dropped, and the rest carry on.
           console.error(`picture "${a.v.name}":`, e);
@@ -451,6 +585,7 @@ export function Visions({
         ctx.restore();
         ctx.globalCompositeOperation = dark ? "lighter" : "source-over";
       }
+      for (const say of said) say();
     };
   });
 

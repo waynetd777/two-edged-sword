@@ -32,6 +32,7 @@ export const RENEWAL: Vision[] = [
     name: "waterfall",
     verse: "Ezekiel 43:2",
     lane: "back",
+    kind: "scene",
     dur: [24, 40],
     themes: [
       "waterfall",
@@ -265,6 +266,7 @@ export const RENEWAL: Vision[] = [
     name: "desert blooms",
     verse: "Isaiah 35:1",
     lane: "back",
+    kind: "scene",
     dur: [24, 40],
     themes: [
       "desert",
@@ -620,6 +622,7 @@ export const RENEWAL: Vision[] = [
     name: "garden",
     verse: "Isaiah 58:11",
     lane: "back",
+    kind: "scene",
     dur: [24, 40],
     themes: [
       "garden",
@@ -1300,6 +1303,7 @@ export const RENEWAL: Vision[] = [
     name: "the catch",
     verse: "Luke 5:6",
     lane: "pass",
+    kind: "scene",
     alone: true,
     dur: [13, 20],
     themes: [
@@ -1518,6 +1522,7 @@ export const RENEWAL: Vision[] = [
     name: "manna",
     verse: "Psalm 78:24",
     lane: "pass",
+    kind: "ambient",
     dur: [13, 20],
     moving: true,
     themes: [
