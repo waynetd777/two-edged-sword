@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "mobile/src/styles.css"
+        ],
+        "createdAt": "2026-11-13T22:50:06.162Z",
+        "reason": "Claude: .jprose blockquote's left rule is the standard quote style in journal prose (from 2026-11-08, not this change), not an accent card"
+      }
+    ]
+  }
+}
