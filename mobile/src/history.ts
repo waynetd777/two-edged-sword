@@ -1,13 +1,14 @@
 // Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
 // SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
-// Back and forward over everything, as on the desktop (state.tsx's navigate): changing tab, every move
+// Back and forward over everything, as on the desktop (state.tsx's navigate): changing screen, every move
 // in Read, and Compare on or off are each a step. A step back puts the tab, the passage, the verse,
 // Compare and how far down the page was back as they were.
 
 import { useSyncExternalStore } from "react";
 
-export type Tab = "read" | "plans" | "search" | "words" | "library" | "more";
+/** The screens, as the menu lists them (Menu.tsx). */
+export type Tab = "read" | "search" | "words" | "journal" | "plans" | "library" | "settings" | "help";
 
 export interface Place {
   tab: Tab;

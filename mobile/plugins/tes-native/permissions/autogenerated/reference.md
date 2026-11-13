@@ -19,6 +19,7 @@ Everything the phone app uses
 - `allow-voice-for`
 - `allow-speech-settings`
 - `allow-tap`
+- `allow-splash-drawn`
 - `allow-register-listener`
 - `allow-remove-listener`
 
@@ -391,6 +392,32 @@ Enables the speech_stop command without any pre-configured scope.
 <td>
 
 Denies the speech_stop command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`tes-native:allow-splash-drawn`
+
+</td>
+<td>
+
+Enables the splash_drawn command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`tes-native:deny-splash-drawn`
+
+</td>
+<td>
+
+Denies the splash_drawn command without any pre-configured scope.
 
 </td>
 </tr>

@@ -17,6 +17,8 @@
   --scrim: rgba(31, 35, 40, 0.34);
   --red: #cf222e;
   --amber: #bf8700;
+  --green: #1a7f37;
+  --disabled: #b7bcc2;
   --read: "Atkinson Hyperlegible Next Variable", -apple-system, sans-serif;
   --orig: "EB Garamond", Garamond, Georgia, serif;
   --read-size: 19px;
@@ -39,6 +41,8 @@
     --scrim: rgba(1, 4, 9, 0.6);
     --red: #ff7b72;
     --amber: #d29922;
+    --green: #3fb950;
+    --disabled: #5f666f;
   }
 }
 :root[data-theme="dark"] {
@@ -56,6 +60,8 @@
   --scrim: rgba(1, 4, 9, 0.6);
   --red: #ff7b72;
   --amber: #d29922;
+  --green: #3fb950;
+  --disabled: #5f666f;
 }
 :root[data-theme="dark"] {
   color-scheme: dark;
@@ -103,6 +109,8 @@ button {
   height: 100%;
   display: flex;
   flex-direction: column;
+  /* No tab bar now: the screens stop short of the home indicator. */
+  padding-bottom: var(--bottom);
 }
 
 /* ---------- top bar ---------- */
@@ -145,8 +153,8 @@ button {
   color: var(--accent);
 }
 .nav:disabled {
-  color: var(--muted);
-  opacity: 0.4;
+  /* A solid dim colour, not opacity: Android's web view drew a disabled button with opacity as nothing. */
+  color: var(--disabled);
 }
 .spacer {
   flex: 1;
@@ -635,36 +643,6 @@ button {
     transform: rotate(360deg);
   }
 }
-.tabs {
-  flex: none;
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  padding: 6px 4px calc(var(--bottom) + 2px);
-  background: var(--bar);
-  border-top: 1px solid var(--line);
-}
-.tab {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
-  min-height: 48px;
-  padding-top: 4px;
-  border: none;
-  background: none;
-  color: var(--muted);
-  font-size: 10.5px;
-}
-.tab.on {
-  color: var(--accent);
-  font-weight: 600;
-}
-.tab .alpha {
-  height: 24px;
-  font-family: var(--orig);
-  font-size: 36px;
-  line-height: 22px;
-}
 .soon {
   flex: 1;
   display: flex;
@@ -754,7 +732,7 @@ button {
   text-overflow: ellipsis;
 }
 .wordnav button:disabled {
-  opacity: 0.35;
+  color: var(--disabled);
 }
 .nums {
   flex: none;
@@ -2296,10 +2274,6 @@ h2.jtitle {
 
 /* Sync with the computer isn't right (phoneSync.ts phoneLevel): a dot on the More tab's icon, amber when
    syncs have been failing for over a day, red when it needs the user; and the same dot on More's line. */
-.tab .ticon {
-  position: relative;
-  display: inline-flex;
-}
 .syncdot {
   position: absolute;
   top: -1px;
@@ -2307,7 +2281,7 @@ h2.jtitle {
   width: 9px;
   height: 9px;
   border-radius: 50%;
-  box-shadow: 0 0 0 2px var(--bar);
+  box-shadow: 0 0 0 2px var(--bg);
 }
 .syncdot.sync-amber,
 .syncnote.sync-amber::before {
@@ -2325,4 +2299,184 @@ h2.jtitle {
   margin-right: 7px;
   border-radius: 50%;
   vertical-align: 1px;
+}
+
+/* ---------- the menu (Menu.tsx): ☰ in every top bar, the screens in the desktop sidebar's order ---------- */
+.menubtn {
+  position: relative;
+  width: 40px;
+  color: var(--text);
+}
+.menubtn .syncdot {
+  top: 9px;
+  right: 4px;
+}
+.menuscrim {
+  z-index: 20;
+}
+.menu {
+  position: fixed;
+  z-index: 21;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: min(300px, 82vw);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow-y: auto;
+  padding: calc(var(--top) + 14px) 12px calc(var(--bottom) + 16px) calc(env(safe-area-inset-left) + 12px);
+  background: var(--panel);
+  border-right: 1px solid var(--border);
+  box-shadow: 8px 0 28px var(--scrim);
+  animation: slidein 0.22s ease-out;
+}
+@keyframes slidein {
+  from {
+    transform: translateX(-100%);
+  }
+}
+.menu .brand {
+  padding: 0 4px 14px;
+}
+.menu .item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 48px;
+  padding: 0 12px;
+  border: none;
+  border-radius: 10px;
+  background: none;
+  color: var(--text);
+  font-size: 17px;
+  text-align: left;
+}
+.menu .item.on {
+  background: var(--accentsoft);
+  color: var(--accent);
+  font-weight: 600;
+}
+.menu svg.i {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex-shrink: 0;
+}
+.menu .item:not(.on) svg.i {
+  color: var(--muted);
+}
+.menu .grow {
+  flex: 1;
+  min-height: 16px;
+}
+.menusync {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 4px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+.menusync .dot {
+  flex: none;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+.menusync .dot.sync-ok {
+  background: var(--green);
+}
+.menusync .dot.sync-amber {
+  background: var(--amber);
+}
+.menusync .dot.sync-red {
+  background: var(--red);
+}
+.menusync .what {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow-wrap: anywhere;
+}
+.menusync .t {
+  font-size: 14px;
+  font-weight: 600;
+}
+.menusync .s {
+  font-size: 13px;
+  color: var(--muted);
+}
+.menusync button {
+  flex: none;
+  width: auto;
+  height: 34px;
+  padding: 0 12px;
+  font-size: 14px;
+}
+
+/* The desktop's logo (src/styles.css .wordmark): the sword on its navy plate, gold in dark, silver in light. */
+.wordmark {
+  width: 100%;
+  height: auto;
+  display: block;
+  overflow: visible;
+  --wm-bg: #0b1f3a;
+  --wm-disc: #26354a;
+  --wm-1: #ffffff;
+  --wm-2: #d4dbe3;
+  --wm-3: #6b7784;
+  --wm-4: #eef1f5;
+  --wm-5: #9aa5b1;
+  --wm-edge: #3a434e;
+  --wm-shadow: rgba(0, 0, 0, 0.7);
+}
+.wordmark .medal {
+  --sw-light: #f3f6f9;
+  --sw-dark: #a9b4c0;
+  --sw-fuller: #66727f;
+  --sw-gold: #c9d1da;
+  --sw-grip: #4a5563;
+  --sw-wrap: #6d7987;
+  --sw-pin: #8b96a2;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .wordmark {
+    --wm-1: #fff6d8;
+    --wm-2: #efcb76;
+    --wm-3: #8f631c;
+    --wm-4: #f7dc95;
+    --wm-5: #b5832b;
+    --wm-edge: #6b4a17;
+  }
+  :root:not([data-theme="light"]) .wordmark .medal {
+    --sw-light: #efd9a4;
+    --sw-dark: #c6974a;
+    --sw-fuller: #8a6630;
+    --sw-gold: #d8b160;
+    --sw-grip: #6e4526;
+    --sw-wrap: #8e5d35;
+    --sw-pin: #b48a3e;
+  }
+}
+:root[data-theme="dark"] .wordmark {
+  --wm-1: #fff6d8;
+  --wm-2: #efcb76;
+  --wm-3: #8f631c;
+  --wm-4: #f7dc95;
+  --wm-5: #b5832b;
+  --wm-edge: #6b4a17;
+}
+:root[data-theme="dark"] .wordmark .medal {
+  --sw-light: #efd9a4;
+  --sw-dark: #c6974a;
+  --sw-fuller: #8a6630;
+  --sw-gold: #d8b160;
+  --sw-grip: #6e4526;
+  --sw-wrap: #8e5d35;
+  --sw-pin: #b48a3e;
 }

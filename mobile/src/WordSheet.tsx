@@ -2,10 +2,11 @@
 // SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import { addPluginListener, invoke } from "@tauri-apps/api/core";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { fmtRef } from "../../src/bible";
 import { headwords, lexiconParts, renderHtml, Token } from "../../src/esword";
-import { api, Article } from "./api";
+import { api, Article, TopicHit } from "./api";
+import { wordAtPoint } from "../../src/wordAt";
 import { Icon } from "./icons";
 
 /** Says an original-language word through the native plugin, apart from Listen (which carries on): a Hebrew
@@ -242,6 +243,214 @@ export function WordSheet({
             )}
             <button className="secondary" onClick={onStudy}>
               Study this verse
+            </button>
+          </div>
+        </div>
+      </section>
+    </>
+  );
+}
+
+// ---- A word tapped in a commentary, a dictionary entry or a book, as the desktop's look-up does ----
+
+type TextWord = { word: string; context: string };
+let tapped: TextWord | null = null;
+const tappedWatchers = new Set<() => void>();
+const setTapped = (w: TextWord | null) => {
+  tapped = w;
+  tappedWatchers.forEach((f) => f());
+};
+
+/** On a tap in rendered text: the word under it, looked up, unless the tap was on a link, a number or
+ *  between words. `context` names where it is: "Easton's Bible Dictionary", a book's chapter. */
+export const tapWord = (context: string) => (e: React.MouseEvent) => {
+  if (window.getSelection()?.toString()) return;
+  const w = wordAtPoint(e.clientX, e.clientY, e.target as HTMLElement);
+  if (w) setTapped({ word: w.word, context });
+};
+
+/** The sheet for a tapped word, mounted once (App.tsx): the Greek and Hebrew words the KJV most often
+ *  translates it with, the dictionaries' entries for it, and Word Study, Search and Dictionary. */
+export function TextWordHost({
+  strongsBible,
+  onWordStudy,
+  onDictionary,
+  onSearch,
+}: {
+  strongsBible?: string;
+  onWordStudy: (num: string) => void;
+  onDictionary: (module: string, topic: string) => void;
+  onSearch: (word: string) => void;
+}) {
+  const w = useSyncExternalStore(
+    (f) => {
+      tappedWatchers.add(f);
+      return () => tappedWatchers.delete(f);
+    },
+    () => tapped,
+  );
+  if (!w) return null;
+  const close = () => setTapped(null);
+  return (
+    <TextWordSheet
+      key={`${w.word}|${w.context}`}
+      {...w}
+      strongsBible={strongsBible}
+      onClose={close}
+      onWordStudy={(n) => (close(), onWordStudy(n))}
+      onDictionary={(m, t) => (close(), onDictionary(m, t))}
+      onSearch={(s) => (close(), onSearch(s))}
+    />
+  );
+}
+
+function TextWordSheet({
+  word,
+  context,
+  strongsBible,
+  onClose,
+  onWordStudy,
+  onDictionary,
+  onSearch,
+}: TextWord & {
+  strongsBible?: string;
+  onClose: () => void;
+  onWordStudy: (num: string) => void;
+  onDictionary: (module: string, topic: string) => void;
+  onSearch: (word: string) => void;
+}) {
+  // The numbers the KJV most often translates it from (the desktop's guess, WordLookup.tsx); undefined while looking.
+  const [guess, setGuess] = useState<string[] | undefined>(strongsBible && word.length >= 3 ? undefined : []);
+  const [pick, setPick] = useState<string | null>(null);
+  const [topics, setTopics] = useState<TopicHit[]>([]);
+  const [entry, setEntry] = useState<Article | null | undefined>(undefined);
+  useEffect(() => {
+    let live = true;
+    (async () => {
+      if (strongsBible && word.length >= 3)
+        for (const h of headwords(word)) {
+          const ns = await api.strongsForWord(strongsBible, h).catch(() => []);
+          if (ns.length) {
+            if (live)
+              setGuess(
+                ns
+                  .slice()
+                  .sort((a, b) => b.count - a.count)
+                  .slice(0, 2)
+                  .map((n) => n.num),
+              );
+            break;
+          }
+        }
+      if (live) setGuess((g) => g ?? []);
+      for (const h of headwords(word)) {
+        const t = await api.findTopics(h).catch(() => []);
+        if (t.length) {
+          if (live) setTopics(t.slice(0, 6));
+          return;
+        }
+      }
+    })();
+    return () => {
+      live = false;
+    };
+  }, [word, strongsBible]);
+  const shown = pick ?? guess?.[0];
+  useEffect(() => {
+    if (!shown) {
+      setEntry(guess === undefined ? undefined : null);
+      return;
+    }
+    let live = true;
+    setEntry(undefined);
+    api
+      .article("lexicon", "strong", shown)
+      .then((a) => live && setEntry(a))
+      .catch(() => live && setEntry(null));
+    return () => {
+      live = false;
+    };
+  }, [shown, guess]);
+  const parts = entry ? lexiconParts(entry.html) : null;
+
+  return (
+    <>
+      <div className="scrim clear" onClick={onClose} />
+      <section className="sheet word" aria-label={`Look up: ${word}`}>
+        <div className="grab" onClick={onClose}>
+          <span />
+        </div>
+        <div className="shead">
+          <h2 style={{ flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            “{word}”{" "}
+            <span className="m" style={{ fontWeight: 400, fontSize: 14 }}>
+              {context}
+            </span>
+          </h2>
+          <button className="done" onClick={onClose}>
+            Done
+          </button>
+        </div>
+        {(guess?.length ?? 0) > 1 && (
+          <div className="nums">
+            {guess!.map((n) => (
+              <button key={n} className={n === shown ? "on" : undefined} onClick={() => setPick(n)}>
+                {n}
+              </button>
+            ))}
+          </div>
+        )}
+        <div className="sbody">
+          {entry === undefined ? (
+            <p className="empty">Opening…</p>
+          ) : !shown || !entry || !parts ? (
+            <p className="empty">No Greek or Hebrew word found for “{word}”.</p>
+          ) : (
+            <>
+              <p className="m" style={{ margin: "0 0 8px" }}>
+                The Greek and Hebrew words the KJV most often translates “{word.toLowerCase()}”:
+              </p>
+              <div className="head">
+                <span className="orig" lang={shown.startsWith("H") ? "he" : "el"}>
+                  {parts.word}
+                </span>
+                <span style={{ display: "flex", flexDirection: "column" }}>
+                  <i className="translit">{parts.translit}</i>
+                  <span className="m">{parts.pron}</span>
+                </span>
+                <SayButton word={parts.word} num={shown} pron={parts.pron} />
+                <span className="spacer" />
+                <span className="tag">{shown}</span>
+              </div>
+              <div className="prose">{renderHtml(parts.rest, { inlineNums: true, onStrongs: (n) => setPick(n) })}</div>
+              {parts.total !== undefined && <p className="m">{parts.total} times in the KJV</p>}
+            </>
+          )}
+          {topics.length > 0 && (
+            <>
+              <p className="label" style={{ marginTop: 14 }}>
+                In the dictionaries
+              </p>
+              <div className="card flush">
+                {topics.map((t) => (
+                  <button key={`${t.module}|${t.topic}`} className="row" onClick={() => onDictionary(t.module, t.topic)}>
+                    <span className="grow">
+                      {t.topic} <span className="m">· {t.title}</span>
+                    </span>
+                    <span className="m">›</span>
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+          <div className="actions">
+            {shown && entry && (
+              <button className="primary" onClick={() => onWordStudy(shown)}>
+                Study this word
+              </button>
+            )}
+            <button className="secondary" onClick={() => onSearch(word)}>
+              Search
             </button>
           </div>
         </div>

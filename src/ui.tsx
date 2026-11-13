@@ -7,6 +7,7 @@ import { api, isReadOnly } from "./api";
 import { bibleSizes } from "./sizes";
 import { Icon } from "./icons";
 import { useApp } from "./state";
+import { wordAtPoint } from "./wordAt";
 
 /** Tooltips everywhere in the app, styled like its popovers in place of macOS's plain ones. Any element there with a title (or data-tip, or an icon-only button's aria-label) gets one: the title moves to data-tip
  *  so the native tooltip doesn't show as well. Shown after a short pause, below the element (above
@@ -91,35 +92,11 @@ export function scrollToThird(el: Element | null | undefined, smooth = true) {
   });
 }
 
-/** The word under a click in rendered text (commentary, a book), and where it is, for the same
- *  look-up popup as a Bible word. Found from the click point rather than by wrapping every word in
- *  an element, so long HTML stays as it is. Null for links, numbers, images, a selection being
- *  made, or a click between words. */
+/** The word under a click in rendered text (commentary, a book), for the same look-up popup as a
+ *  Bible word (wordAt.ts). Null while a selection is being made. */
 export function wordAt(e: React.MouseEvent): { word: string; rect: DOMRect } | null {
   if (window.getSelection()?.toString()) return null;
   return wordAtPoint(e.clientX, e.clientY, e.target as HTMLElement);
-}
-
-function wordAtPoint(x: number, y: number, target: HTMLElement): { word: string; rect: DOMRect } | null {
-  if (target.closest("a, button, input, textarea, img, .strongs, [data-num], [role=button]")) return null;
-  const r = document.caretRangeFromPoint?.(x, y);
-  const node = r?.startContainer;
-  if (!r || !node || node.nodeType !== Node.TEXT_NODE) return null;
-  const text = node.textContent ?? "";
-  const isW = (c: string | undefined) => !!c && /[\p{L}\p{M}'’]/u.test(c);
-  let a = r.startOffset,
-    b = r.startOffset;
-  while (a > 0 && isW(text[a - 1])) a--;
-  while (b < text.length && isW(text[b])) b++;
-  while (a < b && /['’]/.test(text[a])) a++;
-  while (b > a && /['’]/.test(text[b - 1])) b--;
-  if (b - a < 2) return null;
-  const range = document.createRange();
-  range.setStart(node, a);
-  range.setEnd(node, b);
-  const rect = range.getBoundingClientRect();
-  if (x < rect.left - 2 || x > rect.right + 2 || y < rect.top - 2 || y > rect.bottom + 2) return null;
-  return { word: text.slice(a, b), rect };
 }
 
 // Pointing at a word in rendered text highlights it and shows a hand, as a Bible word does. The

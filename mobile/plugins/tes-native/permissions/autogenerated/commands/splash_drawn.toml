@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-splash-drawn"
+description = "Enables the splash_drawn command without any pre-configured scope."
+commands.allow = ["splash_drawn"]
+
+[[permission]]
+identifier = "deny-splash-drawn"
+description = "Denies the splash_drawn command without any pre-configured scope."
+commands.deny = ["splash_drawn"]

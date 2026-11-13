@@ -21,7 +21,13 @@ import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
 import android.speech.tts.Voice
 import android.util.Log
+import android.graphics.Color
+import android.view.Gravity
 import android.view.HapticFeedbackConstants
+import android.view.View
+import android.view.ViewGroup
+import android.widget.FrameLayout
+import android.widget.ImageView
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import androidx.activity.result.ActivityResult
@@ -114,8 +120,42 @@ class TesNativePlugin(private val activity: Activity) : Plugin(activity) {
     invoke.resolve()
   }
 
+  /** The logo and Hebrews 4:12 on the navy (tools/make_splash_logo.py), over the web view until the page's own opening screen has drawn (splashDrawn),
+   *  so no blank screen shows between Android's splash and the page's. */
+  private var cover: View? = null
+
+  private fun coverUntilDrawn() {
+    val res = activity.resources
+    val id = res.getIdentifier("splash_logo", "drawable", activity.packageName)
+    if (id == 0) return
+    val d = res.displayMetrics.density
+    val frame = FrameLayout(activity).apply { setBackgroundColor(Color.rgb(0x1b, 0x25, 0x32)) }
+    frame.addView(
+      ImageView(activity).apply {
+        setImageResource(id)
+        scaleType = ImageView.ScaleType.FIT_CENTER
+      },
+      FrameLayout.LayoutParams((320 * d).toInt(), (232 * d).toInt(), Gravity.CENTER),
+    )
+    activity.addContentView(frame, ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
+    cover = frame
+    Handler(Looper.getMainLooper()).postDelayed({ uncover() }, 8000)
+  }
+
+  private fun uncover() {
+    cover?.let { (it.parent as? ViewGroup)?.removeView(it) }
+    cover = null
+  }
+
+  @Command
+  fun splashDrawn(invoke: Invoke) {
+    activity.runOnUiThread { uncover() }
+    invoke.resolve()
+  }
+
   override fun load(webView: WebView) {
     view = webView
+    activity.runOnUiThread { coverUntilDrawn() }
     webView.addJavascriptInterface(insets, "TesInsets")
     ViewCompat.setOnApplyWindowInsetsListener(webView) { _, wi ->
       val bars = wi.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout())
@@ -419,6 +459,16 @@ class TesNativePlugin(private val activity: Activity) : Plugin(activity) {
       tts = null
       ready = false
     }
+
+    /** The speech engine went away under it (Android restarted Google's engine: an update, memory, the
+     *  busy first moments after starting), so every call on it fails: a new one, next use. */
+    fun restart() {
+      try {
+        tts?.shutdown()
+      } catch (_: Exception) {}
+      tts = null
+      ready = false
+    }
   }
 
   /** What's being read, so pause can stop and resume can start again from the verse it was on. */
@@ -553,10 +603,14 @@ class TesNativePlugin(private val activity: Activity) : Plugin(activity) {
   /** A voice for the language is listed, to download. */
   private fun voiceListed(t: TextToSpeech, lang: String) = voicesIn(t, lang).any { it.features.contains("notInstalled") }
 
-  private fun speakFrom(i: Int) {
+  private fun speakFrom(i: Int, retried: Boolean = false) {
     listen.use { t ->
       if (t == null) return@use
-      t.stop()
+      // A dead engine (TextToSpeech says ERROR to everything): start a new one and try again, once.
+      if (t.stop() == TextToSpeech.ERROR && !retried) {
+        listen.restart()
+        return@use speakFrom(i, true)
+      }
       val english = voiceFor(t)
       val others = mutableMapOf<String, Voice?>()
       val voiceOf = { l: String ->
@@ -716,14 +770,21 @@ class TesNativePlugin(private val activity: Activity) : Plugin(activity) {
   @Command
   fun say(invoke: Invoke) {
     val args = invoke.parseArgs(SayArgs::class.java)
-    val go: (TextToSpeech) -> Unit = { t ->
-      val lang = Locale(if (args.lang == "he") "iw" else args.lang)
-      val has = t.isLanguageAvailable(lang) >= TextToSpeech.LANG_AVAILABLE
-      t.language = if (has) lang else Locale.ENGLISH
-      t.setSpeechRate(if (has) 0.8f else 0.9f)
-      t.speak(if (has) args.word else args.pron.replace(Regex("[-'ʼ]"), " "), TextToSpeech.QUEUE_FLUSH, Bundle(), "word")
+    lateinit var go: (TextToSpeech, Boolean) -> Unit
+    go = { t, retried ->
+      // A dead engine (TextToSpeech says ERROR to everything): start a new one and try again, once.
+      if (t.stop() == TextToSpeech.ERROR && !retried) {
+        word.restart()
+        wordEngine { n -> n?.let { go(it, true) } }
+      } else {
+        val lang = Locale(if (args.lang == "he") "iw" else args.lang)
+        val has = t.isLanguageAvailable(lang) >= TextToSpeech.LANG_AVAILABLE
+        t.language = if (has) lang else Locale.ENGLISH
+        t.setSpeechRate(if (has) 0.8f else 0.9f)
+        t.speak(if (has) args.word else args.pron.replace(Regex("[-'ʼ]"), " "), TextToSpeech.QUEUE_FLUSH, Bundle(), "word")
+      }
     }
-    wordEngine { it?.let(go) }
+    wordEngine { it?.let { t -> go(t, false) } }
     invoke.resolve()
   }
 

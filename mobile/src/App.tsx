@@ -3,18 +3,19 @@
 
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
-import { discover, pair, startSync, useSyncLevel } from "./phoneSync";
+import { discover, pair, startSync } from "./phoneSync";
 import { useEffect, useRef, useState } from "react";
 import { api, libraryIs, Module, save, saved, scene } from "./api";
-import { Icon } from "./icons";
 import { Read } from "./Read";
 import { Jump, Search } from "./Search";
 import { WordStudy } from "./WordStudy";
 import { Library } from "./Library";
-import { More, PlansTab } from "./More";
+import { HelpScreen, JournalScreen, PlansTab, SettingsScreen } from "./More";
+import { MenuDrawer } from "./Menu";
 import { JournalHost, newEntry, openEntry } from "./JournalEdit";
 import { journal } from "./journal";
 import { DictionarySheet } from "./Dictionary";
+import { TextWordHost } from "./WordSheet";
 import { syncReminders } from "./Reminder";
 import { plansStore } from "./plansStore";
 import { history, Tab } from "./history";
@@ -28,18 +29,8 @@ const VOICE: Record<string, { voice: string; what: string }> = {
 };
 const ANDROID = /Android/.test(navigator.userAgent);
 
-const TABS: { id: Exclude<Tab, "words">; label: string }[] = [
-  { id: "read", label: "Read" },
-  { id: "plans", label: "Plans" },
-  { id: "search", label: "Search" },
-  { id: "library", label: "Library" },
-  { id: "more", label: "More" },
-];
-
 export function App() {
   const [tab, setTab] = useState<Tab>("read");
-  // A dot on More when sync with the computer isn't right (phoneSync.ts).
-  const syncLevel = useSyncLevel();
   /** Something to open in Read, from another tab; n makes the same place twice count twice. */
   const [jump, setJump] = useState<(Jump & { n: number }) | null>(null);
   const [word, setWord] = useState<string>(() => saved("wordStudy", "G26"));
@@ -51,7 +42,9 @@ export function App() {
     setTab("words");
   };
   /** The dictionaries, over everything: a word to look up, or a dictionary to open at. */
-  const [dict, setDict] = useState<{ start?: string } | null>(null);
+  const [dict, setDict] = useState<{ start?: string; n?: number } | null>(null);
+  /** A word to search for, from a word tapped in a commentary, a dictionary or a book. */
+  const [query, setQuery] = useState<{ q: string; n: number } | null>(null);
   const open = (j: Jump) => {
     setJump({ ...j, n: (jump?.n ?? 0) + 1 });
     setTab("read");
@@ -185,7 +178,9 @@ export function App() {
       // sweeplater: looks for waiting modules again after 8s, as the app coming forward would.
       if (sc.includes("sweeplater")) setTimeout(() => window.dispatchEvent(new Event("tes-inbox")), 8000);
       if (sc.includes("adding")) setTimeout(() => setAdding("Adding 2 modules…"), 2500);
-      if (sc.includes("more")) setTab("more");
+      // Debug: page=<journal|settings|help> opens that screen.
+      const pg = sc.find((x) => x.startsWith("page="))?.slice(5);
+      if (pg === "journal" || pg === "settings" || pg === "help") setTab(pg);
       // entry=<id>: a journal entry open to read; newentry: a new one open to write.
       const en = sc.find((x) => x.startsWith("entry="));
       if (en) journal.load().then(() => openEntry(en.slice(6)));
@@ -228,7 +223,7 @@ export function App() {
 
   return (
     <div className="app">
-      {/* Every tab stays mounted, so each keeps its place while another is shown. */}
+      {/* Every screen stays mounted, so each keeps its place while another is shown. */}
       <div className="screen" hidden={tab !== "read"}>
         <Read
           modules={modules}
@@ -242,7 +237,7 @@ export function App() {
         />
       </div>
       <div className="screen" hidden={tab !== "search"}>
-        <Search modules={modules} active={tab === "search"} onJump={open} />
+        <Search modules={modules} active={tab === "search"} onJump={open} query={query} />
       </div>
       <div className="screen" hidden={tab !== "words"}>
         <WordStudy modules={modules} target={word} onTarget={study} onJump={open} onDictionary={(w) => setDict({ start: w })} />
@@ -272,18 +267,18 @@ export function App() {
           }}
         />
       </div>
-      <div className="screen" hidden={tab !== "more"}>
-        <More
-          modules={modules}
-          onJump={open}
-          onWords={() => {
-            history.push({ tab: "words", word });
-            setTab("words");
-          }}
-        />
+      <div className="screen" hidden={tab !== "journal"}>
+        <JournalScreen />
+      </div>
+      <div className="screen" hidden={tab !== "settings"}>
+        <SettingsScreen modules={modules} />
+      </div>
+      <div className="screen" hidden={tab !== "help"}>
+        <HelpScreen />
       </div>
       {dict && (
         <DictionarySheet
+          key={dict.n}
           modules={modules}
           start={dict.start}
           onGo={(r) => {
@@ -293,6 +288,20 @@ export function App() {
           onClose={() => setDict(null)}
         />
       )}
+      <TextWordHost
+        strongsBible={modules.find((m) => m.kind === "bible" && m.strongs && m.id.startsWith("kjv"))?.id ?? modules.find((m) => m.kind === "bible" && m.strongs)?.id}
+        onWordStudy={study}
+        onDictionary={(m, topic) => {
+          save("dictionary", m);
+          setDict({ start: topic, n: Date.now() });
+        }}
+        onSearch={(q) => {
+          setDict(null);
+          history.push({ tab: "search" });
+          setTab("search");
+          setQuery({ q, n: Date.now() });
+        }}
+      />
       <JournalHost onGo={(r) => open({ ref: r })} />
       {noVoice && (
         <div className="adding" role="alertdialog" aria-label="No voice for this language">
@@ -338,27 +347,13 @@ export function App() {
           {msg.text}
         </div>
       )}
-      <nav className="tabs">
-        {TABS.map((t) => (
-          <button
-            key={t.id}
-            // Word Study is reached from More, so More stays lit there.
-            className={`tab ${tab === t.id || (t.id === "more" && tab === "words") ? "on" : ""}`}
-            onClick={() => {
-              history.push({ tab: t.id });
-              setTab(t.id);
-            }}
-          >
-            <span className="ticon">
-              <Icon name={t.id === "read" ? "book" : t.id === "plans" ? "calendar" : t.id} />
-              {t.id === "more" && syncLevel !== "ok" && (
-                <span className={`syncdot sync-${syncLevel}`} aria-label={syncLevel === "red" ? "Sync needs you" : "Sync isn't working"} />
-              )}
-            </span>
-            {t.label}
-          </button>
-        ))}
-      </nav>
+      <MenuDrawer
+        tab={tab}
+        onPick={(t) => {
+          history.push({ tab: t });
+          setTab(t);
+        }}
+      />
     </div>
   );
 }

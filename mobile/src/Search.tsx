@@ -154,7 +154,18 @@ export function Entry({
   );
 }
 
-export function Search({ modules, active, onJump }: { modules: Module[]; active: boolean; onJump: (j: Jump) => void }) {
+export function Search({
+  modules,
+  active,
+  onJump,
+  query,
+}: {
+  modules: Module[];
+  active: boolean;
+  onJump: (j: Jump) => void;
+  /** A word to search for now (a word tapped in a commentary, a dictionary or a book). */
+  query?: { q: string; n: number } | null;
+}) {
   const bibles = modules.filter((m) => m.kind === "bible");
   const [q, setQ] = useState(last?.q ?? "");
   const [ran, setRan] = useState(last?.ran ?? "");
@@ -192,6 +203,11 @@ export function Search({ modules, active, onJump }: { modules: Module[]; active:
       }
     });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (!query) return;
+    setQ(query.q);
+    run(query.q);
+  }, [query?.n]); // eslint-disable-line react-hooks/exhaustive-deps -- each new query once
   useEffect(() => {
     last = { q, ran, res, scope, scroll: list.current?.scrollTop ?? 0 };
   });

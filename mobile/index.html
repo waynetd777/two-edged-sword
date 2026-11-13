@@ -8,11 +8,11 @@
     <title>Two-edged Sword</title>
   </head>
   <body>
-    <!-- The opening screen, as the iOS launch screen draws it (LaunchScreen.storyboard), until the app has
-         drawn; main.tsx fades it out. Inline so it shows before any script runs. -->
+    <!-- The opening screen, as the launch screen draws it (LaunchScreen.storyboard, Android's cover), until the
+         app has drawn; main.tsx fades it out. The desktop's logo and Hebrews 4:12 at the centre of the navy, 320 by 232
+         (tools/make_splash_logo.py). Inline so it shows before any script runs. -->
     <div id="splash" style="position: fixed; inset: 0; z-index: 100; background: #1b2532; transition: opacity 0.3s">
-      <img src="/splash-icon.png" alt="" style="position: absolute; left: 50%; top: 50%; width: 120px; height: 120px; margin: -90px 0 0 -60px" />
-      <div style="position: absolute; left: 0; right: 0; top: 50%; margin-top: 50px; text-align: center; font: 28px Georgia, 'EB Garamond', serif; color: #e3c27a">Two-edged Sword</div>
+      <img src="/splash-logo.png" alt="Two-edged Sword. For the word of God is quick, and powerful, and sharper than any twoedged sword. Hebrews 4:12" style="position: absolute; left: 50%; top: 50%; width: 320px; height: 232px; margin: -116px 0 0 -160px" />
     </div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>

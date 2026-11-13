@@ -463,6 +463,18 @@
           "markdownDescription": "Denies the speech_stop command without any pre-configured scope."
         },
         {
+          "description": "Enables the splash_drawn command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-splash-drawn",
+          "markdownDescription": "Enables the splash_drawn command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the splash_drawn command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-splash-drawn",
+          "markdownDescription": "Denies the splash_drawn command without any pre-configured scope."
+        },
+        {
           "description": "Enables the tap command without any pre-configured scope.",
           "type": "string",
           "const": "allow-tap",
@@ -499,10 +511,10 @@
           "markdownDescription": "Denies the voices command without any pre-configured scope."
         },
         {
-          "description": "Everything the phone app uses\n#### This default permission set includes:\n\n- `allow-allow-rotation`\n- `allow-speak`\n- `allow-speech-pause`\n- `allow-speech-resume`\n- `allow-speech-stop`\n- `allow-speech-sleep`\n- `allow-voices`\n- `allow-bundled-dir`\n- `allow-inbox-dir`\n- `allow-pick-modules`\n- `allow-discover`\n- `allow-say`\n- `allow-voice-for`\n- `allow-speech-settings`\n- `allow-tap`\n- `allow-register-listener`\n- `allow-remove-listener`",
+          "description": "Everything the phone app uses\n#### This default permission set includes:\n\n- `allow-allow-rotation`\n- `allow-speak`\n- `allow-speech-pause`\n- `allow-speech-resume`\n- `allow-speech-stop`\n- `allow-speech-sleep`\n- `allow-voices`\n- `allow-bundled-dir`\n- `allow-inbox-dir`\n- `allow-pick-modules`\n- `allow-discover`\n- `allow-say`\n- `allow-voice-for`\n- `allow-speech-settings`\n- `allow-tap`\n- `allow-splash-drawn`\n- `allow-register-listener`\n- `allow-remove-listener`",
           "type": "string",
           "const": "default",
-          "markdownDescription": "Everything the phone app uses\n#### This default permission set includes:\n\n- `allow-allow-rotation`\n- `allow-speak`\n- `allow-speech-pause`\n- `allow-speech-resume`\n- `allow-speech-stop`\n- `allow-speech-sleep`\n- `allow-voices`\n- `allow-bundled-dir`\n- `allow-inbox-dir`\n- `allow-pick-modules`\n- `allow-discover`\n- `allow-say`\n- `allow-voice-for`\n- `allow-speech-settings`\n- `allow-tap`\n- `allow-register-listener`\n- `allow-remove-listener`"
+          "markdownDescription": "Everything the phone app uses\n#### This default permission set includes:\n\n- `allow-allow-rotation`\n- `allow-speak`\n- `allow-speech-pause`\n- `allow-speech-resume`\n- `allow-speech-stop`\n- `allow-speech-sleep`\n- `allow-voices`\n- `allow-bundled-dir`\n- `allow-inbox-dir`\n- `allow-pick-modules`\n- `allow-discover`\n- `allow-say`\n- `allow-voice-for`\n- `allow-speech-settings`\n- `allow-tap`\n- `allow-splash-drawn`\n- `allow-register-listener`\n- `allow-remove-listener`"
         }
       ]
     }

@@ -3,6 +3,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Ref } from "../../src/bible";
+import { tapWord } from "./WordSheet";
 import { docSegments, isTitlePara, renderHtml, wordRangeAt } from "../../src/esword";
 import { api, Article } from "./api";
 import { useBookmarks } from "./bookmarks";
@@ -134,7 +135,7 @@ export function DocView({
         <p className="loading">This chapter couldn't be read.</p>
       ) : (
         // In paragraphs, as Listen reads it, so the one being read can be marked and followed.
-        <div className="prose doc" ref={body}>
+        <div className="prose doc" ref={body} onClick={tapWord(`${title}, ${chapter}`)}>
           {said && (
             <span
               className="said saidbox"

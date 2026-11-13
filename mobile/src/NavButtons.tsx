@@ -3,12 +3,14 @@
 
 import { useHistory } from "./history";
 import { Icon } from "./icons";
+import { MenuButton } from "./Menu";
 
-/** Back and forward, at the left of every tab's top bar. */
+/** The menu, then back and forward, at the left of every screen's top bar. */
 export function NavButtons() {
   const h = useHistory();
   return (
     <>
+      <MenuButton />
       <button className="nav" aria-label="Back" disabled={!h.canBack()} onClick={() => h.go(-1)}>
         <Icon name="back" size={22} />
       </button>

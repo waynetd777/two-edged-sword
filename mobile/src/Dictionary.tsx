@@ -3,6 +3,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Ref } from "../../src/bible";
+import { tapWord } from "./WordSheet";
 import { renderHtml } from "../../src/esword";
 import { api, Article, Module, save, saved } from "./api";
 import { Icon } from "./icons";
@@ -291,7 +292,7 @@ export function DictionaryPanel({
             </button>
             <p className="label">{title}</p>
             <h3 className="entry-title">{art.topic}</h3>
-            <div className="prose">
+            <div className="prose" onClick={tapWord(title ?? "Dictionary")}>
               {renderHtml(art.html, {
                 onRef: onGo,
                 topic: (n) => names?.get(n.toLowerCase()),

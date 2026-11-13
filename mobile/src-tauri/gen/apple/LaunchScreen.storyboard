@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- The launch screen: the icon on its navy, the app's full name beneath it, as the page's own splash
-     (mobile/index.html) draws it, so one follows on from the other. -->
+<!-- The launch screen: the desktop's logo and Hebrews 4:12 (SplashLogo, tools/make_splash_logo.py) at the centre of the navy,
+     as the page's own splash (mobile/index.html) and the cover the plugin keeps until it draws
+     (TesNativePlugin.swift coverUntilDrawn) have it, so one follows on from the other. -->
 <document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17150" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="Y6W-OH-hqX">
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17122"/>
@@ -15,32 +16,19 @@
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" image="SplashIcon" translatesAutoresizingMaskIntoConstraints="NO" id="icn-1A-aaa">
-                                <rect key="frame" x="147" y="358" width="120" height="120"/>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" image="SplashLogo" translatesAutoresizingMaskIntoConstraints="NO" id="icn-1A-aaa">
+                                <rect key="frame" x="47" y="332" width="320" height="232"/>
                                 <constraints>
-                                    <constraint firstAttribute="width" constant="120" id="icw-1A-aaa"/>
-                                    <constraint firstAttribute="height" constant="120" id="ich-1A-aaa"/>
+                                    <constraint firstAttribute="width" constant="320" id="icw-1A-aaa"/>
+                                    <constraint firstAttribute="height" constant="232" id="ich-1A-aaa"/>
                                 </constraints>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
-                                        <integer key="value" value="27"/>
-                                    </userDefinedRuntimeAttribute>
-                                </userDefinedRuntimeAttributes>
                             </imageView>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" text="Two-edged Sword" textAlignment="center" lineBreakMode="tailTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="lbl-1A-aaa">
-                                <rect key="frame" x="40" y="498" width="334" height="36"/>
-                                <fontDescription key="fontDescription" name="Georgia" family="Georgia" pointSize="28"/>
-                                <color key="textColor" red="0.890" green="0.761" blue="0.478" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                <nil key="highlightedColor"/>
-                            </label>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="vDu-zF-Fre"/>
                         <color key="backgroundColor" red="0.106" green="0.145" blue="0.196" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
                             <constraint firstItem="icn-1A-aaa" firstAttribute="centerX" secondItem="5EZ-qb-Rvc" secondAttribute="centerX" id="c01-1A-aaa"/>
-                            <constraint firstItem="icn-1A-aaa" firstAttribute="centerY" secondItem="5EZ-qb-Rvc" secondAttribute="centerY" constant="-30" id="c02-1A-aaa"/>
-                            <constraint firstItem="lbl-1A-aaa" firstAttribute="centerX" secondItem="5EZ-qb-Rvc" secondAttribute="centerX" id="c03-1A-aaa"/>
-                            <constraint firstItem="lbl-1A-aaa" firstAttribute="top" secondItem="icn-1A-aaa" secondAttribute="bottom" constant="20" id="c04-1A-aaa"/>
+                            <constraint firstItem="icn-1A-aaa" firstAttribute="centerY" secondItem="5EZ-qb-Rvc" secondAttribute="centerY" id="c02-1A-aaa"/>
                         </constraints>
                     </view>
                 </viewController>
@@ -49,6 +37,6 @@
         </scene>
     </scenes>
     <resources>
-        <image name="SplashIcon" width="120" height="120"/>
+        <image name="SplashLogo" width="320" height="232"/>
     </resources>
 </document>

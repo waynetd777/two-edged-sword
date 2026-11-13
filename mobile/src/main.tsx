@@ -4,6 +4,9 @@
 import { createRoot } from "react-dom/client";
 import "@fontsource-variable/atkinson-hyperlegible-next";
 import "@fontsource/eb-garamond/greek-400.css";
+// The logo at the top of the menu (Menu.tsx), as on the desktop.
+import "@fontsource/cinzel-decorative/700.css";
+import "@fontsource/cinzel-decorative/900.css";
 import "./styles.css";
 import { App } from "./App";
 import { applyPrefs } from "./Settings";
@@ -49,6 +52,10 @@ document.addEventListener(
 );
 window.addEventListener("tes-insets", applyAndroidInsets);
 createRoot(document.getElementById("root")!).render(<App />);
+
+// The page's opening screen has drawn: the launch screen's copy over the web view can go (the plugin's
+// splash_drawn), with nothing blank between them.
+requestAnimationFrame(() => requestAnimationFrame(() => invoke("plugin:tes-native|splash_drawn").catch(() => {})));
 
 // The opening screen goes once the app has drawn, after a moment so it's seen rather than flashed.
 const started = performance.now();

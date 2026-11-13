@@ -3,6 +3,7 @@
 
 import { ReactNode, TouchEvent, useEffect, useRef, useState } from "react";
 import { fmtRef, Ref } from "../../src/bible";
+import { tapWord } from "./WordSheet";
 import { renderHtml } from "../../src/esword";
 import { api, Commentary, Coverage, save, saved, scene, useLibraryKey } from "./api";
 import { Icon } from "./icons";
@@ -168,7 +169,9 @@ export function Study({
         <p className="label">
           {tab === "xrefs" ? (curX?.title ?? "Cross-references") : (current?.title ?? module)} · {span(e, at.book)}
         </p>
-        <div className="prose">{renderHtml(e.html, { onRef: go })}</div>
+        <div className="prose" onClick={tab === "xrefs" ? undefined : tapWord(`${current?.title ?? module} on ${fmtRef(at)}`)}>
+          {renderHtml(e.html, { onRef: go })}
+        </div>
       </div>
     ));
   };

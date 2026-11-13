@@ -175,6 +175,13 @@ async fn tap<R: Runtime>(app: AppHandle<R>) -> Result<(), String> {
     native(&app, "tap", ())
 }
 
+/// The page's own opening screen has drawn: the launch screen's logo, kept over the web view until
+/// then so no blank screen shows between the two, can go.
+#[command]
+async fn splash_drawn<R: Runtime>(app: AppHandle<R>) -> Result<(), String> {
+    native(&app, "splashDrawn", ())
+}
+
 /// Android: where the bundled modules were copied out of the APK, once they have been.
 #[command]
 async fn bundled_dir<R: Runtime>(app: AppHandle<R>) -> Result<serde_json::Value, String> {
@@ -253,7 +260,8 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
             pick_modules,
             discover,
             say,
-            tap
+            tap,
+            splash_drawn
         ])
         .setup(|_app, _api| {
             #[cfg(target_os = "ios")]

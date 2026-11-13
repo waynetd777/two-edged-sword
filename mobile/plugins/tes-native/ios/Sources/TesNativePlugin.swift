@@ -145,10 +145,14 @@ class TesNativePlugin: Plugin, AVSpeechSynthesizerDelegate {
   private var interrupted = false
   /// The sleep timer: the reading stops at its end, here, as the page sleeps with the screen locked.
   private var sleep: DispatchWorkItem?
+  /// The launch screen's logo on its navy, over the web view until the page's own opening screen has
+  /// drawn (splashDrawn), so no blank screen shows between them.
+  private var cover: UIView?
 
   public override func load(webview: WKWebView) {
     super.load(webview: webview)
     self.webview = webview
+    if Thread.isMainThread { coverUntilDrawn(webview) } else { DispatchQueue.main.async { self.coverUntilDrawn(webview) } }
     synth.delegate = self
     wordSynth.delegate = self
     DispatchQueue.main.async { self.hookViewController() }
@@ -284,6 +288,47 @@ class TesNativePlugin: Plugin, AVSpeechSynthesizerDelegate {
       } }
       picker.delegate = self.pickerDelegate
       vc.present(picker, animated: true)
+    }
+  }
+
+  // ---------- the opening screen ----------
+
+  /// The launch screen again (LaunchScreen.storyboard: SplashLogo, 320 by 232, at the centre of the navy),
+  /// laid over the web view, which is blank until the page draws. Gone after 8 seconds whatever happens.
+  private func coverUntilDrawn(_ wv: WKWebView) {
+    guard let logo = UIImage(named: "SplashLogo") else { return }
+    let v = UIView()
+    v.backgroundColor = UIColor(red: 0x1b / 255.0, green: 0x25 / 255.0, blue: 0x32 / 255.0, alpha: 1)
+    v.isUserInteractionEnabled = false
+    v.translatesAutoresizingMaskIntoConstraints = false
+    let img = UIImageView(image: logo)
+    img.contentMode = .scaleAspectFit
+    img.translatesAutoresizingMaskIntoConstraints = false
+    v.addSubview(img)
+    wv.addSubview(v)
+    NSLayoutConstraint.activate([
+      v.leadingAnchor.constraint(equalTo: wv.leadingAnchor),
+      v.trailingAnchor.constraint(equalTo: wv.trailingAnchor),
+      v.topAnchor.constraint(equalTo: wv.topAnchor),
+      v.bottomAnchor.constraint(equalTo: wv.bottomAnchor),
+      img.widthAnchor.constraint(equalToConstant: 320),
+      img.heightAnchor.constraint(equalToConstant: 232),
+      img.centerXAnchor.constraint(equalTo: v.centerXAnchor),
+      img.centerYAnchor.constraint(equalTo: v.centerYAnchor),
+    ])
+    cover = v
+    DispatchQueue.main.asyncAfter(deadline: .now() + 8) { self.uncover() }
+  }
+
+  private func uncover() {
+    cover?.removeFromSuperview()
+    cover = nil
+  }
+
+  @objc public func splashDrawn(_ invoke: Invoke) {
+    DispatchQueue.main.async {
+      self.uncover()
+      invoke.resolve()
     }
   }
 

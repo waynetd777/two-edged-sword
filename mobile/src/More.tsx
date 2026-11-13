@@ -1,7 +1,7 @@
 // Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
 // SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
-import { useEffect, useRef, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import { Module, saved, scene } from "./api";
 import { Help } from "./Help";
 import { JournalList } from "./JournalEdit";
@@ -27,123 +27,42 @@ import {
 import { buildPlan, Choice, CHOICES, plansStore, startPlan, usePlans } from "./plansStore";
 import type { Jump } from "./Search";
 import { Settings } from "./Settings";
-import { phoneProblem, syncNow, useSync, useSyncLevel } from "./phoneSync";
 import { player, PlanStretch, usePlayer } from "./player";
 import { Part } from "./plansShared";
-
-type Page = "home" | "journal" | "settings" | "help";
 
 /** A part's key among the day's ticks. */
 const partKey = (x: { b: number; c: number; v?: number }) => `${x.b}.${x.c}${x.v ? `.${x.v}` : ""}`;
 
-export function More({ modules, onJump, onWords }: { modules: Module[]; onJump: (j: Jump) => void; onWords: () => void }) {
-  const [page, setPage] = useState<Page>("home");
-  const sync = useSync();
-  const syncLevel = useSyncLevel();
-  useEffect(() => {
-    // Debug: page=<settings|help> opens a page.
-    scene.then((sc) => {
-      const pg = sc.find((x) => x.startsWith("page="))?.slice(5) as Page | undefined;
-      if (pg) setPage(pg);
-    });
-  }, []);
-  const title = { home: "More", journal: "Journal", settings: "Settings", help: "Help" }[page];
+/** A screen with a title in its top bar: Journal, Settings and Help. */
+export function Titled({ title, children }: { title: string; children: ReactNode }) {
   return (
     <>
       <header className="topbar">
-        {/* A page under More has its own way back: ‹ to More, not the app's back and forward. */}
-        {page === "home" && <NavButtons />}
-        {page !== "home" && (
-          <button className="nav" aria-label="Back to More" onClick={() => setPage("home")}>
-            <Icon name="back" size={22} />
-          </button>
-        )}
+        <NavButtons />
         <h1 className="bartitle">{title}</h1>
       </header>
-      <div className="results">
-        {page === "home" && (
-          <>
-            {syncLevel !== "ok" && (
-              // Sync with the computer isn't right: what's wrong, and what to do.
-              <div className="card" style={{ marginBottom: 18 }}>
-                <p className={`syncnote sync-${syncLevel}`} style={{ margin: "0 0 10px", overflowWrap: "anywhere" }}>
-                  {phoneProblem(sync)}
-                </p>
-                {sync.needsPairing ? (
-                  <button
-                    className="secondary"
-                    onClick={() => {
-                      setPage("settings");
-                      setTimeout(() => document.getElementById("sync")?.scrollIntoView(), 100);
-                    }}
-                  >
-                    Pair again
-                  </button>
-                ) : (
-                  <button className="secondary" disabled={sync.busy} onClick={() => syncNow().catch(() => {})}>
-                    {sync.busy ? "Syncing…" : "Sync now"}
-                  </button>
-                )}
-              </div>
-            )}
-            {modules.some((m) => m.kind === "devotional") && (
-              <>
-                <p className="label">Today's devotionals</p>
-                <div className="card flush">
-                  {modules
-                    .filter((m) => m.kind === "devotional")
-                    .map((m) => (
-                      <button key={m.id} className="row" onClick={() => onJump({ book: m.id })}>
-                        <Icon name="book" size={20} />
-                        <span className="grow">{m.title}</span>
-                        <span className="m">›</span>
-                      </button>
-                    ))}
-                </div>
-              </>
-            )}
-
-            <p className="label" style={{ marginTop: modules.some((m) => m.kind === "devotional") ? 18 : undefined }}>
-              Study, journal and settings
-            </p>
-            <div className="card flush">
-              <button className="row" onClick={onWords}>
-                <span
-                  aria-hidden="true"
-                  style={{ width: 20, textAlign: "center", fontFamily: "var(--orig)", fontSize: 26, lineHeight: "20px" }}
-                >
-                  α
-                </span>
-                <span className="grow">Word Study</span>
-                <span className="m">›</span>
-              </button>
-              <button className="row" onClick={() => setPage("journal")}>
-                <Icon name="note" size={20} />
-                <span className="grow">Journal</span>
-                <span className="m">›</span>
-              </button>
-              <button className="row" onClick={() => setPage("settings")}>
-                <Icon name="settings" size={20} />
-                <span className="grow">Settings</span>
-                <span className="m">›</span>
-              </button>
-              <button className="row" onClick={() => setPage("help")}>
-                <Icon name="info" size={20} />
-                <span className="grow">Help</span>
-                <span className="m">›</span>
-              </button>
-            </div>
-          </>
-        )}
-        {page === "journal" && <JournalList />}
-        {page === "settings" && <Settings modules={modules} />}
-        {page === "help" && <Help />}
-      </div>
+      <div className="results">{children}</div>
     </>
   );
 }
 
-/** The Plans tab: today's reading from the current plan, then the plans to keep or start. */
+export const JournalScreen = () => (
+  <Titled title="Journal">
+    <JournalList />
+  </Titled>
+);
+export const SettingsScreen = ({ modules }: { modules: Module[] }) => (
+  <Titled title="Settings">
+    <Settings modules={modules} />
+  </Titled>
+);
+export const HelpScreen = () => (
+  <Titled title="Help">
+    <Help />
+  </Titled>
+);
+
+/** Quiet time: today's reading from the current plan, today's devotionals, then the plans to keep or start. */
 export function PlansTab({ modules, onJump, onLibrary }: { modules: Module[]; onJump: (j: Jump) => void; onLibrary: () => void }) {
   useEffect(() => {
     // Debug: plan=<choice> starts a plan.
@@ -158,7 +77,7 @@ export function PlansTab({ modules, onJump, onLibrary }: { modules: Module[]; on
     <>
       <header className="topbar">
         <NavButtons />
-        <h1 className="bartitle">Plans</h1>
+        <h1 className="bartitle">Quiet time</h1>
       </header>
       <div className="results" ref={top}>
         <p className="label" style={{ display: "flex", justifyContent: "space-between" }}>
@@ -171,6 +90,24 @@ export function PlansTab({ modules, onJump, onLibrary }: { modules: Module[]; on
           <div className="card">
             <p style={{ margin: 0 }}>Choose a reading plan below, and today's reading shows here each day.</p>
           </div>
+        )}
+        {modules.some((m) => m.kind === "devotional") && (
+          <>
+            <p className="label" style={{ marginTop: 18 }}>
+              Today's devotionals
+            </p>
+            <div className="card flush">
+              {modules
+                .filter((m) => m.kind === "devotional")
+                .map((m) => (
+                  <button key={m.id} className="row" onClick={() => onJump({ book: m.id })}>
+                    <Icon name="book" size={20} />
+                    <span className="grow">{m.title}</span>
+                    <span className="m">›</span>
+                  </button>
+                ))}
+            </div>
+          </>
         )}
         <div style={{ marginTop: 18 }}>
           <Plans modules={modules} onLibrary={onLibrary} onStarted={() => top.current?.scrollTo({ top: 0, behavior: "smooth" })} />
@@ -244,7 +181,7 @@ function TodayCard({ plan, onJump }: { plan: Plan; onJump: (j: Jump) => void }) 
         </p>
       )}
       {finished ? (
-        <p style={{ margin: "12px 0 0" }}>Finished. Well done! Choose a new plan under Plans.</p>
+        <p style={{ margin: "12px 0 0" }}>Finished. Well done! Choose a new plan under Quiet time.</p>
       ) : (
         <>
           <div style={{ marginTop: 8 }}>

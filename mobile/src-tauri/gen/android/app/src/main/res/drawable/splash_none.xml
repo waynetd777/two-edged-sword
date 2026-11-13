@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Nothing: Android's own splash shows only the navy, and the app's cover (TesNativePlugin.kt) brings in
+     the logo, so the icon doesn't come and go before it. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="@android:color/transparent" />
+</shape>
