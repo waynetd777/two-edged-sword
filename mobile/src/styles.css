@@ -1606,10 +1606,18 @@ input[type="range"] {
   .studyrow {
     gap: 6px;
   }
+}
+/* Phones: ☰ clear of the edge, and the rest tightened so the buttons at the right stay on the screen
+   (the passage's name shortens instead). */
+@media (max-width: 500px) {
   .topbar {
     gap: 4px;
-    padding-right: 8px;
-    padding-left: 4px;
+    padding-right: 6px;
+    padding-left: 12px;
+  }
+  .topbar .menubtn {
+    width: 40px;
+    margin: 0 2px 0 0;
   }
   .topbar .pill {
     padding: 0 9px;
@@ -1621,10 +1629,23 @@ input[type="range"] {
     overflow: hidden;
   }
   .topbar .ibtn {
+    flex: none;
     width: 36px;
   }
+  /* Wide enough apart to tap without catching the next. */
   .topbar .nav {
-    width: 28px;
+    flex: none;
+    width: 36px;
+    margin: 0;
+  }
+}
+/* The narrowest phones (360 points): a little less room between them, so the right-hand buttons stay on. */
+@media (max-width: 380px) {
+  .topbar .menubtn {
+    width: 38px;
+  }
+  .topbar .nav {
+    width: 32px;
   }
 }
 
@@ -2320,8 +2341,8 @@ h2.jtitle {
   color: var(--text);
 }
 .menubtn .syncdot {
-  top: 9px;
-  right: 4px;
+  top: 7px;
+  right: 2px;
 }
 .menuscrim {
   z-index: 20;

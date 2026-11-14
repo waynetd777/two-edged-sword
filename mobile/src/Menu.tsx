@@ -42,12 +42,12 @@ export function MenuButton() {
   return (
     <button className="nav menubtn" aria-label="Menu" aria-haspopup="menu" onClick={() => setOpen(true)}>
       <svg
-        width="22"
-        height="22"
+        width="26"
+        height="26"
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
-        strokeWidth={1.9}
+        strokeWidth={1.8}
         strokeLinecap="round"
         aria-hidden="true"
       >

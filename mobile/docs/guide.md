@@ -5,7 +5,7 @@ Each section below folds open. Tap ☰ at the top left of any screen for the men
 ## Read
 
 - **Next and previous chapter**: swipe left or right.
-- **Go to a passage**: tap the chapter name at the top. Pick a book and chapter, or type a reference like `rom 8 28`.
+- **Go to a passage**: tap the chapter name at the top (shortened on a phone: `Mt 5`). Pick a book and chapter, or type a reference like `rom 8 28`.
 - **Verses or paragraphs**: a verse per line at first; the button at the top switches to paragraphs and back.
 - **Hebrew and other right-to-left Bibles** read from right to left.
 - **Interlinear Bibles** show each original word over its English and Strong's number.

@@ -182,6 +182,9 @@ function Words({
   );
 }
 
+/** A phone rather than a tablet, whichever way it's held: its narrow side under 600 points. */
+const PHONE = Math.min(screen.width, screen.height) < 600;
+
 /** An iPad in landscape: wide enough for the study pane beside the text. */
 const WIDE = "(orientation: landscape) and (min-width: 900px)";
 function useWide(force: boolean) {
@@ -866,16 +869,17 @@ export function Read({
             setGoing(true);
           }}
         >
-          {/* Long names shortened ("Song 8"), so the bar keeps to one line. */}
+          {/* On a phone always the short name ("Mt 5"), so the bar keeps to one line; a tablet has room
+              for the full one, and shortens only a long one in Compare. */}
           {doc ? (
             <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{docMod?.abbrev || docMod?.title || doc.chapter}</span>
           ) : comparing ? (
-            book(loc.book).name.length > 8 ? (
+            PHONE || book(loc.book).name.length > 8 ? (
               fmtRef({ ...loc, verse: sel }, "short")
             ) : (
               fmtRef({ ...loc, verse: sel })
             )
-          ) : book(loc.book).name.length > 10 ? (
+          ) : PHONE ? (
             fmtRef(loc, "short")
           ) : (
             `${book(loc.book).name} ${loc.chapter}`
