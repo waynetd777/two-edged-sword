@@ -128,7 +128,7 @@ The phone app, for iPhone, iPad and Android, is coming soon. Once it's out, it k
 To pair a phone or tablet:
 
 1. In [Settings › Phones and tablets](app:settings#phones-and-tablets), click **Show a pairing code**.
-2. In the phone app, go to More › Settings › Sync, tap **Pair with your computer**, and enter the code.
+2. In the phone app, go to ☰ › Settings › Sync, tap **Pair with your computer**, and enter the code.
 
 The code works for 2 minutes, while Settings is open. Entered wrongly five times, it stops working: show a new one.
 Until a device is paired or a code is showing, this computer doesn't listen for phones at all.

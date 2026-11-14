@@ -588,7 +588,7 @@ reference, and images inline as `data:` URLs.
 | `src-tauri/src/study.rs`, `books.rs` | Writing library material out as files for Ask to search |
 | `index.html` | The splash screen, painted before React starts |
 | `src/scene.ts`, `src-tauri/src/screenshot.rs`, `tools/screenshots.py` | Screenshot mode and the script that drives it |
-| `src/variances.tsx`, `src/KjvHistory.tsx` | The ≠ marks and their popup, and the KJV History page |
+| `src/variances.tsx`, `src/KjvHistory.tsx`, `src/kjvSources.ts` | The ≠ marks and their popup, and the KJV History page; its content (every source and Bible, how they descend, which the library has) is in `kjvSources.ts`, shared with the phone's `mobile/src/KjvHistory.tsx` |
 | `tools/variances/` | Building each translation's differences from the KJV |
 | `tools/sefaria/`, `tools/vulgate/`, `tools/crosswire/` and the rest | Building modules from free sources ([Building modules](#building-modules)) |
 | `tools/make_icons.py` | The icon artwork |
