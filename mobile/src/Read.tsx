@@ -225,10 +225,13 @@ export function Read({
   const [word, setWord] = useState<{ v: number; i: number; num?: string; bible?: string } | null>(null);
   const [comparing, setComparing] = useState(false);
   // An empty list (saved by an older build that let every Bible be unticked) is the default again.
-  const [cmpIds, setCmpIds] = useState<string[]>(() => {
+  const savedCompare = () => {
     const ids = saved<string[]>("compare", COMPARE_DEFAULT);
     return ids.length ? ids : COMPARE_DEFAULT;
-  });
+  };
+  const [cmpIds, setCmpIds] = useState<string[]>(savedCompare);
+  /** Compare's columns when KJV History set a pair ("kjv,asv"), not the saved ones; "" otherwise. */
+  const [pair, setPair] = useState("");
   const [diff, setDiff] = useState<boolean>(() => saved("compareDiff", true));
   const [editing, setEditing] = useState(false);
   const [wideScene, setWideScene] = useState(false);
@@ -455,10 +458,21 @@ export function Read({
 
   // Back and forward are the app's (history.ts): Read's moves are steps in it, and a step back
   // here puts the passage, the verse, Compare and the scroll back.
-  const live = useRef({ loc, sel, comparing, doc });
-  live.current = { loc, sel, comparing, doc };
+  const live = useRef({ loc, sel, comparing, doc, bible, pair });
+  live.current = { loc, sel, comparing, doc, bible, pair };
   useEffect(() => {
-    history.start({ tab: "read", book: loc.book, chapter: loc.chapter, verse: sel, comparing, word: "", doc: docKey(doc), top: 0 });
+    history.start({
+      tab: "read",
+      book: loc.book,
+      chapter: loc.chapter,
+      verse: sel,
+      comparing,
+      word: "",
+      doc: docKey(doc),
+      top: 0,
+      bible,
+      compare: "",
+    });
     history.setSnapshot(() => ({
       book: live.current.loc.book,
       chapter: live.current.loc.chapter,
@@ -466,10 +480,16 @@ export function Read({
       comparing: live.current.comparing,
       doc: docKey(live.current.doc),
       top: page.current?.scrollTop ?? 0,
+      bible: live.current.bible,
+      compare: live.current.pair,
     }));
     return history.onRestore((p) => {
       setWord(null);
       setStudy(false);
+      if (p.bible) setBible(p.bible);
+      // A pair from KJV History there, or the saved columns.
+      setPair(p.compare);
+      setCmpIds(p.compare ? p.compare.split(",") : savedCompare());
       setLoc({ book: p.book, chapter: p.chapter });
       setSel(p.verse);
       setComparing(p.comparing);
@@ -680,6 +700,26 @@ export function Read({
     if (!jump) return;
     setWord(null);
     setStudy(false);
+    // From KJV History: a Bible to read, or two side by side in Compare, where Read is; one step back
+    // returns to the history, with the Bible and Compare's columns as they were.
+    if (jump.bible || jump.compare) {
+      const p = jump.compare?.join(",") ?? "";
+      history.push({
+        tab: "read",
+        doc: "",
+        bible: jump.bible ?? bible,
+        compare: jump.compare ? p : pair,
+        comparing: !!jump.compare || comparing,
+      });
+      setDoc(null);
+      if (jump.bible) setBible(jump.bible);
+      if (jump.compare) {
+        setPair(p);
+        setCmpIds(jump.compare);
+        setComparing(true);
+      }
+      return;
+    }
     if (jump.book) {
       const m = jump.book;
       // A devotional opens at today's reading; a book where it was left.
@@ -1192,7 +1232,18 @@ export function Read({
           onClose={() => setImage(null)}
         />
       )}
-      {editing && <CompareEdit bibles={bibles} ids={cmpIds} onChange={setCmpIds} onClose={() => setEditing(false)} />}
+      {editing && (
+        <CompareEdit
+          bibles={bibles}
+          ids={cmpIds}
+          // Chosen here, the columns are the person's own, saved, rather than KJV History's pair.
+          onChange={(ids) => {
+            setPair("");
+            setCmpIds(ids);
+          }}
+          onClose={() => setEditing(false)}
+        />
+      )}
 
       {going && (
         <GoTo

@@ -12,6 +12,7 @@ import { WordStudy } from "./WordStudy";
 import { Library } from "./Library";
 import { HelpScreen, JournalScreen, PlansTab, SettingsScreen } from "./More";
 import { MenuDrawer } from "./Menu";
+import { KjvHistory } from "./KjvHistory";
 import { JournalHost, newEntry, openEntry } from "./JournalEdit";
 import { journal } from "./journal";
 import { DictionarySheet } from "./Dictionary";
@@ -178,9 +179,9 @@ export function App() {
       // sweeplater: looks for waiting modules again after 8s, as the app coming forward would.
       if (sc.includes("sweeplater")) setTimeout(() => window.dispatchEvent(new Event("tes-inbox")), 8000);
       if (sc.includes("adding")) setTimeout(() => setAdding("Adding 2 modules…"), 2500);
-      // Debug: page=<journal|settings|help> opens that screen.
+      // Debug: page=<journal|settings|help|history> opens that screen.
       const pg = sc.find((x) => x.startsWith("page="))?.slice(5);
-      if (pg === "journal" || pg === "settings" || pg === "help") setTab(pg);
+      if (pg === "journal" || pg === "settings" || pg === "help" || pg === "history") setTab(pg);
       // entry=<id>: a journal entry open to read; newentry: a new one open to write.
       const en = sc.find((x) => x.startsWith("entry="));
       if (en) journal.load().then(() => openEntry(en.slice(6)));
@@ -269,6 +270,9 @@ export function App() {
       </div>
       <div className="screen" hidden={tab !== "journal"}>
         <JournalScreen />
+      </div>
+      <div className="screen" hidden={tab !== "history"}>
+        <KjvHistory modules={modules} onRead={(bible) => open({ bible })} onCompare={(compare) => open({ compare })} />
       </div>
       <div className="screen" hidden={tab !== "settings"}>
         <SettingsScreen modules={modules} />

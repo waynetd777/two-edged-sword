@@ -29,6 +29,10 @@ export interface Jump {
   commentary?: string;
   /** A book to open instead, at the chapter last read in it. */
   book?: string;
+  /** A Bible to read, where Read is (KJV History's labels). */
+  bible?: string;
+  /** Bibles to set side by side in Compare (KJV History's "vs"). */
+  compare?: string[];
 }
 
 /** The last search, for the rest of the session: switching tabs and back keeps it. */

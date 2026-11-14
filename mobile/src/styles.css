@@ -19,6 +19,10 @@
   --amber: #bf8700;
   --green: #1a7f37;
   --disabled: #b7bcc2;
+  --pdbg: #dafbe1;
+  --pdfg: #1a7f37;
+  --pubg: #fff8c5;
+  --pufg: #7d4e00;
   --read: "Atkinson Hyperlegible Next Variable", -apple-system, sans-serif;
   --orig: "EB Garamond", Garamond, Georgia, serif;
   --read-size: 19px;
@@ -43,6 +47,10 @@
     --amber: #d29922;
     --green: #3fb950;
     --disabled: #5f666f;
+    --pdbg: #12261e;
+    --pdfg: #7ee787;
+    --pubg: #2b2111;
+    --pufg: #e3b341;
   }
 }
 :root[data-theme="dark"] {
@@ -62,6 +70,10 @@
   --amber: #d29922;
   --green: #3fb950;
   --disabled: #5f666f;
+  --pdbg: #12261e;
+  --pdfg: #7ee787;
+  --pubg: #2b2111;
+  --pufg: #e3b341;
 }
 :root[data-theme="dark"] {
   color-scheme: dark;
@@ -2479,4 +2491,201 @@ h2.jtitle {
   --sw-grip: #6e4526;
   --sw-wrap: #8e5d35;
   --sw-pin: #b48a3e;
+}
+
+/* ---------- KJV History (KjvHistory.tsx): the desktop's cards and chips (src/styles.css .ks-*), as a list ---------- */
+.ks .seg {
+  margin-bottom: 14px;
+}
+.ks-title {
+  margin: 0 0 6px;
+  font: 600 22px/1.2 var(--read);
+}
+.ks-intro {
+  margin: 0 0 10px;
+  font-size: 14px;
+  line-height: 1.45;
+}
+.ks-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  margin-bottom: 6px;
+}
+.ks-key {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.ks-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+}
+.ks-group > .label {
+  margin: 0;
+}
+.ks-hint {
+  margin: -6px 0 2px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+.ks-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 4px 12px 12px;
+  border-radius: 12px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  scroll-margin-top: 12px;
+}
+.ks-card.ks-have {
+  border-color: var(--green);
+}
+.ks-card.ks-near {
+  border-color: var(--pufg);
+  border-style: dashed;
+}
+.ks-card.ks-main {
+  border: 2px solid var(--accent);
+  background: var(--accentsoft);
+}
+.ks-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 6px 0 0;
+  border: none;
+  background: none;
+  color: var(--text);
+  text-align: left;
+}
+.ks-head .grow {
+  flex: 1;
+  min-width: 0;
+}
+.ks-head b {
+  display: block;
+  font-size: 16px;
+  font-weight: 600;
+}
+.ks-date {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+  font-size: 13px;
+}
+.ks-more {
+  flex: none;
+  color: var(--muted);
+  transition: transform 0.15s;
+}
+.ks-more.on {
+  transform: rotate(180deg);
+}
+.ks-chips {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ks-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.ks-row.wrap {
+  flex-wrap: wrap;
+}
+.ks-chip {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 30px;
+  padding: 0 11px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--bar);
+  color: var(--muted);
+  font-size: 13.5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.ks-legend .ks-chip {
+  min-height: 24px;
+  font-size: 12.5px;
+}
+.ks-chip-have {
+  background: var(--pdbg);
+  color: var(--pdfg);
+}
+.ks-chip-near {
+  background: var(--pubg);
+  color: var(--pufg);
+}
+.ks-chip-rel {
+  background: var(--accentsoft);
+  color: var(--accent);
+}
+.ks-chip-cmp {
+  background: transparent;
+  color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+.ks-apo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  background: var(--pubg);
+  color: var(--pufg);
+  font-size: 12px;
+  font-weight: 700;
+}
+.ks-nt {
+  display: inline-flex;
+  align-items: center;
+  height: 17px;
+  padding: 0 5px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+}
+.ks-about {
+  border-top: 1px solid var(--line);
+  padding-top: 8px;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.ks-about p {
+  margin: 0 0 8px;
+}
+.ks-about p.label {
+  margin: 10px 0 2px;
+}
+.ks-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  margin-top: 8px;
+}
+.ks-links .label {
+  margin: 0;
+  flex-basis: 100%;
+}
+.ks-links .link {
+  min-height: 36px;
+  font-size: 15px;
 }

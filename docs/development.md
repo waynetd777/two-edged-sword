@@ -607,7 +607,7 @@ reference, and images inline as `data:` URLs.
 **What it shares with the desktop**
 
 - Rust: `mobile/src-tauri/src/lib.rs` includes the desktop's `library.rs`, `content.rs`, `search.rs` and `index.rs` with `#[path]`; `store.rs` there gives them the phone's folders.
-- TypeScript: it imports `bible.ts`, `esword.tsx`, `lexicon.ts`, `plans.ts`, `spoken.ts`, `refs.ts`, `dom.ts`, `sync.ts`, `wordAt.ts` and `icons.tsx` (the menu's logo and icons) from `src/`. `vite.config.ts` (`desktopShims`) swaps what those import from the desktop's `api` and `MapPlaces` for `mobile/src/shims`.
+- TypeScript: it imports `bible.ts`, `esword.tsx`, `lexicon.ts`, `plans.ts`, `spoken.ts`, `refs.ts`, `dom.ts`, `sync.ts`, `wordAt.ts`, `kjvSources.ts` (KJV History's content) and `icons.tsx` (the menu's logo and icons) from `src/`. `vite.config.ts` (`desktopShims`) swaps what those import from the desktop's `api` and `MapPlaces` for `mobile/src/shims`.
 - Its Rust is formatted with the desktop's `rustfmt.toml` (copied into `mobile/src-tauri` and the plugin): formatting with the default width rewraps the shared desktop files.
 
 **The native plugin** (`mobile/plugins/tes-native`; Swift for iOS, Kotlin for Android): rotation (only the image viewer turns on iPhone), reading aloud and the word speaker, haptics, the lock screen's controls, Android's bundled modules (copied out of the APK, which SQLite can't open), Add from Files and opened files, finding the computer for sync over Bonjour, and the opening screen: a copy of the launch screen kept over the web view until the page's own has drawn (`splash_drawn`), so nothing blank shows between them. The logo and Hebrews 4:12 on all three are one image, `tools/make_splash_logo.py`'s, drawn as the desktop's splash has them.

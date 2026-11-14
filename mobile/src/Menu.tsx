@@ -16,6 +16,7 @@ export const SCREENS: { id: Tab; label: string; icon: string }[] = [
   { id: "journal", label: "Journal", icon: "journal" },
   { id: "plans", label: "Quiet time", icon: "plans" },
   { id: "library", label: "Library", icon: "library" },
+  { id: "history", label: "KJV History", icon: "lineage" },
   { id: "settings", label: "Settings", icon: "settings" },
   { id: "help", label: "Help", icon: "help" },
 ];
@@ -40,7 +41,16 @@ export function MenuButton() {
   const level = useSyncLevel();
   return (
     <button className="nav menubtn" aria-label="Menu" aria-haspopup="menu" onClick={() => setOpen(true)}>
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.9} strokeLinecap="round" aria-hidden="true">
+      <svg
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.9}
+        strokeLinecap="round"
+        aria-hidden="true"
+      >
         <path d="M4 6.5h16M4 12h16M4 17.5h16" />
       </svg>
       {level !== "ok" && (
@@ -71,7 +81,12 @@ export function MenuDrawer({ tab, onPick }: { tab: Tab; onPick: (t: Tab) => void
           <Wordmark />
         </div>
         {SCREENS.map((s) => (
-          <button key={s.id} className={`item ${tab === s.id ? "on" : ""}`} aria-current={tab === s.id ? "page" : undefined} onClick={() => pick(s.id)}>
+          <button
+            key={s.id}
+            className={`item ${tab === s.id ? "on" : ""}`}
+            aria-current={tab === s.id ? "page" : undefined}
+            onClick={() => pick(s.id)}
+          >
             <DeskIcon name={s.icon} size={20} />
             {s.label}
           </button>
@@ -83,7 +98,9 @@ export function MenuDrawer({ tab, onPick }: { tab: Tab; onPick: (t: Tab) => void
             <>
               <span className={`dot sync-${level}`} aria-hidden="true" />
               <span className="what">
-                <span className="t">{sync.busy ? "Syncing…" : level === "ok" ? `Synced with ${sync.paired.name}` : "Sync isn't right"}</span>
+                <span className="t">
+                  {sync.busy ? "Syncing…" : level === "ok" ? `Synced with ${sync.paired.name}` : "Sync isn't right"}
+                </span>
                 <span className="s">{level === "ok" ? syncLine(sync) : phoneProblem(sync)}</span>
               </span>
               {sync.needsPairing ? (

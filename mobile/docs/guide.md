@@ -1,6 +1,6 @@
 # Two-edged Sword on your phone
 
-Each section below folds open. Tap ☰ at the top left of any screen for the menu: Read, Search, Word Study, Journal, Quiet time, Library, Settings and Help.
+Each section below folds open. Tap ☰ at the top left of any screen for the menu: Read, Search, Word Study, Journal, Quiet time, Library, KJV History, Settings and Help.
 
 ## Read
 
@@ -108,6 +108,25 @@ Modules from Two-edged Sword on your computer (files ending .bbli, .cmti, .dcti,
 <!-- /android -->
 
 A module you add shows as **Added** in the Library. One with the same file name as a module you already have replaces it.
+
+## KJV History
+
+The KJV's family tree, as on the computer, in two tabs:
+
+- **Before the KJV**: the manuscripts, the printed editions the translators used, and the English Bibles before it.
+- **After the KJV**: the English Bibles since, by family, oldest first.
+
+| On a card | Means |
+|---|---|
+| Green label | The text itself is in your library. Tap to read it |
+| Amber label | The closest stand-in you have |
+| Blue label | A related module |
+| **+** | The same Bible with Strong's numbers, glosses or notes |
+| **A** | That Bible has the Apocrypha |
+| **TR**, **MT**, **CT** | The Greek its New Testament follows: Textus Receptus (the KJV's), Majority Text or the modern critical text |
+| **vs KJV** | Opens Compare with the Bible it came from, or the KJV |
+
+Tap a card's name for what it is, how it bears on the KJV, and what it came from and led to. Tap one of those to go to its card.
 
 ## Settings
 

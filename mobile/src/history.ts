@@ -8,7 +8,7 @@
 import { useSyncExternalStore } from "react";
 
 /** The screens, as the menu lists them (Menu.tsx). */
-export type Tab = "read" | "search" | "words" | "journal" | "plans" | "library" | "settings" | "help";
+export type Tab = "read" | "search" | "words" | "journal" | "plans" | "library" | "history" | "settings" | "help";
 
 export interface Place {
   tab: Tab;
@@ -22,6 +22,10 @@ export interface Place {
   doc: string;
   /** How far down the reading page was. */
   top: number;
+  /** The Bible being read there. */
+  bible: string;
+  /** Compare's columns there, when they aren't the saved ones (a pair opened from KJV History), or "". */
+  compare: string;
 }
 
 let stack: Place[] = [];
@@ -43,7 +47,9 @@ const same = (a: Place, b: Place) =>
   a.verse === b.verse &&
   a.comparing === b.comparing &&
   a.word === b.word &&
-  a.doc === b.doc;
+  a.doc === b.doc &&
+  a.bible === b.bible &&
+  a.compare === b.compare;
 const keepCurrent = () => {
   if (at >= 0) stack[at] = { ...stack[at], ...snapshot() };
 };
