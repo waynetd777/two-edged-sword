@@ -128,6 +128,8 @@ The KJV's family tree, as on the computer, in two tabs:
 
 Tap a card's name for what it is, how it bears on the KJV, and what it came from and led to. Tap one of those to go to its card.
 
+On a tablet held sideways it's the computer's tree, with lines from each Bible to the ones that came from it. Tap a card to light up its line of descent, or tap empty space to clear it. Tap a card's ⓘ for what it is and what it came from and led to.
+
 ## Settings
 
 Under ☰ › Settings:
