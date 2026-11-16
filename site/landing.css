@@ -109,12 +109,20 @@ footer p:not(.links) a {
   text-decoration-color: rgba(255, 255, 255, 0.25);
   text-underline-offset: 3px;
 }
+/* The ring follows each control's own shape (a pill stays a pill); only plain text links get a small
+   rounding of their own. */
 a:focus-visible,
 button:focus-visible,
 li:focus-visible {
   outline: 2px solid var(--blue);
   outline-offset: 3px;
+}
+a:not([class]):focus-visible {
   border-radius: 4px;
+}
+::selection {
+  background: rgba(88, 166, 255, 0.32);
+  color: #fff;
 }
 h1,
 h2,
@@ -123,6 +131,8 @@ h3 {
   font-weight: 400;
   margin: 0;
   letter-spacing: -0.025em;
+  /* No word left alone on a heading's last line. */
+  text-wrap: balance;
 }
 p {
   margin: 0;
@@ -502,6 +512,10 @@ p {
   .split.flip {
     grid-template-columns: 1fr;
   }
+  /* Stacked over its picture, the text keeps a comfortable line length. */
+  .split > .text {
+    max-width: 640px;
+  }
   .split.flip > .text {
     order: 0;
   }
@@ -519,7 +533,7 @@ p {
   padding: 0;
   display: grid;
   gap: 6px;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr));
 }
 .steps li {
   position: relative;
@@ -685,12 +699,12 @@ p {
   line-height: 1.5;
 }
 
-/* The menu bar part of Quiet time */
-.split.prayer {
+/* Quiet time's two parts under its tour: the prayer list, and the menu bar */
+.split.prayer,
+.split.tray {
   margin-top: clamp(64px, 8vw, 110px);
 }
 .split.tray {
-  margin-top: clamp(64px, 8vw, 110px);
   grid-template-columns: 4fr 7fr;
 }
 .split.tray figure {
@@ -717,10 +731,11 @@ p {
   margin: 56px auto 0;
   padding: 0 24px 110px;
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 20px;
 }
 .card {
+  min-width: 0;
   display: flex;
   flex-direction: column;
   border-radius: 22px;
@@ -810,10 +825,11 @@ a.card:hover .mini {
 
 @media (max-width: 860px) {
   .cards {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
   .card:last-child:nth-child(odd) {
     width: auto;
+    justify-self: stretch;
   }
 }
 /* Learn: the tutorials on the home page, and the link to them after the install steps. */

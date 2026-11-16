@@ -99,6 +99,7 @@
     steps.forEach(function (li, i) {
       li.setAttribute("tabindex", "0");
       li.setAttribute("role", "button");
+      li.setAttribute("aria-pressed", "false");
       li.addEventListener("click", function () {
         show(i);
         restart();
@@ -117,6 +118,7 @@
       root.style.setProperty("--dur", stay(i) + "ms");
       steps.forEach(function (li, k) {
         li.classList.remove("on");
+        li.setAttribute("aria-pressed", String(k === i));
         if (k === i) {
           void li.offsetWidth;
           li.classList.add("on");
@@ -180,8 +182,9 @@
         timer = null;
       }
     }
+    // Held while the pointer or the keyboard is in the tour, so a step can be read without it moving on.
     function restart() {
-      if (seen) start();
+      if (seen && !root.classList.contains("paused")) start();
     }
 
     root.addEventListener("mouseenter", function () {
@@ -189,6 +192,16 @@
       stop();
     });
     root.addEventListener("mouseleave", function () {
+      if (root.contains(document.activeElement)) return;
+      root.classList.remove("paused");
+      restart();
+    });
+    root.addEventListener("focusin", function () {
+      root.classList.add("paused");
+      stop();
+    });
+    root.addEventListener("focusout", function (e) {
+      if (root.contains(e.relatedTarget) || root.matches(":hover")) return;
       root.classList.remove("paused");
       restart();
     });
