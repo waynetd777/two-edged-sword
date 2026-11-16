@@ -602,7 +602,7 @@ svg.i.sm {
   cursor: pointer;
   white-space: nowrap;
 }
-.btn:hover {
+.btn:hover:not(:disabled) {
   border-color: var(--ring);
 }
 .btn:disabled {
@@ -646,7 +646,7 @@ svg.i.sm {
   cursor: pointer;
   flex-shrink: 0;
 }
-.ibtn:hover {
+.ibtn:hover:not(:disabled) {
   background: var(--hover);
   color: var(--text);
 }
@@ -716,7 +716,7 @@ svg.i.sm {
   white-space: normal;
   text-align: left;
 }
-.chip:hover {
+.chip:hover:not(:disabled) {
   border-color: var(--ring);
 }
 .chip.on {
@@ -763,6 +763,9 @@ svg.i.sm {
   cursor: pointer;
   font-size: 12px;
   color: var(--muted);
+}
+.seg button:not(.on):hover {
+  color: var(--text);
 }
 .seg button.on {
   background: var(--panel);
@@ -2663,6 +2666,17 @@ mark {
   top: 0;
   z-index: 15;
   background: var(--bg);
+}
+/* A short fade under it, so the verses scrolling up go under it rather than being sliced at its edge. */
+.readcol .readhead::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  height: 10px;
+  background: linear-gradient(var(--bg), transparent);
+  pointer-events: none;
 }
 .readcol [data-v] {
   scroll-margin-top: 80px;

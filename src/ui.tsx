@@ -352,7 +352,7 @@ export function Dialog({
   useDismiss(ref, onClose, dismiss);
   return (
     <div className="scrim">
-      <div ref={ref} role="dialog" aria-label={label} className="dialog" style={{ width, height }}>
+      <div ref={ref} role="dialog" aria-modal="true" aria-label={label} className="dialog" style={{ width, height }}>
         {children}
       </div>
     </div>
@@ -380,7 +380,7 @@ export function Seg<T extends string | number>({
   return (
     <div className="seg">
       {options.map(([v, l]) => (
-        <button key={String(v)} type="button" className={v === value ? "on" : ""} onClick={() => onChange(v)}>
+        <button key={String(v)} type="button" className={v === value ? "on" : ""} aria-pressed={v === value} onClick={() => onChange(v)}>
           {l}
         </button>
       ))}

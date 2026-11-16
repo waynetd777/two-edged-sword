@@ -925,7 +925,7 @@ function ClosingCard({
           <Icon name="x" />
         </button>
       </div>
-      {picked.why && <p style={{ margin: 0, font: "400 14.5px/1.55 var(--serif)", color: "var(--muted)" }}>{picked.why}</p>}
+      {picked.why && <p style={{ margin: 0, font: "400 15px/1.55 var(--serif)" }}>{picked.why}</p>}
       {picked.note && (
         <div className="hint" style={{ fontSize: 12.5 }}>
           {picked.note}

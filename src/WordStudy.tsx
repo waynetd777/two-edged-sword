@@ -370,11 +370,11 @@ export function WordStudyScreen() {
           </div>
           <div className="scroll" style={{ display: "flex", flexDirection: "column", gap: 16, minWidth: 0 }}>
             {related.length > 0 && (
-              <div className="card" style={{ padding: "6px 18px" }}>
+              <div className="card" style={{ padding: "6px 18px 8px" }}>
                 <div className="label" style={{ padding: "10px 0 2px" }}>
                   Related words
                 </div>
-                {related.map((r) => (
+                {related.map((r, i) => (
                   <button
                     key={r.num}
                     type="button"
@@ -385,7 +385,7 @@ export function WordStudyScreen() {
                       gridTemplateColumns: "minmax(0,1fr) auto",
                       gap: "2px 10px",
                       padding: "10px 0",
-                      borderBottom: "1px solid var(--border)",
+                      borderBottom: i < related.length - 1 ? "1px solid var(--border)" : 0,
                       borderRadius: 0,
                     }}
                   >
@@ -393,8 +393,19 @@ export function WordStudyScreen() {
                       <span style={{ font: "500 20px var(--display)" }}>{r.word}</span> <i>{r.translit}</i>
                     </span>
                     <span className="n">{r.num}</span>
-                    <span style={{ gridColumn: "1 / -1", fontSize: 12.5, color: "var(--muted)" }}>
-                      {plainText(r.rest.replace(/<num>(.*?)<\/num>/g, "$1")).slice(0, 110)}
+                    {/* Two lines of the definition, ending in an ellipsis where it goes on. */}
+                    <span
+                      style={{
+                        gridColumn: "1 / -1",
+                        fontSize: 12.5,
+                        color: "var(--muted)",
+                        display: "-webkit-box",
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: "vertical",
+                        overflow: "hidden",
+                      }}
+                    >
+                      {plainText(r.rest.replace(/<num>(.*?)<\/num>/g, "$1")).slice(0, 240)}
                     </span>
                   </button>
                 ))}

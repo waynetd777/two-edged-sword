@@ -32,6 +32,11 @@ export const textToken = (text: string): Token => ({ text, word: true, red: fals
 export const HL: HlColor[] = HL_COLOURS;
 export { HL_DOT, hlLabel } from "./ReaderTools";
 
+/** The study pane's width: 520px, narrower in a narrow window (down to 440px, where its tabs still fit) so the chapter keeps room
+ *  to read; the player centres itself on what's left of the window beside it. */
+const STUDY_PANE_W = "min(520px, max(440px, 44%))";
+const STUDY_PANE_RIGHT = "min(520px, max(440px, calc((100vw - 200px) * 0.44)))";
+
 /** The verses of a chapter that journal entries mention. */
 function useNotedVerses(b: number, chapter: number, verses: Verse[]) {
   const { journal } = useApp();
@@ -550,7 +555,9 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        gap: 12,
+        // In a narrow column the buttons go under the title rather than over it.
+        flexWrap: "wrap",
+        gap: "6px 12px",
         padding: focus ? "24px 0 8px" : "4px 0",
       }}
     >
@@ -578,16 +585,16 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
         </div>
       ) : (
         <>
-          <div style={{ display: "flex", alignItems: "baseline", gap: 12, minWidth: 0 }}>
+          <div style={{ display: "flex", alignItems: "baseline", flexWrap: "wrap", gap: "2px 12px", minWidth: 0 }}>
             <h1 data-quiet-anchor style={{ margin: 0, font: "500 30px/1 var(--display)", whiteSpace: "nowrap" }}>
               {book(loc.book).name} {loc.chapter}
             </h1>
             {pill && <span style={{ alignSelf: "center" }}>{pill}</span>}
-            <span style={{ color: "var(--muted)" }}>
+            <span style={{ color: "var(--muted)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "100%" }}>
               {bmod?.title ?? bible} · {verses.length} verses
             </span>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginLeft: "auto" }}>
             {/* The favourite translations from Settings, one click away (for this session, like the Bible picker). */}
             {favs.length > 0 && (
               <div className="seg" role="group" aria-label="Favourite translations">
@@ -865,7 +872,7 @@ export function ReadScreen({ focus, setFocus, openPalette }: { focus: boolean; s
           flexGrow: 1,
           minHeight: 0,
           display: "grid",
-          gridTemplateColumns: !focus && settings.studyPane ? "minmax(0,1fr) 520px" : "minmax(0,1fr)",
+          gridTemplateColumns: !focus && settings.studyPane ? `minmax(0,1fr) ${STUDY_PANE_W}` : "minmax(0,1fr)",
         }}
       >
         <div className="sidenav-wrap">
@@ -1182,7 +1189,7 @@ export function PlayerBar({ focus = false }: { focus?: boolean }) {
       style={{
         position: "fixed",
         left: focus ? 0 : 200,
-        right: app.screen === "read" && !focus && app.settings.studyPane ? 520 : 0,
+        right: app.screen === "read" && !focus && app.settings.studyPane ? STUDY_PANE_RIGHT : 0,
         bottom: 18,
         display: "flex",
         justifyContent: "center",

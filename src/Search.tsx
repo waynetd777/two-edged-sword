@@ -586,7 +586,8 @@ export function SearchScreen() {
                         {new Date(e.created).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
                       </b>
                       <span style={{ font: "400 14.5px/1.55 var(--serif)" }}>
-                        <b>{e.title}.</b> {mark(mdPlain(e.body).slice(0, 200), terms, whole)}…
+                        <b>{e.title}.</b> {mark(mdPlain(e.body).slice(0, 200), terms, whole)}
+                        {mdPlain(e.body).length > 200 && "…"}
                       </span>
                     </button>
                   ))}

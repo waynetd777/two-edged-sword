@@ -213,9 +213,23 @@ export function LibraryScreen() {
         <div style={{ display: "flex", alignItems: "baseline", gap: 14, flexWrap: "wrap" }}>
           <h1 style={{ margin: 0, font: "500 30px/1 var(--display)" }}>Library</h1>
           <span style={{ color: "var(--muted)" }}>
-            {ms.length} modules, {total(ms)} · {n("bible")} Bibles, {n("commentary")} commentaries, {n("dictionary")} dictionaries,{" "}
-            {n("lexicon")} lexicons, {ms.filter((m) => m.kind === "reference" && !isMapBook(m) && !isTalmud(m)).length} reference books,{" "}
-            {ms.filter(isMapBook).length} map books, {ms.filter(isTalmud).length} Talmud tractates, {n("devotional")} devotionals
+            {ms.length} modules, {total(ms)} ·{" "}
+            {(
+              [
+                [n("bible"), "Bible", "Bibles"],
+                [n("commentary"), "commentary", "commentaries"],
+                [n("dictionary"), "dictionary", "dictionaries"],
+                [n("lexicon"), "lexicon", "lexicons"],
+                [ms.filter((m) => m.kind === "reference" && !isMapBook(m) && !isTalmud(m)).length, "reference book", "reference books"],
+                [ms.filter(isMapBook).length, "map book", "map books"],
+                [ms.filter(isTalmud).length, "Talmud tractate", "Talmud tractates"],
+                [n("devotional"), "devotional", "devotionals"],
+              ] as const
+            )
+              // Only the kinds there are, each counted in the singular or plural it needs.
+              .filter(([c]) => c > 0)
+              .map(([c, one, many]) => `${c} ${c === 1 ? one : many}`)
+              .join(", ")}
           </span>
         </div>
         <div className="card" style={{ padding: "14px 16px", display: "flex", alignItems: "center", gap: 14 }}>

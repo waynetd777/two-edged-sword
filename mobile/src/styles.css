@@ -13,6 +13,9 @@
   --onaccent: #ffffff;
   --accentsoft: #ddf4ff;
   --ring: #80ccff;
+  /* Solid fills under white text or a white knob: --ring is too pale for that in light. */
+  --fill: #0969da;
+  --dangerfill: #cf222e;
   --bar: #eef1f4;
   --scrim: rgba(31, 35, 40, 0.34);
   --red: #cf222e;
@@ -41,6 +44,8 @@
     --onaccent: #0d1117;
     --accentsoft: #132339;
     --ring: #1f6feb;
+    --fill: #1f6feb;
+    --dangerfill: #da3633;
     --bar: #010409;
     --scrim: rgba(1, 4, 9, 0.6);
     --red: #ff7b72;
@@ -64,6 +69,8 @@
   --onaccent: #0d1117;
   --accentsoft: #132339;
   --ring: #1f6feb;
+  --fill: #1f6feb;
+  --dangerfill: #da3633;
   --bar: #010409;
   --scrim: rgba(1, 4, 9, 0.6);
   --red: #ff7b72;
@@ -115,6 +122,14 @@ body {
 button {
   font: inherit;
   color: inherit;
+}
+/* Only for a keyboard (an iPad's, say): a tap shows nothing. */
+button:focus-visible,
+a:focus-visible,
+[role="tab"]:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
 }
 
 .app {
@@ -698,7 +713,7 @@ button {
 
 /* ---------- a tapped word ---------- */
 .w.on {
-  background: var(--ring);
+  background: var(--fill);
   color: #ffffff;
   border-radius: 4px;
   padding: 0 2px;
@@ -801,7 +816,7 @@ button {
   height: 44px;
   border: none;
   border-radius: 10px;
-  background: var(--ring);
+  background: var(--fill);
   color: #ffffff;
   font-size: 15px;
   font-weight: 600;
@@ -939,11 +954,18 @@ mark {
   margin: -6px 0 12px;
 }
 .link {
+  position: relative;
   border: none;
   background: none;
   padding: 0;
   color: var(--accent);
   font-size: 12px;
+}
+/* A small word to tap: the finger gets more than the word without moving anything. */
+.link::after {
+  content: "";
+  position: absolute;
+  inset: -12px -8px;
 }
 .switch {
   display: flex;
@@ -978,7 +1000,7 @@ mark {
   transition: left 0.15s;
 }
 .switch input:checked + .knob {
-  background: var(--ring);
+  background: var(--fill);
 }
 .switch input:checked + .knob::after {
   left: 18px;
@@ -1109,7 +1131,7 @@ mark {
 .bars .bar span {
   display: block;
   height: 100%;
-  background: var(--ring);
+  background: var(--fill);
 }
 .bars .n {
   text-align: right;
@@ -1151,7 +1173,7 @@ mark {
   color: var(--red);
 }
 .primary.danger {
-  background: var(--red);
+  background: var(--dangerfill);
   color: #ffffff;
 }
 .round {
@@ -1176,7 +1198,7 @@ mark {
 .progress span {
   display: block;
   height: 100%;
-  background: var(--ring);
+  background: var(--fill);
   transition: width 0.2s;
 }
 /* Tabs whose names differ in length: each as wide as its name needs. */
@@ -1475,7 +1497,7 @@ input[type="range"] {
   border-radius: 6px;
 }
 .said {
-  background: var(--ring);
+  background: var(--fill);
   color: #ffffff;
   border-radius: 3px;
 }
