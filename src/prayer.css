@@ -162,7 +162,7 @@
   opacity: 0.5;
   cursor: default;
 }
-.pr-btn.primary {
+.pr-btn.pr-primary {
   background: var(--accent);
   border-color: var(--accent);
   color: var(--onaccent);
@@ -332,11 +332,9 @@
 
 /* ---------- a point ---------- */
 .pr-point {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto auto;
-  grid-template-areas: "check body trash grip" ". verses verses verses";
-  align-items: start;
-  column-gap: 8px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
   padding: 6px 4px 6px 10px;
   border-top: 1px solid color-mix(in srgb, var(--border) 55%, transparent);
   user-select: none;
@@ -344,11 +342,15 @@
   -webkit-touch-callout: none;
   cursor: default;
 }
+.pr-main {
+  flex: 1 1 0;
+  min-width: 0;
+}
 .pr-point:first-child {
   border-top: 0;
 }
 .pr-check {
-  grid-area: check;
+  flex: none;
   display: grid;
   place-items: center;
   width: 30px;
@@ -395,7 +397,6 @@
 /* Block, not flex: WebKit can measure a flex button in a grid too short, and a long note then runs
    over the verses under it. */
 .pr-body {
-  grid-area: body;
   display: block;
   min-width: 0;
   min-height: 32px;
@@ -428,7 +429,7 @@
   overflow-wrap: anywhere;
 }
 .pr-point > .pr-trash {
-  grid-area: trash;
+  flex: none;
   margin-top: 1px;
   opacity: 0.6;
 }
@@ -465,11 +466,10 @@
   border-radius: 10px;
 }
 .pr-point > .pr-grip {
-  grid-area: grip;
+  flex: none;
   margin-top: 1px;
 }
 .pr-verses {
-  grid-area: verses;
   display: flex;
   flex-wrap: wrap;
   gap: 6px;

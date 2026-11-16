@@ -465,31 +465,35 @@ export function PrayerBoard({
         >
           <Icon name="check" />
         </button>
-        {/* A div acting as a button: WebKit sizes a real <button> too short in this grid when its text
-            wraps, and the verses under it are drawn over the note. */}
-        <div
-          role="button"
-          tabIndex={0}
-          className="pr-body"
-          onClick={() => !suppressClick.current && setEditing({ kind: "point", id: p.id })}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              e.preventDefault();
-              setEditing({ kind: "point", id: p.id });
-            }
-          }}
-          aria-label={`${p.title}${p.note ? `. ${p.note}` : ""}. Edit`}
-        >
-          <span className="pr-title">{p.title}</span>
-          {p.note && <span className="pr-note">{p.note}</span>}
-        </div>
-        {p.verses.length > 0 && (
-          <div className="pr-verses">
-            {p.verses.map((v) => (
-              <VerseChip key={v} v={v} onOpen={onOpenVerse} />
-            ))}
+        {/* The title, note and verses in one column beside the tick, the bin and the grip. A row of flex
+            boxes rather than a grid: WebKit sized a grid row too short for a long note, and the next
+            point was drawn over it. The text is a div acting as a button, as a real <button> is sized
+            too short too. */}
+        <div className="pr-main">
+          <div
+            role="button"
+            tabIndex={0}
+            className="pr-body"
+            onClick={() => !suppressClick.current && setEditing({ kind: "point", id: p.id })}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                setEditing({ kind: "point", id: p.id });
+              }
+            }}
+            aria-label={`${p.title}${p.note ? `. ${p.note}` : ""}. Edit`}
+          >
+            <span className="pr-title">{p.title}</span>
+            {p.note && <span className="pr-note">{p.note}</span>}
           </div>
-        )}
+          {p.verses.length > 0 && (
+            <div className="pr-verses">
+              {p.verses.map((v) => (
+                <VerseChip key={v} v={v} onOpen={onOpenVerse} />
+              ))}
+            </div>
+          )}
+        </div>
         <button type="button" className="pr-ib pr-trash" aria-label={`Delete “${p.title}”`} title="Delete" onClick={() => setAsking(p.id)}>
           <Icon name="trash" />
         </button>
@@ -670,7 +674,7 @@ export function PrayerBoard({
           <Icon name="prayer" /> Pray through
         </button>
         {view === "praying" && !empty && (
-          <button type="button" className="pr-btn primary" onClick={() => setEditing({ kind: "newcat" })}>
+          <button type="button" className="pr-btn pr-primary" onClick={() => setEditing({ kind: "newcat" })}>
             <Icon name="plus" /> New category
           </button>
         )}
@@ -1035,7 +1039,7 @@ function PointEditor({
         <span className="pr-since">Added {fmtDay(point.created)}</span>
         <button
           type="button"
-          className="pr-btn primary"
+          className="pr-btn pr-primary"
           onClick={() => {
             if (verse.trim() && !parseRef(verse)) return setBad(true);
             save();
@@ -1286,7 +1290,7 @@ export function PrayThrough({
               <button type="button" className="pr-btn" onClick={() => setI(0)}>
                 Start again
               </button>
-              <button type="button" className="pr-btn primary" onClick={onClose}>
+              <button type="button" className="pr-btn pr-primary" onClick={onClose}>
                 {doneLabel}
               </button>
             </div>
@@ -1359,7 +1363,7 @@ export function PrayThrough({
                   <Icon name="check" /> Answered
                 </button>
               )}
-              <button type="button" className="pr-btn primary" onClick={() => step(1)}>
+              <button type="button" className="pr-btn pr-primary" onClick={() => step(1)}>
                 {i === ids.length - 1 ? "Finish" : "Next"} <Icon name="fwd" />
               </button>
             </div>
