@@ -55,7 +55,7 @@ Word-by-word Bibles show each original word over its English and its Strong's nu
 
 <a href="images/index.md#translations-and-manuscripts"><picture><source media="(prefers-color-scheme: dark)" srcset="images/kjv-history-dark.png"><img alt="The KJV's family tree: manuscript traditions, printed editions, earlier English Bibles, and which are in the library" src="images/kjv-history-light.png"></picture></a>
 
-**KJV History** (⌘8) is the KJV's family tree, in two tabs:
+**KJV History** (⌘9) is the KJV's family tree, in two tabs:
 
 - **Before the KJV**: the manuscripts, the printed editions the translators used, and the English
   Bibles before it.

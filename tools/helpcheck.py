@@ -40,6 +40,7 @@ APP_ACTIONS = {
     "word",
     "journal",
     "plans",
+    "prayer",
     "library",
     "history",
     "settings",

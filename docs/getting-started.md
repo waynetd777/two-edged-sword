@@ -66,8 +66,9 @@ The sidebar has the eight screens:
 | ⌘4 | [Word Study](app:word) |
 | ⌘5 | [Journal](app:journal) |
 | ⌘6 | [Quiet time](app:plans) |
-| ⌘7 | [Library](app:library) |
-| ⌘8 | [KJV History](app:history) |
+| ⌘7 | [Prayer](app:prayer) |
+| ⌘8 | [Library](app:library) |
+| ⌘9 | [KJV History](app:history) |
 
 Under them are your bookmarks and recent chapters. Hover one for a preview; × removes it.
 

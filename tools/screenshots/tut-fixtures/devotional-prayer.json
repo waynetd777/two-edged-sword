@@ -1,0 +1,122 @@
+{
+ "cats": [
+  {
+   "id": "fam",
+   "name": "Family",
+   "colour": "gold",
+   "order": 2
+  },
+  {
+   "id": "hill",
+   "name": "Hillside Church",
+   "colour": "green",
+   "order": 1
+  },
+  {
+   "id": "work",
+   "name": "Work",
+   "colour": "blue",
+   "order": 3
+  },
+  {
+   "id": "world",
+   "name": "The world",
+   "colour": "purple",
+   "order": 4
+  }
+ ],
+ "points": [
+  {
+   "id": "f1",
+   "cat": "fam",
+   "title": "Wisdom for the children this school year",
+   "verses": [
+    "Jas 1:5"
+   ],
+   "order": 1,
+   "created": "2026-10-30"
+  },
+  {
+   "id": "f2",
+   "cat": "fam",
+   "title": "Strength for a parent after surgery",
+   "verses": [],
+   "order": 2,
+   "created": "2026-11-02",
+   "note": "Rest, and healing through the weeks of recovery"
+  },
+  {
+   "id": "h1",
+   "cat": "hill",
+   "title": "The Thursday group",
+   "verses": [
+    "Col 1:9"
+   ],
+   "order": 1,
+   "created": "2026-10-12",
+   "note": "That we would be filled with the knowledge of His will"
+  },
+  {
+   "id": "h2",
+   "cat": "hill",
+   "title": "Our pastor and the elders",
+   "verses": [
+    "1 Tim 2:1–2"
+   ],
+   "order": 2,
+   "created": "2026-10-12"
+  },
+  {
+   "id": "h3",
+   "cat": "hill",
+   "title": "A new family who visited on Sunday",
+   "verses": [],
+   "order": 3,
+   "created": "2026-11-09"
+  },
+  {
+   "id": "w1",
+   "cat": "work",
+   "title": "Patience with a hard deadline",
+   "verses": [],
+   "order": 1,
+   "created": "2026-11-10"
+  },
+  {
+   "id": "w2",
+   "cat": "work",
+   "title": "A colleague going through a divorce",
+   "verses": [],
+   "order": 2,
+   "created": "2026-11-05",
+   "note": "An open door to encourage him"
+  },
+  {
+   "id": "x1",
+   "cat": "world",
+   "title": "Peace where there is war",
+   "verses": [],
+   "order": 1,
+   "created": "2026-09-01"
+  },
+  {
+   "id": "x2",
+   "cat": "world",
+   "title": "Those who have never heard the gospel",
+   "verses": [
+    "Rom 10:14"
+   ],
+   "order": 2,
+   "created": "2026-09-01"
+  },
+  {
+   "id": "a1",
+   "cat": "hill",
+   "title": "A leader for the youth group",
+   "verses": [],
+   "order": 9,
+   "created": "2026-09-20",
+   "answered": "2026-11-01"
+  }
+ ]
+}

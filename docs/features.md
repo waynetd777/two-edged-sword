@@ -81,7 +81,7 @@ It works the same on Windows, except:
 
 | Keys | Does |
 |---|---|
-| ⌘1 to ⌘8 | Switch screens |
+| ⌘1 to ⌘9 | Switch screens |
 | ⌘K | Go to a reference, word, Strong's number or command |
 | ⌘[ and ⌘] | Back and forward, to where you were |
 | ⌘, | Settings |

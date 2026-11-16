@@ -684,6 +684,9 @@ p {
 }
 
 /* The menu bar part of Quiet time */
+.split.prayer {
+  margin-top: clamp(64px, 8vw, 110px);
+}
 .split.tray {
   margin-top: clamp(64px, 8vw, 110px);
   grid-template-columns: 4fr 7fr;

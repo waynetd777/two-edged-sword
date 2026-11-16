@@ -465,15 +465,24 @@ export function PrayerBoard({
         >
           <Icon name="check" />
         </button>
-        <button
-          type="button"
+        {/* A div acting as a button: WebKit sizes a real <button> too short in this grid when its text
+            wraps, and the verses under it are drawn over the note. */}
+        <div
+          role="button"
+          tabIndex={0}
           className="pr-body"
           onClick={() => !suppressClick.current && setEditing({ kind: "point", id: p.id })}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              setEditing({ kind: "point", id: p.id });
+            }
+          }}
           aria-label={`${p.title}${p.note ? `. ${p.note}` : ""}. Edit`}
         >
           <span className="pr-title">{p.title}</span>
           {p.note && <span className="pr-note">{p.note}</span>}
-        </button>
+        </div>
         {p.verses.length > 0 && (
           <div className="pr-verses">
             {p.verses.map((v) => (

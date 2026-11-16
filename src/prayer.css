@@ -392,15 +392,14 @@
   width: 22px;
   height: 22px;
 }
+/* Block, not flex: WebKit can measure a flex button in a grid too short, and a long note then runs
+   over the verses under it. */
 .pr-body {
   grid-area: body;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+  display: block;
   min-width: 0;
   min-height: 32px;
-  justify-content: center;
-  padding: 5px 2px;
+  padding: 6px 2px 5px;
   border: 0;
   border-radius: 6px;
   background: none;
@@ -409,6 +408,14 @@
 }
 .pr-touch .pr-body {
   min-height: 40px;
+  padding-top: 9px;
+}
+.pr-title,
+.pr-note {
+  display: block;
+}
+.pr-note {
+  margin-top: 2px;
 }
 .pr-title {
   line-height: 1.35;
@@ -920,7 +927,7 @@
   border-radius: 14px;
   background: var(--panel);
   box-shadow: 0 30px 70px -20px var(--shadow, rgba(0, 0, 0, 0.5));
-  outline: none;
+  outline: none !important;
   animation: pr-rise 0.28s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .pr-praytop {
