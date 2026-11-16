@@ -14,7 +14,7 @@ Prayer (⌘7) keeps the people and things you pray for, in categories of your ow
 
 - **New category** adds one. Type its name and press Return; it's then ready for its first point.
 - **Add a point** at the foot of a category adds a prayer point. Return adds it and leaves the box open for the next.
-- Click a point to change it. A point can have a short note under it and verses to pray over: type one such as `Phil 4:6` in **Add a verse** and press Return. **Done** saves it; Esc leaves it as it was.
+- Click a point to change it. A point can have a short note under it and verses to pray over: type one such as `Phil 4:6` in **Add a verse**. Return adds it; **Done** saves the point with it. Esc leaves the point as it was.
 - Click a verse on a point to read it.
 - A category's **⋯** renames it, changes its colour, or deletes it with its points.
 - Click a category's name, or its arrow, to fold it away. Folding is kept on each device.
@@ -46,9 +46,9 @@ Tick the circle beside a point when it's answered. It moves to **Answered** with
 
 <a href="images/index.md#prayer"><picture><source media="(prefers-color-scheme: dark)" srcset="images/prayer-through-dark.png"><img alt="Pray through, showing one prayer point at a time" src="images/prayer-through-light.png"></picture></a>
 
-**Pray through** shows the points one at a time, category by category, so you can pray for each in turn.
+**Pray through** shows the points one at a time, category by category, so you can pray for each in turn. A point's verses are shown in full, in the Bible you're reading; click a reference to read it in context.
 
-- **Next** and **Back**, or → and ←, step through them. Esc closes.
+- **Next** and **Back**, → and ←, or a swipe left or right on a phone or tablet, step through them. Esc closes.
 - **Answered** marks the point answered and goes on.
 
-To pray through your list in Quiet time, turn on the **Prayer** card on a plan's page in [Quiet time](quiet-time.md). It comes after the reading and songs, before the closing verse.
+To pray through your list in Quiet time, turn on the **Prayer** card on a plan's page in [Quiet time](quiet-time.md). It comes first, before the songs and the reading.

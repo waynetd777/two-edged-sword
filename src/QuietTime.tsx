@@ -82,7 +82,8 @@ function quietSteps(
     if (w.before) steps.unshift(step("before", "worship"));
     if (w.after) steps.push(step("after", w.before ? "worship-after" : "worship"));
   }
-  if (plan.prayer && prayer && steps.length) steps.push({ key: "prayer", label: "Prayer", kind: "prayer" });
+  // Prayer first of all, before the songs and the reading.
+  if (plan.prayer && prayer && steps.length) steps.unshift({ key: "prayer", label: "Prayer", kind: "prayer" });
   if (plan.closing && steps.length) steps.push({ key: "closing", label: "Closing verse", kind: "closing", bible: plan.bible });
   // A favourite passage, read every day at the very end, after the closing verse.
   const f = plan.finale;
@@ -684,7 +685,14 @@ export function QuietTime({ focus }: { focus: boolean }) {
         </div>
       )}
       {step.kind === "prayer" && (
-        <PrayThrough key={s.started} list={app.prayer} onChange={app.setPrayer} onClose={() => goRef.current(1)} doneLabel="Go on" />
+        <PrayThrough
+          key={s.started}
+          list={app.prayer}
+          onChange={app.setPrayer}
+          onClose={() => goRef.current(1)}
+          doneLabel="Go on"
+          chapter={(b, c) => api.chapter(app.settings.bible, b, c)}
+        />
       )}
       {step.kind === "worship" && (
         <div

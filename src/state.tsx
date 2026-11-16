@@ -419,7 +419,7 @@ export type QuietStep = { key: string; label: string } & (
   | { kind: "worship"; songs: number; when: "before" | "after"; picked?: Song[]; intro?: string; note?: string }
   /** The last part: a verse or passage chosen to wrap up the day (closing.ts); `picked` once it is. */
   | { kind: "closing"; bible: string; picked?: Closing }
-  /** Pray through the prayer list (PrayerBoard.tsx PrayThrough), before the closing verse. */
+  /** Pray through the prayer list (PrayerBoard.tsx PrayThrough), the first part of all. */
   | { kind: "prayer" }
 );
 export interface Session {

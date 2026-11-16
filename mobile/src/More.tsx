@@ -2,7 +2,11 @@
 // SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import { ReactNode, useEffect, useRef, useState } from "react";
-import { Module, saved, scene } from "./api";
+import { Module, save, saved, scene } from "./api";
+import { PrayThrough } from "../../src/PrayerBoard";
+import { prayingNow } from "../../src/prayer";
+import { prayerStore, usePrayer } from "./prayerStore";
+import { readChapter } from "./PrayerScreen";
 import { Help } from "./Help";
 import { JournalList } from "./JournalEdit";
 import { Icon } from "./icons";
@@ -22,6 +26,7 @@ import {
   tickPart,
   today,
   todayFor,
+  ymd,
   unmarkDayRead,
 } from "./plansShared";
 import { buildPlan, Choice, CHOICES, plansStore, startPlan, usePlans } from "./plansStore";
@@ -73,6 +78,16 @@ export function PlansTab({ modules, onJump, onLibrary }: { modules: Module[]; on
   }, []);
   const plan = current(usePlans());
   const top = useRef<HTMLDivElement>(null);
+  const prayer = usePrayer();
+  const toPray = prayingNow(prayer).length;
+  /** Pray through open, and what follows it (the reading or listening that asked for it first). */
+  const [praying, setPraying] = useState<{ then?: () => void } | null>(null);
+  /** With the plan's Prayer on, Quiet time begins with Pray through, once a day: Start reading and Listen
+   *  open it first, then go on. */
+  const first = (go: () => void) => {
+    if (plan?.prayer && toPray && saved("prayedOn", "") !== ymd(today())) setPraying({ then: go });
+    else go();
+  };
   return (
     <>
       <header className="topbar">
@@ -80,12 +95,13 @@ export function PlansTab({ modules, onJump, onLibrary }: { modules: Module[]; on
         <h1 className="bartitle">Quiet time</h1>
       </header>
       <div className="results" ref={top}>
+        {plan && toPray > 0 && <PrayerCard plan={plan} points={toPray} onPray={() => setPraying({})} />}
         <p className="label" style={{ display: "flex", justifyContent: "space-between" }}>
           <span>Today's reading</span>
           <span style={{ textTransform: "none", letterSpacing: 0, fontWeight: 400 }}>{fmtLong(today()).replace(/ \d{4}$/, "")}</span>
         </p>
         {plan ? (
-          <TodayCard plan={plan} onJump={onJump} />
+          <TodayCard plan={plan} onJump={onJump} first={first} />
         ) : (
           <div className="card">
             <p style={{ margin: 0 }}>Choose a reading plan below, and today's reading shows here each day.</p>
@@ -113,6 +129,21 @@ export function PlansTab({ modules, onJump, onLibrary }: { modules: Module[]; on
           <Plans modules={modules} onLibrary={onLibrary} onStarted={() => top.current?.scrollTo({ top: 0, behavior: "smooth" })} />
         </div>
       </div>
+      {praying && (
+        <PrayThrough
+          list={prayer}
+          onChange={prayerStore.set}
+          touch
+          doneLabel={praying.then ? "Go on" : "Close"}
+          chapter={readChapter}
+          onClose={() => {
+            save("prayedOn", ymd(today()));
+            const then = praying.then;
+            setPraying(null);
+            then?.();
+          }}
+        />
+      )}
     </>
   );
 }
@@ -134,7 +165,37 @@ function stretches(parts: Part[]): PlanStretch[] {
   return out;
 }
 
-function TodayCard({ plan, onJump }: { plan: Plan; onJump: (j: Jump) => void }) {
+/** Prayer, first in Quiet time: the plan's switch for it (synced, as the desktop's Prayer card), and Pray
+ *  through now. */
+function PrayerCard({ plan, points, onPray }: { plan: Plan; points: number; onPray: () => void }) {
+  const prayed = saved("prayedOn", "") === ymd(today());
+  return (
+    <>
+      <p className="label">Prayer</p>
+      <div className="card" style={{ marginBottom: 18, display: "flex", flexDirection: "column", gap: 12 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <span className="grow">
+            {points} {points === 1 ? "point" : "points"} to pray for{prayed ? " · prayed today" : ""}
+          </span>
+          <button className={prayed ? "secondary" : "primary"} style={{ flex: "none" }} onClick={onPray}>
+            Pray through
+          </button>
+        </div>
+        <label className="switch">
+          Start Quiet time with prayer
+          <input
+            type="checkbox"
+            checked={!!plan.prayer}
+            onChange={(e) => plansStore.update({ ...plan, prayer: e.target.checked || undefined })}
+          />
+          <span className="knob" aria-hidden="true" />
+        </label>
+      </div>
+    </>
+  );
+}
+
+function TodayCard({ plan, onJump, first }: { plan: Plan; onJump: (j: Jump) => void; first: (go: () => void) => void }) {
   const pl = usePlayer();
   const d = today();
   const t = todayFor(plan);
@@ -228,11 +289,11 @@ function TodayCard({ plan, onJump }: { plan: Plan; onJump: (j: Jump) => void }) 
                 <div style={{ display: "flex", gap: 8 }}>
                   <button
                     className="primary"
-                    onClick={() => onJump({ ref: partRef(t.parts.find((x) => !ticked.includes(partKey(x))) ?? t.parts[0]) })}
+                    onClick={() => first(() => onJump({ ref: partRef(t.parts.find((x) => !ticked.includes(partKey(x))) ?? t.parts[0]) }))}
                   >
                     {ticked.length ? "Continue reading" : "Start reading"}
                   </button>
-                  <button className="secondary listenplan" onClick={() => (listening ? player.stop() : listen())}>
+                  <button className="secondary listenplan" onClick={() => (listening ? player.stop() : first(listen))}>
                     <Icon name="speaker" size={18} />
                     {listening ? "Stop" : "Listen"}
                   </button>

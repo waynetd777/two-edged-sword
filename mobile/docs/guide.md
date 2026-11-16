@@ -82,6 +82,7 @@ Open it from **☰ › Word Study**, or **Study this word** on a tapped word. Ty
 
 ## Quiet time
 
+- With prayer points to pray for, a **Prayer** card comes first. **Start Quiet time with prayer** makes the day's first **Start reading** or **Listen** open Pray through, then go on to the reading. The setting is the same plan setting as on the computer.
 - **Quiet time** (in ☰) shows today's passages at the top. Tap one to read it, or **Listen** to hear them all. Tick each one as you read it.
 - Then today's devotionals, if you have any.
 - Under them it lists your plans, and starts a new one.
@@ -95,7 +96,7 @@ Open it from **☰ › Word Study**, or **Study this word** on a tapped word. Ty
 - Tap a category's name to fold it away. **⋯** renames it, changes its colour, or deletes it.
 - The bin beside a point deletes it, after asking.
 - Tick the circle when a prayer is answered. It moves to **Answered**, with the day.
-- **Pray through** shows the points one at a time, so you can pray for each in turn.
+- **Pray through** shows the points one at a time, so you can pray for each in turn. Swipe left for the next, right for the one before. A point's verses are shown in full.
 - It's kept in step with your computer when they're paired.
 
 ## Library

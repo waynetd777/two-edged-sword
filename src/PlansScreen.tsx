@@ -267,12 +267,13 @@ export function PlansScreen({ openPalette }: { openPalette: () => void }) {
           </div>
           <TodayCard plan={plan} update={update} />
         </div>
-        {/* Side by side, three across on a wide window, fewer as it narrows. */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 16, alignItems: "stretch" }}>
-          <DevotionalsCard plan={plan} update={update} />
-          <WorshipCard plan={plan} update={update} />
-          <ClosingSetting plan={plan} update={update} />
+        {/* Side by side, four across on a wide window, fewer as it narrows. */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: 16, alignItems: "stretch" }}>
+          {/* In the order Quiet time goes: prayer, songs, devotionals (after the day's reading), closing verse. */}
           <PrayerSetting plan={plan} update={update} />
+          <WorshipCard plan={plan} update={update} />
+          <DevotionalsCard plan={plan} update={update} />
+          <ClosingSetting plan={plan} update={update} />
         </div>
         <TryQuietTime plan={plan} />
         <div style={{ display: "grid", gridTemplateColumns: "420px minmax(0,1fr)", gap: 16 }}>
@@ -1175,7 +1176,7 @@ function WorshipCard({ plan, update }: { plan: Plan; update: (p: Plan) => void }
 }
 
 /** The closing verse in Quiet time: whether to end with one; and a favourite passage read every day after it. */
-/** Praying through the prayer list, before the closing verse. */
+/** Praying through the prayer list, at the start of Quiet time. */
 function PrayerSetting({ plan, update }: { plan: Plan; update: (p: Plan) => void }) {
   const app = useApp();
   const n = prayingNow(app.prayer).length;
@@ -1188,7 +1189,7 @@ function PrayerSetting({ plan, update }: { plan: Plan; update: (p: Plan) => void
           <Switch on={!!plan.prayer} onChange={(on) => update({ ...plan, prayer: on || undefined })} />
         </span>
       </div>
-      <div className="hint">Pray through your prayer list, one point at a time, after the reading and before the closing verse.</div>
+      <div className="hint">Pray through your prayer list, one point at a time, at the start of Quiet time.</div>
       <div style={{ display: "flex", alignItems: "center", gap: 10, borderTop: "1px solid var(--border)", paddingTop: 12, marginTop: 2 }}>
         <span style={{ color: n ? "var(--text)" : "var(--muted)" }}>
           {n ? `${n} ${n === 1 ? "point" : "points"} in ${cats} ${cats === 1 ? "category" : "categories"}` : "Your prayer list is empty"}

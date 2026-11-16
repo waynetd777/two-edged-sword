@@ -913,6 +913,7 @@
   position: relative;
   width: min(640px, 100%);
   min-height: 360px;
+  max-height: 100%;
   display: flex;
   flex-direction: column;
   border: 1px solid var(--border);
@@ -948,6 +949,8 @@
 }
 .pr-praybody {
   flex: 1;
+  min-height: 0;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   padding: 34px 40px 26px;
@@ -975,6 +978,46 @@
   color: var(--muted);
   font-size: 16px;
   line-height: 1.5;
+}
+.pr-scripture {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 2px 0 6px;
+}
+.pr-scripture blockquote {
+  margin: 0;
+  padding: 14px 16px 12px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--pc, var(--accent)) 8%, transparent);
+}
+.pr-scripture p {
+  margin: 0;
+  max-width: 62ch;
+  font-family: var(--serif, var(--read, Georgia, serif));
+  font-size: 17px;
+  line-height: 1.55;
+}
+.pr-cite {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-style: normal;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+button.pr-cite {
+  color: var(--accent);
+  cursor: pointer;
+}
+.pr-touch .pr-cite {
+  font-size: 13px;
+  min-height: 32px;
 }
 .pr-praybody .pr-verses {
   padding: 0;
@@ -1051,8 +1094,12 @@
     width: 100%;
     border: 0;
     border-radius: 0;
-    padding-top: env(safe-area-inset-top);
-    padding-bottom: env(safe-area-inset-bottom);
+    /* The phone app's insets (mobile/src/main.tsx sets them from Android's; iOS's come from env()). */
+    padding-top: var(--top, env(safe-area-inset-top));
+    padding-bottom: var(--bottom, env(safe-area-inset-bottom));
+  }
+  .pr-praytop {
+    padding: 14px 8px 0 22px;
   }
   .pr-praybody {
     padding: 28px 22px 20px;

@@ -39,7 +39,7 @@ export interface SequencePlan {
   worship?: Worship;
   /** A closing verse, chosen by the assistant to wrap up the day's Quiet time (closing.ts). */
   closing?: boolean;
-  /** Pray through the prayer list before the closing verse. */
+  /** Pray through the prayer list at the start of Quiet time. */
   prayer?: boolean;
   /** Parts of the current day ticked off so far (see progressKey). */
   progress?: Progress;

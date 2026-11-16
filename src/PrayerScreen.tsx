@@ -7,6 +7,7 @@
 import { PrayerBoard } from "./PrayerBoard";
 import { SearchField, Topbar } from "./Shell";
 import { useApp } from "./state";
+import { api } from "./api";
 
 export function PrayerScreen({ openPalette }: { openPalette: () => void }) {
   const app = useApp();
@@ -21,6 +22,7 @@ export function PrayerScreen({ openPalette }: { openPalette: () => void }) {
           list={app.prayer}
           onChange={app.setPrayer}
           onOpenVerse={(r) => app.open({ book: r.book, chapter: r.chapter, verse: r.verse, to: r.to }, "read")}
+          chapter={(b, c) => api.chapter(app.settings.bible, b, c)}
         />
       </div>
     </div>

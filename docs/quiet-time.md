@@ -127,7 +127,7 @@ The first time, macOS asks whether the app may control Music.
 
 ## Prayer
 
-Turn on the **Prayer** card on a plan's page to pray through your [prayer list](prayer.md) each day. It comes after the reading and songs, before the closing verse: one point at a time, with **Next**, **Back** and **Answered**. **Go on** at the end carries on with Quiet time.
+Turn on the **Prayer** card on a plan's page to pray through your [prayer list](prayer.md) each day. It comes first, before the songs and the reading: one point at a time, with **Next**, **Back** and **Answered**. **Go on** at the end carries on with Quiet time.
 
 ## Closing verse
 

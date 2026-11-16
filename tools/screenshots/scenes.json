@@ -167,7 +167,8 @@
   },
   {
     "name": "quiet-time",
-    "screen": "plans"
+    "screen": "plans",
+    "prayerFile": "prayer.json"
   },
   {
     "name": "prayer",

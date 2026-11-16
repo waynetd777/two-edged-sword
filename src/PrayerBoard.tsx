@@ -12,6 +12,7 @@ import { Fragment, ReactNode, useEffect, useLayoutEffect, useMemo, useRef, useSt
 import "./prayer.css";
 import { fmtRef, parseRef, Ref } from "./bible";
 import { Icon } from "./icons";
+import { plainText } from "./esword";
 import {
   addCat,
   addPoint,
@@ -116,12 +117,15 @@ export function PrayerBoard({
   onChange,
   onOpenVerse,
   touch = false,
+  chapter,
 }: {
   list: PrayerList;
   onChange: Change;
   onOpenVerse: (r: Ref) => void;
   /** A touch screen: bigger rows, and holding a moment starts a drag. */
   touch?: boolean;
+  /** For Pray through to show the words of a point's verses. */
+  chapter?: ChapterOf;
 }) {
   const [view, setView] = useState<"praying" | "answered">("praying");
   const [editing, setEditing] = useState<Editing>(null);
@@ -717,7 +721,80 @@ export function PrayerBoard({
       <div className="pr-sr" aria-live="polite">
         {say}
       </div>
-      {praying && <PrayThrough list={list} onChange={onChange} onClose={() => setPraying(false)} onOpenVerse={onOpenVerse} />}
+      {praying && (
+        <PrayThrough
+          list={list}
+          onChange={onChange}
+          onClose={() => setPraying(false)}
+          onOpenVerse={onOpenVerse}
+          touch={touch}
+          chapter={chapter}
+        />
+      )}
+    </div>
+  );
+}
+
+/** A chapter's verses, as each app reads them (the text in e-Sword markup). */
+export type ChapterOf = (book: number, chapter: number) => Promise<{ v: number; text: string }[]>;
+
+/** At most this many verses of a passage are shown; a longer one ends with "…". */
+const MOST_VERSES = 12;
+
+/** A passage's words, plain: the verses it names in its first chapter (the whole chapter for "Psalm 23"). */
+async function passage(chapter: ChapterOf, r: Ref): Promise<{ text: string; more: boolean }> {
+  const vs = await chapter(r.book, r.chapter);
+  const from = r.verse ?? 1;
+  const to = r.toChapter && r.toChapter !== r.chapter ? Infinity : (r.to ?? r.verse ?? Infinity);
+  const in_ = vs.filter((x) => x.v >= from && x.v <= to);
+  const shown = in_.slice(0, MOST_VERSES);
+  return {
+    text: shown.map((x) => plainText(x.text)).join(" "),
+    more: in_.length > shown.length || (!!r.toChapter && r.toChapter !== r.chapter),
+  };
+}
+
+/** The words of a point's verses, in Pray through. */
+function Scripture({ refs, chapter, onOpen }: { refs: string[]; chapter: ChapterOf; onOpen?: (r: Ref) => void }) {
+  const [texts, setTexts] = useState<Record<string, { text: string; more: boolean } | null>>({});
+  const key = refs.join("|");
+  useEffect(() => {
+    let live = true;
+    for (const v of refs) {
+      const r = parseRef(v);
+      if (!r) continue;
+      passage(chapter, r)
+        .then((t) => live && setTexts((x) => ({ ...x, [v]: t.text ? t : null })))
+        .catch(() => live && setTexts((x) => ({ ...x, [v]: null })));
+    }
+    return () => {
+      live = false;
+    };
+  }, [key]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Each reference with its words once they're read; a reference without them (not in this Bible, or
+  // not read yet) is still shown, as a chip.
+  return (
+    <div className="pr-scripture">
+      {refs.map((v) => {
+        const t = texts[v];
+        if (!t) return <VerseChip key={v} v={v} onOpen={onOpen} />;
+        const r = parseRef(v);
+        return (
+          <blockquote key={v}>
+            <p>
+              {t.text}
+              {t.more ? " …" : ""}
+            </p>
+            {onOpen && r ? (
+              <button type="button" className="pr-cite" title={`Read ${v}`} onClick={() => onOpen(r)}>
+                {v}
+              </button>
+            ) : (
+              <cite className="pr-cite">{v}</cite>
+            )}
+          </blockquote>
+        );
+      })}
     </div>
   );
 }
@@ -848,7 +925,10 @@ function PointEditor({
     closed.current = true;
     const t = title.trim();
     const n = note.trim();
-    onDone({ title: t || point.title, note: n || undefined, verses });
+    // A verse typed but not yet added with Return is kept too.
+    const typed = parseRef(verse);
+    const label = typed && fmtRef(typed, "short");
+    onDone({ title: t || point.title, note: n || undefined, verses: label && !verses.includes(label) ? [...verses, label] : verses });
   };
   const saveRef = useRef(save);
   saveRef.current = save;
@@ -948,7 +1028,7 @@ function PointEditor({
           type="button"
           className="pr-btn primary"
           onClick={() => {
-            if (verse.trim() && !addVerse()) return;
+            if (verse.trim() && !parseRef(verse)) return setBad(true);
             save();
           }}
         >
@@ -1110,6 +1190,8 @@ export function PrayThrough({
   onClose,
   onOpenVerse,
   doneLabel = "Close",
+  touch = false,
+  chapter,
 }: {
   list: PrayerList;
   onChange: Change;
@@ -1118,6 +1200,10 @@ export function PrayThrough({
   onOpenVerse?: (r: Ref) => void;
   /** The last page's button. */
   doneLabel?: string;
+  /** A touch screen: touch-sized buttons. */
+  touch?: boolean;
+  /** A chapter's verses in the Bible being read, for the words of a point's verses. */
+  chapter?: ChapterOf;
 }) {
   // The order as it was when it opened, so marking one answered doesn't shift the rest.
   const [ids] = useState(() => prayingNow(list).map((p) => p.id));
@@ -1128,6 +1214,24 @@ export function PrayThrough({
   const cat = p && list.cats.find((c) => c.id === p.cat);
   const end = i >= ids.length;
   const step = (d: number) => setI((n) => Math.max(0, Math.min(ids.length, n + d)));
+  /** A swipe across: left for the next point, right for the one before. Mostly sideways, and far enough
+   *  that a tap or a scroll isn't taken for one. */
+  const swipe = useRef<{ x: number; y: number } | null>(null);
+  const swipeStart = (e: React.TouchEvent) => {
+    const t = e.touches[0];
+    swipe.current = e.touches.length === 1 && t ? { x: t.clientX, y: t.clientY } : null;
+  };
+  const swipeEnd = (e: React.TouchEvent) => {
+    const s0 = swipe.current;
+    const t = e.changedTouches[0];
+    swipe.current = null;
+    if (!s0 || !t) return;
+    const dx = t.clientX - s0.x;
+    const dy = t.clientY - s0.y;
+    if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+    if (dx < 0 && i < ids.length) step(1);
+    else if (dx > 0 && i > 0) step(-1);
+  };
   useEffect(() => {
     const key = (e: KeyboardEvent) => {
       if ((e.target as HTMLElement).closest?.("input, textarea")) return;
@@ -1143,9 +1247,16 @@ export function PrayThrough({
   }, [onClose]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => panel.current?.focus(), [i]);
   return (
-    <div className="pr pr-pray" role="dialog" aria-modal="true" aria-label="Pray through">
+    <div className={`pr pr-pray${touch ? " pr-touch" : ""}`} role="dialog" aria-modal="true" aria-label="Pray through">
       <div className="pr-prayscrim" onClick={onClose} />
-      <div className={`pr-praypanel${cat ? ` pc-${cat.colour}` : ""}`} ref={panel} tabIndex={-1}>
+      <div
+        className={`pr-praypanel${cat ? ` pc-${cat.colour}` : ""}`}
+        ref={panel}
+        tabIndex={-1}
+        onTouchStart={swipeStart}
+        onTouchEnd={swipeEnd}
+        onTouchCancel={() => (swipe.current = null)}
+      >
         <div className="pr-praytop">
           <span className="pr-prayprog" aria-label={end ? "Finished" : `${i + 1} of ${ids.length}`}>
             {end ? `${ids.length} of ${ids.length}` : `${i + 1} of ${ids.length}`}
@@ -1179,7 +1290,20 @@ export function PrayThrough({
             </p>
             <h2>{p.title}</h2>
             {p.note && <p className="pr-praynote">{p.note}</p>}
-            {p.verses.length > 0 && (
+            {chapter && p.verses.length > 0 && (
+              <Scripture
+                refs={p.verses}
+                chapter={chapter}
+                onOpen={
+                  onOpenVerse &&
+                  ((r) => {
+                    onClose();
+                    onOpenVerse(r);
+                  })
+                }
+              />
+            )}
+            {!chapter && p.verses.length > 0 && (
               <div className="pr-verses">
                 {p.verses.map((v) => (
                   <VerseChip

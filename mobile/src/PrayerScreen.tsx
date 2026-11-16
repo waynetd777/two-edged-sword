@@ -8,6 +8,10 @@ import { PrayerBoard } from "../../src/PrayerBoard";
 import type { Ref } from "../../src/bible";
 import { NavButtons } from "./NavButtons";
 import { prayerStore, usePrayer } from "./prayerStore";
+import { api, saved } from "./api";
+
+/** A chapter in the Bible being read (Read's own choice). */
+export const readChapter = (b: number, c: number) => api.chapter(saved("bible", "kjv+"), b, c);
 
 export function PrayerScreen({ onVerse }: { onVerse: (r: Ref) => void }) {
   const list = usePrayer();
@@ -18,7 +22,7 @@ export function PrayerScreen({ onVerse }: { onVerse: (r: Ref) => void }) {
         <h1 className="bartitle">Prayer</h1>
       </header>
       <div className="results wide">
-        <PrayerBoard list={list} onChange={prayerStore.set} onOpenVerse={onVerse} touch />
+        <PrayerBoard list={list} onChange={prayerStore.set} onOpenVerse={onVerse} touch chapter={readChapter} />
       </div>
     </>
   );
