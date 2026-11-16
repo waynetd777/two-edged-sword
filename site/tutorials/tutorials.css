@@ -304,11 +304,11 @@
   width: 40px;
   height: 40px;
   border-radius: 12px;
-  background: linear-gradient(135deg, #d9ac5f, #9c6f2c);
+  background: linear-gradient(135deg, #d9ac5f, #a87833);
   color: #1a1206;
   font: 700 18px var(--ui);
   margin-bottom: 18px;
-  box-shadow: 0 8px 22px -8px rgba(198, 151, 74, 0.6);
+  box-shadow: 0 8px 20px -8px rgba(0, 0, 0, 0.7);
 }
 .lesson h2 {
   font-size: clamp(30px, 4vw, 44px);

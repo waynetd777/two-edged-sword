@@ -20,6 +20,24 @@
         ],
         "createdAt": "2026-11-16T20:42:13.839Z",
         "reason": "Wayne confirmed: the side border at styles.css:3195 is the help guides' blockquote style, not a card"
+      },
+      {
+        "rule": "buried-raster",
+        "value": "*",
+        "files": [
+          "site/index.html"
+        ],
+        "createdAt": "2026-11-16T22:31:16.666Z",
+        "reason": "Claude, audit 2026-11-17: the tours' screenshots cross-fade (opacity 0 until their step), they aren't buried"
+      },
+      {
+        "rule": "cramped-padding",
+        "value": "*",
+        "files": [
+          "site/index.html"
+        ],
+        "createdAt": "2026-11-16T22:31:16.745Z",
+        "reason": "Claude, audit 2026-11-17: .feature and .download sections have 80-150px vertical padding; the detector reads the full-bleed band, not its inset content"
       }
     ]
   }

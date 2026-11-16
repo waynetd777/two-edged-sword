@@ -55,11 +55,13 @@
   --line: rgba(255, 255, 255, 0.08);
   --text: #e6edf3;
   --muted: #9aa4af;
-  --faint: #5b6470;
+  /* Quiet, but readable: 4.7:1 on the panels, 5.4:1 on the page (WCAG AA). */
+  --faint: #7d8691;
   --gold: #c6974a;
   --gold-soft: rgba(198, 151, 74, 0.18);
   --blue: #58a6ff;
-  --blue-deep: #1f6feb;
+  /* Deep enough for light text on it to read at 4.6:1. */
+  --blue-deep: #1a63d8;
   --display: "Atkinson Hyperlegible Next", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
   --ui: "Atkinson Hyperlegible Next", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
   --greek: "EB Garamond", Garamond, "Iowan Old Style", Georgia, serif;
@@ -233,7 +235,7 @@ p {
 .interlinear u {
   text-decoration: none;
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: 11px;
   color: var(--faint);
   margin-top: 5px;
 }
