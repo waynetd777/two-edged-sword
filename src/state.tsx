@@ -17,6 +17,7 @@ import {
   forget,
   keepBoth,
   Ledger,
+  Items,
   merge,
   payload as syncPayload,
   Payload,
@@ -28,6 +29,7 @@ import {
   stamp,
   vanished,
   withoutJournal,
+  withoutPrayer,
 } from "./sync";
 
 /** The most journal entries one sync may delete; a phone that removes more is refused. */
@@ -48,6 +50,7 @@ const forgetVanished = (l: Ledger, now: Record<string, unknown>) => {
 const journalVanished = (l: Ledger, journal: unknown[]) =>
   journal.length === 0 && Object.entries(l).filter(([k, e]) => k.startsWith("j|") && !e.del).length > MAX_SYNC_DELETES;
 import { fromItems, itemsOf, placesOf, Synced } from "./syncHub";
+import { EMPTY_PRAYER, isPrayerKey, PrayerList, readPrayer } from "./prayer";
 import { api, JournalEntry, LibraryInfo, ModuleInfo } from "./api";
 import { claudeAlias } from "./assistant";
 import { Ref } from "./bible";
@@ -293,7 +296,7 @@ export interface Pending {
   commentary?: string;
 }
 
-export type Screen = "read" | "compare" | "search" | "word" | "journal" | "plans" | "library" | "history" | "settings";
+export type Screen = "read" | "compare" | "search" | "word" | "journal" | "plans" | "prayer" | "library" | "history" | "settings";
 
 /** A passage or book chapter opened lately: of the Bible, or (with `doc`) of a reference book or devotional. `verse`/`to` are the verses it was opened at, if any; one entry per chapter, the latest open. */
 export interface Recent {
@@ -416,6 +419,8 @@ export type QuietStep = { key: string; label: string } & (
   | { kind: "worship"; songs: number; when: "before" | "after"; picked?: Song[]; intro?: string; note?: string }
   /** The last part: a verse or passage chosen to wrap up the day (closing.ts); `picked` once it is. */
   | { kind: "closing"; bible: string; picked?: Closing }
+  /** Pray through the prayer list (PrayerBoard.tsx PrayThrough), before the closing verse. */
+  | { kind: "prayer" }
 );
 export interface Session {
   planId: string;
@@ -499,6 +504,9 @@ interface Ctx {
   deleteEntry: (id: string) => Promise<void>;
 
   plans: Plan[];
+  /** The prayer list (src/prayer.ts). */
+  prayer: PrayerList;
+  setPrayer: (f: (l: PrayerList) => PrayerList) => void;
   /** Settings and plans have been read from the store, so they are the user's and not the defaults. */
   plansReady: boolean;
   setPlans: (f: (p: Plan[]) => Plan[]) => void;
@@ -662,6 +670,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }>("place", { loc: { book: 43, chapter: 1 }, recent: [], doc: null, docAt: {}, word: null });
   const [plans, setPlans, plansLoaded, f5] = useStored<Plan[]>("plans", []);
   const [chats, setChats, , f6] = useStored<Chat[]>("chats", []);
+  const [prayerRaw, setPrayer, prayerLoaded, f7] = useStored<PrayerList>("prayer", EMPTY_PRAYER);
+  const prayer = useMemo(() => readPrayer(prayerRaw), [prayerRaw]);
   const [screen, setScreen] = useState<Screen>("read");
   // Back and forward: every place the user goes (a screen, a passage, a book's chapter, a word
   // studied, a search) is pushed here, and back/forward restore one.
@@ -946,7 +956,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       undo ? 6000 : 2600,
     );
   }, []);
-  const readFailed = [f1, f2, f3, f4, f5, f6].some(Boolean);
+  const readFailed = [f1, f2, f3, f4, f5, f6, f7].some(Boolean);
   useEffect(() => {
     if (readFailed) toast("Couldn't read your saved data — changes this session won't be saved");
   }, [readFailed, toast]);
@@ -964,12 +974,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   /** Removed here on purpose since the last stamp; only these are synced as removed (the journal's from
    *  deleteEntry alone, as an entry missing from the files may only be unread). */
   const removedHere = useRef(new Set<string>());
-  const synced = useRef<Synced>({ bookmarks, highlights, docAt: nav.docAt, plans, recent: nav.recent, journal });
-  synced.current = { bookmarks, highlights, docAt: nav.docAt, plans, recent: nav.recent, journal };
+  const synced = useRef<Synced>({ bookmarks, highlights, docAt: nav.docAt, plans, recent: nav.recent, journal, prayer });
+  synced.current = { bookmarks, highlights, docAt: nav.docAt, plans, recent: nav.recent, journal, prayer };
   const syncedNow = (): Synced => ({ ...synced.current, journal: journalNow.current });
   const journalLoaded = settingsLoaded && !!journalDir && journalLoadedFor === journalDir;
   // Not when saved data couldn't be read: what's here would be taken for everything removed.
-  const syncReady = bookmarksLoaded && highlightsLoaded && navLoaded && plansLoaded && journalLoaded && !readFailed;
+  const syncReady = bookmarksLoaded && highlightsLoaded && navLoaded && plansLoaded && prayerLoaded && journalLoaded && !readFailed;
   const syncReadyRef = useRef(false);
   syncReadyRef.current = syncReady;
   const readFailedRef = useRef(readFailed);
@@ -1042,7 +1052,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         console.error("sync: couldn't read the sync ledger; not syncing", e);
       },
     );
-  }, [syncReady, bookmarks, highlights, nav.docAt, plans, journal]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [syncReady, bookmarks, highlights, nav.docAt, plans, journal, prayer]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     /** A sync that didn't happen, and why; `red` when it needs the user rather than another try (shown so in
      *  Settings and on the phone). */
@@ -1099,7 +1109,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
       // A result that would remove many of one kind (a phone that lost them) is refused, and they go back.
       const { merged, refused } = refuseMassRemoval(
         now,
-        merge(mine, { ...theirs, items: theirs.journal ? keepBoth(mine.items, theirs) : withoutJournal(theirs.items) }),
+        merge(mine, {
+          ...theirs,
+          items: (theirs.prayer ? (x: Items) => x : withoutPrayer)(
+            theirs.journal ? keepBoth(mine.items, theirs) : withoutJournal(theirs.items),
+          ),
+        }),
       );
       if (refused.size) console.error(`sync: a phone would have removed many ${[...refused].join(", ")}; kept`);
       const done = settle(merged);
@@ -1166,6 +1181,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setHighlights(() => next.highlights);
       setNav((n) => ({ ...n, docAt: next.docAt, recent: next.recent }));
       setPlans(() => next.plans);
+      setPrayer(() => next.prayer);
       putJournal(() => next.journal);
       // Seen by the next answer at once, before React renders.
       synced.current = { ...next };
@@ -1173,10 +1189,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const differ = (a: Record<string, unknown>, b: Record<string, unknown>) =>
         new Set([...Object.keys(a), ...Object.keys(b)].filter((k) => stable(a[k]) !== stable(b[k]))).size;
       const theyHad = Object.fromEntries(Object.entries(theirs.items).flatMap(([k, e]): [string, unknown][] => (e.del ? [] : [[k, e.v]])));
-      const theyGet = theirs.journal ? done.now : Object.fromEntries(Object.entries(done.now).filter(([k]) => !k.startsWith("j|")));
+      const theyGet = Object.fromEntries(
+        Object.entries(done.now).filter(([k]) => (theirs.journal || !k.startsWith("j|")) && (theirs.prayer || !isPrayerKey(k))),
+      );
       const stats = { sent: differ(theyHad, theyGet), received: differ(now, seen.current) };
       const out: Payload = { ...merged, serverNow: Date.now() + 1, stats };
-      const reply: Payload = theirs.journal ? { ...out, journal: true } : { ...out, items: withoutJournal(out.items) };
+      // The journal and the prayer list only go to a phone that syncs them, and the reply says this computer does.
+      const withJ: Payload = theirs.journal ? { ...out, journal: true } : { ...out, items: withoutJournal(out.items) };
+      const reply: Payload = theirs.prayer ? { ...withJ, prayer: true } : { ...withJ, items: withoutPrayer(withJ.items) };
       invoke("sync_reply", { rid, merged: reply }).catch(() => {});
     };
     return () => {
@@ -1323,6 +1343,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     },
     plans,
     setPlans,
+    prayer,
+    setPrayer: (f) => setPrayer((l) => f(readPrayer(l))),
     plansReady: settingsLoaded && plansLoaded,
     chats,
     setChats,

@@ -7,6 +7,7 @@
 import type { Plan } from "./plans";
 import type { JournalEntry } from "./api";
 import type { Bookmark, HlColor, Recent } from "./state";
+import { PrayerList, prayerFrom, prayerItems } from "./prayer";
 import { Entry, entryKey, Mark, markKey, Place, planItems, plansFrom, under } from "./sync";
 
 export interface Synced {
@@ -16,6 +17,7 @@ export interface Synced {
   plans: Plan[];
   recent: Recent[];
   journal: JournalEntry[];
+  prayer: PrayerList;
 }
 
 const toMark = (b: Bookmark): Mark =>
@@ -41,6 +43,7 @@ export function itemsOf(s: Synced): Record<string, unknown> {
   for (const [m, t] of Object.entries(s.docAt)) out[`at|${m}`] = t;
   for (const p of s.plans) Object.assign(out, planItems(p));
   for (const e of s.journal) out[entryKey(e.id)] = toEntry(e);
+  Object.assign(out, prayerItems(s.prayer));
   return out;
 }
 
@@ -116,5 +119,5 @@ export function fromItems(now: Record<string, unknown>, places: Place[], was: Sy
   const journal = under(now, "j|")
     .map(([, v]) => v as JournalEntry)
     .sort((a, b) => b.created.localeCompare(a.created));
-  return { bookmarks, highlights, docAt, plans: plansFrom(now), recent, journal };
+  return { bookmarks, highlights, docAt, plans: plansFrom(now), recent, journal, prayer: prayerFrom(now, was.prayer) };
 }

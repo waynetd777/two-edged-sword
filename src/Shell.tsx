@@ -20,12 +20,13 @@ const NAV: { s: Screen; label: string; icon: string; key: string; tip: string }[
   { s: "word", label: "Word Study", icon: "word", key: "4", tip: "A Greek or Hebrew word: its meaning and every use" },
   { s: "journal", label: "Journal", icon: "journal", key: "5", tip: "Your journal, linked to the verses" },
   { s: "plans", label: "Quiet time", icon: "plans", key: "6", tip: "Reading plans and devotionals for today" },
-  { s: "library", label: "Library", icon: "library", key: "7", tip: "Your modules and their order" },
+  { s: "prayer", label: "Prayer", icon: "prayer", key: "7", tip: "Your prayer list, in categories of your own" },
+  { s: "library", label: "Library", icon: "library", key: "8", tip: "Your modules and their order" },
   {
     s: "history",
     label: "KJV History",
     icon: "lineage",
-    key: "8",
+    key: "9",
     tip: "Where the King James Version came from, and which of its sources you have",
   },
 ];

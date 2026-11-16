@@ -12,6 +12,7 @@
 // each, and both take the result. Recent is a list merged by when each place was read.
 
 import type { Plan } from "./plans";
+import { isPrayerKey, validPrayer } from "./prayer.ts";
 
 /** One item as sent: its value, or that it was removed; and when that happened (ms since 1970). */
 export interface Item {
@@ -53,6 +54,9 @@ export interface Payload {
   /** Set by a side that syncs the journal. Journal items only go to a side that sets it: one without
    *  the journal would take every entry for removed on its next sync and delete them everywhere. */
   journal?: true;
+  /** Set by a side that syncs the prayer list (src/prayer.ts). As with the journal, its items only go to
+   *  a side that sets it, and a side only takes them from one that does. */
+  prayer?: true;
   items: Items;
   recent: Place[];
 }
@@ -200,6 +204,11 @@ export function overRemoved(here: Record<string, unknown>, next: Record<string, 
       const plan = `plan|${k.split("|")[1]}`;
       if (plan in here && !(plan in next)) continue;
     }
+    // Nor a prayer category's points when the category goes too.
+    if (k.startsWith("pp|")) {
+      const cat = `pc|${(here[k] as { cat?: string } | undefined)?.cat}`;
+      if (cat in here && !(cat in next)) continue;
+    }
     n.set(groupOf(k), (n.get(groupOf(k)) ?? 0) + 1);
   }
   return new Set([...n].filter(([, c]) => c > SYNC_LIMIT).map(([g]) => g));
@@ -248,6 +257,9 @@ export interface Entry {
 export const entryKey = (id: string) => `j|${id}`;
 
 /** The items without the journal's, for a side that doesn't sync it. */
+/** The items without the prayer list's, for a side that doesn't sync it. */
+export const withoutPrayer = (items: Items): Items => Object.fromEntries(Object.entries(items).filter(([k]) => !isPrayerKey(k)));
+
 export const withoutJournal = (items: Items): Items => Object.fromEntries(Object.entries(items).filter(([k]) => !k.startsWith("j|")));
 
 /** An entry's id for a copy: unique, and close to the desktop's own (state.tsx uid). */
@@ -302,6 +314,7 @@ export function validValue(k: string, v: unknown): boolean {
   if (k.startsWith("at|")) return isStr(v);
   if (k.startsWith("plan|")) return isObj(v) && v.id === k.slice(5) && isStr(v.kind) && isStr(v.start);
   if (k.startsWith("pd|")) return isNum(v);
+  if (isPrayerKey(k)) return validPrayer(k, v);
   if (k.startsWith("j|"))
     return (
       isObj(v) &&
@@ -348,6 +361,7 @@ export function checkPayload(p: unknown): { payload: Payload; dropped: string[] 
   if (isNum(p.serverNow)) out.serverNow = p.serverNow;
   if (isObj(p.stats) && isNum(p.stats.sent) && isNum(p.stats.received)) out.stats = { sent: p.stats.sent, received: p.stats.received };
   if (p.journal === true) out.journal = true;
+  if (p.prayer === true) out.prayer = true;
   return { payload: out, dropped };
 }
 

@@ -11,6 +11,15 @@
         ],
         "createdAt": "2026-11-13T22:50:06.162Z",
         "reason": "Claude: .jprose blockquote's left rule is the standard quote style in journal prose (from 2026-11-08, not this change), not an accent card"
+      },
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "src/styles.css"
+        ],
+        "createdAt": "2026-11-16T20:42:13.839Z",
+        "reason": "Wayne confirmed: the side border at styles.css:3195 is the help guides' blockquote style, not a card"
       }
     ]
   }

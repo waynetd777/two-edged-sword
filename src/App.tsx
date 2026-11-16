@@ -20,6 +20,7 @@ import { LyricsPage } from "./LyricsPage";
 import { StrongsHover } from "./WordLookup";
 import { QuietTime, useWorshipAhead } from "./QuietTime";
 import { SCREEN_KEYS, Sidebar } from "./Shell";
+import { PrayerScreen } from "./PrayerScreen";
 import { NoVoiceHost, PlayerProvider, usePlayer } from "./speech";
 import { runScene } from "./scene";
 import { AppProvider, useApp } from "./state";
@@ -192,6 +193,7 @@ function Screens() {
       {screen === "word" && <WordStudyScreen />}
       {screen === "journal" && <JournalScreen openPalette={openPalette} focus={focus} setFocus={setFocus} />}
       {screen === "plans" && <PlansScreen openPalette={openPalette} />}
+      {screen === "prayer" && <PrayerScreen openPalette={openPalette} />}
       {screen === "library" && <LibraryScreen />}
       {screen === "history" && <KjvHistoryScreen />}
       {screen === "settings" && <SettingsScreen />}

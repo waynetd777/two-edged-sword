@@ -170,6 +170,25 @@
     "screen": "plans"
   },
   {
+    "name": "prayer",
+    "screen": "prayer",
+    "prayerFile": "prayer.json"
+  },
+  {
+    "name": "prayer-through",
+    "screen": "prayer",
+    "prayerFile": "prayer.json",
+    "click": ".pr-sp + .pr-btn",
+    "settle": 8
+  },
+  {
+    "name": "prayer-answered",
+    "screen": "prayer",
+    "prayerFile": "prayer.json",
+    "click": ".pr-seg button:last-child",
+    "settle": 8
+  },
+  {
     "name": "worship",
     "loc": {
       "book": 19,
@@ -259,7 +278,7 @@
   },
   {
     "name": "ask-models",
-    "settle": 12,
+    "settle": 19,
     "screen": "journal",
     "journal": "demo-shepherd",
     "click": [

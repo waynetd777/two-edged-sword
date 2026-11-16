@@ -8,7 +8,7 @@
 import { useSyncExternalStore } from "react";
 
 /** The screens, as the menu lists them (Menu.tsx). */
-export type Tab = "read" | "search" | "words" | "journal" | "plans" | "library" | "history" | "settings" | "help";
+export type Tab = "read" | "search" | "words" | "journal" | "plans" | "prayer" | "library" | "history" | "settings" | "help";
 
 export interface Place {
   tab: Tab;

@@ -30,6 +30,8 @@ import {
   under,
   vanished,
   withoutJournal,
+  withoutPrayer,
+  type Items,
 } from "../../src/sync";
 import { save, saved, scene, type Module } from "./api";
 import { ago, DAY, lastLine, type Level } from "../../src/syncStatus";
@@ -37,6 +39,8 @@ import { bookmarks, Mark } from "./bookmarks";
 import { highlights, HlColor } from "./highlights";
 import { Entry, journal } from "./journal";
 import { plansStore } from "./plansStore";
+import { prayerStore } from "./prayerStore";
+import { isPrayerKey, prayerFrom, prayerItems } from "../../src/prayer";
 
 /** The computer paired with: its name (as announced), where it was last found, and this device's id
  *  there and the key agreed when it paired. A pairing made before sync was encrypted has neither. */
@@ -165,6 +169,7 @@ function itemsNow(): Record<string, unknown> {
   for (const [m, t] of Object.entries(docAtNow())) out[`at|${m}`] = t;
   for (const p of plansStore.get()) Object.assign(out, planItems(p));
   for (const e of journal.get()) out[entryKey(e.id)] = e;
+  Object.assign(out, prayerItems(prayerStore.get()));
   return out;
 }
 
@@ -270,6 +275,7 @@ export function startSync() {
   bookmarks.subscribe(changed);
   highlights.subscribe(changed);
   plansStore.subscribe(changed);
+  prayerStore.subscribe(changed);
   journal.subscribe(changed);
   window.addEventListener("tes-docat", changed);
   document.addEventListener("visibilitychange", () => document.visibilityState === "visible" && syncNow().catch(() => {}));
@@ -409,16 +415,19 @@ async function run() {
     // The journal only goes to a computer that has said it syncs it (an older one would delete it).
     const all = payload(ledger, itemsNow(), placesNow());
     const withJ = saved("syncJournal", false);
+    // So too the prayer list, once the computer has said it syncs it.
+    const withP = saved("syncPrayer", false);
     // Changed here since the last sync, by this phone's own clock: for entries changed on both sides.
     const lastSent = saved("syncSentAt", 0);
     const changedHere = withJ ? Object.keys(all.items).filter((k) => k.startsWith("j|") && all.items[k].t > lastSent) : [];
     const mine: Payload = {
       ...all,
-      items: withJ ? all.items : withoutJournal(all.items),
+      items: (withP ? (x: Items) => x : withoutPrayer)(withJ ? all.items : withoutJournal(all.items)),
       since: saved("syncSince", 0),
       changed: changedHere,
       from: deviceName(),
       journal: true,
+      prayer: true,
     };
     let reply: unknown;
     try {
@@ -444,7 +453,7 @@ async function run() {
     };
     // The journal is only taken from the reply when this sync sent it too: otherwise the reply has the
     // computer's entries and not this phone's, and they'd be lost.
-    const late = await apply(merge(mine, theirs), !!merged.journal && withJ, sentAt);
+    const late = await apply(merge(mine, theirs), !!merged.journal && withJ, !!merged.prayer && withP, sentAt);
     save("syncSince", merged.serverNow ?? 0);
     save("syncSentAt", sentAt);
     const last = Date.now();
@@ -463,6 +472,10 @@ async function run() {
     // The computer syncs the journal: from now on it goes too, starting straight away.
     if (merged.journal && !withJ) {
       save("syncJournal", true);
+      window.setTimeout(() => syncNow().catch(() => {}), 500);
+    }
+    if (merged.prayer && !withP) {
+      save("syncPrayer", true);
       window.setTimeout(() => syncNow().catch(() => {}), 500);
     }
   } catch (e) {
@@ -558,24 +571,24 @@ export const syncLine = (s: SyncState, now = Date.now()) =>
  *  taken for a change. What changed here while the sync was under way is kept over it, and synced next
  *  time. The journal is written before the ledger is kept: if it can't be, the ledger stays as it was.
  *  Answers whether anything changed here meanwhile. */
-async function apply(m0: Payload, withJournal: boolean, sentAt: number): Promise<boolean> {
+async function apply(m0: Payload, withJournal: boolean, withPrayer: boolean, sentAt: number): Promise<boolean> {
+  /** Kinds this sync didn't carry both ways: left as they are here, ledger and all. */
+  const left = (k: string) => (!withJournal && k.startsWith("j|")) || (!withPrayer && isPrayerKey(k));
   note();
   const before = ledger ?? {};
   // Changed here since the request went: what's here now wins.
   const nowHere = itemsNow();
-  const late = Object.entries(before).filter(([k, e]) => e.t > sentAt && (withJournal || !k.startsWith("j|")));
+  const late = Object.entries(before).filter(([k, e]) => e.t > sentAt && !left(k));
   const items = { ...m0.items };
   for (const [k, e] of late) items[k] = e.del ? { t: e.t, del: true } : k in nowHere ? { t: e.t, v: nowHere[k] } : items[k];
   // A result that would remove many of one kind here (the computer lost them) is refused: they're kept,
   // and sync back to it.
-  const here = withJournal ? nowHere : Object.fromEntries(Object.entries(nowHere).filter(([k]) => !k.startsWith("j|")));
+  const here = Object.fromEntries(Object.entries(nowHere).filter(([k]) => !left(k)));
   const { merged: m, refused } = refuseMassRemoval(here, { ...m0, items });
   if (refused.size) invoke("log", { msg: `sync: would remove many ${[...refused].join(", ")}; kept` }).catch(() => {});
-  const done = settle(withJournal ? m : { ...m, items: withoutJournal(m.items) });
-  // Without the journal, its ledger entries stay as they were here.
-  const next = withJournal
-    ? done.ledger
-    : { ...done.ledger, ...Object.fromEntries(Object.entries(before).filter(([k]) => k.startsWith("j|"))) };
+  const done = settle({ ...m, items: Object.fromEntries(Object.entries(m.items).filter(([k]) => !left(k))) });
+  // Without the journal (or the prayer list), its ledger entries stay as they were here.
+  const next = { ...done.ledger, ...Object.fromEntries(Object.entries(before).filter(([k]) => left(k))) };
   const marks = under(done.now, "bm|")
     .map(([, v]) => fromSync(v as SyncMark))
     .sort((a, b) => b.at.localeCompare(a.at));
@@ -591,6 +604,10 @@ async function apply(m0: Payload, withJournal: boolean, sentAt: number): Promise
     plansStore.set(() => plansFrom(done.now));
     // Only from a sync that carried the journal both ways; otherwise what's here stays as it is.
     if (withJournal) written = journal.replace(under(done.now, "j|").map(([, v]) => v as Entry));
+    if (withPrayer) {
+      const was = prayerStore.get();
+      prayerStore.set(() => prayerFrom(done.now, was));
+    }
   } finally {
     applying = false;
   }

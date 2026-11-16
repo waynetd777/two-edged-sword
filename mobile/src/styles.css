@@ -1571,6 +1571,11 @@ input[type="range"] {
     max-width: 760px;
     margin: 0 auto;
   }
+  /* Prayer's cards take the whole width: two columns upright, three sideways. */
+  .results.wide {
+    max-width: none;
+    padding: 16px 20px 24px;
+  }
   .sheet {
     left: calc(50% - min(340px, 50%));
     right: calc(50% - min(340px, 50%));

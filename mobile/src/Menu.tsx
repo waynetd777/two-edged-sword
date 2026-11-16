@@ -15,6 +15,7 @@ export const SCREENS: { id: Tab; label: string; icon: string }[] = [
   { id: "words", label: "Word Study", icon: "word" },
   { id: "journal", label: "Journal", icon: "journal" },
   { id: "plans", label: "Quiet time", icon: "plans" },
+  { id: "prayer", label: "Prayer", icon: "prayer" },
   { id: "library", label: "Library", icon: "library" },
   { id: "history", label: "KJV History", icon: "lineage" },
   { id: "settings", label: "Settings", icon: "settings" },

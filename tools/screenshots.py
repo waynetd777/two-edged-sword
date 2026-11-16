@@ -106,6 +106,7 @@ def capture(scene, theme):
         "variancesFile": "variances",
         "songFile": "song",
         "chapterSongsFile": "chapterSongs",
+        "prayerFile": "prayer",
     }
     sc = {
         k: v

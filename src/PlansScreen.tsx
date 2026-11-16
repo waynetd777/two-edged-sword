@@ -1,6 +1,7 @@
 // Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
 // SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
+import { prayingNow } from "./prayer";
 import { useEffect, useMemo, useState } from "react";
 import { api } from "./api";
 import { book, BOOKS, fmtRef, parseRef, psalmLabel, SECTIONS, SHORT } from "./bible";
@@ -271,6 +272,7 @@ export function PlansScreen({ openPalette }: { openPalette: () => void }) {
           <DevotionalsCard plan={plan} update={update} />
           <WorshipCard plan={plan} update={update} />
           <ClosingSetting plan={plan} update={update} />
+          <PrayerSetting plan={plan} update={update} />
         </div>
         <TryQuietTime plan={plan} />
         <div style={{ display: "grid", gridTemplateColumns: "420px minmax(0,1fr)", gap: 16 }}>
@@ -1173,6 +1175,32 @@ function WorshipCard({ plan, update }: { plan: Plan; update: (p: Plan) => void }
 }
 
 /** The closing verse in Quiet time: whether to end with one; and a favourite passage read every day after it. */
+/** Praying through the prayer list, before the closing verse. */
+function PrayerSetting({ plan, update }: { plan: Plan; update: (p: Plan) => void }) {
+  const app = useApp();
+  const n = prayingNow(app.prayer).length;
+  const cats = app.prayer.cats.length;
+  return (
+    <div className="card" style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <span className="label">Prayer</span>
+        <span style={{ marginLeft: "auto" }}>
+          <Switch on={!!plan.prayer} onChange={(on) => update({ ...plan, prayer: on || undefined })} />
+        </span>
+      </div>
+      <div className="hint">Pray through your prayer list, one point at a time, after the reading and before the closing verse.</div>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, borderTop: "1px solid var(--border)", paddingTop: 12, marginTop: 2 }}>
+        <span style={{ color: n ? "var(--text)" : "var(--muted)" }}>
+          {n ? `${n} ${n === 1 ? "point" : "points"} in ${cats} ${cats === 1 ? "category" : "categories"}` : "Your prayer list is empty"}
+        </span>
+        <button className="btn small" type="button" style={{ marginLeft: "auto" }} onClick={() => app.go("prayer")}>
+          {n ? "Open Prayer" : "Start a list"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function ClosingSetting({ plan, update }: { plan: Plan; update: (p: Plan) => void }) {
   return (
     <div className="card" style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: 10 }}>

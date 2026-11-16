@@ -19,6 +19,7 @@ are kept separately.
 | [Translations and manuscripts](manuscripts.md) | Differences from the KJV, Greek and Hebrew, KJV History, the Targums and Talmud |
 | [Journal](journal.md) | Entries linked to verses, kept in step with Markdown notes apps such as [Brainstead](https://brainstead.davies.co.za/), and printed as a PDF |
 | [Quiet time](quiet-time.md) | Reading plans, worship music, the reminder, the menu bar |
+| [Prayer](prayer.md) | Your prayer list: categories, points, answered prayer, praying through |
 | [Ask](ask.md) | The AI assistant and what it sends |
 | [Library](library.md) | Your modules, adding and building more |
 

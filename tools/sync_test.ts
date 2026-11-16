@@ -112,3 +112,47 @@ test("sync status: a dot only when something isn't right", async () => {
   assert.equal(worst([]), "ok");
   assert.equal(lastLine({ ok: 0, sent: 0, received: 0, err: "", errAt: 0 }, now), "Not synced yet");
 });
+
+test("the prayer list syncs item by item, and only with a side that syncs it", async () => {
+  const pr = await import("../src/prayer.ts");
+  const { withoutPrayer, refuseMassRemoval } = await import("../src/sync.ts");
+  let l = pr.addCat(pr.EMPTY_PRAYER, "Family").list;
+  const cat = l.cats[0].id;
+  l = pr.addPoint(l, cat, "A first point").list;
+  l = pr.addPoint(l, cat, "A second point").list;
+  const items = pr.prayerItems(l);
+  // Every item passes the check it gets on arrival, and comes back as it was.
+  for (const [k, v] of Object.entries(items)) assert.ok(validValue(k, v), k);
+  assert.deepEqual(pr.prayerFrom(items, pr.EMPTY_PRAYER).points.length, 2);
+  // Folding is this device's own: it isn't sent, and survives a sync.
+  const folded = pr.updateCat(l, cat, { folded: true });
+  assert.deepEqual(pr.prayerItems(folded), items);
+  assert.equal(pr.prayerFrom(items, folded).cats[0].folded, true);
+  // Not to a side without it.
+  assert.deepEqual(Object.keys(withoutPrayer({ ...Object.fromEntries(Object.entries(items).map(([k, v]) => [k, { t: 1, v }])), "hl|1.1.1": { t: 1, v: "yellow" } })), ["hl|1.1.1"]);
+  const p = checkPayload({ v: 1, items: {}, recent: [], prayer: true });
+  assert.equal(p?.payload.prayer, true);
+  // Moving one point changes that point alone, so two devices' moves merge.
+  const [a, b] = pr.pointsIn(l, cat);
+  const moved = pr.movePoint(l, b.id, cat, 0);
+  const changed = Object.entries(pr.prayerItems(moved)).filter(([k, v]) => JSON.stringify(v) !== JSON.stringify(items[k]));
+  assert.deepEqual(changed.map(([k]) => k), [pr.pointKey(b.id)]);
+  assert.deepEqual(pr.pointsIn(moved, cat).map((x) => x.id), [b.id, a.id]);
+  // A category deleted with many points isn't taken for a mass removal and put back.
+  let big = pr.addCat(pr.EMPTY_PRAYER, "Work").list;
+  const w = big.cats[0].id;
+  for (let i = 0; i < 15; i++) big = pr.addPoint(big, w, `Point ${i}`).list;
+  const here = pr.prayerItems(big);
+  const gone: Payload = { v: 1, items: Object.fromEntries(Object.keys(here).map((k) => [k, { t: 5, del: true as const }])), recent: [] };
+  assert.equal(refuseMassRemoval(here, gone, 9).refused.size, 0);
+  // But points vanishing from a category that stays are.
+  const pointsGone: Payload = {
+    v: 1,
+    items: Object.fromEntries(Object.keys(here).map((k) => [k, k.startsWith("pc|") ? { t: 5, v: here[k] } : { t: 5, del: true as const }])),
+    recent: [],
+  };
+  assert.deepEqual([...refuseMassRemoval(here, pointsGone, 9).refused], ["pp"]);
+  // Malformed ones are dropped.
+  assert.equal(validValue(pr.pointKey("x"), { id: "x", cat: "c", title: 3, verses: [], order: 1, created: "2026-01-01" }), false);
+  assert.equal(validValue(pr.catKey("x"), { id: "x", name: "A", colour: "pink", order: 1 }), false);
+});

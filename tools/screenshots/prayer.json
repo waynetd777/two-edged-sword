@@ -1,0 +1,172 @@
+{
+ "cats": [
+  {
+   "id": "fam",
+   "name": "Family",
+   "colour": "gold",
+   "order": 1
+  },
+  {
+   "id": "church",
+   "name": "Church",
+   "colour": "green",
+   "order": 2
+  },
+  {
+   "id": "work",
+   "name": "Work",
+   "colour": "blue",
+   "order": 3
+  },
+  {
+   "id": "world",
+   "name": "The world",
+   "colour": "purple",
+   "order": 4
+  },
+  {
+   "id": "me",
+   "name": "Myself",
+   "colour": "red",
+   "order": 5
+  }
+ ],
+ "points": [
+  {
+   "id": "f1",
+   "cat": "fam",
+   "title": "Healing for a parent after surgery",
+   "verses": [
+    "Jas 5:15"
+   ],
+   "order": 1,
+   "created": "2026-11-02",
+   "note": "Strength through the weeks of recovery"
+  },
+  {
+   "id": "f2",
+   "cat": "fam",
+   "title": "Wisdom for the children at school",
+   "verses": [],
+   "order": 2,
+   "created": "2026-10-28"
+  },
+  {
+   "id": "f3",
+   "cat": "fam",
+   "title": "A brother's search for work",
+   "verses": [],
+   "order": 3,
+   "created": "2026-10-20",
+   "note": "An open door, and peace while he waits"
+  },
+  {
+   "id": "c1",
+   "cat": "church",
+   "title": "The new home group starting in March",
+   "verses": [],
+   "order": 1,
+   "created": "2026-11-01",
+   "note": "That people would come and stay"
+  },
+  {
+   "id": "c2",
+   "cat": "church",
+   "title": "Our pastor and his family",
+   "verses": [
+    "1 Tim 2:1–2"
+   ],
+   "order": 2,
+   "created": "2026-10-12"
+  },
+  {
+   "id": "c3",
+   "cat": "church",
+   "title": "Missionaries we support abroad",
+   "verses": [],
+   "order": 3,
+   "created": "2026-09-30"
+  },
+  {
+   "id": "w1",
+   "cat": "work",
+   "title": "Patience with a difficult project",
+   "verses": [],
+   "order": 1,
+   "created": "2026-11-10"
+  },
+  {
+   "id": "w2",
+   "cat": "work",
+   "title": "Colleagues going through hard times",
+   "verses": [],
+   "order": 2,
+   "created": "2026-11-05",
+   "note": "Opportunities to encourage them"
+  },
+  {
+   "id": "w3",
+   "cat": "work",
+   "title": "Integrity in every decision",
+   "verses": [
+    "Col 3:23"
+   ],
+   "order": 3,
+   "created": "2026-10-01"
+  },
+  {
+   "id": "x1",
+   "cat": "world",
+   "title": "Peace where there is war",
+   "verses": [],
+   "order": 1,
+   "created": "2026-09-01"
+  },
+  {
+   "id": "x2",
+   "cat": "world",
+   "title": "Those who have never heard the gospel",
+   "verses": [
+    "Rom 10:14"
+   ],
+   "order": 2,
+   "created": "2026-09-01"
+  },
+  {
+   "id": "m1",
+   "cat": "me",
+   "title": "A steady habit of prayer",
+   "verses": [],
+   "order": 1,
+   "created": "2026-10-05"
+  },
+  {
+   "id": "m2",
+   "cat": "me",
+   "title": "Contentment",
+   "verses": [
+    "Phil 4:11"
+   ],
+   "order": 2,
+   "created": "2026-10-05"
+  },
+  {
+   "id": "a1",
+   "cat": "fam",
+   "title": "Safe travel for the family holiday",
+   "verses": [],
+   "order": 9,
+   "created": "2026-10-25",
+   "answered": "2026-11-08"
+  },
+  {
+   "id": "a2",
+   "cat": "church",
+   "title": "A new job for a friend",
+   "verses": [],
+   "order": 9,
+   "created": "2026-09-14",
+   "answered": "2026-10-30"
+  }
+ ]
+}

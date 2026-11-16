@@ -75,7 +75,7 @@ function showTarget(target: string, tries = 20) {
   el.classList.add("help-flash");
 }
 
-const SCREENS: Screen[] = ["read", "compare", "search", "word", "journal", "plans", "library", "history", "settings"];
+const SCREENS: Screen[] = ["read", "compare", "search", "word", "journal", "plans", "prayer", "library", "history", "settings"];
 
 /** What a guide's `app:` button does: app:library (any screen; app:library#commentaries also brings
  *  the element marked data-help="commentaries" into view and flashes it), app:open/john-3 (a

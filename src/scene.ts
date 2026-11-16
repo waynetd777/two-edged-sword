@@ -5,6 +5,7 @@
 // tools/screenshots/scenes.json); the app sets it up and saves nothing, so the user's settings,
 // chats and place are untouched. Outside screenshot mode none of this runs.
 
+import type { PrayerList } from "./prayer";
 import { api, JournalEntry, setReadOnly, setSceneJournal } from "./api";
 import { setSceneChat } from "./Ask";
 import { assistantChecked } from "./assistant";
@@ -49,6 +50,8 @@ interface Scene {
   session?: Omit<Session, "started">;
   /** Journal entries shown instead of the user's (from entriesFile). */
   entries?: JournalEntry[];
+  /** A prayer list shown instead of the user's (from prayerFile). */
+  prayer?: PrayerList;
   /** A journal entry to open, by id. */
   journal?: string;
   /** The help drawer open, at the screen's section. */
@@ -105,6 +108,10 @@ export function runScene(app: ReturnType<typeof useApp>, still: (s: Partial<Play
       setSceneDevices(sc.syncDevices ?? []);
       // Give the stored settings and place a moment to load, so the scene is applied on top of them.
       window.setTimeout(() => {
+        if (sc.prayer) {
+          const l = sc.prayer;
+          app.setPrayer(() => l);
+        }
         if (sc.chat) {
           const chat = sc.chat;
           app.setChats(() => [chat]);

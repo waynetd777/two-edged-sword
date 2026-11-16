@@ -25,7 +25,7 @@ interface HelpTopic {
 }
 
 /** The guides in the order the help lists them; Features first, as the front page. */
-const PAGES = ["features", "getting-started", "reading", "study", "manuscripts", "journal", "quiet-time", "ask", "library"];
+const PAGES = ["features", "getting-started", "reading", "study", "manuscripts", "journal", "quiet-time", "prayer", "ask", "library"];
 
 /** Each screen's section, as `guide#anchor`. tools/helpcheck.py checks they exist. */
 const SCREEN_HELP: Record<Screen, string> = {
@@ -35,6 +35,7 @@ const SCREEN_HELP: Record<Screen, string> = {
   word: "study#word-study",
   journal: "journal#write",
   plans: "quiet-time#plans",
+  prayer: "prayer#your-prayer-list",
   library: "library#the-library-screen",
   history: "manuscripts#kjv-history",
   settings: "features#settings",

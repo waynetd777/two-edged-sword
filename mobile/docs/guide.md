@@ -86,6 +86,18 @@ Open it from **☰ › Word Study**, or **Study this word** on a tapped word. Ty
 - Then today's devotionals, if you have any.
 - Under them it lists your plans, and starts a new one.
 
+## Prayer
+
+- **Prayer** (in ☰) keeps the people and things you pray for, in categories of your own: Family, Work, Church, or anything else.
+- **New category** (or **+ category** on a phone) adds one. **Add a point** at the foot of a category adds a prayer point.
+- Tap a point to change it: a short note, and verses to pray over (type one such as Phil 4:6). Tap a verse to read it.
+- To move a point, touch and hold it, then drag it up or down or into another category. Drag a category by its header. The grip ⠿ drags at once.
+- Tap a category's name to fold it away. **⋯** renames it, changes its colour, or deletes it.
+- The bin beside a point deletes it, after asking.
+- Tick the circle when a prayer is answered. It moves to **Answered**, with the day.
+- **Pray through** shows the points one at a time, so you can pray for each in turn.
+- It's kept in step with your computer when they're paired.
+
 ## Library
 
 - The tabs choose Bibles, Commentaries, Dictionaries or Books.

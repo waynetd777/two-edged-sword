@@ -13,6 +13,7 @@ import { Library } from "./Library";
 import { HelpScreen, JournalScreen, PlansTab, SettingsScreen } from "./More";
 import { MenuDrawer } from "./Menu";
 import { KjvHistory } from "./KjvHistory";
+import { PrayerScreen } from "./PrayerScreen";
 import { JournalHost, newEntry, openEntry } from "./JournalEdit";
 import { journal } from "./journal";
 import { DictionarySheet } from "./Dictionary";
@@ -179,9 +180,9 @@ export function App() {
       // sweeplater: looks for waiting modules again after 8s, as the app coming forward would.
       if (sc.includes("sweeplater")) setTimeout(() => window.dispatchEvent(new Event("tes-inbox")), 8000);
       if (sc.includes("adding")) setTimeout(() => setAdding("Adding 2 modules…"), 2500);
-      // Debug: page=<journal|settings|help|history> opens that screen.
+      // Debug: page=<journal|settings|help|history|prayer> opens that screen.
       const pg = sc.find((x) => x.startsWith("page="))?.slice(5);
-      if (pg === "journal" || pg === "settings" || pg === "help" || pg === "history") setTab(pg);
+      if (pg === "journal" || pg === "settings" || pg === "help" || pg === "history" || pg === "prayer") setTab(pg);
       // entry=<id>: a journal entry open to read; newentry: a new one open to write.
       const en = sc.find((x) => x.startsWith("entry="));
       if (en) journal.load().then(() => openEntry(en.slice(6)));
@@ -268,6 +269,9 @@ export function App() {
           }}
         />
       </div>
+      <div className="screen" hidden={tab !== "prayer"}>
+        <PrayerScreen onVerse={(ref) => open({ ref })} />
+      </div>
       <div className="screen" hidden={tab !== "journal"}>
         <JournalScreen />
       </div>
@@ -293,7 +297,10 @@ export function App() {
         />
       )}
       <TextWordHost
-        strongsBible={modules.find((m) => m.kind === "bible" && m.strongs && m.id.startsWith("kjv"))?.id ?? modules.find((m) => m.kind === "bible" && m.strongs)?.id}
+        strongsBible={
+          modules.find((m) => m.kind === "bible" && m.strongs && m.id.startsWith("kjv"))?.id ??
+          modules.find((m) => m.kind === "bible" && m.strongs)?.id
+        }
         onWordStudy={study}
         onDictionary={(m, topic) => {
           save("dictionary", m);

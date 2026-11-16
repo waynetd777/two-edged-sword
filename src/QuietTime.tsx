@@ -44,6 +44,8 @@ import { PickedSongs } from "./PickedSongs";
 import { Closing, pickClosing } from "./closing";
 import { cancelAutoRead, inverts, readWhenReady } from "./WebPage";
 import { isMac } from "./keys";
+import { PrayThrough } from "./PrayerBoard";
+import { prayingNow } from "./prayer";
 
 const FIRST_DELAY = 900; // let the first part's screen open before reading starts
 const NEXT_DELAY = 2000;
@@ -57,6 +59,8 @@ function quietSteps(
   devotionalIds: string[],
   day: Date,
   online: OnlineDevotional[] = ONLINE_DEVOTIONALS,
+  /** There are prayer points to pray through. */
+  prayer = false,
 ): QuietStep[] {
   const steps: QuietStep[] = [];
   for (const p of parts) {
@@ -78,6 +82,7 @@ function quietSteps(
     if (w.before) steps.unshift(step("before", "worship"));
     if (w.after) steps.push(step("after", w.before ? "worship-after" : "worship"));
   }
+  if (plan.prayer && prayer && steps.length) steps.push({ key: "prayer", label: "Prayer", kind: "prayer" });
   if (plan.closing && steps.length) steps.push({ key: "closing", label: "Closing verse", kind: "closing", bible: plan.bible });
   // A favourite passage, read every day at the very end, after the closing verse.
   const f = plan.finale;
@@ -100,7 +105,7 @@ function quietSteps(
 function sessionSteps(app: ReturnType<typeof useApp>, plan: Plan, parts: Part[], day: Date): QuietStep[] {
   const online = onlineDevotionals(app.settings.webDevotionals);
   const ids = (plan.devotionals ?? []).filter((id) => online.some((o) => o.id === id) || app.mod("devotional", id));
-  return quietSteps(plan, parts, ids, day, online).map((s) =>
+  return quietSteps(plan, parts, ids, day, online, prayingNow(app.prayer).length > 0).map((s) =>
     s.kind === "devotional" ? { ...s, label: app.mod("devotional", s.module)?.abbrev || s.label } : s,
   );
 }
@@ -108,7 +113,7 @@ function sessionSteps(app: ReturnType<typeof useApp>, plan: Plan, parts: Part[],
 /** What the closing verse is chosen for: the day's readings, not the songs, the closing verse
  *  itself or the favourite passage (read every day, so it says nothing about the day). */
 const readingsOf = (steps: QuietStep[]) =>
-  steps.filter((x) => x.kind !== "worship" && x.kind !== "closing" && x.key !== "finale").map((x) => x.label);
+  steps.filter((x) => x.kind !== "worship" && x.kind !== "closing" && x.kind !== "prayer" && x.key !== "finale").map((x) => x.label);
 /** The favourite passage's label, for the closing verse to steer clear of. */
 const finaleOf = (steps: QuietStep[]) => steps.find((x) => x.key === "finale")?.label;
 /** Chooses the closing verse (kept for the day, so this is quick once it's been chosen). */
@@ -461,6 +466,8 @@ export function QuietTime({ focus }: { focus: boolean }) {
       if (!p) return;
       if (app.mod("bible", step.bible) && app.settings.bible !== step.bible) app.set({ bible: step.bible });
       app.open({ book: p.b, chapter: p.c, verse: p.v, to: p.v2 }, "read");
+    } else if (step.kind === "prayer") {
+      // Pray through shows over whatever is open (below).
     } else if (step.window) {
       api.openWeb(step.id, step.url, step.label, inverts(app.settings, step.id)).catch((e) => app.toast(String(e)));
     } else {
@@ -468,11 +475,11 @@ export function QuietTime({ focus }: { focus: boolean }) {
     }
     // Songs, or a devotional on the web, stop the reading before them and close its player (one the
     // app knows how to read is read aloud once its page is ready).
-    if (step.kind === "worship" || step.kind === "online") player.stop();
+    if (step.kind === "worship" || step.kind === "online" || step.kind === "prayer") player.stop();
     if (s.audio && step.kind === "closing" && step.picked) {
       // Time to read the summary first.
       setReadIn(readTime(`${step.picked.why ?? ""} ${step.picked.note ?? ""}`));
-    } else if (s.audio && step.kind !== "worship" && (step.kind !== "online" || readsItself(step))) {
+    } else if (s.audio && step.kind !== "worship" && step.kind !== "prayer" && (step.kind !== "online" || readsItself(step))) {
       const delay = first.current ? FIRST_DELAY : NEXT_DELAY;
       timer.current = window.setTimeout(() => speakStep(step), delay);
     }
@@ -675,6 +682,9 @@ export function QuietTime({ focus }: { focus: boolean }) {
         >
           <ClosingCard key={s.started} picked={step.picked} readIn={readIn} onReadNow={() => setReadIn(0)} />
         </div>
+      )}
+      {step.kind === "prayer" && (
+        <PrayThrough key={s.started} list={app.prayer} onChange={app.setPrayer} onClose={() => goRef.current(1)} doneLabel="Go on" />
       )}
       {step.kind === "worship" && (
         <div

@@ -3,7 +3,7 @@
 <sub>[Features](features.md) › Quiet time</sub>
 
 <!-- github -->
-**Contents:** [Plans](#plans) · [Worship music](#worship-music) · [Closing verse](#closing-verse) · [Favourite passage](#favourite-passage) · [Daily reminder](#daily-reminder) · [Menu bar](#menu-bar)
+**Contents:** [Plans](#plans) · [Worship music](#worship-music) · [Prayer](#prayer) · [Closing verse](#closing-verse) · [Favourite passage](#favourite-passage) · [Daily reminder](#daily-reminder) · [Menu bar](#menu-bar)
 <!-- /github -->
 
 ## Plans
@@ -124,6 +124,10 @@ songs and closing verse, without marking anything read. **Try it with audio** do
 <!-- mac -->
 The first time, macOS asks whether the app may control Music.
 <!-- /mac -->
+
+## Prayer
+
+Turn on the **Prayer** card on a plan's page to pray through your [prayer list](prayer.md) each day. It comes after the reading and songs, before the closing verse: one point at a time, with **Next**, **Back** and **Answered**. **Go on** at the end carries on with Quiet time.
 
 ## Closing verse
 

@@ -70,6 +70,15 @@ On [Quiet time](../quiet-time.md).
 - The daily reminder in Settings: [light](reminder-light.png) · [dark](reminder-dark.png)
 - The menu-bar window: [light](tray-light.png) · [dark](tray-dark.png)
 
+
+## Prayer
+
+On [Prayer](../prayer.md).
+
+- The prayer list, a card for each category: [light](prayer-light.png) · [dark](prayer-dark.png)
+- Answered prayers, each with the day: [light](prayer-answered-light.png) · [dark](prayer-answered-dark.png)
+- Pray through, one point at a time: [light](prayer-through-light.png) · [dark](prayer-through-dark.png)
+
 ## Library
 
 On [Library](../library.md).

@@ -165,8 +165,9 @@ export function Palette({ onClose, onAsk }: { onClose: () => void; onAsk: (ref: 
           ["word", "Word Study", "⌘4"],
           ["journal", "Journal", "⌘5"],
           ["plans", "Quiet time", "⌘6"],
-          ["library", "Library", "⌘7"],
-          ["history", "KJV History", "⌘8"],
+          ["prayer", "Prayer", "⌘7"],
+          ["library", "Library", "⌘8"],
+          ["history", "KJV History", "⌘9"],
           ["settings", "Settings", "⌘,"],
         ] as [Screen, string, string][]
       ).forEach(([s, l, k]) =>
