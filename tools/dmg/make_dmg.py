@@ -127,7 +127,11 @@ def main():
                     run("SetFile", "-a", "V", str(mount / item))
             run("SetFile", "-a", "E", str(mount / APP.name))
             time.sleep(1)
-            run("osascript", "-e", LAYOUT.format(volume=VOLUME, right=200 + W, bottom=120 + H + 28, y=ICON_Y, x_out=W + 400))
+            run(
+                "osascript",
+                "-e",
+                LAYOUT.format(volume=VOLUME, right=200 + W, bottom=120 + H + 28, y=ICON_Y, x_out=W + 400),
+            )
             run("sync")
         finally:
             run("hdiutil", "detach", dev)

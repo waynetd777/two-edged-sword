@@ -117,6 +117,10 @@ accept another update. Updates are checked in release builds only, never in scre
 `tools/dmg/make_dmg.py` draws the DMG window's background from `tools/dmg/background.html` (in the
 product page's look, with `site/`'s fonts and icon, rendered by WebKit) and has Finder lay out
 the icons. Its first run therefore asks to let the terminal control Finder.
+macOS 27's Finder shows a disk image's dot-named items (`.background`, `.fseventsd`) and moves the
+icons down to make room for them, so the script flags them invisible and its layout puts them
+outside the window. Before uploading a DMG, open it and check the window: only the app, the arrow
+and Applications, level with each other.
 
 `.github/workflows/windows-release.yml` adds the Windows installer to each release when it's
 published:
