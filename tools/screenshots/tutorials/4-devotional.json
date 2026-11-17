@@ -2,7 +2,7 @@
   {"name": "tut-card-devotional", "card": true, "screen": "plans", "crop": [945, 108, 400, 250]},
   {"name": "tut4-plans", "screen": "plans"},
   {"name": "tut4-choose", "screen": "plans", "clickText": "Choose a plan…"},
-  {"name": "tut4-cards", "screen": "plans", "prayerFile": "tut-fixtures/devotional-prayer.json", "crop": [218, 425, 1150, 205]},
+  {"name": "tut4-steps", "screen": "plans", "prayerFile": "tut-fixtures/devotional-prayer.json", "scrollTo": ".qs", "crop": [216, 211, 1153, 503]},
   {"name": "tut4-prayer", "screen": "prayer", "prayerFile": "tut-fixtures/devotional-prayer.json"},
   {"name": "tut4-praythrough", "screen": "prayer", "prayerFile": "tut-fixtures/devotional-prayer.json", "click": ".pr-sp + .pr-btn", "settle": 8},
   {"name": "tut4-worship", "loc": {"book": 19, "chapter": 15}, "settings": {"studyPane": false}, "sessionFile": "tut-fixtures/devotional-worship.json"},

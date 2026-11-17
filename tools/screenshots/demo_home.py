@@ -174,6 +174,17 @@ def plans(today):
             "worship": {"before": 1, "after": 1},
             "closing": True,
             "finale": {"b": 20, "c": 3, "v": 5, "v2": 6},
+            "prayer": True,
+            # Quiet time's steps in an order of the plan's own (plans.ts PlanStep), as the Steps card shows them.
+            "steps": [
+                {"id": "s1", "kind": "worship", "songs": 1, "style": "praise"},
+                {"id": "s2", "kind": "prayer"},
+                {"id": "s3", "kind": "reading"},
+                {"id": "s4", "kind": "worship", "songs": 2, "style": "worship"},
+                {"id": "s5", "kind": "devotional", "devotional": "sme"},
+                {"id": "s6", "kind": "closing"},
+                {"id": "s7", "kind": "passage", "passage": {"b": 20, "c": 3, "v": 5, "v2": 6}},
+            ],
             "doneDates": done,
             "progress": {"done": [], "key": ymd(today)},
         }

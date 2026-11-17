@@ -984,7 +984,7 @@ function TodayCard({ plan, update }: { plan: Plan; update: (p: Plan) => void }) 
         {plan.kind === "ppo" ? `Today · ${fmtLong(today())}` : t?.label === "Finished" ? "Finished" : `Next · day ${firstUndone(seq!) + 1}`}
       </div>
       {/* Side by side, wrapping, so a day of three readings doesn't make the card three lines taller. */}
-      <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", columnGap: 4, rowGap: 2 }}>
+      <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", columnGap: 8, rowGap: 2 }}>
         {t?.parts.map((x, i) => {
           const read = Array.from({ length: (x.c2 ?? x.c) - x.c + 1 }, (_, k) => `${x.b}.${x.c + k}`).every((k) => partsDone.includes(k));
           return (
@@ -997,7 +997,8 @@ function TodayCard({ plan, update }: { plan: Plan; update: (p: Plan) => void }) 
               style={{
                 border: 0,
                 padding: "2px 8px",
-                margin: i === 0 ? "0 0 0 -8px" : 0,
+                // Each one's text in line with the label above, its hover box reaching out past it.
+                margin: "0 0 0 -8px",
                 borderRadius: 8,
                 textAlign: "left",
                 cursor: "pointer",

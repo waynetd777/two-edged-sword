@@ -368,13 +368,15 @@ A daily reading plan, read or heard, with devotionals.
 
 Pick one: the Bible in a year, the New Testament in 90 days, the Gospels, F. B. Meyer's daily readings, a Psalm and a Proverb a day, or your own.
 
-### Add devotionals
+### Lay out your Quiet time
 
-A plan can include devotionals from your library, or Our Daily Bread and Heartlight from the web. **Add a website…** adds a devotional site of your own.
+A plan's page lists Quiet time's steps in order. **Add a step** adds prayer, worship songs, a reading, a devotional, a closing verse, a favourite passage or a pause to be still, as many as you like. Drag a step by its handle to move it; its bin removes it. Click a step to change it.
+
+A Devotional step can be one from your library, or Our Daily Bread and Heartlight from the web. **Add a website…** adds a devotional site of your own.
 
 ### Read each day
 
-- **Read** opens each of the day's readings in turn; **Read with audio** reads them aloud, one after another.
+- **Read** goes through the steps in turn; **Read with audio** reads them aloud, one after another.
 - Parts are ticked off as you finish them. Your streak and the last seven days are under the progress bar.
 - The calendar marks the days you read; click a day to read it.
 
@@ -393,10 +395,10 @@ The reminder only comes while the app is running, even if it's only in the notif
 
 ### End the day well
 
-In a plan's page:
+Two steps for the end:
 
-- **Closing verse**: the AI assistant picks a verse that gathers up what the day's reading taught, read at the end.
-- **Favourite passage**: one of your own, such as Proverbs 3:5–6, read every day at the very end.
+- **Closing verse**: the AI assistant picks a verse that gathers up what the day's reading taught.
+- **Favourite passage**: one of your own, such as Proverbs 3:5–6, read every day.
 
 **Try it now** runs today's Quiet time without marking anything read.
 
@@ -408,7 +410,7 @@ Songs from your own music, chosen to suit what you're reading.
 
 [Open Quiet time](app:plans)
 
-Turn on **Songs before the reading** or **Songs after the reading** in a plan's page. The AI assistant picks songs to suit the day's readings, and a card says why each was chosen.
+Add a **Worship** step to a plan's Quiet time, as many as you like, anywhere in it. Each chooses praise songs, worship songs or either. The AI assistant picks songs to suit the day's readings, different for each step, and a card says why each was chosen.
 
 <!-- mac -->
 Songs play in Apple Music from your Music library. The first time, macOS asks whether the app may control Music.
