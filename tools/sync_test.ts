@@ -156,3 +156,17 @@ test("the prayer list syncs item by item, and only with a side that syncs it", a
   assert.equal(validValue(pr.pointKey("x"), { id: "x", cat: "c", title: 3, verses: [], order: 1, created: "2026-01-01" }), false);
   assert.equal(validValue(pr.catKey("x"), { id: "x", name: "A", colour: "pink", order: 1 }), false);
 });
+
+test("devotional websites sync one item each, in the order kept here", async () => {
+  const s = await import("../src/sync.ts");
+  const a = { id: "web:a", title: "Site A", url: "https://example.com/{yyyy}/{mm}/{dd}" };
+  const b = { id: "web:b", title: "Site B", url: "https://example.org/", window: true as const };
+  const items = s.webItems([a, b]);
+  assert.deepEqual(Object.keys(items), ["wd|web:a", "wd|web:b"]);
+  for (const [k, v] of Object.entries(items)) assert.ok(validValue(k, v));
+  assert.ok(!validValue("wd|web:a", { ...a, url: "http://example.com/" }));
+  assert.ok(!validValue("wd|web:x", a));
+  // Here first in the order they were; one new from the other side after; one gone, gone.
+  const c = { id: "web:c", title: "Site C", url: "https://example.net/" };
+  assert.deepEqual(s.webFrom({ ...s.webItems([c, b]) }, [b, a]), [b, c]);
+});

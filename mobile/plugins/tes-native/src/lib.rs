@@ -3,7 +3,8 @@
 
 //! The phone app's native side: Swift on iOS (`ios/`), Kotlin on Android (`android/`). The iPhone stays upright except while a picture is
 //! open full screen (allow_rotation); reading aloud with iOS's own voices, which carries on with the screen
-//! locked (speak and the rest, with "speech" events for each word). Elsewhere the commands do nothing.
+//! locked (speak and the rest, with "speech" events for each word); a web page shown full
+//! screen over the app (open_web). Elsewhere the commands do nothing.
 
 use tauri::plugin::{Builder, TauriPlugin};
 use tauri::{command, AppHandle, Runtime};
@@ -243,6 +244,41 @@ async fn pick_modules<R: Runtime>(app: AppHandle<R>) -> Result<serde_json::Value
     }
 }
 
+/// The desktop's script for a devotional's own window, which inverts the page to look dark: one copy for both.
+const DARK_PAGE: &str = include_str!("../../../../src-tauri/src/dark_page.js");
+
+#[derive(serde::Serialize)]
+struct Web {
+    url: String,
+    title: String,
+    /// The app is dark: the view is black while the page loads, with a dark bar.
+    black: bool,
+    /// dark_page.js, run at the start of every page and frame, when the page is to be shown dark.
+    script: Option<String>,
+}
+
+/// A devotional that won't be framed in the app (X-Frame-Options, frame-ancestors), shown full screen
+/// over it instead, with a bar of its own and Done; open_web on the desktop opens a window. `dark`
+/// inverts the page; `black` is the app's dark theme, for the view around a page left as it is.
+#[command]
+async fn open_web<R: Runtime>(app: AppHandle<R>, url: String, title: String, dark: bool, black: bool) -> Result<(), String> {
+    let parsed: tauri::Url = url.parse().map_err(|e| format!("bad address: {e}"))?;
+    if parsed.scheme() != "https" {
+        return Err("only https pages can be opened".into());
+    }
+    let web = Web { url, title, black: black || dark, script: dark.then(|| DARK_PAGE.to_string()) };
+    #[cfg(mobile)]
+    {
+        use tauri::Manager;
+        return app.state::<Native<R>>().0.run_mobile_plugin::<()>("openWeb", web).map_err(|e| e.to_string());
+    }
+    #[cfg(not(mobile))]
+    {
+        let _ = (app, web);
+        Err("the desktop opens these in a window of their own".into())
+    }
+}
+
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
     Builder::new("tes-native")
         .invoke_handler(tauri::generate_handler![
@@ -261,7 +297,8 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
             discover,
             say,
             tap,
-            splash_drawn
+            splash_drawn,
+            open_web
         ])
         .setup(|_app, _api| {
             #[cfg(target_os = "ios")]

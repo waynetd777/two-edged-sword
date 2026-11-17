@@ -51,4 +51,4 @@ Tick the circle beside a point when it's answered. It moves to **Answered** with
 - **Next** and **Back**, → and ←, or a swipe left or right on a phone or tablet, step through them. Esc closes.
 - **Answered** marks the point answered and goes on.
 
-To pray through your list in Quiet time, turn on the **Prayer** card on a plan's page in [Quiet time](quiet-time.md). It comes first, before the songs and the reading.
+To pray through your list in Quiet time, add a **Prayer** step to a plan's [steps](quiet-time.md#steps), wherever you want it in Quiet time.

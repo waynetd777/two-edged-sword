@@ -47,6 +47,15 @@ class SleepArgs: Decodable {
   let stopAt: Double?
 }
 
+class WebArgs: Decodable {
+  let url: String
+  let title: String
+  /// The app is dark: black around the page while it loads, and a dark bar.
+  let black: Bool
+  /// dark_page.js, to show the page dark, when it is to be.
+  let script: String?
+}
+
 /// The orientations the app allows now: upright, but any way while a picture is open. Info.ios.plist lists
 /// every orientation for the iPhone; the web view's view controller narrows them to these.
 private var allowed: UIInterfaceOrientationMask = .portrait
@@ -129,6 +138,122 @@ class SyncFinder {
       self.done = { self.q.asyncAfter(deadline: .now() + 1) { answer() } }
       self.q.asyncAfter(deadline: .now() + 6) { answer() }
     }
+  }
+}
+
+/// A devotional that won't be framed in the app, shown full screen over it (openWeb): its own web view under a
+/// bar with the title and Done. Links stay in it.
+class WebPageController: UIViewController, WKNavigationDelegate, WKUIDelegate {
+  private let args: WebArgs
+  private var web: WKWebView!
+
+  init(_ args: WebArgs) {
+    self.args = args
+    super.init(nibName: nil, bundle: nil)
+    modalPresentationStyle = .fullScreen
+    overrideUserInterfaceStyle = args.black ? .dark : .light
+  }
+
+  required init?(coder: NSCoder) { fatalError("not from a storyboard") }
+
+  override var preferredStatusBarStyle: UIStatusBarStyle { args.black ? .lightContent : .darkContent }
+
+  // Turns as the app does: upright on a phone (unless a picture allowed it), freely on an iPad.
+  override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
+    UIDevice.current.userInterfaceIdiom == .pad ? .all : allowed
+  }
+
+  override func viewDidLoad() {
+    super.viewDidLoad()
+    let bg: UIColor = args.black ? .black : .white
+    let barBg: UIColor = args.black ? UIColor(red: 18 / 255, green: 18 / 255, blue: 20 / 255, alpha: 1) : UIColor(white: 0.97, alpha: 1)
+    view.backgroundColor = bg
+
+    let config = WKWebViewConfiguration()
+    config.allowsInlineMediaPlayback = true
+    if let script = args.script {
+      // Every frame, as the page's own may be in one.
+      config.userContentController.addUserScript(WKUserScript(source: script, injectionTime: .atDocumentStart, forMainFrameOnly: false))
+    }
+    web = WKWebView(frame: .zero, configuration: config)
+    // Not opaque, so the black or white behind shows until the page draws, not a white flash.
+    web.isOpaque = false
+    web.backgroundColor = bg
+    web.scrollView.backgroundColor = bg
+    web.allowsBackForwardNavigationGestures = true
+    web.navigationDelegate = self
+    web.uiDelegate = self
+
+    let bar = UIView()
+    bar.backgroundColor = barBg
+    let title = UILabel()
+    title.text = args.title
+    title.font = .preferredFont(forTextStyle: .headline)
+    title.textColor = args.black ? .white : .black
+    title.textAlignment = .center
+    title.lineBreakMode = .byTruncatingTail
+    let done = UIButton(type: .system)
+    done.setTitle("Done", for: .normal)
+    done.titleLabel?.font = .systemFont(ofSize: 17, weight: .semibold)
+    done.addTarget(self, action: #selector(close), for: .touchUpInside)
+    let line = UIView()
+    line.backgroundColor = args.black ? UIColor(white: 1, alpha: 0.12) : UIColor(white: 0, alpha: 0.12)
+
+    for v in [web, bar, title, done, line] as [UIView] { v.translatesAutoresizingMaskIntoConstraints = false }
+    view.addSubview(web)
+    view.addSubview(bar)
+    bar.addSubview(title)
+    bar.addSubview(done)
+    bar.addSubview(line)
+    let safe = view.safeAreaLayoutGuide
+    // Centred, unless a long title needs the room.
+    let centred = title.centerXAnchor.constraint(equalTo: bar.centerXAnchor)
+    centred.priority = .defaultHigh
+    NSLayoutConstraint.activate([
+      // The bar reaches up behind the status bar; its contents sit below it.
+      bar.topAnchor.constraint(equalTo: view.topAnchor),
+      bar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+      bar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+      bar.bottomAnchor.constraint(equalTo: safe.topAnchor, constant: 44),
+      done.trailingAnchor.constraint(equalTo: safe.trailingAnchor, constant: -16),
+      done.bottomAnchor.constraint(equalTo: bar.bottomAnchor),
+      done.heightAnchor.constraint(equalToConstant: 44),
+      centred,
+      title.centerYAnchor.constraint(equalTo: done.centerYAnchor),
+      // Kept clear of Done on both sides, so it stays centred.
+      title.leadingAnchor.constraint(greaterThanOrEqualTo: safe.leadingAnchor, constant: 80),
+      title.trailingAnchor.constraint(lessThanOrEqualTo: done.leadingAnchor, constant: -8),
+      line.leadingAnchor.constraint(equalTo: bar.leadingAnchor),
+      line.trailingAnchor.constraint(equalTo: bar.trailingAnchor),
+      line.bottomAnchor.constraint(equalTo: bar.bottomAnchor),
+      line.heightAnchor.constraint(equalToConstant: 1 / UIScreen.main.scale),
+      web.topAnchor.constraint(equalTo: bar.bottomAnchor),
+      web.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+      web.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+      web.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+    ])
+
+    if let url = URL(string: args.url) { web.load(URLRequest(url: url)) }
+  }
+
+  @objc private func close() {
+    web.stopLoading()
+    dismiss(animated: true)
+  }
+
+  /// Web pages load here; anything else (mail, a phone number, an app's link) goes to iOS.
+  func webView(_ webView: WKWebView, decidePolicyFor action: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+    guard let url = action.request.url, let scheme = url.scheme?.lowercased() else { return decisionHandler(.cancel) }
+    if ["http", "https", "about", "data", "blob"].contains(scheme) { return decisionHandler(.allow) }
+    UIApplication.shared.open(url)
+    decisionHandler(.cancel)
+  }
+
+  /// A link meant for a new window or tab opens here instead.
+  func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration, for action: WKNavigationAction,
+               windowFeatures: WKWindowFeatures) -> WKWebView? {
+    if action.targetFrame == nil { webView.load(action.request) }
+    return nil
   }
 }
 
@@ -446,6 +571,17 @@ class TesNativePlugin: Plugin, AVSpeechSynthesizerDelegate {
       NSLog("tes-native: orientations answered by %@", NSStringFromClass(cls))
     }
     refresh(turnUpright: true)
+  }
+
+  /// A web page full screen over the app, for a devotional that won't be framed in it.
+  @objc public func openWeb(_ invoke: Invoke) throws {
+    let args = try invoke.parseArgs(WebArgs.self)
+    DispatchQueue.main.async {
+      guard var top = self.manager.viewController else { return invoke.reject("no window") }
+      while let p = top.presentedViewController { top = p }
+      top.present(WebPageController(args), animated: true)
+      invoke.resolve()
+    }
   }
 
   @objc public func allowRotation(_ invoke: Invoke) throws {

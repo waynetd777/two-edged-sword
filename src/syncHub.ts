@@ -4,11 +4,11 @@
 // The desktop's side of sync with the phone app (src/sync.ts has the merging, sync.rs the server): what
 // the desktop keeps, as sync's items and places, and back.
 
-import type { Plan } from "./plans";
+import type { Plan, WebDevotional } from "./plans";
 import type { JournalEntry } from "./api";
 import type { Bookmark, HlColor, Recent } from "./state";
 import { PrayerList, prayerFrom, prayerItems } from "./prayer";
-import { Entry, entryKey, Mark, markKey, Place, planItems, plansFrom, under } from "./sync";
+import { Entry, entryKey, Mark, markKey, Place, planItems, plansFrom, under, webFrom, webItems } from "./sync";
 
 export interface Synced {
   bookmarks: Bookmark[];
@@ -18,6 +18,8 @@ export interface Synced {
   recent: Recent[];
   journal: JournalEntry[];
   prayer: PrayerList;
+  /** The devotional websites the user added (settings.webDevotionals). */
+  webDevotionals: WebDevotional[];
 }
 
 const toMark = (b: Bookmark): Mark =>
@@ -44,6 +46,7 @@ export function itemsOf(s: Synced): Record<string, unknown> {
   for (const p of s.plans) Object.assign(out, planItems(p));
   for (const e of s.journal) out[entryKey(e.id)] = toEntry(e);
   Object.assign(out, prayerItems(s.prayer));
+  Object.assign(out, webItems(s.webDevotionals));
   return out;
 }
 
@@ -119,5 +122,14 @@ export function fromItems(now: Record<string, unknown>, places: Place[], was: Sy
   const journal = under(now, "j|")
     .map(([, v]) => v as JournalEntry)
     .sort((a, b) => b.created.localeCompare(a.created));
-  return { bookmarks, highlights, docAt, plans: plansFrom(now), recent, journal, prayer: prayerFrom(now, was.prayer) };
+  return {
+    bookmarks,
+    highlights,
+    docAt,
+    plans: plansFrom(now),
+    recent,
+    journal,
+    prayer: prayerFrom(now, was.prayer),
+    webDevotionals: webFrom(now, was.webDevotionals),
+  };
 }

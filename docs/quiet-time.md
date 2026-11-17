@@ -3,7 +3,7 @@
 <sub>[Features](features.md) › Quiet time</sub>
 
 <!-- github -->
-**Contents:** [Plans](#plans) · [Worship music](#worship-music) · [Prayer](#prayer) · [Closing verse](#closing-verse) · [Favourite passage](#favourite-passage) · [Daily reminder](#daily-reminder) · [Menu bar](#menu-bar)
+**Contents:** [Plans](#plans) · [Steps](#steps) · [Worship music](#worship-music) · [Prayer](#prayer) · [Closing verse](#closing-verse) · [Favourite passage](#favourite-passage) · [Daily reminder](#daily-reminder) · [Menu bar](#menu-bar)
 <!-- /github -->
 
 ## Plans
@@ -51,18 +51,49 @@ open the first.
 | F7 and F9 | Previous or next part: what is being read stops at once |
 | F8 or ⌘P | Pause and resume reading aloud |
 
+## Steps
+
+A plan's page lists Quiet time's steps in the order they come. You can add any step, as many
+times as you like, in any order.
+
+| Step | Does |
+|---|---|
+| Prayer | Pray through your prayer list |
+| Worship | Praise or worship songs from your Music library, chosen for today's reading |
+| Reading | Today's reading from the plan: all of it, or one part |
+| Devotional | A devotional's reading for the day, from your library or online |
+| Closing verse | A verse chosen to gather up the day |
+| Favourite passage | The same passage every day |
+| Be still | A quiet pause of 1 to 10 minutes, ended by a bell |
+
+- **Add a step** puts the new step after the one chosen.
+- Drag a step by its handle to move it. With the handle selected, ↑ and ↓ move it too.
+- The bin on a step removes it.
+- Click a step to change it in the panel beside the list: how many songs, which reading, which
+  devotional, which passage, how long a pause.
+- **Start from…** replaces the steps with a ready-made order.
+- A Reading step can be one part of the day (its first, second or third reading), so songs or
+  prayer can go between readings. Parts no Reading step has are read after the last one.
+- Worship and Closing verse choose from the day's reading: without a Reading step they say so.
+- Prayer is left out while your prayer list is empty.
+- The steps are kept with the plan, and sync to the phone app with it.
+
+**Try it now**, under the steps, runs today's Quiet time without marking anything read. **Try it
+with audio** does the same, read aloud.
+
 ## Worship music
 
 <a href="images/index.md#quiet-time"><picture><source media="(prefers-color-scheme: dark)" srcset="images/worship-dark.png"><img alt="The Worship part of Quiet time: why each song suits the day's reading" src="images/worship-light.png"></picture></a>
 
-Turn it on with the **Worship music** card on a plan's page in Plans. The AI assistant picks songs
-from your Music library to suit the day's readings, and a card explains each choice. **Play songs**
-plays them in Music. Otherwise they start by themselves after a countdown, which leaves time to
-read the card.
+Add a **Worship** step to a plan's [steps](#steps). The AI assistant picks songs from your Music
+library to suit the day's readings, and a card explains each choice. **Play songs** plays them in
+Music. Otherwise they start by themselves after a countdown, which leaves time to read the card.
 
-- **Songs before the reading** and **Songs after the reading** turn on separately, and each has
-  its own number of songs.
-- With both on, different songs play after the reading.
+- Each Worship step has its own number of songs, 1 to 5.
+- **Kind of songs** chooses praise songs (upbeat, celebrating God), worship songs (slower and
+  quieter), or either. The library doesn't say which a song is, so the assistant judges from what
+  it knows of each song; for one it doesn't know, it guesses from the title.
+- Each Worship step plays different songs.
 - A song Quiet time has played isn't chosen again for 14 days.
 <!-- mac -->
 - Songs Music can't play aren't chosen: ones Apple Music no longer has, and ones unticked in Music.
@@ -118,39 +149,35 @@ name, artist, album and length. If LRCLIB has no lyrics, any you've saved with t
 are shown, without timing. If LRCLIB is busy, the app tries for a few seconds, then says so: open
 the song's Lyrics again later.
 
-**Try it now**, under the Closing verse card on a plan's page, runs today's Quiet time with its
-songs and closing verse, without marking anything read. **Try it with audio** does the same, read aloud.
-
 <!-- mac -->
 The first time, macOS asks whether the app may control Music.
 <!-- /mac -->
 
 ## Prayer
 
-Turn on the **Prayer** card on a plan's page to pray through your [prayer list](prayer.md) each day. It comes first, before the songs and the reading: one point at a time, with **Next**, **Back** and **Answered**. **Go on** at the end carries on with Quiet time.
+Add a **Prayer** step to a plan's [steps](#steps) to pray through your [prayer list](prayer.md) each day: one point at a time, with **Next**, **Back** and **Answered**. **Go on** at the end carries on with Quiet time.
 
 ## Closing verse
 
 <a href="images/index.md#quiet-time"><picture><source media="(prefers-color-scheme: dark)" srcset="images/closing-dark.png"><img alt="The closing verse, with how it sums up the day" src="images/closing-light.png"></picture></a>
 
-Turn it on with the Closing verse card on a plan's page in Plans. Quiet time then ends with a verse
-or short passage, chosen by the AI assistant to sum up what the day's reading taught.
+Add a **Closing verse** step to a plan's [steps](#steps). It is a verse or short passage, chosen by
+the AI assistant to sum up what the day's reading taught.
 
 - The passage opens in the Bible reader, highlighted, with a card that says in a few sentences
   how it sums up the day.
 - With audio, it is read aloud after a countdown that leaves time to read the card. **Read now**
   skips the wait.
-- It stays open when it's done. **Finish** ends Quiet time; if you've set a favourite passage, that is read next instead.
+- As the last step, it stays open when it's done, and **Finish** ends Quiet time.
 - It is chosen while you read, so it's usually ready by the end. The worship songs are chosen to suit it as well as the readings.
 - Without an AI assistant, the blessing of Numbers 6:24–26 closes instead.
 
 ## Favourite passage
 
-A passage of your own, such as Proverbs 3:5–6, read every day at the very end of Quiet time, after the closing verse. Set it in the Closing verse card, on a plan's page in Plans.
+A passage of your own, such as Proverbs 3:5–6, read every day. Add a **Favourite passage** step to a plan's [steps](#steps), wherever you want it.
 
-- Type the passage and click **Add**.
-- **Remove** stops it.
-- It stays open when it's done. **Finish** ends Quiet time.
+- Type the passage and click **Change**.
+- As the last step, it stays open when it's done, and **Finish** ends Quiet time.
 - It's the same every day, so it plays no part in choosing the day's songs; the closing verse is never the same passage.
 
 ## Daily reminder

@@ -29,6 +29,8 @@ import {
   stamp,
   under,
   vanished,
+  webFrom,
+  webItems,
   withoutJournal,
   withoutPrayer,
   type Items,
@@ -40,6 +42,7 @@ import { highlights, HlColor } from "./highlights";
 import { Entry, journal } from "./journal";
 import { plansStore } from "./plansStore";
 import { prayerStore } from "./prayerStore";
+import { webStore } from "./webStore";
 import { isPrayerKey, prayerFrom, prayerItems } from "../../src/prayer";
 
 /** The computer paired with: its name (as announced), where it was last found, and this device's id
@@ -170,6 +173,7 @@ function itemsNow(): Record<string, unknown> {
   for (const p of plansStore.get()) Object.assign(out, planItems(p));
   for (const e of journal.get()) out[entryKey(e.id)] = e;
   Object.assign(out, prayerItems(prayerStore.get()));
+  Object.assign(out, webItems(webStore.get().sites));
   return out;
 }
 
@@ -276,6 +280,7 @@ export function startSync() {
   highlights.subscribe(changed);
   plansStore.subscribe(changed);
   prayerStore.subscribe(changed);
+  webStore.subscribe(changed);
   journal.subscribe(changed);
   window.addEventListener("tes-docat", changed);
   document.addEventListener("visibilitychange", () => document.visibilityState === "visible" && syncNow().catch(() => {}));
@@ -602,6 +607,8 @@ async function apply(m0: Payload, withJournal: boolean, withPrayer: boolean, sen
     for (const k of Object.keys(docAtNow())) if (!(k in at)) localStorage.removeItem(DOC_AT + k);
     for (const [k, t] of Object.entries(at)) save(`docAt.${k}`, t);
     plansStore.set(() => plansFrom(done.now));
+    const sites = webStore.get().sites;
+    webStore.setSites(() => webFrom(done.now, sites));
     // Only from a sync that carried the journal both ways; otherwise what's here stays as it is.
     if (withJournal) written = journal.replace(under(done.now, "j|").map(([, v]) => v as Entry));
     if (withPrayer) {

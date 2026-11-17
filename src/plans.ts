@@ -45,6 +45,8 @@ export interface SequencePlan {
   progress?: Progress;
   /** A favourite passage read every day, at the very end of Quiet time (after the closing verse). */
   finale?: Part;
+  /** Quiet time's steps, in order (planSteps); absent for the order made from the settings above. */
+  steps?: PlanStep[];
   active: boolean;
 }
 
@@ -90,11 +92,74 @@ export interface PpoPlan {
   closing?: boolean;
   prayer?: boolean;
   finale?: Part;
+  steps?: PlanStep[];
   progress?: Progress;
   active: boolean;
 }
 
 export type Plan = SequencePlan | PpoPlan;
+
+/** One step of Quiet time, as the user lays them out: any of them, as many as wanted, in any order. */
+export type PlanStep = { id: string } &
+  /** Pray through the prayer list. */
+  (
+    | { kind: "prayer" }
+    /** Songs from the Music library chosen for the day's reading, different in each Worship step: praise
+     *  songs, worship songs, or (with no style) either. */
+    | { kind: "worship"; songs: number; style?: "praise" | "worship" }
+    /** The day's reading from the plan: one of its parts (0 for the first), or with none all those no
+     *  other Reading step has. Parts no step has are read after the last Reading step. */
+    | { kind: "reading"; part?: number }
+    /** A devotional's reading for the day: an e-Sword module's id, or an online one's. */
+    | { kind: "devotional"; devotional: string }
+    /** A verse chosen by the assistant to gather up the day (closing.ts). */
+    | { kind: "closing" }
+    /** A favourite passage, read every day. */
+    | { kind: "passage"; passage: Part }
+    /** A quiet pause, timed. */
+    | { kind: "still"; minutes: number }
+  );
+export type StepKind = PlanStep["kind"];
+
+/** A new step's id. */
+export const stepId = () => `st${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
+
+/** Quiet time's steps: the plan's own, or for a plan from before they could be laid out, the order its
+ *  settings made: prayer, songs, the reading, devotionals, songs, closing verse, favourite passage. */
+export function planSteps(p: Plan): PlanStep[] {
+  if (p.steps) return p.steps;
+  const w = worshipCounts(p.worship);
+  const out: PlanStep[] = [];
+  if (p.prayer) out.push({ id: "prayer", kind: "prayer" });
+  if (w.before) out.push({ id: "worship", kind: "worship", songs: w.before });
+  out.push({ id: "reading", kind: "reading" });
+  for (const d of p.devotionals ?? []) out.push({ id: `dev-${d}`, kind: "devotional", devotional: d });
+  if (w.after) out.push({ id: "worship-after", kind: "worship", songs: w.after });
+  if (p.closing) out.push({ id: "closing", kind: "closing" });
+  if (p.finale) out.push({ id: "finale", kind: "passage", passage: p.finale });
+  return out;
+}
+
+/** The plan with these steps. The settings they replace are kept to match, for an older app reading
+ *  the plan (synced from this one): its devotionals, prayer, songs before and after the first reading,
+ *  closing verse and favourite passage. */
+export function withSteps(p: Plan, steps: PlanStep[]): Plan {
+  const first = steps.findIndex((x) => x.kind === "reading");
+  const songs = (before: boolean) =>
+    steps.reduce((n, x, i) => n + (x.kind === "worship" && (first < 0 || i < first) === before ? x.songs : 0), 0);
+  const before = songs(true),
+    after = songs(false);
+  const passage = steps.find((x) => x.kind === "passage");
+  return {
+    ...p,
+    steps,
+    devotionals: steps.flatMap((x) => (x.kind === "devotional" ? [x.devotional] : [])),
+    prayer: steps.some((x) => x.kind === "prayer") || undefined,
+    closing: steps.some((x) => x.kind === "closing") || undefined,
+    worship: before || after ? { before, after } : undefined,
+    finale: passage?.kind === "passage" ? passage.passage : undefined,
+  };
+}
 
 // ---------- dates ----------
 

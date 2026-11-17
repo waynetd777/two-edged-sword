@@ -11,7 +11,7 @@
 // entry stays as it was and nothing is sent for it. A sync sends the items, the Mac keeps the newer of
 // each, and both take the result. Recent is a list merged by when each place was read.
 
-import type { Plan } from "./plans";
+import type { Plan, WebDevotional } from "./plans";
 import { isPrayerKey, validPrayer } from "./prayer.ts";
 
 /** One item as sent: its value, or that it was removed; and when that happened (ms since 1970). */
@@ -314,6 +314,15 @@ export function validValue(k: string, v: unknown): boolean {
   if (k.startsWith("at|")) return isStr(v);
   if (k.startsWith("plan|")) return isObj(v) && v.id === k.slice(5) && isStr(v.kind) && isStr(v.start);
   if (k.startsWith("pd|")) return isNum(v);
+  if (k.startsWith("wd|"))
+    return (
+      isObj(v) &&
+      v.id === k.slice(3) &&
+      isStr(v.title) &&
+      isStr(v.url) &&
+      v.url.startsWith("https://") &&
+      (v.window === undefined || v.window === true)
+    );
   if (isPrayerKey(k)) return validPrayer(k, v);
   if (k.startsWith("j|"))
     return (
@@ -419,6 +428,18 @@ export function planItems(p: Plan): Record<string, unknown> {
     for (const d of doneDates) out[`pd|${id}|date|${d}`] = 1;
   }
   return out;
+}
+
+/** The devotional websites the user added (WebDevotional), one item each. */
+export function webItems(ws: WebDevotional[]): Record<string, unknown> {
+  return Object.fromEntries(ws.map((w) => [`wd|${w.id}`, { id: w.id, title: w.title, url: w.url, ...(w.window ? { window: true } : {}) }]));
+}
+
+/** The devotional websites back from their items: in the order they were here, new ones after. */
+export function webFrom(now: Record<string, unknown>, was: WebDevotional[]): WebDevotional[] {
+  const got = new Map(under(now, "wd|").map(([, v]) => [(v as WebDevotional).id, v as WebDevotional]));
+  const kept = was.filter((w) => got.has(w.id)).map((w) => got.get(w.id)!);
+  return [...kept, ...[...got.values()].filter((w) => !was.some((x) => x.id === w.id))];
 }
 
 /** The plans back from their items, in the order they were started. */

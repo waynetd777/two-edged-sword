@@ -117,6 +117,49 @@ const PATHS = {
   up: <path d="M7 14l5-5 5 5" />,
   star: <path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.8l-5.2 2.8 1-5.8-4.3-4.1 5.9-.8z" />,
   check: <path d="M5 12.5l4.5 4.5L19 7.5" />,
+  close: <path d="M6 6l12 12M18 6L6 18" />,
+  moon: <path d="M19 14.5A7.5 7.5 0 0 1 9.5 5a7.5 7.5 0 1 0 9.5 9.5z" />,
+  refresh: (
+    <>
+      <path d="M19 12a7 7 0 1 1-2.1-5" />
+      <path d="M19 4.5V9h-4.5" />
+    </>
+  ),
+  textsize: (
+    <>
+      <path d="M4 18l4.5-11L13 18M5.6 14h5.8" />
+      <path d="M14 18l3-7 3 7M14.9 16h4.2" />
+    </>
+  ),
+  globe: (
+    <>
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M3.5 12h17M12 3.5c-2.4 2.4-3.5 5.2-3.5 8.5s1.1 6.1 3.5 8.5c2.4-2.4 3.5-5.2 3.5-8.5S14.4 5.9 12 3.5z" />
+    </>
+  ),
+  music: (
+    <>
+      <path d="M9 18V6l10-2v12" />
+      <circle cx="6.5" cy="18" r="2.5" />
+      <circle cx="16.5" cy="16" r="2.5" />
+    </>
+  ),
+  prayer: <path d="M11 4L8 11.5l-.4 4.5L4.5 19l2 2 4.2-3.4.3-2.6zM13 4l3 7.5.4 4.5 3.1 3-2 2-4.2-3.4-.3-2.6z" />,
+  quote: <path d="M5 17c2.5-.5 4-2.5 4-5.5V7H5v5h4M15 17c2.5-.5 4-2.5 4-5.5V7h-4v5h4" />,
+  clock: (
+    <>
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M12 7.5V12l3 2" />
+    </>
+  ),
+  grip: (
+    <>
+      {[7, 12, 17].flatMap((y) => [
+        <circle key={`a${y}`} cx="9" cy={y} r="1.4" fill="currentColor" stroke="none" />,
+        <circle key={`b${y}`} cx="15" cy={y} r="1.4" fill="currentColor" stroke="none" />,
+      ])}
+    </>
+  ),
 };
 
 export type IconName = keyof typeof PATHS;

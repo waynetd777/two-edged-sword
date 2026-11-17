@@ -27,8 +27,9 @@ export interface PlayerState {
   len: number;
   speed: number;
   sleep: Sleep;
-  /** Reading a book's chapter (a devotional's day) instead of the Bible; `verse` is then the paragraph. */
-  doc?: { module: string; chapter: string; title: string };
+  /** Reading a book's chapter (a devotional's day) instead of the Bible; `verse` is then the paragraph.
+   *  `web`: an online devotional's page (WebPage.tsx), its paragraphs as the page gave them. */
+  doc?: { module: string; chapter: string; title: string; web?: boolean };
   error?: string;
 }
 
@@ -122,6 +123,16 @@ async function speakFrom(bible: string, book: number, chapter: number, verse: nu
   });
 }
 
+/** What Quiet time does when what is being read comes to its end (QuietSession.tsx), instead of
+ *  reading on: set with the reading, and dropped when it's stopped or something else is read. */
+let then: (() => void) | null = null;
+/** Stopped at its end, then on to what follows. */
+const ended = () => {
+  const t = then;
+  stop();
+  t?.();
+};
+
 /** One stretch of a plan's day as read: a chapter, from a verse, to a verse; `part` is which of the
  *  day's parts it belongs to. */
 export interface PlanStretch {
@@ -152,7 +163,7 @@ async function speakPlan(bible: string, stretches: PlanStretch[], onPart: (part:
       items.push({ id: base + v.v, text: spoken, lang: langOf(spoken, la) });
     }
   }
-  if (items.length <= 1) return stop();
+  if (items.length <= 1) return ended();
   void checkVoices(items);
   plan = { stretches, onPart, part: stretches[0].part };
   const f = stretches[0];
@@ -175,6 +186,41 @@ async function speakPlan(bible: string, stretches: PlanStretch[], onPart: (part:
 }
 
 /** A book's chapter, paragraph by paragraph from `from`, announced by its name (a devotional by its title and day). */
+/** An online devotional's page, from the paragraph tapped on (WebPage.tsx), announced by its name: its
+ *  paragraphs as the page sent them, numbered from 1 as a book's are, so the page can mark each and its words as they're read. */
+async function speakWeb(d: { module: string; title: string }, paras: string[]) {
+  pageAt.clear();
+  const items = paras
+    .map((p, i) => {
+      const { spoken, at } = speakable(p);
+      pageAt.set(i + 1, at);
+      return { id: i + 1, text: spoken };
+    })
+    .filter((x) => x.text.trim());
+  // Nothing to read: on to what follows, if Quiet time is waiting for it.
+  if (!items.length) return ended();
+  set({
+    on: true,
+    paused: false,
+    doc: { ...d, chapter: "", web: true },
+    bible: "",
+    book: 0,
+    chapter: 0,
+    verse: items[0].id,
+    at: -1,
+    len: 0,
+    error: undefined,
+  });
+  await call("speak", {
+    // Announced by name first, as the desktop does ("Our Daily Bread").
+    items: [{ id: 0, text: d.title }, ...items],
+    rate: state.speed,
+    title: d.title,
+    voice: saved<string | null>("listenVoice", null),
+    stopAt: sleepAt,
+  }).catch((e) => set({ ...IDLE, speed: state.speed, sleep: state.sleep, error: String(e) }));
+}
+
 async function speakDoc(d: { module: string; chapter: string; title: string }, from: number) {
   const html = await docHtml(d.module, d.chapter).catch(() => null);
   const paras = html ? docParas(html, d.chapter) : [];
@@ -187,7 +233,8 @@ async function speakDoc(d: { module: string; chapter: string; title: string }, f
       return { id: i + 1, text: spoken };
     })
     .filter((x) => x.id >= from && x.text.trim());
-  if (!items.length) return stop();
+  // Nothing to read: on to what follows, if Quiet time is waiting for it.
+  if (!items.length) return ended();
   set({ on: true, paused: false, doc: d, bible: "", book: 0, chapter: 0, verse: items[0].id, at: -1, len: 0, error: undefined });
   const announce = isDevotional(d.module) ? `${d.title}, ${d.chapter}` : d.chapter;
   await call("speak", {
@@ -227,7 +274,7 @@ function listen() {
         set({ book: x.book, chapter: x.chapter, verse: v, at: pageAt.get(e.id)?.[e.at!] ?? e.at!, len: e.len! });
       else if (e.kind === "end") {
         plan.onPart(plan.part);
-        stop();
+        ended();
       }
       if (e.kind !== "paused" && e.kind !== "resumed") return;
     }
@@ -239,6 +286,7 @@ function listen() {
     else if (e.kind === "end" && state.doc) {
       // A book goes on to its next chapter; a devotional stops at the end of the day.
       const d = state.doc;
+      if (then || d.web) return ended();
       if (state.sleep === "chapter" || isDevotional(d.module) || over()) return stop();
       bookTitles(d.module).then((t) => {
         const next = t[t.indexOf(d.chapter) + 1];
@@ -283,16 +331,27 @@ export const player = {
   play(bible: string, book: number, chapter: number, verse: number, verses?: Verse[]) {
     listen();
     plan = null;
+    then = null;
     return speakFrom(bible, book, chapter, verse, verses);
   },
-  playDoc(d: { module: string; chapter: string; title: string }, from = 1) {
+  /** `next`: Quiet time's, for when the day's reading of it ends. */
+  playDoc(d: { module: string; chapter: string; title: string }, from = 1, next?: () => void) {
     listen();
     plan = null;
+    then = next ?? null;
     return speakDoc(d, from);
   },
-  /** A plan's day, all of it, in `bible`; `onPart` as each part is finished. */
-  playPlan(bible: string, stretches: PlanStretch[], onPart: (part: number) => void, title: string) {
+  /** An online devotional's paragraphs (WebPage.tsx); `next` as playDoc's. */
+  playWeb(d: { module: string; title: string }, paras: string[], next?: () => void) {
     listen();
+    plan = null;
+    then = next ?? null;
+    return speakWeb(d, paras);
+  },
+  /** A plan's day, all of it, in `bible`; `onPart` as each part is finished; `next` as playDoc's. */
+  playPlan(bible: string, stretches: PlanStretch[], onPart: (part: number) => void, title: string, next?: () => void) {
+    listen();
+    then = next ?? null;
     return speakPlan(bible, stretches, onPart, title);
   },
   pause() {
@@ -330,6 +389,7 @@ export const player = {
 
 function stop() {
   plan = null;
+  then = null;
   if (sleepTimer) clearTimeout(sleepTimer);
   sleepTimer = null;
   sleepAt = null;

@@ -182,6 +182,30 @@ fn agent() -> ureq::Agent {
     ureq::AgentBuilder::new().timeout_connect(std::time::Duration::from_secs(10)).timeout_read(std::time::Duration::from_secs(30)).build()
 }
 
+/// Whether a web page lets itself be shown inside another page (an online devotional the user added,
+/// framed in the app), from the last response's headers after any redirects: X-Frame-Options, or a
+/// Content-Security-Policy with frame-ancestors, says no (as the desktop's web_frameable). A site that
+/// is busy (429, 5xx) is an error rather than a guess: its error page's headers say nothing of the page.
+#[tauri::command(async)]
+fn web_frameable(url: String) -> Result<bool, String> {
+    if !url.starts_with("https://") {
+        return Err("only https pages can be opened".into());
+    }
+    let r = match agent().get(&url).set("User-Agent", "Mozilla/5.0 (iPhone) AppleWebKit/605.1.15 Mobile Safari/604.1").call() {
+        Ok(r) => r,
+        Err(ureq::Error::Status(code, _)) if code == 429 || code >= 500 => {
+            return Err("that site isn't answering just now; try again in a moment".into())
+        }
+        Err(ureq::Error::Status(_, r)) => r,
+        Err(_) => return Err("couldn't reach that address".into()),
+    };
+    let csp = r.all("content-security-policy").iter().any(|v| {
+        let v = v.to_lowercase();
+        v.contains("frame-ancestors") && !v.contains("frame-ancestors *")
+    });
+    Ok(r.header("x-frame-options").is_none() && !csp)
+}
+
 /// The downloads' manifest, as text.
 #[tauri::command(async)]
 fn fetch_manifest(url: String) -> Result<String, String> {
@@ -597,6 +621,13 @@ pub fn run() {
         .plugin(tauri_plugin_tes_native::init())
         .plugin(tauri_plugin_notification::init())
         .setup(|app| {
+            // The window is made here rather than from the config alone, so a script runs in the frames
+            // inside it: an online devotional's page (the desktop's frame.js, shared).
+            if let Some(cfg) = app.config().app.windows.iter().find(|w| w.label == "main").cloned() {
+                tauri::WebviewWindowBuilder::from_config(app.handle(), &cfg)?
+                    .initialization_script_for_all_frames(include_str!("../../../src-tauri/src/frame.js"))
+                    .build()?;
+            }
             let paths = app.path();
             let _ = store::DATA_DIR.set(paths.app_data_dir()?);
             *store::RESOURCE_DIR.write().unwrap() = Some(paths.resource_dir()?);
@@ -610,6 +641,7 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             log,
+            web_frameable,
             scene,
             set_bundled,
             modules,

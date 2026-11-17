@@ -1,11 +1,12 @@
 // Run in every frame of the main window, it does something only in an online devotional's page,
-// framed in the reading column (src/WebPage.tsx), and only when the app asks: the app can't reach
+// framed in the reading column (src/WebPage.tsx; on the phone, mobile/src/WebPage.tsx), and only when the app asks: the app can't reach
 // into a page from another site, but it can post it messages. It sets the page's text size, lets
 // a click on the page say where to start reading it aloud, and marks the paragraph and word being
 // read. ⌘ keys and Escape pressed in the page go to the app, so its shortcuts work there too.
 (() => {
   if (window.top === window || window.parent !== window.top) return;
-  const APP = ["tauri://localhost", "http://tauri.localhost", "http://localhost:1430"];
+  // The desktop app and the phone app (mobile/), built and in development.
+  const APP = ["tauri://localhost", "http://tauri.localhost", "http://localhost:1430", "http://localhost:1432"];
   let app = null; // the app's origin, once it has written
   const tell = (m) => app && window.parent.postMessage({ tes: true, ...m }, app);
   const SKIP =

@@ -2,11 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
 import { ReactNode, useEffect, useRef, useState } from "react";
-import { Module, save, saved, scene } from "./api";
-import { PrayThrough } from "../../src/PrayerBoard";
-import { prayingNow } from "../../src/prayer";
-import { prayerStore, usePrayer } from "./prayerStore";
-import { readChapter } from "./PrayerScreen";
+import { Module, saved, scene } from "./api";
 import { Help } from "./Help";
 import { JournalList } from "./JournalEdit";
 import { Icon } from "./icons";
@@ -26,17 +22,14 @@ import {
   tickPart,
   today,
   todayFor,
-  ymd,
   unmarkDayRead,
 } from "./plansShared";
 import { buildPlan, Choice, CHOICES, plansStore, startPlan, usePlans } from "./plansStore";
 import type { Jump } from "./Search";
 import { Settings } from "./Settings";
-import { player, PlanStretch, usePlayer } from "./player";
-import { Part } from "./plansShared";
-
-/** A part's key among the day's ticks. */
-const partKey = (x: { b: number; c: number; v?: number }) => `${x.b}.${x.c}${x.v ? `.${x.v}` : ""}`;
+import { player, usePlayer } from "./player";
+import { partKey, startQuiet } from "./QuietSession";
+import { StepsList } from "./QuietSteps";
 
 /** A screen with a title in its top bar: Journal, Settings and Help. */
 export function Titled({ title, children }: { title: string; children: ReactNode }) {
@@ -67,7 +60,7 @@ export const HelpScreen = () => (
   </Titled>
 );
 
-/** Quiet time: today's reading from the current plan, today's devotionals, then the plans to keep or start. */
+/** Quiet time: today's reading from the current plan, Quiet time's steps, then the plans to keep or start. */
 export function PlansTab({ modules, onJump, onLibrary }: { modules: Module[]; onJump: (j: Jump) => void; onLibrary: () => void }) {
   useEffect(() => {
     // Debug: plan=<choice> starts a plan.
@@ -78,16 +71,6 @@ export function PlansTab({ modules, onJump, onLibrary }: { modules: Module[]; on
   }, []);
   const plan = current(usePlans());
   const top = useRef<HTMLDivElement>(null);
-  const prayer = usePrayer();
-  const toPray = prayingNow(prayer).length;
-  /** Pray through open, and what follows it (the reading or listening that asked for it first). */
-  const [praying, setPraying] = useState<{ then?: () => void } | null>(null);
-  /** With the plan's Prayer on, Quiet time begins with Pray through, once a day: Start reading and Listen
-   *  open it first, then go on. */
-  const first = (go: () => void) => {
-    if (plan?.prayer && toPray && saved("prayedOn", "") !== ymd(today())) setPraying({ then: go });
-    else go();
-  };
   return (
     <>
       <header className="topbar">
@@ -95,107 +78,27 @@ export function PlansTab({ modules, onJump, onLibrary }: { modules: Module[]; on
         <h1 className="bartitle">Quiet time</h1>
       </header>
       <div className="results" ref={top}>
-        {plan && toPray > 0 && <PrayerCard plan={plan} points={toPray} onPray={() => setPraying({})} />}
         <p className="label" style={{ display: "flex", justifyContent: "space-between" }}>
           <span>Today's reading</span>
           <span style={{ textTransform: "none", letterSpacing: 0, fontWeight: 400 }}>{fmtLong(today()).replace(/ \d{4}$/, "")}</span>
         </p>
         {plan ? (
-          <TodayCard plan={plan} onJump={onJump} first={first} />
+          <TodayCard plan={plan} modules={modules} onJump={onJump} />
         ) : (
           <div className="card">
             <p style={{ margin: 0 }}>Choose a reading plan below, and today's reading shows here each day.</p>
           </div>
         )}
-        {modules.some((m) => m.kind === "devotional") && (
-          <>
-            <p className="label" style={{ marginTop: 18 }}>
-              Today's devotionals
-            </p>
-            <div className="card flush">
-              {modules
-                .filter((m) => m.kind === "devotional")
-                .map((m) => (
-                  <button key={m.id} className="row" onClick={() => onJump({ book: m.id })}>
-                    <Icon name="book" size={20} />
-                    <span className="grow">{m.title}</span>
-                    <span className="m">›</span>
-                  </button>
-                ))}
-            </div>
-          </>
-        )}
+        {plan && <StepsList plan={plan} modules={modules} />}
         <div style={{ marginTop: 18 }}>
           <Plans modules={modules} onLibrary={onLibrary} onStarted={() => top.current?.scrollTo({ top: 0, behavior: "smooth" })} />
         </div>
       </div>
-      {praying && (
-        <PrayThrough
-          list={prayer}
-          onChange={prayerStore.set}
-          touch
-          doneLabel={praying.then ? "Go on" : "Close"}
-          chapter={readChapter}
-          onClose={() => {
-            save("prayedOn", ymd(today()));
-            const then = praying.then;
-            setPraying(null);
-            then?.();
-          }}
-        />
-      )}
     </>
   );
 }
 
-/** A day's parts as stretches to read aloud: whole chapters one by one, a verse range as it runs (into a
- *  later chapter where it does). */
-function stretches(parts: Part[]): PlanStretch[] {
-  const out: PlanStretch[] = [];
-  parts.forEach((x, part) => {
-    const last = x.c2 ?? x.c;
-    if (!x.v) for (let c = x.c; c <= last; c++) out.push({ book: x.b, chapter: c, from: 1, part });
-    else if (last === x.c) out.push({ book: x.b, chapter: x.c, from: x.v, to: x.v2 ?? x.v, part });
-    else {
-      out.push({ book: x.b, chapter: x.c, from: x.v, part });
-      for (let c = x.c + 1; c < last; c++) out.push({ book: x.b, chapter: c, from: 1, part });
-      out.push({ book: x.b, chapter: last, from: 1, to: x.v2, part });
-    }
-  });
-  return out;
-}
-
-/** Prayer, first in Quiet time: the plan's switch for it (synced, as the desktop's Prayer card), and Pray
- *  through now. */
-function PrayerCard({ plan, points, onPray }: { plan: Plan; points: number; onPray: () => void }) {
-  const prayed = saved("prayedOn", "") === ymd(today());
-  return (
-    <>
-      <p className="label">Prayer</p>
-      <div className="card" style={{ marginBottom: 18, display: "flex", flexDirection: "column", gap: 12 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <span className="grow">
-            {points} {points === 1 ? "point" : "points"} to pray for{prayed ? " · prayed today" : ""}
-          </span>
-          <button className={prayed ? "secondary" : "primary"} style={{ flex: "none" }} onClick={onPray}>
-            Pray through
-          </button>
-        </div>
-        <label className="switch">
-          Start Quiet time with prayer
-          <input
-            type="checkbox"
-            checked={!!plan.prayer}
-            onChange={(e) => plansStore.update({ ...plan, prayer: e.target.checked || undefined })}
-          />
-          <span className="knob" aria-hidden="true" />
-        </label>
-      </div>
-    </>
-  );
-}
-
-function TodayCard({ plan, onJump, first }: { plan: Plan; onJump: (j: Jump) => void; first: (go: () => void) => void }) {
+function TodayCard({ plan, modules, onJump }: { plan: Plan; modules: Module[]; onJump: (j: Jump) => void }) {
   const pl = usePlayer();
   const d = today();
   const t = todayFor(plan);
@@ -206,23 +109,9 @@ function TodayCard({ plan, onJump, first }: { plan: Plan; onJump: (j: Jump) => v
   const late = plan.kind === "sequence" ? behind(plan) : 0;
   const keys = t.parts.map(partKey);
   const tick = (k: string) => plansStore.update(tickPart(plan, key, k, keys, d));
-  /** Read with audio, as the desktop's: the day's parts read one after another from the first not yet
-   *  read, each ticked off as it's finished, the reader following on the Read tab. */
-  const listen = () => {
-    const todo = t.parts.map((x, i) => ({ x, i })).filter(({ x }) => !ticked.includes(partKey(x)));
-    const parts = todo.length ? todo : t.parts.map((x, i) => ({ x, i }));
-    const all = stretches(parts.map((p) => p.x)).map((s) => ({ ...s, part: parts[s.part].i }));
-    if (!all.length) return;
-    const bible = saved("bible", "kjv+");
-    onJump({ ref: { book: all[0].book, chapter: all[0].chapter, verse: all[0].from } });
-    // Ticked against the plan as it is when each part ends, not as it was when reading began.
-    const done = (i: number) => {
-      const now = plansStore.get().find((p) => p.id === plan.id);
-      if (now) plansStore.update(tickPart(now, progressKey(now, today()), partKey(t.parts[i]), keys, today()));
-    };
-    setTimeout(() => player.playPlan(bible, all, done, `${plan.name} · ${t.label}`), 350);
-  };
-  const listening = pl.on && !pl.doc;
+  /** Quiet time in the plan's steps, read aloud, each step going on to the next by itself. */
+  const listen = () => startQuiet(plan, modules, true);
+  const listening = pl.on;
   useEffect(() => {
     scene.then((sc) => sc.includes("listenplan") && setTimeout(listen, 1500));
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -287,13 +176,10 @@ function TodayCard({ plan, onJump, first }: { plan: Plan; onJump: (j: Jump) => v
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: 8, flex: 1 }}>
                 <div style={{ display: "flex", gap: 8 }}>
-                  <button
-                    className="primary"
-                    onClick={() => first(() => onJump({ ref: partRef(t.parts.find((x) => !ticked.includes(partKey(x))) ?? t.parts[0]) }))}
-                  >
-                    {ticked.length ? "Continue reading" : "Start reading"}
+                  <button className="primary" onClick={() => startQuiet(plan, modules, false)}>
+                    {ticked.length ? "Continue" : "Begin"}
                   </button>
-                  <button className="secondary listenplan" onClick={() => (listening ? player.stop() : first(listen))}>
+                  <button className="secondary listenplan" onClick={() => (listening ? player.stop() : listen())}>
                     <Icon name="speaker" size={18} />
                     {listening ? "Stop" : "Listen"}
                   </button>

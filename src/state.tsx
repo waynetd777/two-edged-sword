@@ -410,18 +410,30 @@ interface Doc {
 type DocKind = "reference" | "devotional";
 
 /** One part of a Quiet time: a chapter (or part of one), a devotional's reading, or an online devotional. */
-export type QuietStep = { key: string; label: string } & (
-  | { kind: "bible"; bible: string; b: number; c: number; v?: number; v2?: number }
-  | { kind: "devotional"; module: string; title: string }
-  /** `window`: the site won't be shown inside the app, so it opens in a window of its own. */
-  | { kind: "online"; id: string; url: string; window?: boolean }
-  /** Songs for the day's reading; `picked` once they are chosen (worship.ts), with why when it had to guess. */
-  | { kind: "worship"; songs: number; when: "before" | "after"; picked?: Song[]; intro?: string; note?: string }
-  /** The last part: a verse or passage chosen to wrap up the day (closing.ts); `picked` once it is. */
-  | { kind: "closing"; bible: string; picked?: Closing }
-  /** Pray through the prayer list (PrayerBoard.tsx PrayThrough), the first part of all. */
-  | { kind: "prayer" }
-);
+export type QuietStep = { key: string; label: string } &
+  /** `every`: the favourite passage, read every day, rather than the day's reading. */
+  (
+    | { kind: "bible"; bible: string; b: number; c: number; v?: number; v2?: number; every?: boolean }
+    | { kind: "devotional"; module: string; title: string }
+    /** `window`: the site won't be shown inside the app, so it opens in a window of its own. */
+    | { kind: "online"; id: string; url: string; window?: boolean }
+    /** Songs for the day's reading; `picked` once they are chosen (worship.ts), with why when it had to guess. */
+    | {
+        kind: "worship";
+        songs: number;
+        when: "before" | "after";
+        style?: "praise" | "worship";
+        picked?: Song[];
+        intro?: string;
+        note?: string;
+      }
+    /** The last part: a verse or passage chosen to wrap up the day (closing.ts); `picked` once it is. */
+    | { kind: "closing"; bible: string; picked?: Closing }
+    /** Pray through the prayer list (PrayerBoard.tsx PrayThrough). */
+    | { kind: "prayer" }
+    /** A quiet pause of some minutes (QuietTime.tsx StillCard). */
+    | { kind: "still"; minutes: number }
+  );
 export interface Session {
   planId: string;
   dayKey: string;
@@ -974,8 +986,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   /** Removed here on purpose since the last stamp; only these are synced as removed (the journal's from
    *  deleteEntry alone, as an entry missing from the files may only be unread). */
   const removedHere = useRef(new Set<string>());
-  const synced = useRef<Synced>({ bookmarks, highlights, docAt: nav.docAt, plans, recent: nav.recent, journal, prayer });
-  synced.current = { bookmarks, highlights, docAt: nav.docAt, plans, recent: nav.recent, journal, prayer };
+  const webDevotionals = settings.webDevotionals;
+  const synced = useRef<Synced>({ bookmarks, highlights, docAt: nav.docAt, plans, recent: nav.recent, journal, prayer, webDevotionals });
+  synced.current = { bookmarks, highlights, docAt: nav.docAt, plans, recent: nav.recent, journal, prayer, webDevotionals };
   const syncedNow = (): Synced => ({ ...synced.current, journal: journalNow.current });
   const journalLoaded = settingsLoaded && !!journalDir && journalLoadedFor === journalDir;
   // Not when saved data couldn't be read: what's here would be taken for everything removed.
@@ -1052,7 +1065,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         console.error("sync: couldn't read the sync ledger; not syncing", e);
       },
     );
-  }, [syncReady, bookmarks, highlights, nav.docAt, plans, journal, prayer]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [syncReady, bookmarks, highlights, nav.docAt, plans, journal, prayer, webDevotionals]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     /** A sync that didn't happen, and why; `red` when it needs the user rather than another try (shown so in
      *  Settings and on the phone). */
@@ -1182,6 +1195,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setNav((n) => ({ ...n, docAt: next.docAt, recent: next.recent }));
       setPlans(() => next.plans);
       setPrayer(() => next.prayer);
+      setSettings((s) => ({ ...s, webDevotionals: next.webDevotionals }));
       putJournal(() => next.journal);
       // Seen by the next answer at once, before React renders.
       synced.current = { ...next };

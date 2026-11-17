@@ -82,10 +82,24 @@ Open it from **☰ › Word Study**, or **Study this word** on a tapped word. Ty
 
 ## Quiet time
 
-- With prayer points to pray for, a **Prayer** card comes first. **Start Quiet time with prayer** makes the day's first **Start reading** or **Listen** open Pray through, then go on to the reading. The setting is the same plan setting as on the computer.
-- **Quiet time** (in ☰) shows today's passages at the top. Tap one to read it, or **Listen** to hear them all. Tick each one as you read it.
-- Then today's devotionals, if you have any.
+- **Quiet time** (in ☰) shows today's passages at the top. Tap one to read it. Tick each one as you read it.
+- **Begin** goes through Quiet time's steps in order, under a bar with **Next**. **Listen** does the same, read aloud, each step going on to the next by itself.
+- **Steps** lists Quiet time in order: prayer, the reading, devotionals, a favourite passage, a pause to be still. They're the same steps as on the computer, synced with the plan.
+- Tap a step to change it: which reading, which devotional, which passage, how long a pause. **Add a step** adds one.
+- **Edit** shows a bin on each step to remove it, and a handle to drag it somewhere else.
+- Worship and Closing verse steps play on your Mac only: they need its Music library and AI assistant. They show here, and can be moved or removed, but are left out on the phone.
 - Under them it lists your plans, and starts a new one.
+
+## Online devotionals
+
+Our Daily Bread, Heartlight and websites of your own can be a Devotional step. The site's page shows in the app.
+
+- **Listen** (the speaker), then tap where reading should start. The word being read is marked as in the Bible reader.
+- With Quiet time's **Listen**, Our Daily Bread and Heartlight read by themselves from the day's reading.
+- In the dark theme the page is inverted to look dark, pictures as they should be. The moon turns that off for a site that's dark already.
+- **Aa** makes the page's text bigger or smaller. Each site keeps its own size.
+- **Add a website…**, in a Devotional step's choices, adds a site of your own: a name and its address. For a page whose address changes each day, put `{yyyy}`, `{mm}` and `{dd}` where the date goes. Your sites sync with the computer.
+- A site that won't show inside the app opens full screen on its own. **Done** closes it.
 
 ## Prayer
 
@@ -156,7 +170,7 @@ Under ☰ › Settings:
 
 ## Sync with your computer
 
-Bookmarks, highlights, the journal, reading plans, Recent and the chapter you're at in each book can be kept the same as Two-edged Sword on your computer.
+Bookmarks, highlights, the journal, reading plans and their steps, your devotional websites, Recent and the chapter you're at in each book can be kept the same as Two-edged Sword on your computer.
 
 1. On the computer, open Settings › Phones and tablets and click **Show a pairing code**.
 2. Here, go to ☰ › Settings › Sync, tap **Pair with your computer**, and enter the code.

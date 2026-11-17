@@ -2872,3 +2872,377 @@ h2.jtitle {
   border-top: none;
   padding-top: 4px;
 }
+
+/* An online devotional's page (WebPage.tsx): over everything, the app's bar above the site's page. */
+.webpage {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+}
+.webpage .bartitle {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.webpage-hint {
+  padding: 8px 16px;
+  text-align: center;
+  font-size: 14px;
+  background: var(--accentsoft);
+  color: var(--accent);
+}
+.webpage-size {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--line);
+  font-variant-numeric: tabular-nums;
+}
+.webpage-size button {
+  min-width: 56px;
+}
+.webpage-frame {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  padding-bottom: var(--bottom);
+  background: #fff;
+}
+.webpage-frame iframe {
+  flex: 1;
+  width: 100%;
+  border: 0;
+  background: #fff;
+}
+.webpage-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  color: var(--muted);
+}
+.webpage-loading .spin {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 3px solid var(--line);
+  border-top-color: var(--accent);
+  animation: spin 0.9s linear infinite;
+}
+
+/* ---------- Quiet time's steps (QuietSteps.tsx) and going through them (QuietSession.tsx) ---------- */
+.linkbtn {
+  border: none;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0;
+  padding: 4px 0;
+}
+.qsteps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.qstep {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-left: 4px;
+  background: var(--panel);
+  border-top: 1px solid var(--line);
+}
+.qstep:first-child {
+  border-top: 0;
+}
+.qstep.drag {
+  position: relative;
+  z-index: 1;
+  border-radius: 12px;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.25);
+}
+.qsteps.dragging,
+.qsteps.dragging * {
+  user-select: none;
+  -webkit-user-select: none;
+}
+.qstep-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 60px;
+  padding: 8px 12px 8px 8px;
+  border: none;
+  background: none;
+  color: var(--text);
+  text-align: left;
+}
+.qstep-main:disabled {
+  opacity: 1;
+}
+.qstep.mac .qstep-text span {
+  font-style: italic;
+}
+.qs-ico {
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  /* Dark on the highlight colours, which are the same in both themes. */
+  color: #1f2328;
+}
+.qstep-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.qstep-text b {
+  font-weight: 600;
+  font-size: 16px;
+}
+.qstep-text span {
+  color: var(--muted);
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.qstep-del {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: none;
+  color: var(--red);
+  display: grid;
+  place-items: center;
+}
+.qstep-del:disabled {
+  color: var(--disabled);
+}
+.qstep-grip {
+  flex: none;
+  width: 48px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  touch-action: none;
+}
+.qsteps-add {
+  margin-top: 10px;
+  width: 100%;
+  min-height: 48px;
+  border: 1px dashed var(--border);
+  border-radius: 14px;
+  background: none;
+  color: var(--accent);
+  font-size: 16px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.qsheet {
+  max-height: calc(100% - var(--top) - 60px);
+  overflow-y: auto;
+  padding: 14px 16px calc(var(--bottom) + 16px);
+  gap: 12px;
+}
+.qsheet-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.qsheet-head h2 {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: 18px;
+}
+.qsheet-kind {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 56px;
+  padding: 6px 4px;
+  border: none;
+  border-bottom: 1px solid var(--line);
+  background: none;
+  color: var(--text);
+  text-align: left;
+}
+.qsheet-note {
+  margin: 0;
+  line-height: 1.5;
+}
+.qsheet-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.qsheet-field > span {
+  font-size: 13px;
+  font-weight: 600;
+}
+.qsheet-field .m {
+  margin: 0;
+}
+.qsheet-opt {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+}
+.qsheet-opt label {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+}
+.qsheet-opt input {
+  width: 20px;
+  height: 20px;
+  flex: none;
+}
+.seg.wrapseg {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+.seg.wrapseg button {
+  flex: 1 0 auto;
+  padding: 0 10px;
+}
+.qbar {
+  flex: none;
+  position: relative;
+  z-index: 70;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 10px;
+  border-top: 1px solid var(--line);
+  background: var(--panel);
+}
+.qbar-dots {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+}
+.qbar-dots span {
+  width: 6px;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--border);
+  transition: width 0.2s;
+}
+.qbar-dots span.past {
+  background: var(--ring);
+}
+.qbar-dots span.on {
+  width: 16px;
+  background: var(--accent);
+}
+.qbar-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.qbar-now {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 15px;
+}
+.qbar-next {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: auto;
+  padding: 0 14px;
+}
+/* With the bar showing, a devotional's page and the pause stop above it. */
+.app:has(.qbar) .webpage {
+  bottom: calc(var(--bottom) + 86px);
+}
+.app:has(.qbar) .webpage-frame {
+  padding-bottom: 0;
+}
+.still {
+  position: fixed;
+  inset: 0;
+  z-index: 55;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: var(--top) 32px 0;
+  background: var(--bg);
+  text-align: center;
+}
+.app:has(.qbar) .still {
+  bottom: calc(var(--bottom) + 86px);
+}
+.still-time {
+  font: 500 64px/1 var(--orig);
+  font-variant-numeric: tabular-nums;
+}
+.still-verse {
+  margin: 0;
+  max-width: 28ch;
+  color: var(--muted);
+  font: italic 19px/1.45 var(--orig);
+}
+.still .secondary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: auto;
+  padding: 0 18px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .qbar-dots span {
+    transition: none;
+  }
+}
+/* Buttons stacked in a step's sheet keep their height: .primary and .secondary grow to fill a row, and in
+   a column that scrolls that would squash them. */
+.qsheet > .secondary,
+.qsheet-field > .secondary,
+.still .secondary {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+}

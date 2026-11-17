@@ -19,7 +19,6 @@
   --ring: #80ccff;
   --red: #cf222e;
   --amber: #bf8700;
-  --hl-gold: #f3e2b3;
   --hl-red: #f6d6d2;
   --hl-orange: #f8e2c8;
   --hl-yellow: #f4ebb8;
@@ -75,7 +74,6 @@
     --ring: #1f6feb;
     --red: #ff7b72;
     --amber: #d29922;
-    --hl-gold: #3d3012;
     --hl-red: #49211f;
     --hl-orange: #47301a;
     --hl-yellow: #3f3914;
@@ -125,7 +123,6 @@
   --ring: #1f6feb;
   --red: #ff7b72;
   --amber: #d29922;
-  --hl-gold: #3d3012;
   --hl-red: #49211f;
   --hl-orange: #47301a;
   --hl-yellow: #3f3914;
@@ -2412,7 +2409,7 @@ button.ks-chip {
 }
 
 mark {
-  background: var(--hl-gold);
+  background: var(--hl-yellow);
   color: inherit;
   border-radius: 3px;
   padding: 0 2px;
@@ -3390,4 +3387,214 @@ html.tray-view #root {
   margin-right: 6px;
   border-radius: 50%;
   vertical-align: 1px;
+}
+
+/* Quiet time's steps on a plan's page (QuietSteps.tsx): the list, and the chosen step's settings beside it. */
+.qs {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+}
+.qs-list {
+  padding: 16px 18px 18px 20px;
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+.qs-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.qs-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.qs-step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 6px 7px 4px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel);
+  cursor: pointer;
+  transition:
+    box-shadow 0.15s,
+    transform 0.15s;
+}
+.qs-step:hover {
+  background: var(--hover);
+}
+.qs-step.on {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+.qs-step.drag {
+  box-shadow: 0 10px 26px var(--shadow);
+  transform: scale(1.01);
+  border-color: var(--accent);
+  position: relative;
+  z-index: 1;
+}
+.qs-steps.dragging,
+.qs-steps.dragging * {
+  cursor: grabbing !important;
+  user-select: none;
+}
+.qs-grip {
+  border: 0;
+  background: none;
+  color: var(--muted);
+  padding: 4px 4px;
+  border-radius: 4px;
+  cursor: grab;
+  touch-action: none;
+  display: grid;
+  place-items: center;
+}
+.qs-grip:focus-visible {
+  outline: 2px solid var(--ring);
+}
+.qs-num {
+  width: 16px;
+  text-align: right;
+  color: var(--muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.qs-ico {
+  width: 28px;
+  height: 28px;
+  flex: none;
+  border-radius: 7px;
+  display: grid;
+  place-items: center;
+  /* Dark on the highlight colours, which are the same in both themes. */
+  color: #1f2328;
+}
+.qs-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.qs-text b {
+  font-weight: 600;
+}
+.qs-text span {
+  color: var(--muted);
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.qs-text span.warn,
+.qs-warn {
+  color: var(--amber);
+}
+.qs-min {
+  color: var(--muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.qs-del {
+  color: var(--muted);
+}
+.qs-foot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+/* Its right edge under the steps' minutes: the bin's width, the gap and the row's padding in from the end. */
+.qs-total {
+  margin-left: auto;
+  padding-right: 45px;
+  color: var(--muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.qs-total b {
+  color: var(--text);
+  font-weight: 600;
+  margin-left: 6px;
+}
+.qs-kinds {
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+}
+.qs-kinds button {
+  border: 0;
+  background: none;
+  color: var(--text);
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 8px;
+  border-radius: 7px;
+  cursor: pointer;
+}
+.qs-kinds button:hover {
+  background: var(--accentsoft);
+}
+.qs-kinds small {
+  display: block;
+  color: var(--muted);
+  font-size: 11.5px;
+}
+.qs-detail {
+  padding: 16px 20px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+.qs-dhead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.qs-dhead h3 {
+  margin: 0;
+  font: 600 18px var(--display);
+}
+.qs-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.qs-field > span:not(.hint) {
+  font-size: 12px;
+  font-weight: 600;
+}
+.qs-field .seg {
+  flex-wrap: wrap;
+  align-self: flex-start;
+}
+.qs-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+@media (max-width: 1000px) {
+  .qs {
+    grid-template-columns: 1fr;
+  }
+  .qs-list {
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .qs-step {
+    transition: none;
+  }
 }

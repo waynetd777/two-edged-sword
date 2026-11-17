@@ -2,36 +2,16 @@
    which both apps name the same; where the phone app has no such token, a fallback. */
 
 :root {
-  --pc-gold: #9a6700;
-  --pc-green: #1a7f37;
-  --pc-blue: #0969da;
-  --pc-purple: #8250df;
-  --pc-red: #cf222e;
-  --pc-teal: #127e86;
-  --pc-orange: #bc4c00;
-  --pc-grey: #6e7781;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --pc-gold: #e3b341;
-    --pc-green: #56d364;
-    --pc-blue: #79b8ff;
-    --pc-purple: #bc8cff;
-    --pc-red: #ff7b72;
-    --pc-teal: #56d4dd;
-    --pc-orange: #ffa657;
-    --pc-grey: #8b949e;
-  }
-}
-:root[data-theme="dark"] {
-  --pc-gold: #e3b341;
-  --pc-green: #56d364;
-  --pc-blue: #79b8ff;
-  --pc-purple: #bc8cff;
-  --pc-red: #ff7b72;
-  --pc-teal: #56d4dd;
-  --pc-orange: #ffa657;
-  --pc-grey: #8b949e;
+  /* The verse highlight colours (ReaderTools.tsx HL_DOT), as the highlight picker shows them: the same in
+     both themes, so what's drawn on them is dark. Gold is highlighting's yellow. */
+  --pc-gold: #e9d271;
+  --pc-green: #a9cf9f;
+  --pc-blue: #9fc0e6;
+  --pc-purple: #c1a9e3;
+  --pc-red: #e59a92;
+  --pc-teal: #8fcfc6;
+  --pc-orange: #efb97e;
+  --pc-grey: #aab3bf;
 }
 .pc-gold {
   --pc: var(--pc-gold);
@@ -384,7 +364,7 @@
   background: color-mix(in srgb, var(--pc, var(--accent)) 22%, transparent);
 }
 .pr-check:hover {
-  color: var(--pc, var(--accent));
+  color: color-mix(in srgb, var(--pc, var(--accent)) 55%, var(--text));
 }
 .pr-touch .pr-check {
   width: 40px;
@@ -859,7 +839,7 @@
   margin-top: 1px;
   border-radius: 50%;
   background: var(--pc, var(--good, var(--green)));
-  color: var(--panel);
+  color: #1f2328;
 }
 .pr-done svg.i {
   width: 12px;
@@ -968,7 +948,8 @@
   align-items: center;
   gap: 8px;
   margin: 0 0 14px;
-  color: var(--pc, var(--muted));
+  /* The dot beside it has the colour: pale colours don't read as text on a light page. */
+  color: var(--muted);
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.08em;

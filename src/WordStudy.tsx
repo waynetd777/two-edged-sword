@@ -203,7 +203,7 @@ export function WordStudyScreen() {
   const marked = (h: VerseHit) =>
     tokenize(h.text).map((t, i) =>
       t.word && t.showNums?.includes(num) ? (
-        <b key={i} style={{ background: "var(--hl-gold)", borderRadius: 3, padding: "0 2px" }}>
+        <b key={i} style={{ background: "var(--hl-yellow)", borderRadius: 3, padding: "0 2px" }}>
           {t.text}
         </b>
       ) : (

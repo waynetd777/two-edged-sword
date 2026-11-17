@@ -133,13 +133,34 @@ function kept(key: string, pick: () => Promise<Picked>, fresh = false): Promise<
 
 const nSongs = (n: number) => `${n} worship song${n === 1 ? "" : "s"}`;
 
+/** Praise (upbeat, celebrating God) or worship (slower, quieter, close to Him); none for either. The
+ *  library doesn't say which a song is, so the assistant tells them apart from what it knows of them. */
+export type SongStyle = "praise" | "worship";
+
+/** What kind of song to choose, as the prompt asks for it. */
+const SUITS: Record<SongStyle | "either", string> = {
+  either: "that suit worship (not upbeat rock or songs about something else)",
+  praise:
+    "that are praise songs: upbeat and joyful, celebrating who God is and what He has done, with a lively tempo (not slow, quiet worship songs, and not songs about something else)",
+  worship:
+    "that are worship songs: slower and reflective, quiet and close to God, surrendering and adoring (not upbeat, fast praise songs, and not songs about something else)",
+};
+
 /** `n` songs for a Quiet time reading `about` (its parts, "John 3", "My Utmost for His Highest"),
  *  leaving out the songs in `avoid` (by id). */
-export function pickSongs(n: number, about: string[], when: "before" | "after", model: string, avoid: string[] = []): Promise<Picked> {
-  const key = JSON.stringify([n, about, when, avoid, today().toDateString()]);
-  const ask = `Choose ${nSongs(n)} for someone's quiet time with God, to play ${when === "before" ? "before their reading, preparing their heart for it" : "after their reading, as a response to it"}.
+export function pickSongs(
+  n: number,
+  about: string[],
+  when: "before" | "after",
+  model: string,
+  avoid: string[] = [],
+  style?: SongStyle,
+): Promise<Picked> {
+  const key = JSON.stringify([n, about, when, avoid, style ?? "", today().toDateString()]);
+  const kind = `${style ?? "worship"} song${n === 1 ? "" : "s"}`;
+  const ask = `Choose ${n} ${kind} for someone's quiet time with God, to play ${when === "before" ? "before their reading, preparing their heart for it" : "after their reading, as a response to it"}.
 Today they are reading: ${about.join("; ")}.`;
-  return kept(key, () => choose(n, ask, ["these passages", "today's reading"], model, new Set(avoid), true));
+  return kept(key, () => choose(n, ask, ["these passages", "today's reading"], model, new Set(avoid), true, SUITS[style ?? "either"]));
 }
 
 /** `n` songs to play while reading a chapter: `about` names it ("Romans 8", or a book's chapter),
@@ -174,7 +195,15 @@ export const setChapterPlaying = (s: Song[]) => (chapterPlaying = s);
 
 /** Asks the assistant to choose: `ask` says what for, `it` names the reading as the songs should
  *  fit it and as the intro describes it. With `rest`, songs played lately are left out. */
-async function choose(n: number, ask: string, it: [string, string], model: string, avoid: Set<string>, rest: boolean): Promise<Picked> {
+async function choose(
+  n: number,
+  ask: string,
+  it: [string, string],
+  model: string,
+  avoid: Set<string>,
+  rest: boolean,
+  suit = SUITS.either,
+): Promise<Picked> {
   const library = (await worshipSongs()).filter((t) => !avoid.has(t.id));
   if (!library.length)
     throw new Error(`No worship songs in your Music ${isMac ? "library" : "folder"} (Christian, gospel or worship genres).`);
@@ -192,7 +221,7 @@ async function choose(n: number, ask: string, it: [string, string], model: strin
   const order = shuffled(all);
   const list = order.map((t, i) => `${i + 1}. ${t.name} — ${t.artist}`).join("\n");
   const prompt = `${ask}
-Choose songs whose words and themes fit what ${it[0]} ${it[0] === "this chapter" ? "is" : "are"} about, and that suit worship (not upbeat rock or songs about something else). Choose only from the numbered list below, which is their own music library. Many of them fit most readings, so choose the ones that fit this one best rather than the most familiar.
+Choose songs whose words and themes fit what ${it[0]} ${it[0] === "this chapter" ? "is" : "are"} about, and ${suit}. Choose only from the numbered list below, which is their own music library. Many of them fit most readings, so choose the ones that fit this one best rather than the most familiar.
 Reply with only JSON, and nothing else, in this form:
 {"intro": "one or two sentences on what ${it[1]} is about and how the songs answer it", "songs": [{"n": 12, "why": "one sentence on how this song relates to the reading"}]}
 with the songs in the order to play them. Speak to the reader as "you", warmly and plainly; name passages, not verse numbers alone.

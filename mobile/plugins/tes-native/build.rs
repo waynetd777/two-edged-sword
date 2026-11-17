@@ -18,6 +18,7 @@ const COMMANDS: &[&str] = &[
     "speech_settings",
     "tap",
     "splash_drawn",
+    "open_web",
     // addPluginListener in the app goes through these (the "speech" events).
     "register_listener",
     "remove_listener",

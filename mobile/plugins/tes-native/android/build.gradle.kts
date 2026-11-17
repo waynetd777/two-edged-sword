@@ -29,5 +29,7 @@ kotlin {
 dependencies {
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.appcompat:appcompat:1.7.0")
+    // openWeb: the dark script at the start of every page and frame.
+    implementation("androidx.webkit:webkit:1.14.0")
     implementation(project(":tauri-android"))
 }

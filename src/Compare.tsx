@@ -84,7 +84,7 @@ const Marked = memo(function Marked({
           <span key={i}>
             <span
               className={`w ${t.red && red ? "red" : ""} ${activeWi === t.wi ? "on" : ""} ${speaking ? "speaking" : ""}`}
-              style={d ? { background: "var(--hl-gold)", borderRadius: 3, padding: "0 2px" } : undefined}
+              style={d ? { background: "var(--hl-yellow)", borderRadius: 3, padding: "0 2px" } : undefined}
               onClick={(e) => {
                 e.stopPropagation();
                 onWord(t, e.currentTarget);

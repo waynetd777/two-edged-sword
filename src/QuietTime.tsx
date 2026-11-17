@@ -1,15 +1,15 @@
 // Copyright © 2026 Wayne Davies. Free software under the GNU General Public License, version 3 or later.
 // SPDX-License-Identifier: GPL-3.0-or-later. See LICENSE in the project root.
 
-// Quiet time: today's plan and devotionals as one session. Each part opens in turn (a chapter in
-// the Bible reader, a devotional or an online one's page in the reading column) under a
-// floating bar with Previous and Next. With audio, a part that finishes reading opens the next,
-// waits two seconds and reads on. Parts are ticked off as they are finished, and the plan's day is
-// marked read once all its Bible parts are. A plan with worship songs gets a Worship part before
-// or after the reading: songs from the Music library chosen for the day (worship.ts), played in
-// Music while the part is open, their words in the reading column (LyricsPage), moving on when they finish.
-// A plan with a closing verse ends with one chosen to wrap up the day (closing.ts); a favourite
-// passage read every day comes after it, last of all.
+// Quiet time: today's plan as one session, in the order of the plan's steps (plans.ts PlanStep, laid
+// out in QuietSteps.tsx). Each part opens in turn (a chapter in the Bible reader, a devotional or an
+// online one's page in the reading column) under a floating bar with Previous and Next. With audio, a
+// part that finishes reading opens the next, waits two seconds and reads on. Parts are ticked off as
+// they are finished, and the plan's day is marked read once all its Bible parts are. A Worship part
+// plays songs from the Music library chosen for the day (worship.ts) in Music, their words in the
+// reading column (LyricsPage), moving on when they finish; each Worship part gets different songs. A
+// closing verse is chosen to wrap up the day (closing.ts); a favourite passage is read every day; Be
+// still is a timed pause ending with a bell.
 
 import { useEffect, useRef, useState } from "react";
 import { Working } from "./Ask";
@@ -31,8 +31,8 @@ import {
   tickPart,
   today as startOfToday,
   todayIfOngoing,
-  worshipCounts,
   partLabel,
+  planSteps,
 } from "./plans";
 import { checkMusic, useMusicState } from "./music";
 import { usePlayer } from "./speech";
@@ -52,61 +52,89 @@ const NEXT_DELAY = 2000;
 /** Seconds to read a card before what follows starts: about three words a second, 8 to 40. */
 const readTime = (text: string) => Math.min(40, Math.max(8, Math.round(text.split(/\s+/).filter(Boolean).length / 3) + 3));
 
-/** Today's parts, one chapter at a time, then the chosen devotionals; worship songs first or last. */
+/** Today's Quiet time from the plan's steps (planSteps), in their order: a Reading step as its parts one
+ *  chapter at a time, a devotional's reading, songs, prayer, the closing verse, a favourite passage, a
+ *  pause. Parts of the day no Reading step has come after the last one. Without anything from the day's
+ *  reading there is no Quiet time. */
 function quietSteps(
   plan: Plan,
   parts: Part[],
-  devotionalIds: string[],
   day: Date,
   online: OnlineDevotional[] = ONLINE_DEVOTIONALS,
   /** There are prayer points to pray through. */
   prayer = false,
+  /** Whether a devotional module is in the library. */
+  have: (id: string) => boolean = () => true,
 ): QuietStep[] {
-  const steps: QuietStep[] = [];
-  for (const p of parts) {
+  const plan_ = planSteps(plan);
+  const chapters = (p: Part): QuietStep[] => {
+    const out: QuietStep[] = [];
     const last = p.c2 ?? p.c;
     for (let c = p.c; c <= last; c++) {
       const whole = p.c === last && p.v ? { v: p.v, v2: p.v2 } : {};
       const label = `${psalmLabel(book(p.b).name)} ${c}${whole.v ? `:${whole.v}${whole.v2 ? `–${whole.v2}` : ""}` : ""}`;
-      steps.push({ key: `${p.b}.${c}`, label, kind: "bible", bible: plan.bible, b: p.b, c, ...whole });
+      out.push({ key: `${p.b}.${c}`, label, kind: "bible", bible: plan.bible, b: p.b, c, ...whole });
     }
-  }
-  for (const id of devotionalIds) {
-    const o = online.find((x) => x.id === id);
-    if (o) steps.push({ key: id, label: o.title, kind: "online", id, url: o.url(day), window: o.window });
-    else steps.push({ key: id, label: id, kind: "devotional", module: id, title: dayTitle(day) });
-  }
-  const w = worshipCounts(plan.worship);
-  if (steps.length) {
-    const step = (when: "before" | "after", key: string): QuietStep => ({ key, label: "Worship", kind: "worship", songs: w[when], when });
-    if (w.before) steps.unshift(step("before", "worship"));
-    if (w.after) steps.push(step("after", w.before ? "worship-after" : "worship"));
-  }
-  // Prayer first of all, before the songs and the reading.
-  if (plan.prayer && prayer && steps.length) steps.unshift({ key: "prayer", label: "Prayer", kind: "prayer" });
-  if (plan.closing && steps.length) steps.push({ key: "closing", label: "Closing verse", kind: "closing", bible: plan.bible });
-  // A favourite passage, read every day at the very end, after the closing verse.
-  const f = plan.finale;
-  if (f && steps.length) {
-    const label = psalmLabel(partLabel(f));
-    steps.push({
-      key: "finale",
-      label,
-      kind: "bible",
-      bible: plan.bible,
-      b: f.b,
-      c: f.c,
-      ...(f.v ? { v: f.v, v2: f.c2 ? undefined : f.v2 } : {}),
-    });
-  }
-  return steps;
+    return out;
+  };
+  // Which parts each Reading step reads: its own, or (with none) all that no other step has.
+  const claimed = new Set(plan_.flatMap((x) => (x.kind === "reading" && x.part !== undefined ? [x.part] : [])));
+  const given = new Set<number>();
+  const partsOf = (x: { part?: number }) => {
+    const ix = x.part !== undefined ? [x.part] : parts.map((_, i) => i).filter((i) => !claimed.has(i));
+    return ix.filter((i) => i < parts.length && !given.has(i) && given.add(i));
+  };
+  const lastReading = plan_.map((x) => x.kind).lastIndexOf("reading");
+  const steps: QuietStep[] = [];
+  const keys = new Set<string>();
+  // Each part's key once: the first of a kind keeps the name older days were ticked under.
+  const key = (k: string, id: string) => (keys.has(k) ? `${k}-${id}` : k);
+  const push = (x: QuietStep) => {
+    if (keys.has(x.key)) return;
+    keys.add(x.key);
+    steps.push(x);
+  };
+  plan_.forEach((x, i) => {
+    if (x.kind === "reading") {
+      for (const p of partsOf(x)) chapters(parts[p]).forEach(push);
+      // The rest of the day after the last Reading step.
+      if (i === lastReading) parts.forEach((p, k) => !given.has(k) && given.add(k) && chapters(p).forEach(push));
+    } else if (x.kind === "devotional") {
+      const o = online.find((y) => y.id === x.devotional);
+      if (o) push({ key: key(o.id, x.id), label: o.title, kind: "online", id: o.id, url: o.url(day), window: o.window });
+      else if (have(x.devotional))
+        push({ key: key(x.devotional, x.id), label: x.devotional, kind: "devotional", module: x.devotional, title: dayTitle(day) });
+    } else if (x.kind === "worship") {
+      // Before the reading, or after some of it: for what the songs are chosen to do.
+      const when = steps.some((y) => y.kind === "bible") ? "after" : "before";
+      const label = x.style === "praise" ? "Praise" : "Worship";
+      push({ key: key("worship", x.id), label, kind: "worship", songs: x.songs, when, ...(x.style ? { style: x.style } : {}) });
+    } else if (x.kind === "prayer") {
+      if (prayer) push({ key: key("prayer", x.id), label: "Prayer", kind: "prayer" });
+    } else if (x.kind === "closing") push({ key: key("closing", x.id), label: "Closing verse", kind: "closing", bible: plan.bible });
+    else if (x.kind === "passage") {
+      const f = x.passage;
+      push({
+        key: key("finale", x.id),
+        label: psalmLabel(partLabel(f)),
+        kind: "bible",
+        every: true,
+        bible: plan.bible,
+        b: f.b,
+        c: f.c,
+        ...(f.v ? { v: f.v, v2: f.c2 ? undefined : f.v2 } : {}),
+      });
+    } else if (x.kind === "still") push({ key: key("still", x.id), label: "Be still", kind: "still", minutes: x.minutes });
+  });
+  // No Reading step: the day's reading comes last.
+  if (lastReading < 0) parts.forEach((p) => chapters(p).forEach(push));
+  return steps.some((x) => x.kind === "bible" && !x.every) ? steps : [];
 }
 
 /** The session's parts as the app shows them: devotionals it has, named by their abbreviations. */
 function sessionSteps(app: ReturnType<typeof useApp>, plan: Plan, parts: Part[], day: Date): QuietStep[] {
   const online = onlineDevotionals(app.settings.webDevotionals);
-  const ids = (plan.devotionals ?? []).filter((id) => online.some((o) => o.id === id) || app.mod("devotional", id));
-  return quietSteps(plan, parts, ids, day, online, prayingNow(app.prayer).length > 0).map((s) =>
+  return quietSteps(plan, parts, day, online, prayingNow(app.prayer).length > 0, (id) => !!app.mod("devotional", id)).map((s) =>
     s.kind === "devotional" ? { ...s, label: app.mod("devotional", s.module)?.abbrev || s.label } : s,
   );
 }
@@ -114,9 +142,13 @@ function sessionSteps(app: ReturnType<typeof useApp>, plan: Plan, parts: Part[],
 /** What the closing verse is chosen for: the day's readings, not the songs, the closing verse
  *  itself or the favourite passage (read every day, so it says nothing about the day). */
 const readingsOf = (steps: QuietStep[]) =>
-  steps.filter((x) => x.kind !== "worship" && x.kind !== "closing" && x.kind !== "prayer" && x.key !== "finale").map((x) => x.label);
+  steps
+    .filter(
+      (x) => x.kind !== "worship" && x.kind !== "closing" && x.kind !== "prayer" && x.kind !== "still" && !(x.kind === "bible" && x.every),
+    )
+    .map((x) => x.label);
 /** The favourite passage's label, for the closing verse to steer clear of. */
-const finaleOf = (steps: QuietStep[]) => steps.find((x) => x.key === "finale")?.label;
+const finaleOf = (steps: QuietStep[]) => steps.find((x) => x.kind === "bible" && x.every)?.label;
 /** Chooses the closing verse (kept for the day, so this is quick once it's been chosen). */
 const closingFor = (steps: QuietStep[], model: string) => {
   const c = steps.find((x) => x.kind === "closing");
@@ -137,7 +169,7 @@ async function pickWorship(steps: QuietStep[], model: string, put: (key: string,
   const avoid: string[] = [];
   for (const w of steps) {
     if (w.kind !== "worship") continue;
-    const p = await pickSongs(w.songs, about, w.when, model, [...avoid]).catch((e): Picked => ({
+    const p = await pickSongs(w.songs, about, w.when, model, [...avoid], w.style).catch((e): Picked => ({
       songs: [],
       note: e instanceof Error ? e.message : String(e),
     }));
@@ -156,10 +188,7 @@ export function useWorshipAhead() {
   const done = !!plan && readOn(plan, startOfToday());
   const w = plan?.worship;
   const ready = app.plansReady && !!app.lib;
-  const key =
-    plan && t && (w || plan.closing) && !done
-      ? JSON.stringify([plan.id, t.label, w, plan.closing, (plan.devotionals ?? []).join(), app.settings.model])
-      : null;
+  const key = plan && t && (w || plan.closing) && !done ? JSON.stringify([plan.id, t.label, planSteps(plan), app.settings.model]) : null;
   useEffect(() => {
     if (!ready || !key || !plan || !t || isReadOnly()) return;
     const timer = window.setTimeout(() => {
@@ -409,7 +438,7 @@ export function QuietTime({ focus }: { focus: boolean }) {
     step.kind === "online" && !step.window && !!onlineDevotionals(app.settings.webDevotionals).find((o) => o.id === step.id)?.start;
   const speakStep = async (step: QuietStep) => {
     const x = sRef.current;
-    const last = !!x && x.steps[x.steps.length - 1] === step && (step.kind === "closing" || step.key === "finale");
+    const last = !!x && x.steps[x.steps.length - 1] === step && (step.kind === "closing" || (step.kind === "bible" && !!step.every));
     // An onEnd, even one doing nothing, is what stops a passage at its last verse.
     const onEnd = last ? () => {} : () => goRef.current(1);
     if (step.kind === "bible") player.play(step.bible, step.b, step.c, step.v, { toVerse: step.v2 ?? step.v, onEnd });
@@ -467,8 +496,8 @@ export function QuietTime({ focus }: { focus: boolean }) {
       if (!p) return;
       if (app.mod("bible", step.bible) && app.settings.bible !== step.bible) app.set({ bible: step.bible });
       app.open({ book: p.b, chapter: p.c, verse: p.v, to: p.v2 }, "read");
-    } else if (step.kind === "prayer") {
-      // Pray through shows over whatever is open (below).
+    } else if (step.kind === "prayer" || step.kind === "still") {
+      // Pray through, or the pause's card, shows over whatever is open (below).
     } else if (step.window) {
       api.openWeb(step.id, step.url, step.label, inverts(app.settings, step.id)).catch((e) => app.toast(String(e)));
     } else {
@@ -476,11 +505,17 @@ export function QuietTime({ focus }: { focus: boolean }) {
     }
     // Songs, or a devotional on the web, stop the reading before them and close its player (one the
     // app knows how to read is read aloud once its page is ready).
-    if (step.kind === "worship" || step.kind === "online" || step.kind === "prayer") player.stop();
+    if (step.kind === "worship" || step.kind === "online" || step.kind === "prayer" || step.kind === "still") player.stop();
     if (s.audio && step.kind === "closing" && step.picked) {
       // Time to read the summary first.
       setReadIn(readTime(`${step.picked.why ?? ""} ${step.picked.note ?? ""}`));
-    } else if (s.audio && step.kind !== "worship" && step.kind !== "prayer" && (step.kind !== "online" || readsItself(step))) {
+    } else if (
+      s.audio &&
+      step.kind !== "worship" &&
+      step.kind !== "prayer" &&
+      step.kind !== "still" &&
+      (step.kind !== "online" || readsItself(step))
+    ) {
       const delay = first.current ? FIRST_DELAY : NEXT_DELAY;
       timer.current = window.setTimeout(() => speakStep(step), delay);
     }
@@ -694,6 +729,22 @@ export function QuietTime({ focus }: { focus: boolean }) {
           chapter={(b, c) => api.chapter(app.settings.bible, b, c)}
         />
       )}
+      {step.kind === "still" && (
+        <div
+          style={{
+            position: "fixed",
+            top: (at?.y ?? 84) + 30,
+            left: at?.x ?? (focus ? 0 : 200),
+            right: at?.x !== undefined ? 16 : 0,
+            display: "flex",
+            justifyContent: at?.x !== undefined ? "flex-start" : "center",
+            pointerEvents: "none",
+            zIndex: 45,
+          }}
+        >
+          <StillCard key={`${s.started}.${s.i}`} minutes={step.minutes} onDone={() => goRef.current(1)} />
+        </div>
+      )}
       {step.kind === "worship" && (
         <div
           style={{
@@ -711,6 +762,75 @@ export function QuietTime({ focus }: { focus: boolean }) {
         </div>
       )}
     </>
+  );
+}
+
+/** A soft bell, made here (no sound file): a few partials of a struck bowl, dying away. */
+function chime() {
+  try {
+    const ctx = new AudioContext();
+    const t = ctx.currentTime;
+    for (const [f, g] of [
+      [528, 0.22],
+      [1056, 0.06],
+      [1584, 0.03],
+    ]) {
+      const o = ctx.createOscillator();
+      const v = ctx.createGain();
+      o.frequency.value = f;
+      v.gain.setValueAtTime(0, t);
+      v.gain.linearRampToValueAtTime(g, t + 0.02);
+      v.gain.exponentialRampToValueAtTime(0.0001, t + 4);
+      o.connect(v).connect(ctx.destination);
+      o.start(t);
+      o.stop(t + 4.1);
+    }
+    window.setTimeout(() => ctx.close(), 4500);
+  } catch {
+    // No sound to be had: the pause still ends.
+  }
+}
+
+/** The Be still part: a quiet pause, its time counting down, a bell at the end, then on. */
+function StillCard({ minutes, onDone }: { minutes: number; onDone: () => void }) {
+  const [left, setLeft] = useState(minutes * 60);
+  const [paused, setPaused] = useState(false);
+  useEffect(() => {
+    if (paused) return;
+    if (left <= 0) {
+      chime();
+      const t = window.setTimeout(onDone, 2500);
+      return () => window.clearTimeout(t);
+    }
+    const t = window.setTimeout(() => setLeft((n) => n - 1), 1000);
+    return () => window.clearTimeout(t);
+  }, [left, paused]); // eslint-disable-line react-hooks/exhaustive-deps
+  return (
+    <div
+      className="card"
+      style={{
+        pointerEvents: "auto",
+        width: 380,
+        maxWidth: "calc(100% - 48px)",
+        padding: "20px 24px",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 10,
+        textAlign: "center",
+        boxShadow: "0 10px 30px var(--shadow)",
+      }}
+    >
+      <span className="label">Be still</span>
+      <div style={{ font: "500 44px/1 var(--display)", fontVariantNumeric: "tabular-nums" }} aria-live="off">
+        {mmss(Math.max(0, left))}
+      </div>
+      <div style={{ font: "italic 17px/1.4 var(--serif)", color: "var(--muted)" }}>Be still, and know that I am God. Psalm 46:10</div>
+      <button className="btn small" type="button" onClick={() => setPaused((p) => !p)} disabled={left <= 0}>
+        {paused ? <Play size={11} /> : <Pause size={11} />}
+        {paused ? "Carry on" : "Pause"}
+      </button>
+    </div>
   );
 }
 
@@ -855,7 +975,9 @@ function WorshipCard({
     >
       {/* Picked up by its heading, so the songs' reasons can still be selected and scrolled. */}
       <div {...drag.bind} style={{ display: "flex", alignItems: "center", gap: 8, cursor: "grab", touchAction: "none" }}>
-        <span className="label">Worship · {step.when === "before" ? "before your reading" : "after your reading"}</span>
+        <span className="label">
+          {step.label} · {step.when === "before" ? "before your reading" : "after your reading"}
+        </span>
         <button
           className="ibtn"
           type="button"

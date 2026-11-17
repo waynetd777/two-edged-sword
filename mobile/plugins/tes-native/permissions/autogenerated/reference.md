@@ -20,6 +20,7 @@ Everything the phone app uses
 - `allow-speech-settings`
 - `allow-tap`
 - `allow-splash-drawn`
+- `allow-open-web`
 - `allow-register-listener`
 - `allow-remove-listener`
 
@@ -132,6 +133,32 @@ Enables the inbox_dir command without any pre-configured scope.
 <td>
 
 Denies the inbox_dir command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`tes-native:allow-open-web`
+
+</td>
+<td>
+
+Enables the open_web command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`tes-native:deny-open-web`
+
+</td>
+<td>
+
+Denies the open_web command without any pre-configured scope.
 
 </td>
 </tr>

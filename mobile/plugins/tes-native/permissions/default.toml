@@ -17,6 +17,7 @@ permissions = [
   "allow-speech-settings",
   "allow-tap",
   "allow-splash-drawn",
+  "allow-open-web",
   "allow-register-listener",
   "allow-remove-listener",
 ]

@@ -22,6 +22,8 @@ import { syncReminders } from "./Reminder";
 import { plansStore } from "./plansStore";
 import { history, Tab } from "./history";
 import { MissingVoice, onMissingVoice } from "./player";
+import { WebPageHost } from "./WebPage";
+import { QuietHost } from "./QuietSession";
 
 /** The voice each language is read in, and what it reads, for the message when the phone has none. */
 const VOICE: Record<string, { voice: string; what: string }> = {
@@ -358,6 +360,8 @@ export function App() {
           {msg.text}
         </div>
       )}
+      <WebPageHost />
+      <QuietHost onJump={open} />
       <MenuDrawer
         tab={tab}
         onPick={(t) => {

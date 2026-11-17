@@ -30,6 +30,21 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
+import android.graphics.Bitmap
+import android.graphics.Typeface
+import android.text.TextUtils
+import android.util.TypedValue
+import android.webkit.WebChromeClient
+import android.webkit.WebResourceRequest
+import android.webkit.WebViewClient
+import android.widget.LinearLayout
+import android.widget.TextView
+import androidx.activity.ComponentDialog
+import androidx.activity.addCallback
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsControllerCompat
+import androidx.webkit.WebViewCompat
+import androidx.webkit.WebViewFeature
 import androidx.activity.result.ActivityResult
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -88,6 +103,18 @@ class SpeakArgs {
 @InvokeArg
 class SleepArgs {
   var stopAt: Double? = null
+}
+
+@InvokeArg
+class WebArgs {
+  var url: String = ""
+  var title: String = ""
+
+  /** The app is dark: black around the page while it loads, and a dark bar. */
+  var black: Boolean = false
+
+  /** dark_page.js, to show the page dark, when it is to be. */
+  var script: String? = null
 }
 
 /**
@@ -395,6 +422,122 @@ class TesNativePlugin(private val activity: Activity) : Plugin(activity) {
     activity.runOnUiThread {
       activity.requestedOrientation =
         if (tablet || !on) ActivityInfo.SCREEN_ORIENTATION_FULL_USER else ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+    }
+  }
+
+  /** A web page full screen over the app, for a devotional that won't be framed in it: its own web view under
+   *  a bar with the title and Done. Links stay in it; Back goes back a page, then closes it. */
+  @Command
+  fun openWeb(invoke: Invoke) {
+    val args = invoke.parseArgs(WebArgs::class.java)
+    activity.runOnUiThread {
+      val d = activity.resources.displayMetrics.density
+      val bg = if (args.black) Color.BLACK else Color.WHITE
+      val barBg = if (args.black) Color.rgb(18, 18, 20) else Color.rgb(247, 247, 247)
+      val ink = if (args.black) Color.WHITE else Color.rgb(20, 20, 20)
+      val accent = if (args.black) Color.rgb(10, 132, 255) else Color.rgb(0, 122, 255)
+      val theme = if (args.black) android.R.style.Theme_DeviceDefault_NoActionBar else android.R.style.Theme_DeviceDefault_Light_NoActionBar
+      val dialog = ComponentDialog(activity, theme)
+
+      val web = WebView(activity)
+      web.setBackgroundColor(bg)
+      web.settings.javaScriptEnabled = true
+      web.settings.domStorageEnabled = true
+      val script = args.script
+      // At the start of every page and frame where the web view can; otherwise the main frame, as each
+      // page starts and again when it has loaded (the script adds itself only once).
+      val early = script != null && WebViewFeature.isFeatureSupported(WebViewFeature.DOCUMENT_START_SCRIPT)
+      if (early) WebViewCompat.addDocumentStartJavaScript(web, script!!, setOf("*"))
+      web.webChromeClient = WebChromeClient()
+      web.webViewClient =
+        object : WebViewClient() {
+          // Web pages load here; anything else (mail, a phone number, an app's link) goes to Android.
+          override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
+            val scheme = request.url.scheme?.lowercase() ?: return true
+            if (scheme == "http" || scheme == "https") return false
+            try {
+              activity.startActivity(Intent(Intent.ACTION_VIEW, request.url))
+            } catch (e: Exception) {
+              Log.w("tes-native", "nothing opens $scheme links")
+            }
+            return true
+          }
+
+          override fun onPageStarted(view: WebView, url: String?, favicon: Bitmap?) {
+            if (script != null && !early) view.evaluateJavascript(script, null)
+          }
+
+          override fun onPageFinished(view: WebView, url: String?) {
+            if (script != null && !early) view.evaluateJavascript(script, null)
+          }
+        }
+
+      val title =
+        TextView(activity).apply {
+          text = args.title
+          setTextColor(ink)
+          setTextSize(TypedValue.COMPLEX_UNIT_SP, 17f)
+          typeface = Typeface.DEFAULT_BOLD
+          maxLines = 1
+          ellipsize = TextUtils.TruncateAt.END
+          gravity = Gravity.CENTER_VERTICAL
+        }
+      val done =
+        TextView(activity).apply {
+          text = "Done"
+          setTextColor(accent)
+          setTextSize(TypedValue.COMPLEX_UNIT_SP, 17f)
+          typeface = Typeface.DEFAULT_BOLD
+          gravity = Gravity.CENTER
+          setPadding((16 * d).toInt(), 0, (16 * d).toInt(), 0)
+          isClickable = true
+          contentDescription = "Done"
+          setOnClickListener { dialog.dismiss() }
+        }
+      val bar =
+        LinearLayout(activity).apply {
+          orientation = LinearLayout.HORIZONTAL
+          setBackgroundColor(barBg)
+          setPadding((16 * d).toInt(), 0, 0, 0)
+          addView(title, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1f))
+          addView(done, LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT))
+        }
+      val line = View(activity).apply { setBackgroundColor(if (args.black) Color.argb(31, 255, 255, 255) else Color.argb(31, 0, 0, 0)) }
+      val root =
+        LinearLayout(activity).apply {
+          orientation = LinearLayout.VERTICAL
+          // The bar's colour behind the status bar and the gesture bar too.
+          setBackgroundColor(barBg)
+          addView(bar, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (52 * d).toInt()))
+          addView(line, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, maxOf(1, d.toInt())))
+          addView(web, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f))
+        }
+      // Edge to edge (as Android 15 on has every window), so the bars' room is kept clear here.
+      ViewCompat.setOnApplyWindowInsetsListener(root) { v, wi ->
+        val bars = wi.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout() or WindowInsetsCompat.Type.ime())
+        v.setPadding(bars.left, bars.top, bars.right, bars.bottom)
+        WindowInsetsCompat.CONSUMED
+      }
+
+      dialog.setContentView(root)
+      dialog.window?.let { w ->
+        w.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+        WindowCompat.setDecorFitsSystemWindows(w, false)
+        WindowInsetsControllerCompat(w, w.decorView).apply {
+          isAppearanceLightStatusBars = !args.black
+          isAppearanceLightNavigationBars = !args.black
+        }
+      }
+      dialog.onBackPressedDispatcher.addCallback(dialog) {
+        if (web.canGoBack()) web.goBack() else dialog.dismiss()
+      }
+      dialog.setOnDismissListener {
+        web.stopLoading()
+        web.destroy()
+      }
+      web.loadUrl(args.url)
+      dialog.show()
+      invoke.resolve()
     }
   }
 
