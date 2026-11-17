@@ -65,8 +65,12 @@ const toEntry = (e: JournalEntry): Entry => ({
 export function placesOf(recent: Recent[]): Place[] {
   return recent.flatMap((r): Place[] => {
     const at = Date.parse(r.at) || 0;
+    // An online devotional, the song words, or a book with no chapter (a phone that took an online
+    // devotional being read aloud for one): not a place to go back to.
     if (r.doc)
-      return r.doc.url || r.doc.view ? [] : [{ at, module: r.doc.module, title: r.doc.title, ...(r.doc.kind ? { kind: r.doc.kind } : {}) }];
+      return r.doc.url || r.doc.view || !r.doc.title
+        ? []
+        : [{ at, module: r.doc.module, title: r.doc.title, ...(r.doc.kind ? { kind: r.doc.kind } : {}) }];
     return [{ at, book: r.book, chapter: r.chapter, ...(r.verse ? { verse: r.verse } : {}), ...(r.to ? { to: r.to } : {}) }];
   });
 }
@@ -99,22 +103,24 @@ export function fromItems(now: Record<string, unknown>, places: Place[], was: Sy
   const docAt = Object.fromEntries(under(now, "at|")) as Record<string, string>;
   const kept = was.recent.filter((r) => r.doc && (r.doc.url || r.doc.view));
   const recent: Recent[] = [
-    ...places.map((p): Recent =>
-      p.module
-        ? {
-            book: 0,
-            chapter: 0,
-            at: new Date(p.at).toISOString(),
-            doc: { module: p.module, title: p.title ?? "", ...(p.kind ? { kind: p.kind as never } : {}) },
-          }
-        : {
-            book: p.book ?? 1,
-            chapter: p.chapter ?? 1,
-            ...(p.verse ? { verse: p.verse } : {}),
-            ...(p.to ? { to: p.to } : {}),
-            at: new Date(p.at).toISOString(),
-          },
-    ),
+    ...places
+      .filter((p) => !p.module || p.title)
+      .map((p): Recent =>
+        p.module
+          ? {
+              book: 0,
+              chapter: 0,
+              at: new Date(p.at).toISOString(),
+              doc: { module: p.module, title: p.title ?? "", ...(p.kind ? { kind: p.kind as never } : {}) },
+            }
+          : {
+              book: p.book ?? 1,
+              chapter: p.chapter ?? 1,
+              ...(p.verse ? { verse: p.verse } : {}),
+              ...(p.to ? { to: p.to } : {}),
+              at: new Date(p.at).toISOString(),
+            },
+      ),
     ...kept,
   ]
     .sort((a, b) => b.at.localeCompare(a.at))

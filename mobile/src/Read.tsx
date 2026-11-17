@@ -627,7 +627,9 @@ export function Read({
   const where = doc ? `doc:${doc.module}|${doc.chapter}` : `bible:${bible}|${loc.book}.${loc.chapter}`;
   const reading = pl.on ? (pl.doc ? `doc:${pl.doc.module}|${pl.doc.chapter}` : `bible:${pl.bible}|${pl.book}.${pl.chapter}`) : "";
   useEffect(() => {
-    if (!pl.on || reading === where) return;
+    // Not an online devotional's page: it's read over Read, in its own page (WebPage.tsx), and isn't a
+    // book here (it would be opened as one with no chapter, and kept in Recent untitled).
+    if (!pl.on || pl.doc?.web || reading === where) return;
     // The player went on: follow it, if it's still reading what this page was reading.
     following.current = true;
     if (pl.doc) setDoc({ module: pl.doc.module, chapter: pl.doc.chapter });

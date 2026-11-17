@@ -597,7 +597,11 @@ async function apply(m0: Payload, withJournal: boolean, withPrayer: boolean, sen
   const marks = under(done.now, "bm|")
     .map(([, v]) => fromSync(v as SyncMark))
     .sort((a, b) => b.at.localeCompare(a.at));
-  const recent = m.recent.slice(0, 30).map(fromPlace);
+  // Not a book with no chapter: an online devotional read aloud, once taken for a book here.
+  const recent = m.recent
+    .filter((p) => !p.module || p.title)
+    .slice(0, 30)
+    .map(fromPlace);
   let written: Promise<void> = Promise.resolve();
   applying = true;
   try {
